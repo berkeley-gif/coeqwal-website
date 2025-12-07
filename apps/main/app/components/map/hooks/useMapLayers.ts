@@ -151,6 +151,8 @@ export function useMapLayers() {
         }
 
         const animate = (now: number) => {
+          // Guard against map being unmounted during animation
+          if (!mapInstance || typeof mapInstance.getLayer !== "function") return
           if (!mapInstance.getLayer(layerId)) return
 
           const progress = Math.min((now - startTime) / FADE_DURATION, 1)
@@ -169,7 +171,11 @@ export function useMapLayers() {
           if (progress < 1) {
             animationFrameRef.current = requestAnimationFrame(animate)
           } else if (!visible) {
-            mapInstance.setLayoutProperty(layerId, "visibility", "none")
+            try {
+              mapInstance.setLayoutProperty(layerId, "visibility", "none")
+            } catch {
+              // Map may have unmounted
+            }
           }
         }
 

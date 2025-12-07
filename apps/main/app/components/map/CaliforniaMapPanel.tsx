@@ -272,26 +272,51 @@ export default function CaliforniaMapPanel({
                 fontFamily: theme.typography.fontFamily,
               }}
             >
-              {/* Mod_name */}
-              {hoveredFeature.modName && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.blue.darkest,
-                    mb: 0.5,
-                  }}
-                >
-                  {hoveredFeature.modName}
-                </Typography>
-              )}
+              {/* Primary name - Urb_Name for CWS, Mod_Name for others */}
+              {(() => {
+                const isUrban = hoveredFeature.classType === "Urban"
+                const primaryName = isUrban && hoveredFeature.urbName 
+                  ? hoveredFeature.urbName 
+                  : hoveredFeature.modName
+                const secondaryName = isUrban && hoveredFeature.urbName && hoveredFeature.modName
+                  ? hoveredFeature.modName
+                  : null
+                
+                return (
+                  <>
+                    {primaryName && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.blue.darkest,
+                          mb: 0.5,
+                        }}
+                      >
+                        {primaryName}
+                      </Typography>
+                    )}
+                    {secondaryName && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.grey[700],
+                          mb: 0.5,
+                        }}
+                      >
+                        {secondaryName}
+                      </Typography>
+                    )}
+                  </>
+                )
+              })()}
 
               {/* Sub_name */}
               {hoveredFeature.subName && (
                 <Typography
                   variant="body2"
                   sx={{
-                    color: theme.palette.grey[700],
+                    color: theme.palette.grey[600],
                     mb: 0.5,
                   }}
                 >
