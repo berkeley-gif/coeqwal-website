@@ -427,11 +427,11 @@ export default function MapOverlayPanels() {
           </Section>
         </motion.div>
 
-        {/* Strategy row - scrolls in and sticks near bottom of viewport */}
+        {/* Strategy row - scrolls in on the right side and sticks at same level as paragraph */}
         <Box
           sx={{
             position: "sticky",
-            top: "55vh",
+            top: "15vh", // Same level as the paragraph on the left
             zIndex: 1,
             mt: "100vh", // Delay entrance until paragraph is at top position
           }}
@@ -443,9 +443,11 @@ export default function MapOverlayPanels() {
           >
             <Box
               sx={{
-                pl: { xs: 4, sm: 8, md: 12, lg: 16 },
-                pr: { xs: 2, sm: 3, md: 4 },
+                display: "flex",
+                justifyContent: "flex-end",
                 width: "100%",
+                pl: { xs: 2, sm: 3, md: 4 },
+                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
               }}
             >
               <StrategyRow strategyValue="current-ops" />
