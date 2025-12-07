@@ -145,6 +145,22 @@ export default function MapOverlayPanels() {
     [0, 1, 1, 0],
   )
 
+  // Disable pointer events on hidden panels to prevent tooltip activation
+  const strategyInfoPointerEvents = useTransform(
+    strategyInfoPanelOpacity,
+    (opacity) => (opacity > 0.1 ? "auto" : "none"),
+  )
+
+  const keyOperationsPointerEvents = useTransform(
+    keyOperationsPanelOpacity,
+    (opacity) => (opacity > 0.1 ? "auto" : "none"),
+  )
+
+  const keyOutcomesPointerEvents = useTransform(
+    keyOutcomesPanelOpacity,
+    (opacity) => (opacity > 0.1 ? "auto" : "none"),
+  )
+
   // First panel entrance animation
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -506,7 +522,7 @@ export default function MapOverlayPanels() {
             }}
           >
             {/* Strategy info panel */}
-            <motion.div style={{ opacity: strategyInfoPanelOpacity }}>
+            <motion.div style={{ opacity: strategyInfoPanelOpacity, pointerEvents: strategyInfoPointerEvents }}>
               <Section
                 id="strategy-row"
                 amount={0.5}
@@ -558,7 +574,7 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key operations panel */}
-            <motion.div style={{ opacity: keyOperationsPanelOpacity }}>
+            <motion.div style={{ opacity: keyOperationsPanelOpacity, pointerEvents: keyOperationsPointerEvents }}>
               <Section
                 id="key-operations"
                 amount={0.5}
@@ -611,7 +627,7 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key outcomes panel */}
-            <motion.div style={{ opacity: keyOutcomesPanelOpacity }}>
+            <motion.div style={{ opacity: keyOutcomesPanelOpacity, pointerEvents: keyOutcomesPointerEvents }}>
               <Section
                 id="key-outcomes"
                 amount={0.5}
