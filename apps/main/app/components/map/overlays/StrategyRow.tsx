@@ -9,8 +9,11 @@
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
+import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
+import { OUTCOMES } from "../../../lib/outcomes"
+import { useScenarioTiers } from "../../../hooks/useTierData"
 
 interface StrategyRowProps {
   /** Strategy value to display (defaults to "current-ops") */
@@ -27,6 +30,11 @@ interface StrategyInfoPanelProps {
 interface KeyOperationsPanelProps {
   /** Strategy value to display (defaults to "current-ops") */
   strategyValue?: string
+}
+
+interface KeyOutcomesPanelProps {
+  /** Scenario ID to display (defaults to "s0020" for current operations) */
+  scenarioId?: string
 }
 
 /**
@@ -344,6 +352,158 @@ export function KeyOperationsPanel({
             </Box>
           </InfoTooltip>
         ))}
+      </Box>
+    </Box>
+  )
+}
+
+/**
+ * KeyOutcomesPanel - Shows the key outcomes glyphs
+ * Uses the same layout as ScenarioCard
+ */
+export function KeyOutcomesPanel({
+  scenarioId = "s0020",
+}: KeyOutcomesPanelProps) {
+  const theme = useTheme()
+
+  // Fetch tier data for the scenario
+  const { chartData, isLoading } = useScenarioTiers(scenarioId)
+
+  // Helper function to get tier values for an outcome
+  const getTierValues = (outcome: string): [number, number, number, number] => {
+    const tierData = chartData[outcome]
+    if (!tierData || tierData.length !== 4) {
+      return [0, 0, 0, 0]
+    }
+    return [
+      tierData[0]?.value ?? 0,
+      tierData[1]?.value ?? 0,
+      tierData[2]?.value ?? 0,
+      tierData[3]?.value ?? 0,
+    ]
+  }
+
+  // Helper function to detect if tier data represents a single value
+  const isSingleValueTier = (outcome: string): boolean => {
+    const tierData = chartData[outcome]
+    if (!tierData || tierData.length === 0) return false
+    return tierData[0]?.tierType === "single_value"
+  }
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        borderRadius: 0,
+        padding: { xs: 2, sm: 2.5, md: 3 },
+        boxShadow: theme.shadows[2],
+        width: "100%",
+        maxWidth: "500px",
+        boxSizing: "border-box",
+        pointerEvents: "auto",
+      }}
+    >
+      <Typography
+        variant="subtitle2"
+        sx={{
+          mb: 1.5,
+          fontSize: theme.typography.body2.fontSize,
+          fontWeight: theme.typography.fontWeightMedium,
+          color: theme.palette.grey[900],
+        }}
+      >
+        Key outcomes
+      </Typography>
+
+      {/* Outcomes grid - 5 columns like ScenarioCard */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: 1,
+          alignItems: "start",
+        }}
+      >
+        {OUTCOMES.map((outcome) => {
+          const tierData = chartData[outcome]
+          const hasData =
+            tierData !== undefined &&
+            tierData.length > 0 &&
+            tierData.some((tier) => tier.value > 0)
+
+          return (
+            <InfoTooltip
+              key={outcome}
+              description={
+                <>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                  >
+                    {outcome}
+                  </Box>
+                  Click to learn more about this outcome.
+                </>
+              }
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
+                  cursor: "pointer",
+                  p: 0.5,
+                  borderRadius: theme.borderRadius.rounded,
+                  transition: "all 0.2s ease",
+                  opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
+                  "&:hover": {
+                    backgroundColor: theme.palette.grey[100],
+                  },
+                }}
+              >
+                <ScenarioGlyph
+                  tierColors={
+                    hasData
+                      ? [
+                          theme.palette.tiers.tier1,
+                          theme.palette.tiers.tier2,
+                          theme.palette.tiers.tier3,
+                          theme.palette.tiers.tier4,
+                        ]
+                      : [
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                        ]
+                  }
+                  values={getTierValues(outcome)}
+                  variant={isSingleValueTier(outcome) ? "dots" : "bars"}
+                  size={45}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: hasData
+                      ? theme.palette.blue.darkest
+                      : theme.palette.grey[500],
+                    fontWeight: 500,
+                    textAlign: "center",
+                    fontSize: "0.65rem",
+                    lineHeight: 1.2,
+                    minHeight: "2rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {outcome}
+                </Typography>
+              </Box>
+            </InfoTooltip>
+          )
+        })}
       </Box>
     </Box>
   )
