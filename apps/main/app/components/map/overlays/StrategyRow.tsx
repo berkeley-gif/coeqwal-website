@@ -1,12 +1,10 @@
 "use client"
 
 /**
- * StrategyRow
+ * StrategyRow and related components
  *
- * A strategy row component for the Learn section that displays
- * strategy data from the same sources as StrategyGrid.
- * 
- * Accepts a strategyValue prop to specify which strategy to show.
+ * Components for displaying strategy information in the Learn section.
+ * Data is pulled from the same sources as StrategyGrid.
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
@@ -19,6 +17,16 @@ interface StrategyRowProps {
   strategyValue?: string
   /** Whether to show the description */
   showDescription?: boolean
+}
+
+interface StrategyInfoPanelProps {
+  /** Strategy value to display (defaults to "current-ops") */
+  strategyValue?: string
+}
+
+interface KeyOperationsPanelProps {
+  /** Strategy value to display (defaults to "current-ops") */
+  strategyValue?: string
 }
 
 /**
@@ -181,6 +189,135 @@ export function StrategyRow({
           </InfoTooltip>
         ))}
         </Box>
+      </Box>
+    </Box>
+  )
+}
+
+/**
+ * StrategyInfoPanel - Shows just the title and description
+ */
+export function StrategyInfoPanel({
+  strategyValue = "current-ops",
+}: StrategyInfoPanelProps) {
+  const theme = useTheme()
+
+  const strategy = strategies.find((s) => s.value === strategyValue)
+  
+  if (!strategy) {
+    console.warn(`Strategy "${strategyValue}" not found`)
+    return null
+  }
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        borderRadius: 0,
+        padding: { xs: 2, sm: 2.5, md: 3 },
+        boxShadow: theme.shadows[2],
+        width: "100%",
+        maxWidth: "500px",
+        boxSizing: "border-box",
+        pointerEvents: "auto",
+      }}
+    >
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: theme.typography.fontWeightMedium,
+          mb: 0.5,
+          fontSize: theme.typography.body2.fontSize,
+          lineHeight: 1.3,
+          color: theme.palette.grey[900],
+        }}
+      >
+        {strategy.label} strategy
+      </Typography>
+
+      <Typography
+        variant="body2"
+        sx={{
+          lineHeight: 1.4,
+          fontSize: theme.typography.nav.fontSize,
+          color: theme.palette.grey[700],
+        }}
+      >
+        {strategy.description}
+      </Typography>
+    </Box>
+  )
+}
+
+/**
+ * KeyOperationsPanel - Shows just the key operations icons
+ */
+export function KeyOperationsPanel({
+  strategyValue = "current-ops",
+}: KeyOperationsPanelProps) {
+  const theme = useTheme()
+
+  const strategy = strategies.find((s) => s.value === strategyValue)
+  
+  if (!strategy) {
+    console.warn(`Strategy "${strategyValue}" not found`)
+    return null
+  }
+
+  const icons = getStrategyIcons(strategyValue)
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        borderRadius: 0,
+        padding: { xs: 2, sm: 2.5, md: 3 },
+        boxShadow: theme.shadows[2],
+        width: "100%",
+        maxWidth: "500px",
+        boxSizing: "border-box",
+        pointerEvents: "auto",
+      }}
+    >
+      <Typography
+        variant="subtitle2"
+        sx={{
+          mb: 1.5,
+          fontSize: theme.typography.body2.fontSize,
+          fontWeight: theme.typography.fontWeightMedium,
+          color: theme.palette.grey[900],
+        }}
+      >
+        Key operations
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          gap: { xs: 0.5, md: 1 },
+          alignItems: "flex-start",
+          flexDirection: "row",
+          justifyContent: "flex-start",
+        }}
+      >
+        {icons.map((icon) => (
+          <InfoTooltip key={icon.path} description={icon.description}>
+            <Box
+              sx={{
+                width: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                height: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                cursor: "pointer",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={icon.path}
+                alt={icon.alt}
+                style={{ width: "100%", height: "100%" }}
+              />
+            </Box>
+          </InfoTooltip>
+        ))}
       </Box>
     </Box>
   )

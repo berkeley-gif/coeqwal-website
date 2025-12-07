@@ -16,7 +16,7 @@ import ClimateCard from "../../ClimateCard"
 import ScrollTooltip from "./ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
-import { StrategyRow } from "./StrategyRow"
+import { StrategyInfoPanel, KeyOperationsPanel } from "./StrategyRow"
 import { Section, StickySection } from "./Section"
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
@@ -38,6 +38,10 @@ export default function MapOverlayPanels() {
 
   // Ref for multi-step sticky animation
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
+  
+  // Refs for key operations tooltip
+  const keyOperationsRef = useRef<HTMLDivElement>(null)
+  const keyOperationsContainerRef = useRef<HTMLDivElement>(null)
 
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
@@ -85,6 +89,14 @@ export default function MapOverlayPanels() {
     scenarioIntroProgress,
     [0, 0.25, 0.4, 1],
     ["45vh", "45vh", "15vh", "15vh"],
+  )
+
+  // Key operations tooltip opacity - appears after key operations panel is in position
+  // Similar timing to scenario card tooltips (10% scroll range)
+  const keyOperationsTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.75, 0.8, 0.9, 0.95],
+    [0, 1, 1, 0],
   )
 
   // First panel entrance animation
@@ -394,7 +406,7 @@ export default function MapOverlayPanels() {
         ref={scenarioIntroRef}
         id="scenario-intro-wrapper"
         sx={{
-          minHeight: "250vh", // Increased to accommodate the extra scroll phase
+          minHeight: "350vh", // Increased to accommodate multiple panels
           position: "relative",
         }}
       >
@@ -427,7 +439,7 @@ export default function MapOverlayPanels() {
           </Section>
         </motion.div>
 
-        {/* Strategy row - scrolls in on the right side and sticks at same level as paragraph */}
+        {/* Strategy info panel - scrolls in on the right side and sticks at same level as paragraph */}
         <Box
           sx={{
             position: "sticky",
@@ -450,7 +462,73 @@ export default function MapOverlayPanels() {
                 pr: { xs: 4, sm: 8, md: 12, lg: 16 },
               }}
             >
-              <StrategyRow strategyValue="current-ops" />
+              <Box sx={{ width: "100%", maxWidth: "500px" }}>
+                <StrategyInfoPanel strategyValue="current-ops" />
+              </Box>
+            </Box>
+          </Section>
+        </Box>
+
+        {/* Key operations panel - scrolls in after strategy info panel is stuck */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: "calc(15vh + 140px)", // Dock right below the strategy info panel
+            zIndex: 1,
+            mt: "80vh", // Delay entrance until strategy info is fully in position
+          }}
+        >
+          <Section
+            id="key-operations"
+            amount={0.5}
+            sx={{ minHeight: "auto", alignItems: "flex-start" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                width: "100%",
+                pl: { xs: 2, sm: 3, md: 4 },
+                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
+              }}
+            >
+              {/* Container for tooltip positioning */}
+              <Box
+                ref={keyOperationsContainerRef}
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "500px",
+                }}
+              >
+                <Box ref={keyOperationsRef}>
+                  <KeyOperationsPanel strategyValue="current-ops" />
+                </Box>
+                
+                {/* Key operations tooltip */}
+                <ScrollTooltip
+                  targetRef={keyOperationsRef}
+                  containerRef={keyOperationsContainerRef}
+                  content={
+                    <>
+                      <Box
+                        component="span"
+                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      >
+                        Key operations
+                      </Box>
+                      These icons represent the key operational decisions that define
+                      this water management strategy.
+                      <Box component="p" sx={{ mt: 1, mb: 0, fontStyle: "italic" }}>
+                        Hover over the icons to see what key operations they represent.
+                      </Box>
+                    </>
+                  }
+                  position="left"
+                  offsetY={20}
+                  opacity={keyOperationsTooltipOpacity}
+                />
+              </Box>
             </Box>
           </Section>
         </Box>
