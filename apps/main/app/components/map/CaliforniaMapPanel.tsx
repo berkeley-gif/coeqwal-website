@@ -8,8 +8,8 @@
  */
 
 import { useEffect, useRef, useState } from "react"
-import { Map, NavigationControl, Marker, useMap } from "@repo/map"
-import { Box } from "@repo/ui/mui"
+import { Map, NavigationControl, Marker, Popup, useMap } from "@repo/map"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
@@ -52,6 +52,7 @@ export default function CaliforniaMapPanel({
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
+  const theme = useTheme()
 
   // Store selectors
   const activeSection = useActiveSection()
@@ -70,8 +71,11 @@ export default function CaliforniaMapPanel({
     : false
 
   // Use demand unit layer for CWS, AG_REV, etc.
-  const { isLoading: demandUnitsLoading, error: demandUnitsError } =
-    useOutcomeMapLayer({
+  const { 
+    isLoading: demandUnitsLoading, 
+    error: demandUnitsError,
+    hoveredFeature,
+  } = useOutcomeMapLayer({
       outcome: usesDemandUnits ? selectedOutcome : null,
       strategy: "current-ops",
       visible: usesDemandUnits && !!selectedOutcome,
@@ -249,6 +253,117 @@ export default function CaliforniaMapPanel({
         {/* Tier markers for outcomes that DON'T use demand units */}
         {/* (Demand unit outcomes like CWS/AG_REV are handled by useOutcomeMapLayer) */}
         {tierData && !usesDemandUnits && <TierMarkers data={tierData} />}
+
+        {/* Hover tooltip for demand unit polygons */}
+        {hoveredFeature && (
+          <Popup
+            longitude={hoveredFeature.longitude}
+            latitude={hoveredFeature.latitude}
+            anchor="bottom"
+            closeButton={false}
+            closeOnClick={false}
+            offset={15}
+          >
+            <Box
+              sx={{
+                p: 1.5,
+                minWidth: 200,
+                maxWidth: 300,
+                fontFamily: theme.typography.fontFamily,
+              }}
+            >
+              {/* Mod_name */}
+              {hoveredFeature.modName && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.blue.darkest,
+                    mb: 0.5,
+                  }}
+                >
+                  {hoveredFeature.modName}
+                </Typography>
+              )}
+
+              {/* Sub_name */}
+              {hoveredFeature.subName && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.grey[700],
+                    mb: 0.5,
+                  }}
+                >
+                  {hoveredFeature.subName}
+                </Typography>
+              )}
+
+              {/* Comments */}
+              {hoveredFeature.comments && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    display: "block",
+                    mb: 0.5,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {hoveredFeature.comments}
+                </Typography>
+              )}
+
+              {/* Type */}
+              {hoveredFeature.type && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    display: "block",
+                    mb: 0.5,
+                  }}
+                >
+                  {hoveredFeature.type}
+                </Typography>
+              )}
+
+              {/* CalSim ID */}
+              <Typography
+                variant="caption"
+                sx={{
+                  color: theme.palette.grey[500],
+                  display: "block",
+                  mb: 1,
+                }}
+              >
+                CalSim ID: {hoveredFeature.duId}
+              </Typography>
+
+              {/* Tier with colored bullet */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "2px",
+                    backgroundColor: theme.palette.tiers[`tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers],
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
+                  <strong>Tier {hoveredFeature.tierLevel}:</strong> {hoveredFeature.tierLabel}
+                </Typography>
+              </Box>
+            </Box>
+          </Popup>
+        )}
       </Map>
     </Box>
   )
