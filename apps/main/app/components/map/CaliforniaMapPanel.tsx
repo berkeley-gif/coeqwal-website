@@ -16,6 +16,10 @@ import BasinInflowArrows from "./layers/BasinInflowArrows"
 import TierMarkers from "../../features/scenarioExplorer/components/TierMarkers"
 import { fetchTierLocationData, type TierLocationResponse } from "../../api/tierLocationApi"
 import {
+  useOutcomeMapLayer,
+  outcomeUsesDemandUnits,
+} from "../../hooks/useOutcomeMapLayer"
+import {
   useActiveSection,
   useGeocoderMarker,
   useRiversProgress,
@@ -60,13 +64,27 @@ export default function CaliforniaMapPanel({
   const cameraView = useCameraView()
   const selectedOutcome = useSelectedOutcome()
 
-  // Tier location data for map visualization
+  // Check if outcome uses demand unit layer (CWS, AG_REV, etc.)
+  const usesDemandUnits = selectedOutcome
+    ? outcomeUsesDemandUnits(selectedOutcome)
+    : false
+
+  // Use demand unit layer for CWS, AG_REV, etc.
+  const { isLoading: demandUnitsLoading, error: demandUnitsError } =
+    useOutcomeMapLayer({
+      outcome: usesDemandUnits ? selectedOutcome : null,
+      strategy: "current-ops",
+      visible: usesDemandUnits && !!selectedOutcome,
+    })
+
+  // Tier location data for other outcomes (point/polygon based from API)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
   const [tierDataLoading, setTierDataLoading] = useState(false)
 
-  // Fetch tier location data when selectedOutcome changes
+  // Fetch tier location data for outcomes that DON'T use demand units
   useEffect(() => {
-    if (!selectedOutcome) {
+    // Clear if no outcome or if using demand units layer
+    if (!selectedOutcome || usesDemandUnits) {
       setTierData(null)
       return
     }
@@ -78,28 +96,37 @@ export default function CaliforniaMapPanel({
         setTierDataLoading(true)
         // Use "current-ops" strategy for the Learn section
         const data = await fetchTierLocationData("current-ops", selectedOutcome!)
-        
+
         if (!cancelled) {
           setTierData(data)
-          
+
           // Zoom to show all markers if there are features
           if (data.features.length > 0 && map.mapRef?.current) {
             // Calculate bounds from features
-            let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity
-            
+            let minLng = Infinity,
+              minLat = Infinity,
+              maxLng = -Infinity,
+              maxLat = -Infinity
+
             data.features.forEach((feature) => {
               if (feature.geometry.type === "Point") {
-                const [lng, lat] = feature.geometry.coordinates as [number, number]
+                const [lng, lat] = feature.geometry.coordinates as [
+                  number,
+                  number,
+                ]
                 minLng = Math.min(minLng, lng)
                 minLat = Math.min(minLat, lat)
                 maxLng = Math.max(maxLng, lng)
                 maxLat = Math.max(maxLat, lat)
               }
             })
-            
+
             if (minLng !== Infinity) {
               map.mapRef.current.fitBounds(
-                [[minLng, minLat], [maxLng, maxLat]],
+                [
+                  [minLng, minLat],
+                  [maxLng, maxLat],
+                ],
                 { padding: 100, maxZoom: 9, duration: 1000 }
               )
             }
@@ -122,7 +149,7 @@ export default function CaliforniaMapPanel({
     return () => {
       cancelled = true
     }
-  }, [selectedOutcome, map])
+  }, [selectedOutcome, usesDemandUnits, map])
 
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
@@ -219,8 +246,9 @@ export default function CaliforniaMapPanel({
           </Marker>
         )}
 
-        {/* Tier markers for selected outcome */}
-        {tierData && <TierMarkers data={tierData} />}
+        {/* Tier markers for outcomes that DON'T use demand units */}
+        {/* (Demand unit outcomes like CWS/AG_REV are handled by useOutcomeMapLayer) */}
+        {tierData && !usesDemandUnits && <TierMarkers data={tierData} />}
       </Map>
     </Box>
   )
