@@ -5,51 +5,38 @@ export const OUTCOMES = OUTCOME_DISPLAY_ORDER
 
 export type Outcome = (typeof OUTCOMES)[number]
 
-// Outcome definitions (hardcoded for now / database fetch commented out)
+/**
+ * Outcome definitions - synchronous constant for use in components
+ * Maps outcome display names to their descriptions.
+ * These definitions are also in the database. The thinking is that we want to 
+ * allow frontend developers to modify the definitions without having to wait 
+ * for a database update.
+ */
+export const OUTCOME_DEFINITIONS: Record<string, string> = {
+  "Community deliveries":
+    "This chart reflects how much municipal & industrial water deliveries satisfy the demands of each region, under current plans and assumptions.",
+  "Agricultural revenue":
+    "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
+  "Environmental flows":
+    "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+  "Delta estuary ecology":
+    "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
+  "Freshwater for Delta exports":
+    "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
+  "Freshwater for in-Delta uses":
+    "How often water in the Delta is fresh enough for in-Delta uses, assessed at two compliance locations in the western Delta.",
+  "Reservoir storage":
+    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in XX large reservoirs.",
+  "Groundwater storage":
+    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
+  "Salmon abundance":
+    "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
+}
+
+// Async version for backwards compatibility (wraps the constant)
+// TODO: Re-enable database fetch when ready
 export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
-  // TODO: Re-enable database fetch when ready
-  /*
-  try {
-    const [apiDefinitions, tierMapping] = await Promise.all([
-      fetchTierDefinitions(),
-      getTierMapping(),
-    ])
-
-    // Convert API short codes to display names
-    const definitions: Record<string, string> = {}
-    Object.entries(apiDefinitions).forEach(([shortCode, description]) => {
-      const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-      definitions[displayName] = description
-    })
-
-    return definitions
-  } catch (error) {
-    console.error("Failed to fetch tier definitions:", error)
-  }
-  */
-
-  // Using hardcoded definitions (with UI display names)
-  return {
-    "Community deliveries":
-      "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
-    "Agricultural revenue":
-      "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
-    "Environmental flows":
-      "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
-    // UI display name
-    "Delta estuary ecology":
-      "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
-    "Freshwater for Delta exports":
-      "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
-    "Freshwater for in-Delta uses":
-      "How often water in the Delta is fresh enough for in-Delta uses, assessed at two compliance locations in the western Delta.",
-    "Reservoir storage":
-      "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in XX large reservoirs.",
-    "Groundwater storage":
-      "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
-    "Salmon abundance":
-      "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
-  }
+  return OUTCOME_DEFINITIONS
 }
 
 // For backwards compatibility, export the function result
@@ -62,10 +49,10 @@ export const outcomeTierValues: Record<
   { tier1: string; tier2: string; tier3: string; tier4: string }
 > = {
   "Community deliveries": {
-    tier1: "Optimal: TBD",
-    tier2: "Suboptimal: TBD",
-    tier3: "At-risk: TBD",
-    tier4: "Critical: TBD",
+    tier1: "Optimal: Water deliveries reduced by less than 10% of planned",
+    tier2: "Suboptimal: Water deliveries reduced by less than 20% of planned",
+    tier3: "At-risk: Water deliveries reduced by less than 30% of planned",
+    tier4: "Critical: Water deliveries reduced by more than 30% of planned",
   },
   "Agricultural revenue": {
     tier1: "Optimal: Agricultural revenue remains stable or increase",
