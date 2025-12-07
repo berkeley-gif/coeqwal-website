@@ -11,12 +11,11 @@
 import { useState, useEffect, useRef } from "react"
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
-import ScenarioCard from "../../ScenarioCard"
-import ClimateCard from "../../ClimateCard"
 import ScrollTooltip from "./ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
 import { StrategyInfoPanel, KeyOperationsPanel, KeyOutcomesPanel } from "./StrategyRow"
+import { SummaryPanel } from "./SummaryPanel"
 import { Section, StickySection } from "./Section"
 import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
@@ -30,11 +29,6 @@ export default function MapOverlayPanels() {
 
   // UI state
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
-
-  // Refs for tooltips
-  const baselineOverlayRef = useRef<HTMLDivElement>(null)
-  const climateCardRef = useRef<HTMLDivElement>(null)
-  const scrollTrackRef = useRef<HTMLElement | null>(null)
 
   // Ref for multi-step sticky animation
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
@@ -68,37 +62,6 @@ export default function MapOverlayPanels() {
     }
   }, [isOutcomeActive])
 
-  // Tooltip scroll progress
-  const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
-
-  useEffect(() => {
-    if (baselineOverlayRef.current && climateCardRef.current) {
-      setTooltipRefsReady(true)
-    }
-  }, [])
-
-  const { scrollYProgress } = useScroll({
-    target: tooltipRefsReady ? scrollTrackRef : undefined,
-    offset: ["start end", "end start"],
-    layoutEffect: false,
-  })
-
-  const firstTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.3, 0.4, 0.5],
-    [0, 1, 1, 0],
-  )
-  const secondTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.6, 0.7, 0.8],
-    [0, 1, 1, 0],
-  )
-  const thirdTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.8, 0.85, 0.95, 1.0],
-    [0, 1, 1, 0],
-  )
-
   // Multi-step sticky choreography:
   // Tracks scroll through the scenario-intro-wrapper section
   const { scrollYProgress: scenarioIntroProgress } = useScroll({
@@ -121,8 +84,8 @@ export default function MapOverlayPanels() {
   // 2. Strategy description tooltip (0.38-0.48)
   // 3. Key operations panel enters (~0.50) - stays visible
   // 4. Key operations tooltip (0.53-0.63)
-  // 5. Key outcomes panel enters (~0.70) - stays visible
-  // 6. Key outcomes tooltip (0.73-0.83)
+  // 5. Key outcomes + Summary panels enter together (~0.70) - stay visible
+  // 6. Key outcomes tooltip (0.75-0.88)
 
   // Panel opacity - fade in and stay visible
   const strategyInfoPanelOpacity = useTransform(
@@ -138,6 +101,13 @@ export default function MapOverlayPanels() {
   )
 
   const keyOutcomesPanelOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.68, 0.74],
+    [0, 1],
+  )
+
+  // Summary panel enters at same time as key outcomes panel
+  const summaryPanelOpacity = useTransform(
     scenarioIntroProgress,
     [0.68, 0.74],
     [0, 1],
@@ -709,6 +679,34 @@ export default function MapOverlayPanels() {
                 </Box>
               </Section>
             </motion.div>
+
+            {/* Summary panel - positioned under outcomes panel on right side */}
+            <motion.div style={{ opacity: summaryPanelOpacity }}>
+              <Section
+                id="scenario-summary"
+                amount={0.5}
+                sx={{ minHeight: "auto", alignItems: "flex-start" }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <Box 
+                    sx={{ 
+                      pointerEvents: "auto",
+                      width: "100%",
+                      maxWidth: "500px",
+                    }}
+                  >
+                    <SummaryPanel strategy="current-ops" />
+                  </Box>
+                </Box>
+              </Section>
+            </motion.div>
           </Box>
         </Box>
 
@@ -716,75 +714,7 @@ export default function MapOverlayPanels() {
         <Box sx={{ height: "100vh" }} aria-hidden="true" />
           </Box>
 
-      {/* ==================== SECTION 13: Scenario Cards (Sticky) ==================== */}
-      <Section id="scenario-cards" amount={0.3} sx={{ minHeight: "150vh" }}>
-          <Box
-            sx={{
-            position: "sticky",
-            top: "100px",
-            height: "calc(100vh - 100px)",
-            width: "100%",
-              display: "flex",
-            justifyContent: "flex-end",
-              alignItems: "flex-start",
-            pointerEvents: "none",
-            pr: { xs: 1, sm: 2, md: 3, lg: 4 },
-              pt: 2,
-            }}
-          >
-            <Box
-              id="baseline-scenario-overlay"
-              ref={baselineOverlayRef}
-              sx={{
-                maxWidth: "580px",
-                maxHeight: "100%",
-                padding: (theme) => theme.spacing(2),
-              display: "flex",
-              flexDirection: "column",
-              gap: (theme) => theme.spacing(1.5),
-              backgroundColor: (theme) => theme.palette.brand.sky,
-              backdropFilter: "blur(10px)",
-              borderRadius: (theme) => theme.borderRadius.card,
-                overflow: "auto",
-                position: "relative",
-              pointerEvents: "auto",
-            }}
-          >
-            <ScenarioCard
-              isMinimized={false}
-              minimizedTitle="Current operations"
-              firstTooltipOpacity={firstTooltipOpacity}
-              secondTooltipOpacity={secondTooltipOpacity}
-            />
-            <ClimateCard
-              ref={climateCardRef}
-              isMinimized={false}
-              selectedClimate={1}
-            />
-
-            <ScrollTooltip
-              targetRef={climateCardRef}
-              containerRef={baselineOverlayRef}
-              content={
-                <>
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                  >
-                    Hydroclimate
-                  </Box>
-                  These options let you explore how a strategy performs under
-                  different possible future climate conditions.
-                </>
-              }
-              position="left"
-              opacity={thirdTooltipOpacity}
-            />
-          </Box>
-        </Box>
-      </Section>
-
-      {/* ==================== SECTION 14: Scenario Conclusion ==================== */}
+      {/* ==================== SECTION 13: Scenario Conclusion ==================== */}
       <Section id="scenario-conclusion" amount={0.5}>
       <CallResponsePanel
         id="scenario-conclusion-call"

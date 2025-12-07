@@ -15,6 +15,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { getTierLabel, getTierColorsFromTheme, TierLevel } from "../../../lib/tiers"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapInstance = any
@@ -47,7 +48,7 @@ interface TierLocation {
   display_order: number
 }
 
-interface TierLocationsResponse {
+export interface TierLocationsResponse {
   scenario: string
   tier_code: string
   tier_name: string
@@ -102,8 +103,9 @@ const tierLocationCache: Map<string, TierLocationsResponse> = new Map()
 
 /**
  * Fetch tier locations with caching
+ * Exported so other components can use the same cached data
  */
-async function fetchTierLocations(
+export async function fetchTierLocations(
   scenarioId: string,
   tierCode: string
 ): Promise<TierLocationsResponse> {
@@ -147,10 +149,12 @@ export interface HoveredFeatureInfo {
   longitude: number
   latitude: number
   duId: string
-  modName: string | null
+  urbName: string | null  // Primary name for CWS (Urban)
+  modName: string | null  // Secondary name (or primary if no urbName)
   subName: string | null
   comments: string | null
   type: string | null
+  classType: string | null  // "Urban", "Agriculture", etc.
   tierLevel: number
   tierLabel: string
 }
@@ -186,25 +190,9 @@ export function useOutcomeMapLayer({
   // Get config for this outcome
   const config = outcome ? OUTCOME_LAYER_CONFIG[outcome] : null
 
-  // Helper to get tier label
-  const getTierLabel = useCallback((tier: number): string => {
-    switch (tier) {
-      case 1: return "Optimal"
-      case 2: return "Sub-optimal"
-      case 3: return "At-risk"
-      case 4: return "Critical"
-      default: return "Unknown"
-    }
-  }, [])
-
-  // Tier colors
+  // Tier colors from theme (using centralized helper)
   const tierColors = useMemo(
-    () => ({
-      1: theme.palette.tiers.tier1,
-      2: theme.palette.tiers.tier2,
-      3: theme.palette.tiers.tier3,
-      4: theme.palette.tiers.tier4,
-    }),
+    () => getTierColorsFromTheme(theme),
     [theme]
   )
 
@@ -387,7 +375,7 @@ export function useOutcomeMapLayer({
           Object.entries(tierLookup).forEach(([duId, tierLevel]) => {
             colorPairs.push(duId)
             colorPairs.push(
-              tierColors[tierLevel as 1 | 2 | 3 | 4] || theme.palette.grey[500]
+              tierColors[tierLevel as TierLevel] || theme.palette.grey[500]
             )
           })
 
@@ -573,10 +561,12 @@ export function useOutcomeMapLayer({
           longitude: lng,
           latitude: lat,
           duId,
+          urbName: props.Urb_Name || null,
           modName: props.Mod_Name || null,
           subName: props.Sub_Name || null,
           comments: props.Comments || null,
           type: props.Type || null,
+          classType: props.Class || null,
           tierLevel,
           tierLabel: getTierLabel(tierLevel),
         })
@@ -596,7 +586,7 @@ export function useOutcomeMapLayer({
       })
       setHoveredFeature(null)
     }
-  }, [visible, outcome, mapAPI, getTierLabel])
+  }, [visible, outcome, mapAPI])
 
   // Cleanup on unmount
   useEffect(() => {

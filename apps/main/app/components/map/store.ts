@@ -31,7 +31,7 @@ export type SectionId =
   | "strategy-row"
   | "key-operations"
   | "key-outcomes"
-  | "scenario-cards"
+  | "scenario-summary"
   | "scenario-conclusion"
 
 export interface CameraView {
@@ -174,7 +174,7 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
-  "scenario-cards": {
+  "scenario-summary": {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
