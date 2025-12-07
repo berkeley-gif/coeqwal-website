@@ -365,7 +365,7 @@ export function KeyOperationsPanel({
       <Typography
         variant="subtitle2"
         sx={{
-          mb: 1.5,
+          mb: 1,
           fontSize: theme.typography.body2.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
@@ -448,13 +448,6 @@ export function KeyOutcomesPanel({
     ]
   }
 
-  // Helper function to detect if tier data represents a single value
-  const isSingleValueTier = (outcome: string): boolean => {
-    const tierData = chartData[outcome]
-    if (!tierData || tierData.length === 0) return false
-    return tierData[0]?.tierType === "single_value"
-  }
-
   return (
     <Box
       sx={{
@@ -471,7 +464,7 @@ export function KeyOutcomesPanel({
       <Typography
         variant="subtitle2"
         sx={{
-          mb: 1.5,
+          mb: 1,
           fontSize: theme.typography.body2.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
@@ -480,16 +473,31 @@ export function KeyOutcomesPanel({
         Key outcomes
       </Typography>
 
-      {/* Outcomes grid - 5 columns like ScenarioCard */}
+      {/* Multiple location outcomes - first 5 */}
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          mb: 1,
+          fontSize: "0.7rem",
+          fontWeight: theme.typography.fontWeightMedium,
+          color: theme.palette.grey[600],
+          // textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}
+      >
+        Multiple location outcomes
+      </Typography>
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
           gap: 1,
           alignItems: "start",
+          mb: 1.5,
         }}
       >
-        {OUTCOMES.map((outcome) => {
+        {OUTCOMES.slice(0, 5).map((outcome) => {
           const tierData = chartData[outcome]
           const hasData =
             tierData !== undefined &&
@@ -547,7 +555,114 @@ export function KeyOutcomesPanel({
                         ]
                   }
                   values={getTierValues(outcome)}
-                  variant={isSingleValueTier(outcome) ? "dots" : "bars"}
+                  variant="bars"
+                  size={45}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: hasData
+                      ? theme.palette.blue.darkest
+                      : theme.palette.grey[500],
+                    fontWeight: 500,
+                    textAlign: "center",
+                    fontSize: "0.65rem",
+                    lineHeight: 1.2,
+                    minHeight: "2rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {outcome}
+                </Typography>
+              </Box>
+            </InfoTooltip>
+          )
+        })}
+      </Box>
+
+      {/* Single location outcomes - last 4 */}
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          mb: 1,
+          fontSize: "0.7rem",
+          fontWeight: theme.typography.fontWeightMedium,
+          color: theme.palette.grey[600],
+          letterSpacing: "0.5px",
+        }}
+      >
+        Single location outcomes
+      </Typography>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 1,
+          alignItems: "start",
+        }}
+      >
+        {OUTCOMES.slice(5).map((outcome) => {
+          const tierData = chartData[outcome]
+          const hasData =
+            tierData !== undefined &&
+            tierData.length > 0 &&
+            tierData.some((tier) => tier.value > 0)
+
+          return (
+            <InfoTooltip
+              key={outcome}
+              description={
+                <>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                  >
+                    {outcome}
+                  </Box>
+                  Click to learn more about this outcome.
+                </>
+              }
+              tooltipProps={{
+                PopperProps: { disablePortal: true },
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
+                  cursor: "pointer",
+                  p: 0.5,
+                  borderRadius: theme.borderRadius.rounded,
+                  transition: "all 0.2s ease",
+                  opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
+                  "&:hover": {
+                    backgroundColor: theme.palette.grey[100],
+                  },
+                }}
+              >
+                <ScenarioGlyph
+                  tierColors={
+                    hasData
+                      ? [
+                          theme.palette.tiers.tier1,
+                          theme.palette.tiers.tier2,
+                          theme.palette.tiers.tier3,
+                          theme.palette.tiers.tier4,
+                        ]
+                      : [
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                          theme.palette.grey[300],
+                        ]
+                  }
+                  values={getTierValues(outcome)}
+                  variant="dots"
                   size={45}
                 />
                 <Typography

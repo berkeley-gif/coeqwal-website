@@ -663,10 +663,15 @@ export default function MapOverlayPanels() {
                           >
                             Key outcomes
                           </Box>
-                          These metrics show how this strategy affects water supply,
+                          These outcomes show how this strategy affects water supply,
                           ecosystems, agriculture, and communities.
+                          <Box component="span" sx={{ display: "block", mt: 1 }}>
+                            Some outcomes record values from multiple locations in a bar chart
+                            that shows the number of locations in each tier. Other outcomes
+                            are recorded at a single location such as the Delta or Sacramento River.
+                          </Box>
                           <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                            Hover over the outcomes to learn more about each metric.
+                            Hover over the outcomes to learn more about each one. Click to see the outcomes on a map.
                           </Box>
                         </>
                       }
