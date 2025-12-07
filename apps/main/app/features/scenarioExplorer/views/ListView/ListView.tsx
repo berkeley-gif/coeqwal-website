@@ -3,7 +3,6 @@
 import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
-import SearchSortBar from "../../components/SearchSortBar"
 import StrategyGrid from "../../components/StrategyGrid"
 import { useScenarioData } from "../../hooks/useScenarioData"
 import {
@@ -160,15 +159,14 @@ export default function ListView() {
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Search and Sort */}
-      <SearchSortBar placeholder="Search scenarios by name or description..." />
-
       {/* Scenarios Grid */}
       <Box
         sx={{
           flex: 1,
           overflowY: "auto",
-          p: theme.spacing(theme.cards.spacing.standard),
+          px: theme.spacing(theme.cards.spacing.standard),
+          pt: theme.spacing(1.5),
+          pb: 0,
         }}
       >
         <StrategyGrid

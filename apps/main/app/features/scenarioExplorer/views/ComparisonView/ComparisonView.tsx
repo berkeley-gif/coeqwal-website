@@ -4,7 +4,6 @@ import React from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import { useComparisonData } from "./useComparisonData"
-import SearchSortBar from "../../components/SearchSortBar"
 import ScenarioPanel from "../MapView/components/ScenarioPanel"
 
 /**
@@ -107,7 +106,6 @@ export default function ComparisonView() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <SearchSortBar placeholder="Search scenarios..." showReset={false} />
         <ScenarioPanel onTierClick={() => {}} />
       </Box>
 

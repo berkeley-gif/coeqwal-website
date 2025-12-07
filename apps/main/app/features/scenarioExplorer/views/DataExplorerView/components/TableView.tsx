@@ -4,7 +4,6 @@ import React from "react"
 import {
   Box,
   Typography,
-  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -14,6 +13,7 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { SearchIcon } from "@repo/ui/mui"
+import { StyledTextInput } from "@repo/ui"
 import { useScenarioExplorerStore } from "@repo/state"
 import {
   outcomeMetrics,
@@ -156,18 +156,17 @@ export default function TableView() {
         }}
       >
         {/* Search */}
-        <TextField
-          placeholder="Search metrics..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          size="small"
-          sx={{ minWidth: theme.spacing(35) }}
-          InputProps={{
-            startAdornment: (
-              <SearchIcon sx={{ mr: 1, color: theme.palette.grey[500] }} />
-            ),
-          }}
-        />
+        <Box sx={{ minWidth: theme.spacing(35) }}>
+          <StyledTextInput
+            placeholder="Search metrics..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            size="small"
+            startIcon={<SearchIcon />}
+            showClearButton={!!searchQuery}
+            onClear={() => setSearchQuery("")}
+          />
+        </Box>
 
         {/* Category Filter */}
         <FormControl size="small" sx={{ minWidth: theme.spacing(25) }}>

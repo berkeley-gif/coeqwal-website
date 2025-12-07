@@ -10,6 +10,7 @@ import ComparisonView from "./views/ComparisonView/ComparisonView"
 import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
+import SearchBar from "./components/SearchBar"
 
 /**
  * ScenarioExplorer -- Multi-tab version
@@ -110,6 +111,11 @@ export default function ScenarioExplorerNew() {
 
         {/* Selection Banner, currently shown for all views except needs-based */}
         {activeView !== "needs" && <SelectionBanner />}
+
+        {/* Search bar for list, map, and comparison views */}
+        {(activeView === "list" || activeView === "map" || activeView === "comparison") && (
+          <SearchBar placeholder="Search scenarios by name or description" />
+        )}
 
         {/* View content */}
         <Box
