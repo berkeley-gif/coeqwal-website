@@ -39,6 +39,10 @@ export default function MapOverlayPanels() {
   // Ref for multi-step sticky animation
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
   
+  // Refs for strategy info tooltip
+  const strategyInfoRef = useRef<HTMLDivElement>(null)
+  const strategyInfoContainerRef = useRef<HTMLDivElement>(null)
+  
   // Refs for key operations tooltip
   const keyOperationsRef = useRef<HTMLDivElement>(null)
   const keyOperationsContainerRef = useRef<HTMLDivElement>(null)
@@ -91,11 +95,19 @@ export default function MapOverlayPanels() {
     ["45vh", "45vh", "15vh", "15vh"],
   )
 
+  // Strategy info tooltip opacity - appears after strategy info panel is in position
+  // Sequence: panel enters ~0.45, tooltip appears 0.5-0.65
+  const strategyInfoTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.5, 0.55, 0.62, 0.67],
+    [0, 1, 1, 0],
+  )
+
   // Key operations tooltip opacity - appears after key operations panel is in position
-  // Similar timing to scenario card tooltips (10% scroll range)
+  // Sequence: panel enters ~0.7, tooltip appears 0.75-0.9
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.75, 0.8, 0.9, 0.95],
+    [0.78, 0.82, 0.9, 0.95],
     [0, 1, 1, 0],
   )
 
@@ -462,8 +474,41 @@ export default function MapOverlayPanels() {
                 pr: { xs: 4, sm: 8, md: 12, lg: 16 },
               }}
             >
-              <Box sx={{ width: "100%", maxWidth: "500px" }}>
-                <StrategyInfoPanel strategyValue="current-ops" />
+              {/* Container for tooltip positioning */}
+              <Box
+                ref={strategyInfoContainerRef}
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "500px",
+                }}
+              >
+                <Box ref={strategyInfoRef}>
+                  <StrategyInfoPanel strategyValue="current-ops" />
+                </Box>
+                
+                {/* Strategy info tooltip */}
+                <ScrollTooltip
+                  targetRef={strategyInfoRef}
+                  containerRef={strategyInfoContainerRef}
+                  content={
+                    <>
+                      <Box
+                        component="span"
+                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      >
+                        Strategy
+                      </Box>
+                      This describes the water management strategy being modeled.
+                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
+                        Hover over the i icon to see definitions of terms.
+                      </Box>
+                    </>
+                  }
+                  position="left"
+                  offsetY={20}
+                  opacity={strategyInfoTooltipOpacity}
+                />
               </Box>
             </Box>
           </Section>

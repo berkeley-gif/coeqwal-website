@@ -170,24 +170,37 @@ export function StrategyRow({
             justifyContent: "flex-start",
           }}
         >
-        {icons.map((icon) => (
-          <InfoTooltip key={icon.path} description={icon.description}>
-            <Box
-              sx={{
-                width: { xs: theme.spacing(4), lg: theme.spacing(5) },
-                height: { xs: theme.spacing(4), lg: theme.spacing(5) },
-                cursor: "pointer",
-              }}
+          {icons.map((icon) => (
+            <InfoTooltip
+              key={icon.path}
+              description={
+                <>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                  >
+                    {icon.label.replace(/\n/g, " ")}
+                  </Box>
+                  {icon.description}
+                </>
+              }
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={icon.path}
-                alt={icon.alt}
-                style={{ width: "100%", height: "100%" }}
-              />
-            </Box>
-          </InfoTooltip>
-        ))}
+              <Box
+                sx={{
+                  width: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                  height: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                  cursor: "pointer",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={icon.path}
+                  alt={icon.alt}
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </Box>
+            </InfoTooltip>
+          ))}
         </Box>
       </Box>
     </Box>
@@ -301,7 +314,20 @@ export function KeyOperationsPanel({
         }}
       >
         {icons.map((icon) => (
-          <InfoTooltip key={icon.path} description={icon.description}>
+          <InfoTooltip
+            key={icon.path}
+            description={
+              <>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                >
+                  {icon.label.replace(/\n/g, " ")}
+                </Box>
+                {icon.description}
+              </>
+            }
+          >
             <Box
               sx={{
                 width: { xs: theme.spacing(4), lg: theme.spacing(5) },
