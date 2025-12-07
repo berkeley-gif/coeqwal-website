@@ -16,7 +16,7 @@ import ClimateCard from "../../ClimateCard"
 import ScrollTooltip from "./ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
-import { StrategyInfoPanel, KeyOperationsPanel } from "./StrategyRow"
+import { StrategyInfoPanel, KeyOperationsPanel, KeyOutcomesPanel } from "./StrategyRow"
 import { Section, StickySection } from "./Section"
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
@@ -46,6 +46,41 @@ export default function MapOverlayPanels() {
   // Refs for key operations tooltip
   const keyOperationsRef = useRef<HTMLDivElement>(null)
   const keyOperationsContainerRef = useRef<HTMLDivElement>(null)
+  
+  // Refs for key outcomes tooltip
+  const keyOutcomesRef = useRef<HTMLDivElement>(null)
+  const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
+
+  // Dynamic panel heights for stacking
+  const [strategyInfoHeight, setStrategyInfoHeight] = useState(0)
+  const [keyOperationsHeight, setKeyOperationsHeight] = useState(0)
+
+  // Measure panel heights after render
+  useEffect(() => {
+    const measureHeights = () => {
+      if (strategyInfoRef.current) {
+        setStrategyInfoHeight(strategyInfoRef.current.offsetHeight)
+      }
+      if (keyOperationsRef.current) {
+        setKeyOperationsHeight(keyOperationsRef.current.offsetHeight)
+      }
+    }
+    
+    // Measure initially and on resize
+    measureHeights()
+    window.addEventListener("resize", measureHeights)
+    return () => window.removeEventListener("resize", measureHeights)
+  }, [])
+
+  // Calculate stacking positions (with 16px gap between panels)
+  const panelGap = 16
+  const baseTop = "15vh"
+  const keyOperationsTop = strategyInfoHeight > 0 
+    ? `calc(${baseTop} + ${strategyInfoHeight + panelGap}px)` 
+    : `calc(${baseTop} + 150px)` // Fallback
+  const keyOutcomesTop = (strategyInfoHeight > 0 && keyOperationsHeight > 0)
+    ? `calc(${baseTop} + ${strategyInfoHeight + keyOperationsHeight + (panelGap * 2)}px)`
+    : `calc(${baseTop} + 280px)` // Fallback
 
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
@@ -95,19 +130,29 @@ export default function MapOverlayPanels() {
     ["45vh", "45vh", "15vh", "15vh"],
   )
 
-  // Strategy info tooltip opacity - appears after strategy info panel is in position
-  // Sequence: panel enters ~0.45, tooltip appears 0.5-0.65
+  // Tooltip sequence (each tooltip appears after its panel, before the next panel):
+  // 1. Strategy row panel enters (~0.35)
+  // 2. Strategy description tooltip (0.38-0.48)
+  // 3. Key operations panel enters (~0.50)
+  // 4. Key operations tooltip (0.53-0.63)
+  // 5. Key outcomes panel enters (~0.70)
+  // 6. Key outcomes tooltip (0.73-0.83)
+
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.5, 0.55, 0.62, 0.67],
+    [0.38, 0.42, 0.46, 0.50],
     [0, 1, 1, 0],
   )
 
-  // Key operations tooltip opacity - appears after key operations panel is in position
-  // Sequence: panel enters ~0.7, tooltip appears 0.75-0.9
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.78, 0.82, 0.9, 0.95],
+    [0.53, 0.57, 0.63, 0.67],
+    [0, 1, 1, 0],
+  )
+
+  const keyOutcomesTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.75, 0.78, 0.85, 0.88],
     [0, 1, 1, 0],
   )
 
@@ -418,7 +463,7 @@ export default function MapOverlayPanels() {
         ref={scenarioIntroRef}
         id="scenario-intro-wrapper"
         sx={{
-          minHeight: "350vh", // Increased to accommodate multiple panels
+          minHeight: "550vh", // Space for: paragraph, strategy row + tooltip, key operations + tooltip, key outcomes + tooltip
           position: "relative",
         }}
       >
@@ -514,13 +559,13 @@ export default function MapOverlayPanels() {
           </Section>
         </Box>
 
-        {/* Key operations panel - scrolls in after strategy info panel is stuck */}
+        {/* Key operations panel - scrolls in after strategy description tooltip */}
         <Box
           sx={{
             position: "sticky",
-            top: "calc(15vh + 140px)", // Dock right below the strategy info panel
+            top: keyOperationsTop, // Dynamically calculated based on strategy info height
             zIndex: 1,
-            mt: "80vh", // Delay entrance until strategy info is fully in position
+            mt: "100vh", // Delay entrance until after strategy description tooltip
           }}
         >
           <Section
@@ -564,7 +609,7 @@ export default function MapOverlayPanels() {
                       </Box>
                       These icons represent the key operational decisions that define
                       this water management strategy.
-                      <Box component="p" sx={{ mt: 1, mb: 0, fontStyle: "italic" }}>
+                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
                         Hover over the icons to see what key operations they represent.
                       </Box>
                     </>
@@ -578,8 +623,72 @@ export default function MapOverlayPanels() {
           </Section>
         </Box>
 
-        {/* Scroll spacer - allows both elements to stick while scrolling continues */}
-        <Box sx={{ height: "70vh" }} aria-hidden="true" />
+        {/* Key outcomes panel - scrolls in after key operations tooltip */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: keyOutcomesTop, // Dynamically calculated based on panels above
+            zIndex: 1,
+            mt: "120vh", // Delay entrance until after key operations tooltip
+          }}
+        >
+          <Section
+            id="key-outcomes"
+            amount={0.5}
+            sx={{ minHeight: "auto", alignItems: "flex-start" }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                width: "100%",
+                pl: { xs: 2, sm: 3, md: 4 },
+                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
+              }}
+            >
+              {/* Container for tooltip positioning */}
+              <Box
+                ref={keyOutcomesContainerRef}
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "500px",
+                }}
+              >
+                <Box ref={keyOutcomesRef}>
+                  <KeyOutcomesPanel scenarioId="s0020" />
+                </Box>
+                
+                {/* Key outcomes tooltip */}
+                <ScrollTooltip
+                  targetRef={keyOutcomesRef}
+                  containerRef={keyOutcomesContainerRef}
+                  content={
+                    <>
+                      <Box
+                        component="span"
+                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      >
+                        Key outcomes
+                      </Box>
+                      These metrics show how this strategy affects water supply,
+                      ecosystems, agriculture, and communities.
+                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
+                        Hover over the outcomes to learn more about each metric.
+                      </Box>
+                    </>
+                  }
+                  position="left"
+                  offsetY={20}
+                  opacity={keyOutcomesTooltipOpacity}
+                />
+              </Box>
+            </Box>
+          </Section>
+        </Box>
+
+        {/* Scroll spacer - allows all elements to stick while scrolling continues */}
+        <Box sx={{ height: "100vh" }} aria-hidden="true" />
       </Box>
 
       {/* ==================== SECTION 13: Scenario Cards (Sticky) ==================== */}
