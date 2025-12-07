@@ -689,7 +689,7 @@ export default function MapOverlayPanels() {
                             are recorded at a single location such as the Delta or Sacramento River.
                           </Box>
                           <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                            Hover over the outcomes to learn more about each one. Click to see the outcomes on a map.
+                            Click on the <InfoIcon sx={{ fontSize: "1rem", verticalAlign: "text-top", mx: 0.25, color: "blue.bright" }} /> icons to learn more about each outcome. Click on the chart to see the outcome on a map.
                           </Box>
                         </>
                       }
