@@ -12,7 +12,7 @@
  * - Agricultural revenue (Class=Agriculture)
  */
 
-import { useEffect, useState, useMemo, useCallback } from "react"
+import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 
@@ -127,10 +127,25 @@ interface UseOutcomeMapLayerProps {
   visible: boolean
 }
 
+/** Info about a hovered/clicked polygon */
+export interface HoveredFeatureInfo {
+  longitude: number
+  latitude: number
+  duId: string
+  modName: string | null
+  subName: string | null
+  comments: string | null
+  type: string | null
+  tierLevel: number
+  tierLabel: string
+}
+
 interface UseOutcomeMapLayerResult {
   isLoading: boolean
   error: string | null
   featureCount: number
+  /** Info about currently hovered polygon (for tooltip) */
+  hoveredFeature: HoveredFeatureInfo | null
   /** Clear the layer styling */
   clear: () => void
 }
@@ -148,9 +163,24 @@ export function useOutcomeMapLayer({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [featureCount, setFeatureCount] = useState(0)
+  const [hoveredFeature, setHoveredFeature] = useState<HoveredFeatureInfo | null>(null)
+
+  // Store tier lookup in a ref so event handlers can access it
+  const tierLookupRef = useRef<Record<string, number>>({})
 
   // Get config for this outcome
   const config = outcome ? OUTCOME_LAYER_CONFIG[outcome] : null
+
+  // Helper to get tier label
+  const getTierLabel = useCallback((tier: number): string => {
+    switch (tier) {
+      case 1: return "Optimal"
+      case 2: return "Sub-optimal"
+      case 3: return "At-risk"
+      case 4: return "Critical"
+      default: return "Unknown"
+    }
+  }, [])
 
   // Tier colors
   const tierColors = useMemo(
@@ -299,6 +329,9 @@ export function useOutcomeMapLayer({
           // location_id matches DU_ID in the Mapbox layer
           tierLookup[location.location_id] = location.tier_level
         })
+
+        // Store in ref for event handlers to access
+        tierLookupRef.current = tierLookup
 
         const duIds = Object.keys(tierLookup)
         setFeatureCount(duIds.length)
@@ -512,6 +545,85 @@ export function useOutcomeMapLayer({
     }
   }, [outcome, strategy, visible, config, tierColors, theme, mapAPI, clear, fadeBasemapDim])
 
+  // Set up hover events for tooltips
+  useEffect(() => {
+    if (!visible || !outcome) {
+      setHoveredFeature(null)
+      return
+    }
+
+    // Mapbox GL mouse event handlers
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mouseEnterHandler: ((e: any) => void) | null = null
+    let mouseLeaveHandler: (() => void) | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let mouseMoveHandler: ((e: any) => void) | null = null
+
+    mapAPI.withMap((mapRef) => {
+      const map = mapRef.getMap()
+
+      if (!map.getLayer(DEMAND_UNITS_LAYER_ID)) return
+
+      // Mouse enter - change cursor
+      mouseEnterHandler = () => {
+        map.getCanvas().style.cursor = "pointer"
+      }
+
+      // Mouse leave - reset cursor and clear hover
+      mouseLeaveHandler = () => {
+        map.getCanvas().style.cursor = ""
+        setHoveredFeature(null)
+      }
+
+      // Mouse move - update hovered feature
+      mouseMoveHandler = (e) => {
+        if (!e.features || e.features.length === 0) {
+          setHoveredFeature(null)
+          return
+        }
+
+        const feature = e.features[0]
+        const props = feature.properties || {}
+        const duId = props.DU_ID
+        const tierLevel = tierLookupRef.current[duId] || 0
+
+        if (!duId || tierLevel === 0) {
+          setHoveredFeature(null)
+          return
+        }
+
+        // Use the mouse position as the tooltip anchor
+        const [lng, lat] = e.lngLat.toArray()
+
+        setHoveredFeature({
+          longitude: lng,
+          latitude: lat,
+          duId,
+          modName: props.Mod_Name || null,
+          subName: props.Sub_Name || null,
+          comments: props.Comments || null,
+          type: props.Type || null,
+          tierLevel,
+          tierLabel: getTierLabel(tierLevel),
+        })
+      }
+
+      map.on("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
+      map.on("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
+      map.on("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
+    })
+
+    return () => {
+      mapAPI.withMap((mapRef) => {
+        const map = mapRef.getMap()
+        if (mouseEnterHandler) map.off("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
+        if (mouseLeaveHandler) map.off("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
+        if (mouseMoveHandler) map.off("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
+      })
+      setHoveredFeature(null)
+    }
+  }, [visible, outcome, mapAPI, getTierLabel])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -523,6 +635,7 @@ export function useOutcomeMapLayer({
     isLoading,
     error,
     featureCount,
+    hoveredFeature,
     clear,
   }
 }
