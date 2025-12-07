@@ -79,6 +79,18 @@ export const LABEL_FADE = {
   DELTA_END: 0.95,
 } as const
 
+// ==================== STICKY POSITIONS ====================
+
+/** Vertical positions for sticky elements (from top of viewport) */
+export const STICKY_POSITIONS = {
+  /** Top sticky position for intro text (accounts for header) */
+  TOP: "15vh",
+  /** Bottom sticky position for secondary elements */
+  BOTTOM: "60vh",
+  /** Default sticky position (legacy, used by other panels) */
+  DEFAULT: "100px",
+} as const
+
 // ==================== INTERSECTION OBSERVER CONFIG ====================
 
 /** Intersection observer thresholds for panel detection */

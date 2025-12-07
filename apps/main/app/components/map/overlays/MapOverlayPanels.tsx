@@ -16,6 +16,7 @@ import ClimateCard from "../../ClimateCard"
 import ScrollTooltip from "./ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
+import { StrategyRow } from "./StrategyRow"
 import { Section, StickySection } from "./Section"
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
@@ -361,20 +362,78 @@ export default function MapOverlayPanels() {
         </CallResponsePanel>
       </Section>
 
-      {/* ==================== SECTION 12: Scenario Intro ==================== */}
-      <Section id="scenario-intro" amount={0.5}>
-        <CallResponsePanel
-          id="scenario-intro-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
+      {/* ==================== SECTION 12: Scenario Intro with Strategy Row ==================== */}
+      {/* 
+        Dual-sticky choreography:
+        1. Intro paragraph scrolls in and sticks near top (15vh)
+        2. Strategy row scrolls in and sticks near bottom (55vh)
+        Both remain visible together while scrolling through this section
+      */}
+      <Box
+        id="scenario-intro-wrapper"
+        sx={{
+          minHeight: "200vh",
+          position: "relative",
+        }}
+      >
+        {/* Sticky intro text - sticks near top of viewport */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: "15vh",
+            zIndex: 2,
+          }}
         >
-          <Typography variant="body1" sx={{ maxWidth: "460px" }}>
-            Each water management scenario on this site can be read as having
-            three main elements:
-          </Typography>
-        </CallResponsePanel>
-      </Section>
+          <Section
+            id="scenario-intro"
+            amount={0.3}
+            sx={{ minHeight: "auto", alignItems: "flex-start" }}
+          >
+            <CallResponsePanel
+              id="scenario-intro-call"
+              side="left"
+              variant="call"
+              isVisible={isFirstPanelVisible}
+              minHeight="auto"
+              alignItems="flex-start"
+            >
+              <Typography variant="body1" sx={{ maxWidth: "460px" }}>
+                Each water management scenario on this site can be read as having
+                three main elements. Let&apos;s look at the water management scenario for the way we currently manage Central Valley water.
+              </Typography>
+            </CallResponsePanel>
+          </Section>
+        </Box>
+
+        {/* Strategy row - scrolls in and sticks near bottom of viewport */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: "55vh",
+            zIndex: 1,
+            mt: "40vh",
+          }}
+        >
+          <Section
+            id="strategy-row"
+            amount={0.5}
+            sx={{ minHeight: "auto", alignItems: "flex-start" }}
+          >
+            <Box
+              sx={{
+                pl: { xs: 4, sm: 8, md: 12, lg: 16 },
+                pr: { xs: 2, sm: 3, md: 4 },
+                width: "100%",
+              }}
+            >
+              <StrategyRow strategyValue="current-ops" />
+            </Box>
+          </Section>
+        </Box>
+
+        {/* Scroll spacer - allows both elements to stick while scrolling continues */}
+        <Box sx={{ height: "60vh" }} aria-hidden="true" />
+      </Box>
 
       {/* ==================== SECTION 13: Scenario Cards (Sticky) ==================== */}
       <Section id="scenario-cards" amount={0.3} sx={{ minHeight: "150vh" }}>

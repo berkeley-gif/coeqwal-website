@@ -28,6 +28,7 @@ export type SectionId =
   | "coeqwal"
   | "public-data"
   | "scenario-intro"
+  | "strategy-row"
   | "scenario-cards"
   | "scenario-conclusion"
 
@@ -150,6 +151,11 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     camera: CENTRAL_VALLEY_VIEW,
   },
   "scenario-intro": {
+    basins: true,
+    rivers: true,
+    camera: CENTRAL_VALLEY_VIEW,
+  },
+  "strategy-row": {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,

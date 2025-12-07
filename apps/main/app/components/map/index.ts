@@ -24,6 +24,7 @@ export { default as ScrollTooltip } from "./overlays/ScrollTooltip"
 export { DeltaInfoPanel } from "./overlays/DeltaInfoPanel"
 export { GeocodingPanel } from "./overlays/GeocodingPanel"
 export { Section, StickySection } from "./overlays/Section"
+export { StrategyRow } from "./overlays/StrategyRow"
 
 // Choreography constants (still used by DeltaInfoPanel)
 export * from "./choreography/scrollChoreographyConstants"
