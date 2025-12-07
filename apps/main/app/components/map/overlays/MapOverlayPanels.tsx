@@ -342,7 +342,7 @@ export default function MapOverlayPanels() {
               wet years
             </Box>{" "}
             water flows from the Tulare Basin into the San Joaquin River.
-          </Typography>
+            </Typography>
           </CallResponsePanel>
       </StickySection>
 
@@ -607,8 +607,8 @@ export default function MapOverlayPanels() {
                       width: "100%",
                       maxWidth: "500px",
                       pointerEvents: "none", // Allow map interaction
-                    }}
-                  >
+            }}
+          >
                     <Box ref={keyOperationsRef} sx={{ pointerEvents: "auto" }}>
                       <KeyOperationsPanel 
                         strategyValue="current-ops" 

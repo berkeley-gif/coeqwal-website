@@ -71,7 +71,7 @@ export default function CaliforniaMapPanel({
     : false
 
   // Use demand unit layer for CWS, AG_REV, etc.
-  const { 
+  const {
     isLoading: demandUnitsLoading, 
     error: demandUnitsError,
     hoveredFeature,
