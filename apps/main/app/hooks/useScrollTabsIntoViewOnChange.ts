@@ -17,11 +17,8 @@ export function useScrollTabsIntoViewOnChange({
   behavior = "smooth",
   offsetPx = 0,
 }: Options) {
-  const { state, tabsRef, isInTabsArea } = useTabs()
+  const { state, tabsRef, panelRef, isInTabsArea } = useTabs()
   const { activeTab } = state
-
-  // Store the original Y-position of the tabs container
-  const originalTabsTopRef = useRef<number | null>(null)
 
   // Track whether we were in the tabs area on last render
   const wasInAreaRef = useRef(false)
@@ -29,20 +26,10 @@ export function useScrollTabsIntoViewOnChange({
   // Track which tab we already aligned for (so we don't re-scroll on the same tab)
   const lastAlignedTabRef = useRef<TabKey | null>(null)
 
-  // Capture original position once, on mount (before sticky behavior matters)
   useEffect(() => {
     const tabsEl = tabsRef.current
-    if (!tabsEl) return
-
-    if (originalTabsTopRef.current == null) {
-      originalTabsTopRef.current =
-        tabsEl.getBoundingClientRect().top + window.scrollY
-    }
-  }, [tabsRef])
-
-  useEffect(() => {
-    const tabsEl = tabsRef.current
-    if (!tabsEl) return
+    const panelEl = panelRef.current
+    if (!tabsEl || !panelEl) return
 
     const wasInArea = wasInAreaRef.current
     wasInAreaRef.current = isInTabsArea
@@ -62,16 +49,20 @@ export function useScrollTabsIntoViewOnChange({
 
     // If the active tab didn't change since we last aligned, return
     if (lastAlignedTabRef.current === activeTab) return
-
     lastAlignedTabRef.current = activeTab
 
-    const raf = requestAnimationFrame(() => {
-      // Fallback: if for some reason we never captured original, measure now
-      const baseTabsTop =
-        originalTabsTopRef.current ??
-        tabsEl.getBoundingClientRect().top + window.scrollY
+    console.log('activeTab changed')
 
-      const rawTarget = baseTabsTop - offsetPx
+    const raf = requestAnimationFrame(() => {
+      const panelRect = panelEl.getBoundingClientRect()
+      // Fallback: if for some reason we never captured original, measure now
+      const tabsHeight = tabsEl.offsetHeight
+
+      const absolutePanelTop = window.scrollY + panelRect.top
+
+      console.log(`absolutePanelTop => window.scrollY: ${window.scrollY} + panelRect.top: ${panelRect.top} = ${absolutePanelTop}`)
+
+      const rawTarget = absolutePanelTop - tabsHeight - offsetPx
 
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight
@@ -79,6 +70,7 @@ export function useScrollTabsIntoViewOnChange({
 
       const epsilon = 1
       if (Math.abs(window.scrollY - targetY) > epsilon) {
+        console.log('scrolling to targetY: ', targetY)
         window.scrollTo({ top: targetY, behavior })
       }
     })
