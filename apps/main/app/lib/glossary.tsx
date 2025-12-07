@@ -106,6 +106,11 @@ export const glossaryTerms: GlossaryTerm[] = [
       "The distribution of water from storage and conveyance systems to end users, including farms, communities, and environmental uses. Water deliveries are managed according to water rights, contracts, and regulatory requirements. See also allocation.",
   },
   {
+    icon: <WaterIcon />,
+    term: "Demands",
+    definition: "TODO",
+  },
+  {
     icon: <EngineeringIcon />,
     term: "Delta Conveyance Project",
     definition:
