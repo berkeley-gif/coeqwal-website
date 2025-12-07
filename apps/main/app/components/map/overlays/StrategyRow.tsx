@@ -461,6 +461,33 @@ export function KeyOutcomesPanel({
     openDrawer("glossary")
   }
 
+  // Helper to render tier text with bold label and quantity (e.g., "Optimal: ... less than 10%")
+  const renderTierText = (tierText: string) => {
+    const colonIndex = tierText.indexOf(":")
+    if (colonIndex === -1) return tierText
+    const label = tierText.substring(0, colonIndex)
+    const rest = tierText.substring(colonIndex + 1)
+    
+    // Find and bold quantity patterns like "less than 10%" or "more than 30%"
+    const quantityRegex = /(less than \d+%|more than \d+%)/gi
+    const parts = rest.split(quantityRegex)
+    
+    return (
+      <>
+        <span style={{ fontWeight: 600 }}>{label}</span>:
+        {parts.map((part, i) => {
+          // Check if this part matches the quantity pattern
+          const isQuantity = /^(less than \d+%|more than \d+%)$/i.test(part)
+          return isQuantity ? (
+            <span key={i} style={{ fontWeight: 500, whiteSpace: "nowrap" }}>{part}</span>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        })}
+      </>
+    )
+  }
+
   // Helper to render definition with clickable glossary terms
   const renderDefinitionWithLinks = (definition: string, outcome: string) => {
     // For "Community deliveries", make "demands" clickable
@@ -584,13 +611,28 @@ export function KeyOutcomesPanel({
                   </Box>
                   {renderDefinitionWithLinks(definition, outcome)}
                   {tierDefs && (
-                    <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
-                      <Box component="li">{tierDefs.tier1}</Box>
-                      <Box component="li">{tierDefs.tier2}</Box>
-                      <Box component="li">{tierDefs.tier3}</Box>
-                      <Box component="li">{tierDefs.tier4}</Box>
+                    <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier1)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier2)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier3)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier4)}</span>
+                      </Box>
                     </Box>
                   )}
+                  <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                    Click on chart to show values on map.
+                  </Box>
                 </>
               }
               tooltipProps={{
@@ -705,13 +747,28 @@ export function KeyOutcomesPanel({
                   </Box>
                   {renderDefinitionWithLinks(definition, outcome)}
                   {tierDefs && (
-                    <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
-                      <Box component="li">{tierDefs.tier1}</Box>
-                      <Box component="li">{tierDefs.tier2}</Box>
-                      <Box component="li">{tierDefs.tier3}</Box>
-                      <Box component="li">{tierDefs.tier4}</Box>
+                    <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier1)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier2)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier3)}</span>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                        <span>{renderTierText(tierDefs.tier4)}</span>
+                      </Box>
                     </Box>
                   )}
+                  <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                    Click on chart to show values on map.
+                  </Box>
                 </>
               }
               tooltipProps={{
