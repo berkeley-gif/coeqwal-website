@@ -208,7 +208,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       case 1:
         return "Optimal"
       case 2:
-        return "Suboptimal"
+        return "Sub-optimal"
       case 3:
         return "At-risk"
       case 4:
