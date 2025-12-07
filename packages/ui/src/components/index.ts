@@ -84,6 +84,8 @@ export type {
   StrategyDefinitionPanelProps,
   StrategyDefinition,
 } from "./common/StrategyDefinitionPanel"
+export { StyledTextInput } from "./common/StyledTextInput"
+export type { StyledTextInputProps } from "./common/StyledTextInput"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"

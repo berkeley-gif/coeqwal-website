@@ -8,7 +8,6 @@ import {
   GeolocateControl,
   MapProvider,
 } from "@repo/map"
-import SearchSortBar from "../../components/SearchSortBar"
 import ScenarioPanel from "./components/ScenarioPanel"
 import TierMarkers from "../../components/TierMarkers"
 import { useTierMapData } from "../../hooks/useTierMapData"
@@ -53,7 +52,6 @@ function MapViewContent() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <SearchSortBar placeholder="Search scenarios..." showReset={false} />
         <ScenarioPanel onTierClick={handleTierClick} />
       </Box>
 

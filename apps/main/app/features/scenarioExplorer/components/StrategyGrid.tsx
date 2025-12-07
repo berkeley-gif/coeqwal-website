@@ -255,7 +255,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 gridColumn: "1 / 3",
                 display: "flex",
                 alignItems: "center",
-                height: theme.spacing(7),
+                height: theme.spacing(5.5),
               }}
             >
               <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
@@ -266,7 +266,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               sx={{
                 display: "flex",
                 alignItems: "center",
-                height: theme.spacing(7),
+                height: theme.spacing(5.5),
               }}
             >
               <Typography variant="subtitle2">Key operations</Typography>
@@ -277,7 +277,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 2,
-                height: theme.spacing(7),
+                height: theme.spacing(5.5),
               }}
             >
               <Typography variant="subtitle2">Key outcomes</Typography>
@@ -368,9 +368,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 },
               }}
             >
-              {displayName === "Freshwater for in-Delta uses"
-                ? "Freshwater for in-Delta uses"
-                : getOutcomeDisplayLabel(name)}{" "}
+              {displayName === "Freshwater for in-Delta uses" ? (
+                <>Freshwater for <span style={{ whiteSpace: "nowrap" }}>in-Delta</span> uses</>
+              ) : (
+                getOutcomeDisplayLabel(name)
+              )}{" "}
               <InfoIcon
                 sx={{
                   fontSize: theme.typography.compact.micro.fontSize,
@@ -603,7 +605,33 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       />
                     </Box>
                   </InfoTooltip>
-                  {/* No TUCP icon */}
+                  {/* TUCP icon - show for strategies that include TUCPs */}
+                  {strategy.value !== "current-ops-wo-tucp" && (
+                    <InfoTooltip 
+                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species." 
+                      placement="top"
+                    >
+                      <Box
+                        sx={{
+                          width: showMapView
+                            ? theme.spacing(3.5)
+                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                          height: showMapView
+                            ? theme.spacing(3.5)
+                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                          cursor: "pointer",
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/images/icons/tucp.svg"
+                          alt="TUCPs allowed"
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </Box>
+                    </InfoTooltip>
+                  )}
+                  {/* No TUCP icon - show for strategies without TUCPs */}
                   {strategy.value === "current-ops-wo-tucp" && (
                     <InfoTooltip description="Without TUCPs" placement="top">
                       <Box

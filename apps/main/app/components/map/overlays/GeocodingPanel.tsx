@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { StyledTextInput } from "@repo/ui"
 import { useMap, useGeocoding, useBasinLookup, BOUNDING_BOXES } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { bbox } from "@turf/turf"
@@ -177,83 +178,14 @@ export function GeocodingPanel({
 
       {/* Search input */}
       <Box sx={{ position: "relative" }}>
-        <Box
-          component="input"
-          type="text"
+        <StyledTextInput
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Enter your California address, city, or landmark"
-          sx={{
-            width: "100%",
-            padding: theme.spacing(1.5),
-            paddingRight: searchQuery ? theme.spacing(6) : theme.spacing(1.5),
-            fontSize: "14px",
-            border: `1px solid ${theme.palette.grey[300]}`,
-            borderRadius: theme.borderRadius.standard,
-            backgroundColor: theme.palette.common.white,
-            outline: "none",
-            transition: "border-color 0.2s",
-            "&:focus": {
-              borderColor: theme.palette.primary.main,
-            },
-            "&::placeholder": {
-              color: theme.palette.grey[500],
-            },
-          }}
+          loading={geocoding.loading}
+          showClearButton
+          onClear={handleClearSearch}
         />
-
-        {/* Clear/loading indicator */}
-        {searchQuery && (
-          <Box
-            sx={{
-              position: "absolute",
-              right: theme.spacing(1.5),
-              top: "50%",
-              transform: "translateY(-50%)",
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-            }}
-          >
-            {geocoding.loading && (
-              <Box
-                sx={{
-                  width: 16,
-                  height: 16,
-                  border: `2px solid ${theme.palette.grey[300]}`,
-                  borderTopColor: theme.palette.primary.main,
-                  borderRadius: "50%",
-                  animation: "spin 0.6s linear infinite",
-                  "@keyframes spin": {
-                    to: { transform: "rotate(360deg)" },
-                  },
-                }}
-              />
-            )}
-            {!geocoding.loading && (
-              <Box
-                component="button"
-                onClick={handleClearSearch}
-                sx={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: 0.5,
-                  display: "flex",
-                  alignItems: "center",
-                  color: theme.palette.grey[600],
-                  fontSize: "18px",
-                  "&:hover": {
-                    color: theme.palette.grey[800],
-                  },
-                }}
-                aria-label="Clear search"
-              >
-                ×
-              </Box>
-            )}
-          </Box>
-        )}
 
         {/* Results dropdown */}
         {showResults && geocoding.results.length > 0 && (
