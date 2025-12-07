@@ -12,7 +12,7 @@ import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
-import { OUTCOMES } from "../../../lib/outcomes"
+import { OUTCOMES, OUTCOME_DEFINITIONS, outcomeTierValues } from "../../../lib/outcomes"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 
 interface StrategyRowProps {
@@ -528,6 +528,8 @@ export function KeyOutcomesPanel({
             tierData.length > 0 &&
             tierData.some((tier) => tier.value > 0)
 
+          const tierDefs = outcomeTierValues[outcome]
+          
           return (
             <InfoTooltip
               key={outcome}
@@ -539,7 +541,15 @@ export function KeyOutcomesPanel({
                   >
                     {outcome}
                   </Box>
-                  Click to learn more about this outcome.
+                  {OUTCOME_DEFINITIONS[outcome] || "No definition available."}
+                  {tierDefs && (
+                    <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier1 }}>{tierDefs.tier1}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier2 }}>{tierDefs.tier2}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier3 }}>{tierDefs.tier3}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier4 }}>{tierDefs.tier4}</Box>
+                    </Box>
+                  )}
                 </>
               }
               tooltipProps={{
@@ -634,6 +644,7 @@ export function KeyOutcomesPanel({
             tierData !== undefined &&
             tierData.length > 0 &&
             tierData.some((tier) => tier.value > 0)
+          const tierDefs = outcomeTierValues[outcome]
 
           return (
             <InfoTooltip
@@ -646,7 +657,15 @@ export function KeyOutcomesPanel({
                   >
                     {outcome}
                   </Box>
-                  Click to learn more about this outcome.
+                  {OUTCOME_DEFINITIONS[outcome] || "No definition available."}
+                  {tierDefs && (
+                    <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier1 }}>{tierDefs.tier1}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier2 }}>{tierDefs.tier2}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier3 }}>{tierDefs.tier3}</Box>
+                      <Box component="li" sx={{ color: theme.palette.tiers.tier4 }}>{tierDefs.tier4}</Box>
+                    </Box>
+                  )}
                 </>
               }
               tooltipProps={{
