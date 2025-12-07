@@ -3,6 +3,7 @@
 import { memo, useMemo } from "react"
 import { Source, Layer, Marker } from "@repo/map"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
+import { useIsOutcomeVisualizationActive } from "../store"
 
 interface RiversLayerProps {
   visible: boolean
@@ -87,9 +88,13 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Progress goes 0→1 as user scrolls (matches old choreography)
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
+  // Check if outcome visualization is active - hide labels when showing outcome data
+  const isOutcomeActive = useIsOutcomeVisualizationActive()
+
   // Calculate label opacity: fade in from 30% to 50% of river drawing
+  // Labels are hidden when outcome visualization is active
   const labelOpacity = useMemo(() => {
-    if (!visible) return 0
+    if (!visible || isOutcomeActive) return 0
     const labelFadeStart = 0.3
     const labelFadeEnd = 0.5
     return Math.max(
@@ -99,7 +104,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart),
       ),
     )
-  }, [visible, clampedProgress])
+  }, [visible, clampedProgress, isOutcomeActive])
 
   // Calculate Delta marker opacity: fade in from 80% to 95% of river drawing
   const deltaOpacity = useMemo(() => {
@@ -144,7 +149,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#1a3a52",
-            "line-width": 7.5,
+            "line-width": 7,
             "line-opacity": 0.5,
             "line-trim-offset": [clampedProgress, 1],
           }}
@@ -160,7 +165,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#4A90C9",
-            "line-width": 4.5,
+            "line-width": 4,
             "line-blur": 3,
             "line-opacity": 0.35,
             "line-trim-offset": [clampedProgress, 1],
@@ -177,7 +182,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#116bb0",
-            "line-width": 2.5,
+            "line-width": 2,
             "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
           }}
@@ -203,7 +208,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#1a3a52",
-            "line-width": 7.5,
+            "line-width": 7,
             "line-opacity": 0.5,
             "line-trim-offset": [clampedProgress, 1],
           }}
@@ -219,7 +224,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#4A90C9",
-            "line-width": 4.5,
+            "line-width": 4,
             "line-blur": 3,
             "line-opacity": 0.35,
             "line-trim-offset": [clampedProgress, 1],
@@ -236,7 +241,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#116bb0",
-            "line-width": 2.5,
+            "line-width": 2,
             "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
           }}

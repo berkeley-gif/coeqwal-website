@@ -2,6 +2,7 @@
 
 import { Source, Layer } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
+import { useIsOutcomeVisualizationActive } from "../store"
 
 interface BasinsLayerProps {
   visible: boolean
@@ -14,6 +15,16 @@ export default function BasinsLayer({
   riverBasinLabelsOpacity = 1,
 }: BasinsLayerProps) {
   const visibility = visible ? "visible" : "none"
+  
+  // When outcome visualization is active, fade labels and outlines
+  const isOutcomeActive = useIsOutcomeVisualizationActive()
+  
+  // Fade outlines to 30% when outcome is active
+  const outlineOpacity = isOutcomeActive ? 0.3 : 0.8
+  const haloOpacity = isOutcomeActive ? 0.3 : 1
+  
+  // Hide all labels when outcome is active
+  const labelsOpacity = isOutcomeActive ? 0 : riverBasinLabelsOpacity
 
   return (
     <Source id="basins-source" type="geojson" data={centralValleyBasins}>
@@ -34,7 +45,7 @@ export default function BasinsLayer({
         paint={{
           "line-color": "rgb(61, 41, 41)",
           "line-width": 3,
-          "line-opacity": 1,
+          "line-opacity": haloOpacity,
         }}
       />
       {/* Main outline layer on top */}
@@ -45,7 +56,7 @@ export default function BasinsLayer({
         paint={{
           "line-color": "white",
           "line-width": 2,
-          "line-opacity": 0.8,
+          "line-opacity": outlineOpacity,
         }}
       />
       <Layer
@@ -72,13 +83,14 @@ export default function BasinsLayer({
           "text-halo-color": "rgb(61, 41, 41)",
           "text-halo-width": 2,
           // Only fade Sacramento and San Joaquin labels; Tulare stays visible
+          // All labels hidden when outcome visualization is active
           "text-opacity": [
             "case",
             ["==", ["get", "name"], "Sacramento River Basin"],
-            riverBasinLabelsOpacity,
+            labelsOpacity,
             ["==", ["get", "name"], "San Joaquin River Basin"],
-            riverBasinLabelsOpacity,
-            1, // Tulare and other labels stay at full opacity
+            labelsOpacity,
+            isOutcomeActive ? 0 : 1, // Tulare and other labels - hidden when outcome active
           ],
         }}
       />

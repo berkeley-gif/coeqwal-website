@@ -42,6 +42,11 @@ export default function ScrollTooltip({
     isClosed ? 0 : value
   )
 
+  // Derive pointer events from opacity - disable when not visible
+  const effectivePointerEvents = useTransform(opacity, (value) =>
+    isClosed || value < 0.1 ? "none" : "auto"
+  )
+
   useEffect(() => {
     if (!targetRef.current || !containerRef.current) return
 
@@ -150,7 +155,10 @@ export default function ScrollTooltip({
 
   return (
     <MotionBox
-      style={{ opacity: effectiveOpacity }} // Combined scroll + manual close opacity
+      style={{ 
+        opacity: effectiveOpacity,
+        pointerEvents: effectivePointerEvents, // Disable when not visible
+      }}
       sx={{
         position: "absolute",
         top: tooltipPosition.top,
@@ -160,7 +168,6 @@ export default function ScrollTooltip({
             ? "translateY(-50%)"
             : "translateX(-50%)",
         zIndex: 9999,
-        pointerEvents: isClosed ? "none" : "auto", // Enable clicks when visible
       }}
     >
       <Box
