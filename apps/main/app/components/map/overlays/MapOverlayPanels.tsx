@@ -22,7 +22,7 @@ import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { learnMapActions, useGeocodingResetCounter } from "../store"
-import { useScroll, useTransform } from "@repo/motion"
+import { useScroll, useTransform, motion } from "@repo/motion"
 
 export default function MapOverlayPanels() {
   const map = useMap()
@@ -35,6 +35,9 @@ export default function MapOverlayPanels() {
   const baselineOverlayRef = useRef<HTMLDivElement>(null)
   const climateCardRef = useRef<HTMLDivElement>(null)
   const scrollTrackRef = useRef<HTMLElement | null>(null)
+
+  // Ref for multi-step sticky animation
+  const scenarioIntroRef = useRef<HTMLDivElement>(null)
 
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
@@ -65,6 +68,23 @@ export default function MapOverlayPanels() {
     scrollYProgress,
     [0.8, 0.85, 0.95, 1.0],
     [0, 1, 1, 0],
+  )
+
+  // Multi-step sticky choreography:
+  // Tracks scroll through the scenario-intro-wrapper section
+  const { scrollYProgress: scenarioIntroProgress } = useScroll({
+    target: scenarioIntroRef,
+    offset: ["start end", "end start"],
+  })
+
+  // Animate paragraph position: starts at 45vh (midpoint), moves to 15vh (top)
+  // Progress 0-0.3: paragraph enters and sticks at midpoint (45vh)
+  // Progress 0.3-0.5: paragraph moves from midpoint to top (45vh -> 15vh)
+  // Progress 0.5+: paragraph stays at top, strategy row enters
+  const paragraphTop = useTransform(
+    scenarioIntroProgress,
+    [0, 0.25, 0.4, 1],
+    ["45vh", "45vh", "15vh", "15vh"],
   )
 
   // First panel entrance animation
@@ -364,23 +384,25 @@ export default function MapOverlayPanels() {
 
       {/* ==================== SECTION 12: Scenario Intro with Strategy Row ==================== */}
       {/* 
-        Dual-sticky choreography:
-        1. Intro paragraph scrolls in and sticks near top (15vh)
-        2. Strategy row scrolls in and sticks near bottom (55vh)
+        Multi-step sticky choreography:
+        1. Intro paragraph scrolls in and pauses at midpoint (45vh)
+        2. Continued scrolling moves paragraph to top (15vh)
+        3. Strategy row scrolls in and sticks near bottom (55vh)
         Both remain visible together while scrolling through this section
       */}
       <Box
+        ref={scenarioIntroRef}
         id="scenario-intro-wrapper"
         sx={{
-          minHeight: "200vh",
+          minHeight: "250vh", // Increased to accommodate the extra scroll phase
           position: "relative",
         }}
       >
-        {/* Sticky intro text - sticks near top of viewport */}
-        <Box
-          sx={{
+        {/* Sticky intro text - animated position from midpoint to top */}
+        <motion.div
+          style={{
             position: "sticky",
-            top: "15vh",
+            top: paragraphTop,
             zIndex: 2,
           }}
         >
@@ -403,7 +425,7 @@ export default function MapOverlayPanels() {
               </Typography>
             </CallResponsePanel>
           </Section>
-        </Box>
+        </motion.div>
 
         {/* Strategy row - scrolls in and sticks near bottom of viewport */}
         <Box
@@ -411,7 +433,7 @@ export default function MapOverlayPanels() {
             position: "sticky",
             top: "55vh",
             zIndex: 1,
-            mt: "40vh",
+            mt: "100vh", // Delay entrance until paragraph is at top position
           }}
         >
           <Section
@@ -432,7 +454,7 @@ export default function MapOverlayPanels() {
         </Box>
 
         {/* Scroll spacer - allows both elements to stick while scrolling continues */}
-        <Box sx={{ height: "60vh" }} aria-hidden="true" />
+        <Box sx={{ height: "70vh" }} aria-hidden="true" />
       </Box>
 
       {/* ==================== SECTION 13: Scenario Cards (Sticky) ==================== */}
