@@ -13,6 +13,7 @@ import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
 import { OUTCOMES, OUTCOME_DEFINITIONS, outcomeTierValues } from "../../../lib/outcomes"
+import { useDrawerStore } from "@repo/state"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 
 interface StrategyRowProps {
@@ -449,9 +450,48 @@ export function KeyOutcomesPanel({
   onTitleClick,
 }: KeyOutcomesPanelProps) {
   const theme = useTheme()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
 
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
+
+  // Helper to open glossary to a specific term
+  const handleGlossaryOpen = (term: string) => {
+    setDrawerContent({ selectedTerm: term })
+    openDrawer("glossary")
+  }
+
+  // Helper to render definition with clickable glossary terms
+  const renderDefinitionWithLinks = (definition: string, outcome: string) => {
+    // For "Community deliveries", make "demands" clickable
+    if (outcome === "Community deliveries" && definition.includes("demands")) {
+      const parts = definition.split("demands")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation()
+              handleGlossaryOpen("Demands")
+            }}
+            sx={{
+              color: theme.palette.blue.bright,
+              textDecoration: "underline",
+              cursor: "pointer",
+              "&:hover": {
+                color: theme.palette.blue.dark,
+              },
+            }}
+          >
+            demands
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+    return definition
+  }
 
   // Helper function to get tier values for an outcome
   const getTierValues = (outcome: string): [number, number, number, number] => {
@@ -529,6 +569,7 @@ export function KeyOutcomesPanel({
             tierData.some((tier) => tier.value > 0)
 
           const tierDefs = outcomeTierValues[outcome]
+          const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
           
           return (
             <InfoTooltip
@@ -541,19 +582,23 @@ export function KeyOutcomesPanel({
                   >
                     {outcome}
                   </Box>
-                  {OUTCOME_DEFINITIONS[outcome] || "No definition available."}
+                  {renderDefinitionWithLinks(definition, outcome)}
                   {tierDefs && (
                     <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier1 }}>{tierDefs.tier1}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier2 }}>{tierDefs.tier2}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier3 }}>{tierDefs.tier3}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier4 }}>{tierDefs.tier4}</Box>
+                      <Box component="li">{tierDefs.tier1}</Box>
+                      <Box component="li">{tierDefs.tier2}</Box>
+                      <Box component="li">{tierDefs.tier3}</Box>
+                      <Box component="li">{tierDefs.tier4}</Box>
                     </Box>
                   )}
                 </>
               }
               tooltipProps={{
-                PopperProps: { disablePortal: true },
+                PopperProps: { 
+                  disablePortal: true,
+                  sx: { zIndex: 10001 }, // Above ScrollTooltip (z-index: 9999)
+                },
+                leaveDelay: 1000, // Give user time to move mouse to tooltip for clicking links
               }}
             >
               <Box
@@ -645,6 +690,7 @@ export function KeyOutcomesPanel({
             tierData.length > 0 &&
             tierData.some((tier) => tier.value > 0)
           const tierDefs = outcomeTierValues[outcome]
+          const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
 
           return (
             <InfoTooltip
@@ -657,19 +703,23 @@ export function KeyOutcomesPanel({
                   >
                     {outcome}
                   </Box>
-                  {OUTCOME_DEFINITIONS[outcome] || "No definition available."}
+                  {renderDefinitionWithLinks(definition, outcome)}
                   {tierDefs && (
                     <Box component="ul" sx={{ mt: 1, mb: 0, pl: 2, fontSize: "0.8rem" }}>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier1 }}>{tierDefs.tier1}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier2 }}>{tierDefs.tier2}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier3 }}>{tierDefs.tier3}</Box>
-                      <Box component="li" sx={{ color: theme.palette.tiers.tier4 }}>{tierDefs.tier4}</Box>
+                      <Box component="li">{tierDefs.tier1}</Box>
+                      <Box component="li">{tierDefs.tier2}</Box>
+                      <Box component="li">{tierDefs.tier3}</Box>
+                      <Box component="li">{tierDefs.tier4}</Box>
                     </Box>
                   )}
                 </>
               }
               tooltipProps={{
-                PopperProps: { disablePortal: true },
+                PopperProps: { 
+                  disablePortal: true,
+                  sx: { zIndex: 10001 }, // Above ScrollTooltip (z-index: 9999)
+                },
+                leaveDelay: 1000, // Give user time to move mouse to tooltip for clicking links
               }}
             >
               <Box
