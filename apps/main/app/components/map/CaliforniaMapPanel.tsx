@@ -7,12 +7,14 @@
  * Layer visibility is determined by activeSection
  */
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
+import TierMarkers from "../../features/scenarioExplorer/components/TierMarkers"
+import { fetchTierLocationData, type TierLocationResponse } from "../../api/tierLocationApi"
 import {
   useActiveSection,
   useGeocoderMarker,
@@ -22,6 +24,7 @@ import {
   useShowRivers,
   useShowArrows,
   useCameraView,
+  useSelectedOutcome,
   CALIFORNIA_VIEW,
   type SectionId,
 } from "./store"
@@ -55,6 +58,71 @@ export default function CaliforniaMapPanel({
   const showRivers = useShowRivers()
   const showArrows = useShowArrows()
   const cameraView = useCameraView()
+  const selectedOutcome = useSelectedOutcome()
+
+  // Tier location data for map visualization
+  const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
+  const [tierDataLoading, setTierDataLoading] = useState(false)
+
+  // Fetch tier location data when selectedOutcome changes
+  useEffect(() => {
+    if (!selectedOutcome) {
+      setTierData(null)
+      return
+    }
+
+    let cancelled = false
+
+    async function fetchData() {
+      try {
+        setTierDataLoading(true)
+        // Use "current-ops" strategy for the Learn section
+        const data = await fetchTierLocationData("current-ops", selectedOutcome!)
+        
+        if (!cancelled) {
+          setTierData(data)
+          
+          // Zoom to show all markers if there are features
+          if (data.features.length > 0 && map.mapRef?.current) {
+            // Calculate bounds from features
+            let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity
+            
+            data.features.forEach((feature) => {
+              if (feature.geometry.type === "Point") {
+                const [lng, lat] = feature.geometry.coordinates as [number, number]
+                minLng = Math.min(minLng, lng)
+                minLat = Math.min(minLat, lat)
+                maxLng = Math.max(maxLng, lng)
+                maxLat = Math.max(maxLat, lat)
+              }
+            })
+            
+            if (minLng !== Infinity) {
+              map.mapRef.current.fitBounds(
+                [[minLng, minLat], [maxLng, maxLat]],
+                { padding: 100, maxZoom: 9, duration: 1000 }
+              )
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch tier location data:", err)
+        if (!cancelled) {
+          setTierData(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setTierDataLoading(false)
+        }
+      }
+    }
+
+    fetchData()
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedOutcome, map])
 
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
@@ -150,6 +218,9 @@ export default function CaliforniaMapPanel({
             </Box>
           </Marker>
         )}
+
+        {/* Tier markers for selected outcome */}
+        {tierData && <TierMarkers data={tierData} />}
       </Map>
     </Box>
   )

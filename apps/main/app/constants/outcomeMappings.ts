@@ -55,7 +55,9 @@ export const UI_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 export const DISPLAY_NAME_TO_API_SHORT_CODE: Record<string, string> = {
   "Agricultural revenue": "AG_REV",
   "Community deliveries": "CWS_DEL",
+  "Community water system deliveries": "CWS_DEL", // Alternative name
   "Delta ecology": "DELTA_ECO",
+  "Delta estuary ecology": "DELTA_ECO", // UI display name
   "Environmental flows": "ENV_FLOWS",
   "Freshwater for in-Delta uses": "FW_DELTA_USES",
   "Freshwater for Delta exports": "FW_EXP",
