@@ -17,10 +17,14 @@ export interface CallResponsePanelProps {
   isVisible: boolean
   /** Optional delay for staggered animations (in seconds) */
   delay?: number
-  /** Custom styles to apply */
+  /** Custom styles to apply to the inner content box */
   sx?: SxProps<Theme>
   /** Disable the highlight effect (useful when using custom backgrounds) */
   disableHighlight?: boolean
+  /** Minimum height of the outer container (default: "100vh") */
+  minHeight?: string
+  /** Vertical alignment of content (default: "center") */
+  alignItems?: "center" | "flex-start" | "flex-end"
 }
 
 /**
@@ -41,15 +45,17 @@ export function CallResponsePanel({
   delay = 0,
   sx = {},
   disableHighlight = false,
+  minHeight = "100vh",
+  alignItems = "center",
 }: CallResponsePanelProps) {
   return (
     <Box
       id={id}
       sx={{
         position: "relative",
-        minHeight: "100vh",
+        minHeight,
         display: "flex",
-        alignItems: "center",
+        alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
         px: { xs: 4, sm: 8, md: 12, lg: 16 },
