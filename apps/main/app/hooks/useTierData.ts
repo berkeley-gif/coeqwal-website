@@ -225,6 +225,7 @@ export function useMultipleScenarioTiers() {
   const theme = useTheme()
 
   // Fetch all scenarios in parallel with consistent keys
+  // Baseline scenarios
   const s0020Result = useSWR(`/api/tiers/scenarios/s0020/tiers`, () =>
     fetchScenarioTiers("s0020"),
   )
@@ -233,6 +234,23 @@ export function useMultipleScenarioTiers() {
   )
   const s0011Result = useSWR(`/api/tiers/scenarios/s0011/tiers`, () =>
     fetchScenarioTiers("s0011"),
+  )
+  const s0023Result = useSWR(`/api/tiers/scenarios/s0023/tiers`, () =>
+    fetchScenarioTiers("s0023"),
+  )
+  const s0024Result = useSWR(`/api/tiers/scenarios/s0024/tiers`, () =>
+    fetchScenarioTiers("s0024"),
+  )
+  // Groundwater (SGMA) scenarios
+  const s0025Result = useSWR(`/api/tiers/scenarios/s0025/tiers`, () =>
+    fetchScenarioTiers("s0025"),
+  )
+  const s0027Result = useSWR(`/api/tiers/scenarios/s0027/tiers`, () =>
+    fetchScenarioTiers("s0027"),
+  )
+  // Environmental scenarios
+  const s0029Result = useSWR(`/api/tiers/scenarios/s0029/tiers`, () =>
+    fetchScenarioTiers("s0029"),
   )
 
   const {
@@ -257,6 +275,7 @@ export function useMultipleScenarioTiers() {
     const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
 
     // Process each scenario using helper function
+    // Baseline scenarios
     if (s0020Result.data)
       result["s0020"] = processScenarioData(
         s0020Result.data,
@@ -275,12 +294,49 @@ export function useMultipleScenarioTiers() {
         tierMapping,
         themeColors,
       )
+    if (s0023Result.data)
+      result["s0023"] = processScenarioData(
+        s0023Result.data,
+        tierMapping,
+        themeColors,
+      )
+    if (s0024Result.data)
+      result["s0024"] = processScenarioData(
+        s0024Result.data,
+        tierMapping,
+        themeColors,
+      )
+    // Groundwater (SGMA) scenarios
+    if (s0025Result.data)
+      result["s0025"] = processScenarioData(
+        s0025Result.data,
+        tierMapping,
+        themeColors,
+      )
+    if (s0027Result.data)
+      result["s0027"] = processScenarioData(
+        s0027Result.data,
+        tierMapping,
+        themeColors,
+      )
+    // Environmental scenarios
+    if (s0029Result.data)
+      result["s0029"] = processScenarioData(
+        s0029Result.data,
+        tierMapping,
+        themeColors,
+      )
 
     return result
   }, [
     s0020Result.data,
     s0021Result.data,
     s0011Result.data,
+    s0023Result.data,
+    s0024Result.data,
+    s0025Result.data,
+    s0027Result.data,
+    s0029Result.data,
     tierMapping,
     themeColors,
   ])
@@ -322,17 +378,36 @@ export function useMultipleScenarioTiers() {
     s0020Result.isLoading ||
     s0021Result.isLoading ||
     s0011Result.isLoading ||
+    s0023Result.isLoading ||
+    s0024Result.isLoading ||
+    s0025Result.isLoading ||
+    s0027Result.isLoading ||
+    s0029Result.isLoading ||
     tiersLoading ||
     mappingLoading
 
   // Provide specific error messages
   const error = useMemo(() => {
+    // Baseline scenarios
     if (s0020Result.error)
       return `Failed to load s0020 data: ${s0020Result.error.message}`
     if (s0021Result.error)
       return `Failed to load s0021 data: ${s0021Result.error.message}`
     if (s0011Result.error)
       return `Failed to load s0011 data: ${s0011Result.error.message}`
+    if (s0023Result.error)
+      return `Failed to load s0023 data: ${s0023Result.error.message}`
+    if (s0024Result.error)
+      return `Failed to load s0024 data: ${s0024Result.error.message}`
+    // Groundwater scenarios
+    if (s0025Result.error)
+      return `Failed to load s0025 data: ${s0025Result.error.message}`
+    if (s0027Result.error)
+      return `Failed to load s0027 data: ${s0027Result.error.message}`
+    // Environmental scenarios
+    if (s0029Result.error)
+      return `Failed to load s0029 data: ${s0029Result.error.message}`
+    // Tier metadata
     if (tiersError) return `Failed to load tier list: ${tiersError.message}`
     if (mappingError)
       return `Failed to load tier mapping: ${mappingError.message}`
@@ -341,6 +416,11 @@ export function useMultipleScenarioTiers() {
     s0020Result.error,
     s0021Result.error,
     s0011Result.error,
+    s0023Result.error,
+    s0024Result.error,
+    s0025Result.error,
+    s0027Result.error,
+    s0029Result.error,
     tiersError,
     mappingError,
   ])

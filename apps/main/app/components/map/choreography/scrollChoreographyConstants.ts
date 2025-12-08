@@ -37,10 +37,14 @@ export const ENTRANCE_RAMPS = {
 export const ANIMATION_DURATION = {
   /** Standard fade animations */
   FADE: 600,
+  /** Layer fade animations (slightly longer for smoothness) */
+  LAYER_FADE: 800,
   /** Camera movement transitions */
   CAMERA: 1500,
   /** Smooth easing transitions */
   EASE: 2000,
+  /** Default scroll lock duration */
+  SCROLL_LOCK: 600,
 } as const
 
 /** Animation easing functions */
