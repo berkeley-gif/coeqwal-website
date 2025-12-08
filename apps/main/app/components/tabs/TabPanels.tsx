@@ -82,7 +82,13 @@ export default function TabPanels() {
 
       const rect = panelRef.current.getBoundingClientRect()
       const absoluteTop = window.scrollY + rect.top
-      const targetY = absoluteTop
+      
+      const offsetPx =
+        typeof HEADER_SHRUNK_H === "number"
+          ? HEADER_SHRUNK_H
+          : parseFloat(HEADER_SHRUNK_H)
+
+      const targetY = absoluteTop - offsetPx
 
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }
@@ -120,7 +126,6 @@ export default function TabPanels() {
   return (
     <AutoHeight>
       <motion.div
-        ref={panelRef}
         animate={{ backgroundColor: panelColor }}
         transition={{ type: "spring", stiffness: 180, damping: 26 }}
         style={{
