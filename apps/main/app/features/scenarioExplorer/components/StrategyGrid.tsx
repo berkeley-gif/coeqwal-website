@@ -14,6 +14,8 @@ import {
   InfoIcon,
   Theme,
   Checkbox,
+  ArrowDropDownIcon,
+  ArrowDropUpIcon,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
@@ -169,6 +171,11 @@ interface StrategyGridProps {
   onMapViewChange: (enabled: boolean) => void
   onShowOnlyChosenChange: (enabled: boolean) => void
   onShowDefinitionsChange: (enabled: boolean) => void
+
+  // Sorting props (optional - only used in list view)
+  sortBy?: string | null // Outcome display name to sort by
+  sortDirection?: "asc" | "desc" // Sort direction
+  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
 }
 
 const gridStyles = {
@@ -271,6 +278,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showDefinitions,
   onShowOnlyChosenChange,
   onShowDefinitionsChange,
+  sortBy,
+  sortDirection = "asc",
+  onSortChange,
 }: StrategyGridProps) {
   const theme = useTheme()
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
@@ -451,53 +461,156 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             pb: 1.5, // Padding below headers
           }}
         >
-          {outcomeNames.map(({ name, displayName }) => (
-            <Box
-              key={displayName}
-              component="button"
-              onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                if (activeTooltip === name) {
-                  setActiveTooltip(null)
-                  setTooltipAnchor(null)
-                } else {
-                  setActiveTooltip(name)
-                  setTooltipAnchor(e.currentTarget)
-                }
-              }}
-              sx={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                padding: theme.spacing(0.5),
-                textAlign: "center",
-                fontSize: theme.typography.compact.caption.fontSize,
-                fontWeight: theme.typography.fontWeightMedium,
-                color: theme.palette.blue.darkest,
-                lineHeight: theme.typography.compact.caption.lineHeight,
-                "&:hover": {
-                  backgroundColor: theme.palette.action.hover,
-                  borderRadius: 1,
-                },
-              }}
-            >
-              {displayName === "Freshwater for in-Delta uses" ? (
-                <>
-                  Freshwater for{" "}
-                  <span style={{ whiteSpace: "nowrap" }}>in-Delta</span> uses
-                </>
-              ) : (
-                getOutcomeDisplayLabel(name)
-              )}{" "}
-              <InfoIcon
+          {outcomeNames.map(({ name, displayName }) => {
+            const isSorted = sortBy === displayName
+            const SortIcon = isSorted
+              ? sortDirection === "asc"
+                ? ArrowDropUpIcon
+                : ArrowDropDownIcon
+              : null
+
+            return (
+              <Box
+                key={displayName}
                 sx={{
-                  fontSize: theme.typography.compact.micro.fontSize,
-                  color: theme.palette.blue.bright,
-                  verticalAlign: "baseline",
-                  marginLeft: theme.spacing(0.25),
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
                 }}
-              />
-            </Box>
-          ))}
+              >
+                {/* Outcome label */}
+                <Typography
+                  component="div"
+                  sx={{
+                    textAlign: "center",
+                    fontSize: theme.typography.compact.caption.fontSize,
+                    fontWeight: theme.typography.fontWeightMedium,
+                    color: theme.palette.blue.darkest,
+                    lineHeight: theme.typography.compact.caption.lineHeight,
+                  }}
+                >
+                  {displayName === "Freshwater for in-Delta uses" ? (
+                    <>
+                      Freshwater for{" "}
+                      <span style={{ whiteSpace: "nowrap" }}>in-Delta</span>{" "}
+                      uses
+                    </>
+                  ) : displayName === "Reservoir storage" ? (
+                    <>
+                      Reservoir
+                      <br />
+                      storage
+                    </>
+                  ) : (
+                    getOutcomeDisplayLabel(name)
+                  )}
+                </Typography>
+
+                {/* Icons row below label */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  {/* Info icon button for tooltip */}
+                  <Box
+                    component="button"
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      if (activeTooltip === name) {
+                        setActiveTooltip(null)
+                        setTooltipAnchor(null)
+                      } else {
+                        setActiveTooltip(name)
+                        setTooltipAnchor(e.currentTarget)
+                      }
+                    }}
+                    sx={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      color: theme.palette.blue.bright,
+                      "&:hover": {
+                        opacity: 0.8,
+                      },
+                    }}
+                    title="Click for outcome details"
+                  >
+                    <InfoIcon sx={{ fontSize: 16 }} />
+                  </Box>
+
+                  {/* Sort button */}
+                  {onSortChange && (
+                    <Box
+                      component="button"
+                      onClick={() => {
+                        if (isSorted) {
+                          // Toggle direction or clear sort
+                          if (sortDirection === "asc") {
+                            onSortChange(displayName, "desc")
+                          } else {
+                            onSortChange(null, "asc") // Clear sort
+                          }
+                        } else {
+                          // Start sorting by this outcome (ascending = best first)
+                          onSortChange(displayName, "asc")
+                        }
+                      }}
+                      sx={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: isSorted
+                          ? theme.palette.blue.bright
+                          : theme.palette.grey[400],
+                        transition: "color 0.2s ease",
+                        "&:hover": {
+                          color: theme.palette.blue.bright,
+                        },
+                      }}
+                      title={
+                        isSorted
+                          ? sortDirection === "asc"
+                            ? "Sorted: Best first (click to reverse)"
+                            : "Sorted: Worst first (click to clear)"
+                          : "Click to sort by this outcome"
+                      }
+                    >
+                      {SortIcon ? (
+                        <SortIcon sx={{ fontSize: 26 }} />
+                      ) : (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            lineHeight: 0,
+                          }}
+                        >
+                          <ArrowDropUpIcon
+                            sx={{ fontSize: 26, marginBottom: "-10px" }}
+                          />
+                          <ArrowDropDownIcon
+                            sx={{ fontSize: 26, marginTop: "-10px" }}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            )
+          })}
         </Box>
         {/* Strategy rows */}
         {displayStrategies

@@ -1,10 +1,11 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
 import StrategyGrid from "../../components/StrategyGrid"
 import { useScenarioData } from "../../hooks/useScenarioData"
+import { useMultipleScenarioTiers } from "../../../../hooks/useTierData"
 import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,
@@ -37,6 +38,19 @@ export default function ListView() {
   const theme = useTheme()
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
     useScenarioData()
+  const { allScoreData } = useMultipleScenarioTiers()
+
+  // Sort state
+  const [sortBy, setSortBy] = useState<string | null>(null)
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+
+  const handleSortChange = (
+    outcome: string | null,
+    direction: "asc" | "desc",
+  ) => {
+    setSortBy(outcome)
+    setSortDirection(direction)
+  }
 
   // Get all state from the scenario explorer store
   const {
@@ -49,12 +63,41 @@ export default function ListView() {
     searchQuery,
   } = useScenarioExplorerStore()
 
-  // Sort strategies based on search query - matches first, then non-matches
+  // Sort strategies based on search query and outcome sorting
   const { sortedStrategies, matchingStrategyValues, hasSearchResults } =
     useMemo(() => {
+      const baseStrategies = [...strategies]
+
+      // Apply outcome-based sorting if active
+      if (sortBy && allScoreData && Object.keys(allScoreData).length > 0) {
+        baseStrategies.sort((a, b) => {
+          const aScenarioId = getScenarioIdFromStrategy(a.value)
+          const bScenarioId = getScenarioIdFromStrategy(b.value)
+
+          const aScores = allScoreData[aScenarioId]
+          const bScores = allScoreData[bScenarioId]
+
+          // If either scenario doesn't have score data, put it at the end
+          if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
+          if (!aScores?.[sortBy]) return 1
+          if (!bScores?.[sortBy]) return -1
+
+          const aScore = aScores[sortBy].weighted_score
+          const bScore = bScores[sortBy].weighted_score
+
+          // Ascending = best first (lower weighted_score is better)
+          // Descending = worst first (higher weighted_score is worse)
+          if (sortDirection === "asc") {
+            return aScore - bScore
+          } else {
+            return bScore - aScore
+          }
+        })
+      }
+
       if (!searchQuery.trim()) {
         return {
-          sortedStrategies: strategies,
+          sortedStrategies: baseStrategies,
           matchingStrategyValues: new Set<string>(),
           hasSearchResults: false,
         }
@@ -65,7 +108,7 @@ export default function ListView() {
       const nonMatches: typeof strategies = []
       const matchingValues = new Set<string>()
 
-      strategies.forEach((strategy) => {
+      baseStrategies.forEach((strategy) => {
         let isMatch = false
 
         // Search in strategy label
@@ -103,7 +146,7 @@ export default function ListView() {
         matchingStrategyValues: matchingValues,
         hasSearchResults: matches.length > 0,
       }
-    }, [searchQuery])
+    }, [searchQuery, sortBy, sortDirection, allScoreData])
 
   // Convert scenario IDs to strategy values for StrategyGrid
   const selectedStrategies = selectedScenarios.map(scenarioIdToStrategy)
@@ -185,6 +228,9 @@ export default function ListView() {
           onMapViewChange={() => {}} // No-op in list view
           onShowOnlyChosenChange={setShowOnlyChosen}
           onShowDefinitionsChange={setShowDefinitions}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSortChange={handleSortChange}
         />
       </Box>
     </Box>

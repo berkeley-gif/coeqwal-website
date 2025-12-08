@@ -94,6 +94,7 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
@@ -128,6 +129,7 @@ export {
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
   ArrowDropDownIcon,
+  ArrowDropUpIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   OpacityIcon,

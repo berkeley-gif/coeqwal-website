@@ -43,16 +43,35 @@ export interface MultiValueTier {
   total: number
 }
 
+/**
+ * Calculated score fields returned by the API for each tier
+ * These enable sorting, parallel plot visualization, and equity analysis
+ */
+export interface TierScores {
+  /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting. */
+  weighted_score: number
+  /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis. */
+  normalized_score: number
+  /** Gini coefficient (0.0-1.0, lower = more equitable). Use for equity indicator. */
+  gini: number
+  /** Spread band top edge (0.0-1.0). Where best locations are. */
+  band_upper: number
+  /** Spread band bottom edge (0.0-1.0). Where worst locations are. */
+  band_lower: number
+}
+
+export interface TierInfo extends TierScores {
+  name: string
+  type: "single_value" | "multi_value"
+  level?: number // For single_value
+  data?: MultiValueTierData[] // For multi_value
+  total?: number // For multi_value
+}
+
 export interface ScenarioTiersResponse {
   scenario: string
   tiers: {
-    [tierCode: string]: {
-      name: string
-      type: "single_value" | "multi_value"
-      level?: number // For single_value
-      data?: MultiValueTierData[] // For multi_value
-      total?: number // For multi_value
-    }
+    [tierCode: string]: TierInfo
   }
 }
 
@@ -196,4 +215,67 @@ export function convertSingleValueToChartData(
       tierType: "single_value" as const,
     },
   ]
+}
+
+// ============================================================================
+// Equity & Spread Helpers
+// ============================================================================
+
+export type EquityLevel = "high" | "moderate" | "low"
+
+export interface EquityInfo {
+  level: EquityLevel
+  label: string
+  description: string
+}
+
+/**
+ * Interpret Gini coefficient as equity level
+ * @param gini - Gini coefficient (0.0-1.0, lower = more equitable)
+ */
+export function getEquityInfo(gini: number): EquityInfo {
+  if (gini < 0.2) {
+    return {
+      level: "high",
+      label: "Highly equitable",
+      description: "Outcomes are distributed fairly evenly across all locations",
+    }
+  } else if (gini < 0.4) {
+    return {
+      level: "moderate",
+      label: "Moderately equitable",
+      description: "Some variation in outcomes across locations",
+    }
+  } else {
+    return {
+      level: "low",
+      label: "Unequal distribution",
+      description: "Significant variation in outcomes across locations",
+    }
+  }
+}
+
+/**
+ * Get spread band width (0-1, wider = more spread)
+ * Useful for determining if outcomes are concentrated or dispersed
+ */
+export function getSpreadWidth(bandUpper: number, bandLower: number): number {
+  return bandUpper - bandLower
+}
+
+/**
+ * Check if outcomes are concentrated (narrow spread)
+ */
+export function isConcentrated(bandUpper: number, bandLower: number): boolean {
+  return getSpreadWidth(bandUpper, bandLower) < 0.33
+}
+
+/**
+ * Get performance level description based on normalized score
+ */
+export function getPerformanceLevel(normalizedScore: number): string {
+  if (normalizedScore >= 0.75) return "Excellent"
+  if (normalizedScore >= 0.5) return "Good"
+  if (normalizedScore >= 0.25) return "Fair"
+  return "Poor"
 }
