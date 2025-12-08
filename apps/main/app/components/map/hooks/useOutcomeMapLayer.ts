@@ -527,7 +527,7 @@ export function useOutcomeMapLayer({
 
             // Always use fitBounds to reset view, even if user has panned/zoomed manually
             map.fitBounds(bounds, {
-              padding: { top: 100, bottom: 100, left: 100, right: 350 }, // Extra right padding for panels
+              padding: { top: 300, bottom: 50, left: 100, right: 350 }, // Extra top padding to avoid tab coverage
               maxZoom: 8,
               duration: 1000,
             })
