@@ -1,6 +1,6 @@
 /**
  * Centralized Tier Definitions
- * 
+ *
  * Tier colors should come from theme.palette.tiers
  * This file provides tier labels and helper functions.
  */
@@ -33,14 +33,18 @@ export function getTierLevel(label: string): TierLevel | null {
 /**
  * Get tier color from theme
  * Usage: getTierColor(theme, 1) returns theme.palette.tiers.tier1
- * 
+ *
  * @param theme - MUI theme object
  * @param tierLevel - Tier level (1-4)
  * @returns Color string from theme
  */
 export function getTierColor(
-  theme: { palette: { tiers: { tier1: string; tier2: string; tier3: string; tier4: string } } },
-  tierLevel: number
+  theme: {
+    palette: {
+      tiers: { tier1: string; tier2: string; tier3: string; tier4: string }
+    }
+  },
+  tierLevel: number,
 ): string {
   switch (tierLevel) {
     case 1:
@@ -60,9 +64,11 @@ export function getTierColor(
  * Create a tier colors object from theme for use in components
  * Usage: const tierColors = getTierColorsFromTheme(theme)
  */
-export function getTierColorsFromTheme(
-  theme: { palette: { tiers: { tier1: string; tier2: string; tier3: string; tier4: string } } }
-): Record<TierLevel, string> {
+export function getTierColorsFromTheme(theme: {
+  palette: {
+    tiers: { tier1: string; tier2: string; tier3: string; tier4: string }
+  }
+}): Record<TierLevel, string> {
   return {
     1: theme.palette.tiers.tier1,
     2: theme.palette.tiers.tier2,
@@ -70,4 +76,3 @@ export function getTierColorsFromTheme(
     4: theme.palette.tiers.tier4,
   }
 }
-

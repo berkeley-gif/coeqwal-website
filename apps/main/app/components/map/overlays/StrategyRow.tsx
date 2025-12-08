@@ -8,13 +8,23 @@
  */
 
 import { useState, useCallback } from "react"
-import { Box, Typography, useTheme, InfoIcon, ClickAwayListener } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  InfoIcon,
+  ClickAwayListener,
+} from "@repo/ui/mui"
 import { learnMapActions } from "../store"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
-import { OUTCOMES, OUTCOME_DEFINITIONS, outcomeTierValues } from "../../../lib/outcomes"
+import {
+  OUTCOMES,
+  OUTCOME_DEFINITIONS,
+  outcomeTierValues,
+} from "../../../lib/outcomes"
 import { useDrawerStore } from "@repo/state"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 
@@ -57,7 +67,8 @@ function getStrategyIcons(strategyValue: string) {
   icons.push({
     path: CURRENT_OPERATIONS_ICONS[0]?.path || "/images/icons/current_ops.svg",
     alt: CURRENT_OPERATIONS_ICONS[0]?.alt || "Current operations",
-    description: CURRENT_OPERATIONS_ICONS[0]?.description || "Current operations",
+    description:
+      CURRENT_OPERATIONS_ICONS[0]?.description || "Current operations",
     label: "Current operations",
   })
 
@@ -73,7 +84,9 @@ function getStrategyIcons(strategyValue: string) {
     icons.push({
       path: CURRENT_OPERATIONS_ICONS[1]?.path || "/images/icons/land_use.svg",
       alt: CURRENT_OPERATIONS_ICONS[1]?.alt || "Current land use",
-      description: CURRENT_OPERATIONS_ICONS[1]?.description || "Current land use considerations",
+      description:
+        CURRENT_OPERATIONS_ICONS[1]?.description ||
+        "Current land use considerations",
       label: "Updated agricultural\nland use (2020)",
     })
   }
@@ -83,14 +96,17 @@ function getStrategyIcons(strategyValue: string) {
     icons.push({
       path: "/images/icons/no_tucp.svg",
       alt: "Without TUCPs",
-      description: "Operations without Temporary Urgent Change Petitions (TUCPs)",
+      description:
+        "Operations without Temporary Urgent Change Petitions (TUCPs)",
       label: "TUCPs\nnot allowed",
     })
   } else {
     icons.push({
       path: CURRENT_OPERATIONS_ICONS[2]?.path || "/images/icons/tucp.svg",
       alt: CURRENT_OPERATIONS_ICONS[2]?.alt || "TUCP considerations",
-      description: CURRENT_OPERATIONS_ICONS[2]?.description || "Temporary Urgent Change Petitions permitted",
+      description:
+        CURRENT_OPERATIONS_ICONS[2]?.description ||
+        "Temporary Urgent Change Petitions permitted",
       label: "TUCPs\nallowed",
     })
   }
@@ -106,7 +122,7 @@ export function StrategyRow({
 
   // Look up strategy data from shared source
   const strategy = strategies.find((s) => s.value === strategyValue)
-  
+
   if (!strategy) {
     console.warn(`Strategy "${strategyValue}" not found`)
     return null
@@ -153,38 +169,36 @@ export function StrategyRow({
             color: theme.palette.grey[700],
           }}
         >
-          {strategy.description
-            .split(/(\bTUCPs?\b)/g)
-            .map((part, index) => {
-              if (part.match(/\bTUCPs?\b/)) {
-                return (
-                  <span key={index}>
-                    {part}
-                    <InfoTooltip
-                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
-                      placement="top"
-                      tooltipProps={{
-                        PopperProps: { disablePortal: true },
+          {strategy.description.split(/(\bTUCPs?\b)/g).map((part, index) => {
+            if (part.match(/\bTUCPs?\b/)) {
+              return (
+                <span key={index}>
+                  {part}
+                  <InfoTooltip
+                    description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                    placement="top"
+                    tooltipProps={{
+                      PopperProps: { disablePortal: true },
+                    }}
+                  >
+                    <InfoIcon
+                      sx={{
+                        fontSize: "1rem",
+                        ml: 0.5,
+                        cursor: "pointer",
+                        color: theme.palette.blue.bright,
+                        verticalAlign: "text-top",
+                        "&:hover": {
+                          color: theme.palette.blue.darkest,
+                        },
                       }}
-                    >
-                      <InfoIcon
-                        sx={{
-                          fontSize: "1rem",
-                          ml: 0.5,
-                          cursor: "pointer",
-                          color: theme.palette.blue.bright,
-                          verticalAlign: "text-top",
-                          "&:hover": {
-                            color: theme.palette.blue.darkest,
-                          },
-                        }}
-                      />
-                    </InfoTooltip>
-                  </span>
-                )
-              }
-              return part
-            })}
+                    />
+                  </InfoTooltip>
+                </span>
+              )
+            }
+            return part
+          })}
         </Typography>
       )}
 
@@ -268,7 +282,7 @@ export function StrategyInfoPanel({
   const theme = useTheme()
 
   const strategy = strategies.find((s) => s.value === strategyValue)
-  
+
   if (!strategy) {
     console.warn(`Strategy "${strategyValue}" not found`)
     return null
@@ -297,9 +311,11 @@ export function StrategyInfoPanel({
           lineHeight: 1.3,
           color: theme.palette.grey[900],
           cursor: onTitleClick ? "pointer" : "default",
-          "&:hover": onTitleClick ? {
-            color: theme.palette.blue.bright,
-          } : {},
+          "&:hover": onTitleClick
+            ? {
+                color: theme.palette.blue.bright,
+              }
+            : {},
         }}
       >
         {strategy.label} strategy
@@ -313,35 +329,33 @@ export function StrategyInfoPanel({
           color: theme.palette.grey[700],
         }}
       >
-        {strategy.description
-          .split(/(\bTUCPs?\b)/g)
-          .map((part, index) => {
-            if (part.match(/\bTUCPs?\b/)) {
-              return (
-                <span key={index}>
-                  {part}
-                  <InfoTooltip
-                    description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
-                    placement="top"
-                  >
-                    <InfoIcon
-                      sx={{
-                        fontSize: "1rem",
-                        ml: 0.5,
-                        cursor: "pointer",
-                        color: theme.palette.blue.bright,
-                        verticalAlign: "middle",
-                        "&:hover": {
-                          color: theme.palette.blue.darkest,
-                        },
-                      }}
-                    />
-                  </InfoTooltip>
-                </span>
-              )
-            }
-            return part
-          })}
+        {strategy.description.split(/(\bTUCPs?\b)/g).map((part, index) => {
+          if (part.match(/\bTUCPs?\b/)) {
+            return (
+              <span key={index}>
+                {part}
+                <InfoTooltip
+                  description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                  placement="top"
+                >
+                  <InfoIcon
+                    sx={{
+                      fontSize: "1rem",
+                      ml: 0.5,
+                      cursor: "pointer",
+                      color: theme.palette.blue.bright,
+                      verticalAlign: "middle",
+                      "&:hover": {
+                        color: theme.palette.blue.darkest,
+                      },
+                    }}
+                  />
+                </InfoTooltip>
+              </span>
+            )
+          }
+          return part
+        })}
       </Typography>
     </Box>
   )
@@ -357,7 +371,7 @@ export function KeyOperationsPanel({
   const theme = useTheme()
 
   const strategy = strategies.find((s) => s.value === strategyValue)
-  
+
   if (!strategy) {
     console.warn(`Strategy "${strategyValue}" not found`)
     return null
@@ -387,9 +401,11 @@ export function KeyOperationsPanel({
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
           cursor: onTitleClick ? "pointer" : "default",
-          "&:hover": onTitleClick ? {
-            color: theme.palette.blue.bright,
-          } : {},
+          "&:hover": onTitleClick
+            ? {
+                color: theme.palette.blue.bright,
+              }
+            : {},
         }}
       >
         Key operations
@@ -419,7 +435,7 @@ export function KeyOperationsPanel({
               </>
             }
             tooltipProps={{
-              PopperProps: { 
+              PopperProps: {
                 style: { zIndex: 10001 },
               },
             }}
@@ -478,11 +494,11 @@ export function KeyOutcomesPanel({
     if (colonIndex === -1) return tierText
     const label = tierText.substring(0, colonIndex)
     const rest = tierText.substring(colonIndex + 1)
-    
+
     // Find and bold quantity patterns like "less than 10%" or "more than 30%"
     const quantityRegex = /(less than \d+%|more than \d+%)/gi
     const parts = rest.split(quantityRegex)
-    
+
     return (
       <>
         <span style={{ fontWeight: 600 }}>{label}</span>:
@@ -490,7 +506,9 @@ export function KeyOutcomesPanel({
           // Check if this part matches the quantity pattern
           const isQuantity = /^(less than \d+%|more than \d+%)$/i.test(part)
           return isQuantity ? (
-            <span key={i} style={{ fontWeight: 500, whiteSpace: "nowrap" }}>{part}</span>
+            <span key={i} style={{ fontWeight: 500, whiteSpace: "nowrap" }}>
+              {part}
+            </span>
           ) : (
             <span key={i}>{part}</span>
           )
@@ -567,9 +585,11 @@ export function KeyOutcomesPanel({
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
           cursor: onTitleClick ? "pointer" : "default",
-          "&:hover": onTitleClick ? {
-            color: theme.palette.blue.bright,
-          } : {},
+          "&:hover": onTitleClick
+            ? {
+                color: theme.palette.blue.bright,
+              }
+            : {},
         }}
       >
         Key outcomes
@@ -607,10 +627,16 @@ export function KeyOutcomesPanel({
             tierData.some((tier) => tier.value > 0)
 
           const tierDefs = outcomeTierValues[outcome]
-          const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
-          
+          const definition =
+            OUTCOME_DEFINITIONS[outcome] || "No definition available."
+
           return (
-            <ClickAwayListener key={outcome} onClickAway={() => openTooltip === outcome && setOpenTooltip(null)}>
+            <ClickAwayListener
+              key={outcome}
+              onClickAway={() =>
+                openTooltip === outcome && setOpenTooltip(null)
+              }
+            >
               <Box>
                 <InfoTooltip
                   description={
@@ -623,26 +649,102 @@ export function KeyOutcomesPanel({
                       </Box>
                       {renderDefinitionWithLinks(definition, outcome)}
                       {tierDefs && (
-                        <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                        <Box
+                          sx={{
+                            mt: 1.5,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 1,
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier1,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier1)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier2,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier2)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier3,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier3)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier4,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier4)}</span>
                           </Box>
                         </Box>
                       )}
-                      <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "block",
+                          mt: 1.5,
+                          fontStyle: "italic",
+                          fontSize: "0.8rem",
+                        }}
+                      >
                         Click{" "}
                         <Box
                           component="span"
@@ -656,8 +758,8 @@ export function KeyOutcomesPanel({
                           }}
                         >
                           here
-                        </Box>
-                        {" "}or on chart to show values on map.
+                        </Box>{" "}
+                        or on chart to show values on map.
                       </Box>
                     </>
                   }
@@ -666,7 +768,7 @@ export function KeyOutcomesPanel({
                     open: openTooltip === outcome,
                     disableHoverListener: true,
                     disableFocusListener: true,
-                    PopperProps: { 
+                    PopperProps: {
                       disablePortal: true,
                       sx: { zIndex: 10001 },
                     },
@@ -747,7 +849,9 @@ export function KeyOutcomesPanel({
                       <InfoIcon
                         onClick={(e) => {
                           e.stopPropagation()
-                          setOpenTooltip(openTooltip === outcome ? null : outcome)
+                          setOpenTooltip(
+                            openTooltip === outcome ? null : outcome,
+                          )
                         }}
                         sx={{
                           fontSize: "0.85rem",
@@ -796,10 +900,16 @@ export function KeyOutcomesPanel({
             tierData.length > 0 &&
             tierData.some((tier) => tier.value > 0)
           const tierDefs = outcomeTierValues[outcome]
-          const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
+          const definition =
+            OUTCOME_DEFINITIONS[outcome] || "No definition available."
 
           return (
-            <ClickAwayListener key={outcome} onClickAway={() => openTooltip === outcome && setOpenTooltip(null)}>
+            <ClickAwayListener
+              key={outcome}
+              onClickAway={() =>
+                openTooltip === outcome && setOpenTooltip(null)
+              }
+            >
               <Box>
                 <InfoTooltip
                   description={
@@ -812,26 +922,102 @@ export function KeyOutcomesPanel({
                       </Box>
                       {renderDefinitionWithLinks(definition, outcome)}
                       {tierDefs && (
-                        <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                        <Box
+                          sx={{
+                            mt: 1.5,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 1,
+                            fontSize: "0.8rem",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier1,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier1)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier2,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier2)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier3,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier3)}</span>
                           </Box>
-                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                flexShrink: 0,
+                                mt: "4px",
+                                backgroundColor: theme.palette.tiers.tier4,
+                                borderRadius: 0.5,
+                              }}
+                            />
                             <span>{renderTierText(tierDefs.tier4)}</span>
                           </Box>
                         </Box>
                       )}
-                      <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "block",
+                          mt: 1.5,
+                          fontStyle: "italic",
+                          fontSize: "0.8rem",
+                        }}
+                      >
                         Click{" "}
                         <Box
                           component="span"
@@ -845,8 +1031,8 @@ export function KeyOutcomesPanel({
                           }}
                         >
                           here
-                        </Box>
-                        {" "}or on chart to show values on map.
+                        </Box>{" "}
+                        or on chart to show values on map.
                       </Box>
                     </>
                   }
@@ -855,7 +1041,7 @@ export function KeyOutcomesPanel({
                     open: openTooltip === outcome,
                     disableHoverListener: true,
                     disableFocusListener: true,
-                    PopperProps: { 
+                    PopperProps: {
                       disablePortal: true,
                       sx: { zIndex: 10001 },
                     },
@@ -936,7 +1122,9 @@ export function KeyOutcomesPanel({
                       <InfoIcon
                         onClick={(e) => {
                           e.stopPropagation()
-                          setOpenTooltip(openTooltip === outcome ? null : outcome)
+                          setOpenTooltip(
+                            openTooltip === outcome ? null : outcome,
+                          )
                         }}
                         sx={{
                           fontSize: "0.85rem",
@@ -960,4 +1148,3 @@ export function KeyOutcomesPanel({
 }
 
 export default StrategyRow
-

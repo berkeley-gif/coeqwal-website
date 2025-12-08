@@ -113,7 +113,9 @@ export default function ScenarioExplorerNew() {
         {activeView !== "needs" && <SelectionBanner />}
 
         {/* Search bar for list, map, and comparison views */}
-        {(activeView === "list" || activeView === "map" || activeView === "comparison") && (
+        {(activeView === "list" ||
+          activeView === "map" ||
+          activeView === "comparison") && (
           <SearchBar placeholder="Search scenarios by name or description" />
         )}
 

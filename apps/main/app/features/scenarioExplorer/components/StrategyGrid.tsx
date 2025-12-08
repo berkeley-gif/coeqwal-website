@@ -52,31 +52,34 @@ function isSingleValueTier(
  */
 function generateOutcomePlainSummary(
   outcome: string,
-  chartData: Array<{ label: string; color: string; value: number }> | undefined
+  chartData: Array<{ label: string; color: string; value: number }> | undefined,
 ): string {
   if (!chartData || chartData.length === 0) {
     return `No data available for ${outcome}.`
   }
-  
+
   // Calculate totals and percentages
   const total = chartData.reduce((sum, tier) => sum + tier.value, 0)
   if (total === 0) return `No data available for ${outcome}.`
-  
+
   const tierData: Record<number, { count: number; pct: number }> = {}
   for (const point of chartData) {
     const tierLevel = parseInt(point.label.replace("Tier ", ""))
     tierData[tierLevel] = {
       count: point.value,
-      pct: (point.value / total) * 100
+      pct: (point.value / total) * 100,
     }
   }
-  
+
   const tier1Pct = tierData[1]?.pct || 0
   const tier4Count = tierData[4]?.count || 0
   const tier3Count = tierData[3]?.count || 0
-  
+
   // Generate outcome-specific summaries
-  if (outcome === "Community deliveries" || outcome === "Community water system deliveries") {
+  if (
+    outcome === "Community deliveries" ||
+    outcome === "Community water system deliveries"
+  ) {
     if (tier1Pct >= 80) {
       return `The vast majority of water systems (${tierData[1]?.count} of ${total}) are thriving under this scenario with optimal water deliveries.`
     } else if (tier1Pct >= 50) {
@@ -118,7 +121,7 @@ function generateOutcomePlainSummary(
       return `Reservoir storage shows moderate levels under this scenario.`
     }
   }
-  
+
   // Generic summary for other outcomes
   if (tier1Pct >= 70) {
     return `This outcome performs well under this scenario with ${Math.round(tier1Pct)}% at optimal levels.`
@@ -266,13 +269,15 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const theme = useTheme()
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null)
-  
+
   // Track which strategies have expanded summaries and which outcome is selected
-  const [expandedSummaries, setExpandedSummaries] = useState<Record<string, string | null>>({})
-  
+  const [expandedSummaries, setExpandedSummaries] = useState<
+    Record<string, string | null>
+  >({})
+
   // Toggle summary for a strategy with a specific outcome
   const toggleSummary = (strategyValue: string, outcome: string) => {
-    setExpandedSummaries(prev => {
+    setExpandedSummaries((prev) => {
       const currentOutcome = prev[strategyValue]
       if (currentOutcome === outcome) {
         // Clicking same outcome closes the summary
@@ -470,7 +475,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               }}
             >
               {displayName === "Freshwater for in-Delta uses" ? (
-                <>Freshwater for <span style={{ whiteSpace: "nowrap" }}>in-Delta</span> uses</>
+                <>
+                  Freshwater for{" "}
+                  <span style={{ whiteSpace: "nowrap" }}>in-Delta</span> uses
+                </>
               ) : (
                 getOutcomeDisplayLabel(name)
               )}{" "}
@@ -708,8 +716,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   </InfoTooltip>
                   {/* TUCP icon - show for strategies that include TUCPs */}
                   {strategy.value !== "current-ops-wo-tucp" && (
-                    <InfoTooltip 
-                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species." 
+                    <InfoTooltip
+                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
                       placement="top"
                     >
                       <Box
@@ -793,13 +801,15 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           padding: 0,
                           borderRadius: theme.borderRadius.rounded,
                           transition: "all 0.2s ease",
-                          backgroundColor: expandedSummaries[strategy.value] === displayName 
-                            ? theme.palette.blue.bright + "10"
-                            : "transparent",
+                          backgroundColor:
+                            expandedSummaries[strategy.value] === displayName
+                              ? theme.palette.blue.bright + "10"
+                              : "transparent",
                           opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
                           border:
                             expandedSummaries[strategy.value] === displayName ||
-                            (selectedOutcomes[strategy.value] === displayName && onTierClick)
+                            (selectedOutcomes[strategy.value] === displayName &&
+                              onTierClick)
                               ? `2px solid ${theme.palette.blue.bright}`
                               : "2px solid transparent",
                           "&:hover": {
@@ -884,93 +894,108 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
             // Get the selected outcome for this strategy's summary (if any)
             const selectedOutcomeForSummary = expandedSummaries[strategy.value]
-            const strategyChartDataForSummary = getChartDataForStrategy(strategy.value)
-            
+            const strategyChartDataForSummary = getChartDataForStrategy(
+              strategy.value,
+            )
+
             // Summary row (shown when an outcome is clicked)
-            const summaryRow = selectedOutcomeForSummary && !showMapView ? (
-              <Box
-                key={`summary-${strategy.value}`}
-                sx={{
-                  gridColumn: "1 / -1",
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "32px minmax(0, 1fr)",
-                    lg: "32px minmax(0, 1fr)",
-                  },
-                  gap: theme.spacing(1),
-                  columnGap: theme.spacing(2),
-                  alignItems: "start",
-                  py: theme.spacing(1.5),
-                  px: theme.spacing(1),
-                  backgroundColor: theme.palette.grey[50],
-                  borderRadius: theme.borderRadius.standard,
-                  mb: theme.spacing(1),
-                }}
-              >
-                {/* Empty checkbox column for alignment */}
-                <Box />
-                
-                {/* Summary content */}
-                <Box sx={{ pr: 2 }}>
-                  {/* Outcome name header */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: theme.typography.fontWeightMedium,
-                        color: theme.palette.blue.darkest,
-                        fontSize: theme.typography.body2.fontSize,
-                      }}
-                    >
-                      {selectedOutcomeForSummary}
-                    </Typography>
-                    {/* Close button */}
+            const summaryRow =
+              selectedOutcomeForSummary && !showMapView ? (
+                <Box
+                  key={`summary-${strategy.value}`}
+                  sx={{
+                    gridColumn: "1 / -1",
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "32px minmax(0, 1fr)",
+                      lg: "32px minmax(0, 1fr)",
+                    },
+                    gap: theme.spacing(1),
+                    columnGap: theme.spacing(2),
+                    alignItems: "start",
+                    py: theme.spacing(1.5),
+                    px: theme.spacing(1),
+                    backgroundColor: theme.palette.grey[50],
+                    borderRadius: theme.borderRadius.standard,
+                    mb: theme.spacing(1),
+                  }}
+                >
+                  {/* Empty checkbox column for alignment */}
+                  <Box />
+
+                  {/* Summary content */}
+                  <Box sx={{ pr: 2 }}>
+                    {/* Outcome name header */}
                     <Box
-                      component="button"
-                      onClick={() => toggleSummary(strategy.value, selectedOutcomeForSummary)}
                       sx={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0.5,
                         display: "flex",
                         alignItems: "center",
-                        color: theme.palette.grey[500],
-                        fontSize: "16px",
-                        borderRadius: "50%",
-                        "&:hover": {
-                          color: theme.palette.grey[700],
-                          backgroundColor: theme.palette.grey[200],
-                        },
+                        gap: 1,
+                        mb: 1,
                       }}
-                      aria-label="Close summary"
                     >
-                      ×
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: theme.typography.fontWeightMedium,
+                          color: theme.palette.blue.darkest,
+                          fontSize: theme.typography.body2.fontSize,
+                        }}
+                      >
+                        {selectedOutcomeForSummary}
+                      </Typography>
+                      {/* Close button */}
+                      <Box
+                        component="button"
+                        onClick={() =>
+                          toggleSummary(
+                            strategy.value,
+                            selectedOutcomeForSummary,
+                          )
+                        }
+                        sx={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0.5,
+                          display: "flex",
+                          alignItems: "center",
+                          color: theme.palette.grey[500],
+                          fontSize: "16px",
+                          borderRadius: "50%",
+                          "&:hover": {
+                            color: theme.palette.grey[700],
+                            backgroundColor: theme.palette.grey[200],
+                          },
+                        }}
+                        aria-label="Close summary"
+                      >
+                        ×
+                      </Box>
                     </Box>
+
+                    {/* Plain language summary */}
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.grey[800],
+                        fontSize: theme.typography.nav.fontSize,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {generateOutcomePlainSummary(
+                        selectedOutcomeForSummary,
+                        strategyChartDataForSummary[selectedOutcomeForSummary],
+                      )}
+                    </Typography>
                   </Box>
-                  
-                  {/* Plain language summary */}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.grey[800],
-                      fontSize: theme.typography.nav.fontSize,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {generateOutcomePlainSummary(
-                      selectedOutcomeForSummary,
-                      strategyChartDataForSummary[selectedOutcomeForSummary]
-                    )}
-                  </Typography>
                 </Box>
-              </Box>
-            ) : null
+              ) : null
 
             // Return strategy row plus summary and optional divider
             const rows = [strategyRow]
             if (summaryRow) rows.push(summaryRow)
-            
+
             if (shouldShowDivider) {
               rows.push(
                 <Box
@@ -981,7 +1006,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     height: "1px",
                     backgroundColor: theme.palette.grey[300],
                   }}
-                />
+                />,
               )
             }
 

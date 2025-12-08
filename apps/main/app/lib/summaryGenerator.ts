@@ -9,12 +9,12 @@ import { TIER_LABELS, TierLevel } from "./tiers"
 // Feature properties from Mapbox layer
 export interface DemandUnitProperties {
   DU_ID: string
-  Urb_Name: string | null  // Primary name for CWS (Urban)
-  Mod_Name: string | null  // Secondary name for CWS, primary for others
+  Urb_Name: string | null // Primary name for CWS (Urban)
+  Mod_Name: string | null // Secondary name for CWS, primary for others
   Sub_Name: string | null
   Type: string | null
   Comments: string | null
-  Class: string  // "Urban", "Agriculture", etc.
+  Class: string // "Urban", "Agriculture", etc.
   longitude?: number
   latitude?: number
 }
@@ -22,8 +22,8 @@ export interface DemandUnitProperties {
 // Location with issues
 export interface AtRiskLocation {
   duId: string
-  primaryName: string      // Urb_Name for CWS, Mod_Name for others
-  secondaryName: string | null  // Mod_Name for CWS if both exist
+  primaryName: string // Urb_Name for CWS, Mod_Name for others
+  secondaryName: string | null // Mod_Name for CWS if both exist
   subName: string | null
   classType: string | null
   tierLevel: number
@@ -36,20 +36,23 @@ export interface AtRiskLocation {
  * CWS (Urban): Urb_Name is primary, Mod_Name is secondary
  * Others: Mod_Name is primary
  */
-function getDisplayName(props: DemandUnitProperties | undefined, locationId: string): { primary: string; secondary: string | null } {
+function getDisplayName(
+  props: DemandUnitProperties | undefined,
+  locationId: string,
+): { primary: string; secondary: string | null } {
   if (!props) {
     return { primary: locationId, secondary: null }
   }
-  
+
   const isUrban = props.Class === "Urban"
-  
+
   if (isUrban && props.Urb_Name) {
     return {
       primary: props.Urb_Name,
       secondary: props.Mod_Name || null,
     }
   }
-  
+
   return {
     primary: props.Mod_Name || locationId,
     secondary: null,
@@ -83,30 +86,44 @@ export interface ScenarioSummary {
 function analyzeTierDistribution(tierData: TierLocationsResponse) {
   const total = tierData.locations.length
   const counts = { 1: 0, 2: 0, 3: 0, 4: 0 }
-  
-  tierData.locations.forEach(loc => {
+
+  tierData.locations.forEach((loc) => {
     if (loc.tier_level >= 1 && loc.tier_level <= 4) {
       counts[loc.tier_level as 1 | 2 | 3 | 4]++
     }
   })
-  
+
   return {
-    tier1: { count: counts[1], percentage: total > 0 ? (counts[1] / total) * 100 : 0 },
-    tier2: { count: counts[2], percentage: total > 0 ? (counts[2] / total) * 100 : 0 },
-    tier3: { count: counts[3], percentage: total > 0 ? (counts[3] / total) * 100 : 0 },
-    tier4: { count: counts[4], percentage: total > 0 ? (counts[4] / total) * 100 : 0 },
+    tier1: {
+      count: counts[1],
+      percentage: total > 0 ? (counts[1] / total) * 100 : 0,
+    },
+    tier2: {
+      count: counts[2],
+      percentage: total > 0 ? (counts[2] / total) * 100 : 0,
+    },
+    tier3: {
+      count: counts[3],
+      percentage: total > 0 ? (counts[3] / total) * 100 : 0,
+    },
+    tier4: {
+      count: counts[4],
+      percentage: total > 0 ? (counts[4] / total) * 100 : 0,
+    },
   }
 }
 
 /**
  * Generate a qualitative assessment based on tier distribution
  */
-function getQualitativeAssessment(breakdown: ReturnType<typeof analyzeTierDistribution>): string {
+function getQualitativeAssessment(
+  breakdown: ReturnType<typeof analyzeTierDistribution>,
+): string {
   const optimalPct = breakdown.tier1.percentage
   const criticalPct = breakdown.tier4.percentage
   const atRiskPct = breakdown.tier3.percentage
-  const _subOptimalPct = breakdown.tier2.percentage // Reserved for future use
-  
+  // subOptimalPct available via breakdown.tier2.percentage if needed
+
   // Mostly optimal
   if (optimalPct >= 80) {
     return "performing excellently"
@@ -133,10 +150,9 @@ function getQualitativeAssessment(breakdown: ReturnType<typeof analyzeTierDistri
 function generateHeadline(
   outcome: string,
   breakdown: ReturnType<typeof analyzeTierDistribution>,
-  _total: number // Reserved for future use
 ): string {
   const assessment = getQualitativeAssessment(breakdown)
-  
+
   switch (outcome) {
     case "Community deliveries":
       return `Community water systems are ${assessment} under this scenario.`
@@ -155,29 +171,36 @@ function generateDetails(
   breakdown: ReturnType<typeof analyzeTierDistribution>,
   total: number,
   atRiskCount: number,
-  criticalCount: number
+  criticalCount: number,
 ): string {
   const optimalPct = Math.round(breakdown.tier1.percentage)
   const subOptimalPct = Math.round(breakdown.tier2.percentage)
-  const _atRiskPct = Math.round(breakdown.tier3.percentage) // Reserved for future use
-  const _criticalPct = Math.round(breakdown.tier4.percentage) // Reserved for future use
-  
+  // atRiskPct and criticalPct available via breakdown.tier3/4.percentage if needed
+
   const parts: string[] = []
-  
+
   // Opening statement about the majority
   if (optimalPct >= 50) {
-    parts.push(`${optimalPct}% of locations (${breakdown.tier1.count} of ${total}) are receiving optimal water deliveries.`)
+    parts.push(
+      `${optimalPct}% of locations (${breakdown.tier1.count} of ${total}) are receiving optimal water deliveries.`,
+    )
   } else if (optimalPct + subOptimalPct >= 50) {
-    parts.push(`${optimalPct + subOptimalPct}% of locations are at optimal or sub-optimal levels.`)
+    parts.push(
+      `${optimalPct + subOptimalPct}% of locations are at optimal or sub-optimal levels.`,
+    )
   }
-  
+
   // Note about concerns
   if (criticalCount > 0) {
-    parts.push(`However, ${criticalCount} location${criticalCount === 1 ? ' is' : 's are'} at critical levels, requiring immediate attention.`)
+    parts.push(
+      `However, ${criticalCount} location${criticalCount === 1 ? " is" : "s are"} at critical levels, requiring immediate attention.`,
+    )
   } else if (atRiskCount > 0) {
-    parts.push(`${atRiskCount} location${atRiskCount === 1 ? ' is' : 's are'} at-risk and should be monitored.`)
+    parts.push(
+      `${atRiskCount} location${atRiskCount === 1 ? " is" : "s are"} at-risk and should be monitored.`,
+    )
   }
-  
+
   return parts.join(" ")
 }
 
@@ -187,20 +210,20 @@ function generateDetails(
 export function generateOutcomeSummary(
   outcome: string,
   tierData: TierLocationsResponse,
-  featureProperties?: Map<string, DemandUnitProperties>
+  featureProperties?: Map<string, DemandUnitProperties>,
 ): OutcomeSummary {
   const breakdown = analyzeTierDistribution(tierData)
   const total = tierData.locations.length
-  
+
   // Identify at-risk and critical locations
   const atRiskLocations: AtRiskLocation[] = []
   const criticalLocations: AtRiskLocation[] = []
-  
-  tierData.locations.forEach(loc => {
+
+  tierData.locations.forEach((loc) => {
     if (loc.tier_level === 3 || loc.tier_level === 4) {
       const props = featureProperties?.get(loc.location_id)
       const displayNames = getDisplayName(props, loc.location_id)
-      
+
       const location: AtRiskLocation = {
         duId: loc.location_id,
         primaryName: displayNames.primary,
@@ -209,11 +232,12 @@ export function generateOutcomeSummary(
         classType: props?.Class || null,
         tierLevel: loc.tier_level,
         tierLabel: TIER_LABELS[loc.tier_level as TierLevel],
-        coordinates: props?.longitude && props?.latitude 
-          ? [props.longitude, props.latitude] 
-          : null,
+        coordinates:
+          props?.longitude && props?.latitude
+            ? [props.longitude, props.latitude]
+            : null,
       }
-      
+
       if (loc.tier_level === 3) {
         atRiskLocations.push(location)
       } else {
@@ -221,10 +245,16 @@ export function generateOutcomeSummary(
       }
     }
   })
-  
+
   return {
-    headline: generateHeadline(outcome, breakdown, total),
-    details: generateDetails(outcome, breakdown, total, atRiskLocations.length, criticalLocations.length),
+    headline: generateHeadline(outcome, breakdown),
+    details: generateDetails(
+      outcome,
+      breakdown,
+      total,
+      atRiskLocations.length,
+      criticalLocations.length,
+    ),
     tierBreakdown: breakdown,
     atRiskLocations,
     criticalLocations,
@@ -236,42 +266,44 @@ export function generateOutcomeSummary(
  */
 export function generateScenarioSummary(
   scenarioId: string,
-  outcomeTiers: Record<string, TierLocationsResponse>
+  outcomeTiers: Record<string, TierLocationsResponse>,
 ): ScenarioSummary {
   const insights: string[] = []
   const outcomeSummaries: Record<string, string> = {}
-  
+
   // Analyze each outcome
   Object.entries(outcomeTiers).forEach(([outcome, tierData]) => {
     const breakdown = analyzeTierDistribution(tierData)
     const assessment = getQualitativeAssessment(breakdown)
     outcomeSummaries[outcome] = assessment
   })
-  
+
   // Generate headline based on overall picture
   const headlines: string[] = []
-  
+
   // Check community and agricultural water
   const cwsAssessment = outcomeSummaries["Community deliveries"]
   const agAssessment = outcomeSummaries["Agricultural revenue"]
-  
+
   if (cwsAssessment && agAssessment) {
     if (cwsAssessment.includes("well") && agAssessment.includes("well")) {
-      headlines.push("This scenario favors community and agricultural water deliveries")
+      headlines.push(
+        "This scenario favors community and agricultural water deliveries",
+      )
     } else if (cwsAssessment.includes("well")) {
       headlines.push("This scenario favors community water deliveries")
     } else if (agAssessment.includes("well")) {
       headlines.push("This scenario favors agricultural water deliveries")
     }
   }
-  
+
   // Build key insights
   if (cwsAssessment?.includes("concern") || cwsAssessment?.includes("stress")) {
     insights.push("Not every community is served equally under this scenario.")
   }
-  
+
   // Add more outcome-specific insights here as we expand
-  
+
   return {
     headline: headlines.join(", ") + ".",
     keyInsights: insights,
@@ -282,20 +314,30 @@ export function generateScenarioSummary(
 /**
  * Format a list of location names for display
  */
-export function formatLocationList(locations: AtRiskLocation[], maxItems = 5): string {
+export function formatLocationList(
+  locations: AtRiskLocation[],
+  maxItems = 5,
+): string {
   if (locations.length === 0) return ""
-  
+
   // Group by primary name to avoid repetition
-  const uniqueNames = [...new Set(locations.map(l => l.primaryName))]
-  
+  const uniqueNames = [...new Set(locations.map((l) => l.primaryName))]
+
   if (uniqueNames.length <= maxItems) {
     if (uniqueNames.length === 1) {
       return uniqueNames[0] ?? ""
     }
-    return uniqueNames.slice(0, -1).join(", ") + " and " + (uniqueNames[uniqueNames.length - 1] ?? "")
+    return (
+      uniqueNames.slice(0, -1).join(", ") +
+      " and " +
+      (uniqueNames[uniqueNames.length - 1] ?? "")
+    )
   }
-  
-  return uniqueNames.slice(0, maxItems).join(", ") + ` and ${uniqueNames.length - maxItems} others`
+
+  return (
+    uniqueNames.slice(0, maxItems).join(", ") +
+    ` and ${uniqueNames.length - maxItems} others`
+  )
 }
 
 /**
@@ -303,25 +345,34 @@ export function formatLocationList(locations: AtRiskLocation[], maxItems = 5): s
  */
 export function generateOutcomeInsight(
   outcome: string,
-  summary: OutcomeSummary
+  summary: OutcomeSummary,
 ): string {
   const { tierBreakdown, atRiskLocations, criticalLocations } = summary
-  const total = Object.values(tierBreakdown).reduce((sum, t) => sum + t.count, 0)
-  
+  const total = Object.values(tierBreakdown).reduce(
+    (sum, t) => sum + t.count,
+    0,
+  )
+
   const parts: string[] = []
-  
+
   // Opening based on outcome type
   if (outcome === "Community deliveries") {
     parts.push("Looking at community water system data,")
-    
+
     if (tierBreakdown.tier1.percentage >= 80) {
-      parts.push(`we can see that the vast majority (${tierBreakdown.tier1.count} of ${total}) of water systems are thriving under this scenario.`)
+      parts.push(
+        `we can see that the vast majority (${tierBreakdown.tier1.count} of ${total}) of water systems are thriving under this scenario.`,
+      )
     } else if (tierBreakdown.tier1.percentage >= 50) {
-      parts.push(`we can see that most water systems are doing well under this scenario, but a minority are not.`)
+      parts.push(
+        `we can see that most water systems are doing well under this scenario, but a minority are not.`,
+      )
     } else {
-      parts.push(`we can see significant challenges facing water systems under this scenario.`)
+      parts.push(
+        `we can see significant challenges facing water systems under this scenario.`,
+      )
     }
-    
+
     // Add critical/at-risk details
     if (criticalLocations.length > 0) {
       const names = formatLocationList(criticalLocations)
@@ -332,21 +383,26 @@ export function generateOutcomeInsight(
     }
   } else if (outcome === "Agricultural revenue") {
     parts.push("Looking at agricultural water delivery data,")
-    
+
     if (tierBreakdown.tier1.percentage >= 80) {
-      parts.push(`agricultural districts are largely thriving (${tierBreakdown.tier1.count} of ${total} at optimal levels).`)
+      parts.push(
+        `agricultural districts are largely thriving (${tierBreakdown.tier1.count} of ${total} at optimal levels).`,
+      )
     } else if (tierBreakdown.tier1.percentage >= 50) {
-      parts.push(`most agricultural districts are receiving adequate water, though some are struggling.`)
+      parts.push(
+        `most agricultural districts are receiving adequate water, though some are struggling.`,
+      )
     } else {
-      parts.push(`agricultural districts face significant water delivery challenges.`)
+      parts.push(
+        `agricultural districts face significant water delivery challenges.`,
+      )
     }
-    
+
     if (criticalLocations.length > 0) {
       const names = formatLocationList(criticalLocations)
       parts.push(`Districts at critical levels include ${names}.`)
     }
   }
-  
+
   return parts.join(" ")
 }
-

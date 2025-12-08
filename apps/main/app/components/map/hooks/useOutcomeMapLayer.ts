@@ -15,7 +15,11 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import { getTierLabel, getTierColorsFromTheme, TierLevel } from "../../../lib/tiers"
+import {
+  getTierLabel,
+  getTierColorsFromTheme,
+  TierLevel,
+} from "../../../lib/tiers"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapInstance = any
@@ -75,13 +79,22 @@ interface OutcomeLayerConfig {
  */
 const OUTCOME_BOUNDS: Record<string, [[number, number], [number, number]]> = {
   // CWS covers urban areas throughout Central Valley
-  "Community deliveries": [[-122.5, 35.5], [-119.0, 40.5]],
+  "Community deliveries": [
+    [-122.5, 35.5],
+    [-119.0, 40.5],
+  ],
   // AG_REV covers agricultural districts throughout Central Valley
-  "Agricultural revenue": [[-122.5, 35.0], [-118.5, 40.5]],
+  "Agricultural revenue": [
+    [-122.5, 35.0],
+    [-118.5, 40.5],
+  ],
 }
 
 // Default bounds for Central Valley if no preset is defined
-const DEFAULT_BOUNDS: [[number, number], [number, number]] = [[-122.5, 35.0], [-118.5, 40.5]]
+const DEFAULT_BOUNDS: [[number, number], [number, number]] = [
+  [-122.5, 35.0],
+  [-118.5, 40.5],
+]
 
 /**
  * Configuration for each outcome type
@@ -107,7 +120,7 @@ const tierLocationCache: Map<string, TierLocationsResponse> = new Map()
  */
 export async function fetchTierLocations(
   scenarioId: string,
-  tierCode: string
+  tierCode: string,
 ): Promise<TierLocationsResponse> {
   const cacheKey = `${scenarioId}-${tierCode}`
 
@@ -123,7 +136,7 @@ export async function fetchTierLocations(
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
     throw new Error(
-      errorData.detail || `Failed to fetch tier locations: ${response.status}`
+      errorData.detail || `Failed to fetch tier locations: ${response.status}`,
     )
   }
 
@@ -149,12 +162,12 @@ export interface HoveredFeatureInfo {
   longitude: number
   latitude: number
   duId: string
-  urbName: string | null  // Primary name for CWS (Urban)
-  modName: string | null  // Secondary name (or primary if no urbName)
+  urbName: string | null // Primary name for CWS (Urban)
+  modName: string | null // Secondary name (or primary if no urbName)
   subName: string | null
   comments: string | null
   type: string | null
-  classType: string | null  // "Urban", "Agriculture", etc.
+  classType: string | null // "Urban", "Agriculture", etc.
   tierLevel: number
   tierLabel: string
 }
@@ -182,7 +195,8 @@ export function useOutcomeMapLayer({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [featureCount, setFeatureCount] = useState(0)
-  const [hoveredFeature, setHoveredFeature] = useState<HoveredFeatureInfo | null>(null)
+  const [hoveredFeature, setHoveredFeature] =
+    useState<HoveredFeatureInfo | null>(null)
 
   // Store tier lookup in a ref so event handlers can access it
   const tierLookupRef = useRef<Record<string, number>>({})
@@ -191,10 +205,7 @@ export function useOutcomeMapLayer({
   const config = outcome ? OUTCOME_LAYER_CONFIG[outcome] : null
 
   // Tier colors from theme (using centralized helper)
-  const tierColors = useMemo(
-    () => getTierColorsFromTheme(theme),
-    [theme]
-  )
+  const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // Fade the basemap dim layer
   const fadeBasemapDim = useCallback(
@@ -235,7 +246,7 @@ export function useOutcomeMapLayer({
               "fill-opacity": 0,
             },
           },
-          DEMAND_UNITS_LAYER_ID // Add below the demand units layer
+          DEMAND_UNITS_LAYER_ID, // Add below the demand units layer
         )
       }
 
@@ -249,10 +260,15 @@ export function useOutcomeMapLayer({
         const progress = Math.min(elapsed / duration, 1)
         // Ease out cubic
         const eased = 1 - Math.pow(1 - progress, 3)
-        const currentOpacity = startOpacity + (endOpacity - startOpacity) * eased
+        const currentOpacity =
+          startOpacity + (endOpacity - startOpacity) * eased
 
         if (map.getLayer(BASEMAP_DIM_LAYER_ID)) {
-          map.setPaintProperty(BASEMAP_DIM_LAYER_ID, "fill-opacity", currentOpacity)
+          map.setPaintProperty(
+            BASEMAP_DIM_LAYER_ID,
+            "fill-opacity",
+            currentOpacity,
+          )
         }
 
         if (progress < 1) {
@@ -262,7 +278,7 @@ export function useOutcomeMapLayer({
 
       requestAnimationFrame(animate)
     },
-    []
+    [],
   )
 
   // Reset layer to hidden/default state
@@ -352,7 +368,9 @@ export function useOutcomeMapLayer({
           // Check if layer exists
           const layer = map.getLayer(DEMAND_UNITS_LAYER_ID)
           if (!layer) {
-            console.warn(`Layer "${DEMAND_UNITS_LAYER_ID}" not found in map style`)
+            console.warn(
+              `Layer "${DEMAND_UNITS_LAYER_ID}" not found in map style`,
+            )
             return
           }
 
@@ -375,7 +393,7 @@ export function useOutcomeMapLayer({
           Object.entries(tierLookup).forEach(([duId, tierLevel]) => {
             colorPairs.push(duId)
             colorPairs.push(
-              tierColors[tierLevel as TierLevel] || theme.palette.grey[500]
+              tierColors[tierLevel as TierLevel] || theme.palette.grey[500],
             )
           })
 
@@ -390,18 +408,21 @@ export function useOutcomeMapLayer({
           map.setPaintProperty(
             DEMAND_UNITS_LAYER_ID,
             "fill-color",
-            colorExpression
+            colorExpression,
           )
-          
+
           // Fill opacity decreases as you zoom in (more detail visible)
           // At zoom 5: 0.75 opacity, at zoom 10: 0.4 opacity
           map.setPaintProperty(DEMAND_UNITS_LAYER_ID, "fill-opacity", [
             "interpolate",
             ["linear"],
             ["zoom"],
-            5, 0.75,  // Zoomed out: more opaque
-            8, 0.55,  // Medium zoom
-            10, 0.35, // Zoomed in: more transparent
+            5,
+            0.75, // Zoomed out: more opaque
+            8,
+            0.55, // Medium zoom
+            10,
+            0.35, // Zoomed in: more transparent
           ])
 
           // Make fill layer visible
@@ -416,7 +437,9 @@ export function useOutcomeMapLayer({
             const fillLayer = map.getLayer(DEMAND_UNITS_LAYER_ID)
             if (fillLayer) {
               const sourceId = fillLayer.source as string
-              const sourceLayer = (fillLayer as { "source-layer"?: string })["source-layer"]
+              const sourceLayer = (fillLayer as { "source-layer"?: string })[
+                "source-layer"
+              ]
 
               map.addLayer(
                 {
@@ -441,31 +464,50 @@ export function useOutcomeMapLayer({
 
           // Apply filter and styling to outline with tier colors
           if (map.getLayer(DEMAND_UNITS_OUTLINE_ID)) {
-            map.setFilter(DEMAND_UNITS_OUTLINE_ID, ["all", classFilter, duIdFilter])
-            map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-color", colorExpression)
+            map.setFilter(DEMAND_UNITS_OUTLINE_ID, [
+              "all",
+              classFilter,
+              duIdFilter,
+            ])
+            map.setPaintProperty(
+              DEMAND_UNITS_OUTLINE_ID,
+              "line-color",
+              colorExpression,
+            )
             // Stroke width: thin at low zoom to prevent jumbling, thicker as you zoom in
             map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-width", [
               "interpolate",
               ["linear"],
               ["zoom"],
-              5, 0.5,   // Very thin at low zoom
-              7, 1,     // Slightly thicker
-              9, 2,     // Medium
-              11, 3,    // Full thickness when zoomed in
+              5,
+              0.5, // Very thin at low zoom
+              7,
+              1, // Slightly thicker
+              9,
+              2, // Medium
+              11,
+              3, // Full thickness when zoomed in
             ])
             map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-opacity", 1)
             map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-offset", [
               "interpolate",
               ["linear"],
               ["zoom"],
-              5, -0.25,
-              7, -0.5,
-              9, -1,
-              11, -1.5,
+              5,
+              -0.25,
+              7,
+              -0.5,
+              9,
+              -1,
+              11,
+              -1.5,
             ])
-            map.setLayoutProperty(DEMAND_UNITS_OUTLINE_ID, "visibility", "visible")
+            map.setLayoutProperty(
+              DEMAND_UNITS_OUTLINE_ID,
+              "visibility",
+              "visible",
+            )
           }
-
         })
 
         // Zoom to preset bounds for this outcome
@@ -474,10 +516,15 @@ export function useOutcomeMapLayer({
         if (!cancelled) {
           mapAPI.withMap((mapRef) => {
             const map = mapRef.getMap()
-            const bounds = outcome ? OUTCOME_BOUNDS[outcome] || DEFAULT_BOUNDS : DEFAULT_BOUNDS
-            
-            console.log(`[useOutcomeMapLayer] Zooming to bounds for "${outcome}":`, bounds)
-            
+            const bounds = outcome
+              ? OUTCOME_BOUNDS[outcome] || DEFAULT_BOUNDS
+              : DEFAULT_BOUNDS
+
+            console.log(
+              `[useOutcomeMapLayer] Zooming to bounds for "${outcome}":`,
+              bounds,
+            )
+
             // Always use fitBounds to reset view, even if user has panned/zoomed manually
             map.fitBounds(bounds, {
               padding: { top: 100, bottom: 100, left: 100, right: 350 }, // Extra right padding for panels
@@ -490,7 +537,7 @@ export function useOutcomeMapLayer({
         if (!cancelled) {
           console.error("Error styling outcome map layer:", err)
           setError(
-            err instanceof Error ? err.message : "Failed to load map data"
+            err instanceof Error ? err.message : "Failed to load map data",
           )
         }
       } finally {
@@ -505,7 +552,17 @@ export function useOutcomeMapLayer({
     return () => {
       cancelled = true
     }
-  }, [outcome, strategy, visible, config, tierColors, theme, mapAPI, clear, fadeBasemapDim])
+  }, [
+    outcome,
+    strategy,
+    visible,
+    config,
+    tierColors,
+    theme,
+    mapAPI,
+    clear,
+    fadeBasemapDim,
+  ])
 
   // Set up hover events for tooltips
   useEffect(() => {
@@ -580,9 +637,12 @@ export function useOutcomeMapLayer({
     return () => {
       mapAPI.withMap((mapRef) => {
         const map = mapRef.getMap()
-        if (mouseEnterHandler) map.off("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
-        if (mouseLeaveHandler) map.off("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
-        if (mouseMoveHandler) map.off("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
+        if (mouseEnterHandler)
+          map.off("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
+        if (mouseLeaveHandler)
+          map.off("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
+        if (mouseMoveHandler)
+          map.off("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
       })
       setHoveredFeature(null)
     }
@@ -610,4 +670,3 @@ export function useOutcomeMapLayer({
 export function outcomeUsesDemandUnits(outcome: string): boolean {
   return outcome in OUTCOME_LAYER_CONFIG
 }
-

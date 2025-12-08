@@ -8,8 +8,8 @@ export type Outcome = (typeof OUTCOMES)[number]
 /**
  * Outcome definitions - synchronous constant for use in components
  * Maps outcome display names to their descriptions.
- * These definitions are also in the database. The thinking is that we want to 
- * allow frontend developers to modify the definitions without having to wait 
+ * These definitions are also in the database. The thinking is that we want to
+ * allow frontend developers to modify the definitions without having to wait
  * for a database update.
  */
 export const OUTCOME_DEFINITIONS: Record<string, string> = {

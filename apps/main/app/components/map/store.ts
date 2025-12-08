@@ -226,7 +226,7 @@ export const learnMapActions = {
     })),
 
   setSelectedOutcome: (outcome: string | null) =>
-    useLearnMapStore.setState({ 
+    useLearnMapStore.setState({
       selectedOutcome: outcome,
       isOutcomeVisualizationActive: outcome !== null,
     }),
@@ -242,7 +242,8 @@ export const learnMapActions = {
 // Selectors
 // ============================================================================
 
-export const useActiveSection = () => useLearnMapStore((s) => s.activeSection)
+export const useActiveSection = (): SectionId =>
+  useLearnMapStore((s) => s.activeSection)
 
 export const useRiversProgress = () => useLearnMapStore((s) => s.riversProgress)
 

@@ -14,7 +14,10 @@ import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
 import TierMarkers from "../../features/scenarioExplorer/components/TierMarkers"
-import { fetchTierLocationData, type TierLocationResponse } from "../../api/tierLocationApi"
+import {
+  fetchTierLocationData,
+  type TierLocationResponse,
+} from "../../api/tierLocationApi"
 import {
   useOutcomeMapLayer,
   outcomeUsesDemandUnits,
@@ -71,19 +74,15 @@ export default function CaliforniaMapPanel({
     : false
 
   // Use demand unit layer for CWS, AG_REV, etc.
-  const {
-    isLoading: demandUnitsLoading, 
-    error: demandUnitsError,
-    hoveredFeature,
-  } = useOutcomeMapLayer({
-      outcome: usesDemandUnits ? selectedOutcome : null,
-      strategy: "current-ops",
-      visible: usesDemandUnits && !!selectedOutcome,
-    })
+  const { hoveredFeature } = useOutcomeMapLayer({
+    outcome: usesDemandUnits ? selectedOutcome : null,
+    strategy: "current-ops",
+    visible: usesDemandUnits && !!selectedOutcome,
+  })
 
   // Tier location data for other outcomes (point/polygon based from API)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
-  const [tierDataLoading, setTierDataLoading] = useState(false)
+  const [, setTierDataLoading] = useState(false)
 
   // Fetch tier location data for outcomes that DON'T use demand units
   useEffect(() => {
@@ -99,7 +98,10 @@ export default function CaliforniaMapPanel({
       try {
         setTierDataLoading(true)
         // Use "current-ops" strategy for the Learn section
-        const data = await fetchTierLocationData("current-ops", selectedOutcome!)
+        const data = await fetchTierLocationData(
+          "current-ops",
+          selectedOutcome!,
+        )
 
         if (!cancelled) {
           setTierData(data)
@@ -131,7 +133,7 @@ export default function CaliforniaMapPanel({
                   [minLng, minLat],
                   [maxLng, maxLat],
                 ],
-                { padding: 100, maxZoom: 9, duration: 1000 }
+                { padding: 100, maxZoom: 9, duration: 1000 },
               )
             }
           }
@@ -275,13 +277,15 @@ export default function CaliforniaMapPanel({
               {/* Primary name - Urb_Name for CWS, Mod_Name for others */}
               {(() => {
                 const isUrban = hoveredFeature.classType === "Urban"
-                const primaryName = isUrban && hoveredFeature.urbName 
-                  ? hoveredFeature.urbName 
-                  : hoveredFeature.modName
-                const secondaryName = isUrban && hoveredFeature.urbName && hoveredFeature.modName
-                  ? hoveredFeature.modName
-                  : null
-                
+                const primaryName =
+                  isUrban && hoveredFeature.urbName
+                    ? hoveredFeature.urbName
+                    : hoveredFeature.modName
+                const secondaryName =
+                  isUrban && hoveredFeature.urbName && hoveredFeature.modName
+                    ? hoveredFeature.modName
+                    : null
+
                 return (
                   <>
                     {primaryName && (
@@ -378,12 +382,16 @@ export default function CaliforniaMapPanel({
                     width: 12,
                     height: 12,
                     borderRadius: "2px",
-                    backgroundColor: theme.palette.tiers[`tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers],
+                    backgroundColor:
+                      theme.palette.tiers[
+                        `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
+                      ],
                     flexShrink: 0,
                   }}
                 />
                 <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                  <strong>Tier {hoveredFeature.tierLevel}:</strong> {hoveredFeature.tierLabel}
+                  <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
+                  {hoveredFeature.tierLabel}
                 </Typography>
               </Box>
             </Box>
