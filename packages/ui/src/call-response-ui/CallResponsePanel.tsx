@@ -82,7 +82,7 @@ export function CallResponsePanel({
             width: { xs: "100%", sm: "420px", md: "460px" },
             maxWidth: "100%",
             padding: 0,
-            pointerEvents: "auto",
+            pointerEvents: isVisible ? "auto" : "none",
             display: "flex",
             flexDirection: "column",
             gap: { xs: 2, sm: 2.5, md: 3 },

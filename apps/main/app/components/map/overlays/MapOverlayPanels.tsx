@@ -122,6 +122,21 @@ export default function MapOverlayPanels() {
     [0, 1],
   )
 
+  // Panel pointer events - disable when not visible
+  const strategyInfoPointerEvents = useTransform(strategyInfoPanelOpacity, (v) =>
+    v > 0.1 ? "auto" : "none",
+  )
+  const keyOperationsPointerEvents = useTransform(
+    keyOperationsPanelOpacity,
+    (v) => (v > 0.1 ? "auto" : "none"),
+  )
+  const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
+    v > 0.1 ? "auto" : "none",
+  )
+  const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
+    v > 0.1 ? "auto" : "none",
+  )
+
   // Tooltip opacity - fade in and out
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
@@ -502,7 +517,12 @@ export default function MapOverlayPanels() {
             }}
           >
             {/* Strategy info panel */}
-            <motion.div style={{ opacity: strategyInfoPanelOpacity }}>
+            <motion.div
+              style={{
+                opacity: strategyInfoPanelOpacity,
+                pointerEvents: strategyInfoPointerEvents,
+              }}
+            >
               <Section
                 id="strategy-row"
                 amount={0.5}
@@ -578,7 +598,12 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key operations panel */}
-            <motion.div style={{ opacity: keyOperationsPanelOpacity }}>
+            <motion.div
+              style={{
+                opacity: keyOperationsPanelOpacity,
+                pointerEvents: keyOperationsPointerEvents,
+              }}
+            >
               <Section
                 id="key-operations"
                 amount={0.5}
@@ -646,7 +671,12 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key outcomes panel */}
-            <motion.div style={{ opacity: keyOutcomesPanelOpacity }}>
+            <motion.div
+              style={{
+                opacity: keyOutcomesPanelOpacity,
+                pointerEvents: keyOutcomesPointerEvents,
+              }}
+            >
               <Section
                 id="key-outcomes"
                 amount={0.5}
@@ -732,7 +762,12 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Summary panel - positioned under outcomes panel on right side */}
-            <motion.div style={{ opacity: summaryPanelOpacity }}>
+            <motion.div
+              style={{
+                opacity: summaryPanelOpacity,
+                pointerEvents: summaryPointerEvents,
+              }}
+            >
               <Section
                 id="scenario-summary"
                 amount={0.5}
