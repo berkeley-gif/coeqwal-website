@@ -799,7 +799,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h6,
       fontWeight: 600,
-      lineHeight: 1.4,
+      lineHeight: 1,
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,

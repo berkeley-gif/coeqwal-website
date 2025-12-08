@@ -201,7 +201,7 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
       <Typography
         variant="subtitle2"
         sx={{
-          mb: 1.5,
+          mb: 0.5,
           fontSize: theme.typography.body2.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],

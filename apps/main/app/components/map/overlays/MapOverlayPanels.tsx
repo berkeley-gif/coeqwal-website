@@ -493,7 +493,7 @@ export default function MapOverlayPanels() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 2,
+              gap: 1,
               justifyContent: "flex-end",
               width: "100%",
               pl: { xs: 2, sm: 3, md: 4 },
