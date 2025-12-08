@@ -16,16 +16,28 @@ interface ThemeIconProps {
  */
 export function SGMAIcon({ size = "100%" }: ThemeIconProps) {
   return (
-    <Box
-      component="svg"
-      viewBox="0 0 40 40"
-      sx={{ width: size, height: size }}
-    >
+    <Box component="svg" viewBox="0 0 40 40" sx={{ width: size, height: size }}>
       <circle cx="20" cy="20" r="20" fill="#4A90A4" />
-      <text x="20" y="17" textAnchor="middle" fill="white" fontSize="8" fontWeight="600" fontFamily="sans-serif">
+      <text
+        x="20"
+        y="17"
+        textAnchor="middle"
+        fill="white"
+        fontSize="8"
+        fontWeight="600"
+        fontFamily="sans-serif"
+      >
         SGMA
       </text>
-      <text x="20" y="27" textAnchor="middle" fill="white" fontSize="7" fontWeight="400" fontFamily="sans-serif">
+      <text
+        x="20"
+        y="27"
+        textAnchor="middle"
+        fill="white"
+        fontSize="7"
+        fontWeight="400"
+        fontFamily="sans-serif"
+      >
         limits
       </text>
     </Box>
@@ -37,13 +49,17 @@ export function SGMAIcon({ size = "100%" }: ThemeIconProps) {
  */
 export function EnvironmentalIcon({ size = "100%" }: ThemeIconProps) {
   return (
-    <Box
-      component="svg"
-      viewBox="0 0 40 40"
-      sx={{ width: size, height: size }}
-    >
+    <Box component="svg" viewBox="0 0 40 40" sx={{ width: size, height: size }}>
       <circle cx="20" cy="20" r="20" fill="#5A8F5A" />
-      <text x="20" y="24" textAnchor="middle" fill="white" fontSize="9" fontWeight="600" fontFamily="sans-serif">
+      <text
+        x="20"
+        y="24"
+        textAnchor="middle"
+        fill="white"
+        fontSize="9"
+        fontWeight="600"
+        fontFamily="sans-serif"
+      >
         ENV
       </text>
     </Box>
@@ -61,7 +77,10 @@ export function getThemeIcon(theme: string): React.ReactNode {
   }
 }
 
-export function getThemeIconDescription(theme: string, strategyValue: string): string {
+export function getThemeIconDescription(
+  theme: string,
+  strategyValue: string,
+): string {
   switch (theme) {
     case "groundwater":
       if (strategyValue === "sgma-sj-valley") {
@@ -77,4 +96,3 @@ export function getThemeIconDescription(theme: string, strategyValue: string): s
       return "Current operations baseline"
   }
 }
-

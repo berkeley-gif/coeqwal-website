@@ -144,7 +144,12 @@ interface StrategyGridProps {
     name: string
     displayName: string
   }>
-  strategies?: Array<{ value: string; label: string; description: string; theme?: string }> // Optional filtered strategies list
+  strategies?: Array<{
+    value: string
+    label: string
+    description: string
+    theme?: string
+  }> // Optional filtered strategies list
   highlightedStrategies?: Set<string> // Strategy values to highlight (search matches)
   showSearchDivider?: boolean // Whether to show a divider between search results and other strategies
 
@@ -808,10 +813,16 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               sx={{
                                 width: showMapView
                                   ? theme.spacing(3.5)
-                                  : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                  : {
+                                      xs: theme.spacing(4),
+                                      lg: theme.spacing(5),
+                                    },
                                 height: showMapView
                                   ? theme.spacing(3.5)
-                                  : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                  : {
+                                      xs: theme.spacing(4),
+                                      lg: theme.spacing(5),
+                                    },
                                 cursor: "pointer",
                               }}
                             >
@@ -828,15 +839,24 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       {/* Baseline: No TUCP icon - show for strategies without TUCPs */}
                       {(strategy.value === "current-ops-wo-tucp" ||
                         strategy.value === "usbr-2024-wo-tucp") && (
-                        <InfoTooltip description="Without TUCPs" placement="top">
+                        <InfoTooltip
+                          description="Without TUCPs"
+                          placement="top"
+                        >
                           <Box
                             sx={{
                               width: showMapView
                                 ? theme.spacing(3.5)
-                                : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                : {
+                                    xs: theme.spacing(4),
+                                    lg: theme.spacing(5),
+                                  },
                               height: showMapView
                                 ? theme.spacing(3.5)
-                                : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                : {
+                                    xs: theme.spacing(4),
+                                    lg: theme.spacing(5),
+                                  },
                               cursor: "pointer",
                             }}
                           >

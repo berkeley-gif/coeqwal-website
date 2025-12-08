@@ -51,7 +51,7 @@ export function useScrollTabsIntoViewOnChange({
     if (lastAlignedTabRef.current === activeTab) return
     lastAlignedTabRef.current = activeTab
 
-    console.log('activeTab changed')
+    console.log("activeTab changed")
 
     const raf = requestAnimationFrame(() => {
       const panelRect = panelEl.getBoundingClientRect()
@@ -60,7 +60,9 @@ export function useScrollTabsIntoViewOnChange({
 
       const absolutePanelTop = window.scrollY + panelRect.top
 
-      console.log(`absolutePanelTop => window.scrollY: ${window.scrollY} + panelRect.top: ${panelRect.top} = ${absolutePanelTop}`)
+      console.log(
+        `absolutePanelTop => window.scrollY: ${window.scrollY} + panelRect.top: ${panelRect.top} = ${absolutePanelTop}`,
+      )
 
       const rawTarget = absolutePanelTop - tabsHeight - offsetPx
 
@@ -70,7 +72,7 @@ export function useScrollTabsIntoViewOnChange({
 
       const epsilon = 1
       if (Math.abs(window.scrollY - targetY) > epsilon) {
-        console.log('scrolling to targetY: ', targetY)
+        console.log("scrolling to targetY: ", targetY)
         window.scrollTo({ top: targetY, behavior })
       }
     })

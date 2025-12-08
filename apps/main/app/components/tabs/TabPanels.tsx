@@ -82,7 +82,7 @@ export default function TabPanels() {
 
       const rect = panelRef.current.getBoundingClientRect()
       const absoluteTop = window.scrollY + rect.top
-      
+
       const offsetPx =
         typeof HEADER_SHRUNK_H === "number"
           ? HEADER_SHRUNK_H

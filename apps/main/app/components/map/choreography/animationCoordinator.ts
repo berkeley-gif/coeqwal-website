@@ -237,4 +237,3 @@ export const coordinator = new AnimationCoordinator()
 
 // Also export the class for testing purposes
 export { AnimationCoordinator }
-
