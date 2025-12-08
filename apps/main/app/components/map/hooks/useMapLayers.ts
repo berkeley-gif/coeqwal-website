@@ -375,17 +375,54 @@ export function useMapLayers() {
       }
 
       // Inflow watersheds
-      // Skip auto-hide when entering rivers section - it will fade out during rivers animation instead
-      if (
+      // Special handling: when leaving rivers section, always restore if needed
+      const wasInRivers = prevSection === "rivers"
+      const needsInflowWatersheds = !!currentLayers.inflowWatersheds
+
+      if (wasInRivers && needsInflowWatersheds) {
+        // Leaving rivers section - explicitly restore inflow-watersheds
+        // (rivers animation may have faded it to 0)
+        console.log(
+          "[useMapLayers] Restoring inflow-watersheds after leaving rivers",
+        )
+        applyLayer(LAYERS.inflowWatersheds, true, "fill-opacity", 0.3)
+      } else if (
         currentLayers.inflowWatersheds !== prevLayers?.inflowWatersheds &&
         activeSection !== "rivers"
       ) {
+        // Normal transition - show or hide based on section config
         applyLayer(
           LAYERS.inflowWatersheds,
-          !!currentLayers.inflowWatersheds,
+          needsInflowWatersheds,
           "fill-opacity",
           0.3,
         )
+      }
+
+      // Restore basins outline layers when leaving rivers section
+      // (rivers animation fades them to 0.6, restore to full opacity)
+      if (wasInRivers && currentLayers.basins) {
+        const mapInstance = coordinator.getValidMap(map.mapRef)
+        if (mapInstance) {
+          try {
+            if (mapInstance.getLayer("basins-outline-halo")) {
+              mapInstance.setPaintProperty(
+                "basins-outline-halo",
+                "line-opacity",
+                1,
+              )
+            }
+            if (mapInstance.getLayer("basins-outline-layer")) {
+              mapInstance.setPaintProperty(
+                "basins-outline-layer",
+                "line-opacity",
+                0.8,
+              )
+            }
+          } catch {
+            // Layer might not exist
+          }
+        }
       }
 
       // Water layer (Delta) - fade out when leaving delta section
