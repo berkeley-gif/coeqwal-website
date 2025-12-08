@@ -1,5 +1,5 @@
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { useOutcomeDefinitions } from "../../../hooks/useTierData"
 import { outcomeTierValues } from "../../../lib/outcomes"
 
@@ -76,6 +76,7 @@ export const formatTierText = (text: string) => {
 
 /**
  * Shared tooltip/legend content for tier information
+ * Styled to match learn-map ScrollTooltip
  */
 export default function TierTooltipContent({
   outcome,
@@ -87,26 +88,46 @@ export default function TierTooltipContent({
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
-        <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+        <Box
+          component="span"
+          sx={{
+            fontWeight: 600,
+            display: "block",
+            mb: 1,
+            fontSize: "0.875rem",
+            lineHeight: 1.4,
+          }}
+        >
           {getOutcomeDisplayLabel(outcome)}
-        </Typography>
+        </Box>
       )}
 
-      <Typography
-        variant="body2"
+      <Box
         component="div"
-        sx={{ mb: 2, lineHeight: 1.4 }}
+        sx={{
+          mb: 1.5,
+          fontSize: "0.875rem",
+          fontWeight: 400,
+          lineHeight: 1.4,
+        }}
       >
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
         )}
-      </Typography>
+      </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box
+          component="span"
+          sx={{
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            lineHeight: 1.4,
+          }}
+        >
           Outcome levels:
-        </Typography>
+        </Box>
 
         {[1, 2, 3, 4].map((tierNum) => (
           <Box
@@ -115,21 +136,24 @@ export default function TierTooltipContent({
           >
             <Box
               sx={{
-                width: 12,
-                minHeight: 12,
+                width: 10,
+                height: 10,
                 borderRadius: "2px",
                 backgroundColor:
                   theme.palette.tiers[
                     `tier${tierNum}` as keyof typeof theme.palette.tiers
                   ],
                 flexShrink: 0,
-                alignSelf: "stretch",
+                mt: "3px", // Align with first line of text
               }}
             />
-            <Typography
-              variant="body2"
-              component="div"
-              sx={{ lineHeight: 1.4 }}
+            <Box
+              component="span"
+              sx={{
+                fontSize: "0.875rem",
+                fontWeight: 400,
+                lineHeight: 1.4,
+              }}
             >
               {formatTierText(
                 (
@@ -148,7 +172,7 @@ export default function TierTooltipContent({
                   ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
                   "",
               )}
-            </Typography>
+            </Box>
           </Box>
         ))}
       </Box>

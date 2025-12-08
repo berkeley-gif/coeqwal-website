@@ -315,33 +315,30 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   return (
     <Box sx={{ position: "relative" }}>
-      {/* Active outcome tooltip */}
+      {/* Active outcome tooltip - matches learn-map ScrollTooltip styling */}
       {activeTooltip && tooltipAnchor && (
         <Box
           sx={{
             position: "absolute",
-            top: tooltipAnchor.offsetTop,
-            right: `calc(100% - ${tooltipAnchor.offsetLeft}px + 16px)`,
-            zIndex: 1000,
-            backgroundColor: "white",
-            padding: 2,
-            borderRadius: theme.borderRadius.rounded,
-            boxShadow: theme.shadow.subtle,
-            width: theme.spacing(56.25),
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              right: theme.spacing(-1),
-              top: theme.spacing(2.5),
-              width: 0,
-              height: 0,
-              borderTop: "8px solid transparent",
-              borderBottom: "8px solid transparent",
-              borderLeft: "8px solid white",
-            },
+            top: tooltipAnchor.offsetTop - 8, // Align arrow with top of anchor
+            right: `calc(100% - ${tooltipAnchor.offsetLeft}px + 24px)`,
+            zIndex: 9999,
           }}
         >
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+          <Box
+            sx={{
+              position: "relative",
+              backgroundColor: theme.palette.common.white,
+              color: theme.palette.text.primary,
+              border: `1px solid ${theme.palette.action.hover}`,
+              borderRadius: theme.borderRadius.card,
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              padding: "16px",
+              paddingRight: "40px", // Extra space for close button
+              width: theme.spacing(56.25),
+            }}
+          >
+            {/* Close button */}
             <Box
               component="button"
               onClick={() => {
@@ -349,22 +346,60 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 setTooltipAnchor(null)
               }}
               sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                width: 24,
+                height: 24,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 border: "none",
                 background: "none",
                 cursor: "pointer",
-                padding: theme.spacing(0.5),
-                fontSize: theme.typography.h6.fontSize,
-                lineHeight: 1,
-                color: theme.palette.grey[600],
+                fontSize: "0.875rem",
+                color: theme.palette.grey[500],
+                borderRadius: "50%",
                 "&:hover": {
-                  color: theme.palette.grey[800],
+                  color: theme.palette.grey[700],
+                  backgroundColor: theme.palette.grey[100],
                 },
               }}
+              aria-label="Close tooltip"
             >
-              ×
+              ✕
             </Box>
+
+            {/* Arrow pointing right (to the anchor) - positioned at upper right */}
+            <Box
+              sx={{
+                position: "absolute",
+                right: -16,
+                top: 16,
+                width: 0,
+                height: 0,
+                border: "8px solid transparent",
+                borderLeftColor: theme.palette.common.white,
+                // Add a shadow effect to the arrow
+                filter: "drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1))",
+              }}
+            />
+            {/* Arrow border overlay */}
+            <Box
+              sx={{
+                position: "absolute",
+                right: -17,
+                top: 16,
+                width: 0,
+                height: 0,
+                border: "8px solid transparent",
+                borderLeftColor: theme.palette.action.hover,
+                zIndex: -1,
+              }}
+            />
+
+            <TierTooltipContent outcome={activeTooltip} showTitle={true} />
           </Box>
-          <TierTooltipContent outcome={activeTooltip} showTitle={true} />
         </Box>
       )}
 
