@@ -144,9 +144,12 @@ export default function SmoothTabs() {
                           margin: 20,
                         }}
                       >
-                        This is a paragraph about what this section is all
-                        about, and what people can expect to find here. You can
-                        find info about tools, links, etc.
+                        {key === "learn" &&
+                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California and how we manage water to support diverse needs."}
+                        {key === "explore" &&
+                          "What if we managed water differently? Explore how water allocations change under different water management scenarios."}
+                        {key === "empower" &&
+                          "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future."}
                       </Typography>
                     </motion.div>
                   )}
