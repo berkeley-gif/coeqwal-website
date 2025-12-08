@@ -27,6 +27,7 @@ import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
 import TierTooltipContent from "./TierTooltipContent"
 import TogglePair from "./TogglePair"
+import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
 
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
@@ -143,7 +144,7 @@ interface StrategyGridProps {
     name: string
     displayName: string
   }>
-  strategies?: Array<{ value: string; label: string; description: string }> // Optional filtered strategies list
+  strategies?: Array<{ value: string; label: string; description: string; theme?: string }> // Optional filtered strategies list
   highlightedStrategies?: Set<string> // Strategy values to highlight (search matches)
   showSearchDivider?: boolean // Whether to show a divider between search results and other strategies
 
@@ -641,127 +642,214 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     justifyContent: "flex-start",
                   }}
                 >
-                  {/* Current operations icon */}
-                  <InfoTooltip
-                    description={
-                      CURRENT_OPERATIONS_ICONS[0]?.description ||
-                      "Current operations"
-                    }
-                    placement="top"
-                  >
-                    <Box
-                      sx={{
-                        width: showMapView
-                          ? theme.spacing(3.5)
-                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                        height: showMapView
-                          ? theme.spacing(3.5)
-                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={
-                          CURRENT_OPERATIONS_ICONS[0]?.path ||
-                          "/images/icons/current_ops.svg"
-                        }
-                        alt={
-                          CURRENT_OPERATIONS_ICONS[0]?.alt ||
+                  {/* Theme-specific icon for non-baseline strategies */}
+                  {strategy.theme && strategy.theme !== "baseline" ? (
+                    <>
+                      {/* Theme icon (Groundwater/Environmental) */}
+                      <InfoTooltip
+                        description={getThemeIconDescription(
+                          strategy.theme,
+                          strategy.value,
+                        )}
+                        placement="top"
+                      >
+                        <Box
+                          sx={{
+                            width: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            height: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {getThemeIcon(strategy.theme)}
+                        </Box>
+                      </InfoTooltip>
+
+                      {/* Land use icon for non-baseline */}
+                      <InfoTooltip
+                        description="2020 LandIQ land use"
+                        placement="top"
+                      >
+                        <Box
+                          sx={{
+                            width: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            height: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/images/icons/land_use.svg"
+                            alt="2020 Land use"
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </Box>
+                      </InfoTooltip>
+
+                      {/* TUCP icon for non-baseline (most have TUCPs) */}
+                      <InfoTooltip
+                        description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                        placement="top"
+                      >
+                        <Box
+                          sx={{
+                            width: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            height: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src="/images/icons/tucp.svg"
+                            alt="TUCPs allowed"
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </Box>
+                      </InfoTooltip>
+                    </>
+                  ) : (
+                    <>
+                      {/* Baseline: Current operations icon */}
+                      <InfoTooltip
+                        description={
+                          CURRENT_OPERATIONS_ICONS[0]?.description ||
                           "Current operations"
                         }
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
+                        placement="top"
+                      >
+                        <Box
+                          sx={{
+                            width: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            height: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              CURRENT_OPERATIONS_ICONS[0]?.path ||
+                              "/images/icons/current_ops.svg"
+                            }
+                            alt={
+                              CURRENT_OPERATIONS_ICONS[0]?.alt ||
+                              "Current operations"
+                            }
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </Box>
+                      </InfoTooltip>
 
-                  {/* Land use icon - different for historical strategy */}
-                  <InfoTooltip
-                    description={
-                      strategy.value === "current-ops-historical-ag"
-                        ? "Historical land use (2004-2013)"
-                        : CURRENT_OPERATIONS_ICONS[1]?.description ||
-                          "Current land use"
-                    }
-                    placement="top"
-                  >
-                    <Box
-                      sx={{
-                        width: showMapView
-                          ? theme.spacing(3.5)
-                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                        height: showMapView
-                          ? theme.spacing(3.5)
-                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={
+                      {/* Baseline: Land use icon - different for historical strategy */}
+                      <InfoTooltip
+                        description={
                           strategy.value === "current-ops-historical-ag"
-                            ? "/images/icons/land_use_prev.svg"
-                            : CURRENT_OPERATIONS_ICONS[1]?.path ||
-                              "/images/icons/land_use.svg"
-                        }
-                        alt={
-                          strategy.value === "current-ops-historical-ag"
-                            ? "Historical land use"
-                            : CURRENT_OPERATIONS_ICONS[1]?.alt ||
+                            ? "Historical land use (2004-2013)"
+                            : CURRENT_OPERATIONS_ICONS[1]?.description ||
                               "Current land use"
                         }
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                  {/* TUCP icon - show for strategies that include TUCPs */}
-                  {strategy.value !== "current-ops-wo-tucp" && (
-                    <InfoTooltip
-                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
-                      placement="top"
-                    >
-                      <Box
-                        sx={{
-                          width: showMapView
-                            ? theme.spacing(3.5)
-                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                          height: showMapView
-                            ? theme.spacing(3.5)
-                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                          cursor: "pointer",
-                        }}
+                        placement="top"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="/images/icons/tucp.svg"
-                          alt="TUCPs allowed"
-                          style={{ width: "100%", height: "100%" }}
-                        />
-                      </Box>
-                    </InfoTooltip>
-                  )}
-                  {/* No TUCP icon - show for strategies without TUCPs */}
-                  {strategy.value === "current-ops-wo-tucp" && (
-                    <InfoTooltip description="Without TUCPs" placement="top">
-                      <Box
-                        sx={{
-                          width: showMapView
-                            ? theme.spacing(3.5)
-                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                          height: showMapView
-                            ? theme.spacing(3.5)
-                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                          cursor: "pointer",
-                        }}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="/images/icons/no_tucp.svg"
-                          alt="Without TUCPs"
-                          style={{ width: "100%", height: "100%" }}
-                        />
-                      </Box>
-                    </InfoTooltip>
+                        <Box
+                          sx={{
+                            width: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            height: showMapView
+                              ? theme.spacing(3.5)
+                              : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                            cursor: "pointer",
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={
+                              strategy.value === "current-ops-historical-ag"
+                                ? "/images/icons/land_use_prev.svg"
+                                : CURRENT_OPERATIONS_ICONS[1]?.path ||
+                                  "/images/icons/land_use.svg"
+                            }
+                            alt={
+                              strategy.value === "current-ops-historical-ag"
+                                ? "Historical land use"
+                                : CURRENT_OPERATIONS_ICONS[1]?.alt ||
+                                  "Current land use"
+                            }
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </Box>
+                      </InfoTooltip>
+
+                      {/* Baseline: TUCP icon - show for strategies that include TUCPs */}
+                      {strategy.value !== "current-ops-wo-tucp" &&
+                        strategy.value !== "usbr-2024-wo-tucp" && (
+                          <InfoTooltip
+                            description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                            placement="top"
+                          >
+                            <Box
+                              sx={{
+                                width: showMapView
+                                  ? theme.spacing(3.5)
+                                  : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                height: showMapView
+                                  ? theme.spacing(3.5)
+                                  : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                                cursor: "pointer",
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src="/images/icons/tucp.svg"
+                                alt="TUCPs allowed"
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </Box>
+                          </InfoTooltip>
+                        )}
+
+                      {/* Baseline: No TUCP icon - show for strategies without TUCPs */}
+                      {(strategy.value === "current-ops-wo-tucp" ||
+                        strategy.value === "usbr-2024-wo-tucp") && (
+                        <InfoTooltip description="Without TUCPs" placement="top">
+                          <Box
+                            sx={{
+                              width: showMapView
+                                ? theme.spacing(3.5)
+                                : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                              height: showMapView
+                                ? theme.spacing(3.5)
+                                : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                              cursor: "pointer",
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src="/images/icons/no_tucp.svg"
+                              alt="Without TUCPs"
+                              style={{ width: "100%", height: "100%" }}
+                            />
+                          </Box>
+                        </InfoTooltip>
+                      )}
+                    </>
                   )}
                 </Box>
 

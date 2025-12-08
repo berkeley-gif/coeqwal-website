@@ -1,0 +1,240 @@
+/**
+ * Animation Coordinator
+ *
+ * Centralized management for map animations and scroll operations.
+ * Prevents conflicts between concurrent animations and scroll hooks.
+ * Uses constants from scrollChoreographyConstants for consistent timing.
+ */
+
+import { ANIMATION_DURATION } from "./scrollChoreographyConstants"
+
+type AnimationId = string
+type CleanupFn = () => void
+
+interface AnimationState {
+  frameId: number | null
+  cleanup?: CleanupFn
+  startTime: number
+}
+
+interface StartOptions {
+  duration?: number
+  onComplete?: () => void
+  onCancel?: () => void
+}
+
+interface ScrollOptions {
+  behavior?: ScrollBehavior
+  lockDuration?: number
+}
+
+class AnimationCoordinator {
+  private animations = new Map<AnimationId, AnimationState>()
+  private scrollLocked = false
+  private scrollLockTimeout: ReturnType<typeof setTimeout> | null = null
+
+  // ============================================
+  // Animation Management
+  // ============================================
+
+  /**
+   * Start an animation. Automatically cancels any existing animation with same ID.
+   * @param id Unique identifier for this animation
+   * @param animateFn Function called each frame. Receives (timestamp, elapsed). Return false to stop.
+   * @param options Optional duration, onComplete, onCancel callbacks
+   */
+  start(
+    id: AnimationId,
+    animateFn: (frame: number, elapsed: number) => boolean,
+    options?: StartOptions,
+  ): void {
+    this.cancel(id) // Cancel existing animation with this ID
+
+    const startTime = performance.now()
+    const state: AnimationState = { frameId: null, startTime }
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime
+
+      // Check if animation was cancelled
+      if (!this.animations.has(id)) {
+        options?.onCancel?.()
+        return
+      }
+
+      // Check duration limit
+      if (options?.duration && elapsed >= options.duration) {
+        this.animations.delete(id)
+        options?.onComplete?.()
+        return
+      }
+
+      // Run animation frame - catch any errors to prevent crashes
+      let shouldContinue = false
+      try {
+        shouldContinue = animateFn(now, elapsed)
+      } catch (e) {
+        console.warn(`[AnimationCoordinator] Animation ${id} error:`, e)
+        shouldContinue = false
+      }
+
+      if (shouldContinue) {
+        state.frameId = requestAnimationFrame(tick)
+        this.animations.set(id, state)
+      } else {
+        this.animations.delete(id)
+        options?.onComplete?.()
+      }
+    }
+
+    state.frameId = requestAnimationFrame(tick)
+    this.animations.set(id, state)
+  }
+
+  /**
+   * Cancel a specific animation by ID
+   */
+  cancel(id: AnimationId): void {
+    const state = this.animations.get(id)
+    if (state) {
+      if (state.frameId) cancelAnimationFrame(state.frameId)
+      state.cleanup?.()
+      this.animations.delete(id)
+    }
+  }
+
+  /**
+   * Cancel all animations matching a prefix
+   * e.g., cancelGroup("layer-") cancels all layer animations
+   */
+  cancelGroup(prefix: string): void {
+    for (const id of this.animations.keys()) {
+      if (id.startsWith(prefix)) {
+        this.cancel(id)
+      }
+    }
+  }
+
+  /**
+   * Cancel all running animations
+   */
+  cancelAll(): void {
+    for (const id of this.animations.keys()) {
+      this.cancel(id)
+    }
+  }
+
+  /**
+   * Check if a specific animation is running
+   */
+  isRunning(id: AnimationId): boolean {
+    return this.animations.has(id)
+  }
+
+  /**
+   * Get count of running animations
+   */
+  getRunningCount(): number {
+    return this.animations.size
+  }
+
+  // ============================================
+  // Scroll Coordination
+  // ============================================
+
+  /**
+   * Lock programmatic scrolling temporarily.
+   * Prevents scroll hooks from fighting each other.
+   * @param durationMs How long to lock (default from ANIMATION_DURATION.SCROLL_LOCK)
+   */
+  lockScroll(durationMs: number = ANIMATION_DURATION.SCROLL_LOCK): void {
+    this.scrollLocked = true
+
+    if (this.scrollLockTimeout) {
+      clearTimeout(this.scrollLockTimeout)
+    }
+
+    this.scrollLockTimeout = setTimeout(() => {
+      this.scrollLocked = false
+      this.scrollLockTimeout = null
+    }, durationMs)
+  }
+
+  /**
+   * Manually unlock scroll (e.g., after animation completes early)
+   */
+  unlockScroll(): void {
+    this.scrollLocked = false
+    if (this.scrollLockTimeout) {
+      clearTimeout(this.scrollLockTimeout)
+      this.scrollLockTimeout = null
+    }
+  }
+
+  /**
+   * Check if scroll is currently locked
+   */
+  isScrollLocked(): boolean {
+    return this.scrollLocked
+  }
+
+  /**
+   * Perform a scroll operation with automatic lock
+   * @param target Y position to scroll to
+   * @param options Scroll behavior and lock duration
+   */
+  scrollTo(target: number, options?: ScrollOptions): void {
+    const lockDuration = options?.lockDuration ?? ANIMATION_DURATION.SCROLL_LOCK
+    this.lockScroll(lockDuration)
+
+    window.scrollTo({
+      top: target,
+      behavior: options?.behavior ?? "smooth",
+    })
+  }
+
+  // ============================================
+  // Map-specific helpers
+  // ============================================
+
+  /**
+   * Get a fresh, valid map instance or null.
+   * Safely handles cases where map is unmounted or invalid.
+   */
+  getValidMap(
+    mapRef: React.RefObject<{ getMap: () => mapboxgl.Map } | null> | null,
+  ): mapboxgl.Map | null {
+    try {
+      const instance = mapRef?.current?.getMap?.()
+      if (instance && typeof instance.getLayer === "function") {
+        return instance
+      }
+    } catch {
+      // Map is invalid or unmounted
+    }
+    return null
+  }
+
+  /**
+   * Safely check if a layer exists on the map
+   */
+  hasLayer(
+    mapRef: React.RefObject<{ getMap: () => mapboxgl.Map } | null> | null,
+    layerId: string,
+  ): boolean {
+    const map = this.getValidMap(mapRef)
+    if (!map) return false
+    try {
+      return !!map.getLayer(layerId)
+    } catch {
+      return false
+    }
+  }
+}
+
+// Singleton instance - use this throughout the map components
+export const coordinator = new AnimationCoordinator()
+
+// Also export the class for testing purposes
+export { AnimationCoordinator }
+
