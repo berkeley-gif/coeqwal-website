@@ -238,7 +238,8 @@ export function getEquityInfo(gini: number): EquityInfo {
     return {
       level: "high",
       label: "Highly equitable",
-      description: "Outcomes are distributed fairly evenly across all locations",
+      description:
+        "Outcomes are distributed fairly evenly across all locations",
     }
   } else if (gini < 0.4) {
     return {

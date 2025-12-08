@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import { useComparisonData } from "./useComparisonData"
@@ -15,6 +15,24 @@ export default function ComparisonView() {
   const theme = useTheme()
   const { data, axes, lineColors, isLoading, error, hasData } =
     useComparisonData()
+
+  // Track which scenario is highlighted (clicked)
+  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
+    null,
+  )
+
+  // Update data with highlighted state
+  const highlightedData = useMemo(() => {
+    return data.map((scenario) => ({
+      ...scenario,
+      highlighted: scenario.id === highlightedScenario,
+    }))
+  }, [data, highlightedScenario])
+
+  // Toggle highlight on click
+  const handleScenarioClick = (scenarioId: string) => {
+    setHighlightedScenario((prev) => (prev === scenarioId ? null : scenarioId))
+  }
 
   // Loading state
   if (isLoading) {
@@ -143,43 +161,59 @@ export default function ComparisonView() {
             draggable arrows on each axis to filter scenarios by brushing
             specific outcome ranges.
           </Typography>
-          {/* Scenario legend */}
+          {/* Scenario legend - clickable, organized in 3 columns */}
           <Box
             sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1.5,
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 1,
               mt: 1,
             }}
           >
-            {data.map((scenario, index) => (
-              <Box
-                key={scenario.id}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                }}
-              >
+            {data.map((scenario, index) => {
+              const isHighlighted = highlightedScenario === scenario.id
+              return (
                 <Box
+                  key={scenario.id}
+                  onClick={() => handleScenarioClick(scenario.id)}
                   sx={{
-                    width: 12,
-                    height: 3,
-                    backgroundColor: lineColors[index],
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    cursor: "pointer",
+                    padding: "4px 8px",
                     borderRadius: 1,
-                  }}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: lineColors[index],
-                    fontWeight: 500,
+                    backgroundColor: isHighlighted
+                      ? theme.palette.grey[100]
+                      : "transparent",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[50],
+                    },
                   }}
                 >
-                  {scenario.name}
-                </Typography>
-              </Box>
-            ))}
+                  <Box
+                    sx={{
+                      width: 20,
+                      height: isHighlighted ? 4 : 3,
+                      backgroundColor: lineColors[index],
+                      borderRadius: 1,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.primary,
+                      fontWeight: isHighlighted ? 600 : 400,
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    {scenario.name}
+                  </Typography>
+                </Box>
+              )
+            })}
           </Box>
         </Box>
 
@@ -207,7 +241,7 @@ export default function ComparisonView() {
           >
             <Box sx={{ flex: 1, minHeight: 0 }}>
               <VerticalParallelLinePlot
-                data={data}
+                data={highlightedData}
                 axes={axes}
                 responsive={true}
                 showBaseline={false}
@@ -217,6 +251,7 @@ export default function ComparisonView() {
                   background: theme.palette.grey[50],
                 }}
                 lineColors={lineColors}
+                onLineClick={(scenario) => handleScenarioClick(scenario.id)}
               />
             </Box>
           </Box>

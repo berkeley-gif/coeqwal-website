@@ -129,15 +129,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       if (elementType === "circle") {
         // Dots: Full opacity when active, faint when filtered
         return passesAllFilters
-          ? 1.0 // Active dots: always full opacity (highlighted or not)
+          ? 1.0 // Active dots: full opacity
           : 0.15 // Filtered dots: faint but visible for experimentation
       } else {
-        // Lines: Two distinct opacity levels - active vs inactive
+        // Lines: Full opacity when active, faint when filtered
         return passesAllFilters
-          ? scenario.highlighted
-            ? 0.7
-            : 0.35 // Active lines: highlighted=70%, normal=35% (more elegant)
-          : 0.08 // Filtered lines: faint but visible for experimentation
+          ? 1.0 // Active lines: full opacity (thickness shows highlight)
+          : 0.1 // Filtered lines: faint
       }
     },
     [axes],
@@ -749,8 +747,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", lineColor)
             .attr(
               "stroke-width",
-              passesAllFilters ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-            ) // More elegant thickness for active scenarios
+              passesAllFilters ? (d.highlighted ? 4 : 1.5) : 1.0,
+            ) // Highlighted lines are much thicker
             .attr("opacity", lineOpacity) // Lines semi-transparent
             .style("cursor", onLineClick ? "pointer" : "default")
             .on("click", function () {
@@ -778,7 +776,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("fill", lineColor)
               .attr("stroke", "white")
               .attr("stroke-width", 1.5) // Original width
-              .attr("r", d.highlighted ? 5 : 4) // Original sizes
+              .attr("r", d.highlighted ? 7 : 4) // Highlighted dots are larger
               .attr("opacity", circleOpacity) // Dots opaque
               .style("cursor", onLineClick ? "pointer" : "default")
               .on("click", function () {

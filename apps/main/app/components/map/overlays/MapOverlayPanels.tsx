@@ -123,8 +123,9 @@ export default function MapOverlayPanels() {
   )
 
   // Panel pointer events - disable when not visible
-  const strategyInfoPointerEvents = useTransform(strategyInfoPanelOpacity, (v) =>
-    v > 0.1 ? "auto" : "none",
+  const strategyInfoPointerEvents = useTransform(
+    strategyInfoPanelOpacity,
+    (v) => (v > 0.1 ? "auto" : "none"),
   )
   const keyOperationsPointerEvents = useTransform(
     keyOperationsPanelOpacity,
