@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "@repo/motion"
+import { motion, AnimatePresence } from "@repo/motion"
 import { Typography, useTheme } from "@repo/ui/mui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
@@ -8,11 +8,13 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
 
+
 export default function SmoothTabs() {
-  const { state, tabsRef } = useTabs()
+  const { state, tabsRef, isInTabsArea } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const theme = useTheme()
+  const MotionTypography = motion(Typography)
 
   const onSelect = (tab: TabKey | undefined) => {
     if (tab && tab !== activeTab) {
@@ -91,29 +93,67 @@ export default function SmoothTabs() {
                   }}
                 />
               )}
-              {selected && (
-                <Typography
-                  variant="h6"
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "1.6rem",
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {label}
-                </Typography>
-              )}
-              {!selected && (
-                <Typography
-                  variant="h6"
-                  style={{
-                    fontWeight: 600,
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {label}
-                </Typography>
-              )}
+              <motion.div
+                layout
+                animate={isInTabsArea ? "sticky" : "expanded"}
+                variants={{
+                  expanded: { gap: 8 },
+                  sticky: { gap: 0 }
+                }}
+              >
+                {selected && (
+                  <Typography
+                    variant="h5"
+                    style={{
+                      fontWeight: 600,
+                      fontSize: '1.6rem',
+                      textTransform: "capitalize",
+                      scale: '1.2'
+                    }}
+                  >
+                    {label}
+                  </Typography>
+
+
+                )}
+                {!selected && (
+                  <Typography
+                    variant="h5"
+                    style={{
+                      fontWeight: 600,
+                      fontSize: '1.6rem',
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                )}
+                <AnimatePresence initial={false}>
+                  {!isInTabsArea && (
+                    <motion.div
+                      key="tab-description"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.20, ease: "easeInOut" }}
+                      style={{
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        style={{
+                          textTransform: "none",
+                          margin: 20,
+                        }}
+                      >
+                        This is a paragraph about what this section is all about, and what
+                        people can expect to find here. You can find info about tools, links, etc. 
+                      </Typography>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </button>
           )
         })}
