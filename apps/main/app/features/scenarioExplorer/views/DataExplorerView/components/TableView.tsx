@@ -158,14 +158,14 @@ export default function TableView() {
         {/* Search */}
         <Box sx={{ minWidth: theme.spacing(35) }}>
           <StyledTextInput
-          placeholder="Search metrics..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          size="small"
+            placeholder="Search metrics..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            size="small"
             startIcon={<SearchIcon />}
             showClearButton={!!searchQuery}
             onClear={() => setSearchQuery("")}
-        />
+          />
         </Box>
 
         {/* Category Filter */}
