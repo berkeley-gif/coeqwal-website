@@ -9,6 +9,7 @@ import {
   convertSingleValueToChartData,
   mapShortCodeToDisplayName,
   type ScenarioTiersResponse,
+  type TierScores,
 } from "../api/tierApi"
 import { applyUIDisplayOverride } from "../constants/outcomeMappings"
 
@@ -31,6 +32,15 @@ interface OutcomeInfo {
   shortCode: string
   name: string
   displayName: string
+}
+
+/**
+ * Score data for an outcome, used for sorting and visualization
+ */
+export interface OutcomeScoreData extends TierScores {
+  displayName: string
+  shortCode: string
+  type: "single_value" | "multi_value"
 }
 
 // Constants - UI display names
@@ -85,6 +95,35 @@ const processScenarioData = (
   })
 
   return converted
+}
+
+/**
+ * Extract score data from scenario API response
+ * Used for sorting, parallel plots, and equity analysis
+ */
+const extractScoreData = (
+  scenarioData: ScenarioTiersResponse,
+  tierMapping: Record<string, string>,
+): Record<string, OutcomeScoreData> => {
+  const scores: Record<string, OutcomeScoreData> = {}
+
+  Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
+    const apiDisplayName = mapShortCodeToDisplayName(shortCode, tierMapping)
+    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
+
+    scores[uiDisplayName] = {
+      displayName: uiDisplayName,
+      shortCode,
+      type: tierInfo.type,
+      weighted_score: tierInfo.weighted_score ?? 0,
+      normalized_score: tierInfo.normalized_score ?? 0,
+      gini: tierInfo.gini ?? 0,
+      band_upper: tierInfo.band_upper ?? 0,
+      band_lower: tierInfo.band_lower ?? 0,
+    }
+  })
+
+  return scores
 }
 
 export function useOutcomeDefinitions() {
@@ -175,6 +214,12 @@ export function useScenarioTiers(scenarioId: string | null) {
     return processScenarioData(scenarioData, tierMapping, getThemeColors(theme))
   }, [scenarioData, tierMapping, theme])
 
+  // Extract score data for sorting and parallel plots
+  const scoreData = useMemo(() => {
+    if (!scenarioData || !tierMapping) return {}
+    return extractScoreData(scenarioData, tierMapping)
+  }, [scenarioData, tierMapping])
+
   // Show outcomes in the specific order, some are inactive
   const outcomeNames = useMemo(() => {
     if (!allTiers || !tierMapping) return []
@@ -214,6 +259,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 
   return {
     chartData,
+    scoreData, // New: contains weighted_score, normalized_score, gini, band_upper, band_lower
     rawData: scenarioData,
     outcomeNames,
     isLoading: scenarioLoading || tiersLoading || mappingLoading,
@@ -341,6 +387,43 @@ export function useMultipleScenarioTiers() {
     themeColors,
   ])
 
+  // Extract score data for all scenarios (for sorting and parallel plots)
+  const allScoreData = useMemo(() => {
+    if (!tierMapping) return {}
+
+    const result: Record<string, Record<string, OutcomeScoreData>> = {}
+
+    // Process each scenario
+    if (s0020Result.data)
+      result["s0020"] = extractScoreData(s0020Result.data, tierMapping)
+    if (s0021Result.data)
+      result["s0021"] = extractScoreData(s0021Result.data, tierMapping)
+    if (s0011Result.data)
+      result["s0011"] = extractScoreData(s0011Result.data, tierMapping)
+    if (s0023Result.data)
+      result["s0023"] = extractScoreData(s0023Result.data, tierMapping)
+    if (s0024Result.data)
+      result["s0024"] = extractScoreData(s0024Result.data, tierMapping)
+    if (s0025Result.data)
+      result["s0025"] = extractScoreData(s0025Result.data, tierMapping)
+    if (s0027Result.data)
+      result["s0027"] = extractScoreData(s0027Result.data, tierMapping)
+    if (s0029Result.data)
+      result["s0029"] = extractScoreData(s0029Result.data, tierMapping)
+
+    return result
+  }, [
+    s0020Result.data,
+    s0021Result.data,
+    s0011Result.data,
+    s0023Result.data,
+    s0024Result.data,
+    s0025Result.data,
+    s0027Result.data,
+    s0029Result.data,
+    tierMapping,
+  ])
+
   // Get outcome names from first scenario (structure should be same)
   const outcomeNames = useMemo(() => {
     if (!allTiers || !tierMapping) return []
@@ -427,6 +510,7 @@ export function useMultipleScenarioTiers() {
 
   return {
     allChartData,
+    allScoreData, // New: score data for all scenarios (for sorting/parallel plots)
     outcomeNames,
     isLoading,
     error,
