@@ -15,14 +15,14 @@ export default function BasinsLayer({
   riverBasinLabelsOpacity = 1,
 }: BasinsLayerProps) {
   const visibility = visible ? "visible" : "none"
-  
+
   // When outcome visualization is active, fade labels and outlines
   const isOutcomeActive = useIsOutcomeVisualizationActive()
-  
+
   // Fade outlines to 30% when outcome is active
   const outlineOpacity = isOutcomeActive ? 0.3 : 0.8
   const haloOpacity = isOutcomeActive ? 0.3 : 1
-  
+
   // Hide all labels when outcome is active
   const labelsOpacity = isOutcomeActive ? 0 : riverBasinLabelsOpacity
 
