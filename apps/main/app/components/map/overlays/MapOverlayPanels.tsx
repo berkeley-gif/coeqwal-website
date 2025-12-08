@@ -189,12 +189,6 @@ export default function MapOverlayPanels() {
               mt: 3,
             }}
           >
-            <Typography
-              variant="body1"
-              sx={{ fontSize: "1.125rem !important", mb: 0.5 }}
-            >
-              scroll to learn more
-            </Typography>
             <Box
               component="span"
               sx={{
