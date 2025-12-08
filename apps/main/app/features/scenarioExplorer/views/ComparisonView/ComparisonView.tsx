@@ -13,7 +13,8 @@ import ScenarioPanel from "../MapView/components/ScenarioPanel"
  */
 export default function ComparisonView() {
   const theme = useTheme()
-  const { data, axes, isLoading, error, hasData } = useComparisonData()
+  const { data, axes, lineColors, isLoading, error, hasData } =
+    useComparisonData()
 
   // Loading state
   if (isLoading) {
@@ -133,17 +134,53 @@ export default function ComparisonView() {
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
             Scenario comparison
           </Typography>
-          <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
-            Comparing three scenarios:{" "}
-            <strong style={{ color: "#ff7f0e" }}>Current operations</strong>,{" "}
-            <strong style={{ color: "#2196f3" }}>Current ops w/o TUCPs</strong>,
-            and{" "}
-            <strong style={{ color: "#4caf50" }}>
-              Current ops w/ historical ag
-            </strong>
-            . Use the draggable arrows on each axis to filter scenarios by
-            brushing specific outcome ranges.
+          <Typography
+            variant="body2"
+            component="div"
+            sx={{ color: theme.palette.grey[600], mb: 1 }}
+          >
+            Comparing {data.length} scenarios across key outcomes. Use the
+            draggable arrows on each axis to filter scenarios by brushing
+            specific outcome ranges.
           </Typography>
+          {/* Scenario legend */}
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.5,
+              mt: 1,
+            }}
+          >
+            {data.map((scenario, index) => (
+              <Box
+                key={scenario.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 3,
+                    backgroundColor: lineColors[index],
+                    borderRadius: 1,
+                  }}
+                />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: lineColors[index],
+                    fontWeight: 500,
+                  }}
+                >
+                  {scenario.name}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
         </Box>
 
         {/* Chart container */}
@@ -179,11 +216,7 @@ export default function ComparisonView() {
                   highlighted: theme.palette.blue.darkest,
                   background: theme.palette.grey[50],
                 }}
-                lineColors={[
-                  "#ff7f0e", // s0020 - orange (Current operations)
-                  "#2196f3", // s0021 - bright blue (Current ops w/o TUCPs)
-                  "#4caf50", // s0011 - green (Current ops w/ historical ag)
-                ]}
+                lineColors={lineColors}
               />
             </Box>
           </Box>
