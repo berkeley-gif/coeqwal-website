@@ -44,7 +44,7 @@ export function CallResponsePanel({
   isVisible,
   delay = 0,
   sx = {},
-  disableHighlight = false,
+  disableHighlight = true,
   minHeight = "100vh",
   alignItems = "center",
 }: CallResponsePanelProps) {

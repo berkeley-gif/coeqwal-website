@@ -821,7 +821,7 @@ export function KeyOutcomesPanel({
                       }
                       values={getTierValues(outcome)}
                       variant="bars"
-                      size={45}
+                      size={60}
                     />
                     <Box
                       sx={{
@@ -1094,7 +1094,7 @@ export function KeyOutcomesPanel({
                       }
                       values={getTierValues(outcome)}
                       variant="dots"
-                      size={45}
+                      size={60}
                     />
                     <Box
                       sx={{
