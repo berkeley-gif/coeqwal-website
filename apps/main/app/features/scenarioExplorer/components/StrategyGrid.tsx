@@ -458,7 +458,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             display: { xs: "none", lg: "grid" },
             gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
             gap: theme.spacing(1),
-            pb: 1.5, // Padding below headers
+            pb: 0.5, // Reduced padding below headers
           }}
         >
           {outcomeNames.map(({ name, displayName }) => {
@@ -476,7 +476,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 0.5,
+                  gap: 0,
                 }}
               >
                 {/* Outcome label */}
@@ -513,7 +513,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 0.5,
+                    gap: 0.25,
+                    mt: -0.5, // Negative margin to reduce space between label and icons
                   }}
                 >
                   {/* Info icon button for tooltip */}
@@ -542,7 +543,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     }}
                     title="Click for outcome details"
                   >
-                    <InfoIcon sx={{ fontSize: 16 }} />
+                    <InfoIcon sx={{ fontSize: "1rem" }} />
                   </Box>
 
                   {/* Sort button */}
