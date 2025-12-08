@@ -8,7 +8,6 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
 
-
 export default function SmoothTabs() {
   const { state, tabsRef, isInTabsArea } = useTabs()
   const { activeTab } = state
@@ -98,7 +97,7 @@ export default function SmoothTabs() {
                 animate={isInTabsArea ? "sticky" : "expanded"}
                 variants={{
                   expanded: { gap: 8 },
-                  sticky: { gap: 0 }
+                  sticky: { gap: 0 },
                 }}
               >
                 {selected && (
@@ -106,22 +105,20 @@ export default function SmoothTabs() {
                     variant="h5"
                     style={{
                       fontWeight: 600,
-                      fontSize: '1.6rem',
+                      fontSize: "1.6rem",
                       textTransform: "capitalize",
-                      scale: '1.2'
+                      scale: "1.2",
                     }}
                   >
                     {label}
                   </Typography>
-
-
                 )}
                 {!selected && (
                   <Typography
                     variant="h5"
                     style={{
                       fontWeight: 600,
-                      fontSize: '1.6rem',
+                      fontSize: "1.6rem",
                       textTransform: "capitalize",
                     }}
                   >
@@ -135,7 +132,7 @@ export default function SmoothTabs() {
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.20, ease: "easeInOut" }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
                       style={{
                         overflow: "hidden",
                       }}
@@ -147,8 +144,9 @@ export default function SmoothTabs() {
                           margin: 20,
                         }}
                       >
-                        This is a paragraph about what this section is all about, and what
-                        people can expect to find here. You can find info about tools, links, etc. 
+                        This is a paragraph about what this section is all
+                        about, and what people can expect to find here. You can
+                        find info about tools, links, etc.
                       </Typography>
                     </motion.div>
                   )}

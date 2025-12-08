@@ -11,12 +11,11 @@ export function useMarkTabsInView(stickyOffsetPx: number = 0) {
     if (!tabsEl) return
 
     const update = () => {
-
       const tabsRect = tabsEl.getBoundingClientRect()
 
       // ✅ Tabs are "in view" if they are stuck at their sticky offset
       const inArea = Math.abs(tabsRect.top - stickyOffsetPx) <= 1
-      console.log('window.scrollY', window.scrollY)
+      console.log("window.scrollY", window.scrollY)
       setIsInTabsArea(inArea)
     }
 
