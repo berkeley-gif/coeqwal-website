@@ -34,7 +34,7 @@ import {
   useIsOutcomeVisualizationActive,
   type SectionId,
 } from "../store"
-import { useScroll, useTransform, motion } from "@repo/motion"
+import { useTransform, motion, useMotionValue } from "@repo/motion"
 import {
   useLearnScrollama,
   SCROLLAMA_CONFIG,
@@ -52,6 +52,36 @@ export default function MapOverlayPanels() {
 
   // Ref for multi-step sticky animation (Framer Motion)
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
+  
+  // Use MutationObserver to detect when the element is added to DOM
+  const [isScenarioIntroMounted, setIsScenarioIntroMounted] = useState(false)
+  
+  useEffect(() => {
+    // Check if element already exists
+    const checkElement = () => {
+      const element = document.getElementById('scenario-intro-wrapper')
+      if (element) {
+        // Store the element in the ref for scroll tracking
+        scenarioIntroRef.current = element as HTMLDivElement
+        setIsScenarioIntroMounted(true)
+        return true
+      }
+      return false
+    }
+    
+    if (checkElement()) return
+    
+    // Otherwise observe DOM for the element
+    const observer = new MutationObserver(() => {
+      if (checkElement()) {
+        observer.disconnect()
+      }
+    })
+    
+    observer.observe(document.body, { childList: true, subtree: true })
+    
+    return () => observer.disconnect()
+  }, [])
 
   // Refs for strategy info tooltip
   const strategyInfoRef = useRef<HTMLDivElement>(null)
@@ -89,10 +119,45 @@ export default function MapOverlayPanels() {
 
   // Multi-step sticky choreography:
   // Tracks scroll through the scenario-intro-wrapper section
-  const { scrollYProgress: scenarioIntroProgress } = useScroll({
-    target: scenarioIntroRef,
-    offset: ["start end", "end start"],
-  })
+  // We use manual scroll tracking because useScroll doesn't work reliably
+  // when the ref isn't available at mount time (which happens due to conditional rendering)
+  const scenarioIntroProgress = useMotionValue(0)
+  
+  useEffect(() => {
+    if (!isScenarioIntroMounted || !scenarioIntroRef.current) return
+    
+    const updateProgress = () => {
+      const element = scenarioIntroRef.current
+      if (!element) return
+      
+      const rect = element.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const elementHeight = element.offsetHeight
+      
+      // Progress calculation matching Framer Motion's ["start end", "end start"] offset:
+      // 0 when element top hits viewport bottom
+      // 1 when element bottom hits viewport top
+      const scrollStart = -viewportHeight // element top at viewport bottom
+      const scrollEnd = elementHeight // element bottom at viewport top
+      const totalRange = scrollEnd - scrollStart
+      const currentPosition = -rect.top // How far past scrollStart we are
+      
+      const progress = Math.max(0, Math.min(1, currentPosition / totalRange))
+      scenarioIntroProgress.set(progress)
+    }
+    
+    // Initial update
+    updateProgress()
+    
+    // Update on scroll
+    window.addEventListener("scroll", updateProgress, { passive: true })
+    window.addEventListener("resize", updateProgress, { passive: true })
+    
+    return () => {
+      window.removeEventListener("scroll", updateProgress)
+      window.removeEventListener("resize", updateProgress)
+    }
+  }, [isScenarioIntroMounted, scenarioIntroProgress])
 
   // Animate paragraph position: starts at 45vh (midpoint), moves to 15vh (top)
   const paragraphTop = useTransform(
@@ -583,7 +648,6 @@ export default function MapOverlayPanels() {
         */}
         <Step data={"scenario-intro" as SectionId}>
           <Box
-            ref={scenarioIntroRef}
             id="scenario-intro-wrapper"
             sx={{
               minHeight: "550vh",
