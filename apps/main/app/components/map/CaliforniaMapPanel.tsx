@@ -182,7 +182,28 @@ export default function CaliforniaMapPanel({
       if (onMapReadyCalledRef.current) return
       onMapReadyCalledRef.current = true
 
-      // Step 1: Make all our layers visible to trigger tile loading
+      // Step 1: Immediately hide all layers and set opacity to 0
+      // This prevents any visual flash from stale layer state
+      MAPBOX_LAYER_IDS.forEach((layerId) => {
+        try {
+          if (mapboxInstance.getLayer(layerId)) {
+            mapboxInstance.setLayoutProperty(layerId, "visibility", "none")
+            // Also reset opacity to 0 to prevent flash when visibility changes
+            const layer = mapboxInstance.getLayer(layerId)
+            if (layer?.type === "symbol") {
+              mapboxInstance.setPaintProperty(layerId, "text-opacity", 0)
+            } else if (layer?.type === "fill") {
+              mapboxInstance.setPaintProperty(layerId, "fill-opacity", 0)
+            } else if (layer?.type === "line") {
+              mapboxInstance.setPaintProperty(layerId, "line-opacity", 0)
+            }
+          }
+        } catch {
+          // Layer might not exist
+        }
+      })
+
+      // Step 2: Trigger tile loading by briefly making layers visible (but with 0 opacity)
       MAPBOX_LAYER_IDS.forEach((layerId) => {
         try {
           if (mapboxInstance.getLayer(layerId)) {
@@ -193,9 +214,9 @@ export default function CaliforniaMapPanel({
         }
       })
 
-      // Step 2: Wait for idle event (all tiles loaded) or timeout
+      // Step 3: Wait for idle event (all tiles loaded) or timeout
       const onIdle = () => {
-        // Step 3: Reset layers to hidden (useMapLayers will properly show them)
+        // Step 4: Hide all layers again (useMapLayers will properly show them)
         MAPBOX_LAYER_IDS.forEach((layerId) => {
           try {
             if (mapboxInstance.getLayer(layerId)) {
@@ -206,7 +227,7 @@ export default function CaliforniaMapPanel({
           }
         })
 
-        // Step 4: Now we're truly ready
+        // Step 5: Now we're truly ready
         onMapReady?.()
       }
 
