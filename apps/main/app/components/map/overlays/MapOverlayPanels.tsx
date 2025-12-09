@@ -156,12 +156,8 @@ export default function MapOverlayPanels() {
     }
   }, [isScenarioIntroMounted, scenarioIntroProgress])
 
-  // Animate paragraph position: starts at 45vh (midpoint), moves to 15vh (top)
-  const paragraphTop = useTransform(
-    scenarioIntroProgress,
-    [0, 0.25, 0.4, 1],
-    ["45vh", "45vh", "15vh", "15vh"],
-  )
+  // Paragraph position: fixed at top (no animation, just scrolls naturally)
+  const paragraphTop = "15vh"
 
   // Panel opacity - fade in and stay visible
   const strategyInfoPanelOpacity = useTransform(
@@ -220,7 +216,7 @@ export default function MapOverlayPanels() {
     const unsubscribe = scenarioIntroProgress.on("change", (progress) => {
       // Clear outcome when scrolled past the KeyOutcomes section (> 0.90)
       // or scrolled before it (< 0.65)
-      if (progress > 0.90 || progress < 0.65) {
+      if (progress > 0.9 || progress < 0.65) {
         learnMapActions.setSelectedOutcome(null)
       }
     })
@@ -396,7 +392,7 @@ export default function MapOverlayPanels() {
         <Step data={"arrows" as SectionId}>
           <Box
             sx={{
-              minHeight: "120vh", // Extended to keep arrows visible longer
+              minHeight: "120vh", // keep arrows visible
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
