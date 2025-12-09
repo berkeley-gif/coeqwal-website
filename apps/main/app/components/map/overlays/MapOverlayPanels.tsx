@@ -265,9 +265,7 @@ export default function MapOverlayPanels() {
                 <Box component="span" sx={{ fontWeight: 600 }}>
                   Central Valley
                 </Box>{" "}
-                is a long, low valley that collects much of California&apos;s
-                water. This water is stored, divided, and transported to farms
-                and cities across the state.
+                is a long, low valley that collects much of California&apos;s water. This water is stored, divided, and transported to farms and cities across the state, supporting some of the most productive agricultural land in the country.
               </Typography>
             </CallResponsePanel>
           </Box>

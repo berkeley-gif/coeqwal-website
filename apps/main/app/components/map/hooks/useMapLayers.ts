@@ -66,7 +66,7 @@ const LAYER_GROUPS: Record<string, LayerSpec[]> = {
     },
   ],
   inflowWatersheds: [
-    { id: "inflow-watersheds", opacityProp: "fill-opacity", targetOpacity: 0.5 },
+    { id: "inflow-watersheds", opacityProp: "fill-opacity", targetOpacity: 0.4 },
   ],
 }
 
@@ -248,6 +248,11 @@ export function useMapLayers() {
 
     // ALWAYS apply ALL layer groups to their correct state
     Object.keys(LAYER_GROUPS).forEach((groupKey) => {
+      // Skip inflowWatersheds when entering rivers section - the rivers progress effect handles it
+      if (groupKey === "inflowWatersheds" && activeSection === "rivers") {
+        return
+      }
+
       const shouldBeVisible = !!currentConfig[groupKey as keyof typeof currentConfig]
 
       // On first run: set immediately (no animation)
@@ -279,8 +284,8 @@ export function useMapLayers() {
 
     try {
       if (mapInstance.getLayer("inflow-watersheds")) {
-        // Clamp opacity to valid range [0, 0.5]
-        const opacity = Math.max(0, Math.min(0.5, 0.5 * (1 - fadeProgress)))
+        // Clamp opacity to valid range [0, 0.4]
+        const opacity = Math.max(0, Math.min(0.4, 0.4 * (1 - fadeProgress)))
         mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", opacity)
       }
     } catch {
@@ -301,13 +306,61 @@ export function useMapLayers() {
       try {
         if (mapInstance.getLayer("inflow-watersheds")) {
           mapInstance.setLayoutProperty("inflow-watersheds", "visibility", "visible")
-          mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", 0.5)
+          mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", 0.4)
         }
       } catch {
         // Layer might not exist
       }
     }
   }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
+
+  // Hide water layer when leaving the delta section
+  // (The water layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
+  useEffect(() => {
+    if (!mapReady) return
+    if (activeSection === "delta") return // Still in delta, don't hide
+
+    const mapInstance = coordinator.getValidMap(map.mapRef)
+    if (!mapInstance) return
+
+    try {
+      if (mapInstance.getLayer("water")) {
+        // Fade out and hide
+        const startOpacity =
+          (mapInstance.getPaintProperty("water", "fill-opacity") as number) ?? 0
+
+        // Only fade out if currently visible
+        if (startOpacity > 0.01) {
+          const duration = FADE_DURATION
+          const startTime = performance.now()
+
+          const fadeOut = (currentTime: number) => {
+            const elapsed = currentTime - startTime
+            const progress = Math.min(elapsed / duration, 1)
+            const eased = 1 - Math.pow(1 - progress, 3)
+            const opacity = Math.max(0, startOpacity * (1 - eased))
+
+            try {
+              mapInstance.setPaintProperty("water", "fill-opacity", opacity)
+            } catch {
+              return
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(fadeOut)
+            } else {
+              // Hide completely when done
+              mapInstance.setLayoutProperty("water", "visibility", "none")
+            }
+          }
+
+          requestAnimationFrame(fadeOut)
+        }
+      }
+    } catch {
+      // Layer might not exist
+    }
+  }, [activeSection, map.mapRef, mapReady])
 
   return {
     activeSection,
