@@ -20,7 +20,7 @@ export function useLearnScrollama() {
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
     learnMapActions.setActiveSection(data)
-    
+
     // Clear outcome visualization when entering any section other than scenario-intro
     // This handles cases where user scrolls quickly past the exit trigger
     if (data !== "scenario-intro") {

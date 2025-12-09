@@ -321,8 +321,10 @@ export function useMapLayers() {
     try {
       if (mapInstance.getLayer("water")) {
         // Fade out and hide
-        const startOpacity =
+        // Clamp startOpacity to valid range [0, 1]
+        const rawOpacity =
           (mapInstance.getPaintProperty("water", "fill-opacity") as number) ?? 0
+        const startOpacity = Math.max(0, Math.min(1, rawOpacity))
 
         // Only fade out if currently visible
         if (startOpacity > 0.01) {
@@ -333,7 +335,8 @@ export function useMapLayers() {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
-            const opacity = Math.max(0, startOpacity * (1 - eased))
+            // Clamp opacity to valid range [0, 1]
+            const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
 
             try {
               mapInstance.setPaintProperty("water", "fill-opacity", opacity)
