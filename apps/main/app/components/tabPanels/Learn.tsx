@@ -38,8 +38,8 @@ export default function LearnPanel() {
         }}
       >
         {/* Text column */}
-        <Box id="textColumn" sx={{ width: "70%" }}>
-          <LeadingMarkerText title="Learn">
+        <Box id="textColumn" sx={{ width: "40%" }}>
+          <LeadingMarkerText title="Learn More">
             <div
               style={{
                 display: "flex",
@@ -47,28 +47,6 @@ export default function LearnPanel() {
                 gap: "15px",
               }}
             >
-              <Typography
-                variant="body1"
-                sx={{
-                  fontSize: "1.2rem",
-                  width: "40%",
-                }}
-                fontWeight={700}
-              >
-                Do you know that California has one of the most complex water
-                systems in the world?
-              </Typography>
-              <Typography
-                sx={{
-                  width: "60%",
-                }}
-                variant="body1"
-              >
-                Learn how hydroclimate affects water availability, how water
-                flows through California&apos;s Central Valley, the ways in
-                which we manage water to satisfy diverse needs, and why
-                inequities in water access persist.
-              </Typography>
             </div>
 
             <Box
@@ -87,7 +65,7 @@ export default function LearnPanel() {
                 marginTop: "40px",
               }}
             >
-              Learn more: How water moves through California →
+              How water moves through California →
             </Box>
             <Box
               component="a"
@@ -105,7 +83,7 @@ export default function LearnPanel() {
                 },
               }}
             >
-              Learn more: Climate change and California water →
+              Climate change and California water →
             </Box>
           </LeadingMarkerText>
         </Box>
