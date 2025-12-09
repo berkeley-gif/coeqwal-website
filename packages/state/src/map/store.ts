@@ -7,7 +7,7 @@ import { ViewState, MapboxMapRef, MapState } from "./types"
 
 // TODO: Add proper cleanup
 
-// We'll store the map instance outside the store for direct access
+// Storing the map instance outside the store for direct access
 // This avoids issues with read-only properties
 let mapInstance: MapboxMapRef | null = null
 

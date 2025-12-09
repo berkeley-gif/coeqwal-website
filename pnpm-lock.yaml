@@ -93,6 +93,9 @@ importers:
       next:
         specifier: ^15.2.1
         version: 15.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+      react-scrollama:
+        specifier: ^2.4.2
+        version: 2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       swr:
         specifier: ^2.3.6
         version: 2.3.6(react@19.1.0)
@@ -3401,6 +3404,15 @@ packages:
     peerDependencies:
       react: ^19.1.0
 
+  react-intersection-observer@9.16.0:
+    resolution: {integrity: sha512-w9nJSEp+DrW9KmQmeWHQyfaP6b03v+TdXynaoA964Wxt7mdR3An11z4NNCQgL4gKSK7y1ver2Fq+JKH6CWEzUA==}
+    peerDependencies:
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -3422,6 +3434,13 @@ packages:
         optional: true
       maplibre-gl:
         optional: true
+
+  react-scrollama@2.4.2:
+    resolution: {integrity: sha512-+A1iWB1VKf+F1MtuDa4e+LqOfzzL95WImNS7PN+stYmHq5pqaKLdi0OpkS9pixDLssYZq1dnR704ZT8jsvLc7A==}
+    engines: {node: '>=8', npm: '>=5'}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.2 || ^18.2.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.2 || ^18.2.0 || ^19.0.0
 
   react-transition-group@4.4.5:
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
@@ -7974,6 +7993,12 @@ snapshots:
       react: 19.1.0
       scheduler: 0.26.0
 
+  react-intersection-observer@9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+    optionalDependencies:
+      react-dom: 19.1.0(react@19.1.0)
+
   react-is@16.13.1: {}
 
   react-is@19.1.0: {}
@@ -7988,6 +8013,12 @@ snapshots:
       react-dom: 19.1.0(react@19.1.0)
     optionalDependencies:
       mapbox-gl: 3.11.0
+
+  react-scrollama@2.4.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      react-intersection-observer: 9.16.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   react-transition-group@4.4.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:

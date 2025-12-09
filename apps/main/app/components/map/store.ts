@@ -3,8 +3,9 @@
 /**
  * Learn Map Store
  *
- * Local Zustand store for the Learn section map choreography.
- * Uses direct Zustand import (not @repo/state) since this is app-specific.
+ * Central state management for the Learn section map choreography.
+ * SECTION_LAYERS is the single source of truth for what layers
+ * should be visible at each scroll position.
  */
 
 import { create } from "zustand"
@@ -28,10 +29,6 @@ export type SectionId =
   | "coeqwal"
   | "public-data"
   | "scenario-intro"
-  | "strategy-row"
-  | "key-operations"
-  | "key-outcomes"
-  | "scenario-summary"
   | "scenario-conclusion"
 
 export interface CameraView {
@@ -42,31 +39,28 @@ export interface CameraView {
   pitch?: number
 }
 
+/**
+ * Layer visibility configuration for a section.
+ * Each boolean controls whether that layer group should be visible.
+ * Missing = false (hidden).
+ */
 export interface SectionLayerConfig {
+  // Native Mapbox layers (controlled via useMapLayers)
   californiaLabel?: boolean
   centralValley?: boolean
-  basins?: boolean
   inflowWatersheds?: boolean
-  arrows?: boolean
+
+  // React component layers (controlled via props)
+  basins?: boolean
   rivers?: boolean
-  water?: boolean // Delta water layer
+  arrows?: boolean
+
+  // Camera position
   camera?: CameraView
 }
 
-interface LearnMapState {
-  activeSection: SectionId
-  riversProgress: number
-  arrowsOpacity: number
-  geocoderMarker: [number, number] | null
-  geocodingResetCounter: number // Incremented to trigger GeocodingPanel reset
-  selectedOutcome: string | null
-  isPanelsExpanded: boolean
-  /** When true, outcome visualization is active - fades other map elements */
-  isOutcomeVisualizationActive: boolean
-}
-
 // ============================================================================
-// Configuration
+// Camera presets
 // ============================================================================
 
 export const CALIFORNIA_VIEW: CameraView = {
@@ -86,99 +80,117 @@ export const CENTRAL_VALLEY_VIEW: CameraView = {
 }
 
 export const DELTA_VIEW: CameraView = {
-  longitude: -126,
+  longitude: -121.8,
   latitude: 38.12,
   zoom: 10,
   bearing: 0,
   pitch: 0,
 }
 
+// ============================================================================
+// Section layer configuration
+// ============================================================================
+
+/**
+ * SECTION_LAYERS: The single source of truth for layer visibility.
+ *
+ * Each section defines exactly which layers should be visible.
+ * The system compares current vs previous section and applies
+ * the differences with smooth animations.
+ *
+ * Layer groups:
+ * - californiaLabel: "California" text label on the map
+ * - centralValley: Central Valley outline + label
+ * - basins: Basin outlines + labels (React component)
+ * - inflowWatersheds: Mountain watershed fills
+ * - arrows: Inflow arrows (React component)
+ * - rivers: River lines + labels (React component)
+ */
 export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
+  // === Introduction ===
   california: {
     californiaLabel: true,
     camera: CALIFORNIA_VIEW,
   },
+
+  // === Central Valley ===
   "central-valley": {
     centralValley: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Basins ===
   basins: {
     basins: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Watersheds (basins + inflow fills) ===
   watersheds: {
     basins: true,
     inflowWatersheds: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Arrows (basins + inflow + arrows) ===
   arrows: {
     basins: true,
     inflowWatersheds: true,
     arrows: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Find Basin (geocoding) ===
   "find-basin": {
     basins: true,
     inflowWatersheds: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Rivers (basins + rivers, watersheds fade out during animation) ===
   rivers: {
     basins: true,
-    // inflowWatersheds fades out during rivers animation
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
+  // === Delta onwards - rivers stay visible ===
   delta: {
     basins: true,
     rivers: true,
-    // water: NOT auto-shown - only shown when user clicks "Go to Delta" button
-    camera: CENTRAL_VALLEY_VIEW, // Camera is controlled by DeltaInfoPanel button
+    camera: CENTRAL_VALLEY_VIEW,
   },
+
   distribution: {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
   calsim: {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
   coeqwal: {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
   "public-data": {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
+
   "scenario-intro": {
     basins: true,
     rivers: true,
     camera: CENTRAL_VALLEY_VIEW,
   },
-  "strategy-row": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-  "key-operations": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-  "key-outcomes": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-  "scenario-summary": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
+
   "scenario-conclusion": {
     basins: true,
     rivers: true,
@@ -187,34 +199,53 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
 }
 
 // ============================================================================
-// Store
+// State Interface
 // ============================================================================
 
-const initialState: LearnMapState = {
+interface LearnMapState {
+  activeSection: SectionId
+  riversProgress: number
+  geocoderMarker: [number, number] | null
+  geocodingResetCounter: number
+  selectedOutcome: string | null
+  isOutcomeVisualizationActive: boolean
+  isPanelsExpanded: boolean
+  mapReady: boolean
+  setMapReady: (ready: boolean) => void
+}
+
+const initialState: Omit<LearnMapState, "setMapReady"> = {
   activeSection: "california",
   riversProgress: 0,
-  arrowsOpacity: 0,
   geocoderMarker: null,
   geocodingResetCounter: 0,
   selectedOutcome: null,
-  isPanelsExpanded: false,
   isOutcomeVisualizationActive: false,
+  isPanelsExpanded: false,
+  mapReady: false,
 }
 
+// ============================================================================
+// Store
+// ============================================================================
+
 export const useLearnMapStore = create<LearnMapState>()(
-  immer(() => initialState),
+  immer((set) => ({
+    ...initialState,
+    setMapReady: (ready: boolean) => set({ mapReady: ready }),
+  })),
 )
 
-// Actions (outside store for better tree-shaking)
+// ============================================================================
+// Actions
+// ============================================================================
+
 export const learnMapActions = {
   setActiveSection: (section: SectionId) =>
     useLearnMapStore.setState({ activeSection: section }),
 
   setRiversProgress: (progress: number) =>
     useLearnMapStore.setState({ riversProgress: progress }),
-
-  setArrowsOpacity: (opacity: number) =>
-    useLearnMapStore.setState({ arrowsOpacity: opacity }),
 
   setGeocoderMarker: (marker: [number, number] | null) =>
     useLearnMapStore.setState({ geocoderMarker: marker }),
@@ -242,20 +273,18 @@ export const learnMapActions = {
 // Selectors
 // ============================================================================
 
+// Core state
 export const useActiveSection = (): SectionId =>
   useLearnMapStore((s) => s.activeSection)
 
-export const useRiversProgress = () => useLearnMapStore((s) => s.riversProgress)
+export const useRiversProgress = () =>
+  useLearnMapStore((s) => s.riversProgress)
 
-export const useArrowsOpacity = () => useLearnMapStore((s) => s.arrowsOpacity)
-
-export const useGeocoderMarker = () => useLearnMapStore((s) => s.geocoderMarker)
+export const useGeocoderMarker = () =>
+  useLearnMapStore((s) => s.geocoderMarker)
 
 export const useGeocodingResetCounter = () =>
   useLearnMapStore((s) => s.geocodingResetCounter)
-
-export const useIsPanelsExpanded = () =>
-  useLearnMapStore((s) => s.isPanelsExpanded)
 
 export const useSelectedOutcome = () =>
   useLearnMapStore((s) => s.selectedOutcome)
@@ -263,7 +292,15 @@ export const useSelectedOutcome = () =>
 export const useIsOutcomeVisualizationActive = () =>
   useLearnMapStore((s) => s.isOutcomeVisualizationActive)
 
-// Derived selectors
+export const useIsPanelsExpanded = () =>
+  useLearnMapStore((s) => s.isPanelsExpanded)
+
+export const useMapReady = () => useLearnMapStore((s) => s.mapReady)
+
+// Derived selectors - read directly from SECTION_LAYERS
+export const useLayerConfig = () =>
+  useLearnMapStore((s) => SECTION_LAYERS[s.activeSection])
+
 export const useShowBasins = () =>
   useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].basins)
 
@@ -273,12 +310,12 @@ export const useShowRivers = () =>
 export const useShowArrows = () =>
   useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].arrows)
 
-// Derived opacity for arrows - 1 when visible, 0 when not
-export const useDerivedArrowsOpacity = () =>
-  useLearnMapStore((s) => (SECTION_LAYERS[s.activeSection].arrows ? 1 : 0))
+export const useShowInflowWatersheds = () =>
+  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].inflowWatersheds)
 
 export const useCameraView = () =>
   useLearnMapStore((s) => SECTION_LAYERS[s.activeSection].camera)
 
-export const useLayerConfig = () =>
-  useLearnMapStore((s) => SECTION_LAYERS[s.activeSection])
+// Arrows opacity: 1 when visible, 0 when not
+export const useDerivedArrowsOpacity = () =>
+  useLearnMapStore((s) => (SECTION_LAYERS[s.activeSection].arrows ? 1 : 0))
