@@ -18,26 +18,20 @@ export function useLearnScrollama() {
    * Called when a step enters the viewport.
    * Updates the active section in the store.
    */
-  const onStepEnter = useCallback(
-    ({ data }: StepEvent<SectionId>) => {
-      learnMapActions.setActiveSection(data)
-    },
-    [],
-  )
+  const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
+    learnMapActions.setActiveSection(data)
+  }, [])
 
   /**
    * Called when a step exits the viewport.
    * Used for cleanup like resetting geocoding when leaving find-basin.
    */
-  const onStepExit = useCallback(
-    ({ data }: StepEvent<SectionId>) => {
-      // Reset geocoding when leaving find-basin section
-      if (data === "find-basin") {
-        learnMapActions.resetGeocoding()
-      }
-    },
-    [],
-  )
+  const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
+    // Reset geocoding when leaving find-basin section
+    if (data === "find-basin") {
+      learnMapActions.resetGeocoding()
+    }
+  }, [])
 
   /**
    * Called during scroll within a step that has progress tracking enabled.
@@ -71,4 +65,3 @@ export const SCROLLAMA_CONFIG = {
   /** Enable debug mode (set to true to see trigger line) */
   debug: false,
 } as const
-

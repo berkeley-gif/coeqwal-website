@@ -50,9 +50,7 @@ declare module "react-scrollama" {
    * Scrollama container component
    * Wraps Step components and provides scroll detection
    */
-  export function Scrollama<T = unknown>(
-    props: ScrollamaProps<T>,
-  ): JSX.Element
+  export function Scrollama<T = unknown>(props: ScrollamaProps<T>): JSX.Element
 
   /**
    * Step component
@@ -60,4 +58,3 @@ declare module "react-scrollama" {
    */
   export function Step<T = unknown>(props: StepProps<T>): JSX.Element
 }
-

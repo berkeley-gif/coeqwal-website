@@ -29,4 +29,3 @@ export function useIsLearnTabActive(): boolean {
   const activeTab = useActiveTabFromURL()
   return activeTab === "learn"
 }
-

@@ -103,7 +103,7 @@ const IntroSection = () => {
         }
       />
 
-{/*       <OneColumnPanel
+      {/*       <OneColumnPanel
         id="scenariosIntro"
         fullHeight={false}
         fullWidth

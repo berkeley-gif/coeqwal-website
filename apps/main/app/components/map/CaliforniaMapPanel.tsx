@@ -168,7 +168,7 @@ export default function CaliforniaMapPanel({
   const MAPBOX_LAYER_IDS = [
     "california-label",
     "central-valley-polygon",
-    "central-valley-polygon-halo", 
+    "central-valley-polygon-halo",
     "central-valley-label",
     "inflow-watersheds",
   ]
@@ -181,7 +181,7 @@ export default function CaliforniaMapPanel({
     const preloadAndNotify = (mapboxInstance: mapboxgl.Map) => {
       if (onMapReadyCalledRef.current) return
       onMapReadyCalledRef.current = true
-      
+
       // Step 1: Make all our layers visible to trigger tile loading
       MAPBOX_LAYER_IDS.forEach((layerId) => {
         try {
@@ -205,7 +205,7 @@ export default function CaliforniaMapPanel({
             // Ignore
           }
         })
-        
+
         // Step 4: Now we're truly ready
         onMapReady?.()
       }

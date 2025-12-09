@@ -35,10 +35,7 @@ import {
   type SectionId,
 } from "../store"
 import { useTransform, motion, useMotionValue } from "@repo/motion"
-import {
-  useLearnScrollama,
-  SCROLLAMA_CONFIG,
-} from "../hooks/useLearnScrollama"
+import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 export default function MapOverlayPanels() {
   const map = useMap()
@@ -52,14 +49,14 @@ export default function MapOverlayPanels() {
 
   // Ref for multi-step sticky animation (Framer Motion)
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
-  
+
   // Use MutationObserver to detect when the element is added to DOM
   const [isScenarioIntroMounted, setIsScenarioIntroMounted] = useState(false)
-  
+
   useEffect(() => {
     // Check if element already exists
     const checkElement = () => {
-      const element = document.getElementById('scenario-intro-wrapper')
+      const element = document.getElementById("scenario-intro-wrapper")
       if (element) {
         // Store the element in the ref for scroll tracking
         scenarioIntroRef.current = element as HTMLDivElement
@@ -68,18 +65,18 @@ export default function MapOverlayPanels() {
       }
       return false
     }
-    
+
     if (checkElement()) return
-    
+
     // Otherwise observe DOM for the element
     const observer = new MutationObserver(() => {
       if (checkElement()) {
         observer.disconnect()
       }
     })
-    
+
     observer.observe(document.body, { childList: true, subtree: true })
-    
+
     return () => observer.disconnect()
   }, [])
 
@@ -122,18 +119,18 @@ export default function MapOverlayPanels() {
   // We use manual scroll tracking because useScroll doesn't work reliably
   // when the ref isn't available at mount time (which happens due to conditional rendering)
   const scenarioIntroProgress = useMotionValue(0)
-  
+
   useEffect(() => {
     if (!isScenarioIntroMounted || !scenarioIntroRef.current) return
-    
+
     const updateProgress = () => {
       const element = scenarioIntroRef.current
       if (!element) return
-      
+
       const rect = element.getBoundingClientRect()
       const viewportHeight = window.innerHeight
       const elementHeight = element.offsetHeight
-      
+
       // Progress calculation matching Framer Motion's ["start end", "end start"] offset:
       // 0 when element top hits viewport bottom
       // 1 when element bottom hits viewport top
@@ -141,18 +138,18 @@ export default function MapOverlayPanels() {
       const scrollEnd = elementHeight // element bottom at viewport top
       const totalRange = scrollEnd - scrollStart
       const currentPosition = -rect.top // How far past scrollStart we are
-      
+
       const progress = Math.max(0, Math.min(1, currentPosition / totalRange))
       scenarioIntroProgress.set(progress)
     }
-    
+
     // Initial update
     updateProgress()
-    
+
     // Update on scroll
     window.addEventListener("scroll", updateProgress, { passive: true })
     window.addEventListener("resize", updateProgress, { passive: true })
-    
+
     return () => {
       window.removeEventListener("scroll", updateProgress)
       window.removeEventListener("resize", updateProgress)
@@ -330,7 +327,10 @@ export default function MapOverlayPanels() {
                 <Box component="span" sx={{ fontWeight: 600 }}>
                   Central Valley
                 </Box>{" "}
-                is a long, low valley that collects much of California&apos;s water. This water is stored, divided, and transported to farms and cities across the state, supporting some of the most productive agricultural land in the country.
+                is a long, low valley that collects much of California&apos;s
+                water. This water is stored, divided, and transported to farms
+                and cities across the state, supporting some of the most
+                productive agricultural land in the country.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -421,7 +421,9 @@ export default function MapOverlayPanels() {
             >
               <GeocodingPanel
                 basinsData={
-                  centralValleyBasins as FeatureCollection<Polygon | MultiPolygon>
+                  centralValleyBasins as FeatureCollection<
+                    Polygon | MultiPolygon
+                  >
                 }
                 onMarkerChange={learnMapActions.setGeocoderMarker}
                 resetTrigger={geocodingResetCounter}
@@ -744,7 +746,10 @@ export default function MapOverlayPanels() {
                           pointerEvents: "none",
                         }}
                       >
-                        <Box ref={strategyInfoRef} sx={{ pointerEvents: "auto" }}>
+                        <Box
+                          ref={strategyInfoRef}
+                          sx={{ pointerEvents: "auto" }}
+                        >
                           <StrategyInfoPanel
                             strategyValue="current-ops"
                             onTitleClick={() => setStrategyTooltipClosed(false)}
@@ -857,8 +862,9 @@ export default function MapOverlayPanels() {
                               >
                                 Key operations
                               </Box>
-                              These icons represent the key operational decisions
-                              that define this water management strategy.
+                              These icons represent the key operational
+                              decisions that define this water management
+                              strategy.
                               <Box
                                 component="span"
                                 sx={{
@@ -942,15 +948,16 @@ export default function MapOverlayPanels() {
                               >
                                 Key outcomes
                               </Box>
-                              These outcomes show how this strategy affects water
-                              supply, ecosystems, agriculture, and communities.
+                              These outcomes show how this strategy affects
+                              water supply, ecosystems, agriculture, and
+                              communities.
                               <Box
                                 component="span"
                                 sx={{ display: "block", mt: 1 }}
                               >
                                 Some outcomes record values from multiple
-                                locations in a bar chart that shows the number of
-                                locations in each tier. Other outcomes are
+                                locations in a bar chart that shows the number
+                                of locations in each tier. Other outcomes are
                                 recorded at a single location such as the Delta
                                 or Sacramento River.
                               </Box>
