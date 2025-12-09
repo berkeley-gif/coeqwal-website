@@ -162,25 +162,25 @@ export default function MapOverlayPanels() {
   // Panel opacity - fade in and stay visible
   const strategyInfoPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.32, 0.38],
+    [0.12, 0.18],
     [0, 1],
   )
 
   const keyOperationsPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.48, 0.54],
+    [0.28, 0.34],
     [0, 1],
   )
 
   const keyOutcomesPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.68, 0.74],
+    [0.48, 0.54],
     [0, 1],
   )
 
   const summaryPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.68, 0.74],
+    [0.48, 0.54],
     [0, 1],
   )
 
@@ -191,32 +191,32 @@ export default function MapOverlayPanels() {
   const keyOutcomesPointerEvents = "none" as const
   const summaryPointerEvents = "none" as const
 
-  // Tooltip opacity - fade in and out
+  // Tooltip opacity - fade in and out (adjusted for compressed timing)
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.38, 0.42, 0.46, 0.5],
+    [0.18, 0.22, 0.26, 0.3],
     [0, 1, 1, 0],
   )
 
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.53, 0.57, 0.63, 0.67],
+    [0.33, 0.37, 0.43, 0.47],
     [0, 1, 1, 0],
   )
 
   const keyOutcomesTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.75, 0.78, 0.85, 0.88],
+    [0.55, 0.58, 0.65, 0.68],
     [0, 1, 1, 0],
   )
 
   // Clear outcome visualization when scrolling past the KeyOutcomes panel
-  // The panel is visible from ~0.68 to ~0.88 progress
+  // The panel is visible from ~0.48 to ~0.68 progress (compressed timing)
   useEffect(() => {
     const unsubscribe = scenarioIntroProgress.on("change", (progress) => {
-      // Clear outcome when scrolled past the KeyOutcomes section (> 0.90)
-      // or scrolled before it (< 0.65)
-      if (progress > 0.9 || progress < 0.65) {
+      // Clear outcome when scrolled past the KeyOutcomes section (> 0.70)
+      // or scrolled before it (< 0.45)
+      if (progress > 0.7 || progress < 0.45) {
         learnMapActions.setSelectedOutcome(null)
       }
     })
@@ -657,7 +657,7 @@ export default function MapOverlayPanels() {
               pointerEvents: "none",
             }}
           >
-            {/* Sticky intro text - animated position from midpoint to top */}
+            {/* Sticky intro text at top */}
             <motion.div
               style={{
                 position: "sticky",
@@ -795,7 +795,7 @@ export default function MapOverlayPanels() {
                             </>
                           }
                           position="left"
-                          offsetY={20}
+                          offsetY={30}
                           opacity={strategyInfoTooltipOpacity}
                           isClosed={strategyTooltipClosed}
                           onClose={() => setStrategyTooltipClosed(true)}
