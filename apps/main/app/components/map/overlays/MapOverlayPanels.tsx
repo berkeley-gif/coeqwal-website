@@ -650,7 +650,7 @@ export default function MapOverlayPanels() {
           <Box
             id="scenario-intro-wrapper"
             sx={{
-              minHeight: "550vh",
+              minHeight: "900vh",
               position: "relative",
               pointerEvents: "none",
             }}
