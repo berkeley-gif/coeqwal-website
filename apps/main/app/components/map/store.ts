@@ -267,6 +267,17 @@ export const learnMapActions = {
 
   setIsPanelsExpanded: (expanded: boolean) =>
     useLearnMapStore.setState({ isPanelsExpanded: expanded }),
+
+  /**
+   * Reset state when Learn tab remounts.
+   * Clears mapReady and resets activeSection to initial state.
+   */
+  resetForRemount: () =>
+    useLearnMapStore.setState({
+      mapReady: false,
+      activeSection: "california",
+      riversProgress: 0,
+    }),
 }
 
 // ============================================================================

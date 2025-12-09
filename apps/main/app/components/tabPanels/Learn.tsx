@@ -17,18 +17,30 @@
  * - Clean document flow
  */
 
-import { Suspense, useCallback, useRef } from "react"
+import { Suspense, useCallback, useRef, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
 import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { useLearnMapStore } from "../map/store"
+import { useLearnMapStore, learnMapActions } from "../map/store"
 
 export default function LearnPanel() {
   const setMapReady = useLearnMapStore((s) => s.setMapReady)
   const mapReady = useLearnMapStore((s) => s.mapReady)
   const mapReadyCalledRef = useRef(false)
+
+  // Reset state when component mounts (handles tab switching)
+  useEffect(() => {
+    // Reset to initial state on mount
+    learnMapActions.resetForRemount()
+    mapReadyCalledRef.current = false
+
+    return () => {
+      // Also reset on unmount to ensure clean state for next mount
+      mapReadyCalledRef.current = false
+    }
+  }, [])
 
   // Handle map ready state
   const handleMapReady = useCallback(() => {
