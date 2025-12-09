@@ -12,13 +12,16 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
     const thisPanelId = `panel-${tabKey}`
 
+    // Learn tab gets teal background to cover any gaps
+    const backgroundColor = tabKey === "learn" ? "#68C3CE" : undefined
+
     return (
       <div
         ref={ref}
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding: "2rem 0" }}
+        style={{ padding: "2rem 0", backgroundColor }}
       >
         {children}
         <AutoAdvanceFooter />

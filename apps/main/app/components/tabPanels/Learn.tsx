@@ -3,90 +3,131 @@
 /**
  * LearnPanel
  *
- * The Learn tab content. The map canvas is rendered in PersistentLearnMap
- * (at page level) to avoid unmount/remount issues.
+ * The Learn tab content with an integrated sticky map.
  *
- * The scrolling overlays (MapOverlayPanels, ProgressiveScenarioPanels) are
- * rendered here so they scroll with the page over the fixed map.
+ * Architecture:
+ * - ScrollytellingContainer: Contains the sticky map + overlay content
+ * - StickyMap: The map sticks to the viewport while scrolling through overlays
+ * - OverlayPanels: Scroll over the sticky map, triggering section changes
+ * - LearnMore: Comes after the container, no z-index battles
  *
- * This panel has a transparent background so the map shows through.
- * The "Learn More" section at the bottom has the teal background.
+ * The sticky approach means:
+ * - Map scrolls away naturally when container ends
+ * - Learn More section appears without layout hacks
+ * - Clean document flow
  */
 
-import { Suspense, useEffect } from "react"
+import { Suspense, useCallback, useRef } from "react"
 import { Box } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
+import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
 import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { useMapReady } from "../map/store"
+import { useLearnMapStore } from "../map/store"
 
 export default function LearnPanel() {
-  const mapReady = useMapReady()
+  const setMapReady = useLearnMapStore((s) => s.setMapReady)
+  const mapReady = useLearnMapStore((s) => s.mapReady)
+  const mapReadyCalledRef = useRef(false)
 
-  // Debug: log mapReady state changes
-  useEffect(() => {
-    console.log("[LearnPanel] mapReady:", mapReady)
-  }, [mapReady])
+  // Handle map ready state
+  const handleMapReady = useCallback(() => {
+    if (mapReadyCalledRef.current) return
+    mapReadyCalledRef.current = true
+    setMapReady(true)
+  }, [setMapReady])
 
   return (
     <div
       style={{
         position: "relative",
-        // Transparent background so the map shows through
-        backgroundColor: "transparent",
+        backgroundColor: "#68C3CE", // Teal background covers any gaps
       }}
     >
-      {/* Scrollytelling overlays - only render when map is ready */}
-      {mapReady && (
-        <Suspense fallback={null}>
-          {/* Scrolling overlay panels over the fixed map */}
-          <MapOverlayPanels />
-
-          {/* Progressive scenario and hydroclimate panels */}
-          <ProgressiveScenarioPanels />
-        </Suspense>
-      )}
-
-      {/* Fallback spacer when map not ready (maintains scroll height) */}
-      {!mapReady && (
+      {/* 
+        Scrollytelling Container
+        This container holds the sticky map and scrolling overlays.
+        Its height determines when the map stops being sticky.
+      */}
+      <Box
+        sx={{
+          position: "relative",
+          // Container needs explicit height - the overlays define this via their content
+        }}
+      >
+        {/* Sticky Map - sticks to viewport while scrolling through container */}
         <Box
           sx={{
-            height: "200vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "grey.500",
-            flexDirection: "column",
-            gap: 2,
+            position: "sticky",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100vh",
+            zIndex: 0,
           }}
         >
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-              border: "3px solid",
-              borderColor: "grey.300",
-              borderTopColor: "primary.main",
-              animation: "spin 1s linear infinite",
-              "@keyframes spin": {
-                "0%": { transform: "rotate(0deg)" },
-                "100%": { transform: "rotate(360deg)" },
-              },
-            }}
-          />
-          Loading map...
+          <CaliforniaMapPanel id="california-map" onMapReady={handleMapReady} />
         </Box>
-      )}
 
-      {/* Learn More section with opaque teal background */}
-      {/* Extra padding at bottom to cover the AutoAdvanceFooter added by TabPanel */}
+        {/* Overlay content - scrolls over the sticky map */}
+        {/* Uses negative margin to overlap the sticky map area */}
+        <Box
+          sx={{
+            position: "relative",
+            marginTop: "-100vh", // Pull up to overlap the sticky map
+            zIndex: 1,
+            pointerEvents: "none", // Let map interactions through
+            "& > *": {
+              pointerEvents: "auto", // But panels can be interacted with
+            },
+          }}
+        >
+          {mapReady ? (
+            <Suspense fallback={null}>
+              <MapOverlayPanels />
+              <ProgressiveScenarioPanels />
+            </Suspense>
+          ) : (
+            <Box
+              sx={{
+                height: "200vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "grey.500",
+                flexDirection: "column",
+                gap: 2,
+                pointerEvents: "auto",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  border: "3px solid",
+                  borderColor: "grey.300",
+                  borderTopColor: "primary.main",
+                  animation: "spin 1s linear infinite",
+                  "@keyframes spin": {
+                    "0%": { transform: "rotate(0deg)" },
+                    "100%": { transform: "rotate(360deg)" },
+                  },
+                }}
+              />
+              Loading map...
+            </Box>
+          )}
+        </Box>
+      </Box>
+
+      {/* Learn More section - comes after the scrollytelling container naturally */}
       <Box
         sx={{
           backgroundColor: "#68C3CE", // Learn tab teal color
           padding: "60px 20px",
-          paddingBottom: "150px", // Extra to cover footer
-          marginBottom: "-100px", // Extend into footer area
+          paddingBottom: "150px",
+          marginBottom: "-100px",
         }}
       >
         <Box

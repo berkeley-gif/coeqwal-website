@@ -3,52 +3,18 @@
 /**
  * PersistentLearnMap
  *
- * A persistent map layer that lives at the page level and never unmounts.
- * This solves race conditions between map loading and scrollytelling.
+ * NOTE: The Learn tab now has its own sticky map inside LearnPanel.
+ * This component is kept for potential future use by other tabs (like Explore)
+ * but is currently not rendered.
  *
- * Architecture:
- * - Map is always mounted (never destroyed on tab switch)
- * - Visibility controlled by activeTab (from URL)
- * - Sits at z-index 0, covered by opaque tab content when not needed
- *
- * NOTE: The scrolling overlays (MapOverlayPanels, ProgressiveScenarioPanels)
- * are rendered in LearnPanel so they scroll with the page. This component
- * only hosts the fixed map canvas.
- *
- * NOTE: MapProvider is at page.tsx level so overlays can also use useMap().
+ * The Learn tab uses a sticky map approach which:
+ * - Allows the map to scroll away naturally
+ * - Lets the Learn More section appear without z-index battles
+ * - Maintains proper document flow
  */
 
-import { useCallback, useRef } from "react"
-import { Box } from "@repo/ui/mui"
-import CaliforniaMapPanel from "./map/CaliforniaMapPanel"
-import { useIsLearnTabActive } from "../hooks/useActiveTabFromURL"
-import { useLearnMapStore } from "./map/store"
-
 export default function PersistentLearnMap() {
-  const isLearnTab = useIsLearnTabActive()
-  const setMapReady = useLearnMapStore((s) => s.setMapReady)
-  const mapReadyCalledRef = useRef(false)
-
-  // Handle map ready state - update zustand store
-  const handleMapReady = useCallback(() => {
-    if (mapReadyCalledRef.current) return
-    mapReadyCalledRef.current = true
-    setMapReady(true)
-  }, [setMapReady])
-
-  return (
-    <Box
-      sx={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 0, // Base layer - tabs sit on top
-        // Visibility: always rendered, but pointer events only when Learn tab
-        visibility: isLearnTab ? "visible" : "hidden",
-        pointerEvents: isLearnTab ? "auto" : "none",
-      }}
-    >
-      {/* The map canvas - always rendered */}
-      <CaliforniaMapPanel id="california-map" onMapReady={handleMapReady} />
-    </Box>
-  )
+  // Currently not rendering anything - Learn tab has its own map
+  // Keep this component for potential future use by other tabs
+  return null
 }
