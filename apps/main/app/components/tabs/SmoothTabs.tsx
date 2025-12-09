@@ -145,7 +145,7 @@ export default function SmoothTabs() {
                         }}
                       >
                         {key === "learn" &&
-                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California&apos;s Central Valley and how we manage water to support diverse needs."}
+                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California's Central Valley and how we manage water to support diverse needs."}
                         {key === "explore" &&
                           "What if we managed water differently? Explore how water allocations change under different water management scenarios."}
                         {key === "empower" &&
