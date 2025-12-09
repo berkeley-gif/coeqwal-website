@@ -103,7 +103,7 @@ const IntroSection = () => {
         }
       />
 
-      <OneColumnPanel
+{/*       <OneColumnPanel
         id="scenariosIntro"
         fullHeight={false}
         fullWidth
@@ -172,7 +172,7 @@ const IntroSection = () => {
             </Typography>
           </Box>
         }
-      />
+      /> */}
 
       {/* Interstitial panel - can be broken out into a component */}
       {/* <OneColumnPanel
