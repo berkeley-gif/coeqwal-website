@@ -18,7 +18,7 @@
  * NOTE: MapProvider is at page.tsx level so overlays can also use useMap().
  */
 
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useRef } from "react"
 import { Box } from "@repo/ui/mui"
 import CaliforniaMapPanel from "./map/CaliforniaMapPanel"
 import { useIsLearnTabActive } from "../hooks/useActiveTabFromURL"
@@ -33,17 +33,8 @@ export default function PersistentLearnMap() {
   const handleMapReady = useCallback(() => {
     if (mapReadyCalledRef.current) return
     mapReadyCalledRef.current = true
-    console.log("[PersistentLearnMap] Map is ready, updating store")
     setMapReady(true)
   }, [setMapReady])
-
-  // Debug: log when this component mounts/unmounts
-  useEffect(() => {
-    console.log("[PersistentLearnMap] Mounted")
-    return () => {
-      console.log("[PersistentLearnMap] Unmounted")
-    }
-  }, [])
 
   return (
     <Box

@@ -19,8 +19,7 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(
-    ({ data, direction }: StepEvent<SectionId>) => {
-      console.log(`[Scrollama] Enter: ${data}, direction: ${direction}`)
+    ({ data }: StepEvent<SectionId>) => {
       learnMapActions.setActiveSection(data)
     },
     [],
@@ -31,9 +30,7 @@ export function useLearnScrollama() {
    * Used for cleanup like resetting geocoding when leaving find-basin.
    */
   const onStepExit = useCallback(
-    ({ data, direction }: StepEvent<SectionId>) => {
-      console.log(`[Scrollama] Exit: ${data}, direction: ${direction}`)
-
+    ({ data }: StepEvent<SectionId>) => {
       // Reset geocoding when leaving find-basin section
       if (data === "find-basin") {
         learnMapActions.resetGeocoding()
