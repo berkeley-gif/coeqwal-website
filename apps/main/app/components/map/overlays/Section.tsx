@@ -3,8 +3,13 @@
 /**
  * Section Component
  *
- * Wraps a panel and reports when it becomes active (in view).
- * Uses Framer Motion's useInView for robust scroll detection.
+ * @deprecated Use react-scrollama's <Step> component instead.
+ * This component is kept for backwards compatibility but should not be used
+ * for new sections. The react-scrollama integration provides more robust
+ * scroll detection with direction awareness and progress tracking.
+ *
+ * See: apps/main/app/components/map/hooks/useLearnScrollama.ts
+ * See: MapOverlayPanels.tsx for usage with react-scrollama
  */
 
 import { useRef, useEffect, ReactNode } from "react"

@@ -1,8 +1,16 @@
 /**
  * useMapLayers Hook
  *
- * Applies layer visibility based on the active section.
- * Uses centralized AnimationCoordinator for (hopefully robust) animation management.
+ * Applies native Mapbox layer visibility based on the active section.
+ * Uses SECTION_LAYERS as the single source of truth.
+ *
+ * This hook handles ONLY the native Mapbox layers defined in the map style:
+ * - california-label
+ * - central-valley-polygon, central-valley-polygon-halo, central-valley-label
+ * - inflow-watersheds
+ *
+ * React component layers (BasinsLayer, RiversLayer, BasinInflowArrows) are
+ * controlled via props from CaliforniaMapPanel using derived selectors.
  */
 
 "use client"
@@ -12,448 +20,256 @@ import { useMap } from "@repo/map"
 import {
   useActiveSection,
   useRiversProgress,
+  useShowInflowWatersheds,
   SECTION_LAYERS,
-  learnMapActions,
   type SectionId,
 } from "../store"
 import { coordinator } from "../choreography/animationCoordinator"
 import { ANIMATION_DURATION } from "../choreography/scrollChoreographyConstants"
 
-// Mapbox layer IDs
-const LAYERS = {
-  californiaLabel: "california-label",
-  centralValleyPolygon: "central-valley-polygon",
-  centralValleyPolygonHalo: "central-valley-polygon-halo",
-  centralValleyLabel: "central-valley-label",
-  inflowWatersheds: "inflow-watersheds",
-  water: "water",
-} as const
+// ============================================================================
+// Layer Definitions
+// ============================================================================
 
-// Use centralized animation duration for layer fades
+/**
+ * Mapbox layer specification: layer ID + opacity property + target opacity
+ */
+interface LayerSpec {
+  id: string
+  opacityProp: "text-opacity" | "fill-opacity" | "line-opacity"
+  targetOpacity: number
+}
+
+/**
+ * Native Mapbox layer groups.
+ * Each group maps to a boolean in SectionLayerConfig.
+ */
+const LAYER_GROUPS: Record<string, LayerSpec[]> = {
+  californiaLabel: [
+    { id: "california-label", opacityProp: "text-opacity", targetOpacity: 0.9 },
+  ],
+  centralValley: [
+    {
+      id: "central-valley-polygon",
+      opacityProp: "line-opacity",
+      targetOpacity: 0.9,
+    },
+    {
+      id: "central-valley-polygon-halo",
+      opacityProp: "line-opacity",
+      targetOpacity: 0.9,
+    },
+    {
+      id: "central-valley-label",
+      opacityProp: "text-opacity",
+      targetOpacity: 0.9,
+    },
+  ],
+  inflowWatersheds: [
+    { id: "inflow-watersheds", opacityProp: "fill-opacity", targetOpacity: 0.5 },
+  ],
+}
+
 const FADE_DURATION = ANIMATION_DURATION.LAYER_FADE
-
-// Animation ID prefix for layer animations
 const LAYER_ANIMATION_PREFIX = "layer-"
+
+// ============================================================================
+// Hook
+// ============================================================================
 
 export function useMapLayers() {
   const map = useMap()
   const activeSection = useActiveSection()
   const riversProgress = useRiversProgress()
+  const showInflowWatersheds = useShowInflowWatersheds()
 
-  // State to trigger re-render when map is ready
   const [mapReady, setMapReady] = useState(false)
-
-  // Track previous section for transition animations
   const prevSectionRef = useRef<SectionId | null>(null)
-  const mapReadyRef = useRef(false)
+  const initializedRef = useRef(false)
 
-  // Cleanup on unmount - cancel all layer animations
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
     }
   }, [])
 
-  // Poll for map to be ready
+  // Wait for map style to be ready
   useEffect(() => {
     if (mapReady) return
 
     const checkMap = () => {
       const mapInstance = coordinator.getValidMap(map.mapRef)
-      if (mapInstance) {
-        console.log("[useMapLayers] Map instance found!")
-        if (mapInstance.isStyleLoaded()) {
-          console.log("[useMapLayers] Style already loaded")
-          setMapReady(true)
-        } else {
-          console.log("[useMapLayers] Waiting for style.load")
-          mapInstance.once("style.load", () => {
-            console.log("[useMapLayers] Style loaded!")
-            setMapReady(true)
-          })
-        }
+      if (!mapInstance) return false
+
+      if (mapInstance.isStyleLoaded()) {
+        setMapReady(true)
         return true
       }
-      return false
+
+      // Wait for style to load
+      mapInstance.once("style.load", () => setMapReady(true))
+      return true
     }
 
-    // Try immediately
     if (checkMap()) return
 
-    // Poll until map is available
     const interval = setInterval(() => {
-      if (checkMap()) {
-        clearInterval(interval)
-      }
+      if (checkMap()) clearInterval(interval)
     }, 100)
 
     return () => clearInterval(interval)
   }, [map.mapRef, mapReady])
 
-  // Helper to apply layer with animation using coordinator
+  /**
+   * Apply layer visibility with optional animation
+   */
   const applyLayer = useCallback(
-    (
-      layerId: string,
-      visible: boolean,
-      opacityProp: "text-opacity" | "fill-opacity" | "line-opacity",
-      targetOpacity: number = 0.9,
-      immediate: boolean = false,
-    ) => {
-      const animationId = `${LAYER_ANIMATION_PREFIX}${layerId}`
-
-      // Get fresh map reference
+    (spec: LayerSpec, visible: boolean, immediate = false) => {
       const mapInstance = coordinator.getValidMap(map.mapRef)
-      if (!mapInstance) {
-        console.warn(`[useMapLayers] No valid map for layer ${layerId}`)
-        return
-      }
+      if (!mapInstance) return
 
       try {
-        const layerExists = mapInstance.getLayer(layerId)
-        console.log(
-          `[useMapLayers] Layer ${layerId} exists:`,
-          !!layerExists,
-          "visible:",
-          visible,
-          "targetOpacity:",
-          targetOpacity,
-          "immediate:",
-          immediate,
-        )
+        if (!mapInstance.getLayer(spec.id)) return
 
-        if (!layerExists) {
-          console.warn(`[useMapLayers] Layer ${layerId} not found in map style`)
-          return
-        }
+        const endOpacity = visible ? spec.targetOpacity : 0
 
         if (immediate) {
-          // Set immediately without animation
-          const visValue = visible ? "visible" : "none"
-          const opacityValue = visible ? targetOpacity : 0
-          console.log(
-            `[useMapLayers] SETTING ${layerId}: visibility=${visValue}, ${opacityProp}=${opacityValue}`,
-          )
-          mapInstance.setLayoutProperty(layerId, "visibility", visValue)
-          mapInstance.setPaintProperty(layerId, opacityProp, opacityValue)
-
-          // Verify it was set
-          const actualVisibility = mapInstance.getLayoutProperty(
-            layerId,
+          mapInstance.setLayoutProperty(
+            spec.id,
             "visibility",
+            visible ? "visible" : "none",
           )
-          const actualOpacity = mapInstance.getPaintProperty(
-            layerId,
-            opacityProp,
-          )
-          console.log(
-            `[useMapLayers] VERIFIED ${layerId}: visibility=${actualVisibility}, ${opacityProp}=${actualOpacity}`,
-          )
+          mapInstance.setPaintProperty(spec.id, spec.opacityProp, endOpacity)
           return
         }
 
         // Make visible before animating in
         if (visible) {
-          mapInstance.setLayoutProperty(layerId, "visibility", "visible")
+          mapInstance.setLayoutProperty(spec.id, "visibility", "visible")
         }
 
-        // Get current opacity for smooth transition
         const startOpacity =
-          (mapInstance.getPaintProperty(layerId, opacityProp) as number) ?? 0
-        const endOpacity = visible ? targetOpacity : 0
+          (mapInstance.getPaintProperty(spec.id, spec.opacityProp) as number) ??
+          0
 
-        // Skip animation if already at target
+        // Skip if already at target
         if (Math.abs(startOpacity - endOpacity) < 0.01) {
           if (!visible) {
-            mapInstance.setLayoutProperty(layerId, "visibility", "none")
+            mapInstance.setLayoutProperty(spec.id, "visibility", "none")
           }
           return
         }
 
-        // Use coordinator for animation
+        // Animate
+        const animationId = `${LAYER_ANIMATION_PREFIX}${spec.id}`
         coordinator.start(
           animationId,
           (_now, elapsed) => {
-            // Get fresh map reference each frame
             const currentMap = coordinator.getValidMap(map.mapRef)
-            if (!currentMap) return false // Stop animation - map gone
-
-            // Check layer still exists
-            if (!coordinator.hasLayer(map.mapRef, layerId)) return false
-
-            // Calculate eased progress
-            const progress = Math.min(elapsed / FADE_DURATION, 1)
-            const eased = 1 - Math.pow(1 - progress, 3)
-            const opacity = Math.max(
-              0,
-              Math.min(1, startOpacity + (endOpacity - startOpacity) * eased),
-            )
-
-            try {
-              currentMap.setPaintProperty(layerId, opacityProp, opacity)
-            } catch {
-              return false // Stop on error
+            if (!currentMap || !coordinator.hasLayer(map.mapRef, spec.id)) {
+              return false
             }
 
-            return progress < 1 // Continue if not done
+            const progress = Math.min(elapsed / FADE_DURATION, 1)
+            const eased = 1 - Math.pow(1 - progress, 3)
+            // Clamp opacity to valid range [0, targetOpacity] to prevent floating point errors
+            const rawOpacity = startOpacity + (endOpacity - startOpacity) * eased
+            const opacity = Math.max(0, Math.min(spec.targetOpacity, rawOpacity))
+
+            try {
+              currentMap.setPaintProperty(spec.id, spec.opacityProp, opacity)
+            } catch {
+              return false
+            }
+
+            return progress < 1
           },
           {
             duration: FADE_DURATION,
             onComplete: () => {
-              // Hide layer after fading out
               if (!visible) {
                 const currentMap = coordinator.getValidMap(map.mapRef)
-                if (currentMap && coordinator.hasLayer(map.mapRef, layerId)) {
-                  try {
-                    currentMap.setLayoutProperty(layerId, "visibility", "none")
-                  } catch {
-                    // Map may have unmounted
-                  }
+                if (currentMap && coordinator.hasLayer(map.mapRef, spec.id)) {
+                  currentMap.setLayoutProperty(spec.id, "visibility", "none")
                 }
               }
             },
           },
         )
-      } catch (e) {
-        console.warn(`Failed to apply layer ${layerId}:`, e)
+      } catch {
+        // Layer might not exist
       }
     },
     [map.mapRef],
   )
 
-  // Main effect: apply layer states based on active section
-  useEffect(() => {
-    console.log(
-      "[useMapLayers] Main effect running, mapReady:",
-      mapReady,
-      "activeSection:",
-      activeSection,
-    )
+  /**
+   * Apply a layer group (show/hide all layers in the group)
+   */
+  const applyLayerGroup = useCallback(
+    (groupKey: string, visible: boolean, immediate = false) => {
+      const specs = LAYER_GROUPS[groupKey]
+      if (!specs) return
+      specs.forEach((spec) => applyLayer(spec, visible, immediate))
+    },
+    [applyLayer],
+  )
 
-    if (!mapReady) {
-      console.log("[useMapLayers] Map not ready yet")
-      return
-    }
-
-    const mapInstance = coordinator.getValidMap(map.mapRef)
-    if (!mapInstance) {
-      console.log("[useMapLayers] No valid mapInstance")
-      return
-    }
-
-    console.log("[useMapLayers] Applying layer states...")
-
-    // Cancel any running layer animations when section changes
-    coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
-
-    const applyLayerStates = () => {
-      console.log("[useMapLayers] applyLayerStates called")
-      const currentLayers = SECTION_LAYERS[activeSection]
-      const prevSection = prevSectionRef.current
-      const prevLayers = prevSection ? SECTION_LAYERS[prevSection] : null
-      const isFirstRun = !mapReadyRef.current
-
-      // Mark as ready after first run
-      mapReadyRef.current = true
-
-      // On first run, set all layers to their correct state immediately
-      if (isFirstRun) {
-        console.log("[useMapLayers] Initial setup for section:", activeSection)
-
-        // Configure label layers for better visibility on Globe projection
-        const labelLayers = [LAYERS.californiaLabel, LAYERS.centralValleyLabel]
-        labelLayers.forEach((layerId) => {
-          try {
-            if (mapInstance.getLayer(layerId)) {
-              // Allow labels to overlap (prevent collision culling on globe)
-              mapInstance.setLayoutProperty(layerId, "text-allow-overlap", true)
-              mapInstance.setLayoutProperty(
-                layerId,
-                "text-ignore-placement",
-                true,
-              )
-              // Don't avoid globe edges
-              mapInstance.setLayoutProperty(
-                layerId,
-                "symbol-avoid-edges",
-                false,
-              )
-              console.log(
-                `[useMapLayers] Configured ${layerId} for Globe projection`,
-              )
-            }
-          } catch (e) {
-            console.warn(`Failed to configure ${layerId}:`, e)
-          }
-        })
-
-        // California label
-        applyLayer(
-          LAYERS.californiaLabel,
-          !!currentLayers.californiaLabel,
-          "text-opacity",
-          0.9,
-          true, // immediate
-        )
-
-        // Central Valley layers
-        applyLayer(
-          LAYERS.centralValleyPolygon,
-          !!currentLayers.centralValley,
-          "line-opacity",
-          0.9,
-          true,
-        )
-        applyLayer(
-          LAYERS.centralValleyPolygonHalo,
-          !!currentLayers.centralValley,
-          "line-opacity",
-          0.9,
-          true,
-        )
-        applyLayer(
-          LAYERS.centralValleyLabel,
-          !!currentLayers.centralValley,
-          "text-opacity",
-          0.9,
-          true,
-        )
-
-        // Inflow watersheds
-        applyLayer(
-          LAYERS.inflowWatersheds,
-          !!currentLayers.inflowWatersheds,
-          "fill-opacity",
-          0.3,
-          true,
-        )
-
-        // Water layer (Delta) - starts hidden, shown by DeltaInfoPanel button
-        applyLayer(LAYERS.water, false, "fill-opacity", 0.9, true)
-
-        prevSectionRef.current = activeSection
-        return
-      }
-
-      // Skip if section hasn't changed
-      if (prevSection === activeSection) return
-
-      console.log(
-        "[useMapLayers] Section change:",
-        prevSection,
-        "->",
-        activeSection,
-      )
-      prevSectionRef.current = activeSection
-
-      // Animate layer changes
-      // California label
-      if (currentLayers.californiaLabel !== prevLayers?.californiaLabel) {
-        applyLayer(
-          LAYERS.californiaLabel,
-          !!currentLayers.californiaLabel,
-          "text-opacity",
-        )
-      }
-
-      // Central Valley
-      if (currentLayers.centralValley !== prevLayers?.centralValley) {
-        applyLayer(
-          LAYERS.centralValleyPolygon,
-          !!currentLayers.centralValley,
-          "line-opacity",
-        )
-        applyLayer(
-          LAYERS.centralValleyPolygonHalo,
-          !!currentLayers.centralValley,
-          "line-opacity",
-        )
-        applyLayer(
-          LAYERS.centralValleyLabel,
-          !!currentLayers.centralValley,
-          "text-opacity",
-        )
-      }
-
-      // Inflow watersheds
-      // Special handling: when leaving rivers section, always restore if needed
-      const wasInRivers = prevSection === "rivers"
-      const needsInflowWatersheds = !!currentLayers.inflowWatersheds
-
-      if (wasInRivers && needsInflowWatersheds) {
-        // Leaving rivers section - explicitly restore inflow-watersheds
-        // (rivers animation may have faded it to 0)
-        console.log(
-          "[useMapLayers] Restoring inflow-watersheds after leaving rivers",
-        )
-        applyLayer(LAYERS.inflowWatersheds, true, "fill-opacity", 0.3)
-      } else if (
-        currentLayers.inflowWatersheds !== prevLayers?.inflowWatersheds &&
-        activeSection !== "rivers"
-      ) {
-        // Normal transition - show or hide based on section config
-        applyLayer(
-          LAYERS.inflowWatersheds,
-          needsInflowWatersheds,
-          "fill-opacity",
-          0.3,
-        )
-      }
-
-      // Restore basins outline layers when leaving rivers section
-      // (rivers animation fades them to 0.6, restore to full opacity)
-      if (wasInRivers && currentLayers.basins) {
-        const mapInstance = coordinator.getValidMap(map.mapRef)
-        if (mapInstance) {
-          try {
-            if (mapInstance.getLayer("basins-outline-halo")) {
-              mapInstance.setPaintProperty(
-                "basins-outline-halo",
-                "line-opacity",
-                1,
-              )
-            }
-            if (mapInstance.getLayer("basins-outline-layer")) {
-              mapInstance.setPaintProperty(
-                "basins-outline-layer",
-                "line-opacity",
-                0.8,
-              )
-            }
-          } catch {
-            // Layer might not exist
-          }
-        }
-      }
-
-      // Water layer (Delta) - fade out when leaving delta section
-      // Note: Water layer is SHOWN by DeltaInfoPanel button click, hidden here on section change
-      if (prevSection === "delta" && activeSection !== "delta") {
-        applyLayer(LAYERS.water, false, "fill-opacity", 0.9)
-      }
-
-      // Reset geocoding (marker + panel state) when leaving find-basin section
-      if (prevSection === "find-basin" && activeSection !== "find-basin") {
-        learnMapActions.resetGeocoding()
-      }
-    }
-
-    // Apply immediately - map is ready (mapReady state ensures this)
-    applyLayerStates()
-  }, [activeSection, map.mapRef, applyLayer, mapReady])
-
-  // Fade out inflow-watersheds and basins outline during rivers animation
-  // Both fade starting at 30% and ending at 60% of rivers animation
+  // Main effect: apply layer visibility when section changes
   useEffect(() => {
     if (!mapReady) return
-
-    // Only apply during rivers section
-    if (activeSection !== "rivers") return
 
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
 
-    // Start fading at 30% of animation, finish at 60%
-    // Rivers are well underway before these layers fade
+    coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
+
+    const currentConfig = SECTION_LAYERS[activeSection]
+    const prevSection = prevSectionRef.current
+    const isFirstRun = !initializedRef.current
+
+    // Configure label layers for Globe projection on first run
+    if (isFirstRun) {
+      const labelLayers = ["california-label", "central-valley-label"]
+      labelLayers.forEach((layerId) => {
+        try {
+          if (mapInstance.getLayer(layerId)) {
+            mapInstance.setLayoutProperty(layerId, "text-allow-overlap", true)
+            mapInstance.setLayoutProperty(layerId, "text-ignore-placement", true)
+            mapInstance.setLayoutProperty(layerId, "symbol-avoid-edges", false)
+          }
+        } catch {
+          // Layer might not exist
+        }
+      })
+      initializedRef.current = true
+    }
+
+    // ALWAYS apply ALL layer groups to their correct state
+    Object.keys(LAYER_GROUPS).forEach((groupKey) => {
+      const shouldBeVisible = !!currentConfig[groupKey as keyof typeof currentConfig]
+
+      // On first run: set immediately (no animation)
+      // On section change: animate the transition
+      if (isFirstRun) {
+        applyLayerGroup(groupKey, shouldBeVisible, true) // immediate
+      } else if (prevSection !== activeSection) {
+        applyLayerGroup(groupKey, shouldBeVisible, false) // animate
+      }
+    })
+
+    prevSectionRef.current = activeSection
+  }, [activeSection, map.mapRef, applyLayerGroup, mapReady])
+
+  // Rivers section: fade out inflow watersheds as rivers animate
+  useEffect(() => {
+    if (!mapReady || activeSection !== "rivers") return
+
+    const mapInstance = coordinator.getValidMap(map.mapRef)
+    if (!mapInstance) return
+
+    // Fade from 30% to 60% of rivers progress
     const fadeStart = 0.3
     const fadeEnd = 0.6
     const fadeProgress = Math.max(
@@ -462,39 +278,36 @@ export function useMapLayers() {
     )
 
     try {
-      // Fade inflow-watersheds from 0.3 to 0
-      if (mapInstance.getLayer(LAYERS.inflowWatersheds)) {
-        const opacity = Math.max(0, 0.3 * (1 - fadeProgress))
-        mapInstance.setPaintProperty(
-          LAYERS.inflowWatersheds,
-          "fill-opacity",
-          opacity,
-        )
-      }
-
-      // Fade basins outline layers to 0.6 opacity
-      // basins-outline-halo: 1 -> 0.6
-      if (mapInstance.getLayer("basins-outline-halo")) {
-        const opacity = 1 - fadeProgress * 0.4 // 1 -> 0.6
-        mapInstance.setPaintProperty(
-          "basins-outline-halo",
-          "line-opacity",
-          opacity,
-        )
-      }
-      // basins-outline-layer: 0.8 -> 0.6
-      if (mapInstance.getLayer("basins-outline-layer")) {
-        const opacity = 0.8 - fadeProgress * 0.2 // 0.8 -> 0.6
-        mapInstance.setPaintProperty(
-          "basins-outline-layer",
-          "line-opacity",
-          opacity,
-        )
+      if (mapInstance.getLayer("inflow-watersheds")) {
+        // Clamp opacity to valid range [0, 0.5]
+        const opacity = Math.max(0, Math.min(0.5, 0.5 * (1 - fadeProgress)))
+        mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", opacity)
       }
     } catch {
       // Layer might not exist
     }
   }, [activeSection, riversProgress, map.mapRef, mapReady])
+
+  // Restore inflow-watersheds when leaving rivers section
+  useEffect(() => {
+    if (!mapReady) return
+    if (activeSection === "rivers") return
+
+    // If inflow-watersheds should be visible but we just left rivers
+    if (showInflowWatersheds) {
+      const mapInstance = coordinator.getValidMap(map.mapRef)
+      if (!mapInstance) return
+
+      try {
+        if (mapInstance.getLayer("inflow-watersheds")) {
+          mapInstance.setLayoutProperty("inflow-watersheds", "visibility", "visible")
+          mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", 0.5)
+        }
+      } catch {
+        // Layer might not exist
+      }
+    }
+  }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
 
   return {
     activeSection,

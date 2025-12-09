@@ -47,15 +47,19 @@ const MAP_BOUNDS: [[number, number], [number, number]] = [
 interface CaliforniaMapPanelProps {
   id?: string
   mapboxToken?: string
+  /** Called when the map style has loaded and is ready for interaction */
+  onMapReady?: () => void
 }
 
 export default function CaliforniaMapPanel({
   id = "california-map",
   mapboxToken,
+  onMapReady,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
   const theme = useTheme()
+  const onMapReadyCalledRef = useRef(false)
 
   // Store selectors
   const activeSection = useActiveSection()
@@ -159,6 +163,45 @@ export default function CaliforniaMapPanel({
 
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
+
+  // Notify parent when map is ready
+  // Use polling to handle cases where the map is already loaded before this effect runs
+  useEffect(() => {
+    if (onMapReadyCalledRef.current) return
+
+    const checkReady = () => {
+      if (onMapReadyCalledRef.current) return false
+
+      const mapboxInstance = map.mapRef?.current?.getMap?.()
+      if (mapboxInstance && mapboxInstance.isStyleLoaded()) {
+        onMapReadyCalledRef.current = true
+        console.log("[CaliforniaMapPanel] Map style loaded, calling onMapReady")
+        onMapReady?.()
+        return true
+      }
+      return false
+    }
+
+    // Check immediately
+    if (checkReady()) return
+
+    // Poll until ready (handles race conditions)
+    const interval = setInterval(() => {
+      if (checkReady()) {
+        clearInterval(interval)
+      }
+    }, 100)
+
+    // Also listen for style.load event as backup
+    const mapboxInstance = map.mapRef?.current?.getMap?.()
+    if (mapboxInstance) {
+      mapboxInstance.once("style.load", checkReady)
+    }
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [map.mapRef, onMapReady])
 
   // Track previous section for camera transitions
   const prevSectionRef = useRef<SectionId | null>(null)
