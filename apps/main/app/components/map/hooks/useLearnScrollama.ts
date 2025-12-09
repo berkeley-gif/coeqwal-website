@@ -19,13 +19,11 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    console.log(`[Scrollama] Enter: ${data}`)
     learnMapActions.setActiveSection(data)
     
     // Clear outcome visualization when entering any section other than scenario-intro
     // This handles cases where user scrolls quickly past the exit trigger
     if (data !== "scenario-intro") {
-      console.log(`[Scrollama] Clearing outcome (entered ${data})`)
       learnMapActions.setSelectedOutcome(null)
     }
   }, [])
@@ -36,8 +34,6 @@ export function useLearnScrollama() {
    * and clearing outcome visualization when leaving scenario-intro.
    */
   const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
-    console.log(`[Scrollama] Exit: ${data}`)
-    
     // Reset geocoding when leaving find-basin section
     if (data === "find-basin") {
       learnMapActions.resetGeocoding()
@@ -45,7 +41,6 @@ export function useLearnScrollama() {
 
     // Clear outcome visualization when leaving scenario-intro section
     if (data === "scenario-intro") {
-      console.log("[Scrollama] Clearing outcome visualization")
       learnMapActions.setSelectedOutcome(null)
     }
   }, [])

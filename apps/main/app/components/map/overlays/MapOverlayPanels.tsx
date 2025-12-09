@@ -188,21 +188,12 @@ export default function MapOverlayPanels() {
     [0, 1],
   )
 
-  // Panel pointer events - disable when not visible
-  const strategyInfoPointerEvents = useTransform(
-    strategyInfoPanelOpacity,
-    (v) => (v > 0.1 ? "auto" : "none"),
-  )
-  const keyOperationsPointerEvents = useTransform(
-    keyOperationsPanelOpacity,
-    (v) => (v > 0.1 ? "auto" : "none"),
-  )
-  const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
-    v > 0.1 ? "auto" : "none",
-  )
-  const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
-    v > 0.1 ? "auto" : "none",
-  )
+  // Panel pointer events - always "none" on container, let children handle their own
+  // This allows map panning through panel backgrounds
+  const strategyInfoPointerEvents = "none" as const
+  const keyOperationsPointerEvents = "none" as const
+  const keyOutcomesPointerEvents = "none" as const
+  const summaryPointerEvents = "none" as const
 
   // Tooltip opacity - fade in and out
   const strategyInfoTooltipOpacity = useTransform(

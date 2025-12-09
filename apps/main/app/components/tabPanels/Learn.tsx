@@ -89,9 +89,8 @@ export default function LearnPanel() {
             marginTop: "-100vh", // Pull up to overlap the sticky map
             zIndex: 1,
             pointerEvents: "none", // Let map interactions through
-            "& > *": {
-              pointerEvents: "auto", // But panels can be interacted with
-            },
+            // Note: child components handle their own pointerEvents
+            // MapOverlayPanels sets pointerEvents: "none" with "auto" on interactive elements
           }}
         >
           {mapReady ? (
