@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 
 // Format text with medium weight on key words
@@ -156,6 +156,32 @@ export default function VideoHero({
         >
           {t("homePanel.title")}
         </Typography>
+      </div>
+      <div id="scrollArrow">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            height: "80vh"
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              fontSize: "2.5rem",
+              color: "white",
+              animation: "bounce 2s ease-in-out infinite",
+              "@keyframes bounce": {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-8px)" },
+              },
+            }}
+          >
+            ↓
+          </Box>
+        </Box>
       </div>
       <div
         id="homeHeroBody"
