@@ -164,19 +164,70 @@ export default function CaliforniaMapPanel({
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
 
+  // Mapbox layer IDs that we need to preload
+  const MAPBOX_LAYER_IDS = [
+    "california-label",
+    "central-valley-polygon",
+    "central-valley-polygon-halo", 
+    "central-valley-label",
+    "inflow-watersheds",
+  ]
+
   // Notify parent when map is ready
-  // Use polling to handle cases where the map is already loaded before this effect runs
+  // Includes preloading of Mapbox layers to ensure tile data is cached
   useEffect(() => {
     if (onMapReadyCalledRef.current) return
+
+    const preloadAndNotify = (mapboxInstance: mapboxgl.Map) => {
+      if (onMapReadyCalledRef.current) return
+      onMapReadyCalledRef.current = true
+      
+      // Step 1: Make all our layers visible to trigger tile loading
+      MAPBOX_LAYER_IDS.forEach((layerId) => {
+        try {
+          if (mapboxInstance.getLayer(layerId)) {
+            mapboxInstance.setLayoutProperty(layerId, "visibility", "visible")
+          }
+        } catch {
+          // Layer might not exist
+        }
+      })
+
+      // Step 2: Wait for idle event (all tiles loaded) or timeout
+      const onIdle = () => {
+        // Step 3: Reset layers to hidden (useMapLayers will properly show them)
+        MAPBOX_LAYER_IDS.forEach((layerId) => {
+          try {
+            if (mapboxInstance.getLayer(layerId)) {
+              mapboxInstance.setLayoutProperty(layerId, "visibility", "none")
+            }
+          } catch {
+            // Ignore
+          }
+        })
+        
+        // Step 4: Now we're truly ready
+        onMapReady?.()
+      }
+
+      // Use idle event with timeout fallback
+      const timeoutId = setTimeout(() => {
+        mapboxInstance.off("idle", onIdle)
+        onIdle()
+      }, 3000) // 3 second max wait
+
+      mapboxInstance.once("idle", () => {
+        clearTimeout(timeoutId)
+        onIdle()
+      })
+    }
 
     const checkReady = () => {
       if (onMapReadyCalledRef.current) return false
 
       const mapboxInstance = map.mapRef?.current?.getMap?.()
       if (mapboxInstance && mapboxInstance.isStyleLoaded()) {
-        onMapReadyCalledRef.current = true
-        console.log("[CaliforniaMapPanel] Map style loaded, calling onMapReady")
-        onMapReady?.()
+        preloadAndNotify(mapboxInstance)
         return true
       }
       return false

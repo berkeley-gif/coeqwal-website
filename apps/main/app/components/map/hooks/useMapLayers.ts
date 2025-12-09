@@ -15,12 +15,13 @@
 
 "use client"
 
-import { useEffect, useRef, useCallback, useState } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import { useMap } from "@repo/map"
 import {
   useActiveSection,
   useRiversProgress,
   useShowInflowWatersheds,
+  useMapReady,
   SECTION_LAYERS,
   type SectionId,
 } from "../store"
@@ -82,8 +83,8 @@ export function useMapLayers() {
   const activeSection = useActiveSection()
   const riversProgress = useRiversProgress()
   const showInflowWatersheds = useShowInflowWatersheds()
+  const mapReady = useMapReady() // Use global Zustand state
 
-  const [mapReady, setMapReady] = useState(false)
   const prevSectionRef = useRef<SectionId | null>(null)
   const initializedRef = useRef(false)
 
@@ -94,32 +95,6 @@ export function useMapLayers() {
     }
   }, [])
 
-  // Wait for map style to be ready
-  useEffect(() => {
-    if (mapReady) return
-
-    const checkMap = () => {
-      const mapInstance = coordinator.getValidMap(map.mapRef)
-      if (!mapInstance) return false
-
-      if (mapInstance.isStyleLoaded()) {
-        setMapReady(true)
-        return true
-      }
-
-      // Wait for style to load
-      mapInstance.once("style.load", () => setMapReady(true))
-      return true
-    }
-
-    if (checkMap()) return
-
-    const interval = setInterval(() => {
-      if (checkMap()) clearInterval(interval)
-    }, 100)
-
-    return () => clearInterval(interval)
-  }, [map.mapRef, mapReady])
 
   /**
    * Apply layer visibility with optional animation
