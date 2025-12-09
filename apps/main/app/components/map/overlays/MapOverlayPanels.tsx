@@ -223,6 +223,19 @@ export default function MapOverlayPanels() {
     [0, 1, 1, 0],
   )
 
+  // Clear outcome visualization when scrolling past the KeyOutcomes panel
+  // The panel is visible from ~0.68 to ~0.88 progress
+  useEffect(() => {
+    const unsubscribe = scenarioIntroProgress.on("change", (progress) => {
+      // Clear outcome when scrolled past the KeyOutcomes section (> 0.90)
+      // or scrolled before it (< 0.65)
+      if (progress > 0.90 || progress < 0.65) {
+        learnMapActions.setSelectedOutcome(null)
+      }
+    })
+    return () => unsubscribe()
+  }, [scenarioIntroProgress])
+
   // First panel entrance animation
   useEffect(() => {
     const observer = new IntersectionObserver(
