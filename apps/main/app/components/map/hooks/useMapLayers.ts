@@ -67,7 +67,11 @@ const LAYER_GROUPS: Record<string, LayerSpec[]> = {
     },
   ],
   inflowWatersheds: [
-    { id: "inflow-watersheds", opacityProp: "fill-opacity", targetOpacity: 0.4 },
+    {
+      id: "inflow-watersheds",
+      opacityProp: "fill-opacity",
+      targetOpacity: 0.4,
+    },
   ],
 }
 
@@ -94,7 +98,6 @@ export function useMapLayers() {
       coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
     }
   }, [])
-
 
   /**
    * Apply layer visibility with optional animation
@@ -149,8 +152,12 @@ export function useMapLayers() {
             const progress = Math.min(elapsed / FADE_DURATION, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
             // Clamp opacity to valid range [0, targetOpacity] to prevent floating point errors
-            const rawOpacity = startOpacity + (endOpacity - startOpacity) * eased
-            const opacity = Math.max(0, Math.min(spec.targetOpacity, rawOpacity))
+            const rawOpacity =
+              startOpacity + (endOpacity - startOpacity) * eased
+            const opacity = Math.max(
+              0,
+              Math.min(spec.targetOpacity, rawOpacity),
+            )
 
             try {
               currentMap.setPaintProperty(spec.id, spec.opacityProp, opacity)
@@ -211,7 +218,11 @@ export function useMapLayers() {
         try {
           if (mapInstance.getLayer(layerId)) {
             mapInstance.setLayoutProperty(layerId, "text-allow-overlap", true)
-            mapInstance.setLayoutProperty(layerId, "text-ignore-placement", true)
+            mapInstance.setLayoutProperty(
+              layerId,
+              "text-ignore-placement",
+              true,
+            )
             mapInstance.setLayoutProperty(layerId, "symbol-avoid-edges", false)
           }
         } catch {
@@ -228,7 +239,8 @@ export function useMapLayers() {
         return
       }
 
-      const shouldBeVisible = !!currentConfig[groupKey as keyof typeof currentConfig]
+      const shouldBeVisible =
+        !!currentConfig[groupKey as keyof typeof currentConfig]
 
       // On first run: set immediately (no animation)
       // On section change: animate the transition
@@ -261,7 +273,11 @@ export function useMapLayers() {
       if (mapInstance.getLayer("inflow-watersheds")) {
         // Clamp opacity to valid range [0, 0.4]
         const opacity = Math.max(0, Math.min(0.4, 0.4 * (1 - fadeProgress)))
-        mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", opacity)
+        mapInstance.setPaintProperty(
+          "inflow-watersheds",
+          "fill-opacity",
+          opacity,
+        )
       }
     } catch {
       // Layer might not exist
@@ -280,7 +296,11 @@ export function useMapLayers() {
 
       try {
         if (mapInstance.getLayer("inflow-watersheds")) {
-          mapInstance.setLayoutProperty("inflow-watersheds", "visibility", "visible")
+          mapInstance.setLayoutProperty(
+            "inflow-watersheds",
+            "visibility",
+            "visible",
+          )
           mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", 0.4)
         }
       } catch {

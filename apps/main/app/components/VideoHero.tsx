@@ -164,7 +164,7 @@ export default function VideoHero({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "flex-end",
-            height: "80vh"
+            height: "80vh",
           }}
         >
           <Box

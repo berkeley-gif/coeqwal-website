@@ -277,11 +277,9 @@ export const learnMapActions = {
 export const useActiveSection = (): SectionId =>
   useLearnMapStore((s) => s.activeSection)
 
-export const useRiversProgress = () =>
-  useLearnMapStore((s) => s.riversProgress)
+export const useRiversProgress = () => useLearnMapStore((s) => s.riversProgress)
 
-export const useGeocoderMarker = () =>
-  useLearnMapStore((s) => s.geocoderMarker)
+export const useGeocoderMarker = () => useLearnMapStore((s) => s.geocoderMarker)
 
 export const useGeocodingResetCounter = () =>
   useLearnMapStore((s) => s.geocodingResetCounter)
