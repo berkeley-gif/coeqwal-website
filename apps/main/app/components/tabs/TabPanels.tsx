@@ -95,7 +95,7 @@ export default function TabPanels() {
   }, [])
 
   // Background color tied to active tab
-  // Learn tab is transparent so the persistent map shows through
+  // Learn tab uses transparent since it has its own integrated map
   const panelColor: string = useMemo(() => {
     if (activeTab === "learn") return "transparent"
     return TABS.find((t) => t.key === activeTab)?.panelColor ?? "fffff"
