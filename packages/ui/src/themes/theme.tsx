@@ -17,7 +17,7 @@ Components with hardcoded fontFamily styles (inline or in sx props) would need i
  ========================================================
 | 1. Global theme values
 |    - Typography scale (Perfect Fourth ratio with typeScale constants) <- possibly obsolete
-|    - Font families neueHaasText, neueHaasDisplay
+|    - Font families (text, display) with switchable presets
 |    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
 |    - Tier colors for data visualization
@@ -83,25 +83,66 @@ Change these values to update the theme across the site
 */
 
 // ===============================================================================
+// FONT CONFIGURATION SYSTEM
+// ===============================================================================
+// 
+// To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
+// Each preset defines: text (body), display (headlines), and cssImport (font loading)
+//
+// Available presets: "neueHaas" | "roboto" | "inter" | "system"
+//
+
+type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
+
+// CHANGE THIS TO SWITCH FONTS
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas"
+
+const FONT_PRESETS = {
+  neueHaas: {
+    text: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display: '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
+  roboto: {
+    text: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    display: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+  },
+  inter: {
+    text: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+  },
+  system: {
+    text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '', // No import needed for system fonts
+  },
+} as const
+
+// Active font configuration (used throughout theme)
+const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
+
+// ===============================================================================
 // TYPOGRAPHY SCALE
 // ===============================================================================
 //
 // Perfect Fourth (1.333) type scale
-// Headlines: Neue Haas Display (h1, h2, h3, h5, h6) | Body text: Neue Haas Text (h4, body1, body2, UI)
+// Headlines: Display font (h1, h2, h3, h5, h6) | Body text: Text font (h4, body1, body2, UI)
 //
 // Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
-// • h2: 4.35rem (69.6px) - Section headlines "What is the future..." (Neue Haas Display Medium)
-// • h3: 2.8rem (44.8px) - Subsection headlines (Neue Haas Display Medium)
-// • h4: 2.45rem (39.2px) - Card titles and smaller headlines (Neue Haas Text Regular)
-// • h5: 1.84rem (29.4px) - Labels and minor headlines (Neue Haas Display Medium)
-// • h6: 1.38rem (22.1px) - Small headlines and captions (Neue Haas Display SemiBold)
-// • body1: 1.25rem (20px) - Primary body text (Neue Haas Text Regular)
-// • body2: 0.95rem (15.2px) - Dashboard interface text (Neue Haas Text Regular)
+// • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water"
+// • h2: 4.35rem (69.6px) - Section headlines "What is the future..."
+// • h3: 2.8rem (44.8px) - Subsection headlines
+// • h4: 2.45rem (39.2px) - Card titles and smaller headlines
+// • h5: 1.84rem (29.4px) - Labels and minor headlines
+// • h6: 1.38rem (22.1px) - Small headlines and captions
+// • body1: 1.25rem (20px) - Primary body text
+// • body2: 0.95rem (15.2px) - Dashboard interface text
 //
 // Additional variants:
-// • subtitle1: 1.25rem (20px) - Medium weight body text (Neue Haas Text Medium)
-// • subtitle2: 0.95rem (15.2px) - Medium weight interface text (Neue Haas Text Medium)
+// • subtitle1: 1.25rem (20px) - Medium weight body text
+// • subtitle2: 0.95rem (15.2px) - Medium weight interface text
 // • button: 1rem (16px) - UI button text (Medium weight, no transform)
 // • caption: 1rem (16px) - Aligned with body2 for consistency
 // • nav: 0.875rem (14px) - Navigation text (custom variant)
@@ -137,12 +178,10 @@ const typeScale = {
 }
 
 export const themeValues = {
-  // Typography
+  // Typography - uses active font preset. Change ACTIVE_FONT_PRESET above to switch.
   fontFamily: {
-    neueHaasText:
-      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    neueHaasDisplay:
-      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    text: activeFont.text,     // Body text, UI elements
+    display: activeFont.display, // Headlines, display text
   },
 
   // Layout dimensions, for layout and layout calculations
@@ -440,7 +479,7 @@ const cardTypographyMixins = {
   // Main card title (e.g., "Current Operations")
   cardTitle: {
     color: "text.secondary",
-    fontFamily: themeValues.fontFamily.neueHaasText,
+    fontFamily: themeValues.fontFamily.text,
     fontWeight: 500,
     fontSize: "1.5rem", // Could use typeScale.h6 but this is specifically for cards
     lineHeight: 1.3,
@@ -769,7 +808,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: themeValues.fontFamily.neueHaasText,
+    fontFamily: themeValues.fontFamily.text,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -777,64 +816,64 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 1.0, // Tighter for large hero text
       // textTransform: "uppercase",
     },
     h2: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h2,
       fontWeight: 500,
       lineHeight: 1.1, // Slightly tighter for section headers
     },
     h3: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.15, // Balanced for subsection headers
     },
     h4: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.h4,
       fontWeight: 400,
       lineHeight: 1.25, // Slightly more open for card titles
     },
     h5: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
       lineHeight: 1.35, // Good balance for minor headlines
     },
     h6: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h6,
       fontWeight: 600,
       lineHeight: 1,
     },
     body1: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1.125rem", // 18px - primary body text
       fontWeight: 400,
       lineHeight: 1.5, // 1.5x ratio (27px at 18px font size)
     },
     body2: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1rem", // 16px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.5,
     },
     subtitle1: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - matches body1
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
     subtitle2: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1rem",
       fontWeight: 500,
       letterSpacing: "normal",
@@ -894,9 +933,7 @@ const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: `
-        @import url("https://use.typekit.net/rxm7kha.css");
-        /* @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap"); */
-        /* @import url("https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;500;600;700&display=swap"); */
+        ${activeFont.cssImport}
                 
         *, *::before, *::after {
           box-sizing: border-box;
@@ -913,13 +950,13 @@ const theme = createTheme({
           margin: 0;
           padding: 0;
           height: 100%;
-          font-family: ${themeValues.fontFamily.neueHaasText}
+          font-family: ${themeValues.fontFamily.text}
           overflow-x: hidden; /* Prevent horizontal scrollbar */
         }
         body {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          font-family: ${themeValues.fontFamily.neueHaasText}
+          font-family: ${themeValues.fontFamily.text}
         }
       `,
     },
