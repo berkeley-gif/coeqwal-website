@@ -24,24 +24,14 @@ import theme from "@repo/ui/themes/theme"
 
 ## Typography system
 
-The theme uses a Perfect Fourth (1.333) scale with font family assignments:
-
 ### Font families
 
-- **Headlines (h1, h2)**: Farnham Headline
 - **Display text (h3, h5, h6)**: Neue Haas Display
 - **Body & UI text**: Neue Haas Text
 
 ### Typography scale
 
-- **h1**: 6rem (96px) - Hero headlines
-- **h2**: 4.5rem (72px) - Section headlines
-- **h3**: 3.375rem (54px) - Subsection headlines
-- **h4**: 2.53rem (40.5px) - Card titles
-- **h5**: 1.9rem (30.4px) - Minor headlines
-- **h6**: 1.425rem (22.8px) - Small headlines
-- **body1**: 1.25rem (20px) - Primary body text
-- **body2**: 0.95rem (15.2px) - Dashboard interface text
+TBD
 
 ### Compact UI typography
 
@@ -68,14 +58,6 @@ For UI elements requiring tighter spacing:
 - **lg**: 12px - Medium compact
 - **xl**: 16px - Standard compact
 
-### Control dimensions
-
-Standardized form control sizes:
-
-- **Standard**: 20px × 20px (default)
-- **Compact**: 16px × 16px (dense interfaces)
-- **Micro**: 12px × 12px (indicators)
-
 ## Color system
 
 ### Palette
@@ -87,7 +69,7 @@ Standardized form control sizes:
 - **Utility**: Black and white
 - **Ambient**: Translucent ripple effects
 
-### Specialized Ccolors
+### Specialized colors
 
 - **Categories**: 12 distinct colors for operation categories
 - **Tiers**: 4-tier outcome colors (green, blue, orange, red)

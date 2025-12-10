@@ -386,7 +386,6 @@ export default function CaliforniaMapPanel({
                 p: 1.5,
                 minWidth: 200,
                 maxWidth: 300,
-                fontFamily: theme.typography.fontFamily,
               }}
             >
               {/* Primary name - Urb_Name for CWS, Mod_Name for others */}
