@@ -61,8 +61,6 @@ const ClimateCard = forwardRef<HTMLDivElement, ClimateCardProps>(
               <Box
                 sx={{
                   color: theme.palette.blue.darkest,
-                  fontFamily:
-                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                   fontWeight: 500,
                   fontSize: "1.5rem",
                   lineHeight: 1.3,
@@ -100,8 +98,6 @@ const ClimateCard = forwardRef<HTMLDivElement, ClimateCardProps>(
                 <Box
                   sx={{
                     color: theme.palette.blue.darkest,
-                    fontFamily:
-                      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                     fontWeight: 500,
                     fontSize: "1.5rem",
                     lineHeight: 1.3,

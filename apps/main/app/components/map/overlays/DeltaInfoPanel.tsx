@@ -118,7 +118,6 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           padding: 0,
           cursor: "pointer",
           color: theme.palette.blue.medium,
-          fontFamily: theme.typography.fontFamily,
           fontSize: "1rem",
           fontWeight: 500,
           textDecoration: "none",

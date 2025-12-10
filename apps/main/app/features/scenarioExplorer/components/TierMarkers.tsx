@@ -277,7 +277,6 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             style={{
               padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
               minWidth: theme.spacing(27.5),
-              fontFamily: theme.typography.fontFamily,
             }}
           >
             <div

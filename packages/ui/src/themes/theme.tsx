@@ -1,10 +1,22 @@
 import { createTheme, Theme } from "@mui/material/styles"
 
 /* ========================================================
+ NOTES
+ ========================================================
+
+To change fonts site-wide:
+
+- Add the new font import (TypeKit, Google Fonts, or @font-face)
+- Update themeValues.fontFamily constants
+
+The changes would cascade through all MUI components using theme.typography
+Components with hardcoded fontFamily styles (inline or in sx props) would need individual updates. A search for "fontFamily" in the codebase would reveal these exceptions.
+
+/* ========================================================
  TABLE OF CONTENTS
  ========================================================
 | 1. Global theme values
-|    - Typography scale (Perfect Fourth ratio with typeScale constants)
+|    - Typography scale (Perfect Fourth ratio with typeScale constants) <- possibly obsolete
 |    - Font families neueHaasText, neueHaasDisplay
 |    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
@@ -15,7 +27,7 @@ import { createTheme, Theme } from "@mui/material/styles"
 |    - Z-Index layering system (5 layers: background, content, interactive, navigation, system)
 |    - Map prompt dialog configuration
 |
-| 2. Reusable mixins (defined before theme creation)
+| 2. Reusable mixins (defined before theme creation) <- many are obsolete
 |    - Scenario card list styling
 |    - Tooltip action button styling
 |    - Triangle checkbox mixin for expandable controls
@@ -102,7 +114,7 @@ Change these values to update the theme across the site
 //
 
 // ===============================================================================
-// SPECS FOR THEME VALUES
+// CONSTANTS
 // ===============================================================================
 
 const typeScale = {
@@ -224,7 +236,7 @@ export const themeValues = {
       waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
     },
 
-    // Outcome tier colors, used
+    // Outcome tier colors
     tiers: {
       tier1: "#7b9d3f", // Green, tier 1
       tier2: "#60aacb", // Blue, tier 2
@@ -954,7 +966,7 @@ const theme = createTheme({
           }),
         },
         {
-          props: { variant: "standard" }, // This is our standard button
+          props: { variant: "standard" },
           style: ({ theme }) => ({
             textTransform: "none",
             borderRadius: theme.borderRadius.pill,
