@@ -1,7 +1,7 @@
 import { createTheme, Theme } from "@mui/material/styles"
 
 /* ========================================================
- NOTES
+ GENERAL COMMENTS THAT SHOULD PROBABLY GO IN A README
  ========================================================
 
 To change fonts site-wide:
@@ -9,7 +9,7 @@ To change fonts site-wide:
 - Add the new font import (TypeKit, Google Fonts, or @font-face)
 - Update themeValues.fontFamily constants
 
-The changes would cascade through all MUI components using theme.typography
+The changes will cascade through all MUI components using theme.typography
 Components with hardcoded fontFamily styles (inline or in sx props) would need individual updates. A search for "fontFamily" in the codebase would reveal these exceptions.
 
 /* ========================================================
@@ -18,13 +18,13 @@ Components with hardcoded fontFamily styles (inline or in sx props) would need i
 | 1. Global theme values
 |    - Typography scale (Perfect Fourth ratio with typeScale constants) <- possibly obsolete
 |    - Font families (text, display) with switchable presets
-|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
+|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer) <- useful! also probably partially obsolete
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
 |    - Tier colors for data visualization
 |    - Border radius values
 |    - Border styles  
 |    - Shadows
-|    - Z-Index layering system (5 layers: background, content, interactive, navigation, system)
+|    - Z-Index layering system (5 layers: background, content, interactive, navigation, system) <- obsolete. Revive?
 |    - Map prompt dialog configuration
 |
 | 2. Reusable mixins (defined before theme creation) <- many are obsolete
@@ -133,8 +133,8 @@ const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 // Scale progression using Perfect Fourth ratio (1.333):
 // • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water"
 // • h2: 4.35rem (69.6px) - Section headlines "What is the future..."
-// • h3: 2.8rem (44.8px) - Subsection headlines
-// • h4: 2.45rem (39.2px) - Card titles and smaller headlines
+// • h3: 3.26rem (52.2px) - Subsection headlines (h2 ÷ 1.333)
+// • h4: 2.45rem (39.2px) - Card titles (h3 ÷ 1.333)
 // • h5: 1.84rem (29.4px) - Labels and minor headlines
 // • h6: 1.38rem (22.1px) - Small headlines and captions
 // • body1: 1.25rem (20px) - Primary body text
@@ -159,11 +159,10 @@ const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 // ===============================================================================
 
 const typeScale = {
-  // Redo: We changed the h1 scale to fit the longer headline. We could change the type scale to accomodate new content / new layout
   // Headline sizes using Perfect Fourth ratio (1.333)
   h1: "5.8rem", // 92.8px - Hero size
   h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
-  h3: "2.8rem", // 44.8px - Subsection headers (updated for map overlay panels)
+  h3: "3.26rem", // 52.2px - Subsection headers (h2 ÷ 1.333)
   h4: "2.45rem", // 39.2px - Card titles (h3 ÷ 1.333)
   h5: "1.84rem", // 29.4px - Minor headlines (h4 ÷ 1.333)
   h6: "1.38rem", // 22.1px - Section headers (h5 ÷ 1.333)
