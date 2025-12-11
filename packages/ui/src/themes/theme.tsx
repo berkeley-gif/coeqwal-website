@@ -468,68 +468,6 @@ export const themeValues = {
   },
 }
 
-// ScenarioCard list styling mixin
-const scenarioCardListMixin = {
-  "& ul": {
-    margin: 0,
-    paddingLeft: `${themeValues.layout.controls.standard}px`, // 20px standardized
-    "& li": {
-      fontSize: "0.95rem", // 15.2px - dashboard interface text (matches body2)
-      fontWeight: 400,
-      lineHeight: 1.4, // Tighter to conserve vertical space
-      marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
-
-      color: "inherit",
-      "&:last-child": {
-        marginBottom: 0,
-      },
-      // Bullet styling
-      "&::marker": {
-        color: "inherit",
-      },
-    },
-  },
-} as const
-
-// Tooltip action button mixin
-const tooltipActionButtonMixin = {
-  textTransform: "none",
-  borderRadius: themeValues.borderRadius.pill,
-  boxShadow: "none",
-  border: "none",
-  padding: "4px 12px", // Use theme.spacing(theme.cards.spacing.compact.sm, theme.cards.spacing.compact.lg) in components
-  minWidth: "auto",
-  lineHeight: 1.5,
-  fontSize: typeScale.compact.subtitle, // 0.8rem - compact dialog subtitles
-  fontWeight: 500,
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-} as const
-
-// Triangle checkbox mixin (for dropdown menus in the scenario search panel)
-const triangleCheckboxMixin = {
-  display: "inline-block",
-  width: `${themeValues.layout.controls.standard}px !important`,
-  height: `${themeValues.layout.controls.standard}px !important`,
-  minWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent shrinking
-  maxWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent growing
-  flexShrink: 0, // Don't shrink in flex containers
-  borderRadius: "2px",
-  backgroundColor: "transparent",
-  padding: "0",
-  alignSelf: "flex-start",
-  transform: "translateY(2px)", // Fine-tune vertical position
-  // Center the triangle content
-  lineHeight: `${themeValues.layout.controls.standard - 2}px`, // height minus border (20px - 2px)
-  textAlign: "center",
-  fontSize: typeScale.compact.micro, // 0.7rem
-  transition: "all 0.2s ease",
-  position: "relative",
-  boxSizing: "border-box !important",
-  filter: "none",
-  backdropFilter: "none",
-} as const
-
 // Form control base mixin (shared styling for all form controls)
 const formControlBaseMixin = {
   width: `${themeValues.layout.controls.standard}px !important`,
@@ -547,49 +485,6 @@ const formControlBaseMixin = {
   boxSizing: "border-box",
   filter: "none !important",
   backdropFilter: "none !important",
-} as const
-
-// Card typography mixins (standardized from MapPanel card patterns)
-const cardTypographyMixins = {
-  // Eyebrow text (e.g., "SCENARIO")
-  eyebrow: {
-    color: "blue.medium",
-    textTransform: "uppercase",
-    fontSize: typeScale.compact.caption, // 0.75rem - compact captions/labels
-    fontWeight: 500,
-    display: "block",
-    mb: 0.5,
-  } as const,
-  // Main card title (e.g., "Current Operations")
-  cardTitle: {
-    color: "text.secondary",
-    fontFamily: themeValues.fontFamily.text,
-    fontWeight: 500,
-    fontSize: "1.5rem", // Could use typeScale.h6 but this is specifically for cards
-    lineHeight: 1.3,
-    mb: 1,
-  } as const,
-  // Section headers within cards (e.g., "Scenario snapshot")
-  sectionHeader: {
-    // Uses Typography variant="h6" with theme color
-    color: "text.secondary",
-  } as const,
-  // Body text containers
-  bodyContainer: {
-    color: "text.secondary",
-    fontFamily: "typography.fontFamily",
-    mb: 2.5,
-  } as const,
-  // Instructional text
-  instructionalText: {
-    color: "text.primary",
-    fontFamily: "typography.fontFamily",
-    // Uses Typography variant="body1"
-  } as const,
-  // Highlighted words within text
-  highlightedSpan: {
-    color: "text.secondary",
-  } as const,
 } as const
 
 // Drawer content styling mixins
@@ -1490,10 +1385,6 @@ const theme = createTheme({
   mixins: {
     ...baseTheme.mixins,
     drawerContent: drawerContentMixins,
-    cardTypography: cardTypographyMixins,
-    scenarioCardList: scenarioCardListMixin,
-    tooltipActionButton: tooltipActionButtonMixin,
-    triangleCheckbox: triangleCheckboxMixin,
     formControlBase: formControlBaseMixin,
   },
 })
@@ -1548,13 +1439,6 @@ theme.mapPromptDialog = {
     },
   },
 }
-
-// expose mixin constants for easy import if needed
-export const cardTypography = cardTypographyMixins
-export const scenarioCardList = scenarioCardListMixin
-export const tooltipActionButton = tooltipActionButtonMixin
-export const triangleCheckbox = triangleCheckboxMixin
-export const formControlBase = formControlBaseMixin
 
 export default theme
 
@@ -1670,10 +1554,6 @@ declare module "@mui/material/styles" {
 
   interface Mixins {
     drawerContent: typeof drawerContentMixins
-    cardTypography: typeof cardTypographyMixins
-    scenarioCardList: typeof scenarioCardListMixin
-    tooltipActionButton: typeof tooltipActionButtonMixin
-    triangleCheckbox: typeof triangleCheckboxMixin
     formControlBase: typeof formControlBaseMixin
   }
 
