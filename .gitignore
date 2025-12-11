@@ -27,3 +27,6 @@ dist
 
 # Documentation (developer notes not for repo)
 docs/
+
+# Archived code (unused files preserved outside version control)
+**/archive/
