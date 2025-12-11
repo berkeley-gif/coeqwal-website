@@ -126,7 +126,7 @@ export default function CategoryView() {
             onChange={() => handleAccordionChange(category.id)}
             sx={{
               backgroundColor: theme.palette.common.white,
-              boxShadow: theme.shadow.subtle,
+              boxShadow: theme.boxShadows.subtle,
               mb: theme.spacing(2),
               "&:before": {
                 display: "none",

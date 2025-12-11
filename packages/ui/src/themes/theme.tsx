@@ -1,101 +1,32 @@
 import { createTheme, Theme } from "@mui/material/styles"
 
 /* ========================================================
- GENERAL COMMENTS THAT SHOULD PROBABLY GO IN A README
- ========================================================
-
-To change fonts site-wide:
-
-- Add the new font import (TypeKit, Google Fonts, or @font-face)
-- Update themeValues.fontFamily constants
-
-The changes will cascade through all MUI components using theme.typography
-Components with hardcoded fontFamily styles (inline or in sx props) would need individual updates. A search for "fontFamily" in the codebase would reveal these exceptions.
-
-/* ========================================================
- TABLE OF CONTENTS
- ========================================================
-| 1. Global theme values
-|    - Typography scale (Perfect Fourth ratio with typeScale constants) <- possibly obsolete
-|    - Font families (text, display) with switchable presets
-|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer) <- useful! also probably partially obsolete
-|    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
-|    - Tier colors for data visualization
-|    - Border radius values
-|    - Border styles  
-|    - Shadows
-|    - Z-Index layering system (5 layers: background, content, interactive, navigation, system) <- obsolete. Revive?
-|    - Map prompt dialog configuration
-|
-| 2. Reusable mixins (defined before theme creation) <- many are obsolete
-|    - Scenario card list styling
-|    - Tooltip action button styling
-|    - Triangle checkbox mixin for expandable controls
-|    - Form control base mixin (standardized 20px × 20px controls)
-|    - Card typography mixins (eyebrow, cardTitle, sectionHeader, bodyContainer, etc.)
-|    - Drawer content styling mixins (contentWrapper, itemBox, chips, etc.)
-|
-| 3. Theme configuration
-|    - Base theme creation
-|    - Helper functions (createBorderStyles, createDrawerMixins)
-|    - Main theme object with:
-|      - Custom layout properties and responsive spacing system
-|      - Cards typography scale and spacing system
-|      - California Water palette integration
-|      - Typography variants using typeScale
-|      - Shape settings
-|      - Z-index configuration
-|      - Component overrides for MUI components:
-|        * CssBaseline (incl. font imports)
-|        * Button variants (pill, standard, outlined, actionCard)
-|        * Drawer (mini-drawer with transitions)
-|        * Form controls (Checkbox, Radio, FormControlLabel)
-|        * Navigation (incl tabs)
-|        * UI components (Typography, Paper, Toolbar, Tooltip, etc.)
-|      - Custom mixins integration
-|
-| 4. Custom theme properties (post-creation)
-|    - Border utilities with palette colors
-|    - Background overlays (transparent, paragraph, overlay variants)
-|    - Border radius application
-|    - Map prompt dialog configuration
-|    - Exported mixin constants
-|
-| 5. TypeScript customizations
-|    - Extended palette interface (brand, blue, accent, nature, utility, grey, ambient)
-|    - Tier color interfaces
-|    - Custom theme interface extensions (layout, cards, border, background, mapPromptDialog)
-|    - Z-Index interface extensions (layered system with semantic names)
-|    - Cards typography and spacing interfaces
-|    - Component variant overrides (Button, Typography)
-|    - Custom mixins interface (all reusable mixins)
-|
-| 6. Documentation & usage guides
-|    - Form control conventions and specifications
-|    - Z-index layering system guide
-|    - Usage examples and best practices
-| ========================================================
+ * COEQWAL MUI THEME
+ * ========================================================
+ *
+ * TABLE OF CONTENTS
+ * -----------------
+ * 1. themeValues     - Design tokens (fonts, colors, spacing, shadows)
+ * 2. Mixins          - Reusable style patterns (formControlBase, drawerContent)
+ * 3. createTheme()   - MUI theme with palette, typography, component overrides
+ * 4. Post-creation   - Custom properties (border, background, boxShadows)
+ * 5. TypeScript      - Module augmentation for custom theme properties
+ */
 
 
-| 1. Global theme values
-======================================================== 
-Change these values to update the theme across the site
+/* ===============================================================================
+* FONT CONFIGURATION SYSTEM
+* ===============================================================================
+* 
+* To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
+* Each preset defines: text (body), display (headlines), and cssImport (font loading)
+*
+* Available presets: "neueHaas" | "roboto" | "inter" | "system"
 */
-
-// ===============================================================================
-// FONT CONFIGURATION SYSTEM
-// ===============================================================================
-// 
-// To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
-// Each preset defines: text (body), display (headlines), and cssImport (font loading)
-//
-// Available presets: "neueHaas" | "roboto" | "inter" | "system"
-//
 
 type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
 
-// CHANGE THIS TO SWITCH FONTS
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas"
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -120,52 +51,21 @@ const FONT_PRESETS = {
   },
 } as const
 
-// Active font configuration (used throughout theme)
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
-// ===============================================================================
-// TYPOGRAPHY SCALE
-// ===============================================================================
-//
-// Perfect Fourth (1.333) type scale
-// Headlines: Display font (h1, h2, h3, h5, h6) | Body text: Text font (h4, body1, body2, UI)
-//
-// Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water"
-// • h2: 4.35rem (69.6px) - Section headlines "What is the future..."
-// • h3: 3.26rem (52.2px) - Subsection headlines (h2 ÷ 1.333)
-// • h4: 2.45rem (39.2px) - Card titles (h3 ÷ 1.333)
-// • h5: 1.84rem (29.4px) - Labels and minor headlines
-// • h6: 1.38rem (22.1px) - Small headlines and captions
-// • body1: 1.25rem (20px) - Primary body text
-// • body2: 0.95rem (15.2px) - Dashboard interface text
-//
-// Additional variants:
-// • subtitle1: 1.25rem (20px) - Medium weight body text
-// • subtitle2: 0.95rem (15.2px) - Medium weight interface text
-// • button: 1rem (16px) - UI button text (Medium weight, no transform)
-// • caption: 1rem (16px) - Aligned with body2 for consistency
-// • nav: 0.875rem (14px) - Navigation text (custom variant)
-//
-// Compact UI variants (for dialogs, tooltips, form labels):
-// • compact.title: 0.9rem (14.4px) - Compact dialog titles
-// • compact.subtitle: 0.8rem (12.8px) - Compact dialog subtitles
-// • compact.caption: 0.75rem (12px) - Compact captions/labels
-// • compact.micro: 0.7rem (11.2px) - Micro text (form helpers)
-//
 
-// ===============================================================================
-// CONSTANTS
-// ===============================================================================
+/* ========================================================
+ * 1. themeValues - Design tokens
+ * ======================================================== */
 
 const typeScale = {
   // Headline sizes using Perfect Fourth ratio (1.333)
   h1: "5.8rem", // 92.8px - Hero size
-  h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
-  h3: "3.26rem", // 52.2px - Subsection headers (h2 ÷ 1.333)
-  h4: "2.45rem", // 39.2px - Card titles (h3 ÷ 1.333)
-  h5: "1.84rem", // 29.4px - Minor headlines (h4 ÷ 1.333)
-  h6: "1.38rem", // 22.1px - Section headers (h5 ÷ 1.333)
+  h2: "4.35rem", // 69.6px - Major section headers
+  h3: "3.26rem", // 52.2px - Subsection headers
+  h4: "2.45rem", // 39.2px - Card titles
+  h5: "1.84rem", // 29.4px - Minor headlines
+  h6: "1.38rem", // 22.1px - Section headers
 
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
@@ -177,13 +77,11 @@ const typeScale = {
 }
 
 // themeValues - runtime values for custom theme properties
-// (also typed in Theme and ThemeOptions interfaces below for TypeScript support)
-// necessary  for MUI typscript support; unfortunately it means we repeat the terms three times in the theme.
 export const themeValues = {
-  // Typography - uses active font preset. Change ACTIVE_FONT_PRESET above to switch.
+  // Typography (uses active font preset. Change ACTIVE_FONT_PRESET above to switch.)
   fontFamily: {
-    text: activeFont.text,     // Body text, UI elements
-    display: activeFont.display, // Headlines, display text
+    text: activeFont.text,
+    display: activeFont.display,
   },
 
   // Layout dimensions, for layout and layout calculations
@@ -205,9 +103,9 @@ export const themeValues = {
     },
     // Spacer component spacing system - responsive values for section spacing
     spacer: {
-      small: { xs: 24, md: 48, lg: 64 }, // 24px / 48px / 64px
-      medium: { xs: 48, md: 96 }, // 48px / 96px
-      large: { xs: 100, lg: 0 }, // 100px / 0
+      small: { xs: 24, md: 48, lg: 64 },
+      medium: { xs: 48, md: 96 },
+      large: { xs: 100, lg: 0 },
     },
   },
 
@@ -219,13 +117,13 @@ export const themeValues = {
       water: "#64A4D6", // Bottom of gradient - water blue
     },
 
-    // Text and UI blues (organized by intensity)
+    // Text and UI blues 
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
-      dark: "#186b88", // Dark teal - secondary text
-      medium: "#2d89b6", // Medium blue - accent (a beautiful blue FWIW)
+      dark: "#186b88", // Dark teal
+      medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
-      light: "#77a2d9", // Light blue - subtle elements
+      light: "#77a2d9", // Light blue
     },
 
     text: {
@@ -310,12 +208,16 @@ export const themeValues = {
     thick: "2px solid",
   },
 
-  // Shadows
-  shadow: {
-    none: "none",
-    subtle: "0 1px 3px rgba(0,0,0,0.2)", // Subtle shadow for panels and overlays
-    medium: "0 2px 4px rgba(0,0,0,0.3)", // Medium shadow for interactive elements
-    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)", // Prominent shadow for floating elements
+  // Box shadows
+  boxShadows: {
+    subtle: "0 1px 3px rgba(0,0,0,0.2)",
+    medium: "0 2px 4px rgba(0,0,0,0.3)",
+    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)",
+    panel: "0 8px 32px rgba(0, 0, 0, 0.2)",
+    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)",
+    toast: "0 4px 20px rgba(0, 0, 0, 0.3)",
+    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)",
+    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)",
   },
 
   // Z-index values
@@ -352,22 +254,9 @@ export const themeValues = {
     debug: 9999, // Debug overlays (development)
   },
 
-  // Box shadows - could be standardized further, recorded here for expedience
-  boxShadows: {
-    panel: "0 8px 32px rgba(0, 0, 0, 0.2)", // Floating panels
-    card: "0 4px 12px rgba(0, 0, 0, 0.15)", // Cards, tooltips
-    hover: "0 4px 8px rgba(0, 0, 0, 0.1)", // Hover states
-    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)", // Strong hover (glossary button)
-    active: "0 2px 4px rgba(0, 0, 0, 0.1)", // Active/pressed
-    toast: "0 4px 20px rgba(0, 0, 0, 0.3)", // Notifications, buttons
-    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)", // Focus ring
-    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)", // Focus ring hover
-    none: "none",
-  },
-
   // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
   mapPromptDialog: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)", // theme.background.overlay.dark
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     textColor: "#FFFFFF", // theme.palette.utility.white
     borderRadius: "8px", // theme.borderRadius.card
     padding: "16px", // theme.borderRadius.card
@@ -422,17 +311,17 @@ export const themeValues = {
         fontWeight: 400,
       },
       body: {
-        fontSize: "0.95rem", // matches body1
+        fontSize: "0.95rem", // compact card body text
         lineHeight: 1.5,
         fontWeight: 400,
       },
       caption: {
-        fontSize: "0.95rem", // align with body1
+        fontSize: "0.95rem", // compact card captions
         lineHeight: 1.4,
         fontWeight: 400,
       },
       button: {
-        fontSize: "0.95rem", // align with body1
+        fontSize: "0.95rem",
         lineHeight: 1.5,
         fontWeight: 500,
       },
@@ -468,7 +357,11 @@ export const themeValues = {
   },
 }
 
-// Form control base mixin (shared styling for all form controls)
+/* ========================================================
+ * 2. Mixins - Reusable style patterns
+ * ======================================================== */
+
+// Form control base mixin
 const formControlBaseMixin = {
   width: `${themeValues.layout.controls.standard}px !important`,
   height: `${themeValues.layout.controls.standard}px !important`,
@@ -550,8 +443,8 @@ const drawerContentMixins = {
 } as const
 
 /* ========================================================
-| 2. Theme configuration
-======================================================== */
+ * 3. createTheme() - MUI theme configuration
+ * ======================================================== */
 
 const baseTheme = createTheme()
 
@@ -780,7 +673,7 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.25rem", // 20px - matches body1
+      fontSize: "1.25rem", // 20px
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
@@ -951,7 +844,7 @@ const theme = createTheme({
             boxShadow: "none",
             border: "none",
             padding: "16px",
-            fontSize: "0.95rem", // align with body1
+            fontSize: "0.95rem",
             fontWeight: 400,
             textAlign: "center",
             transition: "all 0.2s ease",
@@ -1287,7 +1180,7 @@ const theme = createTheme({
           margin: 0, // Remove default margins for condensed spacing
           alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
-            fontSize: "0.95rem", // align with body1
+            fontSize: "0.95rem",
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
@@ -1309,7 +1202,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary,
-          fontSize: "0.95rem", // align with body1
+          fontSize: "0.95rem",
           fontWeight: 400,
           textTransform: "none",
           minWidth: "auto",
@@ -1390,8 +1283,8 @@ const theme = createTheme({
 })
 
 /* ========================================================
-| 3. Custom theme properties
-======================================================== */
+ * 4. Post-creation - Custom theme properties
+ * ======================================================== */
 
 // Apply border styles with colors from palette
 theme.border = createBorderStyles(
@@ -1410,8 +1303,6 @@ theme.background = {
 }
 
 theme.borderRadius = themeValues.borderRadius
-
-theme.shadow = themeValues.shadow
 
 theme.boxShadows = themeValues.boxShadows
 
@@ -1443,8 +1334,8 @@ theme.mapPromptDialog = {
 export default theme
 
 /* ========================================================
-| 4. TypeScript customizations
-======================================================== */
+ * 5. TypeScript
+ * ======================================================== */
 
 /**
  * MUI Theme Type Augmentation
@@ -1524,7 +1415,6 @@ declare module "@mui/material/styles" {
       overlay: { light: string; medium: string; dark: string }
     }
     borderRadius: typeof themeValues.borderRadius
-    shadow: typeof themeValues.shadow
     boxShadows: typeof themeValues.boxShadows
     mapPromptDialog: typeof themeValues.mapPromptDialog & {
       typography: {
