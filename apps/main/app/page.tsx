@@ -23,26 +23,26 @@ export default function Home() {
           <PersistentLearnMap />
         </Suspense>
 
-        <TabsProvider>
-          <Header />
-          <FloatingGlossary />
-          <Box
-            component="main"
-            sx={{
-              position: "relative",
-              overflowX: "clip",
-              overflowY: "visible",
+      <TabsProvider>
+        <Header />
+        <FloatingGlossary />
+        <Box
+          component="main"
+          sx={{
+            position: "relative",
+            overflowX: "clip",
+            overflowY: "visible",
               // Ensure tab content sits above the map
               zIndex: 1,
-            }}
-          >
-            <IntroSection />
-            <Suspense fallback={null}>
-              <SmoothTabs />
-              <TabPanels />
-            </Suspense>
-          </Box>
-        </TabsProvider>
+          }}
+        >
+          <IntroSection />
+          <Suspense fallback={null}>
+            <SmoothTabs />
+            <TabPanels />
+          </Suspense>
+        </Box>
+      </TabsProvider>
       </MapProvider>
     </>
   )

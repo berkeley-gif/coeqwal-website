@@ -208,29 +208,29 @@ export function useMapLayers() {
     coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
 
     const currentConfig = SECTION_LAYERS[activeSection]
-    const prevSection = prevSectionRef.current
+      const prevSection = prevSectionRef.current
     const isFirstRun = !initializedRef.current
 
     // Configure label layers for Globe projection on first run
-    if (isFirstRun) {
+      if (isFirstRun) {
       const labelLayers = ["california-label", "central-valley-label"]
-      labelLayers.forEach((layerId) => {
-        try {
-          if (mapInstance.getLayer(layerId)) {
-            mapInstance.setLayoutProperty(layerId, "text-allow-overlap", true)
-            mapInstance.setLayoutProperty(
-              layerId,
-              "text-ignore-placement",
-              true,
-            )
+        labelLayers.forEach((layerId) => {
+          try {
+            if (mapInstance.getLayer(layerId)) {
+              mapInstance.setLayoutProperty(layerId, "text-allow-overlap", true)
+              mapInstance.setLayoutProperty(
+                layerId,
+                "text-ignore-placement",
+                true,
+              )
             mapInstance.setLayoutProperty(layerId, "symbol-avoid-edges", false)
+            }
+          } catch {
+            // Layer might not exist
           }
-        } catch {
-          // Layer might not exist
-        }
       })
       initializedRef.current = true
-    }
+      }
 
     // ALWAYS apply ALL layer groups to their correct state
     Object.keys(LAYER_GROUPS).forEach((groupKey) => {
