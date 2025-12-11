@@ -397,6 +397,75 @@ export const themeValues = {
       },
     },
   },
+
+  // Card typography and spacing system
+  cards: {
+    typography: {
+      hero: {
+        fontSize: "2.5rem", // 40px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      sectionTitle: {
+        fontSize: "2rem", // 32px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      cardTitle: {
+        fontSize: "1.5rem", // 24px
+        lineHeight: 1.4,
+        fontWeight: 500,
+      },
+      subtitle: {
+        fontSize: "1.25rem", // 20px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      body: {
+        fontSize: "0.95rem", // matches body1
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      caption: {
+        fontSize: "0.95rem", // align with body1
+        lineHeight: 1.4,
+        fontWeight: 400,
+      },
+      button: {
+        fontSize: "0.95rem", // align with body1
+        lineHeight: 1.5,
+        fontWeight: 500,
+      },
+    },
+    spacing: {
+      standard: 3, // 24px - standardized spacing unit
+      padding: 3, // 24px inner padding
+      gap: 3, // 24px between cards
+      capsule: {
+        px: 2, // Horizontal emphasis
+        py: 0.5, // Minimal vertical padding
+        marginRight: 1, // Space between capsules (horizontal)
+        marginBottom: 1, // Space between capsules (vertical wrapping)
+      },
+      modal: {
+        padding: 4, // 32px for modal content
+      },
+      coBenefitTags: {
+        marginTop: 2, // Slightly detached from subtypes
+      },
+      tellMoreIcon: {
+        marginLeft: "auto", // Aligns right within card header row
+      },
+      // Compact spacing for cards, dialogs, tooltips, form controls
+      compact: {
+        xs: 0.25, // 2px
+        sm: 0.5, // 4px
+        md: 1, // 8px
+        lg: 1.5, // 12px
+        xl: 2, // 16px
+      },
+    },
+  },
 }
 
 // ScenarioCard list styling mixin
@@ -652,74 +721,8 @@ const theme = createTheme({
   breakpoints: {
     values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
   },
-  // Card typography scale
-  cards: {
-    typography: {
-      hero: {
-        fontSize: "2.5rem", // 40px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      sectionTitle: {
-        fontSize: "2rem", // 32px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      cardTitle: {
-        fontSize: "1.5rem", // 24px
-        lineHeight: 1.4,
-        fontWeight: 500,
-      },
-      subtitle: {
-        fontSize: "1.25rem", // 20px
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      body: {
-        fontSize: "0.95rem", // matches body1
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      caption: {
-        fontSize: "0.95rem", // align with body1
-        lineHeight: 1.4,
-        fontWeight: 400,
-      },
-      button: {
-        fontSize: "0.95rem", // align with body1
-        lineHeight: 1.5,
-        fontWeight: 500,
-      },
-    },
-    spacing: {
-      standard: 3, // 24px - standardized spacing unit
-      padding: 3, // 24px inner padding
-      gap: 3, // 24px between cards
-      capsule: {
-        px: 2, // Horizontal emphasis
-        py: 0.5, // Minimal vertical padding
-        marginRight: 1, // Space between capsules (horizontal)
-        marginBottom: 1, // Space between capsules (vertical wrapping)
-      },
-      modal: {
-        padding: 4, // 32px for modal content
-      },
-      coBenefitTags: {
-        marginTop: 2, // Slightly detached from subtypes
-      },
-      tellMoreIcon: {
-        marginLeft: "auto", // Aligns right within card header row
-      },
-      // Compact spacing for cards, dialogs, tooltips, form controls
-      compact: {
-        xs: 0.25, // 2px
-        sm: 0.5, // 4px
-        md: 1, // 8px
-        lg: 1.5, // 12px
-        xl: 2, // 16px
-      },
-    },
-  },
+  // Card typography and spacing (from themeValues)
+  cards: themeValues.cards,
   // Palette - California Water theme (MUI integration)
   palette: {
     common: {
@@ -1560,184 +1563,67 @@ export default theme
 ======================================================== */
 
 /**
- * MUI theme types
+ * MUI Theme Type Augmentation
  *
- * Custom theme properties must be defined in 3 places due to how MUI's TypeScript types work:
+ * Types are derived from `themeValues` using `typeof` to maintain a single source of truth.
+ * This reduces duplication while preserving full TypeScript autocomplete support.
  *
- * 1. `themeValues` object (above) - The actual runtime values
- * 2. `interface Theme` (below) - Type for accessing theme (e.g., theme.boxShadows.panel)
- * 3. `interface ThemeOptions` (below) - Type for creating/extending themes via createTheme()
- *
- * This is verbose but required for full TypeScript support with autocomplete.
+ * @see https://www.typescriptlang.org/docs/handbook/2/typeof-types.html
  */
 declare module "@mui/material/styles" {
-  // Custom palette colors - California Water Theme
+  // Custom palette colors - derived from themeValues.palette
   interface Palette {
-    interaction: {
-      hoverBackground: string
-    }
-    brand: {
-      sky: string
-      water: string
-    }
-    blue: {
-      darkest: string
-      dark: string
-      medium: string
-      bright: string
-      light: string
-    }
-    accent: {
-      gold: string
-      orange: string
-      alert: string
-    }
-    nature: {
-      earth: string
-      forest: string
-    }
-    learn: {
-      background: string
-      text: string
-    }
-    explore: {
-      background: string
-      text: string
-    }
-    empower: {
-      background: string
-      text: string
-    }
-    utility: {
-      white: string
-      black: string
-    }
-
-    ambient: {
-      rippleWhite: string
-      rippleBlue: string
-    }
-
-    overlay: {
-      water: string
-      waterLight: string
-    }
-
-    tiers: {
-      tier1: string
-      tier2: string
-      tier3: string
-      tier4: string
-    }
+    interaction: { hoverBackground: string }
+    brand: typeof themeValues.palette.brand
+    blue: typeof themeValues.palette.blue
+    accent: typeof themeValues.palette.accent
+    nature: typeof themeValues.palette.nature
+    learn: { background: string; text: string }
+    explore: { background: string; text: string }
+    empower: { background: string; text: string }
+    utility: typeof themeValues.palette.utility
+    ambient: typeof themeValues.palette.ambient
+    overlay: typeof themeValues.palette.overlay
+    tiers: typeof themeValues.palette.tiers
   }
 
   interface PaletteOptions {
-    brand?: {
-      sky?: string
-      water?: string
-    }
-    blue?: {
-      darkest?: string
-      dark?: string
-      medium?: string
-      bright?: string
-      light?: string
-    }
-    accent?: {
-      gold?: string
-      orange?: string
-      alert?: string
-    }
-    nature?: {
-      earth: string
-      forest?: string
-    }
-    learn: {
-      background: string
-      text: string
-    }
-    explore: {
-      background: string
-      text: string
-    }
-    empower: {
-      background: string
-      text: string
-    }
-    utility?: {
-      white?: string
-      black?: string
-    }
-
-    ambient?: {
-      rippleWhite?: string
-      rippleBlue?: string
-    }
-
-    overlay?: {
-      water?: string
-      waterLight?: string
-    }
-
-    tiers?: {
-      tier1?: string
-      tier2?: string
-      tier3?: string
-      tier4?: string
-    }
-
-    interaction?: {
-      hoverBackground?: string
-    }
+    interaction?: { hoverBackground?: string }
+    brand?: Partial<typeof themeValues.palette.brand>
+    blue?: Partial<typeof themeValues.palette.blue>
+    accent?: Partial<typeof themeValues.palette.accent>
+    nature?: Partial<typeof themeValues.palette.nature>
+    learn?: { background?: string; text?: string }
+    explore?: { background?: string; text?: string }
+    empower?: { background?: string; text?: string }
+    utility?: Partial<typeof themeValues.palette.utility>
+    ambient?: Partial<typeof themeValues.palette.ambient>
+    overlay?: Partial<typeof themeValues.palette.overlay>
+    tiers?: Partial<typeof themeValues.palette.tiers>
   }
 
-  // zIndex interface
+  // zIndex - derived from themeValues.zIndex
   interface ZIndex {
-    // Background layers
     basement: number
     sectionBackground: number
-
-    // Content layers
     content: number
     panels: number
-
-    // Intro section layers
     introBackgroundImages: number
     introText: number
     introForegroundImages: number
     introBubbles: number
-
-    // Interactive layers
     mapControls: number
     floatingElements: number
-
-    // Navigation layers
     drawerBackdrop: number
     overlay: number
-
-    // System layers
     notification: number
     loading: number
     debug: number
   }
 
-  // Theme interface - types for accessing theme properties (e.g., theme.boxShadows.panel)
+  // Theme interface - types derived from themeValues
   interface Theme {
-    layout: {
-      headerHeight: number
-      drawer: {
-        width: number
-        closedWidth: number
-        glossaryWidth: number
-      }
-      textContainer: {
-        maxWidth: string
-      }
-      controls: {
-        standard: number
-        compact: number
-        micro: number
-      }
+    layout: typeof themeValues.layout & {
       spacing: {
         xs: { xs: number; sm: number; md: number }
         sm: { xs: number; sm: number; md: number }
@@ -1746,161 +1632,29 @@ declare module "@mui/material/styles" {
         xl: { xs: number; sm: number; md: number }
         xxl: { xs: number; sm: number; md: number }
       }
-      spacer: {
-        small: { xs: number; md: number; lg: number }
-        medium: { xs: number; md: number }
-        large: { xs: number; lg: number }
-      }
     }
     border: ReturnType<typeof createBorderStyles>
     background: {
       transparent: string
       paragraph: string
-      overlay: {
-        light: string
-        medium: string
-        dark: string
-      }
+      overlay: { light: string; medium: string; dark: string }
     }
-    borderRadius: {
-      pill: string
-      rounded: string
-      card: string
-      standard: string
-      none: string
-    }
-    shadow: {
-      none: string
-      subtle: string
-      medium: string
-      prominent: string
-    }
-    boxShadows: {
-      panel: string
-      card: string
-      hover: string
-      hoverStrong: string
-      active: string
-      toast: string
-      ring: string
-      ringHover: string
-      none: string
-    }
-    mapPromptDialog: {
-      backgroundColor: string
-      textColor: string
-      borderRadius: string
-      padding: string
-      minWidth: string
-      boxShadow: string
-      zIndex: number
-      position: {
-        top: string
-        centerX: boolean
-      }
+    borderRadius: typeof themeValues.borderRadius
+    shadow: typeof themeValues.shadow
+    boxShadows: typeof themeValues.boxShadows
+    mapPromptDialog: typeof themeValues.mapPromptDialog & {
       typography: {
-        title: {
-          fontSize: string
-          fontWeight: number
-          marginBottom: string
-        }
-        subtitle: {
-          fontSize: string
-          opacity: number
-          marginBottom: string
-        }
-        action: {
-          fontSize: string
-          fontWeight: string
-          cursor: string
-          textDecoration: string
-        }
+        title: { fontSize: string; fontWeight: number; marginBottom: string }
+        subtitle: { fontSize: string; opacity: number; marginBottom: string }
+        action: { fontSize: string; fontWeight: string; cursor: string; textDecoration: string }
       }
     }
-    cards: {
-      typography: {
-        hero: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        sectionTitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        cardTitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        subtitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        body: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        caption: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        button: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-      }
-      spacing: {
-        standard: number
-        padding: number
-        gap: number
-        capsule: {
-          px: number
-          py: number
-          marginRight: number
-          marginBottom: number
-        }
-        modal: {
-          padding: number
-        }
-        coBenefitTags: {
-          marginTop: number
-        }
-        tellMoreIcon: {
-          marginLeft: string
-        }
-        compact: {
-          xs: number
-          sm: number
-          md: number
-          lg: number
-          xl: number
-        }
-      }
-    }
+    cards: typeof themeValues.cards
   }
 
-  // ThemeOptions interface - types for createTheme() options (optional properties)
+  // ThemeOptions interface - optional versions for createTheme()
   interface ThemeOptions {
-    layout?: {
-      headerHeight?: number
-      drawer?: {
-        width?: number
-        closedWidth?: number
-      }
-      textContainer?: {
-        maxWidth?: string
-      }
-      controls?: {
-        standard?: number
-        compact?: number
-        micro?: number
-      }
+    layout?: Partial<typeof themeValues.layout> & {
       spacing?: {
         xs?: { xs: number; sm: number; md: number }
         sm?: { xs: number; sm: number; md: number }
@@ -1910,83 +1664,8 @@ declare module "@mui/material/styles" {
         xxl?: { xs: number; sm: number; md: number }
       }
     }
-    boxShadows?: {
-      panel?: string
-      card?: string
-      hover?: string
-      hoverStrong?: string
-      active?: string
-      toast?: string
-      ring?: string
-      ringHover?: string
-      none?: string
-    }
-    cards?: {
-      typography?: {
-        hero?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        sectionTitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        cardTitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        subtitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        body?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        caption?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        button?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-      }
-      spacing?: {
-        standard?: number
-        padding?: number
-        gap?: number
-        capsule?: {
-          px?: number
-          py?: number
-          marginRight?: number
-          marginBottom?: number
-        }
-        modal?: {
-          padding?: number
-        }
-        coBenefitTags?: {
-          marginTop?: number
-        }
-        tellMoreIcon?: {
-          marginLeft?: string
-        }
-        compact?: {
-          xs?: number
-          sm?: number
-          md?: number
-          lg?: number
-          xl?: number
-        }
-      }
-    }
+    boxShadows?: Partial<typeof themeValues.boxShadows>
+    cards?: Partial<typeof themeValues.cards>
   }
 
   interface Mixins {
@@ -2034,141 +1713,3 @@ declare module "@mui/material/Typography" {
   }
 }
 
-/* ========================================================
-| FORM CONTROL CONVENTIONS - USAGE GUIDE
-======================================================== 
-
-All form controls in the application follow standardized conventions
-for consistent appearance and behavior across the site.
-
-CONTROL DIMENSIONS:
-- Standard: 20px × 20px (theme.layout.controls.standard)
-- Compact: 16px × 16px (theme.layout.controls.compact)
-- Micro: 12px × 12px (theme.layout.controls.micro)
-
-STANDARD SPECIFICATIONS:
-- Size: Uses theme.layout.controls.standard (20px × 20px)
-- Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
-- Border: 1px solid using theme.palette.text.primary
-- Background: Transparent with hover states (for checkboxes/radios)
-- Spacing: theme.spacing(0.5) margin
-- Protection: flexShrink: 0 prevents label compression
-
-BACKGROUND COLOR STANDARDS:
-- Text fields, dropdowns, selects: white (theme.palette.common.white)
-- Checkboxes, radios: Transparent with hover states
-- Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
-
-COMPACT SPACING SYSTEM:
-- xs: 2px (theme.cards.spacing.compact.xs) - micro spacing
-- sm: 4px (theme.cards.spacing.compact.sm) - tight spacing
-- md: 8px (theme.cards.spacing.compact.md) - compact spacing
-- lg: 12px (theme.cards.spacing.compact.lg) - medium compact
-- xl: 16px (theme.cards.spacing.compact.xl) - standard compact
-- Usage: theme.spacing(theme.cards.spacing.compact.sm) for consistent spacing
-
-TYPOGRAPHY FOR CONTROLS:
-- Labels: typeScale.compact.caption (0.75rem/12px)
-- Helper text: typeScale.compact.micro (0.7rem/11.2px)
-- Form titles: typeScale.compact.title (0.9rem/14.4px)
-
-REUSABLE MIXINS:
-
-1. theme.mixins.formControlBase
-   - Base styling for all standard form controls
-   - Uses theme.layout.controls.standard (20px × 20px)
-   - Includes sizing, positioning, and interaction states
-
-2. theme.mixins.triangleCheckbox  
-   - Specialized for expandable/collapsible controls
-   - Uses standardized control dimensions and compact typography
-   - Includes text centering for triangle symbols (typeScale.compact.micro)
-
-USAGE EXAMPLES:
-
-Standard Checkbox:
-  sx={{ 
-    ...theme.mixins.formControlBase,
-    borderRadius: "2px",
-    border: `1px solid ${theme.palette.text.primary}`
-  }}
-
-Compact Control (custom):
-  sx={{
-    width: `${theme.layout.controls.compact}px`,
-    height: `${theme.layout.controls.compact}px`,
-    fontSize: theme.typography.compact.micro
-  }}
-
-Triangle Dropdown:
-  sx={{
-    ...theme.mixins.triangleCheckbox,
-    border: `1px solid ${theme.palette.text.primary}`
-  }}
-
-Form Label with Compact Typography:
-  sx={{
-    fontSize: theme.typography.compact.caption,
-    marginBottom: theme.spacing(theme.cards.spacing.compact.sm)
-  }}
-
-MUI COMPONENT OVERRIDES:
-- MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
-- MuiRadio: Uses formControlBase + circular styling + 20px dimensions
-- MuiFormControlLabel: alignItems "flex-start" for multi-line labels
-- MuiOutlinedInput: White background
-- MuiSelect: White background for dropdowns
-- MuiTextField: White background for text inputs
-- MuiMenu: White background for dropdown panels
-- MuiPaper: White background for menu/select panels
-
-SIZING GUIDELINES:
-- Standard (20px): Default for most form controls
-- Compact (16px): Dense interfaces, secondary controls
-- Micro (12px): Indicators, status controls, tight spaces
-
-========================================================
-
-Z-INDEX LAYERING SYSTEM - USAGE GUIDE
-========================================================
-
-The z-index system is organized into logical layers to prevent
-conflicts and ensure predictable stacking behavior:
-
-BACKGROUND LAYERS (negative values):
-- basement (-1): Map when used as background element
-- sectionBackground (0): Section background decorations
-
-CONTENT LAYERS (0-99):
-- content (20): Default content layer for main sections
-- panels (10): Main content panels and cards
-
-INTRO SECTION MICRO-LAYERS (1-40):
-- introBackgroundImages (15): Decorative background images
-- introText (20): Text content over backgrounds
-- introForegroundImages (30): Decorative foreground elements
-- introBubbles (40): Interactive floating elements
-
-INTERACTIVE LAYERS (100-999):
-- mapControls (100): Map overlay controls and panels
-- floatingElements (110): Floating UI elements, scroll controls
-
-NAVIGATION LAYERS (1200-1499):
-- drawerBackdrop (1199): Drawer backdrop/overlay
-- drawer (1200): Side drawer/navigation
-- overlay (1250): General overlay elements
-- modal (1300): Modal dialogs
-- appBar (1400): Top navigation bar
-
-SYSTEM LAYERS (1500+):
-- tooltip (1500): Tooltips, help text, and map prompt dialogs
-- notification (1600): Toast notifications  
-- loading (1700): Loading overlays
-- debug (9999): Debug overlays (development only)
-
-USAGE:
-Always use theme.zIndex.layerName instead of hardcoded numbers:
-  zIndex: (theme) => theme.zIndex.mapControls
-  zIndex: (theme) => theme.zIndex.tooltip
-
-======================================================== */
