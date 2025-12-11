@@ -139,7 +139,7 @@ export function StrategyRow({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: "500px",
+        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -296,7 +296,7 @@ export function StrategyInfoPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: "500px",
+        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -387,7 +387,7 @@ export function KeyOperationsPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: "500px",
+        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -571,7 +571,7 @@ export function KeyOutcomesPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: "500px",
+        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}

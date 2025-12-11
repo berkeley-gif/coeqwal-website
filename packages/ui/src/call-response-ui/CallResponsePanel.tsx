@@ -58,7 +58,8 @@ export function CallResponsePanel({
         alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        px: { xs: 4, sm: 8, md: 12, lg: 16 },
+        // Responsive horizontal padding - minimal to maximize map space
+        px: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 },
       }}
     >
       <motion.div
@@ -79,7 +80,8 @@ export function CallResponsePanel({
       >
         <Box
           sx={{
-            width: { xs: "100%", sm: "420px", md: "460px" },
+            // Responsive panel width - narrower on smaller screens to leave room for map
+            width: { xs: "100%", sm: "340px", md: "380px", lg: "420px", xl: "460px" },
             maxWidth: "100%",
             padding: 0,
             pointerEvents: isVisible ? "auto" : "none",

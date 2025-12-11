@@ -682,7 +682,7 @@ export default function MapOverlayPanels() {
                   minHeight="auto"
                   alignItems="flex-start"
                 >
-                  <Typography variant="body1" sx={{ maxWidth: "460px" }}>
+                  <Typography variant="body1" sx={{ maxWidth: { xs: "100%", sm: "340px", md: "380px", lg: "420px", xl: "460px" } }}>
                     Each water management scenario on this site can be read as
                     having three main elements. Let&apos;s look at the water
                     management scenario for the way we currently manage Central
@@ -709,8 +709,7 @@ export default function MapOverlayPanels() {
                   gap: 1,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pl: { xs: 2, sm: 3, md: 4 },
-                  pr: { xs: 4, sm: 8, md: 12, lg: 16 },
+                  pr: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 }, // Match left panel padding
                   pointerEvents: "none",
                 }}
               >
@@ -742,7 +741,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: "500px",
+                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
                           pointerEvents: "none",
                         }}
                       >
@@ -833,7 +832,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: "500px",
+                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
                           pointerEvents: "none",
                         }}
                       >
@@ -917,7 +916,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: "500px",
+                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
                           pointerEvents: "none",
                         }}
                       >
@@ -1021,7 +1020,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           pointerEvents: "auto",
                           width: "100%",
-                          maxWidth: "500px",
+                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
                         }}
                       >
                         <SummaryPanel strategy="current-ops" />
