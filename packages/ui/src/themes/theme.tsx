@@ -176,6 +176,9 @@ const typeScale = {
   },
 }
 
+// themeValues - runtime values for custom theme properties
+// (also typed in Theme and ThemeOptions interfaces below for TypeScript support)
+// necessary  for MUI typscript support; unfortunately it means we repeat the terms three times in the theme.
 export const themeValues = {
   // Typography - uses active font preset. Change ACTIVE_FONT_PRESET above to switch.
   fontFamily: {
@@ -347,6 +350,19 @@ export const themeValues = {
     notification: 1600, // Toast notifications
     loading: 1700, // Loading overlays
     debug: 9999, // Debug overlays (development)
+  },
+
+  // Box shadows - could be standardized further, recorded here for expedience
+  boxShadows: {
+    panel: "0 8px 32px rgba(0, 0, 0, 0.2)", // Floating panels
+    card: "0 4px 12px rgba(0, 0, 0, 0.15)", // Cards, tooltips
+    hover: "0 4px 8px rgba(0, 0, 0, 0.1)", // Hover states
+    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)", // Strong hover (glossary button)
+    active: "0 2px 4px rgba(0, 0, 0, 0.1)", // Active/pressed
+    toast: "0 4px 20px rgba(0, 0, 0, 0.3)", // Notifications, buttons
+    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)", // Focus ring
+    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)", // Focus ring hover
+    none: "none",
   },
 
   // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
@@ -944,6 +960,7 @@ const theme = createTheme({
           hyphens: none;
           -ms-hyphens: none;
           -webkit-hyphens: none;
+          -webkit-tap-highlight-color: transparent;
         }
         html, body {
           margin: 0;
@@ -1502,6 +1519,8 @@ theme.borderRadius = themeValues.borderRadius
 
 theme.shadow = themeValues.shadow
 
+theme.boxShadows = themeValues.boxShadows
+
 // Map prompt dialog configuration
 theme.mapPromptDialog = {
   ...themeValues.mapPromptDialog,
@@ -1540,7 +1559,17 @@ export default theme
 | 4. TypeScript customizations
 ======================================================== */
 
-// Custom palette colors and theme properties
+/**
+ * MUI theme types
+ *
+ * Custom theme properties must be defined in 3 places due to how MUI's TypeScript types work:
+ *
+ * 1. `themeValues` object (above) - The actual runtime values
+ * 2. `interface Theme` (below) - Type for accessing theme (e.g., theme.boxShadows.panel)
+ * 3. `interface ThemeOptions` (below) - Type for creating/extending themes via createTheme()
+ *
+ * This is verbose but required for full TypeScript support with autocomplete.
+ */
 declare module "@mui/material/styles" {
   // Custom palette colors - California Water Theme
   interface Palette {
@@ -1692,6 +1721,7 @@ declare module "@mui/material/styles" {
     debug: number
   }
 
+  // Theme interface - types for accessing theme properties (e.g., theme.boxShadows.panel)
   interface Theme {
     layout: {
       headerHeight: number
@@ -1744,6 +1774,17 @@ declare module "@mui/material/styles" {
       subtle: string
       medium: string
       prominent: string
+    }
+    boxShadows: {
+      panel: string
+      card: string
+      hover: string
+      hoverStrong: string
+      active: string
+      toast: string
+      ring: string
+      ringHover: string
+      none: string
     }
     mapPromptDialog: {
       backgroundColor: string
@@ -1844,6 +1885,7 @@ declare module "@mui/material/styles" {
     }
   }
 
+  // ThemeOptions interface - types for createTheme() options (optional properties)
   interface ThemeOptions {
     layout?: {
       headerHeight?: number
@@ -1867,6 +1909,17 @@ declare module "@mui/material/styles" {
         xl?: { xs: number; sm: number; md: number }
         xxl?: { xs: number; sm: number; md: number }
       }
+    }
+    boxShadows?: {
+      panel?: string
+      card?: string
+      hover?: string
+      hoverStrong?: string
+      active?: string
+      toast?: string
+      ring?: string
+      ringHover?: string
+      none?: string
     }
     cards?: {
       typography?: {

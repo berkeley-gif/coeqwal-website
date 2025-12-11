@@ -95,22 +95,22 @@ export function FloatingGlossaryButton({
         width: 64,
         height: 64,
         borderRadius: "50%",
-        backgroundColor: isOpen ? theme.palette.blue.bright : "#000",
+        backgroundColor: isOpen
+          ? theme.palette.blue.bright
+          : theme.palette.common.black,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: isDragging ? "grabbing" : "grab",
-        boxShadow: isOpen
-          ? "0 0 0 4px rgba(33, 150, 243, 0.2)"
-          : "0 4px 20px rgba(0, 0, 0, 0.3)",
+        boxShadow: isOpen ? theme.boxShadows.ring : theme.boxShadows.toast,
         transition: isDragging ? "none" : "all 0.3s ease",
         zIndex: theme.zIndex.drawer, // Above panel to remain clickable
         userSelect: "none",
         "&:hover": {
           transform: isOpen || isDragging ? "none" : "scale(1.1)",
           boxShadow: isOpen
-            ? "0 0 0 4px rgba(33, 150, 243, 0.3)"
-            : "0 6px 24px rgba(0, 0, 0, 0.4)",
+            ? theme.boxShadows.ringHover
+            : theme.boxShadows.hoverStrong,
         },
         "&:active": {
           transform: isDragging ? "none" : "scale(0.95)",
@@ -133,14 +133,14 @@ export function FloatingGlossaryButton({
             pointerEvents: "none",
           }}
         >
-          <RoundedRightArrow color="#fff" />
+          <RoundedRightArrow color={theme.palette.common.white} />
         </Box>
       )}
 
       <MenuBookIcon
         sx={{
           fontSize: "2rem",
-          color: "#fff",
+          color: theme.palette.common.white,
           pointerEvents: "none", // Prevent icon from interfering with drag
         }}
       />
@@ -160,7 +160,7 @@ export function FloatingGlossaryButton({
             pointerEvents: "none",
           }}
         >
-          <RoundedRightArrow color="#fff" />
+          <RoundedRightArrow color={theme.palette.common.white} />
         </Box>
       )}
     </Box>
