@@ -13,7 +13,7 @@ import {
   CheckIcon,
   VisibilityIcon,
 } from "@repo/ui/mui"
-import { ColoredText } from "../../scenarioResults/components/ui"
+import { ColoredText } from "./ColoredText"
 
 import {
   EditingFieldTarget,
