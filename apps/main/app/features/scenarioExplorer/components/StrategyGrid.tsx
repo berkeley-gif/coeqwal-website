@@ -11,14 +11,14 @@ import {
   Box,
   Typography,
   useTheme,
-  InfoIcon,
   Theme,
   Checkbox,
-  ArrowDropDownIcon,
-  ArrowDropUpIcon,
+  InfoIcon,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
+  InfoIconButton,
+  SortButton,
   DocumentListIcon,
   DocumentCheckedIcon,
   DocumentExpandedIcon,
@@ -167,6 +167,9 @@ interface StrategyGridProps {
   showOnlyChosen: boolean
   showDefinitions: boolean
 
+  // Layout props
+  compact?: boolean // When true, shows labels below charts instead of column headers (for 50% width views)
+
   // UI control handlers
   onMapViewChange: (enabled: boolean) => void
   onShowOnlyChosenChange: (enabled: boolean) => void
@@ -276,6 +279,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
+  compact = false,
   onShowOnlyChosenChange,
   onShowDefinitionsChange,
   sortBy,
@@ -484,13 +488,17 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             </Box>
           </>
         )}
-        {/* Outcome name headers - show in both list and map view */}
-        <Box sx={{ gridColumn: "1 / 3" }} />{" "}
-        {/* Empty for checkbox + strategy columns */}
-        <Box /> {/* Empty for operations column */}
+        {/* Outcome name headers - show in full-width list view only (not compact mode) */}
+        {!compact && (
+          <>
+            <Box sx={{ gridColumn: "1 / 3" }} />{" "}
+            {/* Empty for checkbox + strategy columns */}
+            <Box /> {/* Empty for operations column */}
+          </>
+        )}
         <Box
           sx={{
-            display: { xs: "none", lg: "grid" },
+            display: compact ? "none" : { xs: "none", lg: "grid" },
             gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
             gap: theme.spacing(1),
             pb: 0.5, // Reduced padding below headers
@@ -498,11 +506,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         >
           {outcomeNames.map(({ name, displayName }) => {
             const isSorted = sortBy === displayName
-            const SortIcon = isSorted
-              ? sortDirection === "asc"
-                ? ArrowDropUpIcon
-                : ArrowDropDownIcon
-              : null
 
             return (
               <Box
@@ -548,14 +551,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    gap: 0.25,
-                    mt: -0.5, // Negative margin to reduce space between label and icons
+                    gap: 0,
+                    mt: -0.5,
                   }}
                 >
-                  {/* Info icon button for tooltip */}
-                  <Box
-                    component="button"
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  <InfoIconButton
+                    isActive={activeTooltip === name}
+                    onClick={(e) => {
                       if (activeTooltip === name) {
                         setActiveTooltip(null)
                         setTooltipAnchor(null)
@@ -564,84 +566,28 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         setTooltipAnchor(e.currentTarget)
                       }
                     }}
-                    sx={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      color: theme.palette.blue.bright,
-                      "&:hover": {
-                        opacity: 0.8,
-                      },
-                    }}
                     title="Click for outcome details"
-                  >
-                    <InfoIcon sx={{ fontSize: "1rem" }} />
-                  </Box>
+                  />
 
-                  {/* Sort button */}
                   {onSortChange && (
-                    <Box
-                      component="button"
-                      onClick={() => {
-                        if (isSorted) {
-                          // Toggle direction or clear sort
-                          if (sortDirection === "asc") {
-                            onSortChange(displayName, "desc")
-                          } else {
-                            onSortChange(null, "asc") // Clear sort
-                          }
+                    <SortButton
+                      sortState={isSorted ? sortDirection : null}
+                      onAscClick={() => {
+                        if (sortDirection === "asc") {
+                          onSortChange(null, "asc") // Clear sort
                         } else {
-                          // Start sorting by this outcome (ascending = best first)
                           onSortChange(displayName, "asc")
                         }
                       }}
-                      sx={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: isSorted
-                          ? theme.palette.blue.bright
-                          : theme.palette.grey[400],
-                        transition: "color 0.2s ease",
-                        "&:hover": {
-                          color: theme.palette.blue.bright,
-                        },
+                      onDescClick={() => {
+                        if (sortDirection === "desc") {
+                          onSortChange(null, "asc") // Clear sort
+                        } else {
+                          onSortChange(displayName, "desc")
+                        }
                       }}
-                      title={
-                        isSorted
-                          ? sortDirection === "asc"
-                            ? "Sorted: Best first (click to reverse)"
-                            : "Sorted: Worst first (click to clear)"
-                          : "Click to sort by this outcome"
-                      }
-                    >
-                      {SortIcon ? (
-                        <SortIcon sx={{ fontSize: 26 }} />
-                      ) : (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            lineHeight: 0,
-                          }}
-                        >
-                          <ArrowDropUpIcon
-                            sx={{ fontSize: 26, marginBottom: "-10px" }}
-                          />
-                          <ArrowDropDownIcon
-                            sx={{ fontSize: 26, marginTop: "-10px" }}
-                          />
-                        </Box>
-                      )}
-                    </Box>
+                      title="Sort by this outcome"
+                    />
                   )}
                 </Box>
               </Box>
@@ -1036,7 +982,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     maxWidth: "100%",
                   }}
                 >
-                  {outcomeNames.map(({ displayName }) => {
+                  {outcomeNames.map(({ name, displayName }) => {
                     // Get chart data for this strategy
                     const strategyChartData = getChartDataForStrategy(
                       strategy.value,
@@ -1046,6 +992,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     const isActiveForStrategy =
                       strategyChartData[displayName] !== undefined &&
                       strategyChartData[displayName].length > 0
+
+                    // Sort state for this outcome (used in compact mode)
+                    const isSortedByThisOutcome = sortBy === displayName
 
                     const chartBox = (
                       <Box
@@ -1113,7 +1062,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             <ScenarioGlyph
                               variant={variant}
                               values={values}
-                              size={showMapView ? 45 : 50}
+                              size={showMapView ? 45 : compact ? 45 : 50}
                               tierColors={
                                 isActiveForStrategy
                                   ? (strategyChartData[displayName]
@@ -1139,6 +1088,83 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             />
                           )
                         })()}
+                        {/* Show label and icons below chart in compact mode */}
+                        {compact && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              mt: 0.5,
+                            }}
+                          >
+                            {/* Outcome label */}
+                            <Typography
+                              component="div"
+                              sx={{
+                                textAlign: "center",
+                                fontSize: "0.65rem",
+                                fontWeight: theme.typography.fontWeightMedium,
+                                color: isActiveForStrategy
+                                  ? theme.palette.blue.darkest
+                                  : theme.palette.grey[500],
+                                lineHeight: 1.2,
+                                maxWidth: "70px",
+                              }}
+                            >
+                              {displayName}
+                            </Typography>
+
+                            {/* Icons row below label */}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 0,
+                                mt: 0.25,
+                              }}
+                            >
+                              <InfoIconButton
+                                isActive={activeTooltip === name}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  if (activeTooltip === name) {
+                                    setActiveTooltip(null)
+                                    setTooltipAnchor(null)
+                                  } else {
+                                    setActiveTooltip(name)
+                                    setTooltipAnchor(e.currentTarget)
+                                  }
+                                }}
+                                title="Click for outcome details"
+                              />
+
+                              {onSortChange && (
+                                <SortButton
+                                  sortState={isSortedByThisOutcome ? sortDirection : null}
+                                  onAscClick={(e) => {
+                                    e.stopPropagation()
+                                    if (sortDirection === "asc") {
+                                      onSortChange(null, "asc")
+                                    } else {
+                                      onSortChange(displayName, "asc")
+                                    }
+                                  }}
+                                  onDescClick={(e) => {
+                                    e.stopPropagation()
+                                    if (sortDirection === "desc") {
+                                      onSortChange(null, "asc")
+                                    } else {
+                                      onSortChange(displayName, "desc")
+                                    }
+                                  }}
+                                  title="Sort by this outcome"
+                                />
+                              )}
+                            </Box>
+                          </Box>
+                        )}
                       </Box>
                     )
 

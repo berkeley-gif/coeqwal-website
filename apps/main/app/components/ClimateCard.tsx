@@ -116,10 +116,8 @@ const ClimateCard = forwardRef<HTMLDivElement, ClimateCardProps>(
                   }
                 </Box>
                 <InfoIconButton
-                  mode="glossary"
-                  glossaryEntry="Changing climate"
-                  onGlossaryOpen={handleGlossaryOpen}
-                  sx={{ color: theme.palette.blue.bright }}
+                  onClick={() => handleGlossaryOpen("Changing climate")}
+                  title="Learn about climate scenarios"
                 />
               </Box>
 

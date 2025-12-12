@@ -1,80 +1,77 @@
 "use client"
 
 import React from "react"
-import { InfoIcon } from "../.."
-import { InfoTooltip } from "../.."
+import { Box, InfoIcon } from "../.."
 import { Theme } from "@mui/material/styles"
 
+// ============================================================================
+// CONFIGURABLE CONSTANTS
+// ============================================================================
+const ICON_SIZE = "1.3rem"
+const CIRCLE_SIZE = "24px"
+
+// ============================================================================
+// TYPES
+// ============================================================================
 export interface InfoIconButtonProps {
-  /** Mode of operation - tooltip or glossary */
-  mode: "tooltip" | "glossary"
-  /** Content for tooltip mode - can be string or JSX */
-  tooltipContent?: React.ReactNode
-  /** Glossary entry key for glossary mode */
-  glossaryEntry?: string
-  /** Tooltip placement */
-  placement?:
-    | "top"
-    | "top-start"
-    | "top-end"
-    | "bottom"
-    | "bottom-start"
-    | "bottom-end"
-    | "left"
-    | "right"
-  /** Custom styling */
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+  isActive?: boolean
+  title?: string
   sx?: object
-  /** Callback for glossary mode */
-  onGlossaryOpen?: (entry: string) => void
 }
 
+// ============================================================================
+// STYLES
+// ============================================================================
+const circleButtonStyles = {
+  border: "none",
+  cursor: "pointer",
+  padding: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: "50%",
+  width: CIRCLE_SIZE,
+  height: CIRCLE_SIZE,
+  minWidth: CIRCLE_SIZE,
+  minHeight: CIRCLE_SIZE,
+  transition: "all 0.15s ease",
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 /**
- * Reusable info icon button that can either show a tooltip or open a glossary entry.
- *
- * Features:
- * - Tooltip mode: Shows content in a tooltip on hover
- * - Glossary mode: Opens glossary to specific entry on click
+ * Info icon button that opens a tooltip when clicked.
  */
 export function InfoIconButton({
-  mode,
-  tooltipContent,
-  glossaryEntry,
-  placement = "top-start",
+  onClick,
+  isActive = false,
+  title,
   sx = {},
-  onGlossaryOpen,
 }: InfoIconButtonProps) {
-  const handleClick = () => {
-    if (mode === "glossary" && glossaryEntry && onGlossaryOpen) {
-      onGlossaryOpen(glossaryEntry)
-    }
-  }
-
-  const iconStyles = {
-    fontSize: "1rem",
-    color: (theme: Theme) => theme.palette.text.secondary,
-    cursor: "pointer",
-    "&:hover": {
-      color: (theme: Theme) => theme.palette.blue.bright,
-    },
-    ...sx,
-  }
-
-  // Tooltip mode: wrap in InfoTooltip
-  if (mode === "tooltip" && tooltipContent) {
-    return (
-      <InfoTooltip description={tooltipContent} placement={placement}>
-        <InfoIcon sx={iconStyles} />
-      </InfoTooltip>
-    )
-  }
-
-  // Glossary mode: direct click handler
-  if (mode === "glossary" && glossaryEntry) {
-    return <InfoIcon sx={iconStyles} onClick={handleClick} />
-  }
-
-  // Fallback: just the icon without functionality
-  return <InfoIcon sx={iconStyles} />
+  return (
+    <Box
+      component="button"
+      onClick={onClick}
+      title={title}
+      sx={{
+        ...circleButtonStyles,
+        background: (theme: Theme) =>
+          isActive
+            ? `${theme.palette.blue.bright}20`
+            : `${theme.palette.grey[500]}15`,
+        color: (theme: Theme) =>
+          isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
+        "&:hover": {
+          background: (theme: Theme) => `${theme.palette.blue.bright}30`,
+          color: (theme: Theme) => theme.palette.blue.darkest,
+        },
+      }}
+    >
+      <InfoIcon sx={{ fontSize: ICON_SIZE, ...sx }} />
+    </Box>
+  )
 }
 
 export default InfoIconButton

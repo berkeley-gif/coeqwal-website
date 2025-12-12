@@ -236,6 +236,7 @@ export default function ListView({ compact = false, onTierClick }: ListViewProps
           showMapView={false} // List view doesn't show map mode
           showOnlyChosen={showOnlyChosen}
           showDefinitions={showDefinitions}
+          compact={compact}
           onMapViewChange={() => {}} // No-op in list view
           onShowOnlyChosenChange={setShowOnlyChosen}
           onShowDefinitionsChange={setShowDefinitions}
