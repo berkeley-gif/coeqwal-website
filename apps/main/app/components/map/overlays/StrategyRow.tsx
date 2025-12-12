@@ -12,11 +12,10 @@ import {
   Box,
   Typography,
   useTheme,
-  InfoIcon,
   ClickAwayListener,
 } from "@repo/ui/mui"
 import { learnMapActions } from "../store"
-import { InfoTooltip } from "@repo/ui"
+import { InfoTooltip, InfoIconButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
@@ -174,26 +173,18 @@ export function StrategyRow({
               return (
                 <span key={index}>
                   {part}
-                  <InfoTooltip
-                    description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
-                    placement="top"
-                    tooltipProps={{
-                      PopperProps: { disablePortal: true },
-                    }}
-                  >
-                    <InfoIcon
-                      sx={{
-                        fontSize: "1rem",
-                        ml: 0.5,
-                        cursor: "pointer",
-                        color: theme.palette.blue.bright,
-                        verticalAlign: "text-top",
-                        "&:hover": {
-                          color: theme.palette.blue.darkest,
-                        },
-                      }}
-                    />
-                  </InfoTooltip>
+                  <InfoIconButton
+                    variant="inline"
+                    tooltipContent={
+                      <>
+                        <Box component="span" sx={{ fontWeight: 600 }}>
+                          Temporary Urgent Change Petitions (TUCPs)
+                        </Box>{" "}
+                        permit changes during droughts to meet human health and
+                        safety needs and protect endangered species.
+                      </>
+                    }
+                  />
                 </span>
               )
             }
@@ -334,23 +325,18 @@ export function StrategyInfoPanel({
             return (
               <span key={index}>
                 {part}
-                <InfoTooltip
-                  description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
-                  placement="top"
-                >
-                  <InfoIcon
-                    sx={{
-                      fontSize: "1rem",
-                      ml: 0.5,
-                      cursor: "pointer",
-                      color: theme.palette.blue.bright,
-                      verticalAlign: "middle",
-                      "&:hover": {
-                        color: theme.palette.blue.darkest,
-                      },
-                    }}
-                  />
-                </InfoTooltip>
+                <InfoIconButton
+                  variant="inline"
+                  tooltipContent={
+                    <>
+                      <Box component="span" sx={{ fontWeight: 600 }}>
+                        Temporary Urgent Change Petitions (TUCPs)
+                      </Box>{" "}
+                      permit changes during droughts to meet human health and
+                      safety needs and protect endangered species.
+                    </>
+                  }
+                />
               </span>
             )
           }
@@ -846,21 +832,15 @@ export function KeyOutcomesPanel({
                       >
                         {outcome}
                       </Typography>
-                      <InfoIcon
+                      <InfoIconButton
+                        isActive={openTooltip === outcome}
                         onClick={(e) => {
                           e.stopPropagation()
                           setOpenTooltip(
                             openTooltip === outcome ? null : outcome,
                           )
                         }}
-                        sx={{
-                          fontSize: "0.85rem",
-                          color: theme.palette.blue.bright,
-                          cursor: "pointer",
-                          "&:hover": {
-                            color: theme.palette.blue.dark,
-                          },
-                        }}
+                        title="Click for outcome details"
                       />
                     </Box>
                   </Box>
@@ -1119,21 +1099,15 @@ export function KeyOutcomesPanel({
                       >
                         {outcome}
                       </Typography>
-                      <InfoIcon
+                      <InfoIconButton
+                        isActive={openTooltip === outcome}
                         onClick={(e) => {
                           e.stopPropagation()
                           setOpenTooltip(
                             openTooltip === outcome ? null : outcome,
                           )
                         }}
-                        sx={{
-                          fontSize: "0.85rem",
-                          color: theme.palette.blue.bright,
-                          cursor: "pointer",
-                          "&:hover": {
-                            color: theme.palette.blue.dark,
-                          },
-                        }}
+                        title="Click for outcome details"
                       />
                     </Box>
                   </Box>

@@ -5,10 +5,9 @@ import {
   Box,
   Typography,
   useTheme,
-  InfoIcon,
-  IconButton,
   Tooltip,
 } from "@repo/ui/mui"
+import { InfoIconButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useSelectedOutcome } from "./map/store"
@@ -277,27 +276,16 @@ export default function ScenarioCard({
                         disableHoverListener
                         disableTouchListener
                       >
-                        <IconButton
-                          size="small"
-                          component="span"
-                          onClick={() =>
-                            setOpenTooltipIndex(
-                              openTooltipIndex === index ? null : index,
-                            )
-                          }
-                          sx={{
-                            padding: 0,
-                            minWidth: 0,
-                            width: "auto",
-                            height: "auto",
-                            color: theme.palette.blue.bright,
-                            verticalAlign: "middle",
-                            display: "inline-flex",
-                            ml: 0.25,
-                          }}
-                        >
-                          <InfoIcon sx={{ fontSize: "0.75rem" }} />
-                        </IconButton>
+                        <Box component="span" sx={{ display: "inline-flex", verticalAlign: "middle", ml: 0.25 }}>
+                          <InfoIconButton
+                            isActive={openTooltipIndex === index}
+                            onClick={() =>
+                              setOpenTooltipIndex(
+                                openTooltipIndex === index ? null : index,
+                              )
+                            }
+                          />
+                        </Box>
                       </Tooltip>
                     </Typography>
                   </Box>
