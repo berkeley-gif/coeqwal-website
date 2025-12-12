@@ -465,7 +465,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         onRightClick={() => onShowOnlyChosenChange(true)}
                         gap={-0.5}
                       />
-                    </Box>
+            </Box>
                   </InfoTooltip>
                   <InfoTooltip description="Show or hide strategy details">
                     <Box>
@@ -483,112 +483,112 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             </Box>
             {!compact && (
               <>
-                <Box
-                  sx={{
-                    display: "flex",
+            <Box
+              sx={{
+                display: "flex",
                     alignItems: "flex-end",
-                    height: theme.spacing(5.5),
-                  }}
-                >
-                  <Typography variant="subtitle2">Key operations</Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: { xs: "none", lg: "flex" },
+                height: theme.spacing(5.5),
+              }}
+            >
+              <Typography variant="subtitle2">Key operations</Typography>
+            </Box>
+            <Box
+              sx={{
+                display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
-                    justifyContent: "space-between",
-                    gap: 2,
-                    height: theme.spacing(5.5),
-                  }}
-                >
-                  <Typography variant="subtitle2">Key outcomes</Typography>
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <InfoTooltip description="Show all strategies or only chosen ones">
-                      <Box>
-                        <TogglePair
+                justifyContent: "space-between",
+                gap: 2,
+                height: theme.spacing(5.5),
+              }}
+            >
+              <Typography variant="subtitle2">Key outcomes</Typography>
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <InfoTooltip description="Show all strategies or only chosen ones">
+                  <Box>
+                    <TogglePair
                           leftIcon={<DocumentListIcon active={!showOnlyChosen} size={40} />}
                           rightIcon={<DocumentCheckedIcon active={showOnlyChosen} size={40} />}
-                          onLeftClick={() => onShowOnlyChosenChange(false)}
-                          onRightClick={() => onShowOnlyChosenChange(true)}
-                          gap={-0.5}
-                        />
-                      </Box>
-                    </InfoTooltip>
-                    <InfoTooltip description="Show or hide strategy details">
-                      <Box>
-                        <TogglePair
+                      onLeftClick={() => onShowOnlyChosenChange(false)}
+                      onRightClick={() => onShowOnlyChosenChange(true)}
+                      gap={-0.5}
+                    />
+                  </Box>
+                </InfoTooltip>
+                <InfoTooltip description="Show or hide strategy details">
+                  <Box>
+                    <TogglePair
                           leftIcon={<DocumentExpandedIcon active={showDefinitions} size={40} />}
                           rightIcon={<DocumentCollapsedIcon active={!showDefinitions} size={40} />}
-                          onLeftClick={() => onShowDefinitionsChange(true)}
-                          onRightClick={() => onShowDefinitionsChange(false)}
-                          gap={-0.5}
-                        />
-                      </Box>
-                    </InfoTooltip>
+                      onLeftClick={() => onShowDefinitionsChange(true)}
+                      onRightClick={() => onShowDefinitionsChange(false)}
+                      gap={-0.5}
+                    />
                   </Box>
-                </Box>
-              </>
-            )}
+                </InfoTooltip>
+              </Box>
+            </Box>
+          </>
+        )}
           </>
         )}
         {/* Outcome name headers - only render if not contentOnly mode, show in full-width list view only (not compact mode) */}
         {renderMode !== "contentOnly" && (
-          <Box
-            sx={{
+        <Box
+          sx={{
               gridColumn: "4 / -1",
               display: compact ? "none" : { xs: "none", lg: "grid" },
-              gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
-              gap: theme.spacing(1),
+            gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
+            gap: theme.spacing(1),
               pb: 1.5,
-            }}
-          >
-            {outcomeNames.map(({ name, displayName }) => {
-              const isSorted = sortBy === displayName
+          }}
+        >
+          {outcomeNames.map(({ name, displayName }) => {
+            const isSorted = sortBy === displayName
 
-              return (
-                <Box
-                  key={displayName}
+            return (
+              <Box
+                key={displayName}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0,
+                }}
+              >
+                {/* Outcome label */}
+                <Typography
+                  component="div"
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 0,
+                    textAlign: "center",
+                    fontSize: theme.typography.compact.caption.fontSize,
+                    fontWeight: theme.typography.fontWeightMedium,
+                    color: theme.palette.blue.darkest,
+                    lineHeight: theme.typography.compact.caption.lineHeight,
                   }}
                 >
-                  {/* Outcome label */}
-                  <Typography
-                    component="div"
-                    sx={{
-                      textAlign: "center",
-                      fontSize: theme.typography.compact.caption.fontSize,
-                      fontWeight: theme.typography.fontWeightMedium,
-                      color: theme.palette.blue.darkest,
-                      lineHeight: theme.typography.compact.caption.lineHeight,
-                    }}
-                  >
-                    {displayName === "Freshwater for in-Delta uses" ? (
-                      <>
-                        Freshwater for{" "}
-                        <span style={{ whiteSpace: "nowrap" }}>in-Delta</span>{" "}
-                        uses
-                      </>
-                    ) : displayName === "Reservoir storage" ? (
-                      <>
-                        Reservoir
-                        <br />
-                        storage
-                      </>
-                    ) : (
-                      getOutcomeDisplayLabel(name)
-                    )}
-                  </Typography>
+                  {displayName === "Freshwater for in-Delta uses" ? (
+                    <>
+                      Freshwater for{" "}
+                      <span style={{ whiteSpace: "nowrap" }}>in-Delta</span>{" "}
+                      uses
+                    </>
+                  ) : displayName === "Reservoir storage" ? (
+                    <>
+                      Reservoir
+                      <br />
+                      storage
+                    </>
+                  ) : (
+                    getOutcomeDisplayLabel(name)
+                  )}
+                </Typography>
 
-                  {/* Icons row below label */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                {/* Icons row below label */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                       gap: 0,
                       mt: 0.5,
                     }}
@@ -596,19 +596,19 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     <InfoIconButton
                       isActive={activeTooltip === name}
                       onClick={(e) => handleToggleWithAnchor(name, e.currentTarget)}
-                      title="Click for outcome details"
+                    title="Click for outcome details"
                     />
 
-                    {onSortChange && (
+                  {onSortChange && (
                       <SortButton
                         sortState={isSorted ? sortDirection : null}
                         onAscClick={() => {
                           if (sortDirection === "asc") {
                             onSortChange(null, "asc") // Clear sort
-                          } else {
-                            onSortChange(displayName, "asc")
-                          }
-                        }}
+                        } else {
+                          onSortChange(displayName, "asc")
+                        }
+                      }}
                         onDescClick={() => {
                           if (sortDirection === "desc") {
                             onSortChange(null, "asc") // Clear sort
@@ -618,12 +618,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         }}
                         title="Sort by this outcome"
                       />
-                    )}
-                  </Box>
+                  )}
                 </Box>
-              )
-            })}
-          </Box>
+              </Box>
+            )
+          })}
+        </Box>
         )}
 
         {/* Strategy rows - only render if not headersOnly mode */}
@@ -713,7 +713,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           variant="subtitle1"
                           sx={{
                             fontWeight: theme.typography.fontWeightMedium,
-                            fontSize: "1.05rem",
+                            fontSize: "1.1rem",
                             maxWidth: "280px",
                           }}
                         >
@@ -1148,7 +1148,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     variant="subtitle1"
                     sx={{
                       fontWeight: theme.typography.fontWeightMedium,
-                      fontSize: "1.05rem",
+                      fontSize: "1.1rem",
                       maxWidth: "280px",
                       mb: showDefinitions ? 0.5 : 0,
                       lineHeight: 1.3,
@@ -1503,12 +1503,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               : [0, 0, 0, 0]
                             const variant = isSingleValueTier(chartData) ? "dots" : "bars"
 
-                            return (
-                              <ScenarioGlyph
-                                variant={variant}
-                                values={values}
+                          return (
+                            <ScenarioGlyph
+                              variant={variant}
+                              values={values}
                                 size={60}
-                                tierColors={
+                              tierColors={
                                   (chartData?.map((tier) => tier.color).slice(0, 4) as [string, string, string, string]) ||
                                   [theme.palette.tiers.tier1, theme.palette.tiers.tier2, theme.palette.tiers.tier3, theme.palette.tiers.tier4]
                                 }
@@ -1539,7 +1539,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             >
                               No data at this time
                             </Typography>
-                          </Box>
+                      </Box>
                         )}
                       </Box>
                           </div>
