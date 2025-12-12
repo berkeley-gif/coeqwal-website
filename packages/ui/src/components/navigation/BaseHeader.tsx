@@ -37,6 +37,7 @@ type TranslationsMap = {
 }
 
 export const HEADER_SHRUNK_H = 40
+export const HEADER_EXPANDED_H = 70
 
 // Secondary nav option (optional)
 export interface SecondaryNavItem {
