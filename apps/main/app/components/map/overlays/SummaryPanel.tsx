@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable react/prop-types */ // TypeScript handles prop validation
 
 import { useEffect, useState, useCallback } from "react"
 import { Box, Typography, Chip, CircularProgress, useTheme } from "@repo/ui/mui"
