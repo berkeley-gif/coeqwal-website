@@ -82,8 +82,6 @@ For UI elements requiring tighter spacing:
 Pre-built styling patterns for common UI elements:
 
 - **Form Controls**: Standardized 20px form elements
-- **Card Typography**: Eyebrow, titles, body text patterns
-- **Tooltip Actions**: Pill-style button styling
 - **Drawer Content**: Navigation and content styling
 
 ### Z-Index system
@@ -126,14 +124,11 @@ sx={{ ...theme.mixins.formControlBase }}
 ### Using Mixins
 
 ```typescript
-// Card typography
-sx={(theme) => ({ ...theme.mixins.cardTypography.eyebrow })}
-
 // Form controls
 sx={{ ...theme.mixins.formControlBase }}
 
-// Tooltip buttons
-sx={{ ...theme.mixins.tooltipActionButton }}
+// Drawer content
+sx={{ ...theme.mixins.drawerContent.infoBox }}
 ```
 
 ## 📚 Detailed Documentation

@@ -8,6 +8,7 @@ import {
   Stack,
   IconButton,
   CloseIcon,
+  alpha,
 } from "@repo/ui/mui"
 import { glossaryTerms } from "../../lib/glossary"
 import React, { useRef, useEffect, useState } from "react"
@@ -85,7 +86,17 @@ export function FloatingGlossaryPanel({
     ) // Delay if opening, immediate if already open
   }
 
-  // Function to render definition text with clickable term links
+  // Shared styles
+  const termLinkStyle = {
+    color: theme.palette.blue.bright,
+    textDecoration: "underline",
+    cursor: "pointer",
+    "&:hover": {
+      color: theme.palette.blue.darkest,
+    },
+  } as const
+
+  // Render helpers
   const renderDefinition = (definition: string) => {
     // Find all terms that appear in this definition (case-insensitive)
     const termsInText = glossaryTerms.filter((term) =>
@@ -117,14 +128,7 @@ export function FloatingGlossaryPanel({
                 key={index}
                 component="span"
                 onClick={() => handleTermClick(matchedTerm.term)}
-                sx={{
-                  color: theme.palette.blue.bright,
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  "&:hover": {
-                    color: theme.palette.blue.darkest,
-                  },
-                }}
+                sx={termLinkStyle}
               >
                 {part}
               </Box>
@@ -160,9 +164,9 @@ export function FloatingGlossaryPanel({
           minWidth: "400px",
           maxWidth: "600px",
           maxHeight: "70vh", // Don't take up full height
-          backgroundColor: "#fff",
+          backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.card,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+          boxShadow: theme.boxShadows.panel,
           transform: isOpen ? "scale(1)" : "scale(0.9)",
           opacity: isOpen ? 1 : 0,
           // Transform origin changes based on position
@@ -216,7 +220,7 @@ export function FloatingGlossaryPanel({
                     internalSelectedTerm === term.term
                       ? {
                           scrollMarginTop: "20px",
-                          backgroundColor: "rgba(33, 150, 243, 0.08)",
+                          backgroundColor: alpha(theme.palette.blue.bright, 0.08),
                           padding: 2,
                           borderRadius: theme.borderRadius.card,
                           border: `2px solid ${theme.palette.blue.bright}`,
@@ -303,14 +307,7 @@ export function FloatingGlossaryPanel({
                         <Box
                           component="span"
                           onClick={() => handleTermClick(term.seeAlso!)}
-                          sx={{
-                            color: theme.palette.blue.bright,
-                            textDecoration: "underline",
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: theme.palette.blue.darkest,
-                            },
-                          }}
+                          sx={termLinkStyle}
                         >
                           {term.seeAlso}
                         </Box>
