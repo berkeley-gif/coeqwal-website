@@ -244,7 +244,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 borderRadius: "50%",
                 backgroundColor: getTierColor(feature.properties.tier_level),
                 border: `2px solid ${theme.palette.common.white}`,
-                boxShadow: theme.shadow.medium,
+                boxShadow: theme.boxShadows.medium,
                 cursor: "pointer",
               }}
               onClick={() =>
