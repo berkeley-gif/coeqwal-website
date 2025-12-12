@@ -7,7 +7,7 @@ import { useScenarioExplorerStore, type ExplorerView } from "@repo/state"
 import ListView from "./views/ListView/ListView"
 import MapView from "./views/MapView/MapView"
 import ComparisonView from "./views/ComparisonView/ComparisonView"
-import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
+// import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
@@ -19,7 +19,7 @@ import SearchBar from "./components/SearchBar"
  * - List: Full list of scenarios with searching/sorting
  * - Map: Location-based performance visualization
  * - Comparison: Visual comparison chart using parallel coordinates
- * - Needs-based: Criteria-based scenario search
+ * - Needs-based: Criteria-based scenario search (commented out)
  * - Data explorer: Detailed data comparison and exports
  */
 export default function ScenarioExplorerNew() {
@@ -37,7 +37,7 @@ export default function ScenarioExplorerNew() {
     list: "Full list of scenarios",
     map: "Map view",
     comparison: "Scenario comparison chart",
-    needs: "Needs-based search",
+    needs: "Needs-based search", // Hidden from UI but required by type
     data: "Data explorer",
   }
 
@@ -104,13 +104,13 @@ export default function ScenarioExplorerNew() {
             <Tab label={viewLabels.list} value="list" />
             <Tab label={viewLabels.map} value="map" />
             <Tab label={viewLabels.comparison} value="comparison" />
-            <Tab label={viewLabels.needs} value="needs" />
+            {/* <Tab label={viewLabels.needs} value="needs" /> */}
             <Tab label={viewLabels.data} value="data" />
           </Tabs>
         </Box>
 
-        {/* Selection Banner, currently shown for all views except needs-based */}
-        {activeView !== "needs" && <SelectionBanner />}
+        {/* Selection Banner */}
+        <SelectionBanner />
 
         {/* Search bar for list, map, and comparison views */}
         {(activeView === "list" ||
@@ -129,7 +129,7 @@ export default function ScenarioExplorerNew() {
           {activeView === "list" && <ListView />}
           {activeView === "map" && <MapView />}
           {activeView === "comparison" && <ComparisonView />}
-          {activeView === "needs" && <NeedsBasedView />}
+          {/* {activeView === "needs" && <NeedsBasedView />} */}
           {activeView === "data" && <DataExplorerView />}
         </Box>
       </Box>
