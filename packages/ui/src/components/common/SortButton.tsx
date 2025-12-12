@@ -7,9 +7,9 @@ import { Theme } from "@mui/material/styles"
 // ============================================================================
 // CONFIGURABLE CONSTANTS
 // ============================================================================
-const ARROW_SIZE = "2rem"
-const CIRCLE_SIZE = "24px"
-const ARROW_GAP = "-12px" // Negative margin to overlap arrows
+const ARROW_SIZE = "1.6rem"
+const CIRCLE_SIZE = "20px"
+const ARROW_GAP = "-9px" // Negative margin to overlap arrows
 
 // ============================================================================
 // TYPES

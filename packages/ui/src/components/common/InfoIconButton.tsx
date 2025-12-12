@@ -43,21 +43,21 @@
  * - "inline": Minimal styling for use within text, 20px touch target
  * 
  * ## Configurable constants
- * - BUTTON_ICON_SIZE: Icon size for "button" variant (default: 1.3rem)
+ * - BUTTON_ICON_SIZE: Icon size for "button" variant (default: 1.2rem)
  * - INLINE_ICON_SIZE: Icon size for "inline" variant (default: 1.1rem)
  * - CIRCLE_SIZE: Touch target size for "button" variant (default: 24px)
  * - INLINE_TOUCH_TARGET: Touch target size for "inline" variant (default: 20px)
  */
 
-import React, { useState, useRef, forwardRef } from "react"
-import { Box, InfoIcon, ClickAwayListener } from "../.."
-import { InfoTooltip } from "./InfoTooltip"
+import React, { useRef, forwardRef } from "react"
+import { Box, InfoIcon } from "../.."
+import { HybridTooltip } from "./tooltips/HybridTooltip"
 import { Theme } from "@mui/material/styles"
 
 // ============================================================================
 // CONFIGURABLE CONSTANTS
 // ============================================================================
-const BUTTON_ICON_SIZE = "1.3rem"
+const BUTTON_ICON_SIZE = "1.2rem"
 const INLINE_ICON_SIZE = "1.1rem"
 const CIRCLE_SIZE = "24px"
 const INLINE_TOUCH_TARGET = "20px"
@@ -70,6 +70,8 @@ export interface InfoIconButtonProps {
   tooltipContent?: React.ReactNode
   /** Click handler for external control. Not needed if tooltipContent is provided. */
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  /** MouseDown handler - use to mark clicking before ClickAwayListener fires */
+  onMouseDown?: (e: React.MouseEvent<HTMLButtonElement>) => void
   /** Whether tooltip is currently shown. Used for external control and styling. */
   isActive?: boolean
   /** Native title attribute for accessibility */
@@ -124,6 +126,7 @@ export const InfoIconButton = forwardRef<HTMLButtonElement, InfoIconButtonProps>
     {
       tooltipContent,
       onClick,
+      onMouseDown,
       isActive: externalIsActive,
       title,
       sx = {},
@@ -132,50 +135,36 @@ export const InfoIconButton = forwardRef<HTMLButtonElement, InfoIconButtonProps>
     },
     ref,
   ) {
-    // Internal state for self-managed tooltip
-    const [internalOpen, setInternalOpen] = useState(false)
     const buttonRef = useRef<HTMLButtonElement>(null)
     
     // Use forwarded ref if provided, otherwise use internal ref
     const actualRef = (ref as React.RefObject<HTMLButtonElement>) || buttonRef
 
-    // Determine if tooltip is open (internal or external control)
+    // Determine if tooltip is self-managed or externally controlled
     const isSelfManaged = tooltipContent !== undefined
-    const isOpen = isSelfManaged ? internalOpen : (externalIsActive ?? false)
+    const isActive = externalIsActive ?? false
     
     const isInline = variant === "inline"
     const iconSize = isInline ? INLINE_ICON_SIZE : BUTTON_ICON_SIZE
-
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (isSelfManaged) {
-        setInternalOpen(!internalOpen)
-      }
-      onClick?.(e)
-    }
-
-    const handleClickAway = () => {
-      if (isSelfManaged && internalOpen) {
-        setInternalOpen(false)
-      }
-    }
 
     const button = (
       <Box
         component="button"
         ref={actualRef}
-        onClick={handleClick}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
         title={title}
         sx={{
           ...(isInline ? inlineButtonStyles : circleButtonStyles),
           background: isInline
             ? "none"
             : (theme: Theme) =>
-                isOpen
+                isActive
                   ? `${theme.palette.blue.bright}20`
                   : `${theme.palette.grey[500]}15`,
           color: (theme: Theme) =>
-            isOpen ? theme.palette.blue.darkest : theme.palette.blue.bright,
-          "&:hover": {
+            isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
+    "&:hover": {
             background: isInline
               ? "none"
               : (theme: Theme) => `${theme.palette.blue.bright}30`,
@@ -187,27 +176,14 @@ export const InfoIconButton = forwardRef<HTMLButtonElement, InfoIconButtonProps>
       </Box>
     )
 
-    // If self-managed, wrap with ClickAwayListener and InfoTooltip
+    // If self-managed, use HybridTooltip (hover on desktop, click on touch)
     if (isSelfManaged) {
-      return (
-        <ClickAwayListener onClickAway={handleClickAway}>
-          <span style={{ display: isInline ? "inline" : "inline-flex" }}>
-            <InfoTooltip
-              description={tooltipContent}
-              placement={placement}
-              tooltipProps={{
-                open: internalOpen,
-                disableFocusListener: true,
-                disableHoverListener: true,
-                disableTouchListener: true,
-              }}
-            >
-              {button}
-            </InfoTooltip>
-          </span>
-        </ClickAwayListener>
-      )
-    }
+    return (
+        <HybridTooltip content={tooltipContent} placement={placement}>
+          {button}
+        </HybridTooltip>
+    )
+  }
 
     // External control - just return the button
     return button
