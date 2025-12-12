@@ -30,11 +30,21 @@ const scenarioIdToStrategy = (scenarioId: string): string => {
   return entry ? entry[0] : scenarioId
 }
 
+interface ListViewProps {
+  /** Compact mode for split-panel layouts (50% width) - reduces padding */
+  compact?: boolean
+  /** Callback when a tier/outcome is clicked (for map integration) */
+  onTierClick?: (strategy: string, outcome: string) => void
+}
+
 /**
  * ListView: Full list of COEQWAL scenarios with searching and sorting
  * Shows all scenarios in a grid/table format with outcome summaries
+ * 
+ * @param compact - When true, uses reduced padding for split-panel layouts
+ * @param onTierClick - Optional callback for tier/outcome clicks (used by MapView)
  */
-export default function ListView() {
+export default function ListView({ compact = false, onTierClick }: ListViewProps) {
   const theme = useTheme()
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
     useScenarioData()
@@ -207,8 +217,8 @@ export default function ListView() {
         sx={{
           flex: 1,
           overflowY: "auto",
-          px: theme.spacing(theme.cards.spacing.standard),
-          pt: theme.spacing(1.5),
+          px: theme.spacing(compact ? 1.5 : theme.cards.spacing.standard),
+          pt: theme.spacing(compact ? 1 : 1.5),
           pb: 0,
         }}
       >
@@ -219,6 +229,7 @@ export default function ListView() {
           highlightedStrategies={matchingStrategyValues}
           showSearchDivider={hasSearchResults}
           onOutcomeSelect={handleOutcomeSelect}
+          onTierClick={onTierClick}
           onToggleScenario={handleToggleScenario}
           selectedScenarios={selectedStrategies}
           selectedOutcomes={localSelectedOutcomes}

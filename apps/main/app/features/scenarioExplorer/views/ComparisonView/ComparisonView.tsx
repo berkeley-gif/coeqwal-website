@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import { useComparisonData } from "./useComparisonData"
-import ScenarioPanel from "../MapView/components/ScenarioPanel"
+import ListView from "../ListView/ListView"
 
 /**
  * ComparisonView: Visual comparison matrix of scenarios
@@ -117,7 +117,7 @@ export default function ComparisonView() {
       {/* Left Panel: Scenario List */}
       <Box
         sx={{
-          width: "45%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
           borderRight: theme.border.standard,
@@ -125,13 +125,13 @@ export default function ComparisonView() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <ScenarioPanel onTierClick={() => {}} />
+        <ListView compact />
       </Box>
 
       {/* Right panel: Comparison chart */}
       <Box
         sx={{
-          width: "55%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
           position: "relative",

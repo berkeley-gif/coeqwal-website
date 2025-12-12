@@ -8,7 +8,7 @@ import {
   GeolocateControl,
   MapProvider,
 } from "@repo/map"
-import ScenarioPanel from "./components/ScenarioPanel"
+import ListView from "../ListView/ListView"
 import TierMarkers from "../../components/TierMarkers"
 import { useTierMapData } from "../../hooks/useTierMapData"
 
@@ -44,7 +44,7 @@ function MapViewContent() {
       {/* Left Panel: Scenarios */}
       <Box
         sx={{
-          width: "45%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
           borderRight: theme.border.standard,
@@ -52,13 +52,13 @@ function MapViewContent() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <ScenarioPanel onTierClick={handleTierClick} />
+        <ListView compact onTierClick={handleTierClick} />
       </Box>
 
       {/* Right Panel: Map */}
       <Box
         sx={{
-          width: "55%",
+          width: "50%",
           position: "relative",
         }}
       >
