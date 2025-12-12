@@ -130,13 +130,14 @@ export default function ComparisonView() {
         <ListView compact />
       </Box>
 
-      {/* Right panel: Comparison chart (fixed) */}
+      {/* Right panel: Comparison chart (scrollable) */}
       <Box
         sx={{
           width: "50%",
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          overflowY: "auto",
         }}
       >
         {/* Header */}
@@ -151,13 +152,24 @@ export default function ComparisonView() {
             flexShrink: 0,
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: theme.typography.fontWeightMedium,
+              fontSize: "1.1rem",
+              mb: 1,
+            }}
+          >
             Scenario comparison
           </Typography>
           <Typography
             variant="body2"
             component="div"
-            sx={{ color: theme.palette.grey[600], mb: 1 }}
+            sx={{
+              color: theme.palette.grey[600],
+              mb: 1,
+              fontSize: theme.typography.nav.fontSize,
+            }}
           >
             Comparing {data.length} scenarios across key outcomes. Use the
             draggable arrows on each axis to filter scenarios by brushing
@@ -208,7 +220,7 @@ export default function ComparisonView() {
                     sx={{
                       color: theme.palette.text.primary,
                       fontWeight: isHighlighted ? 600 : 400,
-                      fontSize: "0.75rem",
+                      fontSize: theme.typography.nav.fontSize,
                     }}
                   >
                     {scenario.name}
@@ -222,26 +234,22 @@ export default function ComparisonView() {
         {/* Chart container */}
         <Box
           sx={{
-            flex: 1,
             p: theme.spacing(3),
-            overflow: "hidden",
             display: "flex",
             flexDirection: "column",
           }}
         >
           <Box
             sx={{
-              flex: 1,
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.rounded,
               padding: theme.spacing(2),
               boxShadow: theme.shadow.subtle,
-              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
             }}
           >
-            <Box sx={{ flex: 1, minHeight: 0 }}>
+            <Box sx={{ height: "540px" }}>
               <VerticalParallelLinePlot
                 data={highlightedData}
                 axes={axes}
@@ -251,6 +259,7 @@ export default function ComparisonView() {
                   default: theme.palette.grey[600],
                   highlighted: theme.palette.blue.darkest,
                   background: theme.palette.grey[50],
+                  axis: theme.palette.grey[500],
                 }}
                 lineColors={lineColors}
                 onLineClick={(scenario) => handleScenarioClick(scenario.id)}
