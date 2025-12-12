@@ -13,7 +13,6 @@ import {
   useTheme,
   Theme,
   Checkbox,
-  InfoIcon,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
@@ -705,24 +704,19 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             return (
                               <span key={index}>
                                 {part}
-                                <InfoTooltip
-                                  description="Temporary Urgent Change Petitions permit changes during droughts to meet human health and safety needs and protect endangered species"
-                                  placement="top"
-                                >
-                                  <InfoIcon
-                                    sx={{
-                                      fontSize:
-                                        theme.typography.compact.subtitle
-                                          .fontSize,
-                                      ml: 0.5,
-                                      cursor: "pointer",
-                                      color: theme.palette.blue.bright,
-                                      "&:hover": {
-                                        color: theme.palette.blue.darkest,
-                                      },
-                                    }}
-                                  />
-                                </InfoTooltip>
+                                <InfoIconButton
+                                  variant="inline"
+                                  tooltipContent={
+                                    <>
+                                      <Box component="span" sx={{ fontWeight: 600 }}>
+                                        Temporary Urgent Change Petitions
+                                      </Box>{" "}
+                                      permit changes during droughts to meet human
+                                      health and safety needs and protect endangered
+                                      species.
+                                    </>
+                                  }
+                                />
                               </span>
                             )
                           }

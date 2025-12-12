@@ -780,7 +780,7 @@ export default function MapOverlayPanels() {
                                   fontStyle: "italic",
                                 }}
                               >
-                                Hover over the{" "}
+                                Click the{" "}
                                 <InfoIcon
                                   sx={{
                                     fontSize: "1rem",
@@ -872,7 +872,7 @@ export default function MapOverlayPanels() {
                                   fontStyle: "italic",
                                 }}
                               >
-                                Hover over the icons to see what key operations
+                                Click the icons to see what key operations
                                 they represent.
                               </Box>
                             </>
