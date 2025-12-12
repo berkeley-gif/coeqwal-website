@@ -184,12 +184,20 @@ export default function MapOverlayPanels() {
     [0, 1],
   )
 
-  // Panel pointer events - always "none" on container, let children handle their own
-  // This allows map panning through panel backgrounds
-  const strategyInfoPointerEvents = "none" as const
-  const keyOperationsPointerEvents = "none" as const
-  const keyOutcomesPointerEvents = "none" as const
-  const summaryPointerEvents = "none" as const
+  // Panel pointer events - derived from opacity to prevent invisible panels from receiving events
+  // When opacity < 0.5, pointer events are disabled entirely (including children)
+  const strategyInfoPointerEvents = useTransform(strategyInfoPanelOpacity, (v) =>
+    v < 0.5 ? "none" : "auto",
+  )
+  const keyOperationsPointerEvents = useTransform(keyOperationsPanelOpacity, (v) =>
+    v < 0.5 ? "none" : "auto",
+  )
+  const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
+    v < 0.5 ? "none" : "auto",
+  )
+  const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
+    v < 0.5 ? "none" : "auto",
+  )
 
   // Tooltip opacity - fade in and out (adjusted for compressed timing)
   const strategyInfoTooltipOpacity = useTransform(
@@ -200,7 +208,7 @@ export default function MapOverlayPanels() {
 
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.33, 0.37, 0.43, 0.47],
+    [0.36, 0.40, 0.46, 0.50],
     [0, 1, 1, 0],
   )
 
@@ -745,15 +753,15 @@ export default function MapOverlayPanels() {
                           pointerEvents: "none",
                         }}
                       >
-                        <Box
+                        <motion.div
                           ref={strategyInfoRef}
-                          sx={{ pointerEvents: "auto" }}
+                          style={{ pointerEvents: strategyInfoPointerEvents }}
                         >
                           <StrategyInfoPanel
                             strategyValue="current-ops"
                             onTitleClick={() => setStrategyTooltipClosed(false)}
                           />
-                        </Box>
+                        </motion.div>
 
                         <ScrollTooltip
                           targetRef={strategyInfoRef}
@@ -836,15 +844,15 @@ export default function MapOverlayPanels() {
                           pointerEvents: "none",
                         }}
                       >
-                        <Box
+                        <motion.div
                           ref={keyOperationsRef}
-                          sx={{ pointerEvents: "auto" }}
+                          style={{ pointerEvents: keyOperationsPointerEvents }}
                         >
                           <KeyOperationsPanel
                             strategyValue="current-ops"
                             onTitleClick={() => setKeyOpsTooltipClosed(false)}
                           />
-                        </Box>
+                        </motion.div>
 
                         <ScrollTooltip
                           targetRef={keyOperationsRef}
@@ -920,9 +928,9 @@ export default function MapOverlayPanels() {
                           pointerEvents: "none",
                         }}
                       >
-                        <Box
+                        <motion.div
                           ref={keyOutcomesRef}
-                          sx={{ pointerEvents: "auto" }}
+                          style={{ pointerEvents: keyOutcomesPointerEvents }}
                         >
                           <KeyOutcomesPanel
                             scenarioId="s0020"
@@ -930,7 +938,7 @@ export default function MapOverlayPanels() {
                               setKeyOutcomesTooltipClosed(false)
                             }
                           />
-                        </Box>
+                        </motion.div>
 
                         <ScrollTooltip
                           targetRef={keyOutcomesRef}
@@ -1016,15 +1024,15 @@ export default function MapOverlayPanels() {
                         pointerEvents: "none",
                       }}
                     >
-                      <Box
-                        sx={{
-                          pointerEvents: "auto",
+                      <motion.div
+                        style={{
+                          pointerEvents: summaryPointerEvents,
                           width: "100%",
-                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          maxWidth: "500px", // Simplified for motion.div
                         }}
                       >
                         <SummaryPanel strategy="current-ops" />
-                      </Box>
+                      </motion.div>
                     </Box>
                   </Box>
                 </motion.div>

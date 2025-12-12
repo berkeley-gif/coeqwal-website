@@ -6,13 +6,15 @@
  * or useExploreUserWorkflowStore().
  */
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Box,
   Typography,
   useTheme,
   Theme,
   Checkbox,
+  Portal,
+  ClickAwayListener,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
@@ -29,6 +31,7 @@ import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
 import TierTooltipContent from "./TierTooltipContent"
 import TogglePair from "./TogglePair"
 import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
+import { useTierTooltipState } from "../../shared/hooks/useTierTooltipState"
 
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
@@ -286,8 +289,30 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onSortChange,
 }: StrategyGridProps) {
   const theme = useTheme()
-  const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
-  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null)
+  
+  // Use unified tooltip state management
+  const { 
+    openTooltip: activeTooltip, 
+    anchor: tooltipAnchor, 
+    handleToggleWithAnchor, 
+    handleClose: closeTooltip,
+    forceClose: forceCloseTooltip,
+  } = useTierTooltipState()
+  
+  const [tooltipPosition, setTooltipPosition] = useState<{ top: number; right: number } | null>(null)
+
+  // Calculate tooltip position when anchor changes (for Portal positioning)
+  useEffect(() => {
+    if (tooltipAnchor) {
+      const rect = tooltipAnchor.getBoundingClientRect()
+      setTooltipPosition({
+        top: rect.top - 8, // Align arrow with top of anchor
+        right: window.innerWidth - rect.left + 24, // Position to the left of anchor
+      })
+    } else {
+      setTooltipPosition(null)
+    }
+  }, [tooltipAnchor])
 
   // Track which strategies have expanded summaries and which outcome is selected
   const [expandedSummaries, setExpandedSummaries] = useState<
@@ -318,92 +343,97 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   return (
     <Box sx={{ position: "relative" }}>
-      {/* Active outcome tooltip - matches learn-map ScrollTooltip styling */}
-      {activeTooltip && tooltipAnchor && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: tooltipAnchor.offsetTop - 8, // Align arrow with top of anchor
-            right: `calc(100% - ${tooltipAnchor.offsetLeft}px + 24px)`,
-            zIndex: 9999,
-          }}
-        >
-          <Box
-            sx={{
-              position: "relative",
-              backgroundColor: theme.palette.common.white,
-              color: theme.palette.text.primary,
-              border: `1px solid ${theme.palette.action.hover}`,
-              borderRadius: theme.borderRadius.card,
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-              padding: "16px",
-              paddingRight: "40px", // Extra space for close button
-              width: theme.spacing(56.25),
-            }}
+      {/* Active outcome tooltip - rendered via Portal to escape stacking context */}
+      {activeTooltip && tooltipPosition && (
+        <Portal>
+          <ClickAwayListener
+            onClickAway={closeTooltip}
+            mouseEvent="onMouseUp"
+            touchEvent="onTouchEnd"
           >
-            {/* Close button */}
             <Box
-              component="button"
-              onClick={() => {
-                setActiveTooltip(null)
-                setTooltipAnchor(null)
-              }}
               sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                width: 24,
-                height: 24,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                fontSize: "0.875rem",
-                color: theme.palette.grey[500],
-                borderRadius: "50%",
-                "&:hover": {
-                  color: theme.palette.grey[700],
-                  backgroundColor: theme.palette.grey[100],
-                },
+                position: "fixed",
+                top: tooltipPosition.top,
+                right: tooltipPosition.right,
+                zIndex: theme.zIndex.tooltip,
               }}
-              aria-label="Close tooltip"
             >
-              ✕
+              <Box
+                sx={{
+                  position: "relative",
+                  backgroundColor: theme.palette.common.white,
+                  color: theme.palette.text.primary,
+                  border: `1px solid ${theme.palette.action.hover}`,
+                  borderRadius: theme.borderRadius.card,
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                  padding: "16px",
+                  paddingRight: "40px", // Extra space for close button
+                  width: theme.spacing(56.25),
+                }}
+              >
+                {/* Close button */}
+                <Box
+                  component="button"
+                  onClick={forceCloseTooltip}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    color: theme.palette.grey[500],
+                    borderRadius: "50%",
+                    "&:hover": {
+                      color: theme.palette.grey[700],
+                      backgroundColor: theme.palette.grey[100],
+                    },
+                  }}
+                  aria-label="Close tooltip"
+                >
+                  ✕
+                </Box>
+
+                {/* Arrow pointing right (to the anchor) - positioned at upper right */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: -16,
+                    top: 16,
+                    width: 0,
+                    height: 0,
+                    border: "8px solid transparent",
+                    borderLeftColor: theme.palette.common.white,
+                    // Add a shadow effect to the arrow
+                    filter: "drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1))",
+                  }}
+                />
+                {/* Arrow border overlay */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: -17,
+                    top: 16,
+                    width: 0,
+                    height: 0,
+                    border: "8px solid transparent",
+                    borderLeftColor: theme.palette.action.hover,
+                    zIndex: -1,
+                  }}
+                />
+
+                <TierTooltipContent outcome={activeTooltip} showTitle={true} />
+              </Box>
             </Box>
-
-            {/* Arrow pointing right (to the anchor) - positioned at upper right */}
-            <Box
-              sx={{
-                position: "absolute",
-                right: -16,
-                top: 16,
-                width: 0,
-                height: 0,
-                border: "8px solid transparent",
-                borderLeftColor: theme.palette.common.white,
-                // Add a shadow effect to the arrow
-                filter: "drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1))",
-              }}
-            />
-            {/* Arrow border overlay */}
-            <Box
-              sx={{
-                position: "absolute",
-                right: -17,
-                top: 16,
-                width: 0,
-                height: 0,
-                border: "8px solid transparent",
-                borderLeftColor: theme.palette.action.hover,
-                zIndex: -1,
-              }}
-            />
-
-            <TierTooltipContent outcome={activeTooltip} showTitle={true} />
-          </Box>
-        </Box>
+          </ClickAwayListener>
+        </Portal>
       )}
 
       <Box sx={gridStyles.container(showMapView, theme)}>
@@ -490,9 +520,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         {/* Outcome name headers - show in full-width list view only (not compact mode) */}
         {!compact && (
           <>
-            <Box sx={{ gridColumn: "1 / 3" }} />{" "}
-            {/* Empty for checkbox + strategy columns */}
-            <Box /> {/* Empty for operations column */}
+        <Box sx={{ gridColumn: "1 / 3" }} />{" "}
+        {/* Empty for checkbox + strategy columns */}
+        <Box /> {/* Empty for operations column */}
           </>
         )}
         <Box
@@ -556,15 +586,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 >
                   <InfoIconButton
                     isActive={activeTooltip === name}
-                    onClick={(e) => {
-                      if (activeTooltip === name) {
-                        setActiveTooltip(null)
-                        setTooltipAnchor(null)
-                      } else {
-                        setActiveTooltip(name)
-                        setTooltipAnchor(e.currentTarget)
-                      }
-                    }}
+                    onClick={(e) => handleToggleWithAnchor(name, e.currentTarget)}
                     title="Click for outcome details"
                   />
 
@@ -572,8 +594,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     <SortButton
                       sortState={isSorted ? sortDirection : null}
                       onAscClick={() => {
-                        if (sortDirection === "asc") {
-                          onSortChange(null, "asc") // Clear sort
+                          if (sortDirection === "asc") {
+                            onSortChange(null, "asc") // Clear sort
                         } else {
                           onSortChange(displayName, "asc")
                         }
@@ -716,7 +738,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                       species.
                                     </>
                                   }
-                                />
+                                  />
                               </span>
                             )
                           }
@@ -1123,13 +1145,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                 isActive={activeTooltip === name}
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  if (activeTooltip === name) {
-                                    setActiveTooltip(null)
-                                    setTooltipAnchor(null)
-                                  } else {
-                                    setActiveTooltip(name)
-                                    setTooltipAnchor(e.currentTarget)
-                                  }
+                                  handleToggleWithAnchor(name, e.currentTarget)
                                 }}
                                 title="Click for outcome details"
                               />
