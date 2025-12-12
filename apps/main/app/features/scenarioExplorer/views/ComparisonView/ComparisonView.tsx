@@ -110,11 +110,13 @@ export default function ComparisonView() {
     <Box
       sx={{
         display: "flex",
-        height: "100%",
+        // Account for header (40px) + tabs (~48px) + banner (~60px) + search (~56px) + padding
+        // TODO: set this value as a variable in the theme and use
+        height: "calc(100vh - 220px)",
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Left Panel: Scenario List */}
+      {/* Left Panel: Scenario List (scrollable via ListView) */}
       <Box
         sx={{
           width: "50%",
@@ -128,13 +130,13 @@ export default function ComparisonView() {
         <ListView compact />
       </Box>
 
-      {/* Right panel: Comparison chart */}
+      {/* Right panel: Comparison chart (fixed) */}
       <Box
         sx={{
           width: "50%",
           display: "flex",
           flexDirection: "column",
-          position: "relative",
+          height: "100%",
         }}
       >
         {/* Header */}
