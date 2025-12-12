@@ -1024,15 +1024,21 @@ export default function MapOverlayPanels() {
                         pointerEvents: "none",
                       }}
                     >
-                      <motion.div
-                        style={{
-                          pointerEvents: summaryPointerEvents,
+                      <Box
+                        sx={{
                           width: "100%",
-                          maxWidth: "500px", // Simplified for motion.div
+                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          pointerEvents: "none",
                         }}
                       >
-                        <SummaryPanel strategy="current-ops" />
-                      </motion.div>
+                        <motion.div
+                          style={{
+                            pointerEvents: summaryPointerEvents,
+                          }}
+                        >
+                          <SummaryPanel strategy="current-ops" />
+                        </motion.div>
+                      </Box>
                     </Box>
                   </Box>
                 </motion.div>

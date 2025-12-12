@@ -543,7 +543,7 @@ export function KeyOutcomesPanel({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(5, 1fr)" },
           gap: 1,
           alignItems: "start",
           mb: 1.5,
@@ -612,26 +612,44 @@ export function KeyOutcomesPanel({
                   },
                 }}
               >
-                <ScenarioGlyph
-                  tierColors={
-                    hasData
-                      ? [
-                          theme.palette.tiers.tier1,
-                          theme.palette.tiers.tier2,
-                          theme.palette.tiers.tier3,
-                          theme.palette.tiers.tier4,
-                        ]
-                      : [
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                        ]
-                  }
-                  values={getTierValues(outcome)}
-                  variant="bars"
-                  size={60}
-                />
+                {hasData ? (
+                  <ScenarioGlyph
+                    tierColors={[
+                      theme.palette.tiers.tier1,
+                      theme.palette.tiers.tier2,
+                      theme.palette.tiers.tier3,
+                      theme.palette.tiers.tier4,
+                    ]}
+                    values={getTierValues(outcome)}
+                    variant="bars"
+                    size={60}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: theme.palette.grey[100],
+                      borderRadius: theme.borderRadius.rounded,
+                      border: `1px solid ${theme.palette.grey[300]}`,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "0.55rem",
+                        color: theme.palette.text.primary,
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                        px: 0.5,
+                      }}
+                    >
+                      No data at this time
+                    </Typography>
+                  </Box>
+                )}
                 <Box
                   sx={{
                     display: "flex",
@@ -687,7 +705,7 @@ export function KeyOutcomesPanel({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)" },
           gap: 1,
           alignItems: "start",
         }}
@@ -755,26 +773,44 @@ export function KeyOutcomesPanel({
                   },
                 }}
               >
-                <ScenarioGlyph
-                  tierColors={
-                    hasData
-                      ? [
-                          theme.palette.tiers.tier1,
-                          theme.palette.tiers.tier2,
-                          theme.palette.tiers.tier3,
-                          theme.palette.tiers.tier4,
-                        ]
-                      : [
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                        ]
-                  }
-                  values={getTierValues(outcome)}
-                  variant="dots"
-                  size={60}
-                />
+                {hasData ? (
+                  <ScenarioGlyph
+                    tierColors={[
+                      theme.palette.tiers.tier1,
+                      theme.palette.tiers.tier2,
+                      theme.palette.tiers.tier3,
+                      theme.palette.tiers.tier4,
+                    ]}
+                    values={getTierValues(outcome)}
+                    variant="dots"
+                    size={60}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: theme.palette.grey[100],
+                      borderRadius: theme.borderRadius.rounded,
+                      border: `1px solid ${theme.palette.grey[300]}`,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "0.55rem",
+                        color: theme.palette.text.primary,
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                        px: 0.5,
+                      }}
+                    >
+                      No data at this time
+                    </Typography>
+                  </Box>
+                )}
                 <Box
                   sx={{
                     display: "flex",
