@@ -1,101 +1,32 @@
 import { createTheme, Theme } from "@mui/material/styles"
 
 /* ========================================================
- GENERAL COMMENTS THAT SHOULD PROBABLY GO IN A README
- ========================================================
-
-To change fonts site-wide:
-
-- Add the new font import (TypeKit, Google Fonts, or @font-face)
-- Update themeValues.fontFamily constants
-
-The changes will cascade through all MUI components using theme.typography
-Components with hardcoded fontFamily styles (inline or in sx props) would need individual updates. A search for "fontFamily" in the codebase would reveal these exceptions.
-
-/* ========================================================
- TABLE OF CONTENTS
- ========================================================
-| 1. Global theme values
-|    - Typography scale (Perfect Fourth ratio with typeScale constants) <- possibly obsolete
-|    - Font families (text, display) with switchable presets
-|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer) <- useful! also probably partially obsolete
-|    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
-|    - Tier colors for data visualization
-|    - Border radius values
-|    - Border styles  
-|    - Shadows
-|    - Z-Index layering system (5 layers: background, content, interactive, navigation, system) <- obsolete. Revive?
-|    - Map prompt dialog configuration
-|
-| 2. Reusable mixins (defined before theme creation) <- many are obsolete
-|    - Scenario card list styling
-|    - Tooltip action button styling
-|    - Triangle checkbox mixin for expandable controls
-|    - Form control base mixin (standardized 20px × 20px controls)
-|    - Card typography mixins (eyebrow, cardTitle, sectionHeader, bodyContainer, etc.)
-|    - Drawer content styling mixins (contentWrapper, itemBox, chips, etc.)
-|
-| 3. Theme configuration
-|    - Base theme creation
-|    - Helper functions (createBorderStyles, createDrawerMixins)
-|    - Main theme object with:
-|      - Custom layout properties and responsive spacing system
-|      - Cards typography scale and spacing system
-|      - California Water palette integration
-|      - Typography variants using typeScale
-|      - Shape settings
-|      - Z-index configuration
-|      - Component overrides for MUI components:
-|        * CssBaseline (incl. font imports)
-|        * Button variants (pill, standard, outlined, actionCard)
-|        * Drawer (mini-drawer with transitions)
-|        * Form controls (Checkbox, Radio, FormControlLabel)
-|        * Navigation (incl tabs)
-|        * UI components (Typography, Paper, Toolbar, Tooltip, etc.)
-|      - Custom mixins integration
-|
-| 4. Custom theme properties (post-creation)
-|    - Border utilities with palette colors
-|    - Background overlays (transparent, paragraph, overlay variants)
-|    - Border radius application
-|    - Map prompt dialog configuration
-|    - Exported mixin constants
-|
-| 5. TypeScript customizations
-|    - Extended palette interface (brand, blue, accent, nature, utility, grey, ambient)
-|    - Tier color interfaces
-|    - Custom theme interface extensions (layout, cards, border, background, mapPromptDialog)
-|    - Z-Index interface extensions (layered system with semantic names)
-|    - Cards typography and spacing interfaces
-|    - Component variant overrides (Button, Typography)
-|    - Custom mixins interface (all reusable mixins)
-|
-| 6. Documentation & usage guides
-|    - Form control conventions and specifications
-|    - Z-index layering system guide
-|    - Usage examples and best practices
-| ========================================================
+ * COEQWAL MUI THEME
+ * ========================================================
+ *
+ * TABLE OF CONTENTS
+ * -----------------
+ * 1. themeValues     - Design tokens (fonts, colors, spacing, shadows)
+ * 2. Mixins          - Reusable style patterns (formControlBase, drawerContent)
+ * 3. createTheme()   - MUI theme with palette, typography, component overrides
+ * 4. Post-creation   - Custom properties (border, background, boxShadows)
+ * 5. TypeScript      - Module augmentation for custom theme properties
+ */
 
 
-| 1. Global theme values
-======================================================== 
-Change these values to update the theme across the site
+/* ===============================================================================
+* FONT CONFIGURATION SYSTEM
+* ===============================================================================
+* 
+* To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
+* Each preset defines: text (body), display (headlines), and cssImport (font loading)
+*
+* Available presets: "neueHaas" | "roboto" | "inter" | "system"
 */
-
-// ===============================================================================
-// FONT CONFIGURATION SYSTEM
-// ===============================================================================
-// 
-// To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
-// Each preset defines: text (body), display (headlines), and cssImport (font loading)
-//
-// Available presets: "neueHaas" | "roboto" | "inter" | "system"
-//
 
 type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
 
-// CHANGE THIS TO SWITCH FONTS
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas"
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -120,52 +51,21 @@ const FONT_PRESETS = {
   },
 } as const
 
-// Active font configuration (used throughout theme)
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
-// ===============================================================================
-// TYPOGRAPHY SCALE
-// ===============================================================================
-//
-// Perfect Fourth (1.333) type scale
-// Headlines: Display font (h1, h2, h3, h5, h6) | Body text: Text font (h4, body1, body2, UI)
-//
-// Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water"
-// • h2: 4.35rem (69.6px) - Section headlines "What is the future..."
-// • h3: 3.26rem (52.2px) - Subsection headlines (h2 ÷ 1.333)
-// • h4: 2.45rem (39.2px) - Card titles (h3 ÷ 1.333)
-// • h5: 1.84rem (29.4px) - Labels and minor headlines
-// • h6: 1.38rem (22.1px) - Small headlines and captions
-// • body1: 1.25rem (20px) - Primary body text
-// • body2: 0.95rem (15.2px) - Dashboard interface text
-//
-// Additional variants:
-// • subtitle1: 1.25rem (20px) - Medium weight body text
-// • subtitle2: 0.95rem (15.2px) - Medium weight interface text
-// • button: 1rem (16px) - UI button text (Medium weight, no transform)
-// • caption: 1rem (16px) - Aligned with body2 for consistency
-// • nav: 0.875rem (14px) - Navigation text (custom variant)
-//
-// Compact UI variants (for dialogs, tooltips, form labels):
-// • compact.title: 0.9rem (14.4px) - Compact dialog titles
-// • compact.subtitle: 0.8rem (12.8px) - Compact dialog subtitles
-// • compact.caption: 0.75rem (12px) - Compact captions/labels
-// • compact.micro: 0.7rem (11.2px) - Micro text (form helpers)
-//
 
-// ===============================================================================
-// CONSTANTS
-// ===============================================================================
+/* ========================================================
+ * 1. themeValues - Design tokens
+ * ======================================================== */
 
 const typeScale = {
   // Headline sizes using Perfect Fourth ratio (1.333)
   h1: "5.8rem", // 92.8px - Hero size
-  h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
-  h3: "3.26rem", // 52.2px - Subsection headers (h2 ÷ 1.333)
-  h4: "2.45rem", // 39.2px - Card titles (h3 ÷ 1.333)
-  h5: "1.84rem", // 29.4px - Minor headlines (h4 ÷ 1.333)
-  h6: "1.38rem", // 22.1px - Section headers (h5 ÷ 1.333)
+  h2: "4.35rem", // 69.6px - Major section headers
+  h3: "3.26rem", // 52.2px - Subsection headers
+  h4: "2.45rem", // 39.2px - Card titles
+  h5: "1.84rem", // 29.4px - Minor headlines
+  h6: "1.38rem", // 22.1px - Section headers
 
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
@@ -177,13 +77,11 @@ const typeScale = {
 }
 
 // themeValues - runtime values for custom theme properties
-// (also typed in Theme and ThemeOptions interfaces below for TypeScript support)
-// necessary  for MUI typscript support; unfortunately it means we repeat the terms three times in the theme.
 export const themeValues = {
-  // Typography - uses active font preset. Change ACTIVE_FONT_PRESET above to switch.
+  // Typography (uses active font preset. Change ACTIVE_FONT_PRESET above to switch.)
   fontFamily: {
-    text: activeFont.text,     // Body text, UI elements
-    display: activeFont.display, // Headlines, display text
+    text: activeFont.text,
+    display: activeFont.display,
   },
 
   // Layout dimensions, for layout and layout calculations
@@ -205,9 +103,9 @@ export const themeValues = {
     },
     // Spacer component spacing system - responsive values for section spacing
     spacer: {
-      small: { xs: 24, md: 48, lg: 64 }, // 24px / 48px / 64px
-      medium: { xs: 48, md: 96 }, // 48px / 96px
-      large: { xs: 100, lg: 0 }, // 100px / 0
+      small: { xs: 24, md: 48, lg: 64 },
+      medium: { xs: 48, md: 96 },
+      large: { xs: 100, lg: 0 },
     },
   },
 
@@ -219,13 +117,13 @@ export const themeValues = {
       water: "#64A4D6", // Bottom of gradient - water blue
     },
 
-    // Text and UI blues (organized by intensity)
+    // Text and UI blues 
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
-      dark: "#186b88", // Dark teal - secondary text
-      medium: "#2d89b6", // Medium blue - accent (a beautiful blue FWIW)
+      dark: "#186b88", // Dark teal
+      medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
-      light: "#77a2d9", // Light blue - subtle elements
+      light: "#77a2d9", // Light blue
     },
 
     text: {
@@ -310,12 +208,16 @@ export const themeValues = {
     thick: "2px solid",
   },
 
-  // Shadows
-  shadow: {
-    none: "none",
-    subtle: "0 1px 3px rgba(0,0,0,0.2)", // Subtle shadow for panels and overlays
-    medium: "0 2px 4px rgba(0,0,0,0.3)", // Medium shadow for interactive elements
-    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)", // Prominent shadow for floating elements
+  // Box shadows
+  boxShadows: {
+    subtle: "0 1px 3px rgba(0,0,0,0.2)",
+    medium: "0 2px 4px rgba(0,0,0,0.3)",
+    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)",
+    panel: "0 8px 32px rgba(0, 0, 0, 0.2)",
+    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)",
+    toast: "0 4px 20px rgba(0, 0, 0, 0.3)",
+    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)",
+    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)",
   },
 
   // Z-index values
@@ -352,22 +254,9 @@ export const themeValues = {
     debug: 9999, // Debug overlays (development)
   },
 
-  // Box shadows - could be standardized further, recorded here for expedience
-  boxShadows: {
-    panel: "0 8px 32px rgba(0, 0, 0, 0.2)", // Floating panels
-    card: "0 4px 12px rgba(0, 0, 0, 0.15)", // Cards, tooltips
-    hover: "0 4px 8px rgba(0, 0, 0, 0.1)", // Hover states
-    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)", // Strong hover (glossary button)
-    active: "0 2px 4px rgba(0, 0, 0, 0.1)", // Active/pressed
-    toast: "0 4px 20px rgba(0, 0, 0, 0.3)", // Notifications, buttons
-    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)", // Focus ring
-    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)", // Focus ring hover
-    none: "none",
-  },
-
   // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
   mapPromptDialog: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)", // theme.background.overlay.dark
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
     textColor: "#FFFFFF", // theme.palette.utility.white
     borderRadius: "8px", // theme.borderRadius.card
     padding: "16px", // theme.borderRadius.card
@@ -397,71 +286,82 @@ export const themeValues = {
       },
     },
   },
-}
 
-// ScenarioCard list styling mixin
-const scenarioCardListMixin = {
-  "& ul": {
-    margin: 0,
-    paddingLeft: `${themeValues.layout.controls.standard}px`, // 20px standardized
-    "& li": {
-      fontSize: "0.95rem", // 15.2px - dashboard interface text (matches body2)
-      fontWeight: 400,
-      lineHeight: 1.4, // Tighter to conserve vertical space
-      marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
-
-      color: "inherit",
-      "&:last-child": {
-        marginBottom: 0,
+  // Card typography and spacing system
+  cards: {
+    typography: {
+      hero: {
+        fontSize: "2.5rem", // 40px
+        lineHeight: 1.25,
+        fontWeight: 600,
       },
-      // Bullet styling
-      "&::marker": {
-        color: "inherit",
+      sectionTitle: {
+        fontSize: "2rem", // 32px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      cardTitle: {
+        fontSize: "1.5rem", // 24px
+        lineHeight: 1.4,
+        fontWeight: 500,
+      },
+      subtitle: {
+        fontSize: "1.25rem", // 20px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      body: {
+        fontSize: "0.95rem", // compact card body text
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      caption: {
+        fontSize: "0.95rem", // compact card captions
+        lineHeight: 1.4,
+        fontWeight: 400,
+      },
+      button: {
+        fontSize: "0.95rem",
+        lineHeight: 1.5,
+        fontWeight: 500,
+      },
+    },
+    spacing: {
+      standard: 3, // 24px - standardized spacing unit
+      padding: 3, // 24px inner padding
+      gap: 3, // 24px between cards
+      capsule: {
+        px: 2, // Horizontal emphasis
+        py: 0.5, // Minimal vertical padding
+        marginRight: 1, // Space between capsules (horizontal)
+        marginBottom: 1, // Space between capsules (vertical wrapping)
+      },
+      modal: {
+        padding: 4, // 32px for modal content
+      },
+      coBenefitTags: {
+        marginTop: 2, // Slightly detached from subtypes
+      },
+      tellMoreIcon: {
+        marginLeft: "auto", // Aligns right within card header row
+      },
+      // Compact spacing for cards, dialogs, tooltips, form controls
+      compact: {
+        xs: 0.25, // 2px
+        sm: 0.5, // 4px
+        md: 1, // 8px
+        lg: 1.5, // 12px
+        xl: 2, // 16px
       },
     },
   },
-} as const
+}
 
-// Tooltip action button mixin
-const tooltipActionButtonMixin = {
-  textTransform: "none",
-  borderRadius: themeValues.borderRadius.pill,
-  boxShadow: "none",
-  border: "none",
-  padding: "4px 12px", // Use theme.spacing(theme.cards.spacing.compact.sm, theme.cards.spacing.compact.lg) in components
-  minWidth: "auto",
-  lineHeight: 1.5,
-  fontSize: typeScale.compact.subtitle, // 0.8rem - compact dialog subtitles
-  fontWeight: 500,
-  cursor: "pointer",
-  transition: "all 0.2s ease",
-} as const
+/* ========================================================
+ * 2. Mixins - Reusable style patterns
+ * ======================================================== */
 
-// Triangle checkbox mixin (for dropdown menus in the scenario search panel)
-const triangleCheckboxMixin = {
-  display: "inline-block",
-  width: `${themeValues.layout.controls.standard}px !important`,
-  height: `${themeValues.layout.controls.standard}px !important`,
-  minWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent shrinking
-  maxWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent growing
-  flexShrink: 0, // Don't shrink in flex containers
-  borderRadius: "2px",
-  backgroundColor: "transparent",
-  padding: "0",
-  alignSelf: "flex-start",
-  transform: "translateY(2px)", // Fine-tune vertical position
-  // Center the triangle content
-  lineHeight: `${themeValues.layout.controls.standard - 2}px`, // height minus border (20px - 2px)
-  textAlign: "center",
-  fontSize: typeScale.compact.micro, // 0.7rem
-  transition: "all 0.2s ease",
-  position: "relative",
-  boxSizing: "border-box !important",
-  filter: "none",
-  backdropFilter: "none",
-} as const
-
-// Form control base mixin (shared styling for all form controls)
+// Form control base mixin
 const formControlBaseMixin = {
   width: `${themeValues.layout.controls.standard}px !important`,
   height: `${themeValues.layout.controls.standard}px !important`,
@@ -478,49 +378,6 @@ const formControlBaseMixin = {
   boxSizing: "border-box",
   filter: "none !important",
   backdropFilter: "none !important",
-} as const
-
-// Card typography mixins (standardized from MapPanel card patterns)
-const cardTypographyMixins = {
-  // Eyebrow text (e.g., "SCENARIO")
-  eyebrow: {
-    color: "blue.medium",
-    textTransform: "uppercase",
-    fontSize: typeScale.compact.caption, // 0.75rem - compact captions/labels
-    fontWeight: 500,
-    display: "block",
-    mb: 0.5,
-  } as const,
-  // Main card title (e.g., "Current Operations")
-  cardTitle: {
-    color: "text.secondary",
-    fontFamily: themeValues.fontFamily.text,
-    fontWeight: 500,
-    fontSize: "1.5rem", // Could use typeScale.h6 but this is specifically for cards
-    lineHeight: 1.3,
-    mb: 1,
-  } as const,
-  // Section headers within cards (e.g., "Scenario snapshot")
-  sectionHeader: {
-    // Uses Typography variant="h6" with theme color
-    color: "text.secondary",
-  } as const,
-  // Body text containers
-  bodyContainer: {
-    color: "text.secondary",
-    fontFamily: "typography.fontFamily",
-    mb: 2.5,
-  } as const,
-  // Instructional text
-  instructionalText: {
-    color: "text.primary",
-    fontFamily: "typography.fontFamily",
-    // Uses Typography variant="body1"
-  } as const,
-  // Highlighted words within text
-  highlightedSpan: {
-    color: "text.secondary",
-  } as const,
 } as const
 
 // Drawer content styling mixins
@@ -586,8 +443,8 @@ const drawerContentMixins = {
 } as const
 
 /* ========================================================
-| 2. Theme configuration
-======================================================== */
+ * 3. createTheme() - MUI theme configuration
+ * ======================================================== */
 
 const baseTheme = createTheme()
 
@@ -652,74 +509,8 @@ const theme = createTheme({
   breakpoints: {
     values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
   },
-  // Card typography scale
-  cards: {
-    typography: {
-      hero: {
-        fontSize: "2.5rem", // 40px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      sectionTitle: {
-        fontSize: "2rem", // 32px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      cardTitle: {
-        fontSize: "1.5rem", // 24px
-        lineHeight: 1.4,
-        fontWeight: 500,
-      },
-      subtitle: {
-        fontSize: "1.25rem", // 20px
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      body: {
-        fontSize: "0.95rem", // matches body1
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      caption: {
-        fontSize: "0.95rem", // align with body1
-        lineHeight: 1.4,
-        fontWeight: 400,
-      },
-      button: {
-        fontSize: "0.95rem", // align with body1
-        lineHeight: 1.5,
-        fontWeight: 500,
-      },
-    },
-    spacing: {
-      standard: 3, // 24px - standardized spacing unit
-      padding: 3, // 24px inner padding
-      gap: 3, // 24px between cards
-      capsule: {
-        px: 2, // Horizontal emphasis
-        py: 0.5, // Minimal vertical padding
-        marginRight: 1, // Space between capsules (horizontal)
-        marginBottom: 1, // Space between capsules (vertical wrapping)
-      },
-      modal: {
-        padding: 4, // 32px for modal content
-      },
-      coBenefitTags: {
-        marginTop: 2, // Slightly detached from subtypes
-      },
-      tellMoreIcon: {
-        marginLeft: "auto", // Aligns right within card header row
-      },
-      // Compact spacing for cards, dialogs, tooltips, form controls
-      compact: {
-        xs: 0.25, // 2px
-        sm: 0.5, // 4px
-        md: 1, // 8px
-        lg: 1.5, // 12px
-        xl: 2, // 16px
-      },
-    },
-  },
+  // Card typography and spacing (from themeValues)
+  cards: themeValues.cards,
   // Palette - California Water theme (MUI integration)
   palette: {
     common: {
@@ -882,7 +673,7 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.25rem", // 20px - matches body1
+      fontSize: "1.25rem", // 20px
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
@@ -1053,7 +844,7 @@ const theme = createTheme({
             boxShadow: "none",
             border: "none",
             padding: "16px",
-            fontSize: "0.95rem", // align with body1
+            fontSize: "0.95rem",
             fontWeight: 400,
             textAlign: "center",
             transition: "all 0.2s ease",
@@ -1389,7 +1180,7 @@ const theme = createTheme({
           margin: 0, // Remove default margins for condensed spacing
           alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
-            fontSize: "0.95rem", // align with body1
+            fontSize: "0.95rem",
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
@@ -1411,7 +1202,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary,
-          fontSize: "0.95rem", // align with body1
+          fontSize: "0.95rem",
           fontWeight: 400,
           textTransform: "none",
           minWidth: "auto",
@@ -1487,17 +1278,13 @@ const theme = createTheme({
   mixins: {
     ...baseTheme.mixins,
     drawerContent: drawerContentMixins,
-    cardTypography: cardTypographyMixins,
-    scenarioCardList: scenarioCardListMixin,
-    tooltipActionButton: tooltipActionButtonMixin,
-    triangleCheckbox: triangleCheckboxMixin,
     formControlBase: formControlBaseMixin,
   },
 })
 
 /* ========================================================
-| 3. Custom theme properties
-======================================================== */
+ * 4. Post-creation - Custom theme properties
+ * ======================================================== */
 
 // Apply border styles with colors from palette
 theme.border = createBorderStyles(
@@ -1516,8 +1303,6 @@ theme.background = {
 }
 
 theme.borderRadius = themeValues.borderRadius
-
-theme.shadow = themeValues.shadow
 
 theme.boxShadows = themeValues.boxShadows
 
@@ -1546,198 +1331,74 @@ theme.mapPromptDialog = {
   },
 }
 
-// expose mixin constants for easy import if needed
-export const cardTypography = cardTypographyMixins
-export const scenarioCardList = scenarioCardListMixin
-export const tooltipActionButton = tooltipActionButtonMixin
-export const triangleCheckbox = triangleCheckboxMixin
-export const formControlBase = formControlBaseMixin
-
 export default theme
 
 /* ========================================================
-| 4. TypeScript customizations
-======================================================== */
+ * 5. TypeScript
+ * ======================================================== */
 
 /**
- * MUI theme types
+ * MUI Theme Type Augmentation
  *
- * Custom theme properties must be defined in 3 places due to how MUI's TypeScript types work:
+ * Types are derived from `themeValues` using `typeof` to maintain a single source of truth.
+ * This reduces duplication while preserving full TypeScript autocomplete support.
  *
- * 1. `themeValues` object (above) - The actual runtime values
- * 2. `interface Theme` (below) - Type for accessing theme (e.g., theme.boxShadows.panel)
- * 3. `interface ThemeOptions` (below) - Type for creating/extending themes via createTheme()
- *
- * This is verbose but required for full TypeScript support with autocomplete.
+ * @see https://www.typescriptlang.org/docs/handbook/2/typeof-types.html
  */
 declare module "@mui/material/styles" {
-  // Custom palette colors - California Water Theme
+  // Custom palette colors - derived from themeValues.palette
   interface Palette {
-    interaction: {
-      hoverBackground: string
-    }
-    brand: {
-      sky: string
-      water: string
-    }
-    blue: {
-      darkest: string
-      dark: string
-      medium: string
-      bright: string
-      light: string
-    }
-    accent: {
-      gold: string
-      orange: string
-      alert: string
-    }
-    nature: {
-      earth: string
-      forest: string
-    }
-    learn: {
-      background: string
-      text: string
-    }
-    explore: {
-      background: string
-      text: string
-    }
-    empower: {
-      background: string
-      text: string
-    }
-    utility: {
-      white: string
-      black: string
-    }
-
-    ambient: {
-      rippleWhite: string
-      rippleBlue: string
-    }
-
-    overlay: {
-      water: string
-      waterLight: string
-    }
-
-    tiers: {
-      tier1: string
-      tier2: string
-      tier3: string
-      tier4: string
-    }
+    interaction: { hoverBackground: string }
+    brand: typeof themeValues.palette.brand
+    blue: typeof themeValues.palette.blue
+    accent: typeof themeValues.palette.accent
+    nature: typeof themeValues.palette.nature
+    learn: { background: string; text: string }
+    explore: { background: string; text: string }
+    empower: { background: string; text: string }
+    utility: typeof themeValues.palette.utility
+    ambient: typeof themeValues.palette.ambient
+    overlay: typeof themeValues.palette.overlay
+    tiers: typeof themeValues.palette.tiers
   }
 
   interface PaletteOptions {
-    brand?: {
-      sky?: string
-      water?: string
-    }
-    blue?: {
-      darkest?: string
-      dark?: string
-      medium?: string
-      bright?: string
-      light?: string
-    }
-    accent?: {
-      gold?: string
-      orange?: string
-      alert?: string
-    }
-    nature?: {
-      earth: string
-      forest?: string
-    }
-    learn: {
-      background: string
-      text: string
-    }
-    explore: {
-      background: string
-      text: string
-    }
-    empower: {
-      background: string
-      text: string
-    }
-    utility?: {
-      white?: string
-      black?: string
-    }
-
-    ambient?: {
-      rippleWhite?: string
-      rippleBlue?: string
-    }
-
-    overlay?: {
-      water?: string
-      waterLight?: string
-    }
-
-    tiers?: {
-      tier1?: string
-      tier2?: string
-      tier3?: string
-      tier4?: string
-    }
-
-    interaction?: {
-      hoverBackground?: string
-    }
+    interaction?: { hoverBackground?: string }
+    brand?: Partial<typeof themeValues.palette.brand>
+    blue?: Partial<typeof themeValues.palette.blue>
+    accent?: Partial<typeof themeValues.palette.accent>
+    nature?: Partial<typeof themeValues.palette.nature>
+    learn?: { background?: string; text?: string }
+    explore?: { background?: string; text?: string }
+    empower?: { background?: string; text?: string }
+    utility?: Partial<typeof themeValues.palette.utility>
+    ambient?: Partial<typeof themeValues.palette.ambient>
+    overlay?: Partial<typeof themeValues.palette.overlay>
+    tiers?: Partial<typeof themeValues.palette.tiers>
   }
 
-  // zIndex interface
+  // zIndex - derived from themeValues.zIndex
   interface ZIndex {
-    // Background layers
     basement: number
     sectionBackground: number
-
-    // Content layers
     content: number
     panels: number
-
-    // Intro section layers
     introBackgroundImages: number
     introText: number
     introForegroundImages: number
     introBubbles: number
-
-    // Interactive layers
     mapControls: number
     floatingElements: number
-
-    // Navigation layers
     drawerBackdrop: number
     overlay: number
-
-    // System layers
     notification: number
     loading: number
     debug: number
   }
 
-  // Theme interface - types for accessing theme properties (e.g., theme.boxShadows.panel)
+  // Theme interface - types derived from themeValues
   interface Theme {
-    layout: {
-      headerHeight: number
-      drawer: {
-        width: number
-        closedWidth: number
-        glossaryWidth: number
-      }
-      textContainer: {
-        maxWidth: string
-      }
-      controls: {
-        standard: number
-        compact: number
-        micro: number
-      }
+    layout: typeof themeValues.layout & {
       spacing: {
         xs: { xs: number; sm: number; md: number }
         sm: { xs: number; sm: number; md: number }
@@ -1746,161 +1407,28 @@ declare module "@mui/material/styles" {
         xl: { xs: number; sm: number; md: number }
         xxl: { xs: number; sm: number; md: number }
       }
-      spacer: {
-        small: { xs: number; md: number; lg: number }
-        medium: { xs: number; md: number }
-        large: { xs: number; lg: number }
-      }
     }
     border: ReturnType<typeof createBorderStyles>
     background: {
       transparent: string
       paragraph: string
-      overlay: {
-        light: string
-        medium: string
-        dark: string
-      }
+      overlay: { light: string; medium: string; dark: string }
     }
-    borderRadius: {
-      pill: string
-      rounded: string
-      card: string
-      standard: string
-      none: string
-    }
-    shadow: {
-      none: string
-      subtle: string
-      medium: string
-      prominent: string
-    }
-    boxShadows: {
-      panel: string
-      card: string
-      hover: string
-      hoverStrong: string
-      active: string
-      toast: string
-      ring: string
-      ringHover: string
-      none: string
-    }
-    mapPromptDialog: {
-      backgroundColor: string
-      textColor: string
-      borderRadius: string
-      padding: string
-      minWidth: string
-      boxShadow: string
-      zIndex: number
-      position: {
-        top: string
-        centerX: boolean
-      }
+    borderRadius: typeof themeValues.borderRadius
+    boxShadows: typeof themeValues.boxShadows
+    mapPromptDialog: typeof themeValues.mapPromptDialog & {
       typography: {
-        title: {
-          fontSize: string
-          fontWeight: number
-          marginBottom: string
-        }
-        subtitle: {
-          fontSize: string
-          opacity: number
-          marginBottom: string
-        }
-        action: {
-          fontSize: string
-          fontWeight: string
-          cursor: string
-          textDecoration: string
-        }
+        title: { fontSize: string; fontWeight: number; marginBottom: string }
+        subtitle: { fontSize: string; opacity: number; marginBottom: string }
+        action: { fontSize: string; fontWeight: string; cursor: string; textDecoration: string }
       }
     }
-    cards: {
-      typography: {
-        hero: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        sectionTitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        cardTitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        subtitle: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        body: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        caption: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-        button: {
-          fontSize: string
-          lineHeight: number
-          fontWeight: number
-        }
-      }
-      spacing: {
-        standard: number
-        padding: number
-        gap: number
-        capsule: {
-          px: number
-          py: number
-          marginRight: number
-          marginBottom: number
-        }
-        modal: {
-          padding: number
-        }
-        coBenefitTags: {
-          marginTop: number
-        }
-        tellMoreIcon: {
-          marginLeft: string
-        }
-        compact: {
-          xs: number
-          sm: number
-          md: number
-          lg: number
-          xl: number
-        }
-      }
-    }
+    cards: typeof themeValues.cards
   }
 
-  // ThemeOptions interface - types for createTheme() options (optional properties)
+  // ThemeOptions interface - optional versions for createTheme()
   interface ThemeOptions {
-    layout?: {
-      headerHeight?: number
-      drawer?: {
-        width?: number
-        closedWidth?: number
-      }
-      textContainer?: {
-        maxWidth?: string
-      }
-      controls?: {
-        standard?: number
-        compact?: number
-        micro?: number
-      }
+    layout?: Partial<typeof themeValues.layout> & {
       spacing?: {
         xs?: { xs: number; sm: number; md: number }
         sm?: { xs: number; sm: number; md: number }
@@ -1910,91 +1438,12 @@ declare module "@mui/material/styles" {
         xxl?: { xs: number; sm: number; md: number }
       }
     }
-    boxShadows?: {
-      panel?: string
-      card?: string
-      hover?: string
-      hoverStrong?: string
-      active?: string
-      toast?: string
-      ring?: string
-      ringHover?: string
-      none?: string
-    }
-    cards?: {
-      typography?: {
-        hero?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        sectionTitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        cardTitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        subtitle?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        body?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        caption?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-        button?: {
-          fontSize?: string
-          lineHeight?: number
-          fontWeight?: number
-        }
-      }
-      spacing?: {
-        standard?: number
-        padding?: number
-        gap?: number
-        capsule?: {
-          px?: number
-          py?: number
-          marginRight?: number
-          marginBottom?: number
-        }
-        modal?: {
-          padding?: number
-        }
-        coBenefitTags?: {
-          marginTop?: number
-        }
-        tellMoreIcon?: {
-          marginLeft?: string
-        }
-        compact?: {
-          xs?: number
-          sm?: number
-          md?: number
-          lg?: number
-          xl?: number
-        }
-      }
-    }
+    boxShadows?: Partial<typeof themeValues.boxShadows>
+    cards?: Partial<typeof themeValues.cards>
   }
 
   interface Mixins {
     drawerContent: typeof drawerContentMixins
-    cardTypography: typeof cardTypographyMixins
-    scenarioCardList: typeof scenarioCardListMixin
-    tooltipActionButton: typeof tooltipActionButtonMixin
-    triangleCheckbox: typeof triangleCheckboxMixin
     formControlBase: typeof formControlBaseMixin
   }
 
@@ -2034,141 +1483,3 @@ declare module "@mui/material/Typography" {
   }
 }
 
-/* ========================================================
-| FORM CONTROL CONVENTIONS - USAGE GUIDE
-======================================================== 
-
-All form controls in the application follow standardized conventions
-for consistent appearance and behavior across the site.
-
-CONTROL DIMENSIONS:
-- Standard: 20px × 20px (theme.layout.controls.standard)
-- Compact: 16px × 16px (theme.layout.controls.compact)
-- Micro: 12px × 12px (theme.layout.controls.micro)
-
-STANDARD SPECIFICATIONS:
-- Size: Uses theme.layout.controls.standard (20px × 20px)
-- Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
-- Border: 1px solid using theme.palette.text.primary
-- Background: Transparent with hover states (for checkboxes/radios)
-- Spacing: theme.spacing(0.5) margin
-- Protection: flexShrink: 0 prevents label compression
-
-BACKGROUND COLOR STANDARDS:
-- Text fields, dropdowns, selects: white (theme.palette.common.white)
-- Checkboxes, radios: Transparent with hover states
-- Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
-
-COMPACT SPACING SYSTEM:
-- xs: 2px (theme.cards.spacing.compact.xs) - micro spacing
-- sm: 4px (theme.cards.spacing.compact.sm) - tight spacing
-- md: 8px (theme.cards.spacing.compact.md) - compact spacing
-- lg: 12px (theme.cards.spacing.compact.lg) - medium compact
-- xl: 16px (theme.cards.spacing.compact.xl) - standard compact
-- Usage: theme.spacing(theme.cards.spacing.compact.sm) for consistent spacing
-
-TYPOGRAPHY FOR CONTROLS:
-- Labels: typeScale.compact.caption (0.75rem/12px)
-- Helper text: typeScale.compact.micro (0.7rem/11.2px)
-- Form titles: typeScale.compact.title (0.9rem/14.4px)
-
-REUSABLE MIXINS:
-
-1. theme.mixins.formControlBase
-   - Base styling for all standard form controls
-   - Uses theme.layout.controls.standard (20px × 20px)
-   - Includes sizing, positioning, and interaction states
-
-2. theme.mixins.triangleCheckbox  
-   - Specialized for expandable/collapsible controls
-   - Uses standardized control dimensions and compact typography
-   - Includes text centering for triangle symbols (typeScale.compact.micro)
-
-USAGE EXAMPLES:
-
-Standard Checkbox:
-  sx={{ 
-    ...theme.mixins.formControlBase,
-    borderRadius: "2px",
-    border: `1px solid ${theme.palette.text.primary}`
-  }}
-
-Compact Control (custom):
-  sx={{
-    width: `${theme.layout.controls.compact}px`,
-    height: `${theme.layout.controls.compact}px`,
-    fontSize: theme.typography.compact.micro
-  }}
-
-Triangle Dropdown:
-  sx={{
-    ...theme.mixins.triangleCheckbox,
-    border: `1px solid ${theme.palette.text.primary}`
-  }}
-
-Form Label with Compact Typography:
-  sx={{
-    fontSize: theme.typography.compact.caption,
-    marginBottom: theme.spacing(theme.cards.spacing.compact.sm)
-  }}
-
-MUI COMPONENT OVERRIDES:
-- MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
-- MuiRadio: Uses formControlBase + circular styling + 20px dimensions
-- MuiFormControlLabel: alignItems "flex-start" for multi-line labels
-- MuiOutlinedInput: White background
-- MuiSelect: White background for dropdowns
-- MuiTextField: White background for text inputs
-- MuiMenu: White background for dropdown panels
-- MuiPaper: White background for menu/select panels
-
-SIZING GUIDELINES:
-- Standard (20px): Default for most form controls
-- Compact (16px): Dense interfaces, secondary controls
-- Micro (12px): Indicators, status controls, tight spaces
-
-========================================================
-
-Z-INDEX LAYERING SYSTEM - USAGE GUIDE
-========================================================
-
-The z-index system is organized into logical layers to prevent
-conflicts and ensure predictable stacking behavior:
-
-BACKGROUND LAYERS (negative values):
-- basement (-1): Map when used as background element
-- sectionBackground (0): Section background decorations
-
-CONTENT LAYERS (0-99):
-- content (20): Default content layer for main sections
-- panels (10): Main content panels and cards
-
-INTRO SECTION MICRO-LAYERS (1-40):
-- introBackgroundImages (15): Decorative background images
-- introText (20): Text content over backgrounds
-- introForegroundImages (30): Decorative foreground elements
-- introBubbles (40): Interactive floating elements
-
-INTERACTIVE LAYERS (100-999):
-- mapControls (100): Map overlay controls and panels
-- floatingElements (110): Floating UI elements, scroll controls
-
-NAVIGATION LAYERS (1200-1499):
-- drawerBackdrop (1199): Drawer backdrop/overlay
-- drawer (1200): Side drawer/navigation
-- overlay (1250): General overlay elements
-- modal (1300): Modal dialogs
-- appBar (1400): Top navigation bar
-
-SYSTEM LAYERS (1500+):
-- tooltip (1500): Tooltips, help text, and map prompt dialogs
-- notification (1600): Toast notifications  
-- loading (1700): Loading overlays
-- debug (9999): Debug overlays (development only)
-
-USAGE:
-Always use theme.zIndex.layerName instead of hardcoded numbers:
-  zIndex: (theme) => theme.zIndex.mapControls
-  zIndex: (theme) => theme.zIndex.tooltip
-
-======================================================== */

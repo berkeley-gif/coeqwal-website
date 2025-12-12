@@ -334,7 +334,7 @@ function MetricRow({
         "&:hover": {
           backgroundColor: theme.palette.grey[50],
           borderColor: category ? category.color : theme.palette.grey[300],
-          boxShadow: theme.shadow.subtle,
+          boxShadow: theme.boxShadows.subtle,
         },
       }}
     >

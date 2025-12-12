@@ -244,7 +244,8 @@ export default function ComparisonView() {
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.rounded,
               padding: theme.spacing(2),
-              boxShadow: theme.shadow.subtle,
+              boxShadow: theme.boxShadows.subtle,
+              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
             }}

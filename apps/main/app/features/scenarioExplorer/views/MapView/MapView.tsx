@@ -110,7 +110,7 @@ function MapViewContent() {
             backgroundColor: "rgba(255, 255, 255, 0.95)",
             borderRadius: theme.borderRadius.rounded,
             padding: theme.spacing(2),
-            boxShadow: theme.shadow.subtle,
+            boxShadow: theme.boxShadows.subtle,
             maxWidth: theme.spacing(40),
           }}
         >
