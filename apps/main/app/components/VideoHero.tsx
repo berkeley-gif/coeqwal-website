@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 
+import { HEADER_EXPANDED_H } from "../../../../packages/ui/src/components/navigation/BaseHeader"
+
 // Format text with medium weight on key words
 const formatHeroText = (text: string) => {
   const parts = text.split(/(\blearn\b|\bexplore\b|\bempowers?\b)/gi)
@@ -76,11 +78,12 @@ export default function VideoHero({
       id="homeHero"
       style={{
         position: "relative",
-        minHeight: "100vh",
+        height: `calc(100vh - ${HEADER_EXPANDED_H}px)`,
         width: "100%",
         overflow: "hidden",
-        paddingTop: "100px",
+        paddingTop: "50px",
         paddingBottom: "100px",
+        marginTop: HEADER_EXPANDED_H,
       }}
     >
       <div
@@ -144,17 +147,19 @@ export default function VideoHero({
           variant="h1"
           component="h1"
           sx={{
-            fontSize: { sm: "2.5rem", md: "3rem", lg: "3.5rem", xl: "5.5rem" }, // Custom for demo with new title
-            padding: { sm: "45px", md: "85px" },
+            fontSize: { sm: "2.5rem", md: "3rem", lg: "2.6rem", xl: "5.5rem" }, // Custom for demo with new title
+            padding: { sm: "45px", md: "45px" },
+            lineHeight: "120%",
             textAlign: "left",
             fontWeight: 500,
-            width: { md: 420, lg: 435, xl: 700 },
+            width: "auto",
             color: theme.palette.blue.darkest,
             fontFamily:
               "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
           }}
         >
-          {t("homePanel.title")}
+          {t("homePanel.titleLine1")} <br />
+          {t("homePanel.titleLine2")}
         </Typography>
       </div>
       <div id="scrollArrow">
@@ -192,7 +197,7 @@ export default function VideoHero({
           minHeight: "auto",
           maxWidth: "40vw",
           background: theme.palette.blue.darkest,
-          padding: 85,
+          padding: "50px",
         }}
       >
         <div
