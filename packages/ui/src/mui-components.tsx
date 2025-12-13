@@ -22,6 +22,9 @@ export {
 
   // Typography and content
   Typography,
+  Card, 
+  CardContent, 
+  CardActionArea,
 
   // Inputs and controls
   Button,

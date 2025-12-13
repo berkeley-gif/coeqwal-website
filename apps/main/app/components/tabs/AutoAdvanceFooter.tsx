@@ -2,43 +2,49 @@
 
 import React from "react"
 import { ScrollToButton } from "@repo/ui"
-import { Typography } from "@repo/ui/mui"
+import { Typography, useTheme } from "@repo/ui/mui"
 
 import { useTabs, nextTab } from "../../context/Tabs"
-import { TAB_ORDER } from "../../types/tabs"
+import { TABS, TAB_ORDER } from "../../types/tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+
+
 
 export default function AutoAdvanceFooter() {
   const { state } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
+  const theme = useTheme()
 
   const onAdvance = () => {
     const nxt = nextTab(TAB_ORDER, activeTab)!
     navigateToTab(nxt)
   }
 
+  const tab = TABS.find((t) => t.key === activeTab)
+
+
   return (
     <div
       data-auto-advance-sentinel
       style={{
         position: "relative",
-        paddingTop: "2rem",
-        paddingBottom: "2rem",
+        paddingTop: "1rem",
+        paddingBottom: "1rem",
         display: "flex",
         alignItems: "center",
         minHeight: 48,
         justifyContent: "center",
         gap: 12,
+        backgroundColor: theme.palette.utility.white,
       }}
     >
       <Typography variant="caption">
-        Explore water allocation scenarios
+        {tab?.footerText ?? ""}
       </Typography>
       <ScrollToButton
         onClick={onAdvance}
         delay={0}
-        showDuration={0.1}
         animationComplete
         rotation="-90deg"
         axis="horizontal"
