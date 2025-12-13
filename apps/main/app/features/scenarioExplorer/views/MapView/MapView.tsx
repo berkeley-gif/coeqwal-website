@@ -51,7 +51,7 @@ export default function MapView() {
           backgroundColor: theme.palette.common.white,
           // Ensure this panel sits above the map
           position: "relative",
-          zIndex: 1,
+          zIndex: theme.zIndex.panels,
         }}
       >
         <ListView compact onTierClick={handleTierClick} />
@@ -63,8 +63,7 @@ export default function MapView() {
           width: "50%",
           height: "80vh",
           position: "relative",
-          // Map is at z-index 0 (behind content) at page level
-          // This box is transparent so the map shows through
+          // This box is transparent so the persistent map shows through
           backgroundColor: "transparent",
         }}
       >
@@ -79,7 +78,7 @@ export default function MapView() {
             padding: theme.spacing(2),
             boxShadow: theme.boxShadows.subtle,
             maxWidth: theme.spacing(40),
-            zIndex: 2,
+            zIndex: theme.zIndex.mapControls,
           }}
         >
           <Box
