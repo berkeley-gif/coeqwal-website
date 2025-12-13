@@ -1,4 +1,4 @@
-version: 1
+version: 2
 applications:
   - frontend:
       phases:
@@ -8,17 +8,14 @@ applications:
             - nvm use 22
             - node -v
             - npm install -g pnpm@10.0.0
-            - pnpm install
+            - pnpm -v
+            - pnpm install --frozen-lockfile
         build:
           commands:
-            - pnpm rebuild
-            - npx turbo run build --filter=main
+            - pnpm turbo run build --filter=main
       artifacts:
         baseDirectory: apps/main/out
         files:
-          - '**/*'
+          - "**/*"
       buildPath: /
     appRoot: apps/main
-    environment:
-      variables:
-        NODE_VERSION: 22
