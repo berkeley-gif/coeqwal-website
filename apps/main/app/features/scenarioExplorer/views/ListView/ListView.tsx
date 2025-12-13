@@ -9,8 +9,8 @@ import { useMultipleScenarioTiers } from "../../../../hooks/useTierData"
 import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,
-} from "../../../../constants/outcomeMappings"
-import { strategies, strategyDefinitions } from "../../../../lib/scenarios"
+} from "../../../../lib/constants/outcomeMappings"
+import { strategies, strategyDefinitions } from "../../../../content/scenarios"
 
 /**
  * Convert strategy values to scenario IDs (using centralized mapping)

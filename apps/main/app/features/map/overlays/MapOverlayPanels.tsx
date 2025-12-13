@@ -16,7 +16,7 @@ import { useState, useEffect, useRef } from "react"
 import { Scrollama, Step } from "react-scrollama"
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
-import ScrollTooltip from "./ScrollTooltip"
+import ScrollTooltip from "../../tooltips/ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
 import {

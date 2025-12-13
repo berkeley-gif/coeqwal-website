@@ -8,10 +8,10 @@ import {
 } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
-import { OUTCOMES } from "../lib/outcomes"
-import { useSelectedOutcome } from "./map/store"
+import { OUTCOMES } from "../content/outcomes"
+import { useSelectedOutcome } from "../features/map/store"
 import { useScenarioTiers } from "../hooks/useTierData"
-import ScrollTooltip from "./map/overlays/ScrollTooltip"
+import ScrollTooltip from "../features/tooltips/ScrollTooltip"
 import type { MotionValue } from "@repo/motion"
 
 // Shared operation icons for current operations strategy

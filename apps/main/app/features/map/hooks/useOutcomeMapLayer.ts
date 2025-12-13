@@ -19,14 +19,14 @@ import {
   getTierLabel,
   getTierColorsFromTheme,
   TierLevel,
-} from "../../../lib/tiers"
+} from "../../../content/tiers"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapInstance = any
 import {
   STRATEGY_TO_SCENARIO_ID,
   getShortCodeFromDisplayName,
-} from "../../../constants/outcomeMappings"
+} from "../../../lib/constants/outcomeMappings"
 
 // Mapbox expression type (simplified for our use case)
 type MapboxExpression = ["match", ["get", string], ...unknown[]]

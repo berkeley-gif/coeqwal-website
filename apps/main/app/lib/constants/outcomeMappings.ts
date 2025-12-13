@@ -18,7 +18,7 @@
  */
 
 // Re-export the canonical list from useTierData for convenience
-export { OUTCOME_DISPLAY_ORDER } from "../hooks/useTierData"
+export { OUTCOME_DISPLAY_ORDER } from "../../hooks/useTierData"
 
 /**
  * Map API short codes to display names

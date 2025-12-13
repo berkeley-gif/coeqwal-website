@@ -13,11 +13,11 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
-import TierMarkers from "../../features/scenarioExplorer/components/TierMarkers"
+import TierMarkers from "../scenarioExplorer/components/TierMarkers"
 import {
   fetchTierLocationData,
   type TierLocationResponse,
-} from "../../api/tierLocationApi"
+} from "../../lib/api/tierLocationApi"
 import {
   useOutcomeMapLayer,
   outcomeUsesDemandUnits,

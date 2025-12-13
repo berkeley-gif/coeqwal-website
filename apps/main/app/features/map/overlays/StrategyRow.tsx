@@ -16,14 +16,14 @@ import {
 import { learnMapActions } from "../store"
 import { InfoIconButton, HybridTooltip, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
-import { strategies } from "../../../lib/scenarios"
-import { CURRENT_OPERATIONS_ICONS } from "../../ScenarioCard"
+import { strategies } from "../../../content/scenarios"
+import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
 import {
   OUTCOMES,
-} from "../../../lib/outcomes"
-import TierTooltipContent from "../../../features/scenarioExplorer/components/TierTooltipContent"
+} from "../../../content/outcomes"
+import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { useScenarioTiers } from "../../../hooks/useTierData"
-import { useTierTooltipState } from "../../../features/shared/hooks/useTierTooltipState"
+import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 
 interface StrategyRowProps {
   /** Strategy value to display (defaults to "current-ops") */

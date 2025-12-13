@@ -3,8 +3,8 @@
  * Analyzes tier data and generates plain language summaries
  */
 
-import { TierLocationsResponse } from "../components/map/hooks/useOutcomeMapLayer"
-import { TIER_LABELS, TierLevel } from "./tiers"
+import { TierLocationsResponse } from "../map/hooks/useOutcomeMapLayer"
+import { TIER_LABELS, TierLevel } from "../../content/tiers"
 
 // Feature properties from Mapbox layer
 export interface DemandUnitProperties {

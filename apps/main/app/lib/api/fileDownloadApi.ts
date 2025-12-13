@@ -1,4 +1,4 @@
-import type { ScenariosResponse } from "../types/scenarioDownloads"
+import type { ScenariosResponse } from "../../types/scenarioDownloads"
 
 // File download endpoints (presigned S3 URLs)
 const FILE_DOWNLOAD_API_BASE =
