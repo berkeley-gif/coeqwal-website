@@ -77,14 +77,15 @@ const MAP_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // Position styles for different modes
-const getContainerStyles = (mode: MapMode): React.CSSProperties => {
+// zIndexBasement comes from theme.zIndex.basement
+const getContainerStyles = (mode: MapMode, zIndexBasement: number): React.CSSProperties => {
   const base: React.CSSProperties = {
     position: "fixed",
     top: 0,
     left: 0,
     width: "100vw",
     height: "100vh",
-    // No z-index - rely on DOM order (map rendered first = behind content)
+    zIndex: zIndexBasement, // Use theme z-index for map background layer
     transition: "opacity 0.3s ease-out",
   }
 
@@ -104,8 +105,6 @@ const getContainerStyles = (mode: MapMode): React.CSSProperties => {
     case "explore":
       return {
         ...base,
-        // For explore mode, we'll position differently when active
-        // But the map stays full width, the left panel overlays it
         opacity: 1,
         pointerEvents: "auto",
       }
@@ -364,7 +363,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     })
   }, [mapMode, map])
 
-  const containerStyles = getContainerStyles(mapMode)
+  const containerStyles = getContainerStyles(mapMode, theme.zIndex.basement)
 
   // Determine if we should show Learn or Explore layers
   const isLearnMode = mapMode === "learn"

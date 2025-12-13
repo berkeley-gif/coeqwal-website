@@ -1,52 +1,44 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
 import { DashboardPanel } from "@repo/ui"
-import {
-  useScenarioExplorerStore,
-  type ExplorerView,
-} from "@repo/state/scenarioExplorer"
-import ListView from "./views/ListView/ListView"
-import MapView from "./views/MapView/MapView"
-import ComparisonView from "./views/ComparisonView/ComparisonView"
-// import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
+import UnifiedExploreView, {
+  type ExploreMode,
+} from "./views/UnifiedExploreView"
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 
+type MainView = "explorer" | "data"
+
 /**
- * ScenarioExplorer -- Multi-tab version
+ * ScenarioExplorer
  *
- * Views:
- * - List: Full list of scenarios with searching/sorting
- * - Map: Location-based performance visualization
- * - Comparison: Visual comparison chart using parallel coordinates
- * - Needs-based: Criteria-based scenario search (commented out)
- * - Data explorer: Detailed data comparison and exports
+ * Two main views:
+ * - Explorer: Unified view with list/map/comparison modes (with smooth transitions)
+ * - Data: Detailed data comparison and exports
+ *
+ * The Explorer view handles its own internal mode switching (list ↔ map ↔ comparison)
+ * with animated transitions. The persistent map shows through in map mode.
  */
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
-  const { activeView, setActiveView } = useScenarioExplorerStore()
+  const [mainView, setMainView] = useState<MainView>("explorer")
+  const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
 
-  const handleTabChange = (
-    _event: React.SyntheticEvent,
-    newValue: ExplorerView,
-  ) => {
-    setActiveView(newValue)
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
+    setMainView(newValue)
   }
 
-  const viewLabels: Record<ExplorerView, string> = {
-    list: "Full list of scenarios",
-    map: "Map view",
-    comparison: "Scenario comparison chart",
-    needs: "Needs-based search", // Hidden from UI but required by type
-    data: "Data explorer",
-  }
+  // Map mode in explorer needs transparent background so persistent map shows through
+  const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
   return (
     <DashboardPanel
-      backgroundColor={theme.palette.grey[100]}
+      backgroundColor={
+        needsTransparentBg ? "transparent" : theme.palette.explore.background
+      }
       color={theme.palette.text.primary}
       headerHeight={theme.layout.headerHeight}
       includeHeaderSpacing={true}
@@ -69,7 +61,7 @@ export default function ScenarioExplorerNew() {
           }}
         >
           <Tabs
-            value={activeView}
+            value={mainView}
             onChange={handleTabChange}
             TabIndicatorProps={{
               style: {
@@ -88,37 +80,32 @@ export default function ScenarioExplorerNew() {
                 transition: "all 0.2s ease-in-out",
                 borderTopLeftRadius: theme.shape.borderRadius,
                 borderTopRightRadius: theme.shape.borderRadius,
-                marginTop: theme.spacing(1), // Gap from top of container
-                marginRight: theme.spacing(0.5), // Small gap between tabs
+                marginTop: theme.spacing(1),
+                marginRight: theme.spacing(0.5),
                 paddingLeft: theme.spacing(3),
                 paddingRight: theme.spacing(3),
                 "&.Mui-selected": {
                   color: theme.palette.blue.bright,
                   fontWeight: theme.typography.fontWeightBold,
-                  backgroundColor: `${theme.palette.blue.bright}1A`, // 10% opacity bright blue tint
+                  backgroundColor: `${theme.palette.blue.bright}1A`,
                 },
                 "&:hover:not(.Mui-selected)": {
                   color: theme.palette.blue.dark,
-                  backgroundColor: `${theme.palette.blue.bright}1A`, // Same blue tint as selected
+                  backgroundColor: `${theme.palette.blue.bright}1A`,
                 },
               },
             }}
           >
-            <Tab label={viewLabels.list} value="list" />
-            <Tab label={viewLabels.map} value="map" />
-            <Tab label={viewLabels.comparison} value="comparison" />
-            {/* <Tab label={viewLabels.needs} value="needs" /> */}
-            <Tab label={viewLabels.data} value="data" />
+            <Tab label="Explore scenarios" value="explorer" />
+            <Tab label="Data explorer" value="data" />
           </Tabs>
         </Box>
 
         {/* Selection Banner */}
         <SelectionBanner />
 
-        {/* Search bar for list, map, and comparison views */}
-        {(activeView === "list" ||
-          activeView === "map" ||
-          activeView === "comparison") && (
+        {/* Search bar for explorer view */}
+        {mainView === "explorer" && (
           <SearchBar placeholder="Search scenarios by name or description" />
         )}
 
@@ -129,11 +116,13 @@ export default function ScenarioExplorerNew() {
             overflow: "hidden",
           }}
         >
-          {activeView === "list" && <ListView />}
-          {activeView === "map" && <MapView />}
-          {activeView === "comparison" && <ComparisonView />}
-          {/* {activeView === "needs" && <NeedsBasedView />} */}
-          {activeView === "data" && <DataExplorerView />}
+          {mainView === "explorer" && (
+            <UnifiedExploreView
+              mode={exploreMode}
+              onModeChange={setExploreMode}
+            />
+          )}
+          {mainView === "data" && <DataExplorerView />}
         </Box>
       </Box>
     </DashboardPanel>
