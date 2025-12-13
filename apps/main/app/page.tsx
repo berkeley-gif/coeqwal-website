@@ -6,7 +6,7 @@ import { MapProvider } from "@repo/map"
 import { Header } from "./components/Header"
 import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
-import PersistentLearnMap from "./features/map/PersistentLearnMap"
+import PersistentMap from "./features/map/PersistentMap"
 
 import { TabsProvider } from "./context/Tabs"
 import SmoothTabs from "./components/tabs/SmoothTabs"
@@ -17,10 +17,13 @@ export default function Home() {
     <>
       {/* MapProvider at top level so both the map and overlays can access it */}
       <MapProvider>
-        {/* Persistent map layer - sits at z-index 0, never unmounts */}
-        {/* Wrapped in Suspense for useSearchParams */}
+        {/* 
+          Persistent map - renders once and stays mounted.
+          Preloads during IntroSection scroll, ready when tabs appear.
+          Positions itself based on mapMode from store (hidden/learn/explore).
+        */}
         <Suspense fallback={null}>
-          <PersistentLearnMap />
+          <PersistentMap />
         </Suspense>
 
         <TabsProvider>
@@ -32,8 +35,7 @@ export default function Home() {
               position: "relative",
               overflowX: "clip",
               overflowY: "visible",
-              // Ensure tab content sits above the map
-              zIndex: 1,
+              // No z-index necessaryhere, flows in natural DOM order, rendered first (behind) in the DOM
             }}
           >
             <IntroSection />

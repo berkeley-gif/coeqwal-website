@@ -15,6 +15,14 @@ import { immer } from "zustand/middleware/immer"
 // Types
 // ============================================================================
 
+/**
+ * MapMode controls which tab/context the persistent map is serving.
+ * - 'hidden': Map is preloading but not visible
+ * - 'learn': Map is in Learn tab mode (sticky, scrollytelling)
+ * - 'explore': Map is in Explore tab mode (fixed right panel)
+ */
+export type MapMode = "hidden" | "learn" | "explore"
+
 export type SectionId =
   | "california"
   | "central-valley"
@@ -199,10 +207,24 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
 }
 
 // ============================================================================
+// Explore-specific types
+// ============================================================================
+
+export interface ExploreTierSelection {
+  strategy: string
+  outcome: string
+}
+
+// ============================================================================
 // State Interface
 // ============================================================================
 
 interface LearnMapState {
+  // Persistent map state (shared across tabs)
+  mapMode: MapMode
+  mapReady: boolean
+
+  // Learn-specific state
   activeSection: SectionId
   riversProgress: number
   geocoderMarker: [number, number] | null
@@ -210,11 +232,20 @@ interface LearnMapState {
   selectedOutcome: string | null
   isOutcomeVisualizationActive: boolean
   isPanelsExpanded: boolean
-  mapReady: boolean
+
+  // Explore-specific state
+  exploreTierSelection: ExploreTierSelection | null
+
+  // Actions stored in state (Zustand v5 pattern)
   setMapReady: (ready: boolean) => void
 }
 
 const initialState: Omit<LearnMapState, "setMapReady"> = {
+  // Persistent map state
+  mapMode: "hidden",
+  mapReady: false,
+
+  // Learn-specific state
   activeSection: "california",
   riversProgress: 0,
   geocoderMarker: null,
@@ -222,7 +253,9 @@ const initialState: Omit<LearnMapState, "setMapReady"> = {
   selectedOutcome: null,
   isOutcomeVisualizationActive: false,
   isPanelsExpanded: false,
-  mapReady: false,
+
+  // Explore-specific state
+  exploreTierSelection: null,
 }
 
 // ============================================================================
@@ -241,6 +274,21 @@ export const useLearnMapStore = create<LearnMapState>()(
 // ============================================================================
 
 export const learnMapActions = {
+  // === Persistent Map Actions ===
+
+  /**
+   * Set the map mode (which tab/context the map is serving).
+   * The PersistentMap component uses this to adjust its position and layers.
+   */
+  setMapMode: (mode: MapMode) => useLearnMapStore.setState({ mapMode: mode }),
+
+  /**
+   * Set map ready state. Called when WebGL context is initialized.
+   */
+  setMapReady: (ready: boolean) => useLearnMapStore.setState({ mapReady: ready }),
+
+  // === Learn-specific Actions ===
+
   setActiveSection: (section: SectionId) =>
     useLearnMapStore.setState({ activeSection: section }),
 
@@ -269,14 +317,42 @@ export const learnMapActions = {
     useLearnMapStore.setState({ isPanelsExpanded: expanded }),
 
   /**
-   * Reset state when Learn tab remounts.
-   * Clears mapReady and resets activeSection to initial state.
+   * Reset Learn-specific state when Learn tab remounts.
+   * Does NOT reset mapReady since the persistent map stays alive.
+   */
+  resetLearnState: () =>
+    useLearnMapStore.setState({
+      activeSection: "california",
+      riversProgress: 0,
+      geocoderMarker: null,
+      selectedOutcome: null,
+      isOutcomeVisualizationActive: false,
+    }),
+
+  /**
+   * @deprecated Use resetLearnState instead. Kept for backwards compatibility.
    */
   resetForRemount: () =>
     useLearnMapStore.setState({
-      mapReady: false,
       activeSection: "california",
       riversProgress: 0,
+    }),
+
+  // === Explore-specific Actions ===
+
+  /**
+   * Set the selected tier for Explore map view.
+   * This controls which tier markers are shown on the map.
+   */
+  setExploreTierSelection: (selection: ExploreTierSelection | null) =>
+    useLearnMapStore.setState({ exploreTierSelection: selection }),
+
+  /**
+   * Reset Explore-specific state.
+   */
+  resetExploreState: () =>
+    useLearnMapStore.setState({
+      exploreTierSelection: null,
     }),
 }
 
@@ -284,7 +360,11 @@ export const learnMapActions = {
 // Selectors
 // ============================================================================
 
-// Core state
+// Persistent map state
+export const useMapMode = () => useLearnMapStore((s) => s.mapMode)
+export const useMapReady = () => useLearnMapStore((s) => s.mapReady)
+
+// Learn-specific state
 export const useActiveSection = (): SectionId =>
   useLearnMapStore((s) => s.activeSection)
 
@@ -304,7 +384,9 @@ export const useIsOutcomeVisualizationActive = () =>
 export const useIsPanelsExpanded = () =>
   useLearnMapStore((s) => s.isPanelsExpanded)
 
-export const useMapReady = () => useLearnMapStore((s) => s.mapReady)
+// Explore-specific state
+export const useExploreTierSelection = () =>
+  useLearnMapStore((s) => s.exploreTierSelection)
 
 // Derived selectors - read directly from SECTION_LAYERS
 export const useLayerConfig = () =>
