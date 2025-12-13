@@ -30,3 +30,4 @@ docs/
 
 # Archived code (unused files preserved outside version control)
 **/archive/
+**/_archive/
