@@ -36,7 +36,7 @@ export default function AutoAdvanceFooter() {
         minHeight: 48,
         justifyContent: "center",
         gap: 12,
-        backgroundColor: theme.palette.utility.white,
+        backgroundColor: theme.palette.nature.earth,
       }}
     >
       <Typography variant="caption">
