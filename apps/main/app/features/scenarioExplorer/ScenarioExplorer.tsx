@@ -3,7 +3,10 @@
 import React from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
 import { DashboardPanel } from "@repo/ui"
-import { useScenarioExplorerStore, type ExplorerView } from "@repo/state"
+import {
+  useScenarioExplorerStore,
+  type ExplorerView,
+} from "@repo/state/scenarioExplorer"
 import ListView from "./views/ListView/ListView"
 import MapView from "./views/MapView/MapView"
 import ComparisonView from "./views/ComparisonView/ComparisonView"

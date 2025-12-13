@@ -9,7 +9,7 @@ import {
   FormControl,
 } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
-import { hydroclimateOptions } from "../../../lib/scenarios"
+import { hydroclimateOptions } from "../../../content/scenarios"
 
 interface HydroclimateCardProps {
   layout?: "horizontal" | "vertical"

@@ -2,15 +2,15 @@
 
 import React, { useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 import StrategyGrid from "../../components/StrategyGrid"
 import { useScenarioData } from "../../hooks/useScenarioData"
 import { useMultipleScenarioTiers } from "../../../../hooks/useTierData"
 import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,
-} from "../../../../constants/outcomeMappings"
-import { strategies, strategyDefinitions } from "../../../../lib/scenarios"
+} from "../../../../lib/constants/outcomeMappings"
+import { strategies, strategyDefinitions } from "../../../../content/scenarios"
 
 /**
  * Convert strategy values to scenario IDs (using centralized mapping)
@@ -40,11 +40,14 @@ interface ListViewProps {
 /**
  * ListView: Full list of COEQWAL scenarios with searching and sorting
  * Shows all scenarios in a grid/table format with outcome summaries
- * 
+ *
  * @param compact - When true, uses reduced padding for split-panel layouts
  * @param onTierClick - Optional callback for tier/outcome clicks (used by MapView)
  */
-export default function ListView({ compact = false, onTierClick }: ListViewProps) {
+export default function ListView({
+  compact = false,
+  onTierClick,
+}: ListViewProps) {
   const theme = useTheme()
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
     useScenarioData()

@@ -51,7 +51,8 @@ interface ArrowButtonProps {
 
 function ArrowButton({ direction, isActive, onClick }: ArrowButtonProps) {
   const Icon = direction === "up" ? ArrowDropUpIcon : ArrowDropDownIcon
-  const margin = direction === "up" ? { marginBottom: ARROW_GAP } : { marginTop: ARROW_GAP }
+  const margin =
+    direction === "up" ? { marginBottom: ARROW_GAP } : { marginTop: ARROW_GAP }
 
   return (
     <Box
@@ -72,7 +73,12 @@ function ArrowButton({ direction, isActive, onClick }: ArrowButtonProps) {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-export function SortButton({ sortState, onAscClick, onDescClick, title }: SortButtonProps) {
+export function SortButton({
+  sortState,
+  onAscClick,
+  onDescClick,
+  title,
+}: SortButtonProps) {
   const isSorted = sortState !== null
 
   return (
@@ -98,8 +104,16 @@ export function SortButton({ sortState, onAscClick, onDescClick, title }: SortBu
         },
       }}
     >
-      <ArrowButton direction="up" isActive={sortState === "asc"} onClick={onAscClick} />
-      <ArrowButton direction="down" isActive={sortState === "desc"} onClick={onDescClick} />
+      <ArrowButton
+        direction="up"
+        isActive={sortState === "asc"}
+        onClick={onAscClick}
+      />
+      <ArrowButton
+        direction="down"
+        isActive={sortState === "desc"}
+        onClick={onDescClick}
+      />
     </Box>
   )
 }
