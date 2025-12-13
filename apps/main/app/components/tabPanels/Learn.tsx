@@ -3,94 +3,73 @@
 /**
  * LearnPanel
  *
- * The Learn tab content with an integrated sticky map.
+ * The Learn tab content that uses the persistent map from page level.
  *
  * Architecture:
- * - ScrollytellingContainer: Contains the sticky map + overlay content
- * - StickyMap: The map sticks to the viewport while scrolling through overlays
- * - OverlayPanels: Scroll over the sticky map, triggering section changes
- * - LearnMore: Comes after the container, no z-index battles
+ * - Calls setMapMode('learn') on mount to configure the persistent map
+ * - The actual map lives in PersistentMap at the page level
+ * - Overlay content scrolls over the persistent map
+ * - LearnMore section comes after the scrollytelling content
  *
- * The sticky approach means:
- * - Map scrolls away naturally when container ends
- * - Learn More section appears without layout hacks
- * - Clean document flow
+ * The persistent map approach means:
+ * - No map remounting when switching tabs
+ * - WebGL context stays alive (performance)
+ * - Map is preloaded during IntroSection scroll
  */
 
-import { Suspense, useCallback, useRef, useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
-import CaliforniaMapPanel from "../../features/map/CaliforniaMapPanel"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { useLearnMapStore, learnMapActions } from "../../features/map/store"
+import { useMapReady, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
-  const setMapReady = useLearnMapStore((s) => s.setMapReady)
-  const mapReady = useLearnMapStore((s) => s.mapReady)
-  const mapReadyCalledRef = useRef(false)
+  const mapReady = useMapReady()
 
-  // Reset state when component mounts (handles tab switching)
+  // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
-    // Reset to initial state on mount
-    learnMapActions.resetForRemount()
-    mapReadyCalledRef.current = false
+    // Reset Learn-specific state and activate Learn mode
+    learnMapActions.resetLearnState()
+    learnMapActions.setMapMode("learn")
 
     return () => {
-      // Also reset on unmount to ensure clean state for next mount
-      mapReadyCalledRef.current = false
+      // Hide the map when leaving Learn tab
+      learnMapActions.setMapMode("hidden")
     }
   }, [])
-
-  // Handle map ready state
-  const handleMapReady = useCallback(() => {
-    if (mapReadyCalledRef.current) return
-    mapReadyCalledRef.current = true
-    setMapReady(true)
-  }, [setMapReady])
 
   return (
     <div
       style={{
         position: "relative",
-        backgroundColor: "#68C3CE", // Teal background covers any gaps
       }}
     >
       {/* 
         Scrollytelling Container
-        This container holds the sticky map and scrolling overlays.
-        Its height determines when the map stops being sticky.
+        The persistent map is positioned fixed at page level (z-index 0).
+        This container is transparent so the map shows through.
+        Only the overlay panels have backgrounds.
       */}
       <Box
         sx={{
           position: "relative",
-          // Container needs explicit height - the overlays define this via their content
+          minHeight: "100vh",
+          // Transparent background - map shows through
+          backgroundColor: "transparent",
         }}
       >
-        {/* Sticky Map - sticks to viewport while scrolling through container */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            zIndex: 0,
-          }}
-        >
-          <CaliforniaMapPanel id="california-map" onMapReady={handleMapReady} />
-        </Box>
+        {/* Spacer for the initial map view - transparent */}
+        <Box sx={{ height: "100vh", backgroundColor: "transparent" }} />
 
-        {/* Overlay content - scrolls over the sticky map */}
-        {/* Uses negative margin to overlap the sticky map area */}
+        {/* Overlay content - scrolls over the fixed persistent map */}
         <Box
           sx={{
             position: "relative",
-            marginTop: "-100vh", // Pull up to overlap the sticky map
+            marginTop: "-100vh", // Pull up to overlap the map area
             zIndex: 1,
             pointerEvents: "none", // Let map interactions through
-            // Note: child components handle their own pointerEvents
-            // MapOverlayPanels sets pointerEvents: "none" with "auto" on interactive elements
+            backgroundColor: "transparent",
           }}
         >
           {mapReady ? (
@@ -132,7 +111,7 @@ export default function LearnPanel() {
         </Box>
       </Box>
 
-      {/* Learn More section - comes after the scrollytelling container naturally */}
+      {/* Learn More section - comes after the scrollytelling content naturally */}
       <Box
         sx={{
           backgroundColor: "#68C3CE", // Learn tab teal color
