@@ -1,14 +1,12 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useCallback } from "react"
 import {
   Box,
   Typography,
   useTheme,
-  InfoIcon,
-  IconButton,
-  Tooltip,
 } from "@repo/ui/mui"
+import { ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useSelectedOutcome } from "./map/store"
@@ -57,9 +55,39 @@ export default function ScenarioCard({
 }: ScenarioCardProps) {
   const theme = useTheme()
   const selectedOutcome = useSelectedOutcome()
-
-  // State for operation icon tooltips (track which tooltip is open)
-  const [openTooltipIndex, setOpenTooltipIndex] = useState<number | null>(null)
+  
+  // State for which operation icon tooltip is open (null = none)
+  const [openIconTooltip, setOpenIconTooltip] = useState<number | null>(null)
+  const justClickedRef = useRef(false)
+  
+  // Handler for icon click - manages tooltip state cleanly
+  // Closes current tooltip first, then opens new one to prevent content flash
+  const handleIconClick = useCallback((index: number) => {
+    justClickedRef.current = true
+    
+    setOpenIconTooltip(prev => {
+      if (prev === index) {
+        // Toggle off - just close
+        return null
+      } else if (prev !== null) {
+        // Switching to different tooltip - close first, then open after delay
+        setTimeout(() => setOpenIconTooltip(index), 50)
+        return null
+      } else {
+        // No tooltip open - just open
+        return index
+      }
+    })
+    
+    setTimeout(() => { justClickedRef.current = false }, 150)
+  }, [])
+  
+  // Handler for click-away - respects the justClicked flag
+  const handleCloseIconTooltip = useCallback(() => {
+    if (!justClickedRef.current) {
+      setOpenIconTooltip(null)
+    }
+  }, [])
 
   // Refs for tooltip targets and container
   const cardContainerRef = useRef<HTMLDivElement>(null)
@@ -231,76 +259,73 @@ export default function ScenarioCard({
                 }}
               >
                 {CURRENT_OPERATIONS_ICONS.map((icon, index) => (
-                  <Box
+                  <ClickTooltip
                     key={icon.path}
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 1,
-                    }}
+                    open={openIconTooltip === index}
+                    onClose={handleCloseIconTooltip}
+                    placement="top"
+                    content={
+                      <>
+                        <Box
+                          component="span"
+                          sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                        >
+                          {icon.label.replace(/\n/g, " ")}
+                        </Box>
+                        {icon.description}
+                      </>
+                    }
                   >
                     <Box
+                      onClick={() => handleIconClick(index)}
                       sx={{
-                        width: theme.spacing(5),
-                        height: theme.spacing(5),
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 1,
+                        cursor: "pointer",
                       }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={icon.path}
-                        alt={icon.alt}
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.blue.darkest,
-                        fontWeight: 500,
-                        textAlign: "center",
-                        fontSize: "0.75rem",
-                        mt: 0.5,
-                        maxWidth: "100px",
-                        whiteSpace: "pre-line",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {icon.label}{" "}
-                      <Tooltip
-                        title={icon.description}
-                        arrow
-                        placement="top"
-                        open={openTooltipIndex === index}
-                        onClose={() => setOpenTooltipIndex(null)}
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
+                      <Box
+                        sx={{
+                          width: theme.spacing(5),
+                          height: theme.spacing(5),
+                          // Ensure entire box is click target, not just SVG fill
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          position: "relative",
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            inset: 0,
+                          },
+                        }}
                       >
-                        <IconButton
-                          size="small"
-                          component="span"
-                          onClick={() =>
-                            setOpenTooltipIndex(
-                              openTooltipIndex === index ? null : index,
-                            )
-                          }
-                          sx={{
-                            padding: 0,
-                            minWidth: 0,
-                            width: "auto",
-                            height: "auto",
-                            color: theme.palette.blue.bright,
-                            verticalAlign: "middle",
-                            display: "inline-flex",
-                            ml: 0.25,
-                          }}
-                        >
-                          <InfoIcon sx={{ fontSize: "0.75rem" }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Typography>
-                  </Box>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={icon.path}
+                          alt={icon.alt}
+                          style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+                        />
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.blue.darkest,
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: "0.75rem",
+                          mt: 0.5,
+                          maxWidth: "100px",
+                          whiteSpace: "pre-line",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {icon.label}
+                      </Typography>
+                    </Box>
+                  </ClickTooltip>
                 ))}
               </Box>
             </Box>
