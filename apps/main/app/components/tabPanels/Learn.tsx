@@ -10,6 +10,7 @@
  * - The actual map lives in PersistentMap at the page level
  * - Overlay content scrolls over the persistent map
  * - LearnMore section comes after the scrollytelling content
+ * - Map fades out as footer approaches (via IntersectionObserver)
  *
  * The persistent map approach means:
  * - No map remounting when switching tabs
@@ -17,7 +18,7 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { Suspense, useEffect } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { Box } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
@@ -26,6 +27,7 @@ import { useMapReady, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
+  const footerRef = useRef<HTMLDivElement>(null)
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -37,6 +39,34 @@ export default function LearnPanel() {
       // Hide the map when leaving Learn tab
       learnMapActions.setMapMode("hidden")
     }
+  }, [])
+
+  // Fade map out as footer comes into view
+  useEffect(() => {
+    const footer = footerRef.current
+    if (!footer) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // When footer starts entering viewport, hide the map
+          if (entry.isIntersecting) {
+            learnMapActions.setMapMode("hidden")
+          } else {
+            // Only re-show map if we're still in Learn tab
+            learnMapActions.setMapMode("learn")
+          }
+        })
+      },
+      {
+        // Trigger when footer is 10% visible
+        threshold: 0.1,
+        rootMargin: "0px 0px -50% 0px", // Start transition early
+      },
+    )
+
+    observer.observe(footer)
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -112,12 +142,17 @@ export default function LearnPanel() {
       </Box>
 
       {/* Learn More section - comes after the scrollytelling content naturally */}
+      {/* Map fades out when this section comes into view */}
       <Box
+        ref={footerRef}
         sx={{
           backgroundColor: "#68C3CE", // Learn tab teal color
           padding: "60px 20px",
           paddingBottom: "150px",
           marginBottom: "-100px",
+          // Ensure footer is above the map
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Box
