@@ -6,10 +6,15 @@
     "dev": "turbo run dev",
     "dev:main": "pnpm --filter main dev",
     "dev:storyline-flow": "pnpm --filter storyline-flow dev",
+    "dev:storyline-climate": "pnpm --filter storyline-climate dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md,scss,json}\"",
-    "serve": "pnpm dlx serve apps/main/out/",
-    "clean": "rm -rf node_modules .turbo && pnpm install && pnpm build",
+    "format": "prettier . --write --ignore-unknown --cache",
+    "serve": "pnpm build && pnpm dlx serve apps/main/out/",
+    "clean:turbo": "rm -rf .turbo/cache",
+    "clean:next": "rm -rf apps/*/.next/cache",
+    "clean:caches": "pnpm clean:turbo && pnpm clean:next",
+    "clean:all": "rm -rf node_modules .turbo apps/*/.next",
+    "reset": "pnpm clean:all && pnpm install",
     "check-types": "turbo run check-types"
   },
   "dependencies": {

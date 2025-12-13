@@ -24,14 +24,14 @@ Dependencies and configurations set at the root level are overriden by local dep
 
 ### Prerequisites
 
-Node.js: Ensure you have Node.js version 20.x installed. Use nvm or Volta for version management.
+Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for version management.
 
 ```sh
-nvm install 20.19.1
-nvm use 20.19.1
+nvm install 22.21.1
+nvm use 22.21.1
 ```
 
-pnpm: Install pnpm using Corepack (included in Node.js 20.x).
+pnpm: Install pnpm using Corepack (included in Node.js 22.x).
 
 ```sh
 corepack enable
@@ -60,7 +60,7 @@ Here is how to explicitly run the dev script:
 pnpm dev
 ```
 
-### Run a specific app only
+### Run a specific app only (dev)
 
 To run a specific app (e.g., `main`), navigate to its directory and start it:
 
@@ -69,15 +69,58 @@ cd apps/main
 pnpm dev
 ```
 
+or 
+
+```sh
+pnpm dev --filter=main
+```
+
+This is recommended while developing because running the whole `pnpm dev` will slow down your dev builds and hot reload because it will start every package/app that has a dev task and their watchers.
+
+You can also add scripts to the root `package.json` like:
+
+```sh
+    "dev:main": "pnpm --filter main dev",
+```
+
+if you find that convenient. Feel free to use shorthand for apps with long names:
+
+```sh
+    "dev:sf": "pnpm --filter storyline-flow dev",
+```
+
 ### Build script sequence
 
-To build, and before I push to GitHub, I run:
+To build, and before pushing to github:
 
 ```sh
 pnpm format
 pnpm lint
 pnpm build
 ```
+
+or 
+
+```sh
+pnpm format --filter=main
+pnpm lint --filter=main
+pnpm build --filter=main
+```
+
+## Do local dev builds feel sluggish? 
+
+### Try clearing your cache 
+(especially if you have been doing data intensive work)
+
+- To clean bloated Turbo and app-level NextJS caches 
+(again, using `main` app as example):
+
+```sh
+rm -rf .turbo/cache
+rm -rf .turbo apps/main/.next
+```
+
+See also the `clean` scripts in the root `package.json`.
 
 ## Changes from the Standard Turborepo
 
@@ -178,3 +221,36 @@ pnpm install
 ```
 
 at the root level to make sure all new packages and workspace import/exports are installed.
+
+## Regular Turborepo maintenance (for lead dev)
+
+Ideally a quarterly review, but at least yearly:
+- Keep node, NextJS, and package versions up-to-date
+- Review and maintain configs
+
+### Next steps
+
+- In the near future, I'd like to implement pnpm cataloging to keep package versions in sync. This looks like having a `pnpm-workspace.yaml` that contains packages and versions like so:
+
+```
+catalog:
+  react: 19.2.1
+  react-dom: 19.2.1
+  next: 15.5.9
+  typescript: 5.8.2
+  turbo: 2.6.3
+```
+
+Then in each app/package that needs them:
+
+```
+{
+  "dependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "next": "catalog:"
+  }
+}
+```
+
+This can be optional and per app. If you are a developer responsible for making sure an app "stays in place" over time, you can pin a version in your `package.json`.
