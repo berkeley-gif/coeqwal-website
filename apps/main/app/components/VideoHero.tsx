@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
+import { ScrollToButton } from "@repo/ui"
 
 import { HEADER_EXPANDED_H } from "../../../../packages/ui/src/components/navigation/BaseHeader"
 
@@ -70,11 +71,11 @@ export default function VideoHero({
         height: `calc(100vh - ${HEADER_EXPANDED_H}px)`,
         width: "100%",
         overflow: "hidden",
-        paddingTop: "80px",
-        paddingBottom: "100px",
+        paddingTop: "75px",
         marginTop: HEADER_EXPANDED_H,
       }}
     >
+      {/** Video */}
       <div
         id="homeHeroVid"
         style={{
@@ -123,6 +124,7 @@ export default function VideoHero({
           </video>
         )}
       </div>
+      {/** Title / Question */}
       <motion.div
         id="homeHeroTitle"
         initial="hidden"
@@ -140,9 +142,9 @@ export default function VideoHero({
           variant="h1"
           component="h1"
           sx={{
-            fontSize: { sm: "2.5rem", md: "3rem", lg: "2.6rem", xl: "5.5rem" }, // Custom for demo with new title
-            padding: { sm: "45px", md: "45px" },
-            lineHeight: "120%",
+            fontSize: { sm: "2.2rem", md: "2.8rem", lg: "2.6rem", xl: "3.8rem" }, // Custom for demo with new title
+            padding: { sm: "35px", md: "45px" },
+            lineHeight: "140%",
             textAlign: "left",
             fontWeight: 500,
             width: "auto",
@@ -155,32 +157,8 @@ export default function VideoHero({
           {t("homePanel.titleLine2")}
         </Typography>
       </motion.div>
-      <div id="scrollArrow">
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            height: "80vh",
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              fontSize: "2.5rem",
-              color: "white",
-              animation: "bounce 2s ease-in-out infinite",
-              "@keyframes bounce": {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-8px)" },
-              },
-            }}
-          >
-            ↓
-          </Box>
-        </Box>
-      </div>
+
+      {/** Body Text */}
       <motion.div
         id="homeHeroBody"
         initial="hidden"
@@ -200,8 +178,8 @@ export default function VideoHero({
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            gap: "25px",
+            flexDirection: "column",
+            gap: "10px",
             color: theme.palette.utility.white,
           }}
         >
@@ -213,6 +191,10 @@ export default function VideoHero({
           >
             {t("homePanel.content")}
           </Typography>
+          <ScrollToButton
+            color={theme.palette.utility.white}
+            size={70}
+          />
         </div>
       </motion.div>
     </div>
