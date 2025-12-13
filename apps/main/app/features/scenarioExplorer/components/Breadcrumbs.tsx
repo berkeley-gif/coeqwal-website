@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box, Typography, Chip, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 /**
  * Mini-breadcrumbs showing current selections

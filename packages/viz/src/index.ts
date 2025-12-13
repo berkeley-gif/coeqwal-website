@@ -1,5 +1,13 @@
 // Export types
-export * from "./types"
+export type {
+  ChartConfig,
+  DecileData,
+  DecileChartProps,
+  TimeSeriesData,
+  TimeSeriesChartProps,
+  ScenarioComparisonData,
+  ScenarioComparisonChartProps,
+} from "./types"
 
 // Export components
 export { default as BarChart } from "./components/BarChart"
@@ -33,4 +41,10 @@ export type { ScenarioGlyphProps } from "./components/ScenarioGlyph"
 export { useResizeObserver } from "./hooks/useResizeObserver"
 
 // Export utilities
-export * from "./utils/d3-utils"
+export {
+  parseDecileData,
+  createDecileColorScale,
+  formatValue,
+  calculateChartDimensions,
+  getNestedValue,
+} from "./utils/d3-utils"
