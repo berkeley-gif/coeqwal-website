@@ -34,7 +34,7 @@ import {
   useIsOutcomeVisualizationActive,
   type SectionId,
 } from "../store"
-import { useTransform, motion, useMotionValue } from "@repo/motion"
+import { useTransform, motion, useMotionValue, useMotionValueEvent } from "@repo/motion"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 export default function MapOverlayPanels() {
@@ -184,20 +184,43 @@ export default function MapOverlayPanels() {
     [0, 1],
   )
 
+  // TODO: find another way to allow map panning and disable triggering hidden interactive panel features.
   // Panel pointer events - derived from opacity to prevent invisible panels from receiving events
-  // When opacity < 0.5, pointer events are disabled entirely (including children)
+  // When opacity < 0.1, pointer events are disabled (prevents clicking hidden panels)
+  // Using lower threshold to ensure panels are truly invisible before allowing map panning
+  // Applied to inner motion.div so map panning still works through backgrounds
   const strategyInfoPointerEvents = useTransform(strategyInfoPanelOpacity, (v) =>
-    v < 0.5 ? "none" : "auto",
+    v < 0.1 ? "none" : "auto",
   )
   const keyOperationsPointerEvents = useTransform(keyOperationsPanelOpacity, (v) =>
-    v < 0.5 ? "none" : "auto",
+    v < 0.1 ? "none" : "auto",
   )
   const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
-    v < 0.5 ? "none" : "auto",
+    v < 0.1 ? "none" : "auto",
   )
   const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
-    v < 0.5 ? "none" : "auto",
+    v < 0.1 ? "none" : "auto",
   )
+
+  // Convert motion values to state to override panel's hardcoded pointerEvents: "auto"
+  const [strategyInfoPE, setStrategyInfoPE] = useState<"none" | "auto">("none")
+  const [keyOperationsPE, setKeyOperationsPE] = useState<"none" | "auto">("none")
+  const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
+  const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
+
+  // Sync motion values to state for use in MUI sx prop
+  useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
+    setStrategyInfoPE(latest as "none" | "auto")
+  })
+  useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
+    setKeyOperationsPE(latest as "none" | "auto")
+  })
+  useMotionValueEvent(keyOutcomesPointerEvents, "change", (latest) => {
+    setKeyOutcomesPE(latest as "none" | "auto")
+  })
+  useMotionValueEvent(summaryPointerEvents, "change", (latest) => {
+    setSummaryPE(latest as "none" | "auto")
+  })
 
   // Tooltip opacity - fade in and out (adjusted for compressed timing)
   const strategyInfoTooltipOpacity = useTransform(
@@ -725,7 +748,7 @@ export default function MapOverlayPanels() {
                 <motion.div
                   style={{
                     opacity: strategyInfoPanelOpacity,
-                    pointerEvents: strategyInfoPointerEvents,
+                    pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
                   <Box
@@ -750,17 +773,25 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
-                          pointerEvents: "none",
+                          pointerEvents: strategyInfoPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={strategyInfoRef}
-                          style={{ pointerEvents: strategyInfoPointerEvents }}
+                          style={{ 
+                            pointerEvents: strategyInfoPointerEvents, // "none" when hidden, "auto" when visible
+                          }}
                         >
-                          <StrategyInfoPanel
-                            strategyValue="current-ops"
-                            onTitleClick={() => setStrategyTooltipClosed(false)}
-                          />
+                          <Box
+                            sx={{
+                              pointerEvents: strategyInfoPE, // Override panel's hardcoded "auto"
+                            }}
+                          >
+                            <StrategyInfoPanel
+                              strategyValue="current-ops"
+                              onTitleClick={() => setStrategyTooltipClosed(false)}
+                            />
+                          </Box>
                         </motion.div>
 
                         <ScrollTooltip
@@ -816,7 +847,7 @@ export default function MapOverlayPanels() {
                 <motion.div
                   style={{
                     opacity: keyOperationsPanelOpacity,
-                    pointerEvents: keyOperationsPointerEvents,
+                    pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
                   <Box
@@ -841,17 +872,25 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
-                          pointerEvents: "none",
+                          pointerEvents: keyOperationsPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={keyOperationsRef}
-                          style={{ pointerEvents: keyOperationsPointerEvents }}
+                          style={{ 
+                            pointerEvents: keyOperationsPointerEvents, // "none" when hidden, "auto" when visible
+                          }}
                         >
-                          <KeyOperationsPanel
-                            strategyValue="current-ops"
-                            onTitleClick={() => setKeyOpsTooltipClosed(false)}
-                          />
+                          <Box
+                            sx={{
+                              pointerEvents: keyOperationsPE, // Override panel's hardcoded "auto"
+                            }}
+                          >
+                            <KeyOperationsPanel
+                              strategyValue="current-ops"
+                              onTitleClick={() => setKeyOpsTooltipClosed(false)}
+                            />
+                          </Box>
                         </motion.div>
 
                         <ScrollTooltip
@@ -900,7 +939,7 @@ export default function MapOverlayPanels() {
                 <motion.div
                   style={{
                     opacity: keyOutcomesPanelOpacity,
-                    pointerEvents: keyOutcomesPointerEvents,
+                    pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
                   <Box
@@ -925,19 +964,27 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
-                          pointerEvents: "none",
+                          pointerEvents: keyOutcomesPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={keyOutcomesRef}
-                          style={{ pointerEvents: keyOutcomesPointerEvents }}
+                          style={{ 
+                            pointerEvents: keyOutcomesPointerEvents, // "none" when hidden, "auto" when visible
+                          }}
                         >
-                          <KeyOutcomesPanel
-                            scenarioId="s0020"
-                            onTitleClick={() =>
-                              setKeyOutcomesTooltipClosed(false)
-                            }
-                          />
+                          <Box
+                            sx={{
+                              pointerEvents: keyOutcomesPE, // Override panel's hardcoded "auto"
+                            }}
+                          >
+                            <KeyOutcomesPanel
+                              scenarioId="s0020"
+                              onTitleClick={() =>
+                                setKeyOutcomesTooltipClosed(false)
+                              }
+                            />
+                          </Box>
                         </motion.div>
 
                         <ScrollTooltip
@@ -1005,7 +1052,7 @@ export default function MapOverlayPanels() {
                 <motion.div
                   style={{
                     opacity: summaryPanelOpacity,
-                    pointerEvents: summaryPointerEvents,
+                    pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
                   <Box
@@ -1033,10 +1080,16 @@ export default function MapOverlayPanels() {
                       >
                         <motion.div
                           style={{
-                            pointerEvents: summaryPointerEvents,
+                            pointerEvents: summaryPointerEvents, // "none" when hidden, "auto" when visible
                           }}
                         >
-                          <SummaryPanel strategy="current-ops" />
+                          <Box
+                            sx={{
+                              pointerEvents: summaryPE, // Override panel's hardcoded "auto"
+                            }}
+                          >
+                            <SummaryPanel strategy="current-ops" />
+                          </Box>
                         </motion.div>
                       </Box>
                     </Box>
