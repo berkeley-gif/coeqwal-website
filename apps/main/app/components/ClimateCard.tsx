@@ -3,7 +3,7 @@
 import { forwardRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, DiscreteSlider } from "@repo/ui"
-import { useDrawerStore } from "@repo/state"
+import { useDrawerStore } from "@repo/state/drawer"
 
 interface ClimateCardProps {
   isMinimized?: boolean

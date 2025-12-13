@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { useDrawerStore } from "@repo/state"
+import { useDrawerStore } from "@repo/state/drawer"
 import { FloatingGlossaryButton } from "./FloatingGlossaryButton"
 import { FloatingGlossaryPanel } from "./FloatingGlossaryPanel"
 

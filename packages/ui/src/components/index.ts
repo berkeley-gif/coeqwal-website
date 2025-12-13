@@ -83,7 +83,13 @@ export type {
 } from "./panels/DashboardPanel"
 
 // Custom icons
-export * from "./icons/DocumentIcons"
+export {
+  DocumentListIcon,
+  DocumentCheckedIcon,
+  DocumentExpandedIcon,
+  DocumentCollapsedIcon,
+  MapIcon,
+} from "./icons/DocumentIcons"
 
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
