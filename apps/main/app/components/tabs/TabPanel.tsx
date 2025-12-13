@@ -12,8 +12,9 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
     const thisPanelId = `panel-${tabKey}`
 
-    // Learn tab gets teal background to cover any gaps
-    const backgroundColor = tabKey === "learn" ? "#68C3CE" : undefined
+    // Learn tab needs transparent background so the persistent map shows through
+    // Not necesssary for other tabs.
+    const backgroundColor = tabKey === "learn" ? "transparent" : undefined
 
     return (
       <div
