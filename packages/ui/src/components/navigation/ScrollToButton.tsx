@@ -3,6 +3,7 @@ import { useTheme, Theme } from "../../mui-components"
 import { ScrollIndicator } from "@repo/motion/components"
 import { CircularArrowButton } from "../common/CircularArrowButton"
 
+type MotionAxis = "vertical" | "horizontal"
 interface ScrollToButtonProps {
   scrollToId?: string
   onClick?: () => void
@@ -11,6 +12,9 @@ interface ScrollToButtonProps {
   animationComplete?: boolean
   style?: React.CSSProperties
   size?: number
+  //i.e rotation = "0deg",
+  rotation?: string
+  axis?: MotionAxis
 }
 
 export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
@@ -21,6 +25,8 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   animationComplete = true,
   style,
   size,
+  rotation,
+  axis,
 }) => {
   const theme = useTheme()
   const buttonColor =
@@ -40,6 +46,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       color={buttonColor}
       animationComplete={animationComplete}
       delay={delay}
+      motionAxis={axis}
       style={{
         ...style,
         // if no action, keep animation but disable interaction
@@ -47,7 +54,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       }}
       {...(!isInteractive ? { "aria-hidden": true } : null)}
     >
-      <CircularArrowButton size={size} color={buttonColor} />
+      <CircularArrowButton size={size} color={buttonColor} rotation={rotation} />
     </ScrollIndicator>
   )
 
