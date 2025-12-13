@@ -220,7 +220,10 @@ export function FloatingGlossaryPanel({
                     internalSelectedTerm === term.term
                       ? {
                           scrollMarginTop: "20px",
-                          backgroundColor: alpha(theme.palette.blue.bright, 0.08),
+                          backgroundColor: alpha(
+                            theme.palette.blue.bright,
+                            0.08,
+                          ),
                           padding: 2,
                           borderRadius: theme.borderRadius.card,
                           border: `2px solid ${theme.palette.blue.bright}`,

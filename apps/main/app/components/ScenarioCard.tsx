@@ -1,11 +1,7 @@
 "use client"
 
 import { useRef, useState, useCallback } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../content/outcomes"
@@ -55,17 +51,17 @@ export default function ScenarioCard({
 }: ScenarioCardProps) {
   const theme = useTheme()
   const selectedOutcome = useSelectedOutcome()
-  
+
   // State for which operation icon tooltip is open (null = none)
   const [openIconTooltip, setOpenIconTooltip] = useState<number | null>(null)
   const justClickedRef = useRef(false)
-  
+
   // Handler for icon click - manages tooltip state cleanly
   // Closes current tooltip first, then opens new one to prevent content flash
   const handleIconClick = useCallback((index: number) => {
     justClickedRef.current = true
-    
-    setOpenIconTooltip(prev => {
+
+    setOpenIconTooltip((prev) => {
       if (prev === index) {
         // Toggle off - just close
         return null
@@ -78,10 +74,12 @@ export default function ScenarioCard({
         return index
       }
     })
-    
-    setTimeout(() => { justClickedRef.current = false }, 150)
+
+    setTimeout(() => {
+      justClickedRef.current = false
+    }, 150)
   }, [])
-  
+
   // Handler for click-away - respects the justClicked flag
   const handleCloseIconTooltip = useCallback(() => {
     if (!justClickedRef.current) {
@@ -306,7 +304,11 @@ export default function ScenarioCard({
                         <img
                           src={icon.path}
                           alt={icon.alt}
-                          style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            pointerEvents: "none",
+                          }}
                         />
                       </Box>
                       <Typography

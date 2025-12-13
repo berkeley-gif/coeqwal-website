@@ -8,7 +8,4 @@ export {
   horizontalGrowRectVariants,
 } from "./variants"
 
-export {
-  springUpTextVariants,
-  opacityTextVariants,
-} from "./textVariants"
+export { springUpTextVariants, opacityTextVariants } from "./textVariants"

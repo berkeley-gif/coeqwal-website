@@ -8,19 +8,13 @@
  */
 
 import { useCallback } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { learnMapActions } from "../store"
 import { InfoIconButton, HybridTooltip, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
-import {
-  OUTCOMES,
-} from "../../../content/outcomes"
+import { OUTCOMES } from "../../../content/outcomes"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
@@ -136,7 +130,13 @@ export function StrategyRow({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+        maxWidth: {
+          xs: "100%",
+          sm: "360px",
+          md: "420px",
+          lg: "460px",
+          xl: "500px",
+        },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -257,7 +257,11 @@ export function StrategyRow({
                 <img
                   src={icon.path}
                   alt={icon.alt}
-                  style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                  }}
                 />
               </Box>
             </HybridTooltip>
@@ -292,7 +296,13 @@ export function StrategyInfoPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+        maxWidth: {
+          xs: "100%",
+          sm: "360px",
+          md: "420px",
+          lg: "460px",
+          xl: "500px",
+        },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -378,7 +388,13 @@ export function KeyOperationsPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+        maxWidth: {
+          xs: "100%",
+          sm: "360px",
+          md: "420px",
+          lg: "460px",
+          xl: "500px",
+        },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -466,7 +482,7 @@ export function KeyOutcomesPanel({
   onTitleClick,
 }: KeyOutcomesPanelProps) {
   const theme = useTheme()
-  
+
   // Use unified tooltip state management
   const { openTooltip, handleToggle, handleClose } = useTierTooltipState()
 
@@ -474,10 +490,13 @@ export function KeyOutcomesPanel({
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
 
   // Handler to show outcome data on the map
-  const handleShowOnMap = useCallback((outcome: string) => {
-    handleClose() // Close tooltip when showing on map
-    learnMapActions.setSelectedOutcome(outcome)
-  }, [handleClose])
+  const handleShowOnMap = useCallback(
+    (outcome: string) => {
+      handleClose() // Close tooltip when showing on map
+      learnMapActions.setSelectedOutcome(outcome)
+    },
+    [handleClose],
+  )
 
   // Helper function to get tier values for an outcome
   const getTierValues = (outcome: string): [number, number, number, number] => {
@@ -501,7 +520,13 @@ export function KeyOutcomesPanel({
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+        maxWidth: {
+          xs: "100%",
+          sm: "360px",
+          md: "420px",
+          lg: "460px",
+          xl: "500px",
+        },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
