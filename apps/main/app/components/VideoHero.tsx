@@ -1,27 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
+import { motion } from "@repo/motion"
 
 import { HEADER_EXPANDED_H } from "../../../../packages/ui/src/components/navigation/BaseHeader"
 
-// Format text with medium weight on key words
-const formatHeroText = (text: string) => {
-  const parts = text.split(/(\blearn\b|\bexplore\b|\bempowers?\b)/gi)
-
-  return parts.map((part, index) => {
-    if (part.match(/\b(learn|explore|empowers?)\b/i)) {
-      return (
-        <span key={index} style={{ fontWeight: 600 }}>
-          {part}
-        </span>
-      )
-    }
-    return part
-  })
-}
-
 export type VideoSource = { src: string; type: string }
-
 export interface VideoHeroProps {
   sources: VideoSource[]
   poster?: string
@@ -35,12 +19,7 @@ export interface VideoHeroProps {
 
 export default function VideoHero({
   sources,
-  fallbackImage,
-  className,
-  id,
-  title,
-  paragraphs,
-  children,
+  fallbackImage
 }: VideoHeroProps) {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -73,6 +52,16 @@ export default function VideoHero({
 
   const showStaticImage = failed
 
+  const heroIn = {
+    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut" } },
+  }
+
+  const heroInRight = {
+    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut", delay: 0.12 } },
+  }
+
   return (
     <div
       id="homeHero"
@@ -81,7 +70,7 @@ export default function VideoHero({
         height: `calc(100vh - ${HEADER_EXPANDED_H}px)`,
         width: "100%",
         overflow: "hidden",
-        paddingTop: "50px",
+        paddingTop: "80px",
         paddingBottom: "100px",
         marginTop: HEADER_EXPANDED_H,
       }}
@@ -134,8 +123,12 @@ export default function VideoHero({
           </video>
         )}
       </div>
-      <div
+      <motion.div
         id="homeHeroTitle"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={heroIn}
         style={{
           position: "absolute",
           left: 0,
@@ -161,7 +154,7 @@ export default function VideoHero({
           {t("homePanel.titleLine1")} <br />
           {t("homePanel.titleLine2")}
         </Typography>
-      </div>
+      </motion.div>
       <div id="scrollArrow">
         <Box
           sx={{
@@ -188,8 +181,12 @@ export default function VideoHero({
           </Box>
         </Box>
       </div>
-      <div
+      <motion.div
         id="homeHeroBody"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={heroInRight}
         style={{
           position: "absolute",
           right: 0,
@@ -217,7 +214,7 @@ export default function VideoHero({
             {t("homePanel.content")}
           </Typography>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
