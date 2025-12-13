@@ -2,20 +2,20 @@
 
 /**
  * InfoIconButton Component
- * 
+ *
  * @description
  * A clickable info icon (rounded ℹ️) that displays tooltip content.
- * 
+ *
  * @since 12 Dec 2025
- * 
+ *
  * ## Pattern 1: Self-managed (simple case)
- * 
+ *
  * **When to use:** Text content, formatted definitions, simple info
- * 
+ *
  * - Component manages open/close state internally
  * - Uses InfoTooltip (standard tooltip styling)
  * - ClickAwayListener handled automatically
- * 
+ *
  * ```tsx
  * <InfoIconButton
  *   tooltipContent={
@@ -25,23 +25,23 @@
  *   }
  * />
  * ```
- * 
+ *
  * ## Pattern 2: Externally controlled (complex case)
- * 
+ *
  * **When to use:** Charts, interactive content, coordination with other UI
- * 
+ *
  * - Parent manages state
  * - Parent renders whatever content it needs (charts, forms, etc.)
- * 
+ *
  * ```tsx
  * <InfoIconButton onClick={handleClick} isActive={isOpen} />
  * {isOpen && <TierTooltipContent ... />}
  * ```
- * 
+ *
  * ## Variants
  * - "button" (default): Semi-transparent circle background, 24px touch target
  * - "inline": Minimal styling for use within text, 20px touch target
- * 
+ *
  * ## Configurable constants
  * - BUTTON_ICON_SIZE: Icon size for "button" variant (default: 1.2rem)
  * - INLINE_ICON_SIZE: Icon size for "inline" variant (default: 1.1rem)
@@ -121,73 +121,74 @@ const inlineButtonStyles = {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-export const InfoIconButton = forwardRef<HTMLButtonElement, InfoIconButtonProps>(
-  function InfoIconButton(
-    {
-      tooltipContent,
-      onClick,
-      onMouseDown,
-      isActive: externalIsActive,
-      title,
-      sx = {},
-      variant = "button",
-      placement = "top",
-    },
-    ref,
-  ) {
-    const buttonRef = useRef<HTMLButtonElement>(null)
-    
-    // Use forwarded ref if provided, otherwise use internal ref
-    const actualRef = (ref as React.RefObject<HTMLButtonElement>) || buttonRef
+export const InfoIconButton = forwardRef<
+  HTMLButtonElement,
+  InfoIconButtonProps
+>(function InfoIconButton(
+  {
+    tooltipContent,
+    onClick,
+    onMouseDown,
+    isActive: externalIsActive,
+    title,
+    sx = {},
+    variant = "button",
+    placement = "top",
+  },
+  ref,
+) {
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
-    // Determine if tooltip is self-managed or externally controlled
-    const isSelfManaged = tooltipContent !== undefined
-    const isActive = externalIsActive ?? false
-    
-    const isInline = variant === "inline"
-    const iconSize = isInline ? INLINE_ICON_SIZE : BUTTON_ICON_SIZE
+  // Use forwarded ref if provided, otherwise use internal ref
+  const actualRef = (ref as React.RefObject<HTMLButtonElement>) || buttonRef
 
-    const button = (
-      <Box
-        component="button"
-        ref={actualRef}
-        onClick={onClick}
-        onMouseDown={onMouseDown}
-        title={title}
-        sx={{
-          ...(isInline ? inlineButtonStyles : circleButtonStyles),
+  // Determine if tooltip is self-managed or externally controlled
+  const isSelfManaged = tooltipContent !== undefined
+  const isActive = externalIsActive ?? false
+
+  const isInline = variant === "inline"
+  const iconSize = isInline ? INLINE_ICON_SIZE : BUTTON_ICON_SIZE
+
+  const button = (
+    <Box
+      component="button"
+      ref={actualRef}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      title={title}
+      sx={{
+        ...(isInline ? inlineButtonStyles : circleButtonStyles),
+        background: isInline
+          ? "none"
+          : (theme: Theme) =>
+              isActive
+                ? `${theme.palette.blue.bright}20`
+                : `${theme.palette.grey[500]}15`,
+        color: (theme: Theme) =>
+          isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
+        "&:hover": {
           background: isInline
             ? "none"
-            : (theme: Theme) =>
-                isActive
-                  ? `${theme.palette.blue.bright}20`
-                  : `${theme.palette.grey[500]}15`,
-          color: (theme: Theme) =>
-            isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
-    "&:hover": {
-            background: isInline
-              ? "none"
-              : (theme: Theme) => `${theme.palette.blue.bright}30`,
-            color: (theme: Theme) => theme.palette.blue.darkest,
-          },
-        }}
-      >
-        <InfoIcon sx={{ fontSize: iconSize, ...sx }} />
-      </Box>
-    )
+            : (theme: Theme) => `${theme.palette.blue.bright}30`,
+          color: (theme: Theme) => theme.palette.blue.darkest,
+        },
+      }}
+    >
+      <InfoIcon sx={{ fontSize: iconSize, ...sx }} />
+    </Box>
+  )
 
-    // If self-managed, use HybridTooltip (hover on desktop, click on touch)
-    if (isSelfManaged) {
+  // If self-managed, use HybridTooltip (hover on desktop, click on touch)
+  if (isSelfManaged) {
     return (
-        <HybridTooltip content={tooltipContent} placement={placement}>
-          {button}
-        </HybridTooltip>
+      <HybridTooltip content={tooltipContent} placement={placement}>
+        {button}
+      </HybridTooltip>
     )
   }
 
-    // External control - just return the button
-    return button
-  },
-)
+  // External control - just return the button
+  return button
+})
 
 export default InfoIconButton

@@ -34,7 +34,12 @@ import {
   useIsOutcomeVisualizationActive,
   type SectionId,
 } from "../store"
-import { useTransform, motion, useMotionValue, useMotionValueEvent } from "@repo/motion"
+import {
+  useTransform,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+} from "@repo/motion"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 export default function MapOverlayPanels() {
@@ -189,11 +194,13 @@ export default function MapOverlayPanels() {
   // When opacity < 0.1, pointer events are disabled (prevents clicking hidden panels)
   // Using lower threshold to ensure panels are truly invisible before allowing map panning
   // Applied to inner motion.div so map panning still works through backgrounds
-  const strategyInfoPointerEvents = useTransform(strategyInfoPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
+  const strategyInfoPointerEvents = useTransform(
+    strategyInfoPanelOpacity,
+    (v) => (v < 0.1 ? "none" : "auto"),
   )
-  const keyOperationsPointerEvents = useTransform(keyOperationsPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
+  const keyOperationsPointerEvents = useTransform(
+    keyOperationsPanelOpacity,
+    (v) => (v < 0.1 ? "none" : "auto"),
   )
   const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
     v < 0.1 ? "none" : "auto",
@@ -204,7 +211,9 @@ export default function MapOverlayPanels() {
 
   // Convert motion values to state to override panel's hardcoded pointerEvents: "auto"
   const [strategyInfoPE, setStrategyInfoPE] = useState<"none" | "auto">("none")
-  const [keyOperationsPE, setKeyOperationsPE] = useState<"none" | "auto">("none")
+  const [keyOperationsPE, setKeyOperationsPE] = useState<"none" | "auto">(
+    "none",
+  )
   const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
   const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
 
@@ -231,7 +240,7 @@ export default function MapOverlayPanels() {
 
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.36, 0.40, 0.46, 0.50],
+    [0.36, 0.4, 0.46, 0.5],
     [0, 1, 1, 0],
   )
 
@@ -713,7 +722,18 @@ export default function MapOverlayPanels() {
                   minHeight="auto"
                   alignItems="flex-start"
                 >
-                  <Typography variant="body1" sx={{ maxWidth: { xs: "100%", sm: "340px", md: "380px", lg: "420px", xl: "460px" } }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      maxWidth: {
+                        xs: "100%",
+                        sm: "340px",
+                        md: "380px",
+                        lg: "420px",
+                        xl: "460px",
+                      },
+                    }}
+                  >
                     Each water management scenario on this site can be read as
                     having three main elements. Let&apos;s look at the water
                     management scenario for the way we currently manage Central
@@ -772,13 +792,19 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "360px",
+                            md: "420px",
+                            lg: "460px",
+                            xl: "500px",
+                          },
                           pointerEvents: strategyInfoPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={strategyInfoRef}
-                          style={{ 
+                          style={{
                             pointerEvents: strategyInfoPointerEvents, // "none" when hidden, "auto" when visible
                           }}
                         >
@@ -789,7 +815,9 @@ export default function MapOverlayPanels() {
                           >
                             <StrategyInfoPanel
                               strategyValue="current-ops"
-                              onTitleClick={() => setStrategyTooltipClosed(false)}
+                              onTitleClick={() =>
+                                setStrategyTooltipClosed(false)
+                              }
                             />
                           </Box>
                         </motion.div>
@@ -871,13 +899,19 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "360px",
+                            md: "420px",
+                            lg: "460px",
+                            xl: "500px",
+                          },
                           pointerEvents: keyOperationsPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={keyOperationsRef}
-                          style={{ 
+                          style={{
                             pointerEvents: keyOperationsPointerEvents, // "none" when hidden, "auto" when visible
                           }}
                         >
@@ -919,8 +953,8 @@ export default function MapOverlayPanels() {
                                   fontStyle: "italic",
                                 }}
                               >
-                                Click the icons to see what key operations
-                                they represent.
+                                Click the icons to see what key operations they
+                                represent.
                               </Box>
                             </>
                           }
@@ -963,13 +997,19 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "360px",
+                            md: "420px",
+                            lg: "460px",
+                            xl: "500px",
+                          },
                           pointerEvents: keyOutcomesPE, // Block panel AND tooltip when hidden
                         }}
                       >
                         <motion.div
                           ref={keyOutcomesRef}
-                          style={{ 
+                          style={{
                             pointerEvents: keyOutcomesPointerEvents, // "none" when hidden, "auto" when visible
                           }}
                         >
@@ -1074,7 +1114,13 @@ export default function MapOverlayPanels() {
                       <Box
                         sx={{
                           width: "100%",
-                          maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "360px",
+                            md: "420px",
+                            lg: "460px",
+                            xl: "500px",
+                          },
                           pointerEvents: "none",
                         }}
                       >
