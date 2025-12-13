@@ -31,12 +31,14 @@ nvm install 22.21.1
 nvm use 22.21.1
 ```
 
-pnpm: Install pnpm using Corepack (included in Node.js 22.x).
+pnpm: Install pnpm using Corepack locally (included in Node.js 22.x).
 
 ```sh
 corepack enable
 corepack prepare pnpm@10.0.0 --activate
 ```
+
+Note (in case you were reading the `amplify.yml` and wondering): Locally it's easiest to use Corepack. AWS Amplify instead installs pnpm globally in the container they use to run the build.  
 
 ### Installating the repo and packages
 
