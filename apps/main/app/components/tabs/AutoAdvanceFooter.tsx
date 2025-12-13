@@ -2,6 +2,7 @@
 
 import React from "react"
 import { ScrollToButton } from "@repo/ui"
+import { Typography } from "@repo/ui/mui"
 
 import { useTabs, nextTab } from "../../context/Tabs"
 import { TAB_ORDER } from "../../types/tabs"
@@ -31,11 +32,16 @@ export default function AutoAdvanceFooter() {
         gap: 12,
       }}
     >
+      <Typography variant="caption">
+        Explore water allocation scenarios
+      </Typography>
       <ScrollToButton
         onClick={onAdvance}
-        delay={0.2}
+        delay={0}
+        showDuration={0.1}
         animationComplete
-        style={{ transform: "translateY(-2px)" }}
+        rotation="-90deg"
+        axis="horizontal"
       />
     </div>
   )

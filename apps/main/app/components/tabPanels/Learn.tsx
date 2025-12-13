@@ -18,7 +18,7 @@
  */
 
 import { Suspense, useCallback, useRef, useEffect } from "react"
-import { Box } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
 import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
@@ -164,7 +164,6 @@ export default function LearnPanel() {
                   gap: "15px",
                 }}
               ></div>
-
               <Box
                 component="a"
                 href="https://flow.coeqwal.org/"
