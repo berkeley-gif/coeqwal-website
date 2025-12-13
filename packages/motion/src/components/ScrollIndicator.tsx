@@ -121,13 +121,6 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
                       : 1
 
                   await controls.start(bounceAnim)
-
-                  // Wait/pause for 3 cycle durations (4.5 seconds)
-                  if (animationRunning) {
-                    await new Promise((resolve) => {
-                      timeoutId = setTimeout(resolve, 4500)
-                    })
-                  }
                 } catch {
                   // Animation interrupted, exit gracefully
                   break
