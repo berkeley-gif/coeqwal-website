@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable react/prop-types */ // TypeScript handles prop validation
 
 import { useEffect, useState, useCallback } from "react"
 import { Box, Typography, Chip, CircularProgress, useTheme } from "@repo/ui/mui"
@@ -192,7 +193,7 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
         width: "100%",
-        maxWidth: "500px",
+        maxWidth: { xs: "100%", sm: "360px", md: "420px", lg: "460px", xl: "500px" },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}

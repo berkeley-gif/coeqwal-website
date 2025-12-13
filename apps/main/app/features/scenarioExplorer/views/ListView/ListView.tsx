@@ -30,11 +30,21 @@ const scenarioIdToStrategy = (scenarioId: string): string => {
   return entry ? entry[0] : scenarioId
 }
 
+interface ListViewProps {
+  /** Compact mode for split-panel layouts (50% width) - reduces padding */
+  compact?: boolean
+  /** Callback when a tier/outcome is clicked (for map integration) */
+  onTierClick?: (strategy: string, outcome: string) => void
+}
+
 /**
  * ListView: Full list of COEQWAL scenarios with searching and sorting
  * Shows all scenarios in a grid/table format with outcome summaries
+ * 
+ * @param compact - When true, uses reduced padding for split-panel layouts
+ * @param onTierClick - Optional callback for tier/outcome clicks (used by MapView)
  */
-export default function ListView() {
+export default function ListView({ compact = false, onTierClick }: ListViewProps) {
   const theme = useTheme()
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
     useScenarioData()
@@ -193,6 +203,74 @@ export default function ListView() {
     )
   }
 
+  // Common props for StrategyGrid
+  const strategyGridProps = {
+    getChartDataForStrategy,
+    outcomeNames: outcomeNames || [],
+    strategies: sortedStrategies,
+    highlightedStrategies: matchingStrategyValues,
+    showSearchDivider: hasSearchResults,
+    onOutcomeSelect: handleOutcomeSelect,
+    onTierClick,
+    onToggleScenario: handleToggleScenario,
+    selectedScenarios: selectedStrategies,
+    selectedOutcomes: localSelectedOutcomes,
+    showMapView: false, // List view doesn't show map mode
+    showOnlyChosen,
+    showDefinitions,
+    compact,
+    onMapViewChange: () => {}, // No-op in list view
+    onShowOnlyChosenChange: setShowOnlyChosen,
+    onShowDefinitionsChange: setShowDefinitions,
+    sortBy,
+    sortDirection,
+    onSortChange: handleSortChange,
+  }
+
+  // For list view (non-compact): split headers and content for proper scrolling
+  // Use explicit height calculation to ensure proper scrolling behavior
+  if (!compact) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          // Use calc to set explicit height - accounts for header (40px) + tabs (~48px) + banner (~60px) + search (~56px) + padding
+          height: "calc(100vh - 220px)",
+          overflow: "hidden",
+          backgroundColor: theme.palette.grey[100],
+        }}
+      >
+        {/* Fixed header section (not scrolling) */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            px: theme.spacing(theme.cards.spacing.standard),
+            pt: theme.spacing(1.5),
+            backgroundColor: theme.palette.grey[100],
+          }}
+        >
+          <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+        </Box>
+
+        {/* Scrollable content section */}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            px: theme.spacing(theme.cards.spacing.standard),
+            pb: theme.spacing(10),
+          }}
+        >
+          <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+        </Box>
+      </Box>
+    )
+  }
+
+  // For compact mode: everything scrolls together
   return (
     <Box
       sx={{
@@ -202,36 +280,17 @@ export default function ListView() {
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Scenarios Grid */}
       <Box
         sx={{
           flex: 1,
           overflowY: "auto",
-          px: theme.spacing(theme.cards.spacing.standard),
-          pt: theme.spacing(1.5),
-          pb: 0,
+          overscrollBehavior: "contain",
+          px: theme.spacing(1.5),
+          pt: theme.spacing(1),
+          pb: theme.spacing(10),
         }}
       >
-        <StrategyGrid
-          getChartDataForStrategy={getChartDataForStrategy}
-          outcomeNames={outcomeNames || []}
-          strategies={sortedStrategies}
-          highlightedStrategies={matchingStrategyValues}
-          showSearchDivider={hasSearchResults}
-          onOutcomeSelect={handleOutcomeSelect}
-          onToggleScenario={handleToggleScenario}
-          selectedScenarios={selectedStrategies}
-          selectedOutcomes={localSelectedOutcomes}
-          showMapView={false} // List view doesn't show map mode
-          showOnlyChosen={showOnlyChosen}
-          showDefinitions={showDefinitions}
-          onMapViewChange={() => {}} // No-op in list view
-          onShowOnlyChosenChange={setShowOnlyChosen}
-          onShowDefinitionsChange={setShowDefinitions}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortChange={handleSortChange}
-        />
+        <StrategyGrid {...strategyGridProps} renderMode="all" />
       </Box>
     </Box>
   )
