@@ -14,6 +14,7 @@ import {
   useTransform,
 } from "@repo/motion"
 import { useRef, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -128,6 +129,12 @@ export function BaseHeader({
   // Responsive breakpoints (using standard MUI breakpoints)
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
+
+  const router = useRouter()
+
+  const handleLogoClick = () => {
+    router.refresh() // re-fetches server components/data without a full reload
+  }
 
   const buttonStyle = {
     fontSize: "1rem",
@@ -251,7 +258,9 @@ export function BaseHeader({
           style={{ minHeight: "var(--header-h)" }}
         >
           <Box
-            component={motion.div}
+            component={motion.button}
+            type="button"
+            onClick={handleLogoClick}
             style={{
               scale: logoScale,
               originX: 0,
@@ -263,7 +272,17 @@ export function BaseHeader({
               alignItems: "center",
               pl: 2,
               width: 168,
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              "&:focus-visible": {
+                outline: "2px solid currentColor",
+                outlineOffset: "4px",
+                borderRadius: "6px",
+              },
             }}
+            aria-label="Refresh page"
           >
             <Logo />
           </Box>

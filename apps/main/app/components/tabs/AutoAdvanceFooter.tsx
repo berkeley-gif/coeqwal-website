@@ -30,13 +30,13 @@ export default function AutoAdvanceFooter() {
       style={{
         position: "relative",
         paddingTop: "1rem",
-        paddingBottom: "1rem",
+        paddingBottom: "2.1rem",
         display: "flex",
         alignItems: "center",
-        minHeight: 48,
         justifyContent: "center",
         gap: 12,
-        backgroundColor: theme.palette.nature.earth,
+        backgroundColor: theme.palette.blue.darkest,
+        color: theme.palette.utility.white, 
       }}
     >
       <Typography variant="caption">
@@ -44,10 +44,11 @@ export default function AutoAdvanceFooter() {
       </Typography>
       <ScrollToButton
         onClick={onAdvance}
-        delay={0}
         animationComplete
         rotation="-90deg"
         axis="horizontal"
+        size={60}
+        color={theme.palette.utility.white}
       />
     </div>
   )

@@ -147,8 +147,8 @@ export default function LearnPanel() {
       <Box
         sx={{
           backgroundColor: "#68C3CE", // Learn tab teal color
-          padding: "60px 20px",
-          paddingBottom: "150px",
+          padding: "60px",
+          paddingBottom: "200px",
           marginBottom: "-100px",
         }}
       >
