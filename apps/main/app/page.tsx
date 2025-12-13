@@ -4,9 +4,9 @@ import { Suspense } from "react"
 import { Box } from "@repo/ui/mui"
 import { MapProvider } from "@repo/map"
 import { Header } from "./components/Header"
-import { FloatingGlossary } from "./components/FloatingGlossary"
+import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
-import PersistentLearnMap from "./components/PersistentLearnMap"
+import PersistentLearnMap from "./features/map/PersistentLearnMap"
 
 import { TabsProvider } from "./context/Tabs"
 import SmoothTabs from "./components/tabs/SmoothTabs"
@@ -23,26 +23,26 @@ export default function Home() {
           <PersistentLearnMap />
         </Suspense>
 
-      <TabsProvider>
-        <Header />
-        <FloatingGlossary />
-        <Box
-          component="main"
-          sx={{
-            position: "relative",
-            overflowX: "clip",
-            overflowY: "visible",
+        <TabsProvider>
+          <Header />
+          <FloatingGlossary />
+          <Box
+            component="main"
+            sx={{
+              position: "relative",
+              overflowX: "clip",
+              overflowY: "visible",
               // Ensure tab content sits above the map
               zIndex: 1,
-          }}
-        >
-          <IntroSection />
-          <Suspense fallback={null}>
-            <SmoothTabs />
-            <TabPanels />
-          </Suspense>
-        </Box>
-      </TabsProvider>
+            }}
+          >
+            <IntroSection />
+            <Suspense fallback={null}>
+              <SmoothTabs />
+              <TabPanels />
+            </Suspense>
+          </Box>
+        </TabsProvider>
       </MapProvider>
     </>
   )
