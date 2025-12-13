@@ -26,12 +26,12 @@ import {
   DocumentCollapsedIcon,
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
-import { strategies } from "../../../lib/scenarios"
+import { strategies } from "../../../content/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
-import TierTooltipContent from "./TierTooltipContent"
+import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import TogglePair from "./TogglePair"
 import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
-import { useTierTooltipState } from "../../shared/hooks/useTierTooltipState"
+import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {

@@ -1,7 +1,7 @@
 import React from "react"
 import { Box, useTheme } from "@repo/ui/mui"
-import { useOutcomeDefinitions } from "../../../hooks/useTierData"
-import { outcomeTierValues } from "../../../lib/outcomes"
+import { useOutcomeDefinitions } from "../../hooks/useTierData"
+import { outcomeTierValues } from "../../content/outcomes"
 
 interface TierTooltipContentProps {
   outcome: string

@@ -19,8 +19,8 @@ import { getMapMetrics, outcomeCategories } from "../outcomeDefinitions"
 import {
   fetchTierLocationData,
   type TierLocationResponse,
-} from "../../../../../api/tierLocationApi"
-import { getDisplayNameFromMetricId } from "../../../../../constants/outcomeMappings"
+} from "../../../../../lib/api/tierLocationApi"
+import { getDisplayNameFromMetricId } from "../../../../../lib/constants/outcomeMappings"
 import TierMarkers from "../../../components/TierMarkers"
 import TierLegend from "../../../components/TierLegend"
 import TemporalControls from "./TemporalControls"

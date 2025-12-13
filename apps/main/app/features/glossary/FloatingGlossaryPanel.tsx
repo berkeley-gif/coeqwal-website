@@ -10,7 +10,7 @@ import {
   CloseIcon,
   alpha,
 } from "@repo/ui/mui"
-import { glossaryTerms } from "../../lib/glossary"
+import { glossaryTerms } from "../../content/glossary"
 import React, { useRef, useEffect, useState } from "react"
 
 interface Position {

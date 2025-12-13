@@ -10,8 +10,8 @@ import {
   mapShortCodeToDisplayName,
   type ScenarioTiersResponse,
   type TierScores,
-} from "../api/tierApi"
-import { applyUIDisplayOverride } from "../constants/outcomeMappings"
+} from "../lib/api/tierApi"
+import { applyUIDisplayOverride } from "../lib/constants/outcomeMappings"
 
 // Types
 interface TierColors {

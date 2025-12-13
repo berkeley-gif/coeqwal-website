@@ -10,14 +10,14 @@ import {
   OutcomeSummary,
   AtRiskLocation,
   DemandUnitProperties,
-} from "../../../lib/summaryGenerator"
+} from "../../summary/summaryGenerator"
 import {
   TIER_LABELS,
   TierLevel,
   getTierColorsFromTheme,
-} from "../../../lib/tiers"
+} from "../../../content/tiers"
 import { fetchTierLocations } from "../hooks/useOutcomeMapLayer"
-import { STRATEGY_TO_SCENARIO_ID } from "../../../constants/outcomeMappings"
+import { STRATEGY_TO_SCENARIO_ID } from "../../../lib/constants/outcomeMappings"
 import { useSelectedOutcome } from "../store"
 import { useMap } from "@repo/map"
 
