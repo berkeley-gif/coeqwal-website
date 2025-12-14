@@ -14,7 +14,6 @@ import {
   useTransform,
 } from "@repo/motion"
 import { useRef, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -56,6 +55,7 @@ export interface BaseHeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
 
   // Action handlers
+  onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
@@ -113,6 +113,7 @@ export function BaseHeader({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [],
+  onLogoClick,
   onDataClick,
   onToolsClick,
   onAboutClick,
@@ -129,12 +130,6 @@ export function BaseHeader({
   // Responsive breakpoints (using standard MUI breakpoints)
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
-
-  const router = useRouter()
-
-  const handleLogoClick = () => {
-    router.refresh() // re-fetches server components/data without a full reload
-  }
 
   const buttonStyle = {
     fontSize: "1rem",
@@ -260,7 +255,13 @@ export function BaseHeader({
           <Box
             component={motion.button}
             type="button"
-            onClick={handleLogoClick}
+            onClick={() => {
+              if (onLogoClick) {
+                onLogoClick()
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }
+            }}
             style={{
               scale: logoScale,
               originX: 0,
@@ -282,7 +283,7 @@ export function BaseHeader({
                 borderRadius: "6px",
               },
             }}
-            aria-label="Refresh page"
+            aria-label="Scroll to top"
           >
             <Logo />
           </Box>
