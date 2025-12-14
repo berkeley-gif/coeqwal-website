@@ -62,6 +62,7 @@ import {
   useCameraView,
   useSelectedOutcome,
   useExploreTierSelection,
+  useLearnMapScrollOffset,
   learnMapActions,
   CALIFORNIA_VIEW,
   type SectionId,
@@ -78,7 +79,12 @@ const MAP_BOUNDS: [[number, number], [number, number]] = [
 
 // Position styles for different modes
 // zIndexBasement comes from theme.zIndex.basement
-const getContainerStyles = (mode: MapMode, zIndexBasement: number): React.CSSProperties => {
+// scrollOffset creates the "release from sticky" effect in Learn mode
+const getContainerStyles = (
+  mode: MapMode,
+  zIndexBasement: number,
+  scrollOffset: number = 0,
+): React.CSSProperties => {
   const base: React.CSSProperties = {
     position: "fixed",
     top: 0,
@@ -101,6 +107,11 @@ const getContainerStyles = (mode: MapMode, zIndexBasement: number): React.CSSPro
         ...base,
         opacity: 1,
         pointerEvents: "auto",
+        // Apply scroll offset to "release" the map from being fixed
+        // This makes the map scroll up with content when offset > 0
+        // Short transition smooths the initial "release" moment
+        transform: scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
+        transition: "opacity 0.3s ease-out, transform 0.15s ease-out",
       }
     case "explore":
       return {
@@ -141,6 +152,9 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Explore-specific state
   const exploreTierSelection = useExploreTierSelection()
+
+  // Scroll offset for "release from sticky" effect in Learn mode
+  const learnMapScrollOffset = useLearnMapScrollOffset()
 
   // Check if outcome uses demand unit layer
   const usesDemandUnits = selectedOutcome
@@ -363,22 +377,44 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     })
   }, [mapMode, map])
 
-  const containerStyles = getContainerStyles(mapMode, theme.zIndex.basement)
+  const containerStyles = getContainerStyles(
+    mapMode,
+    theme.zIndex.basement,
+    mapMode === "learn" ? learnMapScrollOffset : 0,
+  )
 
   // Determine if we should show Learn or Explore layers
   const isLearnMode = mapMode === "learn"
   const isExploreMode = mapMode === "explore"
 
   return (
-    <Box
-      id="persistent-map"
-      sx={{
-        ...containerStyles,
-        "& .mapboxgl-ctrl-bottom-left": isExploreMode
-          ? { bottom: "80px" }
-          : undefined,
-      }}
-    >
+    <>
+      {/* Teal backdrop for Learn mode - sits behind the map, revealed when map scrolls away */}
+      {isLearnMode && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: theme.palette.learn.background,
+            zIndex: theme.zIndex.basement - 1, // Behind the map
+            opacity: learnMapScrollOffset > 0 ? 1 : 0,
+            transition: "opacity 0.15s ease-out",
+            pointerEvents: "none",
+          }}
+        />
+      )}
+      <Box
+        id="persistent-map"
+        sx={{
+          ...containerStyles,
+          "& .mapboxgl-ctrl-bottom-left": isExploreMode
+            ? { bottom: "80px" }
+            : undefined,
+        }}
+      >
       <Map
         mapboxToken={token}
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
@@ -571,5 +607,6 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         )}
       </Map>
     </Box>
+    </>
   )
 }

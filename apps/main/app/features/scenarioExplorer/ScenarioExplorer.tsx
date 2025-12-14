@@ -42,6 +42,11 @@ export default function ScenarioExplorerNew() {
       color={theme.palette.text.primary}
       headerHeight={theme.layout.headerHeight}
       includeHeaderSpacing={true}
+      panelPadding={{
+        desktop: { top: 0, sides: 0, bottom: 0 },
+        tablet: { top: 0, sides: 0, bottom: 0 },
+        mobile: { top: 0, sides: 0, bottom: 0 },
+      }}
       sx={{ pointerEvents: "auto" }}
     >
       <Box

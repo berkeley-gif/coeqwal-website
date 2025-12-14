@@ -9,8 +9,8 @@
  * - Calls setMapMode('learn') on mount to configure the persistent map
  * - The actual map lives in PersistentMap at the page level
  * - Overlay content scrolls over the persistent map
- * - LearnMore section comes after the scrollytelling content
- * - Map fades out as footer approaches (via IntersectionObserver)
+ * - Map "releases" from fixed position when scrollytelling ends
+ * - Footer comes after the map section naturally
  *
  * The persistent map approach means:
  * - No map remounting when switching tabs
@@ -18,8 +18,8 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { Suspense, useEffect, useRef } from "react"
-import { Box } from "@repo/ui/mui"
+import { Suspense, useEffect, useRef, useCallback } from "react"
+import { Box, useTheme } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
@@ -27,7 +27,8 @@ import { useMapReady, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
-  const footerRef = useRef<HTMLDivElement>(null)
+  const theme = useTheme()
+  const scrollytellingRef = useRef<HTMLDivElement>(null)
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -38,36 +39,43 @@ export default function LearnPanel() {
     return () => {
       // Hide the map when leaving Learn tab
       learnMapActions.setMapMode("hidden")
+      learnMapActions.setLearnMapScrollOffset(0)
     }
   }, [])
 
-  // Fade map out as footer comes into view
-  useEffect(() => {
-    const footer = footerRef.current
-    if (!footer) return
+  // Track scroll to "release" the map when scrollytelling ends
+  const handleScroll = useCallback(() => {
+    const container = scrollytellingRef.current
+    if (!container) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          // When footer starts entering viewport, hide the map
-          if (entry.isIntersecting) {
-            learnMapActions.setMapMode("hidden")
-          } else {
-            // Only re-show map if we're still in Learn tab
-            learnMapActions.setMapMode("learn")
-          }
-        })
-      },
-      {
-        // Trigger when footer is 10% visible
-        threshold: 0.1,
-        rootMargin: "0px 0px -50% 0px", // Start transition early
-      },
-    )
+    const rect = container.getBoundingClientRect()
+    const windowHeight = window.innerHeight
 
-    observer.observe(footer)
-    return () => observer.disconnect()
+    // When bottom of scrollytelling container is above the viewport bottom,
+    // start scrolling the map up with the content
+    const containerBottom = rect.bottom
+    const releasePoint = windowHeight // When container bottom reaches viewport bottom
+
+    if (containerBottom < releasePoint) {
+      // Calculate how much the map should scroll up
+      const offset = releasePoint - containerBottom
+      learnMapActions.setLearnMapScrollOffset(offset)
+    } else {
+      // Map stays fixed
+      learnMapActions.setLearnMapScrollOffset(0)
+    }
   }, [])
+
+  // Set up scroll listener
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    // Initial check
+    handleScroll()
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [handleScroll])
 
   return (
     <div
@@ -77,11 +85,12 @@ export default function LearnPanel() {
     >
       {/* 
         Scrollytelling Container
-        The persistent map is positioned fixed at page level (z-index 0).
-        This container is transparent so the map shows through.
-        Only the overlay panels have backgrounds.
+        The persistent map is positioned fixed at page level.
+        When this container's bottom scrolls above the viewport,
+        the map "releases" and scrolls up with the content.
       */}
       <Box
+        ref={scrollytellingRef}
         sx={{
           position: "relative",
           minHeight: "100vh",
@@ -141,18 +150,20 @@ export default function LearnPanel() {
         </Box>
       </Box>
 
-      {/* Learn More section - comes after the scrollytelling content naturally */}
-      {/* Map fades out when this section comes into view */}
+      {/* 
+        Learn More section - positioned after the map container.
+        The solid background covers the fixed map behind it.
+        z-index ensures it's above the basement-level map.
+      */}
       <Box
-        ref={footerRef}
         sx={{
-          backgroundColor: "#68C3CE", // Learn tab teal color
+          backgroundColor: theme.palette.learn.background,
           padding: "60px 20px",
           paddingBottom: "150px",
           marginBottom: "-100px",
-          // Ensure footer is above the map
+          // Stack above the fixed map (which is at z-index basement)
           position: "relative",
-          zIndex: 1,
+          zIndex: theme.zIndex.panels,
         }}
       >
         <Box
