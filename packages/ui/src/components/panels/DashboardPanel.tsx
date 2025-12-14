@@ -52,40 +52,53 @@ const DashboardPanelRoot = styled(Box, {
       tablet: { top: 16, sides: 16, bottom: 16 },
       mobile: { top: 16, sides: 16, bottom: 16 },
     },
-  }) => ({
-    width: "100%",
-    minHeight: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    position: "relative",
-    backgroundColor,
-    color,
+  }) => {
+    // Use nullish coalescing (??) so 0 is respected as a valid value
+    const desktopTop = panelPadding.desktop?.top ?? 24
+    const desktopSides = panelPadding.desktop?.sides ?? 24
+    const desktopBottom = panelPadding.desktop?.bottom ?? 24
+    const tabletTop = panelPadding.tablet?.top ?? 16
+    const tabletSides = panelPadding.tablet?.sides ?? 16
+    const tabletBottom = panelPadding.tablet?.bottom ?? 16
+    const mobileTop = panelPadding.mobile?.top ?? 16
+    const mobileSides = panelPadding.mobile?.sides ?? 16
+    const mobileBottom = panelPadding.mobile?.bottom ?? 16
 
-    paddingTop: includeHeaderSpacing
-      ? `${headerHeight + (panelPadding.desktop?.top || 24)}px`
-      : `${panelPadding.desktop?.top || 24}px`,
-    paddingLeft: `${panelPadding.desktop?.sides || 24}px`,
-    paddingRight: `${panelPadding.desktop?.sides || 24}px`,
-    paddingBottom: `${panelPadding.desktop?.bottom || 24}px`,
+    return {
+      width: "100%",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      position: "relative",
+      backgroundColor,
+      color,
 
-    "@media (min-width: 900px) and (max-width: 1199px)": {
       paddingTop: includeHeaderSpacing
-        ? `${headerHeight + (panelPadding.tablet?.top || 16)}px`
-        : `${panelPadding.tablet?.top || 16}px`,
-      paddingLeft: `${panelPadding.tablet?.sides || 16}px`,
-      paddingRight: `${panelPadding.tablet?.sides || 16}px`,
-      paddingBottom: `${panelPadding.tablet?.bottom || 16}px`,
-    },
+        ? `${headerHeight + desktopTop}px`
+        : `${desktopTop}px`,
+      paddingLeft: `${desktopSides}px`,
+      paddingRight: `${desktopSides}px`,
+      paddingBottom: `${desktopBottom}px`,
 
-    "@media (max-width: 599px)": {
-      paddingTop: includeHeaderSpacing
-        ? `${headerHeight + (panelPadding.mobile?.top || 16)}px`
-        : `${panelPadding.mobile?.top || 16}px`,
-      paddingLeft: `${panelPadding.mobile?.sides || 16}px`,
-      paddingRight: `${panelPadding.mobile?.sides || 16}px`,
-      paddingBottom: `${panelPadding.mobile?.bottom || 16}px`,
-    },
-  }),
+      "@media (min-width: 900px) and (max-width: 1199px)": {
+        paddingTop: includeHeaderSpacing
+          ? `${headerHeight + tabletTop}px`
+          : `${tabletTop}px`,
+        paddingLeft: `${tabletSides}px`,
+        paddingRight: `${tabletSides}px`,
+        paddingBottom: `${tabletBottom}px`,
+      },
+
+      "@media (max-width: 599px)": {
+        paddingTop: includeHeaderSpacing
+          ? `${headerHeight + mobileTop}px`
+          : `${mobileTop}px`,
+        paddingLeft: `${mobileSides}px`,
+        paddingRight: `${mobileSides}px`,
+        paddingBottom: `${mobileBottom}px`,
+      },
+    }
+  },
 )
 
 export function DashboardPanel({

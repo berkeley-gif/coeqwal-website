@@ -12,9 +12,11 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
     const thisPanelId = `panel-${tabKey}`
 
-    // Learn tab needs transparent background so the persistent map shows through
-    // Not necesssary for other tabs.
-    const backgroundColor = tabKey === "learn" ? "transparent" : undefined
+    // Learn and Explore tabs need transparent backgrounds and no padding
+    // so the persistent map shows through / content sits flush with tabs
+    const isMapTab = tabKey === "learn" || tabKey === "explore"
+    const backgroundColor = isMapTab ? "transparent" : undefined
+    const padding = isMapTab ? "0" : "2rem 0"
 
     return (
       <div
@@ -22,7 +24,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding: "2rem 0", backgroundColor }}
+        style={{ padding, backgroundColor }}
       >
         {children}
         <AutoAdvanceFooter />
