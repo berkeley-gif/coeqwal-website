@@ -55,7 +55,6 @@ export interface BaseHeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
 
   // Action handlers
-  onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
@@ -113,7 +112,6 @@ export function BaseHeader({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [],
-  onLogoClick,
   onDataClick,
   onToolsClick,
   onAboutClick,
@@ -253,9 +251,9 @@ export function BaseHeader({
           style={{ minHeight: "var(--header-h)" }}
         >
           <Box
-            component={onLogoClick ? motion.button : motion.div}
-            type={onLogoClick ? "button" : undefined}
-            onClick={onLogoClick}
+            component={motion.button}
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             style={{
               scale: logoScale,
               originX: 0,
@@ -267,19 +265,17 @@ export function BaseHeader({
               alignItems: "center",
               pl: 2,
               width: 168,
-              ...(onLogoClick && {
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                "&:focus-visible": {
-                  outline: "2px solid currentColor",
-                  outlineOffset: "4px",
-                  borderRadius: "6px",
-                },
-              }),
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              "&:focus-visible": {
+                outline: "2px solid currentColor",
+                outlineOffset: "4px",
+                borderRadius: "6px",
+              },
             }}
-            aria-label={onLogoClick ? "Refresh page" : undefined}
+            aria-label="Scroll to top"
           >
             <Logo />
           </Box>

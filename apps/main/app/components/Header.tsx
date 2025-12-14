@@ -9,11 +9,6 @@ import { AppHeader } from "@repo/ui"
 export function Header() {
   const router = useRouter()
 
-  // Handle logo click - refresh page without full reload
-  const handleLogoClick = () => {
-    router.refresh()
-  }
-
   // Handle data page navigation
   const handleDataClick = () => {
     router.push("/data")
@@ -38,7 +33,6 @@ export function Header() {
 
   return (
     <AppHeader
-      onLogoClick={handleLogoClick}
       onDataClick={handleDataClick}
       // onToolsClick={handleToolsClick} // Disabled temporarily
       onAboutClick={handleAboutClick}
