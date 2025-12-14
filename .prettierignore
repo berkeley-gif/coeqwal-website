@@ -1,0 +1,25 @@
+# deps
+**/node_modules/**
+
+# turborepo
+.turbo/**
+**/.turbo/**
+
+# next / build output
+**/.next/**
+**/out/**
+**/dist/**
+**/build/**
+
+# caches
+**/.cache/**
+**/.eslintcache
+**/*.tsbuildinfo
+
+# misc
+**/.DS_Store
+**/*.log
+
+# lockfiles
+pnpm-lock.yaml
+

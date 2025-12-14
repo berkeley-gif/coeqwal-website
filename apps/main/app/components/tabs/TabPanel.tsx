@@ -21,7 +21,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding: "2rem 0", backgroundColor }}
+        style={{ padding: "2rem 0 0", backgroundColor }}
       >
         {children}
         <AutoAdvanceFooter />
