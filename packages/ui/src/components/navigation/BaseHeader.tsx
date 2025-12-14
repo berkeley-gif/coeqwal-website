@@ -55,6 +55,7 @@ export interface BaseHeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
 
   // Action handlers
+  onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
@@ -112,6 +113,7 @@ export function BaseHeader({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [],
+  onLogoClick,
   onDataClick,
   onToolsClick,
   onAboutClick,
@@ -253,7 +255,13 @@ export function BaseHeader({
           <Box
             component={motion.button}
             type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => {
+              if (onLogoClick) {
+                onLogoClick()
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }
+            }}
             style={{
               scale: logoScale,
               originX: 0,
