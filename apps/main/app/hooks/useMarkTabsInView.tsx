@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useTabs } from "../context/Tabs"
 
 export function useMarkTabsInView(stickyOffsetPx: number = 0) {
-  const { tabsRef, setIsInTabsArea } = useTabs()
+  const { tabsRef, setIsInTabsArea, isInTabsArea } = useTabs()
 
   useEffect(() => {
     const tabsEl = tabsRef.current
@@ -12,11 +12,26 @@ export function useMarkTabsInView(stickyOffsetPx: number = 0) {
 
     const update = () => {
       const tabsRect = tabsEl.getBoundingClientRect()
+      const distanceFromSticky = Math.abs(tabsRect.top - stickyOffsetPx)
 
-      // ✅ Tabs are "in view" if they are stuck at their sticky offset
-      const inArea = Math.abs(tabsRect.top - stickyOffsetPx) <= 1
-      console.log("window.scrollY", window.scrollY)
-      setIsInTabsArea(inArea)
+      // Hysteresis: different thresholds for entering vs leaving collapsed state
+      // - Collapse when within 1px of sticky position
+      // - Stay collapsed until 50px away from sticky position
+      // This prevents jitter when tabs collapse and page height changes
+      const enterThreshold = 1
+      const exitThreshold = 50
+
+      if (isInTabsArea) {
+        // Currently collapsed - only expand if we scroll far enough away
+        if (distanceFromSticky > exitThreshold) {
+          setIsInTabsArea(false)
+        }
+      } else {
+        // Currently expanded - collapse when we reach sticky position
+        if (distanceFromSticky <= enterThreshold) {
+          setIsInTabsArea(true)
+        }
+      }
     }
 
     // Run once in case we load mid-page
@@ -26,9 +41,8 @@ export function useMarkTabsInView(stickyOffsetPx: number = 0) {
     window.addEventListener("resize", update)
 
     return () => {
-      console.log("useMarkTabsInView cleanup")
       window.removeEventListener("scroll", update)
       window.removeEventListener("resize", update)
     }
-  }, [tabsRef, stickyOffsetPx, setIsInTabsArea])
+  }, [tabsRef, stickyOffsetPx, setIsInTabsArea, isInTabsArea])
 }
