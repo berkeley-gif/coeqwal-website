@@ -13,7 +13,6 @@ export default function SmoothTabs() {
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const theme = useTheme()
-  const MotionTypography = motion(Typography)
 
   const onSelect = (tab: TabKey | undefined) => {
     if (tab && tab !== activeTab) {
@@ -69,13 +68,14 @@ export default function SmoothTabs() {
               style={{
                 flex: 1,
                 position: "relative",
-                padding: "12px 16px",
+                padding: '13px 12px',
                 border: "none",
                 background: panelColor,
                 cursor: "pointer",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 color: theme.palette.blue.darkest,
+
               }}
             >
               {selected && (
@@ -100,31 +100,16 @@ export default function SmoothTabs() {
                   sticky: { gap: 0 },
                 }}
               >
-                {selected && (
-                  <Typography
-                    variant="h5"
-                    style={{
-                      fontWeight: 600,
-                      fontSize: "1.6rem",
-                      textTransform: "capitalize",
-                      scale: "1.2",
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                )}
-                {!selected && (
-                  <Typography
-                    variant="h5"
-                    style={{
-                      fontWeight: 600,
-                      fontSize: "1.6rem",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                )}
+                <Typography
+                  variant="h5"
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "1.6rem",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {label}
+                </Typography>
                 <AnimatePresence initial={false}>
                   {!isInTabsArea && (
                     <motion.div
@@ -145,11 +130,14 @@ export default function SmoothTabs() {
                         }}
                       >
                         {key === "learn" &&
-                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California's Central Valley and how we manage water to support diverse needs."}
+                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California's Central Valley and how we manage water to support diverse needs."
+                        }
                         {key === "explore" &&
-                          "What if we managed water differently? Explore how water allocations change under different water management scenarios."}
+                          "What if we managed water differently? Explore how water allocations change under different water management scenarios."
+                        }
                         {key === "empower" &&
-                          "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future."}
+                          "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future."
+                        }
                       </Typography>
                     </motion.div>
                   )}

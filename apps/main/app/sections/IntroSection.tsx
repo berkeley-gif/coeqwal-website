@@ -3,6 +3,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 import { useCallback } from "react"
+import { motion } from "@repo/motion"
 
 import VideoHero from "../components/VideoHero"
 import type { VideoSource } from "../components/VideoHero"
@@ -27,6 +28,16 @@ const IntroSection = () => {
     },
     [setDrawerContent, openDrawer],
   )
+
+  const slideIn = {
+    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut" } },
+  }
+
+  const slideInRight = {
+    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut", delay: 0.12 } },
+  }
 
   return (
     <Box>
@@ -75,29 +86,44 @@ const IntroSection = () => {
                 gap: "20px",
               }}
             >
-              <Typography
-                fontWeight={700}
-                variant="body1"
-                style={{ fontSize: "1.5rem", maxWidth: "80%" }}
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: false, amount: 0.3 }}
+                variants={slideIn}
               >
-                {t("frontmatterPanel.boldText")}
-              </Typography>
-              <Typography variant="body1">
-                <GlossaryLinkedText
-                  text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
-                  terms={[
-                    { name: "CalSim", glossaryTerm: "CalSim" },
-                    {
-                      name: "water management strategies",
-                      glossaryTerm: "Water management strategies",
-                    },
-                    { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
-                  ]}
-                  onActivate={handleGlossaryOpen}
-                  color={theme.palette.text.primary}
-                  underlineColor={theme.palette.text.primary}
-                />
-              </Typography>
+                <Typography
+                  fontWeight={700}
+                  variant="body1"
+                  style={{ fontSize: "1.5rem", maxWidth: "80%" }}
+                >
+                  {t("frontmatterPanel.boldText")}
+                </Typography>
+              </motion.div>
+
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: false, amount: 0.3 }}
+                variants={slideInRight}
+              >
+                <Typography variant="body1">
+                  <GlossaryLinkedText
+                    text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
+                    terms={[
+                      { name: "CalSim", glossaryTerm: "CalSim" },
+                      {
+                        name: "water management strategies",
+                        glossaryTerm: "Water management strategies",
+                      },
+                      { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
+                    ]}
+                    onActivate={handleGlossaryOpen}
+                    color={theme.palette.text.primary}
+                    underlineColor={theme.palette.text.primary}
+                  />
+                </Typography>
+              </motion.div>
             </Box>
           </Box>
         }
