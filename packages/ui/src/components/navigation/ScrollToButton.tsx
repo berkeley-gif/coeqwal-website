@@ -3,6 +3,7 @@ import { useTheme, Theme } from "../../mui-components"
 import { ScrollIndicator } from "@repo/motion/components"
 import { CircularArrowButton } from "../common/CircularArrowButton"
 
+type MotionAxis = "vertical" | "horizontal"
 interface ScrollToButtonProps {
   scrollToId?: string
   onClick?: () => void
@@ -10,6 +11,10 @@ interface ScrollToButtonProps {
   delay?: number
   animationComplete?: boolean
   style?: React.CSSProperties
+  size?: number
+  //i.e rotation = "0deg",
+  rotation?: string
+  axis?: MotionAxis
 }
 
 export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
@@ -19,6 +24,9 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   delay = 1.0,
   animationComplete = true,
   style,
+  size,
+  rotation,
+  axis,
 }) => {
   const theme = useTheme()
   const buttonColor =
@@ -26,35 +34,29 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       ? color(theme)
       : color || theme.palette.blue.darkest
 
-  // if scroll goes to an id in the page
-  if (scrollToId) {
-    return (
-      <ScrollIndicator
-        scrollToId={scrollToId}
-        color={buttonColor}
-        animationComplete={animationComplete}
-        delay={delay}
-        style={style}
-      >
-        <CircularArrowButton color={buttonColor} />
-      </ScrollIndicator>
-    )
-  }
+  const hasScrollTarget = !!scrollToId
+  const hasOnClick = typeof onClick === "function"
+  const isInteractive = hasScrollTarget || hasOnClick
 
-  // if scroll runs a function provided
-  if (onClick) {
-    return (
-      <ScrollIndicator
-        onClick={onClick}
-        color={buttonColor}
-        animationComplete={animationComplete}
-        delay={delay}
-        style={style}
-      >
-        <CircularArrowButton color={buttonColor} />
-      </ScrollIndicator>
-    )
-  }
+  return (
+    <ScrollIndicator
+      // only pass these when they exist
+      scrollToId={hasScrollTarget ? scrollToId : undefined}
+      onClick={hasOnClick ? onClick : undefined}
+      color={buttonColor}
+      animationComplete={animationComplete}
+      delay={delay}
+      motionAxis={axis}
+      style={{
+        ...style,
+        // if no action, keep animation but disable interaction
+        ...(isInteractive ? null : { pointerEvents: "none" }),
+      }}
+      {...(!isInteractive ? { "aria-hidden": true } : null)}
+    >
+      <CircularArrowButton size={size} color={buttonColor} rotation={rotation} />
+    </ScrollIndicator>
+  )
 
   return null
 }
