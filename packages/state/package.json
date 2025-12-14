@@ -4,10 +4,6 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts"
-    },
     "./map": {
       "import": "./src/map/index.ts",
       "types": "./src/map/index.ts"
@@ -21,8 +17,12 @@
       "types": "./src/drawer/index.ts"
     },
     "./workflow": {
-      "import": "./src/workflow/index.ts",
-      "types": "./src/workflow/index.ts"
+      "import": "./src/exploreUserWorkflow/index.ts",
+      "types": "./src/exploreUserWorkflow/index.ts"
+    },
+    "./scenarioExplorer": {
+      "import": "./src/scenarioExplorer/index.ts",
+      "types": "./src/scenarioExplorer/index.ts"
     }
   },
   "scripts": {

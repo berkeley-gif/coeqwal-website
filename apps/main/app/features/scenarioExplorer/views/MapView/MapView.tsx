@@ -1,36 +1,34 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
-import {
-  Map,
-  NavigationControl,
-  GeolocateControl,
-  MapProvider,
-} from "@repo/map"
 import ListView from "../ListView/ListView"
-import TierMarkers from "../../components/TierMarkers"
-import { useTierMapData } from "../../hooks/useTierMapData"
+import { learnMapActions } from "../../../../features/map/store"
 
 /**
  * MapView
+ *
+ * Uses the persistent map from page level (no duplicate WebGL context).
  * Left side: Scenario selection panel
- * Right side: Map with location-based tier data
- * Shows which scenarios perform best at specific locations
+ * Right side: Persistent map shows through (positioned at z-index 0)
+ *
+ * The persistent map renders TierMarkers based on the store's
+ * exploreTierSelection state, which this component updates.
  */
-function MapViewContent() {
+export default function MapView() {
   const theme = useTheme()
-  const [selectedTier, setSelectedTier] = useState<{
-    strategy: string
-    outcome: string
-  } | null>(null)
 
-  const { tierData } = useTierMapData({
-    selectedTier,
-  })
+  // Activate explore map mode when this view is active
+  useEffect(() => {
+    learnMapActions.setMapMode("explore")
+    return () => {
+      learnMapActions.setMapMode("hidden")
+      learnMapActions.setExploreTierSelection(null)
+    }
+  }, [])
 
   const handleTierClick = (strategy: string, outcome: string) => {
-    setSelectedTier({ strategy, outcome })
+    learnMapActions.setExploreTierSelection({ strategy, outcome })
   }
 
   return (
@@ -39,7 +37,7 @@ function MapViewContent() {
         display: "flex",
         // Account for header (40px) + tabs (~48px) + banner (~60px) + search (~56px) + padding
         height: "calc(100vh - 220px)",
-        backgroundColor: theme.palette.grey[100],
+        backgroundColor: "transparent", // Let map show through
       }}
     >
       {/* Left Panel: Scenarios (scrollable via ListView) */}
@@ -51,56 +49,24 @@ function MapViewContent() {
           borderRight: theme.border.standard,
           borderColor: theme.palette.grey[300],
           backgroundColor: theme.palette.common.white,
+          // Ensure this panel sits above the map
+          position: "relative",
+          zIndex: theme.zIndex.panels,
         }}
       >
         <ListView compact onTierClick={handleTierClick} />
       </Box>
 
-      {/* Right Panel: Map (fixed) */}
+      {/* Right Panel: The persistent map shows through here */}
       <Box
         sx={{
           width: "50%",
           height: "80vh",
           position: "relative",
-          // Offset map controls up from bottom
-          "& .mapboxgl-ctrl-bottom-left": {
-            bottom: "80px",
-          },
+          // This box is transparent so the persistent map shows through
+          backgroundColor: "transparent",
         }}
       >
-        <Map
-          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
-          mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
-          initialViewState={{
-            longitude: -120.5,
-            latitude: 37.5,
-            zoom: 5.8,
-          }}
-          minZoom={4}
-          maxZoom={18}
-          maxBounds={[
-            [-126, 30], // Southwest
-            [-112, 44], // Northeast
-          ]}
-          scrollZoom={false}
-          touchZoom={true}
-          doubleClickZoom={true}
-          dragPan={true}
-          dragRotate={false}
-          touchRotate={false}
-          keyboard={true}
-          style={{ width: "100%", height: "100%" }}
-          projection={{ name: "mercator" }}
-        >
-          <NavigationControl position="bottom-left" />
-          <GeolocateControl position="bottom-left" />
-
-          {/* Tier location markers */}
-          {tierData && tierData.features && tierData.features.length > 0 && (
-            <TierMarkers data={tierData} />
-          )}
-        </Map>
-
         {/* Info overlay */}
         <Box
           sx={{
@@ -112,6 +78,7 @@ function MapViewContent() {
             padding: theme.spacing(2),
             boxShadow: theme.boxShadows.subtle,
             maxWidth: theme.spacing(40),
+            zIndex: theme.zIndex.mapControls,
           }}
         >
           <Box
@@ -128,14 +95,5 @@ function MapViewContent() {
         </Box>
       </Box>
     </Box>
-  )
-}
-
-// Exported wrapper that provides its own MapProvider context
-export default function MapView() {
-  return (
-    <MapProvider>
-      <MapViewContent />
-    </MapProvider>
   )
 }
