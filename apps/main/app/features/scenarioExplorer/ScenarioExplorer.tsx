@@ -33,14 +33,11 @@ export default function ScenarioExplorerNew() {
   // Map mode in explorer needs transparent background so persistent map shows through
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
-  // Height of the app header + main tab bar (Learn/Explore/Empower)
-  const headerPlusTabsHeight = 55
-
   return (
     <Box
       sx={{
-        // Fill the available viewport height below header + tabs
-        height: `calc(100vh - ${headerPlusTabsHeight}px)`,
+        // Fill the parent container (TabPanel sets height for explore tab)
+        height: "100%",
         backgroundColor: needsTransparentBg
           ? "transparent"
           : theme.palette.explore.background,

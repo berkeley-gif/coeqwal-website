@@ -19,8 +19,16 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     // Learn and Explore tabs need transparent backgrounds and no padding
     // so the persistent map shows through / content sits flush with tabs.
     const isMapTab = tabKey === "learn" || tabKey === "explore"
+    const isExploreTab = tabKey === "explore"
     const backgroundColor = isMapTab ? "transparent" : undefined
     const padding = isMapTab ? "0" : "2rem 0"
+
+    // Explore tab gets a fixed viewport height so it doesn't cause page scroll
+    // The 55px is the header height when shrunk (scrolled to tabs area).
+    // TODO: Finalize this value and put in theme as a variable.
+    const exploreStyles: React.CSSProperties = isExploreTab
+      ? { height: "calc(100vh - 55px)", overflow: "hidden" }
+      : {}
 
     return (
       <div
@@ -28,7 +36,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding, backgroundColor }}
+        style={{ padding, backgroundColor, ...exploreStyles }}
       >
         {children}
         <AutoAdvanceFooter />
