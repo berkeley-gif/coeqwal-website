@@ -656,6 +656,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
+      letterSpacing: "0.02em",
       lineHeight: 1.35, // Good balance for minor headlines
     },
     h6: {
