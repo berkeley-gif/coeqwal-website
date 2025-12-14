@@ -11,7 +11,6 @@ export interface AppHeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
 
   // Action handlers
-  onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
@@ -31,7 +30,6 @@ export function AppHeader({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [],
-  onLogoClick,
   onDataClick,
   onToolsClick,
   onAboutClick,
@@ -47,7 +45,6 @@ export function AppHeader({
       onSectionClick={onSectionClick}
       showSecondaryNav={showSecondaryNav}
       secondaryNavItems={secondaryNavItems}
-      onLogoClick={onLogoClick}
       onDataClick={onDataClick}
       onToolsClick={onToolsClick}
       onAboutClick={onAboutClick}
