@@ -1,14 +1,11 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "skipLibCheck": true,
-    "emitDeclarationOnly": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
     "module": "ESNext",
-    "jsx": "react-jsx",
-    "esModuleInterop": true
+    "moduleResolution": "Bundler",
+    "outDir": "dist",
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "hooks/**/*", "context/**/*"],
   "exclude": ["node_modules", "dist"]
