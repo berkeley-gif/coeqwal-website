@@ -2,36 +2,36 @@
 
 /**
  * ClickTooltip component
- * 
+ *
  * @description
- * A click-to-open tooltip with X button and optional click outside (default: true ) to close. 
+ * A click-to-open tooltip with X button and optional click outside (default: true ) to close.
  * Supports two variants for different content complexity.
- * 
+ *
  * @since 12 Dec 2025
- * 
+ *
  * ## When to use ClickTooltip vs HybridTooltip
- * 
+ *
  * Use **ClickTooltip** when you need consistent click-to-open behavior on ALL
  * devices (both desktop and touch). The tooltip always shows X button and
  * supports click-outside to close. Best for: tier/outcome tooltips, complex
  * interactive content that benefits from explicit open/close control.
- * 
+ *
  * Use **HybridTooltip** when you want device-adaptive behavior: hover on desktop
  * for quick access, click on touch devices. Best for: simple hints, definitions,
  * icon descriptions where hover feels natural on desktop.
- * 
+ *
  * @see HybridTooltip - For device-adaptive hover/click behavior
- * 
+ *
  * ## Variants
- * 
+ *
  * ### variant="tooltip" (default)
  * Uses MUI Tooltip with arrow, auto-positioning relative to anchor.
  * Best for: Simple to medium content that should feel like a tooltip.
- * 
+ *
  * ### variant="overlay"
  * Uses a custom positioned overlay box, no arrow, centered on screen.
  * Best for: Complex content (charts, interactive elements), full control.
- * 
+ *
  * ## Features
  * - Click to open (not hover)
  * - X button to close
@@ -39,9 +39,9 @@
  * - Close on scroll (opt-in via closeOnScroll={true}) - useful for tier/outcome tooltips
  * - Uses theme.zIndex.tooltip for proper layering
  * - Standard dimensions with custom override
- * 
+ *
  * ## Usage
- * 
+ *
  * ```tsx
  * // Simple tooltip variant
  * <ClickTooltip
@@ -51,7 +51,7 @@
  * >
  *   <Button onClick={() => setOpen(true)}>Open</Button>
  * </ClickTooltip>
- * 
+ *
  * // Complex overlay variant
  * <ClickTooltip
  *   variant="overlay"
@@ -205,7 +205,7 @@ function TooltipVariant({
 
   if (clickOutsideToClose) {
     return (
-      <ClickAwayListener 
+      <ClickAwayListener
         onClickAway={onClose}
         mouseEvent="onMouseUp"
         touchEvent="onTouchEnd"
@@ -266,11 +266,7 @@ function OverlayVariant({
   )
 
   if (clickOutsideToClose && open) {
-    return (
-      <ClickAwayListener onClickAway={onClose}>
-        {result}
-      </ClickAwayListener>
-    )
+    return <ClickAwayListener onClickAway={onClose}>{result}</ClickAwayListener>
   }
 
   return result
@@ -302,7 +298,7 @@ export function ClickTooltip({
 
     // Use capture phase to catch scroll events on any element
     window.addEventListener("scroll", handleScroll, true)
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll, true)
     }
@@ -341,4 +337,3 @@ export function ClickTooltip({
 }
 
 export default ClickTooltip
-

@@ -2,7 +2,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import TierTooltipContent, {
   getOutcomeDisplayLabel,
-} from "./TierTooltipContent"
+} from "../../tooltips/TierTooltipContent"
 
 interface TierLegendProps {
   outcome: string

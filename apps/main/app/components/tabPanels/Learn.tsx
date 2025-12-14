@@ -28,10 +28,10 @@ import {
 } from "@repo/ui/mui"
 
 import { LeadingMarkerText } from "@repo/ui"
-import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
-import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
+import CaliforniaMapPanel from "../../features/map/CaliforniaMapPanel"
+import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { useLearnMapStore, learnMapActions } from "../map/store"
+import { useLearnMapStore, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
   const setMapReady = useLearnMapStore((s) => s.setMapReady)

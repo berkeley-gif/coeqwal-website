@@ -22,7 +22,7 @@ import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
   fetchScenariosForDownload,
-} from "../utils/fileDownloadApi"
+} from "../lib/api/fileDownloadApi"
 
 export default function DataPage() {
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
