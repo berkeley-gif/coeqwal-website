@@ -1,13 +1,12 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "outDir": "dist",
-    "skipLibCheck": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
-    "module": "ESNext"
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "../motion/src/components/HeaderStory.tsx"],
-  "exclude": ["node_modules", "dist", "**/_archive/**"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
