@@ -24,10 +24,10 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const padding = isMapTab ? "0" : "2rem 0"
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll
-    // The 55px is the header height when shrunk (scrolled to tabs area).
-    // TODO: Finalize this value and put in theme as a variable.
+    // 100px = header (40px) + SmoothTabs when collapsed (60px)
+    // TODO: Import HEADER_SHRUNK_H and define a tabs height constant in theme.
     const exploreStyles: React.CSSProperties = isExploreTab
-      ? { height: "calc(100vh - 55px)", overflow: "hidden" }
+      ? { height: "calc(100vh - 100px)", overflow: "hidden" }
       : {}
 
     return (
