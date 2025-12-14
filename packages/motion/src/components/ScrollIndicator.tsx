@@ -1,5 +1,8 @@
 import React, { useEffect } from "react"
 import { motion, useAnimation } from "../index"
+import type { TargetAndTransition } from "framer-motion"
+
+type MotionAxis = "vertical" | "horizontal"
 
 interface ScrollIndicatorProps {
   /** Whether to start the animation immediately */
@@ -26,11 +29,13 @@ interface ScrollIndicatorProps {
   style?: React.CSSProperties
   /** CSS class name */
   className?: string
+  /** The direction of bounce */
+  motionAxis?: MotionAxis
 }
 
 /**
  * An animated scroll indicator that bounces and pulses to draw attention.
- * Used to indicate that users should scroll down to see more content.
+ * Used to indicate that users should click or scroll to see more content.
  */
 export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   animationComplete = true,
@@ -45,8 +50,11 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   children,
   style = {},
   className,
+  motionAxis = "vertical"
 }) => {
   const controls = useAnimation()
+
+  const axisKey: "x" | "y" = motionAxis === "horizontal" ? "x" : "y"
 
   // Handle scroll to target element
   const handleScrollClick = () => {
@@ -75,6 +83,8 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
     let animationRunning = true
     let timeoutId: NodeJS.Timeout | null = null
 
+    const bounce = [0, 10, 0, 10, 0, 10, 0]
+
     const animateIndicator = async () => {
       if (!animationRunning) return
 
@@ -84,12 +94,13 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
           if (!animationRunning) return
 
           try {
-            // Start the animation sequence
-            await controls.start({
+            const showAnim: TargetAndTransition = {
               opacity: 1,
-              y: 0,
               transition: { duration: showDuration },
-            })
+            }
+            showAnim[axisKey] = 0
+            // Start the animation sequence
+            await controls.start(showAnim)
 
             // Begin the pulsing/bouncing animation with pauses
             const animateWithPauses = async () => {
@@ -97,21 +108,19 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
                 if (!animationRunning) break
 
                 try {
-                  // Animate 3 bounces
-                  await controls.start({
-                    y: [0, 10, 0, 10, 0, 10, 0],
+                  const bounceAnim: TargetAndTransition = {
                     transition: {
-                      duration: 6, // seconds per pulse × 3 pulses
+                      duration: 6,
                       ease: "easeInOut",
                     },
-                  })
-
-                  // Wait/pause for 3 cycle durations (4.5 seconds)
-                  if (animationRunning) {
-                    await new Promise((resolve) => {
-                      timeoutId = setTimeout(resolve, 4500)
-                    })
                   }
+                  bounceAnim[axisKey] = bounce
+                  bounceAnim.scale =
+                    pulseIntensity !== 1
+                      ? [1, pulseIntensity, 1]
+                      : 1
+
+                  await controls.start(bounceAnim)
                 } catch {
                   // Animation interrupted, exit gracefully
                   break
@@ -129,11 +138,12 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
       } else {
         // Hide the indicator if animation isn't complete
         try {
-          controls.start({
+          const hideAnim: TargetAndTransition = {
             opacity: 0,
-            y: 20,
             transition: { duration: hideDuration },
-          })
+          }
+          hideAnim[axisKey] = 20
+          controls.start(hideAnim)
         } catch {
           // Animation interrupted, exit gracefully
         }
@@ -156,11 +166,18 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
     pulseIntensity,
     showDuration,
     hideDuration,
+    motionAxis,
+    pulseIntensity,
+    axisKey
   ])
+
+  /** Initial state (typed safely) */
+  const initial: TargetAndTransition = { opacity: 0 }
+  initial[axisKey] = 20
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={initial}
       animate={controls}
       onClick={handleScrollClick}
       className={className}

@@ -1,7 +1,6 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
-
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 export interface LeadingMarkerTextProps {
   title: string
   children: React.ReactNode
@@ -9,6 +8,8 @@ export interface LeadingMarkerTextProps {
   bodySpansFull?: boolean
   /** Typography variant for the headline (defaults to h2) */
   headlineVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
+  /** The color of the circle */
+  circleColor?: string
 }
 
 export function LeadingMarkerText({
@@ -16,6 +17,7 @@ export function LeadingMarkerText({
   children,
   bodySpansFull = false,
   headlineVariant = "h2",
+  circleColor,
 }: LeadingMarkerTextProps) {
   return (
     <Box
@@ -63,7 +65,7 @@ export function LeadingMarkerText({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: (theme) => theme.palette.nature.earth,
+            backgroundColor: circleColor,
             gridColumn: 1,
             gridRow: 1,
             position: "relative",
