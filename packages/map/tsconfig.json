@@ -5,13 +5,12 @@
     "paths": {
       "@repo/map/client": ["./client"]
     },
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "outDir": "dist",
-    "skipLibCheck": true,
     "emitDeclarationOnly": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "bundler",
-    "module": "ESNext"
+    "allowImportingTsExtensions": true
   },
-  "include": ["src/**/*", "hooks/**/*", "src/context/**/*"],
+  "include": ["src/**/*", "hooks/**/*"],
   "exclude": ["node_modules", "dist"]
 }
