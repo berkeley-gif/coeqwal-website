@@ -1,5 +1,5 @@
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 // Scenario ID to display name mapping
 const getScenarioDisplayName = (scenarioId: string): string => {

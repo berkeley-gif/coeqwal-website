@@ -3,94 +3,112 @@
 /**
  * LearnPanel
  *
- * The Learn tab content with an integrated sticky map.
+ * The Learn tab content that uses the persistent map from page level.
  *
  * Architecture:
- * - ScrollytellingContainer: Contains the sticky map + overlay content
- * - StickyMap: The map sticks to the viewport while scrolling through overlays
- * - OverlayPanels: Scroll over the sticky map, triggering section changes
- * - LearnMore: Comes after the container, no z-index battles
+ * - Calls setMapMode('learn') on mount to configure the persistent map
+ * - The actual map lives in PersistentMap at the page level
+ * - Overlay content scrolls over the persistent map
+ * - Map "releases" from fixed position when scrollytelling ends
+ * - Footer comes after the map section naturally
  *
- * The sticky approach means:
- * - Map scrolls away naturally when container ends
- * - Learn More section appears without layout hacks
- * - Clean document flow
+ * The persistent map approach means:
+ * - No map remounting when switching tabs
+ * - WebGL context stays alive (performance)
+ * - Map is preloaded during IntroSection scroll
  */
 
-import { Suspense, useCallback, useRef, useEffect } from "react"
-import { Box } from "@repo/ui/mui"
+import { Suspense, useEffect, useRef, useCallback } from "react"
+import { Box, useTheme } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
-import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
-import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
+import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { useLearnMapStore, learnMapActions } from "../map/store"
+import { useMapReady, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
-  const setMapReady = useLearnMapStore((s) => s.setMapReady)
-  const mapReady = useLearnMapStore((s) => s.mapReady)
-  const mapReadyCalledRef = useRef(false)
+  const mapReady = useMapReady()
+  const theme = useTheme()
+  const scrollytellingRef = useRef<HTMLDivElement>(null)
 
-  // Reset state when component mounts (handles tab switching)
+  // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
-    // Reset to initial state on mount
-    learnMapActions.resetForRemount()
-    mapReadyCalledRef.current = false
+    // Reset Learn-specific state and activate Learn mode
+    learnMapActions.resetLearnState()
+    learnMapActions.setMapMode("learn")
 
     return () => {
-      // Also reset on unmount to ensure clean state for next mount
-      mapReadyCalledRef.current = false
+      // Hide the map when leaving Learn tab
+      learnMapActions.setMapMode("hidden")
+      learnMapActions.setLearnMapScrollOffset(0)
     }
   }, [])
 
-  // Handle map ready state
-  const handleMapReady = useCallback(() => {
-    if (mapReadyCalledRef.current) return
-    mapReadyCalledRef.current = true
-    setMapReady(true)
-  }, [setMapReady])
+  // Track scroll to "release" the map when scrollytelling ends
+  const handleScroll = useCallback(() => {
+    const container = scrollytellingRef.current
+    if (!container) return
+
+    const rect = container.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+
+    // When bottom of scrollytelling container is above the viewport bottom,
+    // start scrolling the map up with the content
+    const containerBottom = rect.bottom
+    const releasePoint = windowHeight // When container bottom reaches viewport bottom
+
+    if (containerBottom < releasePoint) {
+      // Calculate how much the map should scroll up
+      const offset = releasePoint - containerBottom
+      learnMapActions.setLearnMapScrollOffset(offset)
+    } else {
+      // Map stays fixed
+      learnMapActions.setLearnMapScrollOffset(0)
+    }
+  }, [])
+
+  // Set up scroll listener
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    // Initial check
+    handleScroll()
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [handleScroll])
 
   return (
     <div
       style={{
         position: "relative",
-        backgroundColor: "#68C3CE", // Teal background covers any gaps
       }}
     >
       {/* 
         Scrollytelling Container
-        This container holds the sticky map and scrolling overlays.
-        Its height determines when the map stops being sticky.
+        The persistent map is positioned fixed at page level.
+        When this container's bottom scrolls above the viewport,
+        the map "releases" and scrolls up with the content.
       */}
       <Box
+        ref={scrollytellingRef}
         sx={{
           position: "relative",
-          // Container needs explicit height - the overlays define this via their content
+          minHeight: "100vh",
+          // Transparent background - map shows through
+          backgroundColor: "transparent",
         }}
       >
-        {/* Sticky Map - sticks to viewport while scrolling through container */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            zIndex: 0,
-          }}
-        >
-          <CaliforniaMapPanel id="california-map" onMapReady={handleMapReady} />
-        </Box>
+        {/* Spacer for the initial map view - transparent */}
+        <Box sx={{ height: "100vh", backgroundColor: "transparent" }} />
 
-        {/* Overlay content - scrolls over the sticky map */}
-        {/* Uses negative margin to overlap the sticky map area */}
+        {/* Overlay content - scrolls over the fixed persistent map */}
         <Box
           sx={{
             position: "relative",
-            marginTop: "-100vh", // Pull up to overlap the sticky map
+            marginTop: "-100vh", // Pull up to overlap the map area
             zIndex: 1,
             pointerEvents: "none", // Let map interactions through
-            // Note: child components handle their own pointerEvents
-            // MapOverlayPanels sets pointerEvents: "none" with "auto" on interactive elements
+            backgroundColor: "transparent",
           }}
         >
           {mapReady ? (
@@ -132,13 +150,20 @@ export default function LearnPanel() {
         </Box>
       </Box>
 
-      {/* Learn More section - comes after the scrollytelling container naturally */}
+      {/* 
+        Learn More section - positioned after the map container.
+        The solid background covers the fixed map behind it.
+        z-index ensures it's above the basement-level map.
+      */}
       <Box
         sx={{
-          backgroundColor: "#68C3CE", // Learn tab teal color
+          backgroundColor: theme.palette.learn.background,
           padding: "60px 20px",
           paddingBottom: "150px",
           marginBottom: "-100px",
+          // Stack above the fixed map (which is at z-index basement)
+          position: "relative",
+          zIndex: theme.zIndex.panels,
         }}
       >
         <Box
