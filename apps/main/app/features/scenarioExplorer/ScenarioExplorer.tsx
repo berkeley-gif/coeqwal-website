@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
+import AboutScenariosView from "./views/AboutScenariosView"
 import UnifiedExploreView, {
   type ExploreMode,
 } from "./views/UnifiedExploreView"
@@ -9,12 +10,13 @@ import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 
-type MainView = "explorer" | "data"
+type MainView = "about" | "explorer" | "data"
 
 /**
  * ScenarioExplorer
  *
- * Two main views:
+ * Three main views:
+ * - About: Introduction explaining COEQWAL scenarios, the tier system, and outcomes
  * - Explorer: Unified view with list/map/comparison modes (with smooth transitions)
  * - Data: Detailed data comparison and exports
  *
@@ -23,7 +25,7 @@ type MainView = "explorer" | "data"
  */
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
-  const [mainView, setMainView] = useState<MainView>("explorer")
+  const [mainView, setMainView] = useState<MainView>("about")
   const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
@@ -110,13 +112,14 @@ export default function ScenarioExplorerNew() {
               },
             }}
           >
+            <Tab label="About COEQWAL scenarios" value="about" />
             <Tab label="Explore scenarios" value="explorer" />
             <Tab label="Data explorer" value="data" />
           </Tabs>
           </Box>
 
-          {/* Selection Banner */}
-          <SelectionBanner />
+          {/* Selection Banner - only show when exploring data */}
+          {(mainView === "explorer" || mainView === "data") && <SelectionBanner />}
 
           {/* Search bar for explorer view */}
           {mainView === "explorer" && (
@@ -131,6 +134,7 @@ export default function ScenarioExplorerNew() {
             overflow: "hidden",
           }}
         >
+          {mainView === "about" && <AboutScenariosView />}
           {mainView === "explorer" && (
             <UnifiedExploreView
               mode={exploreMode}
