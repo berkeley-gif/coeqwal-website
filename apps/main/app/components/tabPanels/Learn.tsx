@@ -19,7 +19,14 @@
  */
 
 import { Suspense, useEffect, useRef, useCallback } from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  MuiCard as Card,
+  MuiCardContent as CardContent,
+  MuiCardActionArea as CardActionArea,
+} from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
@@ -29,6 +36,7 @@ export default function LearnPanel() {
   const mapReady = useMapReady()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
+  const cardColor = theme.palette.blue.white
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -158,8 +166,8 @@ export default function LearnPanel() {
       <Box
         sx={{
           backgroundColor: theme.palette.learn.background,
-          padding: "60px 20px",
-          paddingBottom: "150px",
+          padding: "60px",
+          paddingBottom: "200px",
           marginBottom: "-100px",
           // Stack above the fixed map (which is at z-index basement)
           position: "relative",
@@ -179,55 +187,6 @@ export default function LearnPanel() {
             margin: "0 auto",
           }}
         >
-          {/* Text column */}
-          <Box id="textColumn" sx={{ width: "40%" }}>
-            <LeadingMarkerText title="Learn More">
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "15px",
-                }}
-              ></div>
-
-              <Box
-                component="a"
-                href="https://flow.coeqwal.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  textDecoration: "none",
-                  display: "block",
-                  fontWeight: 500,
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                  marginTop: "40px",
-                }}
-              >
-                How water moves through California →
-              </Box>
-              <Box
-                component="a"
-                href="https://climate.coeqwal.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  textDecoration: "none",
-                  display: "block",
-                  mb: (theme) => theme.layout.spacing.xs,
-                  fontWeight: 500,
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                Climate change and California water →
-              </Box>
-            </LeadingMarkerText>
-          </Box>
           {/* Image column */}
           <Box
             sx={{
@@ -244,6 +203,64 @@ export default function LearnPanel() {
               sx={{ width: "100%", maxWidth: 520, height: "auto" }}
             />
           </Box>
+          {/* Text column */}
+          <Box id="textColumn" sx={{ width: "44%" }}>
+            <LeadingMarkerText title="Learn More" circleColor="#66b479">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                  marginTop: "20px",
+                }}
+              >
+                <Card
+                  sx={{
+                    backgroundColor: cardColor
+                  }}
+                  component="a"
+                  href="https://flow.coeqwal.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CardActionArea
+                    sx={{
+                      padding: "17px",
+                    }}
+                  >
+                    <CardContent sx={{ height: '100%' }}>
+                      <Typography variant="body1">
+                        How water moves through California →
+                      </Typography>
+
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+                <Card
+                  component="a"
+                  href="https://climate.coeqwal.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    backgroundColor: cardColor
+                  }}
+                >
+                  <CardActionArea
+                    sx={{
+                      padding: "17px",
+                    }}
+                  >
+                    <CardContent sx={{ height: '100%' }}>
+                      <Typography variant="body1">
+                        Climate change and California water →
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </div>
+            </LeadingMarkerText>
+          </Box>
+
         </Box>
       </Box>
     </div>
