@@ -341,7 +341,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const words = axis.split(/\s+/)
         const lineHeight = 14 // pixels
         // Use 2 words per line for longer labels, 1 for others
-        const longerLabels = ["Freshwater for Delta exports", "Freshwater for in-Delta uses", "Delta estuary ecology"]
+        const longerLabels = [
+          "Freshwater for Delta exports",
+          "Freshwater for in-Delta uses",
+          "Delta estuary ecology",
+        ]
         const maxWordsPerLine = longerLabels.includes(axis) ? 2 : 1
 
         // Group words into lines

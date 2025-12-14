@@ -4,7 +4,7 @@ import {
   fetchTierLocationData,
   type TierLocationResponse,
   type TierFeature,
-} from "../../../api/tierLocationApi"
+} from "../../../lib/api/tierLocationApi"
 
 interface UseTierMapDataProps {
   selectedTier: { strategy: string; outcome: string } | null

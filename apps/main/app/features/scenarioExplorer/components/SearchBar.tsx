@@ -3,7 +3,7 @@
 import React from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 interface SearchBarProps {
   placeholder?: string

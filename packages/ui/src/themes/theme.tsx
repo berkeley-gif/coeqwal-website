@@ -13,16 +13,15 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 5. TypeScript      - Module augmentation for custom theme properties
  */
 
-
 /* ===============================================================================
-* FONT CONFIGURATION SYSTEM
-* ===============================================================================
-* 
-* To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
-* Each preset defines: text (body), display (headlines), and cssImport (font loading)
-*
-* Available presets: "neueHaas" | "roboto" | "inter" | "system"
-*/
+ * FONT CONFIGURATION SYSTEM
+ * ===============================================================================
+ *
+ * To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
+ * Each preset defines: text (body), display (headlines), and cssImport (font loading)
+ *
+ * Available presets: "neueHaas" | "roboto" | "inter" | "system"
+ */
 
 type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
 
@@ -31,28 +30,33 @@ const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FO
 const FONT_PRESETS = {
   neueHaas: {
     text: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
     text: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    display: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+    display:
+      '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
   },
   inter: {
     text: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+    display:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
   system: {
     text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '', // No import needed for system fonts
+    display:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: "", // No import needed for system fonts
   },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
-
 
 /* ========================================================
  * 1. themeValues - Design tokens
@@ -117,7 +121,7 @@ export const themeValues = {
       water: "#64A4D6", // Bottom of gradient - water blue
     },
 
-    // Text and UI blues 
+    // Text and UI blues
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
       dark: "#186b88", // Dark teal
@@ -1449,7 +1453,12 @@ declare module "@mui/material/styles" {
       typography: {
         title: { fontSize: string; fontWeight: number; marginBottom: string }
         subtitle: { fontSize: string; opacity: number; marginBottom: string }
-        action: { fontSize: string; fontWeight: string; cursor: string; textDecoration: string }
+        action: {
+          fontSize: string
+          fontWeight: string
+          cursor: string
+          textDecoration: string
+        }
       }
     }
     cards: typeof themeValues.cards
@@ -1511,4 +1520,3 @@ declare module "@mui/material/Typography" {
     nav: true
   }
 }
-

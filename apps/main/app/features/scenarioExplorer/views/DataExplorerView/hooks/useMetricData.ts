@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { useScenarioTiers } from "../../../../../hooks/useTierData"
 import type { OutcomeMetric } from "../outcomeDefinitions"
-import { getDisplayNameFromMetricId } from "../../../../../constants/outcomeMappings"
+import { getDisplayNameFromMetricId } from "../../../../../lib/constants/outcomeMappings"
 
 /**
  * Hook to fetch metric data for multiple scenarios

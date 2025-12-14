@@ -1,7 +1,7 @@
 import { OneColumnPanel, ScrollToButton, GlossaryLinkedText } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { useDrawerStore } from "@repo/state"
+import { useDrawerStore } from "@repo/state/drawer"
 import { useCallback } from "react"
 import { motion } from "@repo/motion"
 

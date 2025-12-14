@@ -2,52 +2,52 @@
 
 /**
  * HybridTooltip component
- * 
+ *
  * @description
  * A tooltip that adapts its interaction based on device type:
  * - Desktop (pointer: fine): Hover to show, auto-closes on mouse leave
  * - Touch (pointer: coarse): Click to show, X button, click-outside to close
- * 
+ *
  * Uses MUI's useMediaQuery with `pointer: coarse` to detect touch devices.
- * 
+ *
  * @since 12 Dec 2025
- * 
+ *
  * ## When to use HybridTooltip vs ClickTooltip
- * 
+ *
  * Use **HybridTooltip** when you want device-adaptive behavior: hover on desktop
  * for quick, frictionless access; click on touch devices for explicit control.
  * Best for: simple hints, definitions, icon descriptions, key operation icons,
  * toggle explanations—-anywhere hover feels natural on desktop.
- * 
+ *
  * Use **ClickTooltip** when you need consistent click-to-open behavior on ALL
  * devices. The tooltip always shows X button regardless of device type.
  * Best for: tier/outcome tooltips, complex interactive content, or when you
  * want explicit user control over open/close on all platforms.
- * 
+ *
  * @see ClickTooltip - For always-click behavior on all devices
- * 
+ *
  * ## Variants
- * 
+ *
  * ### variant="tooltip" (default)
  * Uses MUI Tooltip with arrow, auto-positioning relative to anchor.
  * Best for: Simple to medium content that should feel like a tooltip.
- * 
+ *
  * ### variant="overlay"
  * Uses a custom positioned overlay box, no arrow, centered on screen.
  * Best for: Complex content (charts, interactive elements), full control.
- * 
+ *
  * ## Device behavior
  * - Desktop (pointer: fine): Hover interaction, no X button
  * - Touch (pointer: coarse): Click interaction, X button, click-outside to close (default)
- * 
+ *
  * ## Usage
- * 
+ *
  * ```tsx
  * // Simple tooltip (hover on desktop, click on touch)
  * <HybridTooltip content={<>Tooltip content</>}>
  *   <Button>Hover/Tap me</Button>
  * </HybridTooltip>
- * 
+ *
  * // Complex overlay (hover on desktop, click on touch)
  * <HybridTooltip variant="overlay" content={<ChartComponent />}>
  *   <Button>Hover/Tap me</Button>
@@ -56,7 +56,13 @@
  */
 
 import React, { useState, useRef } from "react"
-import { Box, Tooltip, ClickAwayListener, useMediaQuery, useTheme } from "../../.."
+import {
+  Box,
+  Tooltip,
+  ClickAwayListener,
+  useMediaQuery,
+  useTheme,
+} from "../../.."
 import { Theme } from "@mui/material/styles"
 import type { TooltipProps } from "@mui/material"
 
@@ -176,7 +182,7 @@ export function HybridTooltip({
   const theme = useTheme()
   const [open, setOpen] = useState(false)
   const anchorRef = useRef<HTMLSpanElement>(null)
-  
+
   // Detect touch device using pointer: coarse media query
   const isTouchDevice = useMediaQuery("(pointer: coarse)")
 
@@ -278,7 +284,7 @@ export function HybridTooltip({
   // ==========================================================================
   // DESKTOP MODE (Hover, no X button)
   // ==========================================================================
-  
+
   // Overlay variant for desktop (hover)
   if (variant === "overlay") {
     return (
@@ -334,4 +340,3 @@ export function HybridTooltip({
 }
 
 export default HybridTooltip
-
