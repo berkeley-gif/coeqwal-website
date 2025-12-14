@@ -425,9 +425,6 @@ importers:
       immer:
         specifier: ^10.1.1
         version: 10.1.1
-      next:
-        specifier: '>=15.0.0'
-        version: 15.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
       react:
         specifier: '>=19'
         version: 19.1.0
