@@ -128,6 +128,7 @@ export const themeValues = {
       medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
       light: "#77a2d9", // Light blue
+      white: "#cef1f5",
     },
 
     text: {
@@ -541,6 +542,7 @@ const theme = createTheme({
       medium: themeValues.palette.blue.medium,
       bright: themeValues.palette.blue.bright,
       light: themeValues.palette.blue.light,
+      white: themeValues.palette.blue.white,
     },
     accent: {
       gold: themeValues.palette.accent.gold,
@@ -654,6 +656,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
+      letterSpacing: "0.02em",
       lineHeight: 1.35, // Good balance for minor headlines
     },
     h6: {
@@ -783,6 +786,33 @@ const theme = createTheme({
       },
       defaultProps: {
         elevation: 0,
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: "3px",
+          textDecoration: "none",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
+        }),
+      },
+    },
+
+    MuiCardActionArea: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // keep MUI's focus ring behavior sane
+          borderRadius: "3px",
+        }),
+      },
+    },
+
+    MuiCardContent: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          // optional: if you want CardContent to inherit link styling cleanly
+          textDecoration: "inherit",
+        }),
       },
     },
     MuiButton: {

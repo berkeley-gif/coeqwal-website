@@ -1,25 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Typography, useTheme, Box } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
+import { motion } from "@repo/motion"
+import { ScrollToButton } from "@repo/ui"
 
-// Format text with medium weight on key words
-const formatHeroText = (text: string) => {
-  const parts = text.split(/(\blearn\b|\bexplore\b|\bempowers?\b)/gi)
-
-  return parts.map((part, index) => {
-    if (part.match(/\b(learn|explore|empowers?)\b/i)) {
-      return (
-        <span key={index} style={{ fontWeight: 600 }}>
-          {part}
-        </span>
-      )
-    }
-    return part
-  })
-}
+import { HEADER_EXPANDED_H } from "../../../../packages/ui/src/components/navigation/BaseHeader"
 
 export type VideoSource = { src: string; type: string }
-
 export interface VideoHeroProps {
   sources: VideoSource[]
   poster?: string
@@ -33,12 +20,7 @@ export interface VideoHeroProps {
 
 export default function VideoHero({
   sources,
-  fallbackImage,
-  className,
-  id,
-  title,
-  paragraphs,
-  children,
+  fallbackImage
 }: VideoHeroProps) {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -71,18 +53,29 @@ export default function VideoHero({
 
   const showStaticImage = failed
 
+  const heroIn = {
+    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut" } },
+  }
+
+  const heroInRight = {
+    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut", delay: 0.12 } },
+  }
+
   return (
     <div
       id="homeHero"
       style={{
         position: "relative",
-        minHeight: "100vh",
+        height: `calc(100vh - ${HEADER_EXPANDED_H}px)`,
         width: "100%",
         overflow: "hidden",
-        paddingTop: "100px",
-        paddingBottom: "100px",
+        paddingTop: "75px",
+        marginTop: HEADER_EXPANDED_H,
       }}
     >
+      {/** Video */}
       <div
         id="homeHeroVid"
         style={{
@@ -131,8 +124,13 @@ export default function VideoHero({
           </video>
         )}
       </div>
-      <div
+      {/** Title / Question */}
+      <motion.div
         id="homeHeroTitle"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={heroIn}
         style={{
           position: "absolute",
           left: 0,
@@ -144,47 +142,29 @@ export default function VideoHero({
           variant="h1"
           component="h1"
           sx={{
-            fontSize: { sm: "2.5rem", md: "3rem", lg: "3.5rem", xl: "5.5rem" }, // Custom for demo with new title
-            padding: { sm: "45px", md: "85px" },
+            fontSize: { sm: "2.2rem", md: "2.8rem", lg: "2.6rem", xl: "3.8rem" }, // Custom for demo with new title
+            padding: { sm: "35px", md: "45px" },
+            lineHeight: "140%",
             textAlign: "left",
             fontWeight: 500,
-            width: { md: 420, lg: 435, xl: 700 },
+            width: "auto",
             color: theme.palette.blue.darkest,
             fontFamily:
               "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
           }}
         >
-          {t("homePanel.title")}
+          {t("homePanel.titleLine1")} <br />
+          {t("homePanel.titleLine2")}
         </Typography>
-      </div>
-      <div id="scrollArrow">
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            height: "80vh",
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              fontSize: "2.5rem",
-              color: "white",
-              animation: "bounce 2s ease-in-out infinite",
-              "@keyframes bounce": {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-8px)" },
-              },
-            }}
-          >
-            ↓
-          </Box>
-        </Box>
-      </div>
-      <div
+      </motion.div>
+
+      {/** Body Text */}
+      <motion.div
         id="homeHeroBody"
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={heroInRight}
         style={{
           position: "absolute",
           right: 0,
@@ -192,14 +172,14 @@ export default function VideoHero({
           minHeight: "auto",
           maxWidth: "40vw",
           background: theme.palette.blue.darkest,
-          padding: 85,
+          padding: "50px",
         }}
       >
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            gap: "25px",
+            flexDirection: "column",
+            gap: "10px",
             color: theme.palette.utility.white,
           }}
         >
@@ -211,8 +191,12 @@ export default function VideoHero({
           >
             {t("homePanel.content")}
           </Typography>
+          <ScrollToButton
+            color={theme.palette.utility.white}
+            size={70}
+          />
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
