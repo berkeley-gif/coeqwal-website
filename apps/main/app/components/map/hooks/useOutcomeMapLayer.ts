@@ -37,7 +37,7 @@ const DEMAND_UNITS_OUTLINE_ID = "demand-units-outline"
 const BASEMAP_DIM_LAYER_ID = "basemap-dim-overlay"
 
 // Dimming overlay opacity (0 = no dim, 1 = full black)
-const BASEMAP_DIM_OPACITY = 0.35
+const BASEMAP_DIM_OPACITY = 0.15
 
 // API base URL
 const API_BASE = "https://api.coeqwal.org/api"
@@ -71,30 +71,6 @@ interface OutcomeLayerConfig {
   /** API short code for tier data */
   tierCode: string
 }
-
-/**
- * Preset bounds for each outcome type
- * These ensure consistent zooming when switching between outcomes
- * Format: [[minLng, minLat], [maxLng, maxLat]]
- */
-const OUTCOME_BOUNDS: Record<string, [[number, number], [number, number]]> = {
-  // CWS covers urban areas throughout Central Valley
-  "Community deliveries": [
-    [-122.5, 35.5],
-    [-119.0, 40.5],
-  ],
-  // AG_REV covers agricultural districts throughout Central Valley
-  "Agricultural revenue": [
-    [-122.5, 35.0],
-    [-118.5, 40.5],
-  ],
-}
-
-// Default bounds for Central Valley if no preset is defined
-const DEFAULT_BOUNDS: [[number, number], [number, number]] = [
-  [-122.5, 35.0],
-  [-118.5, 40.5],
-]
 
 /**
  * Configuration for each outcome type
@@ -510,25 +486,21 @@ export function useOutcomeMapLayer({
           }
         })
 
-        // Zoom to preset bounds for this outcome
         // This is a SEPARATE withMap call to ensure zoom happens even if styling encounters issues
         // and to always trigger when switching outcomes (regardless of previous map state)
         if (!cancelled) {
           mapAPI.withMap((mapRef) => {
             const map = mapRef.getMap()
-            const bounds = outcome
-              ? OUTCOME_BOUNDS[outcome] || DEFAULT_BOUNDS
-              : DEFAULT_BOUNDS
+            const currentCenter = map.getCenter()
+
+            const targetZoom = 6.5
 
             console.log(
-              `[useOutcomeMapLayer] Zooming to bounds for "${outcome}":`,
-              bounds,
+              `[useOutcomeMapLayer] Zooming to level ${targetZoom} for "${outcome}" (keeping current center)`,
             )
-
-            // Always use fitBounds to reset view, even if user has panned/zoomed manually
-            map.fitBounds(bounds, {
-              padding: { top: 300, bottom: 50, left: 100, right: 350 }, // Extra top padding to avoid tab coverage
-              maxZoom: 8,
+            map.easeTo({
+              zoom: targetZoom,
+              center: currentCenter, // Keep current center
               duration: 1000,
             })
           })

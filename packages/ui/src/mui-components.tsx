@@ -62,6 +62,7 @@ export {
   useMediaQuery,
   SvgIcon,
   ClickAwayListener,
+  Portal,
 } from "@mui/material"
 
 export type { BoxProps } from "@mui/material"

@@ -8,7 +8,7 @@ import {
   GeolocateControl,
   MapProvider,
 } from "@repo/map"
-import ScenarioPanel from "./components/ScenarioPanel"
+import ListView from "../ListView/ListView"
 import TierMarkers from "../../components/TierMarkers"
 import { useTierMapData } from "../../hooks/useTierMapData"
 
@@ -37,14 +37,15 @@ function MapViewContent() {
     <Box
       sx={{
         display: "flex",
-        height: "100%",
+        // Account for header (40px) + tabs (~48px) + banner (~60px) + search (~56px) + padding
+        height: "calc(100vh - 220px)",
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Left Panel: Scenarios */}
+      {/* Left Panel: Scenarios (scrollable via ListView) */}
       <Box
         sx={{
-          width: "45%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
           borderRight: theme.border.standard,
@@ -52,23 +53,28 @@ function MapViewContent() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <ScenarioPanel onTierClick={handleTierClick} />
+        <ListView compact onTierClick={handleTierClick} />
       </Box>
 
-      {/* Right Panel: Map */}
+      {/* Right Panel: Map (fixed) */}
       <Box
         sx={{
-          width: "55%",
+          width: "50%",
+          height: "80vh",
           position: "relative",
+          // Offset map controls up from bottom
+          "& .mapboxgl-ctrl-bottom-left": {
+            bottom: "80px",
+          },
         }}
       >
         <Map
           mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
           mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
           initialViewState={{
-            longitude: -118,
-            latitude: 39,
-            zoom: 4,
+            longitude: -120.5,
+            latitude: 37.5,
+            zoom: 5.8,
           }}
           minZoom={4}
           maxZoom={18}
@@ -76,7 +82,7 @@ function MapViewContent() {
             [-126, 30], // Southwest
             [-112, 44], // Northeast
           ]}
-          scrollZoom={true}
+          scrollZoom={false}
           touchZoom={true}
           doubleClickZoom={true}
           dragPan={true}
@@ -86,8 +92,8 @@ function MapViewContent() {
           style={{ width: "100%", height: "100%" }}
           projection={{ name: "mercator" }}
         >
-          <NavigationControl position="bottom-right" />
-          <GeolocateControl position="bottom-right" />
+          <NavigationControl position="bottom-left" />
+          <GeolocateControl position="bottom-left" />
 
           {/* Tier location markers */}
           {tierData && tierData.features && tierData.features.length > 0 && (
@@ -100,7 +106,7 @@ function MapViewContent() {
           sx={{
             position: "absolute",
             top: theme.spacing(2),
-            left: theme.spacing(2),
+            right: theme.spacing(2),
             backgroundColor: "rgba(255, 255, 255, 0.95)",
             borderRadius: theme.borderRadius.rounded,
             padding: theme.spacing(2),
@@ -112,7 +118,7 @@ function MapViewContent() {
             component="p"
             sx={{
               margin: 0,
-              fontSize: theme.typography.body2.fontSize,
+              fontSize: theme.typography.compact.subtitle.fontSize,
               color: theme.palette.text.primary,
             }}
           >
