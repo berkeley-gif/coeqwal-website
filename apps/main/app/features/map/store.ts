@@ -233,6 +233,10 @@ interface LearnMapState {
   isOutcomeVisualizationActive: boolean
   isPanelsExpanded: boolean
 
+  // Map scroll offset - when > 0, the map scrolls up with content
+  // This creates the "release from sticky" effect at end of scrollytelling
+  learnMapScrollOffset: number
+
   // Explore-specific state
   exploreTierSelection: ExploreTierSelection | null
 
@@ -253,6 +257,7 @@ const initialState: Omit<LearnMapState, "setMapReady"> = {
   selectedOutcome: null,
   isOutcomeVisualizationActive: false,
   isPanelsExpanded: false,
+  learnMapScrollOffset: 0,
 
   // Explore-specific state
   exploreTierSelection: null,
@@ -317,6 +322,13 @@ export const learnMapActions = {
     useLearnMapStore.setState({ isPanelsExpanded: expanded }),
 
   /**
+   * Set the scroll offset for the Learn map.
+   * When > 0, the map translates up, creating a "release from sticky" effect.
+   */
+  setLearnMapScrollOffset: (offset: number) =>
+    useLearnMapStore.setState({ learnMapScrollOffset: offset }),
+
+  /**
    * Reset Learn-specific state when Learn tab remounts.
    * Does NOT reset mapReady since the persistent map stays alive.
    */
@@ -327,6 +339,7 @@ export const learnMapActions = {
       geocoderMarker: null,
       selectedOutcome: null,
       isOutcomeVisualizationActive: false,
+      learnMapScrollOffset: 0,
     }),
 
   /**
@@ -383,6 +396,9 @@ export const useIsOutcomeVisualizationActive = () =>
 
 export const useIsPanelsExpanded = () =>
   useLearnMapStore((s) => s.isPanelsExpanded)
+
+export const useLearnMapScrollOffset = () =>
+  useLearnMapStore((s) => s.learnMapScrollOffset)
 
 // Explore-specific state
 export const useExploreTierSelection = () =>

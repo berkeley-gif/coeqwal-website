@@ -2,7 +2,6 @@
 
 import React, { useState } from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
-import { DashboardPanel } from "@repo/ui"
 import UnifiedExploreView, {
   type ExploreMode,
 } from "./views/UnifiedExploreView"
@@ -35,32 +34,47 @@ export default function ScenarioExplorerNew() {
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
   return (
-    <DashboardPanel
-      backgroundColor={
-        needsTransparentBg ? "transparent" : theme.palette.explore.background
-      }
-      color={theme.palette.text.primary}
-      headerHeight={theme.layout.headerHeight}
-      includeHeaderSpacing={true}
-      sx={{ pointerEvents: "auto" }}
+    <Box
+      sx={{
+        // Fill the parent container (TabPanel sets height for explore tab)
+        height: "100%",
+        backgroundColor: needsTransparentBg
+          ? "transparent"
+          : theme.palette.explore.background,
+        color: theme.palette.text.primary,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        pointerEvents: "auto",
+      }}
     >
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          overflow: "hidden",
         }}
       >
-        {/* Tab Navigation */}
+        {/* Header section - sticky to stay visible */}
         <Box
           sx={{
-            backgroundColor: theme.palette.common.white,
-            borderBottom: theme.border.standard,
-            borderColor: theme.palette.grey[300],
-            px: theme.spacing(theme.cards.spacing.standard),
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            flexShrink: 0,
           }}
         >
-          <Tabs
+          {/* Tab Navigation */}
+          <Box
+            sx={{
+              backgroundColor: theme.palette.common.white,
+              borderBottom: theme.border.standard,
+              borderColor: theme.palette.grey[300],
+              px: theme.spacing(theme.cards.spacing.standard),
+            }}
+          >
+            <Tabs
             value={mainView}
             onChange={handleTabChange}
             TabIndicatorProps={{
@@ -99,15 +113,16 @@ export default function ScenarioExplorerNew() {
             <Tab label="Explore scenarios" value="explorer" />
             <Tab label="Data explorer" value="data" />
           </Tabs>
+          </Box>
+
+          {/* Selection Banner */}
+          <SelectionBanner />
+
+          {/* Search bar for explorer view */}
+          {mainView === "explorer" && (
+            <SearchBar placeholder="Search scenarios by name or description" />
+          )}
         </Box>
-
-        {/* Selection Banner */}
-        <SelectionBanner />
-
-        {/* Search bar for explorer view */}
-        {mainView === "explorer" && (
-          <SearchBar placeholder="Search scenarios by name or description" />
-        )}
 
         {/* View content */}
         <Box
@@ -125,6 +140,6 @@ export default function ScenarioExplorerNew() {
           {mainView === "data" && <DataExplorerView />}
         </Box>
       </Box>
-    </DashboardPanel>
+    </Box>
   )
 }
