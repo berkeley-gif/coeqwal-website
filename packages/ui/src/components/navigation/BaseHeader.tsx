@@ -14,7 +14,6 @@ import {
   useTransform,
 } from "@repo/motion"
 import { useRef, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -130,10 +129,8 @@ export function BaseHeader({
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
 
-  const router = useRouter()
-
   const handleLogoClick = () => {
-    router.refresh() // re-fetches server components/data without a full reload
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const buttonStyle = {
@@ -282,7 +279,7 @@ export function BaseHeader({
                 borderRadius: "6px",
               },
             }}
-            aria-label="Refresh page"
+            aria-label="Scroll to top"
           >
             <Logo />
           </Box>
