@@ -22,6 +22,10 @@ export {
 
   // Typography and content
   Typography,
+  // MUI Card components exported with "Mui" prefix to avoid conflict with custom Card
+  Card as MuiCard,
+  CardContent as MuiCardContent,
+  CardActionArea as MuiCardActionArea,
 
   // Inputs and controls
   Button,

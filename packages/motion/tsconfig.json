@@ -2,10 +2,6 @@
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "outDir": "dist",
-    "emitDeclarationOnly": true,
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*"],

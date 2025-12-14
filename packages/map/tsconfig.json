@@ -5,10 +5,6 @@
     "paths": {
       "@repo/map/client": ["./client"]
     },
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "outDir": "dist",
-    "emitDeclarationOnly": true,
     "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "hooks/**/*"],
