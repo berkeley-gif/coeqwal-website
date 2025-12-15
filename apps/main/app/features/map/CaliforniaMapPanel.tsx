@@ -44,6 +44,15 @@ const MAP_BOUNDS: [[number, number], [number, number]] = [
   [-95.0, 55.0], // Northeast
 ]
 
+// Mapbox layer IDs that we need to preload
+const MAPBOX_LAYER_IDS = [
+  "california-label",
+  "central-valley-polygon",
+  "central-valley-polygon-halo",
+  "central-valley-label",
+  "inflow-watersheds",
+]
+
 interface CaliforniaMapPanelProps {
   id?: string
   mapboxToken?: string
@@ -163,15 +172,6 @@ export default function CaliforniaMapPanel({
 
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
-
-  // Mapbox layer IDs that we need to preload
-  const MAPBOX_LAYER_IDS = [
-    "california-label",
-    "central-valley-polygon",
-    "central-valley-polygon-halo",
-    "central-valley-label",
-    "inflow-watersheds",
-  ]
 
   // Notify parent when map is ready
   // Includes preloading of Mapbox layers to ensure tile data is cached
