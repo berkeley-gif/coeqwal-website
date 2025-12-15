@@ -32,7 +32,7 @@ export default function SearchBar({
         borderColor: theme.palette.grey[300],
       }}
     >
-      <Box sx={{ maxWidth: theme.spacing(50) }}>
+      <Box sx={{ flex: 1, minWidth: 0, maxWidth: theme.spacing(40) }}>
         <StyledTextInput
           size="small"
           placeholder={placeholder}
@@ -40,10 +40,11 @@ export default function SearchBar({
           onChange={(e) => setSearchQuery(e.target.value)}
           showClearButton={!!searchQuery}
           onClear={() => setSearchQuery("")}
+          fullWidth
         />
       </Box>
       {rightContent && (
-        <Box sx={{ display: "flex", alignItems: "center", ml: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", ml: 2, flexShrink: 0 }}>
           {rightContent}
         </Box>
       )}
