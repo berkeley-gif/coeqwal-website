@@ -390,6 +390,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     })
   }, [mapMode, map])
 
+  // Clear visualizations when map is hidden (tab change)
+  useEffect(() => {
+    if (mapMode === "hidden") {
+      learnMapActions.setSelectedOutcome(null)
+      learnMapActions.setExploreTierSelection(null)
+    }
+  }, [mapMode])
+
   const containerStyles = getContainerStyles(
     mapMode,
     theme.zIndex.basement,
