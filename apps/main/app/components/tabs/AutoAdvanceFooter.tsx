@@ -36,7 +36,8 @@ export default function AutoAdvanceFooter() {
         justifyContent: "center",
         gap: 12,
         backgroundColor: theme.palette.blue.darkest,
-        color: theme.palette.utility.white, 
+        color: theme.palette.utility.white,
+        pointerEvents: "auto", // Ensure footer is clickable even when parent has pointerEvents: none
       }}
     >
       <Typography variant="caption">
