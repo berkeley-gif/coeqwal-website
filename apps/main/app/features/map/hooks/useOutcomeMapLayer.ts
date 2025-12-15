@@ -637,8 +637,10 @@ export function useOutcomeMapLayer({
 }
 
 /**
- * Check if an outcome uses demand unit mapping
+ * Check if an outcome uses polygon visualization (demand units layer)
+ * Returns true for outcomes like "Community deliveries" and "Agricultural revenue"
+ * that are rendered as polygons on the map rather than point markers.
  */
-export function outcomeUsesDemandUnits(outcome: string): boolean {
+export function outcomeUsesPolygons(outcome: string): boolean {
   return outcome in OUTCOME_LAYER_CONFIG
 }

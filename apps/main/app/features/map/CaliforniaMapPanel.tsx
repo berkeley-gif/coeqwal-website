@@ -20,7 +20,7 @@ import {
 } from "../../lib/api/tierLocationApi"
 import {
   useOutcomeMapLayer,
-  outcomeUsesDemandUnits,
+  outcomeUsesPolygons,
 } from "./hooks/useOutcomeMapLayer"
 import {
   useActiveSection,
@@ -81,26 +81,26 @@ export default function CaliforniaMapPanel({
   const cameraView = useCameraView()
   const selectedOutcome = useSelectedOutcome()
 
-  // Check if outcome uses demand unit layer (CWS, AG_REV, etc.)
-  const usesDemandUnits = selectedOutcome
-    ? outcomeUsesDemandUnits(selectedOutcome)
+  // Check if outcome uses polygon visualization (CWS, AG_REV, etc.)
+  const usesPolygons = selectedOutcome
+    ? outcomeUsesPolygons(selectedOutcome)
     : false
 
-  // Use demand unit layer for CWS, AG_REV, etc.
+  // Use polygon layer for CWS, AG_REV, etc.
   const { hoveredFeature } = useOutcomeMapLayer({
-    outcome: usesDemandUnits ? selectedOutcome : null,
+    outcome: usesPolygons ? selectedOutcome : null,
     strategy: "current-ops",
-    visible: usesDemandUnits && !!selectedOutcome,
+    visible: usesPolygons && !!selectedOutcome,
   })
 
   // Tier location data for other outcomes (point/polygon based from API)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
   const [, setTierDataLoading] = useState(false)
 
-  // Fetch tier location data for outcomes that DON'T use demand units
+  // Fetch tier location data for outcomes that DON'T use polygons
   useEffect(() => {
-    // Clear if no outcome or if using demand units layer
-    if (!selectedOutcome || usesDemandUnits) {
+    // Clear if no outcome or if using polygon layer
+    if (!selectedOutcome || usesPolygons) {
       setTierData(null)
       return
     }
@@ -168,7 +168,7 @@ export default function CaliforniaMapPanel({
     return () => {
       cancelled = true
     }
-  }, [selectedOutcome, usesDemandUnits, map])
+  }, [selectedOutcome, usesPolygons, map])
 
   // Apply Mapbox layer states based on activeSection
   useMapLayers()
@@ -367,11 +367,11 @@ export default function CaliforniaMapPanel({
           </Marker>
         )}
 
-        {/* Tier markers for outcomes that DON'T use demand units */}
-        {/* (Demand unit outcomes like CWS/AG_REV are handled by useOutcomeMapLayer) */}
-        {tierData && !usesDemandUnits && <TierMarkers data={tierData} />}
+        {/* Tier markers for outcomes that DON'T use polygons */}
+        {/* (Polygon outcomes like CWS/AG_REV are handled by useOutcomeMapLayer) */}
+        {tierData && !usesPolygons && <TierMarkers data={tierData} />}
 
-        {/* Hover tooltip for demand unit polygons */}
+        {/* Hover tooltip for polygon layer features */}
         {hoveredFeature && (
           <Popup
             longitude={hoveredFeature.longitude}
