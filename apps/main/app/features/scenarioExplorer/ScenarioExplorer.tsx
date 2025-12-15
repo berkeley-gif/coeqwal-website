@@ -25,7 +25,7 @@ type MainView = "about" | "explorer" | "data"
  */
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
-  const [mainView, setMainView] = useState<MainView>("about")
+  const [mainView, setMainView] = useState<MainView>("explorer")
   const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
