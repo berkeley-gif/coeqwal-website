@@ -367,10 +367,10 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     if (mapMode !== "explore") return
     if (!map.mapRef?.current) return
 
-    // Fly to California overview for Explore
+    // Fly to California overview for Explore - shifted west so CA appears on right
     map.mapRef.current.easeTo({
-      center: [-120.5, 37.5],
-      zoom: 5.8,
+      center: [-128, 39],  // Shifted west and north to position California in right half, lower on screen
+      zoom: 5.5,
       bearing: 0,
       pitch: 0,
       duration: 1000,
