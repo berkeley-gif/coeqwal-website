@@ -22,6 +22,7 @@ import {
   useRiversProgress,
   useShowInflowWatersheds,
   useMapReady,
+  useMapMode,
   SECTION_LAYERS,
   type SectionId,
 } from "../store"
@@ -88,6 +89,7 @@ export function useMapLayers() {
   const riversProgress = useRiversProgress()
   const showInflowWatersheds = useShowInflowWatersheds()
   const mapReady = useMapReady() // Use global Zustand state
+  const mapMode = useMapMode() // Track which mode the map is in
 
   const prevSectionRef = useRef<SectionId | null>(null)
   const initializedRef = useRef(false)
@@ -207,6 +209,14 @@ export function useMapLayers() {
 
     coordinator.cancelGroup(LAYER_ANIMATION_PREFIX)
 
+    // Hide all native layers when not in Learn mode
+    if (mapMode !== "learn") {
+      Object.keys(LAYER_GROUPS).forEach((groupKey) => {
+        applyLayerGroup(groupKey, false, true) // immediate hide
+      })
+      return
+    }
+
     const currentConfig = SECTION_LAYERS[activeSection]
     const prevSection = prevSectionRef.current
     const isFirstRun = !initializedRef.current
@@ -252,7 +262,7 @@ export function useMapLayers() {
     })
 
     prevSectionRef.current = activeSection
-  }, [activeSection, map.mapRef, applyLayerGroup, mapReady])
+  }, [activeSection, map.mapRef, applyLayerGroup, mapReady, mapMode])
 
   // Rivers section: fade out inflow watersheds as rivers animate
   useEffect(() => {

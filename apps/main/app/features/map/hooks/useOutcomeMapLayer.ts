@@ -131,6 +131,8 @@ interface UseOutcomeMapLayerProps {
   strategy: string
   /** Whether to show the layer */
   visible: boolean
+  /** Skip camera control (zoom) - useful when another system handles camera */
+  skipCameraControl?: boolean
 }
 
 /** Info about a hovered/clicked polygon */
@@ -165,6 +167,7 @@ export function useOutcomeMapLayer({
   outcome,
   strategy,
   visible,
+  skipCameraControl = false,
 }: UseOutcomeMapLayerProps): UseOutcomeMapLayerResult {
   const theme = useTheme()
   const mapAPI = useMap()
@@ -488,7 +491,8 @@ export function useOutcomeMapLayer({
 
         // This is a SEPARATE withMap call to ensure zoom happens even if styling encounters issues
         // and to always trigger when switching outcomes (regardless of previous map state)
-        if (!cancelled) {
+        // Skip zoom when skipCameraControl is true (e.g., Explore mode where useTierMapData handles zoom)
+        if (!cancelled && !skipCameraControl) {
           mapAPI.withMap((mapRef) => {
             const map = mapRef.getMap()
             const currentCenter = map.getCenter()
