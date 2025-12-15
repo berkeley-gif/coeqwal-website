@@ -76,6 +76,12 @@ const MAP_BOUNDS: [[number, number], [number, number]] = [
   [-95.0, 55.0], // Northeast
 ]
 
+// California geographic bounds for Explore mode centering
+const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
+  [-124.5, 32.5], // Southwest (lon, lat)
+  [-114.0, 42.0], // Northeast (lon, lat)
+]
+
 // Position styles for different modes
 // zIndexBasement comes from theme.zIndex.basement
 // scrollOffset creates the "release from sticky" effect in Learn mode
@@ -377,14 +383,34 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     if (mapMode !== "explore") return
     if (!map.mapRef?.current) return
 
-    // Fly to California overview for Explore - shifted west so CA appears on right
-    map.mapRef.current.easeTo({
-      center: [-128, 39],  // Shifted west and north to position California in right half, lower on screen
-      zoom: 5.5,
-      bearing: 0,
-      pitch: 0,
+    // Calculate left padding = 50% of viewport width (the left panel)
+    const leftPadding = window.innerWidth / 2
+
+    // Fit California bounds into the visible right half
+    // top: 180 pushes map lower, right: 0 shifts map right, maxZoom: 6 zooms out
+    map.mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
+      padding: { left: leftPadding, top: 180, right: 0, bottom: 20 },
+      maxZoom: 6,
       duration: 1000,
     })
+  }, [mapMode, map])
+
+  // Re-center on resize while in Explore mode
+  useEffect(() => {
+    if (mapMode !== "explore") return
+    if (!map.mapRef?.current) return
+
+    const handleResize = () => {
+      const leftPadding = window.innerWidth / 2
+      map.mapRef.current?.fitBounds(CALIFORNIA_BOUNDS, {
+        padding: { left: leftPadding, top: 180, right: 0, bottom: 20 },
+        maxZoom: 6,
+        duration: 300,
+      })
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [mapMode, map])
 
   // Reset camera when switching to Learn mode
