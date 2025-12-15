@@ -216,6 +216,8 @@ export default function UnifiedExploreView({
           flex: 1,
           overflow: "hidden",
           position: "relative",
+          // Allow map panning through in map mode
+          pointerEvents: mode === "map" ? "none" : "auto",
         }}
       >
         {/* Left Panel: List (animates width) */}
@@ -234,6 +236,7 @@ export default function UnifiedExploreView({
             position: "relative",
             zIndex: theme.zIndex.panels,
             overflow: "hidden",
+            pointerEvents: "auto", // Keep list interactive even when parent is "none"
           }}
         >
           <ListView
@@ -251,6 +254,8 @@ export default function UnifiedExploreView({
             position: "relative",
             backgroundColor:
               mode === "comparison" ? theme.palette.grey[100] : "transparent",
+            // Allow map panning through when in map mode
+            pointerEvents: mode === "map" ? "none" : "auto",
           }}
         >
           {/* Map Mode Content */}
@@ -266,6 +271,7 @@ export default function UnifiedExploreView({
                 boxShadow: theme.boxShadows.subtle,
                 maxWidth: theme.spacing(40),
                 zIndex: theme.zIndex.mapControls,
+                pointerEvents: "auto", // Re-enable for the info overlay
               }}
             >
               <Typography

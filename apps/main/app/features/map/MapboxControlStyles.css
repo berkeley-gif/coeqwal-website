@@ -1,5 +1,18 @@
 /* Style Mapbox controls */
 
+/* Ensure map and canvas receive pointer events */
+.mapboxgl-map {
+  pointer-events: auto !important;
+}
+
+.mapboxgl-canvas-container {
+  pointer-events: auto !important;
+}
+
+.mapboxgl-canvas {
+  pointer-events: auto !important;
+}
+
 /* Make GeolocateControl parent container round */
 .mapboxgl-ctrl-group:has(.mapboxgl-ctrl-geolocate) {
   background: transparent !important;

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useTheme } from "@mui/material/styles"
+import { useTheme } from "@repo/ui/mui"
 import { BaseHeader } from "@repo/ui"
 
 /**

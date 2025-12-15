@@ -89,6 +89,7 @@ export default function LearnPanel() {
     <div
       style={{
         position: "relative",
+        pointerEvents: "none", // Allow map panning through - child elements re-enable as needed
       }}
     >
       {/* 
@@ -104,10 +105,11 @@ export default function LearnPanel() {
           minHeight: "100vh",
           // Transparent background - map shows through
           backgroundColor: "transparent",
+          pointerEvents: "none", // Allow map panning - overlay panels re-enable as needed
         }}
       >
-        {/* Spacer for the initial map view - transparent */}
-        <Box sx={{ height: "100vh", backgroundColor: "transparent" }} />
+        {/* Spacer for the initial map view - transparent, allows map panning */}
+        <Box sx={{ height: "100vh", backgroundColor: "transparent", pointerEvents: "none" }} />
 
         {/* Overlay content - scrolls over the fixed persistent map */}
         <Box
@@ -172,6 +174,8 @@ export default function LearnPanel() {
           // Stack above the fixed map (which is at z-index basement)
           position: "relative",
           zIndex: theme.zIndex.panels,
+          // Re-enable pointer events for interactive cards
+          pointerEvents: "auto",
         }}
       >
         <Box

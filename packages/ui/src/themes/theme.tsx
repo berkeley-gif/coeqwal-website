@@ -228,12 +228,12 @@ export const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers
-    basement: -1, // Map when used as background
+    basement: 1, // Map when used as background (positive for proper pointer event handling)
     sectionBackground: 0, // Section background elements
 
     // Content layers (0-99)
     content: 20, // Default content layer
-    panels: 10, // Main content panels
+    panels: 15, // Main content panels (above basement)
 
     // Intro section micro-layers (1-9)
     introBackgroundImages: 15, // Background decorative images
