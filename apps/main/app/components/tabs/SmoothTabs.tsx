@@ -122,23 +122,28 @@ export default function SmoothTabs() {
                         overflow: "hidden",
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        style={{
-                          textTransform: "none",
-                          margin: 20,
-                        }}
-                      >
-                        {key === "learn" &&
-                          "Did you know that California has one of the most complex water allocation systems in the world? Learn about how water flows through California's Central Valley and how we manage water to support diverse needs."
-                        }
-                        {key === "explore" &&
-                          "What if we managed water differently? Explore how water allocations change under different water management scenarios."
-                        }
-                        {key === "empower" &&
-                          "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future."
-                        }
-                      </Typography>
+                      {/* Inner wrapper with min-height ensures all tabs have equal description height */}
+                      {/* Responsive: narrower viewports need more height for text wrapping */}
+                      {/* Formula: 410px - 23vw, clamped between 125px and 340px */}
+                      <div style={{ minHeight: "clamp(125px, calc(410px - 23vw), 340px)" }}>
+                        <Typography
+                          variant="body2"
+                          style={{
+                            textTransform: "none",
+                            margin: 20,
+                          }}
+                        >
+                          {key === "learn" &&
+                            "Did you know that California has one of the most complex water systems in the world? Learn about how water flows through California's Central Valley and how we manage it to support diverse needs."
+                          }
+                          {key === "explore" &&
+                            "What if we managed water differently? Explore how water allocations change under different water management scenarios and discover new possibilities."
+                          }
+                          {key === "empower" && (
+                            "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future. Tools coming soon."
+                          )}
+                        </Typography>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
