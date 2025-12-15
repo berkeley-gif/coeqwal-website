@@ -51,7 +51,6 @@ import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
 // Store
 import {
   useMapMode,
-  useMapReady,
   useActiveSection,
   useGeocoderMarker,
   useRiversProgress,
@@ -136,8 +135,6 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Store state
   const mapMode = useMapMode()
-  // Note: mapReady is managed by store but not needed in this component
-  // const mapReady = useMapReady()
 
 
   // Learn-specific state
