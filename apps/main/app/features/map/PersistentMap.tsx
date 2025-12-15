@@ -136,7 +136,8 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Store state
   const mapMode = useMapMode()
-  const mapReady = useMapReady()
+  // Note: mapReady is managed by store but not needed in this component
+  // const mapReady = useMapReady()
 
 
   // Learn-specific state

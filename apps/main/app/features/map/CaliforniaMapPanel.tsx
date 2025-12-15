@@ -175,7 +175,6 @@ export default function CaliforniaMapPanel({
 
   // Notify parent when map is ready
   // Includes preloading of Mapbox layers to ensure tile data is cached
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- MAPBOX_LAYER_IDS is a stable constant
   useEffect(() => {
     if (onMapReadyCalledRef.current) return
 
@@ -274,7 +273,7 @@ export default function CaliforniaMapPanel({
     return () => {
       clearInterval(interval)
     }
-  }, [map.mapRef, onMapReady])
+  }, [map.mapRef, onMapReady, MAPBOX_LAYER_IDS])
 
   // Track previous section for camera transitions
   const prevSectionRef = useRef<SectionId | null>(null)
