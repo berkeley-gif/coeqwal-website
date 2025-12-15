@@ -559,7 +559,7 @@ const theme = createTheme({
     },
     explore: {
       background: themeValues.palette.tabPanels.explore,
-      text: themeValues.palette.utility.black,
+      text: themeValues.palette.utility.white,
     },
     empower: {
       background: themeValues.palette.tabPanels.empower,
@@ -790,29 +790,29 @@ const theme = createTheme({
     },
     MuiCard: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           borderRadius: "3px",
           textDecoration: "none",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
-        }),
+        },
       },
     },
 
     MuiCardActionArea: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           // keep MUI's focus ring behavior sane
           borderRadius: "3px",
-        }),
+        },
       },
     },
 
     MuiCardContent: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           // optional: if you want CardContent to inherit link styling cleanly
           textDecoration: "inherit",
-        }),
+        },
       },
     },
     MuiButton: {
