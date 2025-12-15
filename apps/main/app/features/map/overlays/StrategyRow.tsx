@@ -9,7 +9,7 @@
 
 import { useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { learnMapActions } from "../store"
+import { learnMapActions, useSelectedOutcome } from "../store"
 import { InfoIconButton, HybridTooltip, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
@@ -489,13 +489,17 @@ export function KeyOutcomesPanel({
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
 
-  // Handler to show outcome data on the map
+  // Get current selected outcome for toggle behavior
+  const selectedOutcome = useSelectedOutcome()
+
+  // Handler to show outcome data on the map (toggle behavior)
   const handleShowOnMap = useCallback(
     (outcome: string) => {
       handleClose() // Close tooltip when showing on map
-      learnMapActions.setSelectedOutcome(outcome)
+      // Toggle: if same outcome is already selected, clear it; otherwise set it
+      learnMapActions.setSelectedOutcome(selectedOutcome === outcome ? null : outcome)
     },
-    [handleClose],
+    [handleClose, selectedOutcome],
   )
 
   // Helper function to get tier values for an outcome

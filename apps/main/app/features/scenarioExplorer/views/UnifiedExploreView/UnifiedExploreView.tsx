@@ -9,7 +9,7 @@ import {
 } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import ListView from "../ListView/ListView"
-import { learnMapActions } from "../../../../features/map/store"
+import { learnMapActions, useExploreTierSelection } from "../../../../features/map/store"
 import { useComparisonData } from "../ComparisonView/useComparisonData"
 
 export type ExploreMode = "list" | "map" | "comparison"
@@ -63,6 +63,9 @@ export default function UnifiedExploreView({
     setHighlightedScenario((prev) => (prev === scenarioId ? null : scenarioId))
   }
 
+  // Get current tier selection for toggle behavior
+  const currentTierSelection = useExploreTierSelection()
+
   // Set map mode based on current view mode
   useEffect(() => {
     if (mode === "map") {
@@ -78,8 +81,14 @@ export default function UnifiedExploreView({
     }
   }, [mode])
 
+  // Toggle behavior: if same tier is already selected, clear it; otherwise set it
   const handleTierClick = (strategy: string, outcome: string) => {
-    learnMapActions.setExploreTierSelection({ strategy, outcome })
+    const isSameSelection =
+      currentTierSelection?.strategy === strategy &&
+      currentTierSelection?.outcome === outcome
+    learnMapActions.setExploreTierSelection(
+      isSameSelection ? null : { strategy, outcome }
+    )
   }
 
   // Width calculations based on mode
