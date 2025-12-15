@@ -101,6 +101,8 @@ export default function UnifiedExploreView({
         flexDirection: "column",
         height: "100%",
         overflow: "hidden",
+        // Allow map panning through when in map mode
+        pointerEvents: mode === "map" ? "none" : "auto",
       }}
     >
       {/* Mode Toggle Toolbar */}
@@ -115,6 +117,7 @@ export default function UnifiedExploreView({
           borderBottom: theme.border.standard,
           borderColor: theme.palette.grey[300],
           flexShrink: 0,
+          pointerEvents: "auto", // Keep toolbar interactive even when parent is "none"
         }}
       >
         <Typography

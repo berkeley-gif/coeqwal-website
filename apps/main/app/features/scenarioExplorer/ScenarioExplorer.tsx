@@ -47,7 +47,8 @@ export default function ScenarioExplorerNew() {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        pointerEvents: "auto",
+        // Allow map panning through when in map mode
+        pointerEvents: needsTransparentBg ? "none" : "auto",
       }}
     >
       <Box
