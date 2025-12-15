@@ -384,7 +384,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
     // Reset to initial California view for Learn mode
     map.mapRef.current.easeTo({
-      center: CALIFORNIA_VIEW.center,
+      center: [CALIFORNIA_VIEW.longitude, CALIFORNIA_VIEW.latitude],
       zoom: CALIFORNIA_VIEW.zoom,
       bearing: CALIFORNIA_VIEW.bearing,
       pitch: CALIFORNIA_VIEW.pitch,
