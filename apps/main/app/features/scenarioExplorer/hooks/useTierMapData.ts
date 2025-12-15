@@ -96,17 +96,18 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
             const isSalmon = selectedTier!.outcome.includes("Salmon")
 
             // Calculate asymmetric padding for Explore mode
-            // Left panel covers 50% of viewport, extra top padding pushes view lower
+            // Left panel covers 50% of viewport
+            // top: 300 = 230px interface chrome + 70px visual offset
             const leftPadding = window.innerWidth / 2
             const basePadding = isDelta ? 250 : 100
-            const maxZoom = isDelta || isSalmon ? 7 : 8 // zoomed out a bit more
+            const maxZoom = isDelta || isSalmon ? 6 : 7 // zoomed out a bit more
 
             mapAPI.withMap((mapRef) => {
               const map = mapRef.getMap()
               map.fitBounds(bounds, {
                 padding: {
                   left: leftPadding + basePadding,
-                  top: 180 + basePadding,
+                  top: 300 + basePadding,
                   right: basePadding / 2, // Less right padding shifts view right
                   bottom: 20 + basePadding,
                 },

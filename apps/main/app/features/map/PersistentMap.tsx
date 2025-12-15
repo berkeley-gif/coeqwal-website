@@ -178,10 +178,12 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   })
 
   // Use polygon layer for Explore mode (CWS, AG_REV, etc.)
+  // skipCameraControl: let useTierMapData handle zoom instead of this hook
   const { hoveredFeature: exploreHoveredFeature } = useOutcomeMapLayer({
     outcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
     strategy: exploreTierSelection?.strategy ?? "current-ops",
     visible: mapMode === "explore" && exploreUsesPolygons && !!exploreTierSelection,
+    skipCameraControl: true,
   })
 
   // Explore mode: fetch tier data based on selection
@@ -362,17 +364,23 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Camera transitions when section changes (Learn mode)
   useEffect(() => {
-    if (mapMode !== "learn") return
+    // Reset prevSectionRef when leaving Learn mode so camera transition fires on return
+    if (mapMode !== "learn") {
+      prevSectionRef.current = null
+      return
+    }
     if (!map.mapRef?.current || !cameraView) return
     if (prevSectionRef.current === activeSection) return
 
     prevSectionRef.current = activeSection
 
+    // Include padding reset in easeTo to animate both together (smooth transition from Explore)
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
       zoom: cameraView.zoom,
       bearing: cameraView.bearing ?? 0,
       pitch: cameraView.pitch ?? 0,
+      padding: { left: 0, top: 0, right: 0, bottom: 0 },
       duration: 2000,
       easing: (t: number) => t * (2 - t), // ease-out-quad
     })
@@ -387,11 +395,38 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     const leftPadding = window.innerWidth / 2
 
     // Fit California bounds into the visible right half
-    // top: 180 pushes map lower, right: 0 shifts map right, maxZoom: 6 zooms out
+    // top: 300 = 230px interface chrome + 70px visual offset
     map.mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
-      padding: { left: leftPadding, top: 180, right: 0, bottom: 20 },
+      padding: { left: leftPadding, top: 300, right: 0, bottom: 20 },
       maxZoom: 6,
       duration: 1000,
+    })
+  }, [mapMode, map])
+
+  // Hide native Mapbox layers when switching to Explore mode
+  useEffect(() => {
+    if (mapMode !== "explore") return
+    if (!map.mapRef?.current) return
+
+    const mapInstance = map.mapRef.current.getMap()
+
+    // Hide all Learn mode native layers
+    const layersToHide = [
+      "california-label",
+      "central-valley-polygon",
+      "central-valley-polygon-halo",
+      "central-valley-label",
+      "inflow-watersheds",
+    ]
+
+    layersToHide.forEach((layerId) => {
+      try {
+        if (mapInstance.getLayer(layerId)) {
+          mapInstance.setLayoutProperty(layerId, "visibility", "none")
+        }
+      } catch {
+        /* ignore */
+      }
     })
   }, [mapMode, map])
 
@@ -403,7 +438,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     const handleResize = () => {
       const leftPadding = window.innerWidth / 2
       map.mapRef.current?.fitBounds(CALIFORNIA_BOUNDS, {
-        padding: { left: leftPadding, top: 180, right: 0, bottom: 20 },
+        padding: { left: leftPadding, top: 300, right: 0, bottom: 20 },
         maxZoom: 6,
         duration: 300,
       })
@@ -413,20 +448,8 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     return () => window.removeEventListener("resize", handleResize)
   }, [mapMode, map])
 
-  // Reset camera when switching to Learn mode
-  useEffect(() => {
-    if (mapMode !== "learn") return
-    if (!map.mapRef?.current) return
-
-    // Reset to initial California view for Learn mode
-    map.mapRef.current.easeTo({
-      center: [CALIFORNIA_VIEW.longitude, CALIFORNIA_VIEW.latitude],
-      zoom: CALIFORNIA_VIEW.zoom,
-      bearing: CALIFORNIA_VIEW.bearing,
-      pitch: CALIFORNIA_VIEW.pitch,
-      duration: 1000,
-    })
-  }, [mapMode, map])
+  // NOTE: Learn mode camera is handled by "Camera transitions when section changes" effect
+  // which fires when resetLearnState() sets activeSection to "california"
 
   // Clear visualizations when map is hidden (tab change)
   useEffect(() => {
