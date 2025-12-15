@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 export interface LeadingMarkerTextProps {
   title: string
   children: React.ReactNode
