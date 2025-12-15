@@ -34,6 +34,7 @@ import {
   useSelectedOutcome,
   CALIFORNIA_VIEW,
   type SectionId,
+  type MapMode,
 } from "./store"
 import { useMapLayers } from "./hooks/useMapLayers"
 import "./MapboxControlStyles.css"
@@ -87,10 +88,14 @@ export default function CaliforniaMapPanel({
     : false
 
   // Use polygon layer for CWS, AG_REV, etc.
+  // This standalone component always operates in "learn" mode
+  const mapMode: MapMode = "learn"
   const { hoveredFeature } = useOutcomeMapLayer({
-    outcome: usesPolygons ? selectedOutcome : null,
-    strategy: "current-ops",
-    visible: usesPolygons && !!selectedOutcome,
+    learnOutcome: usesPolygons ? selectedOutcome : null,
+    learnStrategy: "current-ops",
+    exploreOutcome: null,
+    exploreStrategy: "current-ops",
+    mapMode,
   })
 
   // Tier location data for other outcomes (point/polygon based from API)

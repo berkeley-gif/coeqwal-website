@@ -20,6 +20,7 @@ import {
   getTierColorsFromTheme,
   TierLevel,
 } from "../../../content/tiers"
+import type { MapMode } from "../store"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapInstance = any
@@ -125,14 +126,16 @@ export async function fetchTierLocations(
 }
 
 interface UseOutcomeMapLayerProps {
-  /** The outcome display name (e.g., "Community deliveries") */
-  outcome: string | null
-  /** The strategy value (e.g., "current-ops") */
-  strategy: string
-  /** Whether to show the layer */
-  visible: boolean
-  /** Skip camera control (zoom) - useful when another system handles camera */
-  skipCameraControl?: boolean
+  /** Learn mode outcome display name (e.g., "Community deliveries") */
+  learnOutcome: string | null
+  /** Learn mode strategy value (e.g., "current-ops") */
+  learnStrategy: string
+  /** Explore mode outcome display name */
+  exploreOutcome: string | null
+  /** Explore mode strategy value */
+  exploreStrategy: string
+  /** Current map mode - determines which outcome to display */
+  mapMode: MapMode
 }
 
 /** Info about a hovered/clicked polygon */
@@ -162,16 +165,36 @@ interface UseOutcomeMapLayerResult {
 
 /**
  * Hook to display outcome data on the calsim-demand-units Mapbox layer
+ * 
+ * This is a mode-aware hook that handles both Learn and Explore modes.
+ * It derives the active outcome based on mapMode, preventing race conditions
+ * and ensuring clean transitions between modes.
  */
 export function useOutcomeMapLayer({
-  outcome,
-  strategy,
-  visible,
-  skipCameraControl = false,
+  learnOutcome,
+  learnStrategy,
+  exploreOutcome,
+  exploreStrategy,
+  mapMode,
 }: UseOutcomeMapLayerProps): UseOutcomeMapLayerResult {
   const theme = useTheme()
   const mapAPI = useMap()
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Derive active outcome and strategy based on mapMode
+  const outcome = mapMode === "learn" ? learnOutcome 
+                : mapMode === "explore" ? exploreOutcome 
+                : null
+  
+  const strategy = mapMode === "learn" ? learnStrategy 
+                 : mapMode === "explore" ? exploreStrategy 
+                 : "current-ops"
+  
+  // Skip camera control in Explore mode (useTierMapData handles it)
+  const skipCameraControl = mapMode === "explore"
+  
+  // Layer is visible when we have an outcome and are in a visible mode
+  const visible = !!outcome && (mapMode === "learn" || mapMode === "explore")
   const [error, setError] = useState<string | null>(null)
   const [featureCount, setFeatureCount] = useState(0)
   const [hoveredFeature, setHoveredFeature] =
@@ -532,6 +555,7 @@ export function useOutcomeMapLayer({
     outcome,
     strategy,
     visible,
+    skipCameraControl,
     config,
     tierColors,
     theme,
