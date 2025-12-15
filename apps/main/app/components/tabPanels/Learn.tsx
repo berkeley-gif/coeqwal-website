@@ -169,8 +169,8 @@ export default function LearnPanel() {
         sx={{
           backgroundColor: theme.palette.learn.background,
           padding: "60px",
-          paddingBottom: "200px",
-          marginBottom: "-100px",
+          paddingBottom: "100px",
+          // Removed marginBottom: "-100px" which was overlapping AutoAdvanceFooter
           // Stack above the fixed map (which is at z-index basement)
           position: "relative",
           zIndex: theme.zIndex.panels,
