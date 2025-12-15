@@ -35,7 +35,11 @@ export default function Home() {
               position: "relative",
               overflowX: "clip",
               overflowY: "visible",
-              // No z-index necessaryhere, flows in natural DOM order, rendered first (behind) in the DOM
+              // Allow pointer events to pass through to the persistent map (z-index: 1)
+              // Child components re-enable pointer events where needed
+              pointerEvents: "none",
+              // Above map basement level so content appears on top
+              zIndex: 10,
             }}
           >
             <IntroSection />

@@ -30,13 +30,17 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
       ? { height: "calc(100vh - 100px)", overflow: "hidden" }
       : {}
 
+    // Map tabs need pointerEvents: "none" so the persistent map behind them
+    // can receive drag/pan events. Child components re-enable pointer events as needed.
+    const pointerEvents = isMapTab ? "none" : undefined
+
     return (
       <div
         ref={ref}
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding, backgroundColor, ...exploreStyles }}
+        style={{ padding, backgroundColor, pointerEvents, ...exploreStyles }}
       >
         {children}
         <AutoAdvanceFooter />

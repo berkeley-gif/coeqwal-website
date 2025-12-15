@@ -268,7 +268,7 @@ export default function MapOverlayPanels() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.target.id === "california-map" && entry.isIntersecting) {
+          if (entry.target.id === "california-call" && entry.isIntersecting) {
             setIsFirstPanelVisible(true)
           }
         })
@@ -276,7 +276,7 @@ export default function MapOverlayPanels() {
       { threshold: 0.5, rootMargin: "0px 0px -200px 0px" },
     )
 
-    const mapPanel = document.getElementById("california-map")
+    const mapPanel = document.getElementById("california-call")
     if (mapPanel) observer.observe(mapPanel)
 
     return () => observer.disconnect()

@@ -29,12 +29,12 @@ export default function AutoHeight({
 
   return (
     <motion.div
-      style={{ height: h }}
+      style={{ height: h, pointerEvents: "inherit" }}
       animate={{ height: h }}
       transition={transition}
       className={className}
     >
-      <div ref={wrapRef}>{children}</div>
+      <div ref={wrapRef} style={{ pointerEvents: "inherit" }}>{children}</div>
     </motion.div>
   )
 }

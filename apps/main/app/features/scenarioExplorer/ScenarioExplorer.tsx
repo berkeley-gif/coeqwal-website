@@ -56,6 +56,8 @@ export default function ScenarioExplorerNew() {
           flexDirection: "column",
           height: "100%",
           overflow: "hidden",
+          // Allow map panning through when in map mode
+          pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
         {/* Header section - sticky to stay visible */}
@@ -65,6 +67,7 @@ export default function ScenarioExplorerNew() {
             top: 0,
             zIndex: 10,
             flexShrink: 0,
+            pointerEvents: "auto", // Keep header interactive even when parent is "none"
           }}
         >
           {/* Tab Navigation */}
@@ -132,6 +135,8 @@ export default function ScenarioExplorerNew() {
           sx={{
             flex: 1,
             overflow: "hidden",
+            // Allow map panning through when in map mode (UnifiedExploreView handles its own pointer events)
+            pointerEvents: needsTransparentBg ? "none" : "auto",
           }}
         >
           {mainView === "about" && <AboutScenariosView />}

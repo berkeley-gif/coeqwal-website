@@ -76,6 +76,7 @@ export function CallResponsePanel({
           width: "100%",
           display: "flex",
           justifyContent: side === "left" ? "flex-start" : "flex-end",
+          pointerEvents: isVisible ? "auto" : "none",
         }}
       >
         <Box
