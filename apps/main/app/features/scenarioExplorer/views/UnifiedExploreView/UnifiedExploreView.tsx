@@ -4,14 +4,9 @@ import React, { useEffect, useMemo, useState } from "react"
 import {
   Box,
   Typography,
-  IconButton,
-  Tooltip,
   useTheme,
   CircularProgress,
-  ViewListIcon,
-  CompareArrowsIcon,
 } from "@repo/ui/mui"
-import Image from "next/image"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import ListView from "../ListView/ListView"
 import { learnMapActions } from "../../../../features/map/store"
@@ -22,8 +17,6 @@ export type ExploreMode = "list" | "map" | "comparison"
 interface UnifiedExploreViewProps {
   /** Current view mode */
   mode: ExploreMode
-  /** Callback when mode changes (for parent to track for background color) */
-  onModeChange: (mode: ExploreMode) => void
 }
 
 /**
@@ -41,7 +34,6 @@ interface UnifiedExploreViewProps {
  */
 export default function UnifiedExploreView({
   mode,
-  onModeChange,
 }: UnifiedExploreViewProps) {
   const theme = useTheme()
 
@@ -105,117 +97,6 @@ export default function UnifiedExploreView({
         pointerEvents: mode === "map" ? "none" : "auto",
       }}
     >
-      {/* Mode Toggle Toolbar */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          px: theme.spacing(2),
-          py: theme.spacing(1),
-          backgroundColor: theme.palette.common.white,
-          borderBottom: theme.border.standard,
-          borderColor: theme.palette.grey[300],
-          flexShrink: 0,
-          pointerEvents: "auto", // Keep toolbar interactive even when parent is "none"
-        }}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            color: theme.palette.grey[600],
-            mr: 1,
-          }}
-        >
-          View:
-        </Typography>
-
-        <Tooltip title="List view" arrow>
-          <IconButton
-            size="small"
-            onClick={() => onModeChange("list")}
-            sx={{
-              backgroundColor:
-                mode === "list"
-                  ? `${theme.palette.blue.bright}1A`
-                  : "transparent",
-              color:
-                mode === "list"
-                  ? theme.palette.blue.bright
-                  : theme.palette.grey[600],
-              "&:hover": {
-                backgroundColor: `${theme.palette.blue.bright}1A`,
-              },
-            }}
-          >
-            <ViewListIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title="Map view" arrow>
-          <IconButton
-            size="small"
-            onClick={() => onModeChange("map")}
-            sx={{
-              backgroundColor:
-                mode === "map"
-                  ? `${theme.palette.blue.bright}1A`
-                  : "transparent",
-              "&:hover": {
-                backgroundColor: `${theme.palette.blue.bright}1A`,
-              },
-            }}
-          >
-            <Image
-              src="/images/icons/map.svg"
-              alt="Map view"
-              width={24}
-              height={24}
-              style={{
-                opacity: mode === "map" ? 1 : 0.6,
-              }}
-            />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title="Comparison view" arrow>
-          <IconButton
-            size="small"
-            onClick={() => onModeChange("comparison")}
-            sx={{
-              backgroundColor:
-                mode === "comparison"
-                  ? `${theme.palette.blue.bright}1A`
-                  : "transparent",
-              color:
-                mode === "comparison"
-                  ? theme.palette.blue.bright
-                  : theme.palette.grey[600],
-              "&:hover": {
-                backgroundColor: `${theme.palette.blue.bright}1A`,
-              },
-            }}
-          >
-            <CompareArrowsIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-
-        {/* Mode-specific helper text */}
-        <Typography
-          variant="caption"
-          sx={{
-            color: theme.palette.grey[500],
-            ml: 2,
-            fontStyle: "italic",
-          }}
-        >
-          {mode === "list" && "Full scenario list"}
-          {mode === "map" && "Click an outcome to see it on the map"}
-          {mode === "comparison" &&
-            "Compare scenarios across outcomes with brushing"}
-        </Typography>
-      </Box>
-
       {/* Main Content Area */}
       <Box
         sx={{
