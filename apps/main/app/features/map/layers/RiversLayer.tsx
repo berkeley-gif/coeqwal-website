@@ -1,9 +1,19 @@
 "use client"
 
-import { memo, useMemo } from "react"
-import { Source, Layer, Marker } from "@repo/map"
+import { memo, useMemo, useEffect } from "react"
+import { Source, Layer, Marker, useMap } from "@repo/map"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 import { useIsOutcomeVisualizationActive } from "../store"
+
+// River layer IDs - exported for use by other components that need to reference them
+export const RIVER_LAYER_IDS = [
+  "sacramento-river-trough",
+  "sacramento-river-glow",
+  "sacramento-river-body",
+  "san-joaquin-river-trough",
+  "san-joaquin-river-glow",
+  "san-joaquin-river-body",
+] as const
 
 interface RiversLayerProps {
   visible: boolean
@@ -84,12 +94,38 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 })
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
+  const { mapRef } = useMap()
+  
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   // Progress goes 0→1 as user scrolls (matches old choreography)
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
   // Check if outcome visualization is active - hide labels when showing outcome data
   const isOutcomeActive = useIsOutcomeVisualizationActive()
+
+  // Move river layers to the top of the layer stack
+  // This ensures rivers are always visible above polygon visualizations
+  useEffect(() => {
+    if (!visible || !mapRef?.current) return
+
+    const map = mapRef.current.getMap()
+    
+    // Small delay to ensure layers are added first
+    const timeoutId = setTimeout(() => {
+      // Move each river layer to the top (in order, so body ends up on top)
+      RIVER_LAYER_IDS.forEach((layerId) => {
+        try {
+          if (map.getLayer(layerId)) {
+            map.moveLayer(layerId)
+          }
+        } catch {
+          // Layer might not exist yet, ignore
+        }
+      })
+    }, 100)
+
+    return () => clearTimeout(timeoutId)
+  }, [visible, mapRef])
 
   // Calculate label opacity: fade in from 30% to 50% of river drawing
   // Labels are hidden when outcome visualization is active
