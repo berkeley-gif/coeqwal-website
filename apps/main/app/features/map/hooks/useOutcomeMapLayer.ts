@@ -21,6 +21,7 @@ import {
   TierLevel,
 } from "../../../content/tiers"
 import type { MapMode } from "../store"
+import { RIVER_LAYER_IDS } from "../layers/RiversLayer"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MapInstance = any
@@ -510,6 +511,17 @@ export function useOutcomeMapLayer({
               "visible",
             )
           }
+
+          // Move river layers to the top so they're always visible above polygons
+          RIVER_LAYER_IDS.forEach((layerId) => {
+            try {
+              if (map.getLayer(layerId)) {
+                map.moveLayer(layerId)
+              }
+            } catch {
+              // Layer might not exist, ignore
+            }
+          })
         })
 
         // This is a SEPARATE withMap call to ensure zoom happens even if styling encounters issues
