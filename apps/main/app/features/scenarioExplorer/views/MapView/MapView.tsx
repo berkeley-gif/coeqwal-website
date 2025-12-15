@@ -65,6 +65,7 @@ export default function MapView() {
           position: "relative",
           // This box is transparent so the persistent map shows through
           backgroundColor: "transparent",
+          pointerEvents: "none", // Allow map interactions to pass through
         }}
       >
         {/* Info overlay */}
@@ -79,6 +80,7 @@ export default function MapView() {
             boxShadow: theme.boxShadows.subtle,
             maxWidth: theme.spacing(40),
             zIndex: theme.zIndex.mapControls,
+            pointerEvents: "auto", // Re-enable for the info box itself
           }}
         >
           <Box

@@ -377,6 +377,21 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     })
   }, [mapMode, map])
 
+  // Reset camera when switching to Learn mode
+  useEffect(() => {
+    if (mapMode !== "learn") return
+    if (!map.mapRef?.current) return
+
+    // Reset to initial California view for Learn mode
+    map.mapRef.current.easeTo({
+      center: CALIFORNIA_VIEW.center,
+      zoom: CALIFORNIA_VIEW.zoom,
+      bearing: CALIFORNIA_VIEW.bearing,
+      pitch: CALIFORNIA_VIEW.pitch,
+      duration: 1000,
+    })
+  }, [mapMode, map])
+
   const containerStyles = getContainerStyles(
     mapMode,
     theme.zIndex.basement,
