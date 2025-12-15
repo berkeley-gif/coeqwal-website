@@ -170,20 +170,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     ? outcomeUsesPolygons(exploreTierSelection.outcome)
     : false
 
-  // Use polygon layer for Learn mode (CWS, AG_REV, etc.)
-  const { hoveredFeature: learnHoveredFeature } = useOutcomeMapLayer({
-    outcome: learnUsesPolygons ? selectedOutcome : null,
-    strategy: "current-ops",
-    visible: mapMode === "learn" && learnUsesPolygons && !!selectedOutcome,
-  })
-
-  // Use polygon layer for Explore mode (CWS, AG_REV, etc.)
-  // skipCameraControl: let useTierMapData handle zoom instead of this hook
-  const { hoveredFeature: exploreHoveredFeature } = useOutcomeMapLayer({
-    outcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
-    strategy: exploreTierSelection?.strategy ?? "current-ops",
-    visible: mapMode === "explore" && exploreUsesPolygons && !!exploreTierSelection,
-    skipCameraControl: true,
+  // Single mode-aware hook for polygon layer (CWS, AG_REV, etc.)
+  // The hook derives which outcome to show based on mapMode
+  const { hoveredFeature } = useOutcomeMapLayer({
+    learnOutcome: learnUsesPolygons ? selectedOutcome : null,
+    learnStrategy: "current-ops",
+    exploreOutcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
+    exploreStrategy: exploreTierSelection?.strategy ?? "current-ops",
+    mapMode,
   })
 
   // Explore mode: fetch tier data based on selection
@@ -451,13 +445,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   // NOTE: Learn mode camera is handled by "Camera transitions when section changes" effect
   // which fires when resetLearnState() sets activeSection to "california"
 
-  // Clear visualizations when map is hidden (tab change)
-  useEffect(() => {
-    if (mapMode === "hidden") {
-      learnMapActions.setSelectedOutcome(null)
-      learnMapActions.setExploreTierSelection(null)
-    }
-  }, [mapMode])
+  // FYI: Visualization state clearing is handled synchronously in setMapMode()
 
   const containerStyles = getContainerStyles(
     mapMode,
@@ -562,10 +550,10 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             {tierData && !learnUsesPolygons && <TierMarkers data={tierData} />}
 
             {/* Hover tooltip for Learn mode polygon features */}
-            {learnHoveredFeature && (
+            {hoveredFeature && (
               <Popup
-                longitude={learnHoveredFeature.longitude}
-                latitude={learnHoveredFeature.latitude}
+                longitude={hoveredFeature.longitude}
+                latitude={hoveredFeature.latitude}
                 anchor="bottom"
                 closeButton={false}
                 closeOnClick={false}
@@ -573,14 +561,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
               >
                 <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
                   {(() => {
-                    const isUrban = learnHoveredFeature.classType === "Urban"
+                    const isUrban = hoveredFeature.classType === "Urban"
                     const primaryName =
-                      isUrban && learnHoveredFeature.urbName
-                        ? learnHoveredFeature.urbName
-                        : learnHoveredFeature.modName
+                      isUrban && hoveredFeature.urbName
+                        ? hoveredFeature.urbName
+                        : hoveredFeature.modName
                     const secondaryName =
-                      isUrban && learnHoveredFeature.urbName && learnHoveredFeature.modName
-                        ? learnHoveredFeature.modName
+                      isUrban && hoveredFeature.urbName && hoveredFeature.modName
+                        ? hoveredFeature.modName
                         : null
 
                     return (
@@ -612,16 +600,16 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     )
                   })()}
 
-                  {learnHoveredFeature.subName && (
+                  {hoveredFeature.subName && (
                     <Typography
                       variant="body2"
                       sx={{ color: theme.palette.grey[600], mb: 0.5 }}
                     >
-                      {learnHoveredFeature.subName}
+                      {hoveredFeature.subName}
                     </Typography>
                   )}
 
-                  {learnHoveredFeature.comments && (
+                  {hoveredFeature.comments && (
                     <Typography
                       variant="caption"
                       sx={{
@@ -631,11 +619,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         lineHeight: 1.3,
                       }}
                     >
-                      {learnHoveredFeature.comments}
+                      {hoveredFeature.comments}
                     </Typography>
                   )}
 
-                  {learnHoveredFeature.type && (
+                  {hoveredFeature.type && (
                     <Typography
                       variant="caption"
                       sx={{
@@ -644,7 +632,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         mb: 0.5,
                       }}
                     >
-                      {learnHoveredFeature.type}
+                      {hoveredFeature.type}
                     </Typography>
                   )}
 
@@ -656,7 +644,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                       mb: 1,
                     }}
                   >
-                    CalSim ID: {learnHoveredFeature.duId}
+                    CalSim ID: {hoveredFeature.duId}
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -667,14 +655,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         borderRadius: "2px",
                         backgroundColor:
                           theme.palette.tiers[
-                            `tier${learnHoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
+                            `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
                           ],
                         flexShrink: 0,
                       }}
                     />
                     <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                      <strong>Tier {learnHoveredFeature.tierLevel}:</strong>{" "}
-                      {learnHoveredFeature.tierLabel}
+                      <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
+                      {hoveredFeature.tierLabel}
                     </Typography>
                   </Box>
                 </Box>
@@ -690,10 +678,10 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         )}
 
         {/* Hover tooltip for Explore mode polygon features */}
-        {isExploreMode && exploreHoveredFeature && (
+        {isExploreMode && hoveredFeature && (
           <Popup
-            longitude={exploreHoveredFeature.longitude}
-            latitude={exploreHoveredFeature.latitude}
+            longitude={hoveredFeature.longitude}
+            latitude={hoveredFeature.latitude}
             anchor="bottom"
             closeButton={false}
             closeOnClick={false}
@@ -701,14 +689,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
           >
             <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
               {(() => {
-                const isUrban = exploreHoveredFeature.classType === "Urban"
+                const isUrban = hoveredFeature.classType === "Urban"
                 const primaryName =
-                  isUrban && exploreHoveredFeature.urbName
-                    ? exploreHoveredFeature.urbName
-                    : exploreHoveredFeature.modName
+                  isUrban && hoveredFeature.urbName
+                    ? hoveredFeature.urbName
+                    : hoveredFeature.modName
                 const secondaryName =
-                  isUrban && exploreHoveredFeature.urbName && exploreHoveredFeature.modName
-                    ? exploreHoveredFeature.modName
+                  isUrban && hoveredFeature.urbName && hoveredFeature.modName
+                    ? hoveredFeature.modName
                     : null
 
                 return (
@@ -740,16 +728,16 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                 )
               })()}
 
-              {exploreHoveredFeature.subName && (
+              {hoveredFeature.subName && (
                 <Typography
                   variant="body2"
                   sx={{ color: theme.palette.grey[600], mb: 0.5 }}
                 >
-                  {exploreHoveredFeature.subName}
+                  {hoveredFeature.subName}
                 </Typography>
               )}
 
-              {exploreHoveredFeature.comments && (
+              {hoveredFeature.comments && (
                 <Typography
                   variant="caption"
                   sx={{
@@ -759,11 +747,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     lineHeight: 1.3,
                   }}
                 >
-                  {exploreHoveredFeature.comments}
+                  {hoveredFeature.comments}
                 </Typography>
               )}
 
-              {exploreHoveredFeature.type && (
+              {hoveredFeature.type && (
                 <Typography
                   variant="caption"
                   sx={{
@@ -772,7 +760,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     mb: 0.5,
                   }}
                 >
-                  {exploreHoveredFeature.type}
+                  {hoveredFeature.type}
                 </Typography>
               )}
 
@@ -784,7 +772,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                   mb: 1,
                 }}
               >
-                CalSim ID: {exploreHoveredFeature.duId}
+                CalSim ID: {hoveredFeature.duId}
               </Typography>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -795,14 +783,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     borderRadius: "2px",
                     backgroundColor:
                       theme.palette.tiers[
-                        `tier${exploreHoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
+                        `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
                       ],
                     flexShrink: 0,
                   }}
                 />
                 <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                  <strong>Tier {exploreHoveredFeature.tierLevel}:</strong>{" "}
-                  {exploreHoveredFeature.tierLabel}
+                  <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
+                  {hoveredFeature.tierLabel}
                 </Typography>
               </Box>
             </Box>
