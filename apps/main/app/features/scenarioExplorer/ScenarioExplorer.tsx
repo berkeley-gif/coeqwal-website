@@ -1,7 +1,18 @@
 "use client"
 
 import React, { useState } from "react"
-import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  Tabs,
+  Tab,
+  useTheme,
+  IconButton,
+  Tooltip,
+  Typography,
+  ViewListIcon,
+  CompareArrowsIcon,
+} from "@repo/ui/mui"
+import Image from "next/image"
 import AboutScenariosView from "./views/AboutScenariosView"
 import UnifiedExploreView, {
   type ExploreMode,
@@ -125,9 +136,86 @@ export default function ScenarioExplorerNew() {
           {/* Selection Banner - only show when exploring data */}
           {(mainView === "explorer" || mainView === "data") && <SelectionBanner />}
 
-          {/* Search bar for explorer view */}
+          {/* Search bar for explorer view with view mode toggle */}
           {mainView === "explorer" && (
-            <SearchBar placeholder="Search scenarios by name or description" />
+            <SearchBar
+              placeholder="Search scenarios by name or description"
+              rightContent={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: theme.palette.grey[600], mr: 1 }}
+                  >
+                    View:
+                  </Typography>
+                  <Tooltip title="List view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("list")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "list"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        color:
+                          exploreMode === "list"
+                            ? theme.palette.blue.bright
+                            : theme.palette.grey[600],
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <ViewListIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Map view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("map")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "map"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <Image
+                        src="/images/icons/map.svg"
+                        alt="Map view"
+                        width={24}
+                        height={24}
+                        style={{ opacity: exploreMode === "map" ? 1 : 0.6 }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Comparison view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("comparison")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "comparison"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        color:
+                          exploreMode === "comparison"
+                            ? theme.palette.blue.bright
+                            : theme.palette.grey[600],
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <CompareArrowsIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
+            />
           )}
         </Box>
 
@@ -142,10 +230,7 @@ export default function ScenarioExplorerNew() {
         >
           {mainView === "about" && <AboutScenariosView />}
           {mainView === "explorer" && (
-            <UnifiedExploreView
-              mode={exploreMode}
-              onModeChange={setExploreMode}
-            />
+            <UnifiedExploreView mode={exploreMode} />
           )}
           {mainView === "data" && <DataExplorerView />}
         </Box>
