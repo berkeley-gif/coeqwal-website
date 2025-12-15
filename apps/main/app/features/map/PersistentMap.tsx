@@ -430,7 +430,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         dragRotate={false}
         doubleClickZoom={true}
         keyboard={true}
-        interactive={mapMode !== "hidden"}
+        interactive={true}  // Always interactive - visibility controlled by CSS pointerEvents
         projection={{ name: "globe" }}
       >
         <NavigationControl position="bottom-left" />

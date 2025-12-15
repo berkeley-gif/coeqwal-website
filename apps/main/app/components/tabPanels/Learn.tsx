@@ -136,7 +136,7 @@ export default function LearnPanel() {
                 color: "grey.500",
                 flexDirection: "column",
                 gap: 2,
-                pointerEvents: "auto",
+                pointerEvents: "none",  // Don't block map panning while loading
               }}
             >
               <Box
