@@ -41,7 +41,7 @@ import {
 // Hooks
 import {
   useOutcomeMapLayer,
-  outcomeUsesDemandUnits,
+  outcomeUsesPolygons,
 } from "./hooks/useOutcomeMapLayer"
 import { useMapLayers } from "./hooks/useMapLayers"
 
@@ -154,16 +154,28 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   // Scroll offset for "release from sticky" effect in Learn mode
   const learnMapScrollOffset = useLearnMapScrollOffset()
 
-  // Check if outcome uses demand unit layer
-  const usesDemandUnits = selectedOutcome
-    ? outcomeUsesDemandUnits(selectedOutcome)
+  // Check if Learn outcome uses polygon visualization
+  const learnUsesPolygons = selectedOutcome
+    ? outcomeUsesPolygons(selectedOutcome)
     : false
 
-  // Use demand unit layer for CWS, AG_REV, etc. (Learn mode only)
-  const { hoveredFeature } = useOutcomeMapLayer({
-    outcome: usesDemandUnits ? selectedOutcome : null,
+  // Check if Explore outcome uses polygon visualization
+  const exploreUsesPolygons = exploreTierSelection?.outcome
+    ? outcomeUsesPolygons(exploreTierSelection.outcome)
+    : false
+
+  // Use polygon layer for Learn mode (CWS, AG_REV, etc.)
+  const { hoveredFeature: learnHoveredFeature } = useOutcomeMapLayer({
+    outcome: learnUsesPolygons ? selectedOutcome : null,
     strategy: "current-ops",
-    visible: mapMode === "learn" && usesDemandUnits && !!selectedOutcome,
+    visible: mapMode === "learn" && learnUsesPolygons && !!selectedOutcome,
+  })
+
+  // Use polygon layer for Explore mode (CWS, AG_REV, etc.)
+  const { hoveredFeature: exploreHoveredFeature } = useOutcomeMapLayer({
+    outcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
+    strategy: exploreTierSelection?.strategy ?? "current-ops",
+    visible: mapMode === "explore" && exploreUsesPolygons && !!exploreTierSelection,
   })
 
   // Explore mode: fetch tier data based on selection
@@ -171,13 +183,13 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     selectedTier: mapMode === "explore" ? exploreTierSelection : null,
   })
 
-  // Tier location data for outcomes that DON'T use demand units
+  // Tier location data for outcomes that DON'T use polygons
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
   const [, setTierDataLoading] = useState(false)
 
-  // Fetch tier location data when in Learn mode and outcome selected
+  // Fetch tier location data when in Learn mode and outcome selected (non-polygon outcomes only)
   useEffect(() => {
-    if (mapMode !== "learn" || !selectedOutcome || usesDemandUnits) {
+    if (mapMode !== "learn" || !selectedOutcome || learnUsesPolygons) {
       setTierData(null)
       return
     }
@@ -228,7 +240,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
     fetchData()
     return () => { cancelled = true }
-  }, [selectedOutcome, usesDemandUnits, map, mapMode])
+  }, [selectedOutcome, learnUsesPolygons, map, mapMode])
 
   // Apply Mapbox layer states based on activeSection (Learn mode only)
   useMapLayers()
@@ -497,14 +509,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
               </Marker>
             )}
 
-            {/* Tier markers for Learn mode outcomes */}
-            {tierData && !usesDemandUnits && <TierMarkers data={tierData} />}
+            {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
+            {tierData && !learnUsesPolygons && <TierMarkers data={tierData} />}
 
-            {/* Hover tooltip for demand unit polygons */}
-            {hoveredFeature && (
+            {/* Hover tooltip for Learn mode polygon features */}
+            {learnHoveredFeature && (
               <Popup
-                longitude={hoveredFeature.longitude}
-                latitude={hoveredFeature.latitude}
+                longitude={learnHoveredFeature.longitude}
+                latitude={learnHoveredFeature.latitude}
                 anchor="bottom"
                 closeButton={false}
                 closeOnClick={false}
@@ -512,14 +524,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
               >
                 <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
                   {(() => {
-                    const isUrban = hoveredFeature.classType === "Urban"
+                    const isUrban = learnHoveredFeature.classType === "Urban"
                     const primaryName =
-                      isUrban && hoveredFeature.urbName
-                        ? hoveredFeature.urbName
-                        : hoveredFeature.modName
+                      isUrban && learnHoveredFeature.urbName
+                        ? learnHoveredFeature.urbName
+                        : learnHoveredFeature.modName
                     const secondaryName =
-                      isUrban && hoveredFeature.urbName && hoveredFeature.modName
-                        ? hoveredFeature.modName
+                      isUrban && learnHoveredFeature.urbName && learnHoveredFeature.modName
+                        ? learnHoveredFeature.modName
                         : null
 
                     return (
@@ -551,16 +563,16 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     )
                   })()}
 
-                  {hoveredFeature.subName && (
+                  {learnHoveredFeature.subName && (
                     <Typography
                       variant="body2"
                       sx={{ color: theme.palette.grey[600], mb: 0.5 }}
                     >
-                      {hoveredFeature.subName}
+                      {learnHoveredFeature.subName}
                     </Typography>
                   )}
 
-                  {hoveredFeature.comments && (
+                  {learnHoveredFeature.comments && (
                     <Typography
                       variant="caption"
                       sx={{
@@ -570,11 +582,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         lineHeight: 1.3,
                       }}
                     >
-                      {hoveredFeature.comments}
+                      {learnHoveredFeature.comments}
                     </Typography>
                   )}
 
-                  {hoveredFeature.type && (
+                  {learnHoveredFeature.type && (
                     <Typography
                       variant="caption"
                       sx={{
@@ -583,7 +595,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         mb: 0.5,
                       }}
                     >
-                      {hoveredFeature.type}
+                      {learnHoveredFeature.type}
                     </Typography>
                   )}
 
@@ -595,7 +607,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                       mb: 1,
                     }}
                   >
-                    CalSim ID: {hoveredFeature.duId}
+                    CalSim ID: {learnHoveredFeature.duId}
                   </Typography>
 
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -606,14 +618,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                         borderRadius: "2px",
                         backgroundColor:
                           theme.palette.tiers[
-                            `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
+                            `tier${learnHoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
                           ],
                         flexShrink: 0,
                       }}
                     />
                     <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                      <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
-                      {hoveredFeature.tierLabel}
+                      <strong>Tier {learnHoveredFeature.tierLevel}:</strong>{" "}
+                      {learnHoveredFeature.tierLabel}
                     </Typography>
                   </Box>
                 </Box>
@@ -623,8 +635,129 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         )}
 
         {/* Explore mode layers */}
-        {isExploreMode && exploreTierData && exploreTierData.features.length > 0 && (
+        {/* Only show TierMarkers when NOT using polygon visualization */}
+        {isExploreMode && exploreTierData && exploreTierData.features.length > 0 && !exploreUsesPolygons && (
           <TierMarkers data={exploreTierData} />
+        )}
+
+        {/* Hover tooltip for Explore mode polygon features */}
+        {isExploreMode && exploreHoveredFeature && (
+          <Popup
+            longitude={exploreHoveredFeature.longitude}
+            latitude={exploreHoveredFeature.latitude}
+            anchor="bottom"
+            closeButton={false}
+            closeOnClick={false}
+            offset={15}
+          >
+            <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
+              {(() => {
+                const isUrban = exploreHoveredFeature.classType === "Urban"
+                const primaryName =
+                  isUrban && exploreHoveredFeature.urbName
+                    ? exploreHoveredFeature.urbName
+                    : exploreHoveredFeature.modName
+                const secondaryName =
+                  isUrban && exploreHoveredFeature.urbName && exploreHoveredFeature.modName
+                    ? exploreHoveredFeature.modName
+                    : null
+
+                return (
+                  <>
+                    {primaryName && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.blue.darkest,
+                          mb: 0.5,
+                        }}
+                      >
+                        {primaryName}
+                      </Typography>
+                    )}
+                    {secondaryName && (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: theme.palette.grey[700],
+                          mb: 0.5,
+                        }}
+                      >
+                        {secondaryName}
+                      </Typography>
+                    )}
+                  </>
+                )
+              })()}
+
+              {exploreHoveredFeature.subName && (
+                <Typography
+                  variant="body2"
+                  sx={{ color: theme.palette.grey[600], mb: 0.5 }}
+                >
+                  {exploreHoveredFeature.subName}
+                </Typography>
+              )}
+
+              {exploreHoveredFeature.comments && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    display: "block",
+                    mb: 0.5,
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {exploreHoveredFeature.comments}
+                </Typography>
+              )}
+
+              {exploreHoveredFeature.type && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    display: "block",
+                    mb: 0.5,
+                  }}
+                >
+                  {exploreHoveredFeature.type}
+                </Typography>
+              )}
+
+              <Typography
+                variant="caption"
+                sx={{
+                  color: theme.palette.grey[500],
+                  display: "block",
+                  mb: 1,
+                }}
+              >
+                CalSim ID: {exploreHoveredFeature.duId}
+              </Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "2px",
+                    backgroundColor:
+                      theme.palette.tiers[
+                        `tier${exploreHoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
+                      ],
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
+                  <strong>Tier {exploreHoveredFeature.tierLevel}:</strong>{" "}
+                  {exploreHoveredFeature.tierLabel}
+                </Typography>
+              </Box>
+            </Box>
+          </Popup>
         )}
       </Map>
     </Box>
