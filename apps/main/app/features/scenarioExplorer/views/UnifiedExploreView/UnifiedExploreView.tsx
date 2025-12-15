@@ -9,9 +9,9 @@ import {
   useTheme,
   CircularProgress,
   ViewListIcon,
-  MapIcon,
   CompareArrowsIcon,
 } from "@repo/ui/mui"
+import Image from "next/image"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import ListView from "../ListView/ListView"
 import { learnMapActions } from "../../../../features/map/store"
@@ -161,16 +161,20 @@ export default function UnifiedExploreView({
                 mode === "map"
                   ? `${theme.palette.blue.bright}1A`
                   : "transparent",
-              color:
-                mode === "map"
-                  ? theme.palette.blue.bright
-                  : theme.palette.grey[600],
               "&:hover": {
                 backgroundColor: `${theme.palette.blue.bright}1A`,
               },
             }}
           >
-            <MapIcon fontSize="small" />
+            <Image
+              src="/images/icons/map.svg"
+              alt="Map view"
+              width={24}
+              height={24}
+              style={{
+                opacity: mode === "map" ? 1 : 0.6,
+              }}
+            />
           </IconButton>
         </Tooltip>
 
