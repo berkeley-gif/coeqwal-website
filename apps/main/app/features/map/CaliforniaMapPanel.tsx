@@ -278,7 +278,7 @@ export default function CaliforniaMapPanel({
     return () => {
       clearInterval(interval)
     }
-  }, [map.mapRef, onMapReady, MAPBOX_LAYER_IDS])
+  }, [map.mapRef, onMapReady])
 
   // Track previous section for camera transitions
   const prevSectionRef = useRef<SectionId | null>(null)
