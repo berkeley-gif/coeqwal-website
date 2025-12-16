@@ -1,98 +1,97 @@
-.axis{
-    stroke: #F2F0EF;
-    stroke-width: 2px;
+.axis {
+  stroke: #f2f0ef;
+  stroke-width: 2px;
 }
 
 .y-axis-ticks text,
 .y-axis text,
 .x-axis-ticks text,
-.x-axis text{
-    fill: #F2F0EF;
+.x-axis text {
+  fill: #f2f0ef;
 }
 
 #hydroclimate-line-title,
-#hydroclimate-scatter-title{
-    fill: #F1B143;
+#hydroclimate-scatter-title {
+  fill: #f1b143;
 }
 
-.climate-points{
-    fill: #F1B143;
-    text-anchor: middle;
-    dominant-baseline: middle;
+.climate-points {
+  fill: #f1b143;
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
-.axis-label{
-    text-anchor: middle;
-    dominant-baseline: middle;
+.axis-label {
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
 .x-axis-ticks {
-    text-anchor: middle;
-    dominant-baseline: middle;
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
 .y-axis-ticks {
-    text-anchor: end;
-    dominant-baseline: middle;
+  text-anchor: end;
+  dominant-baseline: middle;
 }
 
 #y-axis-label,
-#x-axis-label{
-    text-anchor: middle;
+#x-axis-label {
+  text-anchor: middle;
 }
 
 @media (min-width: 1536px) {
-    .climate-points {
-        font-size: 18px;
-    }
+  .climate-points {
+    font-size: 18px;
+  }
 
-    #y-axis-label,
-    #x-axis-label{
-        font-size: 14px;
-    }
-    
-    .y-axis-ticks,
-    .x-axis-ticks{
-        font-size: 14px;
-    }
+  #y-axis-label,
+  #x-axis-label {
+    font-size: 14px;
+  }
 
-    #hydroclimate-line-title,
-    #hydroclimate-scatter-title{
-        font-size: 16px;
-    }
+  .y-axis-ticks,
+  .x-axis-ticks {
+    font-size: 14px;
+  }
+
+  #hydroclimate-line-title,
+  #hydroclimate-scatter-title {
+    font-size: 16px;
+  }
 }
 
 @media (min-width: 1200px) {
-    .climate-points {
-        font-size: 1.1rem;
-    }
-    #y-axis-label,
-    #x-axis-label{
-        font-size: 14px;
-    }
+  .climate-points {
+    font-size: 1.1rem;
+  }
+  #y-axis-label,
+  #x-axis-label {
+    font-size: 14px;
+  }
 
-    .y-axis-ticks,
-    .x-axis-ticks{
-        font-size: 14px;
-    }
+  .y-axis-ticks,
+  .x-axis-ticks {
+    font-size: 14px;
+  }
 
-    #hydroclimate-line-title,
-    #hydroclimate-scatter-title{
-        font-size: 16px;
-    }
+  #hydroclimate-line-title,
+  #hydroclimate-scatter-title {
+    font-size: 16px;
+  }
 }
 
-
 @media (max-width: 600px) {
-    .x-axis-ticks {
-        font-size: 1rem;
-    }
+  .x-axis-ticks {
+    font-size: 1rem;
+  }
 
-    .y-axis-ticks {
-        font-size: 10px;
-    }
+  .y-axis-ticks {
+    font-size: 10px;
+  }
 
-    #y-axis-label{
-        font-size: 12px;
-    }
+  #y-axis-label {
+    font-size: 12px;
+  }
 }

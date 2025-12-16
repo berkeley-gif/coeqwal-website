@@ -83,11 +83,11 @@ export default function MapContainer({
   }, [mapRef, uncontrolledRef])
 
   return (
-    <Box sx={{ width: "100%", height: "100vh" }}>
+    <Box sx={{ width: "100%", height: "100%" }}>
       <Map
         mapboxToken={mapboxToken}
         mapStyle="mapbox://styles/coeqwal/cmc0zhlcr008p01sof4ob61vg"
-        style={{ width: "100%", height: "40vh" }}
+        style={{ width: "100%", height: "100%" }}
         interactive={false}
         navigationControl={false}
         dragPan={true}
@@ -97,7 +97,7 @@ export default function MapContainer({
         <RiverLayer />
         <TunnelLayer />
         <SalinityHistoricalLayer />
-        <RiverFlowLayer />
+        <EcoMachineLayer />
         <AnimatePresence>
           <TextMarkersLayer
             markers={[SacramentoRiver, SanJoaquinRiver]}
@@ -137,7 +137,7 @@ function SalinityHistoricalLayer() {
           type="line"
           source="salinity-historical-arrow"
           paint={{
-            "line-color": "#F2f0EF",
+            "line-color": "#F1B143",
             "line-width": 5,
           }}
           layout={{
@@ -158,6 +158,7 @@ function SalinityHistoricalLayer() {
           paint={{
             "line-color": "#F1B143",
             "line-width": 5,
+            "line-opacity": 0,
           }}
           layout={{
             "line-cap": "round",
@@ -188,6 +189,7 @@ function SalinityHistoricalLayer() {
   )
 }
 
+/*
 function RiverFlowLayer() {
   return (
     <>
@@ -226,6 +228,29 @@ function RiverFlowLayer() {
           layout={{
             "line-cap": "round",
             "line-join": "round",
+          }}
+        />
+      </Source>
+    </>
+  )
+}*/
+
+function EcoMachineLayer() {
+  return (
+    <>
+      <Source
+        id="delta-ecomachine"
+        type="vector"
+        url="mapbox://coeqwal.85cidh9z"
+      >
+        <Layer
+          id="delta-ecomachine-layer"
+          type="fill"
+          source="delta-ecomachine"
+          source-layer="suisan_marsh-banxwv"
+          paint={{
+            "fill-color": InfrastructureColor,
+            "fill-opacity": 0,
           }}
         />
       </Source>

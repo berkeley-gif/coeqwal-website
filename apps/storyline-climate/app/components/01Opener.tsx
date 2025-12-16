@@ -7,6 +7,9 @@ import { useRef, useState } from "react"
 import ScrollIndicator from "./helpers/ScrollIndicator"
 
 function Opener() {
+  const [hideHint, setHideHint] = useState(false)
+  const [knobReady, setKnobReady] = useState(false)
+
   return (
     <Box
       id="opener"
@@ -20,7 +23,29 @@ function Opener() {
       <VerticalImageSlider
         topSrc="/images/oroville_2021_aligned.png"
         bottomSrc="/images/oroville_2023_aligned.png"
+        onFirstUserDrag={() => setHideHint(true)}
+        onKnobVisible={() => setKnobReady(true)}
       />
+
+      {knobReady && !hideHint && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "5%",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        >
+          <Typography
+            variant="body2"
+            className="text-shadow"
+            sx={{ opacity: 0.85 }}
+          >
+            Drag this to see how California water can change in two years!
+          </Typography>
+        </Box>
+      )}
+
       <Box
         className="paragraph text-center-holder text-shadow"
         component="header"

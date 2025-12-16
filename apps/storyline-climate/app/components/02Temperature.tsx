@@ -3,7 +3,6 @@
 import { Box, Typography } from "@repo/ui/mui"
 import useActiveSection from "../hooks/useActiveSection"
 import TemperatureLineChart from "./vis/TemperatureLineChart"
-import { useEffect } from "react"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import StickyContainer from "./helpers/StickyContainer"
 import { motion, useScroll, useTransform } from "@repo/motion"
@@ -108,12 +107,13 @@ function Temperature() {
     offset: ["start end", "end start"],
   })
 
+  /*
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      console.log("Temperature scrollYProgress:", v)
+    const unsubscribe = scrollYProgress.on('change', (v) => { 
+      console.log("Temperature scrollYProgress:", v);
     })
     return () => unsubscribe()
-  }, [scrollYProgress])
+  }, [scrollYProgress]);*/
 
   const linePath = useTransform(scrollYProgress, [0.6, 0.8], [0, 1])
 
