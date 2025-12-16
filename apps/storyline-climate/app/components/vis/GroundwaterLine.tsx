@@ -30,10 +30,9 @@ const axisLabelStyle: React.CSSProperties = {
 // Define drought bands (edit these dates)
 // --------------------------------------------
 const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
-  { start: new Date("2007-01-01"), end: new Date("2009-01-01"), opacity: 0.22 },
-  { start: new Date("2012-01-01"), end: new Date("2013-06-01"), opacity: 0.22 },
-  { start: new Date("2014-01-01"), end: new Date("2016-12-31"), opacity: 0.25 },
-  { start: new Date("2019-10-01"), end: new Date("2020-06-01"), opacity: 0.25 },
+  { start: new Date("1970-01-01"), end: new Date("1977-01-01"), opacity: 0.22 },
+  { start: new Date("1983-01-01"), end: new Date("1994-06-01"), opacity: 0.22 },
+  { start: new Date("1998-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
 ]
 
 type Props = {
@@ -104,6 +103,53 @@ export default function GroundwaterLine({
   const plotWidth = Math.max(0, size.width - margin.left - margin.right)
   const plotHeight = Math.max(0, size.height - margin.top - margin.bottom)
 
+
+  // setting the charge labels below the water curve
+  const RECHARGE_LABELS = ["1st recharge", "2nd recharge"]
+  const rechargeGaps = useMemo(() => {
+    if (DROUGHT_BANDS.length < 2 || data.length === 0) return []
+
+    const bisectDate = d3.bisector<GroundwaterRow, Date>(
+      (d) => d.date!
+    ).center
+
+    return DROUGHT_BANDS.slice(0, -1).map((b, i) => {
+      const next = DROUGHT_BANDS[i + 1]
+      if (!next) return null
+
+      // 1) midpoint time between drought bands
+      const midTime = new Date(
+        (b.end.getTime() + next.start.getTime()) / 2)
+      // 2) x position
+      const x = xScale(midTime)
+      // 3) find closest index (may be out of bounds)
+      let idx = bisectDate(data, midTime)
+      // clamp index safely
+      idx = Math.max(0, Math.min(data.length - 1, idx))
+      const closestDatum = data[idx]
+      if (!closestDatum) return null // extra safety
+      // 4) y position below the curve
+      const yOnCurve = yScale(closestDatum.gse_gwe)
+      const y = Math.min(
+        margin.top + plotHeight - 10, // keep inside plot
+        yOnCurve + 28                 // below curve
+      )
+      const [line1, line2] =
+        (RECHARGE_LABELS[i] ?? `Recharge ${i + 1}`).split(" ")
+      return {
+        x,
+        y,
+        line1,
+        line2,
+      }
+    }).filter(Boolean) as Array<{
+      x: number
+      y: number
+      line1: string
+      line2: string
+    }>
+  }, [xScale, yScale, data, plotHeight])
+
   return (
     <svg ref={svgRef} width="100%" height="100%">
       {/* clip to plotting area so bands/area/line don't spill out */}
@@ -158,6 +204,27 @@ export default function GroundwaterLine({
           )
         })}
       </g>
+      {/* Recharge labels placed below curve */}
+    <g clipPath="url(#plot-clip)" pointerEvents="none">
+      {rechargeGaps.map((g, i) => (
+        <text
+          key={i}
+          x={g.x}
+          y={g.y}
+          textAnchor="middle"
+          style={{
+            fill: OffWhiteColor,
+            fontSize: "1.05rem",
+            opacity: 0.9,
+          }}
+        >
+          <tspan x={g.x} dy="0em">{g.line1}</tspan>
+          <tspan x={g.x} dy="1.2em">{g.line2}</tspan>
+        </text>
+      ))}
+    </g>
+      
+
     </svg>
   )
 }
