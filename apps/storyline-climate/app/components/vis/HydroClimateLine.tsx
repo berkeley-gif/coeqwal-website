@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { ContainerSize } from "./HydroClimate"
 import * as d3 from "d3"
 import "./hydroclimate.css"
-import { FreshWaterColor } from "../helpers/colorPalette"
 
 export type FlowEntry = {
   model: string

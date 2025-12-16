@@ -26,10 +26,9 @@ type VerticalCompareProps = {
   autoPlayDelayMs?: number // delay before starting
   autoPlayDurationMs?: number // total sweep time
   autoPlayOnce?: boolean // run only the first time component mounts
-  
-  onFirstUserDrag?: () => void // to trigger disappear for text 
-  onKnobVisible?: () => void // make sure text appear when the knob visible
 
+  onFirstUserDrag?: () => void // to trigger disappear for text
+  onKnobVisible?: () => void // make sure text appear when the knob visible
 }
 
 export function HorizontalImageSlider({
@@ -215,9 +214,9 @@ export function VerticalImageSlider({
 
   const firedFirstDrag = useRef(false)
   const handlePointerDown = (e: React.PointerEvent) => {
-  ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
-  startUserDrag(e.clientY)
-}
+    ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+    startUserDrag(e.clientY)
+  }
 
   const knobVisibleFired = useRef(false)
   useEffect(() => {
@@ -228,17 +227,17 @@ export function VerticalImageSlider({
   }, [showKnob, onKnobVisible])
 
   const startUserDrag = (clientY: number) => {
-  stopAutoplay()
-  dragging.current = true
-  setIsDragging(true)
+    stopAutoplay()
+    dragging.current = true
+    setIsDragging(true)
 
-  if (!firedFirstDrag.current) {
-    firedFirstDrag.current = true
-    onFirstUserDrag?.()
+    if (!firedFirstDrag.current) {
+      firedFirstDrag.current = true
+      onFirstUserDrag?.()
+    }
+
+    updateFromPointer(clientY)
   }
-
-  updateFromPointer(clientY)
-}
 
   // --- autoplay bookkeeping ---
   const rafId = useRef<number | null>(null)

@@ -1,39 +1,44 @@
 .grass-layer {
-    position: absolute;
-    bottom: 0;
-    height: 400px;
-    /* background: transparent; */
-  }
+  position: absolute;
+  bottom: 0;
+  height: 400px;
+  /* background: transparent; */
+}
 
-  .grass-layer.center{
-    left: 25%;
-    width: 50%;
+.grass-layer.center {
+  left: 25%;
+  width: 50%;
+}
+
+/* Left grass covers 25% of the viewport on the left */
+.grass-layer.left {
+  left: 0;
+  width: 25%;
+}
+
+/* Right grass covers 25% of the viewport on the right */
+.grass-layer.right {
+  right: 0;
+  width: 25%;
+}
+
+/* Grass blades */
+.blade {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  border-radius: 0 0 4px 4px;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  animation: sway 4s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(var(--start-angle));
   }
-  
-  /* Left grass covers 25% of the viewport on the left */
-  .grass-layer.left {
-    left: 0;
-    width: 25%;
+  50% {
+    transform: rotate(var(--end-angle));
   }
-  
-  /* Right grass covers 25% of the viewport on the right */
-  .grass-layer.right {
-    right: 0;
-    width: 25%;
-  }
-  
-  /* Grass blades */
-  .blade {
-    position: absolute;
-    bottom: 0;
-    width: 4px;
-    border-radius: 0 0 4px 4px;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    animation: sway 4s infinite ease-in-out;
-    transform-origin: bottom center;
-  }
-  
-  @keyframes sway {
-    0%, 100% { transform: rotate(var(--start-angle)); }
-    50% { transform: rotate(var(--end-angle)); }
-  }
+}

@@ -1,11 +1,10 @@
 "use client"
 
-import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
+import { Box, Stack, Typography } from "@repo/ui/mui"
 import { motion, MotionValue, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import { useEffect, useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
-import * as d3 from "d3"
 import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 import ResolutionScenario from "./vis/ResolutionScenerio"
@@ -48,23 +47,21 @@ function SectionResolution() {
               justifyContent: "flex-end",
             }}
           >
-            <Hydroclimate />
+            <Box width="50%">
+              <Hydroclimate />
+            </Box>
             <Box width="150vw">
               <ScenarioTheme scrollProgress={scrollYProgress} />
+            </Box>
+            <Box width="100vw">
+              <ScenarioTransition scrollProgress={scrollYProgress} />
             </Box>
             <Box
               id="scenario-transition"
               className="container-center"
               height="100vh"
-              sx={{
-                position: "relative",
-                justifyContent: "center",
-                backgroundImage: "url('/drafts/ending-transition.png')",
-                backgroundSize: "auto 100vh",
-                backgroundPosition: "left",
-                backgroundRepeat: "no-repeat",
-              }}
-            />
+              sx={{ position: "relative" }}
+            ></Box>
           </motion.div>
         </div>
       </div>
@@ -76,10 +73,6 @@ function SectionResolution() {
 
 function Hydroclimate() {
   const { sectionRef } = useActiveSection("hydroclimate", { amount: 0.5 })
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  })
 
   return (
     <StickyContainer
@@ -180,219 +173,61 @@ function ScenarioTheme({
   )
 }
 
-function ScenariosMockup() {
+function ScenarioTransition({
+  scrollProgress,
+}: {
+  scrollProgress: MotionValue<number>
+}) {
+  const { sectionRef } = useActiveSection("scenariotransition", { amount: 0.5 })
+  const pathLength = useTransform(scrollProgress, [0.7, 1], [0, 1])
+
+  //TODO: fix this
   return (
-    <Box
-      id="scenarios"
-      //className="container-center"
-      width="100vw"
-      height="100vh"
-      sx={{
-        position: "relative",
-        justifyContent: "center",
-        //backgroundImage: "url('/drafts/scenario-lines-v2.png')",
-        //backgroundSize: "auto 100vh",
-        //backgroundPosition: "right",
-        //backgroundRepeat: "no-repeat",
-      }}
-      tabIndex={-1}
-      role="region"
+    <StickyContainer
+      sectionID="scenariotransition"
+      stickyRollHeight="100vh"
+      sectionRef={sectionRef}
     >
-      <svg
-        width="100%"
-        height="100%"
-        viewBox="0 0 1728 291"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* loop lines */}
+      <SVGLineContainer viewBox="10 19 1128 1287">
         <motion.path
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          transition={{ duration: 4, ease: "easeInOut" }}
-          d="M0 210.147 C87.9324 240.403 957.486 170.211 894 26.0007 C873.232 -21.1739 804.262 10.8549 820.5 61.5007 
-            C858.573 180.251 1740.16 15.0845 1733 10.1514
-            
-            M0 210.147 C13.5057 228.958 809.64 112.862 894 281.626 C978.36 450.39 712 424.753 796 297.626 
-            C880 170.5 1686.31 232.946 1725 262.147"
-          stroke="#F1B143"
-          strokeWidth="4"
+          className="svg-line"
+          d="M-12.5 290C-12.5 290 173 285 394 279C615 273 969 480 908 692C847 904 865 1117 865 1117"
+          pathLength={pathLength}
         />
-
         <motion.path
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          transition={{ duration: 4, ease: "easeInOut" }}
-          d="M0 210.147 C-9.92595 221.46 395.378 326.686 596 320.074 C637.0672 326.4505 750.465 297.6462 688 237.6067 C625.5352 177.5673 552.5238 319.8387 715.5 388.6055
-            C866.894 485.579 970.411 758.6575 1124.056 765.5815 C1277.7 772.5055 1709.966 978.4125 1709.966 978.4125
-            
-            M0 210.147 C0 210.147 216 127.104 538 339.105 C860 551.106 438.583 519.81 608.542 402.958 C778.5 286.106 1716.02 798.484 1716.02 798.484"
-          stroke="#F1B143"
-          strokeWidth="4"
-          opacity={0.3}
+          className="svg-line"
+          d="M-4 468C-4 468 349 484 493 450C637 415.999 709 588.999 810 679C911 769 1022 834.001 979 890C936 945.999 756 1010 804 1040C852 1070 852 1077 856.5 1093C861 1109 861 1117.5 861 1117.5"
+          pathLength={pathLength}
         />
-      </svg>
-    </Box>
-  )
-}
-
-function Scenarios() {
-  return (
-    <Box
-      id="scenarios"
-      className="container-center"
-      height="100vh"
-      sx={{
-        position: "relative",
-        justifyContent: "center",
-        backgroundImage: "url('/drafts/scenario-lines.png')",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-      tabIndex={-1}
-      role="region"
-    >
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "23%",
-          left: "2rem",
-          width: "30%",
-        }}
-      >
-        <Typography variant="body1">
-          {"COEQWAL also looks at "}
-          <span style={{ fontWeight: "bold" }}>
-            <u>{"different strategies for managing water"}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />{" "}
-          {" and how these might limit the impacts of climate change."}
-        </Typography>
-        <Typography variant="body1">
-          {"These different approaches are grouped into distinct themes."}
-        </Typography>
-      </Box>
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "13%",
-          left: "57%",
-          width: "40%",
-        }}
-      >
-        <Typography variant="h5" style={{ color: "#F1B143" }}>
-          {"Managing Groundwater in a Changing Agricultural Landscape"}
-        </Typography>
-      </Box>
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "20%",
-          left: "57%",
-          width: "40%",
-        }}
-      >
-        <Typography variant="body1">
-          {
-            "For example, COEQWAL explores how reducing groundwater pumping through SGMA can help during droughts, while also considering the economic impacts to agricultural water users."
-          }
-        </Typography>
-      </Box>
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "40%",
-          left: "57%",
-          width: "40%",
-        }}
-      >
-        <Typography variant="h5" style={{ color: "#F1B143" }}>
-          {"Improving Reliability of Delta Exports for Farms and Cities"}
-        </Typography>
-      </Box>
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "48%",
-          left: "57%",
-          width: "40%",
-        }}
-      >
-        <Typography variant="body1">
-          {
-            "COEQWAL also explores scenarios provided by government agencies that represent how the Delta Conveyance Project would affect water experts and salinity conditions in the Delta. These scenarios can help us understand how the tunnel could impact farms, cities, and ecosystems throughout the state."
-          }
-        </Typography>
-      </Box>
-      <Box
-        className="paragraph"
-        component="article"
-        sx={{
-          position: "absolute",
-          textAlign: "left",
-          top: "63%",
-          right: "6rem",
-        }}
-      >
-        <Typography variant="h5" style={{ color: "#F1B143" }}>
-          {"Other scenario themes"}
-        </Typography>
-      </Box>
-    </Box>
-  )
-}
-
-function SvgConnector() {
-  const pathRef = useRef<SVGPathElement>(null)
-
-  useEffect(() => {
-    const p = d3.path()
-
-    const startX = 0.75 * window.innerWidth // 80vw = right edge of your image
-    const y = 0.3 * window.innerHeight // vertical center (adjust as needed)
-    const endX = startX + 0.25 * window.innerWidth // 25vw to the right
-
-    p.moveTo(startX, y)
-    p.lineTo(endX, y)
-    // p.bezierCurveTo()
-
-    if (pathRef.current) {
-      pathRef.current.setAttribute("d", p.toString())
-    }
-  }, [])
-
-  return (
-    <svg
-      width="100%"
-      height="100vh"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        pointerEvents: "none",
-        zIndex: 5,
-      }}
-    >
-      <path ref={pathRef} stroke="#f1b143" strokeWidth={2} fill="none" />
-    </svg>
+        <g style={{ opacity: 0.5 }}>
+          <motion.path
+            className="svg-line"
+            d="M-26 1084C-26 1084 141 1027 307 942.999C473 859 545 910.999 692 936C839 961 909 1017 889 1048C869 1079 869 1118 869 1118"
+            pathLength={pathLength}
+          />
+          <motion.path
+            className="svg-line"
+            d="M-1.5 1054.5C-1.5 1054.5 256.5 1139.5 424.5 1096.5C592.5 1053.5 696 1069 769 1061C842 1053 858 1118 858 1118"
+            pathLength={pathLength}
+          />
+          <motion.path
+            className="svg-line"
+            d="M-2 1092C-2 1092 153 1077 269 1042C385 1007 497.5 863 645.5 954C793.5 1045 918.5 1027.5 901 1057C883.5 1086.5 870 1120.5 870 1120.5"
+            pathLength={pathLength}
+          />
+          <motion.path
+            className="svg-line"
+            d="M-1.5 1024.5C-1.5 1024.5 210.5 973 280 926C349.5 878.999 665 742 800 847C935 952 908 990 921 1033C934 1076 874 1118 874 1118"
+            pathLength={pathLength}
+          />
+          <motion.path
+            className="svg-line"
+            d="M-3 1108C-3 1108 44 1124 168 1098C292 1072 412 975 541 977C670 979 751 1095 793 1088C835 1081 855.5 1120 855.5 1120"
+            pathLength={pathLength}
+          />
+        </g>
+      </SVGLineContainer>
+    </StickyContainer>
   )
 }
 

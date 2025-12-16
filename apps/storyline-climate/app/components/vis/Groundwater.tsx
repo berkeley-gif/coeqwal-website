@@ -26,8 +26,7 @@ export default function GroundwaterContainer({
           const gwRaw = Number(d["GW Change"])
 
           // only flip negatives numbers
-          const gwDepth =
-            Number.isFinite(gwRaw) && gwRaw < 0 ? -gwRaw : gwRaw
+          const gwDepth = Number.isFinite(gwRaw) && gwRaw < 0 ? -gwRaw : gwRaw
           return {
             msmt_date: `${year}-01-01`,
             date: new Date(year, 0, 1),
@@ -38,7 +37,7 @@ export default function GroundwaterContainer({
           (d) =>
             Number.isFinite(d.gse_gwe) &&
             d.date instanceof Date &&
-            !Number.isNaN(d.date.getTime())
+            !Number.isNaN(d.date.getTime()),
         )
       setRows(processed)
 
