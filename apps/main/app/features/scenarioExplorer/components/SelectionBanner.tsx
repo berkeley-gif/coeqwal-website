@@ -1,5 +1,5 @@
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 // Scenario ID to display name mapping
 const getScenarioDisplayName = (scenarioId: string): string => {
@@ -12,9 +12,7 @@ const getScenarioDisplayName = (scenarioId: string): string => {
 }
 
 /**
- * SelectionBanner: Shows count of selected scenarios with clear all button
- * and list of selected scenarios
- * Displayed under tabs in Scenario Explorer views
+ * SelectionBanner: Shows selected scenarios with clear all option
  */
 export default function SelectionBanner() {
   const theme = useTheme()
@@ -28,71 +26,76 @@ export default function SelectionBanner() {
   return (
     <Box
       sx={{
-        backgroundColor: theme.palette.blue.darkest,
-        color: theme.palette.common.white,
+        backgroundColor: theme.palette.common.white,
+        borderBottom: `1px solid ${theme.palette.grey[200]}`,
+        px: { xs: 3, md: 6 },
+        py: 1.5,
       }}
     >
-      {/* Count row with Clear all button */}
       <Box
         sx={{
-          px: theme.spacing(theme.cards.spacing.standard),
-          pt: theme.spacing(1.5),
-          pb: theme.spacing(1),
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 2,
         }}
       >
-        <Typography
-          variant="body2"
-          sx={{ fontWeight: theme.typography.fontWeightMedium }}
-        >
-          {selectedScenarios.length} scenario
-          {selectedScenarios.length !== 1 ? "s" : ""} selected
-        </Typography>
+        {/* Left: Eyebrow + Pills */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", flex: 1 }}>
+          <Typography
+            sx={{
+              fontSize: "0.75rem",
+              fontWeight: 500,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: theme.palette.grey[500],
+              flexShrink: 0,
+            }}
+          >
+            {selectedScenarios.length} Selected
+          </Typography>
+
+          {/* Scenario pills */}
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {selectedScenarios.map((scenarioId) => (
+              <Typography
+                key={scenarioId}
+                variant="caption"
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  backgroundColor: theme.palette.grey[100],
+                  borderRadius: 1,
+                  color: theme.palette.blue.darkest,
+                  fontWeight: 500,
+                }}
+              >
+                {getScenarioDisplayName(scenarioId)}
+              </Typography>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Right: Clear button */}
         <Button
           variant="text"
           size="small"
           onClick={clearScenarios}
           sx={{
-            color: theme.palette.common.white,
+            color: theme.palette.grey[500],
             textTransform: "none",
-            fontSize: theme.typography.compact.subtitle.fontSize,
+            fontSize: "0.75rem",
+            fontWeight: 500,
             minWidth: "auto",
+            px: 1,
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
+              color: theme.palette.grey[700],
+              backgroundColor: theme.palette.grey[100],
             },
           }}
         >
-          Clear all
+          Clear
         </Button>
-      </Box>
-
-      {/* List of selected scenarios */}
-      <Box
-        sx={{
-          px: theme.spacing(theme.cards.spacing.standard),
-          pb: theme.spacing(1.5),
-          display: "flex",
-          flexWrap: "wrap",
-          gap: theme.spacing(1),
-        }}
-      >
-        {selectedScenarios.map((scenarioId) => (
-          <Typography
-            key={scenarioId}
-            variant="body2"
-            sx={{
-              px: theme.spacing(1.5),
-              py: theme.spacing(0.5),
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              borderRadius: theme.borderRadius.pill,
-              fontSize: theme.typography.compact.subtitle.fontSize,
-            }}
-          >
-            {getScenarioDisplayName(scenarioId)}
-          </Typography>
-        ))}
       </Box>
     </Box>
   )

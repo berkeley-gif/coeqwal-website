@@ -22,6 +22,10 @@ export {
 
   // Typography and content
   Typography,
+  // MUI Card components exported with "Mui" prefix to avoid conflict with custom Card
+  Card as MuiCard,
+  CardContent as MuiCardContent,
+  CardActionArea as MuiCardActionArea,
 
   // Inputs and controls
   Button,
@@ -59,6 +63,7 @@ export {
   useMediaQuery,
   SvgIcon,
   ClickAwayListener,
+  Portal,
 } from "@mui/material"
 
 export type { BoxProps } from "@mui/material"
@@ -115,6 +120,9 @@ import AssessmentIcon from "@mui/icons-material/Assessment"
 import CategoryIcon from "@mui/icons-material/Category"
 import WavesIcon from "@mui/icons-material/Waves"
 import TimelineIcon from "@mui/icons-material/Timeline"
+import ViewListIcon from "@mui/icons-material/ViewList"
+import MapIcon from "@mui/icons-material/Map"
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows"
 
 // Export individually imported icons
 export {
@@ -166,6 +174,9 @@ export {
   CategoryIcon,
   WavesIcon,
   TimelineIcon,
+  ViewListIcon,
+  MapIcon,
+  CompareArrowsIcon,
 }
 
 // Export the full icons library for access to other icons as needed

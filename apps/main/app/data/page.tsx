@@ -9,7 +9,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  useTheme,
   Grid,
   IconButton,
   CircularProgress,
@@ -23,10 +22,9 @@ import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
   fetchScenariosForDownload,
-} from "../utils/fileDownloadApi"
+} from "../lib/api/fileDownloadApi"
 
 export default function DataPage() {
-  const theme = useTheme() // Still needed for other theme properties
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])

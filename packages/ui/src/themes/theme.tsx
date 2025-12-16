@@ -13,16 +13,15 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 5. TypeScript      - Module augmentation for custom theme properties
  */
 
-
 /* ===============================================================================
-* FONT CONFIGURATION SYSTEM
-* ===============================================================================
-* 
-* To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
-* Each preset defines: text (body), display (headlines), and cssImport (font loading)
-*
-* Available presets: "neueHaas" | "roboto" | "inter" | "system"
-*/
+ * FONT CONFIGURATION SYSTEM
+ * ===============================================================================
+ *
+ * To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
+ * Each preset defines: text (body), display (headlines), and cssImport (font loading)
+ *
+ * Available presets: "neueHaas" | "roboto" | "inter" | "system"
+ */
 
 type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
 
@@ -31,28 +30,33 @@ const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FO
 const FONT_PRESETS = {
   neueHaas: {
     text: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
     text: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    display: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+    display:
+      '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
   },
   inter: {
     text: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+    display:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
   system: {
     text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '', // No import needed for system fonts
+    display:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: "", // No import needed for system fonts
   },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
-
 
 /* ========================================================
  * 1. themeValues - Design tokens
@@ -117,13 +121,14 @@ export const themeValues = {
       water: "#64A4D6", // Bottom of gradient - water blue
     },
 
-    // Text and UI blues 
+    // Text and UI blues
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
       dark: "#186b88", // Dark teal
       medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
       light: "#77a2d9", // Light blue
+      white: "#cef1f5",
     },
 
     text: {
@@ -223,12 +228,12 @@ export const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers
-    basement: -1, // Map when used as background
+    basement: 1, // Map when used as background (positive for proper pointer event handling)
     sectionBackground: 0, // Section background elements
 
     // Content layers (0-99)
     content: 20, // Default content layer
-    panels: 10, // Main content panels
+    panels: 15, // Main content panels (above basement)
 
     // Intro section micro-layers (1-9)
     introBackgroundImages: 15, // Background decorative images
@@ -537,6 +542,7 @@ const theme = createTheme({
       medium: themeValues.palette.blue.medium,
       bright: themeValues.palette.blue.bright,
       light: themeValues.palette.blue.light,
+      white: themeValues.palette.blue.white,
     },
     accent: {
       gold: themeValues.palette.accent.gold,
@@ -553,7 +559,7 @@ const theme = createTheme({
     },
     explore: {
       background: themeValues.palette.tabPanels.explore,
-      text: themeValues.palette.utility.black,
+      text: themeValues.palette.utility.white,
     },
     empower: {
       background: themeValues.palette.tabPanels.empower,
@@ -650,6 +656,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
+      letterSpacing: "0.02em",
       lineHeight: 1.35, // Good balance for minor headlines
     },
     h6: {
@@ -779,6 +786,33 @@ const theme = createTheme({
       },
       defaultProps: {
         elevation: 0,
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: "3px",
+          textDecoration: "none",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
+        },
+      },
+    },
+
+    MuiCardActionArea: {
+      styleOverrides: {
+        root: {
+          // keep MUI's focus ring behavior sane
+          borderRadius: "3px",
+        },
+      },
+    },
+
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          // optional: if you want CardContent to inherit link styling cleanly
+          textDecoration: "inherit",
+        },
       },
     },
     MuiButton: {
@@ -1420,7 +1454,12 @@ declare module "@mui/material/styles" {
       typography: {
         title: { fontSize: string; fontWeight: number; marginBottom: string }
         subtitle: { fontSize: string; opacity: number; marginBottom: string }
-        action: { fontSize: string; fontWeight: string; cursor: string; textDecoration: string }
+        action: {
+          fontSize: string
+          fontWeight: string
+          cursor: string
+          textDecoration: string
+        }
       }
     }
     cards: typeof themeValues.cards
@@ -1482,4 +1521,3 @@ declare module "@mui/material/Typography" {
     nav: true
   }
 }
-

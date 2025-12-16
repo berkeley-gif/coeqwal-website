@@ -37,6 +37,7 @@ type TranslationsMap = {
 }
 
 export const HEADER_SHRUNK_H = 40
+export const HEADER_EXPANDED_H = 70
 
 // Secondary nav option (optional)
 export interface SecondaryNavItem {
@@ -54,6 +55,7 @@ export interface BaseHeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
 
   // Action handlers
+  onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
@@ -111,6 +113,7 @@ export function BaseHeader({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [],
+  onLogoClick,
   onDataClick,
   onToolsClick,
   onAboutClick,
@@ -250,7 +253,15 @@ export function BaseHeader({
           style={{ minHeight: "var(--header-h)" }}
         >
           <Box
-            component={motion.div}
+            component={motion.button}
+            type="button"
+            onClick={() => {
+              if (onLogoClick) {
+                onLogoClick()
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }
+            }}
             style={{
               scale: logoScale,
               originX: 0,
@@ -262,7 +273,17 @@ export function BaseHeader({
               alignItems: "center",
               pl: 2,
               width: 168,
+              background: "transparent",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              "&:focus-visible": {
+                outline: "2px solid currentColor",
+                outlineOffset: "4px",
+                borderRadius: "6px",
+              },
             }}
+            aria-label="Scroll to top"
           >
             <Logo />
           </Box>

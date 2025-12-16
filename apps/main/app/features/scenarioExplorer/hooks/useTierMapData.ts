@@ -4,7 +4,7 @@ import {
   fetchTierLocationData,
   type TierLocationResponse,
   type TierFeature,
-} from "../../../api/tierLocationApi"
+} from "../../../lib/api/tierLocationApi"
 
 interface UseTierMapDataProps {
   selectedTier: { strategy: string; outcome: string } | null
@@ -95,13 +95,22 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
 
             const isSalmon = selectedTier!.outcome.includes("Salmon")
 
-            const padding = isDelta ? 250 : 100
-            const maxZoom = isDelta || isSalmon ? 8 : 9 // keep within map's maxZoom of 10
+            // Calculate asymmetric padding for Explore mode
+            // Left panel covers 50% of viewport
+            // top: 300 = 230px interface chrome + 70px visual offset
+            const leftPadding = window.innerWidth / 2
+            const basePadding = isDelta ? 250 : 100
+            const maxZoom = isDelta || isSalmon ? 6 : 7 // zoomed out a bit more
 
             mapAPI.withMap((mapRef) => {
               const map = mapRef.getMap()
               map.fitBounds(bounds, {
-                padding,
+                padding: {
+                  left: leftPadding + basePadding,
+                  top: 300 + basePadding,
+                  right: basePadding / 2, // Less right padding shifts view right
+                  bottom: 20 + basePadding,
+                },
                 maxZoom,
                 duration: 1000,
                 pitch: 0,

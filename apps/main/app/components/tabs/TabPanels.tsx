@@ -95,11 +95,17 @@ export default function TabPanels() {
   }, [])
 
   // Background color tied to active tab
-  // Learn tab uses transparent since it has its own integrated map
+  // Learn and Explore tabs use transparent - they manage their own backgrounds
+  // (Learn uses persistent map, Explore uses DashboardPanel with conditional background)
   const panelColor: string = useMemo(() => {
-    if (activeTab === "learn") return "transparent"
+    if (activeTab === "learn" || activeTab === "explore") return "transparent"
     return TABS.find((t) => t.key === activeTab)?.panelColor ?? "fffff"
   }, [activeTab])
+
+  // Map tabs need pointerEvents: "none" on wrapper so the persistent map
+  // behind (at z-index: -1) can receive drag/pan events.
+  // Child components re-enable pointer events on interactive elements.
+  const isMapTab = activeTab === "learn" || activeTab === "explore"
 
   const render = (tab: TabKey) => {
     switch (tab) {
@@ -126,29 +132,35 @@ export default function TabPanels() {
   }
 
   return (
-    <AutoHeight>
-      <motion.div
-        animate={{ backgroundColor: panelColor }}
-        transition={{ type: "spring", stiffness: 180, damping: 26 }}
-        style={{
-          position: "relative",
-          borderRadius: 0,
-        }}
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeTab}
-            variants={panelVariants}
-            initial="center"
-            animate="center"
-            exit="exit"
-            transition={{ type: "spring", stiffness: 220, damping: 26 }}
-            style={{ position: "relative" }}
-          >
-            {render(activeTab)}
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    </AutoHeight>
+    <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
+      <AutoHeight>
+        <motion.div
+          animate={{ backgroundColor: panelColor }}
+          transition={{ type: "spring", stiffness: 180, damping: 26 }}
+          style={{
+            position: "relative",
+            borderRadius: 0,
+            pointerEvents: isMapTab ? "none" : "auto",
+          }}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              variants={panelVariants}
+              initial="center"
+              animate="center"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 220, damping: 26 }}
+              style={{ 
+                position: "relative",
+                pointerEvents: isMapTab ? "none" : "auto",
+              }}
+            >
+              {render(activeTab)}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      </AutoHeight>
+    </div>
   )
 }

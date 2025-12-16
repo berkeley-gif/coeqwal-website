@@ -1,14 +1,13 @@
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "path"
+import { fileURLToPath } from "url"
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-/** @type {import('next').NextConfig} */
+/** @type {import("next").NextConfig} */
 const nextConfig = {
-  output: 'export',  // Enable static export
-  
-  // Transpile workspace packages for optimal dev experience
+  output: "export",
+
   transpilePackages: [
     "@repo/map",
     "@repo/state",
@@ -18,13 +17,13 @@ const nextConfig = {
     "@repo/i18n",
     "@repo/data",
   ],
-  
+
   images: {
-    unoptimized: true  // Required for static export
+    unoptimized: true,
   },
-  
-  // Turbopack configuration for .geojson files (dev mode)
+
   experimental: {
+    // Turbopack loader rules (Next 13.0.0–15.2.x)
     turbo: {
       rules: {
         "*.geojson": {
@@ -33,16 +32,18 @@ const nextConfig = {
         },
       },
     },
+
+    optimizePackageImports: ["@mui/icons-material", "@mui/material"],
   },
 
-  // Webpack configuration for .geojson files (production builds)
+  // Webpack rule (used when you run with --webpack, and for non-turbo tooling paths)
   webpack: (config) => {
     config.module.rules.push({
       test: /\.geojson$/,
       type: "json",
-    });
-    return config;
+    })
+    return config
   },
-}
+};
 
 export default nextConfig

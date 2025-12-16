@@ -1,72 +1,98 @@
 "use client"
 
-import React from "react"
-import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
-import { DashboardPanel } from "@repo/ui"
-import { useScenarioExplorerStore, type ExplorerView } from "@repo/state"
-import ListView from "./views/ListView/ListView"
-import MapView from "./views/MapView/MapView"
-import ComparisonView from "./views/ComparisonView/ComparisonView"
-import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
+import React, { useState } from "react"
+import {
+  Box,
+  Tabs,
+  Tab,
+  useTheme,
+  IconButton,
+  Tooltip,
+  Typography,
+  ViewListIcon,
+  CompareArrowsIcon,
+} from "@repo/ui/mui"
+import Image from "next/image"
+import AboutScenariosView from "./views/AboutScenariosView"
+import UnifiedExploreView, {
+  type ExploreMode,
+} from "./views/UnifiedExploreView"
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 
+type MainView = "about" | "explorer" | "data"
+
 /**
- * ScenarioExplorer -- Multi-tab version
+ * ScenarioExplorer
  *
- * Views:
- * - List: Full list of scenarios with searching/sorting
- * - Map: Location-based performance visualization
- * - Comparison: Visual comparison chart using parallel coordinates
- * - Needs-based: Criteria-based scenario search
- * - Data explorer: Detailed data comparison and exports
+ * Three main views:
+ * - About: Introduction explaining COEQWAL scenarios, the tier system, and outcomes
+ * - Explorer: Unified view with list/map/comparison modes (with smooth transitions)
+ * - Data: Detailed data comparison and exports
+ *
+ * The Explorer view handles its own internal mode switching (list ↔ map ↔ comparison)
+ * with animated transitions. The persistent map shows through in map mode.
  */
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
-  const { activeView, setActiveView } = useScenarioExplorerStore()
+  const [mainView, setMainView] = useState<MainView>("explorer")
+  const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
 
-  const handleTabChange = (
-    _event: React.SyntheticEvent,
-    newValue: ExplorerView,
-  ) => {
-    setActiveView(newValue)
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
+    setMainView(newValue)
   }
 
-  const viewLabels: Record<ExplorerView, string> = {
-    list: "Full list of scenarios",
-    map: "Map view",
-    comparison: "Scenario comparison chart",
-    needs: "Needs-based search",
-    data: "Data explorer",
-  }
+  // Map mode in explorer needs transparent background so persistent map shows through
+  const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
   return (
-    <DashboardPanel
-      backgroundColor={theme.palette.grey[100]}
-      color={theme.palette.text.primary}
-      headerHeight={theme.layout.headerHeight}
-      includeHeaderSpacing={true}
-      sx={{ pointerEvents: "auto" }}
+    <Box
+      sx={{
+        // Fill the parent container (TabPanel sets height for explore tab)
+        height: "100%",
+        backgroundColor: needsTransparentBg
+          ? "transparent"
+          : theme.palette.explore.background,
+        color: theme.palette.text.primary,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        // Allow map panning through when in map mode
+        pointerEvents: needsTransparentBg ? "none" : "auto",
+      }}
     >
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           height: "100%",
+          overflow: "hidden",
+          // Allow map panning through when in map mode
+          pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Tab Navigation */}
+        {/* Header section - sticky to stay visible */}
         <Box
           sx={{
-            backgroundColor: theme.palette.common.white,
-            borderBottom: theme.border.standard,
-            borderColor: theme.palette.grey[300],
-            px: theme.spacing(theme.cards.spacing.standard),
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
+            flexShrink: 0,
+            pointerEvents: "auto", // Keep header interactive even when parent is "none"
           }}
         >
-          <Tabs
-            value={activeView}
+          {/* Tab Navigation */}
+          <Box
+            sx={{
+              backgroundColor: theme.palette.common.white,
+              borderBottom: theme.border.standard,
+              borderColor: theme.palette.grey[300],
+              px: theme.spacing(theme.cards.spacing.standard),
+            }}
+          >
+            <Tabs
+            value={mainView}
             onChange={handleTabChange}
             TabIndicatorProps={{
               style: {
@@ -85,54 +111,130 @@ export default function ScenarioExplorerNew() {
                 transition: "all 0.2s ease-in-out",
                 borderTopLeftRadius: theme.shape.borderRadius,
                 borderTopRightRadius: theme.shape.borderRadius,
-                marginTop: theme.spacing(1), // Gap from top of container
-                marginRight: theme.spacing(0.5), // Small gap between tabs
+                marginTop: theme.spacing(1),
+                marginRight: theme.spacing(0.5),
                 paddingLeft: theme.spacing(3),
                 paddingRight: theme.spacing(3),
                 "&.Mui-selected": {
                   color: theme.palette.blue.bright,
                   fontWeight: theme.typography.fontWeightBold,
-                  backgroundColor: `${theme.palette.blue.bright}1A`, // 10% opacity bright blue tint
+                  backgroundColor: `${theme.palette.blue.bright}1A`,
                 },
                 "&:hover:not(.Mui-selected)": {
                   color: theme.palette.blue.dark,
-                  backgroundColor: `${theme.palette.blue.bright}1A`, // Same blue tint as selected
+                  backgroundColor: `${theme.palette.blue.bright}1A`,
                 },
               },
             }}
           >
-            <Tab label={viewLabels.list} value="list" />
-            <Tab label={viewLabels.map} value="map" />
-            <Tab label={viewLabels.comparison} value="comparison" />
-            <Tab label={viewLabels.needs} value="needs" />
-            <Tab label={viewLabels.data} value="data" />
+            <Tab label="About COEQWAL scenarios" value="about" />
+            <Tab label="Explore scenarios" value="explorer" />
+            <Tab label="Data explorer" value="data" />
           </Tabs>
+          </Box>
+
+          {/* Selection Banner - only show when exploring data */}
+          {(mainView === "explorer" || mainView === "data") && <SelectionBanner />}
+
+          {/* Search bar for explorer view with view mode toggle */}
+          {mainView === "explorer" && (
+            <SearchBar
+              placeholder="Search scenarios by name or description"
+              rightContent={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: theme.palette.grey[600], mr: 1 }}
+                  >
+                    View:
+                  </Typography>
+                  <Tooltip title="List view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("list")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "list"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        color:
+                          exploreMode === "list"
+                            ? theme.palette.blue.bright
+                            : theme.palette.grey[600],
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <ViewListIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Map view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("map")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "map"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <Image
+                        src="/images/icons/map.svg"
+                        alt="Map view"
+                        width={24}
+                        height={24}
+                        style={{ opacity: exploreMode === "map" ? 1 : 0.6 }}
+                      />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Comparison view" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setExploreMode("comparison")}
+                      sx={{
+                        backgroundColor:
+                          exploreMode === "comparison"
+                            ? `${theme.palette.blue.bright}1A`
+                            : "transparent",
+                        color:
+                          exploreMode === "comparison"
+                            ? theme.palette.blue.bright
+                            : theme.palette.grey[600],
+                        "&:hover": {
+                          backgroundColor: `${theme.palette.blue.bright}1A`,
+                        },
+                      }}
+                    >
+                      <CompareArrowsIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              }
+            />
+          )}
         </Box>
-
-        {/* Selection Banner, currently shown for all views except needs-based */}
-        {activeView !== "needs" && <SelectionBanner />}
-
-        {/* Search bar for list, map, and comparison views */}
-        {(activeView === "list" ||
-          activeView === "map" ||
-          activeView === "comparison") && (
-          <SearchBar placeholder="Search scenarios by name or description" />
-        )}
 
         {/* View content */}
         <Box
           sx={{
             flex: 1,
             overflow: "hidden",
+            // Allow map panning through when in map mode (UnifiedExploreView handles its own pointer events)
+            pointerEvents: needsTransparentBg ? "none" : "auto",
           }}
         >
-          {activeView === "list" && <ListView />}
-          {activeView === "map" && <MapView />}
-          {activeView === "comparison" && <ComparisonView />}
-          {activeView === "needs" && <NeedsBasedView />}
-          {activeView === "data" && <DataExplorerView />}
+          {mainView === "about" && <AboutScenariosView />}
+          {mainView === "explorer" && (
+            <UnifiedExploreView mode={exploreMode} />
+          )}
+          {mainView === "data" && <DataExplorerView />}
         </Box>
       </Box>
-    </DashboardPanel>
+    </Box>
   )
 }
