@@ -26,6 +26,10 @@ type VerticalCompareProps = {
   autoPlayDelayMs?: number // delay before starting
   autoPlayDurationMs?: number // total sweep time
   autoPlayOnce?: boolean // run only the first time component mounts
+  
+  onFirstUserDrag?: () => void // to trigger disappear for text 
+  onKnobVisible?: () => void // make sure text appear when the knob visible
+
 }
 
 export function HorizontalImageSlider({
@@ -199,6 +203,8 @@ export function VerticalImageSlider({
   autoPlayDelayMs = 1000,
   autoPlayDurationMs = 3000,
   autoPlayOnce = true,
+  onFirstUserDrag,
+  onKnobVisible,
 }: VerticalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -206,6 +212,33 @@ export function VerticalImageSlider({
   const [isDragging, setIsDragging] = useState(false)
 
   const [showKnob, setShowKnob] = useState(!autoPlay) //toggle circle state
+
+  const firedFirstDrag = useRef(false)
+  const handlePointerDown = (e: React.PointerEvent) => {
+  ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+  startUserDrag(e.clientY)
+}
+
+  const knobVisibleFired = useRef(false)
+  useEffect(() => {
+    if (!showKnob) return
+    if (knobVisibleFired.current) return
+    knobVisibleFired.current = true
+    onKnobVisible?.()
+  }, [showKnob, onKnobVisible])
+
+  const startUserDrag = (clientY: number) => {
+  stopAutoplay()
+  dragging.current = true
+  setIsDragging(true)
+
+  if (!firedFirstDrag.current) {
+    firedFirstDrag.current = true
+    onFirstUserDrag?.()
+  }
+
+  updateFromPointer(clientY)
+}
 
   // --- autoplay bookkeeping ---
   const rafId = useRef<number | null>(null)
@@ -317,12 +350,7 @@ export function VerticalImageSlider({
         touchAction: "none",
         cursor: isDragging ? "pointer" : "default",
       }}
-      onPointerDown={(e) => {
-        ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
-        updateFromPointer(e.clientY)
-        dragging.current = true
-        setIsDragging(true)
-      }}
+      onPointerDown={handlePointerDown}
     >
       {/* Bottom image*/}
       <Box
@@ -406,10 +434,7 @@ export function VerticalImageSlider({
           }}
           onPointerDown={(e) => {
             ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
-            stopAutoplay()
-            dragging.current = true
-            updateFromPointer(e.clientY)
-            setIsDragging(true)
+            startUserDrag(e.clientY)
           }}
         >
           <UnfoldMoreIcon style={{ fill: "#104472" }} />
