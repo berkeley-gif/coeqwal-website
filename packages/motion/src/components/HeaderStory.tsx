@@ -10,7 +10,7 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { LanguageSwitcher, Logo } from "@repo/ui"
+import { LanguageSwitcher } from "@repo/ui"
 import { useRef, useState } from "react"
 import { motion, useMotionValueEvent, useScroll } from "framer-motion"
 

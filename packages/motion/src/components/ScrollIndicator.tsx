@@ -50,7 +50,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   children,
   style = {},
   className,
-  motionAxis = "vertical"
+  motionAxis = "vertical",
 }) => {
   const controls = useAnimation()
 
@@ -116,9 +116,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
                   }
                   bounceAnim[axisKey] = bounce
                   bounceAnim.scale =
-                    pulseIntensity !== 1
-                      ? [1, pulseIntensity, 1]
-                      : 1
+                    pulseIntensity !== 1 ? [1, pulseIntensity, 1] : 1
 
                   await controls.start(bounceAnim)
                 } catch {
@@ -159,17 +157,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
         clearTimeout(timeoutId)
       }
     }
-  }, [
-    animationComplete,
-    controls,
-    delay,
-    pulseIntensity,
-    showDuration,
-    hideDuration,
-    motionAxis,
-    pulseIntensity,
-    axisKey
-  ])
+  }, [animationComplete, controls, delay, pulseIntensity, showDuration, hideDuration, motionAxis, axisKey])
 
   /** Initial state (typed safely) */
   const initial: TargetAndTransition = { opacity: 0 }

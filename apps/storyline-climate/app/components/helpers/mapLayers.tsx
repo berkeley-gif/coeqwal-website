@@ -40,7 +40,7 @@ export function TextMarker({ text }: { text: string }) {
         fontFamily: "akzidenz-grotesk-next-pro",
         position: "relative", // Parent container for positioning
         display: "inline-block",
-        backgroundColor: `${text.includes("Delta") ? InfrastructureColor : OceanWaterColor}`, // Background color
+        backgroundColor: `${text.includes("Delta") || text.includes("Suisan Marsh") ? InfrastructureColor : OceanWaterColor}`, // Background color
         padding: "4px 8px", // Padding to create space around the text
         color: "#f2f0ef", // Text color
         fontSize: "1rem", // Font size

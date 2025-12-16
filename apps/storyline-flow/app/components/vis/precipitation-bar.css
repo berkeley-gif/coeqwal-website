@@ -1,42 +1,42 @@
-.axis{
-    stroke: #F2F0EF;
-    stroke-width: 2px;
+.axis {
+  stroke: #f2f0ef;
+  stroke-width: 2px;
 }
 
-#bar-svg text{
-    fill: #F2F0EF;
+#bar-svg text {
+  fill: #f2f0ef;
 }
 
-.axis-label{
-    text-anchor: middle;
-    dominant-baseline: middle;
+.axis-label {
+  text-anchor: middle;
+  dominant-baseline: middle;
 }
 
 .x-axis-ticks {
-    text-anchor: end;
-    dominant-baseline: middle;
-    font-size: 1.2rem;
+  text-anchor: end;
+  dominant-baseline: middle;
+  font-size: 1.2rem;
 }
 
 .y-axis-ticks {
-    text-anchor: end;
-    dominant-baseline: middle;
-    font-size: 1rem;
+  text-anchor: end;
+  dominant-baseline: middle;
+  font-size: 1rem;
 }
 
-.tooltip{
-    position: absolute;
-    background: rgba(2, 18, 36, 0.9);
-    color: #F2F0EF;
-    padding: 8px;
-    border-radius: 4px;
-    pointer-events: none;
-    white-space: nowrap;
-    font-size: 1rem;
-    z-index: 1000;
+.tooltip {
+  position: absolute;
+  background: rgba(2, 18, 36, 0.9);
+  color: #f2f0ef;
+  padding: 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 1rem;
+  z-index: 1000;
 }
 
-.bars{
-    cursor: pointer;
-    pointer-events: auto;
+.bars {
+  cursor: pointer;
+  pointer-events: auto;
 }
