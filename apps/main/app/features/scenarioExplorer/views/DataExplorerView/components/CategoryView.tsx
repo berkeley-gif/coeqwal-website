@@ -13,7 +13,7 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { ExpandMoreIcon } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 import { VerticalBarChart, TierCircles } from "@repo/viz"
 import {
   outcomeCategories,
@@ -126,7 +126,8 @@ export default function CategoryView() {
             onChange={() => handleAccordionChange(category.id)}
             sx={{
               backgroundColor: theme.palette.common.white,
-              boxShadow: theme.boxShadows.subtle,
+              boxShadow: "none",
+              border: `1px solid ${theme.palette.grey[200]}`,
               mb: theme.spacing(2),
               "&:before": {
                 display: "none",

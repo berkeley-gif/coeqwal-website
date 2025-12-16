@@ -3,7 +3,7 @@
 import { forwardRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, DiscreteSlider } from "@repo/ui"
-import { useDrawerStore } from "@repo/state"
+import { useDrawerStore } from "@repo/state/drawer"
 
 interface ClimateCardProps {
   isMinimized?: boolean
@@ -116,10 +116,8 @@ const ClimateCard = forwardRef<HTMLDivElement, ClimateCardProps>(
                   }
                 </Box>
                 <InfoIconButton
-                  mode="glossary"
-                  glossaryEntry="Changing climate"
-                  onGlossaryOpen={handleGlossaryOpen}
-                  sx={{ color: theme.palette.blue.bright }}
+                  onClick={() => handleGlossaryOpen("Changing climate")}
+                  title="Learn about climate scenarios"
                 />
               </Box>
 

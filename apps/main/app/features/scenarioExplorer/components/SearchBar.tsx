@@ -3,10 +3,11 @@
 import React from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
-import { useScenarioExplorerStore } from "@repo/state"
+import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 interface SearchBarProps {
   placeholder?: string
+  rightContent?: React.ReactNode
 }
 
 /**
@@ -14,6 +15,7 @@ interface SearchBarProps {
  */
 export default function SearchBar({
   placeholder = "Search scenarios...",
+  rightContent,
 }: SearchBarProps) {
   const theme = useTheme()
   const { searchQuery, setSearchQuery } = useScenarioExplorerStore()
@@ -30,7 +32,7 @@ export default function SearchBar({
         borderColor: theme.palette.grey[300],
       }}
     >
-      <Box sx={{ flex: 1, maxWidth: theme.spacing(50) }}>
+      <Box sx={{ maxWidth: theme.spacing(50) }}>
         <StyledTextInput
           size="small"
           placeholder={placeholder}
@@ -40,6 +42,11 @@ export default function SearchBar({
           onClear={() => setSearchQuery("")}
         />
       </Box>
+      {rightContent && (
+        <Box sx={{ display: "flex", alignItems: "center", ml: 2 }}>
+          {rightContent}
+        </Box>
+      )}
     </Box>
   )
 }

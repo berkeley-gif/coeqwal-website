@@ -76,12 +76,19 @@ export function CallResponsePanel({
           width: "100%",
           display: "flex",
           justifyContent: side === "left" ? "flex-start" : "flex-end",
+          pointerEvents: isVisible ? "auto" : "none",
         }}
       >
         <Box
           sx={{
             // Responsive panel width - narrower on smaller screens to leave room for map
-            width: { xs: "100%", sm: "340px", md: "380px", lg: "420px", xl: "460px" },
+            width: {
+              xs: "100%",
+              sm: "340px",
+              md: "380px",
+              lg: "420px",
+              xl: "460px",
+            },
             maxWidth: "100%",
             padding: 0,
             pointerEvents: isVisible ? "auto" : "none",

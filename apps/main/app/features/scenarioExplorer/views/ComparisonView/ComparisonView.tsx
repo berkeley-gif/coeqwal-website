@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import { useComparisonData } from "./useComparisonData"
-import ScenarioPanel from "../MapView/components/ScenarioPanel"
+import ListView from "../ListView/ListView"
 
 /**
  * ComparisonView: Visual comparison matrix of scenarios
@@ -110,14 +110,16 @@ export default function ComparisonView() {
     <Box
       sx={{
         display: "flex",
-        height: "100%",
+        // Account for header (40px) + tabs (~48px) + banner (~60px) + search (~56px) + padding
+        // TODO: set this value as a variable in the theme and use
+        height: "calc(100vh - 220px)",
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Left Panel: Scenario List */}
+      {/* Left Panel: Scenario List (scrollable via ListView) */}
       <Box
         sx={{
-          width: "45%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
           borderRight: theme.border.standard,
@@ -125,16 +127,17 @@ export default function ComparisonView() {
           backgroundColor: theme.palette.common.white,
         }}
       >
-        <ScenarioPanel onTierClick={() => {}} />
+        <ListView compact />
       </Box>
 
-      {/* Right panel: Comparison chart */}
+      {/* Right panel: Comparison chart (scrollable) */}
       <Box
         sx={{
-          width: "55%",
+          width: "50%",
           display: "flex",
           flexDirection: "column",
-          position: "relative",
+          height: "100%",
+          overflowY: "auto",
         }}
       >
         {/* Header */}
@@ -149,13 +152,24 @@ export default function ComparisonView() {
             flexShrink: 0,
           }}
         >
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: theme.typography.fontWeightMedium,
+              fontSize: "1.1rem",
+              mb: 1,
+            }}
+          >
             Scenario comparison
           </Typography>
           <Typography
             variant="body2"
             component="div"
-            sx={{ color: theme.palette.grey[600], mb: 1 }}
+            sx={{
+              color: theme.palette.grey[600],
+              mb: 1,
+              fontSize: theme.typography.nav.fontSize,
+            }}
           >
             Comparing {data.length} scenarios across key outcomes. Use the
             draggable arrows on each axis to filter scenarios by brushing
@@ -206,7 +220,7 @@ export default function ComparisonView() {
                     sx={{
                       color: theme.palette.text.primary,
                       fontWeight: isHighlighted ? 600 : 400,
-                      fontSize: "0.75rem",
+                      fontSize: theme.typography.nav.fontSize,
                     }}
                   >
                     {scenario.name}
@@ -220,16 +234,13 @@ export default function ComparisonView() {
         {/* Chart container */}
         <Box
           sx={{
-            flex: 1,
             p: theme.spacing(3),
-            overflow: "hidden",
             display: "flex",
             flexDirection: "column",
           }}
         >
           <Box
             sx={{
-              flex: 1,
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.rounded,
               padding: theme.spacing(2),
@@ -239,7 +250,7 @@ export default function ComparisonView() {
               flexDirection: "column",
             }}
           >
-            <Box sx={{ flex: 1, minHeight: 0 }}>
+            <Box sx={{ height: "540px" }}>
               <VerticalParallelLinePlot
                 data={highlightedData}
                 axes={axes}
@@ -249,6 +260,7 @@ export default function ComparisonView() {
                   default: theme.palette.grey[600],
                   highlighted: theme.palette.blue.darkest,
                   background: theme.palette.grey[50],
+                  axis: theme.palette.grey[500],
                 }}
                 lineColors={lineColors}
                 onLineClick={(scenario) => handleScenarioClick(scenario.id)}

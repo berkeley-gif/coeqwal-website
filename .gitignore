@@ -1,4 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
 node_modules
@@ -21,6 +20,9 @@ out/
 build
 dist
 
+# TypeScript
+*.tsbuildinfo
+
 # Misc
 .DS_Store
 *.pem
@@ -30,3 +32,4 @@ docs/
 
 # Archived code (unused files preserved outside version control)
 **/archive/
+**/_archive/

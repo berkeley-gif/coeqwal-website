@@ -22,6 +22,7 @@ export interface VerticalParallelLinePlotProps {
     default: string
     highlighted: string
     background: string
+    axis?: string
   }
   lineColors?: string[]
   showBaseline?: boolean
@@ -44,6 +45,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     default: "#1f77b4",
     highlighted: "#ff7f0e",
     background: "#f8f9fa",
+    axis: "#666",
   },
   lineColors = [],
   showBaseline = false,
@@ -322,7 +324,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           axisLine = axisGroup
             .append("line")
             .attr("class", "axis-line")
-            .attr("stroke", "#666") // Original color
+            .attr("stroke", colors.axis || "#666")
             .attr("stroke-width", 2) // Original width
         }
 
@@ -338,10 +340,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         const words = axis.split(/\s+/)
         const lineHeight = 14 // pixels
-        const maxWordsPerLine = 1 // One word per line for better wrapping
+        // Use 2 words per line for longer labels, 1 for others
+        const longerLabels = [
+          "Freshwater for Delta exports",
+          "Freshwater for in-Delta uses",
+          "Delta estuary ecology",
+        ]
+        const maxWordsPerLine = longerLabels.includes(axis) ? 2 : 1
 
         // Group words into lines
-        const lines = []
+        const lines: string[] = []
         for (let i = 0; i < words.length; i += maxWordsPerLine) {
           lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
         }
@@ -376,7 +384,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("x2", xPos)
             .attr("y1", -5) // Above the line (original)
             .attr("y2", 5)
-            .attr("stroke", "#666")
+            .attr("stroke", colors.axis || "#666")
             .attr("stroke-width", 1)
 
           // Tick label
@@ -387,7 +395,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("y", -10) // Above the line (original)
             .attr("text-anchor", "middle")
             .attr("font-size", "10px")
-            .attr("fill", "#666")
+            .attr("fill", colors.axis || "#666")
             .text(tick.toString()) // Show exact values including -0.5 and 0.5
         })
 
