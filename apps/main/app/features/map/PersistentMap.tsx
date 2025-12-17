@@ -21,8 +21,8 @@
  */
 
 import { useEffect, useRef, useState, useMemo } from "react"
-import { Map, NavigationControl, Marker, Popup, useMap, GeolocateControl } from "@repo/map"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Map, NavigationControl, Marker, useMap, GeolocateControl } from "@repo/map"
+import { Box, useTheme } from "@repo/ui/mui"
 
 // Learn layers
 import BasinsLayer from "./layers/BasinsLayer"
@@ -44,6 +44,9 @@ import {
   outcomeUsesPolygons,
 } from "./hooks/useOutcomeMapLayer"
 import { useMapLayers } from "./hooks/useMapLayers"
+
+// Tooltips
+import { PolygonLayerTooltip } from "../tooltips/PolygonLayerTooltip"
 
 // Explore hooks
 import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
@@ -172,13 +175,17 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Single mode-aware hook for polygon layer (CWS, AG_REV, etc.)
   // The hook derives which outcome to show based on mapMode
-  const { hoveredFeature } = useOutcomeMapLayer({
+  const { hoveredFeature, pinnedFeature, clearPinned } = useOutcomeMapLayer({
     learnOutcome: learnUsesPolygons ? selectedOutcome : null,
     learnStrategy: "current-ops",
     exploreOutcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
     exploreStrategy: exploreTierSelection?.strategy ?? "current-ops",
     mapMode,
   })
+
+  // Determine active tooltip (pinned takes precedence over hovered)
+  const activeTooltip = pinnedFeature || hoveredFeature
+  const isTooltipPinned = !!pinnedFeature
 
   // Explore mode: fetch tier data based on selection
   const { tierData: exploreTierData } = useTierMapData({
@@ -549,124 +556,13 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
             {tierData && !learnUsesPolygons && <TierMarkers data={tierData} />}
 
-            {/* Hover tooltip for Learn mode polygon features */}
-            {hoveredFeature && (
-              <Popup
-                longitude={hoveredFeature.longitude}
-                latitude={hoveredFeature.latitude}
-                anchor="bottom"
-                closeButton={false}
-                closeOnClick={false}
-                offset={15}
-              >
-                <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
-                  {(() => {
-                    const isUrban = hoveredFeature.classType === "Urban"
-                    const primaryName =
-                      isUrban && hoveredFeature.urbName
-                        ? hoveredFeature.urbName
-                        : hoveredFeature.modName
-                    const secondaryName =
-                      isUrban && hoveredFeature.urbName && hoveredFeature.modName
-                        ? hoveredFeature.modName
-                        : null
-
-                    return (
-                      <>
-                        {primaryName && (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 600,
-                              color: theme.palette.blue.darkest,
-                              mb: 0.5,
-                            }}
-                          >
-                            {primaryName}
-                          </Typography>
-                        )}
-                        {secondaryName && (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: theme.palette.grey[700],
-                              mb: 0.5,
-                            }}
-                          >
-                            {secondaryName}
-                          </Typography>
-                        )}
-                      </>
-                    )
-                  })()}
-
-                  {hoveredFeature.subName && (
-                    <Typography
-                      variant="body2"
-                      sx={{ color: theme.palette.grey[600], mb: 0.5 }}
-                    >
-                      {hoveredFeature.subName}
-                    </Typography>
-                  )}
-
-                  {hoveredFeature.comments && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.grey[600],
-                        display: "block",
-                        mb: 0.5,
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {hoveredFeature.comments}
-                    </Typography>
-                  )}
-
-                  {hoveredFeature.type && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.grey[600],
-                        display: "block",
-                        mb: 0.5,
-                      }}
-                    >
-                      {hoveredFeature.type}
-                    </Typography>
-                  )}
-
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.grey[500],
-                      display: "block",
-                      mb: 1,
-                    }}
-                  >
-                    CalSim ID: {hoveredFeature.duId}
-                  </Typography>
-
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: "2px",
-                        backgroundColor:
-                          theme.palette.tiers[
-                            `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
-                          ],
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                      <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
-                      {hoveredFeature.tierLabel}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Popup>
+            {/* Tooltip for Learn mode polygon features (hover or pinned) */}
+            {activeTooltip && (
+              <PolygonLayerTooltip
+                feature={activeTooltip}
+                isPinned={isTooltipPinned}
+                onClose={clearPinned}
+              />
             )}
           </>
         )}
@@ -677,124 +573,13 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
           <TierMarkers data={exploreTierData} />
         )}
 
-        {/* Hover tooltip for Explore mode polygon features */}
-        {isExploreMode && hoveredFeature && (
-          <Popup
-            longitude={hoveredFeature.longitude}
-            latitude={hoveredFeature.latitude}
-            anchor="bottom"
-            closeButton={false}
-            closeOnClick={false}
-            offset={15}
-          >
-            <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300 }}>
-              {(() => {
-                const isUrban = hoveredFeature.classType === "Urban"
-                const primaryName =
-                  isUrban && hoveredFeature.urbName
-                    ? hoveredFeature.urbName
-                    : hoveredFeature.modName
-                const secondaryName =
-                  isUrban && hoveredFeature.urbName && hoveredFeature.modName
-                    ? hoveredFeature.modName
-                    : null
-
-                return (
-                  <>
-                    {primaryName && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.blue.darkest,
-                          mb: 0.5,
-                        }}
-                      >
-                        {primaryName}
-                      </Typography>
-                    )}
-                    {secondaryName && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: theme.palette.grey[700],
-                          mb: 0.5,
-                        }}
-                      >
-                        {secondaryName}
-                      </Typography>
-                    )}
-                  </>
-                )
-              })()}
-
-              {hoveredFeature.subName && (
-                <Typography
-                  variant="body2"
-                  sx={{ color: theme.palette.grey[600], mb: 0.5 }}
-                >
-                  {hoveredFeature.subName}
-                </Typography>
-              )}
-
-              {hoveredFeature.comments && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    display: "block",
-                    mb: 0.5,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {hoveredFeature.comments}
-                </Typography>
-              )}
-
-              {hoveredFeature.type && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    display: "block",
-                    mb: 0.5,
-                  }}
-                >
-                  {hoveredFeature.type}
-                </Typography>
-              )}
-
-              <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.grey[500],
-                  display: "block",
-                  mb: 1,
-                }}
-              >
-                CalSim ID: {hoveredFeature.duId}
-              </Typography>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: "2px",
-                    backgroundColor:
-                      theme.palette.tiers[
-                        `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
-                      ],
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                  <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
-                  {hoveredFeature.tierLabel}
-                </Typography>
-              </Box>
-            </Box>
-          </Popup>
+        {/* Tooltip for Explore mode polygon features (hover or pinned) */}
+        {isExploreMode && activeTooltip && (
+          <PolygonLayerTooltip
+            feature={activeTooltip}
+            isPinned={isTooltipPinned}
+            onClose={clearPinned}
+          />
         )}
       </Map>
     </Box>

@@ -8,8 +8,8 @@
  */
 
 import { useEffect, useRef, useState } from "react"
-import { Map, NavigationControl, Marker, Popup, useMap } from "@repo/map"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Map, NavigationControl, Marker, useMap } from "@repo/map"
+import { Box } from "@repo/ui/mui"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
@@ -22,6 +22,7 @@ import {
   useOutcomeMapLayer,
   outcomeUsesPolygons,
 } from "./hooks/useOutcomeMapLayer"
+import { PolygonLayerTooltip } from "../tooltips/PolygonLayerTooltip"
 import {
   useActiveSection,
   useGeocoderMarker,
@@ -68,7 +69,6 @@ export default function CaliforniaMapPanel({
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
-  const theme = useTheme()
   const onMapReadyCalledRef = useRef(false)
 
   // Store selectors
@@ -90,13 +90,17 @@ export default function CaliforniaMapPanel({
   // Use polygon layer for CWS, AG_REV, etc.
   // This standalone component always operates in "learn" mode
   const mapMode: MapMode = "learn"
-  const { hoveredFeature } = useOutcomeMapLayer({
+  const { hoveredFeature, pinnedFeature, clearPinned } = useOutcomeMapLayer({
     learnOutcome: usesPolygons ? selectedOutcome : null,
     learnStrategy: "current-ops",
     exploreOutcome: null,
     exploreStrategy: "current-ops",
     mapMode,
   })
+
+  // Determine active tooltip (pinned takes precedence over hovered)
+  const activeTooltip = pinnedFeature || hoveredFeature
+  const isTooltipPinned = !!pinnedFeature
 
   // Tier location data for other outcomes (point/polygon based from API)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
@@ -278,7 +282,7 @@ export default function CaliforniaMapPanel({
     return () => {
       clearInterval(interval)
     }
-""  }, [map.mapRef, onMapReady])
+  }, [map.mapRef, onMapReady])
 
   // Track previous section for camera transitions
   const prevSectionRef = useRef<SectionId | null>(null)
@@ -376,145 +380,13 @@ export default function CaliforniaMapPanel({
         {/* (Polygon outcomes like CWS/AG_REV are handled by useOutcomeMapLayer) */}
         {tierData && !usesPolygons && <TierMarkers data={tierData} />}
 
-        {/* Hover tooltip for polygon layer features */}
-        {hoveredFeature && (
-          <Popup
-            longitude={hoveredFeature.longitude}
-            latitude={hoveredFeature.latitude}
-            anchor="bottom"
-            closeButton={false}
-            closeOnClick={false}
-            offset={15}
-          >
-            <Box
-              sx={{
-                p: 1.5,
-                minWidth: 200,
-                maxWidth: 300,
-              }}
-            >
-              {/* Primary name - Urb_Name for CWS, Mod_Name for others */}
-              {(() => {
-                const isUrban = hoveredFeature.classType === "Urban"
-                const primaryName =
-                  isUrban && hoveredFeature.urbName
-                    ? hoveredFeature.urbName
-                    : hoveredFeature.modName
-                const secondaryName =
-                  isUrban && hoveredFeature.urbName && hoveredFeature.modName
-                    ? hoveredFeature.modName
-                    : null
-
-                return (
-                  <>
-                    {primaryName && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.blue.darkest,
-                          mb: 0.5,
-                        }}
-                      >
-                        {primaryName}
-                      </Typography>
-                    )}
-                    {secondaryName && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: theme.palette.grey[700],
-                          mb: 0.5,
-                        }}
-                      >
-                        {secondaryName}
-                      </Typography>
-                    )}
-                  </>
-                )
-              })()}
-
-              {/* Sub_name */}
-              {hoveredFeature.subName && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    mb: 0.5,
-                  }}
-                >
-                  {hoveredFeature.subName}
-                </Typography>
-              )}
-
-              {/* Comments */}
-              {hoveredFeature.comments && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    display: "block",
-                    mb: 0.5,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {hoveredFeature.comments}
-                </Typography>
-              )}
-
-              {/* Type */}
-              {hoveredFeature.type && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    display: "block",
-                    mb: 0.5,
-                  }}
-                >
-                  {hoveredFeature.type}
-                </Typography>
-              )}
-
-              {/* CalSim ID */}
-              <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.grey[500],
-                  display: "block",
-                  mb: 1,
-                }}
-              >
-                CalSim ID: {hoveredFeature.duId}
-              </Typography>
-
-              {/* Tier with colored bullet */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: "2px",
-                    backgroundColor:
-                      theme.palette.tiers[
-                        `tier${hoveredFeature.tierLevel}` as keyof typeof theme.palette.tiers
-                      ],
-                    flexShrink: 0,
-                  }}
-                />
-                <Typography variant="body2" sx={{ fontSize: "0.8rem" }}>
-                  <strong>Tier {hoveredFeature.tierLevel}:</strong>{" "}
-                  {hoveredFeature.tierLabel}
-                </Typography>
-              </Box>
-            </Box>
-          </Popup>
+        {/* Tooltip for polygon layer features (hover or pinned) */}
+        {activeTooltip && (
+          <PolygonLayerTooltip
+            feature={activeTooltip}
+            isPinned={isTooltipPinned}
+            onClose={clearPinned}
+          />
         )}
       </Map>
     </Box>
