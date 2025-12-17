@@ -1,13 +1,13 @@
 /**
- * Hook for displaying outcome data on demand unit polygons
+ * Hook for displaying outcome data on polygons
  *
  * This hook:
- * 1. Uses the existing Mapbox layer "demand-units"
+ * 1. Uses the existing Mapbox layer
  * 2. Fetches tier location data from the API
- * 3. Filters the layer by Class (Urban, Agriculture, etc.)
- * 4. Colors polygons by matching DU_ID to tier data
+ * 3. Filters the layer by Class (Urban, Agriculture, etc.), if a demand unit
+ * 4. Colors polygons by matching their id to tier data
  *
- * Used for outcomes that map to demand units:
+ * Outcomes that map to demand units:
  * - Community deliveries (Class=Urban)
  * - Agricultural revenue (Class=Agriculture)
  */
@@ -156,19 +156,34 @@ interface UseOutcomeMapLayerProps {
   mapMode: MapMode
 }
 
-/** Info about a hovered/clicked polygon */
+/** Info about a polygon */
 export interface HoveredFeatureInfo {
   longitude: number
   latitude: number
-  duId: string
+  /** Which layer type this feature is from */
+  layerType: "demand-units" | "wba"
+  /** Feature ID (DU_ID or WBA_ID) */
+  featureId: string
+  /** Tier level (1-5) */
+  tierLevel: number
+  /** Human-readable tier label */
+  tierLabel: string
+  /** Location name from API */
+  locationName: string | null
+  /** Tier value from API (can be null) */
+  tierValue: number | null
+
+  // Demand-units specific fields
   urbName: string | null // Primary name for CWS (Urban)
   modName: string | null // Secondary name (or primary if no urbName)
   subName: string | null
   comments: string | null
   type: string | null
   classType: string | null // "Urban", "Agriculture", etc.
-  tierLevel: number
-  tierLabel: string
+
+  // WBA specific fields
+  hydroRegion: string | null // Hydrological region (SAC, SJR, etc.)
+  gisAcres: number | null // Area in acres
 }
 
 interface UseOutcomeMapLayerResult {
@@ -177,6 +192,10 @@ interface UseOutcomeMapLayerResult {
   featureCount: number
   /** Info about currently hovered polygon (for tooltip) */
   hoveredFeature: HoveredFeatureInfo | null
+  /** Info about clicked/pinned polygon (stays visible until dismissed) */
+  pinnedFeature: HoveredFeatureInfo | null
+  /** Clear the pinned tooltip */
+  clearPinned: () => void
   /** Clear the layer styling */
   clear: () => void
 }
@@ -217,9 +236,18 @@ export function useOutcomeMapLayer({
   const [featureCount, setFeatureCount] = useState(0)
   const [hoveredFeature, setHoveredFeature] =
     useState<HoveredFeatureInfo | null>(null)
+  const [pinnedFeature, setPinnedFeature] =
+    useState<HoveredFeatureInfo | null>(null)
+
+  // Clear pinned tooltip
+  const clearPinned = useCallback(() => {
+    setPinnedFeature(null)
+  }, [])
 
   // Store tier lookup in a ref so event handlers can access it
   const tierLookupRef = useRef<Record<string, number>>({})
+  // Store full location data from API for tooltips
+  const locationDataRef = useRef<Record<string, TierLocation>>({})
 
   // Get config for this outcome
   const config = outcome ? OUTCOME_LAYER_CONFIG[outcome] : null
@@ -347,6 +375,10 @@ export function useOutcomeMapLayer({
       return
     }
 
+    // ALWAYS clear previous layers before applying new styling
+    // This prevents polygon accumulation when switching between outcomes
+    clear()
+
     let cancelled = false
 
     async function loadAndStyle() {
@@ -380,13 +412,16 @@ export function useOutcomeMapLayer({
 
         // Build a lookup of feature ID -> tier_level from API response
         const tierLookup: Record<string, number> = {}
+        const locationData: Record<string, TierLocation> = {}
         tierData.locations.forEach((location) => {
           // location_id matches the idProperty in the Mapbox layer
           tierLookup[location.location_id] = location.tier_level
+          locationData[location.location_id] = location
         })
 
-        // Store in ref for event handlers to access
+        // Store in refs for event handlers to access
         tierLookupRef.current = tierLookup
+        locationDataRef.current = locationData
 
         const featureIds = Object.keys(tierLookup)
         setFeatureCount(featureIds.length)
@@ -609,12 +644,16 @@ export function useOutcomeMapLayer({
     fadeBasemapDim,
   ])
 
-  // Set up hover events for tooltips
+  // Set up hover events for tooltips - works for both demand-units and WBA layers
   useEffect(() => {
-    if (!visible || !outcome) {
+    if (!visible || !outcome || !config) {
       setHoveredFeature(null)
       return
     }
+
+    // Determine which layer to listen to based on config
+    const layerId = config.layerType === "wba" ? WBA_LAYER_ID : DEMAND_UNITS_LAYER_ID
+    const idProperty = config.idProperty
 
     // Mapbox GL mouse event handlers
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -622,18 +661,80 @@ export function useOutcomeMapLayer({
     let mouseLeaveHandler: (() => void) | null = null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mouseMoveHandler: ((e: any) => void) | null = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let clickHandler: ((e: any) => void) | null = null
+
+    // Helper to build feature info from event
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buildFeatureInfo = (e: any): HoveredFeatureInfo | null => {
+      if (!e.features || e.features.length === 0) return null
+
+      const feature = e.features[0]
+      const props = feature.properties || {}
+      const featureId = props[idProperty]
+      const tierLevel = tierLookupRef.current[featureId] || 0
+      const locationInfo = locationDataRef.current[featureId]
+
+      if (!featureId || tierLevel === 0) return null
+
+      // Use the mouse position as the tooltip anchor
+      const [lng, lat] = e.lngLat.toArray()
+
+      if (config.layerType === "wba") {
+        return {
+          longitude: lng,
+          latitude: lat,
+          layerType: "wba",
+          featureId,
+          tierLevel,
+          tierLabel: getTierLabel(tierLevel),
+          locationName: locationInfo?.location_name || null,
+          tierValue: locationInfo?.tier_value ?? null,
+          hydroRegion: props.HydroRegion || null,
+          gisAcres: props.GIS_Acres ? Number(props.GIS_Acres) : null,
+          urbName: null,
+          modName: null,
+          subName: null,
+          comments: null,
+          type: null,
+          classType: null,
+        }
+      } else {
+        return {
+          longitude: lng,
+          latitude: lat,
+          layerType: "demand-units",
+          featureId,
+          tierLevel,
+          tierLabel: getTierLabel(tierLevel),
+          locationName: locationInfo?.location_name || null,
+          tierValue: locationInfo?.tier_value ?? null,
+          urbName: props.Urb_Name || null,
+          modName: props.Mod_Name || null,
+          subName: props.Sub_Name || null,
+          comments: props.Comments || null,
+          type: props.Type || null,
+          classType: props.Class || null,
+          hydroRegion: null,
+          gisAcres: null,
+        }
+      }
+    }
+
+    // Track if we clicked on a polygon (to prevent map click from clearing)
+    let clickedOnPolygon = false
 
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
 
-      if (!map.getLayer(DEMAND_UNITS_LAYER_ID)) return
+      if (!map.getLayer(layerId)) return
 
       // Mouse enter - change cursor
       mouseEnterHandler = () => {
         map.getCanvas().style.cursor = "pointer"
       }
 
-      // Mouse leave - reset cursor and clear hover
+      // Mouse leave - reset cursor and clear hover (but not pinned)
       mouseLeaveHandler = () => {
         map.getCanvas().style.cursor = ""
         setHoveredFeature(null)
@@ -641,57 +742,69 @@ export function useOutcomeMapLayer({
 
       // Mouse move - update hovered feature
       mouseMoveHandler = (e) => {
-        if (!e.features || e.features.length === 0) {
-          setHoveredFeature(null)
-          return
-        }
-
-        const feature = e.features[0]
-        const props = feature.properties || {}
-        const duId = props.DU_ID
-        const tierLevel = tierLookupRef.current[duId] || 0
-
-        if (!duId || tierLevel === 0) {
-          setHoveredFeature(null)
-          return
-        }
-
-        // Use the mouse position as the tooltip anchor
-        const [lng, lat] = e.lngLat.toArray()
-
-        setHoveredFeature({
-          longitude: lng,
-          latitude: lat,
-          duId,
-          urbName: props.Urb_Name || null,
-          modName: props.Mod_Name || null,
-          subName: props.Sub_Name || null,
-          comments: props.Comments || null,
-          type: props.Type || null,
-          classType: props.Class || null,
-          tierLevel,
-          tierLabel: getTierLabel(tierLevel),
-        })
+        const info = buildFeatureInfo(e)
+        setHoveredFeature(info)
       }
 
-      map.on("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
-      map.on("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
-      map.on("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
+      // Click on polygon - pin the tooltip
+      clickHandler = (e) => {
+        clickedOnPolygon = true
+        const info = buildFeatureInfo(e)
+        if (info) {
+          setPinnedFeature(info)
+        }
+        // Reset flag after a short delay
+        setTimeout(() => {
+          clickedOnPolygon = false
+        }, 100)
+      }
+
+      // Click on map (not on polygon) - clear pinned tooltip
+      const mapClickHandler = () => {
+        // Only clear if we didn't click on a polygon
+        if (!clickedOnPolygon) {
+          setPinnedFeature(null)
+        }
+      }
+
+      map.on("mouseenter", layerId, mouseEnterHandler)
+      map.on("mouseleave", layerId, mouseLeaveHandler)
+      map.on("mousemove", layerId, mouseMoveHandler)
+      map.on("click", layerId, clickHandler)
+      map.on("click", mapClickHandler)
+
+      // Store mapClickHandler reference for cleanup
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(mouseEnterHandler as any)._mapClickHandler = mapClickHandler
     })
 
     return () => {
       mapAPI.withMap((mapRef) => {
         const map = mapRef.getMap()
-        if (mouseEnterHandler)
-          map.off("mouseenter", DEMAND_UNITS_LAYER_ID, mouseEnterHandler)
+        if (mouseEnterHandler) {
+          map.off("mouseenter", layerId, mouseEnterHandler)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mapClickHandler = (mouseEnterHandler as any)._mapClickHandler
+          if (mapClickHandler) {
+            map.off("click", mapClickHandler)
+          }
+        }
         if (mouseLeaveHandler)
-          map.off("mouseleave", DEMAND_UNITS_LAYER_ID, mouseLeaveHandler)
+          map.off("mouseleave", layerId, mouseLeaveHandler)
         if (mouseMoveHandler)
-          map.off("mousemove", DEMAND_UNITS_LAYER_ID, mouseMoveHandler)
+          map.off("mousemove", layerId, mouseMoveHandler)
+        if (clickHandler)
+          map.off("click", layerId, clickHandler)
       })
       setHoveredFeature(null)
+      setPinnedFeature(null)
     }
-  }, [visible, outcome, mapAPI])
+  }, [visible, outcome, config, mapAPI])
+
+  // Clear pinned tooltip when outcome changes (clicking another glyph)
+  useEffect(() => {
+    setPinnedFeature(null)
+  }, [outcome])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -705,6 +818,8 @@ export function useOutcomeMapLayer({
     error,
     featureCount,
     hoveredFeature,
+    pinnedFeature,
+    clearPinned,
     clear,
   }
 }
