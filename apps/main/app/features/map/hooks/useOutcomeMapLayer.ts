@@ -36,6 +36,11 @@ type MapboxExpression = ["match", ["get", string], ...unknown[]]
 // The Mapbox layer IDs for demand units
 const DEMAND_UNITS_LAYER_ID = "demand-units"
 const DEMAND_UNITS_OUTLINE_ID = "demand-units-outline"
+
+// The Mapbox layer IDs for Water Budget Areas (WBA)
+const WBA_LAYER_ID = "calsim-wba"
+const WBA_OUTLINE_ID = "calsim-wba-outline"
+
 const BASEMAP_DIM_LAYER_ID = "basemap-dim-overlay"
 
 // Dimming overlay opacity (0 = no dim, 1 = full black)
@@ -68,10 +73,14 @@ export interface TierLocationsResponse {
 }
 
 interface OutcomeLayerConfig {
-  /** Filter demand units by Class */
-  classFilter: "Agriculture" | "Urban" | "Refuge" | "N/A" | null
+  /** Which Mapbox layer to use */
+  layerType: "demand-units" | "wba"
+  /** Filter by Class (for demand-units only) */
+  classFilter?: "Agriculture" | "Urban" | "Refuge" | "N/A" | null
   /** API short code for tier data */
   tierCode: string
+  /** Property name for feature ID matching */
+  idProperty: string
 }
 
 /**
@@ -79,14 +88,22 @@ interface OutcomeLayerConfig {
  */
 export const OUTCOME_LAYER_CONFIG: Record<string, OutcomeLayerConfig> = {
   "Community deliveries": {
+    layerType: "demand-units",
     classFilter: "Urban",
     tierCode: "CWS_DEL",
+    idProperty: "DU_ID",
   },
   "Agricultural revenue": {
+    layerType: "demand-units",
     classFilter: "Agriculture",
     tierCode: "AG_REV",
+    idProperty: "DU_ID",
   },
-  // Add more outcomes as needed
+  "Groundwater storage": {
+    layerType: "wba",
+    tierCode: "GW_STOR",
+    idProperty: "WBA_ID",
+  },
 }
 
 // Cache for tier location data
@@ -291,15 +308,26 @@ export function useOutcomeMapLayer({
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
 
-      // Hide the fill layer
+      // Hide the demand-units fill layer
       if (map.getLayer(DEMAND_UNITS_LAYER_ID)) {
         map.setLayoutProperty(DEMAND_UNITS_LAYER_ID, "visibility", "none")
         map.setFilter(DEMAND_UNITS_LAYER_ID, ["==", "DU_ID", ""])
       }
 
-      // Remove the dynamically created outline layer
+      // Remove the dynamically created demand-units outline layer
       if (map.getLayer(DEMAND_UNITS_OUTLINE_ID)) {
         map.removeLayer(DEMAND_UNITS_OUTLINE_ID)
+      }
+
+      // Hide the WBA fill layer
+      if (map.getLayer(WBA_LAYER_ID)) {
+        map.setLayoutProperty(WBA_LAYER_ID, "visibility", "none")
+        map.setFilter(WBA_LAYER_ID, ["==", "WBA_ID", ""])
+      }
+
+      // Remove the dynamically created WBA outline layer
+      if (map.getLayer(WBA_OUTLINE_ID)) {
+        map.removeLayer(WBA_OUTLINE_ID)
       }
 
       // Fade out the basemap dim layer
@@ -345,20 +373,25 @@ export function useOutcomeMapLayer({
 
         if (cancelled) return
 
-        // Build a lookup of DU_ID -> tier_level from API response
+        // Determine which layer to use based on config
+        const layerId = config.layerType === "wba" ? WBA_LAYER_ID : DEMAND_UNITS_LAYER_ID
+        const outlineId = config.layerType === "wba" ? WBA_OUTLINE_ID : DEMAND_UNITS_OUTLINE_ID
+        const idProperty = config.idProperty
+
+        // Build a lookup of feature ID -> tier_level from API response
         const tierLookup: Record<string, number> = {}
         tierData.locations.forEach((location) => {
-          // location_id matches DU_ID in the Mapbox layer
+          // location_id matches the idProperty in the Mapbox layer
           tierLookup[location.location_id] = location.tier_level
         })
 
         // Store in ref for event handlers to access
         tierLookupRef.current = tierLookup
 
-        const duIds = Object.keys(tierLookup)
-        setFeatureCount(duIds.length)
+        const featureIds = Object.keys(tierLookup)
+        setFeatureCount(featureIds.length)
 
-        if (duIds.length === 0) {
+        if (featureIds.length === 0) {
           // No tier data available - hide layer
           clear()
           return
@@ -369,32 +402,32 @@ export function useOutcomeMapLayer({
           const map = mapRef.getMap()
 
           // Check if layer exists
-          const layer = map.getLayer(DEMAND_UNITS_LAYER_ID)
+          const layer = map.getLayer(layerId)
           if (!layer) {
             console.warn(
-              `Layer "${DEMAND_UNITS_LAYER_ID}" not found in map style`,
+              `Layer "${layerId}" not found in map style`,
             )
             return
           }
 
           // Build filter expression:
-          // Show only features matching Class AND having tier data
+          // Show only features matching Class (if applicable) AND having tier data
           const classFilter = config.classFilter
             ? ["==", ["get", "Class"], config.classFilter]
             : true
 
-          // Filter to only DU_IDs that have tier data
-          const duIdFilter = ["in", ["get", "DU_ID"], ["literal", duIds]]
+          // Filter to only feature IDs that have tier data
+          const idFilter = ["in", ["get", idProperty], ["literal", featureIds]]
 
           // Combine filters
-          map.setFilter(DEMAND_UNITS_LAYER_ID, ["all", classFilter, duIdFilter])
+          map.setFilter(layerId, ["all", classFilter, idFilter])
 
           // Build color expression based on tier data
-          // This creates: ["match", ["get", "DU_ID"], "id1", color1, "id2", color2, ..., defaultColor]
+          // This creates: ["match", ["get", idProperty], "id1", color1, "id2", color2, ..., defaultColor]
           const colorPairs: (string | number)[] = []
 
-          Object.entries(tierLookup).forEach(([duId, tierLevel]) => {
-            colorPairs.push(duId)
+          Object.entries(tierLookup).forEach(([featureId, tierLevel]) => {
+            colorPairs.push(featureId)
             colorPairs.push(
               tierColors[tierLevel as TierLevel] || theme.palette.grey[500],
             )
@@ -402,21 +435,21 @@ export function useOutcomeMapLayer({
 
           const colorExpression: MapboxExpression = [
             "match",
-            ["get", "DU_ID"],
+            ["get", idProperty],
             ...colorPairs,
             theme.palette.grey[500], // Default color (fallback)
           ]
 
           // Apply paint properties for fill
           map.setPaintProperty(
-            DEMAND_UNITS_LAYER_ID,
+            layerId,
             "fill-color",
             colorExpression,
           )
 
           // Fill opacity decreases as you zoom in (more detail visible)
           // At zoom 5: 0.75 opacity, at zoom 10: 0.4 opacity
-          map.setPaintProperty(DEMAND_UNITS_LAYER_ID, "fill-opacity", [
+          map.setPaintProperty(layerId, "fill-opacity", [
             "interpolate",
             ["linear"],
             ["zoom"],
@@ -429,15 +462,15 @@ export function useOutcomeMapLayer({
           ])
 
           // Make fill layer visible
-          map.setLayoutProperty(DEMAND_UNITS_LAYER_ID, "visibility", "visible")
+          map.setLayoutProperty(layerId, "visibility", "visible")
 
           // Fade in the basemap overlay layer for better visibility
           fadeBasemapDim(map, true)
 
           // Style outline layer with tier colors for better visibility
           // Create outline layer dynamically if it doesn't exist
-          if (!map.getLayer(DEMAND_UNITS_OUTLINE_ID)) {
-            const fillLayer = map.getLayer(DEMAND_UNITS_LAYER_ID)
+          if (!map.getLayer(outlineId)) {
+            const fillLayer = map.getLayer(layerId)
             if (fillLayer) {
               const sourceId = fillLayer.source as string
               const sourceLayer = (fillLayer as { "source-layer"?: string })[
@@ -446,7 +479,7 @@ export function useOutcomeMapLayer({
 
               map.addLayer(
                 {
-                  id: DEMAND_UNITS_OUTLINE_ID,
+                  id: outlineId,
                   type: "line",
                   source: sourceId,
                   "source-layer": sourceLayer,
@@ -466,19 +499,19 @@ export function useOutcomeMapLayer({
           }
 
           // Apply filter and styling to outline with tier colors
-          if (map.getLayer(DEMAND_UNITS_OUTLINE_ID)) {
-            map.setFilter(DEMAND_UNITS_OUTLINE_ID, [
+          if (map.getLayer(outlineId)) {
+            map.setFilter(outlineId, [
               "all",
               classFilter,
-              duIdFilter,
+              idFilter,
             ])
             map.setPaintProperty(
-              DEMAND_UNITS_OUTLINE_ID,
+              outlineId,
               "line-color",
               colorExpression,
             )
             // Stroke width: thin at low zoom to prevent jumbling, thicker as you zoom in
-            map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-width", [
+            map.setPaintProperty(outlineId, "line-width", [
               "interpolate",
               ["linear"],
               ["zoom"],
@@ -491,8 +524,8 @@ export function useOutcomeMapLayer({
               11,
               3, // Full thickness when zoomed in
             ])
-            map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-opacity", 1)
-            map.setPaintProperty(DEMAND_UNITS_OUTLINE_ID, "line-offset", [
+            map.setPaintProperty(outlineId, "line-opacity", 1)
+            map.setPaintProperty(outlineId, "line-offset", [
               "interpolate",
               ["linear"],
               ["zoom"],
@@ -506,7 +539,7 @@ export function useOutcomeMapLayer({
               -1.5,
             ])
             map.setLayoutProperty(
-              DEMAND_UNITS_OUTLINE_ID,
+              outlineId,
               "visibility",
               "visible",
             )
