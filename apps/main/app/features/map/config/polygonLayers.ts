@@ -1,14 +1,17 @@
 /**
  * Polygon layer registry
  * 
- * Polygon layer configuration.
+ * Single source of truth for polygon layer configuration.
  * To add a new layer, add an entry to this registry.
- * Tooltip fields are defined alongside layer config
+ * Tooltip fields are defined alongside layer config.
  */
 
 // ============================================================================
 // TYPES
 // ============================================================================
+
+/** Layer type identifier */
+export type LayerType = "demand-units" | "wba"
 
 /** Source of tooltip field data */
 export type TooltipFieldSource = 
@@ -50,6 +53,8 @@ export interface TooltipFieldDef {
 
 /** Configuration for a polygon layer */
 export interface PolygonLayerConfig {
+  /** Layer type identifier */
+  layerType: LayerType
   /** Mapbox layer ID for the fill layer */
   mapboxLayerId: string
   /** Mapbox source layer name */
@@ -67,6 +72,26 @@ export interface PolygonLayerConfig {
 }
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Mapbox layer IDs */
+export const LAYER_IDS = {
+  demandUnits: {
+    fill: "demand-units",
+    outline: "demand-units-outline",
+  },
+  wba: {
+    fill: "calsim-wba",
+    outline: "calsim-wba-outline",
+  },
+  basemapDim: "basemap-dim-overlay",
+} as const
+
+/** Basemap dim opacity */
+export const BASEMAP_DIM_OPACITY = 0.15
+
+// ============================================================================
 // LAYER REGISTRY
 // ============================================================================
 
@@ -80,6 +105,7 @@ export interface PolygonLayerConfig {
  */
 export const POLYGON_LAYER_REGISTRY: Record<string, PolygonLayerConfig> = {
   "Community deliveries": {
+    layerType: "demand-units",
     mapboxLayerId: "demand-units",
     sourceLayer: "demand-units",
     idProperty: "DU_ID",
@@ -128,6 +154,7 @@ export const POLYGON_LAYER_REGISTRY: Record<string, PolygonLayerConfig> = {
   },
 
   "Agricultural revenue": {
+    layerType: "demand-units",
     mapboxLayerId: "demand-units",
     sourceLayer: "demand-units",
     idProperty: "DU_ID",
@@ -168,6 +195,7 @@ export const POLYGON_LAYER_REGISTRY: Record<string, PolygonLayerConfig> = {
   },
 
   "Groundwater storage": {
+    layerType: "wba",
     mapboxLayerId: "calsim-wba",
     sourceLayer: "geoschem",
     idProperty: "WBA_ID",
@@ -223,4 +251,13 @@ export function outcomeUsesPolygons(outcome: string): boolean {
  */
 export function getPolygonOutcomes(): string[] {
   return Object.keys(POLYGON_LAYER_REGISTRY)
+}
+
+/**
+ * Get Mapbox layer IDs for a layer type
+ */
+export function getLayerIds(layerType: LayerType): { fill: string; outline: string } {
+  return layerType === "wba" 
+    ? LAYER_IDS.wba 
+    : LAYER_IDS.demandUnits
 }
