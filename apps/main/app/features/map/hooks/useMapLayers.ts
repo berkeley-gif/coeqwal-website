@@ -319,8 +319,8 @@ export function useMapLayers() {
     }
   }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
 
-  // Hide water layer when leaving the delta section
-  // (The water layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
+  // Hide delta-water layer when leaving the delta section
+  // (The delta-water layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
   useEffect(() => {
     if (!mapReady) return
     if (activeSection === "delta") return // Still in delta, don't hide
@@ -328,12 +328,12 @@ export function useMapLayers() {
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
 
+    // Hide delta-water layer (new Mapbox tileset layer)
     try {
-      if (mapInstance.getLayer("water")) {
+      if (mapInstance.getLayer("delta-water")) {
         // Fade out and hide
-        // Clamp startOpacity to valid range [0, 1]
         const rawOpacity =
-          (mapInstance.getPaintProperty("water", "fill-opacity") as number) ?? 0
+          (mapInstance.getPaintProperty("delta-water", "fill-opacity") as number) ?? 0
         const startOpacity = Math.max(0, Math.min(1, rawOpacity))
 
         // Only fade out if currently visible
@@ -345,7 +345,43 @@ export function useMapLayers() {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
-            // Clamp opacity to valid range [0, 1]
+            const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
+
+            try {
+              mapInstance.setPaintProperty("delta-water", "fill-opacity", opacity)
+            } catch {
+              return
+            }
+
+            if (progress < 1) {
+              requestAnimationFrame(fadeOut)
+            } else {
+              mapInstance.setLayoutProperty("delta-water", "visibility", "none")
+            }
+          }
+
+          requestAnimationFrame(fadeOut)
+        }
+      }
+    } catch {
+      // Layer might not exist
+    }
+
+    // Also hide legacy "water" layer if it exists (backward compatibility)
+    try {
+      if (mapInstance.getLayer("water")) {
+        const rawOpacity =
+          (mapInstance.getPaintProperty("water", "fill-opacity") as number) ?? 0
+        const startOpacity = Math.max(0, Math.min(1, rawOpacity))
+
+        if (startOpacity > 0.01) {
+          const duration = FADE_DURATION
+          const startTime = performance.now()
+
+          const fadeOut = (currentTime: number) => {
+            const elapsed = currentTime - startTime
+            const progress = Math.min(elapsed / duration, 1)
+            const eased = 1 - Math.pow(1 - progress, 3)
             const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
 
             try {
@@ -357,7 +393,6 @@ export function useMapLayers() {
             if (progress < 1) {
               requestAnimationFrame(fadeOut)
             } else {
-              // Hide completely when done
               mapInstance.setLayoutProperty("water", "visibility", "none")
             }
           }
