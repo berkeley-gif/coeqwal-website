@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .bg { fill: #f5a623; }
+      .fg { fill: #fff; }
+    </style>
+  </defs>
+  <!-- Light orange background circle -->
+  <circle class="bg" cx="60" cy="60" r="60"/>
+  <g class="fg">
+    <!-- Sun circle -->
+    <circle cx="60" cy="55" r="22"/>
+    <!-- Sun rays -->
+    <g stroke="#fff" stroke-width="5" stroke-linecap="round">
+      <line x1="60" y1="23" x2="60" y2="13"/>
+      <line x1="60" y1="87" x2="60" y2="97"/>
+      <line x1="28" y1="55" x2="18" y2="55"/>
+      <line x1="92" y1="55" x2="102" y2="55"/>
+      <line x1="37" y1="32" x2="30" y2="25"/>
+      <line x1="83" y1="32" x2="90" y2="25"/>
+      <line x1="37" y1="78" x2="30" y2="85"/>
+      <line x1="83" y1="78" x2="90" y2="85"/>
+    </g>
+  </g>
+</svg>
+
