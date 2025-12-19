@@ -38,21 +38,31 @@ export function ComparisonHeader() {
         height: "100%",
       }}
     >
-      <Typography
-        variant="subtitle2"
+      {/* Title and instructions inline */}
+      <Box
         sx={{
-          fontWeight: theme.typography.fontWeightMedium,
-          mb: 0.5,
+          display: "flex",
+          alignItems: "baseline",
+          gap: 1.5,
+          mb: 1,
+          flexWrap: "wrap",
         }}
       >
-        Scenario Comparison
-      </Typography>
-      <Typography
-        variant="caption"
-        sx={{ color: theme.palette.grey[600] }}
-      >
-        Use draggable arrows on axes to filter scenarios
-      </Typography>
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: theme.typography.fontWeightMedium,
+          }}
+        >
+          Scenario Comparison
+        </Typography>
+        <Typography
+          variant="caption"
+          sx={{ color: theme.palette.grey[600] }}
+        >
+          — Use draggable arrows on axes to filter scenarios
+        </Typography>
+      </Box>
 
       {/* Scenario legend */}
       <Box
@@ -60,7 +70,6 @@ export function ComparisonHeader() {
           display: "flex",
           flexWrap: "wrap",
           gap: 1,
-          mt: 1,
         }}
       >
         {comparisonData.map((scenario, index) => {
@@ -94,10 +103,10 @@ export function ComparisonHeader() {
                 }}
               />
               <Typography
-                variant="caption"
+                variant="body2"
                 sx={{
                   fontWeight: isHighlighted ? 600 : 400,
-                  fontSize: "0.7rem",
+                  fontSize: theme.typography.nav.fontSize,
                 }}
               >
                 {scenario.name}
