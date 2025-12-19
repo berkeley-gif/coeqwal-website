@@ -258,7 +258,7 @@ export function useMapboxLayerStyling({
         // Fade in basemap dim
         fadeBasemapDim(map, true)
 
-        // Move river layers to top
+        // River layers at top (reservoirs go above rivers)
         RIVER_LAYER_IDS.forEach((riverId) => {
           try {
             if (map.getLayer(riverId)) {
@@ -266,6 +266,18 @@ export function useMapboxLayerStyling({
             }
           } catch { /* ignore */ }
         })
+
+        // Reservoirs go above the rivers
+        if (layerType === "reservoir") {
+          try {
+            if (map.getLayer(LAYER_IDS.reservoir.fill)) {
+              map.moveLayer(LAYER_IDS.reservoir.fill)
+            }
+            if (map.getLayer(LAYER_IDS.reservoir.outline)) {
+              map.moveLayer(LAYER_IDS.reservoir.outline)
+            }
+          } catch { /* ignore */ }
+        }
       })
     }, 10)
 
@@ -389,14 +401,21 @@ function applyPolygonStyling(
       map.setFilter(outlineId, filter)
     }
     map.setPaintProperty(outlineId, "line-color", colorExpression)
-    map.setPaintProperty(outlineId, "line-width", [
-      "interpolate", ["linear"], ["zoom"],
-      5, 0.5, 7, 1, 9, 2, 11, 3,
-    ])
-    map.setPaintProperty(outlineId, "line-offset", [
-      "interpolate", ["linear"], ["zoom"],
-      5, -0.25, 7, -0.5, 9, -1, 11, -1.5,
-    ])
+    
+    // Delta gets a fixed thin stroke, others get zoom-interpolated width
+    if (layerType === "delta") {
+      map.setPaintProperty(outlineId, "line-width", 0.5)
+      map.setPaintProperty(outlineId, "line-offset", 0)
+    } else {
+      map.setPaintProperty(outlineId, "line-width", [
+        "interpolate", ["linear"], ["zoom"],
+        5, 0.5, 7, 1, 9, 2, 11, 3,
+      ])
+      map.setPaintProperty(outlineId, "line-offset", [
+        "interpolate", ["linear"], ["zoom"],
+        5, -0.25, 7, -0.5, 9, -1, 11, -1.5,
+      ])
+    }
     map.setLayoutProperty(outlineId, "visibility", "visible")
   }
 }
