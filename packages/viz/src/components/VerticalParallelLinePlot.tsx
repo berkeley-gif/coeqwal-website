@@ -80,8 +80,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       for (const group of groups) {
         const representative = data[group[0]!]!
         const isSimilar = axes.every((axis) => {
-          const val1 = scenario.values[axis] || 0
-          const val2 = representative.values[axis] || 0
+          const val1 = scenario.values[axis]
+          const val2 = representative.values[axis]
+          // If either value is missing, consider them not overlapping on this axis
+          if (val1 === undefined || val2 === undefined) return true
           return Math.abs(val1 - val2) < SIMILARITY_THRESHOLD
         })
         if (isSimilar) {
@@ -120,11 +122,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const getScenarioOpacity = useCallback(
     (scenario: VerticalParallelLineData, elementType: "line" | "circle") => {
       // Check if scenario passes all active filters
+      // Skip axes where the scenario has no value
       const passesAllFilters = axes.every((axis) => {
         const filter = filterRanges.current[axis]
         if (!filter) return true
 
-        const value = scenario.values[axis] || 0
+        const value = scenario.values[axis]
+        if (value === undefined) return true // Skip missing values
         return value >= filter[0] && value <= filter[1]
       })
 
@@ -717,9 +721,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const xOffset = scenarioOffsets[dataIndex] || 0
 
         // Line generator with offset applied (no curves - original styling)
+        // Use defined() to skip missing values
         const lineGenerator = d3
-          .line<[string, number]>()
-          .x(([axis, value]) => scales[axis]!(value) + xOffset)
+          .line<[string, number | undefined]>()
+          .defined(([, value]) => value !== undefined)
+          .x(([axis, value]) => scales[axis]!(value as number) + xOffset)
           .y(([axis]) => yScale(axis)!)
 
         const lineColor =
@@ -730,11 +736,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               : colors.default
 
         // Check if scenario passes all filters for both opacity and stroke width
+        // Only check axes that have values
         const passesAllFilters = axes.every((axis) => {
           const filter = filterRanges.current[axis]
           if (!filter) return true
 
-          const value = d.values[axis] || 0
+          const value = d.values[axis]
+          if (value === undefined) return true // Skip missing values in filter check
           return value >= filter[0] && value <= filter[1]
         })
 
@@ -742,8 +750,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const lineOpacity = getScenarioOpacity(d, "line")
         const circleOpacity = getScenarioOpacity(d, "circle")
 
+        // Include undefined for missing values so line generator can skip them
         const pathData = axes.map(
-          (axis) => [axis, d.values[axis] || 0] as [string, number],
+          (axis) => [axis, d.values[axis]] as [string, number | undefined],
         )
 
         let path = g.select<SVGPathElement>(`.line-${dataIndex}`)
@@ -770,11 +779,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("opacity", lineOpacity) // Lines semi-transparent
 
         // Update circles at intersection points (original styling)
+        // Only draw circles for axes that have values
         axes.forEach((axis) => {
-          const value = d.values[axis] || 0
-          let circle = g.select<SVGCircleElement>(
-            `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`,
-          )
+          const value = d.values[axis]
+          const circleSelector = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
+          
+          if (value === undefined) {
+            // Remove circle if no value exists
+            g.select(circleSelector).remove()
+            return
+          }
+
+          let circle = g.select<SVGCircleElement>(circleSelector)
 
           if (circle.empty()) {
             circle = g
