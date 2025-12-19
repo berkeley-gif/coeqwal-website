@@ -571,11 +571,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
               <ReservoirLabels tierLookup={tierLookup} />
             )}
 
-            {/* Hotspot markers for tier 4 locations ( demo:CWS and Salmon) */}
+            {/* Hotspot markers for tier 4 locations (demo: CWS and Salmon) */}
             <HotspotMarkers
               outcome={selectedOutcome}
               strategy="current-ops"
-              visible={!!selectedOutcome && (selectedOutcome === "Community water systems" || selectedOutcome === "Salmon abundance")}
+              visible={!!selectedOutcome && (selectedOutcome === "Community deliveries" || selectedOutcome === "Salmon abundance")}
             />
 
             {/* Tooltip for Learn mode polygon features (hover or pinned) */}
