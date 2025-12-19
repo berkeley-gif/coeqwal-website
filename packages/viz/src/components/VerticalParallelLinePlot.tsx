@@ -52,7 +52,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   baselineData,
   defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
-  onLineHover, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onLineHover,
   onLineClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -143,6 +143,21 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           ? 1.0 // Active lines: full opacity (thickness shows highlight)
           : 0.1 // Filtered lines: faint
       }
+    },
+    [axes],
+  )
+
+  // Check if scenario is active (passes all filters) - for hover eligibility
+  const isScenarioActive = useCallback(
+    (scenario: VerticalParallelLineData) => {
+      return axes.every((axis) => {
+        const filter = filterRanges.current[axis]
+        if (!filter) return true
+
+        const value = scenario.values[axis]
+        if (value === undefined) return true // Skip missing values
+        return value >= filter[0] && value <= filter[1]
+      })
     },
     [axes],
   )
@@ -767,7 +782,49 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               passesAllFilters ? (d.highlighted ? 4 : 1.5) : 1.0,
             ) // Highlighted lines are much thicker
             .attr("opacity", lineOpacity) // Lines semi-transparent
-            .style("cursor", onLineClick ? "pointer" : "default")
+            .style("cursor", onLineClick || onLineHover ? "pointer" : "default")
+            .on("mouseover", function () {
+              // Only allow hover highlighting for active (unfiltered) scenarios
+              if (!isScenarioActive(d)) return
+
+              onLineHover?.(d)
+              // Highlight line on hover
+              d3.select(this).attr("stroke-width", 3.5).attr("opacity", 1)
+
+              // Highlight all corresponding circles for this line
+              axes.forEach((axisName) => {
+                g.select(
+                  `.circle-${dataIndex}-${axisName.replace(/\s+/g, "-")}`,
+                )
+                  .attr("r", d.highlighted ? 8 : 6)
+                  .attr("opacity", 1)
+              })
+            })
+            .on("mouseout", function () {
+              onLineHover?.(null)
+              const currentLineOpacity = getScenarioOpacity(d, "line")
+              const currentCircleOpacity = getScenarioOpacity(d, "circle")
+
+              // Check if scenario is currently active for stroke width
+              const isActive = isScenarioActive(d)
+
+              // Reset line style
+              d3.select(this)
+                .attr(
+                  "stroke-width",
+                  isActive ? (d.highlighted ? 4 : 1.5) : 1.0,
+                )
+                .attr("opacity", currentLineOpacity)
+
+              // Reset all corresponding circles for this line
+              axes.forEach((axisName) => {
+                g.select(
+                  `.circle-${dataIndex}-${axisName.replace(/\s+/g, "-")}`,
+                )
+                  .attr("r", d.highlighted ? 7 : 4)
+                  .attr("opacity", currentCircleOpacity)
+              })
+            })
             .on("click", function () {
               onLineClick?.(d)
             })
@@ -802,7 +859,57 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("stroke-width", 1.5) // Original width
               .attr("r", d.highlighted ? 7 : 4) // Highlighted dots are larger
               .attr("opacity", circleOpacity) // Dots opaque
-              .style("cursor", onLineClick ? "pointer" : "default")
+              .style("cursor", onLineClick || onLineHover ? "pointer" : "default")
+              .on("mouseover", function () {
+                // Only allow hover highlighting for active (unfiltered) scenarios
+                if (!isScenarioActive(d)) return
+
+                onLineHover?.(d)
+                // Highlight this circle
+                d3.select(this).attr("r", d.highlighted ? 8 : 6).attr("opacity", 1)
+
+                // Highlight the corresponding line for this circle
+                g.select(`.line-${dataIndex}`)
+                  .attr("stroke-width", 3.5)
+                  .attr("opacity", 1)
+
+                // Highlight all other circles for this same line/scenario
+                axes.forEach((otherAxis) => {
+                  g.select(
+                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
+                  )
+                    .attr("r", d.highlighted ? 8 : 6)
+                    .attr("opacity", 1)
+                })
+              })
+              .on("mouseout", function () {
+                onLineHover?.(null)
+                const currentLineOpacity = getScenarioOpacity(d, "line")
+                const currentCircleOpacity = getScenarioOpacity(d, "circle")
+
+                // Reset this circle
+                d3.select(this)
+                  .attr("r", d.highlighted ? 7 : 4)
+                  .attr("opacity", currentCircleOpacity)
+
+                // Reset the corresponding line for this circle
+                const isActive = isScenarioActive(d)
+                g.select(`.line-${dataIndex}`)
+                  .attr(
+                    "stroke-width",
+                    isActive ? (d.highlighted ? 4 : 1.5) : 1.0,
+                  )
+                  .attr("opacity", currentLineOpacity)
+
+                // Reset all other circles for this same line/scenario
+                axes.forEach((otherAxis) => {
+                  g.select(
+                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
+                  )
+                    .attr("r", d.highlighted ? 7 : 4)
+                    .attr("opacity", currentCircleOpacity)
+                })
+              })
               .on("click", function () {
                 onLineClick?.(d)
               })
@@ -843,7 +950,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       baselineData,
       title,
       onLineClick,
+      onLineHover,
       getScenarioOpacity,
+      isScenarioActive,
       overlayTiers,
       updateScenarioVisibility,
       currentHeight,

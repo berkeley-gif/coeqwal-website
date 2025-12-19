@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .bg { fill: #bf360c; }
+      .fg { fill: #fff; }
+    </style>
+  </defs>
+  <!-- Deep red-orange background circle -->
+  <circle class="bg" cx="60" cy="60" r="60"/>
+  <g class="fg">
+    <!-- Sun circle with inner circle for intensity -->
+    <circle cx="60" cy="55" r="24"/>
+    <circle cx="60" cy="55" r="12" fill="#bf360c"/>
+    <!-- Sun rays - even thicker/longer for max intensity -->
+    <g stroke="#fff" stroke-width="7" stroke-linecap="round">
+      <line x1="60" y1="18" x2="60" y2="5"/>
+      <line x1="60" y1="92" x2="60" y2="105"/>
+      <line x1="23" y1="55" x2="10" y2="55"/>
+      <line x1="97" y1="55" x2="110" y2="55"/>
+      <line x1="33" y1="28" x2="23" y2="18"/>
+      <line x1="87" y1="28" x2="97" y2="18"/>
+      <line x1="33" y1="82" x2="23" y2="92"/>
+      <line x1="87" y1="82" x2="97" y2="92"/>
+    </g>
+    <!-- Extra wavy heat lines -->
+    <path d="M40,95 Q45,92 50,95 Q55,98 60,95" stroke="#fff" stroke-width="3" fill="none"/>
+    <path d="M60,95 Q65,92 70,95 Q75,98 80,95" stroke="#fff" stroke-width="3" fill="none"/>
+  </g>
+</svg>
+

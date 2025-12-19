@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <style>
+      .bg { fill: #4caf50; }
+      .fg { fill: #fff; }
+    </style>
+  </defs>
+  <!-- Green background circle -->
+  <circle class="bg" cx="60" cy="60" r="60"/>
+  <g class="fg">
+    <!-- Cloud shape -->
+    <ellipse cx="50" cy="45" rx="20" ry="15"/>
+    <ellipse cx="70" cy="45" rx="18" ry="13"/>
+    <ellipse cx="60" cy="50" rx="25" ry="12"/>
+    <!-- Rain drops -->
+    <path d="M40,65 L38,78 Q38,82 42,78 L40,65 Z"/>
+    <path d="M55,70 L53,85 Q53,89 57,85 L55,70 Z"/>
+    <path d="M70,65 L68,78 Q68,82 72,78 L70,65 Z"/>
+    <path d="M85,68 L83,80 Q83,84 87,80 L85,68 Z"/>
+    <!-- Sun peeking from behind -->
+    <circle cx="85" cy="35" r="12" fill="#fff"/>
+    <g stroke="#fff" stroke-width="3" stroke-linecap="round">
+      <line x1="85" y1="18" x2="85" y2="12"/>
+      <line x1="97" y1="23" x2="102" y2="18"/>
+      <line x1="102" y1="35" x2="108" y2="35"/>
+    </g>
+  </g>
+</svg>
+
