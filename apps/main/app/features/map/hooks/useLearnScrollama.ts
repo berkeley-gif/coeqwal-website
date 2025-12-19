@@ -19,11 +19,13 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
+    console.log("[Scrollama] onStepEnter:", data)
     learnMapActions.setActiveSection(data)
 
     // Clear outcome visualization when entering any section other than scenario-intro
     // This handles cases where user scrolls quickly past the exit trigger
     if (data !== "scenario-intro") {
+      console.log("[Scrollama] Clearing outcome - entered non-scenario-intro section")
       learnMapActions.setSelectedOutcome(null)
     }
   }, [])
@@ -57,6 +59,8 @@ export function useLearnScrollama() {
         const riverProgress = Math.min(1, progress * 1.5)
         learnMapActions.setRiversProgress(riverProgress)
       }
+      // Note: Visualization clearing for scenario-intro is handled in MapOverlayPanels
+      // based on strategy panel visibility, not scroll progress
     },
     [],
   )
