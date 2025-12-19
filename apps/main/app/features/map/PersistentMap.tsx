@@ -48,6 +48,9 @@ import { useMapLayers } from "./hooks/useMapLayers"
 // Tooltips
 import { PolygonLayerTooltip } from "../tooltips/PolygonLayerTooltip"
 
+// Custom layer components
+import { ReservoirLabels } from "./components/ReservoirLabels"
+
 // Explore hooks
 import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
 
@@ -175,7 +178,13 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Single mode-aware hook for polygon layer (CWS, AG_REV, etc.)
   // The hook derives which outcome to show based on mapMode
-  const { hoveredFeature, pinnedFeature, clearPinned } = useOutcomeMapLayer({
+  const { 
+    hoveredFeature, 
+    pinnedFeature, 
+    clearPinned,
+    tierLookup,
+    layerType,
+  } = useOutcomeMapLayer({
     learnOutcome: learnUsesPolygons ? selectedOutcome : null,
     learnStrategy: "current-ops",
     exploreOutcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
@@ -555,6 +564,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
             {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
             {tierData && !learnUsesPolygons && <TierMarkers data={tierData} />}
+
+            {/* Reservoir labels (shown above other layers) */}
+            {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
+              <ReservoirLabels tierLookup={tierLookup} />
+            )}
 
             {/* Tooltip for Learn mode polygon features (hover or pinned) */}
             {activeTooltip && (
