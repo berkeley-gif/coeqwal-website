@@ -61,6 +61,9 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
       return
     }
 
+    // Capture non-null value for use in async function
+    const outcome = selectedOutcome
+
     let cancelled = false
 
     async function loadSummary() {
@@ -71,7 +74,7 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
         if (!scenarioId) return
 
         // Get tier code from outcome using the mapping
-        const tierCode = DISPLAY_NAME_TO_API_SHORT_CODE[selectedOutcome]
+        const tierCode = DISPLAY_NAME_TO_API_SHORT_CODE[outcome]
         if (!tierCode) return
 
         const tierData = await fetchTierLocations(scenarioId, tierCode)
@@ -81,7 +84,7 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
         // Also fetch GeoJSON data for reliable coordinates and API names
         let apiNamesMap = new Map<string, string>()
         try {
-          const geoJsonData = await fetchTierLocationData(strategy, selectedOutcome)
+          const geoJsonData = await fetchTierLocationData(strategy, outcome)
           if (!cancelled) {
             const coordsMap = new Map<string, [number, number]>()
             
@@ -96,7 +99,7 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
               
               if (feature.geometry.type === "Point") {
                 const coords = feature.geometry.coordinates as number[]
-                coordsMap.set(locationId, [coords[0], coords[1]])
+                coordsMap.set(locationId, [coords[0]!, coords[1]!])
               } else if (feature.geometry.type === "Polygon") {
                 // Calculate centroid for polygon
                 const ring = (feature.geometry.coordinates as number[][][])[0]
@@ -190,7 +193,7 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
 
         // Generate summary using Mapbox props + API names as fallback
         const summary = generateOutcomeSummary(
-          selectedOutcome!,
+          outcome,
           tierData,
           propsMap,
           apiNamesMap,
