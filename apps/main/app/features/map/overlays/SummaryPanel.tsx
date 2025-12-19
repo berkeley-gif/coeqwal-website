@@ -18,18 +18,25 @@ import {
 } from "../../../content/tiers"
 import { fetchTierLocations } from "../hooks/useOutcomeMapLayer"
 import { fetchTierLocationData } from "../../../lib/api/tierLocationApi"
-import { STRATEGY_TO_SCENARIO_ID } from "../../../lib/constants/outcomeMappings"
+import { STRATEGY_TO_SCENARIO_ID, DISPLAY_NAME_TO_API_SHORT_CODE } from "../../../lib/constants/outcomeMappings"
 import { useSelectedOutcome } from "../store"
 import { useMap } from "@repo/map"
 
 interface SummaryPanelProps {
   strategy?: string
+  /** Optional outcome override - if not provided, reads from store (Learn mode) */
+  outcome?: string | null
+  /** Variant: 'overlay' for map overlay (narrow), 'inline' for strategy grid (full width) */
+  variant?: "overlay" | "inline"
 }
 
-export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
+export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, variant = "overlay" }: SummaryPanelProps) {
   const theme = useTheme()
   const mapAPI = useMap()
-  const selectedOutcome = useSelectedOutcome()
+  const storeOutcome = useSelectedOutcome()
+  
+  // Use prop if provided (Explore mode), otherwise use store (Learn mode)
+  const selectedOutcome = outcomeProp !== undefined ? outcomeProp : storeOutcome
 
   // Get tier colors from theme
   const tierColors = getTierColorsFromTheme(theme)
@@ -63,14 +70,8 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
         const scenarioId = STRATEGY_TO_SCENARIO_ID[strategy]
         if (!scenarioId) return
 
-        // Get tier code from outcome
-        const tierCode =
-          selectedOutcome === "Community deliveries"
-            ? "CWS_DEL"
-            : selectedOutcome === "Agricultural revenue"
-              ? "AG_REV"
-              : null
-
+        // Get tier code from outcome using the mapping
+        const tierCode = DISPLAY_NAME_TO_API_SHORT_CODE[selectedOutcome]
         if (!tierCode) return
 
         const tierData = await fetchTierLocations(scenarioId, tierCode)
@@ -261,16 +262,18 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
     [mapAPI, featurePropsMap, geoJsonCoords],
   )
 
+  const isInline = variant === "inline"
+
   return (
     <Box
       sx={{
         // Match the styling of other panels (StrategyRow, KeyOperationsPanel, KeyOutcomesPanel)
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        borderRadius: 0,
-        padding: { xs: 2, sm: 2.5, md: 3 },
-        boxShadow: theme.shadows[2],
+        backgroundColor: isInline ? theme.palette.grey[50] : "rgba(255, 255, 255, 0.95)",
+        borderRadius: isInline ? theme.borderRadius.standard : 0,
+        padding: isInline ? { xs: 1.5, sm: 2 } : { xs: 2, sm: 2.5, md: 3 },
+        boxShadow: isInline ? "none" : theme.shadows[2],
         width: "100%",
-        maxWidth: {
+        maxWidth: isInline ? "100%" : {
           xs: "100%",
           sm: "360px",
           md: "420px",
@@ -281,34 +284,38 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
         pointerEvents: "auto",
       }}
     >
-      {/* Panel title - matches KeyOutcomesPanel styling */}
-      <Typography
-        variant="subtitle2"
-        sx={{
-          mb: 0.5,
-          fontSize: theme.typography.body2.fontSize,
-          fontWeight: theme.typography.fontWeightMedium,
-          color: theme.palette.grey[900],
-        }}
-      >
-        Scenario summary
-      </Typography>
+      {/* Panel title - matches KeyOutcomesPanel styling (hidden for inline variant) */}
+      {!isInline && (
+        <>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              mb: 0.5,
+              fontSize: theme.typography.body2.fontSize,
+              fontWeight: theme.typography.fontWeightMedium,
+              color: theme.palette.grey[900],
+            }}
+          >
+            Scenario summary
+          </Typography>
 
-      {/* Base scenario summary - always shown */}
-      <Typography
-        variant="body2"
-        sx={{
-          color: theme.palette.grey[700],
-          lineHeight: 1.5,
-          fontSize: theme.typography.nav.fontSize,
-          mb: 2,
-        }}
-      >
-        Overall, this scenario favors community and agricultural water
-        deliveries, though not every community is served equally. Freshwater for
-        Delta exports is preserved, though Delta estuary ecology is at risk.
-        Winter-run Chinook Salmon are red-lining.
-      </Typography>
+          {/* Base scenario summary - always shown (only for overlay) */}
+          <Typography
+            variant="body2"
+            sx={{
+              color: theme.palette.grey[700],
+              lineHeight: 1.5,
+              fontSize: theme.typography.nav.fontSize,
+              mb: 2,
+            }}
+          >
+            Overall, this scenario favors community and agricultural water
+            deliveries, though not every community is served equally. Freshwater for
+            Delta exports is preserved, though Delta estuary ecology is at risk.
+            Winter-run Chinook Salmon are red-lining.
+          </Typography>
+        </>
+      )}
 
       {/* Outcome-specific insights */}
       <AnimatePresence mode="wait">
@@ -346,8 +353,8 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
           >
             <Box
               sx={{
-                borderTop: `1px solid ${theme.palette.grey[200]}`,
-                pt: 2,
+                borderTop: isInline ? "none" : `1px solid ${theme.palette.grey[200]}`,
+                pt: isInline ? 0 : 2,
               }}
             >
               {/* Outcome name header */}
@@ -356,10 +363,10 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
                 sx={{
                   color: theme.palette.blue.medium,
                   fontWeight: 600,
-                  fontSize: "0.7rem",
+                  fontSize: isInline ? theme.typography.body2.fontSize : "0.7rem",
                   letterSpacing: "0.5px",
                   display: "block",
-                  mb: 1,
+                  mb: isInline ? 0.5 : 1,
                 }}
               >
                 {selectedOutcome}
@@ -378,156 +385,299 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
                 {generateOutcomeInsight(selectedOutcome, outcomeSummary)}
               </Typography>
 
-              {/* Tier breakdown chips */}
-              <Box
-                sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}
-              >
-                {Object.entries(outcomeSummary.tierBreakdown).map(
-                  ([tier, data]) => {
-                    const tierNum = parseInt(
-                      tier.replace("tier", ""),
-                    ) as TierLevel
-                    return (
-                      <Chip
-                        key={tier}
-                        size="small"
-                        label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-                        sx={{
-                          backgroundColor: `${tierColors[tierNum]}15`,
-                          color: tierColors[tierNum],
-                          borderColor: `${tierColors[tierNum]}40`,
-                          border: "1px solid",
-                          fontSize: "0.65rem",
-                          fontWeight: 500,
-                          height: 22,
-                          "& .MuiChip-label": {
-                            px: 1,
-                          },
-                        }}
-                      />
-                    )
-                  },
-                )}
-              </Box>
+              {/* Inline layout: horizontal arrangement of tier chips and locations */}
+              {isInline ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    alignItems: "flex-start",
+                  }}
+                >
+                  {/* Tier breakdown chips */}
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                    {Object.entries(outcomeSummary.tierBreakdown).map(
+                      ([tier, data]) => {
+                        const tierNum = parseInt(tier.replace("tier", "")) as TierLevel
+                        return (
+                          <Chip
+                            key={tier}
+                            size="small"
+                            label={`${TIER_LABELS[tierNum]}: ${data.count}`}
+                            sx={{
+                              backgroundColor: `${tierColors[tierNum]}15`,
+                              color: tierColors[tierNum],
+                              borderColor: `${tierColors[tierNum]}40`,
+                              border: "1px solid",
+                              fontSize: "0.65rem",
+                              fontWeight: 500,
+                              height: 22,
+                              "& .MuiChip-label": { px: 1 },
+                            }}
+                          />
+                        )
+                      },
+                    )}
+                  </Box>
 
-              {/* Critical locations with zoom links */}
-              {outcomeSummary.criticalLocations.length > 0 && (
-                <Box sx={{ mb: 1.5 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: tierColors[4],
-                      fontWeight: 600,
-                      fontSize: theme.typography.nav.fontSize,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    Critical locations:
-                  </Typography>
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {outcomeSummary.criticalLocations.slice(0, 8).map((loc) => (
-                      <Chip
-                        key={loc.duId}
-                        size="small"
-                        label={loc.primaryName}
-                        onClick={() => handleLocationClick(loc)}
+                  {/* Critical locations inline */}
+                  {outcomeSummary.criticalLocations.length > 0 && (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                      <Typography
+                        variant="body2"
+                        component="span"
                         sx={{
-                          cursor: "pointer",
-                          backgroundColor: "transparent",
-                          color: theme.palette.grey[700],
-                          border: `1px solid ${theme.palette.grey[300]}`,
+                          color: tierColors[4],
+                          fontWeight: 600,
                           fontSize: theme.typography.nav.fontSize,
-                          height: 24,
-                          "&:hover": {
-                            backgroundColor: theme.palette.blue.bright,
-                            color: theme.palette.common.white,
-                            borderColor: theme.palette.blue.bright,
-                          },
-                          "& .MuiChip-label": {
-                            px: 1,
-                          },
+                          mr: 0.5,
                         }}
-                      />
-                    ))}
-                    {outcomeSummary.criticalLocations.length > 8 && (
+                      >
+                        Critical:
+                      </Typography>
+                      {outcomeSummary.criticalLocations.slice(0, 6).map((loc) => (
+                        <Chip
+                          key={loc.duId}
+                          size="small"
+                          label={loc.primaryName}
+                          onClick={() => handleLocationClick(loc)}
+                          sx={{
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            color: theme.palette.grey[700],
+                            border: `1px solid ${theme.palette.grey[300]}`,
+                            fontSize: "0.65rem",
+                            height: 22,
+                            "&:hover": {
+                              backgroundColor: theme.palette.blue.bright,
+                              color: theme.palette.common.white,
+                              borderColor: theme.palette.blue.bright,
+                            },
+                            "& .MuiChip-label": { px: 0.75 },
+                          }}
+                        />
+                      ))}
+                      {outcomeSummary.criticalLocations.length > 6 && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: theme.palette.grey[500],
+                            fontSize: "0.65rem",
+                          }}
+                        >
+                          +{outcomeSummary.criticalLocations.length - 6} more
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* At-risk locations inline */}
+                  {outcomeSummary.atRiskLocations.length > 0 && (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                      <Typography
+                        variant="body2"
+                        component="span"
+                        sx={{
+                          color: tierColors[3],
+                          fontWeight: 600,
+                          fontSize: theme.typography.nav.fontSize,
+                          mr: 0.5,
+                        }}
+                      >
+                        At-risk:
+                      </Typography>
+                      {outcomeSummary.atRiskLocations.slice(0, 4).map((loc) => (
+                        <Chip
+                          key={loc.duId}
+                          size="small"
+                          label={loc.primaryName}
+                          onClick={() => handleLocationClick(loc)}
+                          sx={{
+                            cursor: "pointer",
+                            backgroundColor: "transparent",
+                            color: theme.palette.grey[600],
+                            border: `1px solid ${theme.palette.grey[300]}`,
+                            fontSize: "0.6rem",
+                            height: 18,
+                            "&:hover": {
+                              backgroundColor: theme.palette.blue.bright,
+                              color: theme.palette.common.white,
+                              borderColor: theme.palette.blue.bright,
+                            },
+                            "& .MuiChip-label": { px: 0.75 },
+                          }}
+                        />
+                      ))}
+                      {outcomeSummary.atRiskLocations.length > 4 && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: theme.palette.grey[500],
+                            fontSize: "0.6rem",
+                          }}
+                        >
+                          +{outcomeSummary.atRiskLocations.length - 4} more
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              ) : (
+                /* Overlay layout: vertical arrangement */
+                <>
+                  {/* Tier breakdown chips */}
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}
+                  >
+                    {Object.entries(outcomeSummary.tierBreakdown).map(
+                      ([tier, data]) => {
+                        const tierNum = parseInt(
+                          tier.replace("tier", ""),
+                        ) as TierLevel
+                        return (
+                          <Chip
+                            key={tier}
+                            size="small"
+                            label={`${TIER_LABELS[tierNum]}: ${data.count}`}
+                            sx={{
+                              backgroundColor: `${tierColors[tierNum]}15`,
+                              color: tierColors[tierNum],
+                              borderColor: `${tierColors[tierNum]}40`,
+                              border: "1px solid",
+                              fontSize: "0.65rem",
+                              fontWeight: 500,
+                              height: 22,
+                              "& .MuiChip-label": {
+                                px: 1,
+                              },
+                            }}
+                          />
+                        )
+                      },
+                    )}
+                  </Box>
+
+                  {/* Critical locations with zoom links */}
+                  {outcomeSummary.criticalLocations.length > 0 && (
+                    <Box sx={{ mb: 1.5 }}>
                       <Typography
                         variant="body2"
                         sx={{
-                          color: theme.palette.grey[500],
+                          color: tierColors[4],
+                          fontWeight: 600,
                           fontSize: theme.typography.nav.fontSize,
-                          alignSelf: "center",
+                          display: "block",
+                          mb: 0.5,
                         }}
                       >
-                        +{outcomeSummary.criticalLocations.length - 8} more
+                        Critical locations:
                       </Typography>
-                    )}
-                  </Box>
-                </Box>
-              )}
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {outcomeSummary.criticalLocations.slice(0, 8).map((loc) => (
+                          <Chip
+                            key={loc.duId}
+                            size="small"
+                            label={loc.primaryName}
+                            onClick={() => handleLocationClick(loc)}
+                            sx={{
+                              cursor: "pointer",
+                              backgroundColor: "transparent",
+                              color: theme.palette.grey[700],
+                              border: `1px solid ${theme.palette.grey[300]}`,
+                              fontSize: theme.typography.nav.fontSize,
+                              height: 24,
+                              "&:hover": {
+                                backgroundColor: theme.palette.blue.bright,
+                                color: theme.palette.common.white,
+                                borderColor: theme.palette.blue.bright,
+                              },
+                              "& .MuiChip-label": {
+                                px: 1,
+                              },
+                            }}
+                          />
+                        ))}
+                        {outcomeSummary.criticalLocations.length > 8 && (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: theme.palette.grey[500],
+                              fontSize: theme.typography.nav.fontSize,
+                              alignSelf: "center",
+                            }}
+                          >
+                            +{outcomeSummary.criticalLocations.length - 8} more
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  )}
 
-              {/* At-risk locations */}
-              {outcomeSummary.atRiskLocations.length > 0 && (
-                <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: tierColors[3],
-                      fontWeight: 600,
-                      fontSize: "0.7rem",
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    At-risk locations ({outcomeSummary.atRiskLocations.length}):
-                  </Typography>
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {outcomeSummary.atRiskLocations.slice(0, 5).map((loc) => (
-                      <Chip
-                        key={loc.duId}
-                        size="small"
-                        label={loc.primaryName}
-                        onClick={() => handleLocationClick(loc)}
-                        sx={{
-                          cursor: "pointer",
-                          backgroundColor: "transparent",
-                          color: theme.palette.grey[600],
-                          border: `1px solid ${theme.palette.grey[300]}`,
-                          fontSize: "0.6rem",
-                          height: 18,
-                          "&:hover": {
-                            backgroundColor: theme.palette.blue.bright,
-                            color: theme.palette.common.white,
-                            borderColor: theme.palette.blue.bright,
-                          },
-                          "& .MuiChip-label": {
-                            px: 0.75,
-                          },
-                        }}
-                      />
-                    ))}
-                    {outcomeSummary.atRiskLocations.length > 5 && (
+                  {/* At-risk locations */}
+                  {outcomeSummary.atRiskLocations.length > 0 && (
+                    <Box>
                       <Typography
                         variant="caption"
                         sx={{
-                          color: theme.palette.grey[500],
-                          fontSize: "0.6rem",
-                          alignSelf: "center",
+                          color: tierColors[3],
+                          fontWeight: 600,
+                          fontSize: "0.7rem",
+                          display: "block",
+                          mb: 0.5,
                         }}
                       >
-                        +{outcomeSummary.atRiskLocations.length - 5} more
+                        At-risk locations ({outcomeSummary.atRiskLocations.length}):
                       </Typography>
-                    )}
-                  </Box>
-                </Box>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {outcomeSummary.atRiskLocations.slice(0, 5).map((loc) => (
+                          <Chip
+                            key={loc.duId}
+                            size="small"
+                            label={loc.primaryName}
+                            onClick={() => handleLocationClick(loc)}
+                            sx={{
+                              cursor: "pointer",
+                              backgroundColor: "transparent",
+                              color: theme.palette.grey[600],
+                              border: `1px solid ${theme.palette.grey[300]}`,
+                              fontSize: "0.6rem",
+                              height: 18,
+                              "&:hover": {
+                                backgroundColor: theme.palette.blue.bright,
+                                color: theme.palette.common.white,
+                                borderColor: theme.palette.blue.bright,
+                              },
+                              "& .MuiChip-label": {
+                                px: 0.75,
+                              },
+                            }}
+                          />
+                        ))}
+                        {outcomeSummary.atRiskLocations.length > 5 && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: theme.palette.grey[500],
+                              fontSize: "0.6rem",
+                              alignSelf: "center",
+                            }}
+                          >
+                            +{outcomeSummary.atRiskLocations.length - 5} more
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Prompt to select an outcome - shown when no outcome is selected */}
-      {!selectedOutcome && !isLoading && (
+      {/* Prompt to select an outcome - shown when no outcome is selected (overlay only) */}
+      {!isInline && !selectedOutcome && !isLoading && (
         <Typography
           variant="caption"
           sx={{
