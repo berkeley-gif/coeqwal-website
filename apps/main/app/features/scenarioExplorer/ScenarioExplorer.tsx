@@ -40,9 +40,17 @@ export default function ScenarioExplorerNew() {
   const theme = useTheme()
   const [mainView, setMainView] = useState<MainView>("explorer")
   const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
+  
+  // Track highlighted scenario for comparison chart (shared between header and chart)
+  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(null)
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
     setMainView(newValue)
+  }
+
+  // Toggle handler for scenario highlighting
+  const handleScenarioClick = (scenarioId: string) => {
+    setHighlightedScenario((prev) => (prev === scenarioId ? null : scenarioId))
   }
 
   // Map mode in explorer needs transparent background so persistent map shows through
@@ -296,7 +304,12 @@ export default function ScenarioExplorerNew() {
                   }}
                 >
                   {/* Comparison header only in comparison mode */}
-                  {exploreMode === "comparison" && <ComparisonHeader />}
+                  {exploreMode === "comparison" && (
+                    <ComparisonHeader
+                      highlightedScenario={highlightedScenario}
+                      onScenarioClick={handleScenarioClick}
+                    />
+                  )}
                 </Box>
               )}
             </Box>
@@ -314,7 +327,11 @@ export default function ScenarioExplorerNew() {
         >
           {mainView === "about" && <AboutScenariosView />}
           {mainView === "explorer" && (
-            <UnifiedExploreView mode={exploreMode} />
+            <UnifiedExploreView
+              mode={exploreMode}
+              highlightedScenario={highlightedScenario}
+              onScenarioClick={handleScenarioClick}
+            />
           )}
           {mainView === "data" && <DataExplorerView />}
         </Box>

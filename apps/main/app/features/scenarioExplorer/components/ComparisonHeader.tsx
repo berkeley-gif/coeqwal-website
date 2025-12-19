@@ -1,26 +1,27 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useComparisonData } from "../views/ComparisonView/useComparisonData"
+
+interface ComparisonHeaderProps {
+  /** Currently highlighted scenario ID */
+  highlightedScenario: string | null
+  /** Callback when a scenario is clicked (for toggle) */
+  onScenarioClick: (scenarioId: string) => void
+}
 
 /**
  * ComparisonHeader: Shows scenario comparison title and legend
  * Designed to sit in the right 50% of the search bar row, directly above the comparison chart
  */
-export function ComparisonHeader() {
+export function ComparisonHeader({
+  highlightedScenario,
+  onScenarioClick,
+}: ComparisonHeaderProps) {
   const theme = useTheme()
   const { data: comparisonData, lineColors, isLoading, hasData } =
     useComparisonData()
-
-  // Track highlighted scenario in comparison
-  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
-    null,
-  )
-
-  const handleScenarioClick = (scenarioId: string) => {
-    setHighlightedScenario((prev) => (prev === scenarioId ? null : scenarioId))
-  }
 
   if (isLoading || !hasData) {
     return null
@@ -60,7 +61,7 @@ export function ComparisonHeader() {
           variant="caption"
           sx={{ color: theme.palette.grey[600] }}
         >
-          — Use draggable arrows on axes to filter scenarios
+          Use draggable arrows on axes to filter scenarios
         </Typography>
       </Box>
 
@@ -77,7 +78,7 @@ export function ComparisonHeader() {
           return (
             <Box
               key={scenario.id}
-              onClick={() => handleScenarioClick(scenario.id)}
+              onClick={() => onScenarioClick(scenario.id)}
               sx={{
                 display: "flex",
                 alignItems: "center",
