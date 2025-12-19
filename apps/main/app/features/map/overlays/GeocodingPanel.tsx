@@ -167,6 +167,7 @@ export function GeocodingPanel({
         boxShadow: theme.shadows[2],
         width: "100%",
         boxSizing: "border-box",
+        pointerEvents: "auto", // Ensure panel is interactive
       }}
     >
       <Typography

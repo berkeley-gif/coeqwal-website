@@ -217,9 +217,28 @@ export default function MapOverlayPanels() {
   const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
   const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
 
+  // Track if StrategyInfoPanel was ever visible (to avoid clearing on initial render)
+  // Using first panel because it's visible the longest
+  const strategyInfoWasVisible = useRef(false)
+
   // Sync motion values to state for use in MUI sx prop
   useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
-    setStrategyInfoPE(latest as "none" | "auto")
+    const newPE = latest as "none" | "auto"
+    console.log("[MapOverlayPanels] strategyInfoPointerEvents changed:", newPE, "wasVisible:", strategyInfoWasVisible.current)
+    setStrategyInfoPE(newPE)
+    
+    // Track when panel becomes visible
+    if (newPE === "auto") {
+      strategyInfoWasVisible.current = true
+    }
+    
+    // Clear outcome visualization only when transitioning from visible to invisible
+    // (not on initial render when panel starts invisible)
+    if (newPE === "none" && strategyInfoWasVisible.current) {
+      console.log("[MapOverlayPanels] Clearing outcome - strategyInfo became invisible")
+      learnMapActions.setSelectedOutcome(null)
+      strategyInfoWasVisible.current = false // Reset for next cycle
+    }
   })
   useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
     setKeyOperationsPE(latest as "none" | "auto")
@@ -250,18 +269,8 @@ export default function MapOverlayPanels() {
     [0, 1, 1, 0],
   )
 
-  // Clear outcome visualization when scrolling past the KeyOutcomes panel
-  // The panel is visible from ~0.48 to ~0.68 progress (compressed timing)
-  useEffect(() => {
-    const unsubscribe = scenarioIntroProgress.on("change", (progress) => {
-      // Clear outcome when scrolled past the KeyOutcomes section (> 0.70)
-      // or scrolled before it (< 0.45)
-      if (progress > 0.7 || progress < 0.45) {
-        learnMapActions.setSelectedOutcome(null)
-      }
-    })
-    return () => unsubscribe()
-  }, [scenarioIntroProgress])
+  // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
+  // visibility tracking in useMotionValueEvent above
 
   // First panel entrance animation
   useEffect(() => {
@@ -688,7 +697,7 @@ export default function MapOverlayPanels() {
           Scrollama just detects when we enter this section.
           Internal animations are driven by useScroll/useTransform.
         */}
-        <Step data={"scenario-intro" as SectionId}>
+        <Step data={"scenario-intro" as SectionId} progress>
           <Box
             id="scenario-intro-wrapper"
             sx={{
