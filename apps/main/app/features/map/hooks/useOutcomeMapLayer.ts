@@ -50,6 +50,11 @@ interface UseOutcomeMapLayerResult {
   pinnedFeature: HoveredFeatureInfo | null
   clearPinned: () => void
   clear: () => void
+  /** Tier data for custom rendering (e.g., ReservoirLabels) */
+  tierLookup: Record<string, number>
+  locationData: Record<string, { longitude?: number; latitude?: number; location_name?: string }>
+  /** Current layer type (e.g., "reservoir", "demand-units") */
+  layerType: string | null
 }
 
 /**
@@ -79,7 +84,7 @@ export function useOutcomeMapLayer({
   const config: OutcomeLayerConfig | null = outcome ? getOutcomeConfig(outcome) : null
 
   // Only enable for Mapbox-based outcomes (not react-marker)
-  const isMapboxBased = config && config.geometryType !== "react-marker"
+  const isMapboxBased = config ? config.geometryType !== "react-marker" : false
   
   // Whether visualization should be active
   const enabled = !!outcome && !!config && isMapboxBased && (mapMode === "learn" || mapMode === "explore")
@@ -128,7 +133,8 @@ export function useOutcomeMapLayer({
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
       const currentCenter = map.getCenter()
-      const targetZoom = 6.5
+      // Use config's defaultZoom if specified, otherwise default to 6.5
+      const targetZoom = config?.defaultZoom ?? 6.5
 
       console.log(
         `[useOutcomeMapLayer] Zooming to level ${targetZoom} for "${outcome}" (keeping current center)`,
@@ -140,7 +146,7 @@ export function useOutcomeMapLayer({
         duration: 1000,
       })
     })
-  }, [enabled, skipCameraControl, featureIds.length, outcome, mapAPI])
+  }, [enabled, skipCameraControl, featureIds.length, outcome, config, mapAPI])
 
   return {
     isLoading,
@@ -150,6 +156,9 @@ export function useOutcomeMapLayer({
     pinnedFeature,
     clearPinned,
     clear,
+    tierLookup,
+    locationData,
+    layerType: config?.layerType || null,
   }
 }
 

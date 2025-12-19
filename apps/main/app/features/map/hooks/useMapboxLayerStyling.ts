@@ -151,6 +151,9 @@ export function useMapboxLayerStyling({
       if (map.getLayer(LAYER_IDS.reservoir.outline)) {
         try { map.removeLayer(LAYER_IDS.reservoir.outline) } catch { /* ignore */ }
       }
+      if (map.getLayer(LAYER_IDS.reservoir.label)) {
+        try { map.removeLayer(LAYER_IDS.reservoir.label) } catch { /* ignore */ }
+      }
 
       // Clear delta layer
       if (map.getLayer(LAYER_IDS.delta.fill)) {
@@ -341,7 +344,14 @@ function applyPolygonStyling(
     map.setFilter(mapboxLayerId, null)
   }
 
-  // Apply fill styling
+  // Special handling for reservoir: keep natural fill color
+  // Labels are rendered via React component (ReservoirLabels) for better control
+  if (layerType === "reservoir") {
+    map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
+    return // Skip the normal fill/outline styling for reservoirs
+  }
+
+  // Apply fill styling (for non-reservoir polygons)
   map.setPaintProperty(mapboxLayerId, "fill-color", colorExpression)
   map.setPaintProperty(mapboxLayerId, "fill-opacity", [
     "interpolate", ["linear"], ["zoom"],

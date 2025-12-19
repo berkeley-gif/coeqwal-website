@@ -80,6 +80,8 @@ export interface OutcomeLayerConfig {
   lineWidth?: number
   /** React layer IDs (for React-rendered layers like rivers) */
   reactLayerIds?: string[]
+  /** Default zoom level for Learn mode (defaults to 6.5) */
+  defaultZoom?: number
 }
 
 // ============================================================================
@@ -105,6 +107,7 @@ export const LAYER_IDS = {
   reservoir: {
     fill: "california-reservoir",
     outline: "california-reservoir-outline",
+    label: "california-reservoir-labels",
   },
   // Line layers (React-rendered)
   sacramento: {
@@ -235,6 +238,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       { key: "gnisidlabel", label: "GNIS ID", source: "mapbox", mapboxKey: "gnisidlabel", variant: "caption" },
     ],
     idLabel: "Reservoir ID",
+    defaultZoom: 6, // zoom to see all reservoirs across California
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
