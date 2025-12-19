@@ -31,6 +31,8 @@ export interface VerticalParallelLinePlotProps {
   overlayTiers?: boolean
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
+  /** Callback when axes are reordered via drag */
+  onAxesReorder?: (newAxes: string[]) => void
 }
 
 const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
@@ -54,6 +56,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   overlayTiers = false,
   onLineHover,
   onLineClick,
+  onAxesReorder,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -62,6 +65,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   )
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
+  
+  // Track current axis order (can be reordered by dragging)
+  const [currentAxes, setCurrentAxes] = useState<string[]>(axes)
+  
+  // Update currentAxes when props.axes changes
+  useEffect(() => {
+    setCurrentAxes(axes)
+  }, [axes])
 
   // Track filter ranges for each axis [min, max] approach as this summer.
   const filterRanges = useRef<Record<string, [number, number]>>({})
@@ -208,10 +219,22 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     }
   }, [height, responsive])
 
+  // Handle axis reorder via drag
+  const handleAxisReorder = useCallback(
+    (fromIndex: number, toIndex: number) => {
+      const newAxes = [...currentAxes]
+      const [removed] = newAxes.splice(fromIndex, 1)
+      newAxes.splice(toIndex, 0, removed!)
+      setCurrentAxes(newAxes)
+      onAxesReorder?.(newAxes)
+    },
+    [currentAxes, onAxesReorder],
+  )
+
   // Observable pattern: Create update function for smooth resizing
   const updateChart = useCallback(
     (newWidth: number, newHeight: number, animate = true) => {
-      if (!data || data.length === 0 || !axes || axes.length === 0) return
+      if (!data || data.length === 0 || !currentAxes || currentAxes.length === 0) return
 
       const svg = d3.select(svgRef.current)
       const innerWidth = newWidth - margin.left - margin.right
@@ -229,13 +252,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       // Create or update scales
       const scales: Record<string, d3.ScaleLinear<number, number>> = {}
-      axes.forEach((axis) => {
+      currentAxes.forEach((axis) => {
         scales[axis] = d3.scaleLinear().domain([-1, 1]).range([0, innerWidth])
       })
 
       const yScale = d3
         .scalePoint()
-        .domain(axes)
+        .domain(currentAxes)
         .range([0, innerHeight])
         .padding(0)
 
@@ -270,7 +293,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("height", innerHeight)
 
       // Update axes with smooth transitions
-      axes.forEach((axis) => {
+      currentAxes.forEach((axis, axisIndex) => {
         const yPos = yScale(axis)!
         let axisGroup = g.select<SVGGElement>(
           `.axis-${axis.replace(/\s+/g, "-")}`,
@@ -295,7 +318,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const tierColors = ["#CD5C5C", "#FFB347", "#60aacb", "#7b9d3f"] // Red, Orange, Blue, Green (tier4 to tier1)
 
           // Vary segment proportions based on axis index for visual interest
-          const axisIndex = axes.indexOf(axis)
           const segmentProportions = [
             [0.15, 0.25, 0.35, 0.25], // Axis 0: Smaller red, larger blue
             [0.2, 0.3, 0.3, 0.2], // Axis 1: Balanced
@@ -374,18 +396,97 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         }
 
         // Create text element for each line
-        lines.forEach((line, index) => {
+        lines.forEach((line, lineIdx) => {
           axisGroup
             .append("text")
             .attr("class", "axis-label")
             .attr("x", -10)
-            .attr("y", 4 + (index - (lines.length - 1) / 2) * lineHeight) // Center multi-line text vertically
+            .attr("y", 4 + (lineIdx - (lines.length - 1) / 2) * lineHeight) // Center multi-line text vertically
             .attr("text-anchor", "end") // Right align text
             .attr("font-size", "12px")
             .attr("font-weight", "500")
             .attr("fill", "#333")
             .text(line)
         })
+
+        // Add drag handle for axis reordering
+        axisGroup.selectAll(".drag-handle").remove()
+        const dragHandle = axisGroup
+          .append("g")
+          .attr("class", "drag-handle")
+          .attr("transform", `translate(-${margin.left - 15}, 0)`)
+          .style("cursor", "grab")
+
+        // Drag handle icon (≡ hamburger menu style)
+        dragHandle
+          .append("rect")
+          .attr("x", -8)
+          .attr("y", -10)
+          .attr("width", 16)
+          .attr("height", 20)
+          .attr("fill", "transparent")
+
+        for (let i = -1; i <= 1; i++) {
+          dragHandle
+            .append("line")
+            .attr("x1", -5)
+            .attr("x2", 5)
+            .attr("y1", i * 4)
+            .attr("y2", i * 4)
+            .attr("stroke", "#999")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-linecap", "round")
+        }
+
+        // Drag behavior for reordering axes
+        const axisSpacing = innerHeight / (currentAxes.length - 1 || 1)
+        let currentDragY = yPos
+        let totalDragDelta = 0
+
+        const dragBehavior = d3
+          .drag<SVGGElement, unknown>()
+          .on("start", function () {
+            currentDragY = yPos
+            totalDragDelta = 0
+            d3.select(this.parentNode as SVGGElement)
+              .raise()
+              .select(".drag-handle")
+              .style("cursor", "grabbing")
+            d3.select(this.parentNode as SVGGElement)
+              .style("opacity", 0.7)
+          })
+          .on("drag", function (event) {
+            // Use event.dy for smooth incremental updates
+            totalDragDelta += event.dy
+            currentDragY = yPos + totalDragDelta
+            d3.select(this.parentNode as SVGGElement).attr(
+              "transform",
+              `translate(0, ${currentDragY})`,
+            )
+          })
+          .on("end", function () {
+            const newIndex = Math.round(
+              Math.max(0, Math.min(currentAxes.length - 1, axisIndex + totalDragDelta / axisSpacing)),
+            )
+
+            d3.select(this.parentNode as SVGGElement)
+              .style("opacity", 1)
+            d3.select(this.parentNode as SVGGElement)
+              .select(".drag-handle")
+              .style("cursor", "grab")
+
+            if (newIndex !== axisIndex) {
+              handleAxisReorder(axisIndex, newIndex)
+            } else {
+              // Snap back to original position
+              d3.select(this.parentNode as SVGGElement)
+                .transition()
+                .duration(200)
+                .attr("transform", `translate(0, ${yPos})`)
+            }
+          })
+
+        dragHandle.call(dragBehavior as any)
 
         // Add tick marks (original styling)
         axisGroup.selectAll(".tick-line").remove()
@@ -646,7 +747,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .y(([axis]) => yScale(axis)!)
         // No curve - straight lines
 
-        const baselinePathData = axes.map(
+        const baselinePathData = currentAxes.map(
           (axis) => [axis, baselineData.values[axis] || 0] as [string, number],
         )
 
@@ -671,7 +772,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         )
 
         // Update baseline circles - orange to match line
-        axes.forEach((axis) => {
+        currentAxes.forEach((axis) => {
           const value = baselineData.values[axis] || 0
           let circle = g.select<SVGCircleElement>(
             `.baseline-circle-${axis.replace(/\s+/g, "-")}`,
@@ -713,7 +814,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         }
 
         // Remove baseline circles
-        axes.forEach((axis) => {
+        currentAxes.forEach((axis) => {
           const circle = g.select(
             `.baseline-circle-${axis.replace(/\s+/g, "-")}`,
           )
@@ -752,7 +853,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         // Check if scenario passes all filters for both opacity and stroke width
         // Only check axes that have values
-        const passesAllFilters = axes.every((axis) => {
+        const passesAllFilters = currentAxes.every((axis) => {
           const filter = filterRanges.current[axis]
           if (!filter) return true
 
@@ -766,7 +867,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const circleOpacity = getScenarioOpacity(d, "circle")
 
         // Include undefined for missing values so line generator can skip them
-        const pathData = axes.map(
+        const pathData = currentAxes.map(
           (axis) => [axis, d.values[axis]] as [string, number | undefined],
         )
 
@@ -792,7 +893,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               d3.select(this).attr("stroke-width", 3.5).attr("opacity", 1)
 
               // Highlight all corresponding circles for this line
-              axes.forEach((axisName) => {
+              currentAxes.forEach((axisName) => {
                 g.select(
                   `.circle-${dataIndex}-${axisName.replace(/\s+/g, "-")}`,
                 )
@@ -817,7 +918,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 .attr("opacity", currentLineOpacity)
 
               // Reset all corresponding circles for this line
-              axes.forEach((axisName) => {
+              currentAxes.forEach((axisName) => {
                 g.select(
                   `.circle-${dataIndex}-${axisName.replace(/\s+/g, "-")}`,
                 )
@@ -838,7 +939,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         // Update circles at intersection points (original styling)
         // Only draw circles for axes that have values
-        axes.forEach((axis) => {
+        currentAxes.forEach((axis) => {
           const value = d.values[axis]
           const circleSelector = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
           
@@ -875,7 +976,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                   .attr("opacity", 1)
 
                 // Highlight all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
+                currentAxes.forEach((otherAxis) => {
                   g.select(
                     `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
                   )
@@ -903,7 +1004,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                   .attr("opacity", currentLineOpacity)
 
                 // Reset all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
+                currentAxes.forEach((otherAxis) => {
                   g.select(
                     `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
                   )
@@ -943,7 +1044,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     },
     [
       data,
-      axes,
+      currentAxes,
       margin,
       colors,
       lineColors,
@@ -958,6 +1059,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       updateScenarioVisibility,
       currentHeight,
       scenarioOffsets,
+      handleAxisReorder,
     ],
   )
 
