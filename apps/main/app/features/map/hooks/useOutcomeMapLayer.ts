@@ -1,13 +1,11 @@
 /**
  * Hook for displaying outcome data on map layers
  *
- * This is a backward-compatible wrapper around the new unified system.
- * It provides the same interface as before while using the new:
- * - outcomeLayerRegistry (single source of truth for all outcomes)
- * - useMapboxLayerStyling (handles polygon, point, and line layers)
- * - useLayerTooltip (unified tooltip handling)
- *
- * For new code, prefer using useOutcomeVisualization directly.
+ * TODO: This hook maintains backward compatibility with existing callers.
+ * Consider migrating callers to use the unified system directly:
+ * - getOutcomeConfig() from outcomeLayerRegistry
+ * - useMapboxLayerStyling for styling
+ * - useLayerTooltip for tooltips
  */
 
 import { useEffect } from "react"
@@ -22,11 +20,9 @@ import { useTierDataFetch } from "./useTierDataFetch"
 import { useMapboxLayerStyling } from "./useMapboxLayerStyling"
 import { useLayerTooltip, type HoveredFeatureInfo } from "./useLayerTooltip"
 
-// Re-export types for backward compatibility
+// TODO: These re-exports maintain backward compatibility - callers should import directly from source
 export type { HoveredFeatureInfo } from "./useLayerTooltip"
 export type { TierLocationsResponse, TierLocation } from "./useTierDataFetch"
-
-// Re-export fetchTierLocations for components that need direct access
 export { fetchTierLocations } from "./useTierDataFetch"
 
 // ============================================================================
@@ -59,7 +55,7 @@ interface UseOutcomeMapLayerResult {
 /**
  * Hook for outcome visualization on map layers
  * 
- * This is the backward-compatible version. For new code, use useOutcomeVisualization.
+ * TODO: Migrate callers to use the new registry and sub-hooks directly
  */
 export function useOutcomeMapLayer({
   learnOutcome,
@@ -160,7 +156,7 @@ export function useOutcomeMapLayer({
 /**
  * Check if an outcome uses polygon visualization
  * 
- * Re-export from registry for backward compatibility.
+ * TODO: Callers should use getOutcomeConfig(outcome)?.geometryType === "polygon" directly
  */
 export function outcomeUsesPolygons(outcome: string): boolean {
   return registryOutcomeUsesPolygons(outcome)
