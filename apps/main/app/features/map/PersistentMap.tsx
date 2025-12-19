@@ -50,6 +50,7 @@ import { PolygonLayerTooltip } from "../tooltips/PolygonLayerTooltip"
 
 // Custom layer components
 import { ReservoirLabels } from "./components/ReservoirLabels"
+import { HotspotMarkers } from "./components/HotspotMarkers"
 
 // Explore hooks
 import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
@@ -569,6 +570,13 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
               <ReservoirLabels tierLookup={tierLookup} />
             )}
+
+            {/* Hotspot markers for tier 4 locations ( demo:CWS and Salmon) */}
+            <HotspotMarkers
+              outcome={selectedOutcome}
+              strategy="current-ops"
+              visible={!!selectedOutcome && (selectedOutcome === "Community water systems" || selectedOutcome === "Salmon abundance")}
+            />
 
             {/* Tooltip for Learn mode polygon features (hover or pinned) */}
             {activeTooltip && (
