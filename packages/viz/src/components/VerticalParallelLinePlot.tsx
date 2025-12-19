@@ -779,8 +779,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", lineColor)
             .attr(
               "stroke-width",
-              passesAllFilters ? (d.highlighted ? 4 : 1.5) : 1.0,
-            ) // Highlighted lines are much thicker
+              passesAllFilters ? (d.highlighted ? 4 : 2) : 1.5,
+            ) // Highlighted lines are thicker
             .attr("opacity", lineOpacity) // Lines semi-transparent
             .style("cursor", onLineClick || onLineHover ? "pointer" : "default")
             .on("mouseover", function () {
@@ -812,7 +812,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               d3.select(this)
                 .attr(
                   "stroke-width",
-                  isActive ? (d.highlighted ? 4 : 1.5) : 1.0,
+                  isActive ? (d.highlighted ? 4 : 2) : 1.5,
                 )
                 .attr("opacity", currentLineOpacity)
 
@@ -833,6 +833,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const pathSelection = animate ? path.transition(t as any) : path
         ;(pathSelection as any)
           .attr("d", lineGenerator(pathData))
+          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 4 : 2) : 1.5)
           .attr("opacity", lineOpacity) // Lines semi-transparent
 
         // Update circles at intersection points (original styling)
@@ -897,7 +898,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 g.select(`.line-${dataIndex}`)
                   .attr(
                     "stroke-width",
-                    isActive ? (d.highlighted ? 4 : 1.5) : 1.0,
+                    isActive ? (d.highlighted ? 4 : 2) : 1.5,
                   )
                   .attr("opacity", currentLineOpacity)
 

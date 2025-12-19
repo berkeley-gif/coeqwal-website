@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -17,6 +17,10 @@ export type ExploreMode = "list" | "map" | "comparison"
 interface UnifiedExploreViewProps {
   /** Current view mode */
   mode: ExploreMode
+  /** Currently highlighted scenario ID (for comparison mode) */
+  highlightedScenario?: string | null
+  /** Callback when a scenario is clicked in the chart */
+  onScenarioClick?: (scenarioId: string) => void
 }
 
 /**
@@ -34,6 +38,8 @@ interface UnifiedExploreViewProps {
  */
 export default function UnifiedExploreView({
   mode,
+  highlightedScenario = null,
+  onScenarioClick,
 }: UnifiedExploreViewProps) {
   const theme = useTheme()
 
@@ -46,11 +52,6 @@ export default function UnifiedExploreView({
     hasData: hasComparisonData,
   } = useComparisonData()
 
-  // Track highlighted scenario in comparison
-  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
-    null,
-  )
-
   // Update comparison data with highlighted state
   const highlightedData = useMemo(() => {
     return comparisonData.map((scenario) => ({
@@ -58,10 +59,6 @@ export default function UnifiedExploreView({
       highlighted: scenario.id === highlightedScenario,
     }))
   }, [comparisonData, highlightedScenario])
-
-  const handleScenarioClick = (scenarioId: string) => {
-    setHighlightedScenario((prev) => (prev === scenarioId ? null : scenarioId))
-  }
 
   // Get current tier selection for toggle behavior
   const currentTierSelection = useExploreTierSelection()
@@ -251,7 +248,7 @@ export default function UnifiedExploreView({
                         }}
                         lineColors={lineColors}
                         onLineClick={(scenario) =>
-                          handleScenarioClick(scenario.id)
+                          onScenarioClick?.(scenario.id)
                         }
                       />
                     </Box>
