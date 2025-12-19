@@ -590,18 +590,43 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         )}
 
         {/* Explore mode layers */}
-        {/* Only show TierMarkers when NOT using polygon visualization */}
-        {isExploreMode && exploreTierData && exploreTierData.features.length > 0 && !exploreUsesMapboxLayers && (
-          <TierMarkers data={exploreTierData} />
-        )}
+        {isExploreMode && (
+          <>
+            {/* Rivers layer for Explore mode - needed for Salmon abundance visualization */}
+            <RiversLayer 
+              visible={exploreTierSelection?.outcome === "Salmon abundance"} 
+              progress={1} 
+            />
 
-        {/* Tooltip for Explore mode polygon features (hover or pinned) */}
-        {isExploreMode && activeTooltip && (
-          <PolygonLayerTooltip
-            feature={activeTooltip}
-            isPinned={isTooltipPinned}
-            onClose={clearPinned}
-          />
+            {/* Only show TierMarkers when NOT using polygon visualization */}
+            {exploreTierData && exploreTierData.features.length > 0 && !exploreUsesMapboxLayers && (
+              <TierMarkers data={exploreTierData} />
+            )}
+
+            {/* Reservoir labels for Explore mode (shown above other layers) */}
+            {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
+              <ReservoirLabels tierLookup={tierLookup} />
+            )}
+
+            {/* Hotspot markers for tier 4 locations (Community deliveries and Salmon abundance) */}
+            <HotspotMarkers
+              outcome={exploreTierSelection?.outcome ?? null}
+              strategy={exploreTierSelection?.strategy ?? "current-ops"}
+              visible={!!exploreTierSelection?.outcome && (
+                exploreTierSelection.outcome === "Community deliveries" || 
+                exploreTierSelection.outcome === "Salmon abundance"
+              )}
+            />
+
+            {/* Tooltip for Explore mode polygon features (hover or pinned) */}
+            {activeTooltip && (
+              <PolygonLayerTooltip
+                feature={activeTooltip}
+                isPinned={isTooltipPinned}
+                onClose={clearPinned}
+              />
+            )}
+          </>
         )}
       </Map>
     </Box>

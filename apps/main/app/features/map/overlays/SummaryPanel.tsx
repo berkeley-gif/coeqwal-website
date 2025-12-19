@@ -414,11 +414,11 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
               {outcomeSummary.criticalLocations.length > 0 && (
                 <Box sx={{ mb: 1.5 }}>
                   <Typography
-                    variant="caption"
+                    variant="body2"
                     sx={{
                       color: tierColors[4],
                       fontWeight: 600,
-                      fontSize: "0.7rem",
+                      fontSize: theme.typography.nav.fontSize,
                       display: "block",
                       mb: 0.5,
                     }}
@@ -437,25 +437,25 @@ export function SummaryPanel({ strategy = "current-ops" }: SummaryPanelProps) {
                           backgroundColor: "transparent",
                           color: theme.palette.grey[700],
                           border: `1px solid ${theme.palette.grey[300]}`,
-                          fontSize: "0.6rem",
-                          height: 20,
+                          fontSize: theme.typography.nav.fontSize,
+                          height: 24,
                           "&:hover": {
                             backgroundColor: theme.palette.blue.bright,
                             color: theme.palette.common.white,
                             borderColor: theme.palette.blue.bright,
                           },
                           "& .MuiChip-label": {
-                            px: 0.75,
+                            px: 1,
                           },
                         }}
                       />
                     ))}
                     {outcomeSummary.criticalLocations.length > 8 && (
                       <Typography
-                        variant="caption"
+                        variant="body2"
                         sx={{
                           color: theme.palette.grey[500],
-                          fontSize: "0.6rem",
+                          fontSize: theme.typography.nav.fontSize,
                           alignSelf: "center",
                         }}
                       >
