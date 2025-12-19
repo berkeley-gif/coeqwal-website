@@ -2,7 +2,7 @@
  * DeltaInfoPanel (Learn Map)
  *
  * Provides information about the Sacramento-San Joaquin River Delta.
- * When clicked, zooms to the Delta and shows the water layer.
+ * When clicked, zooms to the Delta and shows the delta-water layer.
  */
 
 import { useState } from "react"
@@ -26,6 +26,9 @@ const DELTA_VIEW = {
   pitch: 0,
 }
 
+// Delta water layer ID (Mapbox tileset: coeqwal.delta-water)
+const DELTA_WATER_LAYER = "delta-water"
+
 export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
   const theme = useTheme()
   const [isTextVisible, setIsTextVisible] = useState(false)
@@ -45,13 +48,13 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       })
     }
 
-    // Show and fade in water layer
+    // Show and fade in delta-water layer
     if (map.mapRef?.current) {
       try {
         const mapInstance = map.mapRef.current.getMap()
-        if (mapInstance.getLayer("water")) {
+        if (mapInstance.getLayer(DELTA_WATER_LAYER)) {
           // Make visible
-          mapInstance.setLayoutProperty("water", "visibility", "visible")
+          mapInstance.setLayoutProperty(DELTA_WATER_LAYER, "visibility", "visible")
 
           // Animate opacity from 0 to 0.9
           const targetOpacity = 0.9
@@ -65,10 +68,10 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             const opacity = Math.max(
               0,
               Math.min(targetOpacity, eased * targetOpacity),
-            ) // Clamp between 0 and targetOpacity
+            )
 
             try {
-              mapInstance.setPaintProperty("water", "fill-opacity", opacity)
+              mapInstance.setPaintProperty(DELTA_WATER_LAYER, "fill-opacity", opacity)
             } catch {
               // Layer might not support this property
             }
@@ -79,11 +82,11 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           }
 
           // Start from 0 opacity
-          mapInstance.setPaintProperty("water", "fill-opacity", 0)
+          mapInstance.setPaintProperty(DELTA_WATER_LAYER, "fill-opacity", 0)
           requestAnimationFrame(animateOpacity)
         }
       } catch {
-        // Silently fail if water layer doesn't exist
+        // Silently fail if delta-water layer doesn't exist
       }
     }
   }

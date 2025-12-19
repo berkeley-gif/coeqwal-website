@@ -1,29 +1,29 @@
 /**
- * Hook for displaying outcome data on polygon layers
+ * Hook for displaying outcome data on map layers
  *
- * This is the main composition hook that orchestrates:
- * - Data fetching (useTierDataFetch)
- * - Layer styling (useLayerStyling)  
- * - Tooltip state (usePolygonTooltip)
+ * This is a backward-compatible wrapper around the new unified system.
+ * It provides the same interface as before while using the new:
+ * - outcomeLayerRegistry (single source of truth for all outcomes)
+ * - useMapboxLayerStyling (handles polygon, point, and line layers)
+ * - useLayerTooltip (unified tooltip handling)
  *
- * It provides a clean interface for map components while delegating
- * specific responsibilities to focused sub-hooks.
+ * For new code, prefer using useOutcomeVisualization directly.
  */
 
 import { useEffect } from "react"
 import { useMap } from "@repo/map"
 import type { MapMode } from "../store"
 import {
-  getLayerConfig,
+  getOutcomeConfig,
   outcomeUsesPolygons as registryOutcomeUsesPolygons,
-  type PolygonLayerConfig,
-} from "../config/polygonLayers"
+  type OutcomeLayerConfig,
+} from "../config/outcomeLayerRegistry"
 import { useTierDataFetch } from "./useTierDataFetch"
-import { useLayerStyling } from "./useLayerStyling"
-import { usePolygonTooltip, type HoveredFeatureInfo } from "./usePolygonTooltip"
+import { useMapboxLayerStyling } from "./useMapboxLayerStyling"
+import { useLayerTooltip, type HoveredFeatureInfo } from "./useLayerTooltip"
 
 // Re-export types for backward compatibility
-export type { HoveredFeatureInfo } from "./usePolygonTooltip"
+export type { HoveredFeatureInfo } from "./useLayerTooltip"
 export type { TierLocationsResponse, TierLocation } from "./useTierDataFetch"
 
 // Re-export fetchTierLocations for components that need direct access
@@ -57,10 +57,9 @@ interface UseOutcomeMapLayerResult {
 }
 
 /**
- * Main hook for polygon layer visualization
+ * Hook for outcome visualization on map layers
  * 
- * Composes useTierDataFetch, useLayerStyling, and usePolygonTooltip
- * to provide a complete solution for polygon-based outcome visualization.
+ * This is the backward-compatible version. For new code, use useOutcomeVisualization.
  */
 export function useOutcomeMapLayer({
   learnOutcome,
@@ -80,11 +79,14 @@ export function useOutcomeMapLayer({
                  : mapMode === "explore" ? exploreStrategy 
                  : "current-ops"
 
-  // Get config from registry (single source of truth)
-  const config: PolygonLayerConfig | null = outcome ? getLayerConfig(outcome) : null
+  // Get config from registry (single source of truth for ALL outcomes)
+  const config: OutcomeLayerConfig | null = outcome ? getOutcomeConfig(outcome) : null
 
+  // Only enable for Mapbox-based outcomes (not react-marker)
+  const isMapboxBased = config && config.geometryType !== "react-marker"
+  
   // Whether visualization should be active
-  const enabled = !!outcome && !!config && (mapMode === "learn" || mapMode === "explore")
+  const enabled = !!outcome && !!config && isMapboxBased && (mapMode === "learn" || mapMode === "explore")
 
   // Skip camera control in Explore mode (useTierMapData handles it there)
   const skipCameraControl = mapMode === "explore"
@@ -103,21 +105,21 @@ export function useOutcomeMapLayer({
     enabled,
   })
 
-  // 2. Apply layer styling
-  const { clear } = useLayerStyling({
-    config,
+  // 2. Apply layer styling (using the new unified styling hook)
+  const { clear } = useMapboxLayerStyling({
+    config: enabled ? config : null,
     tierLookup,
     featureIds,
     enabled: enabled && featureIds.length > 0,
   })
 
-  // 3. Handle tooltip state
+  // 3. Handle tooltip state (using the new unified tooltip hook)
   const {
     hoveredFeature,
     pinnedFeature,
     clearPinned,
-  } = usePolygonTooltip({
-    config,
+  } = useLayerTooltip({
+    config: enabled ? config : null,
     tierLookup,
     locationData,
     enabled: enabled && featureIds.length > 0,
