@@ -123,6 +123,10 @@ import TimelineIcon from "@mui/icons-material/Timeline"
 import ViewListIcon from "@mui/icons-material/ViewList"
 import MapIcon from "@mui/icons-material/Map"
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows"
+import HistoryIcon from "@mui/icons-material/History"
+import WbSunnyIcon from "@mui/icons-material/WbSunny"
+import ThunderstormIcon from "@mui/icons-material/Thunderstorm"
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment"
 
 // Export individually imported icons
 export {
@@ -177,6 +181,10 @@ export {
   ViewListIcon,
   MapIcon,
   CompareArrowsIcon,
+  HistoryIcon,
+  WbSunnyIcon,
+  ThunderstormIcon,
+  LocalFireDepartmentIcon,
 }
 
 // Export the full icons library for access to other icons as needed

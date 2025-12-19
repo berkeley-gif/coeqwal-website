@@ -18,6 +18,7 @@ import { OUTCOMES } from "../../../content/outcomes"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
+import { HydroClimateChooser } from "../../../components/HydroClimateChooser"
 
 interface StrategyRowProps {
   /** Strategy value to display (defaults to "current-ops") */
@@ -363,7 +364,7 @@ export function StrategyInfoPanel({
 }
 
 /**
- * KeyOperationsPanel - Shows just the key operations icons
+ * KeyOperationsPanel - Shows just the key operations icons and hydroclimate chooser
  */
 export function KeyOperationsPanel({
   strategyValue = "current-ops",
@@ -387,87 +388,114 @@ export function KeyOperationsPanel({
         borderRadius: 0,
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
-        width: "100%",
-        maxWidth: {
-          xs: "100%",
-          sm: "360px",
-          md: "420px",
-          lg: "460px",
-          xl: "500px",
-        },
+        width: "fit-content",
+        maxWidth: "100%",
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
     >
-      <Typography
-        variant="subtitle2"
-        onClick={onTitleClick}
-        sx={{
-          mb: 1,
-          fontSize: theme.typography.body2.fontSize,
-          fontWeight: theme.typography.fontWeightMedium,
-          color: theme.palette.grey[900],
-          cursor: onTitleClick ? "pointer" : "default",
-          "&:hover": onTitleClick
-            ? {
-                color: theme.palette.blue.bright,
-              }
-            : {},
-        }}
-      >
-        Key operations
-      </Typography>
-
+      {/* Row with Key Operations and Hydroclimate */}
       <Box
         sx={{
           display: "flex",
-          gap: { xs: 0.5, md: 1 },
           alignItems: "flex-start",
-          flexDirection: "row",
-          justifyContent: "flex-start",
+          gap: 3,
+          flexWrap: "nowrap",
         }}
       >
-        {icons.map((icon) => (
-          <HybridTooltip
-            key={icon.path}
-            content={
-              <>
-                <Box
-                  component="span"
-                  sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                >
-                  {icon.label.replace(/\n/g, " ")}
-                </Box>
-                {icon.description}
-              </>
-            }
+        {/* Key Operations section */}
+        <Box>
+          <Typography
+            variant="subtitle2"
+            onClick={onTitleClick}
+            sx={{
+              mb: 1,
+              fontSize: theme.typography.body2.fontSize,
+              fontWeight: theme.typography.fontWeightMedium,
+              color: theme.palette.grey[900],
+              cursor: onTitleClick ? "pointer" : "default",
+              "&:hover": onTitleClick
+                ? {
+                    color: theme.palette.blue.bright,
+                  }
+                : {},
+            }}
           >
-            <Box
-              sx={{
-                width: { xs: theme.spacing(4), lg: theme.spacing(5) },
-                height: { xs: theme.spacing(4), lg: theme.spacing(5) },
-                cursor: "pointer",
-                // Ensure entire box is hover/click target, not just SVG fill
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                position: "relative",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  inset: 0,
-                },
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={icon.path}
-                alt={icon.alt}
-                style={{ width: "100%", height: "100%", pointerEvents: "none" }}
-              />
-            </Box>
-          </HybridTooltip>
-        ))}
+            Key operations
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: { xs: 0.5, md: 1 },
+              alignItems: "flex-start",
+              flexDirection: "row",
+              justifyContent: "flex-start",
+            }}
+          >
+            {icons.map((icon) => (
+              <HybridTooltip
+                key={icon.path}
+                content={
+                  <>
+                    <Box
+                      component="span"
+                      sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                    >
+                      {icon.label.replace(/\n/g, " ")}
+                    </Box>
+                    {icon.description}
+                  </>
+                }
+              >
+                <Box
+                  sx={{
+                    width: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                    height: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                    cursor: "pointer",
+                    // Ensure entire box is hover/click target, not just SVG fill
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    position: "relative",
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      inset: 0,
+                    },
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={icon.path}
+                    alt={icon.alt}
+                    style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+                  />
+                </Box>
+              </HybridTooltip>
+            ))}
+          </Box>
+        </Box>
+
+        {/* Divider */}
+        <Box
+          sx={{
+            width: "1px",
+            alignSelf: "stretch",
+            backgroundColor: theme.palette.grey[300],
+            minHeight: 50,
+          }}
+        />
+
+        {/* Hydroclimate section */}
+        <Box>
+          <HydroClimateChooser 
+            layout="horizontal"
+            size="default"
+            showTitle={true}
+            showLabels={false}
+          />
+        </Box>
       </Box>
     </Box>
   )
