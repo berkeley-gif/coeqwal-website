@@ -79,7 +79,8 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
           key={label.name}
           longitude={label.longitude}
           latitude={label.latitude}
-          anchor="center"
+          anchor="bottom-left"
+          offset={[20, -20]}
         >
           <div
             style={{
