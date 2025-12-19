@@ -5,6 +5,7 @@
 
 import { TierLocationsResponse } from "../map/hooks/useOutcomeMapLayer"
 import { TIER_LABELS, TierLevel } from "../../content/tiers"
+import { getDemandUnitNameInfo } from "../map/config/demandUnitNames"
 
 // Feature properties from Mapbox layer
 export interface DemandUnitProperties {
@@ -32,29 +33,70 @@ export interface AtRiskLocation {
 }
 
 /**
- * Get the display name for a demand unit based on its class type
- * CWS (Urban): Urb_Name is primary, Mod_Name is secondary
- * Others: Mod_Name is primary
+ * Get the display name for a demand unit
+ * Priority: Sub_Name > Urb_Name > Mod_Name > staticMapping > apiName > locationId
  */
 function getDisplayName(
   props: DemandUnitProperties | undefined,
   locationId: string,
+  apiName?: string, // Fallback from API when Mapbox tiles not loaded
 ): { primary: string; secondary: string | null } {
-  if (!props) {
-    return { primary: locationId, secondary: null }
+  // Priority: Sub_Name > Urb_Name > Mod_Name (from Mapbox props)
+  if (props) {
+    const subName = props.Sub_Name?.trim()
+    const urbName = props.Urb_Name?.trim()
+    const modName = props.Mod_Name?.trim()
+
+    if (subName && subName !== '') {
+      return {
+        primary: subName,
+        secondary: urbName || modName || null,
+      }
+    }
+
+    if (urbName && urbName !== '') {
+      return {
+        primary: urbName,
+        secondary: modName || null,
+      }
+    }
+
+    if (modName && modName !== '') {
+      return {
+        primary: modName,
+        secondary: null,
+      }
+    }
   }
 
-  const isUrban = props.Class === "Urban"
+  // Fallback to static mapping when Mapbox tiles not loaded
+  const staticInfo = getDemandUnitNameInfo(locationId)
+  if (staticInfo) {
+    const subName = staticInfo.subName
+    const urbName = staticInfo.urbName
+    const modName = staticInfo.modName
+    
+    if (subName) {
+      return { primary: subName, secondary: urbName || modName || null }
+    }
+    if (urbName) {
+      return { primary: urbName, secondary: modName || null }
+    }
+    if (modName) {
+      return { primary: modName, secondary: null }
+    }
+  }
 
-  if (isUrban && props.Urb_Name) {
+  // Fallback to API name if Mapbox props not available
+  if (apiName && apiName !== locationId) {
     return {
-      primary: props.Urb_Name,
-      secondary: props.Mod_Name || null,
+      primary: apiName,
+      secondary: null,
     }
   }
 
   return {
-    primary: props.Mod_Name || locationId,
+    primary: locationId,
     secondary: null,
   }
 }
@@ -211,6 +253,7 @@ export function generateOutcomeSummary(
   outcome: string,
   tierData: TierLocationsResponse,
   featureProperties?: Map<string, DemandUnitProperties>,
+  apiNames?: Map<string, string>, // Fallback names from API when Mapbox tiles not loaded
 ): OutcomeSummary {
   const breakdown = analyzeTierDistribution(tierData)
   const total = tierData.locations.length
@@ -222,7 +265,8 @@ export function generateOutcomeSummary(
   tierData.locations.forEach((loc) => {
     if (loc.tier_level === 3 || loc.tier_level === 4) {
       const props = featureProperties?.get(loc.location_id)
-      const displayNames = getDisplayName(props, loc.location_id)
+      const apiName = apiNames?.get(loc.location_id)
+      const displayNames = getDisplayName(props, loc.location_id, apiName)
 
       const location: AtRiskLocation = {
         duId: loc.location_id,
