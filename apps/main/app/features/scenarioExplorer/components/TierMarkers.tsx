@@ -229,6 +229,9 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       {pointFeatures.map((feature) => {
         const coords = feature.geometry.coordinates as [number, number]
         const [lng, lat] = coords
+        
+        // Use diamond shape for Environmental flows (ENV_FLOWS)
+        const isDiamond = data.metadata.tier_code === "ENV_FLOWS"
 
         return (
           <Marker
@@ -239,13 +242,15 @@ export default function TierMarkers({ data }: TierMarkersProps) {
           >
             <div
               style={{
-                width: 24,
-                height: 24,
-                borderRadius: "50%",
+                width: 20,
+                height: 20,
                 backgroundColor: getTierColor(feature.properties.tier_level),
                 border: `2px solid ${theme.palette.common.white}`,
                 boxShadow: theme.boxShadows.medium,
                 cursor: "pointer",
+                // Diamond: rotate square 45 degrees; Circle: use border-radius
+                borderRadius: isDiamond ? "3px" : "50%",
+                transform: isDiamond ? "rotate(45deg)" : "none",
               }}
               onClick={() =>
                 setPopupInfo({
