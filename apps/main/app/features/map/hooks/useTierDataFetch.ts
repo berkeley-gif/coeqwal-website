@@ -179,12 +179,6 @@ export function useTierDataFetch({
         locationDataRef.current = locationData
         featureIdsRef.current = Object.keys(tierLookup)
 
-        console.log(`[useTierDataFetch] Fetched ${tierCode} data:`, {
-          locationsCount: data.locations.length,
-          allFeatureIds: Object.keys(tierLookup),
-          sampleLocation: data.locations[0],
-        })
-
         setResponse(data)
       } catch (err) {
         if (!cancelled) {

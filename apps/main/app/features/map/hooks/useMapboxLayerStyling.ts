@@ -163,6 +163,26 @@ export function useMapboxLayerStyling({
         try { map.removeLayer(LAYER_IDS.delta.outline) } catch { /* ignore */ }
       }
 
+      // Restore river layers to original styling
+      if (map.getLayer(LAYER_IDS.sacramento.body)) {
+        map.setPaintProperty(LAYER_IDS.sacramento.body, "line-color", "#116bb0")
+        map.setPaintProperty(LAYER_IDS.sacramento.body, "line-width", 3)
+      }
+      if (map.getLayer(LAYER_IDS.sacramento.trough)) {
+        map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-color", "#1a3a52")
+        map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-width", 7)
+        map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-opacity", 0.5)
+      }
+      if (map.getLayer(LAYER_IDS.sanJoaquin.body)) {
+        map.setPaintProperty(LAYER_IDS.sanJoaquin.body, "line-color", "#116bb0")
+        map.setPaintProperty(LAYER_IDS.sanJoaquin.body, "line-width", 3)
+      }
+      if (map.getLayer(LAYER_IDS.sanJoaquin.trough)) {
+        map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-color", "#1a3a52")
+        map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-width", 7)
+        map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-opacity", 0.5)
+      }
+
       // Fade out basemap dim
       if (map.getLayer(LAYER_IDS.basemapDim)) {
         fadeBasemapDim(map, false)
@@ -185,17 +205,8 @@ export function useMapboxLayerStyling({
         const map = mapRef.getMap()
         const { geometryType, mapboxLayerId, idProperty, classFilter, requiresIdMatching, layerType } = config
 
-        console.log(`[useMapboxLayerStyling] Applying styling for ${layerType}:`, {
-          mapboxLayerId,
-          geometryType,
-          idProperty,
-          featureIdsCount: featureIds.length,
-          featureIdsSample: featureIds.slice(0, 5),
-        })
-
         // Check if layer exists
         if (!map.getLayer(mapboxLayerId)) {
-          console.warn(`[useMapboxLayerStyling] Layer "${mapboxLayerId}" not found in map style`)
           return
         }
 
@@ -203,8 +214,10 @@ export function useMapboxLayerStyling({
         // TODO: Remove reservoir translation once Mapbox tileset has calsim_id property
         const buildColorExpression = (): MapboxExpression | string => {
           if (!requiresIdMatching || !idProperty) {
-            // Single feature - use tier 3 color as highlight
-            return tierColors[3] || theme.palette.blue.medium
+            // Single feature - use the actual tier from the data (first entry)
+            const tierValues = Object.values(tierLookup)
+            const tier = tierValues.length > 0 ? tierValues[0] : 3
+            return tierColors[tier as TierLevel] || theme.palette.blue.medium
           }
 
           // For reservoir layer, translate CalSim IDs to gnisidlabel for color matching
@@ -331,11 +344,6 @@ function applyPolygonStyling(
         }
       })
     }
-    
-    console.log(`[applyPolygonStyling] Reservoir ID translation:`, {
-      original: featureIds,
-      translated: translatedFeatureIds,
-    })
   }
 
   // Build filter
@@ -346,8 +354,6 @@ function applyPolygonStyling(
   if (requiresIdMatching && idProperty && translatedFeatureIds.length > 0) {
     filter.push(["in", ["get", idProperty], ["literal", translatedFeatureIds]])
   }
-
-  console.log(`[applyPolygonStyling] Applying filter:`, JSON.stringify(filter))
 
   // Apply filter
   if (filter.length > 1) {
@@ -363,15 +369,22 @@ function applyPolygonStyling(
     return // Skip the normal fill/outline styling for reservoirs
   }
 
-  // Apply fill styling (for non-reservoir polygons)
-  map.setPaintProperty(mapboxLayerId, "fill-color", colorExpression)
-  map.setPaintProperty(mapboxLayerId, "fill-opacity", [
-    "interpolate", ["linear"], ["zoom"],
-    5, 0.75,
-    8, 0.55,
-    10, 0.35,
-  ])
-  map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
+  // Special handling for delta: keep natural fill color AND opacity from Mapbox style
+  // Only apply outline styling
+  if (layerType === "delta") {
+    map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
+    // Continue to outline styling below, but skip fill-color and fill-opacity
+  } else {
+    // Apply fill styling (for non-reservoir, non-delta polygons)
+    map.setPaintProperty(mapboxLayerId, "fill-color", colorExpression)
+    map.setPaintProperty(mapboxLayerId, "fill-opacity", [
+      "interpolate", ["linear"], ["zoom"],
+      5, 0.75,
+      8, 0.55,
+      10, 0.35,
+    ])
+    map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
+  }
 
   // Create/update outline layer
   if (!map.getLayer(outlineId)) {
@@ -458,18 +471,24 @@ function applyLineStyling(
   config: OutcomeLayerConfig,
   colorExpression: MapboxExpression | string,
 ) {
-  const { reactLayerIds, lineWidth = 4 } = config
+  const { reactLayerIds, lineWidth = 5 } = config
 
-  // For React-rendered layers, we highlight by changing the color
-  // This is handled differently - the rivers are always visible,
-  // we just change their color when selected
+  // For React-rendered layers (rivers), highlight by changing the color
   if (reactLayerIds) {
-    // Highlight the river body layer
+    // Color the body layer with the tier color
     const bodyLayerId = reactLayerIds.find(id => id.includes("body"))
     if (bodyLayerId && map.getLayer(bodyLayerId)) {
-      // Store original color and apply highlight
       map.setPaintProperty(bodyLayerId, "line-color", colorExpression)
       map.setPaintProperty(bodyLayerId, "line-width", lineWidth)
+    }
+    
+    // Also color the trough layer slightly darker for depth effect
+    const troughLayerId = reactLayerIds.find(id => id.includes("trough"))
+    if (troughLayerId && map.getLayer(troughLayerId)) {
+      // Trough uses same color but wider for outline effect
+      map.setPaintProperty(troughLayerId, "line-color", "#1a3a52") // Keep dark outline
+      map.setPaintProperty(troughLayerId, "line-width", lineWidth + 4)
+      map.setPaintProperty(troughLayerId, "line-opacity", 0.7)
     }
   }
 }

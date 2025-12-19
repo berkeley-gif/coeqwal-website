@@ -41,7 +41,7 @@ import {
 // Hooks
 import {
   useOutcomeMapLayer,
-  outcomeUsesPolygons,
+  outcomeUsesMapboxLayers,
 } from "./hooks/useOutcomeMapLayer"
 import { useMapLayers } from "./hooks/useMapLayers"
 
@@ -166,14 +166,14 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   // Scroll offset for "release from sticky" effect in Learn mode
   const learnMapScrollOffset = useLearnMapScrollOffset()
 
-  // Check if Learn outcome uses polygon visualization
-  const learnUsesPolygons = selectedOutcome
-    ? outcomeUsesPolygons(selectedOutcome)
+  // Check if Learn outcome uses Mapbox layers (polygon, line, point - not react-marker)
+  const learnUsesMapboxLayers = selectedOutcome
+    ? outcomeUsesMapboxLayers(selectedOutcome)
     : false
 
-  // Check if Explore outcome uses polygon visualization
-  const exploreUsesPolygons = exploreTierSelection?.outcome
-    ? outcomeUsesPolygons(exploreTierSelection.outcome)
+  // Check if Explore outcome uses Mapbox layers
+  const exploreUsesMapboxLayers = exploreTierSelection?.outcome
+    ? outcomeUsesMapboxLayers(exploreTierSelection.outcome)
     : false
 
   // Single mode-aware hook for polygon layer (CWS, AG_REV, etc.)
@@ -185,9 +185,9 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     tierLookup,
     layerType,
   } = useOutcomeMapLayer({
-    learnOutcome: learnUsesPolygons ? selectedOutcome : null,
+    learnOutcome: learnUsesMapboxLayers ? selectedOutcome : null,
     learnStrategy: "current-ops",
-    exploreOutcome: exploreUsesPolygons ? exploreTierSelection?.outcome ?? null : null,
+    exploreOutcome: exploreUsesMapboxLayers ? exploreTierSelection?.outcome ?? null : null,
     exploreStrategy: exploreTierSelection?.strategy ?? "current-ops",
     mapMode,
   })
@@ -207,7 +207,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Fetch tier location data when in Learn mode and outcome selected (non-polygon outcomes only)
   useEffect(() => {
-    if (mapMode !== "learn" || !selectedOutcome || learnUsesPolygons) {
+    if (mapMode !== "learn" || !selectedOutcome || learnUsesMapboxLayers) {
       setTierData(null)
       return
     }
@@ -258,7 +258,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
     fetchData()
     return () => { cancelled = true }
-  }, [selectedOutcome, learnUsesPolygons, map, mapMode])
+  }, [selectedOutcome, learnUsesMapboxLayers, map, mapMode])
 
   // Apply Mapbox layer states based on activeSection (Learn mode only)
   useMapLayers()
@@ -563,7 +563,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             )}
 
             {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
-            {tierData && !learnUsesPolygons && <TierMarkers data={tierData} />}
+            {tierData && !learnUsesMapboxLayers && <TierMarkers data={tierData} />}
 
             {/* Reservoir labels (shown above other layers) */}
             {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
@@ -583,7 +583,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
         {/* Explore mode layers */}
         {/* Only show TierMarkers when NOT using polygon visualization */}
-        {isExploreMode && exploreTierData && exploreTierData.features.length > 0 && !exploreUsesPolygons && (
+        {isExploreMode && exploreTierData && exploreTierData.features.length > 0 && !exploreUsesMapboxLayers && (
           <TierMarkers data={exploreTierData} />
         )}
 

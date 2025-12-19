@@ -82,6 +82,8 @@ export interface OutcomeLayerConfig {
   reactLayerIds?: string[]
   /** Default zoom level for Learn mode (defaults to 6.5) */
   defaultZoom?: number
+  /** Default center point for Learn mode [longitude, latitude] */
+  defaultCenter?: [number, number]
 }
 
 // ============================================================================
@@ -268,13 +270,14 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     lineWidth: 4,
     reactLayerIds: [
       "sacramento-river-trough",
-      "sacramento-river-glow", 
       "sacramento-river-body",
     ],
     tooltipFields: [
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "River",
+    defaultZoom: 6.5,
+    defaultCenter: [-121.5, 40], // Sacramento River center
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
