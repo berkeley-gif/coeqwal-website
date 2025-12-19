@@ -37,15 +37,15 @@ export function useComparisonData() {
 
       // Use normalized_score from API (0-1 scale, higher = better)
       // Convert to -1 to 1 scale for the chart: (normalized_score * 2) - 1
+      // Only include outcomes that have actual data (don't default to 0)
       const values: Record<string, number> = {}
       OUTCOME_DISPLAY_ORDER.forEach((outcome) => {
         const outcomeScore = scenarioScores[outcome]
         if (outcomeScore?.normalized_score !== undefined) {
           // Convert 0-1 to -1 to 1 range
           values[outcome] = outcomeScore.normalized_score * 2 - 1
-        } else {
-          values[outcome] = 0 // Default if no data
         }
+        // Don't add anything if no data - the chart will skip this point
       })
 
       return {
@@ -55,8 +55,8 @@ export function useComparisonData() {
         highlighted: false,
       }
     }).filter((scenario) => {
-      // Only include scenarios that have data
-      return Object.values(scenario.values).some((v) => v !== 0)
+      // Only include scenarios that have at least some data
+      return Object.keys(scenario.values).length > 0
     })
   }, [allScoreData])
 
