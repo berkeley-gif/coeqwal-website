@@ -32,6 +32,7 @@ import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import TogglePair from "./TogglePair"
 import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
+import { SummaryPanel } from "../../map/overlays/SummaryPanel"
 
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
@@ -50,92 +51,6 @@ function isSingleValueTier(
   if (!chartData || chartData.length === 0) return false
   // Check the tierType metadata from the first data point (all points in a tier have the same type)
   return chartData[0]?.tierType === "single_value"
-}
-
-/**
- * Generate a plain language summary for a specific outcome
- */
-function generateOutcomePlainSummary(
-  outcome: string,
-  chartData: Array<{ label: string; color: string; value: number }> | undefined,
-): string {
-  if (!chartData || chartData.length === 0) {
-    return `No data available for ${outcome}.`
-  }
-
-  // Calculate totals and percentages
-  const total = chartData.reduce((sum, tier) => sum + tier.value, 0)
-  if (total === 0) return `No data available for ${outcome}.`
-
-  const tierData: Record<number, { count: number; pct: number }> = {}
-  for (const point of chartData) {
-    const tierLevel = parseInt(point.label.replace("Tier ", ""))
-    tierData[tierLevel] = {
-      count: point.value,
-      pct: (point.value / total) * 100,
-    }
-  }
-
-  const tier1Pct = tierData[1]?.pct || 0
-  const tier4Count = tierData[4]?.count || 0
-  const tier3Count = tierData[3]?.count || 0
-
-  // Generate outcome-specific summaries
-  if (
-    outcome === "Community deliveries" ||
-    outcome === "Community water system deliveries"
-  ) {
-    if (tier1Pct >= 80) {
-      return `The vast majority of water systems (${tierData[1]?.count} of ${total}) are thriving under this scenario with optimal water deliveries.`
-    } else if (tier1Pct >= 50) {
-      const struggling = tier4Count + tier3Count
-      return `Most water systems are doing well, but ${struggling} system${struggling > 1 ? "s are" : " is"} experiencing challenges with water deliveries.`
-    } else {
-      return `Significant challenges face water systems under this scenario. ${tier4Count > 0 ? `${tier4Count} system${tier4Count > 1 ? "s are" : " is"} at critical levels.` : ""}`
-    }
-  } else if (outcome === "Agricultural revenue") {
-    if (tier1Pct >= 80) {
-      return `Agricultural districts are largely thriving (${tierData[1]?.count} of ${total} at optimal levels) with strong water deliveries supporting revenue.`
-    } else if (tier1Pct >= 50) {
-      return `Most agricultural districts receive adequate water, though some are experiencing reduced deliveries affecting revenue.`
-    } else {
-      return `Agricultural districts face significant water delivery challenges that impact revenue.`
-    }
-  } else if (outcome.includes("Salmon") || outcome.includes("salmon")) {
-    if (tier1Pct >= 70) {
-      return `Conditions are favorable for salmon populations under this scenario.`
-    } else if (tier4Count > 0) {
-      return `Salmon populations face critical stress under this scenario. Conservation measures may be needed.`
-    } else {
-      return `Salmon populations experience mixed conditions under this scenario.`
-    }
-  } else if (outcome.includes("Delta")) {
-    if (tier1Pct >= 70) {
-      return `Delta conditions are well-maintained under this scenario.`
-    } else if (tier4Count > 0) {
-      return `The Delta ecosystem faces stress under this scenario.`
-    } else {
-      return `Delta conditions show mixed results under this scenario.`
-    }
-  } else if (outcome.includes("Storage") || outcome.includes("Reservoir")) {
-    if (tier1Pct >= 70) {
-      return `Reservoir storage levels remain healthy under this scenario.`
-    } else if (tier4Count > 0) {
-      return `Reservoir storage is critically low under this scenario.`
-    } else {
-      return `Reservoir storage shows moderate levels under this scenario.`
-    }
-  }
-
-  // Generic summary for other outcomes
-  if (tier1Pct >= 70) {
-    return `This outcome performs well under this scenario with ${Math.round(tier1Pct)}% at optimal levels.`
-  } else if (tier4Count > 0) {
-    return `This outcome shows critical stress in ${tier4Count} location${tier4Count > 1 ? "s" : ""}.`
-  } else if (tier3Count > 0) {
-    return `This outcome shows some risk in ${tier3Count} location${tier3Count > 1 ? "s" : ""}.`
-  }
-  return `This outcome shows mixed performance under this scenario.`
 }
 
 interface StrategyGridProps {
@@ -2028,11 +1943,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               // Get the selected outcome for this strategy's summary (if any)
               const selectedOutcomeForSummary =
                 expandedSummaries[strategy.value]
-              const strategyChartDataForSummary = getChartDataForStrategy(
-                strategy.value,
-              )
 
-              // Summary row (shown when an outcome is clicked)
+              // Summary row (shown when an outcome is clicked) - uses same SummaryPanel as Learn map
               const summaryRow =
                 selectedOutcomeForSummary && !showMapView ? (
                   <Box
@@ -2047,83 +1959,51 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       gap: theme.spacing(1),
                       columnGap: theme.spacing(2),
                       alignItems: "start",
-                      py: theme.spacing(1.5),
-                      px: theme.spacing(1),
-                      backgroundColor: theme.palette.grey[50],
-                      borderRadius: theme.borderRadius.standard,
                       mb: theme.spacing(1),
                     }}
                   >
                     {/* Empty checkbox column for alignment */}
                     <Box />
 
-                    {/* Summary content */}
-                    <Box sx={{ pr: 2 }}>
-                      {/* Outcome name header */}
+                    {/* Summary content - using the same SummaryPanel as Learn map */}
+                    <Box sx={{ pr: 2, position: "relative" }}>
+                      {/* Close button */}
                       <Box
+                        component="button"
+                        onClick={() =>
+                          toggleSummary(
+                            strategy.value,
+                            selectedOutcomeForSummary,
+                          )
+                        }
                         sx={{
+                          position: "absolute",
+                          top: theme.spacing(1),
+                          right: theme.spacing(1),
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0.5,
                           display: "flex",
                           alignItems: "center",
-                          gap: 1,
-                          mb: 1,
+                          color: theme.palette.grey[500],
+                          fontSize: "16px",
+                          borderRadius: "50%",
+                          zIndex: 1,
+                          "&:hover": {
+                            color: theme.palette.grey[700],
+                            backgroundColor: theme.palette.grey[200],
+                          },
                         }}
+                        aria-label="Close summary"
                       >
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: theme.typography.fontWeightMedium,
-                            color: theme.palette.blue.darkest,
-                            fontSize: theme.typography.body2.fontSize,
-                          }}
-                        >
-                          {selectedOutcomeForSummary}
-                        </Typography>
-                        {/* Close button */}
-                        <Box
-                          component="button"
-                          onClick={() =>
-                            toggleSummary(
-                              strategy.value,
-                              selectedOutcomeForSummary,
-                            )
-                          }
-                          sx={{
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            padding: 0.5,
-                            display: "flex",
-                            alignItems: "center",
-                            color: theme.palette.grey[500],
-                            fontSize: "16px",
-                            borderRadius: "50%",
-                            "&:hover": {
-                              color: theme.palette.grey[700],
-                              backgroundColor: theme.palette.grey[200],
-                            },
-                          }}
-                          aria-label="Close summary"
-                        >
-                          ×
-                        </Box>
+                        ×
                       </Box>
-
-                      {/* Plain language summary */}
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: theme.palette.grey[800],
-                          fontSize: theme.typography.nav.fontSize,
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {generateOutcomePlainSummary(
-                          selectedOutcomeForSummary,
-                          strategyChartDataForSummary[
-                            selectedOutcomeForSummary
-                          ],
-                        )}
-                      </Typography>
+                      <SummaryPanel 
+                        strategy={strategy.value} 
+                        outcome={selectedOutcomeForSummary}
+                        variant="inline"
+                      />
                     </Box>
                   </Box>
                 ) : null

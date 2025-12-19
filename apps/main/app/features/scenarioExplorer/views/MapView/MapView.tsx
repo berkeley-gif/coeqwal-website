@@ -3,7 +3,8 @@
 import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import ListView from "../ListView/ListView"
-import { learnMapActions } from "../../../../features/map/store"
+import { learnMapActions, useExploreTierSelection } from "../../../../features/map/store"
+import { SummaryPanel } from "../../../../features/map/overlays/SummaryPanel"
 
 /**
  * MapView
@@ -17,6 +18,7 @@ import { learnMapActions } from "../../../../features/map/store"
  */
 export default function MapView() {
   const theme = useTheme()
+  const exploreTierSelection = useExploreTierSelection()
 
   // Activate explore map mode when this view is active
   useEffect(() => {
@@ -68,32 +70,44 @@ export default function MapView() {
           pointerEvents: "none", // Allow map interactions to pass through
         }}
       >
-        {/* Info overlay */}
+        {/* Show SummaryPanel when outcome selected, otherwise show info text */}
         <Box
           sx={{
             position: "absolute",
             top: theme.spacing(2),
             right: theme.spacing(2),
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: theme.borderRadius.rounded,
-            padding: theme.spacing(2),
-            boxShadow: theme.boxShadows.subtle,
-            maxWidth: theme.spacing(40),
+            maxWidth: theme.spacing(50),
             zIndex: theme.zIndex.mapControls,
-            pointerEvents: "auto", // Re-enable for the info box itself
+            pointerEvents: "auto",
           }}
         >
-          <Box
-            component="p"
-            sx={{
-              margin: 0,
-              fontSize: theme.typography.compact.subtitle.fontSize,
-              color: theme.palette.text.primary,
-            }}
-          >
-            Click on a scenario outcome in the left panel to see outcomes at
-            specific locations.
-          </Box>
+          {exploreTierSelection?.outcome ? (
+            <SummaryPanel 
+              strategy={exploreTierSelection.strategy} 
+              outcome={exploreTierSelection.outcome}
+            />
+          ) : (
+            <Box
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderRadius: theme.borderRadius.rounded,
+                padding: theme.spacing(2),
+                boxShadow: theme.boxShadows.subtle,
+              }}
+            >
+              <Box
+                component="p"
+                sx={{
+                  margin: 0,
+                  fontSize: theme.typography.compact.subtitle.fontSize,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                Click on a scenario outcome in the left panel to see outcomes at
+                specific locations.
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
