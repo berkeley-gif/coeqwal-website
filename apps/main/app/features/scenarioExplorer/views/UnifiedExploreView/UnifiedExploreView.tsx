@@ -221,95 +221,12 @@ export default function UnifiedExploreView({
                     overflow: "hidden",
                   }}
                 >
-                  {/* Comparison Header */}
-                  <Box
-                    sx={{
-                      px: theme.spacing(2),
-                      pt: theme.spacing(2),
-                      pb: theme.spacing(1),
-                      backgroundColor: theme.palette.common.white,
-                      borderBottom: theme.border.standard,
-                      borderColor: theme.palette.grey[300],
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Typography
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: theme.typography.fontWeightMedium,
-                        mb: 0.5,
-                      }}
-                    >
-                      Scenario Comparison
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: theme.palette.grey[600] }}
-                    >
-                      Use draggable arrows on axes to filter scenarios
-                    </Typography>
-
-                    {/* Scenario legend */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 1,
-                        mt: 1,
-                      }}
-                    >
-                      {comparisonData.map((scenario, index) => {
-                        const isHighlighted =
-                          highlightedScenario === scenario.id
-                        return (
-                          <Box
-                            key={scenario.id}
-                            onClick={() => handleScenarioClick(scenario.id)}
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 0.5,
-                              cursor: "pointer",
-                              px: 1,
-                              py: 0.25,
-                              borderRadius: 0.5,
-                              backgroundColor: isHighlighted
-                                ? theme.palette.grey[100]
-                                : "transparent",
-                              "&:hover": {
-                                backgroundColor: theme.palette.grey[50],
-                              },
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 16,
-                                height: isHighlighted ? 4 : 3,
-                                backgroundColor: lineColors[index],
-                                borderRadius: 0.5,
-                              }}
-                            />
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: isHighlighted ? 600 : 400,
-                                fontSize: "0.7rem",
-                              }}
-                            >
-                              {scenario.name}
-                            </Typography>
-                          </Box>
-                        )
-                      })}
-                    </Box>
-                  </Box>
-
-                  {/* Chart */}
+                  {/* Chart - full height since header is now in the row above */}
                   <Box
                     sx={{
                       flex: 1,
                       p: theme.spacing(2),
-                      overflow: "auto",
+                      overflow: "hidden",
                     }}
                   >
                     <Box
@@ -318,7 +235,7 @@ export default function UnifiedExploreView({
                         borderRadius: theme.borderRadius.rounded,
                         p: 2,
                         boxShadow: theme.boxShadows.subtle,
-                        height: "500px",
+                        height: "100%",
                       }}
                     >
                       <VerticalParallelLinePlot
