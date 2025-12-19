@@ -112,12 +112,10 @@ export const LAYER_IDS = {
   // Line layers (React-rendered)
   sacramento: {
     trough: "sacramento-river-trough",
-    glow: "sacramento-river-glow",
     body: "sacramento-river-body",
   },
   sanJoaquin: {
     trough: "san-joaquin-river-trough",
-    glow: "san-joaquin-river-glow",
     body: "san-joaquin-river-body",
   },
   // Utility layers
@@ -127,10 +125,8 @@ export const LAYER_IDS = {
 /** All river layer IDs for z-index management */
 export const RIVER_LAYER_IDS = [
   LAYER_IDS.sacramento.trough,
-  LAYER_IDS.sacramento.glow,
   LAYER_IDS.sacramento.body,
   LAYER_IDS.sanJoaquin.trough,
-  LAYER_IDS.sanJoaquin.glow,
   LAYER_IDS.sanJoaquin.body,
 ] as const
 

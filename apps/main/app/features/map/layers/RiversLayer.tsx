@@ -8,10 +8,8 @@ import { useIsOutcomeVisualizationActive } from "../store"
 // River layer IDs - exported for use by other components that need to reference them
 export const RIVER_LAYER_IDS = [
   "sacramento-river-trough",
-  "sacramento-river-glow",
   "sacramento-river-body",
   "san-joaquin-river-trough",
-  "san-joaquin-river-glow",
   "san-joaquin-river-body",
 ] as const
 
@@ -179,7 +177,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sacramentoRiverMainstem}
         lineMetrics={true}
       >
-        {/* Layer 0: Depression/trough (wide, transparent dark blue underlayer) */}
+        {/* Layer 0: Trough (semi-transparent dark blue outline) */}
         <Layer
           id="sacramento-river-trough"
           type="line"
@@ -195,31 +193,14 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           }}
         />
 
-        {/* Layer 1: Outer glow */}
-        <Layer
-          id="sacramento-river-glow"
-          type="line"
-          paint={{
-            "line-color": "#4A90C9",
-            "line-width": 4,
-            "line-blur": 3,
-            "line-opacity": 0.35,
-            "line-trim-offset": [clampedProgress, 1],
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-          }}
-        />
-
-        {/* Layer 2: Main river body */}
+        {/* Layer 1: Main river body */}
         <Layer
           id="sacramento-river-body"
           type="line"
           paint={{
             "line-color": "#116bb0",
-            "line-width": 2,
-            "line-opacity": 0.9,
+            "line-width": 3,
+            "line-opacity": 1,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -238,7 +219,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sanJoaquinRiverMainstem}
         lineMetrics={true}
       >
-        {/* Layer 0: Depression/trough (wide, transparent dark blue underlayer) */}
+        {/* Layer 0: Trough (semi-transparent dark blue outline) */}
         <Layer
           id="san-joaquin-river-trough"
           type="line"
@@ -254,31 +235,14 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           }}
         />
 
-        {/* Layer 1: Outer glow */}
-        <Layer
-          id="san-joaquin-river-glow"
-          type="line"
-          paint={{
-            "line-color": "#4A90C9",
-            "line-width": 4,
-            "line-blur": 3,
-            "line-opacity": 0.35,
-            "line-trim-offset": [clampedProgress, 1],
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-          }}
-        />
-
-        {/* Layer 2: Main river body */}
+        {/* Layer 1: Main river body */}
         <Layer
           id="san-joaquin-river-body"
           type="line"
           paint={{
             "line-color": "#116bb0",
-            "line-width": 2,
-            "line-opacity": 0.9,
+            "line-width": 3,
+            "line-opacity": 1,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -289,8 +253,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
       </Source>
 
       {/* ═══════════════════════════════════════════════════════════════
-          RIVER LABELS - Curved SVG text markers (like the inflow arrows)
-          Geolocated curved text that fades in smoothly
+          RIVER LABELS
           ═══════════════════════════════════════════════════════════════ */}
 
       {/* Sacramento River curved label */}
