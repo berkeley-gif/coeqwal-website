@@ -138,7 +138,7 @@ export default function ScenarioExplorerNew() {
           {/* Selection Banner - only show when exploring data */}
           {(mainView === "explorer" || mainView === "data") && <SelectionBanner />}
 
-          {/* Search bar row for explorer view - 50/50 split when in comparison mode */}
+          {/* Search bar row for explorer view - 50/50 split when in map or comparison mode */}
           {mainView === "explorer" && (
             <Box
               sx={{
@@ -146,10 +146,10 @@ export default function ScenarioExplorerNew() {
                 width: "100%",
               }}
             >
-              {/* Left 50%: Search bar with controls */}
+              {/* Left side: Search bar with controls (100% in list mode, 50% in map/comparison) */}
               <Box
                 sx={{
-                  width: exploreMode === "comparison" ? "50%" : "100%",
+                  width: exploreMode === "list" ? "100%" : "50%",
                   transition: "width 0.3s ease-in-out",
                 }}
               >
@@ -270,16 +270,32 @@ export default function ScenarioExplorerNew() {
                 />
               </Box>
 
-              {/* Right 50%: Comparison header (only when in comparison mode) */}
-              {exploreMode === "comparison" && (
+              {/* Right 50%: Content varies by mode */}
+              {exploreMode !== "list" && (
                 <Box
                   sx={{
                     width: "50%",
-                    borderLeft: theme.border.standard,
+                    // Map mode: transparent to let map show through
+                    // Comparison mode: white background with header content
+                    backgroundColor:
+                      exploreMode === "map"
+                        ? "transparent"
+                        : theme.palette.common.white,
+                    borderLeft:
+                      exploreMode === "comparison"
+                        ? theme.border.standard
+                        : "none",
+                    borderBottom:
+                      exploreMode === "comparison"
+                        ? theme.border.standard
+                        : "none",
                     borderColor: theme.palette.grey[300],
+                    // Allow map interaction through this area in map mode
+                    pointerEvents: exploreMode === "map" ? "none" : "auto",
                   }}
                 >
-                  <ComparisonHeader />
+                  {/* Comparison header only in comparison mode */}
+                  {exploreMode === "comparison" && <ComparisonHeader />}
                 </Box>
               )}
             </Box>
