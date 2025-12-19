@@ -224,7 +224,6 @@ export default function MapOverlayPanels() {
   // Sync motion values to state for use in MUI sx prop
   useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
     const newPE = latest as "none" | "auto"
-    console.log("[MapOverlayPanels] strategyInfoPointerEvents changed:", newPE, "wasVisible:", strategyInfoWasVisible.current)
     setStrategyInfoPE(newPE)
     
     // Track when panel becomes visible
@@ -235,7 +234,6 @@ export default function MapOverlayPanels() {
     // Clear outcome visualization only when transitioning from visible to invisible
     // (not on initial render when panel starts invisible)
     if (newPE === "none" && strategyInfoWasVisible.current) {
-      console.log("[MapOverlayPanels] Clearing outcome - strategyInfo became invisible")
       learnMapActions.setSelectedOutcome(null)
       strategyInfoWasVisible.current = false // Reset for next cycle
     }

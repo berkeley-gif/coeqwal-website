@@ -14,6 +14,7 @@ import type { MapMode } from "../store"
 import {
   getOutcomeConfig,
   outcomeUsesPolygons as registryOutcomeUsesPolygons,
+  outcomeUsesMapboxLayers as registryOutcomeUsesMapboxLayers,
   type OutcomeLayerConfig,
 } from "../config/outcomeLayerRegistry"
 import { useTierDataFetch } from "./useTierDataFetch"
@@ -132,17 +133,16 @@ export function useOutcomeMapLayer({
 
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
-      const currentCenter = map.getCenter()
       // Use config's defaultZoom if specified, otherwise default to 6.5
       const targetZoom = config?.defaultZoom ?? 6.5
-
-      console.log(
-        `[useOutcomeMapLayer] Zooming to level ${targetZoom} for "${outcome}" (keeping current center)`,
-      )
+      // Use config's defaultCenter if specified, otherwise keep current center
+      const targetCenter = config?.defaultCenter 
+        ? { lng: config.defaultCenter[0], lat: config.defaultCenter[1] }
+        : map.getCenter()
       
       map.easeTo({
         zoom: targetZoom,
-        center: currentCenter,
+        center: targetCenter,
         duration: 1000,
       })
     })
@@ -169,4 +169,12 @@ export function useOutcomeMapLayer({
  */
 export function outcomeUsesPolygons(outcome: string): boolean {
   return registryOutcomeUsesPolygons(outcome)
+}
+
+/**
+ * Check if an outcome uses Mapbox layers (polygon, line, or point)
+ * as opposed to React-rendered markers
+ */
+export function outcomeUsesMapboxLayers(outcome: string): boolean {
+  return registryOutcomeUsesMapboxLayers(outcome)
 }
