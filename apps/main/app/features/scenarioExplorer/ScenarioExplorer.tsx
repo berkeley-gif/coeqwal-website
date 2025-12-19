@@ -151,6 +151,7 @@ export default function ScenarioExplorerNew() {
                 sx={{
                   width: exploreMode === "list" ? "100%" : "50%",
                   transition: "width 0.3s ease-in-out",
+                  backgroundColor: theme.palette.common.white,
                 }}
               >
                 <SearchBar
