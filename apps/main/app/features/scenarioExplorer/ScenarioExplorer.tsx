@@ -20,6 +20,7 @@ import UnifiedExploreView, {
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
+import { HydroClimateChooser } from "../../components/HydroClimateChooser"
 
 type MainView = "about" | "explorer" | "data"
 
@@ -141,79 +142,116 @@ export default function ScenarioExplorerNew() {
             <SearchBar
               placeholder="Search scenarios by name or description"
               rightContent={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{ color: theme.palette.grey[600], mr: 1 }}
-                  >
-                    View:
-                  </Typography>
-                  <Tooltip title="List view" arrow>
-                    <IconButton
-                      size="small"
-                      onClick={() => setExploreMode("list")}
+                <>
+                  {/* Divider after search */}
+                  <Box
+                    sx={{
+                      width: "1px",
+                      alignSelf: "stretch",
+                      backgroundColor: theme.palette.grey[300],
+                      minHeight: 40,
+                    }}
+                  />
+
+                  {/* View mode section */}
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    <Typography
+                      variant="subtitle2"
                       sx={{
-                        backgroundColor:
-                          exploreMode === "list"
-                            ? `${theme.palette.blue.bright}1A`
-                            : "transparent",
-                        color:
-                          exploreMode === "list"
-                            ? theme.palette.blue.bright
-                            : theme.palette.grey[600],
-                        "&:hover": {
-                          backgroundColor: `${theme.palette.blue.bright}1A`,
-                        },
+                        fontWeight: theme.typography.fontWeightMedium,
+                        fontSize: theme.typography.caption.fontSize,
+                        color: theme.palette.grey[900],
                       }}
                     >
-                      <ViewListIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Map view" arrow>
-                    <IconButton
-                      size="small"
-                      onClick={() => setExploreMode("map")}
-                      sx={{
-                        backgroundColor:
-                          exploreMode === "map"
-                            ? `${theme.palette.blue.bright}1A`
-                            : "transparent",
-                        "&:hover": {
-                          backgroundColor: `${theme.palette.blue.bright}1A`,
-                        },
-                      }}
-                    >
-                      <Image
-                        src="/images/icons/map.svg"
-                        alt="Map view"
-                        width={24}
-                        height={24}
-                        style={{ opacity: exploreMode === "map" ? 1 : 0.6 }}
-                      />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Comparison view" arrow>
-                    <IconButton
-                      size="small"
-                      onClick={() => setExploreMode("comparison")}
-                      sx={{
-                        backgroundColor:
-                          exploreMode === "comparison"
-                            ? `${theme.palette.blue.bright}1A`
-                            : "transparent",
-                        color:
-                          exploreMode === "comparison"
-                            ? theme.palette.blue.bright
-                            : theme.palette.grey[600],
-                        "&:hover": {
-                          backgroundColor: `${theme.palette.blue.bright}1A`,
-                        },
-                      }}
-                    >
-                      <CompareArrowsIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
+                      View
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Tooltip title="List view" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => setExploreMode("list")}
+                          sx={{
+                            backgroundColor:
+                              exploreMode === "list"
+                                ? `${theme.palette.blue.bright}1A`
+                                : "transparent",
+                            color:
+                              exploreMode === "list"
+                                ? theme.palette.blue.bright
+                                : theme.palette.grey[600],
+                            "&:hover": {
+                              backgroundColor: `${theme.palette.blue.bright}1A`,
+                            },
+                          }}
+                        >
+                          <ViewListIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Map view" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => setExploreMode("map")}
+                          sx={{
+                            backgroundColor:
+                              exploreMode === "map"
+                                ? `${theme.palette.blue.bright}1A`
+                                : "transparent",
+                            "&:hover": {
+                              backgroundColor: `${theme.palette.blue.bright}1A`,
+                            },
+                          }}
+                        >
+                          <Image
+                            src="/images/icons/map.svg"
+                            alt="Map view"
+                            width={24}
+                            height={24}
+                            style={{ opacity: exploreMode === "map" ? 1 : 0.6 }}
+                          />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Comparison view" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => setExploreMode("comparison")}
+                          sx={{
+                            backgroundColor:
+                              exploreMode === "comparison"
+                                ? `${theme.palette.blue.bright}1A`
+                                : "transparent",
+                            color:
+                              exploreMode === "comparison"
+                                ? theme.palette.blue.bright
+                                : theme.palette.grey[600],
+                            "&:hover": {
+                              backgroundColor: `${theme.palette.blue.bright}1A`,
+                            },
+                          }}
+                        >
+                          <CompareArrowsIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </Box>
+
+                  {/* Divider */}
+                  <Box
+                    sx={{
+                      width: "1px",
+                      alignSelf: "stretch",
+                      backgroundColor: theme.palette.grey[300],
+                      minHeight: 40,
+                    }}
+                  />
+
+                  {/* Hydroclimate chooser */}
+                  <HydroClimateChooser
+                    layout="horizontal"
+                    size="small"
+                    showTitle={true}
+                    showLabels={false}
+                  />
+                </>
               }
             />
           )}

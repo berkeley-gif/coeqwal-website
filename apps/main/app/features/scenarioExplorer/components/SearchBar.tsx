@@ -1,13 +1,15 @@
 "use client"
 
 import React from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
 import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
 
 interface SearchBarProps {
   placeholder?: string
   rightContent?: React.ReactNode
+  /** Whether to show a label above the search input */
+  showLabel?: boolean
 }
 
 /**
@@ -16,6 +18,7 @@ interface SearchBarProps {
 export default function SearchBar({
   placeholder = "Search scenarios...",
   rightContent,
+  showLabel = true,
 }: SearchBarProps) {
   const theme = useTheme()
   const { searchQuery, setSearchQuery } = useScenarioExplorerStore()
@@ -24,7 +27,8 @@ export default function SearchBar({
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
+        gap: 3,
         px: theme.spacing(theme.cards.spacing.standard),
         py: theme.spacing(2),
         backgroundColor: theme.palette.common.white,
@@ -32,7 +36,21 @@ export default function SearchBar({
         borderColor: theme.palette.grey[300],
       }}
     >
+      {/* Search section */}
       <Box sx={{ flex: 1, minWidth: 0, maxWidth: theme.spacing(40) }}>
+        {showLabel && (
+          <Typography
+            variant="subtitle2"
+            sx={{
+              mb: 1,
+              fontWeight: theme.typography.fontWeightMedium,
+              fontSize: theme.typography.caption.fontSize,
+              color: theme.palette.grey[900],
+            }}
+          >
+            Search
+          </Typography>
+        )}
         <StyledTextInput
           size="small"
           placeholder={placeholder}
@@ -44,7 +62,7 @@ export default function SearchBar({
         />
       </Box>
       {rightContent && (
-        <Box sx={{ display: "flex", alignItems: "center", ml: 2, flexShrink: 0 }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start", flexShrink: 0, gap: 3 }}>
           {rightContent}
         </Box>
       )}
