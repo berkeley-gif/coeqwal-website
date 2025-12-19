@@ -326,7 +326,7 @@ export function HotspotMarkers({
           anchor="bottom"
         >
           <MapMarkerTooltip
-            text={`${config.labelPrefix}: ${hotspot.name}`}
+            text={hotspot.name}
             statusColor={tierColor}
           >
             <Box
@@ -346,7 +346,7 @@ export function HotspotMarkers({
                 src={config.image}
                 alt={config.imageAlt}
                 style={{
-                  width: "50px",
+                  width: "60px",
                   height: "auto",
                   filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.3))",
                 }}
