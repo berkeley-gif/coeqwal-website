@@ -54,7 +54,11 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       }}
       {...(!isInteractive ? { "aria-hidden": true } : null)}
     >
-      <CircularArrowButton size={size} color={buttonColor} rotation={rotation} />
+      <CircularArrowButton
+        size={size}
+        color={buttonColor}
+        rotation={rotation}
+      />
     </ScrollIndicator>
   )
 

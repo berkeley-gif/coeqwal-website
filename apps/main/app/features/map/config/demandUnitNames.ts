@@ -1,12 +1,12 @@
 /**
  * Static mapping of demand unit IDs to their display names
- * 
+ *
  * This provides a fallback when Mapbox tiles aren't loaded (e.g., at lower zoom levels).
  * The Mapbox tileset has Sub_Name, Urb_Name, and Mod_Name fields, but querySourceFeatures
  * only returns features from tiles currently in memory.
- * 
+ *
  * Priority: Sub_Name > Urb_Name > Mod_Name
- * 
+ *
  * Add entries here for any demand units that need reliable name display.
  */
 
@@ -34,12 +34,12 @@ export const DEMAND_UNIT_NAMES: Record<string, DemandUnitNameInfo> = {
   "Musco Family Olive Company": {
     urbName: "Musco Family Olive Company",
   },
-  
+
   // Add more demand units as needed
   // Format:
   // "DU_ID": {
   //   subName: "Sub Name if available",
-  //   urbName: "Urban Name if available", 
+  //   urbName: "Urban Name if available",
   //   modName: "Model Name if available",
   // },
 }
@@ -51,13 +51,15 @@ export const DEMAND_UNIT_NAMES: Record<string, DemandUnitNameInfo> = {
 export function getDemandUnitDisplayName(duId: string): string {
   const info = DEMAND_UNIT_NAMES[duId]
   if (!info) return duId
-  
+
   return info.subName || info.urbName || info.modName || duId
 }
 
 /**
  * Get full name info for a demand unit
  */
-export function getDemandUnitNameInfo(duId: string): DemandUnitNameInfo | undefined {
+export function getDemandUnitNameInfo(
+  duId: string,
+): DemandUnitNameInfo | undefined {
   return DEMAND_UNIT_NAMES[duId]
 }

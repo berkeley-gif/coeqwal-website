@@ -151,7 +151,7 @@ export default function TabPanels() {
               animate="center"
               exit="exit"
               transition={{ type: "spring", stiffness: 220, damping: 26 }}
-              style={{ 
+              style={{
                 position: "relative",
                 pointerEvents: isMapTab ? "none" : "auto",
               }}

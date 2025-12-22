@@ -41,7 +41,15 @@ export default function SelectionBanner() {
         }}
       >
         {/* Left: Eyebrow + Pills */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", flex: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            flexWrap: "wrap",
+            flex: 1,
+          }}
+        >
           <Typography
             sx={{
               fontSize: "0.75rem",

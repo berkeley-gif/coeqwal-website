@@ -333,7 +333,10 @@ export function useMapLayers() {
       if (mapInstance.getLayer("delta-water")) {
         // Fade out and hide
         const rawOpacity =
-          (mapInstance.getPaintProperty("delta-water", "fill-opacity") as number) ?? 0
+          (mapInstance.getPaintProperty(
+            "delta-water",
+            "fill-opacity",
+          ) as number) ?? 0
         const startOpacity = Math.max(0, Math.min(1, rawOpacity))
 
         // Only fade out if currently visible
@@ -348,7 +351,11 @@ export function useMapLayers() {
             const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
 
             try {
-              mapInstance.setPaintProperty("delta-water", "fill-opacity", opacity)
+              mapInstance.setPaintProperty(
+                "delta-water",
+                "fill-opacity",
+                opacity,
+              )
             } catch {
               return
             }

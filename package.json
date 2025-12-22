@@ -7,22 +7,17 @@
     "dev:main": "pnpm --filter main dev",
     "dev:storyline-flow": "pnpm --filter storyline-flow dev",
     "dev:storyline-climate": "pnpm --filter storyline-climate dev",
-
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
-
     "format": "prettier . --write --ignore-unknown --cache",
     "format:check": "prettier . --check --ignore-unknown --cache",
-
     "serve": "pnpm --filter main build && pnpm dlx serve apps/main/out/",
-
     "clean:turbo": "rm -rf .turbo/cache",
     "clean:next": "rm -rf apps/*/.next/cache",
     "clean:ts": "find . -name '*.tsbuildinfo' -type f -delete",
     "clean:caches": "pnpm clean:turbo && pnpm clean:next && pnpm clean:ts",
     "clean:all": "rm -rf node_modules .turbo apps/*/.next",
     "reset": "pnpm clean:all && pnpm install",
-
     "qa": "pnpm lint && pnpm check-types && pnpm turbo run build"
   },
   "dependencies": {

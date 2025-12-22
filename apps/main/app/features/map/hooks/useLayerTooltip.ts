@@ -1,6 +1,6 @@
 /**
  * Hook for managing layer tooltip state and mouse events
- * 
+ *
  * Handles all Mapbox layer types:
  * - Polygons (demand-units, WBA, delta)
  * - Points (salinity compliance points, flow monitoring points)
@@ -37,7 +37,7 @@ export interface HoveredFeatureInfo {
   tierValue: number | null
   /** Raw Mapbox feature properties */
   properties: Record<string, unknown>
-  
+
   // Demand-units specific fields
   /** Urban name (from Urb_Name property) */
   urbName?: string | null
@@ -51,7 +51,7 @@ export interface HoveredFeatureInfo {
   type?: string | null
   /** Class type (from Class property) */
   classType?: string | null
-  
+
   // WBA specific fields
   /** Hydrologic region (from HydroRegion property) */
   hydroRegion?: string | null
@@ -93,8 +93,11 @@ export function useLayerTooltip({
   enabled,
 }: UseLayerTooltipProps): UseLayerTooltipResult {
   const mapAPI = useMap()
-  const [hoveredFeature, setHoveredFeature] = useState<HoveredFeatureInfo | null>(null)
-  const [pinnedFeature, setPinnedFeature] = useState<HoveredFeatureInfo | null>(null)
+  const [hoveredFeature, setHoveredFeature] =
+    useState<HoveredFeatureInfo | null>(null)
+  const [pinnedFeature, setPinnedFeature] = useState<HoveredFeatureInfo | null>(
+    null,
+  )
 
   const clearPinned = useCallback(() => {
     setPinnedFeature(null)
@@ -112,7 +115,13 @@ export function useLayerTooltip({
       return
     }
 
-    const { mapboxLayerId, idProperty, geometryType, layerType, requiresIdMatching } = config
+    const {
+      mapboxLayerId,
+      idProperty,
+      geometryType,
+      layerType,
+      requiresIdMatching,
+    } = config
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mouseEnterHandler: ((e: any) => void) | null = null
@@ -131,10 +140,10 @@ export function useLayerTooltip({
 
       const feature = e.features[0]
       const props = feature.properties || {}
-      
+
       // Get feature ID
       const featureId = idProperty ? props[idProperty] : "single-feature"
-      
+
       // Get tier level
       let tierLevel = 3 // Default for single-feature layers
       if (requiresIdMatching && featureId) {
@@ -153,7 +162,8 @@ export function useLayerTooltip({
         featureId: featureId || "unknown",
         tierLevel,
         tierLabel: getTierLabel(tierLevel),
-        locationName: locationInfo?.location_name || props.name || props.Name || null,
+        locationName:
+          locationInfo?.location_name || props.name || props.Name || null,
         tierValue: locationInfo?.tier_value ?? null,
         properties: props,
         // Demand-units specific fields
@@ -194,7 +204,9 @@ export function useLayerTooltip({
         if (info) {
           setPinnedFeature(info)
         }
-        setTimeout(() => { clickedOnFeature = false }, 100)
+        setTimeout(() => {
+          clickedOnFeature = false
+        }, 100)
       }
 
       mapClickHandler = () => {
@@ -213,9 +225,12 @@ export function useLayerTooltip({
     return () => {
       mapAPI.withMap((mapRef) => {
         const map = mapRef.getMap()
-        if (mouseEnterHandler) map.off("mouseenter", mapboxLayerId, mouseEnterHandler)
-        if (mouseLeaveHandler) map.off("mouseleave", mapboxLayerId, mouseLeaveHandler)
-        if (mouseMoveHandler) map.off("mousemove", mapboxLayerId, mouseMoveHandler)
+        if (mouseEnterHandler)
+          map.off("mouseenter", mapboxLayerId, mouseEnterHandler)
+        if (mouseLeaveHandler)
+          map.off("mouseleave", mapboxLayerId, mouseLeaveHandler)
+        if (mouseMoveHandler)
+          map.off("mousemove", mapboxLayerId, mouseMoveHandler)
         if (clickHandler) map.off("click", mapboxLayerId, clickHandler)
         if (mapClickHandler) map.off("click", mapClickHandler)
       })

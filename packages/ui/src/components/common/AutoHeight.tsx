@@ -34,7 +34,9 @@ export default function AutoHeight({
       transition={transition}
       className={className}
     >
-      <div ref={wrapRef} style={{ pointerEvents: "inherit" }}>{children}</div>
+      <div ref={wrapRef} style={{ pointerEvents: "inherit" }}>
+        {children}
+      </div>
     </motion.div>
   )
 }

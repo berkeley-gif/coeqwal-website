@@ -1,15 +1,13 @@
 "use client"
 
 import React, { useEffect, useMemo } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  CircularProgress,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import ListView from "../ListView/ListView"
-import { learnMapActions, useExploreTierSelection } from "../../../../features/map/store"
+import {
+  learnMapActions,
+  useExploreTierSelection,
+} from "../../../../features/map/store"
 import { useComparisonData } from "../ComparisonView/useComparisonData"
 
 export type ExploreMode = "list" | "map" | "comparison"
@@ -84,7 +82,7 @@ export default function UnifiedExploreView({
       currentTierSelection?.strategy === strategy &&
       currentTierSelection?.outcome === outcome
     learnMapActions.setExploreTierSelection(
-      isSameSelection ? null : { strategy, outcome }
+      isSameSelection ? null : { strategy, outcome },
     )
   }
 

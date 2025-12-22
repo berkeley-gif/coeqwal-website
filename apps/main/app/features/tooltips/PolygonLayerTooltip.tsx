@@ -5,7 +5,7 @@
  *
  * A reusable tooltip component for polygon map layers (demand-units, WBA, etc.)
  * for tooltip rendering across PersistentMap and CaliforniaMapPanel.
- * 
+ *
  * Features:
  * - Supports hover and pinned (click-to-pin) modes
  * - Renders appropriate fields based on layer type
@@ -32,7 +32,7 @@ export interface PolygonLayerTooltipProps {
  */
 function CloseButton({ onClick }: { onClick: () => void }) {
   const theme = useTheme()
-  
+
   return (
     <Box
       onClick={(e) => {
@@ -55,7 +55,9 @@ function CloseButton({ onClick }: { onClick: () => void }) {
         },
       }}
     >
-      <Typography sx={{ fontSize: "14px", lineHeight: 1, color: theme.palette.grey[500] }}>
+      <Typography
+        sx={{ fontSize: "14px", lineHeight: 1, color: theme.palette.grey[500] }}
+      >
         ×
       </Typography>
     </Box>
@@ -67,7 +69,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
  */
 function TierBadge({ level, label }: { level: number; label: string }) {
   const theme = useTheme()
-  
+
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Box
@@ -94,7 +96,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
  */
 function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
   const theme = useTheme()
-  
+
   return (
     <>
       {feature.locationName && (
@@ -149,19 +151,19 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
 /**
  * Demand Units layer tooltip content
  */
-function DemandUnitsTooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
+function DemandUnitsTooltipContent({
+  feature,
+}: {
+  feature: HoveredFeatureInfo
+}) {
   const theme = useTheme()
-  
+
   // Compute primary and secondary names based on class type
   const isUrban = feature.classType === "Urban"
   const primaryName =
-    isUrban && feature.urbName
-      ? feature.urbName
-      : feature.modName
+    isUrban && feature.urbName ? feature.urbName : feature.modName
   const secondaryName =
-    isUrban && feature.urbName && feature.modName
-      ? feature.modName
-      : null
+    isUrban && feature.urbName && feature.modName ? feature.modName : null
 
   return (
     <>
@@ -177,7 +179,7 @@ function DemandUnitsTooltipContent({ feature }: { feature: HoveredFeatureInfo })
           {primaryName}
         </Typography>
       )}
-      
+
       {secondaryName && (
         <Typography
           variant="body2"
@@ -242,7 +244,7 @@ function DemandUnitsTooltipContent({ feature }: { feature: HoveredFeatureInfo })
 
 /**
  * Main tooltip component for polygon map layers
- * 
+ *
  * Renders a Mapbox Popup with feature information based on layer type.
  * Supports both hover and pinned (click-to-stay) modes.
  */

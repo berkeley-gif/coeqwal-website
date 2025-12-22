@@ -44,7 +44,8 @@ export default function AboutScenariosView() {
       level: 2,
       label: "Sub-optimal",
       color: theme.palette.tiers.tier2,
-      description: "Good outcomes with minor compromises. Goals are mostly met.",
+      description:
+        "Good outcomes with minor compromises. Goals are mostly met.",
     },
     {
       level: 3,
@@ -77,7 +78,10 @@ export default function AboutScenariosView() {
     },
     {
       title: "Water quality (Delta salinity)",
-      outcomes: ["Freshwater for in-Delta uses","Freshwater for Delta exports"],
+      outcomes: [
+        "Freshwater for in-Delta uses",
+        "Freshwater for Delta exports",
+      ],
     },
     {
       title: "Storage & supply",
@@ -142,11 +146,17 @@ export default function AboutScenariosView() {
           }}
         >
           A scenario combines a{" "}
-          <Box component="span" sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}>
+          <Box
+            component="span"
+            sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}
+          >
             water management strategy
           </Box>{" "}
           with{" "}
-          <Box component="span" sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}>
+          <Box
+            component="span"
+            sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}
+          >
             climate conditions
           </Box>
           . By modeling many scenarios, we can see how different decisions and
@@ -219,8 +229,8 @@ export default function AboutScenariosView() {
               lineHeight: 1.7,
             }}
           >
-            From historical patterns to extreme warming and drying, we test
-            each strategy under different climate futures.
+            From historical patterns to extreme warming and drying, we test each
+            strategy under different climate futures.
           </Typography>
         </Box>
 
@@ -379,8 +389,9 @@ export default function AboutScenariosView() {
               mb: 3,
             }}
           >
-            Nine outcomes that matter to Californians, from community water supply
-            to salmon health. These capture what farms, cities, and ecosystems need.
+            Nine outcomes that matter to Californians, from community water
+            supply to salmon health. These capture what farms, cities, and
+            ecosystems need.
           </Typography>
 
           {/* Outcomes grid */}
@@ -397,8 +408,12 @@ export default function AboutScenariosView() {
                 key={category.title}
                 sx={{
                   p: 2.5,
-                  borderBottom: index < 2 ? `1px solid ${theme.palette.grey[200]}` : "none",
-                  borderRight: index % 2 === 0 ? `1px solid ${theme.palette.grey[200]}` : "none",
+                  borderBottom:
+                    index < 2 ? `1px solid ${theme.palette.grey[200]}` : "none",
+                  borderRight:
+                    index % 2 === 0
+                      ? `1px solid ${theme.palette.grey[200]}`
+                      : "none",
                 }}
               >
                 <Typography
@@ -456,7 +471,9 @@ export default function AboutScenariosView() {
               lineHeight: 1.7,
             }}
           >
-            Use the tabs above to look at our library of scenarios. Use the first tab to select a set of scenarios of interest. Use the second tab to compare these scenarios in depth.
+            Use the tabs above to look at our library of scenarios. Use the
+            first tab to select a set of scenarios of interest. Use the second
+            tab to compare these scenarios in depth.
           </Typography>
         </Box>
       </Box>

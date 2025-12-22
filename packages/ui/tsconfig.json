@@ -5,8 +5,9 @@
     "moduleResolution": "Bundler",
     "outDir": "dist",
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "rootDir": "."
   },
-  "include": ["src", "../motion/src/components/HeaderStory.tsx"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist", "**/_archive/**"]
 }

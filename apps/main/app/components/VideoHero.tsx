@@ -18,10 +18,7 @@ export interface VideoHeroProps {
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
 }
 
-export default function VideoHero({
-  sources,
-  fallbackImage
-}: VideoHeroProps) {
+export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
   const theme = useTheme()
   const { t } = useTranslation()
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -55,12 +52,22 @@ export default function VideoHero({
 
   const heroIn = {
     hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut" } },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   }
 
   const heroInRight = {
     hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut", delay: 0.12 } },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+    },
   }
 
   return (
@@ -142,7 +149,12 @@ export default function VideoHero({
           variant="h1"
           component="h1"
           sx={{
-            fontSize: { sm: "2.2rem", md: "2.8rem", lg: "2.6rem", xl: "3.8rem" }, // Custom for demo with new title
+            fontSize: {
+              sm: "2.2rem",
+              md: "2.8rem",
+              lg: "2.6rem",
+              xl: "3.8rem",
+            }, // Custom for demo with new title
             padding: { sm: "35px", md: "45px" },
             lineHeight: "140%",
             textAlign: "left",
@@ -191,10 +203,7 @@ export default function VideoHero({
           >
             {t("homePanel.content")}
           </Typography>
-          <ScrollToButton
-            color={theme.palette.utility.white}
-            size={70}
-          />
+          <ScrollToButton color={theme.palette.utility.white} size={70} />
         </div>
       </motion.div>
     </div>

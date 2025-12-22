@@ -31,12 +31,22 @@ const IntroSection = () => {
 
   const slideIn = {
     hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut" } },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   }
 
   const slideInRight = {
     hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: { opacity: 1, x: 0, filter: "blur(0px)", transition: { duration: 0.6, ease: "easeOut", delay: 0.12 } },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+    },
   }
 
   return (

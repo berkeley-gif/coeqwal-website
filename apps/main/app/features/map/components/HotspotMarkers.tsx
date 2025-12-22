@@ -2,7 +2,7 @@
 
 /**
  * HotspotMarkers component
- * 
+ *
  * Renders markers for tier 4 locations for specific outcomes.
  * Each marker shows an image marker.
  * Supports both Point and Polygon geometries (calculates centroid for polygons).
@@ -13,15 +13,21 @@ import { Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useTheme } from "@repo/ui/mui"
 import { MapMarkerTooltip } from "@repo/ui"
-import { fetchTierLocationData, type TierFeature } from "../../../lib/api/tierLocationApi"
+import {
+  fetchTierLocationData,
+  type TierFeature,
+} from "../../../lib/api/tierLocationApi"
 import { getDemandUnitNameInfo } from "../config/demandUnitNames"
 
 // Outcome configurations for hotspots
-const HOTSPOT_CONFIGS: Record<string, {
-  image: string
-  imageAlt: string
-  labelPrefix: string
-}> = {
+const HOTSPOT_CONFIGS: Record<
+  string,
+  {
+    image: string
+    imageAlt: string
+    labelPrefix: string
+  }
+> = {
   "Community deliveries": {
     image: "/images/map_markers/drinking_water.png",
     imageAlt: "Community water system marker showing water system at risk",
@@ -58,32 +64,36 @@ interface HotspotData {
  */
 function getPolygonCenter(feature: TierFeature): [number, number] | null {
   const { geometry } = feature
-  
+
   if (geometry.type === "Point") {
     const coords = geometry.coordinates as number[]
     if (coords.length < 2) return null
     return [coords[0]!, coords[1]!]
   }
-  
+
   // Collect all coordinates to find bounding box
   const allCoords: number[][] = []
-  
+
   if (geometry.type === "Polygon") {
     const coords = geometry.coordinates as number[][][]
-    coords.forEach(ring => ring.forEach(pt => allCoords.push(pt)))
+    coords.forEach((ring) => ring.forEach((pt) => allCoords.push(pt)))
   } else if (geometry.type === "MultiPolygon") {
     const coords = geometry.coordinates as number[][][][]
-    coords.forEach(polygon => polygon.forEach(ring => ring.forEach(pt => allCoords.push(pt))))
+    coords.forEach((polygon) =>
+      polygon.forEach((ring) => ring.forEach((pt) => allCoords.push(pt))),
+    )
   } else {
     return null
   }
-  
+
   if (allCoords.length === 0) return null
-  
+
   // Calculate bounding box
-  let minLng = Infinity, maxLng = -Infinity
-  let minLat = Infinity, maxLat = -Infinity
-  
+  let minLng = Infinity,
+    maxLng = -Infinity
+  let minLat = Infinity,
+    maxLat = -Infinity
+
   for (const point of allCoords) {
     if (point[0] !== undefined && point[1] !== undefined) {
       minLng = Math.min(minLng, point[0])
@@ -92,11 +102,11 @@ function getPolygonCenter(feature: TierFeature): [number, number] | null {
       maxLat = Math.max(maxLat, point[1])
     }
   }
-  
+
   // Return center of bounding box
   const centerLng = (minLng + maxLng) / 2
   const centerLat = (minLat + maxLat) / 2
-  
+
   return [centerLng, centerLat]
 }
 
@@ -110,16 +120,19 @@ export function HotspotMarkers({
   const [hotspots, setHotspots] = useState<HotspotData[]>([])
 
   // Handle click to zoom to hotspot location
-  const handleMarkerClick = useCallback((hotspot: HotspotData) => {
-    mapAPI.withMap((mapRef) => {
-      const map = mapRef.getMap()
-      map.easeTo({
-        center: [hotspot.longitude, hotspot.latitude],
-        zoom: 9,
-        duration: 1000,
+  const handleMarkerClick = useCallback(
+    (hotspot: HotspotData) => {
+      mapAPI.withMap((mapRef) => {
+        const map = mapRef.getMap()
+        map.easeTo({
+          center: [hotspot.longitude, hotspot.latitude],
+          zoom: 9,
+          duration: 1000,
+        })
       })
-    })
-  }, [mapAPI])
+    },
+    [mapAPI],
+  )
 
   // Get config for this outcome
   const config = outcome ? HOTSPOT_CONFIGS[outcome] : null
@@ -130,36 +143,47 @@ export function HotspotMarkers({
       setHotspots([])
       return
     }
-    
+
     const loadHotspots = async () => {
       try {
         const response = await fetchTierLocationData(strategy, outcome)
-        
+
         // Filter for tier 4 features (Point, Polygon, or MultiPolygon)
         const tier4Features = response.features.filter(
-          f => f.properties.tier_level === 4
+          (f) => f.properties.tier_level === 4,
         )
-        
+
         // Query Mapbox for enhanced names and coordinates from actual rendered polygons
         // Wait for tiles to load before querying
         const { namesLookup, mapboxCoordsLookup } = await new Promise<{
-          namesLookup: Map<string, { subName?: string; urbName?: string; modName?: string }>,
+          namesLookup: Map<
+            string,
+            { subName?: string; urbName?: string; modName?: string }
+          >
           mapboxCoordsLookup: Map<string, [number, number]>
         }>((resolve) => {
           mapAPI.withMap((mapRef) => {
             const map = mapRef.getMap()
-            
+
             const queryFeatures = () => {
-              const names: Map<string, { subName?: string; urbName?: string; modName?: string }> = new Map()
+              const names: Map<
+                string,
+                { subName?: string; urbName?: string; modName?: string }
+              > = new Map()
               const coords: Map<string, [number, number]> = new Map()
-              const featuresByDuId: Map<string, Array<{bbox: [number, number, number, number], pointCount: number}>> = new Map()
-              
+              const featuresByDuId: Map<
+                string,
+                Array<{
+                  bbox: [number, number, number, number]
+                  pointCount: number
+                }>
+              > = new Map()
+
               try {
                 const features = map.querySourceFeatures("composite", {
                   sourceLayer: "demand_units",
                 })
-                
-                
+
                 features.forEach((f) => {
                   const duId = f.properties?.DU_ID
                   if (duId) {
@@ -167,28 +191,43 @@ export function HotspotMarkers({
                     const subName = f.properties?.Sub_Name?.trim()
                     const urbName = f.properties?.Urb_Name?.trim()
                     const modName = f.properties?.Mod_Name?.trim()
-                    
+
                     if (!names.has(duId)) {
                       names.set(duId, {})
                     }
                     const nameObj = names.get(duId)!
-                    if (subName && subName !== '') nameObj.subName = subName
-                    if (urbName && urbName !== '') nameObj.urbName = urbName
-                    if (modName && modName !== '') nameObj.modName = modName
-                    
+                    if (subName && subName !== "") nameObj.subName = subName
+                    if (urbName && urbName !== "") nameObj.urbName = urbName
+                    if (modName && modName !== "") nameObj.modName = modName
+
                     // Calculate center from Mapbox geometry (more accurate for rendered polygons)
-                    if (f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon") {
+                    if (
+                      f.geometry.type === "Polygon" ||
+                      f.geometry.type === "MultiPolygon"
+                    ) {
                       const allCoords: number[][] = []
                       if (f.geometry.type === "Polygon") {
-                        const polyCoords = f.geometry.coordinates as number[][][]
-                        polyCoords.forEach(ring => ring.forEach(pt => allCoords.push(pt as number[])))
+                        const polyCoords = f.geometry
+                          .coordinates as number[][][]
+                        polyCoords.forEach((ring) =>
+                          ring.forEach((pt) => allCoords.push(pt as number[])),
+                        )
                       } else {
-                        const multiCoords = f.geometry.coordinates as number[][][][]
-                        multiCoords.forEach(polygon => polygon.forEach(ring => ring.forEach(pt => allCoords.push(pt as number[]))))
+                        const multiCoords = f.geometry
+                          .coordinates as number[][][][]
+                        multiCoords.forEach((polygon) =>
+                          polygon.forEach((ring) =>
+                            ring.forEach((pt) =>
+                              allCoords.push(pt as number[]),
+                            ),
+                          ),
+                        )
                       }
                       if (allCoords.length > 0) {
-                        let minLng = Infinity, maxLng = -Infinity
-                        let minLat = Infinity, maxLat = -Infinity
+                        let minLng = Infinity,
+                          maxLng = -Infinity
+                        let minLat = Infinity,
+                          maxLat = -Infinity
                         for (const pt of allCoords) {
                           if (pt[0] !== undefined && pt[1] !== undefined) {
                             minLng = Math.min(minLng, pt[0])
@@ -197,7 +236,7 @@ export function HotspotMarkers({
                             maxLat = Math.max(maxLat, pt[1])
                           }
                         }
-                        
+
                         // Track this feature's bbox
                         if (!featuresByDuId.has(duId)) {
                           featuresByDuId.set(duId, [])
@@ -206,23 +245,31 @@ export function HotspotMarkers({
                           bbox: [minLng, minLat, maxLng, maxLat],
                           pointCount: allCoords.length,
                         })
-                        
+
                         // Merge bounding boxes if we've seen this DU_ID before
                         const existing = coords.get(duId)
                         if (existing) {
                           // Expand the bbox to include both
                           const prevFeatures = featuresByDuId.get(duId)!
-                          let mergedMinLng = Infinity, mergedMaxLng = -Infinity
-                          let mergedMinLat = Infinity, mergedMaxLat = -Infinity
-                          prevFeatures.forEach(pf => {
+                          let mergedMinLng = Infinity,
+                            mergedMaxLng = -Infinity
+                          let mergedMinLat = Infinity,
+                            mergedMaxLat = -Infinity
+                          prevFeatures.forEach((pf) => {
                             mergedMinLng = Math.min(mergedMinLng, pf.bbox[0])
                             mergedMinLat = Math.min(mergedMinLat, pf.bbox[1])
                             mergedMaxLng = Math.max(mergedMaxLng, pf.bbox[2])
                             mergedMaxLat = Math.max(mergedMaxLat, pf.bbox[3])
                           })
-                          coords.set(duId, [(mergedMinLng + mergedMaxLng) / 2, (mergedMinLat + mergedMaxLat) / 2])
+                          coords.set(duId, [
+                            (mergedMinLng + mergedMaxLng) / 2,
+                            (mergedMinLat + mergedMaxLat) / 2,
+                          ])
                         } else {
-                          coords.set(duId, [(minLng + maxLng) / 2, (minLat + maxLat) / 2])
+                          coords.set(duId, [
+                            (minLng + maxLng) / 2,
+                            (minLat + maxLat) / 2,
+                          ])
                         }
                       }
                     }
@@ -231,10 +278,10 @@ export function HotspotMarkers({
               } catch {
                 // Silently handle query errors - will fall back to static mapping
               }
-              
+
               return { namesLookup: names, mapboxCoordsLookup: coords }
             }
-            
+
             // If source is already loaded, query immediately
             if (map.isSourceLoaded("composite")) {
               resolve(queryFeatures())
@@ -247,7 +294,7 @@ export function HotspotMarkers({
                 }
               }
               map.on("sourcedata", onSourceData)
-              
+
               // Timeout fallback - query anyway after 2 seconds
               setTimeout(() => {
                 map.off("sourcedata", onSourceData)
@@ -256,20 +303,20 @@ export function HotspotMarkers({
             }
           })
         })
-        
+
         // Convert to hotspot data, preferring Mapbox coordinates over API coordinates
         const hotspotsData: HotspotData[] = tier4Features
-          .map(feature => {
+          .map((feature) => {
             const locationId = feature.properties.location_id
-            
+
             // Prefer Mapbox coordinates (more accurate for rendered polygons)
             // Fall back to API polygon center if Mapbox coords not available
             const mapboxCoords = mapboxCoordsLookup.get(locationId)
             const apiCenter = getPolygonCenter(feature)
-            
+
             const coords = mapboxCoords || apiCenter
             if (!coords) return null
-            
+
             // Priority: Sub_Name > Urb_Name > Mod_Name > staticMapping > location_name
             let enhancedName = feature.properties.location_name
             const names = namesLookup.get(locationId)
@@ -285,10 +332,14 @@ export function HotspotMarkers({
               // Fallback to static mapping when Mapbox tiles not loaded
               const staticInfo = getDemandUnitNameInfo(locationId)
               if (staticInfo) {
-                enhancedName = staticInfo.subName || staticInfo.urbName || staticInfo.modName || enhancedName
+                enhancedName =
+                  staticInfo.subName ||
+                  staticInfo.urbName ||
+                  staticInfo.modName ||
+                  enhancedName
               }
             }
-            
+
             return {
               id: locationId,
               name: enhancedName,
@@ -298,14 +349,14 @@ export function HotspotMarkers({
             }
           })
           .filter((h): h is HotspotData => h !== null)
-        
+
         setHotspots(hotspotsData)
       } catch {
         // Silently handle errors
         setHotspots([])
       }
     }
-    
+
     loadHotspots()
   }, [config, outcome, strategy, visible, mapAPI])
 
@@ -325,10 +376,7 @@ export function HotspotMarkers({
           latitude={hotspot.latitude}
           anchor="bottom"
         >
-          <MapMarkerTooltip
-            text={hotspot.name}
-            statusColor={tierColor}
-          >
+          <MapMarkerTooltip text={hotspot.name} statusColor={tierColor}>
             <Box
               onClick={() => handleMarkerClick(hotspot)}
               sx={{

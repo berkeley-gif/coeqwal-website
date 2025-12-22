@@ -93,7 +93,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   const { mapRef } = useMap()
-  
+
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   // Progress goes 0→1 as user scrolls (matches old choreography)
   const clampedProgress = Math.max(0, Math.min(1, progress))
@@ -107,7 +107,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     if (!visible || !mapRef?.current) return
 
     const map = mapRef.current.getMap()
-    
+
     // Small delay to ensure layers are added first
     const timeoutId = setTimeout(() => {
       // Move each river layer to the top (in order, so body ends up on top)

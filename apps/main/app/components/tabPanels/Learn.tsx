@@ -107,7 +107,13 @@ export default function LearnPanel() {
         }}
       >
         {/* Spacer for the initial map view - transparent, allows map panning */}
-        <Box sx={{ height: "100vh", backgroundColor: "transparent", pointerEvents: "none" }} />
+        <Box
+          sx={{
+            height: "100vh",
+            backgroundColor: "transparent",
+            pointerEvents: "none",
+          }}
+        />
 
         {/* Overlay content - scrolls over the fixed persistent map */}
         <Box
@@ -133,7 +139,7 @@ export default function LearnPanel() {
                 color: "theme.palette.common.white",
                 flexDirection: "column",
                 gap: 2,
-                pointerEvents: "none",  // Don't block map panning while loading
+                pointerEvents: "none", // Don't block map panning while loading
               }}
             >
               <Box
@@ -217,7 +223,7 @@ export default function LearnPanel() {
               >
                 <Card
                   sx={{
-                    backgroundColor: cardColor
+                    backgroundColor: cardColor,
                   }}
                   component="a"
                   href="https://flow.coeqwal.org/"
@@ -229,11 +235,10 @@ export default function LearnPanel() {
                       padding: "17px",
                     }}
                   >
-                    <CardContent sx={{ height: '100%' }}>
+                    <CardContent sx={{ height: "100%" }}>
                       <Typography variant="body1">
                         How water moves through California →
                       </Typography>
-
                     </CardContent>
                   </CardActionArea>
                 </Card>
@@ -243,7 +248,7 @@ export default function LearnPanel() {
                   target="_blank"
                   rel="noopener noreferrer"
                   sx={{
-                    backgroundColor: cardColor
+                    backgroundColor: cardColor,
                   }}
                 >
                   <CardActionArea
@@ -251,7 +256,7 @@ export default function LearnPanel() {
                       padding: "17px",
                     }}
                   >
-                    <CardContent sx={{ height: '100%' }}>
+                    <CardContent sx={{ height: "100%" }}>
                       <Typography variant="body1">
                         Climate change and California water →
                       </Typography>
@@ -261,7 +266,6 @@ export default function LearnPanel() {
               </div>
             </LeadingMarkerText>
           </Box>
-
         </Box>
       </Box>
     </div>

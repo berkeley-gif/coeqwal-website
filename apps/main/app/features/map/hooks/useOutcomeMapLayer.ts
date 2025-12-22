@@ -53,14 +53,17 @@ interface UseOutcomeMapLayerResult {
   clear: () => void
   /** Tier data for custom rendering (e.g., ReservoirLabels) */
   tierLookup: Record<string, number>
-  locationData: Record<string, { longitude?: number; latitude?: number; location_name?: string }>
+  locationData: Record<
+    string,
+    { longitude?: number; latitude?: number; location_name?: string }
+  >
   /** Current layer type (e.g., "reservoir", "demand-units") */
   layerType: string | null
 }
 
 /**
  * Hook for outcome visualization on map layers
- * 
+ *
  * TODO: Migrate callers to use the new registry and sub-hooks directly
  */
 export function useOutcomeMapLayer({
@@ -73,22 +76,34 @@ export function useOutcomeMapLayer({
   const mapAPI = useMap()
 
   // Derive active outcome and strategy based on mapMode
-  const outcome = mapMode === "learn" ? learnOutcome 
-                : mapMode === "explore" ? exploreOutcome 
-                : null
-  
-  const strategy = mapMode === "learn" ? learnStrategy 
-                 : mapMode === "explore" ? exploreStrategy 
-                 : "current-ops"
+  const outcome =
+    mapMode === "learn"
+      ? learnOutcome
+      : mapMode === "explore"
+        ? exploreOutcome
+        : null
+
+  const strategy =
+    mapMode === "learn"
+      ? learnStrategy
+      : mapMode === "explore"
+        ? exploreStrategy
+        : "current-ops"
 
   // Get config from registry (single source of truth for ALL outcomes)
-  const config: OutcomeLayerConfig | null = outcome ? getOutcomeConfig(outcome) : null
+  const config: OutcomeLayerConfig | null = outcome
+    ? getOutcomeConfig(outcome)
+    : null
 
   // Only enable for Mapbox-based outcomes (not react-marker)
   const isMapboxBased = config ? config.geometryType !== "react-marker" : false
-  
+
   // Whether visualization should be active
-  const enabled = !!outcome && !!config && isMapboxBased && (mapMode === "learn" || mapMode === "explore")
+  const enabled =
+    !!outcome &&
+    !!config &&
+    isMapboxBased &&
+    (mapMode === "learn" || mapMode === "explore")
 
   // Skip camera control in Explore mode (useTierMapData handles it there)
   const skipCameraControl = mapMode === "explore"
@@ -116,11 +131,7 @@ export function useOutcomeMapLayer({
   })
 
   // 3. Handle tooltip state (using the new unified tooltip hook)
-  const {
-    hoveredFeature,
-    pinnedFeature,
-    clearPinned,
-  } = useLayerTooltip({
+  const { hoveredFeature, pinnedFeature, clearPinned } = useLayerTooltip({
     config: enabled ? config : null,
     tierLookup,
     locationData,
@@ -136,10 +147,10 @@ export function useOutcomeMapLayer({
       // Use config's defaultZoom if specified, otherwise default to 6.5
       const targetZoom = config?.defaultZoom ?? 6.5
       // Use config's defaultCenter if specified, otherwise keep current center
-      const targetCenter = config?.defaultCenter 
+      const targetCenter = config?.defaultCenter
         ? { lng: config.defaultCenter[0], lat: config.defaultCenter[1] }
         : map.getCenter()
-      
+
       map.easeTo({
         zoom: targetZoom,
         center: targetCenter,
@@ -164,7 +175,7 @@ export function useOutcomeMapLayer({
 
 /**
  * Check if an outcome uses polygon visualization
- * 
+ *
  * TODO: Callers should use getOutcomeConfig(outcome)?.geometryType === "polygon" directly
  */
 export function outcomeUsesPolygons(outcome: string): boolean {

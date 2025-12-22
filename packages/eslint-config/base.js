@@ -1,8 +1,8 @@
-import js from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier";
-import turboPlugin from "eslint-plugin-turbo";
-import tseslint from "typescript-eslint";
-import onlyWarn from "eslint-plugin-only-warn";
+import js from "@eslint/js"
+import eslintConfigPrettier from "eslint-config-prettier"
+import turboPlugin from "eslint-plugin-turbo"
+import tseslint from "typescript-eslint"
+import onlyWarn from "eslint-plugin-only-warn"
 // import { noBarrelFilesPlugin } from "./no-barrel-files.js";
 
 /**
@@ -41,4 +41,4 @@ export const config = [
   {
     ignores: ["dist/**"],
   },
-];
+]

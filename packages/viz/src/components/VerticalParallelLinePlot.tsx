@@ -65,10 +65,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   )
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
-  
+
   // Track current axis order (can be reordered by dragging)
   const [currentAxes, setCurrentAxes] = useState<string[]>(axes)
-  
+
   // Update currentAxes when props.axes changes
   useEffect(() => {
     setCurrentAxes(axes)
@@ -234,7 +234,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Observable pattern: Create update function for smooth resizing
   const updateChart = useCallback(
     (newWidth: number, newHeight: number, animate = true) => {
-      if (!data || data.length === 0 || !currentAxes || currentAxes.length === 0) return
+      if (
+        !data ||
+        data.length === 0 ||
+        !currentAxes ||
+        currentAxes.length === 0
+      )
+        return
 
       const svg = d3.select(svgRef.current)
       const innerWidth = newWidth - margin.left - margin.right
@@ -452,8 +458,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .raise()
               .select(".drag-handle")
               .style("cursor", "grabbing")
-            d3.select(this.parentNode as SVGGElement)
-              .style("opacity", 0.7)
+            d3.select(this.parentNode as SVGGElement).style("opacity", 0.7)
           })
           .on("drag", function (event) {
             // Use event.dy for smooth incremental updates
@@ -466,11 +471,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           })
           .on("end", function () {
             const newIndex = Math.round(
-              Math.max(0, Math.min(currentAxes.length - 1, axisIndex + totalDragDelta / axisSpacing)),
+              Math.max(
+                0,
+                Math.min(
+                  currentAxes.length - 1,
+                  axisIndex + totalDragDelta / axisSpacing,
+                ),
+              ),
             )
 
-            d3.select(this.parentNode as SVGGElement)
-              .style("opacity", 1)
+            d3.select(this.parentNode as SVGGElement).style("opacity", 1)
             d3.select(this.parentNode as SVGGElement)
               .select(".drag-handle")
               .style("cursor", "grab")
@@ -911,10 +921,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
               // Reset line style
               d3.select(this)
-                .attr(
-                  "stroke-width",
-                  isActive ? (d.highlighted ? 4 : 2) : 1.5,
-                )
+                .attr("stroke-width", isActive ? (d.highlighted ? 4 : 2) : 1.5)
                 .attr("opacity", currentLineOpacity)
 
               // Reset all corresponding circles for this line
@@ -934,7 +941,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const pathSelection = animate ? path.transition(t as any) : path
         ;(pathSelection as any)
           .attr("d", lineGenerator(pathData))
-          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 4 : 2) : 1.5)
+          .attr(
+            "stroke-width",
+            passesAllFilters ? (d.highlighted ? 4 : 2) : 1.5,
+          )
           .attr("opacity", lineOpacity) // Lines semi-transparent
 
         // Update circles at intersection points (original styling)
@@ -942,7 +952,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         currentAxes.forEach((axis) => {
           const value = d.values[axis]
           const circleSelector = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
-          
+
           if (value === undefined) {
             // Remove circle if no value exists
             g.select(circleSelector).remove()
@@ -961,14 +971,19 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("stroke-width", 1.5) // Original width
               .attr("r", d.highlighted ? 7 : 4) // Highlighted dots are larger
               .attr("opacity", circleOpacity) // Dots opaque
-              .style("cursor", onLineClick || onLineHover ? "pointer" : "default")
+              .style(
+                "cursor",
+                onLineClick || onLineHover ? "pointer" : "default",
+              )
               .on("mouseover", function () {
                 // Only allow hover highlighting for active (unfiltered) scenarios
                 if (!isScenarioActive(d)) return
 
                 onLineHover?.(d)
                 // Highlight this circle
-                d3.select(this).attr("r", d.highlighted ? 8 : 6).attr("opacity", 1)
+                d3.select(this)
+                  .attr("r", d.highlighted ? 8 : 6)
+                  .attr("opacity", 1)
 
                 // Highlight the corresponding line for this circle
                 g.select(`.line-${dataIndex}`)
