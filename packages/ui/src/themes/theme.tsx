@@ -361,6 +361,84 @@ export const themeValues = {
       },
     },
   },
+
+  /* --------------------------------------------------------
+   * Scenario/Strategy component styles
+   * Used across Learn map and Scenario Explorer
+   * -------------------------------------------------------- */
+  scenarios: {
+    // Strategy card row styles
+    card: {
+      base: {
+        borderRadius: "8px", // theme.borderRadius.rounded
+        padding: 1.5, // theme.spacing multiplier
+        transition: "all 0.2s ease",
+        border: "2px solid transparent",
+      },
+      variants: {
+        default: {
+          backgroundColor: "#faf8f5",
+        },
+        highlighted: {
+          backgroundColor: "#ffffff",
+        },
+      },
+      states: {
+        hover: {
+          backgroundColor: "#ffffff",
+        },
+        selected: {
+          borderColor: "#449cd9", // theme.palette.blue.bright
+        },
+      },
+    },
+
+    // Icon sizes for strategy operations
+    icon: {
+      sizes: {
+        sm: 3.5, // theme.spacing multiplier (28px)
+        md: 4, // 32px
+        lg: 5, // 40px
+      },
+    },
+
+    // Outcome visualization box
+    outcome: {
+      box: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: 0.5,
+        borderRadius: "8px",
+        transition: "all 0.2s ease",
+        backgroundColor: "transparent",
+        border: "2px solid transparent",
+      },
+      states: {
+        active: { opacity: 1 },
+        inactive: { opacity: 0.7 },
+        selected: { borderColor: "#449cd9" },
+        hover: { backgroundColor: "#f7fafc" }, // grey[50]
+      },
+      label: {
+        textAlign: "center",
+        whiteSpace: "pre-line",
+      },
+    },
+
+    // Grid layout configuration
+    grid: {
+      columns: {
+        xs: "32px minmax(0, 1fr) auto",
+        lg: "32px minmax(0, 0.8fr) auto minmax(0, 2fr)",
+      },
+      gap: {
+        default: 1,
+        compact: 2,
+      },
+    },
+  },
+
 }
 
 /* ========================================================
@@ -1341,6 +1419,9 @@ theme.borderRadius = themeValues.borderRadius
 
 theme.boxShadows = themeValues.boxShadows
 
+// Scenario/strategy component styles
+theme.scenarios = themeValues.scenarios
+
 // Map prompt dialog configuration
 theme.mapPromptDialog = {
   ...themeValues.mapPromptDialog,
@@ -1465,6 +1546,8 @@ declare module "@mui/material/styles" {
       }
     }
     cards: typeof themeValues.cards
+    // Scenario/strategy component styles
+    scenarios: typeof themeValues.scenarios
   }
 
   // ThemeOptions interface - optional versions for createTheme()
