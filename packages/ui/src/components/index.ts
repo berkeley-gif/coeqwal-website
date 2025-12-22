@@ -7,16 +7,10 @@ export type {
   NavDropdownOption,
 } from "./navigation/NavDropdown"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
-export { MultiDrawer } from "./navigation/MultiDrawer"
-export { AppMultiDrawer } from "./navigation/AppMultiDrawer"
 export { ScrollToButton } from "./navigation/ScrollToButton"
-export type { TabKey } from "./navigation/MultiDrawer"
-export type { AppMultiDrawerProps } from "./navigation/AppMultiDrawer"
 export type { GlossaryTerm, TierInfo } from "../lib/glossary"
 
 // Common components
-export { Card, ScenarioCard } from "./common/Card"
-export type { CardProps, ScenarioCardProps } from "./common/Card"
 export { Logo } from "./common/Logo"
 export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { LeadingMarkerText } from "./common/LeadingMarkerText"
@@ -38,8 +32,6 @@ export { ClickTooltip } from "./common/tooltips/ClickTooltip"
 export type { ClickTooltipProps } from "./common/tooltips/ClickTooltip"
 export { HybridTooltip } from "./common/tooltips/HybridTooltip"
 export type { HybridTooltipProps } from "./common/tooltips/HybridTooltip"
-export { Dropdown } from "./common/Dropdown"
-export type { DropdownProps, DropdownOption } from "./common/Dropdown"
 export { DiscreteSlider } from "./common/DiscreteSlider"
 export type { DiscreteSliderProps } from "./common/DiscreteSlider"
 export { InfoIconButton } from "./common/InfoIconButton"
@@ -51,17 +43,6 @@ export type { StyledTextInputProps } from "./common/StyledTextInput"
 
 // Panel components
 export { OneColumnPanel } from "./panels/OneColumnPanel"
-export { Spacer } from "./panels/Spacer"
-export {
-  DashboardPanel,
-  DashboardGrid,
-  DashboardCardContainer,
-} from "./panels/DashboardPanel"
-export type {
-  DashboardPanelProps,
-  DashboardGridProps,
-  DashboardCardContainerProps,
-} from "./panels/DashboardPanel"
 
 // Custom icons
 export {
