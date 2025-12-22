@@ -1,7 +1,8 @@
-// ============================================================================
-// STRATEGY DEFINITIONS
-// ============================================================================
-// Strategies are grouped by theme for easier understanding
+/**
+ * Strategy definitions
+ *
+ * Grouped by theme
+ */
 
 // Icons for current operations strategy display
 export const CURRENT_OPERATIONS_ICONS = [
