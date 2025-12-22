@@ -8,8 +8,6 @@ import { useTabs, nextTab } from "../../context/Tabs"
 import { TABS, TAB_ORDER } from "../../types/tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 
-
-
 export default function AutoAdvanceFooter() {
   const { state } = useTabs()
   const { activeTab } = state
@@ -22,7 +20,6 @@ export default function AutoAdvanceFooter() {
   }
 
   const tab = TABS.find((t) => t.key === activeTab)
-
 
   return (
     <div
@@ -40,9 +37,7 @@ export default function AutoAdvanceFooter() {
         pointerEvents: "auto", // Ensure footer is clickable even when parent has pointerEvents: none
       }}
     >
-      <Typography variant="caption">
-        {tab?.footerText ?? ""}
-      </Typography>
+      <Typography variant="caption">{tab?.footerText ?? ""}</Typography>
       <ScrollToButton
         onClick={onAdvance}
         animationComplete

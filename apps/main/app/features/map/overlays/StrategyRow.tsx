@@ -18,7 +18,7 @@ import { OUTCOME_DISPLAY_ORDER } from "../../../hooks/useTierData"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
-import { HydroClimateChooser } from "../../scenarioExplorer/components/HydroClimateChooser"
+import { HydroclimateChooser } from "../../scenarioExplorer/components/HydroclimateChooser"
 
 interface StrategyRowProps {
   /** Strategy value to display (defaults to "current-ops") */
@@ -469,7 +469,11 @@ export function KeyOperationsPanel({
                   <img
                     src={icon.path}
                     alt={icon.alt}
-                    style={{ width: "100%", height: "100%", pointerEvents: "none" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      pointerEvents: "none",
+                    }}
                   />
                 </Box>
               </HybridTooltip>
@@ -489,7 +493,7 @@ export function KeyOperationsPanel({
 
         {/* Hydroclimate section */}
         <Box>
-          <HydroClimateChooser 
+          <HydroclimateChooser
             layout="horizontal"
             size="default"
             showTitle={true}
@@ -525,7 +529,9 @@ export function KeyOutcomesPanel({
     (outcome: string) => {
       handleClose() // Close tooltip when showing on map
       // Toggle: if same outcome is already selected, clear it; otherwise set it
-      learnMapActions.setSelectedOutcome(selectedOutcome === outcome ? null : outcome)
+      learnMapActions.setSelectedOutcome(
+        selectedOutcome === outcome ? null : outcome,
+      )
     },
     [handleClose, selectedOutcome],
   )

@@ -37,7 +37,7 @@ export default function BasinInflowArrows({
    * - East: -119.5° lon (Sierra Nevada)
    * - West: -123° lon (Coast Ranges)
    */
-  
+
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
     { lon: -122.05, lat: 40.75, rotation: 65, label: "N - Central north" },
@@ -51,7 +51,11 @@ export default function BasinInflowArrows({
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.2, lat: 37.4, rotation: 240, label: "W - Central Coast Range" },
     { lon: -122.5, lat: 39.3, rotation: 240, label: "W - North Coast Range" },
-    { lon: -122.6, lat: 40.3125, rotation: 240, label: "NW - Northwestern rim",
+    {
+      lon: -122.6,
+      lat: 40.3125,
+      rotation: 240,
+      label: "NW - Northwestern rim",
     },
   ]
 

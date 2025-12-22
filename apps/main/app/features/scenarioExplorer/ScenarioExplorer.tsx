@@ -20,7 +20,7 @@ import UnifiedExploreView, {
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
-import { HydroClimateChooser } from "./components/HydroClimateChooser"
+import { HydroclimateChooser } from "./components/HydroclimateChooser"
 import { ComparisonHeader } from "./components/ComparisonHeader"
 
 type MainView = "about" | "explorer" | "data"
@@ -40,11 +40,16 @@ export default function ScenarioExplorerNew() {
   const theme = useTheme()
   const [mainView, setMainView] = useState<MainView>("explorer")
   const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
-  
-  // Track highlighted scenario for comparison chart (shared between header and chart)
-  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(null)
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: MainView) => {
+  // Track highlighted scenario for comparison chart (shared between header and chart)
+  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
+    null,
+  )
+
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: MainView,
+  ) => {
     setMainView(newValue)
   }
 
@@ -102,49 +107,51 @@ export default function ScenarioExplorerNew() {
             }}
           >
             <Tabs
-            value={mainView}
-            onChange={handleTabChange}
-            TabIndicatorProps={{
-              style: {
-                height: 3,
-                backgroundColor: theme.palette.blue.bright,
-              },
-            }}
-            sx={{
-              minHeight: theme.spacing(7),
-              "& .MuiTab-root": {
+              value={mainView}
+              onChange={handleTabChange}
+              TabIndicatorProps={{
+                style: {
+                  height: 3,
+                  backgroundColor: theme.palette.blue.bright,
+                },
+              }}
+              sx={{
                 minHeight: theme.spacing(7),
-                fontSize: theme.typography.body2.fontSize,
-                textTransform: "none",
-                fontWeight: theme.typography.fontWeightMedium,
-                color: theme.palette.text.primary,
-                transition: "all 0.2s ease-in-out",
-                borderTopLeftRadius: theme.shape.borderRadius,
-                borderTopRightRadius: theme.shape.borderRadius,
-                marginTop: theme.spacing(1),
-                marginRight: theme.spacing(0.5),
-                paddingLeft: theme.spacing(3),
-                paddingRight: theme.spacing(3),
-                "&.Mui-selected": {
-                  color: theme.palette.blue.bright,
-                  fontWeight: theme.typography.fontWeightBold,
-                  backgroundColor: `${theme.palette.blue.bright}1A`,
+                "& .MuiTab-root": {
+                  minHeight: theme.spacing(7),
+                  fontSize: theme.typography.body2.fontSize,
+                  textTransform: "none",
+                  fontWeight: theme.typography.fontWeightMedium,
+                  color: theme.palette.text.primary,
+                  transition: "all 0.2s ease-in-out",
+                  borderTopLeftRadius: theme.shape.borderRadius,
+                  borderTopRightRadius: theme.shape.borderRadius,
+                  marginTop: theme.spacing(1),
+                  marginRight: theme.spacing(0.5),
+                  paddingLeft: theme.spacing(3),
+                  paddingRight: theme.spacing(3),
+                  "&.Mui-selected": {
+                    color: theme.palette.blue.bright,
+                    fontWeight: theme.typography.fontWeightBold,
+                    backgroundColor: `${theme.palette.blue.bright}1A`,
+                  },
+                  "&:hover:not(.Mui-selected)": {
+                    color: theme.palette.blue.dark,
+                    backgroundColor: `${theme.palette.blue.bright}1A`,
+                  },
                 },
-                "&:hover:not(.Mui-selected)": {
-                  color: theme.palette.blue.dark,
-                  backgroundColor: `${theme.palette.blue.bright}1A`,
-                },
-              },
-            }}
-          >
-            <Tab label="About COEQWAL scenarios" value="about" />
-            <Tab label="Explore scenarios" value="explorer" />
-            <Tab label="Data explorer" value="data" />
-          </Tabs>
+              }}
+            >
+              <Tab label="About COEQWAL scenarios" value="about" />
+              <Tab label="Explore scenarios" value="explorer" />
+              <Tab label="Data explorer" value="data" />
+            </Tabs>
           </Box>
 
           {/* Selection Banner - only show when exploring data */}
-          {(mainView === "explorer" || mainView === "data") && <SelectionBanner />}
+          {(mainView === "explorer" || mainView === "data") && (
+            <SelectionBanner />
+          )}
 
           {/* Search bar row for explorer view - 50/50 split when in map or comparison mode */}
           {mainView === "explorer" && (
@@ -177,7 +184,13 @@ export default function ScenarioExplorerNew() {
                       />
 
                       {/* View mode section */}
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
+                      >
                         <Typography
                           variant="subtitle2"
                           sx={{
@@ -188,7 +201,13 @@ export default function ScenarioExplorerNew() {
                         >
                           View
                         </Typography>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
+                        >
                           <Tooltip title="List view" arrow>
                             <IconButton
                               size="small"
@@ -229,7 +248,9 @@ export default function ScenarioExplorerNew() {
                                 alt="Map view"
                                 width={24}
                                 height={24}
-                                style={{ opacity: exploreMode === "map" ? 1 : 0.6 }}
+                                style={{
+                                  opacity: exploreMode === "map" ? 1 : 0.6,
+                                }}
                               />
                             </IconButton>
                           </Tooltip>
@@ -268,7 +289,7 @@ export default function ScenarioExplorerNew() {
                       />
 
                       {/* Hydroclimate chooser */}
-                      <HydroClimateChooser
+                      <HydroclimateChooser
                         layout="horizontal"
                         size="small"
                         showTitle={true}
@@ -334,7 +355,9 @@ export default function ScenarioExplorerNew() {
             />
           )}
           {mainView === "data" && (
-            <DataExplorerView onNavigateToExplorer={() => setMainView("explorer")} />
+            <DataExplorerView
+              onNavigateToExplorer={() => setMainView("explorer")}
+            />
           )}
         </Box>
       </Box>

@@ -229,7 +229,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       {pointFeatures.map((feature) => {
         const coords = feature.geometry.coordinates as [number, number]
         const [lng, lat] = coords
-        
+
         // Use diamond shape for Environmental flows (ENV_FLOWS)
         const isDiamond = data.metadata.tier_code === "ENV_FLOWS"
 

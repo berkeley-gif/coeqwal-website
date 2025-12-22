@@ -284,31 +284,31 @@ export const learnMapActions = {
   /**
    * Set the map mode (which tab/context the map is serving).
    * The PersistentMap component uses this to adjust its position and layers.
-   * 
+   *
    * This also clears the opposite mode's state synchronously to prevent
    * race conditions and stale visualizations.
    */
   setMapMode: (mode: MapMode) => {
     if (mode === "learn") {
       // Entering Learn mode: clear Explore state
-      useLearnMapStore.setState({ 
-        exploreTierSelection: null, 
-        mapMode: mode 
+      useLearnMapStore.setState({
+        exploreTierSelection: null,
+        mapMode: mode,
       })
     } else if (mode === "explore") {
       // Entering Explore mode: clear Learn outcome state
-      useLearnMapStore.setState({ 
+      useLearnMapStore.setState({
         selectedOutcome: null,
         isOutcomeVisualizationActive: false,
-        mapMode: mode 
+        mapMode: mode,
       })
     } else {
       // Hidden mode: clear both
-      useLearnMapStore.setState({ 
-        selectedOutcome: null, 
+      useLearnMapStore.setState({
+        selectedOutcome: null,
         isOutcomeVisualizationActive: false,
-        exploreTierSelection: null, 
-        mapMode: mode 
+        exploreTierSelection: null,
+        mapMode: mode,
       })
     }
   },
@@ -316,7 +316,8 @@ export const learnMapActions = {
   /**
    * Set map ready state. Called when WebGL context is initialized.
    */
-  setMapReady: (ready: boolean) => useLearnMapStore.setState({ mapReady: ready }),
+  setMapReady: (ready: boolean) =>
+    useLearnMapStore.setState({ mapReady: ready }),
 
   // === Learn-specific Actions ===
 

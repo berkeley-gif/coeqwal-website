@@ -16,7 +16,7 @@ applications:
       artifacts:
         baseDirectory: apps/storyline-climate/out
         files:
-          - '**/*'
+          - "**/*"
       buildPath: /
     appRoot: apps/storyline-climate
     environment:

@@ -1,6 +1,6 @@
 /**
  * Hook for applying Mapbox layer styling
- * 
+ *
  * Handles all geometry types:
  * - Polygons: fill + line layers with tier colors
  * - Points: circle layers with tier colors
@@ -77,7 +77,13 @@ export function useMapboxLayerStyling({
               geometry: {
                 type: "Polygon",
                 coordinates: [
-                  [[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]],
+                  [
+                    [-180, -90],
+                    [180, -90],
+                    [180, 90],
+                    [-180, 90],
+                    [-180, -90],
+                  ],
                 ],
               },
             },
@@ -104,7 +110,8 @@ export function useMapboxLayerStyling({
         const elapsed = performance.now() - startTime
         const progress = Math.min(elapsed / duration, 1)
         const eased = 1 - Math.pow(1 - progress, 3)
-        const currentOpacity = startOpacity + (endOpacity - startOpacity) * eased
+        const currentOpacity =
+          startOpacity + (endOpacity - startOpacity) * eased
 
         if (map.getLayer(dimLayerId)) {
           map.setPaintProperty(dimLayerId, "fill-opacity", currentOpacity)
@@ -131,7 +138,11 @@ export function useMapboxLayerStyling({
         map.setFilter(LAYER_IDS.demandUnits.fill, ["==", "DU_ID", ""])
       }
       if (map.getLayer(LAYER_IDS.demandUnits.outline)) {
-        try { map.removeLayer(LAYER_IDS.demandUnits.outline) } catch { /* ignore */ }
+        try {
+          map.removeLayer(LAYER_IDS.demandUnits.outline)
+        } catch {
+          /* ignore */
+        }
       }
 
       // Clear WBA layers
@@ -140,19 +151,31 @@ export function useMapboxLayerStyling({
         map.setFilter(LAYER_IDS.wba.fill, ["==", "WBA_ID", ""])
       }
       if (map.getLayer(LAYER_IDS.wba.outline)) {
-        try { map.removeLayer(LAYER_IDS.wba.outline) } catch { /* ignore */ }
+        try {
+          map.removeLayer(LAYER_IDS.wba.outline)
+        } catch {
+          /* ignore */
+        }
       }
 
-      // Clear reservoir layers 
+      // Clear reservoir layers
       if (map.getLayer(LAYER_IDS.reservoir.fill)) {
         map.setLayoutProperty(LAYER_IDS.reservoir.fill, "visibility", "none")
         map.setFilter(LAYER_IDS.reservoir.fill, ["==", "gnisidlabel", ""])
       }
       if (map.getLayer(LAYER_IDS.reservoir.outline)) {
-        try { map.removeLayer(LAYER_IDS.reservoir.outline) } catch { /* ignore */ }
+        try {
+          map.removeLayer(LAYER_IDS.reservoir.outline)
+        } catch {
+          /* ignore */
+        }
       }
       if (map.getLayer(LAYER_IDS.reservoir.label)) {
-        try { map.removeLayer(LAYER_IDS.reservoir.label) } catch { /* ignore */ }
+        try {
+          map.removeLayer(LAYER_IDS.reservoir.label)
+        } catch {
+          /* ignore */
+        }
       }
 
       // Clear delta layer
@@ -160,7 +183,11 @@ export function useMapboxLayerStyling({
         map.setLayoutProperty(LAYER_IDS.delta.fill, "visibility", "none")
       }
       if (map.getLayer(LAYER_IDS.delta.outline)) {
-        try { map.removeLayer(LAYER_IDS.delta.outline) } catch { /* ignore */ }
+        try {
+          map.removeLayer(LAYER_IDS.delta.outline)
+        } catch {
+          /* ignore */
+        }
       }
 
       // Restore river layers to original styling
@@ -169,7 +196,11 @@ export function useMapboxLayerStyling({
         map.setPaintProperty(LAYER_IDS.sacramento.body, "line-width", 3)
       }
       if (map.getLayer(LAYER_IDS.sacramento.trough)) {
-        map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-color", "#1a3a52")
+        map.setPaintProperty(
+          LAYER_IDS.sacramento.trough,
+          "line-color",
+          "#1a3a52",
+        )
         map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-width", 7)
         map.setPaintProperty(LAYER_IDS.sacramento.trough, "line-opacity", 0.5)
       }
@@ -178,7 +209,11 @@ export function useMapboxLayerStyling({
         map.setPaintProperty(LAYER_IDS.sanJoaquin.body, "line-width", 3)
       }
       if (map.getLayer(LAYER_IDS.sanJoaquin.trough)) {
-        map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-color", "#1a3a52")
+        map.setPaintProperty(
+          LAYER_IDS.sanJoaquin.trough,
+          "line-color",
+          "#1a3a52",
+        )
         map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-width", 7)
         map.setPaintProperty(LAYER_IDS.sanJoaquin.trough, "line-opacity", 0.5)
       }
@@ -203,7 +238,14 @@ export function useMapboxLayerStyling({
     const timeoutId = setTimeout(() => {
       mapAPI.withMap((mapRef) => {
         const map = mapRef.getMap()
-        const { geometryType, mapboxLayerId, idProperty, classFilter, requiresIdMatching, layerType } = config
+        const {
+          geometryType,
+          mapboxLayerId,
+          idProperty,
+          classFilter,
+          requiresIdMatching,
+          layerType,
+        } = config
 
         // Check if layer exists
         if (!map.getLayer(mapboxLayerId)) {
@@ -237,7 +279,9 @@ export function useMapboxLayerStyling({
           const colorPairs: (string | number)[] = []
           Object.entries(lookupToUse).forEach(([featureId, tierLevel]) => {
             colorPairs.push(featureId)
-            colorPairs.push(tierColors[tierLevel as TierLevel] || theme.palette.grey[500])
+            colorPairs.push(
+              tierColors[tierLevel as TierLevel] || theme.palette.grey[500],
+            )
           })
 
           if (colorPairs.length === 0) {
@@ -257,7 +301,14 @@ export function useMapboxLayerStyling({
         // Apply styling based on geometry type
         switch (geometryType) {
           case "polygon":
-            applyPolygonStyling(map, config, colorExpression, featureIds, classFilter, tierLookup)
+            applyPolygonStyling(
+              map,
+              config,
+              colorExpression,
+              featureIds,
+              classFilter,
+              tierLookup,
+            )
             break
           case "point":
             applyPointStyling(map, config, colorExpression, featureIds)
@@ -276,7 +327,9 @@ export function useMapboxLayerStyling({
             if (map.getLayer(riverId)) {
               map.moveLayer(riverId)
             }
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         })
 
         // Reservoirs go above the rivers
@@ -288,13 +341,25 @@ export function useMapboxLayerStyling({
             if (map.getLayer(LAYER_IDS.reservoir.outline)) {
               map.moveLayer(LAYER_IDS.reservoir.outline)
             }
-          } catch { /* ignore */ }
+          } catch {
+            /* ignore */
+          }
         }
       })
     }, 10)
 
     return () => clearTimeout(timeoutId)
-  }, [enabled, config, tierLookup, featureIds, tierColors, theme, mapAPI, clear, fadeBasemapDim])
+  }, [
+    enabled,
+    config,
+    tierLookup,
+    featureIds,
+    tierColors,
+    theme,
+    mapAPI,
+    clear,
+    fadeBasemapDim,
+  ])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -324,11 +389,11 @@ function applyPolygonStyling(
   let translatedTierLookup = tierLookup
   if (layerType === "reservoir" && featureIds.length > 0) {
     translatedFeatureIds = featureIds
-      .map(id => RESERVOIR_CALSIM_TO_GNISIDLABEL[id])
+      .map((id) => RESERVOIR_CALSIM_TO_GNISIDLABEL[id])
       .filter((v): v is string => !!v)
     // TODO: sort out duplicates (SLUIS_CVP and SLUIS_SWP both map to "San Luis Reservoir")
     translatedFeatureIds = [...new Set(translatedFeatureIds)]
-    
+
     // Also translate the tier lookup for color matching
     if (tierLookup) {
       translatedTierLookup = {}
@@ -336,7 +401,10 @@ function applyPolygonStyling(
         const gnisLabel = RESERVOIR_CALSIM_TO_GNISIDLABEL[calsimId]
         if (gnisLabel) {
           // If multiple CalSim IDs map to same reservoir, use highest tier
-          if (!translatedTierLookup![gnisLabel] || tier > translatedTierLookup![gnisLabel]) {
+          if (
+            !translatedTierLookup![gnisLabel] ||
+            tier > translatedTierLookup![gnisLabel]
+          ) {
             translatedTierLookup![gnisLabel] = tier
           }
         }
@@ -376,10 +444,15 @@ function applyPolygonStyling(
     // Apply fill styling (for non-reservoir, non-delta polygons)
     map.setPaintProperty(mapboxLayerId, "fill-color", colorExpression)
     map.setPaintProperty(mapboxLayerId, "fill-opacity", [
-      "interpolate", ["linear"], ["zoom"],
-      5, 0.75,
-      8, 0.55,
-      10, 0.35,
+      "interpolate",
+      ["linear"],
+      ["zoom"],
+      5,
+      0.75,
+      8,
+      0.55,
+      10,
+      0.35,
     ])
     map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
   }
@@ -389,7 +462,9 @@ function applyPolygonStyling(
     const fillLayer = map.getLayer(mapboxLayerId)
     if (fillLayer) {
       const sourceId = fillLayer.source as string
-      const sourceLayer = (fillLayer as { "source-layer"?: string })["source-layer"]
+      const sourceLayer = (fillLayer as { "source-layer"?: string })[
+        "source-layer"
+      ]
 
       map.addLayer({
         id: outlineId,
@@ -412,19 +487,37 @@ function applyPolygonStyling(
       map.setFilter(outlineId, filter)
     }
     map.setPaintProperty(outlineId, "line-color", colorExpression)
-    
+
     // Delta gets a fixed thin stroke, others get zoom-interpolated width
     if (layerType === "delta") {
       map.setPaintProperty(outlineId, "line-width", 0.5)
       map.setPaintProperty(outlineId, "line-offset", 0)
     } else {
       map.setPaintProperty(outlineId, "line-width", [
-        "interpolate", ["linear"], ["zoom"],
-        5, 0.5, 7, 1, 9, 2, 11, 3,
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        0.5,
+        7,
+        1,
+        9,
+        2,
+        11,
+        3,
       ])
       map.setPaintProperty(outlineId, "line-offset", [
-        "interpolate", ["linear"], ["zoom"],
-        5, -0.25, 7, -0.5, 9, -1, 11, -1.5,
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        5,
+        -0.25,
+        7,
+        -0.5,
+        9,
+        -1,
+        11,
+        -1.5,
       ])
     }
     map.setLayoutProperty(outlineId, "visibility", "visible")
@@ -437,7 +530,13 @@ function applyPointStyling(
   colorExpression: MapboxExpression | string,
   featureIds: string[],
 ) {
-  const { mapboxLayerId, idProperty, requiresIdMatching, circleRadius = 8, circleStrokeWidth = 2 } = config
+  const {
+    mapboxLayerId,
+    idProperty,
+    requiresIdMatching,
+    circleRadius = 8,
+    circleStrokeWidth = 2,
+  } = config
 
   // Build filter for ID matching
   let filter: unknown[] | null = null
@@ -453,10 +552,15 @@ function applyPointStyling(
   // Apply circle styling
   map.setPaintProperty(mapboxLayerId, "circle-color", colorExpression)
   map.setPaintProperty(mapboxLayerId, "circle-radius", [
-    "interpolate", ["linear"], ["zoom"],
-    5, circleRadius * 0.5,
-    8, circleRadius,
-    12, circleRadius * 1.5,
+    "interpolate",
+    ["linear"],
+    ["zoom"],
+    5,
+    circleRadius * 0.5,
+    8,
+    circleRadius,
+    12,
+    circleRadius * 1.5,
   ])
   map.setPaintProperty(mapboxLayerId, "circle-stroke-color", "#ffffff")
   map.setPaintProperty(mapboxLayerId, "circle-stroke-width", circleStrokeWidth)
@@ -474,14 +578,14 @@ function applyLineStyling(
   // For React-rendered layers (rivers), highlight by changing the color
   if (reactLayerIds) {
     // Color the body layer with the tier color
-    const bodyLayerId = reactLayerIds.find(id => id.includes("body"))
+    const bodyLayerId = reactLayerIds.find((id) => id.includes("body"))
     if (bodyLayerId && map.getLayer(bodyLayerId)) {
       map.setPaintProperty(bodyLayerId, "line-color", colorExpression)
       map.setPaintProperty(bodyLayerId, "line-width", lineWidth)
     }
-    
+
     // Also color the trough layer slightly darker for depth effect
-    const troughLayerId = reactLayerIds.find(id => id.includes("trough"))
+    const troughLayerId = reactLayerIds.find((id) => id.includes("trough"))
     if (troughLayerId && map.getLayer(troughLayerId)) {
       // Trough uses same color but wider for outline effect
       map.setPaintProperty(troughLayerId, "line-color", "#1a3a52") // Keep dark outline

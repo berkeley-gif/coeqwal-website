@@ -16,7 +16,7 @@ applications:
       artifacts:
         baseDirectory: apps/main/out
         files:
-          - '**/*'
+          - "**/*"
       buildPath: /
     appRoot: apps/main
     environment:

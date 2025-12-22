@@ -17,7 +17,9 @@ interface DataExplorerViewProps {
  *
  * Three sub-views: category, map, table
  */
-export default function DataExplorerView({ onNavigateToExplorer }: DataExplorerViewProps) {
+export default function DataExplorerView({
+  onNavigateToExplorer,
+}: DataExplorerViewProps) {
   const theme = useTheme()
   const { selectedScenarios } = useScenarioExplorerStore()
   const [subView, setSubView] = React.useState<"category" | "map" | "table">(

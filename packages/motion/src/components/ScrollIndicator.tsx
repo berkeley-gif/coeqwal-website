@@ -157,7 +157,16 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
         clearTimeout(timeoutId)
       }
     }
-  }, [animationComplete, controls, delay, pulseIntensity, showDuration, hideDuration, motionAxis, axisKey])
+  }, [
+    animationComplete,
+    controls,
+    delay,
+    pulseIntensity,
+    showDuration,
+    hideDuration,
+    motionAxis,
+    axisKey,
+  ])
 
   /** Initial state (typed safely) */
   const initial: TargetAndTransition = { opacity: 0 }

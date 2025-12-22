@@ -17,24 +17,24 @@ export function Header() {
   const handleLogoClick = () => {
     const start = window.scrollY
     if (start === 0) return // Already at top
-    
+
     const startTime = performance.now()
     const duration = 600 // ms
-    
+
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
-    
+
     const animateScroll = (currentTime: number) => {
       const elapsed = currentTime - startTime
       const progress = Math.min(elapsed / duration, 1)
       const eased = easeOutCubic(progress)
-      
+
       window.scrollTo(0, start * (1 - eased))
-      
+
       if (progress < 1) {
         requestAnimationFrame(animateScroll)
       }
     }
-    
+
     requestAnimationFrame(animateScroll)
   }
 

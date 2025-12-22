@@ -16,7 +16,7 @@ applications:
       artifacts:
         baseDirectory: apps/storyline-flow/out
         files:
-          - '**/*'
+          - "**/*"
       buildPath: /
     appRoot: apps/storyline-flow
     environment:

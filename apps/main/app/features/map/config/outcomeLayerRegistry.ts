@@ -1,8 +1,8 @@
 /**
  * Outcome layer registry
- * 
+ *
  * Single source of truth for all outcome layer configurations.
- * 
+ *
  * To add a new outcome:
  * 1. Add an entry to OUTCOME_LAYER_REGISTRY
  * 2. Ensure the Mapbox layer exists in the style
@@ -17,20 +17,26 @@
 export type GeometryType = "polygon" | "point" | "line" | "react-marker"
 
 /** Layer type identifier */
-export type LayerType = "demand-units" | "wba" | "reservoir" | "delta" | "river" | "marker"
+export type LayerType =
+  | "demand-units"
+  | "wba"
+  | "reservoir"
+  | "delta"
+  | "river"
+  | "marker"
 
 /** Source of tooltip data */
-export type TooltipFieldSource = 
-  | "mapbox"   // From Mapbox feature properties
-  | "api"      // From COEQWAL API response
+export type TooltipFieldSource =
+  | "mapbox" // From Mapbox feature properties
+  | "api" // From COEQWAL API response
   | "computed" // Computed from other fields
 
 /** Format options for displaying values */
-export type TooltipFieldFormat = 
-  | "text"       // Plain text (default)
-  | "acres"      // Number with " acres" suffix and toLocaleString()
-  | "acrefeet"   // Number with " acre-feet" suffix
-  | "number"     // toLocaleString() formatting
+export type TooltipFieldFormat =
+  | "text" // Plain text (default)
+  | "acres" // Number with " acres" suffix and toLocaleString()
+  | "acrefeet" // Number with " acre-feet" suffix
+  | "number" // toLocaleString() formatting
 
 /** Typography variant for the field */
 export type TooltipFieldVariant = "body2" | "caption"
@@ -139,18 +145,18 @@ export const BASEMAP_DIM_OPACITY = 0.15
  * TODO: Update the california-reservoir Mapbox tileset to include a `calsim_id` property
  * with these short codes, then update the registry to use `idProperty: "calsim_id"` and
  * remove this mapping. In the meantime:
- * 
+ *
  * Mapping from CalSim short codes (returned by API) to Mapbox gnisidlabel values
  */
 export const RESERVOIR_CALSIM_TO_GNISIDLABEL: Record<string, string> = {
-  "FOLSM": "Folsom Lake",
-  "MELON": "New Melones Lake",
-  "MLRTN": "Millerton Lake",
-  "OROVL": "Lake Oroville",
-  "SHSTA": "Shasta Lake",
-  "SLUIS_CVP": "San Luis Reservoir",  // CVP portion
-  "SLUIS_SWP": "San Luis Reservoir",  // SWP portion (same reservoir)
-  "TRNTY": "Trinity Lake",
+  FOLSM: "Folsom Lake",
+  MELON: "New Melones Lake",
+  MLRTN: "Millerton Lake",
+  OROVL: "Lake Oroville",
+  SHSTA: "Shasta Lake",
+  SLUIS_CVP: "San Luis Reservoir", // CVP portion
+  SLUIS_SWP: "San Luis Reservoir", // SWP portion (same reservoir)
+  TRNTY: "Trinity Lake",
 }
 
 // ============================================================================
@@ -159,12 +165,12 @@ export const RESERVOIR_CALSIM_TO_GNISIDLABEL: Record<string, string> = {
 
 /**
  * Registry of all outcome layers
-  */
+ */
 export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // POLYGON LAYERS (Mapbox vector tiles with ID matching)
   // ═══════════════════════════════════════════════════════════════════════════
-  
+
   "Community deliveries": {
     geometryType: "polygon",
     layerType: "demand-units",
@@ -175,11 +181,41 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "CWS_DEL",
     requiresIdMatching: true,
     tooltipFields: [
-      { key: "urbName", label: null, source: "mapbox", mapboxKey: "Urb_Name", isPrimary: true },
-      { key: "modName", label: null, source: "mapbox", mapboxKey: "Mod_Name", isSecondary: true },
-      { key: "subName", label: null, source: "mapbox", mapboxKey: "Sub_Name", variant: "body2" },
-      { key: "comments", label: null, source: "mapbox", mapboxKey: "Comments", variant: "caption" },
-      { key: "type", label: null, source: "mapbox", mapboxKey: "Type", variant: "caption" },
+      {
+        key: "urbName",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Urb_Name",
+        isPrimary: true,
+      },
+      {
+        key: "modName",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Mod_Name",
+        isSecondary: true,
+      },
+      {
+        key: "subName",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Sub_Name",
+        variant: "body2",
+      },
+      {
+        key: "comments",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Comments",
+        variant: "caption",
+      },
+      {
+        key: "type",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Type",
+        variant: "caption",
+      },
     ],
     idLabel: "CalSim ID",
   },
@@ -194,10 +230,34 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "AG_REV",
     requiresIdMatching: true,
     tooltipFields: [
-      { key: "modName", label: null, source: "mapbox", mapboxKey: "Mod_Name", isPrimary: true },
-      { key: "subName", label: null, source: "mapbox", mapboxKey: "Sub_Name", variant: "body2" },
-      { key: "comments", label: null, source: "mapbox", mapboxKey: "Comments", variant: "caption" },
-      { key: "type", label: null, source: "mapbox", mapboxKey: "Type", variant: "caption" },
+      {
+        key: "modName",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Mod_Name",
+        isPrimary: true,
+      },
+      {
+        key: "subName",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Sub_Name",
+        variant: "body2",
+      },
+      {
+        key: "comments",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Comments",
+        variant: "caption",
+      },
+      {
+        key: "type",
+        label: null,
+        source: "mapbox",
+        mapboxKey: "Type",
+        variant: "caption",
+      },
     ],
     idLabel: "CalSim ID",
   },
@@ -211,9 +271,28 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "GW_STOR",
     requiresIdMatching: true,
     tooltipFields: [
-      { key: "locationName", label: null, source: "api", apiKey: "location_name", isPrimary: true },
-      { key: "hydroRegion", label: "Region", source: "mapbox", mapboxKey: "HydroRegion", variant: "body2" },
-      { key: "gisAcres", label: "Area", source: "mapbox", mapboxKey: "GIS_Acres", format: "acres", variant: "caption" },
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
+      {
+        key: "hydroRegion",
+        label: "Region",
+        source: "mapbox",
+        mapboxKey: "HydroRegion",
+        variant: "body2",
+      },
+      {
+        key: "gisAcres",
+        label: "Area",
+        source: "mapbox",
+        mapboxKey: "GIS_Acres",
+        format: "acres",
+        variant: "caption",
+      },
     ],
     idLabel: "WBA ID",
   },
@@ -232,8 +311,20 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "RES_STOR",
     requiresIdMatching: true,
     tooltipFields: [
-      { key: "locationName", label: null, source: "api", apiKey: "location_name", isPrimary: true },
-      { key: "gnisidlabel", label: "GNIS ID", source: "mapbox", mapboxKey: "gnisidlabel", variant: "caption" },
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
+      {
+        key: "gnisidlabel",
+        label: "GNIS ID",
+        source: "mapbox",
+        mapboxKey: "gnisidlabel",
+        variant: "caption",
+      },
     ],
     idLabel: "Reservoir ID",
     defaultZoom: 6, // zoom to see all reservoirs across California
@@ -268,10 +359,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "WRC_SALMON_AB",
     requiresIdMatching: false, // Single river, no ID matching
     lineWidth: 4,
-    reactLayerIds: [
-      "sacramento-river-trough",
-      "sacramento-river-body",
-    ],
+    reactLayerIds: ["sacramento-river-trough", "sacramento-river-body"],
     tooltipFields: [
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
@@ -291,7 +379,13 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "ENV_FLOWS",
     requiresIdMatching: false,
     tooltipFields: [
-      { key: "locationName", label: null, source: "api", apiKey: "location_name", isPrimary: true },
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
     ],
     idLabel: "Station ID",
   },
@@ -303,7 +397,13 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "FW_DELTA_USES",
     requiresIdMatching: false,
     tooltipFields: [
-      { key: "locationName", label: null, source: "api", apiKey: "location_name", isPrimary: true },
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
     ],
     idLabel: "Station ID",
   },
@@ -315,7 +415,13 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     tierCode: "FW_EXP",
     requiresIdMatching: false,
     tooltipFields: [
-      { key: "locationName", label: null, source: "api", apiKey: "location_name", isPrimary: true },
+      {
+        key: "locationName",
+        label: null,
+        source: "api",
+        apiKey: "location_name",
+        isPrimary: true,
+      },
     ],
     idLabel: "Station ID",
   },
@@ -349,7 +455,7 @@ export function outcomeUsesMapboxLayers(outcome: string): boolean {
 
 /**
  * Check if an outcome uses polygon visualization
- * 
+ *
  * TODO: Deprecate this function - use getOutcomeConfig(outcome)?.geometryType === "polygon" instead
  */
 export function outcomeUsesPolygons(outcome: string): boolean {
@@ -375,10 +481,13 @@ export function getOutcomesByGeometry(geometryType: GeometryType): string[] {
 
 /**
  * Get Mapbox layer IDs for an outcome
- * 
+ *
  * TODO: Consider removing this helper - callers should use getOutcomeConfig() directly
  */
-export function getOutcomeLayerIds(outcome: string): { fill?: string; outline?: string } {
+export function getOutcomeLayerIds(outcome: string): {
+  fill?: string
+  outline?: string
+} {
   const config = OUTCOME_LAYER_REGISTRY[outcome]
   if (!config) return {}
 

@@ -14,7 +14,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
 
     // Meli, I implemented a different approach to the map, where the same map
     // sits behind the tab panels. This way, the map preloads while visitors are
-    // in the IntroSection, and I and keep the same map throughout, instead of 
+    // in the IntroSection, and I and keep the same map throughout, instead of
     // mounting and unmounting every time we switch tabs. In order to do this, the
     // Learn and Explore tabs need transparent backgrounds and no padding
     // so the persistent map shows through / content sits flush with tabs.

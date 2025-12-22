@@ -225,12 +225,12 @@ export default function MapOverlayPanels() {
   useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
     const newPE = latest as "none" | "auto"
     setStrategyInfoPE(newPE)
-    
+
     // Track when panel becomes visible
     if (newPE === "auto") {
       strategyInfoWasVisible.current = true
     }
-    
+
     // Clear outcome visualization only when transitioning from visible to invisible
     // (not on initial render when panel starts invisible)
     if (newPE === "none" && strategyInfoWasVisible.current) {

@@ -1,6 +1,6 @@
 /**
  * Hook for fetching tier location data from the API
- * 
+ *
  * Responsibilities:
  * - Fetch tier data from COEQWAL API
  * - Cache responses to avoid duplicate requests
@@ -113,7 +113,7 @@ interface UseTierDataFetchProps {
 
 /**
  * Hook to fetch and cache tier location data
- * 
+ *
  * Returns lookup maps that can be used by other hooks for styling and tooltips.
  */
 export function useTierDataFetch({
@@ -183,7 +183,9 @@ export function useTierDataFetch({
       } catch (err) {
         if (!cancelled) {
           console.error("Error fetching tier data:", err)
-          setError(err instanceof Error ? err.message : "Failed to fetch tier data")
+          setError(
+            err instanceof Error ? err.message : "Failed to fetch tier data",
+          )
           resetRefs()
           setResponse(null)
         }

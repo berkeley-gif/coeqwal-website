@@ -1999,8 +1999,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       >
                         ×
                       </Box>
-                      <SummaryPanel 
-                        strategy={strategy.value} 
+                      <SummaryPanel
+                        strategy={strategy.value}
                         outcome={selectedOutcomeForSummary}
                         variant="inline"
                       />

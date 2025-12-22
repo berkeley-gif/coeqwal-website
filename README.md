@@ -38,7 +38,7 @@ corepack enable
 corepack prepare pnpm@10.0.0 --activate
 ```
 
-Note (in case you were reading the `amplify.yml` and wondering): Locally it's easiest to use Corepack. AWS Amplify instead installs pnpm globally in the container they use to run the build.  
+Note (in case you were reading the `amplify.yml` and wondering): Locally it's easiest to use Corepack. AWS Amplify instead installs pnpm globally in the container they use to run the build.
 
 ### Installating the repo and packages
 
@@ -71,7 +71,7 @@ cd apps/main
 pnpm dev
 ```
 
-or 
+or
 
 ```sh
 pnpm dev --filter=main
@@ -101,7 +101,7 @@ pnpm lint
 pnpm build
 ```
 
-or 
+or
 
 ```sh
 pnpm format --filter=main
@@ -109,13 +109,14 @@ pnpm lint --filter=main
 pnpm build --filter=main
 ```
 
-## Do local dev builds feel sluggish? 
+## Do local dev builds feel sluggish?
 
-### Try clearing your cache 
+### Try clearing your cache
+
 (especially if you have been doing data intensive work)
 
-- To clean bloated Turbo and app-level NextJS caches 
-(again, using `main` app as example):
+- To clean bloated Turbo and app-level NextJS caches
+  (again, using `main` app as example):
 
 ```sh
 rm -rf .turbo/cache
@@ -227,6 +228,7 @@ at the root level to make sure all new packages and workspace import/exports are
 ## Regular Turborepo maintenance (for lead dev)
 
 Ideally a quarterly review, but at least yearly:
+
 - Keep node, NextJS, and package versions up-to-date
 - Review and maintain configs
 

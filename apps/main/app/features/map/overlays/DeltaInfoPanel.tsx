@@ -54,7 +54,11 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         const mapInstance = map.mapRef.current.getMap()
         if (mapInstance.getLayer(DELTA_WATER_LAYER)) {
           // Make visible
-          mapInstance.setLayoutProperty(DELTA_WATER_LAYER, "visibility", "visible")
+          mapInstance.setLayoutProperty(
+            DELTA_WATER_LAYER,
+            "visibility",
+            "visible",
+          )
 
           // Animate opacity from 0 to 0.9
           const targetOpacity = 0.9
@@ -71,7 +75,11 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             )
 
             try {
-              mapInstance.setPaintProperty(DELTA_WATER_LAYER, "fill-opacity", opacity)
+              mapInstance.setPaintProperty(
+                DELTA_WATER_LAYER,
+                "fill-opacity",
+                opacity,
+              )
             } catch {
               // Layer might not support this property
             }

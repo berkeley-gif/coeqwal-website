@@ -20,7 +20,10 @@ import {
 } from "../../../content/tiers"
 import { fetchTierLocations } from "../hooks/useOutcomeMapLayer"
 import { fetchTierLocationData } from "../../../lib/api/tierLocationApi"
-import { STRATEGY_TO_SCENARIO_ID, DISPLAY_NAME_TO_API_SHORT_CODE } from "../../../lib/constants/outcomeMappings"
+import {
+  STRATEGY_TO_SCENARIO_ID,
+  DISPLAY_NAME_TO_API_SHORT_CODE,
+} from "../../../lib/constants/outcomeMappings"
 import { useSelectedOutcome } from "../store"
 import { useMap } from "@repo/map"
 
@@ -32,11 +35,15 @@ interface SummaryPanelProps {
   variant?: "overlay" | "inline"
 }
 
-export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, variant = "overlay" }: SummaryPanelProps) {
+export function SummaryPanel({
+  strategy = "current-ops",
+  outcome: outcomeProp,
+  variant = "overlay",
+}: SummaryPanelProps) {
   const theme = useTheme()
   const mapAPI = useMap()
   const storeOutcome = useSelectedOutcome()
-  
+
   // Use prop if provided (Explore mode), otherwise use store (Learn mode)
   const selectedOutcome = outcomeProp !== undefined ? outcomeProp : storeOutcome
 
@@ -52,9 +59,9 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
     DemandUnitProperties
   > | null>(null)
   // Store coordinates from GeoJSON API (more reliable than Mapbox query)
-  const [geoJsonCoords, setGeoJsonCoords] = useState<Map<string, [number, number]>>(new Map())
-  // Store API location names as fallback when Mapbox tiles aren't loaded
-  const [apiNames, setApiNames] = useState<Map<string, string>>(new Map())
+  const [geoJsonCoords, setGeoJsonCoords] = useState<
+    Map<string, [number, number]>
+  >(new Map())
 
   // Fetch tier data and generate summary when outcome changes
   useEffect(() => {
@@ -84,21 +91,21 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
         if (cancelled) return
 
         // Also fetch GeoJSON data for reliable coordinates and API names
-        let apiNamesMap = new Map<string, string>()
+        const apiNamesMap = new Map<string, string>()
         try {
           const geoJsonData = await fetchTierLocationData(strategy, outcome)
           if (!cancelled) {
             const coordsMap = new Map<string, [number, number]>()
-            
+
             geoJsonData.features.forEach((feature) => {
               const locationId = feature.properties.location_id
               const locationName = feature.properties.location_name
-              
+
               // Store API location_name (can be used as fallback)
               if (locationName && locationName !== locationId) {
                 apiNamesMap.set(locationId, locationName)
               }
-              
+
               if (feature.geometry.type === "Point") {
                 const coords = feature.geometry.coordinates as number[]
                 coordsMap.set(locationId, [coords[0]!, coords[1]!])
@@ -106,22 +113,37 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                 // Calculate centroid for polygon
                 const ring = (feature.geometry.coordinates as number[][][])[0]
                 if (ring && ring.length > 0) {
-                  let sumLng = 0, sumLat = 0
-                  ring.forEach(pt => { sumLng += pt[0]!; sumLat += pt[1]! })
-                  coordsMap.set(locationId, [sumLng / ring.length, sumLat / ring.length])
+                  let sumLng = 0,
+                    sumLat = 0
+                  ring.forEach((pt) => {
+                    sumLng += pt[0]!
+                    sumLat += pt[1]!
+                  })
+                  coordsMap.set(locationId, [
+                    sumLng / ring.length,
+                    sumLat / ring.length,
+                  ])
                 }
               } else if (feature.geometry.type === "MultiPolygon") {
                 // Use first polygon's centroid
-                const ring = (feature.geometry.coordinates as number[][][][])[0]?.[0]
+                const ring = (
+                  feature.geometry.coordinates as number[][][][]
+                )[0]?.[0]
                 if (ring && ring.length > 0) {
-                  let sumLng = 0, sumLat = 0
-                  ring.forEach(pt => { sumLng += pt[0]!; sumLat += pt[1]! })
-                  coordsMap.set(locationId, [sumLng / ring.length, sumLat / ring.length])
+                  let sumLng = 0,
+                    sumLat = 0
+                  ring.forEach((pt) => {
+                    sumLng += pt[0]!
+                    sumLat += pt[1]!
+                  })
+                  coordsMap.set(locationId, [
+                    sumLng / ring.length,
+                    sumLat / ring.length,
+                  ])
                 }
               }
             })
             setGeoJsonCoords(coordsMap)
-            setApiNames(apiNamesMap)
           }
         } catch {
           // Silently handle GeoJSON fetch errors
@@ -131,63 +153,67 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
         // This enriches the summary with actual location names from Mapbox
         // Note: querySourceFeatures only returns features from currently loaded tiles
         // Small polygons may not be in tiles at lower zoom levels
-        const propsMap = await new Promise<Map<string, DemandUnitProperties>>((resolve) => {
-          mapAPI.withMap((mapRef) => {
-            const map = mapRef.getMap()
-            
-            const queryFeatures = () => {
-              const resultMap = new Map<string, DemandUnitProperties>()
-              
-              // Query source features to get properties
-              const features = map.querySourceFeatures("composite", {
-                sourceLayer: "demand_units",
-              })
-              
+        const propsMap = await new Promise<Map<string, DemandUnitProperties>>(
+          (resolve) => {
+            mapAPI.withMap((mapRef) => {
+              const map = mapRef.getMap()
 
-              features.forEach((f) => {
-                const duId = f.properties?.DU_ID
-                if (duId) {
-                  // Get centroid for coordinates (simplified - just use first point)
-                  let coords: [number, number] = [0, 0]
-                  if (
-                    f.geometry.type === "Polygon" &&
-                    f.geometry.coordinates?.[0]?.[0]
-                  ) {
-                    coords = f.geometry.coordinates[0][0] as [number, number]
-                  } else if (
-                    f.geometry.type === "MultiPolygon" &&
-                    f.geometry.coordinates?.[0]?.[0]?.[0]
-                  ) {
-                    coords = f.geometry.coordinates[0][0][0] as [number, number]
+              const queryFeatures = () => {
+                const resultMap = new Map<string, DemandUnitProperties>()
+
+                // Query source features to get properties
+                const features = map.querySourceFeatures("composite", {
+                  sourceLayer: "demand_units",
+                })
+
+                features.forEach((f) => {
+                  const duId = f.properties?.DU_ID
+                  if (duId) {
+                    // Get centroid for coordinates (simplified - just use first point)
+                    let coords: [number, number] = [0, 0]
+                    if (
+                      f.geometry.type === "Polygon" &&
+                      f.geometry.coordinates?.[0]?.[0]
+                    ) {
+                      coords = f.geometry.coordinates[0][0] as [number, number]
+                    } else if (
+                      f.geometry.type === "MultiPolygon" &&
+                      f.geometry.coordinates?.[0]?.[0]?.[0]
+                    ) {
+                      coords = f.geometry.coordinates[0][0][0] as [
+                        number,
+                        number,
+                      ]
+                    }
+
+                    // Only use names if they're real (not empty or whitespace)
+                    const subName = f.properties?.Sub_Name?.trim()
+                    const urbName = f.properties?.Urb_Name?.trim()
+                    const modName = f.properties?.Mod_Name?.trim()
+
+                    resultMap.set(duId, {
+                      DU_ID: duId,
+                      Urb_Name: urbName && urbName !== "" ? urbName : null,
+                      Mod_Name: modName && modName !== "" ? modName : null,
+                      Sub_Name: subName && subName !== "" ? subName : null,
+                      Type: f.properties?.Type || null,
+                      Comments: f.properties?.Comments || null,
+                      Class: f.properties?.Class || "Unknown",
+                      longitude: coords[0],
+                      latitude: coords[1],
+                    })
                   }
+                })
 
-                  // Only use names if they're real (not empty or whitespace)
-                  const subName = f.properties?.Sub_Name?.trim()
-                  const urbName = f.properties?.Urb_Name?.trim()
-                  const modName = f.properties?.Mod_Name?.trim()
-                  
-                  resultMap.set(duId, {
-                    DU_ID: duId,
-                    Urb_Name: urbName && urbName !== '' ? urbName : null,
-                    Mod_Name: modName && modName !== '' ? modName : null,
-                    Sub_Name: subName && subName !== '' ? subName : null,
-                    Type: f.properties?.Type || null,
-                    Comments: f.properties?.Comments || null,
-                    Class: f.properties?.Class || "Unknown",
-                    longitude: coords[0],
-                    latitude: coords[1],
-                  })
-                }
-              })
-              
-              return resultMap
-            }
-            
-            // Query immediately - don't wait for tiles, they may never load for small features
-            // The source metadata loads quickly, but individual tile data depends on zoom/viewport
-            resolve(queryFeatures())
-          })
-        })
+                return resultMap
+              }
+
+              // Query immediately - don't wait for tiles, they may never load for small features
+              // The source metadata loads quickly, but individual tile data depends on zoom/viewport
+              resolve(queryFeatures())
+            })
+          },
+        )
 
         if (!cancelled) {
           setFeaturePropsMap(propsMap)
@@ -273,18 +299,22 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
     <Box
       sx={{
         // Match the styling of other panels (StrategyRow, KeyOperationsPanel, KeyOutcomesPanel)
-        backgroundColor: isInline ? theme.palette.grey[50] : "rgba(255, 255, 255, 0.95)",
+        backgroundColor: isInline
+          ? theme.palette.grey[50]
+          : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.standard : 0,
         padding: isInline ? { xs: 1.5, sm: 2 } : { xs: 2, sm: 2.5, md: 3 },
         boxShadow: isInline ? "none" : theme.shadows[2],
         width: "100%",
-        maxWidth: isInline ? "100%" : {
-          xs: "100%",
-          sm: "360px",
-          md: "420px",
-          lg: "460px",
-          xl: "500px",
-        },
+        maxWidth: isInline
+          ? "100%"
+          : {
+              xs: "100%",
+              sm: "360px",
+              md: "420px",
+              lg: "460px",
+              xl: "500px",
+            },
         boxSizing: "border-box",
         pointerEvents: "auto",
       }}
@@ -315,9 +345,9 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
             }}
           >
             Overall, this scenario favors community and agricultural water
-            deliveries, though not every community is served equally. Freshwater for
-            Delta exports is preserved, though Delta estuary ecology is at risk.
-            Winter-run Chinook Salmon are red-lining.
+            deliveries, though not every community is served equally. Freshwater
+            for Delta exports is preserved, though Delta estuary ecology is at
+            risk. Winter-run Chinook Salmon are red-lining.
           </Typography>
         </>
       )}
@@ -358,7 +388,9 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
           >
             <Box
               sx={{
-                borderTop: isInline ? "none" : `1px solid ${theme.palette.grey[200]}`,
+                borderTop: isInline
+                  ? "none"
+                  : `1px solid ${theme.palette.grey[200]}`,
                 pt: isInline ? 0 : 2,
               }}
             >
@@ -368,7 +400,9 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                 sx={{
                   color: theme.palette.blue.medium,
                   fontWeight: 600,
-                  fontSize: isInline ? theme.typography.body2.fontSize : "0.7rem",
+                  fontSize: isInline
+                    ? theme.typography.body2.fontSize
+                    : "0.7rem",
                   letterSpacing: "0.5px",
                   display: "block",
                   mb: isInline ? 0.5 : 1,
@@ -401,10 +435,19 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                   }}
                 >
                   {/* Tier breakdown chips */}
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 0.5,
+                      alignItems: "center",
+                    }}
+                  >
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
-                        const tierNum = parseInt(tier.replace("tier", "")) as TierLevel
+                        const tierNum = parseInt(
+                          tier.replace("tier", ""),
+                        ) as TierLevel
                         return (
                           <Chip
                             key={tier}
@@ -428,7 +471,14 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
 
                   {/* Critical locations inline */}
                   {outcomeSummary.criticalLocations.length > 0 && (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        alignItems: "center",
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         component="span"
@@ -441,28 +491,30 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                       >
                         Critical:
                       </Typography>
-                      {outcomeSummary.criticalLocations.slice(0, 6).map((loc) => (
-                        <Chip
-                          key={loc.duId}
-                          size="small"
-                          label={loc.primaryName}
-                          onClick={() => handleLocationClick(loc)}
-                          sx={{
-                            cursor: "pointer",
-                            backgroundColor: "transparent",
-                            color: theme.palette.grey[700],
-                            border: `1px solid ${theme.palette.grey[300]}`,
-                            fontSize: "0.65rem",
-                            height: 22,
-                            "&:hover": {
-                              backgroundColor: theme.palette.blue.bright,
-                              color: theme.palette.common.white,
-                              borderColor: theme.palette.blue.bright,
-                            },
-                            "& .MuiChip-label": { px: 0.75 },
-                          }}
-                        />
-                      ))}
+                      {outcomeSummary.criticalLocations
+                        .slice(0, 6)
+                        .map((loc) => (
+                          <Chip
+                            key={loc.duId}
+                            size="small"
+                            label={loc.primaryName}
+                            onClick={() => handleLocationClick(loc)}
+                            sx={{
+                              cursor: "pointer",
+                              backgroundColor: "transparent",
+                              color: theme.palette.grey[700],
+                              border: `1px solid ${theme.palette.grey[300]}`,
+                              fontSize: "0.65rem",
+                              height: 22,
+                              "&:hover": {
+                                backgroundColor: theme.palette.blue.bright,
+                                color: theme.palette.common.white,
+                                borderColor: theme.palette.blue.bright,
+                              },
+                              "& .MuiChip-label": { px: 0.75 },
+                            }}
+                          />
+                        ))}
                       {outcomeSummary.criticalLocations.length > 6 && (
                         <Typography
                           variant="body2"
@@ -479,7 +531,14 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
 
                   {/* At-risk locations inline */}
                   {outcomeSummary.atRiskLocations.length > 0 && (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        alignItems: "center",
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         component="span"
@@ -533,7 +592,12 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                 <>
                   {/* Tier breakdown chips */}
                   <Box
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.5 }}
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 0.5,
+                      mb: 1.5,
+                    }}
                   >
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
@@ -579,30 +643,32 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                         Critical locations:
                       </Typography>
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {outcomeSummary.criticalLocations.slice(0, 8).map((loc) => (
-                          <Chip
-                            key={loc.duId}
-                            size="small"
-                            label={loc.primaryName}
-                            onClick={() => handleLocationClick(loc)}
-                            sx={{
-                              cursor: "pointer",
-                              backgroundColor: "transparent",
-                              color: theme.palette.grey[700],
-                              border: `1px solid ${theme.palette.grey[300]}`,
-                              fontSize: theme.typography.nav.fontSize,
-                              height: 24,
-                              "&:hover": {
-                                backgroundColor: theme.palette.blue.bright,
-                                color: theme.palette.common.white,
-                                borderColor: theme.palette.blue.bright,
-                              },
-                              "& .MuiChip-label": {
-                                px: 1,
-                              },
-                            }}
-                          />
-                        ))}
+                        {outcomeSummary.criticalLocations
+                          .slice(0, 8)
+                          .map((loc) => (
+                            <Chip
+                              key={loc.duId}
+                              size="small"
+                              label={loc.primaryName}
+                              onClick={() => handleLocationClick(loc)}
+                              sx={{
+                                cursor: "pointer",
+                                backgroundColor: "transparent",
+                                color: theme.palette.grey[700],
+                                border: `1px solid ${theme.palette.grey[300]}`,
+                                fontSize: theme.typography.nav.fontSize,
+                                height: 24,
+                                "&:hover": {
+                                  backgroundColor: theme.palette.blue.bright,
+                                  color: theme.palette.common.white,
+                                  borderColor: theme.palette.blue.bright,
+                                },
+                                "& .MuiChip-label": {
+                                  px: 1,
+                                },
+                              }}
+                            />
+                          ))}
                         {outcomeSummary.criticalLocations.length > 8 && (
                           <Typography
                             variant="body2"
@@ -632,33 +698,36 @@ export function SummaryPanel({ strategy = "current-ops", outcome: outcomeProp, v
                           mb: 0.5,
                         }}
                       >
-                        At-risk locations ({outcomeSummary.atRiskLocations.length}):
+                        At-risk locations (
+                        {outcomeSummary.atRiskLocations.length}):
                       </Typography>
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {outcomeSummary.atRiskLocations.slice(0, 5).map((loc) => (
-                          <Chip
-                            key={loc.duId}
-                            size="small"
-                            label={loc.primaryName}
-                            onClick={() => handleLocationClick(loc)}
-                            sx={{
-                              cursor: "pointer",
-                              backgroundColor: "transparent",
-                              color: theme.palette.grey[600],
-                              border: `1px solid ${theme.palette.grey[300]}`,
-                              fontSize: "0.6rem",
-                              height: 18,
-                              "&:hover": {
-                                backgroundColor: theme.palette.blue.bright,
-                                color: theme.palette.common.white,
-                                borderColor: theme.palette.blue.bright,
-                              },
-                              "& .MuiChip-label": {
-                                px: 0.75,
-                              },
-                            }}
-                          />
-                        ))}
+                        {outcomeSummary.atRiskLocations
+                          .slice(0, 5)
+                          .map((loc) => (
+                            <Chip
+                              key={loc.duId}
+                              size="small"
+                              label={loc.primaryName}
+                              onClick={() => handleLocationClick(loc)}
+                              sx={{
+                                cursor: "pointer",
+                                backgroundColor: "transparent",
+                                color: theme.palette.grey[600],
+                                border: `1px solid ${theme.palette.grey[300]}`,
+                                fontSize: "0.6rem",
+                                height: 18,
+                                "&:hover": {
+                                  backgroundColor: theme.palette.blue.bright,
+                                  color: theme.palette.common.white,
+                                  borderColor: theme.palette.blue.bright,
+                                },
+                                "& .MuiChip-label": {
+                                  px: 0.75,
+                                },
+                              }}
+                            />
+                          ))}
                         {outcomeSummary.atRiskLocations.length > 5 && (
                           <Typography
                             variant="caption"

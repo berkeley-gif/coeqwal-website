@@ -20,8 +20,12 @@ export function ComparisonHeader({
   onScenarioClick,
 }: ComparisonHeaderProps) {
   const theme = useTheme()
-  const { data: comparisonData, lineColors, isLoading, hasData } =
-    useComparisonData()
+  const {
+    data: comparisonData,
+    lineColors,
+    isLoading,
+    hasData,
+  } = useComparisonData()
 
   if (isLoading || !hasData) {
     return null
@@ -57,10 +61,7 @@ export function ComparisonHeader({
         >
           Scenario Comparison
         </Typography>
-        <Typography
-          variant="caption"
-          sx={{ color: theme.palette.grey[600] }}
-        >
+        <Typography variant="caption" sx={{ color: theme.palette.grey[600] }}>
           Use draggable arrows on axes to filter scenarios
         </Typography>
       </Box>

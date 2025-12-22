@@ -62,7 +62,14 @@ export default function SearchBar({
         />
       </Box>
       {rightContent && (
-        <Box sx={{ display: "flex", alignItems: "flex-start", flexShrink: 0, gap: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            flexShrink: 0,
+            gap: 3,
+          }}
+        >
           {rightContent}
         </Box>
       )}

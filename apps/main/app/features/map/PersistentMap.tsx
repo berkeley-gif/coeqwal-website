@@ -21,7 +21,13 @@
  */
 
 import { useEffect, useRef, useState, useMemo } from "react"
-import { Map, NavigationControl, Marker, useMap, GeolocateControl } from "@repo/map"
+import {
+  Map,
+  NavigationControl,
+  Marker,
+  useMap,
+  GeolocateControl,
+} from "@repo/map"
 import { Box, useTheme } from "@repo/ui/mui"
 
 // Map layers
@@ -30,7 +36,7 @@ import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
 
 // Map components
-import TierMarkers from "./components/TierMarkers" 
+import TierMarkers from "./components/TierMarkers"
 import { ReservoirLabels } from "./components/ReservoirLabels"
 import { HotspotMarkers } from "./components/HotspotMarkers"
 
@@ -118,7 +124,8 @@ const getContainerStyles = (
         // Apply scroll offset to "release" the map from being fixed
         // This makes the map scroll up with content when offset > 0
         // Short transition smooths the initial "release" moment so it's not jarring
-        transform: scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
+        transform:
+          scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
         transition: "opacity 0.3s ease-out, transform 0.15s ease-out",
       }
     case "explore":
@@ -170,19 +177,16 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Single mode-aware hook for polygon tier layer (CWS, AG_REV, etc.)
   // The hook derives which outcome to show based on mapMode
-  const { 
-    hoveredFeature, 
-    pinnedFeature, 
-    clearPinned,
-    tierLookup,
-    layerType,
-  } = useOutcomeMapLayer({
-    learnOutcome: learnUsesMapboxLayers ? selectedOutcome : null,
-    learnStrategy: "current-ops",
-    exploreOutcome: exploreUsesMapboxLayers ? exploreTierSelection?.outcome ?? null : null,
-    exploreStrategy: exploreTierSelection?.strategy ?? "current-ops",
-    mapMode,
-  })
+  const { hoveredFeature, pinnedFeature, clearPinned, tierLookup, layerType } =
+    useOutcomeMapLayer({
+      learnOutcome: learnUsesMapboxLayers ? selectedOutcome : null,
+      learnStrategy: "current-ops",
+      exploreOutcome: exploreUsesMapboxLayers
+        ? (exploreTierSelection?.outcome ?? null)
+        : null,
+      exploreStrategy: exploreTierSelection?.strategy ?? "current-ops",
+      mapMode,
+    })
 
   // Determine active tooltip (pinned takes precedence over hovered)
   const activeTooltip = pinnedFeature || hoveredFeature
@@ -209,18 +213,27 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     async function fetchData() {
       try {
         setTierDataLoading(true)
-        const data = await fetchTierLocationData("current-ops", selectedOutcome!)
+        const data = await fetchTierLocationData(
+          "current-ops",
+          selectedOutcome!,
+        )
 
         if (!cancelled) {
           setTierData(data)
 
           // Zoom to show all markers if there are features
           if (data.features.length > 0 && map.mapRef?.current) {
-            let minLng = Infinity, minLat = Infinity, maxLng = -Infinity, maxLat = -Infinity
+            let minLng = Infinity,
+              minLat = Infinity,
+              maxLng = -Infinity,
+              maxLat = -Infinity
 
             data.features.forEach((feature) => {
               if (feature.geometry.type === "Point") {
-                const [lng, lat] = feature.geometry.coordinates as [number, number]
+                const [lng, lat] = feature.geometry.coordinates as [
+                  number,
+                  number,
+                ]
                 minLng = Math.min(minLng, lng)
                 minLat = Math.min(minLat, lat)
                 maxLng = Math.max(maxLng, lng)
@@ -230,8 +243,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
             if (minLng !== Infinity) {
               map.mapRef.current.fitBounds(
-                [[minLng, minLat], [maxLng, maxLat]],
-                { padding: 100, maxZoom: 9, duration: 1000 }
+                [
+                  [minLng, minLat],
+                  [maxLng, maxLat],
+                ],
+                { padding: 100, maxZoom: 9, duration: 1000 },
               )
             }
           }
@@ -249,20 +265,25 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     }
 
     fetchData()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [selectedOutcome, learnUsesMapboxLayers, map, mapMode])
 
   // Apply Mapbox layer states based on activeSection (Learn mode only)
   useMapLayers()
 
   // Mapbox layer IDs that we need to preload
-  const MAPBOX_LAYER_IDS = useMemo(() => [
-    "california-label",
-    "central-valley-polygon",
-    "central-valley-polygon-halo",
-    "central-valley-label",
-    "inflow-watersheds",
-  ], [])
+  const MAPBOX_LAYER_IDS = useMemo(
+    () => [
+      "california-label",
+      "central-valley-polygon",
+      "central-valley-polygon-halo",
+      "central-valley-label",
+      "inflow-watersheds",
+    ],
+    [],
+  )
 
   // Initialize map and notify when ready
   useEffect(() => {
@@ -495,134 +516,145 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             : undefined,
         }}
       >
-      <Map
-        mapboxToken={token}
-        mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
-        initialViewState={CALIFORNIA_VIEW}
-        minZoom={4}
-        maxZoom={18}
-        maxBounds={MAP_BOUNDS}
-        style={{ width: "100%", height: "100%" }}
-        scrollZoom={false}
-        touchZoom={true}
-        touchRotate={false}
-        dragPan={true}
-        dragRotate={false}
-        doubleClickZoom={true}
-        keyboard={true}
-        interactive={true}  // Always interactive
-        projection={{ name: "globe" }}
-      >
-        <NavigationControl position="bottom-left" />
-        {isExploreMode && <GeolocateControl position="bottom-left" />}
+        <Map
+          mapboxToken={token}
+          mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
+          initialViewState={CALIFORNIA_VIEW}
+          minZoom={4}
+          maxZoom={18}
+          maxBounds={MAP_BOUNDS}
+          style={{ width: "100%", height: "100%" }}
+          scrollZoom={false}
+          touchZoom={true}
+          touchRotate={false}
+          dragPan={true}
+          dragRotate={false}
+          doubleClickZoom={true}
+          keyboard={true}
+          interactive={true} // Always interactive
+          projection={{ name: "globe" }}
+        >
+          <NavigationControl position="bottom-left" />
+          {isExploreMode && <GeolocateControl position="bottom-left" />}
 
-        {/* Learn mode layers */}
-        {isLearnMode && (
-          <>
-            <BasinsLayer
-              visible={showBasins}
-              riverBasinLabelsOpacity={
-                showRivers ? Math.max(0, 1 - riversProgress / 0.3) : 1
-              }
-            />
-            <RiversLayer visible={showRivers} progress={riversProgress} />
-            <BasinInflowArrows visible={showArrows} opacity={arrowsOpacity} />
+          {/* Learn mode layers */}
+          {isLearnMode && (
+            <>
+              <BasinsLayer
+                visible={showBasins}
+                riverBasinLabelsOpacity={
+                  showRivers ? Math.max(0, 1 - riversProgress / 0.3) : 1
+                }
+              />
+              <RiversLayer visible={showRivers} progress={riversProgress} />
+              <BasinInflowArrows visible={showArrows} opacity={arrowsOpacity} />
 
-            {/* Geocoder marker */}
-            {geocoderMarker && (
-              <Marker
-                longitude={geocoderMarker[0]}
-                latitude={geocoderMarker[1]}
-                anchor="center"
-              >
-                <Box
-                  sx={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(255, 255, 255, 0.5)",
-                    border: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                    fontSize: "28px",
-                    lineHeight: 1,
-                  }}
+              {/* Geocoder marker */}
+              {geocoderMarker && (
+                <Marker
+                  longitude={geocoderMarker[0]}
+                  latitude={geocoderMarker[1]}
+                  anchor="center"
                 >
-                  📍
-                </Box>
-              </Marker>
-            )}
-
-            {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
-            {tierData && !learnUsesMapboxLayers && <TierMarkers data={tierData} />}
-
-            {/* Reservoir labels (shown above other layers) */}
-            {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
-              <ReservoirLabels tierLookup={tierLookup} />
-            )}
-
-            {/* Hotspot markers for tier 4 locations */}
-            <HotspotMarkers
-              outcome={selectedOutcome}
-              strategy="current-ops"
-              visible={!!selectedOutcome && (selectedOutcome === "Community deliveries" || selectedOutcome === "Salmon abundance")}
-            />
-
-            {/* Tooltip for Learn mode polygon features (hover or pinned) */}
-            {activeTooltip && (
-              <PolygonLayerTooltip
-                feature={activeTooltip}
-                isPinned={isTooltipPinned}
-                onClose={clearPinned}
-              />
-            )}
-          </>
-        )}
-
-        {/* Explore mode layers */}
-        {isExploreMode && (
-          <>
-            {/* Rivers layer for Explore mode - needed for Salmon abundance visualization */}
-            <RiversLayer 
-              visible={exploreTierSelection?.outcome === "Salmon abundance"} 
-              progress={1} 
-            />
-
-            {/* Only show TierMarkers when NOT using polygon visualization */}
-            {exploreTierData && exploreTierData.features.length > 0 && !exploreUsesMapboxLayers && (
-              <TierMarkers data={exploreTierData} />
-            )}
-
-            {/* Reservoir labels for Explore mode (shown above other layers) */}
-            {layerType === "reservoir" && Object.keys(tierLookup).length > 0 && (
-              <ReservoirLabels tierLookup={tierLookup} />
-            )}
-
-            {/* Hotspot markers for tier 4 locations (Community deliveries and Salmon abundance) */}
-            <HotspotMarkers
-              outcome={exploreTierSelection?.outcome ?? null}
-              strategy={exploreTierSelection?.strategy ?? "current-ops"}
-              visible={!!exploreTierSelection?.outcome && (
-                exploreTierSelection.outcome === "Community deliveries" || 
-                exploreTierSelection.outcome === "Salmon abundance"
+                  <Box
+                    sx={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.5)",
+                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                      fontSize: "28px",
+                      lineHeight: 1,
+                    }}
+                  >
+                    📍
+                  </Box>
+                </Marker>
               )}
-            />
 
-            {/* Tooltip for Explore mode polygon features (hover or pinned) */}
-            {activeTooltip && (
-              <PolygonLayerTooltip
-                feature={activeTooltip}
-                isPinned={isTooltipPinned}
-                onClose={clearPinned}
+              {/* Tier markers for Learn mode outcomes (non-polygon outcomes only) */}
+              {tierData && !learnUsesMapboxLayers && (
+                <TierMarkers data={tierData} />
+              )}
+
+              {/* Reservoir labels (shown above other layers) */}
+              {layerType === "reservoir" &&
+                Object.keys(tierLookup).length > 0 && (
+                  <ReservoirLabels tierLookup={tierLookup} />
+                )}
+
+              {/* Hotspot markers for tier 4 locations */}
+              <HotspotMarkers
+                outcome={selectedOutcome}
+                strategy="current-ops"
+                visible={
+                  !!selectedOutcome &&
+                  (selectedOutcome === "Community deliveries" ||
+                    selectedOutcome === "Salmon abundance")
+                }
               />
-            )}
-          </>
-        )}
-      </Map>
-    </Box>
+
+              {/* Tooltip for Learn mode polygon features (hover or pinned) */}
+              {activeTooltip && (
+                <PolygonLayerTooltip
+                  feature={activeTooltip}
+                  isPinned={isTooltipPinned}
+                  onClose={clearPinned}
+                />
+              )}
+            </>
+          )}
+
+          {/* Explore mode layers */}
+          {isExploreMode && (
+            <>
+              {/* Rivers layer for Explore mode - needed for Salmon abundance visualization */}
+              <RiversLayer
+                visible={exploreTierSelection?.outcome === "Salmon abundance"}
+                progress={1}
+              />
+
+              {/* Only show TierMarkers when NOT using polygon visualization */}
+              {exploreTierData &&
+                exploreTierData.features.length > 0 &&
+                !exploreUsesMapboxLayers && (
+                  <TierMarkers data={exploreTierData} />
+                )}
+
+              {/* Reservoir labels for Explore mode (shown above other layers) */}
+              {layerType === "reservoir" &&
+                Object.keys(tierLookup).length > 0 && (
+                  <ReservoirLabels tierLookup={tierLookup} />
+                )}
+
+              {/* Hotspot markers for tier 4 locations (Community deliveries and Salmon abundance) */}
+              <HotspotMarkers
+                outcome={exploreTierSelection?.outcome ?? null}
+                strategy={exploreTierSelection?.strategy ?? "current-ops"}
+                visible={
+                  !!exploreTierSelection?.outcome &&
+                  (exploreTierSelection.outcome === "Community deliveries" ||
+                    exploreTierSelection.outcome === "Salmon abundance")
+                }
+              />
+
+              {/* Tooltip for Explore mode polygon features (hover or pinned) */}
+              {activeTooltip && (
+                <PolygonLayerTooltip
+                  feature={activeTooltip}
+                  isPinned={isTooltipPinned}
+                  onClose={clearPinned}
+                />
+              )}
+            </>
+          )}
+        </Map>
+      </Box>
     </>
   )
 }

@@ -2,7 +2,7 @@
 
 /**
  * ReservoirLabels component
- * 
+ *
  * Renders tier-colored labels for reservoirs on the map.
  * Uses React Markers.
  */
@@ -28,10 +28,10 @@ interface ReservoirLabelsProps {
 const RESERVOIR_CENTROIDS: Record<string, [number, number]> = {
   "Shasta Lake": [-122.42, 40.72],
   "Lake Oroville": [-121.48, 39.54],
-  "Folsom Lake": [-121.10, 38.72],
+  "Folsom Lake": [-121.1, 38.72],
   "New Melones Lake": [-120.53, 37.95],
-  "Millerton Lake": [-119.70, 37.00],
-  "San Luis Reservoir": [-121.10, 37.06],
+  "Millerton Lake": [-119.7, 37.0],
+  "San Luis Reservoir": [-121.1, 37.06],
   "Trinity Lake": [-122.76, 40.95],
 }
 
@@ -41,11 +41,16 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
   // Get tier color
   const getTierColor = (tier: number): string => {
     switch (tier) {
-      case 1: return theme.palette.tiers.tier1
-      case 2: return theme.palette.tiers.tier2
-      case 3: return theme.palette.tiers.tier3
-      case 4: return theme.palette.tiers.tier4
-      default: return theme.palette.grey[500]
+      case 1:
+        return theme.palette.tiers.tier1
+      case 2:
+        return theme.palette.tiers.tier2
+      case 3:
+        return theme.palette.tiers.tier3
+      case 4:
+        return theme.palette.tiers.tier4
+      default:
+        return theme.palette.grey[500]
     }
   }
 
@@ -60,11 +65,11 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
 
     const centroid = RESERVOIR_CENTROIDS[name]
     if (centroid) {
-      reservoirLabels.push({ 
-        name, 
-        tier, 
-        longitude: centroid[0], 
-        latitude: centroid[1] 
+      reservoirLabels.push({
+        name,
+        tier,
+        longitude: centroid[0],
+        latitude: centroid[1],
       })
     }
   })

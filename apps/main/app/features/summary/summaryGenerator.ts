@@ -1,7 +1,7 @@
 /**
  * Smart summary generator
  * Analyzes tier data and generates plain language summaries
- * 
+ *
  * Experimental, demo version
  */
 
@@ -49,21 +49,21 @@ function getDisplayName(
     const urbName = props.Urb_Name?.trim()
     const modName = props.Mod_Name?.trim()
 
-    if (subName && subName !== '') {
+    if (subName && subName !== "") {
       return {
         primary: subName,
         secondary: urbName || modName || null,
       }
     }
 
-    if (urbName && urbName !== '') {
+    if (urbName && urbName !== "") {
       return {
         primary: urbName,
         secondary: modName || null,
       }
     }
 
-    if (modName && modName !== '') {
+    if (modName && modName !== "") {
       return {
         primary: modName,
         secondary: null,
@@ -77,7 +77,7 @@ function getDisplayName(
     const subName = staticInfo.subName
     const urbName = staticInfo.urbName
     const modName = staticInfo.modName
-    
+
     if (subName) {
       return { primary: subName, secondary: urbName || modName || null }
     }
