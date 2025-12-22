@@ -27,7 +27,7 @@ import {
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
-import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
+import { CURRENT_OPERATIONS_ICONS } from "../../../content/scenarios"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import TogglePair from "./TogglePair"
 import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"

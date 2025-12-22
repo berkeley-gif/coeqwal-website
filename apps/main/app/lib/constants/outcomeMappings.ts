@@ -1,5 +1,5 @@
 /**
- * Source of truth for all tier and outcome mappings
+ * Naming translations for tier and outcome mappings
  *
  * This file consolidates all mappings between:
  * - API short codes (e.g., "DELTA_ECO")
@@ -7,14 +7,14 @@
  * - Metric IDs (e.g., "env-delta-ecology-tier")
  * - Strategy/scenario mappings
  *
- * TODO: Improve API name synchronization (between frontend and backend)
+ * TODO: Improve API name synchronization between frontend and backend
  * The current approach requires manual updates when API names change.
- * Suggested improvements:
+ * Todo improvements:
  * 1. Fetch tier names directly from /api/tiers/list at build time
  * 2. Generate TypeScript types from API response
  * 3. Use API names as source of truth, with UI_DISPLAY_NAME_OVERRIDES for customization only
- * 4. Add validation tests that compare our constants with live API responses
- * 5. Consider creating a shared schema between backend and frontend
+ * 4. Add validation tests to compare constants with live API responses
+ * 5. Consider creating a more formal shared schema between backend and frontend
  */
 
 // Re-export the canonical list from useTierData for convenience

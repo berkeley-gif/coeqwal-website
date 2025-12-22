@@ -24,7 +24,7 @@ export default function DownloadButton({
   sx = {},
   ...props
 }: DownloadButtonProps) {
-  // Use the provided downloadUrl or fall back to the old Lambda function
+  // Use the provided downloadUrl or fall back to the direct Lambda function
   const finalUrl =
     downloadUrl ||
     `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/coeqwalPresignDownload?id=${fileId}`
