@@ -126,7 +126,7 @@ export default function UnifiedExploreView({
                 ? theme.palette.grey[100]
                 : theme.palette.common.white,
             position: "relative",
-            zIndex: theme.zIndex.panels,
+            zIndex: theme.zIndex.pageContent,
             overflow: "hidden",
             pointerEvents: "auto", // Keep list interactive even when parent is "none"
           }}

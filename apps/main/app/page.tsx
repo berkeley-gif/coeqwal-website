@@ -35,11 +35,11 @@ export default function Home() {
               position: "relative",
               overflowX: "clip",
               overflowY: "visible",
-              // Allow pointer events to pass through to the persistent map (z-index: 1)
+              // Allow pointer events to pass through to the persistent map
               // Child components re-enable pointer events where needed
               pointerEvents: "none",
               // Above map level so content appears on top
-              zIndex: 10,
+              zIndex: (theme) => theme.zIndex.pageContent,
             }}
           >
             <IntroSection />

@@ -39,7 +39,7 @@ export default function SmoothTabs() {
       style={{
         position: "sticky",
         top: HEADER_SHRUNK_H,
-        zIndex: 1000,
+        zIndex: theme.zIndex.uiOverlay,
       }}
     >
       <div

@@ -71,7 +71,7 @@ export function NavDropdown({
         open={isOpen}
         onClose={handleClose}
         sx={{
-          zIndex: (theme) => theme.zIndex.appBar + 100, // Hack to ensure it appears above header
+          zIndex: (theme) => theme.zIndex.dropdown,
           "& .MuiPaper-root": {
             backgroundColor: (theme) => theme.palette.common.white,
             borderRadius: (theme) => theme.borderRadius.card,

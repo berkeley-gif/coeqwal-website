@@ -166,7 +166,7 @@ export default function LearnPanel() {
           padding: "60px",
           paddingBottom: "100px",
           position: "relative",
-          zIndex: theme.zIndex.panels,
+          zIndex: theme.zIndex.pageContent,
           pointerEvents: "auto",
         }}
       >

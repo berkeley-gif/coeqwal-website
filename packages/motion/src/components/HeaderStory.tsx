@@ -96,7 +96,7 @@ export function HeaderStory({
       transition={{ duration: 0.3 }}
       position="fixed"
       sx={{
-        zIndex: theme.zIndex.appBar,
+        zIndex: theme.zIndex.uiOverlay,
         backgroundColor: theme.background.transparent,
         borderBottom: theme.border.standard,
         color: theme.palette.text.primary,

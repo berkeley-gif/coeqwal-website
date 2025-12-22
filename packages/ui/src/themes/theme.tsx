@@ -18,7 +18,8 @@ import { createTheme, Theme } from "@mui/material/styles"
  * ===============================================================================
  *
  * To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
- * Each preset defines: text (body), display (headlines), and cssImport (font loading)
+ * Each preset defines: text (body), display (headlines), and cssImport (font loading).
+ * Of course you can make more presets.
  *
  * Available presets: "neueHaas" | "roboto" | "inter" | "system"
  */
@@ -228,36 +229,19 @@ export const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers
-    basement: -1, // Map used as background (storyline apps)
-    persistentMap: 1, // Persistent map in main app (positive for pointer events)
-    sectionBackground: 0, // Section background elements
+    basement: -1, // Storyline apps map background
+    persistentMap: 1, // Main app's persistent map
 
-    // Content layers (0-99)
-    content: 20, // Default content layer
-    panels: 15, // Main content panels
+    // Content layers
+    pageContent: 10, // Page-level content
+    mapControls: 20, // Map overlay stuff
 
-    // Intro section micro-layers (1-9)
-    introBackgroundImages: 15, // Background decorative images
-    introText: 20, // Text content
-    introForegroundImages: 30, // Foreground decorative elements
-    introBubbles: 40, // Interactive bubble elements
-
-    // Interactive layers (100-999)
-    mapControls: 100, // Map overlay controls and panels
-    floatingElements: 110, // Floating UI elements
-
-    // Navigation layers (1200-1499)
-    drawerBackdrop: 1199, // Drawer backdrop/overlay
-    drawer: 1200, // Side drawer/navigation
-    overlay: 1250, // General overlay elements
-    modal: 1300, // Modal dialogs
-    appBar: 1400, // Top navigation bar
-
-    // System layers (1500+)
-    tooltip: 1500, // Tooltips and help text
-    notification: 1600, // Toast notifications
-    loading: 1700, // Loading overlays
-    debug: 9999, // Debug overlays (development)
+    // UI layers
+    floating: 70, // Floating elements (glossary)
+    uiOverlay: 80, // Header, sticky tabs
+    dropdown: 90, // Dropdown menus (above header)
+    tooltip: 100, // Tooltips and help text
+    modal: 110, // Modal dialogs (reserved)
   },
 
   // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
@@ -268,7 +252,7 @@ export const themeValues = {
     padding: "16px", // theme.borderRadius.card
     minWidth: "280px",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    zIndex: 1500, // theme.zIndex.tooltip
+    zIndex: 100, // theme.zIndex.tooltip
     position: {
       top: "16px", // theme.borderRadius.card
       centerX: true, // Horizontal centering
@@ -1073,7 +1057,7 @@ const theme = createTheme({
             width: theme.layout.drawer.width,
 
             "&.MiniDrawer-docked": {
-              zIndex: theme.zIndex.drawer,
+              zIndex: theme.zIndex.floating,
 
               "& .MuiDrawer-paper.MiniDrawer-paper": {
                 backgroundColor: theme.palette.common.white,
@@ -1496,20 +1480,13 @@ declare module "@mui/material/styles" {
   interface ZIndex {
     basement: number
     persistentMap: number
-    sectionBackground: number
-    content: number
-    panels: number
-    introBackgroundImages: number
-    introText: number
-    introForegroundImages: number
-    introBubbles: number
+    pageContent: number
     mapControls: number
-    floatingElements: number
-    drawerBackdrop: number
-    overlay: number
-    notification: number
-    loading: number
-    debug: number
+    floating: number
+    uiOverlay: number
+    dropdown: number
+    tooltip: number
+    modal: number
   }
 
   // Theme interface - types derived from themeValues

@@ -104,7 +104,7 @@ export function FloatingGlossaryButton({
         cursor: isDragging ? "grabbing" : "grab",
         boxShadow: isOpen ? theme.boxShadows.ring : theme.boxShadows.toast,
         transition: isDragging ? "none" : "all 0.3s ease",
-        zIndex: theme.zIndex.drawer, // Above panel to remain clickable
+        zIndex: theme.zIndex.floating, // Above panel to remain clickable
         userSelect: "none",
         "&:hover": {
           transform: isOpen || isDragging ? "none" : "scale(1.1)",

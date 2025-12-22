@@ -25,11 +25,6 @@ import { isSingleValueTier, type StrategyGridProps } from "./StrategyGrid/types"
 import { TierTooltipPortal } from "./StrategyGrid/TierTooltipPortal"
 import { GridControls } from "./StrategyGrid/GridControls"
 
-// Map outcome keys to display labels (no longer needed - using API names directly)
-const getOutcomeDisplayLabel = (name: string): string => {
-  return name
-}
-
 // Strategy Grid component
 const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForStrategy,
@@ -224,7 +219,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         storage
                       </>
                     ) : (
-                      getOutcomeDisplayLabel(name)
+                      name
                     )}
                   </Typography>
 

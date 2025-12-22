@@ -167,7 +167,7 @@ export default function ScrollTooltip({
           position === "right" || position === "left"
             ? "translateY(-50%)"
             : "translateX(-50%)",
-        zIndex: 9999,
+        zIndex: theme.zIndex.tooltip,
       }}
     >
       <Box

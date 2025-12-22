@@ -92,7 +92,7 @@ export default function ScenarioExplorerNew() {
           sx={{
             position: "sticky",
             top: 0,
-            zIndex: 10,
+            zIndex: theme.zIndex.pageContent,
             flexShrink: 0,
             pointerEvents: "auto", // Keep header interactive even when parent is "none"
           }}
