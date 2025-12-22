@@ -3,6 +3,30 @@
 // ============================================================================
 // Strategies are grouped by theme for easier understanding
 
+// Icons for current operations strategy display
+export const CURRENT_OPERATIONS_ICONS = [
+  {
+    path: "/images/icons/current_ops.svg",
+    alt: "Current operations",
+    description:
+      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
+    label: "Current operations",
+  },
+  {
+    path: "/images/icons/land_use.svg",
+    alt: "Current land use considerations",
+    description: "Current land use considerations",
+    label: "Updated agricultural land use (2020)",
+  },
+  {
+    path: "/images/icons/tucp.svg",
+    alt: "TUCP considerations",
+    description:
+      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+    label: "TUCP's\nallowed",
+  },
+]
+
 // Strategy options with descriptions
 export const strategies = [
   // -------------------------------------------------------------------------

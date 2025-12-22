@@ -186,7 +186,6 @@ export const themeValues = {
       tier2: "#60aacb", // Blue, tier 2
       tier3: "#FFB347", // Orange, tier 3
       tier4: "#CD5C5C", // Red, tier 4
-      tier5: "#8B4513", // Brown, tier 5
     },
 
     // Tab panel colors
@@ -597,7 +596,6 @@ const theme = createTheme({
       tier2: themeValues.palette.tiers.tier2,
       tier3: themeValues.palette.tiers.tier3,
       tier4: themeValues.palette.tiers.tier4,
-      tier5: themeValues.palette.tiers.tier5,
     },
     background: {
       default: themeValues.palette.utility.white,

@@ -28,7 +28,6 @@ import {
 } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
 import { useMapReady, learnMapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
@@ -123,7 +122,6 @@ export default function LearnPanel() {
           {mapReady ? (
             <Suspense fallback={null}>
               <MapOverlayPanels />
-              <ProgressiveScenarioPanels />
             </Suspense>
           ) : (
             <Box
