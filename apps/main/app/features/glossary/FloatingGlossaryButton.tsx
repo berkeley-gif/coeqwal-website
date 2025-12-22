@@ -21,7 +21,7 @@ interface FloatingGlossaryButtonProps {
 
 /**
  * Floating circular button for opening the glossary
- * Draggable to reposition the glossary anywhere on the viewport
+ * Draggable to reposition the glossary horizontally in the viewport
  */
 export function FloatingGlossaryButton({
   onClick,

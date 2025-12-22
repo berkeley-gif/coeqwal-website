@@ -328,7 +328,7 @@ function applyPolygonStyling(
     translatedFeatureIds = featureIds
       .map(id => RESERVOIR_CALSIM_TO_GNISIDLABEL[id])
       .filter((v): v is string => !!v)
-    // Remove duplicates (SLUIS_CVP and SLUIS_SWP both map to "San Luis Reservoir")
+    // TODO: sort out duplicates (SLUIS_CVP and SLUIS_SWP both map to "San Luis Reservoir")
     translatedFeatureIds = [...new Set(translatedFeatureIds)]
     
     // Also translate the tier lookup for color matching
@@ -369,7 +369,7 @@ function applyPolygonStyling(
     return // Skip the normal fill/outline styling for reservoirs
   }
 
-  // Special handling for delta: keep natural fill color AND opacity from Mapbox style
+  // Special handling for Delta: keep fill color AND opacity from Mapbox style
   // Only apply outline styling
   if (layerType === "delta") {
     map.setLayoutProperty(mapboxLayerId, "visibility", "visible")

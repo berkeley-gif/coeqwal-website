@@ -328,7 +328,7 @@ export function useMapLayers() {
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
 
-    // Hide delta-water layer (new Mapbox tileset layer)
+    // Hide delta-water
     try {
       if (mapInstance.getLayer("delta-water")) {
         // Fade out and hide
@@ -367,7 +367,7 @@ export function useMapLayers() {
       // Layer might not exist
     }
 
-    // Also hide legacy "water" layer if it exists (backward compatibility)
+    // Also hide legacy "water" layer if it exists (backward compatibility upon layer change) TODO: update this, check with Mapbox layer
     try {
       if (mapInstance.getLayer("water")) {
         const rawOpacity =

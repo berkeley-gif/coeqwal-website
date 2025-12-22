@@ -4,7 +4,7 @@
  * ReservoirLabels component
  * 
  * Renders tier-colored labels for reservoirs on the map.
- * Uses React Markers for precise control and to avoid duplicates.
+ * Uses React Markers.
  */
 
 import React from "react"
@@ -45,7 +45,6 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
       case 2: return theme.palette.tiers.tier2
       case 3: return theme.palette.tiers.tier3
       case 4: return theme.palette.tiers.tier4
-      case 5: return theme.palette.tiers.tier5
       default: return theme.palette.grey[500]
     }
   }

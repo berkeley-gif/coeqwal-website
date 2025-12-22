@@ -357,7 +357,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Model Documentation Section */}
+              {/* Model documentation section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography

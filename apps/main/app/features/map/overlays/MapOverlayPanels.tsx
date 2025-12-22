@@ -121,8 +121,8 @@ export default function MapOverlayPanels() {
 
   // Multi-step sticky choreography:
   // Tracks scroll through the scenario-intro-wrapper section
-  // We use manual scroll tracking because useScroll doesn't work reliably
-  // when the ref isn't available at mount time (which happens due to conditional rendering)
+  // Uses manual scroll tracking because useScroll doesn't work reliably
+  // when the ref isn't available at mount time
   const scenarioIntroProgress = useMotionValue(0)
 
   useEffect(() => {

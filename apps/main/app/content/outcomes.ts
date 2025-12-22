@@ -6,11 +6,11 @@ export const OUTCOMES = OUTCOME_DISPLAY_ORDER
 export type Outcome = (typeof OUTCOMES)[number]
 
 /**
- * Outcome definitions - synchronous constant for use in components
+ * Outcome definitions
  * Maps outcome display names to their descriptions.
  * These definitions are also in the database. The thinking is that we want to
  * allow frontend developers to modify the definitions without having to wait
- * for a database update.
+ * for a database update. TODO: re-evaluate this usage once project nears end.
  */
 export const OUTCOME_DEFINITIONS: Record<string, string> = {
   "Community deliveries":

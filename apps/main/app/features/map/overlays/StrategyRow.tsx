@@ -364,7 +364,7 @@ export function StrategyInfoPanel({
 }
 
 /**
- * KeyOperationsPanel - Shows just the key operations icons and hydroclimate chooser
+ * KeyOperationsPanel - Shows the key operations icons and hydroclimate chooser
  */
 export function KeyOperationsPanel({
   strategyValue = "current-ops",

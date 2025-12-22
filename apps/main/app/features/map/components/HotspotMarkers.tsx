@@ -3,7 +3,7 @@
 /**
  * HotspotMarkers component
  * 
- * Renders markers for tier 4 (red/worst) locations for specific outcomes.
+ * Renders markers for tier 4 locations for specific outcomes.
  * Each marker shows an image marker.
  * Supports both Point and Polygon geometries (calculates centroid for polygons).
  */
@@ -24,12 +24,12 @@ const HOTSPOT_CONFIGS: Record<string, {
 }> = {
   "Community deliveries": {
     image: "/images/map_markers/drinking_water.png",
-    imageAlt: "Community water system marker",
+    imageAlt: "Community water system marker showing water system at risk",
     labelPrefix: "Water system at risk",
   },
   "Salmon abundance": {
     image: "/images/map_markers/salmon.png",
-    imageAlt: "Salmon habitat marker",
+    imageAlt: "Salmon habitat marker showing habitat at risk",
     labelPrefix: "Salmon habitat at risk",
   },
 }
@@ -54,7 +54,7 @@ interface HotspotData {
 /**
  * Calculate the bounding box center of a polygon
  * This is more reliable than centroid for small/irregular polygons
- * For MultiPolygon, calculates bbox across all polygons
+ * For MultiPolygon, calculates bbox across all polygons // TODO: reconsider this, find a better technique
  */
 function getPolygonCenter(feature: TierFeature): [number, number] | null {
   const { geometry } = feature
@@ -124,7 +124,7 @@ export function HotspotMarkers({
   // Get config for this outcome
   const config = outcome ? HOTSPOT_CONFIGS[outcome] : null
 
-  // Fetch tier 4 (worst) locations when outcome changes
+  // Fetch tier 4 locations when outcome changes
   useEffect(() => {
     if (!config || !outcome || !visible) {
       setHotspots([])
@@ -135,7 +135,7 @@ export function HotspotMarkers({
       try {
         const response = await fetchTierLocationData(strategy, outcome)
         
-        // Filter for tier 4 (worst/red tier) features (Point, Polygon, or MultiPolygon)
+        // Filter for tier 4 features (Point, Polygon, or MultiPolygon)
         const tier4Features = response.features.filter(
           f => f.properties.tier_level === 4
         )

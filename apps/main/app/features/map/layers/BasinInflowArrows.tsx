@@ -44,6 +44,7 @@ export default function BasinInflowArrows({
    * Arrow positions around the Central Valley basin perimeter
    *
    * To adjust positioning:
+   * - Can use debug per arrow number labels (toggle with SHOW_DEBUG_NUMBERS flag)
    * - lon/lat: Geographic coordinates where the arrow appears
    * - rotation: Angle in degrees (0 = down/south, 90 = left/west, 180 = up/north, 270 = right/east)
    *
@@ -53,6 +54,7 @@ export default function BasinInflowArrows({
    * - East: -119.5° lon (Sierra Nevada)
    * - West: -123° lon (Coast Ranges)
    */
+  
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
     { lon: -122.05, lat: 40.75, rotation: 65, label: "N - Central north" },
@@ -66,15 +68,11 @@ export default function BasinInflowArrows({
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.2, lat: 37.4, rotation: 240, label: "W - Central Coast Range" },
     { lon: -122.5, lat: 39.3, rotation: 240, label: "W - North Coast Range" },
-    {
-      lon: -122.6,
-      lat: 40.3125,
-      rotation: 240,
-      label: "NW - Northwestern rim",
+    { lon: -122.6, lat: 40.3125, rotation: 240, label: "NW - Northwestern rim",
     },
   ]
 
-  const arrowColor = "#2196F3"
+  const arrowColor = "#2196F3" // TODO: Map components theme, once Meli finishes design system
 
   return (
     <>

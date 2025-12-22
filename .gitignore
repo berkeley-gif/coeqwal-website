@@ -27,7 +27,7 @@ dist
 .DS_Store
 *.pem
 
-# Documentation (developer notes not for repo)
+# Documentation (developer notes)
 docs/
 
 # Archived code (unused files preserved outside version control)

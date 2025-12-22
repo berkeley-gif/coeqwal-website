@@ -154,7 +154,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     )
   }, [visible, clampedProgress])
 
-  // River label positions (memoized as they're constant)
+  // River label positions (memoized bc they're constant)
   const labelPositions = useMemo(
     () => ({
       sacramento: { lon: -121.6, lat: 39.4 },

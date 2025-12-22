@@ -90,7 +90,7 @@ export interface OutcomeLayerConfig {
 // CONSTANTS
 // ============================================================================
 
-/** Mapbox layer IDs - centralized for easy reference */
+/** Mapbox layer IDs */
 export const LAYER_IDS = {
   // Polygon layers
   demandUnits: {
@@ -138,7 +138,7 @@ export const BASEMAP_DIM_OPACITY = 0.15
 /**
  * TODO: Update the california-reservoir Mapbox tileset to include a `calsim_id` property
  * with these short codes, then update the registry to use `idProperty: "calsim_id"` and
- * remove this mapping.
+ * remove this mapping. In the meantime:
  * 
  * Mapping from CalSim short codes (returned by API) to Mapbox gnisidlabel values
  */

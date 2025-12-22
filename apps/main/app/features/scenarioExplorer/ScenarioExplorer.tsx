@@ -333,7 +333,9 @@ export default function ScenarioExplorerNew() {
               onScenarioClick={handleScenarioClick}
             />
           )}
-          {mainView === "data" && <DataExplorerView />}
+          {mainView === "data" && (
+            <DataExplorerView onNavigateToExplorer={() => setMainView("explorer")} />
+          )}
         </Box>
       </Box>
     </Box>

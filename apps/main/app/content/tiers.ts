@@ -1,5 +1,5 @@
 /**
- * Centralized Tier Definitions
+ * Centralized tier definitions
  *
  * Tier colors should come from theme.palette.tiers
  * This file provides tier labels and helper functions.

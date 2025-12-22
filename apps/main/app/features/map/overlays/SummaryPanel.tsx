@@ -1,4 +1,6 @@
 "use client"
+/* Experimental, under development */
+
 /* eslint-disable react/prop-types */ // TypeScript handles prop validation
 
 import { useEffect, useState, useCallback } from "react"
