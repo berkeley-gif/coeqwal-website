@@ -66,11 +66,21 @@ export function OutcomeChartItem({
 
   // Compute glyph values and variant
   const values: [number, number, number, number] = chartData
-    ? (chartData.map((tier) => tier.value).slice(0, 4) as [number, number, number, number])
+    ? (chartData.map((tier) => tier.value).slice(0, 4) as [
+        number,
+        number,
+        number,
+        number,
+      ])
     : [0, 0, 0, 0]
 
   const tierColors: [string, string, string, string] = chartData
-    ? (chartData.map((tier) => tier.color).slice(0, 4) as [string, string, string, string])
+    ? (chartData.map((tier) => tier.color).slice(0, 4) as [
+        string,
+        string,
+        string,
+        string,
+      ])
     : [
         theme.palette.tiers.tier1,
         theme.palette.tiers.tier2,
@@ -155,7 +165,9 @@ export function OutcomeChartItem({
             textAlign: "center",
             fontSize: "0.65rem",
             fontWeight: theme.typography.fontWeightMedium,
-            color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
+            color: isActive
+              ? theme.palette.blue.darkest
+              : theme.palette.grey[500],
             lineHeight: 1.2,
             maxWidth: "70px",
           }}

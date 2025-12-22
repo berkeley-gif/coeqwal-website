@@ -10,17 +10,8 @@
  */
 
 import React, { useState, useEffect } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  Checkbox,
-} from "@repo/ui/mui"
-import {
-  InfoTooltip,
-  InfoIconButton,
-  SortButton,
-} from "@repo/ui"
+import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import { InfoTooltip, InfoIconButton, SortButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../content/scenarios"

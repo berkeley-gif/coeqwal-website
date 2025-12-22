@@ -171,25 +171,37 @@ export default function MapOverlayPanels() {
   // Panel opacity - fade in and stay visible
   const strategyInfoPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeStart, PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd],
+    [
+      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeStart,
+      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd,
+    ],
     [0, 1],
   )
 
   const keyOperationsPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeStart, PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd],
+    [
+      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeStart,
+      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd,
+    ],
     [0, 1],
   )
 
   const keyOutcomesPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeStart, PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd],
+    [
+      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeStart,
+      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd,
+    ],
     [0, 1],
   )
 
   const summaryPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [PANEL_ANIMATION_THRESHOLDS.summary.fadeStart, PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd],
+    [
+      PANEL_ANIMATION_THRESHOLDS.summary.fadeStart,
+      PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd,
+    ],
     [0, 1],
   )
 
