@@ -5,6 +5,9 @@
  *
  * Components for displaying strategy information in the Learn section.
  * Data is pulled from the same sources as StrategyGrid.
+ *
+ * Note: Types and utilities have been extracted to StrategyRow/ folder.
+ * Future refactoring will move panel components to separate files.
  */
 
 import { useCallback } from "react"
@@ -13,98 +16,19 @@ import { learnMapActions, useSelectedOutcome } from "../store"
 import { InfoIconButton, HybridTooltip, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
-import { CURRENT_OPERATIONS_ICONS } from "../../../content/scenarios"
-import { OUTCOME_DISPLAY_ORDER } from "../../../hooks/useTierData"
+import { OUTCOME_DISPLAY_ORDER, useScenarioTiers } from "../../scenarios/hooks"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
-import { useScenarioTiers } from "../../../hooks/useTierData"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
-import { HydroclimateChooser } from "../../scenarioExplorer/components/HydroclimateChooser"
+import { HydroclimateChooser } from "../../scenarios/components"
 
-interface StrategyRowProps {
-  /** Strategy value to display (defaults to "current-ops") */
-  strategyValue?: string
-  /** Whether to show the description */
-  showDescription?: boolean
-}
-
-interface StrategyInfoPanelProps {
-  /** Strategy value to display (defaults to "current-ops") */
-  strategyValue?: string
-  /** Callback when the title is clicked (to reopen tooltip) */
-  onTitleClick?: () => void
-}
-
-interface KeyOperationsPanelProps {
-  /** Strategy value to display (defaults to "current-ops") */
-  strategyValue?: string
-  /** Callback when the title is clicked (to reopen tooltip) */
-  onTitleClick?: () => void
-}
-
-interface KeyOutcomesPanelProps {
-  /** Scenario ID to display (defaults to "s0020" for current operations) */
-  scenarioId?: string
-  /** Callback when the title is clicked (to reopen tooltip) */
-  onTitleClick?: () => void
-}
-
-/**
- * Get the operation icons for a given strategy
- * Uses the same logic as StrategyGrid for consistency
- */
-function getStrategyIcons(strategyValue: string) {
-  const icons = []
-
-  // Icon 1: Current operations (always shown)
-  icons.push({
-    path: CURRENT_OPERATIONS_ICONS[0]?.path || "/images/icons/current_ops.svg",
-    alt: CURRENT_OPERATIONS_ICONS[0]?.alt || "Current operations",
-    description:
-      CURRENT_OPERATIONS_ICONS[0]?.description || "Current operations",
-    label: "Current operations",
-  })
-
-  // Icon 2: Land use (different for historical-ag strategy)
-  if (strategyValue === "current-ops-historical-ag") {
-    icons.push({
-      path: "/images/icons/land_use_prev.svg",
-      alt: "Historical land use",
-      description: "Historical land use (2004-2013)",
-      label: "Historical land use\n(2004-2013)",
-    })
-  } else {
-    icons.push({
-      path: CURRENT_OPERATIONS_ICONS[1]?.path || "/images/icons/land_use.svg",
-      alt: CURRENT_OPERATIONS_ICONS[1]?.alt || "Current land use",
-      description:
-        CURRENT_OPERATIONS_ICONS[1]?.description ||
-        "Current land use considerations",
-      label: "Updated agricultural\nland use (2020)",
-    })
-  }
-
-  // Icon 3: TUCP status
-  if (strategyValue === "current-ops-wo-tucp") {
-    icons.push({
-      path: "/images/icons/no_tucp.svg",
-      alt: "Without TUCPs",
-      description:
-        "Operations without Temporary Urgent Change Petitions (TUCPs)",
-      label: "TUCPs\nnot allowed",
-    })
-  } else {
-    icons.push({
-      path: CURRENT_OPERATIONS_ICONS[2]?.path || "/images/icons/tucp.svg",
-      alt: CURRENT_OPERATIONS_ICONS[2]?.alt || "TUCP considerations",
-      description:
-        CURRENT_OPERATIONS_ICONS[2]?.description ||
-        "Temporary Urgent Change Petitions permitted",
-      label: "TUCPs\nallowed",
-    })
-  }
-
-  return icons
-}
+// Import extracted types and utilities
+import {
+  type StrategyRowProps,
+  type StrategyInfoPanelProps,
+  type KeyOperationsPanelProps,
+  type KeyOutcomesPanelProps,
+} from "./StrategyRow/types"
+import { getStrategyIcons } from "./StrategyRow/utils"
 
 export function StrategyRow({
   strategyValue = "current-ops",

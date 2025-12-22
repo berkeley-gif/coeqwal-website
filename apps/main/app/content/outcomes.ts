@@ -1,4 +1,4 @@
-import { OUTCOME_DISPLAY_ORDER } from "../hooks/useTierData"
+import { OUTCOME_DISPLAY_ORDER } from "../features/scenarios/hooks"
 
 export type Outcome = (typeof OUTCOME_DISPLAY_ORDER)[number]
 

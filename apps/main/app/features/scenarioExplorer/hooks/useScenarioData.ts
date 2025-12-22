@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { useMultipleScenarioTiers } from "../../../hooks/useTierData"
+import { useMultipleScenarioTiers } from "../../scenarios/hooks"
 import { STRATEGY_TO_SCENARIO_ID } from "../../../lib/constants/outcomeMappings"
 import type {
   ChartDataPoint,

@@ -17,8 +17,8 @@
  * 5. Consider creating a more formal shared schema between backend and frontend
  */
 
-// Re-export the canonical list from useTierData for convenience
-export { OUTCOME_DISPLAY_ORDER } from "../../hooks/useTierData"
+// Re-export the canonical list from scenarios feature for convenience
+export { OUTCOME_DISPLAY_ORDER } from "../../features/scenarios/hooks"
 
 /**
  * Map API short codes to display names

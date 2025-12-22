@@ -10,9 +10,13 @@
  * - react-scrollama: Handles section detection (onStepEnter) and rivers progress (onStepProgress)
  * - Framer Motion: Handles smooth animations in the scenario-intro section
  * - Zustand store: Manages activeSection state, layer visibility derived in useMapLayers
+ *
+ * Note: Constants have been extracted to MapOverlayPanels/ folder for better organization.
+ * Future refactoring will extract section components.
  */
 
 import { useState, useEffect, useRef } from "react"
+import { PANEL_ANIMATION_THRESHOLDS, PANEL_POSITIONS } from "./mapOverlayConfig"
 import { Scrollama, Step } from "react-scrollama"
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
@@ -162,30 +166,30 @@ export default function MapOverlayPanels() {
   }, [isScenarioIntroMounted, scenarioIntroProgress])
 
   // Paragraph position: fixed at top (no animation, just scrolls naturally)
-  const paragraphTop = "15vh"
+  const paragraphTop = PANEL_POSITIONS.paragraphTop
 
   // Panel opacity - fade in and stay visible
   const strategyInfoPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.12, 0.18],
+    [PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeStart, PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd],
     [0, 1],
   )
 
   const keyOperationsPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.28, 0.34],
+    [PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeStart, PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd],
     [0, 1],
   )
 
   const keyOutcomesPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.48, 0.54],
+    [PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeStart, PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd],
     [0, 1],
   )
 
   const summaryPanelOpacity = useTransform(
     scenarioIntroProgress,
-    [0.48, 0.54],
+    [PANEL_ANIMATION_THRESHOLDS.summary.fadeStart, PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd],
     [0, 1],
   )
 

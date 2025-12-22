@@ -22,7 +22,7 @@ import {
 } from "../../../../../lib/api/tierLocationApi"
 import { getDisplayNameFromMetricId } from "../../../../../lib/constants/outcomeMappings"
 import TierMarkers from "../../../../map/components/TierMarkers"
-import TierLegend from "../../../components/TierLegend"
+import { TierLegend } from "../../../../scenarios/components"
 import TemporalControls from "./TemporalControls"
 import type { TemporalScale, AggregationType } from "../outcomeDefinitions"
 import {

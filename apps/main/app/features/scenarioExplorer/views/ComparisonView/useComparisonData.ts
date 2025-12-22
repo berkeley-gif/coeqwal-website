@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import {
   useMultipleScenarioTiers,
   OUTCOME_DISPLAY_ORDER,
-} from "../../../../hooks/useTierData"
+} from "../../../scenarios/hooks"
 import type { VerticalParallelLineData } from "@repo/viz"
 
 // All available scenarios with their display names and colors
