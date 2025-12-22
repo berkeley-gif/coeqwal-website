@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
+import { useScenarioExplorerStore } from "../../store"
 import StrategyGrid from "../../components/StrategyGrid"
 import { useScenarioData } from "../../hooks/useScenarioData"
 import { useMultipleScenarioTiers } from "../../../../hooks/useTierData"

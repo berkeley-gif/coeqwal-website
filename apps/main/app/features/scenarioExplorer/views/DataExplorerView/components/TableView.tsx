@@ -14,7 +14,7 @@ import {
 } from "@repo/ui/mui"
 import { SearchIcon } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
-import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
+import { useScenarioExplorerStore } from "../../../store"
 import {
   outcomeMetrics,
   outcomeCategories,

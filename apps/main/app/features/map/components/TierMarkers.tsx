@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react"
 import { Marker, Popup, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import type { TierLocationResponse } from "../../../../lib/api/tierLocationApi"
+import type { TierLocationResponse } from "../../../lib/api/tierLocationApi"
 
 interface TierMarkersProps {
   data: TierLocationResponse
