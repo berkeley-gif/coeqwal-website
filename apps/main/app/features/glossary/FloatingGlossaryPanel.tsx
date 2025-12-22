@@ -166,7 +166,7 @@ export function FloatingGlossaryPanel({
           maxHeight: "70vh", // Don't take up full height
           backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.md,
-          boxShadow: theme.boxShadows.panel,
+          boxShadow: theme.shadow.lg,
           transform: isOpen ? "scale(1)" : "scale(0.9)",
           opacity: isOpen ? 1 : 0,
           // Transform origin changes based on position

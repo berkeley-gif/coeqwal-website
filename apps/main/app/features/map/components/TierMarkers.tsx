@@ -256,7 +256,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 height: 20,
                 backgroundColor: getTierColor(feature.properties.tier_level),
                 border: theme.border.onDark,
-                boxShadow: theme.boxShadows.medium,
+                boxShadow: theme.shadow.sm,
                 cursor: "pointer",
                 // Diamond: rotate square 45 degrees; Circle: use border-radius
                 borderRadius: isDiamond ? theme.borderRadius.xs : theme.borderRadius.circle,

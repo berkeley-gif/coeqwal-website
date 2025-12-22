@@ -475,7 +475,7 @@ function MapViewContent() {
               p: theme.spacing(2),
               backgroundColor: "rgba(255, 255, 255, 0.95)",
               borderRadius: theme.borderRadius.md,
-              boxShadow: theme.boxShadows.medium,
+              boxShadow: theme.shadow.sm,
             }}
           >
             {isLoadingMap && (
@@ -528,7 +528,7 @@ function MapViewContent() {
               p: theme.spacing(1.5),
               backgroundColor: "rgba(255, 255, 255, 0.9)",
               borderRadius: theme.borderRadius.md,
-              boxShadow: theme.boxShadows.subtle,
+              boxShadow: theme.shadow.subtle,
               maxWidth: theme.spacing(40),
             }}
           >

@@ -105,7 +105,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         backgroundColor: "rgba(255, 255, 255, 0.95)",
         borderRadius: 0,
         padding: { xs: 2, sm: 2.5, md: 3 },
-        boxShadow: theme.shadows[2],
+        boxShadow: theme.shadow.sm,
         width: "100%",
         boxSizing: "border-box",
         pointerEvents: "auto", // Ensure panel is interactive

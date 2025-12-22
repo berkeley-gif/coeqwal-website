@@ -52,7 +52,7 @@ export function TierTooltipPortal({
               color: theme.palette.text.primary,
               border: theme.border.light,
               borderRadius: theme.borderRadius.md,
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              boxShadow: theme.shadow.md,
               padding: "16px",
               paddingRight: "40px",
               width: theme.spacing(56.25),

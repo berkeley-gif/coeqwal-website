@@ -567,7 +567,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                       alignItems: "center",
                       justifyContent: "center",
                       cursor: "pointer",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                      boxShadow: theme.shadow.md,
                       fontSize: "28px",
                       lineHeight: 1,
                     }}

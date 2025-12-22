@@ -159,7 +159,7 @@ export default function UnifiedExploreView({
                 backgroundColor: "rgba(255, 255, 255, 0.95)",
                 borderRadius: theme.borderRadius.md,
                 padding: theme.spacing(2),
-                boxShadow: theme.boxShadows.subtle,
+                boxShadow: theme.shadow.subtle,
                 maxWidth: theme.spacing(40),
                 zIndex: theme.zIndex.mapControls,
                 pointerEvents: "auto", // Re-enable for the info overlay
@@ -228,7 +228,7 @@ export default function UnifiedExploreView({
                         backgroundColor: theme.palette.common.white,
                         borderRadius: theme.borderRadius.md,
                         p: 2,
-                        boxShadow: theme.boxShadows.subtle,
+                        boxShadow: theme.shadow.subtle,
                         height: "100%",
                       }}
                     >

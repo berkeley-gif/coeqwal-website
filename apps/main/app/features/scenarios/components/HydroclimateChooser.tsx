@@ -178,12 +178,12 @@ export function HydroclimateChooser({
                       border: isSelected
                         ? theme.border.highlight
                         : "3px solid transparent",
-                      boxShadow: isSelected ? theme.shadows[2] : "none",
+                      boxShadow: isSelected ? theme.shadow.sm : theme.shadow.none,
                       transition: "all 0.2s ease",
                       "&:hover": !isDisabled
                         ? {
                             transform: "scale(1.1)",
-                            boxShadow: theme.shadows[3],
+                            boxShadow: theme.shadow.sm,
                           }
                         : {},
                       // Invisible hit area

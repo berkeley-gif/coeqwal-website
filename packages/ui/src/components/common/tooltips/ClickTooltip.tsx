@@ -184,7 +184,7 @@ function TooltipVariant({
           sx: (theme: Theme) => ({
             backgroundColor: theme.palette.common.white,
             color: theme.palette.text.primary,
-            boxShadow: theme.shadows[4],
+            boxShadow: theme.shadow.md,
             width,
             maxWidth,
             padding: `${PADDING_Y} ${PADDING_X}`,
@@ -244,7 +244,7 @@ function OverlayVariant({
         zIndex: theme.zIndex.tooltip,
         backgroundColor: theme.palette.common.white,
         color: theme.palette.text.primary,
-        boxShadow: theme.shadows[8],
+        boxShadow: theme.shadow.lg,
         borderRadius: theme.borderRadius.md,
         width,
         maxWidth,
