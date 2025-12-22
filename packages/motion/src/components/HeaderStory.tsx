@@ -98,7 +98,7 @@ export function HeaderStory({
       sx={{
         zIndex: theme.zIndex.uiOverlay,
         backgroundColor: theme.background.transparent,
-        borderBottom: theme.border.standard,
+        borderBottom: theme.border.medium,
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
         boxShadow: "none",

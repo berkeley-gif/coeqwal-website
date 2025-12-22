@@ -301,7 +301,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: compact ? "stretch" : "start",
                     transition: "all 0.2s ease",
                     border: isHighlighted
-                      ? `2px solid ${theme.palette.blue.bright}`
+                      ? theme.border.focus
                       : "2px solid transparent",
                     "&:hover": {
                       backgroundColor: theme.palette.common.white,
@@ -724,7 +724,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           (selectedOutcomes[strategy.value] ===
                                             displayName &&
                                             onTierClick)
-                                            ? `2px solid ${theme.palette.blue.bright}`
+                                            ? theme.border.focus
                                             : "2px solid transparent",
                                         "&:hover": {
                                           backgroundColor: isActiveForStrategy
@@ -812,7 +812,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                               theme.palette.grey[100],
                                             borderRadius:
                                               theme.borderRadius.rounded,
-                                            border: `1px solid ${theme.palette.grey[300]}`,
+                                            border: theme.border.medium,
                                           }}
                                         >
                                           <Typography
@@ -956,7 +956,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           (selectedOutcomes[strategy.value] ===
                                             displayName &&
                                             onTierClick)
-                                            ? `2px solid ${theme.palette.blue.bright}`
+                                            ? theme.border.focus
                                             : "2px solid transparent",
                                         "&:hover": {
                                           backgroundColor: isActiveForStrategy
@@ -1044,7 +1044,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                               theme.palette.grey[100],
                                             borderRadius:
                                               theme.borderRadius.rounded,
-                                            border: `1px solid ${theme.palette.grey[300]}`,
+                                            border: theme.border.medium,
                                           }}
                                         >
                                           <Typography
@@ -1519,7 +1519,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                   (selectedOutcomes[strategy.value] ===
                                     displayName &&
                                     onTierClick)
-                                    ? `2px solid ${theme.palette.blue.bright}`
+                                    ? theme.border.focus
                                     : "2px solid transparent",
                                 "&:hover": {
                                   backgroundColor: isActiveForStrategy
@@ -1597,7 +1597,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                     justifyContent: "center",
                                     backgroundColor: theme.palette.grey[100],
                                     borderRadius: theme.borderRadius.rounded,
-                                    border: `1px solid ${theme.palette.grey[300]}`,
+                                    border: theme.border.medium,
                                   }}
                                 >
                                   <Typography

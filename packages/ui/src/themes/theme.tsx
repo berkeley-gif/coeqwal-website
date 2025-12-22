@@ -6,10 +6,19 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 1. themeValues     - Design tokens (fonts, colors, spacing, shadows)
- * 2. Mixins          - Reusable style patterns (formControlBase, drawerContent)
+ * 0. Font Config     - Font presets and active font selection
+ * 1. themeValues     - Design tokens:
+ *      Core tokens:  - typeScale, fontFamily, typography
+ *                    - palette (brand, blue, accent, nature, utility, tiers)
+ *                    - layout, borderRadius, boxShadows, zIndex
+ *      App UI config:- cards (typography, spacing)
+ *                    - scenarios (grid, icon, outcome styles)
+ * 2. Mixins          - Reusable style patterns (drawerContentMixins)
  * 3. createTheme()   - MUI theme with palette, typography, component overrides
- * 4. Post-creation   - Custom properties (border, background, boxShadows)
+ * 4. Post-creation   - Custom properties added to theme object:
+ *                    - border (light, medium, focus, highlight, onDark, etc.)
+ *                    - background (transparent, paragraph, overlay)
+ *                    - borderRadius, boxShadows, cards, scenarios
  * 5. TypeScript      - Module augmentation for custom theme properties
  */
 
@@ -206,13 +215,6 @@ export const themeValues = {
     none: "0px",
   },
 
-  // Border styles
-  border: {
-    standard: "1px solid",
-    none: "none",
-    thin: "0.5px solid",
-    thick: "2px solid",
-  },
 
   // Box shadows
   boxShadows: {
@@ -244,38 +246,10 @@ export const themeValues = {
     modal: 110, // Modal dialogs (reserved)
   },
 
-  // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
-  mapPromptDialog: {
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
-    textColor: "#FFFFFF", // theme.palette.utility.white
-    borderRadius: "8px", // theme.borderRadius.card
-    padding: "16px", // theme.borderRadius.card
-    minWidth: "280px",
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    zIndex: 100, // theme.zIndex.tooltip
-    position: {
-      top: "16px", // theme.borderRadius.card
-      centerX: true, // Horizontal centering
-    },
-    typography: {
-      title: {
-        fontSize: typeScale.compact.title, // 0.9rem
-        fontWeight: 500,
-        marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
-      },
-      subtitle: {
-        fontSize: typeScale.compact.subtitle, // 0.8rem
-        opacity: 0.9,
-        marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
-      },
-      action: {
-        fontSize: typeScale.compact.subtitle, // 0.8rem
-        fontWeight: "bold",
-        cursor: "pointer",
-        textDecoration: "none",
-      },
-    },
-  },
+  /* --------------------------------------------------------
+   * App-specific UI configuration
+   * Styles for specific features (cards, scenarios)
+   * -------------------------------------------------------- */
 
   // Card typography and spacing system
   cards: {
@@ -428,25 +402,6 @@ export const themeValues = {
  * 2. Mixins - Reusable style patterns
  * ======================================================== */
 
-// Form control base mixin
-const formControlBaseMixin = {
-  width: `${themeValues.layout.controls.standard}px !important`,
-  height: `${themeValues.layout.controls.standard}px !important`,
-  minWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent shrinking
-  maxWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent growing
-  flexShrink: 0, // Don't shrink in flex containers
-  backgroundColor: "transparent",
-  padding: "0",
-  alignSelf: "flex-start",
-  transform: "translateY(-3px)", // Fine-tune vertical position
-  transition: "all 0.2s ease",
-  position: "relative",
-  display: "inline-block",
-  boxSizing: "border-box",
-  filter: "none !important",
-  backdropFilter: "none !important",
-} as const
-
 // Drawer content styling mixins
 const drawerContentMixins = {
   contentWrapper: {
@@ -516,19 +471,6 @@ const drawerContentMixins = {
 const baseTheme = createTheme()
 
 // Helper to create border strings
-const createBorderStyles = (borderType: string, color: string) => {
-  return {
-    standard: `${borderType} ${color}`,
-    none: themeValues.border.none,
-    thin: `${themeValues.border.thin} ${color}`,
-    thick: `${themeValues.border.thick} ${color}`,
-    bottom: `border-bottom: ${borderType} ${color}`,
-    top: `border-top: ${borderType} ${color}`,
-    left: `border-left: ${borderType} ${color}`,
-    right: `border-right: ${borderType} ${color}`,
-    all: `border: ${borderType} ${color}`,
-  }
-}
 
 // Helper to create drawer transition mixins
 const createDrawerMixins = (
@@ -890,7 +832,7 @@ const theme = createTheme({
         {
           props: { variant: "outlined" },
           style: ({ theme }) => ({
-            border: theme.border.standard,
+            border: theme.border.medium,
             textTransform: "none",
             borderRadius: theme.borderRadius.pill,
             boxShadow: "none",
@@ -899,7 +841,7 @@ const theme = createTheme({
         {
           props: { variant: "pill" },
           style: ({ theme }) => ({
-            border: theme.border.standard,
+            border: theme.border.medium,
             textTransform: "none",
             borderRadius: theme.borderRadius.pill,
             boxShadow: "none",
@@ -985,10 +927,10 @@ const theme = createTheme({
         root: ({ theme }) => ({
           backgroundColor: theme.palette.common.white,
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.border.standard,
+            border: theme.border.medium,
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: theme.border.standard,
+            border: theme.border.medium,
           },
           "&.Mui-focused": {
             backgroundColor: theme.palette.common.white, // Maintain white background when focused
@@ -1147,7 +1089,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
-            borderLeft: `${themeValues.border.standard} ${theme.palette.divider}`,
+            borderLeft: `1px solid ${theme.palette.divider}`,
           },
         }),
       },
@@ -1187,8 +1129,20 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom square checkbox using standardized form control base
-          ...formControlBaseMixin,
+          // Custom square checkbox
+          width: `${themeValues.layout.controls.standard}px !important`,
+          height: `${themeValues.layout.controls.standard}px !important`,
+          minWidth: `${themeValues.layout.controls.standard}px !important`,
+          maxWidth: `${themeValues.layout.controls.standard}px !important`,
+          flexShrink: 0,
+          backgroundColor: "transparent",
+          padding: "0",
+          alignSelf: "flex-start",
+          transform: "translateY(-3px)",
+          transition: "all 0.2s ease",
+          position: "relative",
+          display: "inline-block",
+          boxSizing: "border-box",
           borderRadius: "2px",
           border: `2px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
@@ -1234,13 +1188,24 @@ const theme = createTheme({
     MuiRadio: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom elegant circular radio button, uses standardized form control base
-          ...formControlBaseMixin,
+          // Custom circular radio button
+          width: `${themeValues.layout.controls.standard}px !important`,
+          height: `${themeValues.layout.controls.standard}px !important`,
+          minWidth: `${themeValues.layout.controls.standard}px !important`,
+          maxWidth: `${themeValues.layout.controls.standard}px !important`,
+          flexShrink: 0,
+          backgroundColor: "transparent",
+          padding: "0",
+          alignSelf: "flex-start",
+          transform: "translateY(-3px)",
+          transition: "all 0.2s ease",
+          position: "relative",
+          display: "inline-block",
+          boxSizing: "border-box",
           borderRadius: "50%",
           border: `1px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
           cursor: "pointer",
-          boxSizing: "border-box", // Ensure border is included in dimensions
           "&:hover": {
             backgroundColor: `${theme.palette.action.hover}30`,
           },
@@ -1374,7 +1339,6 @@ const theme = createTheme({
   mixins: {
     ...baseTheme.mixins,
     drawerContent: drawerContentMixins,
-    formControlBase: formControlBaseMixin,
   },
 })
 
@@ -1382,11 +1346,22 @@ const theme = createTheme({
  * 4. Post-creation - Custom theme properties
  * ======================================================== */
 
-// Apply border styles with colors from palette
-theme.border = createBorderStyles(
-  themeValues.border.standard,
-  theme.palette.primary.main,
-)
+// Border styles - complete values ready to use
+theme.border = {
+  none: "none",
+  light: `1px solid ${theme.palette.grey[200]}`, // Subtle/light borders
+  medium: `1px solid ${theme.palette.grey[300]}`, // Standard borders (most common)
+  focus: `2px solid ${theme.palette.blue.bright}`, // Selected/focus states
+  focusLight: `1px solid ${theme.palette.blue.light}`, // Lighter blue accent
+  highlight: `3px solid ${theme.palette.blue.bright}`, // Strong highlight (selected items)
+  onDark: `2px solid ${theme.palette.common.white}`, // On dark backgrounds
+  subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
+
+  // CSS triangle arrow technique: zero-size box with transparent borders,
+  // then set one side's color to create a triangle pointing opposite direction.
+  // Example: borderLeftColor: white → arrow points right
+  arrowBase: "8px solid transparent",
+}
 
 theme.background = {
   transparent: "transparent",
@@ -1404,31 +1379,6 @@ theme.boxShadows = themeValues.boxShadows
 
 // Scenario/strategy component styles
 theme.scenarios = themeValues.scenarios
-
-// Map prompt dialog configuration
-theme.mapPromptDialog = {
-  ...themeValues.mapPromptDialog,
-  backgroundColor: theme.background.overlay.dark,
-  textColor: theme.palette.utility.white,
-  borderRadius: theme.borderRadius.card,
-  padding: theme.borderRadius.card,
-  zIndex: theme.zIndex.tooltip,
-  position: {
-    ...themeValues.mapPromptDialog.position,
-    top: theme.borderRadius.card,
-  },
-  typography: {
-    ...themeValues.mapPromptDialog.typography,
-    title: {
-      ...themeValues.mapPromptDialog.typography.title,
-      marginBottom: `${theme.spacing(theme.cards.spacing.compact.sm)}px`, // Use compact spacing
-    },
-    subtitle: {
-      ...themeValues.mapPromptDialog.typography.subtitle,
-      marginBottom: `${theme.spacing(theme.cards.spacing.compact.sm)}px`, // Use compact spacing
-    },
-  },
-}
 
 export default theme
 
@@ -1501,7 +1451,17 @@ declare module "@mui/material/styles" {
         xxl: { xs: number; sm: number; md: number }
       }
     }
-    border: ReturnType<typeof createBorderStyles>
+    border: {
+      none: string
+      light: string
+      medium: string
+      focus: string
+      focusLight: string
+      highlight: string
+      onDark: string
+      subtleOutline: string
+      arrowBase: string
+    }
     background: {
       transparent: string
       paragraph: string
@@ -1509,18 +1469,6 @@ declare module "@mui/material/styles" {
     }
     borderRadius: typeof themeValues.borderRadius
     boxShadows: typeof themeValues.boxShadows
-    mapPromptDialog: typeof themeValues.mapPromptDialog & {
-      typography: {
-        title: { fontSize: string; fontWeight: number; marginBottom: string }
-        subtitle: { fontSize: string; opacity: number; marginBottom: string }
-        action: {
-          fontSize: string
-          fontWeight: string
-          cursor: string
-          textDecoration: string
-        }
-      }
-    }
     cards: typeof themeValues.cards
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
@@ -1544,7 +1492,6 @@ declare module "@mui/material/styles" {
 
   interface Mixins {
     drawerContent: typeof drawerContentMixins
-    formControlBase: typeof formControlBaseMixin
   }
 
   // Add custom typography variant

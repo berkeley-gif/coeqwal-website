@@ -38,8 +38,7 @@ export function ComparisonHeader({
         pt: theme.spacing(2),
         pb: theme.spacing(1),
         backgroundColor: theme.palette.common.white,
-        borderBottom: theme.border.standard,
-        borderColor: theme.palette.grey[300],
+        borderBottom: theme.border.medium,
         height: "100%",
       }}
     >

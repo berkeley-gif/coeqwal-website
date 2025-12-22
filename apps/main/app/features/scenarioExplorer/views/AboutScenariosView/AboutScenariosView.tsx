@@ -104,7 +104,7 @@ export default function AboutScenariosView() {
           width: "50%",
           height: "100%",
           backgroundColor: theme.palette.common.white,
-          borderRight: `1px solid ${theme.palette.grey[200]}`,
+          borderRight: theme.border.light,
           px: { xs: 4, md: 12 },
           pt: { xs: 5, md: 8 },
           pb: { xs: 5, md: 8 },
@@ -286,7 +286,7 @@ export default function AboutScenariosView() {
             px: { xs: 4, md: 12 },
             pt: { xs: 5, md: 8 },
             pb: { xs: 5, md: 8 },
-            borderBottom: `1px solid ${theme.palette.grey[200]}`,
+            borderBottom: theme.border.light,
             backgroundColor: theme.palette.common.white,
           }}
         >
@@ -364,7 +364,7 @@ export default function AboutScenariosView() {
             px: { xs: 4, md: 12 },
             pt: { xs: 5, md: 8 },
             pb: { xs: 5, md: 8 },
-            borderBottom: `1px solid ${theme.palette.grey[200]}`,
+            borderBottom: theme.border.light,
             backgroundColor: theme.palette.common.white,
           }}
         >
@@ -400,7 +400,7 @@ export default function AboutScenariosView() {
               display: "grid",
               gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
               gap: 0,
-              border: `1px solid ${theme.palette.grey[200]}`,
+              border: theme.border.light,
             }}
           >
             {outcomeCategories.map((category, index) => (
@@ -409,10 +409,10 @@ export default function AboutScenariosView() {
                 sx={{
                   p: 2.5,
                   borderBottom:
-                    index < 2 ? `1px solid ${theme.palette.grey[200]}` : "none",
+                    index < 2 ? theme.border.light : "none",
                   borderRight:
                     index % 2 === 0
-                      ? `1px solid ${theme.palette.grey[200]}`
+                      ? theme.border.light
                       : "none",
                 }}
               >

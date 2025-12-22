@@ -289,8 +289,7 @@ function MapViewContent() {
               p: theme.spacing(2),
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.rounded,
-              border: theme.border.standard,
-              borderColor: category ? category.color : theme.palette.grey[300],
+              border: category ? `1px solid ${category.color}` : theme.border.medium,
             }}
           >
             {/* Category badge */}
