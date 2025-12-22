@@ -6,7 +6,7 @@ import { useIsOutcomeVisualizationActive } from "../store"
 
 interface BasinsLayerProps {
   visible: boolean
-  /** Opacity for Sacramento/San Joaquin labels (0-1). Tulare label stays at full opacity. */
+  /** Opacity for Sacramento/San Joaquin labels (0-1). Currently, Tulare label stays at full opacity bc always visible (no fade-in, fade-out). */
   riverBasinLabelsOpacity?: number
 }
 

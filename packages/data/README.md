@@ -41,19 +41,6 @@ You can also import specific files directly:
 import centralValleyBasins from "@repo/data/gis/central_valley_basins_4326.geojson"
 ```
 
-## Package structure
-
-```
-packages/data/
-├── src/
-│   ├── index.ts          # Main exports
-│   └── gis/              # GIS data files (GeoJSON, etc.)
-│       └── central_valley_basins_4326.geojson
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
 ## Adding new data files
 
 1. Place your data file in the appropriate subdirectory

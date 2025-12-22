@@ -10,7 +10,6 @@
  * - The actual map lives in PersistentMap at the page level
  * - Overlay content scrolls over the persistent map
  * - Map "releases" from fixed position when scrollytelling ends
- * - Footer comes after the map section naturally
  *
  * The persistent map approach means:
  * - No map remounting when switching tabs
@@ -105,7 +104,7 @@ export default function LearnPanel() {
           minHeight: "100vh",
           // Transparent background - map shows through
           backgroundColor: "transparent",
-          pointerEvents: "none", // Allow map panning - overlay panels re-enable as needed
+          pointerEvents: "none", // Allow map panning
         }}
       >
         {/* Spacer for the initial map view - transparent, allows map panning */}

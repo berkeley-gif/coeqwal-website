@@ -1,6 +1,8 @@
 /**
- * Smart Summary Generator
+ * Smart summary generator
  * Analyzes tier data and generates plain language summaries
+ * 
+ * Experimental, demo version
  */
 
 import { TierLocationsResponse } from "../map/hooks/useOutcomeMapLayer"

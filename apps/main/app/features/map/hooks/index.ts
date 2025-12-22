@@ -19,7 +19,7 @@ export {
 } from "./useOutcomeMapLayer"
 
 // ============================================================================
-// SUB-HOOKS (for advanced use cases)
+// SUB-HOOKS
 // ============================================================================
 
 export { useTierDataFetch, type TierDataResult } from "./useTierDataFetch"

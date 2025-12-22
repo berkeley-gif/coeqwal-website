@@ -20,7 +20,7 @@ export default function Home() {
         {/* 
           Persistent map - renders once and stays mounted.
           Preloads during IntroSection scroll, ready when tabs appear.
-          Positions itself based on mapMode from store (hidden/learn/explore).
+          Positions itself based on mapMode from store (hidden | learn | explore).
         */}
         <Suspense fallback={null}>
           <PersistentMap />
@@ -38,7 +38,7 @@ export default function Home() {
               // Allow pointer events to pass through to the persistent map (z-index: 1)
               // Child components re-enable pointer events where needed
               pointerEvents: "none",
-              // Above map basement level so content appears on top
+              // Above map level so content appears on top
               zIndex: 10,
             }}
           >

@@ -7,14 +7,19 @@ import CategoryView from "./components/CategoryView"
 import MapView from "./components/MapView"
 import TableView from "./components/TableView"
 
+interface DataExplorerViewProps {
+  /** Callback to navigate back to explorer view */
+  onNavigateToExplorer?: () => void
+}
+
 /**
  * DataExplorerView
  *
- * Three sub-views: Category, Map, Table
+ * Three sub-views: category, map, table
  */
-export default function DataExplorerView() {
+export default function DataExplorerView({ onNavigateToExplorer }: DataExplorerViewProps) {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios } = useScenarioExplorerStore()
   const [subView, setSubView] = React.useState<"category" | "map" | "table">(
     "category",
   )
@@ -141,7 +146,7 @@ export default function DataExplorerView() {
             <Box>
               <Button
                 variant="contained"
-                onClick={() => setActiveView("list")}
+                onClick={onNavigateToExplorer}
                 sx={{
                   textTransform: "none",
                   fontWeight: 500,

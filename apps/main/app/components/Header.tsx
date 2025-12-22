@@ -6,7 +6,6 @@ import { BaseHeader } from "@repo/ui"
 
 /**
  * Main application header with Next.js routing and theme integration
- * Uses BaseHeader directly (skipping AppHeader wrapper for simplicity)
  */
 export function Header() {
   const router = useRouter()

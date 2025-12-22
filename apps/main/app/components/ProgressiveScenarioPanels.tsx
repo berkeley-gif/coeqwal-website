@@ -1,5 +1,4 @@
 "use client"
-// Todo: coordinate intersection observer logic with storyline i.o. logic. HY should be an i.o. pro by now.
 import { useState, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -71,7 +70,7 @@ export default function ProgressiveScenarioPanels() {
       },
       {
         threshold: 0.1, // Lower threshold to trigger earlier
-        rootMargin: "0px 0px -50px 0px", // Less aggressive margin
+        rootMargin: "0px 0px -50px 0px",
       },
     )
 

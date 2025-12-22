@@ -10,27 +10,29 @@
  *
  * Architecture:
  * - Renders immediately (preloading during IntroSection scroll)
- * - Positions itself via CSS based on which tab is active
- * - Renders appropriate layers based on mode (Learn vs Explore)
- * - Tabs call `learnMapActions.setMapMode()` to configure the map
+ * - Positions map based on mode (Learn vs Explore)
+ * - Tabs call `learnMapActions.setMapMode()` to configure the map (TODO: rename learnMapActions)
  *
  * Performance benefits:
  * - Single WebGL context (no GPU memory duplication)
  * - No re-initialization when switching tabs
  * - Tiles stay cached across tab switches
+ * - TODO: better organize layers, markers & tooltips
  */
 
 import { useEffect, useRef, useState, useMemo } from "react"
 import { Map, NavigationControl, Marker, useMap, GeolocateControl } from "@repo/map"
 import { Box, useTheme } from "@repo/ui/mui"
 
-// Learn layers
+// Map layers
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
 
-// Explore components
-import TierMarkers from "../scenarioExplorer/components/TierMarkers"
+// Map components
+import TierMarkers from "../scenarioExplorer/components/TierMarkers" 
+import { ReservoirLabels } from "./components/ReservoirLabels"
+import { HotspotMarkers } from "./components/HotspotMarkers"
 
 // API
 import {
@@ -44,16 +46,10 @@ import {
   outcomeUsesMapboxLayers,
 } from "./hooks/useOutcomeMapLayer"
 import { useMapLayers } from "./hooks/useMapLayers"
+import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
 
 // Tooltips
 import { PolygonLayerTooltip } from "../tooltips/PolygonLayerTooltip"
-
-// Custom layer components
-import { ReservoirLabels } from "./components/ReservoirLabels"
-import { HotspotMarkers } from "./components/HotspotMarkers"
-
-// Explore hooks
-import { useTierMapData } from "../scenarioExplorer/hooks/useTierMapData"
 
 // Store
 import {
@@ -77,13 +73,13 @@ import {
 
 import "./MapboxControlStyles.css"
 
-// Map bounds (California region)
+// Map bounds (Learn map)
 const MAP_BOUNDS: [[number, number], [number, number]] = [
   [-145.0, 20.0], // Southwest
   [-95.0, 55.0], // Northeast
 ]
 
-// California geographic bounds for Explore mode centering
+// California geographic bounds (Explore map) TODO: consider renaming
 const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
   [-124.5, 32.5], // Southwest (lon, lat)
   [-114.0, 42.0], // Northeast (lon, lat)
@@ -103,7 +99,7 @@ const getContainerStyles = (
     left: 0,
     width: "100vw",
     height: "100vh",
-    zIndex: zIndexBasement, // Use theme z-index for map background layer
+    zIndex: zIndexBasement, // Use theme z-index for map background layer, TODO: consider generalizing
     transition: "opacity 0.3s ease-out",
   }
 
@@ -121,7 +117,7 @@ const getContainerStyles = (
         pointerEvents: "auto",
         // Apply scroll offset to "release" the map from being fixed
         // This makes the map scroll up with content when offset > 0
-        // Short transition smooths the initial "release" moment
+        // Short transition smooths the initial "release" moment so it's not jarring
         transform: scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
         transition: "opacity 0.3s ease-out, transform 0.15s ease-out",
       }
@@ -146,11 +142,8 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   const theme = useTheme()
   const onMapReadyCalledRef = useRef(false)
 
-  // Store state
+  // State
   const mapMode = useMapMode()
-
-
-  // Learn-specific state
   const activeSection = useActiveSection()
   const geocoderMarker = useGeocoderMarker()
   const riversProgress = useRiversProgress()
@@ -160,14 +153,12 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   const showArrows = useShowArrows()
   const cameraView = useCameraView()
   const selectedOutcome = useSelectedOutcome()
-
-  // Explore-specific state
   const exploreTierSelection = useExploreTierSelection()
 
   // Scroll offset for "release from sticky" effect in Learn mode
   const learnMapScrollOffset = useLearnMapScrollOffset()
 
-  // Check if Learn outcome uses Mapbox layers (polygon, line, point - not react-marker)
+  // Check if Learn outcome uses Mapbox layers (polygon, line, point)
   const learnUsesMapboxLayers = selectedOutcome
     ? outcomeUsesMapboxLayers(selectedOutcome)
     : false
@@ -177,7 +168,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     ? outcomeUsesMapboxLayers(exploreTierSelection.outcome)
     : false
 
-  // Single mode-aware hook for polygon layer (CWS, AG_REV, etc.)
+  // Single mode-aware hook for polygon tier layer (CWS, AG_REV, etc.)
   // The hook derives which outcome to show based on mapMode
   const { 
     hoveredFeature, 
@@ -197,16 +188,16 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   const activeTooltip = pinnedFeature || hoveredFeature
   const isTooltipPinned = !!pinnedFeature
 
-  // Explore mode: fetch tier data based on selection
+  // Fetch tier data based on selection
   const { tierData: exploreTierData } = useTierMapData({
     selectedTier: mapMode === "explore" ? exploreTierSelection : null,
   })
 
-  // Tier location data for outcomes that DON'T use polygons
+  // Tier location data for outcomes that don't use polygons
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
   const [, setTierDataLoading] = useState(false)
 
-  // Fetch tier location data when in Learn mode and outcome selected (non-polygon outcomes only)
+  // Fetch tier location data when in Learn mode and outcome selected (non-polygon outcomes)
   useEffect(() => {
     if (mapMode !== "learn" || !selectedOutcome || learnUsesMapboxLayers) {
       setTierData(null)
@@ -300,7 +291,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         }
       })
 
-      // Trigger tile loading by briefly making layers visible
+      // Trigger tile loading by briefly making layers visible TODO: is this the most efficient way to do this?
       MAPBOX_LAYER_IDS.forEach((layerId) => {
         try {
           if (mapboxInstance.getLayer(layerId)) {
@@ -323,10 +314,11 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
           }
         })
 
-        // Now we're truly ready
+        // Now it's ready
         learnMapActions.setMapReady(true)
       }
 
+      // TODO: review this technique
       const timeoutId = setTimeout(() => {
         mapboxInstance.off("idle", onIdle)
         onIdle()
@@ -385,7 +377,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
     prevSectionRef.current = activeSection
 
-    // Include padding reset in easeTo to animate both together (smooth transition from Explore)
+    // Include map padding reset in easeTo to animate both together (smooth transition from Explore)
     map.mapRef.current.easeTo({
       center: [cameraView.longitude, cameraView.latitude],
       zoom: cameraView.zoom,
@@ -414,7 +406,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     })
   }, [mapMode, map])
 
-  // Hide native Mapbox layers when switching to Explore mode
+  // Hide Mapbox layers when switching to Explore mode
   useEffect(() => {
     if (mapMode !== "explore") return
     if (!map.mapRef?.current) return
@@ -463,6 +455,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   // which fires when resetLearnState() sets activeSection to "california"
 
   // FYI: Visualization state clearing is handled synchronously in setMapMode()
+  // TODO: review this system
 
   const containerStyles = getContainerStyles(
     mapMode,
@@ -476,7 +469,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   return (
     <>
-      {/* Teal backdrop for Learn mode - sits behind the map, revealed when map scrolls away */}
+      {/* Teal backdrop for Learn mode - sits behind the map, sometimes revealed when there are gaps between map and other interface elements */}
       {isLearnMode && (
         <Box
           sx={{
@@ -517,7 +510,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         dragRotate={false}
         doubleClickZoom={true}
         keyboard={true}
-        interactive={true}  // Always interactive - visibility controlled by CSS pointerEvents
+        interactive={true}  // Always interactive
         projection={{ name: "globe" }}
       >
         <NavigationControl position="bottom-left" />
@@ -571,7 +564,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
               <ReservoirLabels tierLookup={tierLookup} />
             )}
 
-            {/* Hotspot markers for tier 4 locations (demo: CWS and Salmon) */}
+            {/* Hotspot markers for tier 4 locations */}
             <HotspotMarkers
               outcome={selectedOutcome}
               strategy="current-ops"
