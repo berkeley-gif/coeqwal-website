@@ -143,7 +143,7 @@ export default function ScenarioExplorerNew() {
               }}
             >
               <Tab label="About COEQWAL scenarios" value="about" />
-              <Tab label="Explore scenarios" value="explorer" />
+              <Tab label="Choose scenarios" value="explorer" />
               <Tab label="Data explorer" value="data" />
             </Tabs>
           </Box>
