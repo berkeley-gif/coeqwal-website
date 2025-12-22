@@ -30,7 +30,7 @@ import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
 
 // Map components
-import TierMarkers from "../scenarioExplorer/components/TierMarkers" 
+import TierMarkers from "./components/TierMarkers" 
 import { ReservoirLabels } from "./components/ReservoirLabels"
 import { HotspotMarkers } from "./components/HotspotMarkers"
 
