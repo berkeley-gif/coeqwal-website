@@ -60,7 +60,10 @@ export function GridControls({
               <DocumentExpandedIcon active={showDefinitions} size={iconSize} />
             }
             rightIcon={
-              <DocumentCollapsedIcon active={!showDefinitions} size={iconSize} />
+              <DocumentCollapsedIcon
+                active={!showDefinitions}
+                size={iconSize}
+              />
             }
             onLeftClick={() => onShowDefinitionsChange(true)}
             onRightClick={() => onShowDefinitionsChange(false)}

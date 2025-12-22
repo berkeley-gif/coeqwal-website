@@ -63,7 +63,9 @@ export interface StrategyGridProps {
  * Helper function to detect if tier data represents a single value
  * Uses the tierType metadata from the API
  */
-export function isSingleValueTier(chartData: ChartDataPoint[] | undefined): boolean {
+export function isSingleValueTier(
+  chartData: ChartDataPoint[] | undefined,
+): boolean {
   if (!chartData || chartData.length === 0) return false
   // Check the tierType metadata from the first data point (all points in a tier have the same type)
   return chartData[0]?.tierType === "single_value"

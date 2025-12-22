@@ -9,7 +9,10 @@ import { useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
-import { OUTCOME_DISPLAY_ORDER, useScenarioTiers } from "../../../scenarios/hooks"
+import {
+  OUTCOME_DISPLAY_ORDER,
+  useScenarioTiers,
+} from "../../../scenarios/hooks"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { learnMapActions, useSelectedOutcome } from "../../store"

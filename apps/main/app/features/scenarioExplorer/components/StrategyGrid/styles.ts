@@ -15,9 +15,11 @@ export const gridStyles = {
   container: (showMapView: boolean, theme: Theme, compact?: boolean) => ({
     display: "grid",
     gridTemplateColumns: theme.scenarios.grid.columns,
-    gap: theme.spacing(compact
-      ? theme.scenarios.grid.gap.compact
-      : theme.scenarios.grid.gap.default),
+    gap: theme.spacing(
+      compact
+        ? theme.scenarios.grid.gap.compact
+        : theme.scenarios.grid.gap.default,
+    ),
     columnGap: theme.spacing(2),
     alignItems: "start",
     width: "100%",
@@ -47,10 +49,16 @@ export const gridStyles = {
   iconBox: (showMapView: boolean, theme: Theme) => ({
     width: showMapView
       ? theme.spacing(theme.scenarios.icon.sizes.sm)
-      : { xs: theme.spacing(theme.scenarios.icon.sizes.md), lg: theme.spacing(theme.scenarios.icon.sizes.lg) },
+      : {
+          xs: theme.spacing(theme.scenarios.icon.sizes.md),
+          lg: theme.spacing(theme.scenarios.icon.sizes.lg),
+        },
     height: showMapView
       ? theme.spacing(theme.scenarios.icon.sizes.sm)
-      : { xs: theme.spacing(theme.scenarios.icon.sizes.md), lg: theme.spacing(theme.scenarios.icon.sizes.lg) },
+      : {
+          xs: theme.spacing(theme.scenarios.icon.sizes.md),
+          lg: theme.spacing(theme.scenarios.icon.sizes.lg),
+        },
     cursor: "pointer",
   }),
 
@@ -82,7 +90,9 @@ export const gridStyles = {
     ...theme.scenarios.outcome.box,
     gap: showMapView ? 0.5 : 1,
     cursor: showMapView && isActive ? "pointer" : "default",
-    ...(isActive ? theme.scenarios.outcome.states.active : theme.scenarios.outcome.states.inactive),
+    ...(isActive
+      ? theme.scenarios.outcome.states.active
+      : theme.scenarios.outcome.states.inactive),
     ...(isSelected && theme.scenarios.outcome.states.selected),
     "&:hover": {
       ...(showMapView && isActive && theme.scenarios.outcome.states.hover),

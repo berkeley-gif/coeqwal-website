@@ -8,7 +8,12 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton } from "@repo/ui"
 import { strategies } from "../../../../content/scenarios"
 import type { StrategyInfoPanelProps } from "./types"
-import { panelBaseStyles, panelMaxWidth, getTitleStyles, getDescriptionStyles } from "./styles"
+import {
+  panelBaseStyles,
+  panelMaxWidth,
+  getTitleStyles,
+  getDescriptionStyles,
+} from "./styles"
 
 export function StrategyInfoPanel({
   strategyValue = "current-ops",

@@ -14,7 +14,13 @@ import { InfoIconButton, HybridTooltip } from "@repo/ui"
 import { strategies } from "../../../content/scenarios"
 import type { StrategyRowProps } from "./StrategyRow/types"
 import { getStrategyIcons } from "./StrategyRow/utils"
-import { panelBaseStyles, panelMaxWidth, getTitleStyles, getDescriptionStyles, getIconBoxStyles } from "./StrategyRow/styles"
+import {
+  panelBaseStyles,
+  panelMaxWidth,
+  getTitleStyles,
+  getDescriptionStyles,
+  getIconBoxStyles,
+} from "./StrategyRow/styles"
 
 // Re-export panel components for backward compatibility
 export { StrategyInfoPanel } from "./StrategyRow/StrategyInfoPanel"
