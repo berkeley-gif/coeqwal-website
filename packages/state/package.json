@@ -4,25 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./map": {
-      "import": "./src/map/index.ts",
-      "types": "./src/map/index.ts"
-    },
-    "./story": {
-      "import": "./src/story/index.ts",
-      "types": "./src/story/index.ts"
-    },
     "./drawer": {
       "import": "./src/drawer/index.ts",
       "types": "./src/drawer/index.ts"
-    },
-    "./workflow": {
-      "import": "./src/exploreUserWorkflow/index.ts",
-      "types": "./src/exploreUserWorkflow/index.ts"
-    },
-    "./scenarioExplorer": {
-      "import": "./src/scenarioExplorer/index.ts",
-      "types": "./src/scenarioExplorer/index.ts"
     }
   },
   "scripts": {
@@ -37,7 +21,6 @@
     "eslint": "^9.15.0"
   },
   "dependencies": {
-    "@repo/map": "workspace:*",
     "immer": "^10.1.1",
     "zustand": "^5.0.3"
   }

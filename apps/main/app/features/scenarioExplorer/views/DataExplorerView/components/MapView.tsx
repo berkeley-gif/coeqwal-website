@@ -14,7 +14,7 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { Map, NavigationControl, MapProvider } from "@repo/map"
-import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
+import { useScenarioExplorerStore } from "../../../store"
 import { getMapMetrics, outcomeCategories } from "../outcomeDefinitions"
 import {
   fetchTierLocationData,

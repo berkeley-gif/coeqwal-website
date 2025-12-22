@@ -13,7 +13,7 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { ExpandMoreIcon } from "@repo/ui/mui"
-import { useScenarioExplorerStore } from "@repo/state/scenarioExplorer"
+import { useScenarioExplorerStore } from "../../../store"
 import { VerticalBarChart, TierCircles } from "@repo/viz"
 import {
   outcomeCategories,
