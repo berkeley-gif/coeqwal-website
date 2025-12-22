@@ -4,6 +4,9 @@
  * This is a fully controlled component that accepts all state as props.
  * Parent components are responsible for state management via useScenarioExplorerStore()
  * or useExploreUserWorkflowStore().
+ *
+ * Note: Types and styles have been extracted to StrategyGrid/ folder for better organization.
+ * Future refactoring will extract sub-components.
  */
 
 import React, { useState, useEffect } from "react"
@@ -11,7 +14,6 @@ import {
   Box,
   Typography,
   useTheme,
-  Theme,
   Checkbox,
   Portal,
   ClickAwayListener,
@@ -34,153 +36,14 @@ import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { SummaryPanel } from "../../map/overlays/SummaryPanel"
 
+// Import extracted types and styles
+import { gridStyles } from "./StrategyGrid/styles"
+import { isSingleValueTier, type StrategyGridProps } from "./StrategyGrid/types"
+
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
   return name
 }
-
-/**
- * Helper function to detect if tier data represents a single value
- * Uses the tierType metadata from the API
- */
-function isSingleValueTier(
-  chartData:
-    | Array<{ label: string; color: string; value: number; tierType?: string }>
-    | undefined,
-): boolean {
-  if (!chartData || chartData.length === 0) return false
-  // Check the tierType metadata from the first data point (all points in a tier have the same type)
-  return chartData[0]?.tierType === "single_value"
-}
-
-interface StrategyGridProps {
-  // Data props
-  getChartDataForStrategy: (
-    strategyValue: string,
-  ) => Record<string, Array<{ label: string; color: string; value: number }>>
-  outcomeNames: Array<{
-    shortCode: string
-    name: string
-    displayName: string
-  }>
-  strategies?: Array<{
-    value: string
-    label: string
-    description: string
-    theme?: string
-  }> // Optional filtered strategies list
-  highlightedStrategies?: Set<string> // Strategy values to highlight (search matches)
-  showSearchDivider?: boolean // Whether to show a divider between search results and other strategies
-
-  // Event handlers
-  onOutcomeSelect: (strategyValue: string, outcome: string) => void
-  onTierClick?: (strategy: string, outcome: string) => void
-  onToggleScenario: (strategyValue: string) => void
-
-  // State props (fully controlled)
-  selectedScenarios: string[]
-  selectedOutcomes: Record<string, string | null> // strategy -> outcome mapping (null = no outcome selected)
-  showMapView: boolean
-  showOnlyChosen: boolean
-  showDefinitions: boolean
-
-  // Layout props
-  compact?: boolean // When true, shows labels below charts instead of column headers (for 50% width views)
-  renderMode?: "all" | "headersOnly" | "contentOnly" // Controls what parts to render (for split header/content layouts)
-
-  // UI control handlers
-  onMapViewChange: (enabled: boolean) => void
-  onShowOnlyChosenChange: (enabled: boolean) => void
-  onShowDefinitionsChange: (enabled: boolean) => void
-
-  // Sorting props (optional - only used in list view)
-  sortBy?: string | null // Outcome display name to sort by
-  sortDirection?: "asc" | "desc" // Sort direction
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
-}
-
-const gridStyles = {
-  container: (showMapView: boolean, theme: Theme, compact?: boolean) => ({
-    display: "grid",
-    gridTemplateColumns: {
-      xs: "32px minmax(0, 1fr) auto",
-      lg: "32px minmax(0, 0.8fr) auto minmax(0, 2fr)",
-    },
-    gap: compact ? theme.spacing(2) : theme.spacing(1),
-    columnGap: theme.spacing(2),
-    alignItems: "start",
-    width: "100%",
-    ...(showMapView && {
-      maxHeight: "40vh",
-      overflowY: "auto",
-      overflowX: "hidden",
-      pt: 1,
-    }),
-  }),
-  operationsIcons: {
-    display: "flex",
-    gap: { xs: 0.5, md: 1 },
-    alignItems: "center",
-    flexDirection: { xs: "column", md: "row" },
-    justifyContent: "flex-start",
-  },
-  iconBox: (showMapView: boolean, theme: Theme) => ({
-    width: showMapView
-      ? theme.spacing(3.5)
-      : { xs: theme.spacing(4), lg: theme.spacing(5) },
-    height: showMapView
-      ? theme.spacing(3.5)
-      : { xs: theme.spacing(4), lg: theme.spacing(5) },
-    cursor: "pointer",
-  }),
-  outcomeChartsContainer: (theme: Theme) => ({
-    gridColumn: { xs: "1 / -1", lg: "auto" },
-    display: "grid",
-    gridTemplateColumns: {
-      xs: "repeat(3, 1fr)",
-      lg: "repeat(auto-fit, minmax(60px, 1fr))",
-    },
-    gap: theme.spacing(1),
-    mt: { xs: 2, lg: 0 },
-    maxWidth: "100%",
-  }),
-  outcomeBox: (
-    showMapView: boolean,
-    isActive: boolean,
-    isSelected: boolean,
-    theme: Theme,
-  ) => ({
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: showMapView ? 0.5 : 1,
-    cursor: showMapView && isActive ? "pointer" : "default",
-    padding: 0.5,
-    borderRadius: theme.borderRadius.rounded,
-    transition: "all 0.2s ease",
-    backgroundColor: "transparent",
-    opacity: isActive ? 1 : 0.7,
-    border: isSelected
-      ? `2px solid ${theme.palette.blue.bright}`
-      : "2px solid transparent",
-    "&:hover": {
-      backgroundColor:
-        showMapView && isActive ? theme.palette.grey[100] : "transparent",
-    },
-  }),
-  outcomeLabel: (showMapView: boolean, isActive: boolean, theme: Theme) => ({
-    color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
-    fontWeight: theme.typography.fontWeightRegular,
-    textAlign: "center",
-    fontSize: showMapView
-      ? "0.6rem"
-      : theme.typography.compact.caption.fontSize,
-    lineHeight: showMapView
-      ? theme.typography.compact.caption.lineHeight
-      : theme.typography.compact.caption.lineHeight,
-    whiteSpace: "pre-line",
-  }),
-} as const
 
 // Strategy Grid component
 const StrategyGrid = React.memo(function StrategyGridComponent({

@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { useScenarioTiers } from "../../../../../hooks/useTierData"
+import { useScenarioTiers } from "../../../../scenarios/hooks"
 import type { OutcomeMetric } from "../outcomeDefinitions"
 import { getDisplayNameFromMetricId } from "../../../../../lib/constants/outcomeMappings"
 

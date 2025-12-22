@@ -5,7 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../../store"
 import StrategyGrid from "../../components/StrategyGrid"
 import { useScenarioData } from "../../hooks/useScenarioData"
-import { useMultipleScenarioTiers } from "../../../../hooks/useTierData"
+import { useMultipleScenarioTiers } from "../../../scenarios/hooks"
 import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,

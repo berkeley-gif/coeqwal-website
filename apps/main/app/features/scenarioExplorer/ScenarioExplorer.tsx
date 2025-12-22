@@ -20,7 +20,7 @@ import UnifiedExploreView, {
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
-import { HydroclimateChooser } from "./components/HydroclimateChooser"
+import { HydroclimateChooser } from "../scenarios/components"
 import { ComparisonHeader } from "./components/ComparisonHeader"
 
 type MainView = "about" | "explorer" | "data"
