@@ -43,6 +43,7 @@ export default function Home() {
             }}
           >
             <IntroSection />
+            {/* Suspense is needed for useSearchParams() */}
             <Suspense fallback={null}>
               <SmoothTabs />
               <TabPanels />

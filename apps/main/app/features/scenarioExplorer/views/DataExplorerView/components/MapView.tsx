@@ -21,7 +21,7 @@ import {
   type TierLocationResponse,
 } from "../../../../../lib/api/tierLocationApi"
 import { getDisplayNameFromMetricId } from "../../../../../lib/constants/outcomeMappings"
-import TierMarkers from "../../../components/TierMarkers"
+import TierMarkers from "../../../../map/components/TierMarkers"
 import TierLegend from "../../../components/TierLegend"
 import TemporalControls from "./TemporalControls"
 import type { TemporalScale, AggregationType } from "../outcomeDefinitions"
