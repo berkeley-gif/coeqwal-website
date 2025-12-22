@@ -146,7 +146,7 @@ export function KeyOutcomesPanel({
                 justifyContent: "center",
                 backgroundColor: theme.palette.grey[100],
                 borderRadius: theme.borderRadius.rounded,
-                border: `1px solid ${theme.palette.grey[300]}`,
+                border: theme.border.medium,
               }}
             >
               <Typography

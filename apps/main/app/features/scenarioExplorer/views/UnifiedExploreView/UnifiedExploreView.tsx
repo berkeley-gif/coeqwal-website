@@ -119,8 +119,7 @@ export default function UnifiedExploreView({
             transition: "width 0.3s ease-in-out",
             display: "flex",
             flexDirection: "column",
-            borderRight: showRightPanel ? theme.border.standard : "none",
-            borderColor: theme.palette.grey[300],
+            borderRight: showRightPanel ? theme.border.medium : "none",
             backgroundColor:
               mode === "list"
                 ? theme.palette.grey[100]

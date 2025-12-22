@@ -107,7 +107,7 @@ export function OutcomeChartItem({
         opacity: isActive ? 1 : 0.7,
         border:
           isExpanded || isSelected
-            ? `2px solid ${theme.palette.blue.bright}`
+            ? theme.border.focus
             : "2px solid transparent",
         "&:hover": {
           backgroundColor: isActive ? theme.palette.grey[100] : "transparent",
@@ -133,7 +133,7 @@ export function OutcomeChartItem({
             justifyContent: "center",
             backgroundColor: theme.palette.grey[100],
             borderRadius: theme.borderRadius.rounded,
-            border: `1px solid ${theme.palette.grey[300]}`,
+            border: theme.border.medium,
           }}
         >
           <Typography

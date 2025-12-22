@@ -127,7 +127,7 @@ export default function CategoryView() {
             sx={{
               backgroundColor: theme.palette.common.white,
               boxShadow: "none",
-              border: `1px solid ${theme.palette.grey[200]}`,
+              border: theme.border.light,
               mb: theme.spacing(2),
               "&:before": {
                 display: "none",
@@ -139,9 +139,8 @@ export default function CategoryView() {
               sx={{
                 backgroundColor: theme.palette.grey[50],
                 borderBottom: expanded.includes(category.id)
-                  ? theme.border.standard
+                  ? theme.border.medium
                   : "none",
-                borderColor: theme.palette.grey[300],
                 "&:hover": {
                   backgroundColor: theme.palette.grey[100],
                 },
@@ -257,11 +256,10 @@ function MetricCard({
         mb: theme.spacing(2),
         backgroundColor: theme.palette.grey[50],
         borderRadius: theme.borderRadius.rounded,
-        border: theme.border.standard,
-        borderColor: theme.palette.grey[200],
+        border: theme.border.light,
         "&:hover": {
           backgroundColor: theme.palette.grey[100],
-          borderColor: theme.palette.grey[300],
+          border: theme.border.medium,
         },
       }}
     >
@@ -382,8 +380,7 @@ function MetricCard({
             p: theme.spacing(2),
             backgroundColor: theme.palette.common.white,
             borderRadius: theme.borderRadius.standard,
-            border: theme.border.standard,
-            borderColor: theme.palette.grey[300],
+            border: theme.border.medium,
           }}
         >
           <Typography

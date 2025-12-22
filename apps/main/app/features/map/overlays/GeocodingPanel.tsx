@@ -202,7 +202,7 @@ export function GeocodingPanel({
               maxHeight: 300,
               overflowY: "auto",
               zIndex: theme.zIndex.pageContent,
-              border: `1px solid ${theme.palette.grey[300]}`,
+              border: theme.border.medium,
             }}
           >
             {geocoding.results.map((feature, index) => (
@@ -216,7 +216,7 @@ export function GeocodingPanel({
                   border: "none",
                   borderBottom:
                     index < geocoding.results.length - 1
-                      ? `1px solid ${theme.palette.grey[200]}`
+                      ? theme.border.light
                       : "none",
                   backgroundColor: theme.palette.common.white,
                   cursor: "pointer",
@@ -272,7 +272,7 @@ export function GeocodingPanel({
               p: 2,
               backgroundColor: "rgba(58, 69, 116, 0.05)",
               borderRadius: theme.borderRadius.standard,
-              border: `1px solid ${theme.palette.blue.light}`,
+              border: theme.border.focusLight,
             }}
           >
             <Typography
@@ -301,7 +301,7 @@ export function GeocodingPanel({
                 sx={{
                   mt: 1.5,
                   pt: 1.5,
-                  borderTop: `1px solid ${theme.palette.grey[300]}`,
+                  borderTop: theme.border.medium,
                 }}
               >
                 <Typography
@@ -326,7 +326,7 @@ export function GeocodingPanel({
                   display: "block",
                   mt: 1.5,
                   pt: 1.5,
-                  borderTop: `1px solid ${theme.palette.grey[300]}`,
+                  borderTop: theme.border.medium,
                   color: theme.palette.grey[600],
                   fontStyle: "italic",
                 }}

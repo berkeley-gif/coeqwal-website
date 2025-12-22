@@ -388,9 +388,7 @@ export function SummaryPanel({
           >
             <Box
               sx={{
-                borderTop: isInline
-                  ? "none"
-                  : `1px solid ${theme.palette.grey[200]}`,
+                borderTop: isInline ? "none" : theme.border.light,
                 pt: isInline ? 0 : 2,
               }}
             >
@@ -503,7 +501,7 @@ export function SummaryPanel({
                               cursor: "pointer",
                               backgroundColor: "transparent",
                               color: theme.palette.grey[700],
-                              border: `1px solid ${theme.palette.grey[300]}`,
+                              border: theme.border.medium,
                               fontSize: "0.65rem",
                               height: 22,
                               "&:hover": {
@@ -561,7 +559,7 @@ export function SummaryPanel({
                             cursor: "pointer",
                             backgroundColor: "transparent",
                             color: theme.palette.grey[600],
-                            border: `1px solid ${theme.palette.grey[300]}`,
+                            border: theme.border.medium,
                             fontSize: "0.6rem",
                             height: 18,
                             "&:hover": {
@@ -655,7 +653,7 @@ export function SummaryPanel({
                                 cursor: "pointer",
                                 backgroundColor: "transparent",
                                 color: theme.palette.grey[700],
-                                border: `1px solid ${theme.palette.grey[300]}`,
+                                border: theme.border.medium,
                                 fontSize: theme.typography.nav.fontSize,
                                 height: 24,
                                 "&:hover": {
@@ -714,7 +712,7 @@ export function SummaryPanel({
                                 cursor: "pointer",
                                 backgroundColor: "transparent",
                                 color: theme.palette.grey[600],
-                                border: `1px solid ${theme.palette.grey[300]}`,
+                                border: theme.border.medium,
                                 fontSize: "0.6rem",
                                 height: 18,
                                 "&:hover": {
@@ -759,7 +757,7 @@ export function SummaryPanel({
             fontStyle: "italic",
             fontSize: "0.75rem",
             display: "block",
-            borderTop: `1px solid ${theme.palette.grey[200]}`,
+            borderTop: theme.border.light,
             pt: 1.5,
           }}
         >

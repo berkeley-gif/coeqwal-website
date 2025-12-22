@@ -101,8 +101,7 @@ export default function ScenarioExplorerNew() {
           <Box
             sx={{
               backgroundColor: theme.palette.common.white,
-              borderBottom: theme.border.standard,
-              borderColor: theme.palette.grey[300],
+              borderBottom: theme.border.medium,
               px: theme.spacing(theme.cards.spacing.standard),
             }}
           >
@@ -313,13 +312,12 @@ export default function ScenarioExplorerNew() {
                         : theme.palette.common.white,
                     borderLeft:
                       exploreMode === "comparison"
-                        ? theme.border.standard
+                        ? theme.border.medium
                         : "none",
                     borderBottom:
                       exploreMode === "comparison"
-                        ? theme.border.standard
+                        ? theme.border.medium
                         : "none",
-                    borderColor: theme.palette.grey[300],
                     // Allow map interaction through this area in map mode
                     pointerEvents: exploreMode === "map" ? "none" : "auto",
                   }}

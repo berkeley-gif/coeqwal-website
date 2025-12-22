@@ -50,7 +50,7 @@ export function TierTooltipPortal({
               position: "relative",
               backgroundColor: theme.palette.common.white,
               color: theme.palette.text.primary,
-              border: `1px solid ${theme.palette.action.hover}`,
+              border: theme.border.light,
               borderRadius: theme.borderRadius.card,
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
               padding: "16px",

@@ -32,8 +32,7 @@ export default function SearchBar({
         px: theme.spacing(theme.cards.spacing.standard),
         py: theme.spacing(2),
         backgroundColor: theme.palette.common.white,
-        borderBottom: theme.border.standard,
-        borderColor: theme.palette.grey[300],
+        borderBottom: theme.border.medium,
       }}
     >
       {/* Search section */}

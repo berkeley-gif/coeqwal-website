@@ -27,7 +27,7 @@ export default function SelectionBanner() {
     <Box
       sx={{
         backgroundColor: theme.palette.common.white,
-        borderBottom: `1px solid ${theme.palette.grey[200]}`,
+        borderBottom: theme.border.light,
         px: { xs: 3, md: 6 },
         py: 1.5,
       }}

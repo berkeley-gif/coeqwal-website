@@ -148,8 +148,7 @@ export default function TableView() {
         sx={{
           p: theme.spacing(2),
           backgroundColor: theme.palette.common.white,
-          borderBottom: theme.border.standard,
-          borderColor: theme.palette.grey[300],
+          borderBottom: theme.border.medium,
           display: "flex",
           flexWrap: "wrap",
           gap: theme.spacing(2),
@@ -328,12 +327,11 @@ function MetricRow({
         p: theme.spacing(2),
         backgroundColor: theme.palette.common.white,
         borderRadius: theme.borderRadius.rounded,
-        border: theme.border.standard,
-        borderColor: theme.palette.grey[200],
+        border: theme.border.light,
         transition: "all 0.2s ease",
         "&:hover": {
           backgroundColor: theme.palette.grey[50],
-          borderColor: category ? category.color : theme.palette.grey[300],
+          border: category ? `1px solid ${category.color}` : theme.border.medium,
           boxShadow: theme.boxShadows.subtle,
         },
       }}

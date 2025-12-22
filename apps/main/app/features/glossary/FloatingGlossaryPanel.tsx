@@ -226,7 +226,7 @@ export function FloatingGlossaryPanel({
                           ),
                           padding: 2,
                           borderRadius: theme.borderRadius.card,
-                          border: `2px solid ${theme.palette.blue.bright}`,
+                          border: theme.border.focus,
                           transition: "all 0.3s ease",
                         }
                       : {
