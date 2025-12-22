@@ -15,30 +15,24 @@ import {
   Typography,
   useTheme,
   Checkbox,
-  Portal,
-  ClickAwayListener,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
   InfoIconButton,
   SortButton,
-  DocumentListIcon,
-  DocumentCheckedIcon,
-  DocumentExpandedIcon,
-  DocumentCollapsedIcon,
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../content/scenarios"
-import TierTooltipContent from "../../tooltips/TierTooltipContent"
-import TogglePair from "./TogglePair"
 import { getThemeIcon, getThemeIconDescription } from "./ThemeIcons"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { SummaryPanel } from "../../map/overlays/SummaryPanel"
 
-// Import extracted types and styles
+// Import extracted types, styles, and components
 import { gridStyles } from "./StrategyGrid/styles"
 import { isSingleValueTier, type StrategyGridProps } from "./StrategyGrid/types"
+import { TierTooltipPortal } from "./StrategyGrid/TierTooltipPortal"
+import { GridControls } from "./StrategyGrid/GridControls"
 
 // Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
@@ -126,98 +120,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   return (
     <Box sx={{ position: "relative" }}>
-      {/* Active outcome tooltip - rendered via Portal to escape stacking context */}
-      {activeTooltip && tooltipPosition && (
-        <Portal>
-          <ClickAwayListener
-            onClickAway={closeTooltip}
-            mouseEvent="onMouseUp"
-            touchEvent="onTouchEnd"
-          >
-            <Box
-              sx={{
-                position: "fixed",
-                top: tooltipPosition.top,
-                right: tooltipPosition.right,
-                zIndex: theme.zIndex.tooltip,
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  backgroundColor: theme.palette.common.white,
-                  color: theme.palette.text.primary,
-                  border: `1px solid ${theme.palette.action.hover}`,
-                  borderRadius: theme.borderRadius.card,
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                  padding: "16px",
-                  paddingRight: "40px", // Extra space for close button
-                  width: theme.spacing(56.25),
-                }}
-              >
-                {/* Close button */}
-                <Box
-                  component="button"
-                  onClick={forceCloseTooltip}
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    width: 24,
-                    height: 24,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "none",
-                    background: "none",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    color: theme.palette.grey[500],
-                    borderRadius: "50%",
-                    "&:hover": {
-                      color: theme.palette.grey[700],
-                      backgroundColor: theme.palette.grey[100],
-                    },
-                  }}
-                  aria-label="Close tooltip"
-                >
-                  ✕
-                </Box>
-
-                {/* Arrow pointing right (to the anchor) - positioned at upper right */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    right: -16,
-                    top: 16,
-                    width: 0,
-                    height: 0,
-                    border: "8px solid transparent",
-                    borderLeftColor: theme.palette.common.white,
-                    // Add a shadow effect to the arrow
-                    filter: "drop-shadow(2px 0 2px rgba(0, 0, 0, 0.1))",
-                  }}
-                />
-                {/* Arrow border overlay */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    right: -17,
-                    top: 16,
-                    width: 0,
-                    height: 0,
-                    border: "8px solid transparent",
-                    borderLeftColor: theme.palette.action.hover,
-                    zIndex: -1,
-                  }}
-                />
-
-                <TierTooltipContent outcome={activeTooltip} showTitle={true} />
-              </Box>
-            </Box>
-          </ClickAwayListener>
-        </Portal>
-      )}
+      {/* Active outcome tooltip - rendered via Portal */}
+      <TierTooltipPortal
+        outcome={activeTooltip}
+        position={tooltipPosition}
+        onClose={closeTooltip}
+        onForceClose={forceCloseTooltip}
+      />
 
       <Box sx={gridStyles.container(showMapView, theme, compact)}>
         {/* Column header - only render if not contentOnly mode */}
@@ -236,50 +145,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 Choose strategies
               </Typography>
               {compact && (
-                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                  <InfoTooltip description="Show all strategies or only chosen ones">
-                    <Box>
-                      <TogglePair
-                        leftIcon={
-                          <DocumentListIcon
-                            active={!showOnlyChosen}
-                            size={40}
-                          />
-                        }
-                        rightIcon={
-                          <DocumentCheckedIcon
-                            active={showOnlyChosen}
-                            size={40}
-                          />
-                        }
-                        onLeftClick={() => onShowOnlyChosenChange(false)}
-                        onRightClick={() => onShowOnlyChosenChange(true)}
-                        gap={-0.5}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                  <InfoTooltip description="Show or hide strategy details">
-                    <Box>
-                      <TogglePair
-                        leftIcon={
-                          <DocumentExpandedIcon
-                            active={showDefinitions}
-                            size={40}
-                          />
-                        }
-                        rightIcon={
-                          <DocumentCollapsedIcon
-                            active={!showDefinitions}
-                            size={40}
-                          />
-                        }
-                        onLeftClick={() => onShowDefinitionsChange(true)}
-                        onRightClick={() => onShowDefinitionsChange(false)}
-                        gap={-0.5}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                </Box>
+                <GridControls
+                  showOnlyChosen={showOnlyChosen}
+                  showDefinitions={showDefinitions}
+                  onShowOnlyChosenChange={onShowOnlyChosenChange}
+                  onShowDefinitionsChange={onShowDefinitionsChange}
+                />
               )}
             </Box>
             {!compact && (
@@ -303,50 +174,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   }}
                 >
                   <Typography variant="subtitle2">Key outcomes</Typography>
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                    <InfoTooltip description="Show all strategies or only chosen ones">
-                      <Box>
-                        <TogglePair
-                          leftIcon={
-                            <DocumentListIcon
-                              active={!showOnlyChosen}
-                              size={40}
-                            />
-                          }
-                          rightIcon={
-                            <DocumentCheckedIcon
-                              active={showOnlyChosen}
-                              size={40}
-                            />
-                          }
-                          onLeftClick={() => onShowOnlyChosenChange(false)}
-                          onRightClick={() => onShowOnlyChosenChange(true)}
-                          gap={-0.5}
-                        />
-                      </Box>
-                    </InfoTooltip>
-                    <InfoTooltip description="Show or hide strategy details">
-                      <Box>
-                        <TogglePair
-                          leftIcon={
-                            <DocumentExpandedIcon
-                              active={showDefinitions}
-                              size={40}
-                            />
-                          }
-                          rightIcon={
-                            <DocumentCollapsedIcon
-                              active={!showDefinitions}
-                              size={40}
-                            />
-                          }
-                          onLeftClick={() => onShowDefinitionsChange(true)}
-                          onRightClick={() => onShowDefinitionsChange(false)}
-                          gap={-0.5}
-                        />
-                      </Box>
-                    </InfoTooltip>
-                  </Box>
+                  <GridControls
+                    showOnlyChosen={showOnlyChosen}
+                    showDefinitions={showDefinitions}
+                    onShowOnlyChosenChange={onShowOnlyChosenChange}
+                    onShowDefinitionsChange={onShowDefinitionsChange}
+                  />
                 </Box>
               </>
             )}
