@@ -1,9 +1,6 @@
 import { OUTCOME_DISPLAY_ORDER } from "../hooks/useTierData"
 
-// Re-export as OUTCOMES for backward compatibility
-export const OUTCOMES = OUTCOME_DISPLAY_ORDER
-
-export type Outcome = (typeof OUTCOMES)[number]
+export type Outcome = (typeof OUTCOME_DISPLAY_ORDER)[number]
 
 /**
  * Outcome definitions

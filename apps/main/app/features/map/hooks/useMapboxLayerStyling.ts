@@ -211,7 +211,6 @@ export function useMapboxLayerStyling({
         }
 
         // Build color expression based on tier data
-        // TODO: Remove reservoir translation once Mapbox tileset has calsim_id property
         const buildColorExpression = (): MapboxExpression | string => {
           if (!requiresIdMatching || !idProperty) {
             // Single feature - use the actual tier from the data (first entry)
@@ -320,7 +319,6 @@ function applyPolygonStyling(
   const { mapboxLayerId, idProperty, requiresIdMatching, layerType } = config
   const outlineId = `${mapboxLayerId}-outline`
 
-  // TODO: Remove this translation once Mapbox tileset has calsim_id property
   // For reservoir layer, translate CalSim IDs to gnisidlabel values
   let translatedFeatureIds = featureIds
   let translatedTierLookup = tierLookup

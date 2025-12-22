@@ -366,43 +366,6 @@ export function useMapLayers() {
     } catch {
       // Layer might not exist
     }
-
-    // Also hide legacy "water" layer if it exists (backward compatibility upon layer change) TODO: update this, check with Mapbox layer
-    try {
-      if (mapInstance.getLayer("water")) {
-        const rawOpacity =
-          (mapInstance.getPaintProperty("water", "fill-opacity") as number) ?? 0
-        const startOpacity = Math.max(0, Math.min(1, rawOpacity))
-
-        if (startOpacity > 0.01) {
-          const duration = FADE_DURATION
-          const startTime = performance.now()
-
-          const fadeOut = (currentTime: number) => {
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3)
-            const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
-
-            try {
-              mapInstance.setPaintProperty("water", "fill-opacity", opacity)
-            } catch {
-              return
-            }
-
-            if (progress < 1) {
-              requestAnimationFrame(fadeOut)
-            } else {
-              mapInstance.setLayoutProperty("water", "visibility", "none")
-            }
-          }
-
-          requestAnimationFrame(fadeOut)
-        }
-      }
-    } catch {
-      // Layer might not exist
-    }
   }, [activeSection, map.mapRef, mapReady])
 
   return {

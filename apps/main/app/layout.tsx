@@ -5,7 +5,7 @@ import { FontLoader } from "./components/FontLoader"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
-  description: "Alternative California water solutions",
+  description: "Alternative California water management scenarios",
 }
 
 export default function RootLayout({

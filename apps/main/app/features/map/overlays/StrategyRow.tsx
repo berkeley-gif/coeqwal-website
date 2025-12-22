@@ -14,7 +14,7 @@ import { InfoIconButton, HybridTooltip, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
 import { CURRENT_OPERATIONS_ICONS } from "../../../content/scenarios"
-import { OUTCOMES } from "../../../content/outcomes"
+import { OUTCOME_DISPLAY_ORDER } from "../../../hooks/useTierData"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
 import { useScenarioTiers } from "../../../hooks/useTierData"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
@@ -606,7 +606,7 @@ export function KeyOutcomesPanel({
           mb: 1.5,
         }}
       >
-        {OUTCOMES.slice(0, 5).map((outcome) => {
+        {OUTCOME_DISPLAY_ORDER.slice(0, 5).map((outcome) => {
           const tierData = chartData[outcome]
           const hasData =
             tierData !== undefined &&
@@ -767,7 +767,7 @@ export function KeyOutcomesPanel({
           alignItems: "start",
         }}
       >
-        {OUTCOMES.slice(5).map((outcome) => {
+        {OUTCOME_DISPLAY_ORDER.slice(5).map((outcome) => {
           const tierData = chartData[outcome]
           const hasData =
             tierData !== undefined &&
