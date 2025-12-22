@@ -228,12 +228,13 @@ export const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers
-    basement: 1, // Map when used as background (positive for proper pointer event handling)
+    basement: -1, // Map used as background (storyline apps)
+    persistentMap: 1, // Persistent map in main app (positive for pointer events)
     sectionBackground: 0, // Section background elements
 
     // Content layers (0-99)
     content: 20, // Default content layer
-    panels: 15, // Main content panels (above basement)
+    panels: 15, // Main content panels
 
     // Intro section micro-layers (1-9)
     introBackgroundImages: 15, // Background decorative images
@@ -1414,6 +1415,7 @@ declare module "@mui/material/styles" {
   // zIndex - derived from themeValues.zIndex
   interface ZIndex {
     basement: number
+    persistentMap: number
     sectionBackground: number
     content: number
     panels: number

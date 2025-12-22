@@ -92,7 +92,7 @@ const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
 ]
 
 // Position styles for different modes
-// zIndexBasement comes from theme.zIndex.basement
+// zIndexPersistentMap comes from theme.zIndex.persistentMap
 // scrollOffset creates the "release from sticky" effect in Learn mode
 const getContainerStyles = (
   mode: MapMode,
@@ -480,7 +480,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   const containerStyles = getContainerStyles(
     mapMode,
-    theme.zIndex.basement,
+    theme.zIndex.persistentMap,
     mapMode === "learn" ? learnMapScrollOffset : 0,
   )
 
@@ -500,7 +500,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             width: "100vw",
             height: "100vh",
             backgroundColor: theme.palette.learn.background,
-            zIndex: theme.zIndex.basement - 1, // Behind the map
+            zIndex: theme.zIndex.persistentMap - 1, // Behind the map
             opacity: learnMapScrollOffset > 0 ? 1 : 0,
             transition: "opacity 0.15s ease-out",
             pointerEvents: "none",
