@@ -99,7 +99,6 @@ export default function DataPage() {
           padding: 0,
           overflowX: "hidden",
           width: "100%",
-          zIndex: (theme) => theme.zIndex.panels,
           pointerEvents: "auto",
         }}
       >

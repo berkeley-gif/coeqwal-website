@@ -1,8 +1,6 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import TierTooltipContent, {
-  getOutcomeDisplayLabel,
-} from "../../tooltips/TierTooltipContent"
+import TierTooltipContent from "../../tooltips/TierTooltipContent"
 
 interface TierLegendProps {
   outcome: string
@@ -30,13 +28,13 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         padding: theme.spacing(3),
         backdropFilter: "blur(8px)",
         boxShadow: theme.boxShadows.prominent,
-        zIndex: 1000,
+        zIndex: theme.zIndex.mapControls,
       }}
     >
       {/* Header with close button */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-          {getOutcomeDisplayLabel(outcome)}
+          {outcome}
         </Typography>
         <Box
           component="button"
@@ -58,7 +56,6 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         </Box>
       </Box>
 
-      {/* Reuse shared tooltip content */}
       <TierTooltipContent outcome={outcome} showTitle={false} />
     </Box>
   )

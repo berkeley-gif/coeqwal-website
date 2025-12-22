@@ -53,7 +53,7 @@ export function Header() {
       onAboutClick={handleAboutClick}
       backgroundColor={theme.palette.utility.white}
       textColor={theme.palette.text.primary}
-      zIndex={theme.zIndex.appBar}
+      zIndex={theme.zIndex.uiOverlay}
       borderRadius={theme.borderRadius.none}
       boxShadow="none"
       hideOnScroll={false}

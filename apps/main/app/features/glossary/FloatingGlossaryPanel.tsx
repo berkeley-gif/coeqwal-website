@@ -173,7 +173,7 @@ export function FloatingGlossaryPanel({
           transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
           transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", // Bouncy easing
           pointerEvents: isOpen ? "auto" : "none",
-          zIndex: theme.zIndex.drawer - 1,
+          zIndex: theme.zIndex.floating,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden", // Clip content to border radius

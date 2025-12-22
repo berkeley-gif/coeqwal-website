@@ -201,7 +201,7 @@ export function GeocodingPanel({
               boxShadow: theme.shadows[3],
               maxHeight: 300,
               overflowY: "auto",
-              zIndex: 10,
+              zIndex: theme.zIndex.pageContent,
               border: `1px solid ${theme.palette.grey[300]}`,
             }}
           >

@@ -8,11 +8,6 @@ interface TierTooltipContentProps {
   showTitle?: boolean
 }
 
-// Map outcome keys to display labels (no longer needed - using API names directly)
-export const getOutcomeDisplayLabel = (name: string): string => {
-  return name
-}
-
 // Format description text with bold markdown (**text**)
 export const formatDescription = (text: string) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
@@ -98,7 +93,7 @@ export default function TierTooltipContent({
             lineHeight: 1.4,
           }}
         >
-          {getOutcomeDisplayLabel(outcome)}
+          {outcome}
         </Box>
       )}
 

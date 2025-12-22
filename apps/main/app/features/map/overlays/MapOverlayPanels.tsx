@@ -309,7 +309,7 @@ export default function MapOverlayPanels() {
     <Box
       sx={{
         position: "relative",
-        zIndex: (theme) => theme.zIndex.content,
+        zIndex: (theme) => theme.zIndex.pageContent,
         pointerEvents: "none",
         // Map is now position: fixed, so no need for negative margin
       }}
