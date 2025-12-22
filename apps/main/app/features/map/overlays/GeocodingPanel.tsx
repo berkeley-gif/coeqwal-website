@@ -164,7 +164,7 @@ export function GeocodingPanel({
         backgroundColor: "rgba(255, 255, 255, 0.95)",
         borderRadius: 0,
         padding: { xs: 2, sm: 2.5, md: 3 },
-        boxShadow: theme.shadows[2],
+        boxShadow: theme.shadow.sm,
         width: "100%",
         boxSizing: "border-box",
         pointerEvents: "auto", // Ensure panel is interactive
@@ -198,7 +198,7 @@ export function GeocodingPanel({
               right: 0,
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.md,
-              boxShadow: theme.shadows[3],
+              boxShadow: theme.shadow.sm,
               maxHeight: 300,
               overflowY: "auto",
               zIndex: theme.zIndex.pageContent,

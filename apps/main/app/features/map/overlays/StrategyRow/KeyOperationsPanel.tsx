@@ -31,7 +31,7 @@ export function KeyOperationsPanel({
     <Box
       sx={{
         ...panelBaseStyles,
-        boxShadow: theme.shadows[2],
+        boxShadow: theme.shadow.sm,
         width: "fit-content",
         maxWidth: "100%",
       }}

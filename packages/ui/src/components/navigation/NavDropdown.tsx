@@ -77,7 +77,7 @@ export function NavDropdown({
             borderRadius: (theme) => theme.borderRadius.md,
             mt: 1,
             minWidth: "200px",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+            boxShadow: (theme) => theme.shadow.md,
             border: (theme) => `1px solid ${theme.palette.action.hover}`,
           },
         }}

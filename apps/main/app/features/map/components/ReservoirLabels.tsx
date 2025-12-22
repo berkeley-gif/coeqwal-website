@@ -95,7 +95,7 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
               fontSize: "11px",
               fontWeight: 600,
               whiteSpace: "nowrap",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+              boxShadow: theme.shadow.subtle,
               border: theme.border.subtleOutline,
               pointerEvents: "none",
             }}

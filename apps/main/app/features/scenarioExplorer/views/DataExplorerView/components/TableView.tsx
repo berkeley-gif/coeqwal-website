@@ -332,7 +332,7 @@ function MetricRow({
         "&:hover": {
           backgroundColor: theme.palette.grey[50],
           border: category ? `1px solid ${category.color}` : theme.border.medium,
-          boxShadow: theme.boxShadows.subtle,
+          boxShadow: theme.shadow.subtle,
         },
       }}
     >
@@ -343,7 +343,7 @@ function MetricRow({
           alignItems: "flex-start",
         }}
       >
-        {/* Left: Category Icon */}
+        {/* Left: category icon */}
         <Box
           sx={{
             width: theme.spacing(5),

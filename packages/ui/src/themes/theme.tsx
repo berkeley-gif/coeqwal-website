@@ -10,7 +10,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 1. themeValues     - Design tokens:
  *      Core tokens:  - typeScale, fontFamily, typography
  *                    - palette (brand, blue, accent, nature, utility, tiers)
- *                    - layout, borderRadius, boxShadows, zIndex
+ *                    - layout, borderRadius, shadow, zIndex
  *      App UI config:- cards (typography, spacing)
  *                    - scenarios (grid, icon, outcome styles)
  * 2. Mixins          - Reusable style patterns (drawerContentMixins)
@@ -18,7 +18,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 4. Post-creation   - Custom properties added to theme object:
  *                    - border (light, medium, focus, highlight, onDark, etc.)
  *                    - background (transparent, paragraph, overlay)
- *                    - borderRadius, boxShadows, cards, scenarios
+ *                    - borderRadius, shadow, cards, scenarios
  * 5. TypeScript      - Module augmentation for custom theme properties
  */
 
@@ -217,16 +217,14 @@ export const themeValues = {
   },
 
 
-  // Box shadows
-  boxShadows: {
-    subtle: "0 1px 3px rgba(0,0,0,0.2)",
-    medium: "0 2px 4px rgba(0,0,0,0.3)",
-    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)",
-    panel: "0 8px 32px rgba(0, 0, 0, 0.2)",
-    hoverStrong: "0 6px 24px rgba(0, 0, 0, 0.4)",
-    toast: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    ring: "0 0 0 4px rgba(33, 150, 243, 0.2)",
-    ringHover: "0 0 0 4px rgba(33, 150, 243, 0.3)",
+  // Shadow - unified elevation system (singular to avoid conflict with MUI's shadows[])
+  shadow: {
+    none: "none",
+    subtle: "0 1px 3px rgba(0,0,0,0.12)", // Light cards, inputs
+    sm: "0 2px 4px rgba(0,0,0,0.15)", // Elevated cards, panels
+    md: "0 4px 12px rgba(0,0,0,0.15)", // Dropdowns, tooltips, overlays
+    lg: "0 8px 24px rgba(0,0,0,0.2)", // Modals, large panels
+    focus: "0 0 0 3px rgba(33, 150, 243, 0.25)", // Focus ring (blue)
   },
 
   // Z-index values
@@ -441,7 +439,7 @@ const drawerContentMixins = {
   },
   selectedItemBox: {
     bgcolor: "rgba(0, 0, 0, 0.08)",
-    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)", // Select focus ring
   },
   chip: {
     color: "text.primary",
@@ -798,7 +796,7 @@ const theme = createTheme({
         root: {
           borderRadius: "3px",
           textDecoration: "none",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
+          boxShadow: themeValues.shadow.md,
         },
       },
     },
@@ -1030,11 +1028,11 @@ const theme = createTheme({
                 "&:hover": {
                   backgroundColor: `${theme.palette.action.hover}cc`,
                   transform: "translateY(-2px)",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  boxShadow: themeValues.shadow.sm,
                 },
                 "&:active": {
                   transform: "translateY(0px)",
-                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  boxShadow: themeValues.shadow.subtle,
                 },
               },
 
@@ -1296,7 +1294,7 @@ const theme = createTheme({
           color: theme.palette.text.primary,
           border: `1px solid ${theme.palette.action.hover}`,
           borderRadius: theme.borderRadius.md,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          boxShadow: themeValues.shadow.md,
           fontSize: "0.875rem",
           fontWeight: 400,
           lineHeight: 1.4,
@@ -1376,7 +1374,7 @@ theme.background = {
 
 theme.borderRadius = themeValues.borderRadius
 
-theme.boxShadows = themeValues.boxShadows
+theme.shadow = themeValues.shadow
 
 // Scenario/strategy component styles
 theme.scenarios = themeValues.scenarios
@@ -1469,7 +1467,7 @@ declare module "@mui/material/styles" {
       overlay: { light: string; medium: string; dark: string }
     }
     borderRadius: typeof themeValues.borderRadius
-    boxShadows: typeof themeValues.boxShadows
+    shadow: typeof themeValues.shadow
     cards: typeof themeValues.cards
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
@@ -1487,7 +1485,7 @@ declare module "@mui/material/styles" {
         xxl?: { xs: number; sm: number; md: number }
       }
     }
-    boxShadows?: Partial<typeof themeValues.boxShadows>
+    shadow?: Partial<typeof themeValues.shadow>
     cards?: Partial<typeof themeValues.cards>
   }
 
