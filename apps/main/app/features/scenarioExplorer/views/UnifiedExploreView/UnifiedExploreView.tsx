@@ -157,7 +157,7 @@ export default function UnifiedExploreView({
                 top: theme.spacing(2),
                 right: theme.spacing(2),
                 backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderRadius: theme.borderRadius.rounded,
+                borderRadius: theme.borderRadius.md,
                 padding: theme.spacing(2),
                 boxShadow: theme.boxShadows.subtle,
                 maxWidth: theme.spacing(40),
@@ -226,7 +226,7 @@ export default function UnifiedExploreView({
                     <Box
                       sx={{
                         backgroundColor: theme.palette.common.white,
-                        borderRadius: theme.borderRadius.rounded,
+                        borderRadius: theme.borderRadius.md,
                         p: 2,
                         boxShadow: theme.boxShadows.subtle,
                         height: "100%",

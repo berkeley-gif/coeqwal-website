@@ -116,7 +116,7 @@ export function KeyOutcomesPanel({
             gap: 0.5,
             cursor: "pointer",
             p: 0.5,
-            borderRadius: theme.borderRadius.rounded,
+            borderRadius: theme.borderRadius.md,
             transition: "all 0.2s ease",
             opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
             "&:hover": {
@@ -145,7 +145,7 @@ export function KeyOutcomesPanel({
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: theme.palette.grey[100],
-                borderRadius: theme.borderRadius.rounded,
+                borderRadius: theme.borderRadius.md,
                 border: theme.border.medium,
               }}
             >

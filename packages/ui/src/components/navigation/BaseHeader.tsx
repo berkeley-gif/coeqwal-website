@@ -280,7 +280,7 @@ export function BaseHeader({
               "&:focus-visible": {
                 outline: "2px solid currentColor",
                 outlineOffset: "4px",
-                borderRadius: "6px",
+                borderRadius: "6px", // Special case: between sm (4px) and md (8px)
               },
             }}
             aria-label="Scroll to top"

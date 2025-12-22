@@ -302,7 +302,7 @@ export function SummaryPanel({
         backgroundColor: isInline
           ? theme.palette.grey[50]
           : "rgba(255, 255, 255, 0.95)",
-        borderRadius: isInline ? theme.borderRadius.standard : 0,
+        borderRadius: isInline ? theme.borderRadius.md : 0,
         padding: isInline ? { xs: 1.5, sm: 2 } : { xs: 2, sm: 2.5, md: 3 },
         boxShadow: isInline ? "none" : theme.shadows[2],
         width: "100%",

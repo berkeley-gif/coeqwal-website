@@ -74,7 +74,7 @@ export function NavDropdown({
           zIndex: (theme) => theme.zIndex.dropdown,
           "& .MuiPaper-root": {
             backgroundColor: (theme) => theme.palette.common.white,
-            borderRadius: (theme) => theme.borderRadius.card,
+            borderRadius: (theme) => theme.borderRadius.md,
             mt: 1,
             minWidth: "200px",
             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",

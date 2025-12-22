@@ -165,7 +165,7 @@ export function FloatingGlossaryPanel({
           maxWidth: "600px",
           maxHeight: "70vh", // Don't take up full height
           backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.card,
+          borderRadius: theme.borderRadius.md,
           boxShadow: theme.boxShadows.panel,
           transform: isOpen ? "scale(1)" : "scale(0.9)",
           opacity: isOpen ? 1 : 0,
@@ -225,7 +225,7 @@ export function FloatingGlossaryPanel({
                             0.08,
                           ),
                           padding: 2,
-                          borderRadius: theme.borderRadius.card,
+                          borderRadius: theme.borderRadius.md,
                           border: theme.border.focus,
                           transition: "all 0.3s ease",
                         }
@@ -287,7 +287,7 @@ export function FloatingGlossaryPanel({
                               sx={{
                                 width: 16,
                                 height: 16,
-                                borderRadius: "50%",
+                                borderRadius: theme.borderRadius.circle,
                                 backgroundColor: tier.color,
                                 flexShrink: 0,
                                 mt: 0.5,

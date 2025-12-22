@@ -144,7 +144,7 @@ export default function LearnPanel() {
                 sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: "50%",
+                  borderRadius: theme.borderRadius.circle,
                   border: "3px solid",
                   borderColor: "grey.300",
                   borderTopColor: "primary.main",

@@ -99,7 +99,7 @@ export function OutcomeChartItem({
         gap: 0.5,
         cursor: isActive ? "pointer" : "default",
         padding: 0,
-        borderRadius: theme.borderRadius.rounded,
+        borderRadius: theme.borderRadius.md,
         transition: "all 0.2s ease",
         backgroundColor: isExpanded
           ? theme.palette.blue.bright + "10"
@@ -132,7 +132,7 @@ export function OutcomeChartItem({
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: theme.palette.grey[100],
-            borderRadius: theme.borderRadius.rounded,
+            borderRadius: theme.borderRadius.md,
             border: theme.border.medium,
           }}
         >

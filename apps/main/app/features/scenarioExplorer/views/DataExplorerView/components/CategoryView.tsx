@@ -255,7 +255,7 @@ function MetricCard({
         p: theme.spacing(2),
         mb: theme.spacing(2),
         backgroundColor: theme.palette.grey[50],
-        borderRadius: theme.borderRadius.rounded,
+        borderRadius: theme.borderRadius.md,
         border: theme.border.light,
         "&:hover": {
           backgroundColor: theme.palette.grey[100],
@@ -363,7 +363,7 @@ function MetricCard({
             mt: theme.spacing(1),
             p: theme.spacing(1),
             backgroundColor: theme.palette.accent.gold,
-            borderRadius: theme.borderRadius.standard,
+            borderRadius: theme.borderRadius.md,
             fontSize: theme.typography.compact.subtitle.fontSize,
             color: theme.palette.text.primary,
           }}
@@ -379,7 +379,7 @@ function MetricCard({
             mt: theme.spacing(2),
             p: theme.spacing(2),
             backgroundColor: theme.palette.common.white,
-            borderRadius: theme.borderRadius.standard,
+            borderRadius: theme.borderRadius.md,
             border: theme.border.medium,
           }}
         >

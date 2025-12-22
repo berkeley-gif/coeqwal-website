@@ -560,7 +560,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                     sx={{
                       width: "48px",
                       height: "48px",
-                      borderRadius: "50%",
+                      borderRadius: theme.borderRadius.circle,
                       backgroundColor: "rgba(255, 255, 255, 0.5)",
                       border: "none",
                       display: "flex",

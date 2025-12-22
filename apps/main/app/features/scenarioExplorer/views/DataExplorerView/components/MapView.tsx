@@ -288,7 +288,7 @@ function MapViewContent() {
             sx={{
               p: theme.spacing(2),
               backgroundColor: theme.palette.common.white,
-              borderRadius: theme.borderRadius.rounded,
+              borderRadius: theme.borderRadius.md,
               border: category ? `1px solid ${category.color}` : theme.border.medium,
             }}
           >
@@ -365,7 +365,7 @@ function MapViewContent() {
                   mt: theme.spacing(1.5),
                   p: theme.spacing(1),
                   backgroundColor: theme.palette.accent.gold,
-                  borderRadius: theme.borderRadius.standard,
+                  borderRadius: theme.borderRadius.md,
                 }}
               >
                 <Typography
@@ -428,7 +428,7 @@ function MapViewContent() {
         sx={{
           flex: 1,
           position: "relative",
-          borderRadius: theme.borderRadius.rounded,
+          borderRadius: theme.borderRadius.md,
           overflow: "hidden",
           backgroundColor: theme.palette.grey[100],
         }}
@@ -474,7 +474,7 @@ function MapViewContent() {
               right: theme.spacing(2),
               p: theme.spacing(2),
               backgroundColor: "rgba(255, 255, 255, 0.95)",
-              borderRadius: theme.borderRadius.rounded,
+              borderRadius: theme.borderRadius.md,
               boxShadow: theme.boxShadows.medium,
             }}
           >
@@ -527,7 +527,7 @@ function MapViewContent() {
               right: theme.spacing(2),
               p: theme.spacing(1.5),
               backgroundColor: "rgba(255, 255, 255, 0.9)",
-              borderRadius: theme.borderRadius.rounded,
+              borderRadius: theme.borderRadius.md,
               boxShadow: theme.boxShadows.subtle,
               maxWidth: theme.spacing(40),
             }}

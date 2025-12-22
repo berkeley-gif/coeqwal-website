@@ -147,7 +147,7 @@ export function GeocoderControl({
               padding: "10px 36px 10px 12px",
               fontSize: "14px",
               border: "none",
-              borderRadius: "4px",
+              borderRadius: "4px", // Hardcoded: map package doesn't have theme access
               boxShadow: "0 0 10px 2px rgba(0,0,0,0.1)",
               outline: "none",
               backgroundColor: "white",
@@ -178,7 +178,7 @@ export function GeocoderControl({
                   height: 16,
                   border: "2px solid #ddd",
                   borderTopColor: "#666",
-                  borderRadius: "50%",
+                  borderRadius: "50%", // Hardcoded: map package doesn't have theme access
                   animation: "spin 0.6s linear infinite",
                 }}
               />
@@ -214,7 +214,7 @@ export function GeocoderControl({
               left: 0,
               right: 0,
               backgroundColor: "white",
-              borderRadius: "4px",
+              borderRadius: "4px", // Hardcoded: map package doesn't have theme access
               boxShadow: "0 0 10px 2px rgba(0,0,0,0.1)",
               maxHeight: 300,
               overflowY: "auto",
@@ -276,7 +276,7 @@ export function GeocoderControl({
               padding: "10px 12px",
               backgroundColor: "#fee",
               color: "#c33",
-              borderRadius: "4px",
+              borderRadius: "4px", // Hardcoded: map package doesn't have theme access
               fontSize: "13px",
               boxShadow: "0 0 10px 2px rgba(0,0,0,0.1)",
             }}

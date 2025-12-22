@@ -94,7 +94,7 @@ export function FloatingGlossaryButton({
         right: position.right,
         width: 64,
         height: 64,
-        borderRadius: "50%",
+        borderRadius: theme.borderRadius.circle,
         backgroundColor: isOpen
           ? theme.palette.blue.bright
           : theme.palette.common.black,

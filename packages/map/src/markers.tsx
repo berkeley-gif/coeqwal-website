@@ -56,7 +56,7 @@ export function ScaledMarker({
           backgroundColor: color,
           width: `${scaledSize}px`,
           height: `${scaledSize}px`,
-          borderRadius: "50%",
+          borderRadius: "50%", // Hardcoded: map package doesn't have theme access
           border: "1px solid white",
           boxShadow: "0 0 0 1px rgba(0,0,0,0.8)",
           cursor: "pointer",
