@@ -158,7 +158,7 @@ export default function DataExplorerView({
                   },
                 }}
               >
-                Go to Explore tab
+                Choose scenarios
               </Button>
             </Box>
           </Box>

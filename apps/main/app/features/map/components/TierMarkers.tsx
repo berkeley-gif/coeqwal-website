@@ -48,9 +48,15 @@ export default function TierMarkers({ data }: TierMarkersProps) {
   useEffect(() => {
     setPopupInfo(null)
 
-    // Remove all previous tier layers
+    // Remove all previous tier layers (only if style is loaded)
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
+
+      // Wait for style to be loaded before accessing layers/sources
+      if (!map.isStyleLoaded()) {
+        return // Style not ready, cleanup will happen when polygon effect runs
+      }
+
       const existingLayers = map.getStyle().layers
       const existingSources = Object.keys(map.getStyle().sources)
 
@@ -82,6 +88,10 @@ export default function TierMarkers({ data }: TierMarkersProps) {
 
     const cleanup = mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
+
+      // Double-check style is loaded (safety check)
+      if (!map.isStyleLoaded()) return
+
       const sourceId = `tier-polygons-${data.metadata.tier_code}`
       const fillLayerId = `tier-polygon-fill-${data.metadata.tier_code}`
       const outlineLayerId = `tier-polygon-outline-${data.metadata.tier_code}`
@@ -95,9 +105,9 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       })
 
       // Remove ALL previous tier sources
-      Object.keys(map.getStyle().sources).forEach((sourceId) => {
-        if (sourceId.startsWith("tier-polygons-")) {
-          map.removeSource(sourceId)
+      Object.keys(map.getStyle().sources).forEach((srcId) => {
+        if (srcId.startsWith("tier-polygons-")) {
+          map.removeSource(srcId)
         }
       })
 
