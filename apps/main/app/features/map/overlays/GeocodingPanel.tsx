@@ -197,7 +197,7 @@ export function GeocodingPanel({
               left: 0,
               right: 0,
               backgroundColor: theme.palette.common.white,
-              borderRadius: theme.borderRadius.standard,
+              borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadows[3],
               maxHeight: 300,
               overflowY: "auto",
@@ -257,7 +257,7 @@ export function GeocodingPanel({
               padding: theme.spacing(1),
               backgroundColor: theme.palette.error.light,
               color: theme.palette.error.dark,
-              borderRadius: theme.borderRadius.standard,
+              borderRadius: theme.borderRadius.md,
             }}
           >
             {geocoding.error.message}
@@ -271,7 +271,7 @@ export function GeocodingPanel({
               mt: 2,
               p: 2,
               backgroundColor: "rgba(58, 69, 116, 0.05)",
-              borderRadius: theme.borderRadius.standard,
+              borderRadius: theme.borderRadius.md,
               border: theme.border.focusLight,
             }}
           >

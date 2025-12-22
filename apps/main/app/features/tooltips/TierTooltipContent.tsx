@@ -133,7 +133,7 @@ export default function TierTooltipContent({
               sx={{
                 width: 10,
                 height: 10,
-                borderRadius: "2px",
+                borderRadius: theme.borderRadius.xs,
                 backgroundColor:
                   theme.palette.tiers[
                     `tier${tierNum}` as keyof typeof theme.palette.tiers

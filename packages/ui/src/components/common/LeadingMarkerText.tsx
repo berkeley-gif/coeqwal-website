@@ -64,7 +64,7 @@ export function LeadingMarkerText({
           return {
             width: 48,
             height: 48,
-            borderRadius: "50%",
+            borderRadius: theme.borderRadius.circle,
             backgroundColor: circleColor,
             gridColumn: 1,
             gridRow: 1,

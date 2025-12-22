@@ -45,7 +45,7 @@ export default function TemporalControls({
       sx={{
         p: theme.spacing(2),
         backgroundColor: theme.palette.grey[50],
-        borderRadius: theme.borderRadius.rounded,
+        borderRadius: theme.borderRadius.md,
         border: theme.border.medium,
         display: "flex",
         flexDirection: "column",

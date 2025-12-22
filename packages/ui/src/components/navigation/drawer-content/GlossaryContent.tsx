@@ -332,7 +332,7 @@ export function GlossaryContent({
                         py: (theme) => theme.spacing(2),
                         pl: 1,
                         mb: (theme) => theme.spacing(2),
-                        borderRadius: (theme) => theme.borderRadius.standard,
+                        borderRadius: (theme) => theme.borderRadius.md,
                         border: "1px solid rgba(255, 172, 110, 0.3)",
                         transition: "background-color 0.3s ease",
                       }
@@ -409,7 +409,7 @@ export function GlossaryContent({
                                 theme.palette.tiers[
                                   tier.color as keyof typeof theme.palette.tiers
                                 ],
-                              borderRadius: "3px",
+                              borderRadius: theme.borderRadius.xs,
                               flexShrink: 0,
                               mt: 0.5,
                             }}

@@ -128,7 +128,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: "50%",
+        borderRadius: (theme: Theme) => theme.borderRadius.circle,
         color: (theme: Theme) => theme.palette.grey[500],
         "&:hover": {
           color: (theme: Theme) => theme.palette.grey[700],
@@ -245,7 +245,7 @@ function OverlayVariant({
         backgroundColor: theme.palette.common.white,
         color: theme.palette.text.primary,
         boxShadow: theme.shadows[8],
-        borderRadius: "8px",
+        borderRadius: theme.borderRadius.md,
         width,
         maxWidth,
         padding: `${PADDING_Y} ${PADDING_X}`,

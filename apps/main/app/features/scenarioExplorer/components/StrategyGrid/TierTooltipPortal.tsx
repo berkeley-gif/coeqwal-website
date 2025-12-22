@@ -51,7 +51,7 @@ export function TierTooltipPortal({
               backgroundColor: theme.palette.common.white,
               color: theme.palette.text.primary,
               border: theme.border.light,
-              borderRadius: theme.borderRadius.card,
+              borderRadius: theme.borderRadius.md,
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
               padding: "16px",
               paddingRight: "40px",
@@ -76,7 +76,7 @@ export function TierTooltipPortal({
                 cursor: "pointer",
                 fontSize: "0.875rem",
                 color: theme.palette.grey[500],
-                borderRadius: "50%",
+                borderRadius: theme.borderRadius.circle,
                 "&:hover": {
                   color: theme.palette.grey[700],
                   backgroundColor: theme.palette.grey[100],

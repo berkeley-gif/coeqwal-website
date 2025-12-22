@@ -24,7 +24,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         maxHeight: "60vh",
         overflowY: "auto",
         backgroundColor: "rgba(255, 255, 255, 0.98)",
-        borderRadius: theme.borderRadius.rounded,
+        borderRadius: theme.borderRadius.md,
         padding: theme.spacing(3),
         backdropFilter: "blur(8px)",
         boxShadow: theme.boxShadows.prominent,

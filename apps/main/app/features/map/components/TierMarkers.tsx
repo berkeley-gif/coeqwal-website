@@ -259,7 +259,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 boxShadow: theme.boxShadows.medium,
                 cursor: "pointer",
                 // Diamond: rotate square 45 degrees; Circle: use border-radius
-                borderRadius: isDiamond ? "3px" : "50%",
+                borderRadius: isDiamond ? theme.borderRadius.xs : theme.borderRadius.circle,
                 transform: isDiamond ? "rotate(45deg)" : "none",
               }}
               onClick={() =>
@@ -325,7 +325,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 style={{
                   width: theme.spacing(1.5),
                   height: theme.spacing(1.5),
-                  borderRadius: theme.borderRadius.standard,
+                  borderRadius: theme.borderRadius.md,
                   backgroundColor: getTierColor(popupInfo.tierLevel),
                   flexShrink: 0,
                 }}

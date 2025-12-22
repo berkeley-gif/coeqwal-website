@@ -91,7 +91,7 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
               backgroundColor: getTierColor(label.tier),
               color: "#ffffff",
               padding: "4px 8px",
-              borderRadius: "4px",
+              borderRadius: theme.borderRadius.sm,
               fontSize: "11px",
               fontWeight: 600,
               whiteSpace: "nowrap",

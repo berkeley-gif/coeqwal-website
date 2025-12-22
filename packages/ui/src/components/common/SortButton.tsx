@@ -93,7 +93,7 @@ export function SortButton({
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: "50%",
+        borderRadius: (theme: Theme) => theme.borderRadius.circle,
         width: CIRCLE_SIZE,
         height: CIRCLE_SIZE,
         minWidth: CIRCLE_SIZE,

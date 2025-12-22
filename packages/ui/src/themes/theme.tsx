@@ -208,11 +208,12 @@ export const themeValues = {
 
   // Border radius values
   borderRadius: {
-    pill: "999px",
-    rounded: "8px",
-    card: "8px",
-    standard: "8px",
-    none: "0px",
+    none: "0px", // Flat edges, no rounding
+    xs: "2px", // Very small (checkboxes, tiny indicators)
+    sm: "4px", // Small (input fields, tags)
+    md: "8px", // Standard (cards, panels, tooltips)
+    pill: "999px", // Full pill/capsule shape
+    circle: "50%", // Perfect circles
   },
 
 
@@ -328,7 +329,7 @@ export const themeValues = {
     // Strategy card row styles
     card: {
       base: {
-        borderRadius: "8px", // theme.borderRadius.rounded
+        borderRadius: "8px", // theme.borderRadius.md
         padding: 1.5, // theme.spacing multiplier
         transition: "all 0.2s ease",
         border: "2px solid transparent",
@@ -742,7 +743,7 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: parseInt(themeValues.borderRadius.standard, 10),
+    borderRadius: parseInt(themeValues.borderRadius.md, 10),
   },
   // Z-index
   zIndex: themeValues.zIndex,
@@ -878,7 +879,7 @@ const theme = createTheme({
           props: { variant: "actionCard" },
           style: ({ theme }) => ({
             textTransform: "none",
-            borderRadius: theme.borderRadius.card,
+            borderRadius: theme.borderRadius.md,
             boxShadow: "none",
             border: "none",
             padding: "16px",
@@ -1017,7 +1018,7 @@ const theme = createTheme({
               "& .MuiListItemButton-root": {
                 display: "block",
                 padding: theme.spacing(2),
-                borderRadius: theme.borderRadius.standard,
+                borderRadius: theme.borderRadius.md,
                 mx: 1,
                 my: 0.5,
                 transition: theme.transitions.create(
@@ -1097,7 +1098,7 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: ({ theme }) => ({
-          borderRadius: theme.borderRadius.card,
+          borderRadius: theme.borderRadius.md,
           // Ensure dropdown panels and menus have white backgrounds
           "&.MuiMenu-paper, &.MuiSelect-paper": {
             backgroundColor: theme.palette.common.white,
@@ -1143,7 +1144,7 @@ const theme = createTheme({
           position: "relative",
           display: "inline-block",
           boxSizing: "border-box",
-          borderRadius: "2px",
+          borderRadius: theme.borderRadius.xs,
           border: `2px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
           cursor: "pointer",
@@ -1202,7 +1203,7 @@ const theme = createTheme({
           position: "relative",
           display: "inline-block",
           boxSizing: "border-box",
-          borderRadius: "50%",
+          borderRadius: theme.borderRadius.circle,
           border: `1px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
           cursor: "pointer",
@@ -1227,7 +1228,7 @@ const theme = createTheme({
             position: "absolute",
             width: "6px",
             height: "6px",
-            borderRadius: "50%",
+            borderRadius: theme.borderRadius.circle,
             backgroundColor: theme.palette.common.white,
             top: "7px", // (20px - 6px) / 2 = 7px
             left: "7px", // (20px - 6px) / 2 = 7px
@@ -1294,7 +1295,7 @@ const theme = createTheme({
           backgroundColor: theme.palette.common.white,
           color: theme.palette.text.primary,
           border: `1px solid ${theme.palette.action.hover}`,
-          borderRadius: theme.borderRadius.card,
+          borderRadius: theme.borderRadius.md,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           fontSize: "0.875rem",
           fontWeight: 400,

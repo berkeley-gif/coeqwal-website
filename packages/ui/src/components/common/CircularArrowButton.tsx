@@ -30,7 +30,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
       sx={{
         width: size,
         height: size,
-        borderRadius: "50%",
+        borderRadius: theme.borderRadius.circle,
         border: "none",
         color: buttonColor,
         ...sx,

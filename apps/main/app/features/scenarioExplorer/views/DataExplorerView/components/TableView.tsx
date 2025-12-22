@@ -326,7 +326,7 @@ function MetricRow({
       sx={{
         p: theme.spacing(2),
         backgroundColor: theme.palette.common.white,
-        borderRadius: theme.borderRadius.rounded,
+        borderRadius: theme.borderRadius.md,
         border: theme.border.light,
         transition: "all 0.2s ease",
         "&:hover": {
@@ -354,7 +354,7 @@ function MetricRow({
             backgroundColor: category
               ? category.color
               : theme.palette.grey[300],
-            borderRadius: theme.borderRadius.rounded,
+            borderRadius: theme.borderRadius.md,
             fontSize: theme.typography.h6.fontSize,
             flexShrink: 0,
           }}
@@ -467,7 +467,7 @@ function MetricRow({
               minWidth: theme.spacing(10),
               p: theme.spacing(1),
               backgroundColor: theme.palette.grey[100],
-              borderRadius: theme.borderRadius.rounded,
+              borderRadius: theme.borderRadius.md,
               flexShrink: 0,
             }}
           >

@@ -177,7 +177,7 @@ export default function ScrollTooltip({
           backgroundColor: theme.palette.common.white,
           color: theme.palette.text.primary,
           border: theme.border.light,
-          borderRadius: theme.borderRadius.card,
+          borderRadius: theme.borderRadius.md,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           padding: "16px",
           paddingRight: onClose ? "32px" : "16px", // Extra space for close button

@@ -49,7 +49,7 @@ function CloseButton({ onClick }: { onClick: () => void }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: "50%",
+        borderRadius: theme.borderRadius.circle,
         "&:hover": {
           backgroundColor: "rgba(0,0,0,0.1)",
         },
@@ -76,7 +76,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
         sx={{
           width: 12,
           height: 12,
-          borderRadius: "2px",
+          borderRadius: theme.borderRadius.xs,
           backgroundColor:
             theme.palette.tiers[
               `tier${level}` as keyof typeof theme.palette.tiers

@@ -171,7 +171,7 @@ export function HydroclimateChooser({
                       alignItems: "center",
                       justifyContent: "center",
                       position: "relative",
-                      borderRadius: "50%",
+                      borderRadius: theme.borderRadius.circle,
                       backgroundColor: isDisabled
                         ? theme.palette.grey[400]
                         : config?.bgColor || theme.palette.blue.bright,

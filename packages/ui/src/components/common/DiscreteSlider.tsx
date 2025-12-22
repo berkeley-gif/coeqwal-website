@@ -62,11 +62,11 @@ const SliderContainer = styled(Box, {
 const SliderTrack = styled(Box, {
   shouldForwardProp: (prop) => prop !== "trackColor" && prop !== "spacing",
 })<{ trackColor: string; spacing: { track?: number } }>(
-  ({ trackColor, spacing }) => ({
+  ({ theme, trackColor, spacing }) => ({
     position: "relative",
     height: "4px",
     backgroundColor: trackColor,
-    borderRadius: "2px",
+    borderRadius: theme.borderRadius.xs,
     margin: `${spacing.track || 24}px 0 ${spacing.track || 16}px 0`,
     cursor: "pointer",
   }),
@@ -76,13 +76,13 @@ const SliderStop = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "active" && prop !== "activeColor" && prop !== "inactiveColor",
 })<{ active: boolean; activeColor: string; inactiveColor: string }>(
-  ({ active, activeColor, inactiveColor }) => ({
+  ({ theme, active, activeColor, inactiveColor }) => ({
     position: "absolute",
     top: "50%",
     transform: "translate(-50%, -50%)",
     width: "20px",
     height: "20px",
-    borderRadius: "50%",
+    borderRadius: theme.borderRadius.circle,
     backgroundColor: active ? activeColor : inactiveColor,
     border: "2px solid white",
     transition: "all 0.2s ease",

@@ -295,7 +295,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     backgroundColor: isHighlighted
                       ? theme.palette.common.white
                       : "#faf8f5",
-                    borderRadius: theme.borderRadius.rounded,
+                    borderRadius: theme.borderRadius.md,
                     padding: compact ? theme.spacing(3) : theme.spacing(1.5),
                     gap: theme.spacing(1),
                     alignItems: compact ? "stretch" : "start",
@@ -710,7 +710,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           : "default",
                                         padding: 0,
                                         borderRadius:
-                                          theme.borderRadius.rounded,
+                                          theme.borderRadius.md,
                                         transition: "all 0.2s ease",
                                         backgroundColor:
                                           expandedSummaries[strategy.value] ===
@@ -811,7 +811,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             backgroundColor:
                                               theme.palette.grey[100],
                                             borderRadius:
-                                              theme.borderRadius.rounded,
+                                              theme.borderRadius.md,
                                             border: theme.border.medium,
                                           }}
                                         >
@@ -942,7 +942,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           : "default",
                                         padding: 0,
                                         borderRadius:
-                                          theme.borderRadius.rounded,
+                                          theme.borderRadius.md,
                                         transition: "all 0.2s ease",
                                         backgroundColor:
                                           expandedSummaries[strategy.value] ===
@@ -1043,7 +1043,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             backgroundColor:
                                               theme.palette.grey[100],
                                             borderRadius:
-                                              theme.borderRadius.rounded,
+                                              theme.borderRadius.md,
                                             border: theme.border.medium,
                                           }}
                                         >
@@ -1505,7 +1505,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                   ? "pointer"
                                   : "default",
                                 padding: 0,
-                                borderRadius: theme.borderRadius.rounded,
+                                borderRadius: theme.borderRadius.md,
                                 transition: "all 0.2s ease",
                                 backgroundColor:
                                   expandedSummaries[strategy.value] ===
@@ -1596,7 +1596,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                     alignItems: "center",
                                     justifyContent: "center",
                                     backgroundColor: theme.palette.grey[100],
-                                    borderRadius: theme.borderRadius.rounded,
+                                    borderRadius: theme.borderRadius.md,
                                     border: theme.border.medium,
                                   }}
                                 >
@@ -1670,7 +1670,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           alignItems: "center",
                           color: theme.palette.grey[500],
                           fontSize: "16px",
-                          borderRadius: "50%",
+                          borderRadius: theme.borderRadius.circle,
                           zIndex: 1,
                           "&:hover": {
                             color: theme.palette.grey[700],
