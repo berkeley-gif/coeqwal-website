@@ -17,7 +17,7 @@
  * - Map is preloaded during IntroSection scroll
  */
 
-import { Suspense, useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -34,7 +34,7 @@ export default function LearnPanel() {
   const mapReady = useMapReady()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
-  const cardColor = theme.palette.blue.white
+  const cardColor = theme.palette.blue.pale
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -126,9 +126,7 @@ export default function LearnPanel() {
           }}
         >
           {mapReady ? (
-            <Suspense fallback={null}>
-              <MapOverlayPanels />
-            </Suspense>
+            <MapOverlayPanels />
           ) : (
             <Box
               sx={{
@@ -162,22 +160,13 @@ export default function LearnPanel() {
           )}
         </Box>
       </Box>
-
-      {/* 
-        Learn More section - positioned after the map container.
-        The solid background covers the fixed map behind it.
-        z-index ensures it's above the basement-level map.
-      */}
       <Box
         sx={{
           backgroundColor: theme.palette.learn.background,
           padding: "60px",
           paddingBottom: "100px",
-          // Removed marginBottom: "-100px" which was overlapping AutoAdvanceFooter
-          // Stack above the fixed map (which is at z-index basement)
           position: "relative",
           zIndex: theme.zIndex.panels,
-          // Re-enable pointer events for interactive cards
           pointerEvents: "auto",
         }}
       >

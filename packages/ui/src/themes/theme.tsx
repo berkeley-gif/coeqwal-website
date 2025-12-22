@@ -128,7 +128,7 @@ export const themeValues = {
       medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
       light: "#77a2d9", // Light blue
-      white: "#cef1f5",
+      pale: "#cef1f5", // Pale cyan/ice blue
     },
 
     text: {
@@ -543,7 +543,7 @@ const theme = createTheme({
       medium: themeValues.palette.blue.medium,
       bright: themeValues.palette.blue.bright,
       light: themeValues.palette.blue.light,
-      white: themeValues.palette.blue.white,
+      pale: themeValues.palette.blue.pale,
     },
     accent: {
       gold: themeValues.palette.accent.gold,
