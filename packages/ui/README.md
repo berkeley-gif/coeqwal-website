@@ -77,13 +77,6 @@ For UI elements requiring tighter spacing:
 
 ## Component system
 
-### Reusable mixins
-
-Pre-built styling patterns for common UI elements:
-
-- **Form Controls**: Standardized 20px form elements
-- **Drawer Content**: Navigation and content styling
-
 ### Z-Index system
 
 Organized layering system prevents stacking conflicts:
@@ -116,19 +109,6 @@ sx={{ color: theme.palette.blue.darkest }}
 
 // Z-index
 sx={{ zIndex: theme.zIndex.tooltip }}
-
-// Form controls
-sx={{ ...theme.mixins.formControlBase }}
-```
-
-### Using Mixins
-
-```typescript
-// Form controls
-sx={{ ...theme.mixins.formControlBase }}
-
-// Drawer content
-sx={{ ...theme.mixins.drawerContent.infoBox }}
 ```
 
 ## 📚 Detailed Documentation
@@ -139,8 +119,6 @@ The theme file (`src/themes/theme.tsx`) contains comprehensive documentation inc
 - **Typography scale ratios** and font family assignments
 - **Spacing system details** with pixel equivalents
 - **Z-index layering guide** with usage patterns
-- **Form control conventions** with sizing guidelines
-- **Mixin usage examples** with code snippets
 
 Refer to the theme file for specific values, implementation details, and advanced usage patterns.
 
