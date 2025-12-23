@@ -74,7 +74,7 @@ export function TierTooltipPortal({
                 border: "none",
                 background: "none",
                 cursor: "pointer",
-                fontSize: "0.875rem",
+                fontSize: theme.typography.nav.fontSize,
                 color: theme.palette.grey[500],
                 borderRadius: theme.borderRadius.circle,
                 "&:hover": {

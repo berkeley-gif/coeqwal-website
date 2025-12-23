@@ -369,7 +369,7 @@ export function SummaryPanel({
                 variant="caption"
                 sx={{
                   color: theme.palette.grey[500],
-                  fontSize: "0.75rem",
+                  fontSize: theme.typography.compact.caption.fontSize,
                 }}
               >
                 Analyzing {selectedOutcome}...
@@ -456,7 +456,7 @@ export function SummaryPanel({
                               color: tierColors[tierNum],
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
-                              fontSize: "0.65rem",
+                              fontSize: theme.typography.compact.micro.fontSize,
                               fontWeight: 500,
                               height: 22,
                               "& .MuiChip-label": { px: 1 },
@@ -502,7 +502,7 @@ export function SummaryPanel({
                               backgroundColor: "transparent",
                               color: theme.palette.grey[700],
                               border: theme.border.medium,
-                              fontSize: "0.65rem",
+                              fontSize: theme.typography.compact.micro.fontSize,
                               height: 22,
                               "&:hover": {
                                 backgroundColor: theme.palette.blue.bright,
@@ -518,7 +518,7 @@ export function SummaryPanel({
                           variant="body2"
                           sx={{
                             color: theme.palette.grey[500],
-                            fontSize: "0.65rem",
+                            fontSize: theme.typography.compact.micro.fontSize,
                           }}
                         >
                           +{outcomeSummary.criticalLocations.length - 6} more
@@ -560,7 +560,7 @@ export function SummaryPanel({
                             backgroundColor: "transparent",
                             color: theme.palette.grey[600],
                             border: theme.border.medium,
-                            fontSize: "0.6rem",
+                            fontSize: theme.typography.compact.micro.fontSize,
                             height: 18,
                             "&:hover": {
                               backgroundColor: theme.palette.blue.bright,
@@ -576,7 +576,7 @@ export function SummaryPanel({
                           variant="caption"
                           sx={{
                             color: theme.palette.grey[500],
-                            fontSize: "0.6rem",
+                            fontSize: theme.typography.compact.micro.fontSize,
                           }}
                         >
                           +{outcomeSummary.atRiskLocations.length - 4} more
@@ -612,7 +612,7 @@ export function SummaryPanel({
                               color: tierColors[tierNum],
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
-                              fontSize: "0.65rem",
+                              fontSize: theme.typography.compact.micro.fontSize,
                               fontWeight: 500,
                               height: 22,
                               "& .MuiChip-label": {
@@ -691,7 +691,7 @@ export function SummaryPanel({
                         sx={{
                           color: tierColors[3],
                           fontWeight: 600,
-                          fontSize: "0.7rem",
+                          fontSize: theme.typography.compact.micro.fontSize,
                           display: "block",
                           mb: 0.5,
                         }}
@@ -713,7 +713,7 @@ export function SummaryPanel({
                                 backgroundColor: "transparent",
                                 color: theme.palette.grey[600],
                                 border: theme.border.medium,
-                                fontSize: "0.6rem",
+                                fontSize: theme.typography.compact.micro.fontSize,
                                 height: 18,
                                 "&:hover": {
                                   backgroundColor: theme.palette.blue.bright,
@@ -731,7 +731,7 @@ export function SummaryPanel({
                             variant="caption"
                             sx={{
                               color: theme.palette.grey[500],
-                              fontSize: "0.6rem",
+                              fontSize: theme.typography.compact.micro.fontSize,
                               alignSelf: "center",
                             }}
                           >
@@ -755,7 +755,7 @@ export function SummaryPanel({
           sx={{
             color: theme.palette.grey[500],
             fontStyle: "italic",
-            fontSize: "0.75rem",
+            fontSize: theme.typography.compact.caption.fontSize,
             display: "block",
             borderTop: theme.border.light,
             pt: 1.5,

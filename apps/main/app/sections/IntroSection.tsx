@@ -105,7 +105,7 @@ const IntroSection = () => {
                 <Typography
                   fontWeight={700}
                   variant="body1"
-                  style={{ fontSize: "1.5rem", maxWidth: "80%" }}
+                  style={{ fontSize: theme.typography.h6.fontSize, maxWidth: "80%" }}
                 >
                   {t("frontmatterPanel.boldText")}
                 </Typography>

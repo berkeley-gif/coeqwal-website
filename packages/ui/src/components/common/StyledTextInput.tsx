@@ -163,7 +163,7 @@ export const StyledTextInput = forwardRef<
                 color: theme.palette.grey[600],
                 cursor: "pointer",
                 transition: "background-color 0.3s ease, color 0.3s ease", // theme.transition.default timing
-                fontSize: "14px",
+                fontSize: theme.typography.nav.fontSize,
                 lineHeight: 1,
                 "&:hover": {
                   backgroundColor: theme.palette.grey[300],

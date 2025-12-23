@@ -27,12 +27,12 @@ import { createTheme, Theme } from "@mui/material/styles"
  * Each preset defines: text (body), display (headlines), and cssImport (font loading).
  * Of course you can make more presets.
  *
- * Available presets: "neueHaas" | "realPro" | "abadi" | "roboto" | "inter" | "system"
+ * Available presets: "neueHaas" | "realPro" | "roboto" | "inter" | "system"
  */
 
-type FontPresetKey = "neueHaas" | "realPro" | "abadi" | "roboto" | "inter" | "system"
+type FontPresetKey = "neueHaas" | "realPro" | "roboto" | "inter" | "system"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "abadi" // CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -45,12 +45,6 @@ const FONT_PRESETS = {
     text: '"ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     display:
       '"ff-real-headline-pro", "ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
-  abadi: {
-    text: '"abadi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"abadi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
@@ -563,7 +557,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
-      letterSpacing: "0.02em",
+      letterSpacing: "0.02rem",
       lineHeight: 1.35, // Good balance for minor headlines
     },
     h6: {
@@ -667,17 +661,22 @@ const theme = createTheme({
           -webkit-hyphens: none;
           -webkit-tap-highlight-color: transparent;
         }
-        html, body {
+        html {
           margin: 0;
           padding: 0;
           height: 100%;
-          font-family: ${themeValues.fontFamily.text}
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          min-height: 100%;
+          font-family: ${themeValues.fontFamily.text};
           overflow-x: hidden; /* Prevent horizontal scrollbar */
         }
         body {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          font-family: ${themeValues.fontFamily.text}
+          font-family: ${themeValues.fontFamily.text};
         }
       `,
     },

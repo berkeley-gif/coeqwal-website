@@ -376,7 +376,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             variant="subtitle1"
                             sx={{
                               fontWeight: theme.typography.fontWeightMedium,
-                              fontSize: "1.1rem",
+                              fontSize: theme.typography.body1.fontSize,
                               maxWidth: "280px",
                             }}
                           >
@@ -817,7 +817,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         >
                                           <Typography
                                             sx={{
-                                              fontSize: "0.6rem",
+                                              fontSize: theme.typography.compact.micro.fontSize,
                                               color: theme.palette.text.primary,
                                               textAlign: "center",
                                               lineHeight: 1.2,
@@ -840,7 +840,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           component="div"
                                           sx={{
                                             textAlign: "center",
-                                            fontSize: "0.65rem",
+                                            fontSize: theme.typography.compact.micro.fontSize,
                                             fontWeight:
                                               theme.typography.fontWeightMedium,
                                             color: isActiveForStrategy
@@ -1049,7 +1049,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         >
                                           <Typography
                                             sx={{
-                                              fontSize: "0.6rem",
+                                              fontSize: theme.typography.compact.micro.fontSize,
                                               color: theme.palette.text.primary,
                                               textAlign: "center",
                                               lineHeight: 1.2,
@@ -1072,7 +1072,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           component="div"
                                           sx={{
                                             textAlign: "center",
-                                            fontSize: "0.65rem",
+                                            fontSize: theme.typography.compact.micro.fontSize,
                                             fontWeight:
                                               theme.typography.fontWeightMedium,
                                             color: isActiveForStrategy
@@ -1149,7 +1149,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         variant="subtitle1"
                         sx={{
                           fontWeight: theme.typography.fontWeightMedium,
-                          fontSize: "1.1rem",
+                          fontSize: theme.typography.body1.fontSize,
                           maxWidth: "280px",
                           mb: showDefinitions ? 0.5 : 0,
                           lineHeight: 1.3,
@@ -1602,7 +1602,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                 >
                                   <Typography
                                     sx={{
-                                      fontSize: "0.6rem",
+                                      fontSize: theme.typography.compact.micro.fontSize,
                                       color: theme.palette.text.primary,
                                       textAlign: "center",
                                       lineHeight: 1.2,
@@ -1669,7 +1669,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           display: "flex",
                           alignItems: "center",
                           color: theme.palette.grey[500],
-                          fontSize: "16px",
+                          fontSize: theme.typography.body2.fontSize,
                           borderRadius: theme.borderRadius.circle,
                           zIndex: 1,
                           "&:hover": {

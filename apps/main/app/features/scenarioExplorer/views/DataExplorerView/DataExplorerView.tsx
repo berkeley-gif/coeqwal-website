@@ -49,9 +49,9 @@ export default function DataExplorerView({
         >
           <Typography
             sx={{
-              fontSize: "0.75rem",
+              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: 500,
-              letterSpacing: "0.15em",
+              letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
               mb: 1,
@@ -92,7 +92,7 @@ export default function DataExplorerView({
               minHeight: 48,
               "& .MuiTab-root": {
                 minHeight: 48,
-                fontSize: "0.875rem",
+                fontSize: theme.typography.nav.fontSize,
                 textTransform: "none",
                 fontWeight: 500,
                 color: theme.palette.grey[600],

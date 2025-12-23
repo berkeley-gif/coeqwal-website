@@ -26,7 +26,7 @@ export function LanguageSwitcher() {
         "& .MuiToggleButton-root": {
           height: 36,
           minHeight: 36,
-          fontSize: "0.95rem",
+          fontSize: (theme) => theme.typography.body2.fontSize,
           fontWeight: 400,
           textTransform: "none",
         },

@@ -44,7 +44,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
             background: "none",
             cursor: "pointer",
             padding: "4px 8px",
-            fontSize: "1.25rem",
+            fontSize: theme.typography.subtitle1.fontSize,
             lineHeight: 1,
             color: theme.palette.grey[600],
             "&:hover": {

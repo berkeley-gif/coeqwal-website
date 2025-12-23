@@ -156,7 +156,7 @@ const getTooltipSlotProps = (
       maxWidth,
       padding: `${PADDING_Y} ${PADDING_X}`,
       paddingRight: showCloseButton ? "40px" : PADDING_X,
-      fontSize: "0.8125rem",
+      fontSize: theme.typography.compact.subtitle.fontSize,
       lineHeight: 1.5,
     },
   },
@@ -217,7 +217,7 @@ export function HybridTooltip({
             width,
             maxWidth,
             padding: `${PADDING_Y} ${PADDING_X}`,
-            fontSize: "0.8125rem",
+            fontSize: theme.typography.compact.subtitle.fontSize,
             lineHeight: 1.5,
           }}
         >
@@ -310,7 +310,7 @@ export function HybridTooltip({
               width,
               maxWidth,
               padding: `${PADDING_Y} ${PADDING_X}`,
-              fontSize: "0.8125rem",
+              fontSize: theme.typography.compact.subtitle.fontSize,
               lineHeight: 1.5,
               pointerEvents: "auto",
             }}
