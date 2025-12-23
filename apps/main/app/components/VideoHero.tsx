@@ -161,8 +161,7 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
             fontWeight: 500,
             width: "auto",
             color: theme.palette.blue.darkest,
-            fontFamily:
-              "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
+            fontFamily: theme.typography.fontFamily,
           }}
         >
           {t("homePanel.titleLine1")} <br />

@@ -188,7 +188,7 @@ function TooltipVariant({
             width,
             maxWidth,
             padding: `${PADDING_Y} ${PADDING_X}`,
-            fontSize: "0.8125rem",
+            fontSize: theme.typography.compact.subtitle.fontSize,
             lineHeight: 1.5,
           }),
         },
@@ -249,7 +249,7 @@ function OverlayVariant({
         width,
         maxWidth,
         padding: `${PADDING_Y} ${PADDING_X}`,
-        fontSize: "0.8125rem",
+        fontSize: theme.typography.compact.subtitle.fontSize,
         lineHeight: 1.5,
       }}
     >

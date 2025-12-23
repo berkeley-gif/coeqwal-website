@@ -200,7 +200,7 @@ export function HydroclimateChooser({
                     <Typography
                       variant="caption"
                       sx={{
-                        fontSize: "0.6rem",
+                        fontSize: theme.typography.compact.micro.fontSize,
                         color: isSelected
                           ? theme.palette.blue.darkest
                           : theme.palette.grey[600],

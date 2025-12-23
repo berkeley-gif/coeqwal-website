@@ -138,7 +138,7 @@ export function OutcomeChartItem({
         >
           <Typography
             sx={{
-              fontSize: "0.6rem",
+              fontSize: theme.typography.compact.micro.fontSize,
               color: theme.palette.text.primary,
               textAlign: "center",
               lineHeight: 1.2,
@@ -163,7 +163,7 @@ export function OutcomeChartItem({
           component="div"
           sx={{
             textAlign: "center",
-            fontSize: "0.65rem",
+            fontSize: theme.typography.compact.micro.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             color: isActive
               ? theme.palette.blue.darkest

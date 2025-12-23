@@ -52,9 +52,9 @@ export default function SelectionBanner() {
         >
           <Typography
             sx={{
-              fontSize: "0.75rem",
+              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: 500,
-              letterSpacing: "0.15em",
+              letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
               flexShrink: 0,
@@ -92,7 +92,7 @@ export default function SelectionBanner() {
           sx={{
             color: theme.palette.grey[500],
             textTransform: "none",
-            fontSize: "0.75rem",
+            fontSize: theme.typography.compact.caption.fontSize,
             fontWeight: 500,
             minWidth: "auto",
             px: 1,

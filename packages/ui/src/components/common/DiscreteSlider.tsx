@@ -148,7 +148,7 @@ const SliderLabel = styled(Typography, {
   bottom: labelPosition === "top" ? "100%" : "auto",
   left: "50%",
   transform: "translateX(-50%)",
-  fontSize: "0.75rem",
+  fontSize: "0.75rem", // theme.typography.compact.caption.fontSize - can't access theme in styled component
   fontWeight: active ? 500 : 400,
   color: active ? activeColor : inactiveColor,
   marginTop: labelPosition === "bottom" ? `${spacing.labels || 20}px` : 0,

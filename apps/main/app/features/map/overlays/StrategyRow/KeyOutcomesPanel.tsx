@@ -85,7 +85,7 @@ export function KeyOutcomesPanel({
                 display: "block",
                 mt: 1.5,
                 fontStyle: "italic",
-                fontSize: "0.8rem",
+                fontSize: theme.typography.compact.subtitle.fontSize,
               }}
             >
               Click{" "}
@@ -151,7 +151,7 @@ export function KeyOutcomesPanel({
             >
               <Typography
                 sx={{
-                  fontSize: "0.55rem",
+                  fontSize: theme.typography.compact.micro.fontSize,
                   color: theme.palette.text.primary,
                   textAlign: "center",
                   lineHeight: 1.2,
@@ -179,7 +179,7 @@ export function KeyOutcomesPanel({
                   : theme.palette.grey[500],
                 fontWeight: 500,
                 textAlign: "center",
-                fontSize: "0.65rem",
+                fontSize: theme.typography.compact.micro.fontSize,
                 lineHeight: 1.2,
               }}
             >
@@ -225,7 +225,7 @@ export function KeyOutcomesPanel({
         sx={{
           display: "block",
           mb: 1,
-          fontSize: "0.7rem",
+          fontSize: theme.typography.compact.micro.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[600],
           letterSpacing: "0.5px",
@@ -253,7 +253,7 @@ export function KeyOutcomesPanel({
         sx={{
           display: "block",
           mb: 1,
-          fontSize: "0.7rem",
+          fontSize: theme.typography.compact.micro.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[600],
           letterSpacing: "0.5px",

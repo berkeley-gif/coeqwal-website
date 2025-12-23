@@ -130,7 +130,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           padding: 0,
           cursor: "pointer",
           color: theme.palette.blue.medium,
-          fontSize: "1rem",
+          fontSize: theme.typography.body2.fontSize,
           fontWeight: 500,
           textDecoration: "none",
           textAlign: "left",
@@ -142,7 +142,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         }}
       >
         <span>Go to the Sacramento-San Joaquin River Delta</span>
-        <span style={{ fontSize: "1.2em" }}>→</span>
+        <span style={{ fontSize: "1.2rem" }}>→</span>
       </Box>
 
       {isTextVisible && (

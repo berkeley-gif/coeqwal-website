@@ -37,7 +37,7 @@ export function MapMarkerTooltip({
           backgroundColor: statusColor,
           flexShrink: 0,
           // Center the bullet with the first line of text
-          marginTop: "0.4em", // Approximately centers with first line based on line-height
+          marginTop: "0.4rem", // Approximately centers with first line based on line-height
         }}
       />
       {text}

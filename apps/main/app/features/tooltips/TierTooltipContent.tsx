@@ -89,7 +89,7 @@ export default function TierTooltipContent({
             fontWeight: 600,
             display: "block",
             mb: 1,
-            fontSize: "0.875rem",
+            fontSize: theme.typography.nav.fontSize,
             lineHeight: 1.4,
           }}
         >
@@ -101,7 +101,7 @@ export default function TierTooltipContent({
         component="div"
         sx={{
           mb: 1.5,
-          fontSize: "0.875rem",
+          fontSize: theme.typography.nav.fontSize,
           fontWeight: 400,
           lineHeight: 1.4,
         }}
@@ -117,7 +117,7 @@ export default function TierTooltipContent({
           component="span"
           sx={{
             fontWeight: 600,
-            fontSize: "0.875rem",
+            fontSize: theme.typography.nav.fontSize,
             lineHeight: 1.4,
           }}
         >
@@ -145,7 +145,7 @@ export default function TierTooltipContent({
             <Box
               component="span"
               sx={{
-                fontSize: "0.875rem",
+                fontSize: theme.typography.nav.fontSize,
                 fontWeight: 400,
                 lineHeight: 1.4,
               }}

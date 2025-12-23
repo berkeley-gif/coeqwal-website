@@ -101,14 +101,13 @@ export function CallResponsePanel({
             boxShadow: "none",
             border: "none",
             "& .MuiTypography-root": {
-              color: (theme) =>
+              color: (theme: Theme) =>
                 side === "right" ? theme.palette.grey[900] : "#faf8f5",
-              fontFamily:
-                side === "left"
-                  ? '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-                  : undefined,
+              fontFamily: (theme: Theme) =>
+                side === "left" ? theme.typography.fontFamily : undefined,
               fontWeight: side === "left" ? 400 : undefined,
-              fontSize: side === "left" ? "1.25rem" : undefined, // 20px
+              fontSize: (theme: Theme) =>
+                side === "left" ? theme.typography.subtitle1.fontSize : undefined,
               lineHeight: side === "left" ? 1.8 : undefined, // maintains ~36px line-height
             },
             ...sx,

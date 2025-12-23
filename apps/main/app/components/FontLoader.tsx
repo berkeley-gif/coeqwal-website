@@ -29,7 +29,7 @@ export function FontLoader({ kitId, timeout = 3000 }: FontLoaderProps) {
 
       const docEl = document.documentElement
       docEl.className +=
-        " wf-loading tk-akzidenz-grotesk-next-pro tk-neue-haas-grotesk-display tk-neue-haas-grotesk-text tk-sentinel tk-sofia-pro"
+        " wf-loading tk-ff-real-headline-pro tk-ff-real-text-pro tk-neue-haas-grotesk-display tk-neue-haas-grotesk-text"
 
       const script = document.createElement("script")
       script.src = `https://use.typekit.net/${kitId}.js`

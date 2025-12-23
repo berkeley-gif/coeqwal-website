@@ -195,7 +195,7 @@ export default function ScrollTooltip({
               right: 4,
               width: 24,
               height: 24,
-              fontSize: "0.875rem",
+              fontSize: theme.typography.nav.fontSize,
               color: theme.palette.grey[500],
               "&:hover": {
                 color: theme.palette.grey[700],
@@ -214,7 +214,7 @@ export default function ScrollTooltip({
         {/* Content */}
         <Typography
           sx={{
-            fontSize: "0.875rem",
+            fontSize: theme.typography.nav.fontSize,
             fontWeight: 400,
             lineHeight: 1.4,
           }}

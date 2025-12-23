@@ -281,7 +281,7 @@ export function GeocodingPanel({
                 color: theme.palette.blue.darkest,
                 fontWeight: 600,
                 textTransform: "uppercase",
-                letterSpacing: "0.1em",
+                letterSpacing: "0.1rem",
               }}
             >
               📍 Selected Location
@@ -310,7 +310,7 @@ export function GeocodingPanel({
                     color: theme.palette.blue.dark,
                     fontWeight: 600,
                     textTransform: "uppercase",
-                    letterSpacing: "0.1em",
+                    letterSpacing: "0.1rem",
                   }}
                 >
                   Basin
