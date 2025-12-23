@@ -20,39 +20,34 @@ import {
 import { HybridTooltip } from "@repo/ui"
 import { hydroclimateOptions } from "../../../content/scenarios"
 
-// Icon configuration for each hydroclimate
+// Icon and background color configuration for each hydroclimate
+// Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
 const HYDROCLIMATE_CONFIG: Record<
   string,
   {
     icon: React.ElementType
-    color: string
     bgColor: string
   }
 > = {
   historical: {
     icon: HistoryIcon,
-    color: "#ffffff",
-    bgColor: "#2d89b7",
+    bgColor: "#2d89b7", // Cool blue - historical baseline
   },
   "warmer-wetter": {
     icon: ThunderstormIcon,
-    color: "#ffffff",
-    bgColor: "#4caf50",
+    bgColor: "#4caf50", // Green - wetter conditions
   },
   "warmer-drier-i": {
     icon: WbSunnyIcon,
-    color: "#ffffff",
-    bgColor: "#f5a623",
+    bgColor: "#f5a623", // Yellow-orange - mild dry
   },
   "warmer-drier-ii": {
     icon: WbSunnyIcon,
-    color: "#ffffff",
-    bgColor: "#e65100",
+    bgColor: "#e65100", // Orange - moderate dry
   },
   "warmer-drier-iii": {
     icon: LocalFireDepartmentIcon,
-    color: "#ffffff",
-    bgColor: "#bf360c",
+    bgColor: "#bf360c", // Red-orange - severe dry
   },
 }
 
@@ -196,7 +191,7 @@ export function HydroclimateChooser({
                   >
                     <IconComponent
                       sx={{
-                        color: config?.color || "#ffffff",
+                        color: theme.palette.utility.white,
                         fontSize: size === "small" ? "1.25rem" : "1.5rem",
                       }}
                     />

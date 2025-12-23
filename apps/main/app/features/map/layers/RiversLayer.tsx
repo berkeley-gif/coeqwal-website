@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useEffect } from "react"
 import { Source, Layer, Marker, useMap } from "@repo/map"
+import { useTheme } from "@repo/ui/mui"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 import { useIsOutcomeVisualizationActive } from "../store"
 
@@ -39,6 +40,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
   letterSpacing?: number
   opacity?: number
 }) {
+  const theme = useTheme()
   const pathId = `river-curve-${text.replace(/\s/g, "-")}`
 
   // Create curved path - positive curvature curves up, negative curves down
@@ -78,7 +80,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
         fontSize="15"
         fontFamily="Georgia, 'Times New Roman', serif"
         fontStyle="italic"
-        fill="#FFFFFF"
+        fill={theme.palette.utility.white}
         fillOpacity="0.9"
         fontWeight="700"
         letterSpacing={letterSpacing}
@@ -92,6 +94,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 })
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
+  const theme = useTheme()
   const { mapRef } = useMap()
 
   // Clamp progress to [0, 1] to avoid floating-point precision errors
@@ -309,7 +312,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
                 fontSize: "15px",
                 fontWeight: 700,
                 fontStyle: "italic",
-                fill: "#FFFFFF",
+                fill: theme.palette.utility.white,
                 fillOpacity: 0.9,
               }}
             >

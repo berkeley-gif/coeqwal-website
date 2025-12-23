@@ -102,7 +102,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
   return (
     <Box
       sx={{
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        backgroundColor: theme.background.whiteOverlay[95],
         borderRadius: 0,
         padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadow.sm,

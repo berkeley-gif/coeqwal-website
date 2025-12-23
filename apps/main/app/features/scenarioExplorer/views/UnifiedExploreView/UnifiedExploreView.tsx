@@ -156,7 +156,7 @@ export default function UnifiedExploreView({
                 position: "absolute",
                 top: theme.spacing(2),
                 right: theme.spacing(2),
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                backgroundColor: theme.background.whiteOverlay[95],
                 borderRadius: theme.borderRadius.md,
                 padding: theme.spacing(2),
                 boxShadow: theme.shadow.subtle,
