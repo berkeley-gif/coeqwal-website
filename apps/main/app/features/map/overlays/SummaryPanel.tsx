@@ -338,9 +338,9 @@ export function SummaryPanel({
           <Typography
             variant="body2"
             sx={{
+              ...theme.typography.nav,
+              lineHeight: 1.5, // Intentionally more relaxed than nav default for readability
               color: theme.palette.grey[700],
-              lineHeight: 1.5,
-              fontSize: theme.typography.nav.fontSize,
               mb: 2,
             }}
           >
@@ -397,7 +397,7 @@ export function SummaryPanel({
                 variant="caption"
                 sx={{
                   color: theme.palette.blue.medium,
-                  fontWeight: 600,
+                  fontWeight: theme.typography.fontWeightSemiBold,
                   fontSize: isInline
                     ? theme.typography.body2.fontSize
                     : "0.7rem",
@@ -413,9 +413,9 @@ export function SummaryPanel({
               <Typography
                 variant="body2"
                 sx={{
+                  ...theme.typography.nav,
+                  lineHeight: 1.5, // Intentionally more relaxed than nav default for readability
                   color: theme.palette.grey[700],
-                  lineHeight: 1.5,
-                  fontSize: theme.typography.nav.fontSize,
                   mb: 1.5,
                 }}
               >
@@ -457,7 +457,7 @@ export function SummaryPanel({
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
                               fontSize: theme.typography.compact.micro.fontSize,
-                              fontWeight: 500,
+                              fontWeight: theme.typography.fontWeightMedium,
                               height: 22,
                               "& .MuiChip-label": { px: 1 },
                             }}
@@ -482,7 +482,7 @@ export function SummaryPanel({
                         component="span"
                         sx={{
                           color: tierColors[4],
-                          fontWeight: 600,
+                          fontWeight: theme.typography.fontWeightSemiBold,
                           fontSize: theme.typography.nav.fontSize,
                           mr: 0.5,
                         }}
@@ -542,7 +542,7 @@ export function SummaryPanel({
                         component="span"
                         sx={{
                           color: tierColors[3],
-                          fontWeight: 600,
+                          fontWeight: theme.typography.fontWeightSemiBold,
                           fontSize: theme.typography.nav.fontSize,
                           mr: 0.5,
                         }}
@@ -613,7 +613,7 @@ export function SummaryPanel({
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
                               fontSize: theme.typography.compact.micro.fontSize,
-                              fontWeight: 500,
+                              fontWeight: theme.typography.fontWeightMedium,
                               height: 22,
                               "& .MuiChip-label": {
                                 px: 1,
@@ -632,7 +632,7 @@ export function SummaryPanel({
                         variant="body2"
                         sx={{
                           color: tierColors[4],
-                          fontWeight: 600,
+                          fontWeight: theme.typography.fontWeightSemiBold,
                           fontSize: theme.typography.nav.fontSize,
                           display: "block",
                           mb: 0.5,
@@ -690,7 +690,7 @@ export function SummaryPanel({
                         variant="caption"
                         sx={{
                           color: tierColors[3],
-                          fontWeight: 600,
+                          fontWeight: theme.typography.fontWeightSemiBold,
                           fontSize: theme.typography.compact.micro.fontSize,
                           display: "block",
                           mb: 0.5,

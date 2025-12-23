@@ -227,7 +227,7 @@ export function GeocodingPanel({
                   },
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
+                <Typography variant="body2" sx={{ fontWeight: theme.typography.fontWeightMedium, mb: 0.25 }}>
                   {feature.text}
                 </Typography>
                 <Typography
@@ -279,14 +279,14 @@ export function GeocodingPanel({
               variant="caption"
               sx={{
                 color: theme.palette.blue.darkest,
-                fontWeight: 600,
+                fontWeight: theme.typography.fontWeightSemiBold,
                 textTransform: "uppercase",
                 letterSpacing: "0.1rem",
               }}
             >
               📍 Selected Location
             </Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ mt: 0.5, fontWeight: theme.typography.fontWeightMedium }}>
               {selectedLocation.text}
             </Typography>
             <Typography
@@ -308,14 +308,14 @@ export function GeocodingPanel({
                   variant="caption"
                   sx={{
                     color: theme.palette.blue.dark,
-                    fontWeight: 600,
+                    fontWeight: theme.typography.fontWeightSemiBold,
                     textTransform: "uppercase",
                     letterSpacing: "0.1rem",
                   }}
                 >
                   Basin
                 </Typography>
-                <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
+                <Typography variant="body2" sx={{ mt: 0.5, fontWeight: theme.typography.fontWeightMedium }}>
                   {basinInfo.name}
                 </Typography>
               </Box>

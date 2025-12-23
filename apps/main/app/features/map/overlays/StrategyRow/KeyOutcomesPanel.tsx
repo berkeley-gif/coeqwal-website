@@ -177,7 +177,7 @@ export function KeyOutcomesPanel({
                 color: hasData
                   ? theme.palette.blue.darkest
                   : theme.palette.grey[500],
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
                 textAlign: "center",
                 fontSize: theme.typography.compact.micro.fontSize,
                 lineHeight: 1.2,

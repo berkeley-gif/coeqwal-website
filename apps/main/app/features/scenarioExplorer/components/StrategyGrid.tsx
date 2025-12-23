@@ -406,7 +406,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             <>
                                               <Box
                                                 component="span"
-                                                sx={{ fontWeight: 600 }}
+                                                sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
                                               >
                                                 Temporary Urgent Change
                                                 Petitions
@@ -1183,7 +1183,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         <>
                                           <Box
                                             component="span"
-                                            sx={{ fontWeight: 600 }}
+                                            sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
                                           >
                                             Temporary Urgent Change Petitions
                                           </Box>{" "}

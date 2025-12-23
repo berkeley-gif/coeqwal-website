@@ -53,7 +53,7 @@ export default function SelectionBanner() {
           <Typography
             sx={{
               fontSize: theme.typography.compact.caption.fontSize,
-              fontWeight: 500,
+              fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
@@ -75,7 +75,7 @@ export default function SelectionBanner() {
                   backgroundColor: theme.palette.grey[100],
                   borderRadius: 1,
                   color: theme.palette.blue.darkest,
-                  fontWeight: 500,
+                  fontWeight: theme.typography.fontWeightMedium,
                 }}
               >
                 {getScenarioDisplayName(scenarioId)}
@@ -93,7 +93,7 @@ export default function SelectionBanner() {
             color: theme.palette.grey[500],
             textTransform: "none",
             fontSize: theme.typography.compact.caption.fontSize,
-            fontWeight: 500,
+            fontWeight: theme.typography.fontWeightMedium,
             minWidth: "auto",
             px: 1,
             "&:hover": {

@@ -527,6 +527,7 @@ const theme = createTheme({
     fontWeightLight: 300,
     fontWeightRegular: 400,
     fontWeightMedium: 500,
+    fontWeightSemiBold: 600,
     fontWeightBold: 700,
     h1: {
       fontFamily: themeValues.fontFamily.display,
@@ -594,44 +595,57 @@ const theme = createTheme({
       lineHeight: 1.6,
     },
     button: {
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1rem", // 16px for top-level UI elements
-      letterSpacing: "normal",
       fontWeight: 500,
+      lineHeight: 1.4,
+      letterSpacing: "normal",
       textTransform: "none",
     },
     caption: {
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "1rem", // align with body2 (dashboard interface size)
-      letterSpacing: "normal",
+      fontWeight: 400,
       lineHeight: 1.4,
+      letterSpacing: "normal",
     },
     overline: {
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "0.75rem",
-      letterSpacing: "normal",
+      fontWeight: 500,
       lineHeight: 1.4,
+      letterSpacing: "normal",
+      textTransform: "uppercase",
     },
     nav: {
+      fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem",
-      letterSpacing: "normal",
+      fontWeight: 400,
       lineHeight: 1.4,
+      letterSpacing: "normal",
     },
     // Compact typography variants for dialogs, tooltips, form labels
     compact: {
       title: {
+        fontFamily: themeValues.fontFamily.text,
         fontSize: typeScale.compact.title, // 0.9rem
         fontWeight: 500,
         lineHeight: 1.4,
       },
       subtitle: {
+        fontFamily: themeValues.fontFamily.text,
         fontSize: typeScale.compact.subtitle, // 0.8rem
         fontWeight: 400,
         lineHeight: 1.4,
       },
       caption: {
+        fontFamily: themeValues.fontFamily.text,
         fontSize: typeScale.compact.caption, // 0.75rem
         fontWeight: 400,
         lineHeight: 1.3,
       },
       micro: {
+        fontFamily: themeValues.fontFamily.text,
         fontSize: typeScale.compact.micro, // 0.7rem
         fontWeight: 400,
         lineHeight: 1.3,
@@ -1351,8 +1365,17 @@ declare module "@mui/material/styles" {
     cards?: Partial<typeof themeValues.cards>
   }
 
+  // Add fontWeightSemiBold to typography
+  interface Typography {
+    fontWeightSemiBold: number
+  }
+  interface TypographyOptions {
+    fontWeightSemiBold?: number
+  }
+
   // Add custom typography variant
   interface TypographyVariants {
+    fontWeightSemiBold: number
     nav: React.CSSProperties
     compact: {
       title: React.CSSProperties
@@ -1362,6 +1385,7 @@ declare module "@mui/material/styles" {
     }
   }
   interface TypographyVariantsOptions {
+    fontWeightSemiBold?: number
     nav?: React.CSSProperties
     compact?: {
       title?: React.CSSProperties

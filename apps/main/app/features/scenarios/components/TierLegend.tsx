@@ -33,7 +33,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
     >
       {/* Header with close button */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
           {outcome}
         </Typography>
         <Box

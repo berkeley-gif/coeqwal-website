@@ -93,7 +93,7 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
               padding: "4px 8px",
               borderRadius: theme.borderRadius.sm,
               fontSize: theme.typography.compact.micro.fontSize,
-              fontWeight: 600,
+              fontWeight: theme.typography.fontWeightSemiBold,
               whiteSpace: "nowrap",
               boxShadow: theme.shadow.subtle,
               border: theme.border.subtleOutline,

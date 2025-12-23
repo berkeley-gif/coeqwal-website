@@ -58,7 +58,7 @@ export function StrategyInfoPanel({
                   variant="inline"
                   tooltipContent={
                     <>
-                      <Box component="span" sx={{ fontWeight: 600 }}>
+                      <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                         Temporary Urgent Change Petitions (TUCPs)
                       </Box>{" "}
                       permit changes during droughts to meet human health and

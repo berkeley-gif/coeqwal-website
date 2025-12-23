@@ -305,7 +305,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             </div>
             <div
               style={{
-                fontWeight: 600,
+                fontWeight: theme.typography.fontWeightSemiBold,
                 fontSize: theme.typography.body2.fontSize,
                 marginBottom: theme.spacing(1),
                 color: theme.palette.blue.darkest,

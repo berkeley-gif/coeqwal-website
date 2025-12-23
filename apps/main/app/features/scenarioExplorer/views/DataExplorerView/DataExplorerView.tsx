@@ -50,7 +50,7 @@ export default function DataExplorerView({
           <Typography
             sx={{
               fontSize: theme.typography.compact.caption.fontSize,
-              fontWeight: 500,
+              fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
@@ -94,7 +94,7 @@ export default function DataExplorerView({
                 minHeight: 48,
                 fontSize: theme.typography.nav.fontSize,
                 textTransform: "none",
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.grey[600],
                 px: 0,
                 mr: 4,
@@ -151,7 +151,7 @@ export default function DataExplorerView({
                 onClick={onNavigateToExplorer}
                 sx={{
                   textTransform: "none",
-                  fontWeight: 500,
+                  fontWeight: theme.typography.fontWeightMedium,
                   backgroundColor: theme.palette.blue.darkest,
                   "&:hover": {
                     backgroundColor: theme.palette.blue.dark,
