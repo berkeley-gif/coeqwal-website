@@ -9,14 +9,14 @@ interface TierTooltipContentProps {
 }
 
 // Format description text with bold markdown (**text**)
-export const formatDescription = (text: string) => {
+export const formatDescription = (text: string, fontWeightMedium: number = 500) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       const content = part.slice(2, -2)
       return (
-        <span key={index} style={{ fontWeight: 500 }}>
+        <span key={index} style={{ fontWeight: fontWeightMedium }}>
           {content}
         </span>
       )
@@ -26,14 +26,14 @@ export const formatDescription = (text: string) => {
 }
 
 // Format tier text with emphasized keywords, numbers, and markdown
-export const formatTierText = (text: string) => {
+export const formatTierText = (text: string, fontWeightMedium: number = 500) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       const content = part.slice(2, -2)
       return (
-        <span key={index} style={{ fontWeight: 500 }}>
+        <span key={index} style={{ fontWeight: fontWeightMedium }}>
           {content}
         </span>
       )
@@ -52,14 +52,14 @@ export const formatTierText = (text: string) => {
         )
       ) {
         return (
-          <span key={key} style={{ fontWeight: 500 }}>
+          <span key={key} style={{ fontWeight: fontWeightMedium }}>
             {subPart}
           </span>
         )
       }
       if (subPart.match(/^\d+%$/)) {
         return (
-          <span key={key} style={{ fontWeight: 500 }}>
+          <span key={key} style={{ fontWeight: fontWeightMedium }}>
             {subPart}
           </span>
         )
@@ -86,11 +86,10 @@ export default function TierTooltipContent({
         <Box
           component="span"
           sx={{
-            fontWeight: 600,
+            ...theme.typography.nav,
+            fontWeight: theme.typography.fontWeightSemiBold,
             display: "block",
             mb: 1,
-            fontSize: theme.typography.nav.fontSize,
-            lineHeight: 1.4,
           }}
         >
           {outcome}
@@ -100,15 +99,14 @@ export default function TierTooltipContent({
       <Box
         component="div"
         sx={{
+          ...theme.typography.nav,
           mb: 1.5,
-          fontSize: theme.typography.nav.fontSize,
-          fontWeight: 400,
-          lineHeight: 1.4,
         }}
       >
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
+          theme.typography.fontWeightMedium as number,
         )}
       </Box>
 
@@ -116,9 +114,8 @@ export default function TierTooltipContent({
         <Box
           component="span"
           sx={{
-            fontWeight: 600,
-            fontSize: theme.typography.nav.fontSize,
-            lineHeight: 1.4,
+            ...theme.typography.nav,
+            fontWeight: theme.typography.fontWeightSemiBold,
           }}
         >
           Outcome levels:
@@ -145,9 +142,7 @@ export default function TierTooltipContent({
             <Box
               component="span"
               sx={{
-                fontSize: theme.typography.nav.fontSize,
-                fontWeight: 400,
-                lineHeight: 1.4,
+                ...theme.typography.nav,
               }}
             >
               {formatTierText(
@@ -166,6 +161,7 @@ export default function TierTooltipContent({
                 ] ||
                   ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
                   "",
+                theme.typography.fontWeightMedium as number,
               )}
             </Box>
           </Box>

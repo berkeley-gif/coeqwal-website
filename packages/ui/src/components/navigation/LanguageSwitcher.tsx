@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
           height: 36,
           minHeight: 36,
           fontSize: (theme) => theme.typography.body2.fontSize,
-          fontWeight: 400,
+          fontWeight: (theme) => theme.typography.fontWeightRegular,
           textTransform: "none",
         },
       }}

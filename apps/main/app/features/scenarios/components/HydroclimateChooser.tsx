@@ -137,7 +137,7 @@ export function HydroclimateChooser({
                   <>
                     <Box
                       component="span"
-                      sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      sx={{ fontWeight: theme.typography.fontWeightSemiBold, display: "block", mb: 0.5 }}
                     >
                       {option.label}
                       {isDisabled && " (Coming soon)"}

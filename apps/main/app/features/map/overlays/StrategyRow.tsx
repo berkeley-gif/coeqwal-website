@@ -88,7 +88,7 @@ export function StrategyRow({
                     variant="inline"
                     tooltipContent={
                       <>
-                        <Box component="span" sx={{ fontWeight: 600 }}>
+                        <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                           Temporary Urgent Change Petitions (TUCPs)
                         </Box>{" "}
                         permit changes during droughts to meet human health and
@@ -121,7 +121,7 @@ export function StrategyRow({
               <>
                 <Box
                   component="span"
-                  sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold, display: "block", mb: 0.5 }}
                 >
                   {icon.label.replace(/\n/g, " ")}
                 </Box>

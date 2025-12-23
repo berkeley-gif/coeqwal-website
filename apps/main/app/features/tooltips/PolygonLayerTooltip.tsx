@@ -103,7 +103,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 600,
+            fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
             mb: 0.5,
           }}
@@ -171,7 +171,7 @@ function DemandUnitsTooltipContent({
         <Typography
           variant="body2"
           sx={{
-            fontWeight: 600,
+            fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
             mb: 0.5,
           }}

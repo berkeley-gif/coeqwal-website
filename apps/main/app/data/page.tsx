@@ -150,7 +150,7 @@ export default function DataPage() {
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
                   fontSize: (theme) => theme.typography.h4.fontSize,
-                  fontWeight: 600,
+                  fontWeight: (theme) => theme.typography.fontWeightSemiBold,
                   lineHeight: 1.2,
                 }}
               >
@@ -179,7 +179,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     Full scenario run files
                   </Typography>
@@ -254,7 +254,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     Scenario data in csv format
                   </Typography>
@@ -361,7 +361,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     Model documentation
                   </Typography>
@@ -394,7 +394,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     Research publications
                   </Typography>
@@ -426,7 +426,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     API access
                   </Typography>
@@ -458,7 +458,7 @@ export default function DataPage() {
                 <Box>
                   <Typography
                     variant="h4"
-                    sx={{ mb: 2, fontWeight: 600, fontSize: (theme) => theme.typography.h5.fontSize }}
+                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
                   >
                     Support & contact
                   </Typography>

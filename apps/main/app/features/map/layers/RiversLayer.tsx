@@ -310,7 +310,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
               style={{
                 fontFamily: "Georgia, Times New Roman, serif",
                 fontSize: "15px",
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
                 fontStyle: "italic",
                 fill: theme.palette.utility.white,
                 fillOpacity: 0.9,

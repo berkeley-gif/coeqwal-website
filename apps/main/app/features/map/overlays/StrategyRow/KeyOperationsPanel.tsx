@@ -74,7 +74,7 @@ export function KeyOperationsPanel({
                   <>
                     <Box
                       component="span"
-                      sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      sx={{ fontWeight: theme.typography.fontWeightSemiBold, display: "block", mb: 0.5 }}
                     >
                       {icon.label.replace(/\n/g, " ")}
                     </Box>

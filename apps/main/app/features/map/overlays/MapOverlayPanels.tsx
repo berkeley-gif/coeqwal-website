@@ -389,7 +389,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   Central Valley
                 </Box>{" "}
                 is a long, low valley that collects much of California&apos;s
@@ -419,7 +419,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The Central Valley lies across three water{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   basins
                 </Box>
                 .
@@ -525,22 +525,22 @@ export default function MapOverlayPanels() {
               >
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   These waters flow to the Valley floor, where the{" "}
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     Sacramento River
                   </Box>{" "}
                   flows from the north and the{" "}
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     San Joaquin River
                   </Box>{" "}
                   flows from the south. The rivers meet and mix in the low-lying{" "}
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     Delta
                   </Box>
                   .
                 </Typography>
                 <Typography variant="body1">
                   During{" "}
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     wet years
                   </Box>{" "}
                   water flows from the Tulare Basin into the San Joaquin River.
@@ -617,15 +617,15 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1" sx={{ mb: 2 }}>
                 To do this water planning and accounting, the federal{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   U.S. Bureau of Reclamation
                 </Box>{" "}
                 and the state{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   Department of Water Resources
                 </Box>{" "}
                 use a computer model called{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   CalSim
                 </Box>
                 .
@@ -658,15 +658,15 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   COEQWAL
                 </Box>{" "}
                 project has received support from the{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   University of California
                 </Box>{" "}
                 and the{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   Bay-Delta Science Program
                 </Box>{" "}
                 to use CalSim to explore a broad range of water management
@@ -695,7 +695,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 We are making these{" "}
-                <Box component="span" sx={{ fontWeight: 600 }}>
+                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   alternative water management scenarios
                 </Box>{" "}
                 available to the public so that communities can envision
@@ -855,7 +855,7 @@ export default function MapOverlayPanels() {
                               <Box
                                 component="span"
                                 sx={{
-                                  fontWeight: 600,
+                                  fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
                                   mb: 0.5,
                                 }}
@@ -960,7 +960,7 @@ export default function MapOverlayPanels() {
                               <Box
                                 component="span"
                                 sx={{
-                                  fontWeight: 600,
+                                  fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
                                   mb: 0.5,
                                 }}
@@ -1060,7 +1060,7 @@ export default function MapOverlayPanels() {
                               <Box
                                 component="span"
                                 sx={{
-                                  fontWeight: 600,
+                                  fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
                                   mb: 0.5,
                                 }}

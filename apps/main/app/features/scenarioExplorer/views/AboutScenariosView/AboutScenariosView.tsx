@@ -117,7 +117,7 @@ export default function AboutScenariosView() {
         <Typography
           sx={{
             fontSize: theme.typography.compact.caption.fontSize,
-            fontWeight: 500,
+            fontWeight: theme.typography.fontWeightMedium,
             letterSpacing: "0.15rem",
             textTransform: "uppercase",
             color: theme.palette.grey[500],
@@ -148,14 +148,14 @@ export default function AboutScenariosView() {
           A scenario combines a{" "}
           <Box
             component="span"
-            sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}
+            sx={{ fontWeight: theme.typography.fontWeightSemiBold, color: theme.palette.blue.darkest }}
           >
             water management strategy
           </Box>{" "}
           with{" "}
           <Box
             component="span"
-            sx={{ fontWeight: 600, color: theme.palette.blue.darkest }}
+            sx={{ fontWeight: theme.typography.fontWeightSemiBold, color: theme.palette.blue.darkest }}
           >
             climate conditions
           </Box>
@@ -169,7 +169,7 @@ export default function AboutScenariosView() {
             <Typography
               sx={{
                 fontSize: "2rem",
-                fontWeight: 600,
+                fontWeight: theme.typography.fontWeightSemiBold,
                 color: theme.palette.nature.forest,
                 lineHeight: 1,
               }}
@@ -179,7 +179,7 @@ export default function AboutScenariosView() {
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.blue.darkest,
               }}
             >
@@ -205,7 +205,7 @@ export default function AboutScenariosView() {
             <Typography
               sx={{
                 fontSize: "2rem",
-                fontWeight: 600,
+                fontWeight: theme.typography.fontWeightSemiBold,
                 color: theme.palette.blue.medium,
                 lineHeight: 1,
               }}
@@ -215,7 +215,7 @@ export default function AboutScenariosView() {
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.blue.darkest,
               }}
             >
@@ -240,7 +240,7 @@ export default function AboutScenariosView() {
             <Typography
               sx={{
                 fontSize: "2rem",
-                fontWeight: 600,
+                fontWeight: theme.typography.fontWeightSemiBold,
                 color: theme.palette.grey[500],
                 lineHeight: 1,
               }}
@@ -250,7 +250,7 @@ export default function AboutScenariosView() {
             <Typography
               variant="body1"
               sx={{
-                fontWeight: 500,
+                fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.blue.darkest,
               }}
             >
@@ -293,7 +293,7 @@ export default function AboutScenariosView() {
           <Typography
             sx={{
               fontSize: theme.typography.compact.caption.fontSize,
-              fontWeight: 500,
+              fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
@@ -336,7 +336,7 @@ export default function AboutScenariosView() {
                   <Typography
                     sx={{
                       fontSize: theme.typography.body2.fontSize,
-                      fontWeight: 600,
+                      fontWeight: theme.typography.fontWeightSemiBold,
                       color: theme.palette.blue.darkest,
                       mb: 0.5,
                     }}
@@ -371,7 +371,7 @@ export default function AboutScenariosView() {
           <Typography
             sx={{
               fontSize: theme.typography.compact.caption.fontSize,
-              fontWeight: 500,
+              fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],
@@ -419,7 +419,7 @@ export default function AboutScenariosView() {
                 <Typography
                   sx={{
                     fontSize: theme.typography.body2.fontSize,
-                    fontWeight: 600,
+                    fontWeight: theme.typography.fontWeightSemiBold,
                     color: theme.palette.blue.darkest,
                     mb: 1,
                   }}
@@ -455,7 +455,7 @@ export default function AboutScenariosView() {
           <Typography
             sx={{
               fontSize: theme.typography.compact.caption.fontSize,
-              fontWeight: 500,
+              fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
               color: theme.palette.grey[500],

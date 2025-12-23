@@ -133,7 +133,7 @@ export function BaseHeader({
 
   const buttonStyle = {
     fontSize: "1rem",
-    fontWeight: 500,
+    fontWeight: 500, // theme.typography.fontWeightMedium - no theme access in this scope
     color: textColor,
     letterSpacing: 0.5,
     textTransform: "none" as const,

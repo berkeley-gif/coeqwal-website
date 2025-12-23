@@ -212,13 +212,7 @@ export default function ScrollTooltip({
         <Box sx={getArrowStyle()} />
 
         {/* Content */}
-        <Typography
-          sx={{
-            fontSize: theme.typography.nav.fontSize,
-            fontWeight: 400,
-            lineHeight: 1.4,
-          }}
-        >
+        <Typography sx={{ ...theme.typography.nav }}>
           {content}
         </Typography>
       </Box>
