@@ -18,6 +18,7 @@ import { useScenarioExplorerStore } from "../../../store"
 import {
   outcomeMetrics,
   outcomeCategories,
+  getOutcomeCategoryColor,
   type OutcomeMetric,
   type SpatialType,
 } from "../outcomeDefinitions"
@@ -331,7 +332,9 @@ function MetricRow({
         transition: theme.transition.default,
         "&:hover": {
           backgroundColor: theme.palette.grey[50],
-          border: category ? `1px solid ${category.color}` : theme.border.medium,
+          border: category
+            ? `1px solid ${getOutcomeCategoryColor(theme, category.id)}`
+            : theme.border.medium,
           boxShadow: theme.shadow.subtle,
         },
       }}
@@ -352,7 +355,7 @@ function MetricRow({
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: category
-              ? category.color
+              ? getOutcomeCategoryColor(theme, category.id)
               : theme.palette.grey[300],
             borderRadius: theme.borderRadius.md,
             fontSize: theme.typography.h6.fontSize,

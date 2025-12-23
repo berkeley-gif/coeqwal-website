@@ -1,6 +1,9 @@
 /**
  * Comprehensive outcome definitions for Data Explorer
  * Organized by category with full metadata
+ *
+ * Colors are defined in theme.palette.outcomes and referenced here by category ID.
+ * Use getOutcomeCategoryColor(theme, categoryId) to get the themed color.
  */
 
 import React from "react"
@@ -10,6 +13,7 @@ import {
   SetMealIcon,
   ScienceIcon,
   WaterDropIcon,
+  type Theme,
 } from "@repo/ui/mui"
 
 export type TemporalScale = "monthly" | "annual" | "period-of-record"
@@ -47,54 +51,67 @@ export interface OutcomeMetric {
   notes?: string
 }
 
+/**
+ * Maps category IDs to theme.palette.outcomes colors.
+ * Use this function to get the themed color for a category.
+ */
+export const getOutcomeCategoryColor = (
+  theme: Theme,
+  categoryId: string,
+): string => {
+  const colorMap: Record<string, string> = {
+    "community-water": theme.palette.outcomes.communityWater,
+    "agricultural-water": theme.palette.outcomes.agriculturalWater,
+    "agricultural-rice": theme.palette.outcomes.agriculturalRice,
+    "environmental-water": theme.palette.outcomes.environmentalWater,
+    "delta-salinity": theme.palette.outcomes.deltaSalinity,
+    "reservoir-storage": theme.palette.outcomes.reservoirStorage,
+    "groundwater-storage": theme.palette.outcomes.groundwaterStorage,
+    "salmon-abundance": theme.palette.outcomes.salmonAbundance,
+  }
+  return colorMap[categoryId] || theme.palette.grey[500]
+}
+
 export const outcomeCategories = [
   {
     id: "community-water",
     name: "Community water systems",
     icon: <HomeIcon fontSize="small" />,
-    color: "#2d89b6",
   },
   {
     id: "agricultural-water",
     name: "Agricultural water",
     icon: <AgricultureIcon fontSize="small" />,
-    color: "#7b9d3f",
   },
   {
     id: "agricultural-rice",
     name: "Agricultural economic model - Rice",
     icon: <AgricultureIcon fontSize="small" />,
-    color: "#9ABD3D",
   },
   {
     id: "environmental-water",
     name: "Environmental water",
     icon: <SetMealIcon fontSize="small" />,
-    color: "#60aacb",
   },
   {
     id: "delta-salinity",
     name: "Delta salinity",
     icon: <ScienceIcon fontSize="small" />,
-    color: "#449cd9",
   },
   {
     id: "reservoir-storage",
     name: "Reservoir storage",
     icon: <WaterDropIcon fontSize="small" />,
-    color: "#186b88",
   },
   {
     id: "groundwater-storage",
     name: "Groundwater storage",
     icon: <WaterDropIcon fontSize="small" />,
-    color: "#77a2d9",
   },
   {
     id: "salmon-abundance",
     name: "Salmon abundance",
     icon: <SetMealIcon fontSize="small" />,
-    color: "#FFB347",
   },
 ]
 

@@ -18,6 +18,7 @@ import { VerticalBarChart, TierCircles } from "@repo/viz"
 import {
   outcomeCategories,
   getMetricsByCategory,
+  getOutcomeCategoryColor,
   type OutcomeMetric,
 } from "../outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
@@ -168,7 +169,7 @@ export default function CategoryView() {
                   label={`${metrics.length} metric${metrics.length !== 1 ? "s" : ""}`}
                   size="small"
                   sx={{
-                    backgroundColor: category.color,
+                    backgroundColor: getOutcomeCategoryColor(theme, category.id),
                     color: theme.palette.common.white,
                     fontWeight: theme.typography.fontWeightMedium,
                   }}

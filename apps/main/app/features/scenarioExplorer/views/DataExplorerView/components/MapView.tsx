@@ -15,7 +15,11 @@ import {
 } from "@repo/ui/mui"
 import { Map, NavigationControl, MapProvider } from "@repo/map"
 import { useScenarioExplorerStore } from "../../../store"
-import { getMapMetrics, outcomeCategories } from "../outcomeDefinitions"
+import {
+  getMapMetrics,
+  outcomeCategories,
+  getOutcomeCategoryColor,
+} from "../outcomeDefinitions"
 import {
   fetchTierLocationData,
   type TierLocationResponse,
@@ -289,7 +293,9 @@ function MapViewContent() {
               p: theme.spacing(2),
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.md,
-              border: category ? `1px solid ${category.color}` : theme.border.medium,
+              border: category
+                ? `1px solid ${getOutcomeCategoryColor(theme, category.id)}`
+                : theme.border.medium,
             }}
           >
             {/* Category badge */}
@@ -299,7 +305,7 @@ function MapViewContent() {
                 size="small"
                 sx={{
                   mb: theme.spacing(1),
-                  backgroundColor: category.color,
+                  backgroundColor: getOutcomeCategoryColor(theme, category.id),
                   color: theme.palette.common.white,
                   fontWeight: theme.typography.fontWeightMedium,
                 }}
@@ -526,7 +532,7 @@ function MapViewContent() {
               bottom: theme.spacing(2),
               right: theme.spacing(2),
               p: theme.spacing(1.5),
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: theme.background.whiteOverlay[95],
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.subtle,
               maxWidth: theme.spacing(40),

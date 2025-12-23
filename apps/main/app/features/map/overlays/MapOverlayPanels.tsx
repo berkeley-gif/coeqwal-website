@@ -16,6 +16,7 @@
  */
 
 import { useState, useEffect, useRef } from "react"
+import { useTheme } from "@repo/ui/mui"
 import { PANEL_ANIMATION_THRESHOLDS, PANEL_POSITIONS } from "./mapOverlayConfig"
 import { Scrollama, Step } from "react-scrollama"
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
@@ -47,6 +48,7 @@ import {
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 export default function MapOverlayPanels() {
+  const theme = useTheme()
   const map = useMap()
   const geocodingResetCounter = useGeocodingResetCounter()
 
@@ -353,7 +355,7 @@ export default function MapOverlayPanels() {
                   component="span"
                   sx={{
                     fontSize: "1.5rem",
-                    color: "white",
+                    color: theme.palette.utility.white,
                     animation: "bounce 2s ease-in-out infinite",
                     "@keyframes bounce": {
                       "0%, 100%": { transform: "translateY(0)" },

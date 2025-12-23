@@ -8,10 +8,10 @@ import { createTheme, Theme } from "@mui/material/styles"
  * -----------------
  * 0. Font Config     - Font presets and active font selection
  * 1. themeValues     - Design tokens:
- *    (Core tokens)   - typeScale, fontFamily, typography
+ *    a. Core tokens  - typeScale, fontFamily, typography
  *                    - palette (brand, blue, accent, nature, utility, tiers)
  *                    - layout, borderRadius, shadow, transition, zIndex
- *    (UI config)     - cards (typography, spacing)
+ *    b. UI config    - cards (typography, spacing)
  *                    - scenario interfaces (grid, icon, outcome styles)
  * 2. Mixins          - Reusable style patterns
  * 3. createTheme()   - MUI theme
@@ -150,6 +150,7 @@ export const themeValues = {
       gold: "#ffd87e", // Golden yellow - highlights
       orange: "#FFA200",
       alert: "#E54545",
+      glossary: "#FFB347", // Warm orange for glossary links
     },
 
     // Greens
@@ -203,6 +204,19 @@ export const themeValues = {
       learn: "#68C3CE",
       explore: "#F4BF4D",
       empower: "#9EC33B",
+    },
+
+    // Data visualization colors for outcome categories
+    // Values are aliases to existing theme colors
+    outcomes: {
+      communityWater: "#2d89b6", // = blue.medium
+      agriculturalWater: "#7b9d3f", // = nature.forest
+      agriculturalRice: "#9ABD3D", // = nature.earth
+      environmentalWater: "#60aacb", // = tiers.tier2
+      deltaSalinity: "#449cd9", // = blue.bright
+      reservoirStorage: "#186b88", // = blue.dark
+      groundwaterStorage: "#77a2d9", // = blue.light
+      salmonAbundance: "#FFB347", // = accent.glossary
     },
   },
 
@@ -536,7 +550,12 @@ const theme = createTheme({
   // Card typography and spacing (from themeValues)
   cards: themeValues.cards,
   // Palette - California Water theme (MUI integration)
+  // Custom colors spread from themeValues, MUI standard colors mapped
   palette: {
+    // Spread custom palette groups directly
+    ...themeValues.palette,
+
+    // MUI standard palette mappings
     common: {
       black: themeValues.palette.utility.black,
       white: themeValues.palette.utility.white,
@@ -551,27 +570,7 @@ const theme = createTheme({
       light: themeValues.palette.brand.sky,
       dark: themeValues.palette.blue.medium,
     },
-    brand: {
-      sky: themeValues.palette.brand.sky,
-      water: themeValues.palette.brand.water,
-    },
-    blue: {
-      darkest: themeValues.palette.blue.darkest,
-      dark: themeValues.palette.blue.dark,
-      medium: themeValues.palette.blue.medium,
-      bright: themeValues.palette.blue.bright,
-      light: themeValues.palette.blue.light,
-      pale: themeValues.palette.blue.pale,
-    },
-    accent: {
-      gold: themeValues.palette.accent.gold,
-      orange: themeValues.palette.accent.orange,
-      alert: themeValues.palette.accent.alert,
-    },
-    nature: {
-      earth: themeValues.palette.nature.earth,
-      forest: themeValues.palette.nature.forest,
-    },
+    // Tab panel semantic colors (derived from tabPanels)
     learn: {
       background: themeValues.palette.tabPanels.learn,
       text: themeValues.palette.utility.white,
@@ -584,38 +583,7 @@ const theme = createTheme({
       background: themeValues.palette.tabPanels.empower,
       text: themeValues.palette.utility.white,
     },
-    utility: {
-      white: themeValues.palette.utility.white,
-      black: themeValues.palette.utility.black,
-    },
-    grey: {
-      50: themeValues.palette.grey[50],
-      100: themeValues.palette.grey[100],
-      200: themeValues.palette.grey[200],
-      300: themeValues.palette.grey[300],
-      400: themeValues.palette.grey[400],
-      500: themeValues.palette.grey[500],
-      600: themeValues.palette.grey[600],
-      700: themeValues.palette.grey[700],
-      800: themeValues.palette.grey[800],
-      900: themeValues.palette.grey[900],
-    },
-    ambient: {
-      rippleWhite: themeValues.palette.ambient.rippleWhite,
-      rippleBlue: themeValues.palette.ambient.rippleBlue,
-    },
-
-    overlay: {
-      water: themeValues.palette.overlay.water,
-      waterLight: themeValues.palette.overlay.waterLight,
-    },
-
-    tiers: {
-      tier1: themeValues.palette.tiers.tier1,
-      tier2: themeValues.palette.tiers.tier2,
-      tier3: themeValues.palette.tiers.tier3,
-      tier4: themeValues.palette.tiers.tier4,
-    },
+    // MUI standard colors
     background: {
       default: themeValues.palette.utility.white,
       paper: themeValues.palette.utility.white,
@@ -626,14 +594,13 @@ const theme = createTheme({
       disabled: themeValues.palette.blue.light,
     },
     action: {
-      hover: themeValues.palette.grey[100], // Light grey hover background for interactive elements
+      hover: themeValues.palette.grey[100],
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
       disabledBackground: themeValues.palette.utility.white,
     },
-    // Colors for interactive elements
     interaction: {
-      hoverBackground: themeValues.palette.grey[100], // Same light grey hover background for interactive elements
+      hoverBackground: themeValues.palette.grey[100],
     },
     divider: themeValues.palette.grey[400],
   },
@@ -1386,6 +1353,10 @@ theme.background = {
     medium: "rgba(0, 0, 0, 0.4)",
     dark: "rgba(0, 0, 0, 0.8)",
   },
+  whiteOverlay: {
+    50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
+    95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
+  },
 }
 
 theme.borderRadius = themeValues.borderRadius
@@ -1426,6 +1397,7 @@ declare module "@mui/material/styles" {
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
+    outcomes: typeof themeValues.palette.outcomes
   }
 
   interface PaletteOptions {
@@ -1441,6 +1413,7 @@ declare module "@mui/material/styles" {
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
+    outcomes?: Partial<typeof themeValues.palette.outcomes>
   }
 
   // zIndex - derived from themeValues.zIndex
@@ -1483,6 +1456,7 @@ declare module "@mui/material/styles" {
       transparent: string
       paragraph: string
       overlay: { light: string; medium: string; dark: string }
+      whiteOverlay: { 50: string; 95: string }
     }
     borderRadius: typeof themeValues.borderRadius
     shadow: typeof themeValues.shadow

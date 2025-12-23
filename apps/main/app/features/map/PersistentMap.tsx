@@ -561,7 +561,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
                       width: "48px",
                       height: "48px",
                       borderRadius: theme.borderRadius.circle,
-                      backgroundColor: "rgba(255, 255, 255, 0.5)",
+                      backgroundColor: theme.background.whiteOverlay[50],
                       border: "none",
                       display: "flex",
                       alignItems: "center",

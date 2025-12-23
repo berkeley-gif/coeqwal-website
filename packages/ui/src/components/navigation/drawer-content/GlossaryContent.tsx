@@ -84,11 +84,11 @@ export function GlossaryContent({
           <Box
             component="span"
             sx={{
-              color: "#FFAC6E",
+              color: theme.palette.accent.glossary,
               cursor: "pointer",
               textDecoration: "underline",
               "&:hover": {
-                color: "#FF8A4A",
+                color: theme.palette.accent.orange,
               },
             }}
             onClick={() => handleTermClick(displayTerm)}
@@ -165,11 +165,11 @@ export function GlossaryContent({
           <Box
             component="span"
             sx={{
-              color: "#449cd9", // theme.palette.blue.bright
+              color: theme.palette.blue.bright,
               cursor: "pointer",
               textDecoration: "underline",
               "&:hover": {
-                color: "#77a2d9", // theme.palette.blue.light
+                color: theme.palette.blue.light,
               },
             }}
             onClick={() => {
@@ -210,11 +210,11 @@ export function GlossaryContent({
             <Box
               component="span"
               sx={{
-                color: "#FFAC6E",
+                color: theme.palette.accent.glossary,
                 cursor: "pointer",
                 textDecoration: "underline",
                 "&:hover": {
-                  color: "#FF8A4A",
+                  color: theme.palette.accent.orange,
                 },
               }}
               onClick={() => handleTermClick("Groundwater")}
@@ -225,11 +225,11 @@ export function GlossaryContent({
             <Box
               component="span"
               sx={{
-                color: "#FFAC6E",
+                color: theme.palette.accent.glossary,
                 cursor: "pointer",
                 textDecoration: "underline",
                 "&:hover": {
-                  color: "#FF8A4A",
+                  color: theme.palette.accent.orange,
                 },
               }}
               onClick={() => handleTermClick("Surface water")}
@@ -260,11 +260,11 @@ export function GlossaryContent({
             <Box
               component="span"
               sx={{
-                color: "#FFAC6E",
+                color: theme.palette.accent.glossary,
                 cursor: "pointer",
                 textDecoration: "underline",
                 "&:hover": {
-                  color: "#FF8A4A",
+                  color: theme.palette.accent.orange,
                 },
               }}
               onClick={() => handleTermClick("Surface water")}
@@ -275,11 +275,11 @@ export function GlossaryContent({
             <Box
               component="span"
               sx={{
-                color: "#FFAC6E",
+                color: theme.palette.accent.glossary,
                 cursor: "pointer",
                 textDecoration: "underline",
                 "&:hover": {
-                  color: "#FF8A4A",
+                  color: theme.palette.accent.orange,
                 },
               }}
               onClick={() => handleTermClick("Groundwater")}
@@ -327,13 +327,13 @@ export function GlossaryContent({
                   internalSelectedTerm === term.term
                     ? {
                         scrollMarginTop: "20px",
-                        backgroundColor: "rgba(255, 172, 110, 0.1)",
+                        backgroundColor: `${theme.palette.accent.glossary}1A`, // 10% opacity
                         px: (theme) => theme.spacing(2),
                         py: (theme) => theme.spacing(2),
                         pl: 1,
                         mb: (theme) => theme.spacing(2),
                         borderRadius: (theme) => theme.borderRadius.md,
-                        border: "1px solid rgba(255, 172, 110, 0.3)",
+                        border: `1px solid ${theme.palette.accent.glossary}4D`, // 30% opacity
                         transition: (theme) => theme.transition.default,
                       }
                     : {
@@ -348,7 +348,7 @@ export function GlossaryContent({
                   <Box
                     sx={{
                       mr: 1.5,
-                      color: "#FFAC6E",
+                      color: theme.palette.accent.glossary,
                       display: "flex",
                       alignItems: "center",
                       fontSize: "1.5rem",
@@ -445,11 +445,11 @@ export function GlossaryContent({
                     <Box
                       component="span"
                       sx={{
-                        color: "#FFAC6E",
+                        color: theme.palette.accent.glossary,
                         cursor: "pointer",
                         textDecoration: "underline",
                         "&:hover": {
-                          color: "#FF8A4A",
+                          color: theme.palette.accent.orange,
                         },
                       }}
                       onClick={() => handleTermClick(term.seeAlso!)}
