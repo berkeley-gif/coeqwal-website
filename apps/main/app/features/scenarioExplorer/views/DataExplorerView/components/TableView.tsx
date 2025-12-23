@@ -328,7 +328,7 @@ function MetricRow({
         backgroundColor: theme.palette.common.white,
         borderRadius: theme.borderRadius.md,
         border: theme.border.light,
-        transition: "all 0.2s ease",
+        transition: theme.transition.default,
         "&:hover": {
           backgroundColor: theme.palette.grey[50],
           border: category ? `1px solid ${category.color}` : theme.border.medium,

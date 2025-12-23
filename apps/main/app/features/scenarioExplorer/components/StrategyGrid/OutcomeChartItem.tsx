@@ -100,7 +100,7 @@ export function OutcomeChartItem({
         cursor: isActive ? "pointer" : "default",
         padding: 0,
         borderRadius: theme.borderRadius.md,
-        transition: "all 0.2s ease",
+        transition: theme.transition.default,
         backgroundColor: isExpanded
           ? theme.palette.blue.bright + "10"
           : "transparent",

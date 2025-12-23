@@ -122,7 +122,7 @@ export default function ScenarioExplorerNew() {
                   textTransform: "none",
                   fontWeight: theme.typography.fontWeightMedium,
                   color: theme.palette.text.primary,
-                  transition: "all 0.2s ease-in-out",
+                  transition: theme.transition.default,
                   borderTopLeftRadius: theme.shape.borderRadius,
                   borderTopRightRadius: theme.shape.borderRadius,
                   marginTop: theme.spacing(1),
@@ -164,7 +164,7 @@ export default function ScenarioExplorerNew() {
               <Box
                 sx={{
                   width: exploreMode === "list" ? "100%" : "50%",
-                  transition: "width 0.3s ease-in-out",
+                  transition: theme.transition.layout,
                   backgroundColor: theme.palette.common.white,
                 }}
               >

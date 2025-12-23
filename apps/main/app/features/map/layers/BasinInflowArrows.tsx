@@ -80,7 +80,7 @@ export default function BasinInflowArrows({
               transform: `rotate(${pos.rotation}deg)`,
               pointerEvents: "none",
               opacity: effectiveOpacity,
-              transition: "opacity 0.8s ease-out",
+              transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
             }}
           >
             <svg

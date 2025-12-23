@@ -138,7 +138,7 @@ export function BaseHeader({
     letterSpacing: 0.5,
     textTransform: "none" as const,
     padding: "8px 16px",
-    transition: "opacity 0.2s ease",
+    transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
     "&:hover": {
       backgroundColor: "transparent",
       opacity: 0.7,
@@ -320,7 +320,7 @@ export function BaseHeader({
                       position: "relative",
                       letterSpacing: "0.03rem",
                       fontWeight: isActive ? 600 : 500,
-                      transition: "color 0.3s ease",
+                      transition: "color 0.3s ease", // theme.transition.color equivalent
                       lineHeight: 1.1,
                       "&:hover": {
                         backgroundColor: "transparent",

@@ -117,7 +117,7 @@ export function KeyOutcomesPanel({
             cursor: "pointer",
             p: 0.5,
             borderRadius: theme.borderRadius.md,
-            transition: "all 0.2s ease",
+            transition: theme.transition.default,
             opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
             "&:hover": {
               backgroundColor: theme.palette.grey[100],

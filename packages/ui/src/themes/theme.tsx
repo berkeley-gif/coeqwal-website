@@ -8,17 +8,17 @@ import { createTheme, Theme } from "@mui/material/styles"
  * -----------------
  * 0. Font Config     - Font presets and active font selection
  * 1. themeValues     - Design tokens:
- *      Core tokens:  - typeScale, fontFamily, typography
+ *    (Core tokens)   - typeScale, fontFamily, typography
  *                    - palette (brand, blue, accent, nature, utility, tiers)
- *                    - layout, borderRadius, shadow, zIndex
- *      App UI config:- cards (typography, spacing)
- *                    - scenarios (grid, icon, outcome styles)
- * 2. Mixins          - Reusable style patterns (drawerContentMixins)
- * 3. createTheme()   - MUI theme with palette, typography, component overrides
+ *                    - layout, borderRadius, shadow, transition, zIndex
+ *    (UI config)     - cards (typography, spacing)
+ *                    - scenario interfaces (grid, icon, outcome styles)
+ * 2. Mixins          - Reusable style patterns
+ * 3. createTheme()   - MUI theme
  * 4. Post-creation   - Custom properties added to theme object:
- *                    - border (light, medium, focus, highlight, onDark, etc.)
+ *                    - borders
  *                    - background (transparent, paragraph, overlay)
- *                    - borderRadius, shadow, cards, scenarios
+ *                    - borderRadius, shadow, transition, cards, scenarios
  * 5. TypeScript      - Module augmentation for custom theme properties
  */
 
@@ -227,6 +227,22 @@ export const themeValues = {
     focus: "0 0 0 3px rgba(33, 150, 243, 0.25)", // Focus ring (blue)
   },
 
+  // Transition - unified animation timing
+  transition: {
+    // Durations
+    fast: "0.15s", // Fast feedback, hover, clicks
+    standard: "0.3s", // Panel, layout changes
+    slow: "0.5s", // Page animations
+
+    // Complete transition strings
+    default: "all 0.3s ease",
+    quick: "all 0.15s ease",
+    fade: "opacity 0.3s ease-out",
+    color: "color 0.3s ease",
+    layout: "width 0.3s ease-in-out",
+    bouncy: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+  },
+
   // Z-index values
   zIndex: {
     // Background layers
@@ -329,7 +345,7 @@ export const themeValues = {
       base: {
         borderRadius: "8px", // theme.borderRadius.md
         padding: 1.5, // theme.spacing multiplier
-        transition: "all 0.2s ease",
+        transition: "all 0.3s ease", // themeValues.transition.default
         border: "2px solid transparent",
       },
       variants: {
@@ -367,7 +383,7 @@ export const themeValues = {
         alignItems: "center",
         padding: 0.5,
         borderRadius: "8px",
-        transition: "all 0.2s ease",
+        transition: "all 0.3s ease", // themeValues.transition.default
         backgroundColor: "transparent",
         border: "2px solid transparent",
       },
@@ -431,7 +447,7 @@ const drawerContentMixins = {
     borderRadius: 1,
     bgcolor: "rgba(0, 0, 0, 0.02)",
     cursor: "pointer",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease", // themeValues.transition.default
     "&:hover": {
       bgcolor: "rgba(0, 0, 0, 0.05)",
       transform: "translateX(4px)",
@@ -884,7 +900,7 @@ const theme = createTheme({
             fontSize: "0.95rem",
             fontWeight: 400,
             textAlign: "center",
-            transition: "all 0.2s ease",
+            transition: "all 0.3s ease", // themeValues.transition.default
             // Default active state - using grey colors
             backgroundColor: theme.palette.grey[200],
             color: theme.palette.text.disabled,
@@ -1138,7 +1154,7 @@ const theme = createTheme({
           padding: "0",
           alignSelf: "flex-start",
           transform: "translateY(-3px)",
-          transition: "all 0.2s ease",
+          transition: "all 0.3s ease", // themeValues.transition.default
           position: "relative",
           display: "inline-block",
           boxSizing: "border-box",
@@ -1197,7 +1213,7 @@ const theme = createTheme({
           padding: "0",
           alignSelf: "flex-start",
           transform: "translateY(-3px)",
-          transition: "all 0.2s ease",
+          transition: "all 0.3s ease", // themeValues.transition.default
           position: "relative",
           display: "inline-block",
           boxSizing: "border-box",
@@ -1376,6 +1392,8 @@ theme.borderRadius = themeValues.borderRadius
 
 theme.shadow = themeValues.shadow
 
+theme.transition = themeValues.transition
+
 // Scenario/strategy component styles
 theme.scenarios = themeValues.scenarios
 
@@ -1468,6 +1486,7 @@ declare module "@mui/material/styles" {
     }
     borderRadius: typeof themeValues.borderRadius
     shadow: typeof themeValues.shadow
+    transition: typeof themeValues.transition
     cards: typeof themeValues.cards
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
@@ -1486,6 +1505,7 @@ declare module "@mui/material/styles" {
       }
     }
     shadow?: Partial<typeof themeValues.shadow>
+    transition?: Partial<typeof themeValues.transition>
     cards?: Partial<typeof themeValues.cards>
   }
 

@@ -65,7 +65,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
         overflow: "visible",
         transform: `rotate(${rotation}deg)`,
         opacity,
-        transition: "opacity 0.3s ease-in-out",
+        transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
       }}
     >
       <defs>
@@ -296,7 +296,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         <div
           style={{
             opacity: deltaOpacity,
-            transition: "opacity 0.3s ease-in-out",
+            transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
           }}
         >
           <svg width="60" height="30" xmlns="http://www.w3.org/2000/svg">

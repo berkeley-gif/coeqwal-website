@@ -171,7 +171,7 @@ export function FloatingGlossaryPanel({
           opacity: isOpen ? 1 : 0,
           // Transform origin changes based on position
           transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
-          transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", // Bouncy easing
+          transition: theme.transition.bouncy,
           pointerEvents: isOpen ? "auto" : "none",
           zIndex: theme.zIndex.floating,
           display: "flex",
@@ -227,7 +227,7 @@ export function FloatingGlossaryPanel({
                           padding: 2,
                           borderRadius: theme.borderRadius.md,
                           border: theme.border.focus,
-                          transition: "all 0.3s ease",
+                          transition: theme.transition.default,
                         }
                       : {
                           padding: 2,

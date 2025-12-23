@@ -85,7 +85,7 @@ const SliderStop = styled(Box, {
     borderRadius: theme.borderRadius.circle,
     backgroundColor: active ? activeColor : inactiveColor,
     border: "2px solid white",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease", // theme.transition.default equivalent
     zIndex: 1,
     boxShadow: "none",
   }),
@@ -102,7 +102,7 @@ const SliderPointer = styled(Box, {
     width: "24px",
     height: "24px",
     cursor: disabled ? "not-allowed" : "grab",
-    transition: "all 0.2s ease",
+    transition: "all 0.3s ease", // theme.transition.default equivalent
     zIndex: 3,
     marginTop: "12px",
     color: pointerColor,
@@ -156,7 +156,7 @@ const SliderLabel = styled(Typography, {
   textAlign: "center",
   minWidth: "50px",
   maxWidth: "80px",
-  transition: "all 0.2s ease",
+  transition: "all 0.3s ease", // theme.transition.default equivalent
   lineHeight: 1.3,
 }))
 
