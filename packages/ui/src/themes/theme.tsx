@@ -6,20 +6,17 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 0. Font Config     - Font presets and active font selection
- * 1. themeValues     - Design tokens:
- *    a. Core tokens  - typeScale, fontFamily, typography
- *                    - palette (brand, blue, accent, nature, utility, tiers)
- *                    - layout, borderRadius, shadow, transition, zIndex
- *    b. UI config    - cards (typography, spacing)
- *                    - scenario interfaces (grid, icon, outcome styles)
- * 2. Mixins          - Reusable style patterns
- * 3. createTheme()   - MUI theme
- * 4. Post-creation   - Custom properties added to theme object:
- *                    - borders
- *                    - background (transparent, paragraph, overlay)
- *                    - borderRadius, shadow, transition, cards, scenarios
- * 5. TypeScript      - Module augmentation for custom theme properties
+ * 1. Font Config     - Font presets and active font selection
+ * 2. Design Tokens   - Standalone token definitions:
+ *                    - typeScale, palette, borderRadius, shadow
+ *                    - transition, zIndex, border, background
+ * 3. themeValues     - Assembled design tokens + UI config:
+ *                    - fontFamily, layout
+ *                    - cards (typography, spacing)
+ *                    - scenarios (grid, icon, outcome styles)
+ * 4. createTheme()   - MUI theme configuration
+ * 5. Post-creation   - Attach design tokens to theme object
+ * 6. TypeScript      - Module augmentation (hybrid: typeof for tokens, explicit for complex)
  */
 
 /* ===============================================================================
@@ -30,18 +27,30 @@ import { createTheme, Theme } from "@mui/material/styles"
  * Each preset defines: text (body), display (headlines), and cssImport (font loading).
  * Of course you can make more presets.
  *
- * Available presets: "neueHaas" | "roboto" | "inter" | "system"
+ * Available presets: "neueHaas" | "realPro" | "abadi" | "roboto" | "inter" | "system"
  */
 
-type FontPresetKey = "neueHaas" | "roboto" | "inter" | "system"
+type FontPresetKey = "neueHaas" | "realPro" | "abadi" | "roboto" | "inter" | "system"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "abadi" // CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
     text: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     display:
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
+  realPro: {
+    text: '"ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"ff-real-headline-pro", "ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
+  abadi: {
+    text: '"abadi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"abadi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
@@ -69,9 +78,10 @@ const FONT_PRESETS = {
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
 /* ========================================================
- * 1. themeValues - Design tokens
+ * 1. Design Tokens
  * ======================================================== */
 
+// Type scale - headline and compact sizes
 const typeScale = {
   // Headline sizes using Perfect Fourth ratio (1.333)
   h1: "5.8rem", // 92.8px - Hero size
@@ -89,6 +99,190 @@ const typeScale = {
     micro: "0.7rem", // 11.2px (form helpers)
   },
 }
+
+// Color palette
+const palette = {
+  // Core colors
+  brand: {
+    sky: "#92C1D5", // Top of gradient - sky blue
+    water: "#64A4D6", // Bottom of gradient - water blue
+  },
+
+  // Text and UI blues
+  blue: {
+    darkest: "#3a4574", // Deep navy - primary text
+    dark: "#186b88", // Dark teal
+    medium: "#2d89b6", // Medium blue
+    bright: "#449cd9", // Bright blue - links/interactive
+    light: "#77a2d9", // Light blue
+    pale: "#cef1f5", // Pale cyan/ice blue
+  },
+
+  // Accent colors - warm tones
+  accent: {
+    gold: "#ffd87e", // Golden yellow - highlights
+    orange: "#FFA200",
+    alert: "#E54545",
+    glossary: "#FFB347", // Warm orange for glossary links
+  },
+
+  // Greens
+  nature: {
+    earth: "#9ABD3D",
+    forest: "#7b9d3f", // Forest green
+  },
+
+  // Utility colors
+  utility: {
+    white: "#FFFFFF",
+    black: "#000000",
+  },
+
+  // MUI greys
+  grey: {
+    50: "#f7fafc", // Very light grey for background hovers
+    100: "#edf2f7",
+    200: "#e2e8f0",
+    300: "#cbd5e0",
+    400: "#a0aec0",
+    500: "#718096",
+    600: "#4a5568", // Dark grey for ui text
+    700: "#2d3748",
+    800: "#1a202c",
+    900: "#171923",
+  },
+
+  // Ambient/mood elements
+  ambient: {
+    rippleWhite: "rgba(255, 255, 255, 0.16)", // White at 16% opacity
+    rippleBlue: "rgba(42, 82, 135, 0.16)", // Blue (#2A5287) at 16% opacity
+  },
+
+  // Header and UI overlay colors
+  overlay: {
+    water: "rgba(42, 82, 135, 0.2)", // Semi-transparent blue for header and UI elements
+    waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
+  },
+
+  // Outcome tier colors
+  tiers: {
+    tier1: "#7b9d3f", // Green, tier 1
+    tier2: "#60aacb", // Blue, tier 2
+    tier3: "#FFB347", // Orange, tier 3
+    tier4: "#CD5C5C", // Red, tier 4
+  },
+
+  // Tab panel colors
+  tabPanels: {
+    learn: "#68C3CE",
+    explore: "#F4BF4D",
+    empower: "#9EC33B",
+  },
+
+  // Data visualization colors for outcome categories
+  get outcomes() {
+    return {
+      communityWater: this.blue.medium,
+      agriculturalWater: this.nature.forest,
+      agriculturalRice: this.nature.earth,
+      environmentalWater: this.tiers.tier2,
+      deltaSalinity: this.blue.bright,
+      reservoirStorage: this.blue.dark,
+      groundwaterStorage: this.blue.light,
+      salmonAbundance: this.accent.glossary,
+    }
+  },
+}
+
+// Border radius
+const borderRadius = {
+  none: "0px",
+  xs: "2px", // Very small (checkboxes, tiny indicators)
+  sm: "4px", // Small (input fields, tags)
+  md: "8px", // Standard (cards, panels, tooltips)
+  pill: "999px", // Full pill/capsule shape
+  circle: "50%", // Perfect circles
+}
+
+// Shadow/elevation system
+const shadow = {
+  none: "none",
+  subtle: "0 1px 3px rgba(0,0,0,0.12)", // Light cards, inputs
+  sm: "0 2px 4px rgba(0,0,0,0.15)", // Elevated cards, panels
+  md: "0 4px 12px rgba(0,0,0,0.15)", // Dropdowns, tooltips, overlays
+  lg: "0 8px 24px rgba(0,0,0,0.2)", // Modals, large panels
+  focus: "0 0 0 3px rgba(33, 150, 243, 0.25)", // Focus ring (blue)
+}
+
+// Transition/animation timing
+const transition = {
+  // Durations
+  fast: "0.15s", // Fast feedback, hover, clicks
+  standard: "0.3s", // Panel, layout changes
+  slow: "0.5s", // Page animations
+
+  // Transition strings
+  default: "all 0.3s ease",
+  quick: "all 0.15s ease",
+  fade: "opacity 0.3s ease-out",
+  color: "color 0.3s ease",
+  layout: "width 0.3s ease-in-out",
+  bouncy: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+}
+
+// Z-index
+const zIndex = {
+  // Background layers
+  basement: -1, // Storyline apps map background
+  persistentMap: 1, // Main app's persistent map
+
+  // Content layers
+  pageContent: 10, // Page-level content
+  mapControls: 20, // Map overlay stuff
+
+  // UI layers
+  floating: 70, // Floating elements (glossary)
+  uiOverlay: 80, // Header, sticky tabs
+  dropdown: 90, // Dropdown menus (above header)
+  tooltip: 100, // Tooltips and help text
+  modal: 110, // Modal dialogs (reserved)
+}
+
+// Border styles
+const border = {
+  none: "none",
+  light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
+  medium: `1px solid ${palette.grey[300]}`, // Standard borders (most common)
+  focus: `2px solid ${palette.blue.bright}`, // Selected/focus states
+  focusLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
+  highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
+  onDark: `2px solid ${palette.utility.white}`, // On dark backgrounds
+  subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
+
+  // CSS triangle arrow technique: zero-size box with transparent borders,
+  // then set one side's color to create a triangle pointing opposite direction.
+  // Example: borderLeftColor: white → arrow points right
+  arrowBase: "8px solid transparent",
+}
+
+// Background styles
+const background = {
+  transparent: "transparent",
+  paragraph: "rgba(0, 0, 0, 0.4)",
+  overlay: {
+    light: "rgba(0, 0, 0, 0.2)",
+    medium: "rgba(0, 0, 0, 0.4)",
+    dark: "rgba(0, 0, 0, 0.8)",
+  },
+  whiteOverlay: {
+    50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
+    95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
+  },
+}
+
+/* ========================================================
+ * 2. themeValues - Assembled design tokens
+ * ======================================================== */
 
 // themeValues - runtime values for custom theme properties
 export const themeValues = {
@@ -109,235 +303,30 @@ export const themeValues = {
     textContainer: {
       maxWidth: "600px",
     },
-    // Compact control dimensions for UI elements
+    // Control dimensions for form elements (used in MUI component overrides)
     controls: {
       standard: 20, // Standard form control size (20px × 20px)
-      compact: 16, // Compact form control size (16px × 16px)
-      micro: 12, // Micro form control size (12px × 12px)
-    },
-    // Spacer component spacing system - responsive values for section spacing
-    spacer: {
-      small: { xs: 24, md: 48, lg: 64 },
-      medium: { xs: 48, md: 96 },
-      large: { xs: 100, lg: 0 },
     },
   },
 
-  // Color palette
-  palette: {
-    // Core colors
-    brand: {
-      sky: "#92C1D5", // Top of gradient - sky blue
-      water: "#64A4D6", // Bottom of gradient - water blue
-    },
-
-    // Text and UI blues
-    blue: {
-      darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
-      dark: "#186b88", // Dark teal
-      medium: "#2d89b6", // Medium blue (a beautiful blue FWIW)
-      bright: "#449cd9", // Bright blue - links/interactive
-      light: "#77a2d9", // Light blue
-      pale: "#cef1f5", // Pale cyan/ice blue
-    },
-
-    text: {
-      default: "#fffff", // This is a mui default; TODO: change it to our text.primary
-    },
-
-    // Accent colors - warm tones
-    accent: {
-      gold: "#ffd87e", // Golden yellow - highlights
-      orange: "#FFA200",
-      alert: "#E54545",
-      glossary: "#FFB347", // Warm orange for glossary links
-    },
-
-    // Greens
-    nature: {
-      earth: "#9ABD3D",
-      forest: "#7b9d3f", // Forest green - for saved scenarios tab
-    },
-
-    // Utility colors
-    utility: {
-      white: "#FFFFFF",
-      black: "#000000",
-    },
-
-    // MUI greys
-    grey: {
-      50: "#f7fafc", // Very light grey for background hovers
-      100: "#edf2f7",
-      200: "#e2e8f0",
-      300: "#cbd5e0",
-      400: "#a0aec0",
-      500: "#718096",
-      600: "#4a5568", // Dark grey for ui text
-      700: "#2d3748",
-      800: "#1a202c",
-      900: "#171923",
-    },
-
-    // Ambient/mood elements
-    ambient: {
-      rippleWhite: "rgba(255, 255, 255, 0.16)", // Water bubbles - white at 16% opacity
-      rippleBlue: "rgba(42, 82, 135, 0.16)", // Water bubbles - blue (#2A5287) at 16% opacity
-    },
-
-    // Header and UI overlay colors
-    overlay: {
-      water: "rgba(42, 82, 135, 0.2)", // Semi-transparent blue for header and UI elements
-      waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
-    },
-
-    // Outcome tier colors
-    tiers: {
-      tier1: "#7b9d3f", // Green, tier 1
-      tier2: "#60aacb", // Blue, tier 2
-      tier3: "#FFB347", // Orange, tier 3
-      tier4: "#CD5C5C", // Red, tier 4
-    },
-
-    // Tab panel colors
-    tabPanels: {
-      learn: "#68C3CE",
-      explore: "#F4BF4D",
-      empower: "#9EC33B",
-    },
-
-    // Data visualization colors for outcome categories
-    // Values are aliases to existing theme colors
-    outcomes: {
-      communityWater: "#2d89b6", // = blue.medium
-      agriculturalWater: "#7b9d3f", // = nature.forest
-      agriculturalRice: "#9ABD3D", // = nature.earth
-      environmentalWater: "#60aacb", // = tiers.tier2
-      deltaSalinity: "#449cd9", // = blue.bright
-      reservoirStorage: "#186b88", // = blue.dark
-      groundwaterStorage: "#77a2d9", // = blue.light
-      salmonAbundance: "#FFB347", // = accent.glossary
-    },
-  },
-
-  // Border radius values
-  borderRadius: {
-    none: "0px", // Flat edges, no rounding
-    xs: "2px", // Very small (checkboxes, tiny indicators)
-    sm: "4px", // Small (input fields, tags)
-    md: "8px", // Standard (cards, panels, tooltips)
-    pill: "999px", // Full pill/capsule shape
-    circle: "50%", // Perfect circles
-  },
-
-
-  // Shadow - unified elevation system (singular to avoid conflict with MUI's shadows[])
-  shadow: {
-    none: "none",
-    subtle: "0 1px 3px rgba(0,0,0,0.12)", // Light cards, inputs
-    sm: "0 2px 4px rgba(0,0,0,0.15)", // Elevated cards, panels
-    md: "0 4px 12px rgba(0,0,0,0.15)", // Dropdowns, tooltips, overlays
-    lg: "0 8px 24px rgba(0,0,0,0.2)", // Modals, large panels
-    focus: "0 0 0 3px rgba(33, 150, 243, 0.25)", // Focus ring (blue)
-  },
-
-  // Transition - unified animation timing
-  transition: {
-    // Durations
-    fast: "0.15s", // Fast feedback, hover, clicks
-    standard: "0.3s", // Panel, layout changes
-    slow: "0.5s", // Page animations
-
-    // Complete transition strings
-    default: "all 0.3s ease",
-    quick: "all 0.15s ease",
-    fade: "opacity 0.3s ease-out",
-    color: "color 0.3s ease",
-    layout: "width 0.3s ease-in-out",
-    bouncy: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-  },
-
-  // Z-index values
-  zIndex: {
-    // Background layers
-    basement: -1, // Storyline apps map background
-    persistentMap: 1, // Main app's persistent map
-
-    // Content layers
-    pageContent: 10, // Page-level content
-    mapControls: 20, // Map overlay stuff
-
-    // UI layers
-    floating: 70, // Floating elements (glossary)
-    uiOverlay: 80, // Header, sticky tabs
-    dropdown: 90, // Dropdown menus (above header)
-    tooltip: 100, // Tooltips and help text
-    modal: 110, // Modal dialogs (reserved)
-  },
+  // Design tokens (from above)
+  palette,
+  borderRadius,
+  shadow,
+  transition,
+  zIndex,
+  border,
+  background,
 
   /* --------------------------------------------------------
    * App-specific UI configuration
    * Styles for specific features (cards, scenarios)
    * -------------------------------------------------------- */
 
-  // Card typography and spacing system
+  // Card spacing system
   cards: {
-    typography: {
-      hero: {
-        fontSize: "2.5rem", // 40px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      sectionTitle: {
-        fontSize: "2rem", // 32px
-        lineHeight: 1.25,
-        fontWeight: 600,
-      },
-      cardTitle: {
-        fontSize: "1.5rem", // 24px
-        lineHeight: 1.4,
-        fontWeight: 500,
-      },
-      subtitle: {
-        fontSize: "1.25rem", // 20px
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      body: {
-        fontSize: "0.95rem", // compact card body text
-        lineHeight: 1.5,
-        fontWeight: 400,
-      },
-      caption: {
-        fontSize: "0.95rem", // compact card captions
-        lineHeight: 1.4,
-        fontWeight: 400,
-      },
-      button: {
-        fontSize: "0.95rem",
-        lineHeight: 1.5,
-        fontWeight: 500,
-      },
-    },
     spacing: {
       standard: 3, // 24px - standardized spacing unit
-      padding: 3, // 24px inner padding
-      gap: 3, // 24px between cards
-      capsule: {
-        px: 2, // Horizontal emphasis
-        py: 0.5, // Minimal vertical padding
-        marginRight: 1, // Space between capsules (horizontal)
-        marginBottom: 1, // Space between capsules (vertical wrapping)
-      },
-      modal: {
-        padding: 4, // 32px for modal content
-      },
-      coBenefitTags: {
-        marginTop: 2, // Slightly detached from subtypes
-      },
-      tellMoreIcon: {
-        marginLeft: "auto", // Aligns right within card header row
-      },
       // Compact spacing for cards, dialogs, tooltips, form controls
       compact: {
         xs: 0.25, // 2px
@@ -357,25 +346,25 @@ export const themeValues = {
     // Strategy card row styles
     card: {
       base: {
-        borderRadius: "8px", // theme.borderRadius.md
+        borderRadius: borderRadius.md,
         padding: 1.5, // theme.spacing multiplier
-        transition: "all 0.3s ease", // themeValues.transition.default
+        transition: transition.default,
         border: "2px solid transparent",
       },
       variants: {
         default: {
-          backgroundColor: "#faf8f5",
+          backgroundColor: palette.grey[50],
         },
         highlighted: {
-          backgroundColor: "#ffffff",
+          backgroundColor: palette.utility.white,
         },
       },
       states: {
         hover: {
-          backgroundColor: "#ffffff",
+          backgroundColor: palette.utility.white,
         },
         selected: {
-          borderColor: "#449cd9", // theme.palette.blue.bright
+          borderColor: palette.blue.bright,
         },
       },
     },
@@ -396,16 +385,16 @@ export const themeValues = {
         flexDirection: "column",
         alignItems: "center",
         padding: 0.5,
-        borderRadius: "8px",
-        transition: "all 0.3s ease", // themeValues.transition.default
+        borderRadius: borderRadius.md,
+        transition: transition.default,
         backgroundColor: "transparent",
         border: "2px solid transparent",
       },
       states: {
         active: { opacity: 1 },
         inactive: { opacity: 0.7 },
-        selected: { borderColor: "#449cd9" },
-        hover: { backgroundColor: "#f7fafc" }, // grey[50]
+        selected: { borderColor: palette.blue.bright },
+        hover: { backgroundColor: palette.grey[50] },
       },
       label: {
         textAlign: "center",
@@ -428,78 +417,10 @@ export const themeValues = {
 }
 
 /* ========================================================
- * 2. Mixins - Reusable style patterns
- * ======================================================== */
-
-// Drawer content styling mixins
-const drawerContentMixins = {
-  contentWrapper: {
-    p: 2,
-    width: "100%",
-    height: "100%",
-    overflow: "auto",
-    color: "text.primary",
-  },
-  contentText: {
-    lineHeight: 1.4,
-    color: "text.primary",
-    mb: 3,
-  },
-  infoBox: {
-    mt: 2,
-    p: 2,
-    bgcolor: "rgba(0, 0, 0, 0.03)",
-    borderRadius: 1,
-  },
-  headingText: {
-    fontWeight: "bold",
-    color: "primary.dark",
-  },
-  itemBox: {
-    mb: 1.5,
-    p: 1.5,
-    borderRadius: 1,
-    bgcolor: "rgba(0, 0, 0, 0.02)",
-    cursor: "pointer",
-    transition: "all 0.3s ease", // themeValues.transition.default
-    "&:hover": {
-      bgcolor: "rgba(0, 0, 0, 0.05)",
-      transform: "translateX(4px)",
-    },
-  },
-  selectedItemBox: {
-    bgcolor: "rgba(0, 0, 0, 0.08)",
-    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)", // Select focus ring
-  },
-  chip: {
-    color: "text.primary",
-    borderColor: "rgba(0, 0, 0, 0.23)",
-    mr: 0.5,
-    mb: 0.5,
-  },
-  icon: {
-    mr: 1.5,
-    mt: 0.5,
-    color: "primary.dark",
-  },
-  secondaryText: {
-    lineHeight: 1.4,
-    color: "text.primary",
-  },
-  bodyText: {
-    mt: 1,
-    lineHeight: 1.4,
-    color: "text.primary",
-  },
-} as const
-
-/* ========================================================
  * 3. createTheme() - MUI theme configuration
  * ======================================================== */
 
 const baseTheme = createTheme()
-
-// Helper to create border strings
 
 // Helper to create drawer transition mixins
 const createDrawerMixins = (
@@ -543,7 +464,7 @@ const theme = createTheme({
       xxl: { xs: 4, sm: 5, md: 6 }, // 32px / 40px / 48px
     },
   },
-  // Custom breakpoints
+  // Spacing and breakpoints use MUI's native APIs (theme.spacing(), theme.breakpoints)
   breakpoints: {
     values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
   },
@@ -570,7 +491,7 @@ const theme = createTheme({
       light: themeValues.palette.brand.sky,
       dark: themeValues.palette.blue.medium,
     },
-    // Tab panel semantic colors (derived from tabPanels)
+    // Tab panel colors
     learn: {
       background: themeValues.palette.tabPanels.learn,
       text: themeValues.palette.utility.white,
@@ -796,7 +717,7 @@ const theme = createTheme({
     MuiCardContent: {
       styleOverrides: {
         root: {
-          // optional: if you want CardContent to inherit link styling cleanly
+          // optional: to inherit link styling cleanly
           textDecoration: "inherit",
         },
       },
@@ -1043,7 +964,6 @@ const theme = createTheme({
       },
     },
     MuiToggleButton: {
-      // Like the language switcher
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
@@ -1318,54 +1238,18 @@ const theme = createTheme({
       },
     },
   },
-  mixins: {
-    ...baseTheme.mixins,
-    drawerContent: drawerContentMixins,
-  },
 })
 
 /* ========================================================
- * 4. Post-creation - Custom theme properties
+ * 4. Post-creation - Attach design tokens to theme object
  * ======================================================== */
 
-// Border styles - complete values ready to use
-theme.border = {
-  none: "none",
-  light: `1px solid ${theme.palette.grey[200]}`, // Subtle/light borders
-  medium: `1px solid ${theme.palette.grey[300]}`, // Standard borders (most common)
-  focus: `2px solid ${theme.palette.blue.bright}`, // Selected/focus states
-  focusLight: `1px solid ${theme.palette.blue.light}`, // Lighter blue accent
-  highlight: `3px solid ${theme.palette.blue.bright}`, // Strong highlight (selected items)
-  onDark: `2px solid ${theme.palette.common.white}`, // On dark backgrounds
-  subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
-
-  // CSS triangle arrow technique: zero-size box with transparent borders,
-  // then set one side's color to create a triangle pointing opposite direction.
-  // Example: borderLeftColor: white → arrow points right
-  arrowBase: "8px solid transparent",
-}
-
-theme.background = {
-  transparent: "transparent",
-  paragraph: "rgba(0, 0, 0, 0.4)",
-  overlay: {
-    light: "rgba(0, 0, 0, 0.2)",
-    medium: "rgba(0, 0, 0, 0.4)",
-    dark: "rgba(0, 0, 0, 0.8)",
-  },
-  whiteOverlay: {
-    50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
-    95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
-  },
-}
-
+// Attach all design tokens from themeValues
+theme.border = themeValues.border
+theme.background = themeValues.background
 theme.borderRadius = themeValues.borderRadius
-
 theme.shadow = themeValues.shadow
-
 theme.transition = themeValues.transition
-
-// Scenario/strategy component styles
 theme.scenarios = themeValues.scenarios
 
 export default theme
@@ -1441,23 +1325,8 @@ declare module "@mui/material/styles" {
         xxl: { xs: number; sm: number; md: number }
       }
     }
-    border: {
-      none: string
-      light: string
-      medium: string
-      focus: string
-      focusLight: string
-      highlight: string
-      onDark: string
-      subtleOutline: string
-      arrowBase: string
-    }
-    background: {
-      transparent: string
-      paragraph: string
-      overlay: { light: string; medium: string; dark: string }
-      whiteOverlay: { 50: string; 95: string }
-    }
+    border: typeof themeValues.border
+    background: typeof themeValues.background
     borderRadius: typeof themeValues.borderRadius
     shadow: typeof themeValues.shadow
     transition: typeof themeValues.transition
@@ -1481,10 +1350,6 @@ declare module "@mui/material/styles" {
     shadow?: Partial<typeof themeValues.shadow>
     transition?: Partial<typeof themeValues.transition>
     cards?: Partial<typeof themeValues.cards>
-  }
-
-  interface Mixins {
-    drawerContent: typeof drawerContentMixins
   }
 
   // Add custom typography variant
