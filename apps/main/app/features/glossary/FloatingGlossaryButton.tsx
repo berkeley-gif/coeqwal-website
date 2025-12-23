@@ -103,7 +103,7 @@ export function FloatingGlossaryButton({
         justifyContent: "center",
         cursor: isDragging ? "grabbing" : "grab",
         boxShadow: isOpen ? theme.shadow.focus : theme.shadow.md,
-        transition: isDragging ? "none" : "all 0.3s ease",
+        transition: isDragging ? "none" : theme.transition.default,
         zIndex: theme.zIndex.floating, // Above panel to remain clickable
         userSelect: "none",
         "&:hover": {
@@ -127,7 +127,7 @@ export function FloatingGlossaryButton({
             height: 16,
             transform: "scaleX(-1)", // Flip horizontally to point left
             opacity: showArrows ? 1 : 0,
-            transition: "opacity 0.2s ease",
+            transition: theme.transition.fade,
             pointerEvents: "none",
           }}
         >
@@ -154,7 +154,7 @@ export function FloatingGlossaryButton({
             width: 16,
             height: 16,
             opacity: showArrows ? 1 : 0,
-            transition: "opacity 0.2s ease",
+            transition: theme.transition.fade,
             pointerEvents: "none",
           }}
         >

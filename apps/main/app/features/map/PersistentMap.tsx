@@ -106,7 +106,7 @@ const getContainerStyles = (
     width: "100vw",
     height: "100vh",
     zIndex: zIndexBasement, // Use theme z-index for map background layer, TODO: consider generalizing
-    transition: "opacity 0.3s ease-out",
+    transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
   }
 
   switch (mode) {
@@ -126,7 +126,7 @@ const getContainerStyles = (
         // Short transition smooths the initial "release" moment so it's not jarring
         transform:
           scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
-        transition: "opacity 0.3s ease-out, transform 0.15s ease-out",
+        transition: "opacity 0.3s ease-out, transform 0.15s ease-out", // Combined fade + quick
       }
     case "explore":
       return {
@@ -502,7 +502,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
             backgroundColor: theme.palette.learn.background,
             zIndex: theme.zIndex.persistentMap - 1, // Behind the map
             opacity: learnMapScrollOffset > 0 ? 1 : 0,
-            transition: "opacity 0.15s ease-out",
+            transition: theme.transition.quick,
             pointerEvents: "none",
           }}
         />

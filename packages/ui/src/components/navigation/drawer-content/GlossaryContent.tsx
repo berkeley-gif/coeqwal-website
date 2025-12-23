@@ -334,7 +334,7 @@ export function GlossaryContent({
                         mb: (theme) => theme.spacing(2),
                         borderRadius: (theme) => theme.borderRadius.md,
                         border: "1px solid rgba(255, 172, 110, 0.3)",
-                        transition: "background-color 0.3s ease",
+                        transition: (theme) => theme.transition.default,
                       }
                     : {
                         px: (theme) => theme.spacing(2),

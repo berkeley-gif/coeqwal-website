@@ -34,7 +34,7 @@ const arrowButtonStyles = {
   alignItems: "center",
   justifyContent: "center",
   lineHeight: 0,
-  transition: "color 0.15s ease",
+  transition: "all 0.15s ease", // theme.transition.quick equivalent
   "&:hover": {
     color: (theme: Theme) => theme.palette.blue.darkest,
   },
@@ -98,7 +98,7 @@ export function SortButton({
         height: CIRCLE_SIZE,
         minWidth: CIRCLE_SIZE,
         minHeight: CIRCLE_SIZE,
-        transition: "all 0.15s ease",
+        transition: (theme: Theme) => theme.transition.quick,
         "&:hover": {
           background: (theme: Theme) => `${theme.palette.blue.bright}30`,
         },

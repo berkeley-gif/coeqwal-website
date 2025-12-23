@@ -221,7 +221,7 @@ export function GeocodingPanel({
                   backgroundColor: theme.palette.common.white,
                   cursor: "pointer",
                   textAlign: "left",
-                  transition: "background-color 0.15s",
+                  transition: theme.transition.quick,
                   "&:hover": {
                     backgroundColor: theme.palette.grey[100],
                   },

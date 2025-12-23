@@ -382,7 +382,7 @@ export function HotspotMarkers({
               sx={{
                 position: "relative",
                 cursor: "pointer",
-                transition: "transform 0.2s ease",
+                transition: theme.transition.default,
                 "&:hover": {
                   transform: "scale(1.2)",
                 },

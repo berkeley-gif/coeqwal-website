@@ -116,7 +116,7 @@ export default function UnifiedExploreView({
         <Box
           sx={{
             width: listWidth,
-            transition: "width 0.3s ease-in-out",
+            transition: theme.transition.layout,
             display: "flex",
             flexDirection: "column",
             borderRight: showRightPanel ? theme.border.medium : "none",
@@ -140,7 +140,7 @@ export default function UnifiedExploreView({
         <Box
           sx={{
             width: showRightPanel ? "50%" : "0%",
-            transition: "width 0.3s ease-in-out",
+            transition: theme.transition.layout,
             overflow: "hidden",
             position: "relative",
             backgroundColor:

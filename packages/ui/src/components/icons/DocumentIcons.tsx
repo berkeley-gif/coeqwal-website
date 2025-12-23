@@ -28,7 +28,7 @@ export function DocumentListIcon({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "color 0.2s ease",
+        transition: "color 0.3s ease", // theme.transition.color equivalent
         ...sx,
       }}
     >
@@ -74,7 +74,7 @@ export function DocumentCheckedIcon({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "color 0.2s ease",
+        transition: "color 0.3s ease", // theme.transition.color equivalent
         ...sx,
       }}
     >
@@ -118,7 +118,7 @@ export function DocumentExpandedIcon({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "color 0.2s ease",
+        transition: "color 0.3s ease", // theme.transition.color equivalent
         ...sx,
       }}
     >
@@ -160,7 +160,7 @@ export function DocumentCollapsedIcon({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "color 0.2s ease",
+        transition: "color 0.3s ease", // theme.transition.color equivalent
         ...sx,
       }}
     >
@@ -197,7 +197,7 @@ export function MapIcon({ active = false, size = 44, sx }: DocumentIconProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "color 0.2s ease",
+        transition: "color 0.3s ease", // theme.transition.color equivalent
         ...sx,
       }}
     >

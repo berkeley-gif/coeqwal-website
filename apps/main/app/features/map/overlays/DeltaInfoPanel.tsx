@@ -134,7 +134,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           fontWeight: 500,
           textDecoration: "none",
           textAlign: "left",
-          transition: "color 0.2s ease",
+          transition: theme.transition.color,
           "&:hover": {
             color: theme.palette.blue.bright,
             textDecoration: "underline",

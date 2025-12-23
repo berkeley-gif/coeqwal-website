@@ -160,7 +160,7 @@ export function HydroclimateChooser({
                     gap: 0.5,
                     cursor: isDisabled ? "not-allowed" : "pointer",
                     opacity: isDisabled ? 0.4 : 1,
-                    transition: "all 0.2s ease",
+                    transition: theme.transition.default,
                   }}
                 >
                   <Box
@@ -179,7 +179,7 @@ export function HydroclimateChooser({
                         ? theme.border.highlight
                         : "3px solid transparent",
                       boxShadow: isSelected ? theme.shadow.sm : theme.shadow.none,
-                      transition: "all 0.2s ease",
+                      transition: theme.transition.default,
                       "&:hover": !isDisabled
                         ? {
                             transform: "scale(1.1)",

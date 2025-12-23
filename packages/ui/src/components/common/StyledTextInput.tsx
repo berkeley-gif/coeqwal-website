@@ -95,7 +95,7 @@ export const StyledTextInput = forwardRef<
           backgroundColor: theme.palette.common.white,
           color: theme.palette.text.primary,
           outline: "none",
-          transition: "border-color 0.2s, box-shadow 0.2s",
+          transition: "border-color 0.3s ease, box-shadow 0.3s ease", // theme.transition.default timing
           boxSizing: "border-box",
           "&:focus": {
             borderColor: theme.palette.primary.main,
@@ -162,7 +162,7 @@ export const StyledTextInput = forwardRef<
                 backgroundColor: theme.palette.grey[200],
                 color: theme.palette.grey[600],
                 cursor: "pointer",
-                transition: "background-color 0.2s, color 0.2s",
+                transition: "background-color 0.3s ease, color 0.3s ease", // theme.transition.default timing
                 fontSize: "14px",
                 lineHeight: 1,
                 "&:hover": {

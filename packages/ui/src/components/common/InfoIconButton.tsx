@@ -99,7 +99,7 @@ const circleButtonStyles = {
   height: CIRCLE_SIZE,
   minWidth: CIRCLE_SIZE,
   minHeight: CIRCLE_SIZE,
-  transition: "all 0.15s ease",
+  transition: "all 0.15s ease", // theme.transition.quick equivalent
 }
 
 const inlineButtonStyles = {
@@ -112,7 +112,7 @@ const inlineButtonStyles = {
   justifyContent: "center",
   verticalAlign: "text-top",
   marginLeft: "4px",
-  transition: "color 0.15s ease",
+  transition: "color 0.15s ease", // theme.transition.quick timing
   // Touch target sizing
   minWidth: INLINE_TOUCH_TARGET,
   minHeight: INLINE_TOUCH_TARGET,

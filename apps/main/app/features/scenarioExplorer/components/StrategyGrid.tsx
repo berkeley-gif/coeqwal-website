@@ -299,7 +299,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     padding: compact ? theme.spacing(3) : theme.spacing(1.5),
                     gap: theme.spacing(1),
                     alignItems: compact ? "stretch" : "start",
-                    transition: "all 0.2s ease",
+                    transition: theme.transition.default,
                     border: isHighlighted
                       ? theme.border.focus
                       : "2px solid transparent",
@@ -711,7 +711,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         padding: 0,
                                         borderRadius:
                                           theme.borderRadius.md,
-                                        transition: "all 0.2s ease",
+                                        transition: theme.transition.default,
                                         backgroundColor:
                                           expandedSummaries[strategy.value] ===
                                           displayName
@@ -943,7 +943,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         padding: 0,
                                         borderRadius:
                                           theme.borderRadius.md,
-                                        transition: "all 0.2s ease",
+                                        transition: theme.transition.default,
                                         backgroundColor:
                                           expandedSummaries[strategy.value] ===
                                           displayName
@@ -1506,7 +1506,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                   : "default",
                                 padding: 0,
                                 borderRadius: theme.borderRadius.md,
-                                transition: "all 0.2s ease",
+                                transition: theme.transition.default,
                                 backgroundColor:
                                   expandedSummaries[strategy.value] ===
                                   displayName
