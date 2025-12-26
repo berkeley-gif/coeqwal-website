@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * Home Page - Main application entry point
+ *
+ * Renders the main page with persistent map, header, tabs, and content sections.
+ */
+
 import { Suspense } from "react"
 import { Box } from "@repo/ui/mui"
 import { MapProvider } from "@repo/map"

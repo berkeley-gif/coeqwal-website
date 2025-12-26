@@ -65,14 +65,18 @@ import {
 } from "../../.."
 import { Theme } from "@mui/material/styles"
 import type { TooltipProps } from "@mui/material"
+import { themeValues } from "../../../themes/theme"
 
 // ============================================================================
 // CONFIGURABLE CONSTANTS
 // ============================================================================
 const DEFAULT_WIDTH = "280px"
-const MAX_WIDTH = "400px"
-const PADDING_Y = "12px"
-const PADDING_X = "16px"
+const MAX_WIDTH = themeValues.layout.maxWidth.md
+// Padding uses semantic spacing tokens (component.md = 1.5 = 12px, component.lg = 2 = 16px)
+const PADDING_Y = themeValues.spacing.component.md
+const PADDING_X = themeValues.spacing.component.lg
+// Close button positioning (component.sm = 1 = 8px)
+const CLOSE_BUTTON_OFFSET = themeValues.spacing.component.sm
 
 // ============================================================================
 // TYPES
@@ -107,8 +111,8 @@ function CloseButton({ onClick }: { onClick: () => void }) {
       }}
       sx={{
         position: "absolute",
-        top: "8px",
-        right: "8px",
+        top: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
+        right: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
         width: "24px",
         height: "24px",
         border: "none",
@@ -154,10 +158,10 @@ const getTooltipSlotProps = (
       boxShadow: theme.shadow.md,
       width,
       maxWidth,
-      padding: `${PADDING_Y} ${PADDING_X}`,
-      paddingRight: showCloseButton ? "40px" : PADDING_X,
-      fontSize: theme.typography.compact.subtitle.fontSize,
-      lineHeight: 1.5,
+      padding: `${theme.spacing(PADDING_Y)} ${theme.spacing(PADDING_X)}`,
+      paddingRight: showCloseButton ? "40px" : theme.spacing(PADDING_X),
+      ...theme.typography.compact.subtitle,
+      // Use variant's default lineHeight (1.4) - don't override
     },
   },
   arrow: {
@@ -216,9 +220,9 @@ export function HybridTooltip({
             borderRadius: theme.borderRadius.md,
             width,
             maxWidth,
-            padding: `${PADDING_Y} ${PADDING_X}`,
-            fontSize: theme.typography.compact.subtitle.fontSize,
-            lineHeight: 1.5,
+            padding: `${theme.spacing(PADDING_Y)} ${theme.spacing(PADDING_X)}`,
+            ...theme.typography.compact.subtitle,
+            // Use variant's default lineHeight (1.4) - don't override
           }}
         >
           <CloseButton onClick={handleClose} />
@@ -309,9 +313,9 @@ export function HybridTooltip({
               borderRadius: theme.borderRadius.md,
               width,
               maxWidth,
-              padding: `${PADDING_Y} ${PADDING_X}`,
-              fontSize: theme.typography.compact.subtitle.fontSize,
-              lineHeight: 1.5,
+              padding: `${theme.spacing(PADDING_Y)} ${theme.spacing(PADDING_X)}`,
+              ...theme.typography.compact.subtitle,
+              // Use variant's default lineHeight (1.4) - don't override
               pointerEvents: "auto",
             }}
             onMouseEnter={() => setOpen(true)}

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * TierMarkers - Map markers showing tier data by location
+ *
+ * Displays markers on the map for each location with tier data.
+ * Clicking a marker shows a popup with outcome details.
+ */
+
 import React, { useState, useEffect } from "react"
 import { Marker, Popup, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
@@ -296,7 +303,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
           >
             <div
               style={{
-                fontSize: theme.typography.caption.fontSize,
+                ...theme.typography.caption,
                 color: theme.palette.grey[600],
                 marginBottom: theme.spacing(0.25),
               }}
@@ -305,8 +312,8 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             </div>
             <div
               style={{
+                ...theme.typography.body2,
                 fontWeight: theme.typography.fontWeightSemiBold,
-                fontSize: theme.typography.body2.fontSize,
                 marginBottom: theme.spacing(1),
                 color: theme.palette.blue.darkest,
               }}
@@ -315,7 +322,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             </div>
             <div
               style={{
-                fontSize: theme.typography.nav.fontSize,
+                ...theme.typography.nav,
                 display: "flex",
                 alignItems: "center",
                 gap: theme.spacing(1),

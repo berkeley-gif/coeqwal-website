@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * AutoHeight - Container that animates height changes
+ *
+ * Wraps content and smoothly animates when the content height changes.
+ * Useful for expandable sections and accordions.
+ */
+
 import React, { useLayoutEffect, useRef, useState } from "react"
 import { motion } from "@repo/motion"
 

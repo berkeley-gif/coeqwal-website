@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * SearchBar - Strategy search input
+ *
+ * Provides search functionality for filtering strategies in the explorer.
+ */
+
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { StyledTextInput } from "@repo/ui"
@@ -36,14 +42,22 @@ export default function SearchBar({
       }}
     >
       {/* Search section */}
-      <Box sx={{ flex: 1, minWidth: 0, maxWidth: theme.spacing(40) }}>
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          maxWidth: theme.spacing(40),
+          display: "flex",
+          flexDirection: "column",
+          // 10px header-to-content spacing
+          gap: 1.25,
+        }}
+      >
         {showLabel && (
           <Typography
-            variant="subtitle2"
+            variant="caption"
             sx={{
-              mb: 1,
               fontWeight: theme.typography.fontWeightMedium,
-              fontSize: theme.typography.caption.fontSize,
               color: theme.palette.grey[900],
             }}
           >

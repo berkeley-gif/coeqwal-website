@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * BaseHeader - Shared header component with navigation and branding
+ *
+ * Provides a responsive header with logo, navigation links, language switcher,
+ * and optional CTA button. Supports scroll-based shrinking animation.
+ */
+
 import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"

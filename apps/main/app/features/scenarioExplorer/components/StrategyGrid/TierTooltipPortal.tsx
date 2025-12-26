@@ -69,12 +69,12 @@ export function TierTooltipPortal({
                 width: 24,
                 height: 24,
                 display: "flex",
+                ...theme.typography.nav,
                 alignItems: "center",
                 justifyContent: "center",
                 border: "none",
                 background: "none",
                 cursor: "pointer",
-                fontSize: theme.typography.nav.fontSize,
                 color: theme.palette.grey[500],
                 borderRadius: theme.borderRadius.circle,
                 "&:hover": {

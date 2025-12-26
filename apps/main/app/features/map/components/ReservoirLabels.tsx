@@ -88,11 +88,11 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
         >
           <div
             style={{
+              ...theme.typography.compact.micro,
               backgroundColor: getTierColor(label.tier),
               color: theme.palette.utility.white,
               padding: "4px 8px",
               borderRadius: theme.borderRadius.sm,
-              fontSize: theme.typography.compact.micro.fontSize,
               fontWeight: theme.typography.fontWeightSemiBold,
               whiteSpace: "nowrap",
               boxShadow: theme.shadow.subtle,

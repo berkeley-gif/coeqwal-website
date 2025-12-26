@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * FloatingGlossaryButton - Floating button to open glossary
+ *
+ * Displays a floating button that opens the glossary panel.
+ * Animates between states based on drawer visibility.
+ */
+
 import { Box, useTheme, MenuBookIcon } from "@repo/ui/mui"
 import { RoundedRightArrow } from "@repo/ui"
 import { useEffect, useState } from "react"

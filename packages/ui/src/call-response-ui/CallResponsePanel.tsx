@@ -1,3 +1,10 @@
+/**
+ * CallResponsePanel - Animated overlay panel for scrollytelling
+ *
+ * Displays call-and-response content panels that animate in from the sides.
+ * Used in the Learn section for step-by-step explanations.
+ */
+
 import { ReactNode } from "react"
 import { Box } from "../mui-components"
 import { motion } from "@repo/motion"
@@ -58,8 +65,8 @@ export function CallResponsePanel({
         alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        // Responsive horizontal padding - minimal to maximize map space
-        px: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 },
+        // Responsive horizontal padding using page.x tokens (24px / 48px)
+        px: (theme: Theme) => theme.spacingTokens.page.x,
       }}
     >
       <motion.div
@@ -94,7 +101,8 @@ export function CallResponsePanel({
             pointerEvents: isVisible ? "auto" : "none",
             display: "flex",
             flexDirection: "column",
-            gap: { xs: 2, sm: 2.5, md: 3 },
+            // Responsive gap using panel.xs tokens (16px / 20px / 24px)
+            gap: (theme: Theme) => theme.spacingTokens.panel.xs,
             backgroundColor: "transparent",
             backdropFilter: "none",
             borderRadius: 0,

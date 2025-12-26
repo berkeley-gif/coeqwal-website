@@ -56,7 +56,8 @@ function CloseButton({ onClick }: { onClick: () => void }) {
       }}
     >
       <Typography
-        sx={{ fontSize: theme.typography.nav.fontSize, lineHeight: 1, color: theme.palette.grey[500] }}
+        variant="nav"
+        sx={{ lineHeight: 1, color: theme.palette.grey[500] }}
       >
         ×
       </Typography>
@@ -84,7 +85,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
           flexShrink: 0,
         }}
       />
-      <Typography variant="body2" sx={{ fontSize: theme.typography.compact.subtitle.fontSize }}>
+      <Typography variant="compactSubtitle">
         <strong>Tier {level}:</strong> {label}
       </Typography>
     </Box>

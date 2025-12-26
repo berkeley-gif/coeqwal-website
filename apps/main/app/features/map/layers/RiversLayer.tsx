@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * RiversLayer - Map layer for major rivers
+ *
+ * Displays Sacramento and San Joaquin river lines with labels.
+ * Includes the Delta region.
+ */
+
 import { memo, useMemo, useEffect } from "react"
 import { Source, Layer, Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"

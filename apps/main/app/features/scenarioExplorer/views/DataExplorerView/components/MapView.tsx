@@ -187,7 +187,7 @@ function MapViewContent() {
           sx={{
             color: theme.palette.grey[500],
             mb: theme.spacing(3),
-            maxWidth: "400px",
+            maxWidth: theme.layout.maxWidth.md,
           }}
         >
           Select scenarios in List View to view their outcomes on the map.
@@ -317,7 +317,6 @@ function MapViewContent() {
               variant="h6"
               sx={{
                 mb: theme.spacing(1),
-                fontSize: theme.typography.h6.fontSize,
               }}
             >
               {metric.name}
@@ -343,22 +342,17 @@ function MapViewContent() {
               }}
             >
               <Typography
-                variant="body2"
-                sx={{ fontSize: theme.typography.compact.subtitle.fontSize }}
+                variant="compactSubtitle"
               >
                 <strong>Unit:</strong> {metric.unit}
               </Typography>
               <Typography
-                variant="body2"
-                sx={{ fontSize: theme.typography.compact.subtitle.fontSize }}
+                variant="compactSubtitle"
               >
                 <strong>Spatial Type:</strong> {metric.spatialType}
               </Typography>
               {metric.spatialLocation && (
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: theme.typography.compact.subtitle.fontSize }}
-                >
+                <Typography variant="compactSubtitle">
                   <strong>Location:</strong> {metric.spatialLocation}
                 </Typography>
               )}
@@ -374,12 +368,7 @@ function MapViewContent() {
                   borderRadius: theme.borderRadius.md,
                 }}
               >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: theme.typography.compact.subtitle.fontSize,
-                  }}
-                >
+                <Typography variant="compactSubtitle">
                   ⚠️ {metric.notes}
                 </Typography>
               </Box>
@@ -539,11 +528,8 @@ function MapViewContent() {
             }}
           >
             <Typography
-              variant="body2"
-              sx={{
-                color: theme.palette.text.primary,
-                fontSize: theme.typography.compact.subtitle.fontSize,
-              }}
+              variant="compactSubtitle"
+              sx={{ color: theme.palette.text.primary }}
             >
               <strong>{tierLocationData.metadata.feature_count}</strong>{" "}
               location

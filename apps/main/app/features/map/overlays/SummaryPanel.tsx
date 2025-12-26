@@ -1,5 +1,11 @@
 "use client"
-/* Experimental, under development */
+
+/**
+ * SummaryPanel - Scenario summary overlay
+ *
+ * Displays a summary of scenario outcomes with tier glyphs.
+ * Used in both Learn map and Explore views.
+ */
 
 /* eslint-disable react/prop-types */ // TypeScript handles prop validation
 
@@ -303,7 +309,10 @@ export function SummaryPanel({
           ? theme.palette.grey[50]
           : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.md : 0,
-        padding: isInline ? { xs: 1.5, sm: 2 } : { xs: 2, sm: 2.5, md: 3 },
+        // Use semantic panel spacing tokens
+        padding: isInline
+          ? theme.spacingTokens.panel.xs
+          : theme.spacingTokens.panel.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
         maxWidth: isInline
@@ -323,10 +332,9 @@ export function SummaryPanel({
       {!isInline && (
         <>
           <Typography
-            variant="subtitle2"
+            variant="body2"
             sx={{
               mb: 0.5,
-              fontSize: theme.typography.body2.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               color: theme.palette.grey[900],
             }}
@@ -366,11 +374,8 @@ export function SummaryPanel({
                 sx={{ color: theme.palette.blue.bright }}
               />
               <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.grey[500],
-                  fontSize: theme.typography.compact.caption.fontSize,
-                }}
+                variant="compactCaption"
+                sx={{ color: theme.palette.grey[500] }}
               >
                 Analyzing {selectedOutcome}...
               </Typography>
@@ -452,11 +457,11 @@ export function SummaryPanel({
                             size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
                             sx={{
+                              ...theme.typography.compact.micro,
                               backgroundColor: `${tierColors[tierNum]}15`,
                               color: tierColors[tierNum],
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
-                              fontSize: theme.typography.compact.micro.fontSize,
                               fontWeight: theme.typography.fontWeightMedium,
                               height: 22,
                               "& .MuiChip-label": { px: 1 },
@@ -478,12 +483,11 @@ export function SummaryPanel({
                       }}
                     >
                       <Typography
-                        variant="body2"
+                        variant="nav"
                         component="span"
                         sx={{
                           color: tierColors[4],
                           fontWeight: theme.typography.fontWeightSemiBold,
-                          fontSize: theme.typography.nav.fontSize,
                           mr: 0.5,
                         }}
                       >
@@ -498,11 +502,11 @@ export function SummaryPanel({
                             label={loc.primaryName}
                             onClick={() => handleLocationClick(loc)}
                             sx={{
+                              ...theme.typography.compact.micro,
                               cursor: "pointer",
                               backgroundColor: "transparent",
                               color: theme.palette.grey[700],
                               border: theme.border.medium,
-                              fontSize: theme.typography.compact.micro.fontSize,
                               height: 22,
                               "&:hover": {
                                 backgroundColor: theme.palette.blue.bright,
@@ -515,11 +519,8 @@ export function SummaryPanel({
                         ))}
                       {outcomeSummary.criticalLocations.length > 6 && (
                         <Typography
-                          variant="body2"
-                          sx={{
-                            color: theme.palette.grey[500],
-                            fontSize: theme.typography.compact.micro.fontSize,
-                          }}
+                          variant="compactMicro"
+                          sx={{ color: theme.palette.grey[500] }}
                         >
                           +{outcomeSummary.criticalLocations.length - 6} more
                         </Typography>
@@ -538,12 +539,11 @@ export function SummaryPanel({
                       }}
                     >
                       <Typography
-                        variant="body2"
+                        variant="nav"
                         component="span"
                         sx={{
                           color: tierColors[3],
                           fontWeight: theme.typography.fontWeightSemiBold,
-                          fontSize: theme.typography.nav.fontSize,
                           mr: 0.5,
                         }}
                       >
@@ -556,11 +556,11 @@ export function SummaryPanel({
                           label={loc.primaryName}
                           onClick={() => handleLocationClick(loc)}
                           sx={{
+                            ...theme.typography.compact.micro,
                             cursor: "pointer",
                             backgroundColor: "transparent",
                             color: theme.palette.grey[600],
                             border: theme.border.medium,
-                            fontSize: theme.typography.compact.micro.fontSize,
                             height: 18,
                             "&:hover": {
                               backgroundColor: theme.palette.blue.bright,
@@ -573,11 +573,8 @@ export function SummaryPanel({
                       ))}
                       {outcomeSummary.atRiskLocations.length > 4 && (
                         <Typography
-                          variant="caption"
-                          sx={{
-                            color: theme.palette.grey[500],
-                            fontSize: theme.typography.compact.micro.fontSize,
-                          }}
+                          variant="compactMicro"
+                          sx={{ color: theme.palette.grey[500] }}
                         >
                           +{outcomeSummary.atRiskLocations.length - 4} more
                         </Typography>
@@ -608,11 +605,11 @@ export function SummaryPanel({
                             size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
                             sx={{
+                              ...theme.typography.compact.micro,
                               backgroundColor: `${tierColors[tierNum]}15`,
                               color: tierColors[tierNum],
                               borderColor: `${tierColors[tierNum]}40`,
                               border: "1px solid",
-                              fontSize: theme.typography.compact.micro.fontSize,
                               fontWeight: theme.typography.fontWeightMedium,
                               height: 22,
                               "& .MuiChip-label": {
@@ -629,11 +626,10 @@ export function SummaryPanel({
                   {outcomeSummary.criticalLocations.length > 0 && (
                     <Box sx={{ mb: 1.5 }}>
                       <Typography
-                        variant="body2"
+                        variant="nav"
                         sx={{
                           color: tierColors[4],
                           fontWeight: theme.typography.fontWeightSemiBold,
-                          fontSize: theme.typography.nav.fontSize,
                           display: "block",
                           mb: 0.5,
                         }}
@@ -650,11 +646,11 @@ export function SummaryPanel({
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
                               sx={{
+                                ...theme.typography.nav,
                                 cursor: "pointer",
                                 backgroundColor: "transparent",
                                 color: theme.palette.grey[700],
                                 border: theme.border.medium,
-                                fontSize: theme.typography.nav.fontSize,
                                 height: 24,
                                 "&:hover": {
                                   backgroundColor: theme.palette.blue.bright,
@@ -669,10 +665,9 @@ export function SummaryPanel({
                           ))}
                         {outcomeSummary.criticalLocations.length > 8 && (
                           <Typography
-                            variant="body2"
+                            variant="nav"
                             sx={{
                               color: theme.palette.grey[500],
-                              fontSize: theme.typography.nav.fontSize,
                               alignSelf: "center",
                             }}
                           >
@@ -687,11 +682,10 @@ export function SummaryPanel({
                   {outcomeSummary.atRiskLocations.length > 0 && (
                     <Box>
                       <Typography
-                        variant="caption"
+                        variant="compactMicro"
                         sx={{
                           color: tierColors[3],
                           fontWeight: theme.typography.fontWeightSemiBold,
-                          fontSize: theme.typography.compact.micro.fontSize,
                           display: "block",
                           mb: 0.5,
                         }}
@@ -709,11 +703,11 @@ export function SummaryPanel({
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
                               sx={{
+                                ...theme.typography.compact.micro,
                                 cursor: "pointer",
                                 backgroundColor: "transparent",
                                 color: theme.palette.grey[600],
                                 border: theme.border.medium,
-                                fontSize: theme.typography.compact.micro.fontSize,
                                 height: 18,
                                 "&:hover": {
                                   backgroundColor: theme.palette.blue.bright,
@@ -728,10 +722,9 @@ export function SummaryPanel({
                           ))}
                         {outcomeSummary.atRiskLocations.length > 5 && (
                           <Typography
-                            variant="caption"
+                            variant="compactMicro"
                             sx={{
                               color: theme.palette.grey[500],
-                              fontSize: theme.typography.compact.micro.fontSize,
                               alignSelf: "center",
                             }}
                           >
@@ -751,11 +744,10 @@ export function SummaryPanel({
       {/* Prompt to select an outcome - shown when no outcome is selected (overlay only) */}
       {!isInline && !selectedOutcome && !isLoading && (
         <Typography
-          variant="caption"
+          variant="compactCaption"
           sx={{
             color: theme.palette.grey[500],
             fontStyle: "italic",
-            fontSize: theme.typography.compact.caption.fontSize,
             display: "block",
             borderTop: theme.border.light,
             pt: 1.5,

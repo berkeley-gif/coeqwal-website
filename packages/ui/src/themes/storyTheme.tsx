@@ -1,3 +1,9 @@
+/**
+ * storyTheme - Theme variant for Storybook documentation
+ *
+ * Extends the base theme with font variations for component showcasing.
+ */
+
 import { createTheme } from "@mui/material/styles"
 import baseTheme from "./theme"
 

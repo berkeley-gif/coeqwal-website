@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * StyledTextInput - Custom styled text input with clear button
+ *
+ * A styled input component with optional clear button, icons, and loading state.
+ * Supports small and medium sizes with consistent theme styling.
+ */
+
 import React, { forwardRef } from "react"
 import { Box, useTheme } from "@mui/material"
 import type { SxProps, Theme } from "@mui/material/styles"
@@ -157,13 +164,13 @@ export const StyledTextInput = forwardRef<
                 width: 20,
                 height: 20,
                 padding: 0,
+                ...theme.typography.nav,
                 border: "none",
                 borderRadius: theme.borderRadius.circle,
                 backgroundColor: theme.palette.grey[200],
                 color: theme.palette.grey[600],
                 cursor: "pointer",
                 transition: "background-color 0.3s ease, color 0.3s ease", // theme.transition.default timing
-                fontSize: theme.typography.nav.fontSize,
                 lineHeight: 1,
                 "&:hover": {
                   backgroundColor: theme.palette.grey[300],

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * ScrollTooltip - Scroll-triggered instructional tooltip
+ *
+ * Displays a tooltip that appears based on scroll position.
+ * Used for scroll tutorials and contextual hints.
+ */
+
 import { RefObject, useEffect, useState, ReactNode } from "react"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 import { motion, MotionValue, useTransform } from "@repo/motion"
@@ -179,9 +186,10 @@ export default function ScrollTooltip({
           border: theme.border.light,
           borderRadius: theme.borderRadius.md,
           boxShadow: theme.shadow.md,
-          padding: "16px",
-          paddingRight: onClose ? "32px" : "16px", // Extra space for close button
-          maxWidth: "300px",
+          // Use semantic component.lg (16px) for tooltip padding
+          padding: theme.spacing(theme.spacingTokens.component.lg),
+          paddingRight: onClose ? "32px" : theme.spacing(theme.spacingTokens.component.lg), // Extra space for close button
+          maxWidth: theme.layout.maxWidth.sm,
         }}
       >
         {/* Close button */}
@@ -190,12 +198,12 @@ export default function ScrollTooltip({
             onClick={onClose}
             size="small"
             sx={{
+              ...theme.typography.nav,
               position: "absolute",
               top: 4,
               right: 4,
               width: 24,
               height: 24,
-              fontSize: theme.typography.nav.fontSize,
               color: theme.palette.grey[500],
               "&:hover": {
                 color: theme.palette.grey[700],

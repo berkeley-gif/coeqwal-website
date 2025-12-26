@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * TemporalControls - Time period and aggregation selectors
+ *
+ * Provides controls for selecting temporal range and aggregation
+ * method in the Data Explorer.
+ */
+
 import React from "react"
 import {
   Box,
@@ -121,11 +128,8 @@ export default function TemporalControls({
 
       {/* Info */}
       <Typography
-        variant="body2"
-        sx={{
-          fontSize: theme.typography.compact.caption.fontSize,
-          color: theme.palette.grey[600],
-        }}
+        variant="compactCaption"
+        sx={{ color: theme.palette.grey[600] }}
       >
         {getTemporalInfo(selectedTemporal, selectedAggregation)}
       </Typography>

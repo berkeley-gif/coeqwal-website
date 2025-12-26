@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * useMarkTabsInView - Hook to track tab visibility
+ *
+ * Uses intersection observer to determine if tabs are in view.
+ */
+
 import { useEffect } from "react"
 import { useTabs } from "../context/Tabs"
 

@@ -163,8 +163,9 @@ export default function LearnPanel() {
       <Box
         sx={{
           backgroundColor: theme.palette.learn.background,
-          padding: "60px",
-          paddingBottom: "100px",
+          // Use semantic section spacing: section.lg (48px) for padding, extended for bottom
+          padding: (theme) => theme.spacing(theme.spacingTokens.section.lg),
+          paddingBottom: "100px", // Extended bottom padding for visual balance
           position: "relative",
           zIndex: theme.zIndex.pageContent,
           pointerEvents: "auto",
@@ -179,7 +180,7 @@ export default function LearnPanel() {
             justifyContent: "center",
             gap: (theme) => theme.layout.spacing.sm,
             width: "100%",
-            maxWidth: "1200px",
+            maxWidth: theme.layout.maxWidth.xl,
             margin: "0 auto",
           }}
         >
@@ -202,12 +203,13 @@ export default function LearnPanel() {
           {/* Text column */}
           <Box id="textColumn" sx={{ width: "44%" }}>
             <LeadingMarkerText title="Learn More" circleColor="#66b479">
-              <div
-                style={{
+              <Box
+                sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: "15px",
-                  marginTop: "20px",
+                  // Use semantic gap.md (12px) and section.xs (16px) top margin
+                  gap: (theme) => theme.spacingTokens.gap.md,
+                  mt: (theme) => theme.spacingTokens.section.xs,
                 }}
               >
                 <Card
@@ -221,7 +223,8 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      padding: "17px",
+                      // Use semantic component.lg (16px) padding
+                      padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
                     }}
                   >
                     <CardContent sx={{ height: "100%" }}>
@@ -242,7 +245,8 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      padding: "17px",
+                      // Use semantic component.lg (16px) padding
+                      padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
                     }}
                   >
                     <CardContent sx={{ height: "100%" }}>
@@ -252,7 +256,7 @@ export default function LearnPanel() {
                     </CardContent>
                   </CardActionArea>
                 </Card>
-              </div>
+              </Box>
             </LeadingMarkerText>
           </Box>
         </Box>

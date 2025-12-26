@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * GlossaryLinkedText - Text with clickable glossary term links
+ *
+ * Renders text content with underlined terms that link to glossary definitions.
+ * Used throughout the app to provide contextual definitions.
+ */
+
 import React from "react"
 import { Box, TypographyProps } from "@repo/ui/mui"
 

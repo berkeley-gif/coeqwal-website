@@ -115,8 +115,8 @@ export default function AboutScenariosView() {
         }}
       >
         <Typography
+          variant="compactCaption"
           sx={{
-            fontSize: theme.typography.compact.caption.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             letterSpacing: "0.15rem",
             textTransform: "uppercase",
@@ -291,8 +291,8 @@ export default function AboutScenariosView() {
           }}
         >
           <Typography
+            variant="compactCaption"
             sx={{
-              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
@@ -334,8 +334,8 @@ export default function AboutScenariosView() {
                 />
                 <Box>
                   <Typography
+                    variant="body2"
                     sx={{
-                      fontSize: theme.typography.body2.fontSize,
                       fontWeight: theme.typography.fontWeightSemiBold,
                       color: theme.palette.blue.darkest,
                       mb: 0.5,
@@ -369,8 +369,8 @@ export default function AboutScenariosView() {
           }}
         >
           <Typography
+            variant="compactCaption"
             sx={{
-              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
@@ -417,8 +417,8 @@ export default function AboutScenariosView() {
                 }}
               >
                 <Typography
+                  variant="body2"
                   sx={{
-                    fontSize: theme.typography.body2.fontSize,
                     fontWeight: theme.typography.fontWeightSemiBold,
                     color: theme.palette.blue.darkest,
                     mb: 1,
@@ -453,8 +453,8 @@ export default function AboutScenariosView() {
           }}
         >
           <Typography
+            variant="compactCaption"
             sx={{
-              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",

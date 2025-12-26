@@ -60,7 +60,8 @@ interface HotspotData {
 /**
  * Calculate the bounding box center of a polygon
  * This is more reliable than centroid for small/irregular polygons
- * For MultiPolygon, calculates bbox across all polygons // TODO: reconsider this, find a better technique
+ * For MultiPolygon, calculates bbox across all polygons
+ * TODO: Consider better technique for MultiPolygon center calculation
  */
 function getPolygonCenter(feature: TierFeature): [number, number] | null {
   const { geometry } = feature

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * ListView - Strategy list view with outcome charts
+ *
+ * Displays strategies in a scrollable list with outcome visualization.
+ * Used in the Explore tab's list mode.
+ */
+
 import React, { useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../../store"

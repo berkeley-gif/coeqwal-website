@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * NavDropdown - Dropdown menu for navigation items
+ *
+ * Renders a button that opens a dropdown menu with configurable options.
+ * Supports outline and text variants.
+ */
+
 import React, { useState } from "react"
 import { Button, Menu, MenuItem } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
@@ -44,10 +51,10 @@ export function NavDropdown({
   }
 
   const buttonStyle = {
+    ...theme.typography.body2,
     lineHeight: 1.1,
     height: theme.spacing(4.5), // 36px to match other header buttons
     minHeight: theme.spacing(4.5),
-    fontSize: theme.typography.body2.fontSize,
     fontWeight: theme.typography.fontWeightMedium,
     color: theme.palette.text.primary,
   }
@@ -90,8 +97,9 @@ export function NavDropdown({
               color: (theme) => theme.palette.blue.darkest,
               fontSize: (theme) => theme.typography.nav.fontSize,
               fontFamily: (theme) => theme.typography.fontFamily,
-              py: (theme) => theme.spacing(1.5), // 12px padding
-              px: (theme) => theme.spacing(2), // 16px padding
+              // Use semantic spacing: component.md (12px) vertical, component.lg (16px) horizontal
+              py: (theme) => theme.spacingTokens.component.md,
+              px: (theme) => theme.spacingTokens.component.lg,
               "&:hover": {
                 backgroundColor: (theme) => theme.palette.action.hover,
                 color: (theme) => theme.palette.blue.darkest,

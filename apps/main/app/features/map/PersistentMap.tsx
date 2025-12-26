@@ -339,7 +339,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         learnMapActions.setMapReady(true)
       }
 
-      // TODO: review this technique
+      // TODO: Review timeout-based map ready detection technique
       const timeoutId = setTimeout(() => {
         mapboxInstance.off("idle", onIdle)
         onIdle()
@@ -474,9 +474,8 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // NOTE: Learn mode camera is handled by "Camera transitions when section changes" effect
   // which fires when resetLearnState() sets activeSection to "california"
-
-  // FYI: Visualization state clearing is handled synchronously in setMapMode()
-  // TODO: review this system
+  // NOTE: Visualization state clearing is handled synchronously in setMapMode()
+  // TODO: Review map mode state management system
 
   const containerStyles = getContainerStyles(
     mapMode,

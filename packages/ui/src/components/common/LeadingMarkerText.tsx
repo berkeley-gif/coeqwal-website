@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * LeadingMarkerText - Text block with leading vertical marker
+ *
+ * Displays a headline and body text with a decorative vertical marker.
+ * Used for callout sections and highlighted content.
+ */
+
 import { Box, Typography } from "@repo/ui/mui"
 export interface LeadingMarkerTextProps {
   title: string
@@ -27,8 +34,9 @@ export function LeadingMarkerText({
         display: "grid",
         gridTemplateColumns: "48px 1fr",
         gridTemplateRows: "auto auto",
-        columnGap: theme.spacing(2),
-        rowGap: theme.spacing(1),
+        // Use semantic spacing: gap.lg (16px) horizontal, gap.sm (8px) vertical
+        columnGap: theme.spacing(theme.spacingTokens.gap.lg),
+        rowGap: theme.spacing(theme.spacingTokens.gap.sm),
         alignItems: "start",
       })}
     >
@@ -84,7 +92,8 @@ export function LeadingMarkerText({
           color: (theme) => theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
-          gap: 2,
+          // Use semantic spacing: gap.lg (16px)
+          gap: (theme) => theme.spacingTokens.gap.lg,
         }}
       >
         {children}

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * DocumentIcons - SVG icons for document types
+ *
+ * Provides icons for CSV, JSON, and other document formats.
+ * Supports active state styling.
+ */
+
 import { Box, useTheme } from "../.."
 import type { SxProps, Theme } from "@mui/material/styles"
 

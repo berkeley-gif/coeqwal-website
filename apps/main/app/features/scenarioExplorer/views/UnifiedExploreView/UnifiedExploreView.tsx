@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * UnifiedExploreView - Combined list and chart exploration view
+ *
+ * Displays strategies in a list with integrated outcome charts.
+ * Used in the Explore tab's unified view mode.
+ */
+
 import React, { useEffect, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
@@ -166,11 +173,8 @@ export default function UnifiedExploreView({
               }}
             >
               <Typography
-                variant="body2"
-                sx={{
-                  fontSize: theme.typography.compact.subtitle.fontSize,
-                  color: theme.palette.text.primary,
-                }}
+                variant="compactSubtitle"
+                sx={{ color: theme.palette.text.primary }}
               >
                 Click on a scenario outcome in the left panel to see outcomes at
                 specific locations.

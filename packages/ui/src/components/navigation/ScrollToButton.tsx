@@ -1,3 +1,10 @@
+/**
+ * ScrollToButton - Animated button for scroll navigation
+ *
+ * Circular arrow button that scrolls to a target element when clicked.
+ * Includes a scroll indicator animation.
+ */
+
 import React from "react"
 import { useTheme, Theme } from "../../mui-components"
 import { ScrollIndicator } from "@repo/motion/components"

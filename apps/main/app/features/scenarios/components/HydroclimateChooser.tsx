@@ -95,7 +95,8 @@ export function HydroclimateChooser({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: 1,
+        // 10px header-to-content spacing
+        gap: 1.25,
       }}
     >
       {showTitle && (
@@ -198,9 +199,8 @@ export function HydroclimateChooser({
                   </Box>
                   {showLabels && (
                     <Typography
-                      variant="caption"
+                      variant="compactMicro"
                       sx={{
-                        fontSize: theme.typography.compact.micro.fontSize,
                         color: isSelected
                           ? theme.palette.blue.darkest
                           : theme.palette.grey[600],
@@ -208,7 +208,7 @@ export function HydroclimateChooser({
                           ? theme.typography.fontWeightMedium
                           : theme.typography.fontWeightRegular,
                         textAlign: "center",
-                        lineHeight: 1.2,
+                        lineHeight: 1.2, // Tighter than variant default for data viz
                         maxWidth: 60,
                       }}
                     >

@@ -10,7 +10,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { InfoIconButton, SortButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
@@ -64,6 +64,11 @@ export function OutcomeChartItem({
 }: OutcomeChartItemProps) {
   const theme = useTheme()
 
+  // Responsive glyph size: 50px at sm, 60px at md+
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
+  const responsiveSize = isMdUp ? 60 : 50
+  const actualSize = size === 60 ? responsiveSize : size // Use responsive if default, otherwise use provided size
+
   // Compute glyph values and variant
   const values: [number, number, number, number] = chartData
     ? (chartData.map((tier) => tier.value).slice(0, 4) as [
@@ -109,6 +114,8 @@ export function OutcomeChartItem({
           isExpanded || isSelected
             ? theme.border.focus
             : "2px solid transparent",
+        minWidth: 0, // Allow grid item to shrink
+        overflow: "hidden",
         "&:hover": {
           backgroundColor: isActive ? theme.palette.grey[100] : "transparent",
         },
@@ -120,14 +127,14 @@ export function OutcomeChartItem({
         <ScenarioGlyph
           variant={variant}
           values={values}
-          size={size}
+          size={actualSize}
           tierColors={tierColors}
         />
       ) : (
         <Box
           sx={{
-            width: size,
-            height: size,
+            width: actualSize,
+            height: actualSize,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -137,11 +144,11 @@ export function OutcomeChartItem({
           }}
         >
           <Typography
+            variant="compactMicro"
             sx={{
-              fontSize: theme.typography.compact.micro.fontSize,
               color: theme.palette.text.primary,
               textAlign: "center",
-              lineHeight: 1.2,
+              lineHeight: 1.2, // Tighter than variant default for data viz
               px: 0.5,
             }}
           >
@@ -156,20 +163,24 @@ export function OutcomeChartItem({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
+          gap: 0.25,
           mt: 0.5,
+          width: "100%",
         }}
       >
         <Typography
+          variant="compactMicro"
           component="div"
           sx={{
             textAlign: "center",
-            fontSize: theme.typography.compact.micro.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             color: isActive
               ? theme.palette.blue.darkest
               : theme.palette.grey[500],
-            lineHeight: 1.2,
-            maxWidth: "70px",
+            lineHeight: 1.2, // Tighter than variant default for data viz
+            wordBreak: "break-word",
+            hyphens: "auto",
           }}
         >
           {displayName}

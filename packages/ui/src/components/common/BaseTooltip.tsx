@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * BaseTooltip - Foundation tooltip component
+ *
+ * Wraps MUI Tooltip with consistent styling and behavior.
+ * Extended by InfoTooltip and MapMarkerTooltip.
+ */
+
 import React from "react"
 import { Tooltip } from "../.."
 import type { TooltipProps } from "@mui/material"

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * SortButton - Clickable sort indicator with up/down arrows
+ *
+ * Displays ascending, descending, or neutral sort state.
+ * Used in data tables and grids for column sorting.
+ */
+
 import React from "react"
 import { Box, ArrowDropUpIcon, ArrowDropDownIcon } from "../.."
 import { Theme } from "@mui/material/styles"

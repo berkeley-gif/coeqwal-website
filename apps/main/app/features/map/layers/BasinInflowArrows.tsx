@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * BasinInflowArrows - Animated arrows showing water inflow
+ *
+ * Displays directional arrows on the map indicating water flow
+ * into major basins. Opacity controlled by scroll progress.
+ */
+
 import { Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 
@@ -59,7 +66,8 @@ export default function BasinInflowArrows({
     },
   ]
 
-  const arrowColor = "#2196F3" // TODO: Map components theme, once Meli finishes design system
+  // TODO: Use theme color once map design system is finalized
+  const arrowColor = "#2196F3"
 
   return (
     <>

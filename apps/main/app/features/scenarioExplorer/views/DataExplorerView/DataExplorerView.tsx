@@ -48,8 +48,8 @@ export default function DataExplorerView({
           }}
         >
           <Typography
+            variant="compactCaption"
             sx={{
-              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
@@ -91,8 +91,8 @@ export default function DataExplorerView({
             sx={{
               minHeight: 48,
               "& .MuiTab-root": {
+                ...theme.typography.nav,
                 minHeight: 48,
-                fontSize: theme.typography.nav.fontSize,
                 textTransform: "none",
                 fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.grey[600],
@@ -138,7 +138,7 @@ export default function DataExplorerView({
                 color: theme.palette.grey[600],
                 lineHeight: 1.7,
                 mb: 3,
-                maxWidth: "400px",
+                maxWidth: theme.layout.maxWidth.md,
               }}
             >
               Choose scenarios from the Explore tab to access detailed charts,

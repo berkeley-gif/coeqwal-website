@@ -1,3 +1,10 @@
+/**
+ * SelectionBanner - Scenario selection summary bar
+ *
+ * Displays selected scenarios with compare button.
+ * Appears when scenarios are selected for comparison.
+ */
+
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 
@@ -28,8 +35,9 @@ export default function SelectionBanner() {
       sx={{
         backgroundColor: theme.palette.common.white,
         borderBottom: theme.border.light,
-        px: { xs: 3, md: 6 },
-        py: 1.5,
+        // Use semantic page.x spacing for horizontal padding
+        px: theme.spacingTokens.page.x,
+        py: theme.spacingTokens.component.md,
       }}
     >
       <Box
@@ -37,7 +45,8 @@ export default function SelectionBanner() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 2,
+          // Use semantic gap.lg (16px) for main layout spacing
+          gap: theme.spacingTokens.gap.lg,
         }}
       >
         {/* Left: Eyebrow + Pills */}
@@ -45,14 +54,14 @@ export default function SelectionBanner() {
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 2,
+            gap: theme.spacingTokens.gap.lg,
             flexWrap: "wrap",
             flex: 1,
           }}
         >
           <Typography
+            variant="compactCaption"
             sx={{
-              fontSize: theme.typography.compact.caption.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
               letterSpacing: "0.15rem",
               textTransform: "uppercase",
@@ -64,7 +73,7 @@ export default function SelectionBanner() {
           </Typography>
 
           {/* Scenario pills */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.sm }}>
             {selectedScenarios.map((scenarioId) => (
               <Typography
                 key={scenarioId}
@@ -90,9 +99,9 @@ export default function SelectionBanner() {
           size="small"
           onClick={clearScenarios}
           sx={{
+            ...theme.typography.compact.caption,
             color: theme.palette.grey[500],
             textTransform: "none",
-            fontSize: theme.typography.compact.caption.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             minWidth: "auto",
             px: 1,
