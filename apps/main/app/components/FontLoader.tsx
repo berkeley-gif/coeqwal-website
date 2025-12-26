@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * FontLoader - Adobe Fonts (TypeKit) loader
+ *
+ * Loads web fonts asynchronously via TypeKit with timeout handling.
+ */
+
 import { useEffect } from "react"
 
 interface FontLoaderProps {

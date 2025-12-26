@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * LanguageSwitcher - Toggle between English and Spanish
+ *
+ * Uses ToggleButtonGroup for language selection.
+ */
+
 import React from "react"
 import { ToggleButtonGroup, ToggleButton } from "@mui/material"
 import { useTranslation } from "@repo/i18n"

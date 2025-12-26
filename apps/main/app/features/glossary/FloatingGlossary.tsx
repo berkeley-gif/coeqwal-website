@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * FloatingGlossary - Floating glossary container
+ *
+ * Manages the floating glossary button and panel state.
+ * Handles positioning and open/close behavior.
+ */
+
 import { useState, useRef, useEffect } from "react"
 import { useDrawerStore } from "@repo/state/drawer"
 import { FloatingGlossaryButton } from "./FloatingGlossaryButton"

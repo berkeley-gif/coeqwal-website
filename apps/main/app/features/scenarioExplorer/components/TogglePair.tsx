@@ -1,3 +1,9 @@
+/**
+ * TogglePair - Two-option toggle button component
+ *
+ * Displays two icons as toggle options with active state highlighting.
+ */
+
 import React from "react"
 import { Box } from "@repo/ui/mui"
 

@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * InfoTooltip - Tooltip with title and description
+ *
+ * Displays a tooltip with optional title, description, and icon.
+ * Wraps BaseTooltip with structured content formatting.
+ */
+
 import React from "react"
 import { Box } from "../.."
 import { BaseTooltip } from "./BaseTooltip"

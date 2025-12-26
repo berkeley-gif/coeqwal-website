@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * ComparisonHeader - Header for scenario comparison view
+ *
+ * Displays scenario names with color indicators for comparison mode.
+ */
+
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useComparisonData } from "../views/ComparisonView/useComparisonData"
@@ -104,10 +110,11 @@ export function ComparisonHeader({
                 }}
               />
               <Typography
-                variant="body2"
+                variant="nav"
                 sx={{
-                  fontWeight: isHighlighted ? 600 : 400,
-                  fontSize: theme.typography.nav.fontSize,
+                  fontWeight: isHighlighted
+                    ? theme.typography.fontWeightSemiBold
+                    : theme.typography.fontWeightRegular,
                 }}
               >
                 {scenario.name}

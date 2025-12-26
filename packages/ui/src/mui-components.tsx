@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * mui-components - Centralized MUI component re-exports
+ *
+ * Single entry point for all MUI components used in the application.
+ * Import from @repo/ui/mui instead of @mui/material directly.
+ */
+
 // Re-export MUI components so the package is the single MUI entry point
 export {
   // Layout components

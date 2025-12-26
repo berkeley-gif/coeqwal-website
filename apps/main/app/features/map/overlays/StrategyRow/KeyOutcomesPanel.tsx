@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { InfoIconButton, ClickTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import {
@@ -24,6 +24,10 @@ export function KeyOutcomesPanel({
   onTitleClick,
 }: KeyOutcomesPanelProps) {
   const theme = useTheme()
+
+  // Responsive glyph size: 50px at sm, 60px at md+
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
+  const glyphSize = isMdUp ? 60 : 50
 
   // Use unified tooltip state management
   const { openTooltip, handleToggle, handleClose } = useTierTooltipState()
@@ -73,7 +77,7 @@ export function KeyOutcomesPanel({
         key={outcome}
         open={openTooltip === outcome}
         onClose={handleClose}
-        placement="top"
+        placement="left"
         width="450px"
         closeOnScroll
         content={
@@ -82,10 +86,10 @@ export function KeyOutcomesPanel({
             <Box
               component="span"
               sx={{
+                ...theme.typography.compact.subtitle,
                 display: "block",
                 mt: 1.5,
                 fontStyle: "italic",
-                fontSize: theme.typography.compact.subtitle.fontSize,
               }}
             >
               Click{" "}
@@ -119,6 +123,8 @@ export function KeyOutcomesPanel({
             borderRadius: theme.borderRadius.md,
             transition: theme.transition.default,
             opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
+            minWidth: 0, // Allow grid item to shrink
+            overflow: "hidden",
             "&:hover": {
               backgroundColor: theme.palette.grey[100],
             },
@@ -134,13 +140,13 @@ export function KeyOutcomesPanel({
               ]}
               values={getTierValues(outcome)}
               variant={variant}
-              size={60}
+              size={glyphSize}
             />
           ) : (
             <Box
               sx={{
-                width: 60,
-                height: 60,
+                width: glyphSize,
+                height: glyphSize,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -150,11 +156,11 @@ export function KeyOutcomesPanel({
               }}
             >
               <Typography
+                variant="compactMicro"
                 sx={{
-                  fontSize: theme.typography.compact.micro.fontSize,
                   color: theme.palette.text.primary,
                   textAlign: "center",
-                  lineHeight: 1.2,
+                  lineHeight: 1.2, // Tighter than variant default for data viz
                   px: 0.5,
                 }}
               >
@@ -165,22 +171,25 @@ export function KeyOutcomesPanel({
           <Box
             sx={{
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
               gap: 0.25,
               minHeight: "2rem",
+              width: "100%",
             }}
           >
             <Typography
-              variant="caption"
+              variant="compactMicro"
               sx={{
                 color: hasData
                   ? theme.palette.blue.darkest
                   : theme.palette.grey[500],
                 fontWeight: theme.typography.fontWeightMedium,
                 textAlign: "center",
-                fontSize: theme.typography.compact.micro.fontSize,
-                lineHeight: 1.2,
+                lineHeight: 1.2, // Tighter than variant default for data viz
+                wordBreak: "break-word",
+                hyphens: "auto",
               }}
             >
               {outcome}
@@ -221,11 +230,10 @@ export function KeyOutcomesPanel({
 
       {/* Multiple location outcomes - first 5 */}
       <Typography
-        variant="caption"
+        variant="compactMicro"
         sx={{
           display: "block",
           mb: 1,
-          fontSize: theme.typography.compact.micro.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[600],
           letterSpacing: "0.5px",
@@ -249,11 +257,10 @@ export function KeyOutcomesPanel({
 
       {/* Single location outcomes - last 4 */}
       <Typography
-        variant="caption"
+        variant="compactMicro"
         sx={{
           display: "block",
           mb: 1,
-          fontSize: theme.typography.compact.micro.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[600],
           letterSpacing: "0.5px",

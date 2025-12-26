@@ -10,7 +10,7 @@
  */
 
 import React, { useState, useEffect } from "react"
-import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import { Box, Typography, useTheme, useMediaQuery, Checkbox } from "@repo/ui/mui"
 import { InfoTooltip, InfoIconButton, SortButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../content/scenarios"
@@ -49,6 +49,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onSortChange,
 }: StrategyGridProps) {
   const theme = useTheme()
+
+  // Responsive glyph size: 50px at sm, 60px at md+
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
+  const glyphSize = isMdUp ? 60 : 50
 
   // Use unified tooltip state management
   const {
@@ -197,13 +201,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 >
                   {/* Outcome label */}
                   <Typography
+                    variant="compactCaption"
                     component="div"
                     sx={{
                       textAlign: "center",
-                      fontSize: theme.typography.compact.caption.fontSize,
                       fontWeight: theme.typography.fontWeightMedium,
                       color: theme.palette.blue.darkest,
-                      lineHeight: theme.typography.compact.caption.lineHeight,
                     }}
                   >
                     {displayName === "Freshwater for in-Delta uses" ? (
@@ -369,15 +372,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: theme.spacing(1.5),
+                            gap: theme.spacing(0.5),
                           }}
                         >
                           <Typography
-                            variant="subtitle1"
+                            variant="body2"
                             sx={{
                               fontWeight: theme.typography.fontWeightMedium,
-                              fontSize: theme.typography.body1.fontSize,
-                              maxWidth: "280px",
+                              maxWidth: theme.layout.maxWidth.sm,
                             }}
                           >
                             {strategy.value === "current-ops-historical-ag"
@@ -386,12 +388,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           </Typography>
                           {showDefinitions && (
                             <Typography
-                              variant="body2"
-                              sx={{
-                                lineHeight: 1.4,
-                                fontSize: theme.typography.nav.fontSize,
-                                maxWidth: "400px",
-                              }}
+                              variant="nav"
+                              sx={{ maxWidth: theme.layout.maxWidth.md }}
                             >
                               {strategy.description
                                 .split(/(\bTUCPs?\b)/g)
@@ -726,6 +724,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             onTierClick)
                                             ? theme.border.focus
                                             : "2px solid transparent",
+                                        minWidth: 0, // Allow grid item to shrink
+                                        overflow: "hidden",
                                         "&:hover": {
                                           backgroundColor: isActiveForStrategy
                                             ? theme.palette.grey[100]
@@ -781,7 +781,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             <ScenarioGlyph
                                               variant={variant}
                                               values={values}
-                                              size={60}
+                                              size={glyphSize}
                                               tierColors={
                                                 (chartData
                                                   ?.map((tier) => tier.color)
@@ -803,8 +803,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                       ) : (
                                         <Box
                                           sx={{
-                                            width: 60,
-                                            height: 60,
+                                            width: glyphSize,
+                                            height: glyphSize,
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
@@ -816,11 +816,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           }}
                                         >
                                           <Typography
+                                            variant="compactMicro"
                                             sx={{
-                                              fontSize: theme.typography.compact.micro.fontSize,
                                               color: theme.palette.text.primary,
                                               textAlign: "center",
-                                              lineHeight: 1.2,
+                                              lineHeight: 1.2, // Tighter than variant default for data viz
                                               px: 0.5,
                                             }}
                                           >
@@ -837,17 +837,17 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         }}
                                       >
                                         <Typography
+                                          variant="compactMicro"
                                           component="div"
                                           sx={{
                                             textAlign: "center",
-                                            fontSize: theme.typography.compact.micro.fontSize,
-                                            fontWeight:
-                                              theme.typography.fontWeightMedium,
+                                            fontWeight: theme.typography.fontWeightMedium,
                                             color: isActiveForStrategy
                                               ? theme.palette.blue.darkest
                                               : theme.palette.grey[500],
-                                            lineHeight: 1.2,
-                                            maxWidth: "70px",
+                                            lineHeight: 1.2, // Tighter than variant default for data viz
+                                            wordBreak: "break-word",
+                                            hyphens: "auto",
                                           }}
                                         >
                                           {displayName}
@@ -958,6 +958,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             onTierClick)
                                             ? theme.border.focus
                                             : "2px solid transparent",
+                                        minWidth: 0, // Allow grid item to shrink
+                                        overflow: "hidden",
                                         "&:hover": {
                                           backgroundColor: isActiveForStrategy
                                             ? theme.palette.grey[100]
@@ -1013,7 +1015,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                             <ScenarioGlyph
                                               variant={variant}
                                               values={values}
-                                              size={60}
+                                              size={glyphSize}
                                               tierColors={
                                                 (chartData
                                                   ?.map((tier) => tier.color)
@@ -1035,8 +1037,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                       ) : (
                                         <Box
                                           sx={{
-                                            width: 60,
-                                            height: 60,
+                                            width: glyphSize,
+                                            height: glyphSize,
                                             display: "flex",
                                             alignItems: "center",
                                             justifyContent: "center",
@@ -1048,11 +1050,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                           }}
                                         >
                                           <Typography
+                                            variant="compactMicro"
                                             sx={{
-                                              fontSize: theme.typography.compact.micro.fontSize,
                                               color: theme.palette.text.primary,
                                               textAlign: "center",
-                                              lineHeight: 1.2,
+                                              lineHeight: 1.2, // Tighter than variant default for data viz
                                               px: 0.5,
                                             }}
                                           >
@@ -1069,17 +1071,17 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                         }}
                                       >
                                         <Typography
+                                          variant="compactMicro"
                                           component="div"
                                           sx={{
                                             textAlign: "center",
-                                            fontSize: theme.typography.compact.micro.fontSize,
-                                            fontWeight:
-                                              theme.typography.fontWeightMedium,
+                                            fontWeight: theme.typography.fontWeightMedium,
                                             color: isActiveForStrategy
                                               ? theme.palette.blue.darkest
                                               : theme.palette.grey[500],
-                                            lineHeight: 1.2,
-                                            maxWidth: "70px",
+                                            lineHeight: 1.2, // Tighter than variant default for data viz
+                                            wordBreak: "break-word",
+                                            hyphens: "auto",
                                           }}
                                         >
                                           {displayName}
@@ -1146,11 +1148,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     /* Non-compact: Original column 2 - Strategy name and description */
                     <Box sx={{ pr: 1 }}>
                       <Typography
-                        variant="subtitle1"
+                        variant="body2"
                         sx={{
                           fontWeight: theme.typography.fontWeightMedium,
-                          fontSize: theme.typography.body1.fontSize,
-                          maxWidth: "280px",
+                          maxWidth: theme.layout.maxWidth.sm,
                           mb: showDefinitions ? 0.5 : 0,
                           lineHeight: 1.3,
                           whiteSpace: "pre-line",
@@ -1521,6 +1522,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                     onTierClick)
                                     ? theme.border.focus
                                     : "2px solid transparent",
+                                minWidth: 0, // Allow grid item to shrink
+                                overflow: "hidden",
                                 "&:hover": {
                                   backgroundColor: isActiveForStrategy
                                     ? theme.palette.grey[100]
@@ -1568,7 +1571,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                     <ScenarioGlyph
                                       variant={variant}
                                       values={values}
-                                      size={60}
+                                      size={glyphSize}
                                       tierColors={
                                         (chartData
                                           ?.map((tier) => tier.color)
@@ -1590,8 +1593,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               ) : (
                                 <Box
                                   sx={{
-                                    width: 60,
-                                    height: 60,
+                                    width: glyphSize,
+                                    height: glyphSize,
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
@@ -1601,11 +1604,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                   }}
                                 >
                                   <Typography
+                                    variant="compactMicro"
                                     sx={{
-                                      fontSize: theme.typography.compact.micro.fontSize,
                                       color: theme.palette.text.primary,
                                       textAlign: "center",
-                                      lineHeight: 1.2,
+                                      lineHeight: 1.2, // Tighter than variant default for data viz
                                       px: 0.5,
                                     }}
                                   >
@@ -1663,13 +1666,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           top: theme.spacing(1),
                           right: theme.spacing(1),
                           background: "none",
+                          ...theme.typography.body2,
                           border: "none",
                           cursor: "pointer",
                           padding: 0.5,
                           display: "flex",
                           alignItems: "center",
                           color: theme.palette.grey[500],
-                          fontSize: theme.typography.body2.fontSize,
                           borderRadius: theme.borderRadius.circle,
                           zIndex: 1,
                           "&:hover": {

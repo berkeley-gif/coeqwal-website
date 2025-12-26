@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * ThemeRegistry - Theme provider wrapper
+ *
+ * Provides MUI theme context to the application.
+ * Currently supports switching between base and story themes.
+ */
+
 import * as React from "react"
 import { ThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"

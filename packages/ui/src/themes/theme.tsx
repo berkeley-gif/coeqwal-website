@@ -17,6 +17,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 4. createTheme()   - MUI theme configuration
  * 5. Post-creation   - Attach design tokens to theme object
  * 6. TypeScript      - Module augmentation (hybrid: typeof for tokens, explicit for complex)
+ *
  */
 
 /* ===============================================================================
@@ -236,7 +237,7 @@ const zIndex = {
 
   // UI layers
   floating: 70, // Floating elements (glossary)
-  uiOverlay: 80, // Header, sticky tabs
+  appBar: 80, // Header, sticky tabs
   dropdown: 90, // Dropdown menus (above header)
   tooltip: 100, // Tooltips and help text
   modal: 110, // Modal dialogs (reserved)
@@ -294,8 +295,13 @@ export const themeValues = {
       closedWidth: 60,
       glossaryWidth: 360,
     },
-    textContainer: {
-      maxWidth: "600px",
+    // Standardized maxWidth tokens
+    maxWidth: {
+      xs: "70px", // Data viz labels (outcome display names)
+      sm: "300px", // Tooltips, strategy labels
+      md: "400px", // Search, filters, form sections
+      lg: "600px", // Text containers, glossary panels
+      xl: "1200px", // Full-width content areas
     },
     // Control dimensions for form elements (used in MUI component overrides)
     controls: {
@@ -311,6 +317,51 @@ export const themeValues = {
   zIndex,
   border,
   background,
+
+  /* --------------------------------------------------------
+   * Semantic Spacing System
+   * All values are MUI spacing multipliers (1 = 8px)
+   * -------------------------------------------------------- */
+  spacing: {
+    // Component-level spacing (internal padding, margins within components)
+    component: {
+      xs: 0.5, // 4px - tight inline spacing
+      sm: 1, // 8px - compact internal spacing
+      md: 1.5, // 12px - default internal spacing
+      lg: 2, // 16px - comfortable spacing
+      xl: 3, // 24px - spacious spacing
+    },
+
+    // Section/layout spacing (between major sections)
+    section: {
+      xs: 2, // 16px - compact sections
+      sm: 3, // 24px - default sections
+      md: 4, // 32px - comfortable sections
+      lg: 6, // 48px - major sections
+      xl: 8, // 64px - page-level spacing
+    },
+
+    // Panel/card padding (responsive by breakpoint)
+    panel: {
+      xs: { xs: 2, sm: 2.5, md: 3 }, // 16/20/24px - compact panels
+      sm: { xs: 2.5, sm: 3, md: 4 }, // 20/24/32px - standard panels
+    },
+
+    // Gap spacing for flex/grid layouts
+    gap: {
+      xs: 0.5, // 4px - tight gap
+      sm: 1, // 8px - compact gap
+      md: 1.5, // 12px - default gap
+      lg: 2, // 16px - comfortable gap
+      xl: 3, // 24px - spacious gap
+    },
+
+    // Page margins (responsive by breakpoint)
+    page: {
+      x: { xs: 3, md: 6 }, // 24px / 48px horizontal
+      y: { xs: 3, md: 4 }, // 24px / 32px vertical
+    },
+  },
 
   /* --------------------------------------------------------
    * App-specific UI configuration
@@ -625,6 +676,7 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     // Compact typography variants for dialogs, tooltips, form labels
+    // Nested structure for spread syntax: ...theme.typography.compact.micro
     compact: {
       title: {
         fontFamily: themeValues.fontFamily.text,
@@ -650,6 +702,31 @@ const theme = createTheme({
         fontWeight: 400,
         lineHeight: 1.3,
       },
+    },
+    // Flat variants for Typography component: variant="compactMicro"
+    compactTitle: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.title, // 0.9rem
+      fontWeight: 500,
+      lineHeight: 1.4,
+    },
+    compactSubtitle: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.subtitle, // 0.8rem
+      fontWeight: 400,
+      lineHeight: 1.4,
+    },
+    compactCaption: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.caption, // 0.75rem
+      fontWeight: 400,
+      lineHeight: 1.3,
+    },
+    compactMicro: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.micro, // 0.7rem
+      fontWeight: 400,
+      lineHeight: 1.3,
     },
   },
   shape: {
@@ -1215,7 +1292,7 @@ const theme = createTheme({
           fontWeight: 400,
           lineHeight: 1.4,
           padding: "16px",
-          maxWidth: "300px",
+          maxWidth: themeValues.layout.maxWidth.sm,
           // Add pointer events so tooltip can be hovered
           pointerEvents: "auto",
         }),
@@ -1264,6 +1341,7 @@ theme.borderRadius = themeValues.borderRadius
 theme.shadow = themeValues.shadow
 theme.transition = themeValues.transition
 theme.scenarios = themeValues.scenarios
+theme.spacingTokens = themeValues.spacing
 
 export default theme
 
@@ -1320,7 +1398,7 @@ declare module "@mui/material/styles" {
     pageContent: number
     mapControls: number
     floating: number
-    uiOverlay: number
+    appBar: number
     dropdown: number
     tooltip: number
     modal: number
@@ -1346,6 +1424,8 @@ declare module "@mui/material/styles" {
     cards: typeof themeValues.cards
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
+    // Semantic spacing tokens
+    spacingTokens: typeof themeValues.spacing
   }
 
   // ThemeOptions interface - optional versions for createTheme()
@@ -1363,6 +1443,7 @@ declare module "@mui/material/styles" {
     shadow?: Partial<typeof themeValues.shadow>
     transition?: Partial<typeof themeValues.transition>
     cards?: Partial<typeof themeValues.cards>
+    spacingTokens?: Partial<typeof themeValues.spacing>
   }
 
   // Add fontWeightSemiBold to typography
@@ -1383,6 +1464,10 @@ declare module "@mui/material/styles" {
       caption: React.CSSProperties
       micro: React.CSSProperties
     }
+    compactTitle: React.CSSProperties
+    compactSubtitle: React.CSSProperties
+    compactCaption: React.CSSProperties
+    compactMicro: React.CSSProperties
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
@@ -1393,6 +1478,10 @@ declare module "@mui/material/styles" {
       caption?: React.CSSProperties
       micro?: React.CSSProperties
     }
+    compactTitle?: React.CSSProperties
+    compactSubtitle?: React.CSSProperties
+    compactCaption?: React.CSSProperties
+    compactMicro?: React.CSSProperties
   }
 }
 
@@ -1408,5 +1497,9 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     nav: true
+    compactTitle: true
+    compactSubtitle: true
+    compactCaption: true
+    compactMicro: true
   }
 }

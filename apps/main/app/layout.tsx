@@ -1,3 +1,9 @@
+/**
+ * Root Layout - Application root with providers
+ *
+ * Sets up theme, translations, and font loading for the entire app.
+ */
+
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"

@@ -1,3 +1,9 @@
+/**
+ * CircularArrowButton - Circular button with arrow icon
+ *
+ * A round button with a rotatable arrow, used for navigation and expansion controls.
+ */
+
 import React from "react"
 import { IconButton, useTheme } from "../../mui-components"
 import type { SxProps, Theme } from "@mui/material/styles"

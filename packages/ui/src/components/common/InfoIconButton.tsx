@@ -102,6 +102,7 @@ const circleButtonStyles = {
   transition: "all 0.15s ease", // theme.transition.quick equivalent
 }
 
+// NOTE: Using static object for performance - marginLeft uses 4px (component.xs = 0.5 * 8)
 const inlineButtonStyles = {
   border: "none",
   cursor: "pointer",
@@ -111,7 +112,7 @@ const inlineButtonStyles = {
   alignItems: "center",
   justifyContent: "center",
   verticalAlign: "text-top",
-  marginLeft: "4px",
+  marginLeft: "4px", // themeValues.spacing.component.xs equivalent
   transition: "color 0.15s ease", // theme.transition.quick timing
   // Touch target sizing
   minWidth: INLINE_TOUCH_TARGET,

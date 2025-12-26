@@ -207,7 +207,7 @@ export default function MapOverlayPanels() {
     [0, 1],
   )
 
-  // TODO: find another way to allow map panning and disable triggering hidden interactive panel features.
+  // TODO: Find better approach for allowing map panning while disabling hidden panel interactions
   // Panel pointer events - derived from opacity to prevent invisible panels from receiving events
   // When opacity < 0.1, pointer events are disabled (prevents clicking hidden panels)
   // Using lower threshold to ensure panels are truly invisible before allowing map panning

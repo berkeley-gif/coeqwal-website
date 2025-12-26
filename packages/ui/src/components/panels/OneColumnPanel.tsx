@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * OneColumnPanel - Single column content panel with header
+ *
+ * Displays content in a single column layout with optional header text.
+ * Used for content sections in the Learn tab.
+ */
+
 import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"

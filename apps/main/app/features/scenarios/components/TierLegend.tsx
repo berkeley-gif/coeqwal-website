@@ -1,3 +1,10 @@
+/**
+ * TierLegend - Tier explanation legend panel
+ *
+ * Displays tier descriptions for a selected outcome.
+ * Used in tooltips and as a standalone legend.
+ */
+
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
@@ -40,11 +47,11 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
           component="button"
           onClick={onClose}
           sx={{
+            ...theme.typography.subtitle1,
             border: "none",
             background: "none",
             cursor: "pointer",
             padding: "4px 8px",
-            fontSize: theme.typography.subtitle1.fontSize,
             lineHeight: 1,
             color: theme.palette.grey[600],
             "&:hover": {

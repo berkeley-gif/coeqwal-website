@@ -1,3 +1,10 @@
+/**
+ * HighlightedText - Text with animated highlight background
+ *
+ * Displays text with a configurable highlight effect that can animate in.
+ * Used in scrollytelling panels for emphasis.
+ */
+
 import { ReactNode, useRef, useEffect, useState, useCallback } from "react"
 import { Box } from "../mui-components"
 

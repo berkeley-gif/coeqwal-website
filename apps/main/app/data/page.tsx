@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * Data Page - Data downloads and API access
+ *
+ * Provides downloadable data files and API documentation
+ * for scenario outcomes and metrics.
+ */
+
 import React, { useState, useEffect } from "react"
 import {
   Box,
@@ -120,12 +127,13 @@ export default function DataPage() {
           <Container
             maxWidth="lg"
             sx={{
-              py: 8,
-              pt: (theme) => `calc(${theme.layout.headerHeight}px + 32px)`,
+              // Use semantic section.xl (64px) for page vertical padding
+              py: (theme) => theme.spacingTokens.section.xl,
+              pt: (theme) => `calc(${theme.layout.headerHeight}px + ${theme.spacing(theme.spacingTokens.section.md)})`,
             }}
           >
             {/* Header with back arrow */}
-            <Box sx={{ position: "relative", mb: 6 }}>
+            <Box sx={{ position: "relative", mb: (theme) => theme.spacingTokens.section.lg }}>
               <IconButton
                 onClick={() => window.history.back()}
                 sx={{

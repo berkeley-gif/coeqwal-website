@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * CategoryView - Outcome categories accordion view
+ *
+ * Displays outcomes grouped by category with expandable sections.
+ * Used in the Data Explorer for browsing outcomes.
+ */
+
 import React from "react"
 import {
   Box,
@@ -84,7 +91,7 @@ export default function CategoryView() {
           sx={{
             color: theme.palette.grey[500],
             mb: theme.spacing(3),
-            maxWidth: "400px",
+            maxWidth: theme.layout.maxWidth.md,
           }}
         >
           Select scenarios in List View to see side-by-side comparisons of
@@ -155,13 +162,7 @@ export default function CategoryView() {
                   width: "100%",
                 }}
               >
-                <Typography
-                  sx={{
-                    fontSize: theme.typography.h5.fontSize,
-                  }}
-                >
-                  {category.icon}
-                </Typography>
+                <Typography variant="h5">{category.icon}</Typography>
                 <Typography variant="h6" sx={{ flex: 1 }}>
                   {category.name}
                 </Typography>
@@ -286,9 +287,9 @@ function MetricCard({
           label={metric.unit}
           size="small"
           sx={{
+            ...theme.typography.compact.caption,
             backgroundColor: theme.palette.blue.light,
             color: theme.palette.common.white,
-            fontSize: theme.typography.compact.caption.fontSize,
           }}
         />
       </Box>
@@ -318,7 +319,7 @@ function MetricCard({
           label={`Temporal: ${metric.temporal.join(", ")}`}
           size="small"
           variant="outlined"
-          sx={{ fontSize: theme.typography.compact.caption.fontSize }}
+          sx={{ ...theme.typography.compact.caption }}
         />
 
         {/* Spatial type */}
@@ -326,7 +327,7 @@ function MetricCard({
           label={`Location: ${metric.spatialType}`}
           size="small"
           variant="outlined"
-          sx={{ fontSize: theme.typography.compact.caption.fontSize }}
+          sx={{ ...theme.typography.compact.caption }}
         />
 
         {/* Map indicator */}
@@ -335,9 +336,9 @@ function MetricCard({
             label="📍 Map"
             size="small"
             sx={{
+              ...theme.typography.compact.caption,
               backgroundColor: theme.palette.nature.earth,
               color: theme.palette.common.white,
-              fontSize: theme.typography.compact.caption.fontSize,
             }}
           />
         )}
@@ -346,11 +347,8 @@ function MetricCard({
       {/* Aggregations */}
       {metric.aggregations.length > 0 && (
         <Typography
-          variant="body2"
-          sx={{
-            color: theme.palette.grey[500],
-            fontSize: theme.typography.compact.subtitle.fontSize,
-          }}
+          variant="compactSubtitle"
+          sx={{ color: theme.palette.grey[500] }}
         >
           <strong>Aggregations:</strong> {metric.aggregations.join(", ")}
         </Typography>
@@ -359,13 +357,12 @@ function MetricCard({
       {/* Notes */}
       {metric.notes && (
         <Typography
-          variant="body2"
+          variant="compactSubtitle"
           sx={{
             mt: theme.spacing(1),
             p: theme.spacing(1),
             backgroundColor: theme.palette.accent.gold,
             borderRadius: theme.borderRadius.md,
-            fontSize: theme.typography.compact.subtitle.fontSize,
             color: theme.palette.text.primary,
           }}
         >
@@ -446,11 +443,10 @@ function MetricCard({
                   }}
                 >
                   <Typography
-                    variant="body2"
+                    variant="compactSubtitle"
                     sx={{
                       mb: theme.spacing(1),
                       fontWeight: theme.typography.fontWeightMedium,
-                      fontSize: theme.typography.compact.subtitle.fontSize,
                       textAlign: "center",
                     }}
                   >

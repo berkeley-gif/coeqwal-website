@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * FloatingGlossaryPanel - Floating glossary sidebar
+ *
+ * Displays searchable glossary terms with definitions.
+ * Opens as a floating panel from the glossary button.
+ */
+
 import {
   Box,
   Typography,
@@ -162,7 +169,7 @@ export function FloatingGlossaryPanel({
               }),
           width: "33.333vw", // 1/3 of viewport width
           minWidth: "400px",
-          maxWidth: "600px",
+          maxWidth: theme.layout.maxWidth.lg,
           maxHeight: "70vh", // Don't take up full height
           backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.md,
@@ -185,7 +192,8 @@ export function FloatingGlossaryPanel({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: 3,
+            // Use semantic section.sm (24px) for panel header padding
+            padding: theme.spacingTokens.section.sm,
             borderBottom: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
             position: "sticky",
@@ -193,7 +201,10 @@ export function FloatingGlossaryPanel({
             zIndex: 1,
           }}
         >
-          <Typography variant="h5" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+          >
             Glossary
           </Typography>
           <IconButton onClick={onClose} size="small">
@@ -206,10 +217,11 @@ export function FloatingGlossaryPanel({
           sx={{
             flex: 1,
             overflowY: "auto",
-            padding: 3,
+            // Use semantic section.sm (24px) for panel content padding
+            padding: theme.spacingTokens.section.sm,
           }}
         >
-          <Stack spacing={2}>
+          <Stack spacing={theme.spacingTokens.gap.lg}>
             {glossaryTerms.map((term, index) => (
               <React.Fragment key={index}>
                 <Box
@@ -224,13 +236,14 @@ export function FloatingGlossaryPanel({
                             theme.palette.blue.bright,
                             0.08,
                           ),
-                          padding: 2,
+                          // Use semantic component.lg (16px) for item padding
+                          padding: theme.spacingTokens.component.lg,
                           borderRadius: theme.borderRadius.md,
                           border: theme.border.focus,
                           transition: theme.transition.default,
                         }
                       : {
-                          padding: 2,
+                          padding: theme.spacingTokens.component.lg,
                         }
                   }
                 >
@@ -239,7 +252,8 @@ export function FloatingGlossaryPanel({
                     sx={{
                       display: "flex",
                       alignItems: "flex-start",
-                      mb: 0.5,
+                      // Tighter spacing between header and definition
+                      mb: theme.spacingTokens.component.xs,
                       gap: 1,
                       ml: -1,
                     }}
@@ -257,9 +271,9 @@ export function FloatingGlossaryPanel({
                       {term.icon}
                     </Box>
                     <Typography
-                      variant="h6"
-                      fontWeight={600}
+                      variant="subtitle1"
                       sx={{
+                        fontWeight: theme.typography.fontWeightSemiBold,
                         color: theme.palette.blue.darkest,
                       }}
                     >

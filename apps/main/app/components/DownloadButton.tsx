@@ -1,5 +1,11 @@
 "use client"
 
+/**
+ * DownloadButton - Button for file downloads
+ *
+ * Styled button with download icon for data file downloads.
+ */
+
 import React from "react"
 import { Button, ButtonProps, icons } from "@repo/ui/mui"
 

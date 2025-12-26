@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * ScenarioExplorer - Main scenario exploration interface
+ *
+ * Provides tabbed views for exploring scenarios: List, Data Explorer,
+ * About, and Comparison modes.
+ */
+
 import React, { useState } from "react"
 import {
   Box,
@@ -117,8 +124,8 @@ export default function ScenarioExplorerNew() {
               sx={{
                 minHeight: theme.spacing(7),
                 "& .MuiTab-root": {
+                  ...theme.typography.body2,
                   minHeight: theme.spacing(7),
-                  fontSize: theme.typography.body2.fontSize,
                   textTransform: "none",
                   fontWeight: theme.typography.fontWeightMedium,
                   color: theme.palette.text.primary,
@@ -187,14 +194,14 @@ export default function ScenarioExplorerNew() {
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: 1,
+                          // 10px header-to-content spacing
+                          gap: 1.25,
                         }}
                       >
                         <Typography
-                          variant="subtitle2"
+                          variant="caption"
                           sx={{
                             fontWeight: theme.typography.fontWeightMedium,
-                            fontSize: theme.typography.caption.fontSize,
                             color: theme.palette.grey[900],
                           }}
                         >
@@ -204,14 +211,17 @@ export default function ScenarioExplorerNew() {
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            gap: 0.5,
+                            // Use semantic gap.xs (4px) for tight icon group spacing
+                            gap: theme.spacingTokens.gap.xs,
                           }}
                         >
                           <Tooltip title="List view" arrow>
                             <IconButton
-                              size="small"
                               onClick={() => setExploreMode("list")}
                               sx={{
+                                // Match hydroclimate icon container size (28-32px)
+                                width: { xs: 28, lg: 32 },
+                                height: { xs: 28, lg: 32 },
                                 backgroundColor:
                                   exploreMode === "list"
                                     ? `${theme.palette.blue.bright}1A`
@@ -225,14 +235,16 @@ export default function ScenarioExplorerNew() {
                                 },
                               }}
                             >
-                              <ViewListIcon fontSize="small" />
+                              <ViewListIcon sx={{ fontSize: "1.25rem" }} />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Map view" arrow>
                             <IconButton
-                              size="small"
                               onClick={() => setExploreMode("map")}
                               sx={{
+                                // Match hydroclimate icon container size (28-32px)
+                                width: { xs: 28, lg: 32 },
+                                height: { xs: 28, lg: 32 },
                                 backgroundColor:
                                   exploreMode === "map"
                                     ? `${theme.palette.blue.bright}1A`
@@ -245,8 +257,8 @@ export default function ScenarioExplorerNew() {
                               <Image
                                 src="/images/icons/map.svg"
                                 alt="Map view"
-                                width={24}
-                                height={24}
+                                width={20}
+                                height={20}
                                 style={{
                                   opacity: exploreMode === "map" ? 1 : 0.6,
                                 }}
@@ -255,9 +267,11 @@ export default function ScenarioExplorerNew() {
                           </Tooltip>
                           <Tooltip title="Comparison view" arrow>
                             <IconButton
-                              size="small"
                               onClick={() => setExploreMode("comparison")}
                               sx={{
+                                // Match hydroclimate icon container size (28-32px)
+                                width: { xs: 28, lg: 32 },
+                                height: { xs: 28, lg: 32 },
                                 backgroundColor:
                                   exploreMode === "comparison"
                                     ? `${theme.palette.blue.bright}1A`
@@ -271,7 +285,7 @@ export default function ScenarioExplorerNew() {
                                 },
                               }}
                             >
-                              <CompareArrowsIcon fontSize="small" />
+                              <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />
                             </IconButton>
                           </Tooltip>
                         </Box>

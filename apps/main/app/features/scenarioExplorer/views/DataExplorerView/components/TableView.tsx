@@ -112,7 +112,7 @@ export default function TableView() {
           sx={{
             color: theme.palette.grey[500],
             mb: theme.spacing(3),
-            maxWidth: "400px",
+            maxWidth: theme.layout.maxWidth.md,
           }}
         >
           Select scenarios in List View to view detailed metrics and export
@@ -349,6 +349,7 @@ function MetricRow({
         {/* Left: category icon */}
         <Box
           sx={{
+            ...theme.typography.h6,
             width: theme.spacing(5),
             height: theme.spacing(5),
             display: "flex",
@@ -358,7 +359,6 @@ function MetricRow({
               ? getOutcomeCategoryColor(theme, category.id)
               : theme.palette.grey[300],
             borderRadius: theme.borderRadius.md,
-            fontSize: theme.typography.h6.fontSize,
             flexShrink: 0,
           }}
         >
@@ -389,7 +389,7 @@ function MetricRow({
               label={metric.unit}
               size="small"
               sx={{
-                fontSize: theme.typography.compact.caption.fontSize,
+                ...theme.typography.compact.caption,
                 height: theme.spacing(2.5),
               }}
             />
@@ -398,9 +398,9 @@ function MetricRow({
                 label="TIER"
                 size="small"
                 sx={{
+                  ...theme.typography.compact.caption,
                   backgroundColor: theme.palette.accent.orange,
                   color: theme.palette.common.white,
-                  fontSize: theme.typography.compact.caption.fontSize,
                   height: theme.spacing(2.5),
                 }}
               />
@@ -409,11 +409,10 @@ function MetricRow({
 
           {/* Description */}
           <Typography
-            variant="body2"
+            variant="compactSubtitle"
             sx={{
               color: theme.palette.grey[600],
               mb: theme.spacing(1),
-              fontSize: theme.typography.compact.subtitle.fontSize,
             }}
           >
             {metric.description}
@@ -427,13 +426,13 @@ function MetricRow({
               label={category?.name || "Unknown"}
               size="small"
               variant="outlined"
-              sx={{ fontSize: theme.typography.compact.caption.fontSize }}
+              sx={{ ...theme.typography.compact.caption }}
             />
             <Chip
               label={metric.spatialType}
               size="small"
               variant="outlined"
-              sx={{ fontSize: theme.typography.compact.caption.fontSize }}
+              sx={{ ...theme.typography.compact.caption }}
             />
             {metric.temporal.map((t) => (
               <Chip
@@ -441,7 +440,7 @@ function MetricRow({
                 label={t}
                 size="small"
                 variant="outlined"
-                sx={{ fontSize: theme.typography.compact.caption.fontSize }}
+                sx={{ ...theme.typography.compact.caption }}
               />
             ))}
             {metric.showOnMap && (
@@ -449,9 +448,9 @@ function MetricRow({
                 label="📍"
                 size="small"
                 sx={{
+                  ...theme.typography.compact.caption,
                   backgroundColor: theme.palette.nature.earth,
                   color: theme.palette.common.white,
-                  fontSize: theme.typography.compact.caption.fontSize,
                   minWidth: "auto",
                   width: theme.spacing(3),
                 }}
@@ -475,11 +474,8 @@ function MetricRow({
             }}
           >
             <Typography
-              variant="body2"
-              sx={{
-                fontSize: theme.typography.compact.subtitle.fontSize,
-                color: theme.palette.grey[600],
-              }}
+              variant="compactSubtitle"
+              sx={{ color: theme.palette.grey[600] }}
             >
               {scenarios.length} scenario{scenarios.length !== 1 ? "s" : ""}
             </Typography>

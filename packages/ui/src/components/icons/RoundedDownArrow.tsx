@@ -1,5 +1,9 @@
 "use client"
 
+/**
+ * RoundedDownArrow - SVG arrow icon pointing down
+ */
+
 import React from "react"
 
 export interface RoundedDownArrowProps extends React.SVGProps<SVGSVGElement> {

@@ -1,5 +1,9 @@
 "use client"
 
+/**
+ * ArrowHead - Triangular arrow SVG icon with rounded corners
+ */
+
 import type { SVGProps } from "react"
 
 export interface ArrowHeadProps extends SVGProps<SVGSVGElement> {

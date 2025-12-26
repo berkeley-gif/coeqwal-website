@@ -1,5 +1,12 @@
+/**
+ * TierTooltipContent - Shared tier tooltip content
+ *
+ * Displays outcome tier descriptions in a consistent format.
+ * Used by TierLegend, ClickTooltip, and HybridTooltip.
+ */
+
 import React from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useOutcomeDefinitions } from "../scenarios/hooks"
 import { outcomeTierValues } from "../../content/outcomes"
 
@@ -83,43 +90,39 @@ export default function TierTooltipContent({
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
-        <Box
+        <Typography
+          variant="nav"
           component="span"
           sx={{
-            ...theme.typography.nav,
             fontWeight: theme.typography.fontWeightSemiBold,
             display: "block",
             mb: 1,
           }}
         >
           {outcome}
-        </Box>
+        </Typography>
       )}
 
-      <Box
-        component="div"
-        sx={{
-          ...theme.typography.nav,
-          mb: 1.5,
-        }}
+      <Typography
+        variant="nav"
+        component="span"
+        sx={{ display: "block", mb: 1.5 }}
       >
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
           theme.typography.fontWeightMedium as number,
         )}
-      </Box>
+      </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Box
+        <Typography
+          variant="nav"
           component="span"
-          sx={{
-            ...theme.typography.nav,
-            fontWeight: theme.typography.fontWeightSemiBold,
-          }}
+          sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
         >
           Outcome levels:
-        </Box>
+        </Typography>
 
         {[1, 2, 3, 4].map((tierNum) => (
           <Box
@@ -139,12 +142,7 @@ export default function TierTooltipContent({
                 mt: "3px", // Align with first line of text
               }}
             />
-            <Box
-              component="span"
-              sx={{
-                ...theme.typography.nav,
-              }}
-            >
+            <Typography variant="nav" component="span">
               {formatTierText(
                 (
                   outcomeTierValues as Record<
@@ -163,7 +161,7 @@ export default function TierTooltipContent({
                   "",
                 theme.typography.fontWeightMedium as number,
               )}
-            </Box>
+            </Typography>
           </Box>
         ))}
       </Box>

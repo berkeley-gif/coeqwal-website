@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * BasinsLayer - Map layer for Central Valley basins
+ *
+ * Displays basin polygons with fill and outline styling.
+ * Visibility controlled by outcome visualization state.
+ */
+
 import { Source, Layer } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { useIsOutcomeVisualizationActive } from "../store"

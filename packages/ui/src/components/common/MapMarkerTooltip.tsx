@@ -1,5 +1,12 @@
 "use client"
 
+/**
+ * MapMarkerTooltip - Tooltip for map marker hover states
+ *
+ * Displays descriptive text when hovering over map markers.
+ * Wraps BaseTooltip with map-specific styling.
+ */
+
 import React from "react"
 import { Box } from "../.."
 import { BaseTooltip } from "./BaseTooltip"
@@ -28,7 +35,8 @@ export function MapMarkerTooltip({
   tooltipProps = {},
 }: MapMarkerTooltipProps) {
   const title = (
-    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+    // Use semantic gap.sm (8px) for tight spacing between bullet and text
+    <Box sx={{ display: "flex", alignItems: "flex-start", gap: (theme) => theme.spacingTokens.gap.sm }}>
       <Box
         sx={{
           width: 8,
