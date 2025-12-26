@@ -1,16 +1,31 @@
 "use client"
 
 /**
- * PolygonLayerTooltip component
+ * PolygonLayerTooltip - Tooltip for polygon map layers
  *
  * A reusable tooltip component for polygon map layers (demand-units, WBA, etc.)
  * for tooltip rendering across PersistentMap and CaliforniaMapPanel.
  *
- * Features:
+ * ## When to Use
+ *
+ * Use PolygonLayerTooltip for map polygon/shape features where:
+ * - Geographic positioning (lat/lng) is required (uses Mapbox Popup)
+ * - Both hover and click-to-pin interactions are needed
+ * - Layer-specific content rendering is required (WBA vs demand-units)
+ *
+ * For non-map tooltips, use:
+ * - HybridTooltip: Hover on desktop, click on touch (general purpose)
+ * - ClickTooltip: Always click-to-open (complex interactive content)
+ * - MapMarkerTooltip: Simple map marker hover hints (not geo-positioned)
+ *
+ * ## Features
+ *
  * - Supports hover and pinned (click-to-pin) modes
  * - Renders appropriate fields based on layer type
  * - Includes tier badge with color indicator
  * - Close button for pinned tooltips
+ *
+ * @see MapMarkerTooltip - For simple map marker tooltips (not geo-positioned)
  */
 
 import React from "react"

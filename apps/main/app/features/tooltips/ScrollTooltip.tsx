@@ -5,6 +5,26 @@
  *
  * Displays a tooltip that appears based on scroll position.
  * Used for scroll tutorials and contextual hints.
+ *
+ * ## When to use
+ *
+ * Use ScrollTooltip for scroll-driven tutorial sequences where:
+ * - Tooltip visibility is controlled by scroll position (Framer Motion)
+ * - Manual positioning relative to a target element is required
+ * - User can dismiss the tooltip with close button
+ *
+ * ## Closed state reset
+ *
+ * The parent component should reset `isClosed` to `false` when the scroll
+ * position leaves the tooltip's visible range (when opacity goes to 0).
+ * This allows the tooltip to reappear when the user scrolls back.
+ *
+ * This is NOT a general-purpose tooltip. For standard tooltips use:
+ * - HybridTooltip: Hover on desktop, click on touch
+ * - ClickTooltip: Always click-to-open with close button
+ *
+ * @see HybridTooltip - Device-adaptive hover/click behavior
+ * @see ClickTooltip - Always click-to-open with close button
  */
 
 import { RefObject, useEffect, useState, ReactNode } from "react"

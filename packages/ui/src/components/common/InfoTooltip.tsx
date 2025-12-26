@@ -1,24 +1,34 @@
 "use client"
 
 /**
- * InfoTooltip - Tooltip with title and description
+ * InfoTooltip - Tooltip with description and optional actions
  *
- * Displays a tooltip with optional title, description, and icon.
- * Wraps BaseTooltip with structured content formatting.
+ * Device-adaptive tooltip: hover on desktop, click on touch devices.
+ * Uses HybridTooltip internally for consistent cross-device behavior.
+ *
+ * ## When to Use
+ *
+ * Use InfoTooltip for contextual help with optional action buttons.
+ * Best for: icon explanations with "Learn more" links, feature hints.
+ *
+ * @see HybridTooltip - The underlying device-adaptive component
+ * @see ClickTooltip - For always click-to-open behavior
  */
 
 import React from "react"
 import { Box } from "../.."
-import { BaseTooltip } from "./BaseTooltip"
-import type { BaseTooltipProps } from "./BaseTooltip"
+import { HybridTooltip } from "./tooltips/HybridTooltip"
+import type { HybridTooltipProps } from "./tooltips/HybridTooltip"
 
-export interface InfoTooltipProps extends Omit<BaseTooltipProps, "title"> {
+export interface InfoTooltipProps {
   /** The main description text */
   description: React.ReactNode
   /** Optional action buttons or additional content */
   actions?: React.ReactNode
-  /** Optional placement override - defaults to "top-end" for info tooltips */
-  placement?: BaseTooltipProps["placement"]
+  /** The child element that triggers the tooltip */
+  children: HybridTooltipProps["children"]
+  /** Optional placement override - defaults to "top" for info tooltips */
+  placement?: HybridTooltipProps["placement"]
 }
 
 /**
@@ -29,36 +39,9 @@ export function InfoTooltip({
   description,
   actions,
   children,
-  placement = "top-end",
-  tooltipProps = {},
+  placement = "top",
 }: InfoTooltipProps) {
-  // Merge default props with user overrides
-  const mergedTooltipProps = {
-    // Default timing for interactive tooltips
-    enterDelay: 200,
-    leaveDelay: 500, // Longer delay allows button interactions
-    enterNextDelay: 100,
-    // Keep all interaction methods enabled
-    disableFocusListener: false,
-    disableHoverListener: false,
-    disableTouchListener: false,
-    // Fine-tune positioning for info tooltips
-    slotProps: {
-      popper: {
-        modifiers: [
-          {
-            name: "offset",
-            options: {
-              offset: [5, -10], // [horizontal, vertical]
-            },
-          },
-        ],
-      },
-    },
-    ...tooltipProps,
-  }
-
-  const title = (
+  const content = (
     <Box>
       <Box sx={{ mb: actions ? 1 : 0 }}>{description}</Box>
       {actions}
@@ -66,13 +49,9 @@ export function InfoTooltip({
   )
 
   return (
-    <BaseTooltip
-      title={title}
-      placement={placement}
-      tooltipProps={mergedTooltipProps}
-    >
+    <HybridTooltip content={content} placement={placement}>
       {children}
-    </BaseTooltip>
+    </HybridTooltip>
   )
 }
 
