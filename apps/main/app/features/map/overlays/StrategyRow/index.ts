@@ -1,12 +1,14 @@
 /**
  * StrategyRow module
  *
- * Re-exports types, utilities, styles, and panel components.
+ * Re-exports types, styles, and panel components.
+ *
+ * Note: Strategy icons and utilities have been moved to
+ * scenarios/components/shared/strategyIcons.tsx for DRY usage.
  */
 
-// Types and utilities
+// Types and styles
 export * from "./types"
-export * from "./utils"
 export * from "./styles"
 
 // Panel components

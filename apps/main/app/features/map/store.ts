@@ -114,6 +114,14 @@ export const DELTA_VIEW: CameraView = {
  * - arrows: Inflow arrows (React component)
  * - rivers: River lines + labels (React component)
  */
+
+// Shared config for sections that show basins + rivers
+const BASINS_AND_RIVERS: SectionLayerConfig = {
+  basins: true,
+  rivers: true,
+  camera: CENTRAL_VALLEY_VIEW,
+}
+
 export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   // === Introduction ===
   california: {
@@ -155,55 +163,15 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     camera: CENTRAL_VALLEY_VIEW,
   },
 
-  // === Rivers (basins + rivers, watersheds fade out during animation) ===
-  rivers: {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  // === Delta onwards - rivers stay visible ===
-  delta: {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  distribution: {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  calsim: {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  coeqwal: {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  "public-data": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  "scenario-intro": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  "scenario-conclusion": {
-    basins: true,
-    rivers: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
+  // === Rivers onwards - basins + rivers stay visible ===
+  rivers: BASINS_AND_RIVERS,
+  delta: BASINS_AND_RIVERS,
+  distribution: BASINS_AND_RIVERS,
+  calsim: BASINS_AND_RIVERS,
+  coeqwal: BASINS_AND_RIVERS,
+  "public-data": BASINS_AND_RIVERS,
+  "scenario-intro": BASINS_AND_RIVERS,
+  "scenario-conclusion": BASINS_AND_RIVERS,
 }
 
 // ============================================================================
@@ -231,7 +199,6 @@ interface LearnMapState {
   geocodingResetCounter: number
   selectedOutcome: string | null
   isOutcomeVisualizationActive: boolean
-  isPanelsExpanded: boolean
 
   // Map scroll offset - when > 0, the map scrolls up with content
   // This creates the "release from sticky" effect at end of scrollytelling
@@ -239,12 +206,9 @@ interface LearnMapState {
 
   // Explore-specific state
   exploreTierSelection: ExploreTierSelection | null
-
-  // Actions stored in state (Zustand v5 pattern)
-  setMapReady: (ready: boolean) => void
 }
 
-const initialState: Omit<LearnMapState, "setMapReady"> = {
+const initialState: LearnMapState = {
   // Persistent map state
   mapMode: "hidden",
   mapReady: false,
@@ -256,7 +220,6 @@ const initialState: Omit<LearnMapState, "setMapReady"> = {
   geocodingResetCounter: 0,
   selectedOutcome: null,
   isOutcomeVisualizationActive: false,
-  isPanelsExpanded: false,
   learnMapScrollOffset: 0,
 
   // Explore-specific state
@@ -268,10 +231,7 @@ const initialState: Omit<LearnMapState, "setMapReady"> = {
 // ============================================================================
 
 export const useLearnMapStore = create<LearnMapState>()(
-  immer((set) => ({
-    ...initialState,
-    setMapReady: (ready: boolean) => set({ mapReady: ready }),
-  })),
+  immer(() => initialState),
 )
 
 // ============================================================================
@@ -342,12 +302,6 @@ export const learnMapActions = {
       isOutcomeVisualizationActive: outcome !== null,
     }),
 
-  setOutcomeVisualizationActive: (active: boolean) =>
-    useLearnMapStore.setState({ isOutcomeVisualizationActive: active }),
-
-  setIsPanelsExpanded: (expanded: boolean) =>
-    useLearnMapStore.setState({ isPanelsExpanded: expanded }),
-
   /**
    * Set the scroll offset for the Learn map.
    * When > 0, the map translates up, creating a "release from sticky" effect.
@@ -367,15 +321,6 @@ export const learnMapActions = {
       selectedOutcome: null,
       isOutcomeVisualizationActive: false,
       learnMapScrollOffset: 0,
-    }),
-
-  /**
-   * @deprecated Use resetLearnState instead. Kept for backwards compatibility.
-   */
-  resetForRemount: () =>
-    useLearnMapStore.setState({
-      activeSection: "california",
-      riversProgress: 0,
     }),
 
   // === Explore-specific Actions ===
@@ -421,9 +366,6 @@ export const useSelectedOutcome = () =>
 export const useIsOutcomeVisualizationActive = () =>
   useLearnMapStore((s) => s.isOutcomeVisualizationActive)
 
-export const useIsPanelsExpanded = () =>
-  useLearnMapStore((s) => s.isPanelsExpanded)
-
 export const useLearnMapScrollOffset = () =>
   useLearnMapStore((s) => s.learnMapScrollOffset)
 
@@ -432,20 +374,14 @@ export const useExploreTierSelection = () =>
   useLearnMapStore((s) => s.exploreTierSelection)
 
 // Derived selectors - read directly from SECTION_LAYERS
-export const useLayerConfig = () =>
-  useLearnMapStore((s) => SECTION_LAYERS[s.activeSection])
+// Helper to create layer visibility selectors
+const createLayerSelector = (key: keyof SectionLayerConfig) => () =>
+  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection][key])
 
-export const useShowBasins = () =>
-  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].basins)
-
-export const useShowRivers = () =>
-  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].rivers)
-
-export const useShowArrows = () =>
-  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].arrows)
-
-export const useShowInflowWatersheds = () =>
-  useLearnMapStore((s) => !!SECTION_LAYERS[s.activeSection].inflowWatersheds)
+export const useShowBasins = createLayerSelector("basins")
+export const useShowRivers = createLayerSelector("rivers")
+export const useShowArrows = createLayerSelector("arrows")
+export const useShowInflowWatersheds = createLayerSelector("inflowWatersheds")
 
 export const useCameraView = () =>
   useLearnMapStore((s) => SECTION_LAYERS[s.activeSection].camera)

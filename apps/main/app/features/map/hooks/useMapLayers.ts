@@ -319,10 +319,12 @@ export function useMapLayers() {
     }
   }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
 
-  // Hide delta-water layer when leaving the delta section
+  // Hide delta-water layer when leaving the delta section in Learn mode only
   // (The delta-water layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
+  // NOTE: In Explore mode, delta-water is managed by useMapboxLayerStyling for outcome visualization
   useEffect(() => {
     if (!mapReady) return
+    if (mapMode !== "learn") return // Only manage in Learn mode
     if (activeSection === "delta") return // Still in delta, don't hide
 
     const mapInstance = coordinator.getValidMap(map.mapRef)
@@ -373,7 +375,7 @@ export function useMapLayers() {
     } catch {
       // Layer might not exist
     }
-  }, [activeSection, map.mapRef, mapReady])
+  }, [activeSection, map.mapRef, mapReady, mapMode])
 
   return {
     activeSection,

@@ -97,7 +97,6 @@ export function NavDropdown({
               color: (theme) => theme.palette.blue.darkest,
               fontSize: (theme) => theme.typography.nav.fontSize,
               fontFamily: (theme) => theme.typography.fontFamily,
-              // Use semantic spacing: component.md (12px) vertical, component.lg (16px) horizontal
               py: (theme) => theme.spacingTokens.component.md,
               px: (theme) => theme.spacingTokens.component.lg,
               "&:hover": {

@@ -309,7 +309,6 @@ export function SummaryPanel({
           ? theme.palette.grey[50]
           : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.md : 0,
-        // Use semantic panel spacing tokens
         padding: isInline
           ? theme.spacingTokens.panel.xs
           : theme.spacingTokens.panel.sm,

@@ -2,18 +2,14 @@
  * StrategyInfoPanel - Shows strategy title and description
  *
  * Used in the Learn section scrollytelling.
+ * Uses shared StrategyHeader component.
  */
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoIconButton } from "@repo/ui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { strategies } from "../../../../content/scenarios"
+import { StrategyHeader } from "../../../scenarios/components/shared"
 import type { StrategyInfoPanelProps } from "./types"
-import {
-  panelBaseStyles,
-  panelMaxWidth,
-  getTitleStyles,
-  getDescriptionStyles,
-} from "./styles"
+import { panelBaseStyles, panelMaxWidth } from "./styles"
 
 export function StrategyInfoPanel({
   strategyValue = "current-ops",
@@ -37,41 +33,12 @@ export function StrategyInfoPanel({
         maxWidth: panelMaxWidth,
       }}
     >
-      <Typography
-        variant="subtitle1"
-        onClick={onTitleClick}
-        sx={{
-          ...getTitleStyles(theme, !!onTitleClick),
-          mb: 0.5,
-        }}
-      >
-        {strategy.label} strategy
-      </Typography>
-
-      <Typography variant="body2" sx={getDescriptionStyles(theme)}>
-        {strategy.description.split(/(\bTUCPs?\b)/g).map((part, index) => {
-          if (part.match(/\bTUCPs?\b/)) {
-            return (
-              <span key={index}>
-                {part}
-                <InfoIconButton
-                  variant="inline"
-                  tooltipContent={
-                    <>
-                      <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
-                        Temporary Urgent Change Petitions (TUCPs)
-                      </Box>{" "}
-                      permit changes during droughts to meet human health and
-                      safety needs and protect endangered species.
-                    </>
-                  }
-                />
-              </span>
-            )
-          }
-          return part
-        })}
-      </Typography>
+      <StrategyHeader
+        strategy={strategy}
+        showDescription={true}
+        titleVariant="subtitle1"
+        onTitleClick={onTitleClick}
+      />
     </Box>
   )
 }

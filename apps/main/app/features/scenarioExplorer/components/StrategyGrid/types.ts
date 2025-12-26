@@ -2,25 +2,17 @@
  * StrategyGrid type definitions
  */
 
-export interface ChartDataPoint {
-  label: string
-  color: string
-  value: number
-  tierType?: string
-}
+// Import and re-export shared types
+import type {
+  ChartDataPoint as SharedChartDataPoint,
+  OutcomeName as SharedOutcomeName,
+  Strategy as SharedStrategy,
+} from "../../../scenarios/components/shared"
+export { isSingleValueTier } from "../../../scenarios/components/shared"
 
-export interface OutcomeName {
-  shortCode: string
-  name: string
-  displayName: string
-}
-
-export interface Strategy {
-  value: string
-  label: string
-  description: string
-  theme?: string
-}
+export type ChartDataPoint = SharedChartDataPoint
+export type OutcomeName = SharedOutcomeName
+export type Strategy = SharedStrategy
 
 export interface StrategyGridProps {
   // Data props
@@ -57,16 +49,4 @@ export interface StrategyGridProps {
   sortBy?: string | null // Outcome display name to sort by
   sortDirection?: "asc" | "desc" // Sort direction
   onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
-}
-
-/**
- * Helper function to detect if tier data represents a single value
- * Uses the tierType metadata from the API
- */
-export function isSingleValueTier(
-  chartData: ChartDataPoint[] | undefined,
-): boolean {
-  if (!chartData || chartData.length === 0) return false
-  // Check the tierType metadata from the first data point (all points in a tier have the same type)
-  return chartData[0]?.tierType === "single_value"
 }

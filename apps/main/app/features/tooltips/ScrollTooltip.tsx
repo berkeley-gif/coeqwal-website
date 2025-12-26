@@ -206,7 +206,6 @@ export default function ScrollTooltip({
           border: theme.border.light,
           borderRadius: theme.borderRadius.md,
           boxShadow: theme.shadow.md,
-          // Use semantic component.lg (16px) for tooltip padding
           padding: theme.spacing(theme.spacingTokens.component.lg),
           paddingRight: onClose ? "32px" : theme.spacing(theme.spacingTokens.component.lg), // Extra space for close button
           maxWidth: theme.layout.maxWidth.sm,

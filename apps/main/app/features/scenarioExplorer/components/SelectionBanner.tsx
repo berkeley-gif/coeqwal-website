@@ -35,7 +35,6 @@ export default function SelectionBanner() {
       sx={{
         backgroundColor: theme.palette.common.white,
         borderBottom: theme.border.light,
-        // Use semantic page.x spacing for horizontal padding
         px: theme.spacingTokens.page.x,
         py: theme.spacingTokens.component.md,
       }}
@@ -45,7 +44,6 @@ export default function SelectionBanner() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          // Use semantic gap.lg (16px) for main layout spacing
           gap: theme.spacingTokens.gap.lg,
         }}
       >

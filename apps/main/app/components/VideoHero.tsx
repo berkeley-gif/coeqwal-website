@@ -156,9 +156,9 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
               xl: "3.8rem",
             }, // Custom for demo with new title
             padding: { sm: "35px", md: "45px" },
-            lineHeight: 1.4,
+            lineHeight: "140%",
             textAlign: "left",
-            fontWeight: theme.typography.fontWeightMedium,
+            fontWeight: 500,
             width: "auto",
             color: theme.palette.blue.darkest,
             fontFamily: theme.typography.fontFamily,

@@ -211,7 +211,6 @@ export default function ScenarioExplorerNew() {
                           sx={{
                             display: "flex",
                             alignItems: "center",
-                            // Use semantic gap.xs (4px) for tight icon group spacing
                             gap: theme.spacingTokens.gap.xs,
                           }}
                         >
