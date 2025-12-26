@@ -2,15 +2,15 @@
  * KeyOperationsPanel - Shows key operations icons and hydroclimate chooser
  *
  * Used in the Learn section scrollytelling.
+ * Uses shared OperationsIconGroup component.
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { HybridTooltip } from "@repo/ui"
 import { strategies } from "../../../../content/scenarios"
 import { HydroclimateChooser } from "../../../scenarios/components"
+import { OperationsIconGroup } from "../../../scenarios/components/shared"
 import type { KeyOperationsPanelProps } from "./types"
-import { getStrategyIcons } from "./utils"
-import { panelBaseStyles, getTitleStyles, getIconBoxStyles } from "./styles"
+import { panelBaseStyles, getTitleStyles } from "./styles"
 
 export function KeyOperationsPanel({
   strategyValue = "current-ops",
@@ -24,8 +24,6 @@ export function KeyOperationsPanel({
     console.warn(`Strategy "${strategyValue}" not found`)
     return null
   }
-
-  const icons = getStrategyIcons(strategyValue)
 
   return (
     <Box
@@ -58,59 +56,12 @@ export function KeyOperationsPanel({
             Key operations
           </Typography>
 
-          <Box
-            sx={{
-              display: "flex",
-              gap: { xs: 0.5, md: 1 },
-              alignItems: "flex-start",
-              flexDirection: "row",
-              justifyContent: "flex-start",
-            }}
-          >
-            {icons.map((icon) => (
-              <HybridTooltip
-                key={icon.path}
-                content={
-                  <>
-                    <Box
-                      component="span"
-                      sx={{ fontWeight: theme.typography.fontWeightSemiBold, display: "block", mb: 0.5 }}
-                    >
-                      {icon.label.replace(/\n/g, " ")}
-                    </Box>
-                    {icon.description}
-                  </>
-                }
-              >
-                <Box
-                  sx={{
-                    ...getIconBoxStyles(theme),
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    position: "relative",
-                    "&::before": {
-                      content: '""',
-                      position: "absolute",
-                      inset: 0,
-                    },
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={icon.path}
-                    alt={icon.alt}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      pointerEvents: "none",
-                    }}
-                  />
-                </Box>
-              </HybridTooltip>
-            ))}
-          </Box>
+          <OperationsIconGroup
+            strategyValue={strategyValue}
+            theme={strategy.theme}
+            size="md"
+            layout="horizontal"
+          />
         </Box>
 
         {/* Divider */}

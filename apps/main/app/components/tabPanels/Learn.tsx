@@ -163,7 +163,6 @@ export default function LearnPanel() {
       <Box
         sx={{
           backgroundColor: theme.palette.learn.background,
-          // Use semantic section spacing: section.lg (48px) for padding, extended for bottom
           padding: (theme) => theme.spacing(theme.spacingTokens.section.lg),
           paddingBottom: "100px", // Extended bottom padding for visual balance
           position: "relative",
@@ -207,7 +206,6 @@ export default function LearnPanel() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  // Use semantic gap.md (12px) and section.xs (16px) top margin
                   gap: (theme) => theme.spacingTokens.gap.md,
                   mt: (theme) => theme.spacingTokens.section.xs,
                 }}
@@ -223,7 +221,6 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      // Use semantic component.lg (16px) padding
                       padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
                     }}
                   >
@@ -245,7 +242,6 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      // Use semantic component.lg (16px) padding
                       padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
                     }}
                   >

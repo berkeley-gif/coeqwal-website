@@ -435,11 +435,12 @@ function applyPolygonStyling(
     return // Skip the normal fill/outline styling for reservoirs
   }
 
-  // Special handling for Delta: keep fill color AND opacity from Mapbox style
-  // Only apply outline styling
+  // Special handling for Delta: keep fill color from Mapbox style but set opacity
   if (layerType === "delta") {
     map.setLayoutProperty(mapboxLayerId, "visibility", "visible")
-    // Continue to outline styling below, but skip fill-color and fill-opacity
+    // Set opacity (layer might be at 0 opacity from previous hide)
+    map.setPaintProperty(mapboxLayerId, "fill-opacity", 0.9)
+    // Continue to outline styling below, but skip fill-color
   } else {
     // Apply fill styling (for non-reservoir, non-delta polygons)
     map.setPaintProperty(mapboxLayerId, "fill-color", colorExpression)

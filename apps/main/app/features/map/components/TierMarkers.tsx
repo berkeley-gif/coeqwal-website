@@ -240,15 +240,18 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
   }
 
+  // Determine if markers should use diamond shape (Environmental flows)
+  // Check tier_code OR tier_name for robustness
+  const isDiamond =
+    data.metadata.tier_code === "ENV_FLOWS" ||
+    data.metadata.tier_name?.toLowerCase().includes("environmental")
+
   return (
     <>
       {/* Point markers */}
       {pointFeatures.map((feature) => {
         const coords = feature.geometry.coordinates as [number, number]
         const [lng, lat] = coords
-
-        // Use diamond shape for Environmental flows (ENV_FLOWS)
-        const isDiamond = data.metadata.tier_code === "ENV_FLOWS"
 
         return (
           <Marker

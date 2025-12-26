@@ -346,6 +346,9 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "Delta",
+    // Camera settings for single-feature outcome
+    defaultZoom: 9,
+    defaultCenter: [-121.5, 38.05], // Delta region center
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

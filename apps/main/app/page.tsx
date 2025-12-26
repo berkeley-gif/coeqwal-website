@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * Home Page - Main application entry point
+ * Main application entry point
  *
  * Renders the main page with persistent map, header, tabs, and content sections.
  */

@@ -4,7 +4,7 @@
  * PersistentMap
  *
  * A single, persistent Mapbox instance that lives outside the tab system.
- * This component renders ONCE at the page level and never unmounts, regardless
+ * This component renders once at the page level and never unmounts, regardless
  * of tab switches. It positions and configures itself based on `mapMode` from
  * the store.
  *
@@ -17,10 +17,9 @@
  * - Single WebGL context (no GPU memory duplication)
  * - No re-initialization when switching tabs
  * - Tiles stay cached across tab switches
- * - TODO: better organize layers, markers & tooltips
  */
 
-import { useEffect, useRef, useState, useMemo } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   Map,
   NavigationControl,
@@ -91,12 +90,20 @@ const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
   [-114.0, 42.0], // Northeast (lon, lat)
 ]
 
+// Mapbox layer IDs that need preloading and visibility management
+const MAPBOX_LAYER_IDS = [
+  "california-label",
+  "central-valley-polygon",
+  "central-valley-polygon-halo",
+  "central-valley-label",
+  "inflow-watersheds",
+] as const
+
 // Position styles for different modes
-// zIndexPersistentMap comes from theme.zIndex.persistentMap
 // scrollOffset creates the "release from sticky" effect in Learn mode
 const getContainerStyles = (
   mode: MapMode,
-  zIndexBasement: number,
+  theme: { zIndex: { persistentMap: number }; transition: { fade: string; fast: string } },
   scrollOffset: number = 0,
 ): React.CSSProperties => {
   const base: React.CSSProperties = {
@@ -105,8 +112,8 @@ const getContainerStyles = (
     left: 0,
     width: "100vw",
     height: "100vh",
-    zIndex: zIndexBasement, // Use theme z-index for map background layer, TODO: consider generalizing
-    transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
+    zIndex: theme.zIndex.persistentMap,
+    transition: theme.transition.fade,
   }
 
   switch (mode) {
@@ -126,7 +133,7 @@ const getContainerStyles = (
         // Short transition smooths the initial "release" moment so it's not jarring
         transform:
           scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
-        transition: "opacity 0.3s ease-out, transform 0.15s ease-out", // Combined fade + quick
+        transition: `${theme.transition.fade}, transform ${theme.transition.fast}`,
       }
     case "explore":
       return {
@@ -192,14 +199,17 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
   const activeTooltip = pinnedFeature || hoveredFeature
   const isTooltipPinned = !!pinnedFeature
 
-  // Fetch tier data based on selection
+  // Fetch tier data for React-rendered markers (TierMarkers) in Explore mode
+  // Only fetch when outcome DOESN'T use Mapbox layers (otherwise useOutcomeMapLayer handles it)
   const { tierData: exploreTierData } = useTierMapData({
-    selectedTier: mapMode === "explore" ? exploreTierSelection : null,
+    selectedTier:
+      mapMode === "explore" && !exploreUsesMapboxLayers
+        ? exploreTierSelection
+        : null,
   })
 
   // Tier location data for outcomes that don't use polygons
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
-  const [, setTierDataLoading] = useState(false)
 
   // Fetch tier location data when in Learn mode and outcome selected (non-polygon outcomes)
   useEffect(() => {
@@ -212,7 +222,6 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
     async function fetchData() {
       try {
-        setTierDataLoading(true)
         const data = await fetchTierLocationData(
           "current-ops",
           selectedOutcome!,
@@ -257,10 +266,6 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         if (!cancelled) {
           setTierData(null)
         }
-      } finally {
-        if (!cancelled) {
-          setTierDataLoading(false)
-        }
       }
     }
 
@@ -272,18 +277,6 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   // Apply Mapbox layer states based on activeSection (Learn mode only)
   useMapLayers()
-
-  // Mapbox layer IDs that we need to preload
-  const MAPBOX_LAYER_IDS = useMemo(
-    () => [
-      "california-label",
-      "central-valley-polygon",
-      "central-valley-polygon-halo",
-      "central-valley-label",
-      "inflow-watersheds",
-    ],
-    [],
-  )
 
   // Initialize map and notify when ready
   useEffect(() => {
@@ -381,7 +374,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     return () => {
       clearInterval(interval)
     }
-  }, [map.mapRef, MAPBOX_LAYER_IDS])
+  }, [map.mapRef])
 
   // Track previous section for camera transitions
   const prevSectionRef = useRef<SectionId | null>(null)
@@ -435,15 +428,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
     const mapInstance = map.mapRef.current.getMap()
 
     // Hide all Learn mode native layers
-    const layersToHide = [
-      "california-label",
-      "central-valley-polygon",
-      "central-valley-polygon-halo",
-      "central-valley-label",
-      "inflow-watersheds",
-    ]
-
-    layersToHide.forEach((layerId) => {
+    MAPBOX_LAYER_IDS.forEach((layerId) => {
       try {
         if (mapInstance.getLayer(layerId)) {
           mapInstance.setLayoutProperty(layerId, "visibility", "none")
@@ -479,7 +464,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   const containerStyles = getContainerStyles(
     mapMode,
-    theme.zIndex.persistentMap,
+    theme,
     mapMode === "learn" ? learnMapScrollOffset : 0,
   )
 
@@ -489,7 +474,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
 
   return (
     <>
-      {/* Teal backdrop for Learn mode - sits behind the map, sometimes revealed when there are gaps between map and other interface elements */}
+      {/* Colored backdrop for Learn mode - sits behind the map, sometimes revealed when there are gaps between map and other interface elements */}
       {isLearnMode && (
         <Box
           sx={{
@@ -510,9 +495,12 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
         id="persistent-map"
         sx={{
           ...containerStyles,
-          "& .mapboxgl-ctrl-bottom-left": isExploreMode
-            ? { bottom: "80px" }
-            : undefined,
+          // Position map controls based on mode with smooth transition
+          "& .mapboxgl-ctrl-bottom-left": {
+            transition: "left 0.3s ease, bottom 0.3s ease",
+            left: isExploreMode ? "calc(50% + 16px)" : "10px",
+            bottom: "16px",
+          },
         }}
       >
         <Map
@@ -534,7 +522,7 @@ export default function PersistentMap({ mapboxToken }: PersistentMapProps) {
           projection={{ name: "globe" }}
         >
           <NavigationControl position="bottom-left" />
-          {isExploreMode && <GeolocateControl position="bottom-left" />}
+          <GeolocateControl position="bottom-left" />
 
           {/* Learn mode layers */}
           {isLearnMode && (

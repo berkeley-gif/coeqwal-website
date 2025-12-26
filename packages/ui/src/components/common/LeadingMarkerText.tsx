@@ -34,7 +34,6 @@ export function LeadingMarkerText({
         display: "grid",
         gridTemplateColumns: "48px 1fr",
         gridTemplateRows: "auto auto",
-        // Use semantic spacing: gap.lg (16px) horizontal, gap.sm (8px) vertical
         columnGap: theme.spacing(theme.spacingTokens.gap.lg),
         rowGap: theme.spacing(theme.spacingTokens.gap.sm),
         alignItems: "start",
@@ -92,7 +91,6 @@ export function LeadingMarkerText({
           color: (theme) => theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
-          // Use semantic spacing: gap.lg (16px)
           gap: (theme) => theme.spacingTokens.gap.lg,
         }}
       >

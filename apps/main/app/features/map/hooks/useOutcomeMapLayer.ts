@@ -105,8 +105,11 @@ export function useOutcomeMapLayer({
     isMapboxBased &&
     (mapMode === "learn" || mapMode === "explore")
 
-  // Skip camera control in Explore mode (useTierMapData handles it there)
-  const skipCameraControl = mapMode === "explore"
+  // Skip camera control in Explore mode ONLY for multi-feature outcomes
+  // (useTierMapData handles camera for those via TierMarkers)
+  // For single-feature Mapbox outcomes (requiresIdMatching: false), we handle camera here
+  const skipCameraControl =
+    mapMode === "explore" && config?.requiresIdMatching !== false
 
   // 1. Fetch tier data
   const {
@@ -122,12 +125,16 @@ export function useOutcomeMapLayer({
     enabled,
   })
 
+  // For single-feature outcomes (requiresIdMatching: false), don't require featureIds
+  const hasDataOrSingleFeature =
+    featureIds.length > 0 || config?.requiresIdMatching === false
+
   // 2. Apply layer styling (using the new unified styling hook)
   const { clear } = useMapboxLayerStyling({
     config: enabled ? config : null,
     tierLookup,
     featureIds,
-    enabled: enabled && featureIds.length > 0,
+    enabled: enabled && hasDataOrSingleFeature,
   })
 
   // 3. Handle tooltip state (using the new unified tooltip hook)
@@ -135,12 +142,13 @@ export function useOutcomeMapLayer({
     config: enabled ? config : null,
     tierLookup,
     locationData,
-    enabled: enabled && featureIds.length > 0,
+    enabled: enabled && hasDataOrSingleFeature,
   })
 
-  // Camera control for Learn mode (zoom to appropriate level)
+  // Camera control (zoom to appropriate level)
+  // Works in Learn mode for all outcomes, and in Explore mode for single-feature outcomes
   useEffect(() => {
-    if (!enabled || skipCameraControl || featureIds.length === 0) return
+    if (!enabled || skipCameraControl || !hasDataOrSingleFeature) return
 
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
@@ -151,13 +159,20 @@ export function useOutcomeMapLayer({
         ? { lng: config.defaultCenter[0], lat: config.defaultCenter[1] }
         : map.getCenter()
 
+      // In Explore mode, account for the left panel (50% of viewport)
+      const isExplore = mapMode === "explore"
+      const leftPadding = isExplore ? window.innerWidth / 2 : 0
+
       map.easeTo({
         zoom: targetZoom,
         center: targetCenter,
         duration: 1000,
+        padding: isExplore
+          ? { left: leftPadding + 100, top: 100, right: 50, bottom: 50 }
+          : undefined,
       })
     })
-  }, [enabled, skipCameraControl, featureIds.length, outcome, config, mapAPI])
+  }, [enabled, skipCameraControl, hasDataOrSingleFeature, outcome, config, mapAPI, mapMode])
 
   return {
     isLoading,

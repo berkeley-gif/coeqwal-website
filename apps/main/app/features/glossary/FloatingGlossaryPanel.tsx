@@ -192,7 +192,6 @@ export function FloatingGlossaryPanel({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            // Use semantic section.sm (24px) for panel header padding
             padding: theme.spacingTokens.section.sm,
             borderBottom: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
@@ -217,7 +216,6 @@ export function FloatingGlossaryPanel({
           sx={{
             flex: 1,
             overflowY: "auto",
-            // Use semantic section.sm (24px) for panel content padding
             padding: theme.spacingTokens.section.sm,
           }}
         >
@@ -236,7 +234,6 @@ export function FloatingGlossaryPanel({
                             theme.palette.blue.bright,
                             0.08,
                           ),
-                          // Use semantic component.lg (16px) for item padding
                           padding: theme.spacingTokens.component.lg,
                           borderRadius: theme.borderRadius.md,
                           border: theme.border.focus,

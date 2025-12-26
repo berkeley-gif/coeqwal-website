@@ -127,7 +127,6 @@ export default function DataPage() {
           <Container
             maxWidth="lg"
             sx={{
-              // Use semantic section.xl (64px) for page vertical padding
               py: (theme) => theme.spacingTokens.section.xl,
               pt: (theme) => `calc(${theme.layout.headerHeight}px + ${theme.spacing(theme.spacingTokens.section.md)})`,
             }}

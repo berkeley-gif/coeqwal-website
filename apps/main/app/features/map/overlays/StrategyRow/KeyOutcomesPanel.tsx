@@ -2,17 +2,17 @@
  * KeyOutcomesPanel - Shows key outcomes glyphs
  *
  * Used in the Learn section scrollytelling.
- * Uses the same layout style as ScenarioCard.
+ * Uses shared OutcomeGlyphItem components with ClickTooltip wrappers.
  */
 
 import { useCallback } from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
-import { InfoIconButton, ClickTooltip } from "@repo/ui"
-import { ScenarioGlyph } from "@repo/viz"
+import { ClickTooltip } from "@repo/ui"
 import {
   OUTCOME_DISPLAY_ORDER,
   useScenarioTiers,
 } from "../../../scenarios/hooks"
+import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { learnMapActions, useSelectedOutcome } from "../../store"
@@ -64,13 +64,19 @@ export function KeyOutcomesPanel({
     ]
   }
 
-  // Shared outcome item renderer
-  const renderOutcomeItem = (outcome: string, variant: "bars" | "dots") => {
+  // Helper to check if outcome has valid data
+  const hasData = (outcome: string): boolean => {
     const tierData = chartData[outcome]
-    const hasData =
+    return (
       tierData !== undefined &&
       tierData.length > 0 &&
       tierData.some((tier) => tier.value > 0)
+    )
+  }
+
+  // Shared outcome item renderer with tooltip wrapper
+  const renderOutcomeItem = (outcome: string) => {
+    const isActive = hasData(outcome)
 
     return (
       <ClickTooltip
@@ -111,102 +117,32 @@ export function KeyOutcomesPanel({
           </>
         }
       >
-        <Box
-          onClick={() => handleShowOnMap(outcome)}
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0.5,
-            cursor: "pointer",
-            p: 0.5,
-            borderRadius: theme.borderRadius.md,
-            transition: theme.transition.default,
-            opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
-            minWidth: 0, // Allow grid item to shrink
-            overflow: "hidden",
-            "&:hover": {
-              backgroundColor: theme.palette.grey[100],
-            },
-          }}
-        >
-          {hasData ? (
-            <ScenarioGlyph
-              tierColors={[
-                theme.palette.tiers.tier1,
-                theme.palette.tiers.tier2,
-                theme.palette.tiers.tier3,
-                theme.palette.tiers.tier4,
-              ]}
-              values={getTierValues(outcome)}
-              variant={variant}
-              size={glyphSize}
-            />
-          ) : (
-            <Box
-              sx={{
-                width: glyphSize,
-                height: glyphSize,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme.palette.grey[100],
-                borderRadius: theme.borderRadius.md,
-                border: theme.border.medium,
-              }}
-            >
-              <Typography
-                variant="compactMicro"
-                sx={{
-                  color: theme.palette.text.primary,
-                  textAlign: "center",
-                  lineHeight: 1.2, // Tighter than variant default for data viz
-                  px: 0.5,
-                }}
-              >
-                No data at this time
-              </Typography>
-            </Box>
-          )}
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 0.25,
-              minHeight: "2rem",
-              width: "100%",
+        <Box>
+          <OutcomeGlyphItem
+            displayName={outcome}
+            name={outcome}
+            chartData={chartData[outcome]}
+            isActive={!isLoading && isActive}
+            isSelected={selectedOutcome === outcome}
+            isTooltipActive={openTooltip === outcome}
+            size={glyphSize}
+            showLabel={true}
+            showInfoButton={true}
+            showSortButton={false}
+            onGlyphClick={() => handleShowOnMap(outcome)}
+            onInfoClick={(e) => {
+              e.stopPropagation()
+              handleToggle(outcome)
             }}
-          >
-            <Typography
-              variant="compactMicro"
-              sx={{
-                color: hasData
-                  ? theme.palette.blue.darkest
-                  : theme.palette.grey[500],
-                fontWeight: theme.typography.fontWeightMedium,
-                textAlign: "center",
-                lineHeight: 1.2, // Tighter than variant default for data viz
-                wordBreak: "break-word",
-                hyphens: "auto",
-              }}
-            >
-              {outcome}
-            </Typography>
-            <InfoIconButton
-              isActive={openTooltip === outcome}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleToggle(outcome)
-              }}
-              title="Click for outcome details"
-            />
-          </Box>
+          />
         </Box>
       </ClickTooltip>
     )
   }
+
+  // Multiple location outcomes (first 5) and single location outcomes (remaining)
+  const multipleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(0, 5)
+  const singleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(5)
 
   return (
     <Box
@@ -250,9 +186,7 @@ export function KeyOutcomesPanel({
           mb: 1.5,
         }}
       >
-        {OUTCOME_DISPLAY_ORDER.slice(0, 5).map((outcome) =>
-          renderOutcomeItem(outcome, "bars"),
-        )}
+        {multipleLocationOutcomes.map(renderOutcomeItem)}
       </Box>
 
       {/* Single location outcomes - last 4 */}
@@ -276,9 +210,7 @@ export function KeyOutcomesPanel({
           alignItems: "start",
         }}
       >
-        {OUTCOME_DISPLAY_ORDER.slice(5).map((outcome) =>
-          renderOutcomeItem(outcome, "dots"),
-        )}
+        {singleLocationOutcomes.map(renderOutcomeItem)}
       </Box>
     </Box>
   )

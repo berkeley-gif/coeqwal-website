@@ -72,7 +72,7 @@ export default function SmoothTabs() {
                 border: "none",
                 background: panelColor,
                 cursor: "pointer",
-                fontWeight: theme.typography.fontWeightSemiBold,
+                fontWeight: 600,
                 textTransform: "uppercase",
                 color: theme.palette.blue.darkest,
               }}
@@ -102,7 +102,7 @@ export default function SmoothTabs() {
                 <Typography
                   variant="h5"
                   style={{
-                    fontWeight: theme.typography.fontWeightSemiBold,
+                    fontWeight: 600,
                     fontSize: "1.6rem",
                     textTransform: "capitalize",
                   }}

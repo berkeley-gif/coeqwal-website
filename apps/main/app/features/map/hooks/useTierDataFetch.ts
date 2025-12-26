@@ -14,6 +14,21 @@ import { STRATEGY_TO_SCENARIO_ID } from "../../../lib/constants/outcomeMappings"
 // API base URL
 const API_BASE = "https://api.coeqwal.org/api"
 
+// GeoJSON response type (for single-feature outcomes)
+interface GeoJSONResponse {
+  type: "FeatureCollection"
+  features: Array<{
+    properties: {
+      location_id: string
+      tier_level: number
+      tier_value?: number
+    }
+  }>
+  metadata?: {
+    tier_type?: "single_value" | "multi_value"
+  }
+}
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -66,7 +81,7 @@ const tierLocationCache = new Map<string, TierLocationsResponse>()
 
 /**
  * Fetch tier locations with caching
- * Exported so other components can use the same cached data
+ * Falls back to GeoJSON endpoint if /locations returns no data (for single-feature outcomes)
  */
 export async function fetchTierLocations(
   scenarioId: string,
@@ -80,22 +95,58 @@ export async function fetchTierLocations(
     return cached
   }
 
-  const url = `${API_BASE}/tier-map/${scenarioId}/${tierCode}/locations`
-  const response = await fetch(url)
+  // Try the /locations endpoint first
+  const locationsUrl = `${API_BASE}/tier-map/${scenarioId}/${tierCode}/locations`
+  const locationsResponse = await fetch(locationsUrl)
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
+  if (locationsResponse.ok) {
+    const data = await locationsResponse.json()
+    // If we got locations, use them
+    if (data.locations && data.locations.length > 0) {
+      tierLocationCache.set(cacheKey, data)
+      return data
+    }
+  }
+
+  // Fallback: fetch GeoJSON and extract tier data from features
+  // This handles single-feature outcomes like Delta, Salmon, etc.
+  const geojsonUrl = `${API_BASE}/tier-map/${scenarioId}/${tierCode}`
+  const geojsonResponse = await fetch(geojsonUrl)
+
+  if (!geojsonResponse.ok) {
+    const errorData = await geojsonResponse.json().catch(() => ({}))
     throw new Error(
-      errorData.detail || `Failed to fetch tier locations: ${response.status}`,
+      errorData.detail || `Failed to fetch tier data: ${geojsonResponse.status}`,
     )
   }
 
-  const data = await response.json()
+  const geojsonData: GeoJSONResponse = await geojsonResponse.json()
 
-  // Store in cache
-  tierLocationCache.set(cacheKey, data)
+  // Convert GeoJSON features to locations format
+  const locations: TierLocation[] = geojsonData.features.map((feature, idx) => ({
+    location_id: feature.properties.location_id || `feature-${idx}`,
+    location_name: feature.properties.location_id || tierCode,
+    location_type: "geojson",
+    tier_level: feature.properties.tier_level,
+    tier_value: feature.properties.tier_value ?? null,
+    display_order: idx,
+  }))
 
-  return data
+  const result: TierLocationsResponse = {
+    scenario: scenarioId,
+    tier_code: tierCode,
+    tier_name: tierCode,
+    tier_type: geojsonData.metadata?.tier_type || "single_value",
+    locations,
+    metadata: {
+      total_locations: locations.length,
+      location_types: ["geojson"],
+      tier_counts: {},
+    },
+  }
+
+  tierLocationCache.set(cacheKey, result)
+  return result
 }
 
 // ============================================================================
