@@ -69,17 +69,13 @@ import { Box, Tooltip, ClickAwayListener, useTheme } from "../../.."
 import { Theme } from "@mui/material/styles"
 import type { TooltipProps } from "@mui/material"
 import { themeValues } from "../../../themes/theme"
+import { TooltipCloseButton } from "./TooltipCloseButton"
 
 // ============================================================================
-// CONFIGURABLE CONSTANTS
+// DEFAULTS
 // ============================================================================
 const DEFAULT_WIDTH = "280px"
 const MAX_WIDTH = themeValues.layout.maxWidth.md
-// Padding uses semantic spacing tokens (component.md = 1.5 = 12px, component.lg = 2 = 16px)
-const PADDING_Y = themeValues.spacing.component.md
-const PADDING_X = themeValues.spacing.component.lg
-// Close button positioning (component.sm = 1 = 8px)
-const CLOSE_BUTTON_OFFSET = themeValues.spacing.component.sm
 
 // ============================================================================
 // TYPES
@@ -110,45 +106,6 @@ export interface ClickTooltipProps {
 }
 
 // ============================================================================
-// CLOSE BUTTON COMPONENT
-// ============================================================================
-function CloseButton({ onClick }: { onClick: () => void }) {
-  return (
-    <Box
-      component="button"
-      onClick={(e: React.MouseEvent) => {
-        e.stopPropagation()
-        onClick()
-      }}
-      sx={{
-        position: "absolute",
-        top: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
-        right: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
-        width: "24px",
-        height: "24px",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: (theme: Theme) => theme.borderRadius.circle,
-        color: (theme: Theme) => theme.palette.grey[500],
-        "&:hover": {
-          color: (theme: Theme) => theme.palette.grey[700],
-          background: (theme: Theme) => theme.palette.grey[100],
-        },
-      }}
-      aria-label="Close tooltip"
-    >
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-        <path d="M11.25 1.8075L10.1925 0.75L6 4.9425L1.8075 0.75L0.75 1.8075L4.9425 6L0.75 10.1925L1.8075 11.25L6 7.0575L10.1925 11.25L11.25 10.1925L7.0575 6L11.25 1.8075Z" />
-      </svg>
-    </Box>
-  )
-}
-
-// ============================================================================
 // TOOLTIP VARIANT (MUI Tooltip with arrow)
 // ============================================================================
 function TooltipVariant({
@@ -164,7 +121,7 @@ function TooltipVariant({
 }: Omit<ClickTooltipProps, "variant">) {
   const tooltipContent = (
     <Box sx={{ position: "relative" }}>
-      {!hideCloseButton && <CloseButton onClick={onClose} />}
+      {!hideCloseButton && <TooltipCloseButton onClick={onClose} />}
       <Box sx={{ pr: hideCloseButton ? 0 : "28px" }}>{content}</Box>
     </Box>
   )
@@ -191,9 +148,8 @@ function TooltipVariant({
             boxShadow: theme.shadow.md,
             width,
             maxWidth,
-            padding: `${theme.spacing(PADDING_Y)} ${theme.spacing(PADDING_X)}`,
+            padding: theme.spacing(theme.spacingTokens.component.xl),
             ...theme.typography.compact.subtitle,
-            // Use variant's default lineHeight (1.4) - don't override
           }),
         },
         arrow: {
@@ -252,12 +208,11 @@ function OverlayVariant({
         borderRadius: theme.borderRadius.md,
         width,
         maxWidth,
-        padding: `${theme.spacing(PADDING_Y)} ${theme.spacing(PADDING_X)}`,
+        padding: theme.spacing(theme.spacingTokens.component.xl),
         ...theme.typography.compact.subtitle,
-        // Use variant's default lineHeight (1.4) - don't override
       }}
     >
-      {!hideCloseButton && <CloseButton onClick={onClose} />}
+      {!hideCloseButton && <TooltipCloseButton onClick={onClose} />}
       <Box sx={{ pr: hideCloseButton ? 0 : "28px" }}>{content}</Box>
     </Box>
   )

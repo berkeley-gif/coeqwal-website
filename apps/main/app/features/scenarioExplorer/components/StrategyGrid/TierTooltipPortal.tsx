@@ -1,12 +1,13 @@
 /**
  * TierTooltipPortal - Renders tier tooltip via Portal
  *
- * Extracted from StrategyGrid for better organization.
  * Renders the tooltip outside the normal DOM hierarchy to escape stacking context.
+ *
  */
 
 import React from "react"
 import { Box, Portal, ClickAwayListener, useTheme } from "@repo/ui/mui"
+import { TooltipCloseButton } from "@repo/ui"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 
 interface TierTooltipPortalProps {
@@ -53,46 +54,20 @@ export function TierTooltipPortal({
               border: theme.border.light,
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.md,
-              padding: "16px",
-              paddingRight: "40px",
-              width: theme.spacing(56.25),
+              padding: theme.spacing(theme.spacingTokens.component.xl),
+              paddingRight: "48px", // Extra space for close button
+              width: "450px",
+              ...theme.typography.compact.subtitle,
             }}
           >
-            {/* Close button */}
-            <Box
-              component="button"
-              onClick={onForceClose}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                width: 24,
-                height: 24,
-                display: "flex",
-                ...theme.typography.nav,
-                alignItems: "center",
-                justifyContent: "center",
-                border: "none",
-                background: "none",
-                cursor: "pointer",
-                color: theme.palette.grey[500],
-                borderRadius: theme.borderRadius.circle,
-                "&:hover": {
-                  color: theme.palette.grey[700],
-                  backgroundColor: theme.palette.grey[100],
-                },
-              }}
-              aria-label="Close tooltip"
-            >
-              ✕
-            </Box>
+            <TooltipCloseButton onClick={onForceClose} />
 
             {/* Arrow pointing right */}
             <Box
               sx={{
                 position: "absolute",
                 right: -16,
-                top: 16,
+                top: theme.spacing(theme.spacingTokens.component.xl),
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",
@@ -105,7 +80,7 @@ export function TierTooltipPortal({
               sx={{
                 position: "absolute",
                 right: -17,
-                top: 16,
+                top: theme.spacing(theme.spacingTokens.component.xl),
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",

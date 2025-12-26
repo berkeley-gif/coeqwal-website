@@ -285,6 +285,18 @@ export default function MapOverlayPanels() {
     [0, 1, 1, 0],
   )
 
+  // Reset tooltip closed states when scrolling away (opacity goes to 0)
+  // This allows tooltips to reappear when user scrolls back to that section
+  useMotionValueEvent(strategyInfoTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setStrategyTooltipClosed(false)
+  })
+  useMotionValueEvent(keyOperationsTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setKeyOpsTooltipClosed(false)
+  })
+  useMotionValueEvent(keyOutcomesTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setKeyOutcomesTooltipClosed(false)
+  })
+
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
   // visibility tracking in useMotionValueEvent above
 
