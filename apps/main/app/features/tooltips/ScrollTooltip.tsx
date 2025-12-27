@@ -28,7 +28,8 @@
  */
 
 import { RefObject, useEffect, useState, ReactNode } from "react"
-import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { TooltipCloseButton } from "@repo/ui"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
@@ -207,41 +208,17 @@ export default function ScrollTooltip({
           borderRadius: theme.borderRadius.md,
           boxShadow: theme.shadow.md,
           padding: theme.spacing(theme.spacingTokens.component.lg),
-          paddingRight: onClose ? "32px" : theme.spacing(theme.spacingTokens.component.lg), // Extra space for close button
           maxWidth: theme.layout.maxWidth.sm,
         }}
       >
         {/* Close button */}
-        {onClose && (
-          <IconButton
-            onClick={onClose}
-            size="small"
-            sx={{
-              ...theme.typography.nav,
-              position: "absolute",
-              top: 4,
-              right: 4,
-              width: 24,
-              height: 24,
-              color: theme.palette.grey[500],
-              "&:hover": {
-                color: theme.palette.grey[700],
-                backgroundColor: theme.palette.grey[100],
-              },
-            }}
-            aria-label="Close tooltip"
-          >
-            ✕
-          </IconButton>
-        )}
+        {onClose && <TooltipCloseButton onClick={onClose} />}
 
         {/* Arrow */}
         <Box sx={getArrowStyle()} />
 
         {/* Content */}
-        <Typography sx={{ ...theme.typography.nav }}>
-          {content}
-        </Typography>
+        <Typography variant="dashboard">{content}</Typography>
       </Box>
     </MotionBox>
   )

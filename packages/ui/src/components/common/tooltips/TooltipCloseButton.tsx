@@ -14,7 +14,7 @@
  * ```tsx
  * <Box sx={{ position: "relative" }}>
  *   <TooltipCloseButton onClick={handleClose} />
- *   <Box sx={{ pr: "28px" }}>{content}</Box>
+ *   {content}
  * </Box>
  * ```
  */
@@ -29,9 +29,11 @@ const CLOSE_BUTTON_OFFSET = themeValues.spacing.component.sm
 
 export interface TooltipCloseButtonProps {
   onClick: () => void
+  /** Custom offset from top-right corner in pixels. Defaults to theme spacing. */
+  offset?: { top?: number; right?: number }
 }
 
-export function TooltipCloseButton({ onClick }: TooltipCloseButtonProps) {
+export function TooltipCloseButton({ onClick, offset }: TooltipCloseButtonProps) {
   return (
     <Box
       component="button"
@@ -41,8 +43,12 @@ export function TooltipCloseButton({ onClick }: TooltipCloseButtonProps) {
       }}
       sx={{
         position: "absolute",
-        top: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
-        right: (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
+        top: offset?.top !== undefined 
+          ? `${offset.top}px` 
+          : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
+        right: offset?.right !== undefined 
+          ? `${offset.right}px` 
+          : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
         width: "24px",
         height: "24px",
         border: "none",

@@ -61,7 +61,6 @@ const OneColumnRoot = styled(Box, {
     height: fullHeight ? "100vh" : "auto",
     minHeight: fullHeight ? "100vh" : "auto",
     position: "relative",
-    boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
 

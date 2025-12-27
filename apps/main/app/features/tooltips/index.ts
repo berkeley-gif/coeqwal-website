@@ -5,9 +5,10 @@
  */
 
 // Components
-export { default as PolygonLayerTooltip } from "./PolygonLayerTooltip"
+export { default as MapFeatureTooltip } from "./MapFeatureTooltip"
 export { default as ScrollTooltip } from "./ScrollTooltip"
 export { default as TierTooltipContent } from "./TierTooltipContent"
+export { default as TierTooltipPortal } from "./TierTooltipPortal"
 
 // Hooks
 export { useTierTooltipState } from "./useTierTooltipState"

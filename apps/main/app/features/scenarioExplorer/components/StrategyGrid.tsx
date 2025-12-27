@@ -13,7 +13,7 @@ import { Box, Typography, useTheme, useMediaQuery, Checkbox } from "@repo/ui/mui
 import { InfoIconButton, SortButton } from "@repo/ui"
 import { strategies } from "../../../content/scenarios"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
-import { SummaryPanel } from "../../map/overlays/SummaryPanel"
+import { SummaryPanel } from "../../map/overlays/scenarioPanels"
 
 // Shared components
 import {
@@ -25,7 +25,7 @@ import {
 // Import extracted types, styles, and components
 import { gridStyles } from "./StrategyGrid/styles"
 import { type StrategyGridProps } from "./StrategyGrid/types"
-import { TierTooltipPortal } from "./StrategyGrid/TierTooltipPortal"
+import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 import { GridControls } from "./StrategyGrid/GridControls"
 
 // Strategy Grid component

@@ -8,7 +8,7 @@
 import React from "react"
 import { Box, Portal, ClickAwayListener, useTheme } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
-import TierTooltipContent from "../../../tooltips/TierTooltipContent"
+import TierTooltipContent from "./TierTooltipContent"
 
 interface TierTooltipPortalProps {
   /** The outcome name to show tooltip for (null = hidden) */
@@ -55,7 +55,6 @@ export function TierTooltipPortal({
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.md,
               padding: theme.spacing(theme.spacingTokens.component.xl),
-              paddingRight: "48px", // Extra space for close button
               width: "450px",
               ...theme.typography.compact.subtitle,
             }}

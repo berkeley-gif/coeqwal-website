@@ -17,7 +17,7 @@ import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,
 } from "../../../../lib/constants/outcomeMappings"
-import { strategies, strategyDefinitions } from "../../../../content/scenarios"
+import { strategies } from "../../../../content/scenarios"
 
 /**
  * Convert strategy values to scenario IDs (using centralized mapping)
@@ -141,17 +141,9 @@ export default function ListView({
         // Search in strategy value/ID
         if (strategy.value.toLowerCase().includes(searchLower)) isMatch = true
 
-        // Search in associated operation icon labels (from strategyDefinitions)
-        // These are the tooltip labels for the operation icons
-        const relatedDefinition = strategyDefinitions.find(
-          (def) => def.id === strategy.value,
-        )
-        if (relatedDefinition) {
-          if (relatedDefinition.label.toLowerCase().includes(searchLower))
-            isMatch = true
-          if (relatedDefinition.description.toLowerCase().includes(searchLower))
-            isMatch = true
-        }
+        // Search in shortLabel if available (compact label variant)
+        if (strategy.shortLabel?.toLowerCase().includes(searchLower))
+          isMatch = true
 
         if (isMatch) {
           matches.push(strategy)

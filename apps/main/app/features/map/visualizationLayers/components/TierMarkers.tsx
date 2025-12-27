@@ -4,16 +4,22 @@
  * TierMarkers - Map markers showing tier data by location
  *
  * Displays markers on the map for each location with tier data.
- * Clicking a marker shows a popup with outcome details.
+ * Reports hover/click events to parent for unified tooltip handling.
  */
 
 import React, { useState, useEffect } from "react"
-import { Marker, Popup, useMap } from "@repo/map"
+import { Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import type { TierLocationResponse } from "../../../../lib/api/tierLocationApi"
+import type { HoveredFeatureInfo } from "../types"
+import { getTierLabel } from "../../../../content/tiers"
 
 interface TierMarkersProps {
   data: TierLocationResponse
+  /** Called when a marker is hovered */
+  onHover?: (feature: HoveredFeatureInfo | null) => void
+  /** Called when a marker is clicked */
+  onClick?: (feature: HoveredFeatureInfo) => void
 }
 
 /**
@@ -21,18 +27,10 @@ interface TierMarkersProps {
  * Displays GeoJSON FeatureCollection with points and polygons
  * Colored by tier level
  */
-export default function TierMarkers({ data }: TierMarkersProps) {
+export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps) {
   const theme = useTheme()
   const mapAPI = useMap()
   const [mapReady, setMapReady] = useState(false)
-  const [popupInfo, setPopupInfo] = useState<{
-    longitude: number
-    latitude: number
-    name: string
-    tierLevel: number
-    tierLabel: string
-    locationType: string
-  } | null>(null)
 
   // Separate by geometry type
   const pointFeatures = data.features.filter((f) => f.geometry.type === "Point")
@@ -51,10 +49,8 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     })
   }, [mapAPI])
 
-  // Close popup and clean up old layers when data changes (new tier selected)
+  // Clean up old layers when data changes (new tier selected)
   useEffect(() => {
-    setPopupInfo(null)
-
     // Remove all previous tier layers (only if style is loaded)
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
@@ -173,19 +169,33 @@ export default function TierMarkers({ data }: TierMarkersProps) {
         },
       })
 
-      // Add click handler
+      // Add click handler for polygon features
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const handleClick = (e: any) => {
         const feature = e.features?.[0]
-        if (feature && feature.properties) {
-          setPopupInfo({
+        if (feature && feature.properties && onClick) {
+          const featureInfo: HoveredFeatureInfo = {
             longitude: e.lngLat.lng,
             latitude: e.lngLat.lat,
-            name: feature.properties.location_name as string,
+            geometryType: "polygon",
+            layerType: "point", // Using point since these are tier-polygon layers
+            featureId: feature.properties.location_id as string,
             tierLevel: feature.properties.tier_level as number,
             tierLabel: getTierLabel(feature.properties.tier_level as number),
+            tierValue: feature.properties.tier_value as number,
+            locationName: feature.properties.location_name as string,
             locationType: feature.properties.location_type_display as string,
-          })
+            properties: feature.properties,
+            urbName: null,
+            modName: null,
+            subName: null,
+            comments: null,
+            type: null,
+            classType: null,
+            hydroRegion: null,
+            gisAcres: null,
+          }
+          onClick(featureInfo)
         }
       }
 
@@ -219,26 +229,33 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     }
   }
 
-  // Get tier label
-  const getTierLabel = (tier: number): string => {
-    switch (tier) {
-      case 1:
-        return "Optimal"
-      case 2:
-        return "Sub-optimal"
-      case 3:
-        return "At-risk"
-      case 4:
-        return "Critical"
-      default:
-        return "Unknown"
-    }
-  }
-
-  // Convert to sentence case
-  const toSentenceCase = (str: string): string => {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-  }
+  // Build feature info for tooltip callbacks
+  const buildFeatureInfo = (
+    feature: (typeof pointFeatures)[0],
+    lng: number,
+    lat: number
+  ): HoveredFeatureInfo => ({
+    longitude: lng,
+    latitude: lat,
+    geometryType: "point",
+    layerType: "point",
+    featureId: feature.properties.location_id,
+    tierLevel: feature.properties.tier_level,
+    tierLabel: getTierLabel(feature.properties.tier_level),
+    tierValue: feature.properties.tier_value,
+    locationName: feature.properties.location_name,
+    locationType: feature.properties.location_type_display,
+    properties: feature.properties,
+    // These are for polygon layers, null for points
+    urbName: null,
+    modName: null,
+    subName: null,
+    comments: null,
+    type: null,
+    classType: null,
+    hydroRegion: null,
+    gisAcres: null,
+  })
 
   // Determine if markers should use diamond shape (Environmental flows)
   // Check tier_code OR tier_name for robustness
@@ -252,6 +269,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       {pointFeatures.map((feature) => {
         const coords = feature.geometry.coordinates as [number, number]
         const [lng, lat] = coords
+        const featureInfo = buildFeatureInfo(feature, lng, lat)
 
         return (
           <Marker
@@ -265,89 +283,22 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 width: 20,
                 height: 20,
                 backgroundColor: getTierColor(feature.properties.tier_level),
-                border: theme.border.onDark,
+                // Diamond: white outline to match rivers; Circle: standard onDark border
+                border: isDiamond ? "2px solid rgba(255, 255, 255, 0.9)" : theme.border.onDark,
                 boxShadow: theme.shadow.sm,
                 cursor: "pointer",
-                // Diamond: rotate square 45 degrees; Circle: use border-radius
+                // Diamond: rotate first, then scale for narrow diamond; Circle: use border-radius
                 borderRadius: isDiamond ? theme.borderRadius.xs : theme.borderRadius.circle,
-                transform: isDiamond ? "rotate(45deg)" : "none",
+                transform: isDiamond ? "scale(0.5, 1) rotate(45deg)" : "none",
+                transformOrigin: "center",
               }}
-              onClick={() =>
-                setPopupInfo({
-                  longitude: lng,
-                  latitude: lat,
-                  name: feature.properties.location_name,
-                  tierLevel: feature.properties.tier_level,
-                  tierLabel: getTierLabel(feature.properties.tier_level),
-                  locationType: feature.properties.location_type_display,
-                })
-              }
+              onMouseEnter={() => onHover?.(featureInfo)}
+              onMouseLeave={() => onHover?.(null)}
+              onClick={() => onClick?.(featureInfo)}
             />
           </Marker>
         )
       })}
-
-      {/* Popup */}
-      {popupInfo && (
-        <Popup
-          longitude={popupInfo.longitude}
-          latitude={popupInfo.latitude}
-          anchor="bottom"
-          onClose={() => setPopupInfo(null)}
-          closeButton={true}
-          closeOnClick={false}
-          offset={15}
-        >
-          <div
-            style={{
-              padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
-              minWidth: theme.spacing(27.5),
-            }}
-          >
-            <div
-              style={{
-                ...theme.typography.caption,
-                color: theme.palette.grey[600],
-                marginBottom: theme.spacing(0.25),
-              }}
-            >
-              {toSentenceCase(popupInfo.locationType)}
-            </div>
-            <div
-              style={{
-                ...theme.typography.body2,
-                fontWeight: theme.typography.fontWeightSemiBold,
-                marginBottom: theme.spacing(1),
-                color: theme.palette.blue.darkest,
-              }}
-            >
-              {popupInfo.name}
-            </div>
-            <div
-              style={{
-                ...theme.typography.nav,
-                display: "flex",
-                alignItems: "center",
-                gap: theme.spacing(1),
-              }}
-            >
-              <div
-                style={{
-                  width: theme.spacing(1.5),
-                  height: theme.spacing(1.5),
-                  borderRadius: theme.borderRadius.md,
-                  backgroundColor: getTierColor(popupInfo.tierLevel),
-                  flexShrink: 0,
-                }}
-              />
-              <span>
-                <strong>Tier {popupInfo.tierLevel}:</strong>{" "}
-                {popupInfo.tierLabel}
-              </span>
-            </div>
-          </div>
-        </Popup>
-      )}
     </>
   )
 }

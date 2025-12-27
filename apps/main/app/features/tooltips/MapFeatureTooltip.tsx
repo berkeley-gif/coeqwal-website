@@ -1,21 +1,20 @@
 "use client"
 
 /**
- * PolygonLayerTooltip - Tooltip for polygon map layers
+ * MapFeatureTooltip - Tooltip for map features (polygons and points)
  *
- * A reusable tooltip component for polygon map layers (demand-units, WBA, etc.)
- * for tooltip rendering across PersistentMap and CaliforniaMapPanel.
+ * A reusable tooltip component for map features (demand-units, WBA, environmental flows, etc.)
  *
  * ## When to Use
  *
- * Use PolygonLayerTooltip for map polygon/shape features where:
+ * Use MapFeatureTooltip for map features where:
  * - Geographic positioning (lat/lng) is required (uses Mapbox Popup)
  * - Both hover and click-to-pin interactions are needed
- * - Layer-specific content rendering is required (WBA vs demand-units)
+ * - Layer-specific content rendering is required
  *
  * For non-map tooltips, use:
  * - HybridTooltip: Hover on desktop, click on touch (general purpose)
- * - ClickTooltip: Always click-to-open (complex interactive content)
+ * - ClickTooltip: Always click-to-open
  * - MapMarkerTooltip: Simple map marker hover hints (not geo-positioned)
  *
  * ## Features
@@ -30,54 +29,17 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { TooltipCloseButton } from "@repo/ui"
 import { Popup } from "@repo/map"
 import type { HoveredFeatureInfo } from "../map/visualizationLayers"
 
-export interface PolygonLayerTooltipProps {
+export interface MapFeatureTooltipProps {
   /** Feature data to display */
   feature: HoveredFeatureInfo
   /** Whether the tooltip is pinned (clicked) vs hovered */
   isPinned: boolean
   /** Callback to close/clear the pinned tooltip */
   onClose: () => void
-}
-
-/**
- * Close button component for pinned tooltips
- */
-function CloseButton({ onClick }: { onClick: () => void }) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick()
-      }}
-      sx={{
-        position: "absolute",
-        top: 4,
-        right: 4,
-        cursor: "pointer",
-        width: 20,
-        height: 20,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: theme.borderRadius.circle,
-        "&:hover": {
-          backgroundColor: "rgba(0,0,0,0.1)",
-        },
-      }}
-    >
-      <Typography
-        variant="nav"
-        sx={{ lineHeight: 1, color: theme.palette.grey[500] }}
-      >
-        ×
-      </Typography>
-    </Box>
-  )
 }
 
 /**
@@ -90,8 +52,8 @@ function TierBadge({ level, label }: { level: number; label: string }) {
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Box
         sx={{
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           borderRadius: theme.borderRadius.xs,
           backgroundColor:
             theme.palette.tiers[
@@ -100,7 +62,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
           flexShrink: 0,
         }}
       />
-      <Typography variant="compactSubtitle">
+      <Typography variant="dashboard">
         <strong>Tier {level}:</strong> {label}
       </Typography>
     </Box>
@@ -117,7 +79,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
     <>
       {feature.locationName && (
         <Typography
-          variant="body2"
+          variant="dashboard"
           sx={{
             fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
@@ -130,7 +92,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
 
       {feature.hydroRegion && (
         <Typography
-          variant="body2"
+          variant="dashboard"
           sx={{ color: theme.palette.grey[600], mb: 0.5 }}
         >
           Region: {feature.hydroRegion}
@@ -139,7 +101,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
 
       {feature.gisAcres && (
         <Typography
-          variant="caption"
+          variant="compactCaption"
           sx={{
             color: theme.palette.grey[600],
             display: "block",
@@ -151,7 +113,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
       )}
 
       <Typography
-        variant="caption"
+        variant="compactCaption"
         sx={{
           color: theme.palette.grey[500],
           display: "block",
@@ -185,7 +147,7 @@ function DemandUnitsTooltipContent({
     <>
       {primaryName && (
         <Typography
-          variant="body2"
+          variant="dashboard"
           sx={{
             fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
@@ -198,7 +160,7 @@ function DemandUnitsTooltipContent({
 
       {secondaryName && (
         <Typography
-          variant="body2"
+          variant="dashboard"
           sx={{
             color: theme.palette.grey[700],
             mb: 0.5,
@@ -210,7 +172,7 @@ function DemandUnitsTooltipContent({
 
       {feature.subName && (
         <Typography
-          variant="body2"
+          variant="dashboard"
           sx={{ color: theme.palette.grey[600], mb: 0.5 }}
         >
           {feature.subName}
@@ -219,12 +181,11 @@ function DemandUnitsTooltipContent({
 
       {feature.comments && (
         <Typography
-          variant="caption"
+          variant="compactCaption"
           sx={{
             color: theme.palette.grey[600],
             display: "block",
             mb: 0.5,
-            lineHeight: 1.3,
           }}
         >
           {feature.comments}
@@ -233,7 +194,7 @@ function DemandUnitsTooltipContent({
 
       {feature.type && (
         <Typography
-          variant="caption"
+          variant="compactCaption"
           sx={{
             color: theme.palette.grey[600],
             display: "block",
@@ -245,7 +206,7 @@ function DemandUnitsTooltipContent({
       )}
 
       <Typography
-        variant="caption"
+        variant="compactCaption"
         sx={{
           color: theme.palette.grey[500],
           display: "block",
@@ -259,16 +220,71 @@ function DemandUnitsTooltipContent({
 }
 
 /**
- * Main tooltip component for polygon map layers
+ * Point marker (environmental flows, etc.) tooltip content
+ */
+function PointMarkerTooltipContent({
+  feature,
+}: {
+  feature: HoveredFeatureInfo
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      {feature.locationName && (
+        <Typography
+          variant="dashboard"
+          sx={{
+            fontWeight: theme.typography.fontWeightSemiBold,
+            color: theme.palette.blue.darkest,
+            mb: 0.5,
+          }}
+        >
+          {feature.locationName}
+        </Typography>
+      )}
+
+      {feature.locationType && (
+        <Typography
+          variant="compactCaption"
+          sx={{
+            color: theme.palette.grey[600],
+            display: "block",
+            mb: 1,
+          }}
+        >
+          {feature.locationType}
+        </Typography>
+      )}
+    </>
+  )
+}
+
+/**
+ * Main tooltip component for map features
  *
  * Renders a Mapbox Popup with feature information based on layer type.
  * Supports both hover and pinned (click-to-stay) modes.
  */
-export function PolygonLayerTooltip({
+export function MapFeatureTooltip({
   feature,
   isPinned,
   onClose,
-}: PolygonLayerTooltipProps) {
+}: MapFeatureTooltipProps) {
+  // Determine content renderer based on layer type
+  const renderContent = () => {
+    switch (feature.layerType) {
+      case "wba":
+        return <WBATooltipContent feature={feature} />
+      case "demand-units":
+        return <DemandUnitsTooltipContent feature={feature} />
+      case "point":
+        return <PointMarkerTooltipContent feature={feature} />
+      default:
+        return <DemandUnitsTooltipContent feature={feature} />
+    }
+  }
+
   return (
     <Popup
       longitude={feature.longitude}
@@ -276,21 +292,24 @@ export function PolygonLayerTooltip({
       anchor="bottom"
       closeButton={false}
       // Don't use closeOnClick - it conflicts with click-to-pin behavior
-      // The pinned tooltip is closed via the X button or by clicking another polygon
+      // The pinned tooltip is closed via the X button or by clicking another feature
       closeOnClick={false}
       onClose={onClose}
       offset={15}
     >
-      <Box sx={{ p: 1.5, minWidth: 200, maxWidth: 300, position: "relative" }}>
+      <Box
+        sx={{
+          p: (theme) => theme.spacing(theme.spacingTokens.component.md),
+          minWidth: 200,
+          maxWidth: 300,
+          position: "relative",
+        }}
+      >
         {/* Close button for pinned tooltips */}
-        {isPinned && <CloseButton onClick={onClose} />}
+        {isPinned && <TooltipCloseButton onClick={onClose} offset={{ top: 0, right: 0 }} />}
 
         {/* Layer-specific content */}
-        {feature.layerType === "wba" ? (
-          <WBATooltipContent feature={feature} />
-        ) : (
-          <DemandUnitsTooltipContent feature={feature} />
-        )}
+        {renderContent()}
 
         {/* Tier badge (always present) */}
         <TierBadge level={feature.tierLevel} label={feature.tierLabel} />
@@ -299,4 +318,5 @@ export function PolygonLayerTooltip({
   )
 }
 
-export default PolygonLayerTooltip
+export default MapFeatureTooltip
+

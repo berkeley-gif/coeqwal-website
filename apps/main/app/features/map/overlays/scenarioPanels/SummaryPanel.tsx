@@ -4,13 +4,20 @@
  * SummaryPanel - Scenario summary overlay
  *
  * Displays a summary of scenario outcomes with tier glyphs.
- * Used in both Learn map and Explore views.
+ * Used in both Learn map and Explore views. Note: this feature is
+ * experimental and unfinished.
  */
 
-/* eslint-disable react/prop-types */ // TypeScript handles prop validation
-
-import { useEffect, useState, useCallback } from "react"
-import { Box, Typography, Chip, CircularProgress, useTheme } from "@repo/ui/mui"
+import { useEffect, useState, useCallback, useMemo } from "react"
+import {
+  Box,
+  Typography,
+  Chip,
+  CircularProgress,
+  useTheme,
+  Theme,
+  SxProps,
+} from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import {
   generateOutcomeSummary,
@@ -18,20 +25,64 @@ import {
   OutcomeSummary,
   AtRiskLocation,
   DemandUnitProperties,
-} from "../../summary/summaryGenerator"
+} from "../../../summary/summaryGenerator"
 import {
   TIER_LABELS,
   TierLevel,
   getTierColorsFromTheme,
-} from "../../../content/tiers"
-import { fetchTierLocations } from "../visualizationLayers/hooks/useTierData"
-import { fetchTierLocationData } from "../../../lib/api/tierLocationApi"
+} from "../../../../content/tiers"
+import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
+import { fetchTierLocationData } from "../../../../lib/api/tierLocationApi"
 import {
   STRATEGY_TO_SCENARIO_ID,
   DISPLAY_NAME_TO_API_SHORT_CODE,
-} from "../../../lib/constants/outcomeMappings"
-import { useActiveOutcomeVisualization } from "../store"
+} from "../../../../lib/constants/outcomeMappings"
+import { useActiveOutcomeVisualization } from "../../store"
 import { useMap } from "@repo/map"
+
+// ============================================================================
+// Styles
+// ============================================================================
+
+/** Common flex wrapper for chips */
+const flexWrapStyles: SxProps<Theme> = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 0.5,
+}
+
+/** Tier chip styles (Optimal/Sub-optimal/At-risk/Critical labels) */
+const getTierChipSx = (theme: Theme, tierColor: string): SxProps<Theme> => ({
+  ...theme.typography.compact.micro,
+  fontWeight: theme.typography.fontWeightMedium,
+  backgroundColor: `${tierColor}15`,
+  color: tierColor,
+  borderColor: `${tierColor}40`,
+  border: "1px solid",
+  height: 22,
+  "& .MuiChip-label": { px: 1 },
+})
+
+/** Location chip styles (clickable location names) */
+const getLocationChipSx = (theme: Theme, color: string): SxProps<Theme> => ({
+  ...theme.typography.compact.micro,
+  fontWeight: theme.typography.fontWeightMedium,
+  cursor: "pointer",
+  backgroundColor: "transparent",
+  color,
+  border: theme.border.medium,
+  height: 22,
+  "&:hover": {
+    backgroundColor: theme.palette.blue.bright,
+    color: theme.palette.common.white,
+    borderColor: theme.palette.blue.bright,
+  },
+  "& .MuiChip-label": { px: 1 },
+})
+
+// ============================================================================
+// Component
+// ============================================================================
 
 interface SummaryPanelProps {
   strategy?: string
@@ -49,13 +100,20 @@ export function SummaryPanel({
   const theme = useTheme()
   const mapAPI = useMap()
   const activeVisualization = useActiveOutcomeVisualization()
-  const storeOutcome = activeVisualization?.outcome ?? null
-
-  // Use prop if provided (Explore mode), otherwise use store (Learn mode)
-  const selectedOutcome = outcomeProp !== undefined ? outcomeProp : storeOutcome
+  const selectedOutcome = outcomeProp ?? activeVisualization?.outcome ?? null
 
   // Get tier colors from theme
   const tierColors = getTierColorsFromTheme(theme)
+
+  // Memoized chip styles
+  const locationChipSx = useMemo(
+    () => getLocationChipSx(theme, theme.palette.grey[700]),
+    [theme],
+  )
+  const locationChipMutedSx = useMemo(
+    () => getLocationChipSx(theme, theme.palette.grey[600]),
+    [theme],
+  )
 
   const [isLoading, setIsLoading] = useState(false)
   const [outcomeSummary, setOutcomeSummary] = useState<OutcomeSummary | null>(
@@ -157,7 +215,7 @@ export function SummaryPanel({
         }
 
         // Try to get feature properties from the map for location names
-        // This enriches the summary with actual location names from Mapbox
+        // to enrich the summary with actual location names from Mapbox
         // Note: querySourceFeatures only returns features from currently loaded tiles
         // Small polygons may not be in tiles at lower zoom levels
         const propsMap = await new Promise<Map<string, DemandUnitProperties>>(
@@ -324,7 +382,6 @@ export function SummaryPanel({
               lg: "460px",
               xl: "500px",
             },
-        boxSizing: "border-box",
         pointerEvents: "auto",
       }}
     >
@@ -332,10 +389,9 @@ export function SummaryPanel({
       {!isInline && (
         <>
           <Typography
-            variant="body2"
+            variant="subtitle2"
             sx={{
               mb: 0.5,
-              fontWeight: theme.typography.fontWeightMedium,
               color: theme.palette.grey[900],
             }}
           >
@@ -344,10 +400,8 @@ export function SummaryPanel({
 
           {/* Base scenario summary - always shown (only for overlay) */}
           <Typography
-            variant="body2"
+            variant="dashboard"
             sx={{
-              ...theme.typography.nav,
-              lineHeight: 1.5, // Intentionally more relaxed than nav default for readability
               color: theme.palette.grey[700],
               mb: 2,
             }}
@@ -399,16 +453,10 @@ export function SummaryPanel({
             >
               {/* Outcome name header */}
               <Typography
-                variant="caption"
+                variant="outcomeHeader"
                 sx={{
                   color: theme.palette.blue.medium,
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  fontSize: isInline
-                    ? theme.typography.body2.fontSize
-                    : "0.7rem",
-                  letterSpacing: "0.5px",
-                  display: "block",
-                  mb: isInline ? 0.5 : 1,
+                  mb: 1,
                 }}
               >
                 {selectedOutcome}
@@ -416,10 +464,8 @@ export function SummaryPanel({
 
               {/* Generated insight */}
               <Typography
-                variant="body2"
+                variant="dashboard"
                 sx={{
-                  ...theme.typography.nav,
-                  lineHeight: 1.5, // Intentionally more relaxed than nav default for readability
                   color: theme.palette.grey[700],
                   mb: 1.5,
                 }}
@@ -438,14 +484,7 @@ export function SummaryPanel({
                   }}
                 >
                   {/* Tier breakdown chips */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 0.5,
-                      alignItems: "center",
-                    }}
-                  >
+                  <Box sx={{ ...flexWrapStyles, alignItems: "center" }}>
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
                         const tierNum = parseInt(
@@ -456,16 +495,7 @@ export function SummaryPanel({
                             key={tier}
                             size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-                            sx={{
-                              ...theme.typography.compact.micro,
-                              backgroundColor: `${tierColors[tierNum]}15`,
-                              color: tierColors[tierNum],
-                              borderColor: `${tierColors[tierNum]}40`,
-                              border: "1px solid",
-                              fontWeight: theme.typography.fontWeightMedium,
-                              height: 22,
-                              "& .MuiChip-label": { px: 1 },
-                            }}
+                            sx={getTierChipSx(theme, tierColors[tierNum])}
                           />
                         )
                       },
@@ -474,22 +504,11 @@ export function SummaryPanel({
 
                   {/* Critical locations inline */}
                   {outcomeSummary.criticalLocations.length > 0 && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 0.5,
-                        alignItems: "center",
-                      }}
-                    >
+                    <Box sx={{ ...flexWrapStyles, alignItems: "center" }}>
                       <Typography
-                        variant="nav"
+                        variant="smallSectionLabel"
                         component="span"
-                        sx={{
-                          color: tierColors[4],
-                          fontWeight: theme.typography.fontWeightSemiBold,
-                          mr: 0.5,
-                        }}
+                        sx={{ color: tierColors[4], mr: 0.5 }}
                       >
                         Critical:
                       </Typography>
@@ -501,20 +520,7 @@ export function SummaryPanel({
                             size="small"
                             label={loc.primaryName}
                             onClick={() => handleLocationClick(loc)}
-                            sx={{
-                              ...theme.typography.compact.micro,
-                              cursor: "pointer",
-                              backgroundColor: "transparent",
-                              color: theme.palette.grey[700],
-                              border: theme.border.medium,
-                              height: 22,
-                              "&:hover": {
-                                backgroundColor: theme.palette.blue.bright,
-                                color: theme.palette.common.white,
-                                borderColor: theme.palette.blue.bright,
-                              },
-                              "& .MuiChip-label": { px: 0.75 },
-                            }}
+                            sx={locationChipSx}
                           />
                         ))}
                       {outcomeSummary.criticalLocations.length > 6 && (
@@ -530,22 +536,11 @@ export function SummaryPanel({
 
                   {/* At-risk locations inline */}
                   {outcomeSummary.atRiskLocations.length > 0 && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 0.5,
-                        alignItems: "center",
-                      }}
-                    >
+                    <Box sx={{ ...flexWrapStyles, alignItems: "center" }}>
                       <Typography
-                        variant="nav"
+                        variant="smallSectionLabel"
                         component="span"
-                        sx={{
-                          color: tierColors[3],
-                          fontWeight: theme.typography.fontWeightSemiBold,
-                          mr: 0.5,
-                        }}
+                        sx={{ color: tierColors[3], mr: 0.5 }}
                       >
                         At-risk:
                       </Typography>
@@ -555,20 +550,7 @@ export function SummaryPanel({
                           size="small"
                           label={loc.primaryName}
                           onClick={() => handleLocationClick(loc)}
-                          sx={{
-                            ...theme.typography.compact.micro,
-                            cursor: "pointer",
-                            backgroundColor: "transparent",
-                            color: theme.palette.grey[600],
-                            border: theme.border.medium,
-                            height: 18,
-                            "&:hover": {
-                              backgroundColor: theme.palette.blue.bright,
-                              color: theme.palette.common.white,
-                              borderColor: theme.palette.blue.bright,
-                            },
-                            "& .MuiChip-label": { px: 0.75 },
-                          }}
+                          sx={locationChipMutedSx}
                         />
                       ))}
                       {outcomeSummary.atRiskLocations.length > 4 && (
@@ -586,14 +568,7 @@ export function SummaryPanel({
                 /* Overlay layout: vertical arrangement */
                 <>
                   {/* Tier breakdown chips */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 0.5,
-                      mb: 1.5,
-                    }}
-                  >
+                  <Box sx={{ ...flexWrapStyles, mb: 1.5 }}>
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
                         const tierNum = parseInt(
@@ -604,18 +579,7 @@ export function SummaryPanel({
                             key={tier}
                             size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-                            sx={{
-                              ...theme.typography.compact.micro,
-                              backgroundColor: `${tierColors[tierNum]}15`,
-                              color: tierColors[tierNum],
-                              borderColor: `${tierColors[tierNum]}40`,
-                              border: "1px solid",
-                              fontWeight: theme.typography.fontWeightMedium,
-                              height: 22,
-                              "& .MuiChip-label": {
-                                px: 1,
-                              },
-                            }}
+                            sx={getTierChipSx(theme, tierColors[tierNum])}
                           />
                         )
                       },
@@ -626,17 +590,12 @@ export function SummaryPanel({
                   {outcomeSummary.criticalLocations.length > 0 && (
                     <Box sx={{ mb: 1.5 }}>
                       <Typography
-                        variant="nav"
-                        sx={{
-                          color: tierColors[4],
-                          fontWeight: theme.typography.fontWeightSemiBold,
-                          display: "block",
-                          mb: 0.5,
-                        }}
+                        variant="smallSectionLabel"
+                        sx={{ color: tierColors[4], mb: 0.5 }}
                       >
                         Critical locations:
                       </Typography>
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      <Box sx={flexWrapStyles}>
                         {outcomeSummary.criticalLocations
                           .slice(0, 8)
                           .map((loc) => (
@@ -645,27 +604,12 @@ export function SummaryPanel({
                               size="small"
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
-                              sx={{
-                                ...theme.typography.nav,
-                                cursor: "pointer",
-                                backgroundColor: "transparent",
-                                color: theme.palette.grey[700],
-                                border: theme.border.medium,
-                                height: 24,
-                                "&:hover": {
-                                  backgroundColor: theme.palette.blue.bright,
-                                  color: theme.palette.common.white,
-                                  borderColor: theme.palette.blue.bright,
-                                },
-                                "& .MuiChip-label": {
-                                  px: 1,
-                                },
-                              }}
+                              sx={locationChipSx}
                             />
                           ))}
                         {outcomeSummary.criticalLocations.length > 8 && (
                           <Typography
-                            variant="nav"
+                            variant="compactMicro"
                             sx={{
                               color: theme.palette.grey[500],
                               alignSelf: "center",
@@ -682,18 +626,12 @@ export function SummaryPanel({
                   {outcomeSummary.atRiskLocations.length > 0 && (
                     <Box>
                       <Typography
-                        variant="compactMicro"
-                        sx={{
-                          color: tierColors[3],
-                          fontWeight: theme.typography.fontWeightSemiBold,
-                          display: "block",
-                          mb: 0.5,
-                        }}
+                        variant="smallSectionLabel"
+                        sx={{ color: tierColors[3], mb: 0.5 }}
                       >
-                        At-risk locations (
-                        {outcomeSummary.atRiskLocations.length}):
+                        At-risk locations ({outcomeSummary.atRiskLocations.length}):
                       </Typography>
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      <Box sx={flexWrapStyles}>
                         {outcomeSummary.atRiskLocations
                           .slice(0, 5)
                           .map((loc) => (
@@ -702,22 +640,7 @@ export function SummaryPanel({
                               size="small"
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
-                              sx={{
-                                ...theme.typography.compact.micro,
-                                cursor: "pointer",
-                                backgroundColor: "transparent",
-                                color: theme.palette.grey[600],
-                                border: theme.border.medium,
-                                height: 18,
-                                "&:hover": {
-                                  backgroundColor: theme.palette.blue.bright,
-                                  color: theme.palette.common.white,
-                                  borderColor: theme.palette.blue.bright,
-                                },
-                                "& .MuiChip-label": {
-                                  px: 0.75,
-                                },
-                              }}
+                              sx={locationChipMutedSx}
                             />
                           ))}
                         {outcomeSummary.atRiskLocations.length > 5 && (

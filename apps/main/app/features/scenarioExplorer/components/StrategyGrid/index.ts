@@ -10,5 +10,4 @@
 
 export * from "./types"
 export { gridStyles } from "./styles"
-export { TierTooltipPortal } from "./TierTooltipPortal"
 export { GridControls } from "./GridControls"

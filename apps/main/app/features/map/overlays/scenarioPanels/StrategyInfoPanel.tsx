@@ -8,18 +8,21 @@
  */
 
 import { Box, useTheme } from "@repo/ui/mui"
-import { strategies } from "../../../../content/scenarios"
+import { getStrategy } from "../../../../content/scenarios"
 import { StrategyHeader } from "../../../scenarios/components/shared"
-import type { StrategyInfoPanelProps } from "./types"
-import { panelBaseStyles, panelMaxWidth } from "./styles"
+import { getLearnPanelBaseStyles, learnPanelMaxWidth } from "./learnPanelStyles"
+
+interface StrategyInfoPanelProps {
+  strategyValue?: string
+  onTitleClick?: () => void
+}
 
 export function StrategyInfoPanel({
   strategyValue = "current-ops",
   onTitleClick,
 }: StrategyInfoPanelProps) {
   const theme = useTheme()
-
-  const strategy = strategies.find((s) => s.value === strategyValue)
+  const strategy = getStrategy(strategyValue)
 
   if (!strategy) {
     console.warn(`Strategy "${strategyValue}" not found`)
@@ -29,10 +32,10 @@ export function StrategyInfoPanel({
   return (
     <Box
       sx={{
-        ...panelBaseStyles,
+        ...getLearnPanelBaseStyles(theme),
         boxShadow: theme.shadow.sm,
         width: "100%",
-        maxWidth: panelMaxWidth,
+        maxWidth: learnPanelMaxWidth,
       }}
     >
       <StrategyHeader
@@ -46,3 +49,4 @@ export function StrategyInfoPanel({
 }
 
 export default StrategyInfoPanel
+

@@ -91,11 +91,9 @@ export default function TierTooltipContent({
     <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
         <Typography
-          variant="nav"
-          component="span"
+          variant="dashboard"
           sx={{
             fontWeight: theme.typography.fontWeightSemiBold,
-            display: "block",
             mb: 1,
           }}
         >
@@ -103,11 +101,7 @@ export default function TierTooltipContent({
         </Typography>
       )}
 
-      <Typography
-        variant="nav"
-        component="span"
-        sx={{ display: "block", mb: 1.5 }}
-      >
+      <Typography variant="dashboard" sx={{ mb: 1.5 }}>
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
@@ -117,8 +111,7 @@ export default function TierTooltipContent({
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <Typography
-          variant="nav"
-          component="span"
+          variant="dashboard"
           sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
         >
           Outcome levels:
@@ -142,7 +135,7 @@ export default function TierTooltipContent({
                 mt: "3px", // Align with first line of text
               }}
             />
-            <Typography variant="nav" component="span">
+            <Typography variant="dashboard" component="span">
               {formatTierText(
                 (
                   outcomeTierValues as Record<

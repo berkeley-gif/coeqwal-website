@@ -49,8 +49,8 @@ import {
   StrategyInfoPanel,
   KeyOperationsPanel,
   KeyOutcomesPanel,
-} from "./StrategyRow"
-import { SummaryPanel } from "./SummaryPanel"
+} from "./scenarioPanels"
+import { SummaryPanel } from "./scenarioPanels"
 import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"

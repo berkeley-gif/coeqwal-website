@@ -4,7 +4,7 @@
  * HotspotMarkers component
  *
  * Renders markers for tier 4 locations for specific outcomes.
- * Each marker shows an image marker.
+ * Each marker shows an image with a tier-colored label.
  * Supports both Point and Polygon geometries (calculates centroid for polygons). TODO: refine this. Some du's are across multiple disconnected polygons.
  */
 
@@ -12,7 +12,6 @@ import React, { useState, useEffect, useCallback } from "react"
 import { Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useTheme } from "@repo/ui/mui"
-import { MapMarkerTooltip } from "@repo/ui"
 import {
   fetchTierLocationData,
   type TierFeature,
@@ -377,31 +376,53 @@ export function HotspotMarkers({
           latitude={hotspot.latitude}
           anchor="bottom"
         >
-          <MapMarkerTooltip text={hotspot.name} statusColor={tierColor}>
+          <Box
+            onClick={() => handleMarkerClick(hotspot)}
+            sx={{
+              position: "relative",
+              cursor: "pointer",
+              transition: theme.transition.default,
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
+            }}
+          >
+            {/* Marker image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={config.image}
+              alt={config.imageAlt}
+              style={{
+                width: "60px",
+                height: "auto",
+                filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.3))",
+              }}
+            />
+
+            {/* Co-marker label */}
             <Box
-              onClick={() => handleMarkerClick(hotspot)}
               sx={{
-                position: "relative",
-                cursor: "pointer",
-                transition: theme.transition.default,
-                "&:hover": {
-                  transform: "scale(1.2)",
-                },
+                position: "absolute",
+                left: "100%",
+                top: "50%",
+                transform: "translateY(-50%)",
+                ml: 1,
+                ...theme.typography.compact.micro,
+                backgroundColor: tierColor,
+                color: theme.palette.utility.white,
+                py: 0.5,
+                px: 1,
+                borderRadius: theme.borderRadius.sm,
+                fontWeight: theme.typography.fontWeightSemiBold,
+                whiteSpace: "nowrap",
+                boxShadow: theme.shadow.subtle,
+                border: theme.border.subtleOutline,
+                pointerEvents: "none",
               }}
             >
-              {/* Marker image */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={config.image}
-                alt={config.imageAlt}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.3))",
-                }}
-              />
+              {hotspot.name}
             </Box>
-          </MapMarkerTooltip>
+          </Box>
         </Marker>
       ))}
     </>

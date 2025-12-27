@@ -134,6 +134,12 @@ const palette = {
     900: "#171923",
   },
 
+  // Background undertones - very light backgrounds with subtle tints
+  undertone: {
+    cool: "#f7fafc", // Cool blue-grey undertone (same as grey[50])
+    warm: "#faf8f5", // Warm cream undertone
+  },
+
   // Ambient/mood elements
   ambient: {
     rippleWhite: "rgba(255, 255, 255, 0.16)", // White at 16% opacity
@@ -614,17 +620,21 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.25rem", // 20px
+      fontSize: "1.125rem", // 18px
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
+      textBoxTrim: "trim-start",
+      textBoxEdge: "cap",
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1rem",
+      fontSize: "1rem", // 16px
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.6,
+      textBoxTrim: "trim-start",
+      textBoxEdge: "cap",
     },
     button: {
       fontFamily: themeValues.fontFamily.text,
@@ -655,6 +665,35 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.4,
       letterSpacing: "normal",
+    },
+    dashboard: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.875rem", // 14px
+      fontWeight: 400,
+      lineHeight: 1.5,
+      letterSpacing: "normal",
+    },
+    smallSectionLabel: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.caption, // 0.75rem (12px)
+      fontWeight: 500,
+      lineHeight: 1.3,
+      color: "#757575", // grey[600]
+    },
+    outcomeLabel: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.micro, // 0.7rem (11px)
+      fontWeight: 500,
+      lineHeight: 1.2,
+      textAlign: "center" as const,
+    },
+    outcomeHeader: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: typeScale.compact.micro, // 0.7rem (11px)
+      fontWeight: 600,
+      lineHeight: 1.3,
+      letterSpacing: "0.5px",
+      textTransform: "uppercase" as const,
     },
     // Compact typography variants for dialogs, tooltips, form labels
     // Nested structure for spread syntax: ...theme.typography.compact.micro
@@ -1090,6 +1129,20 @@ const theme = createTheme({
       },
     },
     MuiTypography: {
+      defaultProps: {
+        variantMapping: {
+          // Map custom variants to semantic HTML elements
+          dashboard: "p",
+          nav: "span",
+          smallSectionLabel: "p",
+          outcomeLabel: "div",
+          outcomeHeader: "p",
+          compactTitle: "span",
+          compactSubtitle: "span",
+          compactCaption: "span",
+          compactMicro: "span",
+        },
+      },
       variants: [
         {
           props: { variant: "h2" },
@@ -1115,7 +1168,6 @@ const theme = createTheme({
           transition: "all 0.3s ease", // themeValues.transition.default
           position: "relative",
           display: "inline-block",
-          boxSizing: "border-box",
           borderRadius: theme.borderRadius.xs,
           border: `2px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
@@ -1174,7 +1226,6 @@ const theme = createTheme({
           transition: "all 0.3s ease", // themeValues.transition.default
           position: "relative",
           display: "inline-block",
-          boxSizing: "border-box",
           borderRadius: theme.borderRadius.circle,
           border: `1px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
@@ -1354,6 +1405,7 @@ declare module "@mui/material/styles" {
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
     outcomes: typeof themeValues.palette.outcomes
+    undertone: typeof themeValues.palette.undertone
   }
 
   interface PaletteOptions {
@@ -1370,6 +1422,7 @@ declare module "@mui/material/styles" {
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
+    undertone?: Partial<typeof themeValues.palette.undertone>
   }
 
   // zIndex - derived from themeValues.zIndex
@@ -1439,6 +1492,10 @@ declare module "@mui/material/styles" {
   interface TypographyVariants {
     fontWeightSemiBold: number
     nav: React.CSSProperties
+    dashboard: React.CSSProperties
+    smallSectionLabel: React.CSSProperties
+    outcomeLabel: React.CSSProperties
+    outcomeHeader: React.CSSProperties
     compact: {
       title: React.CSSProperties
       subtitle: React.CSSProperties
@@ -1453,6 +1510,10 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
     nav?: React.CSSProperties
+    dashboard?: React.CSSProperties
+    smallSectionLabel?: React.CSSProperties
+    outcomeLabel?: React.CSSProperties
+    outcomeHeader?: React.CSSProperties
     compact?: {
       title?: React.CSSProperties
       subtitle?: React.CSSProperties
@@ -1478,6 +1539,10 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     nav: true
+    dashboard: true
+    smallSectionLabel: true
+    outcomeLabel: true
+    outcomeHeader: true
     compactTitle: true
     compactSubtitle: true
     compactCaption: true

@@ -40,9 +40,8 @@ function DescriptionWithTUCPTooltip({
 
   return (
     <Typography
-      variant="nav"
+      variant="dashboard"
       sx={{
-        lineHeight: 1.4,
         color: theme.palette.grey[700],
         maxWidth: maxWidth ?? theme.layout.maxWidth.md,
       }}
@@ -102,12 +101,6 @@ export function StrategyHeader({
           mb: showDescription ? 0.5 : 0,
           lineHeight: 1.3,
           color: theme.palette.grey[900],
-          ...(onTitleClick && {
-            cursor: "pointer",
-            "&:hover": {
-              color: theme.palette.blue.bright,
-            },
-          }),
         }}
       >
         {displayLabel}

@@ -10,8 +10,6 @@
  *
  * Uses MUI's useMediaQuery with `pointer: coarse` to detect touch devices.
  *
- * @since 12 Dec 2025
- *
  * ## When to use HybridTooltip vs ClickTooltip
  *
  * Use **HybridTooltip** when you want device-adaptive behavior: hover on desktop
@@ -116,7 +114,6 @@ const getTooltipSlotProps = (
       width,
       maxWidth,
       padding: theme.spacing(theme.spacingTokens.component.md, theme.spacingTokens.component.lg),
-      paddingRight: showCloseButton ? "40px" : theme.spacing(theme.spacingTokens.component.lg),
       ...theme.typography.compact.subtitle,
     },
   },
@@ -156,7 +153,7 @@ export function HybridTooltip({
     const tooltipContent = (
       <Box sx={{ position: "relative" }}>
         <TooltipCloseButton onClick={handleClose} />
-        <Box sx={{ pr: "28px" }}>{content}</Box>
+        {content}
       </Box>
     )
 
@@ -181,7 +178,7 @@ export function HybridTooltip({
           }}
         >
           <TooltipCloseButton onClick={handleClose} />
-          <Box sx={{ pr: "28px" }}>{content}</Box>
+          {content}
         </Box>
       )
 

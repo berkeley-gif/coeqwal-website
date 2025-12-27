@@ -8,19 +8,23 @@
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { strategies } from "../../../../content/scenarios"
+import { getStrategy } from "../../../../content/scenarios"
 import { HydroclimateChooser } from "../../../scenarios/components"
 import { OperationsIconGroup } from "../../../scenarios/components/shared"
-import type { KeyOperationsPanelProps } from "./types"
-import { panelBaseStyles, getTitleStyles } from "./styles"
+import { getLearnPanelBaseStyles } from "./learnPanelStyles"
+import { getScenarioPanelTitleStyles } from "../../../scenarios/components/shared"
+
+interface KeyOperationsPanelProps {
+  strategyValue?: string
+  onTitleClick?: () => void
+}
 
 export function KeyOperationsPanel({
   strategyValue = "current-ops",
   onTitleClick,
 }: KeyOperationsPanelProps) {
   const theme = useTheme()
-
-  const strategy = strategies.find((s) => s.value === strategyValue)
+  const strategy = getStrategy(strategyValue)
 
   if (!strategy) {
     console.warn(`Strategy "${strategyValue}" not found`)
@@ -30,7 +34,7 @@ export function KeyOperationsPanel({
   return (
     <Box
       sx={{
-        ...panelBaseStyles,
+        ...getLearnPanelBaseStyles(theme),
         boxShadow: theme.shadow.sm,
         width: "fit-content",
         maxWidth: "100%",
@@ -51,7 +55,7 @@ export function KeyOperationsPanel({
             variant="subtitle2"
             onClick={onTitleClick}
             sx={{
-              ...getTitleStyles(theme, !!onTitleClick),
+              ...getScenarioPanelTitleStyles(theme),
               mb: 1,
             }}
           >
@@ -91,3 +95,4 @@ export function KeyOperationsPanel({
 }
 
 export default KeyOperationsPanel
+

@@ -11,10 +11,10 @@
  * Use MapMarkerTooltip for map markers that need tooltips with
  * a status color indicator. Best for: tier indicators, status markers.
  *
- * For polygon/shape tooltips on maps, use PolygonLayerTooltip instead
+ * For map feature tooltips (polygons, points), use MapFeatureTooltip instead
  * (which uses Mapbox Popup for proper geo-positioning).
  *
- * @see PolygonLayerTooltip - For map polygon features (uses Mapbox Popup)
+ * @see MapFeatureTooltip - For map features (uses Mapbox Popup)
  * @see HybridTooltip - The underlying device-adaptive component
  */
 
