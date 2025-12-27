@@ -103,11 +103,6 @@ export function HydroclimateChooser({
         <Typography
           variant="subtitle2"
           sx={{
-            fontWeight: theme.typography.fontWeightMedium,
-            fontSize:
-              size === "small"
-                ? theme.typography.caption.fontSize
-                : theme.typography.body2.fontSize,
             color: theme.palette.grey[900],
             whiteSpace: "nowrap",
           }}

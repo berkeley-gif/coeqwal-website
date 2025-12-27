@@ -18,6 +18,9 @@ export type { OperationsIconGroupProps } from "./OperationsIconGroup"
 export { StrategyHeader } from "./StrategyHeader"
 export type { StrategyHeaderProps } from "./StrategyHeader"
 
+export { SmartSummary } from "./SmartSummary"
+export type { SmartSummaryProps } from "./SmartSummary"
+
 // Utilities
 export {
   getStrategyIcons,
@@ -32,6 +35,9 @@ export type { StrategyIcon, StrategyIconConfig } from "./strategyIcons"
 // Types
 export type { ChartDataPoint, OutcomeName, Strategy } from "./types"
 export { isSingleValueTier } from "./types"
+
+// Styles
+export { getScenarioPanelTitleStyles } from "./scenarioStyles"
 
 
 

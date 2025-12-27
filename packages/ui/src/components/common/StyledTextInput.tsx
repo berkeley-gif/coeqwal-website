@@ -103,7 +103,6 @@ export const StyledTextInput = forwardRef<
           color: theme.palette.text.primary,
           outline: "none",
           transition: "border-color 0.3s ease, box-shadow 0.3s ease", // theme.transition.default timing
-          boxSizing: "border-box",
           "&:focus": {
             borderColor: theme.palette.primary.main,
             boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,

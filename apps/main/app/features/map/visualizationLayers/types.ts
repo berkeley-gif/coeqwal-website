@@ -58,6 +58,7 @@ export type LayerType =
   | "delta"
   | "river"
   | "marker"
+  | "point"
 
 /** Feature info for tooltips - supports all layer types */
 export interface HoveredFeatureInfo {
@@ -81,6 +82,8 @@ export interface HoveredFeatureInfo {
   // WBA specific fields
   hydroRegion?: string | null
   gisAcres?: number | null
+  // Point marker specific fields
+  locationType?: string | null
 }
 
 // ============================================================================

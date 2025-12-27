@@ -172,15 +172,11 @@ export function OutcomeGlyphItem({
         >
           {showLabel && (
             <Typography
-              variant="compactMicro"
-              component="div"
+              variant="outcomeLabel"
               sx={{
-                textAlign: "center",
-                fontWeight: theme.typography.fontWeightMedium,
                 color: isActive
                   ? theme.palette.blue.darkest
                   : theme.palette.grey[500],
-                lineHeight: 1.2,
               }}
             >
               {/* Handle long names that shouldn't break mid-word */}

@@ -7,13 +7,11 @@
  * A click-to-open tooltip with X button and optional click outside (default: true ) to close.
  * Supports two variants for different content complexity.
  *
- * @since 12 Dec 2025
- *
  * ## When to use ClickTooltip vs HybridTooltip
  *
  * Use **ClickTooltip** when you need consistent click-to-open behavior on ALL
  * devices (both desktop and touch). The tooltip always shows X button and
- * supports click-outside to close. Best for: tier/outcome tooltips, complex
+ * supports click-outside to close. Best for: tier/outcome tooltips,
  * interactive content that benefits from explicit open/close control.
  *
  * Use **HybridTooltip** when you want device-adaptive behavior: hover on desktop
@@ -122,7 +120,7 @@ function TooltipVariant({
   const tooltipContent = (
     <Box sx={{ position: "relative" }}>
       {!hideCloseButton && <TooltipCloseButton onClick={onClose} />}
-      <Box sx={{ pr: hideCloseButton ? 0 : "28px" }}>{content}</Box>
+      {content}
     </Box>
   )
 
@@ -213,7 +211,7 @@ function OverlayVariant({
       }}
     >
       {!hideCloseButton && <TooltipCloseButton onClick={onClose} />}
-      <Box sx={{ pr: hideCloseButton ? 0 : "28px" }}>{content}</Box>
+      {content}
     </Box>
   )
 

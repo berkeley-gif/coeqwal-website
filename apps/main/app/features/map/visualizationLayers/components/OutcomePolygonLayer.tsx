@@ -155,19 +155,22 @@ export function OutcomePolygonLayer({
     return { translatedIds: featureIds, translatedColorMap: tierColorMap }
   }, [layerType, featureIds, tierColorMap])
 
+  // Check if we have tier data loaded
+  const hasTierData = Object.keys(translatedColorMap).length > 0
+
   // Build color expression
   const colorExpression = useMemo(() => {
     const colorMapEntries = Object.entries(translatedColorMap)
 
-    // No tier data yet
+    // No tier data yet - will use transparent fill with white outline
     if (colorMapEntries.length === 0) {
-      return theme.palette.grey[500]
+      return "transparent"
     }
 
     // Single-feature outcome (no idProperty): use the first/only color directly
     if (!idProperty) {
       const firstEntry = colorMapEntries[0]
-      return firstEntry ? firstEntry[1] : theme.palette.grey[500]
+      return firstEntry ? firstEntry[1] : "transparent"
     }
 
     // Multi-feature outcome: build a match expression
@@ -226,8 +229,13 @@ export function OutcomePolygonLayer({
       return
     }
 
+    // Loading state: transparent fill (outline will be white)
+    if (!hasTierData) {
+      map.setPaintProperty(fillId, "fill-color", "transparent")
+      map.setPaintProperty(fillId, "fill-opacity", 0)
+    }
     // Special handling for Delta: single-feature, apply tier color directly
-    if (layerType === "delta") {
+    else if (layerType === "delta") {
       map.setPaintProperty(fillId, "fill-color", colorExpression)
       map.setPaintProperty(fillId, "fill-opacity", 0.9)
     } else {
@@ -246,6 +254,9 @@ export function OutcomePolygonLayer({
       ])
     }
 
+    // Determine outline color: white for loading state, tier color otherwise
+    const outlineColor = hasTierData ? colorExpression : "#ffffff"
+
     // Create outline layer if it doesn't exist
     if (!map.getLayer(outlineId) && !outlineCreatedRef.current) {
       const fillLayer = map.getLayer(fillId)
@@ -262,9 +273,9 @@ export function OutcomePolygonLayer({
             source: sourceId,
             "source-layer": sourceLayer,
             paint: {
-              "line-color": colorExpression,
-              "line-width": 0.5,
-              "line-opacity": 1,
+              "line-color": outlineColor,
+              "line-width": hasTierData ? 0.5 : 1,
+              "line-opacity": hasTierData ? 1 : 0.6,
               "line-offset": -0.25,
             },
             layout: { visibility: "none" },
@@ -281,12 +292,19 @@ export function OutcomePolygonLayer({
       if (filterExpression) {
         map.setFilter(outlineId, filterExpression)
       }
-      map.setPaintProperty(outlineId, "line-color", colorExpression)
+      map.setPaintProperty(outlineId, "line-color", outlineColor)
 
-      if (layerType === "delta") {
+      // Loading state: thin white outline
+      if (!hasTierData) {
+        map.setPaintProperty(outlineId, "line-width", 1)
+        map.setPaintProperty(outlineId, "line-opacity", 0.6)
+        map.setPaintProperty(outlineId, "line-offset", 0)
+      } else if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)
+        map.setPaintProperty(outlineId, "line-opacity", 1)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else {
+        map.setPaintProperty(outlineId, "line-opacity", 1)
         map.setPaintProperty(outlineId, "line-width", [
           "interpolate",
           ["linear"],
@@ -324,6 +342,7 @@ export function OutcomePolygonLayer({
     colorExpression,
     filterExpression,
     layerType,
+    hasTierData,
   ])
 
   // Cleanup on unmount

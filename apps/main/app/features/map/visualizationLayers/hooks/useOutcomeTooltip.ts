@@ -9,7 +9,7 @@
  * TODO: handle // eslint-disable-next-line @typescript-eslint/no-explicit-any (or is it worth it?)
  */
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useMap } from "@repo/map"
 import { getTierLabel } from "../../../../content/tiers"
 import type {
@@ -38,10 +38,12 @@ interface UseOutcomeTooltipProps {
 export interface UseOutcomeTooltipResult {
   /** Currently hovered feature */
   hoveredFeature: HoveredFeatureInfo | null
-  /** Pinned feature (click-to-pin) */
-  pinnedFeature: HoveredFeatureInfo | null
-  /** Clear pinned tooltip */
-  clearPinned: () => void
+  /** Array of pinned features (click toggles) */
+  pinnedFeatures: HoveredFeatureInfo[]
+  /** Clear a specific pinned tooltip by featureId */
+  clearPinned: (featureId: string) => void
+  /** Clear all pinned tooltips */
+  clearAllPinned: () => void
 }
 
 // ============================================================================
@@ -59,15 +61,24 @@ export function useOutcomeTooltip({
 }: UseOutcomeTooltipProps): UseOutcomeTooltipResult {
   const { mapRef } = useMap()
   const [hoveredFeature, setHoveredFeature] = useState<HoveredFeatureInfo | null>(null)
-  const [pinnedFeature, setPinnedFeature] = useState<HoveredFeatureInfo | null>(null)
+  const [pinnedFeatures, setPinnedFeatures] = useState<HoveredFeatureInfo[]>([])
+  
+  // Track recently unpinned features to suppress hover tooltip
+  const suppressedFeaturesRef = useRef<Set<string>>(new Set())
 
-  const clearPinned = useCallback(() => {
-    setPinnedFeature(null)
+  const clearPinned = useCallback((featureId: string) => {
+    // Suppress hover tooltip when closing via X button
+    suppressedFeaturesRef.current.add(featureId)
+    setPinnedFeatures(prev => prev.filter(f => f.featureId !== featureId))
   }, [])
 
-  // Clear pinned when config changes
+  const clearAllPinned = useCallback(() => {
+    setPinnedFeatures([])
+  }, [])
+
+  // Clear all pinned when config changes
   useEffect(() => {
-    setPinnedFeature(null)
+    setPinnedFeatures([])
   }, [config])
 
   // Set up mouse events
@@ -154,12 +165,19 @@ export function useOutcomeTooltip({
     mouseLeaveHandler = () => {
       map.getCanvas().style.cursor = ""
       setHoveredFeature(null)
+      // Clear suppression when mouse leaves
+      suppressedFeaturesRef.current.clear()
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mouseMoveHandler = (e: any) => {
       const info = buildFeatureInfo(e)
-      setHoveredFeature(info)
+      // Don't show hover if feature was just unpinned
+      if (info && suppressedFeaturesRef.current.has(info.featureId)) {
+        setHoveredFeature(null)
+      } else {
+        setHoveredFeature(info)
+      }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -167,17 +185,28 @@ export function useOutcomeTooltip({
       clickedOnFeature = true
       const info = buildFeatureInfo(e)
       if (info) {
-        setPinnedFeature(info)
+        // Toggle: if already pinned, remove it; otherwise add it
+        setPinnedFeatures(prev => {
+          const existingIndex = prev.findIndex(f => f.featureId === info.featureId)
+          if (existingIndex >= 0) {
+            // Unpinning: suppress hover tooltip for this feature
+            suppressedFeaturesRef.current.add(info.featureId)
+            return prev.filter((_, i) => i !== existingIndex)
+          } else {
+            // Pinning: remove from suppression if it was there
+            suppressedFeaturesRef.current.delete(info.featureId)
+            return [...prev, info]
+          }
+        })
       }
       setTimeout(() => {
         clickedOnFeature = false
       }, 100)
     }
 
+    // Clicking on empty map area no longer clears all pinned - user must click X
     mapClickHandler = () => {
-      if (!clickedOnFeature) {
-        setPinnedFeature(null)
-      }
+      // No-op: tooltips stay pinned until explicitly closed
     }
 
     map.on("mouseenter", mapboxLayerId, mouseEnterHandler)
@@ -193,14 +222,15 @@ export function useOutcomeTooltip({
       if (clickHandler) map.off("click", mapboxLayerId, clickHandler)
       if (mapClickHandler) map.off("click", mapClickHandler)
       setHoveredFeature(null)
-      setPinnedFeature(null)
+      setPinnedFeatures([])
     }
   }, [enabled, config, tierLevelMap, locationData, mapRef])
 
   return {
     hoveredFeature,
-    pinnedFeature,
+    pinnedFeatures,
     clearPinned,
+    clearAllPinned,
   }
 }
 

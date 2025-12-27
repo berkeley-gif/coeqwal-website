@@ -18,8 +18,13 @@ import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { mapActions, useActiveOutcomeVisualization } from "../../store"
-import type { KeyOutcomesPanelProps } from "./types"
-import { panelBaseStyles, panelMaxWidth, getTitleStyles } from "./styles"
+import { getLearnPanelBaseStyles, learnPanelMaxWidth } from "./learnPanelStyles"
+import { getScenarioPanelTitleStyles } from "../../../scenarios/components/shared"
+
+interface KeyOutcomesPanelProps {
+  scenarioId?: string
+  onTitleClick?: () => void
+}
 
 export function KeyOutcomesPanel({
   scenarioId = "s0020",
@@ -97,7 +102,6 @@ export function KeyOutcomesPanel({
                   color: theme.palette.blue.bright,
                   textDecoration: "underline",
                   cursor: "pointer",
-                  fontStyle: "normal",
                   "&:hover": { color: theme.palette.blue.dark },
                 }}
               >
@@ -138,17 +142,17 @@ export function KeyOutcomesPanel({
   return (
     <Box
       sx={{
-        ...panelBaseStyles,
+        ...getLearnPanelBaseStyles(theme),
         boxShadow: theme.shadow.sm,
         width: "100%",
-        maxWidth: panelMaxWidth,
+        maxWidth: learnPanelMaxWidth,
       }}
     >
       <Typography
         variant="subtitle2"
         onClick={onTitleClick}
         sx={{
-          ...getTitleStyles(theme, !!onTitleClick),
+          ...getScenarioPanelTitleStyles(theme),
           mb: 1,
         }}
       >
@@ -156,16 +160,7 @@ export function KeyOutcomesPanel({
       </Typography>
 
       {/* Multiple location outcomes - first 5 */}
-      <Typography
-        variant="compactMicro"
-        sx={{
-          display: "block",
-          mb: 1,
-          fontWeight: theme.typography.fontWeightMedium,
-          color: theme.palette.grey[600],
-          letterSpacing: "0.5px",
-        }}
-      >
+      <Typography variant="smallSectionLabel" sx={{ mb: 1 }}>
         Multiple location outcomes
       </Typography>
       <Box
@@ -181,16 +176,7 @@ export function KeyOutcomesPanel({
       </Box>
 
       {/* Single location outcomes - last 4 */}
-      <Typography
-        variant="compactMicro"
-        sx={{
-          display: "block",
-          mb: 1,
-          fontWeight: theme.typography.fontWeightMedium,
-          color: theme.palette.grey[600],
-          letterSpacing: "0.5px",
-        }}
-      >
+      <Typography variant="smallSectionLabel" sx={{ mb: 1 }}>
         Single location outcomes
       </Typography>
       <Box
@@ -208,3 +194,5 @@ export function KeyOutcomesPanel({
 }
 
 export default KeyOutcomesPanel
+
+

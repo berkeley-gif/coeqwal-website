@@ -8,3 +8,10 @@ export {
   type ChartDataPoint,
   type OutcomeScoreData,
 } from "./useTierData"
+
+export {
+  useScenarioSummary,
+  useMultipleScenarioSummaries,
+  type ScenarioSummaryData,
+  type UseScenarioSummaryReturn,
+} from "./useScenarioSummary"
