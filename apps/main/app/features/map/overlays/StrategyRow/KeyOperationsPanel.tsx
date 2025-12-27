@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * KeyOperationsPanel - Shows key operations icons and hydroclimate chooser
  *

@@ -1,8 +1,5 @@
 import type { ScenariosResponse } from "../../types/scenarioDownloads"
-
-// File download endpoints (presigned S3 URLs)
-const FILE_DOWNLOAD_API_BASE =
-  "https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default"
+import { FILE_DOWNLOAD_API_BASE } from "../constants/api"
 
 /**
  * Fetch scenarios list for file downloads

@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * StrategyInfoPanel - Shows strategy title and description
  *

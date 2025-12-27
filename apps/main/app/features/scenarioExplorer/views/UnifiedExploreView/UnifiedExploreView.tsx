@@ -12,8 +12,8 @@ import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import ListView from "../ListView/ListView"
 import {
-  learnMapActions,
-  useExploreTierSelection,
+  mapActions,
+  useActiveOutcomeVisualization,
 } from "../../../../features/map/store"
 import { useComparisonData } from "../ComparisonView/useComparisonData"
 
@@ -65,32 +65,35 @@ export default function UnifiedExploreView({
     }))
   }, [comparisonData, highlightedScenario])
 
-  // Get current tier selection for toggle behavior
-  const currentTierSelection = useExploreTierSelection()
+  // Get current visualization for toggle behavior
+  const currentVisualization = useActiveOutcomeVisualization()
 
   // Set map mode based on current view mode
   useEffect(() => {
     if (mode === "map") {
-      learnMapActions.setMapMode("explore")
+      mapActions.setMapMode("explore")
     } else {
-      learnMapActions.setMapMode("hidden")
-      learnMapActions.setExploreTierSelection(null)
+      mapActions.setMapMode("hidden")
+      mapActions.clearOutcomeVisualization()
     }
 
     return () => {
-      learnMapActions.setMapMode("hidden")
-      learnMapActions.setExploreTierSelection(null)
+      mapActions.setMapMode("hidden")
+      mapActions.clearOutcomeVisualization()
     }
   }, [mode])
 
-  // Toggle behavior: if same tier is already selected, clear it; otherwise set it
+  // Toggle behavior: if same outcome is already selected, clear it; otherwise set it
   const handleTierClick = (strategy: string, outcome: string) => {
     const isSameSelection =
-      currentTierSelection?.strategy === strategy &&
-      currentTierSelection?.outcome === outcome
-    learnMapActions.setExploreTierSelection(
-      isSameSelection ? null : { strategy, outcome },
-    )
+      currentVisualization?.strategy === strategy &&
+      currentVisualization?.outcome === outcome
+    
+    if (isSameSelection) {
+      mapActions.clearOutcomeVisualization()
+    } else {
+      mapActions.setOutcomeVisualization(outcome, strategy)
+    }
   }
 
   // Width calculations based on mode

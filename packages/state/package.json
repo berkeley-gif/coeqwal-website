@@ -7,6 +7,10 @@
     "./drawer": {
       "import": "./src/drawer/index.ts",
       "types": "./src/drawer/index.ts"
+    },
+    "./zustand": {
+      "import": "./src/zustand/index.ts",
+      "types": "./src/zustand/index.ts"
     }
   },
   "scripts": {

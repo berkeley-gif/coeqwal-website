@@ -16,7 +16,7 @@ interface TierTooltipContentProps {
 }
 
 // Format description text with bold markdown (**text**)
-export const formatDescription = (text: string, fontWeightMedium: number = 500) => {
+const formatDescription = (text: string, fontWeightMedium: number = 500) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {
@@ -33,7 +33,7 @@ export const formatDescription = (text: string, fontWeightMedium: number = 500) 
 }
 
 // Format tier text with emphasized keywords, numbers, and markdown
-export const formatTierText = (text: string, fontWeightMedium: number = 500) => {
+const formatTierText = (text: string, fontWeightMedium: number = 500) => {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
 
   return parts.map((part, index) => {

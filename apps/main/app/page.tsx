@@ -12,7 +12,7 @@ import { MapProvider } from "@repo/map"
 import { Header } from "./components/Header"
 import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
-import PersistentMap from "./features/map/PersistentMap"
+import PersistentMapWrapper from "./features/map/PersistentMapWrapper"
 
 import { TabsProvider } from "./context/Tabs"
 import SmoothTabs from "./components/tabs/SmoothTabs"
@@ -23,13 +23,9 @@ export default function Home() {
     <>
       {/* MapProvider at top level so both the map and overlays can access it */}
       <MapProvider>
-        {/* 
-          Persistent map - renders once and stays mounted.
-          Preloads during IntroSection scroll, ready when tabs appear.
-          Positions itself based on mapMode from store (hidden | learn | explore).
-        */}
+        {/* PersistentMapWrapper - renders once, stays mounted across tab switches */}
         <Suspense fallback={null}>
-          <PersistentMap />
+          <PersistentMapWrapper />
         </Suspense>
 
         <TabsProvider>

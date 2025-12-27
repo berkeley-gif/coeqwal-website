@@ -66,7 +66,7 @@ export default function BasinInflowArrows({
     },
   ]
 
-  // TODO: Use theme color once map design system is finalized
+  // TODO: Either incorporate into theme colors or use existingtheme color once map design system is finalized
   const arrowColor = "#2196F3"
 
   return (
@@ -162,3 +162,4 @@ export default function BasinInflowArrows({
     </>
   )
 }
+

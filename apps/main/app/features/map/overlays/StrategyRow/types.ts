@@ -1,13 +1,6 @@
 /**
- * StrategyRow type definitions
+ * StrategyRow types - prop interfaces for strategy panels
  */
-
-export interface StrategyRowProps {
-  /** Strategy value to display (defaults to "current-ops") */
-  strategyValue?: string
-  /** Whether to show the description */
-  showDescription?: boolean
-}
 
 export interface StrategyInfoPanelProps {
   /** Strategy value to display (defaults to "current-ops") */

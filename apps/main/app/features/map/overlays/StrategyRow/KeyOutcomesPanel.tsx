@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * KeyOutcomesPanel - Shows key outcomes glyphs
  *
@@ -15,7 +17,7 @@ import {
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
-import { learnMapActions, useSelectedOutcome } from "../../store"
+import { mapActions, useActiveOutcomeVisualization } from "../../store"
 import type { KeyOutcomesPanelProps } from "./types"
 import { panelBaseStyles, panelMaxWidth, getTitleStyles } from "./styles"
 
@@ -35,34 +37,23 @@ export function KeyOutcomesPanel({
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
 
-  // Get current selected outcome for toggle behavior
-  const selectedOutcome = useSelectedOutcome()
+  // Get current visualization for toggle behavior
+  const activeVisualization = useActiveOutcomeVisualization()
+  const selectedOutcome = activeVisualization?.outcome ?? null
 
   // Handler to show outcome data on the map (toggle behavior)
   const handleShowOnMap = useCallback(
     (outcome: string) => {
       handleClose() // Close tooltip when showing on map
       // Toggle: if same outcome is already selected, clear it; otherwise set it
-      learnMapActions.setSelectedOutcome(
-        selectedOutcome === outcome ? null : outcome,
-      )
+      if (selectedOutcome === outcome) {
+        mapActions.clearOutcomeVisualization()
+      } else {
+        mapActions.setOutcomeVisualization(outcome, "current-ops")
+      }
     },
     [handleClose, selectedOutcome],
   )
-
-  // Helper function to get tier values for an outcome
-  const getTierValues = (outcome: string): [number, number, number, number] => {
-    const tierData = chartData[outcome]
-    if (!tierData || tierData.length !== 4) {
-      return [0, 0, 0, 0]
-    }
-    return [
-      tierData[0]?.value ?? 0,
-      tierData[1]?.value ?? 0,
-      tierData[2]?.value ?? 0,
-      tierData[3]?.value ?? 0,
-    ]
-  }
 
   // Helper to check if outcome has valid data
   const hasData = (outcome: string): boolean => {

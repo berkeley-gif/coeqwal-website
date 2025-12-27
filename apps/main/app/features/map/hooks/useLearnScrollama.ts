@@ -1,13 +1,13 @@
+"use client"
+
 /**
- * useLearnScrollama Hook
- *
- * Provides scroll callbacks for react-scrollama integration.
- * Handles section detection and progress tracking for the Learn map.
+ * useLearnScrollama - scroll callbacks for react-scrollama section detection
  */
 
 import { useCallback } from "react"
 import type { StepEvent, StepProgressEvent } from "react-scrollama"
-import { learnMapActions, type SectionId } from "../store"
+import { mapActions } from "../store"
+import type { SectionId } from "../config/sectionLayers"
 
 /**
  * Hook that returns scroll callbacks for react-scrollama.
@@ -19,12 +19,12 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    learnMapActions.setActiveSection(data)
+    mapActions.setActiveSection(data)
 
     // Clear outcome visualization when entering any section other than scenario-intro
     // This handles cases where user scrolls quickly past the exit trigger
     if (data !== "scenario-intro") {
-      learnMapActions.setSelectedOutcome(null)
+      mapActions.clearOutcomeVisualization()
     }
   }, [])
 
@@ -36,12 +36,12 @@ export function useLearnScrollama() {
   const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
     // Reset geocoding when leaving find-basin section
     if (data === "find-basin") {
-      learnMapActions.resetGeocoding()
+      mapActions.resetGeocoding()
     }
 
     // Clear outcome visualization when leaving scenario-intro section
     if (data === "scenario-intro") {
-      learnMapActions.setSelectedOutcome(null)
+      mapActions.clearOutcomeVisualization()
     }
   }, [])
 
@@ -55,7 +55,7 @@ export function useLearnScrollama() {
       if (data === "rivers") {
         // Scale progress: rivers animate during first ~67% of section scroll
         const riverProgress = Math.min(1, progress * 1.5)
-        learnMapActions.setRiversProgress(riverProgress)
+        mapActions.setRiversProgress(riverProgress)
       }
       // Note: Visualization clearing for scenario-intro is handled in MapOverlayPanels
       // based on strategy panel visibility, not scroll progress

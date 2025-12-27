@@ -5,7 +5,7 @@
  *
  * Renders markers for tier 4 locations for specific outcomes.
  * Each marker shows an image marker.
- * Supports both Point and Polygon geometries (calculates centroid for polygons).
+ * Supports both Point and Polygon geometries (calculates centroid for polygons). TODO: refine this. Some du's are across multiple disconnected polygons.
  */
 
 import React, { useState, useEffect, useCallback } from "react"
@@ -16,8 +16,8 @@ import { MapMarkerTooltip } from "@repo/ui"
 import {
   fetchTierLocationData,
   type TierFeature,
-} from "../../../lib/api/tierLocationApi"
-import { getDemandUnitNameInfo } from "../config/demandUnitNames"
+} from "../../../../lib/api/tierLocationApi"
+import { getDemandUnitNameInfo } from "../../config/demandUnitNames"
 
 // Outcome configurations for hotspots
 const HOTSPOT_CONFIGS: Record<
@@ -409,3 +409,4 @@ export function HotspotMarkers({
 }
 
 export default HotspotMarkers
+

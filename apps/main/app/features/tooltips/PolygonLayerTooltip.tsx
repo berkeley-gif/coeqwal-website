@@ -31,7 +31,7 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { Popup } from "@repo/map"
-import type { HoveredFeatureInfo } from "../map/hooks/useOutcomeMapLayer"
+import type { HoveredFeatureInfo } from "../map/visualizationLayers"
 
 export interface PolygonLayerTooltipProps {
   /** Feature data to display */

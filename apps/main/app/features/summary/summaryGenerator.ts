@@ -5,7 +5,7 @@
  * Experimental, demo version
  */
 
-import { TierLocationsResponse } from "../map/hooks/useOutcomeMapLayer"
+import type { TierLocationsResponse } from "../map/visualizationLayers"
 import { TIER_LABELS, TierLevel } from "../../content/tiers"
 import { getDemandUnitNameInfo } from "../map/config/demandUnitNames"
 
@@ -117,13 +117,6 @@ export interface OutcomeSummary {
   criticalLocations: AtRiskLocation[]
 }
 
-// Scenario-level summary
-export interface ScenarioSummary {
-  headline: string
-  keyInsights: string[]
-  outcomeSummaries: Record<string, string>
-}
-
 /**
  * Analyze tier distribution and return counts/percentages
  */
@@ -166,7 +159,6 @@ function getQualitativeAssessment(
   const optimalPct = breakdown.tier1.percentage
   const criticalPct = breakdown.tier4.percentage
   const atRiskPct = breakdown.tier3.percentage
-  // subOptimalPct available via breakdown.tier2.percentage if needed
 
   // Mostly optimal
   if (optimalPct >= 80) {
@@ -219,7 +211,6 @@ function generateDetails(
 ): string {
   const optimalPct = Math.round(breakdown.tier1.percentage)
   const subOptimalPct = Math.round(breakdown.tier2.percentage)
-  // atRiskPct and criticalPct available via breakdown.tier3/4.percentage if needed
 
   const parts: string[] = []
 
@@ -308,59 +299,9 @@ export function generateOutcomeSummary(
 }
 
 /**
- * Generate a scenario-level summary based on multiple outcomes
+ * Format a list of location names for display (internal helper)
  */
-export function generateScenarioSummary(
-  scenarioId: string,
-  outcomeTiers: Record<string, TierLocationsResponse>,
-): ScenarioSummary {
-  const insights: string[] = []
-  const outcomeSummaries: Record<string, string> = {}
-
-  // Analyze each outcome
-  Object.entries(outcomeTiers).forEach(([outcome, tierData]) => {
-    const breakdown = analyzeTierDistribution(tierData)
-    const assessment = getQualitativeAssessment(breakdown)
-    outcomeSummaries[outcome] = assessment
-  })
-
-  // Generate headline based on overall picture
-  const headlines: string[] = []
-
-  // Check community and agricultural water
-  const cwsAssessment = outcomeSummaries["Community deliveries"]
-  const agAssessment = outcomeSummaries["Agricultural revenue"]
-
-  if (cwsAssessment && agAssessment) {
-    if (cwsAssessment.includes("well") && agAssessment.includes("well")) {
-      headlines.push(
-        "This scenario favors community and agricultural water deliveries",
-      )
-    } else if (cwsAssessment.includes("well")) {
-      headlines.push("This scenario favors community water deliveries")
-    } else if (agAssessment.includes("well")) {
-      headlines.push("This scenario favors agricultural water deliveries")
-    }
-  }
-
-  // Build key insights
-  if (cwsAssessment?.includes("concern") || cwsAssessment?.includes("stress")) {
-    insights.push("Not every community is served equally under this scenario.")
-  }
-
-  // Add more outcome-specific insights here as we expand
-
-  return {
-    headline: headlines.join(", ") + ".",
-    keyInsights: insights,
-    outcomeSummaries,
-  }
-}
-
-/**
- * Format a list of location names for display
- */
-export function formatLocationList(
+function formatLocationList(
   locations: AtRiskLocation[],
   maxItems = 5,
 ): string {

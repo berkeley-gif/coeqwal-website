@@ -10,7 +10,7 @@
 import React from "react"
 import { Marker } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../config/outcomeLayerRegistry"
+import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
 
 interface ReservoirLabel {
   name: string
@@ -109,3 +109,4 @@ export function ReservoirLabels({ tierLookup }: ReservoirLabelsProps) {
 }
 
 export default ReservoirLabels
+

@@ -6,6 +6,7 @@ import {
   STRATEGY_TO_SCENARIO_ID,
   getShortCodeFromDisplayName,
 } from "../constants/outcomeMappings"
+import { API_BASE } from "../constants/api"
 
 // Type definitions for GeoJSON response
 export interface TierFeature {
@@ -38,8 +39,6 @@ export interface TierLocationResponse {
     location_types: string[]
   }
 }
-
-const API_BASE = "https://api.coeqwal.org/api"
 
 /**
  * Fetch tier location data for a specific scenario and outcome
