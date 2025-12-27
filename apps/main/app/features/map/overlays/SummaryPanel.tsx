@@ -24,13 +24,13 @@ import {
   TierLevel,
   getTierColorsFromTheme,
 } from "../../../content/tiers"
-import { fetchTierLocations } from "../hooks/useOutcomeMapLayer"
+import { fetchTierLocations } from "../visualizationLayers/hooks/useTierData"
 import { fetchTierLocationData } from "../../../lib/api/tierLocationApi"
 import {
   STRATEGY_TO_SCENARIO_ID,
   DISPLAY_NAME_TO_API_SHORT_CODE,
 } from "../../../lib/constants/outcomeMappings"
-import { useSelectedOutcome } from "../store"
+import { useActiveOutcomeVisualization } from "../store"
 import { useMap } from "@repo/map"
 
 interface SummaryPanelProps {
@@ -48,7 +48,8 @@ export function SummaryPanel({
 }: SummaryPanelProps) {
   const theme = useTheme()
   const mapAPI = useMap()
-  const storeOutcome = useSelectedOutcome()
+  const activeVisualization = useActiveOutcomeVisualization()
+  const storeOutcome = activeVisualization?.outcome ?? null
 
   // Use prop if provided (Explore mode), otherwise use store (Learn mode)
   const selectedOutcome = outcomeProp !== undefined ? outcomeProp : storeOutcome

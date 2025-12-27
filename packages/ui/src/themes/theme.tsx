@@ -6,7 +6,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 1. Font Config     - Font presets and active font selection
+ * 1. Font Config     - Font presets and selection
  * 2. Design Tokens   - Standalone token definitions:
  *                    - typeScale, palette, borderRadius, shadow
  *                    - transition, zIndex, border, background
@@ -37,36 +37,24 @@ const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FO
 
 const FONT_PRESETS = {
   neueHaas: {
-    text: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+    display: '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   realPro: {
-    text: '"ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"ff-real-headline-pro", "ff-real-text-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+    display: '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
-    text: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    display:
-      '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+    text: '"Roboto", Helvetica, Arial, sans-serif',
+    display: '"Roboto", Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
   },
   inter: {
-    text: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
-  },
-  system: {
-    text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: "", // No import needed for system fonts
+    text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
 } as const
 
@@ -97,7 +85,6 @@ const typeScale = {
 
 // Color palette
 const palette = {
-  // Core colors
   brand: {
     sky: "#92C1D5", // Top of gradient - sky blue
     water: "#64A4D6", // Bottom of gradient - water blue
@@ -115,10 +102,10 @@ const palette = {
 
   // Accent colors - warm tones
   accent: {
-    gold: "#ffd87e", // Golden yellow - highlights
+    gold: "#ffd87e", // Golden yellow
     orange: "#FFA200",
     alert: "#E54545",
-    glossary: "#FFB347", // Warm orange for glossary links
+    glossary: "#FFB347", // Warm orange
   },
 
   // Greens
@@ -247,17 +234,12 @@ const zIndex = {
 const border = {
   none: "none",
   light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
-  medium: `1px solid ${palette.grey[300]}`, // Standard borders (most common)
+  medium: `1px solid ${palette.grey[300]}`, // Standard borders
   focus: `2px solid ${palette.blue.bright}`, // Selected/focus states
   focusLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
   onDark: `2px solid ${palette.utility.white}`, // On dark backgrounds
   subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
-
-  // CSS triangle arrow technique: zero-size box with transparent borders,
-  // then set one side's color to create a triangle pointing opposite direction.
-  // Example: borderLeftColor: white → arrow points right
-  arrowBase: "8px solid transparent",
 }
 
 // Background styles
@@ -288,6 +270,7 @@ export const themeValues = {
   },
 
   // Layout dimensions, for layout and layout calculations
+  // TODO: update, not sure about current usage
   layout: {
     headerHeight: 70,
     drawer: {
@@ -319,7 +302,7 @@ export const themeValues = {
   background,
 
   /* --------------------------------------------------------
-   * Semantic Spacing System
+   * Spacing
    * All values are MUI spacing multipliers (1 = 8px)
    * -------------------------------------------------------- */
   spacing: {
@@ -327,21 +310,21 @@ export const themeValues = {
     component: {
       xs: 0.5, // 4px - tight inline spacing
       sm: 1, // 8px - compact internal spacing
-      md: 1.5, // 12px - default internal spacing
+      md: 1.5, // 12px - internal spacing
       lg: 2, // 16px - comfortable spacing
       xl: 3, // 24px - spacious spacing
     },
 
     // Section/layout spacing (between major sections)
     section: {
-      xs: 2, // 16px - compact sections
-      sm: 3, // 24px - default sections
-      md: 4, // 32px - comfortable sections
-      lg: 6, // 48px - major sections
+      xs: 2, // 16px - compact
+      sm: 3, // 24px - default
+      md: 4, // 32px - spatious
+      lg: 6, // 48px - major
       xl: 8, // 64px - page-level spacing
     },
 
-    // Panel/card padding (responsive by breakpoint)
+    // Panel/card padding
     panel: {
       xs: { xs: 2, sm: 2.5, md: 3 }, // 16/20/24px - compact panels
       sm: { xs: 2.5, sm: 3, md: 4 }, // 20/24/32px - standard panels
@@ -356,7 +339,7 @@ export const themeValues = {
       xl: 3, // 24px - spacious gap
     },
 
-    // Page margins (responsive by breakpoint)
+    // Page margins
     page: {
       x: { xs: 3, md: 6 }, // 24px / 48px horizontal
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
@@ -384,7 +367,7 @@ export const themeValues = {
   },
 
   /* --------------------------------------------------------
-   * Scenario/Strategy component styles
+   * Scenario/strategy component styles
    * Used across Learn map and Scenario Explorer
    * -------------------------------------------------------- */
   scenarios: {
@@ -392,9 +375,8 @@ export const themeValues = {
     card: {
       base: {
         borderRadius: borderRadius.md,
-        padding: 1.5, // theme.spacing multiplier
+        padding: 1.5,
         transition: transition.default,
-        border: "2px solid transparent",
       },
       variants: {
         default: {
@@ -417,7 +399,7 @@ export const themeValues = {
     // Icon sizes for strategy operations
     icon: {
       sizes: {
-        sm: 3.5, // theme.spacing multiplier (28px)
+        sm: 3.5, // 28px
         md: 4, // 32px
         lg: 5, // 40px
       },
@@ -539,15 +521,15 @@ const theme = createTheme({
     // Tab panel colors
     learn: {
       background: themeValues.palette.tabPanels.learn,
-      text: themeValues.palette.utility.white,
+      text: themeValues.palette.blue.darkest,
     },
     explore: {
       background: themeValues.palette.tabPanels.explore,
-      text: themeValues.palette.utility.white,
+      text: themeValues.palette.blue.darkest,
     },
     empower: {
       background: themeValues.palette.tabPanels.empower,
-      text: themeValues.palette.utility.white,
+      text: themeValues.palette.blue.darkest,
     },
     // MUI standard colors
     background: {
@@ -584,33 +566,32 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h1,
       fontWeight: 500,
-      lineHeight: 1.0, // Tighter for large hero text
-      // textTransform: "uppercase",
+      lineHeight: 1.0,
     },
     h2: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 1.1, // Slightly tighter for section headers
+      lineHeight: 1.1,
     },
     h3: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h3,
       fontWeight: 500,
-      lineHeight: 1.15, // Balanced for subsection headers
+      lineHeight: 1.15,
     },
     h4: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.h4,
       fontWeight: 400,
-      lineHeight: 1.25, // Slightly more open for card titles
+      lineHeight: 1.25,
     },
     h5: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 500,
       letterSpacing: "0.02rem",
-      lineHeight: 1.35, // Good balance for minor headlines
+      lineHeight: 1.35,
     },
     h6: {
       fontFamily: themeValues.fontFamily.display,
@@ -1350,7 +1331,7 @@ export default theme
  * ======================================================== */
 
 /**
- * MUI Theme Type Augmentation
+ * MUI theme types
  *
  * Types are derived from `themeValues` using `typeof` to maintain a single source of truth.
  * This reduces duplication while preserving full TypeScript autocomplete support.

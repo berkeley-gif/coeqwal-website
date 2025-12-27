@@ -1,16 +1,5 @@
 /**
- * useMapLayers Hook
- *
- * Applies native Mapbox layer visibility based on the active section.
- * Uses SECTION_LAYERS as the single source of truth.
- *
- * This hook handles ONLY the native Mapbox layers defined in the map style:
- * - california-label
- * - central-valley-polygon, central-valley-polygon-halo, central-valley-label
- * - inflow-watersheds
- *
- * React component layers (BasinsLayer, RiversLayer, BasinInflowArrows) are
- * controlled via props from CaliforniaMapPanel using derived selectors.
+ * useMapLayers - applies native Mapbox layer visibility based on activeSection
  */
 
 "use client"
@@ -23,9 +12,8 @@ import {
   useShowInflowWatersheds,
   useMapReady,
   useMapMode,
-  SECTION_LAYERS,
-  type SectionId,
 } from "../store"
+import { SECTION_LAYERS, type SectionId } from "../config/sectionLayers"
 import { coordinator } from "../choreography/animationCoordinator"
 import { ANIMATION_DURATION } from "../choreography/scrollChoreographyConstants"
 

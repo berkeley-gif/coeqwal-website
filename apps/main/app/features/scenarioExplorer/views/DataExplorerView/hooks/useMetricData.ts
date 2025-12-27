@@ -132,7 +132,6 @@ export function useMetricMapData(
   const shouldFetch = scenarioId && metric.showOnMap && metric.isTier
 
   // Uses the existing tier location API
-  // The actual implementation is in useTierMapData
   // Note: Uses UI display name which will be converted to API name in tierLocationApi
   return {
     shouldFetch,

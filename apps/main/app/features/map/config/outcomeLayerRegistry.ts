@@ -1,23 +1,23 @@
 /**
- * Outcome layer registry
- *
- * Single source of truth for all outcome layer configurations.
- *
- * To add a new outcome:
- * 1. Add an entry to OUTCOME_LAYER_REGISTRY
- * 2. Ensure the Mapbox layer exists in the style
- * 3. The visualization system will handle it automatically
+ * Outcome layer registry - single source of truth for all outcome visualizations
  */
 
+import {
+  type CameraView,
+  DELTA_VIEW,
+  SACRAMENTO_RIVER_VIEW,
+  RESERVOIR_VIEW,
+} from "./cameraPresets"
+
 // ============================================================================
-// TYPES
+// TYPES (internal)
 // ============================================================================
 
 /** Geometry type for the layer */
-export type GeometryType = "polygon" | "point" | "line" | "react-marker"
+type GeometryType = "polygon" | "point" | "line" | "react-marker"
 
 /** Layer type identifier */
-export type LayerType =
+type LayerType =
   | "demand-units"
   | "wba"
   | "reservoir"
@@ -26,23 +26,23 @@ export type LayerType =
   | "marker"
 
 /** Source of tooltip data */
-export type TooltipFieldSource =
+type TooltipFieldSource =
   | "mapbox" // From Mapbox feature properties
   | "api" // From COEQWAL API response
   | "computed" // Computed from other fields
 
 /** Format options for displaying values */
-export type TooltipFieldFormat =
+type TooltipFieldFormat =
   | "text" // Plain text (default)
   | "acres" // Number with " acres" suffix and toLocaleString()
   | "acrefeet" // Number with " acre-feet" suffix
   | "number" // toLocaleString() formatting
 
 /** Typography variant for the field */
-export type TooltipFieldVariant = "body2" | "caption"
+type TooltipFieldVariant = "body2" | "caption"
 
 /** Definition for a single tooltip field */
-export interface TooltipFieldDef {
+interface TooltipFieldDef {
   key: string
   label: string | null
   source: TooltipFieldSource
@@ -82,14 +82,8 @@ export interface OutcomeLayerConfig {
   circleRadius?: number
   /** For point layers: circle stroke width */
   circleStrokeWidth?: number
-  /** For line layers: line width */
-  lineWidth?: number
-  /** React layer IDs (for React-rendered layers like rivers) */
-  reactLayerIds?: string[]
-  /** Default zoom level for Learn mode (defaults to 6.5) */
-  defaultZoom?: number
-  /** Default center point for Learn mode [longitude, latitude] */
-  defaultCenter?: [number, number]
+  /** Camera preset for this outcome (zoom/center for Learn mode) */
+  cameraPreset?: CameraView
 }
 
 // ============================================================================
@@ -117,26 +111,13 @@ export const LAYER_IDS = {
     outline: "california-reservoir-outline",
     label: "california-reservoir-labels",
   },
-  // Line layers (React-rendered)
-  sacramento: {
-    trough: "sacramento-river-trough",
-    body: "sacramento-river-body",
-  },
-  sanJoaquin: {
-    trough: "san-joaquin-river-trough",
-    body: "san-joaquin-river-body",
-  },
   // Utility layers
   basemapDim: "basemap-dim-overlay",
 } as const
 
-/** All river layer IDs for z-index management */
-export const RIVER_LAYER_IDS = [
-  LAYER_IDS.sacramento.trough,
-  LAYER_IDS.sacramento.body,
-  LAYER_IDS.sanJoaquin.trough,
-  LAYER_IDS.sanJoaquin.body,
-] as const
+// River layer IDs are defined and exported from RiversLayer.tsx
+// (since that component creates the layers with those IDs)
+export { RIVER_LAYER_IDS } from "../baseLayers/RiversLayer"
 
 /** Basemap dim opacity */
 export const BASEMAP_DIM_OPACITY = 0.15
@@ -327,7 +308,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Reservoir ID",
-    defaultZoom: 6, // zoom to see all reservoirs across California
+    cameraPreset: RESERVOIR_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -346,9 +327,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "Delta",
-    // Camera settings for single-feature outcome
-    defaultZoom: 9,
-    defaultCenter: [-121.5, 38.05], // Delta region center
+    cameraPreset: DELTA_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -361,14 +340,11 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "sacramento-river-body", // Primary layer for interactions
     tierCode: "WRC_SALMON_AB",
     requiresIdMatching: false, // Single river, no ID matching
-    lineWidth: 4,
-    reactLayerIds: ["sacramento-river-trough", "sacramento-river-body"],
     tooltipFields: [
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "River",
-    defaultZoom: 6.5,
-    defaultCenter: [-121.5, 40], // Sacramento River center
+    cameraPreset: SACRAMENTO_RIVER_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -442,13 +418,6 @@ export function getOutcomeConfig(outcome: string): OutcomeLayerConfig | null {
 }
 
 /**
- * Check if an outcome exists in the registry
- */
-export function isValidOutcome(outcome: string): boolean {
-  return outcome in OUTCOME_LAYER_REGISTRY
-}
-
-/**
  * Check if an outcome uses Mapbox layers (vs React markers)
  */
 export function outcomeUsesMapboxLayers(outcome: string): boolean {
@@ -458,52 +427,8 @@ export function outcomeUsesMapboxLayers(outcome: string): boolean {
 
 /**
  * Check if an outcome uses polygon visualization
- *
- * TODO: Deprecate this function - use getOutcomeConfig(outcome)?.geometryType === "polygon" instead
  */
 export function outcomeUsesPolygons(outcome: string): boolean {
   const config = OUTCOME_LAYER_REGISTRY[outcome]
   return config?.geometryType === "polygon"
-}
-
-/**
- * Get all outcome names
- */
-export function getAllOutcomes(): string[] {
-  return Object.keys(OUTCOME_LAYER_REGISTRY)
-}
-
-/**
- * Get outcomes by geometry type
- */
-export function getOutcomesByGeometry(geometryType: GeometryType): string[] {
-  return Object.entries(OUTCOME_LAYER_REGISTRY)
-    .filter(([, config]) => config.geometryType === geometryType)
-    .map(([name]) => name)
-}
-
-/**
- * Get Mapbox layer IDs for an outcome
- *
- * TODO: Consider removing this helper - callers should use getOutcomeConfig() directly
- */
-export function getOutcomeLayerIds(outcome: string): {
-  fill?: string
-  outline?: string
-} {
-  const config = OUTCOME_LAYER_REGISTRY[outcome]
-  if (!config) return {}
-
-  switch (config.layerType) {
-    case "demand-units":
-      return LAYER_IDS.demandUnits
-    case "wba":
-      return LAYER_IDS.wba
-    case "delta":
-      return LAYER_IDS.delta
-    case "reservoir":
-      return LAYER_IDS.reservoir
-    default:
-      return {}
-  }
 }

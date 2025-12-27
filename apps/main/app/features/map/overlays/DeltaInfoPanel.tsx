@@ -1,5 +1,7 @@
+"use client"
+
 /**
- * DeltaInfoPanel (Learn Map)
+ * DeltaInfoPanel (Learn map)
  *
  * Provides information about the Sacramento-San Joaquin River Delta.
  * When clicked, zooms to the Delta and shows the delta-water layer.
@@ -12,18 +14,11 @@ import {
   ANIMATION_DURATION,
   EASING,
 } from "../choreography/scrollChoreographyConstants"
+import { DELTA_VIEW } from "../config/cameraPresets"
 
 interface DeltaInfoPanelProps {
   /** Map operations API for camera control */
   map: MapOperationsAPI
-}
-
-// Delta view coordinates
-const DELTA_VIEW = {
-  center: [-121.8, 38.1] as [number, number],
-  zoom: 9.75,
-  bearing: 0,
-  pitch: 0,
 }
 
 // Delta water layer ID (Mapbox tileset: coeqwal.delta-water)
@@ -39,7 +34,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
     // Zoom to Delta
     if (map.mapRef?.current) {
       map.mapRef.current.easeTo({
-        center: DELTA_VIEW.center,
+        center: [DELTA_VIEW.longitude, DELTA_VIEW.latitude],
         zoom: DELTA_VIEW.zoom,
         bearing: DELTA_VIEW.bearing,
         pitch: DELTA_VIEW.pitch,
@@ -103,17 +98,15 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
     <Box
       sx={{
         backgroundColor: theme.background.whiteOverlay[95],
-        borderRadius: 0,
-        padding: { xs: 2, sm: 2.5, md: 3 },
+        borderRadius: theme.borderRadius.none,
+        padding: theme.spacingTokens.panel.xs,
         boxShadow: theme.shadow.sm,
-        width: "100%",
-        boxSizing: "border-box",
-        pointerEvents: "auto", // Ensure panel is interactive
+        pointerEvents: "auto",
       }}
     >
       <Typography
         variant="body1"
-        sx={{ mb: 2, color: theme.palette.grey[900] }}
+        sx={{ mb: theme.spacingTokens.component.lg, color: theme.palette.grey[900] }}
       >
         What and where is &quot;The Delta&quot;?
       </Typography>
@@ -124,16 +117,13 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         sx={{
           display: "flex",
           alignItems: "center",
-          ...theme.typography.body2,
-          gap: 1,
+          ...theme.typography.subtitle2,
+          gap: theme.spacingTokens.gap.sm,
           background: "none",
           border: "none",
-          padding: 0,
           cursor: "pointer",
           color: theme.palette.blue.medium,
-          fontWeight: theme.typography.fontWeightMedium,
           textDecoration: "none",
-          textAlign: "left",
           transition: theme.transition.color,
           "&:hover": {
             color: theme.palette.blue.bright,
@@ -142,16 +132,14 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         }}
       >
         <span>Go to the Sacramento-San Joaquin River Delta</span>
-        <span style={{ fontSize: "1.2rem" }}>→</span>
+        <Typography component="span" variant="subtitle1">→</Typography>
       </Box>
 
       {isTextVisible && (
         <Typography
           variant="body2"
           sx={{
-            mt: 2,
-            lineHeight: 1.6,
-            textAlign: "left",
+            mt: theme.spacingTokens.component.lg,
           }}
         >
           The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the

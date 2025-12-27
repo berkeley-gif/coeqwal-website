@@ -3,7 +3,7 @@
 /**
  * LearnPanel
  *
- * The Learn tab content that uses the persistent map from page level.
+ * Learn tab content uses the persistent map from page level.
  *
  * Architecture:
  * - Calls setMapMode('learn') on mount to configure the persistent map
@@ -28,7 +28,7 @@ import {
 } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, learnMapActions } from "../../features/map/store"
+import { useMapReady, mapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
@@ -39,13 +39,13 @@ export default function LearnPanel() {
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
     // Reset Learn-specific state and activate Learn mode
-    learnMapActions.resetLearnState()
-    learnMapActions.setMapMode("learn")
+    mapActions.resetLearnState()
+    mapActions.setMapMode("learn")
 
     return () => {
       // Hide the map when leaving Learn tab
-      learnMapActions.setMapMode("hidden")
-      learnMapActions.setLearnMapScrollOffset(0)
+      mapActions.setMapMode("hidden")
+      mapActions.setLearnMapScrollOffset(0)
     }
   }, [])
 
@@ -65,10 +65,10 @@ export default function LearnPanel() {
     if (containerBottom < releasePoint) {
       // Calculate how much the map should scroll up
       const offset = releasePoint - containerBottom
-      learnMapActions.setLearnMapScrollOffset(offset)
+      mapActions.setLearnMapScrollOffset(offset)
     } else {
       // Map stays fixed
-      learnMapActions.setLearnMapScrollOffset(0)
+      mapActions.setLearnMapScrollOffset(0)
     }
   }, [])
 

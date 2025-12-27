@@ -11,14 +11,35 @@
  * - Framer Motion: Handles smooth animations in the scenario-intro section
  * - Zustand store: Manages activeSection state, layer visibility derived in useMapLayers
  *
- * Note: Constants have been extracted to MapOverlayPanels/ folder for better organization.
- * Future refactoring will extract section components.
+ * Dev note: Future refactoring could extract section components, but it makes timing tricky and it's not worth the effort right now.
+ * The react-scrollama library has internal dependencies on how Step components render that break when I try to abstract the inner content. 
+ * Even wrapping just the Box/CallResponsePanel in a helper component causes the IntersectionObserver to fail.
  */
 
 import { useState, useEffect, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
-import { PANEL_ANIMATION_THRESHOLDS, PANEL_POSITIONS } from "./mapOverlayConfig"
 import { Scrollama, Step } from "react-scrollama"
+
+// Animation thresholds for scenario-intro section panels (progress 0-1)
+const PANEL_ANIMATION_THRESHOLDS = {
+  strategyInfo: { fadeStart: 0.12, fadeEnd: 0.18 },
+  keyOperations: { fadeStart: 0.28, fadeEnd: 0.34 },
+  keyOutcomes: { fadeStart: 0.48, fadeEnd: 0.54 },
+  summary: { fadeStart: 0.48, fadeEnd: 0.54 },
+} as const
+
+const PANEL_POSITIONS = {
+  paragraphTop: "15vh",
+} as const
+
+const RIGHT_PANEL_MAX_WIDTH = {
+  xs: "100%",
+  sm: "360px",
+  md: "420px",
+  lg: "460px",
+  xl: "500px",
+} as const
+
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
@@ -34,11 +55,11 @@ import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import {
-  learnMapActions,
+  mapActions,
   useGeocodingResetCounter,
   useIsOutcomeVisualizationActive,
-  type SectionId,
 } from "../store"
+import type { SectionId } from "../config/sectionLayers"
 import {
   useTransform,
   motion,
@@ -46,6 +67,10 @@ import {
   useMotionValueEvent,
 } from "@repo/motion"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
@@ -252,7 +277,7 @@ export default function MapOverlayPanels() {
     // Clear outcome visualization only when transitioning from visible to invisible
     // (not on initial render when panel starts invisible)
     if (newPE === "none" && strategyInfoWasVisible.current) {
-      learnMapActions.setSelectedOutcome(null)
+      mapActions.clearOutcomeVisualization()
       strategyInfoWasVisible.current = false // Reset for next cycle
     }
   })
@@ -360,7 +385,7 @@ export default function MapOverlayPanels() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  mt: 3,
+                  mt: theme.spacingTokens.component.xl,
                 }}
               >
                 <Box
@@ -390,7 +415,6 @@ export default function MapOverlayPanels() {
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
-              mt: "50vh",
             }}
           >
             <CallResponsePanel
@@ -469,7 +493,7 @@ export default function MapOverlayPanels() {
         <Step data={"arrows" as SectionId}>
           <Box
             sx={{
-              minHeight: "120vh", // keep arrows visible
+              minHeight: "50vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -502,7 +526,7 @@ export default function MapOverlayPanels() {
                     Polygon | MultiPolygon
                   >
                 }
-                onMarkerChange={learnMapActions.setGeocoderMarker}
+                onMarkerChange={mapActions.setGeocoderMarker}
                 resetTrigger={geocodingResetCounter}
               />
             </CallResponsePanel>
@@ -535,7 +559,7 @@ export default function MapOverlayPanels() {
                 isVisible={isFirstPanelVisible}
                 sx={{ minHeight: "auto", mb: 0 }}
               >
-                <Typography variant="body1" sx={{ mb: 2 }}>
+                <Typography variant="body1" sx={{ mb: theme.spacingTokens.component.lg }}>
                   These waters flow to the Valley floor, where the{" "}
                   <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     Sacramento River
@@ -627,7 +651,7 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1" sx={{ mb: 2 }}>
+              <Typography variant="body1" sx={{ mb: theme.spacingTokens.component.lg }}>
                 To do this water planning and accounting, the federal{" "}
                 <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   U.S. Bureau of Reclamation
@@ -794,7 +818,7 @@ export default function MapOverlayPanels() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: 1,
+                  gap: theme.spacingTokens.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
                   pr: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 }, // Match left panel padding
@@ -829,13 +853,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: {
-                            xs: "100%",
-                            sm: "360px",
-                            md: "420px",
-                            lg: "460px",
-                            xl: "500px",
-                          },
+                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
                           pointerEvents: strategyInfoPE, // Block panel AND tooltip when hidden
                         }}
                       >
@@ -869,7 +887,7 @@ export default function MapOverlayPanels() {
                                 sx={{
                                   fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
-                                  mb: 0.5,
+                                  mb: theme.spacingTokens.component.xs,
                                 }}
                               >
                                 Strategy
@@ -880,7 +898,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: 1,
+                                  mt: theme.spacingTokens.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >
@@ -936,13 +954,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: {
-                            xs: "100%",
-                            sm: "360px",
-                            md: "420px",
-                            lg: "460px",
-                            xl: "500px",
-                          },
+                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
                           pointerEvents: keyOperationsPE, // Block panel AND tooltip when hidden
                         }}
                       >
@@ -974,7 +986,7 @@ export default function MapOverlayPanels() {
                                 sx={{
                                   fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
-                                  mb: 0.5,
+                                  mb: theme.spacingTokens.component.xs,
                                 }}
                               >
                                 Key operations
@@ -986,7 +998,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: 1,
+                                  mt: theme.spacingTokens.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >
@@ -1034,13 +1046,7 @@ export default function MapOverlayPanels() {
                         sx={{
                           position: "relative",
                           width: "100%",
-                          maxWidth: {
-                            xs: "100%",
-                            sm: "360px",
-                            md: "420px",
-                            lg: "460px",
-                            xl: "500px",
-                          },
+                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
                           pointerEvents: keyOutcomesPE, // Block panel AND tooltip when hidden
                         }}
                       >
@@ -1074,7 +1080,7 @@ export default function MapOverlayPanels() {
                                 sx={{
                                   fontWeight: theme.typography.fontWeightSemiBold,
                                   display: "block",
-                                  mb: 0.5,
+                                  mb: theme.spacingTokens.component.xs,
                                 }}
                               >
                                 Key outcomes
@@ -1084,7 +1090,7 @@ export default function MapOverlayPanels() {
                               communities.
                               <Box
                                 component="span"
-                                sx={{ display: "block", mt: 1 }}
+                                sx={{ display: "block", mt: theme.spacingTokens.component.sm }}
                               >
                                 Some outcomes record values from multiple
                                 locations in a bar chart that shows the number
@@ -1096,7 +1102,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: 1,
+                                  mt: theme.spacingTokens.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >
@@ -1151,13 +1157,7 @@ export default function MapOverlayPanels() {
                       <Box
                         sx={{
                           width: "100%",
-                          maxWidth: {
-                            xs: "100%",
-                            sm: "360px",
-                            md: "420px",
-                            lg: "460px",
-                            xl: "500px",
-                          },
+                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
                           pointerEvents: "none",
                         }}
                       >

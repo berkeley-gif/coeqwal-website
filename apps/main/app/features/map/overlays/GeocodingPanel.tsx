@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * GeocodingPanel - "Find my basin"  (Learn Map)
  *
@@ -12,6 +14,7 @@ import { useMap, useGeocoding, useBasinLookup, BOUNDING_BOXES } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { bbox } from "@turf/turf"
 import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson"
+import { CENTRAL_VALLEY_VIEW } from "../config/cameraPresets"
 
 interface GeocodingPanelProps {
   /** Basin GeoJSON data for lookup */
@@ -136,9 +139,9 @@ export function GeocodingPanel({
 
     // Zoom back out to Central Valley view
     map.flyTo({
-      longitude: -120.8,
-      latitude: 38.5,
-      zoom: 5.82,
+      longitude: CENTRAL_VALLEY_VIEW.longitude,
+      latitude: CENTRAL_VALLEY_VIEW.latitude,
+      zoom: CENTRAL_VALLEY_VIEW.zoom,
       transitionOptions: { duration: 1500 },
     })
   }
@@ -162,17 +165,15 @@ export function GeocodingPanel({
     <Box
       sx={{
         backgroundColor: theme.background.whiteOverlay[95],
-        borderRadius: 0,
-        padding: { xs: 2, sm: 2.5, md: 3 },
+        borderRadius: theme.borderRadius.none,
+        padding: theme.spacingTokens.panel.xs,
         boxShadow: theme.shadow.sm,
-        width: "100%",
-        boxSizing: "border-box",
-        pointerEvents: "auto", // Ensure panel is interactive
+        pointerEvents: "auto",
       }}
     >
       <Typography
         variant="body1"
-        sx={{ mb: 2, color: theme.palette.grey[900] }}
+        sx={{ mb: theme.spacingTokens.component.lg, color: theme.palette.grey[900] }}
       >
         Find my basin
       </Typography>
@@ -193,15 +194,15 @@ export function GeocodingPanel({
           <Box
             sx={{
               position: "absolute",
-              top: "calc(100% + 4px)",
+              top: `calc(100% + ${theme.spacing(0.5)})`,
               left: 0,
               right: 0,
               backgroundColor: theme.palette.common.white,
               borderRadius: theme.borderRadius.md,
-              boxShadow: theme.shadow.sm,
+              boxShadow: theme.shadow.md,
               maxHeight: 300,
               overflowY: "auto",
-              zIndex: theme.zIndex.pageContent,
+              zIndex: theme.zIndex.dropdown,
               border: theme.border.medium,
             }}
           >
@@ -227,9 +228,12 @@ export function GeocodingPanel({
                   },
                 }}
               >
-                <Typography variant="body2" sx={{ fontWeight: theme.typography.fontWeightMedium, mb: 0.25 }}>
-                  {feature.text}
-                </Typography>
+                <Typography
+                variant="subtitle2"
+                sx={{ mb: theme.spacingTokens.component.xs }}
+              >
+                {feature.text}
+              </Typography>
                 <Typography
                   variant="caption"
                   sx={{
@@ -237,7 +241,6 @@ export function GeocodingPanel({
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
-                    display: "block",
                   }}
                 >
                   {feature.place_name}
@@ -252,9 +255,8 @@ export function GeocodingPanel({
           <Typography
             variant="caption"
             sx={{
-              display: "block",
-              mt: 1,
-              padding: theme.spacing(1),
+              mt: theme.spacingTokens.component.sm,
+              padding: theme.spacingTokens.component.sm,
               backgroundColor: theme.palette.error.light,
               color: theme.palette.error.dark,
               borderRadius: theme.borderRadius.md,
@@ -268,30 +270,31 @@ export function GeocodingPanel({
         {selectedLocation && !showResults && (
           <Box
             sx={{
-              mt: 2,
-              p: 2,
-              backgroundColor: "rgba(58, 69, 116, 0.05)",
+              mt: theme.spacingTokens.component.lg,
+              p: theme.spacingTokens.component.lg,
+              backgroundColor: theme.palette.grey[50],
               borderRadius: theme.borderRadius.md,
               border: theme.border.focusLight,
             }}
           >
             <Typography
-              variant="caption"
+              variant="overline"
               sx={{
                 color: theme.palette.blue.darkest,
                 fontWeight: theme.typography.fontWeightSemiBold,
-                textTransform: "uppercase",
-                letterSpacing: "0.1rem",
               }}
             >
               📍 Selected Location
             </Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, fontWeight: theme.typography.fontWeightMedium }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mt: theme.spacingTokens.component.xs }}
+            >
               {selectedLocation.text}
             </Typography>
             <Typography
               variant="caption"
-              sx={{ display: "block", color: theme.palette.grey[600] }}
+              sx={{ color: theme.palette.grey[600] }}
             >
               {selectedLocation.place_name}
             </Typography>
@@ -299,23 +302,24 @@ export function GeocodingPanel({
             {basinInfo ? (
               <Box
                 sx={{
-                  mt: 1.5,
-                  pt: 1.5,
+                  mt: theme.spacingTokens.component.md,
+                  pt: theme.spacingTokens.component.md,
                   borderTop: theme.border.medium,
                 }}
               >
                 <Typography
-                  variant="caption"
+                  variant="overline"
                   sx={{
                     color: theme.palette.blue.dark,
                     fontWeight: theme.typography.fontWeightSemiBold,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1rem",
                   }}
                 >
                   Basin
                 </Typography>
-                <Typography variant="body2" sx={{ mt: 0.5, fontWeight: theme.typography.fontWeightMedium }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ mt: theme.spacingTokens.component.xs }}
+                >
                   {basinInfo.name}
                 </Typography>
               </Box>
@@ -323,9 +327,8 @@ export function GeocodingPanel({
               <Typography
                 variant="caption"
                 sx={{
-                  display: "block",
-                  mt: 1.5,
-                  pt: 1.5,
+                  mt: theme.spacingTokens.component.md,
+                  pt: theme.spacingTokens.component.md,
                   borderTop: theme.border.medium,
                   color: theme.palette.grey[600],
                   fontStyle: "italic",

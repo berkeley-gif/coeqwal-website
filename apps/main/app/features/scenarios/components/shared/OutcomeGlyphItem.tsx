@@ -52,7 +52,8 @@ export interface OutcomeGlyphItemProps {
 
 export function OutcomeGlyphItem({
   displayName,
-  name,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  name, // Reserved for future tooltip key usage
   chartData,
   isActive,
   isSelected = false,

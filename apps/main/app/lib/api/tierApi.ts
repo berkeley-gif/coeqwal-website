@@ -4,9 +4,7 @@
  */
 
 import { API_SHORT_CODE_TO_DISPLAY_NAME } from "../constants/outcomeMappings"
-
-// API base URL
-const API_BASE = "https://api.coeqwal.org/api"
+import { API_BASE } from "../constants/api"
 
 // Type definitions
 export interface TierDefinitions {

@@ -17,7 +17,6 @@ import {
   getThemeIconDescription,
   getIconSize,
 } from "./strategyIcons"
-import { CURRENT_OPERATIONS_ICONS } from "../../../../content/scenarios"
 
 export interface OperationsIconGroupProps {
   /** Strategy value (e.g., "current-ops", "sgma-sj-valley") */
