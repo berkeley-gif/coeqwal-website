@@ -120,7 +120,7 @@ export default function DataPage() {
             overflowX: "hidden",
             width: "100%",
             minHeight: "100vh",
-            backgroundColor: (theme) => theme.palette.utility.white,
+            backgroundColor: (theme) => theme.palette.background.paper,
             color: (theme) => theme.palette.blue.darkest,
           }}
         >
@@ -164,7 +164,7 @@ export default function DataPage() {
             </Box>
 
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity="error" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                 {error}
               </Alert>
             )}
@@ -175,20 +175,20 @@ export default function DataPage() {
               columnSpacing={12}
               rowSpacing={4}
               sx={{
-                mt: (theme) => theme.layout.spacing.sm,
+                mt: (theme) => theme.spacingTokens.section.xs,
                 pointerEvents: "auto",
               }}
             >
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     Full scenario run files
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: (theme) => theme.spacingTokens.section.sm,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -205,7 +205,7 @@ export default function DataPage() {
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl fullWidth sx={{ mb: 3 }}>
+                      <FormControl fullWidth sx={{ mb: (theme) => theme.spacingTokens.section.sm }}>
                         <InputLabel id="zip-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -234,7 +234,7 @@ export default function DataPage() {
 
                       {/* Download buttons (only show when a file is selected) */}
                       {selectedZipDataset && selectedZipScenario?.files.zip && (
-                        <Box sx={{ mb: (theme) => theme.layout.spacing.sm }}>
+                        <Box sx={{ mb: (theme) => theme.spacingTokens.section.xs }}>
                           <DownloadButton
                             fileId={selectedZipDataset}
                             filename={selectedZipScenario.files.zip.filename}
@@ -253,13 +253,13 @@ export default function DataPage() {
               {/* Scenario data section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     Scenario data in csv format
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: (theme) => theme.spacingTokens.section.sm,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -276,7 +276,7 @@ export default function DataPage() {
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl fullWidth sx={{ mb: 3 }}>
+                      <FormControl fullWidth sx={{ mb: (theme) => theme.spacingTokens.section.sm }}>
                         <InputLabel id="csv-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -308,8 +308,8 @@ export default function DataPage() {
                           sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: (theme) => theme.layout.spacing.sm,
-                            mb: (theme) => theme.layout.spacing.sm,
+                            gap: (theme) => theme.spacingTokens.gap.lg,
+                            mb: (theme) => theme.spacingTokens.section.xs,
                           }}
                         >
                           {selectedCsvScenario.files.output_csv && (
@@ -325,7 +325,7 @@ export default function DataPage() {
                               variant="outlined"
                               sx={{
                                 mb: (theme) =>
-                                  theme.spacing(theme.cards.spacing.compact.sm),
+                                  theme.spacing(theme.spacingTokens.component.xs),
                               }}
                             >
                               Download Output CSV
@@ -356,13 +356,13 @@ export default function DataPage() {
               {/* Model documentation section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     Model documentation
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 2,
+                      mb: (theme) => theme.spacingTokens.component.lg,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -385,13 +385,13 @@ export default function DataPage() {
               {/* Research publications section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     Research publications
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 2,
+                      mb: (theme) => theme.spacingTokens.component.lg,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -413,13 +413,13 @@ export default function DataPage() {
               {/* API access section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     API access
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 2,
+                      mb: (theme) => theme.spacingTokens.component.lg,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -441,13 +441,13 @@ export default function DataPage() {
               {/* Support & contact section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: 2 }}>
+                  <Typography variant="h5" sx={{ mb: (theme) => theme.spacingTokens.component.lg }}>
                     Support & contact
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 2,
+                      mb: (theme) => theme.spacingTokens.component.lg,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >

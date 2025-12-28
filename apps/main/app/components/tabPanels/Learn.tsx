@@ -136,7 +136,7 @@ export default function LearnPanel() {
                 justifyContent: "center",
                 color: "theme.palette.common.white",
                 flexDirection: "column",
-                gap: 2,
+                gap: theme.spacingTokens.gap.lg,
                 pointerEvents: "none", // Don't block map panning while loading
               }}
             >
@@ -177,7 +177,7 @@ export default function LearnPanel() {
             alignItems: { sm: "flex-start", md: "center" },
             flexDirection: { sm: "column-reverse", lg: "row" },
             justifyContent: "center",
-            gap: (theme) => theme.layout.spacing.sm,
+            gap: (theme) => theme.spacingTokens.gap.lg,
             width: "100%",
             maxWidth: theme.layout.maxWidth.xl,
             margin: "0 auto",

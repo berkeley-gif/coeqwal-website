@@ -95,8 +95,7 @@ export function HydroclimateChooser({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        // 10px header-to-content spacing
-        gap: 1.25,
+        gap: theme.spacingTokens.gap.md,
       }}
     >
       {showTitle && (
@@ -145,7 +144,7 @@ export function HydroclimateChooser({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 0.5,
+                    gap: theme.spacingTokens.gap.xs,
                     cursor: isDisabled ? "not-allowed" : "pointer",
                     opacity: isDisabled ? 0.4 : 1,
                     transition: theme.transition.default,
@@ -184,7 +183,7 @@ export function HydroclimateChooser({
                   >
                     <IconComponent
                       sx={{
-                        color: theme.palette.utility.white,
+                        color: theme.palette.common.white,
                         fontSize: size === "small" ? "1.25rem" : "1.5rem",
                       }}
                     />

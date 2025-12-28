@@ -208,7 +208,7 @@ export function TierLocationLabels({ tierLookup, data }: TierLocationLabelsProps
                 style={{
                   ...theme.typography.compact.micro,
                   backgroundColor: getTierColor(location.tier),
-                  color: theme.palette.utility.white,
+                  color: theme.palette.common.white,
                   padding: "4px 8px",
                   borderRadius: theme.borderRadius.sm,
                   fontWeight: theme.typography.fontWeightSemiBold,

@@ -40,10 +40,10 @@ export function ComparisonHeader({
   return (
     <Box
       sx={{
-        px: theme.spacing(2),
-        pt: theme.spacing(2),
-        pb: theme.spacing(1),
-        backgroundColor: theme.palette.common.white,
+        px: theme.spacingTokens.component.lg,
+        pt: theme.spacingTokens.component.lg,
+        pb: theme.spacingTokens.component.sm,
+        backgroundColor: theme.palette.background.paper,
         borderBottom: theme.border.medium,
         height: "100%",
       }}
@@ -53,8 +53,8 @@ export function ComparisonHeader({
         sx={{
           display: "flex",
           alignItems: "baseline",
-          gap: 1.5,
-          mb: 1,
+          gap: theme.spacingTokens.gap.md,
+          mb: theme.spacingTokens.component.sm,
           flexWrap: "wrap",
         }}
       >
@@ -69,7 +69,7 @@ export function ComparisonHeader({
         sx={{
           display: "flex",
           flexWrap: "wrap",
-          gap: 1,
+          gap: theme.spacingTokens.gap.sm,
         }}
       >
         {comparisonData.map((scenario, index) => {
@@ -81,11 +81,11 @@ export function ComparisonHeader({
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 0.5,
+                gap: theme.spacingTokens.gap.xs,
                 cursor: "pointer",
-                px: 1,
-                py: 0.25,
-                borderRadius: 0.5,
+                px: theme.spacingTokens.component.sm,
+                py: theme.spacingTokens.component.xs,
+                borderRadius: theme.borderRadius.xs,
                 backgroundColor: isHighlighted
                   ? theme.palette.grey[100]
                   : "transparent",
@@ -99,7 +99,7 @@ export function ComparisonHeader({
                   width: 16,
                   height: isHighlighted ? 4 : 3,
                   backgroundColor: lineColors[index],
-                  borderRadius: 0.5,
+                  borderRadius: theme.borderRadius.xs,
                 }}
               />
               <Typography

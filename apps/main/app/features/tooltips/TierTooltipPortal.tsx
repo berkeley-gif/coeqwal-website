@@ -49,7 +49,7 @@ export function TierTooltipPortal({
           <Box
             sx={{
               position: "relative",
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               border: theme.border.light,
               borderRadius: theme.borderRadius.md,

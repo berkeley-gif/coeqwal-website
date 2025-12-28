@@ -141,7 +141,7 @@ function TooltipVariant({
         },
         tooltip: {
           sx: (theme: Theme) => ({
-            backgroundColor: theme.palette.common.white,
+            backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             boxShadow: theme.shadow.md,
             width,
@@ -200,7 +200,7 @@ function OverlayVariant({
         left: "50%",
         transform: "translate(-50%, -50%)",
         zIndex: theme.zIndex.tooltip,
-        backgroundColor: theme.palette.common.white,
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary,
         boxShadow: theme.shadow.lg,
         borderRadius: theme.borderRadius.md,

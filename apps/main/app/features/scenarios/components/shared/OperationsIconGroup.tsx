@@ -45,7 +45,7 @@ export function OperationsIconGroup({
       <Box
         sx={{
           display: "flex",
-          gap: { xs: 0.5, md: 1 },
+          gap: { xs: theme.spacingTokens.gap.xs, md: theme.spacingTokens.gap.sm },
           alignItems: "flex-start",
           flexDirection: layout === "horizontal" ? "row" : "column",
           justifyContent: "flex-start",
@@ -144,7 +144,7 @@ export function OperationsIconGroup({
     <Box
       sx={{
         display: "flex",
-        gap: { xs: 0.5, md: 1 },
+        gap: { xs: theme.spacingTokens.gap.xs, md: theme.spacingTokens.gap.sm },
         alignItems: "flex-start",
         flexDirection: layout === "horizontal" ? "row" : "column",
         justifyContent: "flex-start",

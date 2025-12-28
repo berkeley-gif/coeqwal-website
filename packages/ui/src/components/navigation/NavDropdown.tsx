@@ -80,9 +80,9 @@ export function NavDropdown({
         sx={{
           zIndex: (theme) => theme.zIndex.dropdown,
           "& .MuiPaper-root": {
-            backgroundColor: (theme) => theme.palette.common.white,
+            backgroundColor: (theme) => theme.palette.background.paper,
             borderRadius: (theme) => theme.borderRadius.md,
-            mt: 1,
+            mt: (theme) => theme.spacingTokens.component.sm,
             minWidth: "200px",
             boxShadow: (theme) => theme.shadow.md,
             border: (theme) => `1px solid ${theme.palette.action.hover}`,

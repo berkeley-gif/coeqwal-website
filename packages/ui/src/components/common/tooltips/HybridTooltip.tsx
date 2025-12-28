@@ -108,7 +108,7 @@ const getTooltipSlotProps = (
   },
   tooltip: {
     sx: {
-      backgroundColor: theme.palette.common.white,
+      backgroundColor: theme.palette.background.paper,
       color: theme.palette.text.primary,
       boxShadow: theme.shadow.md,
       width,
@@ -167,7 +167,7 @@ export function HybridTooltip({
             left: "50%",
             transform: "translate(-50%, -50%)",
             zIndex: theme.zIndex.tooltip,
-            backgroundColor: theme.palette.common.white,
+            backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             boxShadow: theme.shadow.lg,
             borderRadius: theme.borderRadius.md,
@@ -259,7 +259,7 @@ export function HybridTooltip({
               left: "50%",
               transform: "translate(-50%, -50%)",
               zIndex: theme.zIndex.tooltip,
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               boxShadow: theme.shadow.lg,
               borderRadius: theme.borderRadius.md,

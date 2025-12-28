@@ -80,7 +80,7 @@ export function SmartSummary({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm, py: theme.spacingTokens.component.sm }}>
           <CircularProgress
             size={14}
             sx={{ color: theme.palette.blue.bright }}
@@ -107,9 +107,9 @@ export function SmartSummary({
       sx={{
         display: "flex",
         flexWrap: "wrap",
-        gap: 0.5,
+        gap: theme.spacingTokens.gap.xs,
         alignItems: "center",
-        mb: isInline ? 0 : 1.5,
+        mb: isInline ? 0 : theme.spacingTokens.component.md,
       }}
     >
       {Object.entries(summary.tierBreakdown).map(([tier, data]) => {
@@ -154,7 +154,7 @@ export function SmartSummary({
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 0.5,
+            gap: theme.spacingTokens.gap.xs,
             alignItems: "center",
           }}
         >
@@ -164,7 +164,7 @@ export function SmartSummary({
             sx={{
               color: tierColors[4],
               fontWeight: theme.typography.fontWeightSemiBold,
-              mr: 0.5,
+              mr: theme.spacingTokens.component.xs,
             }}
           >
             Critical:
@@ -183,19 +183,19 @@ export function SmartSummary({
     }
 
     return (
-      <Box sx={{ mb: 1.5 }}>
+      <Box sx={{ mb: theme.spacingTokens.component.md }}>
         <Typography
           variant={isCompact ? "compactMicro" : "nav"}
           sx={{
             color: tierColors[4],
             fontWeight: theme.typography.fontWeightSemiBold,
             display: "block",
-            mb: 0.5,
+            mb: theme.spacingTokens.component.xs,
           }}
         >
           Critical locations:
         </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.xs }}>
           {visibleLocations.map((loc) =>
             renderLocationChip(loc, "default", isCompact),
           )}
@@ -225,7 +225,7 @@ export function SmartSummary({
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 0.5,
+            gap: theme.spacingTokens.gap.xs,
             alignItems: "center",
           }}
         >
@@ -235,7 +235,7 @@ export function SmartSummary({
             sx={{
               color: tierColors[3],
               fontWeight: theme.typography.fontWeightSemiBold,
-              mr: 0.5,
+              mr: theme.spacingTokens.component.xs,
             }}
           >
             At-risk:
@@ -331,7 +331,7 @@ export function SmartSummary({
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
-                gap: 2,
+                gap: theme.spacingTokens.gap.lg,
                 alignItems: "flex-start",
               }}
             >

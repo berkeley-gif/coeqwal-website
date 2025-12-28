@@ -392,7 +392,7 @@ export default function MapOverlayPanels() {
                   component="span"
                   sx={{
                     fontSize: "1.5rem",
-                    color: theme.palette.utility.white,
+                    color: theme.palette.common.white,
                     animation: "bounce 2s ease-in-out infinite",
                     "@keyframes bounce": {
                       "0%, 100%": { transform: "translateY(0)" },
@@ -821,7 +821,7 @@ export default function MapOverlayPanels() {
                   gap: theme.spacingTokens.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: { xs: 1.5, sm: 2, md: 3, lg: 4, xl: 6 }, // Match left panel padding
+                  pr: theme.spacingTokens.page.x, // Match left panel padding
                   pointerEvents: "none",
                 }}
               >

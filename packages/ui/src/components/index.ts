@@ -8,7 +8,6 @@ export type {
 } from "./navigation/NavDropdown"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { ScrollToButton } from "./navigation/ScrollToButton"
-export type { GlossaryTerm, TierInfo } from "../lib/glossary"
 
 // Common components
 export { Logo } from "./common/Logo"
@@ -20,8 +19,6 @@ export type { RoundedDownArrowProps } from "./icons/RoundedDownArrow"
 export { RoundedRightArrow } from "./icons/RoundedRightArrow"
 export type { RoundedRightArrowProps } from "./icons/RoundedRightArrow"
 // Tooltip components (all use HybridTooltip internally for device-adaptive behavior)
-export { MapMarkerTooltip } from "./common/MapMarkerTooltip"
-export type { MapMarkerTooltipProps } from "./common/MapMarkerTooltip"
 export { InfoTooltip } from "./common/InfoTooltip"
 export type { InfoTooltipProps } from "./common/InfoTooltip"
 // Core tooltip system

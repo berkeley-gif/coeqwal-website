@@ -158,7 +158,7 @@ const IntroSection = () => {
               textAlign: "left",
               display: "flex",
               flexDirection: "column",
-              color: (theme) => theme.palette.utility.white,
+              color: (theme) => theme.palette.common.white,
               margin: "200px 0",
               gap: "40px",
             }}
@@ -181,8 +181,8 @@ const IntroSection = () => {
                   },
                 ]}
                 onActivate={handleGlossaryOpen}
-                color={theme.palette.utility.white}
-                underlineColor={theme.palette.utility.white}
+                color={theme.palette.common.white}
+                underlineColor={theme.palette.common.white}
               />
             </Typography>
             <Typography variant="body1" sx={{ flex: "2" }}>
@@ -204,8 +204,8 @@ const IntroSection = () => {
                   },
                 ]}
                 onActivate={handleGlossaryOpen}
-                color={theme.palette.utility.white}
-                underlineColor={theme.palette.utility.white}
+                color={theme.palette.common.white}
+                underlineColor={theme.palette.common.white}
               />
             </Typography>
           </Box>
