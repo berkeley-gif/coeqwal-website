@@ -430,4 +430,3 @@ export function HotspotMarkers({
 }
 
 export default HotspotMarkers
-

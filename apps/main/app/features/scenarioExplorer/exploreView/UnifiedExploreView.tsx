@@ -99,7 +99,10 @@ export default function UnifiedExploreView({
             display: "flex",
             flexDirection: "column",
             borderRight: showRightPanel ? theme.border.medium : "none",
-            backgroundColor: mode === "list" ? theme.palette.grey[100] : theme.palette.background.paper,
+            backgroundColor:
+              mode === "list"
+                ? theme.palette.grey[100]
+                : theme.palette.background.paper,
             position: "relative",
             zIndex: theme.zIndex.pageContent,
             overflow: "hidden",
@@ -119,12 +122,20 @@ export default function UnifiedExploreView({
             transition: theme.transition.layout,
             overflow: "hidden",
             position: "relative",
-            backgroundColor: mode === "comparison" ? theme.palette.grey[100] : "transparent",
+            backgroundColor:
+              mode === "comparison" ? theme.palette.grey[100] : "transparent",
             pointerEvents: mode === "map" ? "none" : "auto",
           }}
         >
           {mode === "comparison" && (
-            <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <Box
+              sx={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
               {comparisonLoading ? (
                 <Box
                   sx={{
@@ -136,13 +147,32 @@ export default function UnifiedExploreView({
                   }}
                 >
                   <CircularProgress size={32} />
-                  <Typography variant="body2" sx={{ mt: theme.space.component.lg, color: theme.palette.grey[600] }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: theme.space.component.lg,
+                      color: theme.palette.grey[600],
+                    }}
+                  >
                     Loading comparison...
                   </Typography>
                 </Box>
               ) : hasComparisonData ? (
-                <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-                  <Box sx={{ flex: 1, p: theme.space.component.lg, overflow: "hidden" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      flex: 1,
+                      p: theme.space.component.lg,
+                      overflow: "hidden",
+                    }}
+                  >
                     <Box
                       sx={{
                         backgroundColor: theme.palette.background.paper,
@@ -164,14 +194,26 @@ export default function UnifiedExploreView({
                           axis: theme.palette.grey[500],
                         }}
                         lineColors={lineColors}
-                        onLineClick={(scenario) => onScenarioClick?.(scenario.id)}
+                        onLineClick={(scenario) =>
+                          onScenarioClick?.(scenario.id)
+                        }
                       />
                     </Box>
                   </Box>
                 </Box>
               ) : (
-                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-                  <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100%",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ color: theme.palette.grey[600] }}
+                  >
                     No comparison data available
                   </Typography>
                 </Box>
@@ -183,5 +225,3 @@ export default function UnifiedExploreView({
     </Box>
   )
 }
-
-

@@ -58,7 +58,11 @@ export function InfoOverlay({
     >
       <Typography
         variant="compactSubtitle"
-        sx={{ color: theme.palette.text.primary, lineHeight: 1.4, display: "block" }}
+        sx={{
+          color: theme.palette.text.primary,
+          lineHeight: 1.4,
+          display: "block",
+        }}
       >
         {children}
       </Typography>
@@ -67,4 +71,3 @@ export function InfoOverlay({
 }
 
 export default InfoOverlay
-

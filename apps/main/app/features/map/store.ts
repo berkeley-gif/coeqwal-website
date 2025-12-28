@@ -5,7 +5,11 @@
  */
 
 import { create, immer } from "@repo/state/zustand"
-import { SECTION_LAYERS, type SectionLayerConfig, type SectionId } from "./config/sectionLayers"
+import {
+  SECTION_LAYERS,
+  type SectionLayerConfig,
+  type SectionId,
+} from "./config/sectionLayers"
 
 // ============================================================================
 // Types
@@ -59,9 +63,7 @@ const initialState: MapState = {
 // Store
 // ============================================================================
 
-export const useMapStore = create<MapState>()(
-  immer(() => initialState)
-)
+export const useMapStore = create<MapState>()(immer(() => initialState))
 
 // ============================================================================
 // Actions
@@ -73,12 +75,13 @@ export const mapActions = {
     useMapStore.setState({
       mapMode: mode,
       activeOutcomeVisualization:
-        mode === "hidden" ? null : useMapStore.getState().activeOutcomeVisualization,
+        mode === "hidden"
+          ? null
+          : useMapStore.getState().activeOutcomeVisualization,
     })
   },
 
-  setMapReady: (ready: boolean) =>
-    useMapStore.setState({ mapReady: ready }),
+  setMapReady: (ready: boolean) => useMapStore.setState({ mapReady: ready }),
 
   // Learn mode
   setActiveSection: (section: SectionId) =>
@@ -136,11 +139,9 @@ export const useMapReady = () => useMapStore((s) => s.mapReady)
 export const useActiveSection = (): SectionId =>
   useMapStore((s) => s.activeSection)
 
-export const useRiversProgress = () =>
-  useMapStore((s) => s.riversProgress)
+export const useRiversProgress = () => useMapStore((s) => s.riversProgress)
 
-export const useGeocoderMarker = () =>
-  useMapStore((s) => s.geocoderMarker)
+export const useGeocoderMarker = () => useMapStore((s) => s.geocoderMarker)
 
 export const useGeocodingResetCounter = () =>
   useMapStore((s) => s.geocodingResetCounter)

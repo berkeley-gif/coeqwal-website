@@ -6,7 +6,7 @@
  * Provides consistent filled/outlined toggle styling across the app.
  */
 
-import { Chip, useTheme } from "@mui/material"
+import { Chip } from "@mui/material"
 
 export interface ToggleChipProps {
   /** The label text */
@@ -25,8 +25,6 @@ export function ToggleChip({
   onClick,
   fullWidth = false,
 }: ToggleChipProps) {
-  const theme = useTheme()
-
   return (
     <Chip
       label={label}
@@ -42,10 +40,3 @@ export function ToggleChip({
 }
 
 export default ToggleChip
-
-
-
-
-
-
-

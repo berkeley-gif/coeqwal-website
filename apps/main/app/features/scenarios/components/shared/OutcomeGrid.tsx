@@ -43,7 +43,10 @@ export interface OutcomeGridProps {
   /** Called when a glyph is clicked */
   onGlyphClick?: (outcome: string) => void
   /** Called when info button is clicked */
-  onInfoClick?: (outcome: string, e: React.MouseEvent<HTMLButtonElement>) => void
+  onInfoClick?: (
+    outcome: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => void
   /** Called when sort changes */
   onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
 }
@@ -182,7 +185,3 @@ export function OutcomeGrid({
 }
 
 export default OutcomeGrid
-
-
-
-

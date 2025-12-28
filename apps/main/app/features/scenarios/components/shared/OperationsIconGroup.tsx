@@ -66,8 +66,14 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              height: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
+              width: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
+              height: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -91,8 +97,14 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              height: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
+              width: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
+              height: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
               cursor: "pointer",
             }}
           >
@@ -120,8 +132,14 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              height: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
+              width: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
+              height: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
               cursor: "pointer",
             }}
           >
@@ -164,8 +182,14 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              height: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
+              width: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
+              height: {
+                xs: theme.spacing(iconSize.xs),
+                lg: theme.spacing(iconSize.lg),
+              },
               cursor: "pointer",
               display: "flex",
               alignItems: "center",

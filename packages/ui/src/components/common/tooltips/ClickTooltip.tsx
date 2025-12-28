@@ -119,7 +119,9 @@ function TooltipVariant({
 }: Omit<ClickTooltipProps, "variant">) {
   const tooltipContent = (
     <Box sx={{ position: "relative" }}>
-      {!hideCloseButton && <TooltipCloseButton onClick={onClose} offset={{ top: -8, right: -8 }} />}
+      {!hideCloseButton && (
+        <TooltipCloseButton onClick={onClose} offset={{ top: -8, right: -8 }} />
+      )}
       {content}
     </Box>
   )
@@ -209,8 +211,10 @@ function OverlayVariant({
         p: theme.space.component.xl,
         ...theme.typography.compactSubtitle,
       }}
-      >
-      {!hideCloseButton && <TooltipCloseButton onClick={onClose} offset={{ top: -8, right: -8 }} />}
+    >
+      {!hideCloseButton && (
+        <TooltipCloseButton onClick={onClose} offset={{ top: -8, right: -8 }} />
+      )}
       {content}
     </Box>
   )

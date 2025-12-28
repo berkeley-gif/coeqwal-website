@@ -106,7 +106,11 @@ export default function TableView() {
         </Typography>
         <Typography
           variant="body2"
-          sx={{ color: theme.palette.grey[500], mb: theme.space.section.sm, maxWidth: theme.layout.maxWidth.md }}
+          sx={{
+            color: theme.palette.grey[500],
+            mb: theme.space.section.sm,
+            maxWidth: theme.layout.maxWidth.md,
+          }}
         >
           Select scenarios in List View to view detailed metrics and export
           data.
@@ -192,7 +196,13 @@ export default function TableView() {
         </FormControl>
 
         {/* Quick Filters */}
-        <Box sx={{ display: "flex", gap: theme.space.gap.sm, alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: theme.space.gap.sm,
+            alignItems: "center",
+          }}
+        >
           <ToggleChip
             label="Outcomes only"
             active={showTiersOnly}
@@ -207,7 +217,13 @@ export default function TableView() {
 
         {/* Export buttons and results count */}
         <Box
-          sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: theme.space.gap.sm }}
+          sx={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: theme.space.gap.sm,
+          }}
         >
           <Button
             variant="outlined"
@@ -233,7 +249,13 @@ export default function TableView() {
           >
             Export as JSON
           </Button>
-          <Typography variant="body2" sx={{ color: theme.palette.grey[600], ml: theme.space.component.lg }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: theme.palette.grey[600],
+              ml: theme.space.component.lg,
+            }}
+          >
             Showing {filteredMetrics.length} of {outcomeMetrics.length} metrics
           </Typography>
         </Box>
@@ -251,10 +273,18 @@ export default function TableView() {
               color: theme.palette.grey[500],
             }}
           >
-            <Typography variant="body2">No metrics match your filters</Typography>
+            <Typography variant="body2">
+              No metrics match your filters
+            </Typography>
           </Box>
         ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: theme.space.gap.md }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: theme.space.gap.md,
+            }}
+          >
             {filteredMetrics.map((metric) => (
               <MetricRow
                 key={metric.id}
@@ -299,7 +329,13 @@ function MetricRow({
         },
       }}
     >
-      <Box sx={{ display: "flex", gap: theme.space.gap.lg, alignItems: "flex-start" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: theme.space.gap.lg,
+          alignItems: "flex-start",
+        }}
+      >
         {/* Left: category icon */}
         <Box
           sx={{
@@ -322,7 +358,14 @@ function MetricRow({
         {/* Middle: Content */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           {/* Name and Unit */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, mb: theme.space.component.xs }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: theme.space.gap.sm,
+              mb: theme.space.component.xs,
+            }}
+          >
             <Typography variant="subtitle1">{metric.name}</Typography>
             <Chip
               label={metric.unit}
@@ -347,12 +390,20 @@ function MetricRow({
           </Box>
 
           {/* Description */}
-          <Typography variant="compactSubtitle" sx={{ color: theme.palette.grey[600], mb: theme.space.component.sm }}>
+          <Typography
+            variant="compactSubtitle"
+            sx={{
+              color: theme.palette.grey[600],
+              mb: theme.space.component.sm,
+            }}
+          >
             {metric.description}
           </Typography>
 
           {/* Metadata Tags */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}>
+          <Box
+            sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}
+          >
             <Chip
               label={category?.name || "Unknown"}
               size="small"
@@ -404,7 +455,10 @@ function MetricRow({
               flexShrink: 0,
             }}
           >
-            <Typography variant="compactSubtitle" sx={{ color: theme.palette.grey[600] }}>
+            <Typography
+              variant="compactSubtitle"
+              sx={{ color: theme.palette.grey[600] }}
+            >
               {scenarios.length} scenario{scenarios.length !== 1 ? "s" : ""}
             </Typography>
           </Box>

@@ -59,7 +59,10 @@ export function TierTooltipPortal({
               ...theme.typography.compactSubtitle,
             }}
           >
-            <TooltipCloseButton onClick={onForceClose} offset={{ top: 8, right: 8 }} />
+            <TooltipCloseButton
+              onClick={onForceClose}
+              offset={{ top: 8, right: 8 }}
+            />
 
             {/* Arrow pointing right */}
             <Box

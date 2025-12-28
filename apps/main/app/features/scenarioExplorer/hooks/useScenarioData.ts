@@ -9,11 +9,14 @@ import type { OutcomeInfo } from "../types"
 export function useScenarioData(): {
   allChartData: Record<string, Record<string, ChartDataPoint[]>>
   outcomeNames: OutcomeInfo[]
-  getChartDataForScenario: (scenarioId: string) => Record<string, ChartDataPoint[]>
+  getChartDataForScenario: (
+    scenarioId: string,
+  ) => Record<string, ChartDataPoint[]>
   isLoading: boolean
   error: string | null
 } {
-  const { allChartData, outcomeNames, isLoading, error } = useMultipleScenarioTiers()
+  const { allChartData, outcomeNames, isLoading, error } =
+    useMultipleScenarioTiers()
 
   const getChartDataForScenario = useMemo(
     () => (scenarioId: string) => {

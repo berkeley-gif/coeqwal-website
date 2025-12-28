@@ -73,16 +73,23 @@ export default function CategoryView() {
           alignItems: "center",
           justifyContent: "center",
           height: "100%",
-p: theme.space.component.xl,
-        textAlign: "center",
-      }}
-    >
-      <Typography variant="h6" sx={{ color: theme.palette.grey[600], mb: theme.space.component.lg }}>
+          p: theme.space.component.xl,
+          textAlign: "center",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{ color: theme.palette.grey[600], mb: theme.space.component.lg }}
+        >
           No scenarios selected
         </Typography>
         <Typography
           variant="body2"
-          sx={{ color: theme.palette.grey[500], mb: theme.space.section.sm, maxWidth: theme.layout.maxWidth.md }}
+          sx={{
+            color: theme.palette.grey[500],
+            mb: theme.space.section.sm,
+            maxWidth: theme.layout.maxWidth.md,
+          }}
         >
           Select scenarios in List View to see side-by-side comparisons of
           outcome metrics.
@@ -139,7 +146,12 @@ p: theme.space.component.xl,
               }}
             >
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.lg, width: "100%" }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: theme.space.gap.lg,
+                  width: "100%",
+                }}
               >
                 <Typography variant="h5">{category.icon}</Typography>
                 <Typography variant="h6" sx={{ flex: 1 }}>
@@ -149,7 +161,10 @@ p: theme.space.component.xl,
                   label={`${metrics.length} metric${metrics.length !== 1 ? "s" : ""}`}
                   size="small"
                   sx={{
-                    backgroundColor: getOutcomeCategoryColor(theme, category.id),
+                    backgroundColor: getOutcomeCategoryColor(
+                      theme,
+                      category.id,
+                    ),
                     color: theme.palette.common.white,
                   }}
                 />
@@ -164,7 +179,13 @@ p: theme.space.component.xl,
               {/* Tier Metrics First */}
               {tierMetrics.length > 0 && (
                 <Box sx={{ mb: theme.space.section.sm }}>
-                  <Typography variant="subtitle2" sx={{ mb: theme.space.component.lg, color: theme.palette.blue.dark }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: theme.space.component.lg,
+                      color: theme.palette.blue.dark,
+                    }}
+                  >
                     Outcome tiers
                   </Typography>
                   {tierMetrics.map((metric) => (
@@ -181,8 +202,14 @@ p: theme.space.component.xl,
               {nonTierMetrics.length > 0 && (
                 <Box>
                   {tierMetrics.length > 0 && (
-<Typography variant="subtitle2" sx={{ mb: theme.space.component.lg, color: theme.palette.blue.dark }}>
-                    Additional metrics
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        mb: theme.space.component.lg,
+                        color: theme.palette.blue.dark,
+                      }}
+                    >
+                      Additional metrics
                     </Typography>
                   )}
                   {nonTierMetrics.map((metric) => (
@@ -251,12 +278,22 @@ function MetricCard({
       </Box>
 
       {/* Description */}
-      <Typography variant="body2" sx={{ color: theme.palette.grey[600], mb: theme.space.component.md }}>
+      <Typography
+        variant="body2"
+        sx={{ color: theme.palette.grey[600], mb: theme.space.component.md }}
+      >
         {metric.description}
       </Typography>
 
       {/* Metadata row */}
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.sm, mb: theme.space.component.md }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: theme.space.gap.sm,
+          mb: theme.space.component.md,
+        }}
+      >
         {/* Temporal */}
         <Chip
           label={`Temporal: ${metric.temporal.join(", ")}`}
@@ -329,23 +366,43 @@ function MetricCard({
 
           {isLoading && (
             <Box
-              sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: theme.space.section.sm }}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                py: theme.space.section.sm,
+              }}
             >
               <CircularProgress size={24} />
-              <Typography variant="body2" sx={{ ml: theme.space.component.lg, color: theme.palette.grey[600] }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  ml: theme.space.component.lg,
+                  color: theme.palette.grey[600],
+                }}
+              >
                 Loading data...
               </Typography>
             </Box>
           )}
 
           {error && (
-            <Typography variant="body2" sx={{ color: theme.palette.accent.alert, fontStyle: "italic" }}>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.accent.alert, fontStyle: "italic" }}
+            >
               {error}
             </Typography>
           )}
 
           {!isLoading && !error && data && metric.isTier && (
-            <Box sx={{ display: "flex", gap: theme.space.gap.xl, flexWrap: "wrap" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: theme.space.gap.xl,
+                flexWrap: "wrap",
+              }}
+            >
               {data.map((scenario) => (
                 <Box
                   key={scenario.scenarioId}
@@ -359,7 +416,11 @@ function MetricCard({
                 >
                   <Typography
                     variant="compactSubtitle"
-                    sx={{ mb: theme.space.component.sm, fontWeight: theme.typography.fontWeightMedium, textAlign: "center" }}
+                    sx={{
+                      mb: theme.space.component.sm,
+                      fontWeight: theme.typography.fontWeightMedium,
+                      textAlign: "center",
+                    }}
                   >
                     {scenario.scenarioName}
                   </Typography>
@@ -376,7 +437,12 @@ function MetricCard({
           {!isLoading && !error && !metric.isTier && (
             <Typography
               variant="body2"
-              sx={{ color: theme.palette.grey[600], fontStyle: "italic", textAlign: "center", py: 2 }}
+              sx={{
+                color: theme.palette.grey[600],
+                fontStyle: "italic",
+                textAlign: "center",
+                py: 2,
+              }}
             >
               Detailed metric visualizations coming soon
             </Typography>

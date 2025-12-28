@@ -57,10 +57,3 @@ export function LocationChip({
 }
 
 export default LocationChip
-
-
-
-
-
-
-

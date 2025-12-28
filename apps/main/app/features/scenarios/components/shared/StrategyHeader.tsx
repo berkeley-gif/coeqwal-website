@@ -55,10 +55,7 @@ function DescriptionWithTUCPTooltip({
                 variant="inline"
                 tooltipContent={
                   <>
-                    <Box
-                      component="span"
-                      sx={{ fontWeight: 600 }}
-                    >
+                    <Box component="span" sx={{ fontWeight: 600 }}>
                       Temporary Urgent Change Petitions (TUCPs)
                     </Box>{" "}
                     permit changes during droughts to meet human health and
@@ -116,7 +113,3 @@ export function StrategyHeader({
 }
 
 export default StrategyHeader
-
-
-
-

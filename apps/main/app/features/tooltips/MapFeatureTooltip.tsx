@@ -21,7 +21,9 @@ function TierBadge({ level, label }: { level: number; label: string }) {
   const theme = useTheme()
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+    <Box
+      sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
+    >
       <Box
         sx={{
           width: 10,
@@ -256,7 +258,9 @@ export function MapFeatureTooltip({
           position: "relative",
         }}
       >
-        {isPinned && <TooltipCloseButton onClick={onClose} offset={{ top: 0, right: 0 }} />}
+        {isPinned && (
+          <TooltipCloseButton onClick={onClose} offset={{ top: 0, right: 0 }} />
+        )}
         {renderContent()}
         <TierBadge level={feature.tierLevel} label={feature.tierLabel} />
       </Box>
@@ -265,4 +269,3 @@ export function MapFeatureTooltip({
 }
 
 export default MapFeatureTooltip
-

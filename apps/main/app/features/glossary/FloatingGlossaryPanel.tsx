@@ -200,10 +200,7 @@ export function FloatingGlossaryPanel({
             zIndex: 1,
           }}
         >
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600 }}
-          >
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
             Glossary
           </Typography>
           <IconButton onClick={onClose} size="small">
@@ -251,8 +248,8 @@ export function FloatingGlossaryPanel({
                       alignItems: "flex-start",
                       // Tighter spacing between header and definition
                       mb: theme.space.component.xs,
-gap: theme.space.gap.sm,
-                    ml: -1, // intentional offset for icon alignment
+                      gap: theme.space.gap.sm,
+                      ml: -1, // intentional offset for icon alignment
                     }}
                   >
                     <Box
@@ -279,11 +276,18 @@ gap: theme.space.gap.sm,
                   </Box>
 
                   {/* Definition */}
-                  <Box sx={{ ml: theme.space.section.md }}>{renderDefinition(term.definition)}</Box>
+                  <Box sx={{ ml: theme.space.section.md }}>
+                    {renderDefinition(term.definition)}
+                  </Box>
 
                   {/* Tiers (if applicable) */}
                   {term.tiers && term.tiers.length > 0 && (
-                    <Box sx={{ ml: theme.space.section.md, mt: theme.space.component.lg }}>
+                    <Box
+                      sx={{
+                        ml: theme.space.section.md,
+                        mt: theme.space.component.lg,
+                      }}
+                    >
                       <Typography
                         variant="subtitle2"
                         sx={{
@@ -295,7 +299,10 @@ gap: theme.space.gap.sm,
                       </Typography>
                       <Stack spacing={1}>
                         {term.tiers.map((tier, tierIndex) => (
-                          <Box key={tierIndex} sx={{ display: "flex", gap: theme.space.gap.sm }}>
+                          <Box
+                            key={tierIndex}
+                            sx={{ display: "flex", gap: theme.space.gap.sm }}
+                          >
                             <Box
                               sx={{
                                 width: 16,
@@ -317,7 +324,12 @@ gap: theme.space.gap.sm,
 
                   {/* See also */}
                   {term.seeAlso && (
-                    <Box sx={{ ml: theme.space.section.md, mt: theme.space.component.lg }}>
+                    <Box
+                      sx={{
+                        ml: theme.space.section.md,
+                        mt: theme.space.component.lg,
+                      }}
+                    >
                       <Typography variant="body2" color="text.secondary">
                         <em>See also: </em>
                         <Box

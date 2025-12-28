@@ -12,7 +12,7 @@
  * - Zustand store: Manages activeSection state, layer visibility derived in useMapLayers
  *
  * Dev note: Future refactoring could extract section components, but it makes timing tricky and it's not worth the effort right now.
- * The react-scrollama library has internal dependencies on how Step components render that break when I try to abstract the inner content. 
+ * The react-scrollama library has internal dependencies on how Step components render that break when I try to abstract the inner content.
  * Even wrapping just the Box/CallResponsePanel in a helper component causes the IntersectionObserver to fail.
  */
 
@@ -425,7 +425,10 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   Central Valley
                 </Box>{" "}
                 is a long, low valley that collects much of California&apos;s
@@ -455,7 +458,10 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The Central Valley lies across three water{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   basins
                 </Box>
                 .
@@ -559,24 +565,39 @@ export default function MapOverlayPanels() {
                 isVisible={isFirstPanelVisible}
                 sx={{ minHeight: "auto", mb: 0 }}
               >
-                <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: theme.space.component.lg }}
+                >
                   These waters flow to the Valley floor, where the{" "}
-                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                  >
                     Sacramento River
                   </Box>{" "}
                   flows from the north and the{" "}
-                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                  >
                     San Joaquin River
                   </Box>{" "}
                   flows from the south. The rivers meet and mix in the low-lying{" "}
-                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                  >
                     Delta
                   </Box>
                   .
                 </Typography>
                 <Typography variant="body1">
                   During{" "}
-                  <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                  >
                     wet years
                   </Box>{" "}
                   water flows from the Tulare Basin into the San Joaquin River.
@@ -653,15 +674,24 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
                 To do this water planning and accounting, the federal{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   U.S. Bureau of Reclamation
                 </Box>{" "}
                 and the state{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   Department of Water Resources
                 </Box>{" "}
                 use a computer model called{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   CalSim
                 </Box>
                 .
@@ -694,15 +724,24 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   COEQWAL
                 </Box>{" "}
                 project has received support from the{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   University of California
                 </Box>{" "}
                 and the{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   Bay-Delta Science Program
                 </Box>{" "}
                 to use CalSim to explore a broad range of water management
@@ -731,7 +770,10 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 We are making these{" "}
-                <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
+                <Box
+                  component="span"
+                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                >
                   alternative water management scenarios
                 </Box>{" "}
                 available to the public so that communities can envision
@@ -1078,7 +1120,10 @@ export default function MapOverlayPanels() {
                               communities.
                               <Box
                                 component="span"
-                                sx={{ display: "block", mt: theme.space.component.sm }}
+                                sx={{
+                                  display: "block",
+                                  mt: theme.space.component.sm,
+                                }}
                               >
                                 Some outcomes record values from multiple
                                 locations in a bar chart that shows the number

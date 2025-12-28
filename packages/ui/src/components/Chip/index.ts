@@ -10,5 +10,3 @@ export type { TierChipProps } from "./TierChip"
 
 export { LocationChip } from "./LocationChip"
 export type { LocationChipProps } from "./LocationChip"
-
-

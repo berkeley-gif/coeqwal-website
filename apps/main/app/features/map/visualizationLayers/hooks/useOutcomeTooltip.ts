@@ -45,8 +45,6 @@ export function usePolygonTooltip({
     togglePinned,
     clearPinned,
     clearAllPinned,
-    clearSuppression,
-    isSuppressed,
   } = useTooltipState()
 
   useEffect(() => {
@@ -103,7 +101,8 @@ export function usePolygonTooltip({
         featureId: featureId || "unknown",
         tierLevel,
         tierLabel: getTierLabel(tierLevel),
-        locationName: locationInfo?.location_name || props.name || props.Name || null,
+        locationName:
+          locationInfo?.location_name || props.name || props.Name || null,
         tierValue: locationInfo?.tier_value ?? null,
         properties: props,
         urbName: props.Urb_Name || null,
@@ -143,13 +142,25 @@ export function usePolygonTooltip({
     map.on("click", mapboxLayerId, clickHandler)
 
     return () => {
-      if (mouseEnterHandler) map.off("mouseenter", mapboxLayerId, mouseEnterHandler)
-      if (mouseLeaveHandler) map.off("mouseleave", mapboxLayerId, mouseLeaveHandler)
-      if (mouseMoveHandler) map.off("mousemove", mapboxLayerId, mouseMoveHandler)
+      if (mouseEnterHandler)
+        map.off("mouseenter", mapboxLayerId, mouseEnterHandler)
+      if (mouseLeaveHandler)
+        map.off("mouseleave", mapboxLayerId, mouseLeaveHandler)
+      if (mouseMoveHandler)
+        map.off("mousemove", mapboxLayerId, mouseMoveHandler)
       if (clickHandler) map.off("click", mapboxLayerId, clickHandler)
       clearAllPinned()
     }
-  }, [enabled, config, tierLevelMap, locationData, mapRef, setHovered, togglePinned, clearAllPinned])
+  }, [
+    enabled,
+    config,
+    tierLevelMap,
+    locationData,
+    mapRef,
+    setHovered,
+    togglePinned,
+    clearAllPinned,
+  ])
 
   return {
     hoveredFeature,
@@ -158,4 +169,3 @@ export function usePolygonTooltip({
     clearAllPinned,
   }
 }
-

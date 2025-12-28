@@ -15,7 +15,9 @@ import { DecileData } from "../types"
  * const getColor = createCategoricalColorScale(8)
  * scenarios.map((s, i) => ({ ...s, color: getColor(i) }))
  */
-export function createCategoricalColorScale(count: number): (index: number) => string {
+export function createCategoricalColorScale(
+  count: number,
+): (index: number) => string {
   // For single item, return a mid-range color
   if (count <= 1) {
     return () => d3.interpolateViridis(0.5)

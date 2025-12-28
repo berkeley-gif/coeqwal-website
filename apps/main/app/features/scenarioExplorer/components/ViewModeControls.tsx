@@ -36,7 +36,10 @@ function Divider() {
   )
 }
 
-export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) {
+export function ViewModeControls({
+  mode,
+  onModeChange,
+}: ViewModeControlsProps) {
   const theme = useTheme()
 
   const buttonSx = (isActive: boolean, includeColor = true) => ({
@@ -58,7 +61,13 @@ export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) 
       <Divider />
 
       {/* View mode buttons */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: theme.space.gap.md }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: theme.space.gap.md,
+        }}
+      >
         <Typography
           variant="caption"
           sx={{
@@ -68,14 +77,26 @@ export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) 
         >
           View
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.xs }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.gap.xs,
+          }}
+        >
           <Tooltip title="List view" arrow>
-            <IconButton onClick={() => onModeChange("list")} sx={buttonSx(mode === "list")}>
+            <IconButton
+              onClick={() => onModeChange("list")}
+              sx={buttonSx(mode === "list")}
+            >
               <ViewListIcon sx={{ fontSize: "1.5rem" }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Map view" arrow>
-            <IconButton onClick={() => onModeChange("map")} sx={buttonSx(mode === "map", false)}>
+            <IconButton
+              onClick={() => onModeChange("map")}
+              sx={buttonSx(mode === "map", false)}
+            >
               <Image
                 src="/images/icons/map.svg"
                 alt="Map view"
@@ -86,7 +107,10 @@ export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) 
             </IconButton>
           </Tooltip>
           <Tooltip title="Comparison view" arrow>
-            <IconButton onClick={() => onModeChange("comparison")} sx={buttonSx(mode === "comparison")}>
+            <IconButton
+              onClick={() => onModeChange("comparison")}
+              sx={buttonSx(mode === "comparison")}
+            >
               <CompareArrowsIcon sx={{ fontSize: "1.5rem" }} />
             </IconButton>
           </Tooltip>

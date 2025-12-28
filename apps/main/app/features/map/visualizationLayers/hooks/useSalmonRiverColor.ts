@@ -26,7 +26,7 @@ export function useSalmonRiverColor(): string | undefined {
   // Fetch tier data only when Salmon abundance is active
   const { tierColorMap } = useTierData(
     isSalmonAbundance && isMapVisible ? outcome : null,
-    scenarioId
+    scenarioId,
   )
 
   // Extract the color from the tier map
@@ -36,4 +36,3 @@ export function useSalmonRiverColor(): string | undefined {
     return colors.length > 0 ? colors[0] : undefined
   }, [isSalmonAbundance, isMapVisible, tierColorMap])
 }
-

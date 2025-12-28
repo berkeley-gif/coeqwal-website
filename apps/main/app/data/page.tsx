@@ -128,11 +128,17 @@ export default function DataPage() {
             maxWidth="lg"
             sx={{
               py: (theme) => theme.space.section.xl,
-              pt: (theme) => `calc(${theme.layout.headerHeight}px + ${theme.spacing(4)})`,
+              pt: (theme) =>
+                `calc(${theme.layout.headerHeight}px + ${theme.spacing(4)})`,
             }}
           >
             {/* Header with back arrow */}
-            <Box sx={{ position: "relative", mb: (theme) => theme.space.section.lg }}>
+            <Box
+              sx={{
+                position: "relative",
+                mb: (theme) => theme.space.section.lg,
+              }}
+            >
               <IconButton
                 onClick={() => window.history.back()}
                 sx={{
@@ -164,7 +170,10 @@ export default function DataPage() {
             </Box>
 
             {error && (
-              <Alert severity="error" sx={{ mb: (theme) => theme.space.component.lg }}>
+              <Alert
+                severity="error"
+                sx={{ mb: (theme) => theme.space.component.lg }}
+              >
                 {error}
               </Alert>
             )}
@@ -182,7 +191,10 @@ export default function DataPage() {
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     Full scenario run files
                   </Typography>
                   <Typography
@@ -205,7 +217,10 @@ export default function DataPage() {
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl fullWidth sx={{ mb: (theme) => theme.space.section.sm }}>
+                      <FormControl
+                        fullWidth
+                        sx={{ mb: (theme) => theme.space.section.sm }}
+                      >
                         <InputLabel id="zip-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -253,7 +268,10 @@ export default function DataPage() {
               {/* Scenario data section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     Scenario data in csv format
                   </Typography>
                   <Typography
@@ -276,7 +294,10 @@ export default function DataPage() {
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl fullWidth sx={{ mb: (theme) => theme.space.section.sm }}>
+                      <FormControl
+                        fullWidth
+                        sx={{ mb: (theme) => theme.space.section.sm }}
+                      >
                         <InputLabel id="csv-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -355,7 +376,10 @@ export default function DataPage() {
               {/* Model documentation section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     Model documentation
                   </Typography>
                   <Typography
@@ -384,7 +408,10 @@ export default function DataPage() {
               {/* Research publications section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     Research publications
                   </Typography>
                   <Typography
@@ -412,7 +439,10 @@ export default function DataPage() {
               {/* API access section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     API access
                   </Typography>
                   <Typography
@@ -440,7 +470,10 @@ export default function DataPage() {
               {/* Support & contact section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h5" sx={{ mb: (theme) => theme.space.component.lg }}>
+                  <Typography
+                    variant="h5"
+                    sx={{ mb: (theme) => theme.space.component.lg }}
+                  >
                     Support & contact
                   </Typography>
                   <Typography

@@ -14,7 +14,8 @@ import { useScenarioList } from "../../scenarios/hooks"
  */
 export default function SelectionBanner() {
   const theme = useTheme()
-  const { selectedScenarios, clearScenarios, toggleScenario } = useScenarioExplorerStore()
+  const { selectedScenarios, clearScenarios, toggleScenario } =
+    useScenarioExplorerStore()
   const { getDisplayName } = useScenarioList()
 
   // Don't render if no scenarios selected
@@ -57,7 +58,9 @@ export default function SelectionBanner() {
           </Typography>
 
           {/* Scenario chips with close buttons */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.sm }}>
+          <Box
+            sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.sm }}
+          >
             {selectedScenarios.map((scenarioId) => (
               <Chip
                 key={scenarioId}

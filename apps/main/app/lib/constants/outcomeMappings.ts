@@ -130,4 +130,3 @@ export function getDisplayNameFromMetricId(metricId: string): string {
   const apiName = METRIC_ID_TO_DISPLAY_NAME[metricId] || metricId
   return applyUIDisplayOverride(apiName)
 }
-

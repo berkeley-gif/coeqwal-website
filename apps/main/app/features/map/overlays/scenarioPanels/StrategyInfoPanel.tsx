@@ -27,7 +27,9 @@ export function StrategyInfoPanel({
 
   if (isLoading) {
     return (
-      <Box sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}>
+      <Box
+        sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}
+      >
         <Typography variant="body2">Loading...</Typography>
       </Box>
     )

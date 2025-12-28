@@ -20,7 +20,9 @@ export default function ScenarioExplorerNew() {
   const theme = useTheme()
   const [mainView, setMainView] = useState<MainView>("explorer")
   const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
-  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(null)
+  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
+    null,
+  )
 
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
@@ -28,7 +30,9 @@ export default function ScenarioExplorerNew() {
     <Box
       sx={{
         height: "100%",
-        backgroundColor: needsTransparentBg ? "transparent" : theme.palette.explore.background,
+        backgroundColor: needsTransparentBg
+          ? "transparent"
+          : theme.palette.explore.background,
         color: theme.palette.text.primary,
         overflow: "hidden",
         display: "flex",
@@ -87,11 +91,13 @@ export default function ScenarioExplorerNew() {
                   "&.Mui-selected": {
                     color: theme.palette.blue.bright,
                     fontWeight: theme.typography.fontWeightBold,
-                    backgroundColor: theme.palette.interaction.selectedBackground,
+                    backgroundColor:
+                      theme.palette.interaction.selectedBackground,
                   },
                   "&:hover:not(.Mui-selected)": {
                     color: theme.palette.blue.dark,
-                    backgroundColor: theme.palette.interaction.selectedBackground,
+                    backgroundColor:
+                      theme.palette.interaction.selectedBackground,
                   },
                 },
               }}
@@ -116,7 +122,10 @@ export default function ScenarioExplorerNew() {
                 <SearchBar
                   placeholder="Search scenarios by name or description"
                   rightContent={
-                    <ViewModeControls mode={exploreMode} onModeChange={setExploreMode} />
+                    <ViewModeControls
+                      mode={exploreMode}
+                      onModeChange={setExploreMode}
+                    />
                   }
                 />
               </Box>
@@ -127,22 +136,34 @@ export default function ScenarioExplorerNew() {
                   sx={{
                     width: "50%",
                     position: "relative",
-                    backgroundColor: exploreMode === "map" ? "transparent" : theme.palette.background.paper,
-                    borderLeft: exploreMode === "comparison" ? theme.border.medium : "none",
-                    borderBottom: exploreMode === "comparison" ? theme.border.medium : "none",
+                    backgroundColor:
+                      exploreMode === "map"
+                        ? "transparent"
+                        : theme.palette.background.paper,
+                    borderLeft:
+                      exploreMode === "comparison"
+                        ? theme.border.medium
+                        : "none",
+                    borderBottom:
+                      exploreMode === "comparison"
+                        ? theme.border.medium
+                        : "none",
                     pointerEvents: exploreMode === "map" ? "none" : "auto",
                   }}
                 >
                   {exploreMode === "map" && (
                     <InfoOverlay right={theme.space.component.lg}>
-                      Click on a scenario outcome in the left panel to see outcomes at specific locations.
+                      Click on a scenario outcome in the left panel to see
+                      outcomes at specific locations.
                     </InfoOverlay>
                   )}
                   {exploreMode === "comparison" && (
                     <ComparisonHeader
                       highlightedScenario={highlightedScenario}
                       onScenarioClick={(id) =>
-                        setHighlightedScenario((prev) => (prev === id ? null : id))
+                        setHighlightedScenario((prev) =>
+                          prev === id ? null : id,
+                        )
                       }
                     />
                   )}
@@ -170,7 +191,9 @@ export default function ScenarioExplorerNew() {
             />
           )}
           {mainView === "data" && (
-            <DataExplorerView onNavigateToExplorer={() => setMainView("explorer")} />
+            <DataExplorerView
+              onNavigateToExplorer={() => setMainView("explorer")}
+            />
           )}
         </Box>
       </Box>

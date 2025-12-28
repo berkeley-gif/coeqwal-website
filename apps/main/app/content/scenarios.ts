@@ -197,7 +197,9 @@ export function getScenarioLabel(scenarioId: string): string {
  * Get user-friendly description for a scenario
  */
 export function getScenarioDescription(scenarioId: string): string {
-  return scenarioMetadata[scenarioId]?.description ?? DEFAULT_METADATA.description
+  return (
+    scenarioMetadata[scenarioId]?.description ?? DEFAULT_METADATA.description
+  )
 }
 
 /**

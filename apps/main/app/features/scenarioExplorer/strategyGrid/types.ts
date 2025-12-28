@@ -10,7 +10,9 @@ import type {
 
 export interface StrategyGridProps {
   // Data
-  getChartDataForScenario: (scenarioId: string) => Record<string, ChartDataPoint[]>
+  getChartDataForScenario: (
+    scenarioId: string,
+  ) => Record<string, ChartDataPoint[]>
   outcomeNames: OutcomeName[]
   /** Scenarios to display (from useScenarioList().scenarios) */
   scenarios: ScenarioForDisplay[]

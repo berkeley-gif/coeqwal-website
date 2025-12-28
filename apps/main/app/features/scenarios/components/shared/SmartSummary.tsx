@@ -17,7 +17,11 @@ import {
   type OutcomeSummary,
   type AtRiskLocation,
 } from "../../../summary/summaryGenerator"
-import { TIER_LABELS, TierLevel, getTierColorsFromTheme } from "../../../../content/tiers"
+import {
+  TIER_LABELS,
+  TierLevel,
+  getTierColorsFromTheme,
+} from "../../../../content/tiers"
 
 // =============================================================================
 // Types
@@ -80,7 +84,14 @@ export function SmartSummary({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, py: theme.space.component.sm }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.gap.sm,
+            py: theme.space.component.sm,
+          }}
+        >
           <CircularProgress
             size={14}
             sx={{ color: theme.palette.blue.bright }}
@@ -169,7 +180,9 @@ export function SmartSummary({
           >
             Critical:
           </Typography>
-          {visibleLocations.map((loc) => renderLocationChip(loc, "default", false))}
+          {visibleLocations.map((loc) =>
+            renderLocationChip(loc, "default", false),
+          )}
           {remainingCount > 0 && (
             <Typography
               variant="compactMicro"
@@ -195,7 +208,9 @@ export function SmartSummary({
         >
           Critical locations:
         </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}>
+        <Box
+          sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}
+        >
           {visibleLocations.map((loc) =>
             renderLocationChip(loc, "default", isCompact),
           )}
@@ -240,7 +255,9 @@ export function SmartSummary({
           >
             At-risk:
           </Typography>
-          {visibleLocations.map((loc) => renderLocationChip(loc, "muted", false))}
+          {visibleLocations.map((loc) =>
+            renderLocationChip(loc, "muted", false),
+          )}
           {remainingCount > 0 && (
             <Typography
               variant="compactMicro"
@@ -316,7 +333,9 @@ export function SmartSummary({
           <Typography
             variant="dashboard"
             sx={{
-              fontSize: isCompact ? theme.typography.compactCaption.fontSize : undefined,
+              fontSize: isCompact
+                ? theme.typography.compactCaption.fontSize
+                : undefined,
               lineHeight: isCompact ? 1.3 : undefined, // dashboard default is 1.5
               color: theme.palette.grey[700],
               mb: isCompact ? 0.75 : 1.5,
@@ -354,11 +373,3 @@ export function SmartSummary({
 }
 
 export default SmartSummary
-
-
-
-
-
-
-
-

@@ -165,7 +165,9 @@ export function HydroclimateChooser({
                       border: isSelected
                         ? theme.border.highlight
                         : "3px solid transparent",
-                      boxShadow: isSelected ? theme.shadow.sm : theme.shadow.none,
+                      boxShadow: isSelected
+                        ? theme.shadow.sm
+                        : theme.shadow.none,
                       transition: theme.transition.default,
                       "&:hover": !isDisabled
                         ? {

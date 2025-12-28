@@ -99,7 +99,6 @@ const getTooltipSlotProps = (
   theme: Theme,
   width: string,
   maxWidth: string,
-  showCloseButton: boolean,
 ) => ({
   popper: {
     sx: {
@@ -217,7 +216,7 @@ export function HybridTooltip({
         disableFocusListener
         disableHoverListener
         disableTouchListener
-        slotProps={getTooltipSlotProps(theme, width, maxWidth, true)}
+        slotProps={getTooltipSlotProps(theme, width, maxWidth)}
       >
         {React.cloneElement(children, {
           onClick: (e: React.MouseEvent) => {
@@ -290,7 +289,7 @@ export function HybridTooltip({
       arrow
       enterDelay={200}
       leaveDelay={100}
-      slotProps={getTooltipSlotProps(theme, width, maxWidth, false)}
+      slotProps={getTooltipSlotProps(theme, width, maxWidth)}
     >
       {children}
     </Tooltip>

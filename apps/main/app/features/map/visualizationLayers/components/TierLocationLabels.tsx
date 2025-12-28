@@ -2,7 +2,7 @@
 
 /**
  * TierLocationLabels - Unified labeled markers for tier-based locations
- * 
+ *
  * Handles reservoirs, pumping plants, compliance stations, and other
  * point-based tier visualizations with consistent styling.
  */
@@ -47,19 +47,19 @@ const ARM_CONFIG = {
 // Station coordinates by location_id (from API)
 const STATION_COORDINATES: Record<string, [number, number]> = {
   // Compliance stations (in-Delta uses)
-  "EM": [-121.742, 38.0802], // Emmaton
-  "JP": [-121.685, 38.0519], // Jersey Point
+  EM: [-121.742, 38.0802], // Emmaton
+  JP: [-121.685, 38.0519], // Jersey Point
   // Pumping plants (Delta exports) - coordinates from API
-  "CAA003": [-121.6209, 37.8007], // Banks Pumping Plant
-  "DMC000": [-121.5854, 37.7967], // Jones Pumping Plant
+  CAA003: [-121.6209, 37.8007], // Banks Pumping Plant
+  DMC000: [-121.5854, 37.7967], // Jones Pumping Plant
 }
 
 // Station display names by location_id (from API)
 const STATION_NAMES: Record<string, string> = {
-  "EM": "Emmaton (Salinity) Compliance Station",
-  "JP": "Jersey Point (Salinity) Compliance Station",
-  "CAA003": "Banks Pumping Plant",
-  "DMC000": "Jones Pumping Plant",
+  EM: "Emmaton (Salinity) Compliance Station",
+  JP: "Jersey Point (Salinity) Compliance Station",
+  CAA003: "Banks Pumping Plant",
+  DMC000: "Jones Pumping Plant",
 }
 
 // =============================================================================
@@ -86,7 +86,10 @@ interface TierLocationLabelsProps {
 // COMPONENT
 // =============================================================================
 
-export function TierLocationLabels({ tierLookup, data }: TierLocationLabelsProps) {
+export function TierLocationLabels({
+  tierLookup,
+  data,
+}: TierLocationLabelsProps) {
   const theme = useTheme()
 
   const getTierColor = (tier: number): string => {
@@ -129,25 +132,33 @@ export function TierLocationLabels({ tierLookup, data }: TierLocationLabelsProps
     })
   } else if (data) {
     // DEBUG: Log what the API returns
-    console.log("TierLocationLabels - API data:", data.features.map(f => ({
-      location_id: f.properties.location_id,
-      location_name: f.properties.location_name,
-      tier_level: f.properties.tier_level,
-    })))
-    console.log("TierLocationLabels - Available station IDs:", Object.keys(STATION_COORDINATES))
-    
+    console.log(
+      "TierLocationLabels - API data:",
+      data.features.map((f) => ({
+        location_id: f.properties.location_id,
+        location_name: f.properties.location_name,
+        tier_level: f.properties.tier_level,
+      })),
+    )
+    console.log(
+      "TierLocationLabels - Available station IDs:",
+      Object.keys(STATION_COORDINATES),
+    )
+
     // Station mode: use hardcoded coordinates, only tier from API
     locations = data.features
       .filter((f) => f.geometry.type === "Point")
       .map((f) => {
         const locationId = f.properties.location_id
         const coords = STATION_COORDINATES[locationId]
-        
-        console.log(`TierLocationLabels - Looking up ${locationId}: found=${!!coords}`)
-        
+
+        console.log(
+          `TierLocationLabels - Looking up ${locationId}: found=${!!coords}`,
+        )
+
         // Skip if no hardcoded coordinates for this station
         if (!coords) return null
-        
+
         return {
           id: locationId,
           name: STATION_NAMES[locationId] || locationId,
@@ -170,9 +181,13 @@ export function TierLocationLabels({ tierLookup, data }: TierLocationLabelsProps
     <>
       {locations.map((location, index) => {
         // Use staggerIndex if available (reservoirs), otherwise use index
-        const stagger = location.staggerIndex ?? (index % 2)
-        const verticalOffset = -ARM_CONFIG.baseOffset[1] - (stagger * ARM_CONFIG.staggerStep)
-        const offset: [number, number] = [ARM_CONFIG.baseOffset[0], -verticalOffset]
+        const stagger = location.staggerIndex ?? index % 2
+        const verticalOffset =
+          -ARM_CONFIG.baseOffset[1] - stagger * ARM_CONFIG.staggerStep
+        const offset: [number, number] = [
+          ARM_CONFIG.baseOffset[0],
+          -verticalOffset,
+        ]
 
         return (
           <Marker

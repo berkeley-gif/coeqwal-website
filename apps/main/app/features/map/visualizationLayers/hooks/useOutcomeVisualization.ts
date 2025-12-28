@@ -83,15 +83,15 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // Derived values from config
   const geometryType = config?.geometryType ?? null
   const layerType = config?.layerType ?? null
-  const usesMapboxLayers = config ? config.geometryType !== "react-marker" : false
+  const usesMapboxLayers = config
+    ? config.geometryType !== "react-marker"
+    : false
   const mapboxLayerId = config?.mapboxLayerId ?? null
   const idProperty = config?.idProperty ?? null
 
   // Whether visualization should be active
   const isActive =
-    !!outcome &&
-    !!config &&
-    (mapMode === "learn" || mapMode === "explore")
+    !!outcome && !!config && (mapMode === "learn" || mapMode === "explore")
 
   // Fetch tier data
   const tierDataResult = useTierData(isActive ? outcome : null, scenarioId)
@@ -123,7 +123,10 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
           ? config.cameraPreset.zoom + exploreZoomOffset
           : defaultZoom
         const center = config.cameraPreset
-          ? { lng: config.cameraPreset.longitude, lat: config.cameraPreset.latitude }
+          ? {
+              lng: config.cameraPreset.longitude,
+              lat: config.cameraPreset.latitude,
+            }
           : defaultCenter
 
         // Use padding to account for left panel (same approach as MapInstance.tsx)
@@ -165,4 +168,3 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
     ...tierDataResult,
   }
 }
-

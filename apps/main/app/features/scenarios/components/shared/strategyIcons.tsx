@@ -7,7 +7,10 @@
 
 import React from "react"
 import { Box } from "@repo/ui/mui"
-import { CURRENT_OPERATIONS_ICONS, type ScenarioTheme } from "../../../../content/scenarios"
+import {
+  CURRENT_OPERATIONS_ICONS,
+  type ScenarioTheme,
+} from "../../../../content/scenarios"
 
 // ============================================================================
 // Types

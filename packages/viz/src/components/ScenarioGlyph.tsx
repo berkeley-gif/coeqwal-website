@@ -84,7 +84,9 @@ const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({
       )
     }
     default:
-      return <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
+      return (
+        <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
+      )
   }
 }
 

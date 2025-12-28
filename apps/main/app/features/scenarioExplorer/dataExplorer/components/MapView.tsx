@@ -28,7 +28,10 @@ import { getDisplayNameFromMetricId } from "../../../../lib/constants/outcomeMap
 import TierMarkers from "../../../map/visualizationLayers/components/TierMarkers"
 import { TierLegend } from "../../../scenarios/components"
 import TemporalControls from "./TemporalControls"
-import type { TemporalScale, AggregationType } from "../../config/outcomeDefinitions"
+import type {
+  TemporalScale,
+  AggregationType,
+} from "../../config/outcomeDefinitions"
 import {
   captureMapScreenshot,
   getTimestampedFilename,
@@ -122,7 +125,10 @@ function MapViewContent() {
         }
 
         // Use scenarioId directly (no need for strategy conversion)
-        const data = await fetchTierLocationData(selectedScenario, outcomeDisplayName)
+        const data = await fetchTierLocationData(
+          selectedScenario,
+          outcomeDisplayName,
+        )
 
         if (!cancelled) {
           setTierLocationData(data)
@@ -329,14 +335,10 @@ function MapViewContent() {
                 gap: theme.space.gap.xs,
               }}
             >
-              <Typography
-                variant="compactSubtitle"
-              >
+              <Typography variant="compactSubtitle">
                 <strong>Unit:</strong> {metric.unit}
               </Typography>
-              <Typography
-                variant="compactSubtitle"
-              >
+              <Typography variant="compactSubtitle">
                 <strong>Spatial Type:</strong> {metric.spatialType}
               </Typography>
               {metric.spatialLocation && (
@@ -381,7 +383,10 @@ function MapViewContent() {
         {/* Outcome legend */}
         {metric && metric.isTier && (
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: theme.space.component.md }}>
+            <Typography
+              variant="subtitle2"
+              sx={{ mb: theme.space.component.md }}
+            >
               Outcome legend
             </Typography>
             <TierLegend outcome={metric.name} onClose={() => {}} />

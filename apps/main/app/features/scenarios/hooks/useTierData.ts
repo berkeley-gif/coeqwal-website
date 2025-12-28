@@ -45,7 +45,6 @@ export const OUTCOME_DISPLAY_ORDER = [
   "Salmon abundance",
 ] as const
 
-
 const processScenarioData = (
   scenarioData: ScenarioTiersResponse,
   tierMapping: Record<string, string>,
@@ -193,7 +192,11 @@ export function useScenarioTiers(scenarioId: string | null) {
   // Convert API data to chart format with theme colors
   const chartData = useMemo(() => {
     if (!scenarioData || !tierMapping) return {}
-    return processScenarioData(scenarioData, tierMapping, getThemeColorsForApi(theme))
+    return processScenarioData(
+      scenarioData,
+      tierMapping,
+      getThemeColorsForApi(theme),
+    )
   }, [scenarioData, tierMapping, theme])
 
   // Extract score data for sorting and parallel plots

@@ -1,5 +1,8 @@
 import { useMemo } from "react"
-import { useMultipleScenarioTiers, useScenarioList } from "../../../scenarios/hooks"
+import {
+  useMultipleScenarioTiers,
+  useScenarioList,
+} from "../../../scenarios/hooks"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import { getDisplayNameFromMetricId } from "../../../../lib/constants/outcomeMappings"
 
@@ -33,7 +36,11 @@ export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
  */
 function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
   // Fetch all scenario tier data (handles hooks rules internally)
-  const { allChartData, isLoading: tiersLoading, error: tiersError } = useMultipleScenarioTiers()
+  const {
+    allChartData,
+    isLoading: tiersLoading,
+    error: tiersError,
+  } = useMultipleScenarioTiers()
 
   // Get scenario metadata for display names
   const { getDisplayName, isLoading: scenariosLoading } = useScenarioList()
