@@ -6,8 +6,8 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 1. Font Config      - Font presets and selection
- * 2. Design Tokens    - Standalone token definitions
+ * 1. Font config      - Font presets and selection
+ * 2. Design tokens    - Standalone token definitions
  *                       typeScale, palette, borderRadius, shadow,
  *                       transition, zIndex, border, background
  * 3. themeValues      - Assembled tokens + UI config
@@ -22,18 +22,18 @@ import { createTheme, Theme } from "@mui/material/styles"
  */
 
 /* ========================================================
- * 1. Font Configuration
+ * 1. Font configuration
  * ========================================================
  *
  * To switch fonts, change ACTIVE_FONT_PRESET below.
- * Each preset defines: text (body), display (headlines), cssImport (font loading).
+ * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "system"
+ * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "system" | "avenirNext"
  */
 
-type FontPresetKey = "neueHaas" | "realPro" | "roboto" | "inter" | "system"
+type FontPresetKey = "neueHaas" | "realPro" | "roboto" | "inter" | "system" | "avenirNext"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "avenirNext" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -61,12 +61,17 @@ const FONT_PRESETS = {
     display: '-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif',
     cssImport: '', // No import needed for system fonts
   },
+  avenirNext: {
+    text: '"avenir-next-lt-pro", sans-serif',
+    display: '"avenir-next-lt-pro", sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
 /* ========================================================
- * 2. Design Tokens
+ * 2. Design tokens
  * ======================================================== */
 
 // Type scale - headline and compact sizes
