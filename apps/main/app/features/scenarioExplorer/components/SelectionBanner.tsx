@@ -5,7 +5,7 @@
  * Appears when scenarios are selected for comparison.
  */
 
-import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Button, Chip, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 
@@ -14,7 +14,7 @@ import { useScenarioList } from "../../scenarios/hooks"
  */
 export default function SelectionBanner() {
   const theme = useTheme()
-  const { selectedScenarios, clearScenarios } = useScenarioExplorerStore()
+  const { selectedScenarios, clearScenarios, toggleScenario } = useScenarioExplorerStore()
   const { getDisplayName } = useScenarioList()
 
   // Don't render if no scenarios selected
@@ -56,22 +56,27 @@ export default function SelectionBanner() {
             {selectedScenarios.length} Selected
           </Typography>
 
-          {/* Scenario pills */}
+          {/* Scenario chips with close buttons */}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.sm }}>
             {selectedScenarios.map((scenarioId) => (
-              <Typography
+              <Chip
                 key={scenarioId}
-                variant="compactTitle"
+                label={getDisplayName(scenarioId)}
+                onDelete={() => toggleScenario(scenarioId)}
+                size="small"
                 sx={{
-                  px: 1.5,
-                  py: 0.5,
                   backgroundColor: theme.palette.grey[100],
-                  borderRadius: 1,
                   color: theme.palette.blue.darkest,
+                  fontWeight: theme.typography.fontWeightMedium,
+                  "& .MuiChip-deleteIcon": {
+                    color: theme.palette.grey[400],
+                    fontSize: "1rem",
+                    "&:hover": {
+                      color: theme.palette.grey[600],
+                    },
+                  },
                 }}
-              >
-                {getDisplayName(scenarioId)}
-              </Typography>
+              />
             ))}
           </Box>
         </Box>
