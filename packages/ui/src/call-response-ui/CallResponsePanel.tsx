@@ -114,9 +114,11 @@ export function CallResponsePanel({
               // Left side uses storyBody variant properties for narrative readability
               ...(side === "left" && {
                 fontFamily: (theme: Theme) => theme.typography.fontFamily,
-                fontWeight: (theme: Theme) => theme.typography.storyBody.fontWeight,
+                fontWeight: (theme: Theme) =>
+                  theme.typography.storyBody.fontWeight,
                 fontSize: (theme: Theme) => theme.typography.storyBody.fontSize,
-                lineHeight: (theme: Theme) => theme.typography.storyBody.lineHeight,
+                lineHeight: (theme: Theme) =>
+                  theme.typography.storyBody.lineHeight,
               }),
             },
             ...sx,

@@ -132,11 +132,19 @@ export default function VisualizationLayers() {
 
     async function fetchData() {
       try {
-        console.log("VisualizationLayers - Fetching tier data for:", { outcome, scenarioId, usesMapboxLayers })
+        console.log("VisualizationLayers - Fetching tier data for:", {
+          outcome,
+          scenarioId,
+          usesMapboxLayers,
+        })
         const data = await fetchTierLocationData(scenarioId, outcome!)
 
         if (!cancelled) {
-          console.log("VisualizationLayers - Tier data received:", data.features.length, "features")
+          console.log(
+            "VisualizationLayers - Tier data received:",
+            data.features.length,
+            "features",
+          )
           setTierData(data)
 
           // Zoom to show all markers
@@ -145,7 +153,11 @@ export default function VisualizationLayers() {
           const hasCameraPreset = config?.cameraPreset != null
           const isLearnMode = mapMode === "learn"
           const shouldFitBounds = isLearnMode && !hasCameraPreset
-          if (shouldFitBounds && data.features.length > 0 && map.mapRef?.current) {
+          if (
+            shouldFitBounds &&
+            data.features.length > 0 &&
+            map.mapRef?.current
+          ) {
             let minLng = Infinity,
               minLat = Infinity,
               maxLng = -Infinity,
@@ -153,7 +165,10 @@ export default function VisualizationLayers() {
 
             data.features.forEach((feature) => {
               if (feature.geometry.type === "Point") {
-                const [lng, lat] = feature.geometry.coordinates as [number, number]
+                const [lng, lat] = feature.geometry.coordinates as [
+                  number,
+                  number,
+                ]
                 minLng = Math.min(minLng, lng)
                 minLat = Math.min(minLat, lat)
                 maxLng = Math.max(maxLng, lng)
@@ -172,7 +187,7 @@ export default function VisualizationLayers() {
                   padding: 100,
                   maxZoom: 9,
                   duration: 1000,
-                }
+                },
               )
             }
           }
@@ -196,7 +211,7 @@ export default function VisualizationLayers() {
   // Memoize dim opacity to avoid unnecessary re-renders
   const dimOpacity = useMemo(
     () => (isVisualizationActive ? BASEMAP_DIM_OPACITY : 0),
-    [isVisualizationActive]
+    [isVisualizationActive],
   )
 
   return (
@@ -232,23 +247,24 @@ export default function VisualizationLayers() {
       )}
 
       {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
-      {tierData && !usesMapboxLayers && 
-        outcome !== "Freshwater for Delta exports" && 
+      {tierData &&
+        !usesMapboxLayers &&
+        outcome !== "Freshwater for Delta exports" &&
         outcome !== "Freshwater for in-Delta uses" && (
-        <TierMarkers
-          data={tierData}
-          onHover={handlePointHover}
-          onClick={handlePointClick}
-        />
-      )}
+          <TierMarkers
+            data={tierData}
+            onHover={handlePointHover}
+            onClick={handlePointClick}
+          />
+        )}
 
       {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
       {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
-      {(outcome === "Freshwater for Delta exports" || outcome === "Freshwater for in-Delta uses") && tierData && (
-        <TierLocationLabels data={tierData} />
-      )}
+      {(outcome === "Freshwater for Delta exports" ||
+        outcome === "Freshwater for in-Delta uses") &&
+        tierData && <TierLocationLabels data={tierData} />}
 
       {/* Hotspot markers for tier 4 locations */}
       <HotspotMarkers

@@ -20,7 +20,8 @@ export interface UseTooltipStateResult {
 }
 
 export function useTooltipState(): UseTooltipStateResult {
-  const [hoveredFeature, setHoveredFeature] = useState<HoveredFeatureInfo | null>(null)
+  const [hoveredFeature, setHoveredFeature] =
+    useState<HoveredFeatureInfo | null>(null)
   const [pinnedFeatures, setPinnedFeatures] = useState<HoveredFeatureInfo[]>([])
   const suppressedFeaturesRef = useRef<Set<string>>(new Set())
 
@@ -36,8 +37,10 @@ export function useTooltipState(): UseTooltipStateResult {
   }, [])
 
   const togglePinned = useCallback((feature: HoveredFeatureInfo) => {
-    setPinnedFeatures(prev => {
-      const existingIndex = prev.findIndex(f => f.featureId === feature.featureId)
+    setPinnedFeatures((prev) => {
+      const existingIndex = prev.findIndex(
+        (f) => f.featureId === feature.featureId,
+      )
       if (existingIndex >= 0) {
         // Unpinning: suppress and clear hover to hide tooltip immediately
         suppressedFeaturesRef.current.add(feature.featureId)
@@ -52,8 +55,8 @@ export function useTooltipState(): UseTooltipStateResult {
 
   const clearPinned = useCallback((featureId: string) => {
     suppressedFeaturesRef.current.add(featureId)
-    setHoveredFeature(prev => prev?.featureId === featureId ? null : prev)
-    setPinnedFeatures(prev => prev.filter(f => f.featureId !== featureId))
+    setHoveredFeature((prev) => (prev?.featureId === featureId ? null : prev))
+    setPinnedFeatures((prev) => prev.filter((f) => f.featureId !== featureId))
   }, [])
 
   const clearAllPinned = useCallback(() => {
@@ -80,4 +83,3 @@ export function useTooltipState(): UseTooltipStateResult {
     isSuppressed,
   }
 }
-

@@ -203,12 +203,12 @@ export function BaseHeader({
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   const shrink = useTransform(scrollY, [0, 120, 240], [0, 0.5, 1])
-  const headerHeight = shrinkOnScroll
-    ? useTransform(shrink, [0, 1], ["70px", `${HEADER_SHRUNK_H}px`])
-    : ({} as any) // we'll set a literal below
-  const padY = shrinkOnScroll
-    ? useTransform(shrink, [0, 1], ["12px", "4px"])
-    : ({} as any)
+  // Always call hooks unconditionally
+  const headerHeightMotion = useTransform(shrink, [0, 1], [
+    "70px",
+    `${HEADER_SHRUNK_H}px`,
+  ])
+  const padYMotion = useTransform(shrink, [0, 1], ["12px", "4px"])
   const logoScale = useTransform(shrink, [0, 1], [1, 0.65])
 
   // Static fallbacks if shrink is disabled
@@ -239,11 +239,13 @@ export function BaseHeader({
           ...(position !== "sticky" ? { top: 0, left: 0, right: 0 } : null),
           height: "var(--header-h)",
         }}
-        style={{
-          ["--header-h" as any]: shrinkOnScroll ? headerHeight : staticHeaderH,
-          ["--pad-y" as any]: shrinkOnScroll ? padY : staticPadY,
-          height: shrinkOnScroll ? headerHeight : staticHeaderH,
-        }}
+        style={
+          {
+            "--header-h": shrinkOnScroll ? headerHeightMotion : staticHeaderH,
+            "--pad-y": shrinkOnScroll ? padYMotion : staticPadY,
+            height: shrinkOnScroll ? headerHeightMotion : staticHeaderH,
+          } as React.CSSProperties
+        }
         whileHover={isMounted ? "visible" : undefined}
         onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
         elevation={0}

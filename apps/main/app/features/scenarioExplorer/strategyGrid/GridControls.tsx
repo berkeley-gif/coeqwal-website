@@ -37,7 +37,9 @@ export function GridControls({
 }: GridControlsProps) {
   const theme = useTheme()
   return (
-    <Box sx={{ display: "flex", gap: theme.space.gap.sm, alignItems: "center" }}>
+    <Box
+      sx={{ display: "flex", gap: theme.space.gap.sm, alignItems: "center" }}
+    >
       <InfoTooltip description="Show all strategies or only chosen ones">
         <Box>
           <TogglePair
@@ -76,5 +78,3 @@ export function GridControls({
 }
 
 export default GridControls
-
-

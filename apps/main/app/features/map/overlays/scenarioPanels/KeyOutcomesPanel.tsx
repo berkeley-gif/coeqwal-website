@@ -160,7 +160,10 @@ export function KeyOutcomesPanel({
       </Typography>
 
       {/* Multiple location outcomes - first 5 */}
-      <Typography variant="smallSectionLabel" sx={{ mb: theme.space.component.sm }}>
+      <Typography
+        variant="smallSectionLabel"
+        sx={{ mb: theme.space.component.sm }}
+      >
         Multiple location outcomes
       </Typography>
       <Box
@@ -176,7 +179,10 @@ export function KeyOutcomesPanel({
       </Box>
 
       {/* Single location outcomes - last 4 */}
-      <Typography variant="smallSectionLabel" sx={{ mb: theme.space.component.sm }}>
+      <Typography
+        variant="smallSectionLabel"
+        sx={{ mb: theme.space.component.sm }}
+      >
         Single location outcomes
       </Typography>
       <Box
@@ -194,5 +200,3 @@ export function KeyOutcomesPanel({
 }
 
 export default KeyOutcomesPanel
-
-

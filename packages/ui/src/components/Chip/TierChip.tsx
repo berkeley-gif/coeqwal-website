@@ -39,10 +39,3 @@ export function TierChip({ label, color, compact = false }: TierChipProps) {
 }
 
 export default TierChip
-
-
-
-
-
-
-

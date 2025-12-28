@@ -229,11 +229,11 @@ export function GeocodingPanel({
                 }}
               >
                 <Typography
-                variant="subtitle2"
-                sx={{ mb: theme.space.component.xs }}
-              >
-                {feature.text}
-              </Typography>
+                  variant="subtitle2"
+                  sx={{ mb: theme.space.component.xs }}
+                >
+                  {feature.text}
+                </Typography>
                 <Typography
                   variant="caption"
                   sx={{
@@ -287,7 +287,9 @@ export function GeocodingPanel({
                 gap: 0.5,
               }}
             >
-              <Box component="span" sx={{ fontSize: "1.25rem" }}>📍</Box>
+              <Box component="span" sx={{ fontSize: "1.25rem" }}>
+                📍
+              </Box>
               Selected Location
             </Typography>
             <Typography

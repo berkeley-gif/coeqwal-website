@@ -12,7 +12,10 @@ import { useEffect, useMemo, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import type { TierColorMap, LayerType } from "../types"
-import { LAYER_IDS, RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
+import {
+  LAYER_IDS,
+  RESERVOIR_CALSIM_TO_GNISIDLABEL,
+} from "../../config/outcomeLayerRegistry"
 
 // Mapbox filter type
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,7 +88,10 @@ function getLayerIds(layerType: LayerType, mapboxLayerId?: string) {
     case "wba":
       return { fillId: LAYER_IDS.wba.fill, outlineId: LAYER_IDS.wba.outline }
     case "delta":
-      return { fillId: LAYER_IDS.delta.fill, outlineId: LAYER_IDS.delta.outline }
+      return {
+        fillId: LAYER_IDS.delta.fill,
+        outlineId: LAYER_IDS.delta.outline,
+      }
     case "reservoir":
       return {
         fillId: LAYER_IDS.reservoir.fill,
@@ -275,7 +281,7 @@ export function OutcomePolygonLayer({
             paint: {
               "line-color": outlineColor,
               "line-width": hasTierData ? 0.5 : 1,
-              "line-opacity": hasTierData ? 1 : 0.30,
+              "line-opacity": hasTierData ? 1 : 0.3,
               "line-offset": -0.25,
             },
             layout: { visibility: "none" },
@@ -297,7 +303,7 @@ export function OutcomePolygonLayer({
       // Loading state: thin white outline
       if (!hasTierData) {
         map.setPaintProperty(outlineId, "line-width", 1)
-        map.setPaintProperty(outlineId, "line-opacity", 0.30)
+        map.setPaintProperty(outlineId, "line-opacity", 0.3)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)
@@ -375,4 +381,3 @@ export function OutcomePolygonLayer({
   // This component doesn't render anything - it just manages Mapbox layer styling
   return null
 }
-

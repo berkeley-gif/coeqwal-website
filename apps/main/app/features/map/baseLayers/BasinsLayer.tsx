@@ -5,8 +5,8 @@
  *
  * Displays basin polygons with fill and outline styling.
  * Visibility controlled by outcome visualization state.
- * 
- * TODO: evaluate whether or not to use mapbox tile layer for this 
+ *
+ * TODO: evaluate whether or not to use mapbox tile layer for this
  * (needs to be able to transfer geolocation outcomes to frontend)
  */
 
@@ -107,4 +107,3 @@ export default function BasinsLayer({
     </Source>
   )
 }
-

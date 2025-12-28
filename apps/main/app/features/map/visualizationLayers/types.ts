@@ -129,4 +129,3 @@ export interface OutcomeLayerConfig {
   circleStrokeWidth?: number
   cameraPreset?: CameraView
 }
-

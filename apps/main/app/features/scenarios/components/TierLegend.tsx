@@ -38,10 +38,14 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
       }}
     >
       {/* Header with close button */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: theme.space.component.lg }}>
-        <Typography variant="subtitle1">
-          {outcome}
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          mb: theme.space.component.lg,
+        }}
+      >
+        <Typography variant="subtitle1">{outcome}</Typography>
         <Box
           component="button"
           onClick={onClose}

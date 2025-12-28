@@ -18,7 +18,10 @@ import {
   useTheme,
 } from "@repo/ui/mui"
 import { ToggleChip } from "@repo/ui"
-import type { TemporalScale, AggregationType } from "../../config/outcomeDefinitions"
+import type {
+  TemporalScale,
+  AggregationType,
+} from "../../config/outcomeDefinitions"
 
 interface TemporalControlsProps {
   availableTemporal: TemporalScale[]

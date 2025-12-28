@@ -33,7 +33,10 @@ export interface TooltipCloseButtonProps {
   offset?: { top?: number; right?: number }
 }
 
-export function TooltipCloseButton({ onClick, offset }: TooltipCloseButtonProps) {
+export function TooltipCloseButton({
+  onClick,
+  offset,
+}: TooltipCloseButtonProps) {
   return (
     <Box
       component="button"
@@ -43,12 +46,14 @@ export function TooltipCloseButton({ onClick, offset }: TooltipCloseButtonProps)
       }}
       sx={{
         position: "absolute",
-        top: offset?.top !== undefined 
-          ? `${offset.top}px` 
-          : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
-        right: offset?.right !== undefined 
-          ? `${offset.right}px` 
-          : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
+        top:
+          offset?.top !== undefined
+            ? `${offset.top}px`
+            : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
+        right:
+          offset?.right !== undefined
+            ? `${offset.right}px`
+            : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
         width: "24px",
         height: "24px",
         border: "none",

@@ -132,7 +132,9 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         }}
       >
         <span>Go to the Sacramento-San Joaquin River Delta</span>
-        <Typography component="span" variant="subtitle1">→</Typography>
+        <Typography component="span" variant="subtitle1">
+          →
+        </Typography>
       </Box>
 
       {isTextVisible && (

@@ -29,4 +29,3 @@ export const learnPanelMaxWidth = {
   lg: "460px",
   xl: "500px",
 } as const
-

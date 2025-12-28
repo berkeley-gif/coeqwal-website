@@ -196,7 +196,6 @@ export function convertSingleValueToChartData(
   tierLevel: number,
   tierColors: TierColors,
 ): ChartDataPoint[] {
-
   return [
     {
       label: "Tier 1",
@@ -224,4 +223,3 @@ export function convertSingleValueToChartData(
     },
   ]
 }
-

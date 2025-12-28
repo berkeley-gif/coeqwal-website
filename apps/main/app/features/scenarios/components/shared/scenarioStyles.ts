@@ -14,9 +14,3 @@ export const getScenarioPanelTitleStyles = (theme: Theme) => ({
   ...theme.typography.subtitle2,
   color: theme.palette.grey[900],
 })
-
-
-
-
-
-

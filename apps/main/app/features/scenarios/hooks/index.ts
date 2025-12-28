@@ -15,7 +15,4 @@ export {
   type UseScenarioSummaryReturn,
 } from "./useScenarioSummary"
 
-export {
-  useScenarioList,
-  type ScenarioListItem,
-} from "./useScenarioList"
+export { useScenarioList, type ScenarioListItem } from "./useScenarioList"

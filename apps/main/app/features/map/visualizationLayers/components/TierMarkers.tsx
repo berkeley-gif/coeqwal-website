@@ -27,7 +27,11 @@ interface TierMarkersProps {
  * Displays GeoJSON FeatureCollection with points and polygons
  * Colored by tier level
  */
-export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps) {
+export default function TierMarkers({
+  data,
+  onHover,
+  onClick,
+}: TierMarkersProps) {
   const theme = useTheme()
   const mapAPI = useMap()
   const [mapReady, setMapReady] = useState(false)
@@ -211,7 +215,7 @@ export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps
     })
 
     return cleanup
-  }, [mapAPI, mapReady, polygonFeatures, data, theme])
+  }, [mapAPI, mapReady, polygonFeatures, data, theme, onClick])
 
   // Get tier color
   const getTierColor = (tier: number): string => {
@@ -233,7 +237,7 @@ export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps
   const buildFeatureInfo = (
     feature: (typeof pointFeatures)[0],
     lng: number,
-    lat: number
+    lat: number,
   ): HoveredFeatureInfo => ({
     longitude: lng,
     latitude: lat,
@@ -284,11 +288,15 @@ export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps
                 height: 20,
                 backgroundColor: getTierColor(feature.properties.tier_level),
                 // Diamond: white outline to match rivers; Circle: standard onDark border
-                border: isDiamond ? "2px solid rgba(255, 255, 255, 0.9)" : theme.border.onDark,
+                border: isDiamond
+                  ? "2px solid rgba(255, 255, 255, 0.9)"
+                  : theme.border.onDark,
                 boxShadow: theme.shadow.sm,
                 cursor: "pointer",
                 // Diamond: rotate first, then scale for narrow diamond; Circle: use border-radius
-                borderRadius: isDiamond ? theme.borderRadius.xs : theme.borderRadius.circle,
+                borderRadius: isDiamond
+                  ? theme.borderRadius.xs
+                  : theme.borderRadius.circle,
                 transform: isDiamond ? "scale(0.5, 1) rotate(45deg)" : "none",
                 transformOrigin: "center",
               }}
@@ -302,4 +310,3 @@ export default function TierMarkers({ data, onHover, onClick }: TierMarkersProps
     </>
   )
 }
-

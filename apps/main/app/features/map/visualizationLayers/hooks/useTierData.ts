@@ -20,8 +20,14 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR from "swr"
-import { getTierColorsFromTheme, type TierLevel } from "../../../../content/tiers"
-import { fetchScenarioTiers, type ScenarioTiersResponse } from "../../../../lib/api/tierApi"
+import {
+  getTierColorsFromTheme,
+  type TierLevel,
+} from "../../../../content/tiers"
+import {
+  fetchScenarioTiers,
+  type ScenarioTiersResponse,
+} from "../../../../lib/api/tierApi"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
 import { API_BASE } from "../../../../lib/constants/api"
 import type {
@@ -82,7 +88,11 @@ function convertScenarioTierToLocations(
 ): TierLocationsResponse | null {
   const tierInfo = scenarioData.tiers[tierCode]
 
-  if (!tierInfo || tierInfo.type !== "single_value" || tierInfo.level === undefined) {
+  if (
+    !tierInfo ||
+    tierInfo.type !== "single_value" ||
+    tierInfo.level === undefined
+  ) {
     return null
   }
 
@@ -160,7 +170,10 @@ export function useTierData(
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   // Get config for this outcome
-  const config = useMemo(() => (outcome ? getOutcomeConfig(outcome) : null), [outcome])
+  const config = useMemo(
+    () => (outcome ? getOutcomeConfig(outcome) : null),
+    [outcome],
+  )
 
   // Determine if this is a single-value outcome (uses shared SWR cache)
   const isSingleValue = config && !config.requiresIdMatching
@@ -175,7 +188,9 @@ export function useTierData(
     isLoading: swrLoading,
   } = useSWR(
     // Only fetch if this is a single-value outcome with valid scenarioId
-    isSingleValue && scenarioId ? `/api/tiers/scenarios/${scenarioId}/tiers` : null,
+    isSingleValue && scenarioId
+      ? `/api/tiers/scenarios/${scenarioId}/tiers`
+      : null,
     () => fetchScenarioTiers(scenarioId!),
   )
 
@@ -184,7 +199,11 @@ export function useTierData(
     if (!isSingleValue || !scenarioTiersData || !config || !outcome) {
       return null
     }
-    return convertScenarioTierToLocations(scenarioTiersData, config.tierCode, outcome)
+    return convertScenarioTierToLocations(
+      scenarioTiersData,
+      config.tierCode,
+      outcome,
+    )
   }, [isSingleValue, scenarioTiersData, config, outcome])
 
   // ============================================================================
@@ -201,7 +220,10 @@ export function useTierData(
 
   // CRITICAL: Clear refs synchronously when outcome or scenarioId changes
   // This prevents stale colors from flashing before new data loads
-  if (outcome !== prevOutcomeRef.current || scenarioId !== prevScenarioIdRef.current) {
+  if (
+    outcome !== prevOutcomeRef.current ||
+    scenarioId !== prevScenarioIdRef.current
+  ) {
     tierLevelMapRef.current = {}
     locationDataRef.current = {}
     featureIdsRef.current = []
@@ -264,7 +286,9 @@ export function useTierData(
       } catch (err) {
         if (!cancelled) {
           console.error("Error fetching tier data:", err)
-          setMultiValueError(err instanceof Error ? err.message : "Failed to fetch tier data")
+          setMultiValueError(
+            err instanceof Error ? err.message : "Failed to fetch tier data",
+          )
           reset()
           setMultiValueResponse(null)
         }
@@ -280,14 +304,18 @@ export function useTierData(
     return () => {
       cancelled = true
     }
-  }, [outcome, scenarioId, config, isSingleValue, scenarioId, reset])
+  }, [outcome, scenarioId, config, isSingleValue, reset])
 
   // ============================================================================
   // Unified output
   // ============================================================================
   const isLoading = isSingleValue ? swrLoading : multiValueLoading
   const error = isSingleValue
-    ? (swrError ? swrError.message : (singleValueResponse === null && scenarioTiersData ? `No tier data for ${config?.tierCode}` : null))
+    ? swrError
+      ? swrError.message
+      : singleValueResponse === null && scenarioTiersData
+        ? `No tier data for ${config?.tierCode}`
+        : null
     : multiValueError
 
   // Compute derived values for single-value outcomes directly (NOT in effect)
@@ -313,9 +341,15 @@ export function useTierData(
   }, [isSingleValue, singleValueResponse])
 
   // For single-value: use computed values; for multi-value: use refs (populated by effect)
-  const finalTierLevelMap = isSingleValue ? singleValueDerived.tierLevelMap : tierLevelMapRef.current
-  const finalLocationData = isSingleValue ? singleValueDerived.locationData : locationDataRef.current
-  const finalFeatureIds = isSingleValue ? singleValueDerived.featureIds : featureIdsRef.current
+  const finalTierLevelMap = isSingleValue
+    ? singleValueDerived.tierLevelMap
+    : tierLevelMapRef.current
+  const finalLocationData = isSingleValue
+    ? singleValueDerived.locationData
+    : locationDataRef.current
+  const finalFeatureIds = isSingleValue
+    ? singleValueDerived.featureIds
+    : featureIdsRef.current
 
   // Compute tierColorMap from tierLevelMap
   const tierColorMap = useMemo(() => {
@@ -339,4 +373,3 @@ export function useTierData(
 
 // Re-export the fetch function for direct use (e.g., in SummaryPanel)
 export { fetchTierLocations }
-

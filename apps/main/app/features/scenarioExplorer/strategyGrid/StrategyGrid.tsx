@@ -9,7 +9,13 @@
  */
 
 import React, { useState, useEffect } from "react"
-import { Box, Typography, useTheme, useMediaQuery, Checkbox } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  useMediaQuery,
+  Checkbox,
+} from "@repo/ui/mui"
 import { InfoIconButton, SortButton } from "@repo/ui"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { SummaryPanel } from "../../map/overlays/scenarioPanels"
@@ -110,7 +116,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   // Render outcome item for a scenario
   const renderOutcomeItem = (
-    scenario: { scenarioId: string; label: string; description: string; theme?: ScenarioTheme },
+    scenario: {
+      scenarioId: string
+      label: string
+      description: string
+      theme?: ScenarioTheme
+    },
     displayName: string,
     name: string,
   ) => {
@@ -118,7 +129,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     const chartData = scenarioChartData[displayName]
     const isActive = chartData !== undefined && chartData.length > 0
     const isSelected =
-      (expandedSummaries[scenario.scenarioId] === displayName) ||
+      expandedSummaries[scenario.scenarioId] === displayName ||
       (selectedOutcomes[scenario.scenarioId] === displayName && !!onTierClick)
     const isSorted = sortBy === displayName
 
@@ -189,9 +200,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 height: theme.spacing(5.5),
               }}
             >
-              <Typography variant="subtitle2">
-                Choose scenarios
-              </Typography>
+              <Typography variant="subtitle2">Choose scenarios</Typography>
               {compact && (
                 <GridControls
                   showOnlyChosen={showOnlyChosen}
@@ -210,7 +219,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     height: theme.spacing(5.5),
                   }}
                 >
-                  <Typography variant="subtitle2" sx={{ ml: -1 }}>Key operations</Typography>
+                  <Typography variant="subtitle2" sx={{ ml: -1 }}>
+                    Key operations
+                  </Typography>
                 </Box>
                 <Box
                   sx={{
@@ -222,7 +233,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   }}
                 >
                   {/* Align with center of first outcome label column */}
-                  <Typography variant="subtitle2" sx={{ ml: theme.space.component.xl }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ ml: theme.space.component.xl }}
+                  >
                     Key outcomes
                   </Typography>
                   <GridControls
@@ -321,7 +335,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         {renderMode !== "headersOnly" &&
           displayScenarios
             .filter((scenario) =>
-              showOnlyChosen ? chosenScenarios.includes(scenario.scenarioId) : true,
+              showOnlyChosen
+                ? chosenScenarios.includes(scenario.scenarioId)
+                : true,
             )
             .flatMap((scenario, index, filteredArray) => {
               const isHighlighted = highlighted.has(scenario.scenarioId)
@@ -345,7 +361,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       ? theme.palette.common.white
                       : "#faf8f5",
                     borderRadius: theme.borderRadius.md,
-                    padding: compact ? theme.space.component.xl : theme.space.component.md,
+                    padding: compact
+                      ? theme.space.component.xl
+                      : theme.space.component.md,
                     gap: theme.space.gap.sm,
                     alignItems: compact ? "stretch" : "start",
                     transition: theme.transition.default,
@@ -438,7 +456,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           gap: theme.space.gap.md,
                         }}
                       >
-                        <Typography variant="subtitle2">Key outcomes</Typography>
+                        <Typography variant="subtitle2">
+                          Key outcomes
+                        </Typography>
                         <Box
                           sx={{
                             display: "flex",
@@ -456,9 +476,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               gap: theme.space.gap.sm,
                             }}
                           >
-                            {outcomeNames.slice(0, 5).map(({ name, displayName }) =>
-                              renderOutcomeItem(scenario, displayName, name)
-                            )}
+                            {outcomeNames
+                              .slice(0, 5)
+                              .map(({ name, displayName }) =>
+                                renderOutcomeItem(scenario, displayName, name),
+                              )}
                           </Box>
                           <Box
                             sx={{
@@ -470,9 +492,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               gap: theme.space.gap.sm,
                             }}
                           >
-                            {outcomeNames.slice(5).map(({ name, displayName }) =>
-                              renderOutcomeItem(scenario, displayName, name)
-                            )}
+                            {outcomeNames
+                              .slice(5)
+                              .map(({ name, displayName }) =>
+                                renderOutcomeItem(scenario, displayName, name),
+                              )}
                           </Box>
                         </Box>
                       </Box>
@@ -511,7 +535,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         }}
                       >
                         {outcomeNames.map(({ name, displayName }) =>
-                          renderOutcomeItem(scenario, displayName, name)
+                          renderOutcomeItem(scenario, displayName, name),
                         )}
                       </Box>
                     </>
@@ -520,7 +544,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               )
 
               // Summary row (shown when an outcome is clicked)
-              const selectedOutcomeForSummary = expandedSummaries[scenario.scenarioId]
+              const selectedOutcomeForSummary =
+                expandedSummaries[scenario.scenarioId]
               const summaryRow =
                 selectedOutcomeForSummary && !showMapView ? (
                   <Box
@@ -543,7 +568,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <Box
                         component="button"
                         onClick={() =>
-                          toggleSummary(scenario.scenarioId, selectedOutcomeForSummary)
+                          toggleSummary(
+                            scenario.scenarioId,
+                            selectedOutcomeForSummary,
+                          )
                         }
                         sx={{
                           position: "absolute",

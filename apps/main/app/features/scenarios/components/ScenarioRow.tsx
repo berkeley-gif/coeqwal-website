@@ -13,13 +13,22 @@
  * - Optional summary expansion
  */
 
-import { Box, Checkbox, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
+import {
+  Box,
+  Checkbox,
+  Typography,
+  useTheme,
+  useMediaQuery,
+} from "@repo/ui/mui"
 import { StrategyHeader } from "./shared/StrategyHeader"
 import { OperationsIconGroup } from "./shared/OperationsIconGroup"
 import { OutcomeGlyphItem } from "./shared/OutcomeGlyphItem"
 import { SmartSummary } from "./shared/SmartSummary"
 import type { ChartDataPoint } from "./shared/types"
-import type { OutcomeSummary, AtRiskLocation } from "../../summary/summaryGenerator"
+import type {
+  OutcomeSummary,
+  AtRiskLocation,
+} from "../../summary/summaryGenerator"
 import type { ScenarioTheme } from "../../../content/scenarios"
 
 // =============================================================================
@@ -60,7 +69,10 @@ export interface ScenarioRowProps {
   /** Callbacks */
   onToggleSelect?: () => void
   onOutcomeClick?: (outcome: string) => void
-  onOutcomeInfoClick?: (outcome: string, e: React.MouseEvent<HTMLButtonElement>) => void
+  onOutcomeInfoClick?: (
+    outcome: string,
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => void
   onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
   onLocationClick?: (location: AtRiskLocation) => void
   /** Icon size */
@@ -168,13 +180,13 @@ export function ScenarioRow({
             ? theme.palette.common.white
             : theme.palette.undertone.warm,
           borderRadius: theme.borderRadius.md,
-          padding: compact ? theme.space.component.xl : theme.space.component.md,
+          padding: compact
+            ? theme.space.component.xl
+            : theme.space.component.md,
           gap: theme.space.gap.sm,
           alignItems: compact ? "stretch" : "start",
           transition: theme.transition.default,
-          border: isHighlighted
-            ? theme.border.focus
-            : "2px solid transparent",
+          border: isHighlighted ? theme.border.focus : "2px solid transparent",
           "&:hover": {
             backgroundColor: theme.palette.background.paper,
           },
@@ -279,9 +291,11 @@ export function ScenarioRow({
                     gap: theme.space.gap.sm,
                   }}
                 >
-                  {outcomeNames.slice(0, 5).map(({ name, displayName }) =>
-                    renderOutcomeItem(displayName, name),
-                  )}
+                  {outcomeNames
+                    .slice(0, 5)
+                    .map(({ name, displayName }) =>
+                      renderOutcomeItem(displayName, name),
+                    )}
                 </Box>
                 {/* Remaining outcomes (single-location) */}
                 <Box
@@ -294,9 +308,11 @@ export function ScenarioRow({
                     gap: theme.space.gap.sm,
                   }}
                 >
-                  {outcomeNames.slice(5).map(({ name, displayName }) =>
-                    renderOutcomeItem(displayName, name),
-                  )}
+                  {outcomeNames
+                    .slice(5)
+                    .map(({ name, displayName }) =>
+                      renderOutcomeItem(displayName, name),
+                    )}
                 </Box>
               </Box>
             </Box>
@@ -378,11 +394,3 @@ export function ScenarioRow({
 }
 
 export default ScenarioRow
-
-
-
-
-
-
-
-

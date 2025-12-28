@@ -298,9 +298,9 @@ export function SummaryPanel({
       }
 
       // Fallback: Try feature props map
-      const props = featurePropsMap?.get(location.duId)
-      const lng = props?.longitude
-      const lat = props?.latitude
+      const featureProps = featurePropsMap?.get(location.duId)
+      const lng = featureProps?.longitude
+      const lat = featureProps?.latitude
       if (lng !== undefined && lat !== undefined && (lng !== 0 || lat !== 0)) {
         mapAPI.withMap((mapRef) => {
           const map = mapRef.getMap()
@@ -325,9 +325,7 @@ export function SummaryPanel({
           ? theme.palette.grey[50]
           : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.md : 0,
-        padding: isInline
-          ? theme.space.panel.xs
-          : theme.space.panel.sm,
+        padding: isInline ? theme.space.panel.xs : theme.space.panel.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
         maxWidth: isInline
@@ -379,7 +377,14 @@ export function SummaryPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, py: theme.space.component.sm }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: theme.space.gap.sm,
+                py: theme.space.component.sm,
+              }}
+            >
               <CircularProgress
                 size={14}
                 sx={{ color: theme.palette.blue.bright }}
@@ -543,7 +548,10 @@ export function SummaryPanel({
                     <Box sx={{ mb: theme.space.component.md }}>
                       <Typography
                         variant="smallSectionLabel"
-                        sx={{ color: tierColors[4], mb: theme.space.component.xs }}
+                        sx={{
+                          color: tierColors[4],
+                          mb: theme.space.component.xs,
+                        }}
                       >
                         Critical locations:
                       </Typography>
@@ -579,7 +587,8 @@ export function SummaryPanel({
                         variant="smallSectionLabel"
                         sx={{ color: tierColors[3], mb: 0.5 }}
                       >
-                        At-risk locations ({outcomeSummary.atRiskLocations.length}):
+                        At-risk locations (
+                        {outcomeSummary.atRiskLocations.length}):
                       </Typography>
                       <Box sx={flexWrapStyles}>
                         {outcomeSummary.atRiskLocations

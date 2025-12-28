@@ -12,7 +12,9 @@ interface PersistentMapWrapperProps {
   mapboxToken?: string
 }
 
-export default function PersistentMapWrapper({ mapboxToken }: PersistentMapWrapperProps) {
+export default function PersistentMapWrapper({
+  mapboxToken,
+}: PersistentMapWrapperProps) {
   // Apply Mapbox layer states based on activeSection (Learn mode)
   useMapLayers()
 

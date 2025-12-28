@@ -6,9 +6,13 @@
  */
 
 import { useCallback, useMemo } from "react"
-import { usePolygonTooltip, type UsePolygonTooltipResult } from "./usePolygonTooltip"
-import { useTooltipState, type UseTooltipStateResult } from "./useTooltipState"
-import type { HoveredFeatureInfo, OutcomeLayerConfig, TierLocation } from "../types"
+import { usePolygonTooltip } from "./usePolygonTooltip"
+import { useTooltipState } from "./useTooltipState"
+import type {
+  HoveredFeatureInfo,
+  OutcomeLayerConfig,
+  TierLocation,
+} from "../types"
 
 interface UseMapTooltipsProps {
   polygonConfig: OutcomeLayerConfig | null
@@ -44,20 +48,23 @@ export function useMapTooltips({
   const hoveredFeature = point.hoveredFeature || polygon.hoveredFeature
   const pinnedFeatures = useMemo(
     () => [...point.pinnedFeatures, ...polygon.pinnedFeatures],
-    [point.pinnedFeatures, polygon.pinnedFeatures]
+    [point.pinnedFeatures, polygon.pinnedFeatures],
   )
   const isHoveredAlreadyPinned = useMemo(
-    () => hoveredFeature ? pinnedFeatures.some(f => f.featureId === hoveredFeature.featureId) : false,
-    [hoveredFeature, pinnedFeatures]
+    () =>
+      hoveredFeature
+        ? pinnedFeatures.some((f) => f.featureId === hoveredFeature.featureId)
+        : false,
+    [hoveredFeature, pinnedFeatures],
   )
 
   const handlePointHover = useCallback(
     (feature: HoveredFeatureInfo | null) => point.setHovered(feature),
-    [point.setHovered]
+    [point],
   )
   const handlePointClick = useCallback(
     (feature: HoveredFeatureInfo) => point.togglePinned(feature),
-    [point.togglePinned]
+    [point],
   )
   const clearPinned = useCallback(
     (feature: HoveredFeatureInfo) => {
@@ -67,12 +74,12 @@ export function useMapTooltips({
         polygon.clearPinned(feature.featureId)
       }
     },
-    [point.clearPinned, polygon.clearPinned]
+    [point, polygon],
   )
   const clearAllPinned = useCallback(() => {
     point.clearAllPinned()
     polygon.clearAllPinned()
-  }, [point.clearAllPinned, polygon.clearAllPinned])
+  }, [point, polygon])
 
   return {
     hoveredFeature,
@@ -84,4 +91,3 @@ export function useMapTooltips({
     clearAllPinned,
   }
 }
-

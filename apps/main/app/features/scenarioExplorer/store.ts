@@ -97,64 +97,112 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
   immer<ScenarioExplorerStore>((set) => ({
     ...initialState,
 
-    setActiveView: (view) => set((state) => { state.activeView = view }),
+    setActiveView: (view) =>
+      set((state) => {
+        state.activeView = view
+      }),
 
-    toggleScenario: (scenarioId) => set((state) => {
-      const index = state.selectedScenarios.indexOf(scenarioId)
-      if (index > -1) {
-        state.selectedScenarios.splice(index, 1)
-      } else {
-        state.selectedScenarios.push(scenarioId)
-      }
-    }),
+    toggleScenario: (scenarioId) =>
+      set((state) => {
+        const index = state.selectedScenarios.indexOf(scenarioId)
+        if (index > -1) {
+          state.selectedScenarios.splice(index, 1)
+        } else {
+          state.selectedScenarios.push(scenarioId)
+        }
+      }),
 
-    selectScenarios: (scenarioIds) => set((state) => { state.selectedScenarios = scenarioIds }),
-    clearScenarios: () => set((state) => { state.selectedScenarios = [] }),
+    selectScenarios: (scenarioIds) =>
+      set((state) => {
+        state.selectedScenarios = scenarioIds
+      }),
+    clearScenarios: () =>
+      set((state) => {
+        state.selectedScenarios = []
+      }),
 
-    toggleOutcome: (outcome) => set((state) => {
-      const index = state.selectedOutcomes.indexOf(outcome)
-      if (index > -1) {
-        state.selectedOutcomes.splice(index, 1)
-      } else {
-        state.selectedOutcomes.push(outcome)
-      }
-    }),
+    toggleOutcome: (outcome) =>
+      set((state) => {
+        const index = state.selectedOutcomes.indexOf(outcome)
+        if (index > -1) {
+          state.selectedOutcomes.splice(index, 1)
+        } else {
+          state.selectedOutcomes.push(outcome)
+        }
+      }),
 
-    selectOutcomes: (outcomes) => set((state) => { state.selectedOutcomes = outcomes }),
-    clearOutcomes: () => set((state) => { state.selectedOutcomes = [] }),
+    selectOutcomes: (outcomes) =>
+      set((state) => {
+        state.selectedOutcomes = outcomes
+      }),
+    clearOutcomes: () =>
+      set((state) => {
+        state.selectedOutcomes = []
+      }),
 
-    setSearchQuery: (query) => set((state) => { state.searchQuery = query }),
-    setSortBy: (sort) => set((state) => { state.sortBy = sort }),
-    setHydroclimateScenario: (scenario) => set((state) => { state.hydroclimateScenario = scenario }),
-    setShowOnlyChosen: (show) => set((state) => { state.showOnlyChosen = show }),
-    setShowDefinitions: (show) => set((state) => { state.showDefinitions = show }),
+    setSearchQuery: (query) =>
+      set((state) => {
+        state.searchQuery = query
+      }),
+    setSortBy: (sort) =>
+      set((state) => {
+        state.sortBy = sort
+      }),
+    setHydroclimateScenario: (scenario) =>
+      set((state) => {
+        state.hydroclimateScenario = scenario
+      }),
+    setShowOnlyChosen: (show) =>
+      set((state) => {
+        state.showOnlyChosen = show
+      }),
+    setShowDefinitions: (show) =>
+      set((state) => {
+        state.showDefinitions = show
+      }),
 
-    addOutcomeCriteria: (criteria) => set((state) => { state.outcomeCriteria.push(criteria) }),
-    updateOutcomeCriteria: (index, criteria) => set((state) => {
-      if (index >= 0 && index < state.outcomeCriteria.length) {
-        state.outcomeCriteria[index] = criteria
-      }
-    }),
-    removeOutcomeCriteria: (index) => set((state) => {
-      if (index >= 0 && index < state.outcomeCriteria.length) {
-        state.outcomeCriteria.splice(index, 1)
-      }
-    }),
-    clearOutcomeCriteria: () => set((state) => { state.outcomeCriteria = [] }),
+    addOutcomeCriteria: (criteria) =>
+      set((state) => {
+        state.outcomeCriteria.push(criteria)
+      }),
+    updateOutcomeCriteria: (index, criteria) =>
+      set((state) => {
+        if (index >= 0 && index < state.outcomeCriteria.length) {
+          state.outcomeCriteria[index] = criteria
+        }
+      }),
+    removeOutcomeCriteria: (index) =>
+      set((state) => {
+        if (index >= 0 && index < state.outcomeCriteria.length) {
+          state.outcomeCriteria.splice(index, 1)
+        }
+      }),
+    clearOutcomeCriteria: () =>
+      set((state) => {
+        state.outcomeCriteria = []
+      }),
 
-    setSelectedTier: (tier) => set((state) => { state.selectedTier = tier }),
+    setSelectedTier: (tier) =>
+      set((state) => {
+        state.selectedTier = tier
+      }),
 
-    resetFilters: () => set((state) => {
-      state.searchQuery = ""
-      state.sortBy = "name-asc"
-    }),
+    resetFilters: () =>
+      set((state) => {
+        state.searchQuery = ""
+        state.sortBy = "name-asc"
+      }),
 
-    resetSelections: () => set((state) => {
-      state.selectedScenarios = []
-      state.selectedOutcomes = []
-      state.selectedTier = null
-    }),
+    resetSelections: () =>
+      set((state) => {
+        state.selectedScenarios = []
+        state.selectedOutcomes = []
+        state.selectedTier = null
+      }),
 
-    resetAll: () => set((state) => { Object.assign(state, initialState) }),
+    resetAll: () =>
+      set((state) => {
+        Object.assign(state, initialState)
+      }),
   })),
 )

@@ -2,7 +2,7 @@
 
 /**
  * PointMarkerLabels - Labeled markers for point-based outcomes
- * 
+ *
  * Renders tier-colored labels with leader lines for point features.
  * Used for outcomes like Delta stations (pumping plants, compliance stations).
  * Automatically offsets labels to avoid overlap when multiple markers are close.

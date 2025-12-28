@@ -132,8 +132,8 @@ export default function DataExplorerView({
                 maxWidth: theme.layout.maxWidth.md,
               }}
             >
-              Choose scenarios to access detailed charts,
-              aggregate statistics, and data downloads.
+              Choose scenarios to access detailed charts, aggregate statistics,
+              and data downloads.
             </Typography>
 
             <Box>

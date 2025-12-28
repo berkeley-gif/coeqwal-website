@@ -48,8 +48,11 @@ const MAPBOX_LAYER_IDS = [
 
 const getContainerStyles = (
   mode: MapMode,
-  theme: { zIndex: { persistentMap: number }; transition: { fade: string; fast: string } },
-  scrollOffset: number = 0
+  theme: {
+    zIndex: { persistentMap: number }
+    transition: { fade: string; fast: string }
+  },
+  scrollOffset: number = 0,
 ): React.CSSProperties => {
   const base: React.CSSProperties = {
     position: "fixed",
@@ -69,7 +72,8 @@ const getContainerStyles = (
         ...base,
         opacity: 1,
         pointerEvents: "auto",
-        transform: scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
+        transform:
+          scrollOffset > 0 ? `translateY(-${scrollOffset}px)` : undefined,
         transition: `${theme.transition.fade}, transform ${theme.transition.fast}`,
       }
     case "explore":
@@ -88,7 +92,10 @@ interface MapInstanceProps {
   children?: ReactNode
 }
 
-export default function MapInstance({ mapboxToken, children }: MapInstanceProps) {
+export default function MapInstance({
+  mapboxToken,
+  children,
+}: MapInstanceProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
   const theme = useTheme()
@@ -203,7 +210,7 @@ export default function MapInstance({ mapboxToken, children }: MapInstanceProps)
   const containerStyles = getContainerStyles(
     mapMode,
     theme,
-    isLearnMode ? learnMapScrollOffset : 0
+    isLearnMode ? learnMapScrollOffset : 0,
   )
 
   return (

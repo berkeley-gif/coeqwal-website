@@ -31,35 +31,46 @@ import { createTheme, Theme } from "@mui/material/styles"
  * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "system" | "avenirNext"
  */
 
-type FontPresetKey = "neueHaas" | "realPro" | "roboto" | "inter" | "system" | "avenirNext"
+type FontPresetKey =
+  | "neueHaas"
+  | "realPro"
+  | "roboto"
+  | "inter"
+  | "system"
+  | "avenirNext"
 
 const ACTIVE_FONT_PRESET: FontPresetKey = "avenirNext" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
     text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
-    display: '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   realPro: {
     text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
-    display: '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   roboto: {
     text: '"Roboto", Helvetica, Arial, sans-serif',
     display: '"Roboto", Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
   },
   inter: {
     text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
     display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
   system: {
     text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display: '-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '', // No import needed for system fonts
+    display:
+      "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
+    cssImport: "", // No import needed for system fonts
   },
   avenirNext: {
     text: '"avenir-next-lt-pro", sans-serif',

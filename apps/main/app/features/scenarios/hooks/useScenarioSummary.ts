@@ -11,8 +11,15 @@
  */
 
 import { useMemo } from "react"
-import { useScenarioList, type Scenario, type ScenarioTheme } from "./useScenarioList"
-import { getScenarioIcons, type ScenarioIcon } from "../components/shared/strategyIcons"
+import {
+  useScenarioList,
+  type Scenario,
+  type ScenarioTheme,
+} from "./useScenarioList"
+import {
+  getScenarioIcons,
+  type ScenarioIcon,
+} from "../components/shared/strategyIcons"
 import { useScenarioTiers, OUTCOME_DISPLAY_ORDER } from "./useTierData"
 import type { ChartDataPoint } from "../components/shared/types"
 
@@ -129,7 +136,8 @@ export function useScenarioSummary(
   // Compute error message
   const error = useMemo(() => {
     if (!scenarioId) return null
-    if (!scenario && !scenarioListLoading) return `Scenario "${scenarioId}" not found`
+    if (!scenario && !scenarioListLoading)
+      return `Scenario "${scenarioId}" not found`
     if (tiersError) return `Failed to load outcome data: ${tiersError.message}`
     return null
   }, [scenarioId, scenario, scenarioListLoading, tiersError])
@@ -151,9 +159,7 @@ export function useScenarioSummary(
  * @param scenarioIds - Array of scenario IDs
  * @returns Map of scenario ID to summary data
  */
-export function useMultipleScenarioSummaries(
-  scenarioIds: string[],
-): {
+export function useMultipleScenarioSummaries(scenarioIds: string[]): {
   data: Map<string, ScenarioSummaryData>
   isLoading: boolean
   errors: Map<string, string>

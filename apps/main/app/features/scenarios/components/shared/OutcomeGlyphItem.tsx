@@ -254,7 +254,3 @@ export function OutcomeGlyphItem({
 }
 
 export default OutcomeGlyphItem
-
-
-
-
