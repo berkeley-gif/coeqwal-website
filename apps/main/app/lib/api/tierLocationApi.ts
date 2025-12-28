@@ -2,10 +2,7 @@
  * API functions for fetching tier location data for map visualization
  */
 
-import {
-  STRATEGY_TO_SCENARIO_ID,
-  getShortCodeFromDisplayName,
-} from "../constants/outcomeMappings"
+import { getShortCodeFromDisplayName } from "../constants/outcomeMappings"
 import { API_BASE } from "../constants/api"
 
 // Type definitions for GeoJSON response
@@ -43,17 +40,17 @@ export interface TierLocationResponse {
 /**
  * Fetch tier location data for a specific scenario and outcome
  * Returns GeoJSON FeatureCollection
+ *
+ * @param scenarioId - The scenario ID (e.g., "s0020")
+ * @param outcomeDisplayName - The outcome display name (e.g., "Agricultural revenue")
  */
 export async function fetchTierLocationData(
-  strategyValue: string,
+  scenarioId: string,
   outcomeDisplayName: string,
 ): Promise<TierLocationResponse> {
-  // Map strategy to scenario ID
-  const scenarioId = STRATEGY_TO_SCENARIO_ID[strategyValue]
-
   if (!scenarioId) {
-    console.error(`No scenario ID mapping for strategy: ${strategyValue}`)
-    throw new Error(`Unknown strategy: ${strategyValue}`)
+    console.error("No scenario ID provided")
+    throw new Error("Scenario ID is required")
   }
 
   // Map outcome to tier code (handles both API names and UI display names)

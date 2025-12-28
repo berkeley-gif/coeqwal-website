@@ -3,7 +3,7 @@
 /**
  * DownloadButton - Button for file downloads
  *
- * Styled button with download icon for data file downloads.
+ * Not-yet-styled button with download icon for data file downloads.
  */
 
 import React from "react"

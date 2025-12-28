@@ -5,8 +5,8 @@ export interface OutcomeDotsGlyphProps {
   values?: [number, number, number, number]
   /** size in px */
   size?: number
-  /** custom tier colors [tier1, tier2, tier3, tier4] */
-  tierColors?: [string, string, string, string]
+  /** tier colors [tier1, tier2, tier3, tier4] from theme - required */
+  tierColors: [string, string, string, string]
 }
 
 /**
@@ -18,21 +18,17 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = ({
   size = 60,
   tierColors,
 }) => {
-  // Use provided tier colors or fall back to defaults
-  const defaultColors = ["#2E8B57", "#87CEEB", "#FFB347", "#CD5C5C"] // Green, Light Blue, Orange, Red
-  const colors = tierColors || defaultColors
-
   const tiers = values
     ? values.map((value, idx) => ({
         label: `Tier ${idx + 1}`,
-        color: colors[idx]!,
+        color: tierColors[idx]!,
         value: value, // Keep as 0 or 1 for dots
       }))
     : [
-        { label: "Tier 1", color: colors[0]!, value: 0 },
-        { label: "Tier 2", color: colors[1]!, value: 0 },
-        { label: "Tier 3", color: colors[2]!, value: 0 },
-        { label: "Tier 4", color: colors[3]!, value: 0 },
+        { label: "Tier 1", color: tierColors[0]!, value: 0 },
+        { label: "Tier 2", color: tierColors[1]!, value: 0 },
+        { label: "Tier 3", color: tierColors[2]!, value: 0 },
+        { label: "Tier 4", color: tierColors[3]!, value: 0 },
       ]
 
   const circleRadius = size * 0.1 // Radius for vertical stacking

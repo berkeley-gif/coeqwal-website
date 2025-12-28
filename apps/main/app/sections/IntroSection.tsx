@@ -103,9 +103,11 @@ const IntroSection = () => {
                 variants={slideIn}
               >
                 <Typography
-                  fontWeight={700}
-                  variant="body1"
-                  style={{ fontSize: "1.5rem", maxWidth: "80%" }}
+                  variant="h5"
+                  sx={{
+                    fontWeight: theme.typography.fontWeightBold,
+                    maxWidth: "80%",
+                  }}
                 >
                   {t("frontmatterPanel.boldText")}
                 </Typography>

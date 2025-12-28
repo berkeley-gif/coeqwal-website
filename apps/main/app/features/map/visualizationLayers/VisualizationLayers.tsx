@@ -14,7 +14,7 @@
  * - Tooltips (unified via useMapTooltips hook)
  */
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { useMap, Source, Layer } from "@repo/map"
 
 // Components
@@ -41,7 +41,7 @@ import {
 } from "../../../lib/api/tierLocationApi"
 
 // Store
-import { useMapMode, useGeocoderMarker } from "../store"
+import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
 
 // Large polygon covering California and surrounding area for dim overlay
 const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
@@ -74,7 +74,7 @@ export default function VisualizationLayers() {
   // Get outcome visualization data
   const {
     outcome,
-    strategy,
+    scenarioId,
     config,
     geometryType,
     layerType,
@@ -94,6 +94,7 @@ export default function VisualizationLayers() {
     handlePointHover,
     handlePointClick,
     clearPinned,
+    clearAllPinned,
   } = useMapTooltips({
     polygonConfig: config,
     tierLevelMap,
@@ -101,12 +102,23 @@ export default function VisualizationLayers() {
     polygonEnabled: isVisualizationActive && usesMapboxLayers,
   })
 
+  // Clear all pinned tooltips when signal changes (triggered by glyph clicks)
+  const clearTooltipsSignal = useClearTooltipsSignal()
+  const prevSignalRef = useRef(clearTooltipsSignal)
+  useEffect(() => {
+    if (clearTooltipsSignal !== prevSignalRef.current) {
+      prevSignalRef.current = clearTooltipsSignal
+      clearAllPinned()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearTooltipsSignal])
+
   // Tier location data for React-rendered markers (non-polygon outcomes)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
 
   // Fetch tier data for non-Mapbox outcomes
   useEffect(() => {
-    if (!outcome || usesMapboxLayers) {
+    if (!outcome || !scenarioId || usesMapboxLayers) {
       setTierData(null)
       return
     }
@@ -120,14 +132,20 @@ export default function VisualizationLayers() {
 
     async function fetchData() {
       try {
-        const data = await fetchTierLocationData(strategy, outcome!)
+        console.log("VisualizationLayers - Fetching tier data for:", { outcome, scenarioId, usesMapboxLayers })
+        const data = await fetchTierLocationData(scenarioId, outcome!)
 
         if (!cancelled) {
+          console.log("VisualizationLayers - Tier data received:", data.features.length, "features")
           setTierData(data)
 
-          // Zoom to show all markers (skip if outcome has a cameraPreset - handled elsewhere)
+          // Zoom to show all markers
+          // In explore mode: camera is handled by useOutcomeVisualization
+          // In learn mode: skip if outcome has a cameraPreset (handled by useOutcomeVisualization)
           const hasCameraPreset = config?.cameraPreset != null
-          if (!hasCameraPreset && data.features.length > 0 && map.mapRef?.current) {
+          const isLearnMode = mapMode === "learn"
+          const shouldFitBounds = isLearnMode && !hasCameraPreset
+          if (shouldFitBounds && data.features.length > 0 && map.mapRef?.current) {
             let minLng = Infinity,
               minLat = Infinity,
               maxLng = -Infinity,
@@ -144,18 +162,14 @@ export default function VisualizationLayers() {
             })
 
             if (minLng !== Infinity) {
-              const isExplore = mapMode === "explore"
-              const leftPadding = isExplore ? window.innerWidth / 2 : 0
-
+              // This only runs in learn mode (explore mode handled by useOutcomeVisualization)
               map.mapRef.current.fitBounds(
                 [
                   [minLng, minLat],
                   [maxLng, maxLat],
                 ],
                 {
-                  padding: isExplore
-                    ? { left: leftPadding + 100, top: 100, right: 50, bottom: 50 }
-                    : 100,
+                  padding: 100,
                   maxZoom: 9,
                   duration: 1000,
                 }
@@ -175,7 +189,7 @@ export default function VisualizationLayers() {
     return () => {
       cancelled = true
     }
-  }, [outcome, strategy, usesMapboxLayers, map, mapMode, config])
+  }, [outcome, scenarioId, usesMapboxLayers, map, mapMode, config])
 
   const isLearnMode = mapMode === "learn"
 
@@ -239,7 +253,7 @@ export default function VisualizationLayers() {
       {/* Hotspot markers for tier 4 locations */}
       <HotspotMarkers
         outcome={outcome}
-        strategy={strategy}
+        scenarioId={scenarioId}
         visible={
           !!outcome &&
           (outcome === "Community deliveries" || outcome === "Salmon abundance")

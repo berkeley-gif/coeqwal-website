@@ -1,40 +1,36 @@
 /**
  * useScenarioSummary - Unified hook for scenario summary data
  *
- * Combines strategy metadata, operations icons, and tier outcome data
+ * Combines scenario metadata, operations icons, and tier outcome data
  * into a single hook for use by ScenarioCard and ScenarioRow components.
  *
- * Uses SWR for caching - multiple components using the same strategy
+ * Uses SWR for caching - multiple components using the same scenario
  * will share cached data.
- * 
+ *
  * Experimental: still working on this feature.
  */
 
 import { useMemo } from "react"
-import {
-  getStrategy,
-  type Strategy,
-  type StrategyTheme,
-} from "../../../content/scenarios"
-import { getStrategyIcons, type StrategyIcon } from "../components/shared/strategyIcons"
-import { useScenarioTiers, type ChartDataPoint, OUTCOME_DISPLAY_ORDER } from "./useTierData"
+import { useScenarioList, type Scenario, type ScenarioTheme } from "./useScenarioList"
+import { getScenarioIcons, type ScenarioIcon } from "../components/shared/strategyIcons"
+import { useScenarioTiers, OUTCOME_DISPLAY_ORDER } from "./useTierData"
+import type { ChartDataPoint } from "../components/shared/types"
 
 // =============================================================================
 // Types
 // =============================================================================
 
 export interface ScenarioSummaryData {
-  // Strategy info
-  id: string
+  // Scenario info
+  scenarioId: string
   label: string
   shortLabel: string
   description: string
-  theme: StrategyTheme
-  scenarioId: string
+  theme: ScenarioTheme
   iconPath: string
 
   // Operations icons
-  operations: StrategyIcon[]
+  operations: ScenarioIcon[]
 
   // Outcomes (from tier API)
   outcomes: Record<string, ChartDataPoint[]>
@@ -44,14 +40,14 @@ export interface ScenarioSummaryData {
 }
 
 export interface UseScenarioSummaryReturn {
-  /** Scenario summary data, null if strategy not found */
+  /** Scenario summary data, null if scenario not found */
   data: ScenarioSummaryData | null
   /** Whether data is still loading */
   isLoading: boolean
   /** Error message if data fetch failed */
   error: string | null
-  /** Raw strategy object for backward compatibility */
-  strategy: Strategy | null
+  /** Raw scenario object */
+  scenario: Scenario | null
 }
 
 // =============================================================================
@@ -59,14 +55,14 @@ export interface UseScenarioSummaryReturn {
 // =============================================================================
 
 /**
- * Get complete scenario summary data for a strategy
+ * Get complete scenario summary data
  *
- * @param strategyValue - Strategy identifier (e.g., "current-ops")
+ * @param scenarioId - Scenario ID (e.g., "s0020")
  * @returns Unified scenario summary data with loading/error states
  *
  * @example
  * ```tsx
- * const { data, isLoading, error } = useScenarioSummary("current-ops")
+ * const { data, isLoading, error } = useScenarioSummary("s0020")
  *
  * if (isLoading) return <Spinner />
  * if (error) return <Error message={error} />
@@ -83,16 +79,15 @@ export interface UseScenarioSummaryReturn {
  * ```
  */
 export function useScenarioSummary(
-  strategyValue: string | null,
+  scenarioId: string | null,
 ): UseScenarioSummaryReturn {
-  // Get strategy metadata
-  const strategy = useMemo(
-    () => (strategyValue ? getStrategy(strategyValue) : null),
-    [strategyValue],
-  )
+  // Get scenario metadata from API + local enrichment
+  const { getScenario, isLoading: scenarioListLoading } = useScenarioList()
 
-  // Get scenario ID from strategy
-  const scenarioId = strategy?.scenarioId ?? null
+  const scenario = useMemo(
+    () => (scenarioId ? getScenario(scenarioId) : null),
+    [scenarioId, getScenario],
+  )
 
   // Fetch tier data using existing hook (leverages SWR caching)
   const {
@@ -103,25 +98,24 @@ export function useScenarioSummary(
     error: tiersError,
   } = useScenarioTiers(scenarioId)
 
-  // Get operations icons for this strategy
+  // Get operations icons for this scenario
   const operations = useMemo(
-    () => (strategyValue ? getStrategyIcons(strategyValue) : []),
-    [strategyValue],
+    () => (scenarioId ? getScenarioIcons(scenarioId) : []),
+    [scenarioId],
   )
 
   // Build unified data object
   const data = useMemo<ScenarioSummaryData | null>(() => {
-    if (!strategy) return null
+    if (!scenario) return null
 
     return {
-      // Strategy info
-      id: strategy.value,
-      label: strategy.label,
-      shortLabel: strategy.shortLabel || strategy.label,
-      description: strategy.description,
-      theme: strategy.theme,
-      scenarioId: strategy.scenarioId,
-      iconPath: strategy.iconPath,
+      // Scenario info
+      scenarioId: scenario.scenarioId,
+      label: scenario.label,
+      shortLabel: scenario.shortLabel || scenario.label,
+      description: scenario.description,
+      theme: scenario.theme,
+      iconPath: scenario.iconPath,
 
       // Operations
       operations,
@@ -130,102 +124,92 @@ export function useScenarioSummary(
       outcomes: chartData,
       outcomeNames: OUTCOME_DISPLAY_ORDER as unknown as string[],
     }
-  }, [strategy, operations, chartData])
+  }, [scenario, operations, chartData])
 
   // Compute error message
   const error = useMemo(() => {
-    if (!strategyValue) return null
-    if (!strategy) return `Strategy "${strategyValue}" not found`
+    if (!scenarioId) return null
+    if (!scenario && !scenarioListLoading) return `Scenario "${scenarioId}" not found`
     if (tiersError) return `Failed to load outcome data: ${tiersError.message}`
     return null
-  }, [strategyValue, strategy, tiersError])
+  }, [scenarioId, scenario, scenarioListLoading, tiersError])
 
   return {
     data,
-    isLoading: tiersLoading,
+    isLoading: scenarioListLoading || tiersLoading,
     error,
-    strategy: strategy ?? null,
+    scenario: scenario ?? null,
   }
 }
 
 /**
- * Get scenario summary data for multiple strategies
+ * Get scenario summary data for multiple scenarios
  *
  * Useful for comparison views or grids displaying multiple scenarios.
  * Leverages SWR's deduplication for efficient data fetching.
  *
- * @param strategyValues - Array of strategy identifiers
- * @returns Map of strategy value to summary data
+ * @param scenarioIds - Array of scenario IDs
+ * @returns Map of scenario ID to summary data
  */
 export function useMultipleScenarioSummaries(
-  strategyValues: string[],
+  scenarioIds: string[],
 ): {
   data: Map<string, ScenarioSummaryData>
   isLoading: boolean
   errors: Map<string, string>
 } {
-  // Note: This is a simplified implementation that uses individual hooks.
-  // For production, consider batching API calls or using a more sophisticated
-  // data fetching strategy.
+  // Get all scenarios from API + local enrichment
+  const { getScenario, isLoading } = useScenarioList()
 
-  // Get all strategies
-  const strategies = useMemo(
+  // Get all scenarios
+  const scenarios = useMemo(
     () =>
-      strategyValues
-        .map((v) => ({ value: v, strategy: getStrategy(v) }))
-        .filter((s) => s.strategy !== undefined),
-    [strategyValues],
+      scenarioIds
+        .map((id) => ({ scenarioId: id, scenario: getScenario(id) }))
+        .filter((s) => s.scenario !== undefined),
+    [scenarioIds, getScenario],
   )
 
-  // Build operations for each strategy
+  // Build operations for each scenario
   const operationsMap = useMemo(() => {
-    const map = new Map<string, StrategyIcon[]>()
-    strategies.forEach(({ value }) => {
-      map.set(value, getStrategyIcons(value))
+    const map = new Map<string, ScenarioIcon[]>()
+    scenarios.forEach(({ scenarioId }) => {
+      map.set(scenarioId, getScenarioIcons(scenarioId))
     })
     return map
-  }, [strategies])
+  }, [scenarios])
 
-  // Note: This hook doesn't fetch tier data for all strategies by default
+  // Note: This hook doesn't fetch tier data for all scenarios by default
   // to avoid excessive API calls. Use useMultipleScenarioTiers for that.
   // This returns static data only.
 
   const data = useMemo(() => {
     const map = new Map<string, ScenarioSummaryData>()
 
-    strategies.forEach(({ value, strategy }) => {
-      if (!strategy) return
+    scenarios.forEach(({ scenarioId, scenario }) => {
+      if (!scenario) return
 
-      map.set(value, {
-        id: strategy.value,
-        label: strategy.label,
-        shortLabel: strategy.shortLabel || strategy.label,
-        description: strategy.description,
-        theme: strategy.theme,
-        scenarioId: strategy.scenarioId,
-        iconPath: strategy.iconPath,
-        operations: operationsMap.get(value) || [],
+      map.set(scenarioId, {
+        scenarioId: scenario.scenarioId,
+        label: scenario.label,
+        shortLabel: scenario.shortLabel || scenario.label,
+        description: scenario.description,
+        theme: scenario.theme,
+        iconPath: scenario.iconPath,
+        operations: operationsMap.get(scenarioId) || [],
         outcomes: {}, // Empty - use useMultipleScenarioTiers for outcome data
         outcomeNames: OUTCOME_DISPLAY_ORDER as unknown as string[],
       })
     })
 
     return map
-  }, [strategies, operationsMap])
+  }, [scenarios, operationsMap])
 
   return {
     data,
-    isLoading: false, // Static data only
+    isLoading,
     errors: new Map(),
   }
 }
 
 export default useScenarioSummary
-
-
-
-
-
-
-
-

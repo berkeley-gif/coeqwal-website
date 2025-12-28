@@ -48,9 +48,8 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
     <>
       {feature.locationName && (
         <Typography
-          variant="dashboard"
+          variant="tooltipHeader"
           sx={{
-            fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
             mb: 0.5,
           }}
@@ -113,9 +112,8 @@ function DemandUnitsTooltipContent({
     <>
       {primaryName && (
         <Typography
-          variant="dashboard"
+          variant="tooltipHeader"
           sx={{
-            fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
             mb: 0.5,
           }}
@@ -196,9 +194,8 @@ function PointMarkerTooltipContent({
     <>
       {feature.locationName && (
         <Typography
-          variant="dashboard"
+          variant="tooltipHeader"
           sx={{
-            fontWeight: theme.typography.fontWeightSemiBold,
             color: theme.palette.blue.darkest,
             mb: 0.5,
           }}

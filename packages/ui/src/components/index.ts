@@ -52,3 +52,7 @@ export {
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
+
+// Chip components
+export { ToggleChip, TierChip, LocationChip } from "./Chip"
+export type { ToggleChipProps, TierChipProps, LocationChipProps } from "./Chip"

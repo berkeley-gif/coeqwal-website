@@ -17,7 +17,7 @@ export type MapMode = "hidden" | "learn" | "explore"
 /** Outcome visualization state used by both Learn and Explore modes */
 export interface OutcomeVisualization {
   outcome: string
-  strategy: string
+  scenarioId: string
 }
 
 // ============================================================================
@@ -38,6 +38,9 @@ interface MapState {
 
   // Visualization
   activeOutcomeVisualization: OutcomeVisualization | null
+
+  // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
+  clearTooltipsSignal: number
 }
 
 const initialState: MapState = {
@@ -49,6 +52,7 @@ const initialState: MapState = {
   geocodingResetCounter: 0,
   learnMapScrollOffset: 0,
   activeOutcomeVisualization: null,
+  clearTooltipsSignal: 0,
 }
 
 // ============================================================================
@@ -105,13 +109,19 @@ export const mapActions = {
     }),
 
   // Visualization
-  setOutcomeVisualization: (outcome: string | null, strategy = "current-ops") =>
+  setOutcomeVisualization: (outcome: string | null, scenarioId = "s0020") =>
     useMapStore.setState({
-      activeOutcomeVisualization: outcome ? { outcome, strategy } : null,
+      activeOutcomeVisualization: outcome ? { outcome, scenarioId } : null,
     }),
 
   clearOutcomeVisualization: () =>
     useMapStore.setState({ activeOutcomeVisualization: null }),
+
+  // Tooltips
+  clearMapTooltips: () =>
+    useMapStore.setState((state) => ({
+      clearTooltipsSignal: state.clearTooltipsSignal + 1,
+    })),
 }
 
 // ============================================================================
@@ -159,3 +169,7 @@ export const useActiveOutcomeVisualization = () =>
 
 export const useIsOutcomeVisualizationActive = () =>
   useMapStore((s) => s.activeOutcomeVisualization !== null)
+
+// Tooltips
+export const useClearTooltipsSignal = () =>
+  useMapStore((s) => s.clearTooltipsSignal)

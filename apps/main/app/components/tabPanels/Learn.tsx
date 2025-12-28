@@ -166,7 +166,7 @@ export default function LearnPanel() {
           padding: (theme) => theme.spacing(theme.spacingTokens.section.lg),
           paddingBottom: "100px", // Extended bottom padding for visual balance
           position: "relative",
-          zIndex: theme.zIndex.pageContent,
+          zIndex: theme.zIndex.appBar,
           pointerEvents: "auto",
         }}
       >

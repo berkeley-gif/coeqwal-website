@@ -19,7 +19,7 @@
  * position leaves the tooltip's visible range (when opacity goes to 0).
  * This allows the tooltip to reappear when the user scrolls back.
  *
- * This is NOT a general-purpose tooltip. For standard tooltips use:
+ * This is not a general-purpose tooltip. For standard tooltips use:
  * - HybridTooltip: Hover on desktop, click on touch
  * - ClickTooltip: Always click-to-open with close button
  *

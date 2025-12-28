@@ -1,31 +1,54 @@
 /**
- * Strategy and scenario definitions
+ * Scenario metadata and static content
  *
- * Unified data source for all strategy/scenario information.
- * TODO: Group by theme: baseline, groundwater, environmental (just stubbed in for now)
+ * This file provides UI-specific metadata (themes, icons, user-friendly labels)
+ * for scenarios. The API provides technical details (scenario IDs, short codes).
+ *
+ * Use useScenarioList() hook to get enriched scenario data that combines
+ * API data with this local metadata.
+ *
+ * All identifiers use scenario_id (e.g., "s0020")
  */
 
 // =============================================================================
 // Types
 // =============================================================================
 
-export type StrategyTheme = "baseline" | "groundwater" | "environmental"
+/** Scenario theme for visual categorization */
+export type ScenarioTheme = "baseline" | "groundwater" | "environmental"
 
-export interface Strategy {
-  /** Unique identifier (e.g., "current-ops") */
-  value: string
-  /** Display label */
-  label: string
-  /** Full description of the strategy */
-  description: string
-  /** Strategy theme/category */
-  theme: StrategyTheme
-  /** API scenario ID (e.g., "s0020") */
-  scenarioId: string
-  /** Icon path for strategy display */
+/** UI metadata for a scenario (not available from API) */
+export interface ScenarioMetadata {
+  /** Scenario theme/category for visual styling */
+  theme: ScenarioTheme
+  /** Icon path for scenario display */
   iconPath: string
-  /** Short label for compact displays (optional, defaults to label) */
+  /** User-friendly display label (e.g., "Current operations") */
+  label: string
+  /** User-friendly full description for display */
+  description: string
+  /** Short label for compact displays (optional, falls back to label) */
   shortLabel?: string
+}
+
+/** Enriched scenario combining API data with local metadata */
+export interface Scenario {
+  // Identity
+  scenarioId: string // e.g., "s0020"
+  shortCode: string // e.g., "s0020_DCRadjBL_2020LU_wTUCP"
+  isActive: boolean
+
+  // User-friendly content (from local metadata)
+  label: string
+  description: string
+  shortLabel: string
+  theme: ScenarioTheme
+  iconPath: string
+
+  // Technical content (from API, for reference)
+  apiName: string
+  apiShortTitle: string
+  apiDescription: string
 }
 
 export interface HydroclimateOption {
@@ -42,130 +65,178 @@ export interface OperationIcon {
 }
 
 // =============================================================================
-// Strategy definitions
+// Scenario Metadata (keyed by scenario_id)
 // =============================================================================
 
 /**
- * All available strategies with full metadata
+ * Static UI metadata for each scenario, indexed by scenario_id
+ *
+ * This is the ONLY place to define user-friendly labels, descriptions,
+ * themes, and icons. The API provides technical details only.
  */
-export const strategies: Strategy[] = [
+export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   // ---------------------------------------------------------------------------
-  // BASELINE STRATEGIES - Current operations under different regulatory frameworks
+  // BASELINE SCENARIOS - Current operations under different regulatory frameworks
   // ---------------------------------------------------------------------------
-  {
-    value: "current-ops",
-    label: "Current operations",
-    shortLabel: "Current ops",
-    description:
-      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, and allows for TUCPs.",
+  s0011: {
     theme: "baseline",
-    scenarioId: "s0020",
-    iconPath: "/images/icons/current_ops.svg",
-  },
-  {
-    value: "current-ops-wo-tucp",
-    label: "Current operations without TUCPs",
-    shortLabel: "Without TUCPs",
-    description:
-      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
-    theme: "baseline",
-    scenarioId: "s0021",
-    iconPath: "/images/icons/no_tucp.svg",
-  },
-  {
-    value: "current-ops-historical-ag",
+    iconPath: "/images/icons/land_use_prev.svg",
     label: "Current operations with historical agricultural land use",
-    shortLabel: "Historical ag land use",
     description:
       "This strategy reflects current operations, includes TUCPs, but represents 2004-2013 agricultural land use. This operational strategy is useful for understanding how recent changes in land use affect agricultural water demands and statewide water allocations.",
-    theme: "baseline",
-    scenarioId: "s0011",
-    iconPath: "/images/icons/land_use_prev.svg",
+    shortLabel: "Historical ag land use",
   },
-  {
-    value: "usbr-2024-wo-tucp",
+  s0020: {
+    theme: "baseline",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "Current operations",
+    description:
+      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, and allows for TUCPs.",
+    shortLabel: "Current ops",
+  },
+  s0021: {
+    theme: "baseline",
+    iconPath: "/images/icons/no_tucp.svg",
+    label: "Current operations without TUCPs",
+    description:
+      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
+    shortLabel: "Without TUCPs",
+  },
+  s0023: {
+    theme: "baseline",
+    iconPath: "/images/icons/no_tucp.svg",
     label: "2024 USBR BiOps without TUCPs",
-    shortLabel: "2024 BiOps (no TUCPs)",
     description:
       "Updated baseline scenario using 2024 USBR Proposed Action (Alt2V1) with 2020 LandIQ land use. TUCPs are not active. This scenario reflects the latest federal biological opinions and updated land use data.",
-    theme: "baseline",
-    scenarioId: "s0023",
-    iconPath: "/images/icons/no_tucp.svg",
+    shortLabel: "2024 BiOps (no TUCPs)",
   },
-  {
-    value: "usbr-2024",
+  s0024: {
+    theme: "baseline",
+    iconPath: "/images/icons/current_ops.svg",
     label: "2024 USBR BiOps",
-    shortLabel: "2024 BiOps",
     description:
       "Updated baseline scenario using 2024 USBR Proposed Action (Alt2V1) with 2020 LandIQ land use and TUCPs active. Analogous to USBR's Alt2V1 with DWR's adjusted historical hydroclimate and updated land use.",
-    theme: "baseline",
-    scenarioId: "s0024",
-    iconPath: "/images/icons/current_ops.svg",
+    shortLabel: "2024 BiOps",
   },
 
   // ---------------------------------------------------------------------------
-  // GROUNDWATER STRATEGIES - SGMA implementation scenarios
+  // GROUNDWATER SCENARIOS - SGMA implementation scenarios
   // ---------------------------------------------------------------------------
-  {
-    value: "sgma-sj-valley",
+  s0025: {
+    theme: "groundwater",
+    iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: San Joaquin Valley limits",
-    shortLabel: "SGMA: SJ Valley",
     description:
       "Groundwater pumping limits applied to the San Joaquin Valley region, reflecting potential SGMA sustainability requirements. Based on current operations (s0020) with 2020 LandIQ land use and TUCPs active.",
-    theme: "groundwater",
-    scenarioId: "s0025",
-    iconPath: "/images/icons/groundwater.svg",
+    shortLabel: "SGMA: SJ Valley",
   },
-  {
-    value: "sgma-central-valley",
+  s0027: {
+    theme: "groundwater",
+    iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: Central Valley limits",
-    shortLabel: "SGMA: Central Valley",
     description:
       "Groundwater pumping limits applied across the entire Central Valley, reflecting comprehensive SGMA sustainability requirements. Based on current operations (s0020) with 2020 LandIQ land use and TUCPs active.",
-    theme: "groundwater",
-    scenarioId: "s0027",
-    iconPath: "/images/icons/groundwater.svg",
+    shortLabel: "SGMA: Central Valley",
   },
 
   // ---------------------------------------------------------------------------
-  // ENVIRONMENTAL STRATEGIES - Flow and ecosystem-focused scenarios
+  // ENVIRONMENTAL SCENARIOS - Flow and ecosystem-focused scenarios
   // ---------------------------------------------------------------------------
-  {
-    value: "functional-flows",
+  s0029: {
+    theme: "environmental",
+    iconPath: "/images/icons/environmental.svg",
     label: "Functional flows",
-    shortLabel: "Functional flows",
     description:
       "Environmental flows scenario implementing functional flow requirements on tributaries and the Delta. Uses 2020 LandIQ land use to explore how enhanced environmental flow protections affect water allocation and ecosystem outcomes.",
-    theme: "environmental",
-    scenarioId: "s0029",
-    iconPath: "/images/icons/environmental.svg",
+    shortLabel: "Functional flows",
   },
-]
+}
+
+/** Default metadata for scenarios not in the lookup */
+const DEFAULT_METADATA: ScenarioMetadata = {
+  theme: "baseline",
+  iconPath: "/images/icons/current_ops.svg",
+  label: "Unknown scenario",
+  description: "No description available",
+}
 
 // =============================================================================
 // Helper Functions
 // =============================================================================
 
-/** Get a strategy by its value/id */
-export function getStrategy(value: string): Strategy | undefined {
-  return strategies.find((s) => s.value === value)
+/**
+ * Get UI metadata for a scenario by its scenario_id
+ * Returns default metadata if scenario not found
+ */
+export function getScenarioMetadata(scenarioId: string): ScenarioMetadata {
+  return scenarioMetadata[scenarioId] ?? DEFAULT_METADATA
 }
 
-/** Get a strategy by its scenario ID */
-export function getStrategyByScenarioId(scenarioId: string): Strategy | undefined {
-  return strategies.find((s) => s.scenarioId === scenarioId)
+/**
+ * Get theme for a scenario
+ */
+export function getScenarioTheme(scenarioId: string): ScenarioTheme {
+  return scenarioMetadata[scenarioId]?.theme ?? "baseline"
 }
 
-/** Get all strategies for a theme */
-export function getStrategiesByTheme(theme: StrategyTheme): Strategy[] {
-  return strategies.filter((s) => s.theme === theme)
+/**
+ * Get icon path for a scenario
+ */
+export function getScenarioIconPath(scenarioId: string): string {
+  return scenarioMetadata[scenarioId]?.iconPath ?? DEFAULT_METADATA.iconPath
+}
+
+/**
+ * Get user-friendly label for a scenario
+ */
+export function getScenarioLabel(scenarioId: string): string {
+  return scenarioMetadata[scenarioId]?.label ?? DEFAULT_METADATA.label
+}
+
+/**
+ * Get user-friendly description for a scenario
+ */
+export function getScenarioDescription(scenarioId: string): string {
+  return scenarioMetadata[scenarioId]?.description ?? DEFAULT_METADATA.description
+}
+
+/**
+ * Get short label for a scenario (for compact displays)
+ * Falls back to label if no shortLabel defined
+ */
+export function getScenarioShortLabel(scenarioId: string): string {
+  const meta = scenarioMetadata[scenarioId]
+  return meta?.shortLabel ?? meta?.label ?? DEFAULT_METADATA.label
+}
+
+/**
+ * Check if we have metadata for a scenario
+ */
+export function hasScenarioMetadata(scenarioId: string): boolean {
+  return scenarioId in scenarioMetadata
+}
+
+/**
+ * Get all scenario IDs that have metadata defined
+ */
+export function getKnownScenarioIds(): string[] {
+  return Object.keys(scenarioMetadata)
+}
+
+/**
+ * Get all scenarios for a theme
+ */
+export function getScenarioIdsByTheme(theme: ScenarioTheme): string[] {
+  return Object.entries(scenarioMetadata)
+    .filter(([, meta]) => meta.theme === theme)
+    .map(([id]) => id)
 }
 
 // =============================================================================
 // Operations Icons
 // =============================================================================
 
-/** Icons for current operations strategy display */
+/** Icons for current operations scenario display */
 export const CURRENT_OPERATIONS_ICONS: OperationIcon[] = [
   {
     path: "/images/icons/current_ops.svg",
@@ -241,4 +312,3 @@ export const hydroclimateLabels = [
   "Warmer Drier III",
   "Warmer Drier IV",
 ]
-

@@ -111,12 +111,13 @@ export function CallResponsePanel({
             "& .MuiTypography-root": {
               color: (theme: Theme) =>
                 side === "right" ? theme.palette.grey[900] : "#faf8f5",
-              fontFamily: (theme: Theme) =>
-                side === "left" ? theme.typography.fontFamily : undefined,
-              fontWeight: side === "left" ? 400 : undefined,
-              fontSize: (theme: Theme) =>
-                side === "left" ? theme.typography.subtitle1.fontSize : undefined,
-              lineHeight: side === "left" ? 1.8 : undefined, // maintains ~36px line-height
+              // Left side uses storyBody variant properties for narrative readability
+              ...(side === "left" && {
+                fontFamily: (theme: Theme) => theme.typography.fontFamily,
+                fontWeight: (theme: Theme) => theme.typography.storyBody.fontWeight,
+                fontSize: (theme: Theme) => theme.typography.storyBody.fontSize,
+                lineHeight: (theme: Theme) => theme.typography.storyBody.lineHeight,
+              }),
             },
             ...sx,
           }}

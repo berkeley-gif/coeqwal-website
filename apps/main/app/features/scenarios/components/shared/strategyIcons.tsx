@@ -1,19 +1,19 @@
 /**
- * Strategy icons - Shared utilities for rendering strategy operation icons
+ * Scenario icons - Shared utilities for rendering scenario operation icons
  *
  * Used by OperationsIconGroup and StrategyGrid.
- * Consolidates logic from StrategyRow/utils.ts and ThemeIcons.tsx.
+ * Uses scenario_id (e.g., "s0020") for all identifiers.
  */
 
 import React from "react"
 import { Box } from "@repo/ui/mui"
-import { CURRENT_OPERATIONS_ICONS } from "../../../../content/scenarios"
+import { CURRENT_OPERATIONS_ICONS, type ScenarioTheme } from "../../../../content/scenarios"
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export interface StrategyIcon {
+export interface ScenarioIcon {
   path: string
   alt: string
   description: string
@@ -25,7 +25,7 @@ interface ThemeIconProps {
 }
 
 // ============================================================================
-// Theme Icons (for non-baseline strategies)
+// Theme Icons (for non-baseline scenarios)
 // ============================================================================
 
 /**
@@ -84,9 +84,9 @@ export function EnvironmentalIcon({ size = "100%" }: ThemeIconProps) {
 }
 
 /**
- * Get the theme icon component for a strategy theme
+ * Get the theme icon component for a scenario theme
  */
-export function getThemeIcon(theme: string): React.ReactNode {
+export function getThemeIcon(theme: ScenarioTheme): React.ReactNode {
   switch (theme) {
     case "groundwater":
       return <SGMAIcon />
@@ -101,15 +101,15 @@ export function getThemeIcon(theme: string): React.ReactNode {
  * Get the description for a theme icon
  */
 export function getThemeIconDescription(
-  theme: string,
-  strategyValue: string,
+  theme: ScenarioTheme,
+  scenarioId: string,
 ): string {
   switch (theme) {
     case "groundwater":
-      if (strategyValue === "sgma-sj-valley") {
+      if (scenarioId === "s0025") {
         return "SGMA groundwater pumping limits applied to San Joaquin Valley region"
       }
-      if (strategyValue === "sgma-central-valley") {
+      if (scenarioId === "s0027") {
         return "SGMA groundwater pumping limits applied across entire Central Valley"
       }
       return "Groundwater management scenario with pumping limits"
@@ -121,15 +121,17 @@ export function getThemeIconDescription(
 }
 
 // ============================================================================
-// Strategy Icon Configuration
+// Scenario Icon Configuration
 // ============================================================================
 
 /**
- * Get the operation icons for a given strategy
+ * Get the operation icons for a given scenario
  * Returns icon metadata for rendering with tooltips
+ *
+ * @param scenarioId - The scenario ID (e.g., "s0020", "s0011")
  */
-export function getStrategyIcons(strategyValue: string): StrategyIcon[] {
-  const icons: StrategyIcon[] = []
+export function getScenarioIcons(scenarioId: string): ScenarioIcon[] {
+  const icons: ScenarioIcon[] = []
 
   // Icon 1: Current operations (always shown)
   icons.push({
@@ -140,8 +142,8 @@ export function getStrategyIcons(strategyValue: string): StrategyIcon[] {
     label: "Current operations",
   })
 
-  // Icon 2: Land use (different for historical-ag strategy)
-  if (strategyValue === "current-ops-historical-ag") {
+  // Icon 2: Land use (different for historical-ag scenario s0011)
+  if (scenarioId === "s0011") {
     icons.push({
       path: "/images/icons/land_use_prev.svg",
       alt: "Historical land use",
@@ -159,8 +161,8 @@ export function getStrategyIcons(strategyValue: string): StrategyIcon[] {
     })
   }
 
-  // Icon 3: TUCP status
-  if (strategyValue === "current-ops-wo-tucp") {
+  // Icon 3: TUCP status (without TUCPs for s0021 and s0023)
+  if (scenarioId === "s0021" || scenarioId === "s0023") {
     icons.push({
       path: "/images/icons/no_tucp.svg",
       alt: "Without TUCPs",
@@ -183,14 +185,14 @@ export function getStrategyIcons(strategyValue: string): StrategyIcon[] {
 }
 
 /**
- * Configuration for strategy icons based on strategy theme and value
+ * Configuration for scenario icons based on theme and ID
  */
-export interface StrategyIconConfig {
-  /** Strategy theme determines which icons to show */
-  theme: string | undefined
-  /** Strategy value for special cases */
-  strategyValue: string
-  /** Whether this is a baseline strategy */
+export interface ScenarioIconConfig {
+  /** Scenario theme determines which icons to show */
+  theme: ScenarioTheme
+  /** Scenario ID for special cases */
+  scenarioId: string
+  /** Whether this is a baseline scenario */
   isBaseline: boolean
   /** Icon display size */
   size?: "sm" | "md" | "lg"
@@ -212,7 +214,3 @@ export function getIconSize(size: "sm" | "md" | "lg" = "md"): {
       return { xs: 5, lg: 6 } // 40px / 48px
   }
 }
-
-
-
-

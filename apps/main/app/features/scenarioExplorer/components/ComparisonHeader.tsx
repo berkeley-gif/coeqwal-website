@@ -8,7 +8,7 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useComparisonData } from "../views/ComparisonView/useComparisonData"
+import { useComparisonData } from "../hooks/useComparisonData"
 
 interface ComparisonHeaderProps {
   /** Currently highlighted scenario ID */
@@ -58,14 +58,7 @@ export function ComparisonHeader({
           flexWrap: "wrap",
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: theme.typography.fontWeightMedium,
-          }}
-        >
-          Scenario Comparison
-        </Typography>
+        <Typography variant="subtitle2">Scenario Comparison</Typography>
         <Typography variant="caption" sx={{ color: theme.palette.grey[600] }}>
           Use draggable arrows on axes to filter scenarios
         </Typography>

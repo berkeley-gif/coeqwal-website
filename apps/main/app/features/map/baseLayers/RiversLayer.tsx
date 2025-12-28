@@ -11,7 +11,7 @@ import { memo, useMemo, useEffect } from "react"
 import { Source, Layer, Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
-import { useIsOutcomeVisualizationActive } from "../store"
+import { useIsOutcomeVisualizationActive, useMapMode } from "../store"
 import { useSalmonRiverColor } from "../visualizationLayers/hooks/useSalmonRiverColor"
 
 export const RIVER_LAYER_IDS = [
@@ -89,6 +89,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   const theme = useTheme()
   const { mapRef } = useMap()
   const isOutcomeActive = useIsOutcomeVisualizationActive()
+  const mapMode = useMapMode()
+  const isExploreMode = mapMode === "explore"
 
   // Get visualization color for Salmon abundance outcome (no camera side effects)
   const sacramentoColor = useSalmonRiverColor()
@@ -160,14 +162,14 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   }, [visible, mapRef])
 
   const labelOpacity = useMemo(() => {
-    if (!visible || isOutcomeActive) return 0
+    if (!visible || isOutcomeActive || isExploreMode) return 0
     return Math.max(0, Math.min(1, (clampedProgress - 0.3) / 0.2))
-  }, [visible, clampedProgress, isOutcomeActive])
+  }, [visible, clampedProgress, isOutcomeActive, isExploreMode])
 
   const deltaOpacity = useMemo(() => {
-    if (!visible) return 0
+    if (!visible || isExploreMode) return 0
     return Math.max(0, Math.min(1, (clampedProgress - 0.8) / 0.15))
-  }, [visible, clampedProgress])
+  }, [visible, clampedProgress, isExploreMode])
 
   const labelPositions = useMemo(
     () => ({

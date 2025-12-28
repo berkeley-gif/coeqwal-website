@@ -348,7 +348,7 @@ export default function MapOverlayPanels() {
     <Box
       sx={{
         position: "relative",
-        zIndex: (theme) => theme.zIndex.pageContent,
+        zIndex: (theme) => theme.zIndex.mapOverlays,
         pointerEvents: "none",
         // Map is now position: fixed, so no need for negative margin
       }}
@@ -869,7 +869,7 @@ export default function MapOverlayPanels() {
                             }}
                           >
                             <StrategyInfoPanel
-                              strategyValue="current-ops"
+                              scenarioId="s0020"
                               onTitleClick={() =>
                                 setStrategyTooltipClosed(false)
                               }
@@ -882,16 +882,12 @@ export default function MapOverlayPanels() {
                           containerRef={strategyInfoContainerRef}
                           content={
                             <>
-                              <Box
-                                component="span"
-                                sx={{
-                                  fontWeight: theme.typography.fontWeightSemiBold,
-                                  display: "block",
-                                  mb: theme.spacingTokens.component.xs,
-                                }}
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.spacingTokens.component.xs }}
                               >
                                 Strategy
-                              </Box>
+                              </Typography>
                               This describes the water management strategy being
                               modeled.
                               <Box
@@ -970,7 +966,7 @@ export default function MapOverlayPanels() {
                             }}
                           >
                             <KeyOperationsPanel
-                              strategyValue="current-ops"
+                              scenarioId="s0020"
                               onTitleClick={() => setKeyOpsTooltipClosed(false)}
                             />
                           </Box>
@@ -981,16 +977,12 @@ export default function MapOverlayPanels() {
                           containerRef={keyOperationsContainerRef}
                           content={
                             <>
-                              <Box
-                                component="span"
-                                sx={{
-                                  fontWeight: theme.typography.fontWeightSemiBold,
-                                  display: "block",
-                                  mb: theme.spacingTokens.component.xs,
-                                }}
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.spacingTokens.component.xs }}
                               >
                                 Key operations
-                              </Box>
+                              </Typography>
                               These icons represent the key operational
                               decisions that define this water management
                               strategy.
@@ -1075,16 +1067,12 @@ export default function MapOverlayPanels() {
                           containerRef={keyOutcomesContainerRef}
                           content={
                             <>
-                              <Box
-                                component="span"
-                                sx={{
-                                  fontWeight: theme.typography.fontWeightSemiBold,
-                                  display: "block",
-                                  mb: theme.spacingTokens.component.xs,
-                                }}
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.spacingTokens.component.xs }}
                               >
                                 Key outcomes
-                              </Box>
+                              </Typography>
                               These outcomes show how this strategy affects
                               water supply, ecosystems, agriculture, and
                               communities.
@@ -1171,7 +1159,7 @@ export default function MapOverlayPanels() {
                               pointerEvents: summaryPE, // Override panel's hardcoded "auto"
                             }}
                           >
-                            <SummaryPanel strategy="current-ops" />
+                            <SummaryPanel scenarioId="s0020" />
                           </Box>
                         </motion.div>
                       </Box>

@@ -5,7 +5,8 @@
  * - API short codes (e.g., "DELTA_ECO")
  * - Display names (e.g., "Delta estuary ecology")
  * - Metric IDs (e.g., "env-delta-ecology-tier")
- * - Strategy/scenario mappings
+ *
+ * Strategy/scenario mappings are now in content/scenarios.ts
  *
  * TODO: Improve API name synchronization between frontend and backend
  * The current approach requires manual updates when API names change.
@@ -84,31 +85,6 @@ export const METRIC_ID_TO_DISPLAY_NAME: Record<string, string> = {
 } as const
 
 /**
- * Map strategy values to scenario IDs
- * Used across the app for API calls
- *
- * Scenarios are organized by theme:
- * - Baseline: Current operations under different regulatory frameworks
- * - Groundwater: SGMA implementation scenarios
- * - Environmental: Flow and ecosystem-focused scenarios
- */
-export const STRATEGY_TO_SCENARIO_ID: Record<string, string> = {
-  // Baseline strategies
-  "current-ops": "s0020", // 2019 BiOps, 2020 LandIQ, with TUCPs
-  "current-ops-wo-tucp": "s0021", // 2019 BiOps, 2020 LandIQ, no TUCPs
-  "current-ops-historical-ag": "s0011", // 2019 BiOps, 2004-2013 ag land use, with TUCPs
-  "usbr-2024-wo-tucp": "s0023", // 2024 USBR BiOps, 2020 LandIQ, no TUCPs
-  "usbr-2024": "s0024", // 2024 USBR BiOps, 2020 LandIQ, with TUCPs
-
-  // Groundwater (SGMA) strategies
-  "sgma-sj-valley": "s0025", // SJ Valley GW pumping limits, based on s0020
-  "sgma-central-valley": "s0027", // Central Valley GW pumping limits, based on s0020
-
-  // Environmental strategies
-  "functional-flows": "s0029", // Functional flows on tribs and Delta
-} as const
-
-/**
  * Apply UI display name overrides
  * Converts API names to preferred UI display names
  */
@@ -155,9 +131,3 @@ export function getDisplayNameFromMetricId(metricId: string): string {
   return applyUIDisplayOverride(apiName)
 }
 
-/**
- * Helper function to get scenario ID from strategy value
- */
-export function getScenarioIdFromStrategy(strategyValue: string): string {
-  return STRATEGY_TO_SCENARIO_ID[strategyValue] || strategyValue
-}

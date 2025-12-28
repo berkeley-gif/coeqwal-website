@@ -282,9 +282,13 @@ export function GeocodingPanel({
               sx={{
                 color: theme.palette.blue.darkest,
                 fontWeight: theme.typography.fontWeightSemiBold,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
               }}
             >
-              📍 Selected Location
+              <Box component="span" sx={{ fontSize: "1.25rem" }}>📍</Box>
+              Selected Location
             </Typography>
             <Typography
               variant="subtitle2"
@@ -327,6 +331,7 @@ export function GeocodingPanel({
               <Typography
                 variant="caption"
                 sx={{
+                  display: "block",
                   mt: theme.spacingTokens.component.md,
                   pt: theme.spacingTokens.component.md,
                   borderTop: theme.border.medium,

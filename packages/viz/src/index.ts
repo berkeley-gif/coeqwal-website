@@ -44,6 +44,7 @@ export { useResizeObserver } from "./hooks/useResizeObserver"
 export {
   parseDecileData,
   createDecileColorScale,
+  createCategoricalColorScale,
   formatValue,
   calculateChartDimensions,
   getNestedValue,

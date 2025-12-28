@@ -5,8 +5,7 @@
  *
  * @description
  * A clickable info icon (rounded ℹ️) that displays tooltip content.
- *
- * @since 12 Dec 2025
+
  *
  * ## Pattern 1: Self-managed (simple case)
  *
@@ -20,7 +19,8 @@
  * <InfoIconButton
  *   tooltipContent={
  *     <>
- *       <Box component="span" sx={{ fontWeight: 600 }}>Term</Box> definition...
+ *       <Typography variant="tooltipHeader">Term</Typography>
+ *       definition...
  *     </>
  *   }
  * />
@@ -102,7 +102,7 @@ const circleButtonStyles = {
   transition: "all 0.15s ease", // theme.transition.quick equivalent
 }
 
-// NOTE: Using static object for performance - marginLeft uses 4px (component.xs = 0.5 * 8)
+// NOTE: Using static object for performance
 const inlineButtonStyles = {
   border: "none",
   cursor: "pointer",
@@ -111,8 +111,7 @@ const inlineButtonStyles = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  verticalAlign: "text-top",
-  marginLeft: "4px", // themeValues.spacing.component.xs equivalent
+  verticalAlign: "-3.5px",
   transition: "color 0.15s ease", // theme.transition.quick timing
   // Touch target sizing
   minWidth: INLINE_TOUCH_TARGET,

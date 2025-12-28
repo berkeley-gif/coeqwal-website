@@ -8,26 +8,35 @@
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { getStrategy } from "../../../../content/scenarios"
+import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { HydroclimateChooser } from "../../../scenarios/components"
 import { OperationsIconGroup } from "../../../scenarios/components/shared"
 import { getLearnPanelBaseStyles } from "./learnPanelStyles"
 import { getScenarioPanelTitleStyles } from "../../../scenarios/components/shared"
 
 interface KeyOperationsPanelProps {
-  strategyValue?: string
+  scenarioId?: string
   onTitleClick?: () => void
 }
 
 export function KeyOperationsPanel({
-  strategyValue = "current-ops",
+  scenarioId = "s0020",
   onTitleClick,
 }: KeyOperationsPanelProps) {
   const theme = useTheme()
-  const strategy = getStrategy(strategyValue)
+  const { getScenario, isLoading } = useScenarioList()
+  const scenario = getScenario(scenarioId)
 
-  if (!strategy) {
-    console.warn(`Strategy "${strategyValue}" not found`)
+  if (isLoading) {
+    return (
+      <Box sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}>
+        <Typography variant="body2">Loading...</Typography>
+      </Box>
+    )
+  }
+
+  if (!scenario) {
+    console.warn(`Scenario "${scenarioId}" not found`)
     return null
   }
 
@@ -63,8 +72,8 @@ export function KeyOperationsPanel({
           </Typography>
 
           <OperationsIconGroup
-            strategyValue={strategyValue}
-            theme={strategy.theme}
+            scenarioId={scenarioId}
+            theme={scenario.theme}
             size="md"
             layout="horizontal"
           />
@@ -95,4 +104,3 @@ export function KeyOperationsPanel({
 }
 
 export default KeyOperationsPanel
-

@@ -11,7 +11,7 @@
  *
  * Usage:
  * ```tsx
- * const { tierColorMap, isLoading, error } = useTierData("Reservoir storage", "current-ops")
+ * const { tierColorMap, isLoading, error } = useTierData("Reservoir storage", "s0020")
  *
  * <OutcomePolygonLayer tierColorMap={tierColorMap} ... />
  * ```
@@ -21,7 +21,6 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR from "swr"
 import { getTierColorsFromTheme, type TierLevel } from "../../../../content/tiers"
-import { STRATEGY_TO_SCENARIO_ID } from "../../../../lib/constants/outcomeMappings"
 import { fetchScenarioTiers, type ScenarioTiersResponse } from "../../../../lib/api/tierApi"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
 import { API_BASE } from "../../../../lib/constants/api"
@@ -117,7 +116,7 @@ function convertScenarioTierToLocations(
 export interface UseTierDataResult {
   /** Map from feature ID to hex color (ready for layer components) */
   tierColorMap: TierColorMap
-  /** Map from feature ID to tier level (1-4) */
+  /** Map from feature ID to tier level  */
   tierLevelMap: TierLevelMap
   /** Map from feature ID to full location data */
   locationData: Record<string, TierLocation>
@@ -145,12 +144,12 @@ export interface UseTierDataResult {
  * location-specific tier data.
  *
  * @param outcome - Outcome name (e.g., "Reservoir storage")
- * @param strategy - Strategy value (e.g., "current-ops")
+ * @param scenarioId - Scenario ID (e.g., "s0020")
  * @returns Tier data with pre-computed colors ready for visualization
  */
 export function useTierData(
   outcome: string | null,
-  strategy: string,
+  scenarioId: string,
 ): UseTierDataResult {
   const theme = useTheme()
   const [multiValueLoading, setMultiValueLoading] = useState(false)
@@ -162,9 +161,6 @@ export function useTierData(
 
   // Get config for this outcome
   const config = useMemo(() => (outcome ? getOutcomeConfig(outcome) : null), [outcome])
-
-  // Get scenario ID
-  const scenarioId = useMemo(() => STRATEGY_TO_SCENARIO_ID[strategy], [strategy])
 
   // Determine if this is a single-value outcome (uses shared SWR cache)
   const isSingleValue = config && !config.requiresIdMatching
@@ -196,21 +192,21 @@ export function useTierData(
   // ============================================================================
   // Track previous values to detect changes and clear stale data synchronously
   const prevOutcomeRef = useRef<string | null>(null)
-  const prevStrategyRef = useRef<string>(strategy)
+  const prevScenarioIdRef = useRef<string>(scenarioId)
 
   // Store computed data in refs for stable access
   const tierLevelMapRef = useRef<TierLevelMap>({})
   const locationDataRef = useRef<Record<string, TierLocation>>({})
   const featureIdsRef = useRef<string[]>([])
 
-  // CRITICAL: Clear refs synchronously when outcome or strategy changes
+  // CRITICAL: Clear refs synchronously when outcome or scenarioId changes
   // This prevents stale colors from flashing before new data loads
-  if (outcome !== prevOutcomeRef.current || strategy !== prevStrategyRef.current) {
+  if (outcome !== prevOutcomeRef.current || scenarioId !== prevScenarioIdRef.current) {
     tierLevelMapRef.current = {}
     locationDataRef.current = {}
     featureIdsRef.current = []
     prevOutcomeRef.current = outcome
-    prevStrategyRef.current = strategy
+    prevScenarioIdRef.current = scenarioId
   }
 
   // Reset function
@@ -235,7 +231,7 @@ export function useTierData(
     if (!scenarioId) {
       reset()
       setMultiValueResponse(null)
-      setMultiValueError(`Unknown strategy: ${strategy}`)
+      setMultiValueError(`Unknown scenarioId: ${scenarioId}`)
       return
     }
 
@@ -284,7 +280,7 @@ export function useTierData(
     return () => {
       cancelled = true
     }
-  }, [outcome, strategy, config, isSingleValue, scenarioId, reset])
+  }, [outcome, scenarioId, config, isSingleValue, scenarioId, reset])
 
   // ============================================================================
   // Unified output

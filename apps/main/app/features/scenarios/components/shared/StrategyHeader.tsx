@@ -1,5 +1,5 @@
 /**
- * StrategyHeader - Strategy title and description with TUCP tooltip
+ * StrategyHeader - Strategy title and description (with TUCP tooltip)
  *
  * Shared component for rendering strategy information.
  * Used by both Learn mode (StrategyInfoPanel) and Explore mode (StrategyGrid).
@@ -11,11 +11,11 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton } from "@repo/ui"
-import type { Strategy } from "./types"
+import type { ScenarioForDisplay } from "./types"
 
 export interface StrategyHeaderProps {
-  /** Strategy data */
-  strategy: Strategy
+  /** Scenario data */
+  strategy: ScenarioForDisplay
   /** Whether to show the description */
   showDescription?: boolean
   /** Typography variant for the title */
@@ -57,7 +57,7 @@ function DescriptionWithTUCPTooltip({
                   <>
                     <Box
                       component="span"
-                      sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                      sx={{ fontWeight: 600 }}
                     >
                       Temporary Urgent Change Petitions (TUCPs)
                     </Box>{" "}
@@ -84,22 +84,20 @@ export function StrategyHeader({
 }: StrategyHeaderProps) {
   const theme = useTheme()
 
-  // Format label for historical-ag strategy
+  // Format label for historical-ag scenario (s0011)
   const displayLabel =
-    strategy.value === "current-ops-historical-ag"
+    strategy.scenarioId === "s0011"
       ? "Current operations with historical agricultural land use"
       : strategy.label
 
   return (
     <Box>
       <Typography
-        variant={titleVariant}
+        variant="scenarioTitle"
         onClick={onTitleClick}
         sx={{
-          fontWeight: theme.typography.fontWeightMedium,
           maxWidth: theme.layout.maxWidth.sm,
           mb: showDescription ? 0.5 : 0,
-          lineHeight: 1.3,
           color: theme.palette.grey[900],
         }}
       >

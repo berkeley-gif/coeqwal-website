@@ -40,7 +40,7 @@ export interface TierLocationsResponse {
 /** Map from feature ID to hex color string (ready for Mapbox expressions) */
 export type TierColorMap = Record<string, string>
 
-/** Map from feature ID to tier level (1-4) */
+/** Map from feature ID to tier level  */
 export type TierLevelMap = Record<string, TierLevel>
 
 // ============================================================================

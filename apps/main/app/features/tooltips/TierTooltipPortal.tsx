@@ -59,14 +59,14 @@ export function TierTooltipPortal({
               ...theme.typography.compact.subtitle,
             }}
           >
-            <TooltipCloseButton onClick={onForceClose} />
+            <TooltipCloseButton onClick={onForceClose} offset={{ top: 8, right: 8 }} />
 
             {/* Arrow pointing right */}
             <Box
               sx={{
                 position: "absolute",
-                right: -16,
-                top: theme.spacing(theme.spacingTokens.component.xl),
+                right: -15,
+                top: theme.spacing(theme.spacingTokens.component.md),
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",
@@ -78,8 +78,8 @@ export function TierTooltipPortal({
             <Box
               sx={{
                 position: "absolute",
-                right: -17,
-                top: theme.spacing(theme.spacingTokens.component.xl),
+                right: -16,
+                top: theme.spacing(theme.spacingTokens.component.md),
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",

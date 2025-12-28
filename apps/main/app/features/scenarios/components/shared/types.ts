@@ -1,8 +1,10 @@
 /**
- * Shared types for scenario/strategy components
+ * Shared types for scenario components
  *
  * Used by OutcomeGlyphItem, OutcomeGrid, OperationsIconGroup, etc.
  */
+
+import type { ScenarioTheme } from "../../../../content/scenarios"
 
 export interface ChartDataPoint {
   label: string
@@ -17,11 +19,15 @@ export interface OutcomeName {
   displayName: string
 }
 
-export interface Strategy {
-  value: string
+/**
+ * Scenario data shape for UI components
+ * Components use this minimal interface for flexibility
+ */
+export interface ScenarioForDisplay {
+  scenarioId: string
   label: string
   description: string
-  theme?: string
+  theme?: ScenarioTheme
 }
 
 /**
@@ -34,7 +40,3 @@ export function isSingleValueTier(
   if (!chartData || chartData.length === 0) return false
   return chartData[0]?.tierType === "single_value"
 }
-
-
-
-
