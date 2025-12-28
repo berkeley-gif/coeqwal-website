@@ -202,7 +202,7 @@ export function FloatingGlossaryPanel({
         >
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+            sx={{ fontWeight: 600 }}
           >
             Glossary
           </Typography>
@@ -270,7 +270,7 @@ export function FloatingGlossaryPanel({
                     <Typography
                       variant="subtitle1"
                       sx={{
-                        fontWeight: theme.typography.fontWeightSemiBold,
+                        fontWeight: 600,
                         color: theme.palette.blue.darkest,
                       }}
                     >
@@ -286,8 +286,10 @@ export function FloatingGlossaryPanel({
                     <Box sx={{ ml: 4, mt: 2 }}>
                       <Typography
                         variant="subtitle2"
-                        fontWeight={600}
-                        sx={{ mb: 1 }}
+                        sx={{
+                          fontWeight: 600,
+                          mb: 1,
+                        }}
                       >
                         Tiers:
                       </Typography>

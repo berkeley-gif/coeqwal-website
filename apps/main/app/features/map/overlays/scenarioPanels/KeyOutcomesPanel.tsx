@@ -50,11 +50,12 @@ export function KeyOutcomesPanel({
   const handleShowOnMap = useCallback(
     (outcome: string) => {
       handleClose() // Close tooltip when showing on map
+      mapActions.clearMapTooltips() // Clear any pinned map tooltips
       // Toggle: if same outcome is already selected, clear it; otherwise set it
       if (selectedOutcome === outcome) {
         mapActions.clearOutcomeVisualization()
       } else {
-        mapActions.setOutcomeVisualization(outcome, "current-ops")
+        mapActions.setOutcomeVisualization(outcome, "s0020")
       }
     },
     [handleClose, selectedOutcome],
@@ -85,10 +86,9 @@ export function KeyOutcomesPanel({
         content={
           <>
             <TierTooltipContent outcome={outcome} showTitle={true} />
-            <Box
-              component="span"
+            <Typography
+              variant="compactSubtitle"
               sx={{
-                ...theme.typography.compact.subtitle,
                 display: "block",
                 mt: 1.5,
                 fontStyle: "italic",
@@ -108,7 +108,7 @@ export function KeyOutcomesPanel({
                 here
               </Box>{" "}
               or on chart to show values on map.
-            </Box>
+            </Typography>
           </>
         }
       >

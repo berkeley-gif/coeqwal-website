@@ -5,6 +5,35 @@ import * as d3 from "d3"
 import { DecileData } from "../types"
 
 /**
+ * Creates a continuous color scale for categorical data (scenarios, series, etc.)
+ * Uses interpolateViridis - perceptually uniform, colorblind-friendly
+ *
+ * @param count - Total number of items to color
+ * @returns A function that takes an index (0-based) and returns a hex color
+ *
+ * @example
+ * const getColor = createCategoricalColorScale(8)
+ * scenarios.map((s, i) => ({ ...s, color: getColor(i) }))
+ */
+export function createCategoricalColorScale(count: number): (index: number) => string {
+  // For single item, return a mid-range color
+  if (count <= 1) {
+    return () => d3.interpolateViridis(0.5)
+  }
+
+  // Distribute colors evenly across the spectrum
+  // Offset slightly from edges to avoid very dark/light colors
+  const startOffset = 0.1
+  const endOffset = 0.9
+  const range = endOffset - startOffset
+
+  return (index: number) => {
+    const t = startOffset + (index / (count - 1)) * range
+    return d3.interpolateViridis(t)
+  }
+}
+
+/**
  * Parses data from various formats into DecileData format
  */
 export function parseDecileData(

@@ -7,16 +7,7 @@
 
 import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
-
-// Scenario ID to display name mapping
-const getScenarioDisplayName = (scenarioId: string): string => {
-  const names: Record<string, string> = {
-    s0020: "Current operations",
-    s0021: "Current ops without TUCPs",
-    s0011: "Current ops with historical ag",
-  }
-  return names[scenarioId] || scenarioId
-}
+import { useScenarioList } from "../../scenarios/hooks"
 
 /**
  * SelectionBanner: Shows selected scenarios with clear all option
@@ -24,6 +15,7 @@ const getScenarioDisplayName = (scenarioId: string): string => {
 export default function SelectionBanner() {
   const theme = useTheme()
   const { selectedScenarios, clearScenarios } = useScenarioExplorerStore()
+  const { getDisplayName } = useScenarioList()
 
   // Don't render if no scenarios selected
   if (selectedScenarios.length === 0) {
@@ -47,7 +39,7 @@ export default function SelectionBanner() {
           gap: theme.spacingTokens.gap.lg,
         }}
       >
-        {/* Left: Eyebrow + Pills */}
+        {/* Left: eyebrow + pills */}
         <Box
           sx={{
             display: "flex",
@@ -58,14 +50,8 @@ export default function SelectionBanner() {
           }}
         >
           <Typography
-            variant="compactCaption"
-            sx={{
-              fontWeight: theme.typography.fontWeightMedium,
-              letterSpacing: "0.15rem",
-              textTransform: "uppercase",
-              color: theme.palette.grey[500],
-              flexShrink: 0,
-            }}
+            variant="overline"
+            sx={{ color: theme.palette.grey[500], flexShrink: 0 }}
           >
             {selectedScenarios.length} Selected
           </Typography>
@@ -75,17 +61,16 @@ export default function SelectionBanner() {
             {selectedScenarios.map((scenarioId) => (
               <Typography
                 key={scenarioId}
-                variant="caption"
+                variant="compactTitle"
                 sx={{
                   px: 1.5,
                   py: 0.5,
                   backgroundColor: theme.palette.grey[100],
                   borderRadius: 1,
                   color: theme.palette.blue.darkest,
-                  fontWeight: theme.typography.fontWeightMedium,
                 }}
               >
-                {getScenarioDisplayName(scenarioId)}
+                {getDisplayName(scenarioId)}
               </Typography>
             ))}
           </Box>
@@ -97,10 +82,7 @@ export default function SelectionBanner() {
           size="small"
           onClick={clearScenarios}
           sx={{
-            ...theme.typography.compact.caption,
             color: theme.palette.grey[500],
-            textTransform: "none",
-            fontWeight: theme.typography.fontWeightMedium,
             minWidth: "auto",
             px: 1,
             "&:hover": {

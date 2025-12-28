@@ -1,31 +1,40 @@
 "use client"
 
 /**
- * StrategyInfoPanel - Shows strategy title and description
+ * StrategyInfoPanel - Shows scenario title and description
  *
  * Used in the Learn section scrollytelling.
  * Uses shared StrategyHeader component.
  */
 
-import { Box, useTheme } from "@repo/ui/mui"
-import { getStrategy } from "../../../../content/scenarios"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { StrategyHeader } from "../../../scenarios/components/shared"
 import { getLearnPanelBaseStyles, learnPanelMaxWidth } from "./learnPanelStyles"
 
 interface StrategyInfoPanelProps {
-  strategyValue?: string
+  scenarioId?: string
   onTitleClick?: () => void
 }
 
 export function StrategyInfoPanel({
-  strategyValue = "current-ops",
+  scenarioId = "s0020",
   onTitleClick,
 }: StrategyInfoPanelProps) {
   const theme = useTheme()
-  const strategy = getStrategy(strategyValue)
+  const { getScenario, isLoading } = useScenarioList()
+  const scenario = getScenario(scenarioId)
 
-  if (!strategy) {
-    console.warn(`Strategy "${strategyValue}" not found`)
+  if (isLoading) {
+    return (
+      <Box sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}>
+        <Typography variant="body2">Loading...</Typography>
+      </Box>
+    )
+  }
+
+  if (!scenario) {
+    console.warn(`Scenario "${scenarioId}" not found`)
     return null
   }
 
@@ -39,7 +48,7 @@ export function StrategyInfoPanel({
       }}
     >
       <StrategyHeader
-        strategy={strategy}
+        strategy={scenario}
         showDescription={true}
         titleVariant="subtitle1"
         onTitleClick={onTitleClick}
@@ -49,4 +58,3 @@ export function StrategyInfoPanel({
 }
 
 export default StrategyInfoPanel
-

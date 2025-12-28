@@ -9,14 +9,14 @@ export {
 export { ScenarioRow } from "./ScenarioRow"
 export type { ScenarioRowProps } from "./ScenarioRow"
 
-// Shared strategy/outcome components
+// Shared scenario/outcome components
 export {
   OutcomeGlyphItem,
   OutcomeGrid,
   OperationsIconGroup,
   StrategyHeader,
   SmartSummary,
-  getStrategyIcons,
+  getScenarioIcons,
   getThemeIcon,
   getThemeIconDescription,
   getIconSize,
@@ -28,8 +28,8 @@ export type {
   OperationsIconGroupProps,
   StrategyHeaderProps,
   SmartSummaryProps,
-  StrategyIcon,
-  // Note: ChartDataPoint is exported from hooks/useTierData to avoid duplicate exports
+  ScenarioIcon,
+  ChartDataPoint,
   OutcomeName,
-  Strategy,
+  ScenarioForDisplay,
 } from "./shared"

@@ -42,8 +42,8 @@ const HOTSPOT_CONFIGS: Record<
 interface HotspotMarkersProps {
   /** The outcome to show hotspots for */
   outcome: string | null
-  /** Strategy ID for API call */
-  strategy?: string
+  /** Scenario ID for API call */
+  scenarioId?: string
   /** Whether markers are visible */
   visible?: boolean
 }
@@ -112,7 +112,7 @@ function getPolygonCenter(feature: TierFeature): [number, number] | null {
 
 export function HotspotMarkers({
   outcome,
-  strategy = "current-ops",
+  scenarioId = "s0020",
   visible = true,
 }: HotspotMarkersProps) {
   const theme = useTheme()
@@ -146,7 +146,7 @@ export function HotspotMarkers({
 
     const loadHotspots = async () => {
       try {
-        const response = await fetchTierLocationData(strategy, outcome)
+        const response = await fetchTierLocationData(scenarioId, outcome)
 
         // Filter for tier 4 features (Point, Polygon, or MultiPolygon)
         const tier4Features = response.features.filter(
@@ -358,7 +358,7 @@ export function HotspotMarkers({
     }
 
     loadHotspots()
-  }, [config, outcome, strategy, visible, mapAPI])
+  }, [config, outcome, scenarioId, visible, mapAPI])
 
   // Don't render if no config or not visible
   if (!config || !visible || hotspots.length === 0) {

@@ -131,13 +131,10 @@ export function HydroclimateChooser({
                 key={option.value}
                 content={
                   <>
-                    <Box
-                      component="span"
-                      sx={{ fontWeight: theme.typography.fontWeightSemiBold, display: "block", mb: 0.5 }}
-                    >
+                    <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                       {option.label}
                       {isDisabled && " (Coming soon)"}
-                    </Box>
+                    </Typography>
                     {option.description}
                   </>
                 }

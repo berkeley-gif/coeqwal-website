@@ -1,16 +1,11 @@
 /**
  * API functions for fetching tier data from COEQWAL API
- * Data is fetched, but default backups are listed here
  */
 
 import { API_SHORT_CODE_TO_DISPLAY_NAME } from "../constants/outcomeMappings"
 import { API_BASE } from "../constants/api"
 
 // Type definitions
-export interface TierDefinitions {
-  [key: string]: string // e.g., "AG_REV": "Impact on agricultural production and revenue"
-}
-
 export interface TierListItem {
   short_code: string
   name: string
@@ -18,14 +13,6 @@ export interface TierListItem {
   tier_type: "single_value" | "multi_value"
   tier_count: number
   is_active: boolean
-}
-
-export interface SingleValueTier {
-  scenario: string
-  tier_code: string
-  name: string
-  tier_type: "single_value"
-  single_tier_level: number // 1-4
 }
 
 export interface MultiValueTierData {
@@ -73,6 +60,18 @@ export interface ScenarioTiersResponse {
   }
 }
 
+/**
+ * Scenario metadata from /api/scenarios endpoint
+ */
+export interface ScenarioListItem {
+  scenario_id: string
+  short_code: string
+  name: string
+  short_title: string
+  description: string
+  is_active: boolean
+}
+
 // Helpers
 async function apiFetch<T>(endpoint: string, errorMessage: string): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`)
@@ -83,10 +82,6 @@ async function apiFetch<T>(endpoint: string, errorMessage: string): Promise<T> {
 }
 
 // API functions
-export async function fetchTierDefinitions(): Promise<TierDefinitions> {
-  return apiFetch("/tiers/definitions", "Failed to fetch tier definitions")
-}
-
 export async function fetchTierList(): Promise<TierListItem[]> {
   return apiFetch("/tiers/list", "Failed to fetch tier list")
 }
@@ -100,14 +95,29 @@ export async function fetchScenarioTiers(
   )
 }
 
-export async function fetchSingleTier(
-  scenarioId: string,
-  tierCode: string,
-): Promise<SingleValueTier> {
-  return apiFetch(
-    `/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
-    "Failed to fetch single tier",
+/**
+ * Fetch list of all scenarios with metadata
+ */
+export async function fetchScenarioList(): Promise<ScenarioListItem[]> {
+  return apiFetch("/scenarios", "Failed to fetch scenario list")
+}
+
+/**
+ * Fetch tier data for multiple scenarios in parallel
+ * Returns a map of scenarioId -> ScenarioTiersResponse
+ */
+export async function fetchAllScenarioTiers(
+  scenarioIds: string[],
+): Promise<Record<string, ScenarioTiersResponse>> {
+  const results = await Promise.all(
+    scenarioIds.map((id) => fetchScenarioTiers(id)),
   )
+  const record: Record<string, ScenarioTiersResponse> = {}
+  scenarioIds.forEach((id, i) => {
+    // Safe: results array has same length as scenarioIds
+    record[id] = results[i]!
+  })
+  return record
 }
 
 // Mapping from API
@@ -143,15 +153,11 @@ export function mapShortCodeToDisplayName(
   return mapping[shortCode] || shortCode
 }
 
-// Constants
-const DEFAULT_TIER_COLORS = {
-  tier1: "#7b9d3f", // green
-  tier2: "#60aacb", // blue
-  tier3: "#FFB347", // orange
-  tier4: "#CD5C5C", // red
-} as const
+// TierColors type - imported from content/tiers.ts (single source of truth)
+// Colors should come from theme.palette.tiers - use getThemeColorsForApi() from content/tiers.ts
+import type { TierColors } from "../../content/tiers"
+export type { TierColors }
 
-type TierColors = { tier1: string; tier2: string; tier3: string; tier4: string }
 type ChartDataPoint = {
   label: string
   color: string
@@ -160,19 +166,19 @@ type ChartDataPoint = {
 }
 
 // Helpers
-const getTierColors = (themeColors?: TierColors) =>
-  themeColors || DEFAULT_TIER_COLORS
-
 const formatTierLabel = (tier: string) =>
   tier.charAt(0).toUpperCase() + tier.slice(1)
 
 // Utility functions
+/**
+ * Convert multi-value tier data to chart format
+ * @param tierData - Tier data from API
+ * @param tierColors - Colors from theme (use getTierColorsFromTheme from content/tiers.ts)
+ */
 export function convertMultiValueToChartData(
   tierData: MultiValueTier,
-  themeColors?: TierColors,
+  tierColors: TierColors,
 ): ChartDataPoint[] {
-  const tierColors = getTierColors(themeColors)
-
   return tierData.data.map((item) => ({
     label: formatTierLabel(item.tier),
     color: tierColors[item.tier],
@@ -181,11 +187,15 @@ export function convertMultiValueToChartData(
   }))
 }
 
+/**
+ * Convert single-value tier level to chart format
+ * @param tierLevel - Tier level (1-4)
+ * @param tierColors - Colors from theme (use getTierColorsFromTheme from content/tiers.ts)
+ */
 export function convertSingleValueToChartData(
   tierLevel: number,
-  themeColors?: TierColors,
+  tierColors: TierColors,
 ): ChartDataPoint[] {
-  const tierColors = getTierColors(themeColors)
 
   return [
     {
@@ -215,66 +225,3 @@ export function convertSingleValueToChartData(
   ]
 }
 
-// ============================================================================
-// Equity & Spread Helpers
-// ============================================================================
-
-export type EquityLevel = "high" | "moderate" | "low"
-
-export interface EquityInfo {
-  level: EquityLevel
-  label: string
-  description: string
-}
-
-/**
- * Interpret Gini coefficient as equity level
- * @param gini - Gini coefficient (0.0-1.0, lower = more equitable)
- */
-export function getEquityInfo(gini: number): EquityInfo {
-  if (gini < 0.2) {
-    return {
-      level: "high",
-      label: "Highly equitable",
-      description:
-        "Outcomes are distributed fairly evenly across all locations",
-    }
-  } else if (gini < 0.4) {
-    return {
-      level: "moderate",
-      label: "Moderately equitable",
-      description: "Some variation in outcomes across locations",
-    }
-  } else {
-    return {
-      level: "low",
-      label: "Unequal distribution",
-      description: "Significant variation in outcomes across locations",
-    }
-  }
-}
-
-/**
- * Get spread band width (0-1, wider = more spread)
- * Useful for determining if outcomes are concentrated or dispersed
- */
-export function getSpreadWidth(bandUpper: number, bandLower: number): number {
-  return bandUpper - bandLower
-}
-
-/**
- * Check if outcomes are concentrated (narrow spread)
- */
-export function isConcentrated(bandUpper: number, bandLower: number): boolean {
-  return getSpreadWidth(bandUpper, bandLower) < 0.33
-}
-
-/**
- * Get performance level description based on normalized score
- */
-export function getPerformanceLevel(normalizedScore: number): string {
-  if (normalizedScore >= 0.75) return "Excellent"
-  if (normalizedScore >= 0.5) return "Good"
-  if (normalizedScore >= 0.25) return "Fair"
-  return "Poor"
-}

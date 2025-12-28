@@ -225,8 +225,9 @@ const zIndex = {
   persistentMap: 1, // Main app's persistent map
 
   // Content layers
+  mapOverlays: 5, // Map overlay panels (below page content)
   pageContent: 10, // Page-level content
-  mapControls: 20, // Map overlay stuff
+  mapControls: 20, // Map controls
 
   // UI layers
   floating: 70, // Floating elements (glossary)
@@ -347,7 +348,7 @@ export const themeValues = {
 
     // Page margins
     page: {
-      x: { xs: 3, md: 6 }, // 24px / 48px horizontal
+      x: { xs: 4, sm: 6, md: 8 }, // 32px / 48px / 64px horizontal (clears map controls)
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
     },
   },
@@ -555,6 +556,7 @@ const theme = createTheme({
     },
     interaction: {
       hoverBackground: themeValues.palette.grey[100],
+      selectedBackground: `${themeValues.palette.blue.bright}1A`, // 10% blue for selected states
     },
     divider: themeValues.palette.grey[400],
   },
@@ -595,7 +597,7 @@ const theme = createTheme({
     h5: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
-      fontWeight: 500,
+      fontWeight: 600, // Bumped from 500 - most uses need semibold
       letterSpacing: "0.02rem",
       lineHeight: 1.35,
     },
@@ -747,6 +749,27 @@ const theme = createTheme({
       fontSize: typeScale.compact.micro, // 0.7rem
       fontWeight: 400,
       lineHeight: 1.3,
+    },
+    tooltipHeader: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.9375rem",
+      fontWeight: 600,
+      lineHeight: 1.3,
+      display: "block",
+    },
+    // Scenario/strategy title - tighter lineHeight for card headers
+    scenarioTitle: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "1rem", // 16px - matches body2
+      fontWeight: 500,
+      lineHeight: 1.3,
+    },
+    // Story body text - extra lineHeight for readability in narrative panels
+    storyBody: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "1.125rem", // 18px - matches subtitle1
+      fontWeight: 400,
+      lineHeight: 1.8,
     },
   },
   shape: {
@@ -1132,11 +1155,15 @@ const theme = createTheme({
       defaultProps: {
         variantMapping: {
           // Map custom variants to semantic HTML elements
+          // Block variants (render as <p> or <div>)
           dashboard: "p",
-          nav: "span",
           smallSectionLabel: "p",
           outcomeLabel: "div",
           outcomeHeader: "p",
+          // Inline variants (render as <span>)
+          // These are inline by default for use within flex containers, chips, etc.
+          // Use sx={{ display: "block" }} when standalone block display is needed.
+          nav: "span",
           compactTitle: "span",
           compactSubtitle: "span",
           compactCaption: "span",
@@ -1392,7 +1419,7 @@ export default theme
 declare module "@mui/material/styles" {
   // Custom palette colors - derived from themeValues.palette
   interface Palette {
-    interaction: { hoverBackground: string }
+    interaction: { hoverBackground: string; selectedBackground: string }
     brand: typeof themeValues.palette.brand
     blue: typeof themeValues.palette.blue
     accent: typeof themeValues.palette.accent
@@ -1409,7 +1436,7 @@ declare module "@mui/material/styles" {
   }
 
   interface PaletteOptions {
-    interaction?: { hoverBackground?: string }
+    interaction?: { hoverBackground?: string; selectedBackground?: string }
     brand?: Partial<typeof themeValues.palette.brand>
     blue?: Partial<typeof themeValues.palette.blue>
     accent?: Partial<typeof themeValues.palette.accent>
@@ -1429,6 +1456,7 @@ declare module "@mui/material/styles" {
   interface ZIndex {
     basement: number
     persistentMap: number
+    mapOverlays: number
     pageContent: number
     mapControls: number
     floating: number
@@ -1506,6 +1534,9 @@ declare module "@mui/material/styles" {
     compactSubtitle: React.CSSProperties
     compactCaption: React.CSSProperties
     compactMicro: React.CSSProperties
+    tooltipHeader: React.CSSProperties
+    scenarioTitle: React.CSSProperties
+    storyBody: React.CSSProperties
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
@@ -1524,6 +1555,9 @@ declare module "@mui/material/styles" {
     compactSubtitle?: React.CSSProperties
     compactCaption?: React.CSSProperties
     compactMicro?: React.CSSProperties
+    tooltipHeader?: React.CSSProperties
+    scenarioTitle?: React.CSSProperties
+    storyBody?: React.CSSProperties
   }
 }
 
@@ -1547,5 +1581,8 @@ declare module "@mui/material/Typography" {
     compactSubtitle: true
     compactCaption: true
     compactMicro: true
+    tooltipHeader: true
+    scenarioTitle: true
+    storyBody: true
   }
 }

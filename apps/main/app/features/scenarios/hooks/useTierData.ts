@@ -1,8 +1,10 @@
 import { useMemo } from "react"
-import { useTheme, Theme } from "@repo/ui/mui"
+import { useTheme } from "@repo/ui/mui"
 import useSWR from "swr"
 import {
   fetchScenarioTiers,
+  fetchScenarioList,
+  fetchAllScenarioTiers,
   fetchTierList,
   getTierMapping,
   convertMultiValueToChartData,
@@ -12,21 +14,8 @@ import {
   type TierScores,
 } from "../../../lib/api/tierApi"
 import { applyUIDisplayOverride } from "../../../lib/constants/outcomeMappings"
-
-// Types
-interface TierColors {
-  tier1: string
-  tier2: string
-  tier3: string
-  tier4: string
-}
-
-export interface ChartDataPoint {
-  label: string
-  color: string
-  value: number
-  tierType?: "single_value" | "multi_value" // Metadata from API
-}
+import { getThemeColorsForApi, type TierColors } from "../../../content/tiers"
+import type { ChartDataPoint } from "../components/shared/types"
 
 interface OutcomeInfo {
   shortCode: string
@@ -56,13 +45,6 @@ export const OUTCOME_DISPLAY_ORDER = [
   "Salmon abundance",
 ] as const
 
-// Helpers
-const getThemeColors = (theme: Theme): TierColors => ({
-  tier1: theme.palette.tiers.tier1,
-  tier2: theme.palette.tiers.tier2,
-  tier3: theme.palette.tiers.tier3,
-  tier4: theme.palette.tiers.tier4,
-})
 
 const processScenarioData = (
   scenarioData: ScenarioTiersResponse,
@@ -211,7 +193,7 @@ export function useScenarioTiers(scenarioId: string | null) {
   // Convert API data to chart format with theme colors
   const chartData = useMemo(() => {
     if (!scenarioData || !tierMapping) return {}
-    return processScenarioData(scenarioData, tierMapping, getThemeColors(theme))
+    return processScenarioData(scenarioData, tierMapping, getThemeColorsForApi(theme))
   }, [scenarioData, tierMapping, theme])
 
   // Extract score data for sorting and parallel plots
@@ -270,33 +252,29 @@ export function useScenarioTiers(scenarioId: string | null) {
 export function useMultipleScenarioTiers() {
   const theme = useTheme()
 
-  // Fetch all scenarios in parallel with consistent keys
-  // Baseline scenarios
-  const s0020Result = useSWR(`/api/tiers/scenarios/s0020/tiers`, () =>
-    fetchScenarioTiers("s0020"),
+  // Fetch scenario list from API - this is the source of truth
+  const {
+    data: apiScenarios,
+    error: scenariosError,
+    isLoading: scenariosLoading,
+  } = useSWR("/api/scenarios", fetchScenarioList)
+
+  // Extract active scenario IDs
+  const scenarioIds = useMemo(
+    () =>
+      apiScenarios?.filter((s) => s.is_active).map((s) => s.scenario_id) ?? [],
+    [apiScenarios],
   )
-  const s0021Result = useSWR(`/api/tiers/scenarios/s0021/tiers`, () =>
-    fetchScenarioTiers("s0021"),
-  )
-  const s0011Result = useSWR(`/api/tiers/scenarios/s0011/tiers`, () =>
-    fetchScenarioTiers("s0011"),
-  )
-  const s0023Result = useSWR(`/api/tiers/scenarios/s0023/tiers`, () =>
-    fetchScenarioTiers("s0023"),
-  )
-  const s0024Result = useSWR(`/api/tiers/scenarios/s0024/tiers`, () =>
-    fetchScenarioTiers("s0024"),
-  )
-  // Groundwater (SGMA) scenarios
-  const s0025Result = useSWR(`/api/tiers/scenarios/s0025/tiers`, () =>
-    fetchScenarioTiers("s0025"),
-  )
-  const s0027Result = useSWR(`/api/tiers/scenarios/s0027/tiers`, () =>
-    fetchScenarioTiers("s0027"),
-  )
-  // Environmental scenarios
-  const s0029Result = useSWR(`/api/tiers/scenarios/s0029/tiers`, () =>
-    fetchScenarioTiers("s0029"),
+
+  // Fetch all scenario tier data in a single batched request
+  // SWR key includes scenario IDs so it refetches when list changes
+  const {
+    data: allScenariosData,
+    error: scenarioTiersError,
+    isLoading: scenarioTiersLoading,
+  } = useSWR(
+    scenarioIds.length > 0 ? ["all-scenario-tiers", ...scenarioIds] : null,
+    () => fetchAllScenarioTiers(scenarioIds),
   )
 
   const {
@@ -312,119 +290,39 @@ export function useMultipleScenarioTiers() {
   } = useSWR("/api/tiers/mapping", getTierMapping)
 
   // Memoize theme colors to prevent recalculation
-  const themeColors = useMemo(() => getThemeColors(theme), [theme])
+  const themeColors = useMemo(() => getThemeColorsForApi(theme), [theme])
 
   // Convert all scenario data to chart format
   const allChartData = useMemo(() => {
-    if (!tierMapping) return {}
+    if (!allScenariosData || !tierMapping) return {}
 
     const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
 
-    // Process each scenario using helper function
-    // Baseline scenarios
-    if (s0020Result.data)
-      result["s0020"] = processScenarioData(
-        s0020Result.data,
+    Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
+      result[scenarioId] = processScenarioData(
+        scenarioData,
         tierMapping,
         themeColors,
       )
-    if (s0021Result.data)
-      result["s0021"] = processScenarioData(
-        s0021Result.data,
-        tierMapping,
-        themeColors,
-      )
-    if (s0011Result.data)
-      result["s0011"] = processScenarioData(
-        s0011Result.data,
-        tierMapping,
-        themeColors,
-      )
-    if (s0023Result.data)
-      result["s0023"] = processScenarioData(
-        s0023Result.data,
-        tierMapping,
-        themeColors,
-      )
-    if (s0024Result.data)
-      result["s0024"] = processScenarioData(
-        s0024Result.data,
-        tierMapping,
-        themeColors,
-      )
-    // Groundwater (SGMA) scenarios
-    if (s0025Result.data)
-      result["s0025"] = processScenarioData(
-        s0025Result.data,
-        tierMapping,
-        themeColors,
-      )
-    if (s0027Result.data)
-      result["s0027"] = processScenarioData(
-        s0027Result.data,
-        tierMapping,
-        themeColors,
-      )
-    // Environmental scenarios
-    if (s0029Result.data)
-      result["s0029"] = processScenarioData(
-        s0029Result.data,
-        tierMapping,
-        themeColors,
-      )
+    })
 
     return result
-  }, [
-    s0020Result.data,
-    s0021Result.data,
-    s0011Result.data,
-    s0023Result.data,
-    s0024Result.data,
-    s0025Result.data,
-    s0027Result.data,
-    s0029Result.data,
-    tierMapping,
-    themeColors,
-  ])
+  }, [allScenariosData, tierMapping, themeColors])
 
   // Extract score data for all scenarios (for sorting and parallel plots)
   const allScoreData = useMemo(() => {
-    if (!tierMapping) return {}
+    if (!allScenariosData || !tierMapping) return {}
 
     const result: Record<string, Record<string, OutcomeScoreData>> = {}
 
-    // Process each scenario
-    if (s0020Result.data)
-      result["s0020"] = extractScoreData(s0020Result.data, tierMapping)
-    if (s0021Result.data)
-      result["s0021"] = extractScoreData(s0021Result.data, tierMapping)
-    if (s0011Result.data)
-      result["s0011"] = extractScoreData(s0011Result.data, tierMapping)
-    if (s0023Result.data)
-      result["s0023"] = extractScoreData(s0023Result.data, tierMapping)
-    if (s0024Result.data)
-      result["s0024"] = extractScoreData(s0024Result.data, tierMapping)
-    if (s0025Result.data)
-      result["s0025"] = extractScoreData(s0025Result.data, tierMapping)
-    if (s0027Result.data)
-      result["s0027"] = extractScoreData(s0027Result.data, tierMapping)
-    if (s0029Result.data)
-      result["s0029"] = extractScoreData(s0029Result.data, tierMapping)
+    Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
+      result[scenarioId] = extractScoreData(scenarioData, tierMapping)
+    })
 
     return result
-  }, [
-    s0020Result.data,
-    s0021Result.data,
-    s0011Result.data,
-    s0023Result.data,
-    s0024Result.data,
-    s0025Result.data,
-    s0027Result.data,
-    s0029Result.data,
-    tierMapping,
-  ])
+  }, [allScenariosData, tierMapping])
 
-  // Get outcome names from first scenario (structure should be same)
+  // Get outcome names from tier list
   const outcomeNames = useMemo(() => {
     if (!allTiers || !tierMapping) return []
 
@@ -458,59 +356,24 @@ export function useMultipleScenarioTiers() {
   }, [allTiers, tierMapping])
 
   const isLoading =
-    s0020Result.isLoading ||
-    s0021Result.isLoading ||
-    s0011Result.isLoading ||
-    s0023Result.isLoading ||
-    s0024Result.isLoading ||
-    s0025Result.isLoading ||
-    s0027Result.isLoading ||
-    s0029Result.isLoading ||
-    tiersLoading ||
-    mappingLoading
+    scenariosLoading || scenarioTiersLoading || tiersLoading || mappingLoading
 
-  // Provide specific error messages
+  // Combine errors
   const error = useMemo(() => {
-    // Baseline scenarios
-    if (s0020Result.error)
-      return `Failed to load s0020 data: ${s0020Result.error.message}`
-    if (s0021Result.error)
-      return `Failed to load s0021 data: ${s0021Result.error.message}`
-    if (s0011Result.error)
-      return `Failed to load s0011 data: ${s0011Result.error.message}`
-    if (s0023Result.error)
-      return `Failed to load s0023 data: ${s0023Result.error.message}`
-    if (s0024Result.error)
-      return `Failed to load s0024 data: ${s0024Result.error.message}`
-    // Groundwater scenarios
-    if (s0025Result.error)
-      return `Failed to load s0025 data: ${s0025Result.error.message}`
-    if (s0027Result.error)
-      return `Failed to load s0027 data: ${s0027Result.error.message}`
-    // Environmental scenarios
-    if (s0029Result.error)
-      return `Failed to load s0029 data: ${s0029Result.error.message}`
-    // Tier metadata
+    if (scenariosError)
+      return `Failed to load scenarios: ${scenariosError.message}`
+    if (scenarioTiersError)
+      return `Failed to load scenario tier data: ${scenarioTiersError.message}`
     if (tiersError) return `Failed to load tier list: ${tiersError.message}`
     if (mappingError)
       return `Failed to load tier mapping: ${mappingError.message}`
     return null
-  }, [
-    s0020Result.error,
-    s0021Result.error,
-    s0011Result.error,
-    s0023Result.error,
-    s0024Result.error,
-    s0025Result.error,
-    s0027Result.error,
-    s0029Result.error,
-    tiersError,
-    mappingError,
-  ])
+  }, [scenariosError, scenarioTiersError, tiersError, mappingError])
 
   return {
     allChartData,
-    allScoreData, // New: score data for all scenarios (for sorting/parallel plots)
+    allScoreData,
+    scenarioIds, // Export the dynamic list of scenario IDs
     outcomeNames,
     isLoading,
     error,

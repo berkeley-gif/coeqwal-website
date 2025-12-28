@@ -53,11 +53,11 @@ export function useMapTooltips({
 
   const handlePointHover = useCallback(
     (feature: HoveredFeatureInfo | null) => point.setHovered(feature),
-    [point]
+    [point.setHovered]
   )
   const handlePointClick = useCallback(
     (feature: HoveredFeatureInfo) => point.togglePinned(feature),
-    [point]
+    [point.togglePinned]
   )
   const clearPinned = useCallback(
     (feature: HoveredFeatureInfo) => {
@@ -67,12 +67,12 @@ export function useMapTooltips({
         polygon.clearPinned(feature.featureId)
       }
     },
-    [point, polygon]
+    [point.clearPinned, polygon.clearPinned]
   )
   const clearAllPinned = useCallback(() => {
     point.clearAllPinned()
     polygon.clearAllPinned()
-  }, [point, polygon])
+  }, [point.clearAllPinned, polygon.clearAllPinned])
 
   return {
     hoveredFeature,

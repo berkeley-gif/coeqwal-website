@@ -17,6 +17,36 @@ import { InfoIconButton, SortButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 
+/**
+ * Format outcome label with consistent line breaks
+ * Each outcome breaks at a specific point for visual consistency
+ */
+export function formatOutcomeLabel(displayName: string): React.ReactNode {
+  const breakPoints: Record<string, [string, string]> = {
+    "Community deliveries": ["Community", "deliveries"],
+    "Agricultural revenue": ["Agricultural", "revenue"],
+    "Environmental flows": ["Environmental", "flows"],
+    "Reservoir storage": ["Reservoir", "storage"],
+    "Groundwater storage": ["Groundwater", "storage"],
+    "Delta estuary ecology": ["Delta estuary", "ecology"],
+    "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
+    "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
+    "Salmon abundance": ["Salmon", "abundance"],
+  }
+
+  const parts = breakPoints[displayName]
+  if (parts) {
+    return (
+      <>
+        {parts[0]}
+        <br />
+        {parts[1]}
+      </>
+    )
+  }
+  return displayName
+}
+
 export interface OutcomeGlyphItemProps {
   /** Display name of the outcome (shown as label) */
   displayName: string
@@ -144,11 +174,9 @@ export function OutcomeGlyphItem({
           }}
         >
           <Typography
-            variant="compactMicro"
+            variant="outcomeLabel"
             sx={{
               color: theme.palette.text.primary,
-              textAlign: "center",
-              lineHeight: 1.2,
               px: 0.5,
             }}
           >
@@ -179,22 +207,7 @@ export function OutcomeGlyphItem({
                   : theme.palette.grey[500],
               }}
             >
-              {/* Handle long names that shouldn't break mid-word */}
-              {displayName === "Environmental flows" ? (
-                <>
-                  Environmental
-                  <br />
-                  flows
-                </>
-              ) : displayName === "Freshwater for in-Delta uses" ? (
-                <>
-                  Freshwater for
-                  <br />
-                  <span style={{ whiteSpace: "nowrap" }}>in-Delta</span> uses
-                </>
-              ) : (
-                displayName
-              )}
+              {formatOutcomeLabel(displayName)}
             </Typography>
           )}
 

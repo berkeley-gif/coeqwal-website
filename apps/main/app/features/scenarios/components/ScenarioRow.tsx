@@ -20,19 +20,19 @@ import { OutcomeGlyphItem } from "./shared/OutcomeGlyphItem"
 import { SmartSummary } from "./shared/SmartSummary"
 import type { ChartDataPoint } from "./shared/types"
 import type { OutcomeSummary, AtRiskLocation } from "../../summary/summaryGenerator"
-import type { StrategyTheme } from "../../../content/scenarios"
+import type { ScenarioTheme } from "../../../content/scenarios"
 
 // =============================================================================
 // Types
 // =============================================================================
 
 export interface ScenarioRowProps {
-  /** Strategy data */
-  strategy: {
-    value: string
+  /** Scenario data */
+  scenario: {
+    scenarioId: string
     label: string
     description: string
-    theme?: StrategyTheme
+    theme?: ScenarioTheme
   }
   /** Chart data for outcomes (keyed by display name) */
   chartData: Record<string, ChartDataPoint[]>
@@ -72,7 +72,7 @@ export interface ScenarioRowProps {
 // =============================================================================
 
 export function ScenarioRow({
-  strategy,
+  scenario,
   chartData,
   outcomeNames,
   isSelected = false,
@@ -231,7 +231,7 @@ export function ScenarioRow({
               }}
             >
               <StrategyHeader
-                strategy={strategy}
+                strategy={scenario}
                 showDescription={showDefinitions}
                 titleVariant="body2"
               />
@@ -245,8 +245,8 @@ export function ScenarioRow({
               >
                 <Typography variant="subtitle2">Key operations</Typography>
                 <OperationsIconGroup
-                  strategyValue={strategy.value}
-                  theme={strategy.theme}
+                  scenarioId={scenario.scenarioId}
+                  theme={scenario.theme}
                   size={iconSize}
                 />
               </Box>
@@ -306,17 +306,17 @@ export function ScenarioRow({
             {/* Non-compact: Strategy name and description */}
             <Box sx={{ pr: 1 }}>
               <StrategyHeader
-                strategy={strategy}
+                strategy={scenario}
                 showDescription={showDefinitions}
                 titleVariant="body2"
-                descriptionMaxWidth={theme.layout.maxWidth.sm}
+                descriptionMaxWidth="none"
               />
             </Box>
 
             {/* Non-compact: Key operations */}
             <OperationsIconGroup
-              strategyValue={strategy.value}
-              theme={strategy.theme}
+              scenarioId={scenario.scenarioId}
+              theme={scenario.theme}
               size={iconSize}
             />
 

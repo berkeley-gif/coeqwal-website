@@ -1,28 +1,29 @@
 /**
- * OperationsIconGroup - Renders strategy operation icons with tooltips
+ * OperationsIconGroup - Renders scenario operation icons with tooltips
  *
- * Shared component for rendering the key operations icons for a strategy.
+ * Shared component for rendering the key operations icons for a scenario.
  * Used by both Learn mode (KeyOperationsPanel) and Explore mode (StrategyGrid).
  *
- * Handles both baseline strategies (current ops, land use, TUCP) and
- * non-baseline theme strategies (SGMA, Environmental).
+ * Handles both baseline scenarios (current ops, land use, TUCP) and
+ * non-baseline theme scenarios (SGMA, Environmental).
  */
 
 import React from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
+import type { ScenarioTheme } from "../../../../content/scenarios"
 import {
-  getStrategyIcons,
+  getScenarioIcons,
   getThemeIcon,
   getThemeIconDescription,
   getIconSize,
 } from "./strategyIcons"
 
 export interface OperationsIconGroupProps {
-  /** Strategy value (e.g., "current-ops", "sgma-sj-valley") */
-  strategyValue: string
-  /** Strategy theme (e.g., "baseline", "groundwater", "environmental") */
-  theme?: string
+  /** Scenario ID (e.g., "s0020", "s0025") */
+  scenarioId: string
+  /** Scenario theme (e.g., "baseline", "groundwater", "environmental") */
+  theme?: ScenarioTheme
   /** Icon size variant */
   size?: "sm" | "md" | "lg"
   /** Layout direction */
@@ -30,8 +31,8 @@ export interface OperationsIconGroupProps {
 }
 
 export function OperationsIconGroup({
-  strategyValue,
-  theme: strategyTheme,
+  scenarioId,
+  theme: scenarioTheme,
   size = "md",
   layout = "horizontal",
 }: OperationsIconGroupProps) {
@@ -39,7 +40,7 @@ export function OperationsIconGroup({
   const iconSize = getIconSize(size)
 
   // Non-baseline themes use custom theme icons
-  if (strategyTheme && strategyTheme !== "baseline") {
+  if (scenarioTheme && scenarioTheme !== "baseline") {
     return (
       <Box
         sx={{
@@ -54,19 +55,12 @@ export function OperationsIconGroup({
         <HybridTooltip
           content={
             <>
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  display: "block",
-                  mb: 0.5,
-                }}
-              >
-                {strategyTheme === "groundwater"
+              <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
+                {scenarioTheme === "groundwater"
                   ? "SGMA Limits"
                   : "Environmental Flows"}
-              </Box>
-              {getThemeIconDescription(strategyTheme, strategyValue)}
+              </Typography>
+              {getThemeIconDescription(scenarioTheme, scenarioId)}
             </>
           }
         >
@@ -80,7 +74,7 @@ export function OperationsIconGroup({
               justifyContent: "center",
             }}
           >
-            {getThemeIcon(strategyTheme)}
+            {getThemeIcon(scenarioTheme)}
           </Box>
         </HybridTooltip>
 
@@ -88,16 +82,9 @@ export function OperationsIconGroup({
         <HybridTooltip
           content={
             <>
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  display: "block",
-                  mb: 0.5,
-                }}
-              >
+              <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                 2020 LandIQ land use
-              </Box>
+              </Typography>
               Current agricultural land use data from 2020 LandIQ survey.
             </>
           }
@@ -122,16 +109,9 @@ export function OperationsIconGroup({
         <HybridTooltip
           content={
             <>
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  display: "block",
-                  mb: 0.5,
-                }}
-              >
+              <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                 TUCPs Allowed
-              </Box>
+              </Typography>
               Temporary Urgent Change Petitions (TUCPs) permit changes during
               droughts to meet human health and safety needs and protect
               endangered species.
@@ -157,8 +137,8 @@ export function OperationsIconGroup({
     )
   }
 
-  // Baseline strategies use standard icons from getStrategyIcons
-  const icons = getStrategyIcons(strategyValue)
+  // Baseline scenarios use standard icons from getScenarioIcons
+  const icons = getScenarioIcons(scenarioId)
 
   return (
     <Box
@@ -175,16 +155,9 @@ export function OperationsIconGroup({
           key={icon.path}
           content={
             <>
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  display: "block",
-                  mb: 0.5,
-                }}
-              >
+              <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                 {icon.label.replace(/\n/g, " ")}
-              </Box>
+              </Typography>
               {icon.description}
             </>
           }
@@ -212,49 +185,8 @@ export function OperationsIconGroup({
           </Box>
         </HybridTooltip>
       ))}
-
-      {/* Additional icon for baseline strategies without TUCP */}
-      {(strategyValue === "current-ops-wo-tucp" ||
-        strategyValue === "usbr-2024-wo-tucp") && (
-        <HybridTooltip
-          content={
-            <>
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: theme.typography.fontWeightSemiBold,
-                  display: "block",
-                  mb: 0.5,
-                }}
-              >
-                Without TUCPs
-              </Box>
-              This scenario does not include Temporary Urgent Change Petitions.
-            </>
-          }
-        >
-          <Box
-            sx={{
-              width: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              height: { xs: theme.spacing(iconSize.xs), lg: theme.spacing(iconSize.lg) },
-              cursor: "pointer",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/icons/no_tucp.svg"
-              alt="Without TUCPs"
-              style={{ width: "100%", height: "100%" }}
-            />
-          </Box>
-        </HybridTooltip>
-      )}
     </Box>
   )
 }
 
 export default OperationsIconGroup
-
-
-
-

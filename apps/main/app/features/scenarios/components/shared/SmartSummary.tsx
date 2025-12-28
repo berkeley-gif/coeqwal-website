@@ -9,7 +9,8 @@
  * Used by SummaryPanel (map overlay) and can be embedded in ScenarioCard/Row.
  */
 
-import { Box, Typography, Chip, CircularProgress, useTheme } from "@repo/ui/mui"
+import { Box, Typography, CircularProgress, useTheme } from "@repo/ui/mui"
+import { TierChip, LocationChip } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 import {
   generateOutcomeInsight,
@@ -114,53 +115,29 @@ export function SmartSummary({
       {Object.entries(summary.tierBreakdown).map(([tier, data]) => {
         const tierNum = parseInt(tier.replace("tier", "")) as TierLevel
         return (
-          <Chip
+          <TierChip
             key={tier}
-            size="small"
             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-            sx={{
-              ...theme.typography.compact.micro,
-              backgroundColor: `${tierColors[tierNum]}15`,
-              color: tierColors[tierNum],
-              borderColor: `${tierColors[tierNum]}40`,
-              border: "1px solid",
-              fontWeight: theme.typography.fontWeightMedium,
-              height: isCompact ? 18 : 22,
-              "& .MuiChip-label": { px: isCompact ? 0.5 : 1 },
-            }}
+            color={tierColors[tierNum]}
+            compact={isCompact}
           />
         )
       })}
     </Box>
   )
 
-  // Location chip
+  // Location chip helper
   const renderLocationChip = (
     loc: AtRiskLocation,
-    height: number,
-    textColor: string,
+    variant: "default" | "muted" = "default",
+    compact: boolean = false,
   ) => (
-    <Chip
+    <LocationChip
       key={loc.duId}
-      size="small"
       label={loc.primaryName}
       onClick={onLocationClick ? () => onLocationClick(loc) : undefined}
-      sx={{
-        ...theme.typography.compact.micro,
-        cursor: onLocationClick ? "pointer" : "default",
-        backgroundColor: "transparent",
-        color: textColor,
-        border: theme.border.medium,
-        height,
-        "&:hover": onLocationClick
-          ? {
-              backgroundColor: theme.palette.blue.bright,
-              color: theme.palette.common.white,
-              borderColor: theme.palette.blue.bright,
-            }
-          : undefined,
-        "& .MuiChip-label": { px: isCompact ? 0.5 : 0.75 },
-      }}
+      variant={variant}
+      compact={compact}
     />
   )
 
@@ -192,9 +169,7 @@ export function SmartSummary({
           >
             Critical:
           </Typography>
-          {visibleLocations.map((loc) =>
-            renderLocationChip(loc, 22, theme.palette.grey[700]),
-          )}
+          {visibleLocations.map((loc) => renderLocationChip(loc, "default", false))}
           {remainingCount > 0 && (
             <Typography
               variant="compactMicro"
@@ -222,7 +197,7 @@ export function SmartSummary({
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {visibleLocations.map((loc) =>
-            renderLocationChip(loc, isCompact ? 20 : 24, theme.palette.grey[700]),
+            renderLocationChip(loc, "default", isCompact),
           )}
           {remainingCount > 0 && (
             <Typography
@@ -265,9 +240,7 @@ export function SmartSummary({
           >
             At-risk:
           </Typography>
-          {visibleLocations.map((loc) =>
-            renderLocationChip(loc, 18, theme.palette.grey[600]),
-          )}
+          {visibleLocations.map((loc) => renderLocationChip(loc, "muted", false))}
           {remainingCount > 0 && (
             <Typography
               variant="compactMicro"
@@ -295,7 +268,7 @@ export function SmartSummary({
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {visibleLocations.map((loc) =>
-            renderLocationChip(loc, isCompact ? 16 : 18, theme.palette.grey[600]),
+            renderLocationChip(loc, "muted", isCompact),
           )}
           {remainingCount > 0 && (
             <Typography
@@ -329,9 +302,7 @@ export function SmartSummary({
                 fontWeight: theme.typography.fontWeightSemiBold,
                 fontSize: isInline
                   ? theme.typography.body2.fontSize
-                  : isCompact
-                    ? theme.typography.compact.micro.fontSize
-                    : "0.7rem",
+                  : theme.typography.compact.micro.fontSize,
                 letterSpacing: "0.5px",
                 display: "block",
                 mb: isInline ? 0.5 : isCompact ? 0.25 : 1,

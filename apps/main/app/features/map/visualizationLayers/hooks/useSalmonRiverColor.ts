@@ -17,7 +17,7 @@ export function useSalmonRiverColor(): string | undefined {
   const activeVisualization = useActiveOutcomeVisualization()
 
   const outcome = activeVisualization?.outcome ?? null
-  const strategy = activeVisualization?.strategy ?? "current-ops"
+  const scenarioId = activeVisualization?.scenarioId ?? "s0020"
 
   // Only fetch tier data for Salmon abundance
   const isSalmonAbundance = outcome === "Salmon abundance"
@@ -26,7 +26,7 @@ export function useSalmonRiverColor(): string | undefined {
   // Fetch tier data only when Salmon abundance is active
   const { tierColorMap } = useTierData(
     isSalmonAbundance && isMapVisible ? outcome : null,
-    strategy
+    scenarioId
   )
 
   // Extract the color from the tier map

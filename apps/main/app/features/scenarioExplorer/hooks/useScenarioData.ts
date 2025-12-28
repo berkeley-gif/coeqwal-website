@@ -1,40 +1,26 @@
 import { useMemo } from "react"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-import { STRATEGY_TO_SCENARIO_ID } from "../../../lib/constants/outcomeMappings"
-import type {
-  ChartDataPoint,
-  OutcomeInfo,
-} from "../../../types/scenarioExplorer"
+import type { ChartDataPoint } from "../../scenarios/components/shared/types"
+import type { OutcomeInfo } from "../types"
 
 /**
  * Hook that manages scenario data fetching and mapping
- * Encapsulates the logic for converting API data to chart format
  */
 export function useScenarioData(): {
   allChartData: Record<string, Record<string, ChartDataPoint[]>>
   outcomeNames: OutcomeInfo[]
-  getChartDataForStrategy: (
-    strategyValue: string,
-  ) => Record<string, ChartDataPoint[]>
+  getChartDataForScenario: (scenarioId: string) => Record<string, ChartDataPoint[]>
   isLoading: boolean
   error: string | null
 } {
-  // Fetch tier data
-  const { allChartData, outcomeNames, isLoading, error } =
-    useMultipleScenarioTiers()
+  const { allChartData, outcomeNames, isLoading, error } = useMultipleScenarioTiers()
 
-  // Map strategy values to their corresponding scenario data using centralized mapping
-  const getChartDataForStrategy = useMemo(
-    () => (strategyValue: string) => {
-      const scenarioId = STRATEGY_TO_SCENARIO_ID[strategyValue]
-      if (scenarioId && allChartData[scenarioId]) {
+  const getChartDataForScenario = useMemo(
+    () => (scenarioId: string) => {
+      if (allChartData[scenarioId]) {
         return allChartData[scenarioId]
       }
-      // Fallback to current-ops (s0020) if strategy not found
-      console.warn(
-        `No scenario data found for strategy "${strategyValue}", using s0020 fallback`,
-      )
-      return allChartData["s0020"] || {}
+      return {}
     },
     [allChartData],
   )
@@ -42,7 +28,7 @@ export function useScenarioData(): {
   return {
     allChartData,
     outcomeNames: outcomeNames as OutcomeInfo[],
-    getChartDataForStrategy,
+    getChartDataForScenario,
     isLoading,
     error,
   }

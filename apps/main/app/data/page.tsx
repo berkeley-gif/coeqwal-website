@@ -153,12 +153,10 @@ export default function DataPage() {
                 />
               </IconButton>
               <Typography
-                variant="h2"
+                variant="h4"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  fontSize: (theme) => theme.typography.h4.fontSize,
-                  fontWeight: (theme) => theme.typography.fontWeightSemiBold,
-                  lineHeight: 1.2,
+                  fontWeight: 600,
                 }}
               >
                 Data & downloads
@@ -184,10 +182,7 @@ export default function DataPage() {
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     Full scenario run files
                   </Typography>
                   <Typography
@@ -195,7 +190,6 @@ export default function DataPage() {
                     sx={{
                       mb: 3,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     Access complete CalSim3 model run files in zipped format,
@@ -259,10 +253,7 @@ export default function DataPage() {
               {/* Scenario data section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     Scenario data in csv format
                   </Typography>
                   <Typography
@@ -270,7 +261,6 @@ export default function DataPage() {
                     sx={{
                       mb: 3,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     Download CalSim3 scenario input and output data in csv
@@ -366,10 +356,7 @@ export default function DataPage() {
               {/* Model documentation section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     Model documentation
                   </Typography>
                   <Typography
@@ -377,7 +364,6 @@ export default function DataPage() {
                     sx={{
                       mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
@@ -399,10 +385,7 @@ export default function DataPage() {
               {/* Research publications section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     Research publications
                   </Typography>
                   <Typography
@@ -410,7 +393,6 @@ export default function DataPage() {
                     sx={{
                       mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     Peer-reviewed publications and research papers related to
@@ -431,10 +413,7 @@ export default function DataPage() {
               {/* API access section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     API access
                   </Typography>
                   <Typography
@@ -442,7 +421,6 @@ export default function DataPage() {
                     sx={{
                       mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     REST API endpoints for programmatic access to scenario data,
@@ -463,10 +441,7 @@ export default function DataPage() {
               {/* Support & contact section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography
-                    variant="h4"
-                    sx={{ mb: 2, fontWeight: (theme) => theme.typography.fontWeightSemiBold, fontSize: (theme) => theme.typography.h5.fontSize }}
-                  >
+                  <Typography variant="h5" sx={{ mb: 2 }}>
                     Support & contact
                   </Typography>
                   <Typography
@@ -474,7 +449,6 @@ export default function DataPage() {
                     sx={{
                       mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
-                      lineHeight: 1.6,
                     }}
                   >
                     Contact our team for technical support, questions about the

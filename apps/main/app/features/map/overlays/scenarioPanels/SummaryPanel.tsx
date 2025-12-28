@@ -8,16 +8,16 @@
  * experimental and unfinished.
  */
 
-import { useEffect, useState, useCallback, useMemo } from "react"
+import { useEffect, useState, useCallback } from "react"
 import {
   Box,
   Typography,
-  Chip,
   CircularProgress,
   useTheme,
   Theme,
   SxProps,
 } from "@repo/ui/mui"
+import { TierChip, LocationChip } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 import {
   generateOutcomeSummary,
@@ -33,10 +33,7 @@ import {
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
 import { fetchTierLocationData } from "../../../../lib/api/tierLocationApi"
-import {
-  STRATEGY_TO_SCENARIO_ID,
-  DISPLAY_NAME_TO_API_SHORT_CODE,
-} from "../../../../lib/constants/outcomeMappings"
+import { DISPLAY_NAME_TO_API_SHORT_CODE } from "../../../../lib/constants/outcomeMappings"
 import { useActiveOutcomeVisualization } from "../../store"
 import { useMap } from "@repo/map"
 
@@ -51,41 +48,12 @@ const flexWrapStyles: SxProps<Theme> = {
   gap: 0.5,
 }
 
-/** Tier chip styles (Optimal/Sub-optimal/At-risk/Critical labels) */
-const getTierChipSx = (theme: Theme, tierColor: string): SxProps<Theme> => ({
-  ...theme.typography.compact.micro,
-  fontWeight: theme.typography.fontWeightMedium,
-  backgroundColor: `${tierColor}15`,
-  color: tierColor,
-  borderColor: `${tierColor}40`,
-  border: "1px solid",
-  height: 22,
-  "& .MuiChip-label": { px: 1 },
-})
-
-/** Location chip styles (clickable location names) */
-const getLocationChipSx = (theme: Theme, color: string): SxProps<Theme> => ({
-  ...theme.typography.compact.micro,
-  fontWeight: theme.typography.fontWeightMedium,
-  cursor: "pointer",
-  backgroundColor: "transparent",
-  color,
-  border: theme.border.medium,
-  height: 22,
-  "&:hover": {
-    backgroundColor: theme.palette.blue.bright,
-    color: theme.palette.common.white,
-    borderColor: theme.palette.blue.bright,
-  },
-  "& .MuiChip-label": { px: 1 },
-})
-
 // ============================================================================
 // Component
 // ============================================================================
 
 interface SummaryPanelProps {
-  strategy?: string
+  scenarioId?: string
   /** Optional outcome override - if not provided, reads from store (Learn mode) */
   outcome?: string | null
   /** Variant: 'overlay' for map overlay (narrow), 'inline' for strategy grid (full width) */
@@ -93,7 +61,7 @@ interface SummaryPanelProps {
 }
 
 export function SummaryPanel({
-  strategy = "current-ops",
+  scenarioId = "s0020",
   outcome: outcomeProp,
   variant = "overlay",
 }: SummaryPanelProps) {
@@ -104,16 +72,6 @@ export function SummaryPanel({
 
   // Get tier colors from theme
   const tierColors = getTierColorsFromTheme(theme)
-
-  // Memoized chip styles
-  const locationChipSx = useMemo(
-    () => getLocationChipSx(theme, theme.palette.grey[700]),
-    [theme],
-  )
-  const locationChipMutedSx = useMemo(
-    () => getLocationChipSx(theme, theme.palette.grey[600]),
-    [theme],
-  )
 
   const [isLoading, setIsLoading] = useState(false)
   const [outcomeSummary, setOutcomeSummary] = useState<OutcomeSummary | null>(
@@ -144,7 +102,6 @@ export function SummaryPanel({
       setIsLoading(true)
 
       try {
-        const scenarioId = STRATEGY_TO_SCENARIO_ID[strategy]
         if (!scenarioId) return
 
         // Get tier code from outcome using the mapping
@@ -158,7 +115,7 @@ export function SummaryPanel({
         // Also fetch GeoJSON data for reliable coordinates and API names
         const apiNamesMap = new Map<string, string>()
         try {
-          const geoJsonData = await fetchTierLocationData(strategy, outcome)
+          const geoJsonData = await fetchTierLocationData(scenarioId, outcome)
           if (!cancelled) {
             const coordsMap = new Map<string, [number, number]>()
 
@@ -309,7 +266,7 @@ export function SummaryPanel({
     return () => {
       cancelled = true
     }
-  }, [selectedOutcome, strategy, mapAPI])
+  }, [selectedOutcome, scenarioId, mapAPI])
 
   // Handle clicking on a location to zoom to it
   const handleLocationClick = useCallback(
@@ -491,11 +448,10 @@ export function SummaryPanel({
                           tier.replace("tier", ""),
                         ) as TierLevel
                         return (
-                          <Chip
+                          <TierChip
                             key={tier}
-                            size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-                            sx={getTierChipSx(theme, tierColors[tierNum])}
+                            color={tierColors[tierNum]}
                           />
                         )
                       },
@@ -515,12 +471,10 @@ export function SummaryPanel({
                       {outcomeSummary.criticalLocations
                         .slice(0, 6)
                         .map((loc) => (
-                          <Chip
+                          <LocationChip
                             key={loc.duId}
-                            size="small"
                             label={loc.primaryName}
                             onClick={() => handleLocationClick(loc)}
-                            sx={locationChipSx}
                           />
                         ))}
                       {outcomeSummary.criticalLocations.length > 6 && (
@@ -545,12 +499,11 @@ export function SummaryPanel({
                         At-risk:
                       </Typography>
                       {outcomeSummary.atRiskLocations.slice(0, 4).map((loc) => (
-                        <Chip
+                        <LocationChip
                           key={loc.duId}
-                          size="small"
                           label={loc.primaryName}
                           onClick={() => handleLocationClick(loc)}
-                          sx={locationChipMutedSx}
+                          variant="muted"
                         />
                       ))}
                       {outcomeSummary.atRiskLocations.length > 4 && (
@@ -575,11 +528,10 @@ export function SummaryPanel({
                           tier.replace("tier", ""),
                         ) as TierLevel
                         return (
-                          <Chip
+                          <TierChip
                             key={tier}
-                            size="small"
                             label={`${TIER_LABELS[tierNum]}: ${data.count}`}
-                            sx={getTierChipSx(theme, tierColors[tierNum])}
+                            color={tierColors[tierNum]}
                           />
                         )
                       },
@@ -599,12 +551,10 @@ export function SummaryPanel({
                         {outcomeSummary.criticalLocations
                           .slice(0, 8)
                           .map((loc) => (
-                            <Chip
+                            <LocationChip
                               key={loc.duId}
-                              size="small"
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
-                              sx={locationChipSx}
                             />
                           ))}
                         {outcomeSummary.criticalLocations.length > 8 && (
@@ -635,12 +585,11 @@ export function SummaryPanel({
                         {outcomeSummary.atRiskLocations
                           .slice(0, 5)
                           .map((loc) => (
-                            <Chip
+                            <LocationChip
                               key={loc.duId}
-                              size="small"
                               label={loc.primaryName}
                               onClick={() => handleLocationClick(loc)}
-                              sx={locationChipMutedSx}
+                              variant="muted"
                             />
                           ))}
                         {outcomeSummary.atRiskLocations.length > 5 && (

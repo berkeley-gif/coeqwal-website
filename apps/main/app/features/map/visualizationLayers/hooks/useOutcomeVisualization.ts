@@ -37,8 +37,8 @@ import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 export interface UseOutcomeVisualizationResult extends UseTierDataResult {
   /** Currently selected outcome name */
   outcome: string | null
-  /** Currently selected strategy */
-  strategy: string
+  /** Currently selected scenario ID */
+  scenarioId: string
   /** Layer configuration from registry */
   config: OutcomeLayerConfig | null
   /** Geometry type for this outcome */
@@ -70,9 +70,9 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   const mapMode = useMapMode()
   const activeVisualization = useActiveOutcomeVisualization()
 
-  // Extract outcome and strategy from store
+  // Extract outcome and scenarioId from store
   const outcome = activeVisualization?.outcome ?? null
-  const strategy = activeVisualization?.strategy ?? "current-ops"
+  const scenarioId = activeVisualization?.scenarioId ?? "s0020"
 
   // Get configuration from registry
   const config = useMemo(
@@ -94,7 +94,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
     (mapMode === "learn" || mapMode === "explore")
 
   // Fetch tier data
-  const tierDataResult = useTierData(isActive ? outcome : null, strategy)
+  const tierDataResult = useTierData(isActive ? outcome : null, scenarioId)
 
   // Camera control - zoom to outcome when active
   useEffect(() => {
@@ -105,22 +105,43 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
       const map = mapRef.getMap()
 
       const targetZoom = config.cameraPreset?.zoom ?? 6.5
-      const targetCenter = config.cameraPreset
-        ? { lng: config.cameraPreset.longitude, lat: config.cameraPreset.latitude }
-        : map.getCenter()
+      const targetLng = config.cameraPreset?.longitude ?? map.getCenter().lng
+      const targetLat = config.cameraPreset?.latitude ?? map.getCenter().lat
 
-      // In Explore mode, account for the left panel (50% of viewport)
+      // In Explore mode, shift center to account for left panel (50% of viewport)
       const isExplore = mapMode === "explore"
-      const leftPadding = isExplore ? window.innerWidth / 2 : 0
 
-      map.easeTo({
-        zoom: targetZoom,
-        center: targetCenter,
-        duration: 1000,
-        padding: isExplore
-          ? { left: leftPadding + 100, top: 100, right: 50, bottom: 50 }
-          : undefined,
-      })
+      if (isExplore) {
+        // In explore mode: use same camera presets as Learn mode, but zoomed out
+        // and with left padding to account for scenario panel
+        const exploreZoomOffset = -1 // Zoom out by 1 level for explore view
+        const defaultZoom = 5.5
+        const defaultCenter = { lng: -120.5, lat: 38.0 } // Central Valley fallback
+
+        // Use camera preset if available, otherwise use defaults
+        const zoom = config.cameraPreset
+          ? config.cameraPreset.zoom + exploreZoomOffset
+          : defaultZoom
+        const center = config.cameraPreset
+          ? { lng: config.cameraPreset.longitude, lat: config.cameraPreset.latitude }
+          : defaultCenter
+
+        // Use padding to account for left panel (same approach as MapInstance.tsx)
+        const leftPadding = window.innerWidth / 2
+        map.easeTo({
+          zoom,
+          center,
+          padding: { left: leftPadding, top: 100, right: 0, bottom: 20 },
+          duration: 1000,
+        })
+      } else {
+        // Learn mode - use preset zoom and center
+        map.easeTo({
+          zoom: targetZoom,
+          center: { lng: targetLng, lat: targetLat },
+          duration: 1000,
+        })
+      }
     })
   }, [
     isActive,
@@ -133,7 +154,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
   return {
     outcome,
-    strategy,
+    scenarioId,
     config,
     geometryType,
     layerType,

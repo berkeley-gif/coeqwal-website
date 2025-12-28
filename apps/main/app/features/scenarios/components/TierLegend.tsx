@@ -33,21 +33,21 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         backgroundColor: theme.background.whiteOverlay[95],
         borderRadius: theme.borderRadius.md,
         padding: theme.spacing(3),
-        backdropFilter: "blur(8px)",
         boxShadow: theme.shadow.md,
         zIndex: theme.zIndex.mapControls,
       }}
     >
       {/* Header with close button */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: theme.typography.fontWeightMedium }}>
+        <Typography variant="subtitle1">
           {outcome}
         </Typography>
         <Box
           component="button"
           onClick={onClose}
           sx={{
-            ...theme.typography.subtitle1,
+            fontSize: theme.typography.subtitle1.fontSize,
+            fontFamily: theme.typography.fontFamily,
             border: "none",
             background: "none",
             cursor: "pointer",

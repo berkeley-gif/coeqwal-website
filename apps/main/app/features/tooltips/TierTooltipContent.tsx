@@ -78,7 +78,6 @@ const formatTierText = (text: string, fontWeightMedium: number = 500) => {
 
 /**
  * Shared tooltip/legend content for tier information
- * Styled to match learn-map ScrollTooltip
  */
 export default function TierTooltipContent({
   outcome,
@@ -90,13 +89,7 @@ export default function TierTooltipContent({
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
-        <Typography
-          variant="dashboard"
-          sx={{
-            fontWeight: theme.typography.fontWeightSemiBold,
-            mb: 1,
-          }}
-        >
+        <Typography variant="tooltipHeader" sx={{ mb: 1 }}>
           {outcome}
         </Typography>
       )}
@@ -110,12 +103,7 @@ export default function TierTooltipContent({
       </Typography>
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Typography
-          variant="dashboard"
-          sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-        >
-          Outcome levels:
-        </Typography>
+        <Typography variant="tooltipHeader">Outcome levels:</Typography>
 
         {[1, 2, 3, 4].map((tierNum) => (
           <Box

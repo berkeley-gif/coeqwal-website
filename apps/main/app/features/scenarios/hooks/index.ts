@@ -5,7 +5,6 @@ export {
   useOutcomeDefinitions,
   useOutcomeTierData,
   OUTCOME_DISPLAY_ORDER,
-  type ChartDataPoint,
   type OutcomeScoreData,
 } from "./useTierData"
 
@@ -15,3 +14,8 @@ export {
   type ScenarioSummaryData,
   type UseScenarioSummaryReturn,
 } from "./useScenarioSummary"
+
+export {
+  useScenarioList,
+  type ScenarioListItem,
+} from "./useScenarioList"
