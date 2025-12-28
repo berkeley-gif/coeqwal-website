@@ -326,8 +326,8 @@ export function SummaryPanel({
           : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.md : 0,
         padding: isInline
-          ? theme.spacingTokens.panel.xs
-          : theme.spacingTokens.panel.sm,
+          ? theme.space.panel.xs
+          : theme.space.panel.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
         maxWidth: isInline
@@ -348,7 +348,7 @@ export function SummaryPanel({
           <Typography
             variant="subtitle2"
             sx={{
-              mb: theme.spacingTokens.component.xs,
+              mb: theme.space.component.xs,
               color: theme.palette.grey[900],
             }}
           >
@@ -360,7 +360,7 @@ export function SummaryPanel({
             variant="dashboard"
             sx={{
               color: theme.palette.grey[700],
-              mb: theme.spacingTokens.component.lg,
+              mb: theme.space.component.lg,
             }}
           >
             Overall, this scenario favors community and agricultural water
@@ -379,7 +379,7 @@ export function SummaryPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm, py: theme.spacingTokens.component.sm }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, py: theme.space.component.sm }}>
               <CircularProgress
                 size={14}
                 sx={{ color: theme.palette.blue.bright }}
@@ -413,7 +413,7 @@ export function SummaryPanel({
                 variant="outcomeHeader"
                 sx={{
                   color: theme.palette.blue.medium,
-                  mb: theme.spacingTokens.component.sm,
+                  mb: theme.space.component.sm,
                 }}
               >
                 {selectedOutcome}
@@ -424,7 +424,7 @@ export function SummaryPanel({
                 variant="dashboard"
                 sx={{
                   color: theme.palette.grey[700],
-                  mb: theme.spacingTokens.component.md,
+                  mb: theme.space.component.md,
                 }}
               >
                 {generateOutcomeInsight(selectedOutcome, outcomeSummary)}
@@ -436,7 +436,7 @@ export function SummaryPanel({
                   sx={{
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: theme.spacingTokens.gap.lg,
+                    gap: theme.space.gap.lg,
                     alignItems: "flex-start",
                   }}
                 >
@@ -521,7 +521,7 @@ export function SummaryPanel({
                 /* Overlay layout: vertical arrangement */
                 <>
                   {/* Tier breakdown chips */}
-                  <Box sx={{ ...flexWrapStyles, mb: theme.spacingTokens.component.md }}>
+                  <Box sx={{ ...flexWrapStyles, mb: theme.space.component.md }}>
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
                         const tierNum = parseInt(
@@ -540,10 +540,10 @@ export function SummaryPanel({
 
                   {/* Critical locations with zoom links */}
                   {outcomeSummary.criticalLocations.length > 0 && (
-                    <Box sx={{ mb: theme.spacingTokens.component.md }}>
+                    <Box sx={{ mb: theme.space.component.md }}>
                       <Typography
                         variant="smallSectionLabel"
-                        sx={{ color: tierColors[4], mb: theme.spacingTokens.component.xs }}
+                        sx={{ color: tierColors[4], mb: theme.space.component.xs }}
                       >
                         Critical locations:
                       </Typography>

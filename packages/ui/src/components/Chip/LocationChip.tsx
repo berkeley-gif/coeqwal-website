@@ -37,7 +37,7 @@ export function LocationChip({
       label={label}
       onClick={onClick}
       sx={{
-        ...theme.typography.compact.micro,
+        ...theme.typography.compactMicro,
         cursor: onClick ? "pointer" : "default",
         backgroundColor: "transparent",
         color: textColor,

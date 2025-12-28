@@ -157,7 +157,7 @@ function MapViewContent() {
           alignItems: "center",
           justifyContent: "center",
           height: "100%",
-          p: theme.spacing(theme.spacingTokens.component.xl),
+          p: theme.space.component.xl,
           textAlign: "center",
         }}
       >
@@ -165,7 +165,7 @@ function MapViewContent() {
           variant="h6"
           sx={{
             color: theme.palette.grey[600],
-            mb: theme.spacingTokens.component.lg,
+            mb: theme.space.component.lg,
           }}
         >
           No scenarios selected
@@ -174,7 +174,7 @@ function MapViewContent() {
           variant="body2"
           sx={{
             color: theme.palette.grey[500],
-            mb: theme.spacingTokens.section.sm,
+            mb: theme.space.section.sm,
             maxWidth: theme.layout.maxWidth.md,
           }}
         >
@@ -203,7 +203,7 @@ function MapViewContent() {
       sx={{
         display: "flex",
         height: "100%",
-        gap: theme.spacingTokens.gap.lg,
+        gap: theme.space.gap.lg,
       }}
     >
       {/* Left sidebar */}
@@ -212,9 +212,9 @@ function MapViewContent() {
           width: "360px",
           display: "flex",
           flexDirection: "column",
-          gap: theme.spacingTokens.gap.lg,
+          gap: theme.space.gap.lg,
           overflowY: "auto",
-          pr: theme.spacingTokens.component.lg,
+          pr: theme.space.component.lg,
         }}
       >
         {/* Metric selector */}
@@ -245,7 +245,7 @@ function MapViewContent() {
                   <MenuItem
                     key={m.id}
                     value={m.id}
-                    sx={{ pl: theme.spacingTokens.section.md }}
+                    sx={{ pl: theme.space.section.md }}
                   >
                     {m.name}
                   </MenuItem>
@@ -278,7 +278,7 @@ function MapViewContent() {
         {metric && (
           <Box
             sx={{
-              p: theme.spacingTokens.component.lg,
+              p: theme.space.component.lg,
               backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
               border: category
@@ -292,7 +292,7 @@ function MapViewContent() {
                 label={category.name}
                 size="small"
                 sx={{
-                  mb: theme.spacingTokens.component.sm,
+                  mb: theme.space.component.sm,
                   backgroundColor: getOutcomeCategoryColor(theme, category.id),
                   color: theme.palette.common.white,
                   fontWeight: theme.typography.fontWeightMedium,
@@ -304,7 +304,7 @@ function MapViewContent() {
             <Typography
               variant="h6"
               sx={{
-                mb: theme.spacingTokens.component.sm,
+                mb: theme.space.component.sm,
               }}
             >
               {metric.name}
@@ -315,7 +315,7 @@ function MapViewContent() {
               variant="body2"
               sx={{
                 color: theme.palette.grey[600],
-                mb: theme.spacingTokens.component.md,
+                mb: theme.space.component.md,
               }}
             >
               {metric.description}
@@ -326,7 +326,7 @@ function MapViewContent() {
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: theme.spacingTokens.gap.xs,
+                gap: theme.space.gap.xs,
               }}
             >
               <Typography
@@ -350,8 +350,8 @@ function MapViewContent() {
             {metric.notes && (
               <Box
                 sx={{
-                  mt: theme.spacingTokens.component.md,
-                  p: theme.spacingTokens.component.sm,
+                  mt: theme.space.component.md,
+                  p: theme.space.component.sm,
                   backgroundColor: theme.palette.accent.gold,
                   borderRadius: theme.borderRadius.md,
                 }}
@@ -381,7 +381,7 @@ function MapViewContent() {
         {/* Outcome legend */}
         {metric && metric.isTier && (
           <Box>
-            <Typography variant="subtitle2" sx={{ mb: theme.spacingTokens.component.md }}>
+            <Typography variant="subtitle2" sx={{ mb: theme.space.component.md }}>
               Outcome legend
             </Typography>
             <TierLegend outcome={metric.name} onClose={() => {}} />
@@ -446,10 +446,10 @@ function MapViewContent() {
           <Box
             sx={{
               position: "absolute",
-              top: theme.spacingTokens.component.lg,
-              left: theme.spacingTokens.component.lg,
-              right: theme.spacingTokens.component.lg,
-              p: theme.spacingTokens.component.lg,
+              top: theme.space.component.lg,
+              left: theme.space.component.lg,
+              right: theme.space.component.lg,
+              p: theme.space.component.lg,
               backgroundColor: "rgba(255, 255, 255, 0.95)",
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.sm,
@@ -460,7 +460,7 @@ function MapViewContent() {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: theme.spacingTokens.gap.lg,
+                  gap: theme.space.gap.lg,
                 }}
               >
                 <CircularProgress size={20} />
@@ -500,9 +500,9 @@ function MapViewContent() {
           <Box
             sx={{
               position: "absolute",
-              bottom: theme.spacingTokens.component.lg,
-              right: theme.spacingTokens.component.lg,
-              p: theme.spacingTokens.component.md,
+              bottom: theme.space.component.lg,
+              right: theme.space.component.lg,
+              p: theme.space.component.md,
               backgroundColor: theme.background.whiteOverlay[95],
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.subtle,

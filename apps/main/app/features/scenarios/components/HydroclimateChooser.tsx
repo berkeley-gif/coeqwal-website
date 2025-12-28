@@ -95,7 +95,7 @@ export function HydroclimateChooser({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: theme.spacingTokens.gap.md,
+        gap: theme.space.gap.md,
       }}
     >
       {showTitle && (
@@ -144,7 +144,7 @@ export function HydroclimateChooser({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: theme.spacingTokens.gap.xs,
+                    gap: theme.space.gap.xs,
                     cursor: isDisabled ? "not-allowed" : "pointer",
                     opacity: isDisabled ? 0.4 : 1,
                     transition: theme.transition.default,

@@ -207,7 +207,7 @@ export default function ScrollTooltip({
           border: theme.border.light,
           borderRadius: theme.borderRadius.md,
           boxShadow: theme.shadow.md,
-          padding: theme.spacing(theme.spacingTokens.component.lg),
+          p: theme.space.component.lg,
           maxWidth: theme.layout.maxWidth.sm,
         }}
       >

@@ -6,34 +6,34 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 1. Font Config     - Font presets and selection
- * 2. Design Tokens   - Standalone token definitions:
- *                    - typeScale, palette, borderRadius, shadow
- *                    - transition, zIndex, border, background
- * 3. themeValues     - Assembled design tokens + UI config:
- *                    - fontFamily, layout
- *                    - cards (typography, spacing)
- *                    - scenarios (grid, icon, outcome styles)
- * 4. createTheme()   - MUI theme configuration
- * 5. Post-creation   - Attach design tokens to theme object
- * 6. TypeScript      - Module augmentation (hybrid: typeof for tokens, explicit for complex)
+ * 1. Font Config      - Font presets and selection
+ * 2. Design Tokens    - Standalone token definitions
+ *                       typeScale, palette, borderRadius, shadow,
+ *                       transition, zIndex, border, background
+ * 3. themeValues      - Assembled tokens + UI config
+ *                       fontFamily, layout, spacing, scenarios
+ * 4. createTheme()    - MUI theme configuration
+ *                       palette, typography, components
+ * 5. Post-creation    - Attach tokens to theme object
+ * 6. TypeScript       - Module augmentation for custom types
+ *
+
  *
  */
 
-/* ===============================================================================
- * FONT CONFIGURATION
- * ===============================================================================
+/* ========================================================
+ * 1. Font Configuration
+ * ========================================================
  *
- * To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
- * Each preset defines: text (body), display (headlines), and cssImport (font loading).
- * Of course you can make more presets.
+ * To switch fonts, change ACTIVE_FONT_PRESET below.
+ * Each preset defines: text (body), display (headlines), cssImport (font loading).
  *
- * Available presets: "neueHaas" | "realPro" | "roboto" | "inter" | "system"
+ * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "system"
  */
 
 type FontPresetKey = "neueHaas" | "realPro" | "roboto" | "inter" | "system"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -56,12 +56,17 @@ const FONT_PRESETS = {
     display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
+  system: {
+    text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    display: '-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '', // No import needed for system fonts
+  },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
 /* ========================================================
- * 1. Design Tokens
+ * 2. Design Tokens
  * ======================================================== */
 
 // Type scale - headline and compact sizes
@@ -114,8 +119,11 @@ const palette = {
     forest: "#7b9d3f", // Forest green
   },
 
-  // Note: Use palette.common.white and palette.common.black instead of utility colors
-  // utility colors removed - consolidated to MUI common colors
+  // Common colors (mirrored in MUI palette.common for consistency)
+  common: {
+    white: "#FFFFFF",
+    black: "#000000",
+  },
 
   // MUI greys
   grey: {
@@ -185,6 +193,8 @@ const borderRadius = {
   xs: "2px", // Very small (checkboxes, tiny indicators)
   sm: "4px", // Small (input fields, tags)
   md: "8px", // Standard (cards, panels, tooltips)
+  lg: "12px", // Larger cards, modals, overlay panels
+  xl: "16px", // Feature cards, hero elements
   pill: "999px", // Full pill/capsule shape
   circle: "50%", // Perfect circles
 }
@@ -262,7 +272,7 @@ const background = {
 }
 
 /* ========================================================
- * 2. themeValues - Assembled design tokens
+ * 3. themeValues - Assembled design tokens + UI config
  * ======================================================== */
 
 // themeValues - runtime values for custom theme properties
@@ -273,16 +283,21 @@ export const themeValues = {
     display: activeFont.display,
   },
 
-  // Layout dimensions, for layout and layout calculations
-  // TODO: update, not sure about current usage
+  /**
+   * Layout dimensions for consistent sizing across the app
+   *
+   * - headerHeight: Used by panels, page layouts, drawer positioning
+   * - drawer: Sidebar/drawer dimensions for glossary and navigation
+   * - maxWidth: Content width constraints (heavily used across tooltips, panels, forms)
+   * - controls: Form element sizes (used in MUI checkbox/radio overrides)
+   */
   layout: {
-    headerHeight: 70,
+    headerHeight: 70, // px - fixed header height
     drawer: {
-      width: 360,
-      closedWidth: 60,
-      glossaryWidth: 360,
+      width: 360, // px - open drawer width
+      closedWidth: 60, // px - collapsed drawer width
+      glossaryWidth: 360, // px - glossary panel width
     },
-    // Standardized maxWidth tokens
     maxWidth: {
       xs: "70px", // Data viz labels (outcome display names)
       sm: "300px", // Tooltips, strategy labels
@@ -290,9 +305,8 @@ export const themeValues = {
       lg: "600px", // Text containers, glossary panels
       xl: "1200px", // Full-width content areas
     },
-    // Control dimensions for form elements (used in MUI component overrides)
     controls: {
-      standard: 20, // Standard form control size (20px × 20px)
+      standard: 20, // px - checkbox/radio size (20px × 20px)
     },
   },
 
@@ -367,12 +381,12 @@ export const themeValues = {
           backgroundColor: palette.grey[50],
         },
         highlighted: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: palette.common.white,
         },
       },
       states: {
         hover: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: palette.common.white,
         },
         selected: {
           borderColor: palette.blue.bright,
@@ -413,7 +427,7 @@ export const themeValues = {
       },
     },
 
-    // Grid layout configuration
+    // Grid layout configuration for strategy lists
     grid: {
       columns: {
         xs: "32px minmax(0, 1fr) auto",
@@ -428,7 +442,7 @@ export const themeValues = {
 }
 
 /* ========================================================
- * 3. createTheme() - MUI theme configuration
+ * 4. createTheme() - MUI theme configuration
  * ======================================================== */
 
 const baseTheme = createTheme()
@@ -462,19 +476,8 @@ const createDrawerMixins = (
 // Create theme
 const theme = createTheme({
   ...baseTheme,
-  // Custom layout values and responsive spacing system
-  layout: {
-    ...themeValues.layout,
-    // Responsive layout spacing for major components and sections
-    spacing: {
-      xs: { xs: 1, sm: 1.5, md: 2 }, // 8px / 12px / 16px
-      sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
-      md: { xs: 2, sm: 2.5, md: 3 }, // 16px / 20px / 24px
-      lg: { xs: 2.5, sm: 3, md: 4 }, // 20px / 24px / 32px
-      xl: { xs: 3, sm: 4, md: 5 }, // 24px / 32px / 40px
-      xxl: { xs: 4, sm: 5, md: 6 }, // 32px / 40px / 48px
-    },
-  },
+  // Custom layout values
+  layout: themeValues.layout,
   // Spacing and breakpoints use MUI's native APIs (theme.spacing(), theme.breakpoints)
   breakpoints: {
     values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
@@ -485,11 +488,8 @@ const theme = createTheme({
     // Spread custom palette groups directly
     ...themeValues.palette,
 
-    // MUI standard palette mappings
-    common: {
-      black: "#000000",
-      white: "#FFFFFF",
-    },
+    // MUI standard palette mappings (references palette.common for single source of truth)
+    common: themeValues.palette.common,
     primary: {
       main: themeValues.palette.blue.darkest,
       light: themeValues.palette.blue.light,
@@ -601,8 +601,6 @@ const theme = createTheme({
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
-      textBoxTrim: "trim-start",
-      textBoxEdge: "cap",
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.text,
@@ -610,8 +608,6 @@ const theme = createTheme({
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.6,
-      textBoxTrim: "trim-start",
-      textBoxEdge: "cap",
     },
     button: {
       fontFamily: themeValues.fontFamily.text,
@@ -655,7 +651,7 @@ const theme = createTheme({
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
       fontWeight: 500,
       lineHeight: 1.3,
-      color: "#757575", // grey[600]
+      color: palette.grey[600],
     },
     outcomeLabel: {
       fontFamily: themeValues.fontFamily.text,
@@ -672,56 +668,34 @@ const theme = createTheme({
       letterSpacing: "0.5px",
       textTransform: "uppercase" as const,
     },
-    // Compact typography variants for dialogs, tooltips, form labels
-    // Nested structure for spread syntax: ...theme.typography.compact.micro
-    compact: {
-      title: {
-        fontFamily: themeValues.fontFamily.text,
-        fontSize: typeScale.compact.title, // 0.9rem
-        fontWeight: 500,
-        lineHeight: 1.4,
-      },
-      subtitle: {
-        fontFamily: themeValues.fontFamily.text,
-        fontSize: typeScale.compact.subtitle, // 0.8rem
-        fontWeight: 400,
-        lineHeight: 1.4,
-      },
-      caption: {
-        fontFamily: themeValues.fontFamily.text,
-        fontSize: typeScale.compact.caption, // 0.75rem
-        fontWeight: 400,
-        lineHeight: 1.3,
-      },
-      micro: {
-        fontFamily: themeValues.fontFamily.text,
-        fontSize: typeScale.compact.micro, // 0.7rem
-        fontWeight: 400,
-        lineHeight: 1.3,
-      },
-    },
-    // Flat variants for Typography component: variant="compactMicro"
+    /**
+     * Compact typography variants for dialogs, tooltips, form labels
+     *
+     * Use these for both Typography components and spread syntax:
+     * - <Typography variant="compactSubtitle">
+     * - sx={{ ...theme.typography.compactSubtitle }}
+     */
     compactTitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: typeScale.compact.title, // 0.9rem
+      fontSize: typeScale.compact.title, // 0.9rem (14.4px)
       fontWeight: 500,
       lineHeight: 1.4,
     },
     compactSubtitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: typeScale.compact.subtitle, // 0.8rem
+      fontSize: typeScale.compact.subtitle, // 0.8rem (12.8px)
       fontWeight: 400,
       lineHeight: 1.4,
     },
     compactCaption: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: typeScale.compact.caption, // 0.75rem
+      fontSize: typeScale.compact.caption, // 0.75rem (12px)
       fontWeight: 400,
       lineHeight: 1.3,
     },
     compactMicro: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: typeScale.compact.micro, // 0.7rem
+      fontSize: typeScale.compact.micro, // 0.7rem (11.2px)
       fontWeight: 400,
       lineHeight: 1.3,
     },
@@ -896,7 +870,7 @@ const theme = createTheme({
             fontSize: "0.95rem",
             fontWeight: 400,
             textAlign: "center",
-            transition: "all 0.3s ease", // themeValues.transition.default
+            transition: themeValues.transition.default,
             // Default active state - using grey colors
             backgroundColor: theme.palette.grey[200],
             color: theme.palette.text.disabled,
@@ -1167,7 +1141,7 @@ const theme = createTheme({
           padding: "0",
           alignSelf: "flex-start",
           transform: "translateY(-3px)",
-          transition: "all 0.3s ease", // themeValues.transition.default
+          transition: themeValues.transition.default,
           position: "relative",
           display: "inline-block",
           borderRadius: theme.borderRadius.xs,
@@ -1225,7 +1199,7 @@ const theme = createTheme({
           padding: "0",
           alignSelf: "flex-start",
           transform: "translateY(-3px)",
-          transition: "all 0.3s ease", // themeValues.transition.default
+          transition: themeValues.transition.default,
           position: "relative",
           display: "inline-block",
           borderRadius: theme.borderRadius.circle,
@@ -1365,7 +1339,7 @@ const theme = createTheme({
 })
 
 /* ========================================================
- * 4. Post-creation - Attach design tokens to theme object
+ * 5. Post-creation - Attach design tokens to theme object
  * ======================================================== */
 
 // Attach all design tokens from themeValues
@@ -1375,12 +1349,12 @@ theme.borderRadius = themeValues.borderRadius
 theme.shadow = themeValues.shadow
 theme.transition = themeValues.transition
 theme.scenarios = themeValues.scenarios
-theme.spacingTokens = themeValues.spacing
+theme.space = themeValues.spacing
 
 export default theme
 
 /* ========================================================
- * 5. TypeScript
+ * 6. TypeScript - Module augmentation
  * ======================================================== */
 
 /**
@@ -1441,16 +1415,7 @@ declare module "@mui/material/styles" {
 
   // Theme interface - types derived from themeValues
   interface Theme {
-    layout: typeof themeValues.layout & {
-      spacing: {
-        xs: { xs: number; sm: number; md: number }
-        sm: { xs: number; sm: number; md: number }
-        md: { xs: number; sm: number; md: number }
-        lg: { xs: number; sm: number; md: number }
-        xl: { xs: number; sm: number; md: number }
-        xxl: { xs: number; sm: number; md: number }
-      }
-    }
+    layout: typeof themeValues.layout
     border: typeof themeValues.border
     background: typeof themeValues.background
     borderRadius: typeof themeValues.borderRadius
@@ -1459,24 +1424,15 @@ declare module "@mui/material/styles" {
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
     // Semantic spacing tokens
-    spacingTokens: typeof themeValues.spacing
+    space: typeof themeValues.spacing
   }
 
   // ThemeOptions interface - optional versions for createTheme()
   interface ThemeOptions {
-    layout?: Partial<typeof themeValues.layout> & {
-      spacing?: {
-        xs?: { xs: number; sm: number; md: number }
-        sm?: { xs: number; sm: number; md: number }
-        md?: { xs: number; sm: number; md: number }
-        lg?: { xs: number; sm: number; md: number }
-        xl?: { xs: number; sm: number; md: number }
-        xxl?: { xs: number; sm: number; md: number }
-      }
-    }
+    layout?: Partial<typeof themeValues.layout>
     shadow?: Partial<typeof themeValues.shadow>
     transition?: Partial<typeof themeValues.transition>
-    spacingTokens?: Partial<typeof themeValues.spacing>
+    space?: Partial<typeof themeValues.spacing>
   }
 
   // Add fontWeightSemiBold to typography
@@ -1495,12 +1451,6 @@ declare module "@mui/material/styles" {
     smallSectionLabel: React.CSSProperties
     outcomeLabel: React.CSSProperties
     outcomeHeader: React.CSSProperties
-    compact: {
-      title: React.CSSProperties
-      subtitle: React.CSSProperties
-      caption: React.CSSProperties
-      micro: React.CSSProperties
-    }
     compactTitle: React.CSSProperties
     compactSubtitle: React.CSSProperties
     compactCaption: React.CSSProperties
@@ -1516,12 +1466,6 @@ declare module "@mui/material/styles" {
     smallSectionLabel?: React.CSSProperties
     outcomeLabel?: React.CSSProperties
     outcomeHeader?: React.CSSProperties
-    compact?: {
-      title?: React.CSSProperties
-      subtitle?: React.CSSProperties
-      caption?: React.CSSProperties
-      micro?: React.CSSProperties
-    }
     compactTitle?: React.CSSProperties
     compactSubtitle?: React.CSSProperties
     compactCaption?: React.CSSProperties

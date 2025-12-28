@@ -89,12 +89,12 @@ export default function TierTooltipContent({
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
-        <Typography variant="tooltipHeader" sx={{ mb: theme.spacingTokens.component.sm }}>
+        <Typography variant="tooltipHeader" sx={{ mb: theme.space.component.sm }}>
           {outcome}
         </Typography>
       )}
 
-      <Typography variant="dashboard" sx={{ mb: theme.spacingTokens.component.md }}>
+      <Typography variant="dashboard" sx={{ mb: theme.space.component.md }}>
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
@@ -102,13 +102,13 @@ export default function TierTooltipContent({
         )}
       </Typography>
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: theme.spacingTokens.gap.sm }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: theme.space.gap.sm }}>
         <Typography variant="tooltipHeader">Outcome levels:</Typography>
 
         {[1, 2, 3, 4].map((tierNum) => (
           <Box
             key={tierNum}
-            sx={{ display: "flex", alignItems: "flex-start", gap: theme.spacingTokens.gap.sm }}
+            sx={{ display: "flex", alignItems: "flex-start", gap: theme.space.gap.sm }}
           >
             <Box
               sx={{

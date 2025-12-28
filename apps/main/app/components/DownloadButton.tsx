@@ -44,7 +44,7 @@ export default function DownloadButton({
       disabled={disabled}
       startIcon={<Download />}
       sx={{
-        mt: 2, // theme.spacingTokens.component.lg (16px)
+        mt: 2, // theme.space.component.lg (16px)
         textTransform: "none",
         textDecoration: "none",
         "&:hover": {

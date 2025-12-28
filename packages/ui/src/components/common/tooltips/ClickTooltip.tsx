@@ -146,8 +146,8 @@ function TooltipVariant({
             boxShadow: theme.shadow.md,
             width,
             maxWidth,
-            padding: theme.spacing(theme.spacingTokens.component.xl),
-            ...theme.typography.compact.subtitle,
+            p: theme.space.component.xl,
+            ...theme.typography.compactSubtitle,
           }),
         },
         arrow: {
@@ -206,8 +206,8 @@ function OverlayVariant({
         borderRadius: theme.borderRadius.md,
         width,
         maxWidth,
-        padding: theme.spacing(theme.spacingTokens.component.xl),
-        ...theme.typography.compact.subtitle,
+        p: theme.space.component.xl,
+        ...theme.typography.compactSubtitle,
       }}
       >
       {!hideCloseButton && <TooltipCloseButton onClick={onClose} offset={{ top: -8, right: -8 }} />}

@@ -111,7 +111,7 @@ export function PointMarkerLabels({ data }: PointMarkerLabelsProps) {
             {/* Label */}
             <div
               style={{
-                ...theme.typography.compact.micro,
+                ...theme.typography.compactMicro,
                 backgroundColor: getTierColor(point.tier),
                 color: theme.palette.common.white,
                 padding: "4px 8px",

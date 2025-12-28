@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from "react"
-import { Box, Tabs, Tab, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
+import { InfoOverlay } from "@repo/ui"
 import UnifiedExploreView, { type ExploreMode } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
@@ -59,7 +60,7 @@ export default function ScenarioExplorerNew() {
             sx={{
               backgroundColor: theme.palette.background.paper,
               borderBottom: theme.border.medium,
-              px: theme.spacingTokens.component.xl,
+              px: theme.space.component.xl,
             }}
           >
             <Tabs
@@ -80,9 +81,9 @@ export default function ScenarioExplorerNew() {
                   transition: theme.transition.default,
                   borderTopLeftRadius: theme.shape.borderRadius,
                   borderTopRightRadius: theme.shape.borderRadius,
-                  mt: theme.spacingTokens.component.sm,
-                  mr: theme.spacingTokens.component.xs,
-                  px: theme.spacingTokens.component.xl,
+                  mt: theme.space.component.sm,
+                  mr: theme.space.component.xs,
+                  px: theme.space.component.xl,
                   "&.Mui-selected": {
                     color: theme.palette.blue.bright,
                     fontWeight: theme.typography.fontWeightBold,
@@ -133,26 +134,9 @@ export default function ScenarioExplorerNew() {
                   }}
                 >
                   {exploreMode === "map" && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: theme.spacingTokens.component.lg,
-                        left: theme.spacingTokens.component.xl,
-                        backgroundColor: theme.background.whiteOverlay[95],
-                        borderRadius: theme.borderRadius.md,
-                        padding: theme.spacingTokens.component.md,
-                        maxWidth: "40%",
-                        zIndex: theme.zIndex.mapControls,
-                        pointerEvents: "auto",
-                      }}
-                    >
-                      <Typography
-                        variant="compactSubtitle"
-                        sx={{ color: theme.palette.text.primary }}
-                      >
-                        Click on a scenario outcome in the left panel to see outcomes at specific locations.
-                      </Typography>
-                    </Box>
+                    <InfoOverlay right={theme.space.component.lg}>
+                      Click on a scenario outcome in the left panel to see outcomes at specific locations.
+                    </InfoOverlay>
                   )}
                   {exploreMode === "comparison" && (
                     <ComparisonHeader

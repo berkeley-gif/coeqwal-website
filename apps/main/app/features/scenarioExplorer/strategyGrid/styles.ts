@@ -14,14 +14,14 @@ export const gridStyles = {
     gap: compact
       ? theme.scenarios.grid.gap.compact
       : theme.scenarios.grid.gap.default,
-    columnGap: theme.spacingTokens.gap.lg,
+    columnGap: theme.space.gap.lg,
     alignItems: "start",
     width: "100%",
     ...(showMapView && {
       maxHeight: "40vh",
       overflowY: "auto",
       overflowX: "hidden",
-      pt: theme.spacingTokens.component.sm,
+      pt: theme.space.component.sm,
     }),
   }),
 } as const

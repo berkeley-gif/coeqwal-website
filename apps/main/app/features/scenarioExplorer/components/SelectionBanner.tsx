@@ -27,8 +27,8 @@ export default function SelectionBanner() {
       sx={{
         backgroundColor: theme.palette.background.paper,
         borderBottom: theme.border.light,
-        px: theme.spacingTokens.page.x,
-        py: theme.spacingTokens.component.md,
+        px: theme.space.page.x,
+        py: theme.space.component.md,
       }}
     >
       <Box
@@ -36,7 +36,7 @@ export default function SelectionBanner() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: theme.spacingTokens.gap.lg,
+          gap: theme.space.gap.lg,
         }}
       >
         {/* Left: eyebrow + pills */}
@@ -44,7 +44,7 @@ export default function SelectionBanner() {
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: theme.spacingTokens.gap.lg,
+            gap: theme.space.gap.lg,
             flexWrap: "wrap",
             flex: 1,
           }}
@@ -57,7 +57,7 @@ export default function SelectionBanner() {
           </Typography>
 
           {/* Scenario chips with close buttons */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.sm }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.sm }}>
             {selectedScenarios.map((scenarioId) => (
               <Chip
                 key={scenarioId}
@@ -89,7 +89,7 @@ export default function SelectionBanner() {
           sx={{
             color: theme.palette.grey[500],
             minWidth: "auto",
-            px: theme.spacingTokens.component.sm,
+            px: theme.space.component.sm,
             "&:hover": {
               color: theme.palette.grey[700],
               backgroundColor: theme.palette.grey[100],

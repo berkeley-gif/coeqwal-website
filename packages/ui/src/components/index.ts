@@ -34,6 +34,8 @@ export { SortButton } from "./common/SortButton"
 export type { SortButtonProps } from "./common/SortButton"
 export { StyledTextInput } from "./common/StyledTextInput"
 export type { StyledTextInputProps } from "./common/StyledTextInput"
+export { InfoOverlay } from "./common/InfoOverlay"
+export type { InfoOverlayProps } from "./common/InfoOverlay"
 
 // Panel components
 export { OneColumnPanel } from "./panels/OneColumnPanel"

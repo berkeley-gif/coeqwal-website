@@ -136,18 +136,18 @@ export default function UnifiedExploreView({
                   }}
                 >
                   <CircularProgress size={32} />
-                  <Typography variant="body2" sx={{ mt: theme.spacingTokens.component.lg, color: theme.palette.grey[600] }}>
+                  <Typography variant="body2" sx={{ mt: theme.space.component.lg, color: theme.palette.grey[600] }}>
                     Loading comparison...
                   </Typography>
                 </Box>
               ) : hasComparisonData ? (
                 <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-                  <Box sx={{ flex: 1, p: theme.spacingTokens.component.lg, overflow: "hidden" }}>
+                  <Box sx={{ flex: 1, p: theme.space.component.lg, overflow: "hidden" }}>
                     <Box
                       sx={{
                         backgroundColor: theme.palette.background.paper,
                         borderRadius: theme.borderRadius.md,
-                        p: theme.spacingTokens.component.lg,
+                        p: theme.space.component.lg,
                         boxShadow: theme.shadow.subtle,
                         height: "100%",
                       }}

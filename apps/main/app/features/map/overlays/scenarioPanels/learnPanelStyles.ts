@@ -13,7 +13,7 @@ import type { Theme, SxProps } from "@repo/ui/mui"
 export const getLearnPanelBaseStyles = (theme: Theme): SxProps<Theme> => ({
   backgroundColor: theme.background.whiteOverlay[95],
   borderRadius: theme.borderRadius.none,
-  padding: theme.spacingTokens.panel.xs,
+  padding: theme.space.panel.xs,
   pointerEvents: "auto",
 })
 

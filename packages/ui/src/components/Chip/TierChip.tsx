@@ -26,7 +26,7 @@ export function TierChip({ label, color, compact = false }: TierChipProps) {
       size="small"
       label={label}
       sx={{
-        ...theme.typography.compact.micro,
+        ...theme.typography.compactMicro,
         backgroundColor: `${color}15`,
         color: color,
         borderColor: `${color}40`,
