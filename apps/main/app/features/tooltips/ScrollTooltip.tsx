@@ -202,7 +202,7 @@ export default function ScrollTooltip({
         sx={{
           position: "relative",
           // Match MUI Tooltip theme styling
-          backgroundColor: theme.palette.common.white,
+          backgroundColor: theme.palette.background.paper,
           color: theme.palette.text.primary,
           border: theme.border.light,
           borderRadius: theme.borderRadius.md,

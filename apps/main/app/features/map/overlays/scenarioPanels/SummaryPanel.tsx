@@ -348,7 +348,7 @@ export function SummaryPanel({
           <Typography
             variant="subtitle2"
             sx={{
-              mb: 0.5,
+              mb: theme.spacingTokens.component.xs,
               color: theme.palette.grey[900],
             }}
           >
@@ -360,7 +360,7 @@ export function SummaryPanel({
             variant="dashboard"
             sx={{
               color: theme.palette.grey[700],
-              mb: 2,
+              mb: theme.spacingTokens.component.lg,
             }}
           >
             Overall, this scenario favors community and agricultural water
@@ -379,7 +379,7 @@ export function SummaryPanel({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm, py: theme.spacingTokens.component.sm }}>
               <CircularProgress
                 size={14}
                 sx={{ color: theme.palette.blue.bright }}
@@ -413,7 +413,7 @@ export function SummaryPanel({
                 variant="outcomeHeader"
                 sx={{
                   color: theme.palette.blue.medium,
-                  mb: 1,
+                  mb: theme.spacingTokens.component.sm,
                 }}
               >
                 {selectedOutcome}
@@ -424,7 +424,7 @@ export function SummaryPanel({
                 variant="dashboard"
                 sx={{
                   color: theme.palette.grey[700],
-                  mb: 1.5,
+                  mb: theme.spacingTokens.component.md,
                 }}
               >
                 {generateOutcomeInsight(selectedOutcome, outcomeSummary)}
@@ -436,7 +436,7 @@ export function SummaryPanel({
                   sx={{
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: 2,
+                    gap: theme.spacingTokens.gap.lg,
                     alignItems: "flex-start",
                   }}
                 >
@@ -521,7 +521,7 @@ export function SummaryPanel({
                 /* Overlay layout: vertical arrangement */
                 <>
                   {/* Tier breakdown chips */}
-                  <Box sx={{ ...flexWrapStyles, mb: 1.5 }}>
+                  <Box sx={{ ...flexWrapStyles, mb: theme.spacingTokens.component.md }}>
                     {Object.entries(outcomeSummary.tierBreakdown).map(
                       ([tier, data]) => {
                         const tierNum = parseInt(
@@ -540,10 +540,10 @@ export function SummaryPanel({
 
                   {/* Critical locations with zoom links */}
                   {outcomeSummary.criticalLocations.length > 0 && (
-                    <Box sx={{ mb: 1.5 }}>
+                    <Box sx={{ mb: theme.spacingTokens.component.md }}>
                       <Typography
                         variant="smallSectionLabel"
-                        sx={{ color: tierColors[4], mb: 0.5 }}
+                        sx={{ color: tierColors[4], mb: theme.spacingTokens.component.xs }}
                       >
                         Critical locations:
                       </Typography>

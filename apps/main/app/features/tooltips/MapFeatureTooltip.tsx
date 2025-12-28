@@ -21,7 +21,7 @@ function TierBadge({ level, label }: { level: number; label: string }) {
   const theme = useTheme()
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm }}>
       <Box
         sx={{
           width: 10,
@@ -85,7 +85,7 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
         sx={{
           color: theme.palette.grey[500],
           display: "block",
-          mb: 1,
+          mb: theme.spacingTokens.component.sm,
         }}
       >
         WBA ID: {feature.featureId}
@@ -174,7 +174,7 @@ function DemandUnitsTooltipContent({
         sx={{
           color: theme.palette.grey[500],
           display: "block",
-          mb: 1,
+          mb: theme.spacingTokens.component.sm,
         }}
       >
         CalSim ID: {feature.featureId}
@@ -210,7 +210,7 @@ function PointMarkerTooltipContent({
           sx={{
             color: theme.palette.grey[600],
             display: "block",
-            mb: 1,
+            mb: theme.spacingTokens.component.sm,
           }}
         >
           {feature.locationType}

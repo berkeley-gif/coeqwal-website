@@ -25,20 +25,20 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
     <Box
       sx={{
         position: "absolute",
-        bottom: theme.spacing(3),
-        right: theme.spacing(3),
+        bottom: theme.spacingTokens.component.xl,
+        right: theme.spacingTokens.component.xl,
         width: "450px",
         maxHeight: "60vh",
         overflowY: "auto",
         backgroundColor: theme.background.whiteOverlay[95],
         borderRadius: theme.borderRadius.md,
-        padding: theme.spacing(3),
+        padding: theme.spacingTokens.component.xl,
         boxShadow: theme.shadow.md,
         zIndex: theme.zIndex.mapControls,
       }}
     >
       {/* Header with close button */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: theme.spacingTokens.component.lg }}>
         <Typography variant="subtitle1">
           {outcome}
         </Typography>

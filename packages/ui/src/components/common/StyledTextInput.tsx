@@ -132,7 +132,7 @@ export const StyledTextInput = forwardRef<
             transform: "translateY(-50%)",
             display: "flex",
             alignItems: "center",
-            gap: 0.5,
+            gap: theme.spacingTokens.gap.xs,
           }}
         >
           {loading && (

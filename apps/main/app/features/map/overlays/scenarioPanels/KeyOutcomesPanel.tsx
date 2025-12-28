@@ -153,37 +153,37 @@ export function KeyOutcomesPanel({
         onClick={onTitleClick}
         sx={{
           ...getScenarioPanelTitleStyles(theme),
-          mb: 1,
+          mb: theme.spacingTokens.component.sm,
         }}
       >
         Key outcomes
       </Typography>
 
       {/* Multiple location outcomes - first 5 */}
-      <Typography variant="smallSectionLabel" sx={{ mb: 1 }}>
+      <Typography variant="smallSectionLabel" sx={{ mb: theme.spacingTokens.component.sm }}>
         Multiple location outcomes
       </Typography>
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(5, 1fr)" },
-          gap: 1,
+          gap: theme.spacingTokens.gap.sm,
           alignItems: "start",
-          mb: 1.5,
+          mb: theme.spacingTokens.component.md,
         }}
       >
         {multipleLocationOutcomes.map(renderOutcomeItem)}
       </Box>
 
       {/* Single location outcomes - last 4 */}
-      <Typography variant="smallSectionLabel" sx={{ mb: 1 }}>
+      <Typography variant="smallSectionLabel" sx={{ mb: theme.spacingTokens.component.sm }}>
         Single location outcomes
       </Typography>
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)" },
-          gap: 1,
+          gap: theme.spacingTokens.gap.sm,
           alignItems: "start",
         }}
       >

@@ -34,10 +34,10 @@ export default function SearchBar({
       sx={{
         display: "flex",
         alignItems: "flex-start",
-        gap: 3,
-        px: theme.spacing(theme.cards.spacing.standard),
-        py: theme.spacing(2),
-        backgroundColor: theme.palette.common.white,
+        gap: theme.spacingTokens.gap.xl,
+        px: theme.spacingTokens.component.xl,
+        py: theme.spacingTokens.component.lg,
+        backgroundColor: theme.palette.background.paper,
         borderBottom: theme.border.medium,
       }}
     >
@@ -49,8 +49,7 @@ export default function SearchBar({
           maxWidth: theme.spacing(40),
           display: "flex",
           flexDirection: "column",
-          // 10px header-to-content spacing
-          gap: 1.25,
+          gap: theme.spacingTokens.gap.md,
         }}
       >
         {showLabel && (
@@ -80,7 +79,7 @@ export default function SearchBar({
             display: "flex",
             alignItems: "flex-start",
             flexShrink: 0,
-            gap: 3,
+            gap: theme.spacingTokens.gap.xl,
           }}
         >
           {rightContent}

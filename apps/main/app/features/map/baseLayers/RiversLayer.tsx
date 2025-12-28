@@ -72,7 +72,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
         fontSize="15"
         fontFamily="Georgia, 'Times New Roman', serif"
         fontStyle="italic"
-        fill={theme.palette.utility.white}
+        fill={theme.palette.common.white}
         fillOpacity="0.9"
         fontWeight="700"
         letterSpacing={letterSpacing}
@@ -309,7 +309,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
                 fontSize: "15px",
                 fontWeight: theme.typography.fontWeightBold,
                 fontStyle: "italic",
-                fill: theme.palette.utility.white,
+                fill: theme.palette.common.white,
                 fillOpacity: 0.9,
               }}
             >

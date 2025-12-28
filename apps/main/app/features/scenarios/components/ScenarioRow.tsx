@@ -168,15 +168,15 @@ export function ScenarioRow({
             ? theme.palette.common.white
             : theme.palette.undertone.warm,
           borderRadius: theme.borderRadius.md,
-          padding: compact ? theme.spacing(3) : theme.spacing(1.5),
-          gap: theme.spacing(1),
+          padding: compact ? theme.spacingTokens.component.xl : theme.spacingTokens.component.md,
+          gap: theme.spacingTokens.gap.sm,
           alignItems: compact ? "stretch" : "start",
           transition: theme.transition.default,
           border: isHighlighted
             ? theme.border.focus
             : "2px solid transparent",
           "&:hover": {
-            backgroundColor: theme.palette.common.white,
+            backgroundColor: theme.palette.background.paper,
           },
         }}
       >
@@ -218,7 +218,7 @@ export function ScenarioRow({
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: theme.spacing(1.5),
+              gap: theme.spacingTokens.gap.md,
             }}
           >
             {/* First row: Title/description + Key operations */}
@@ -227,7 +227,7 @@ export function ScenarioRow({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "stretch",
-                gap: theme.spacing(2),
+                gap: theme.spacingTokens.gap.lg,
               }}
             >
               <StrategyHeader
@@ -239,7 +239,7 @@ export function ScenarioRow({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: theme.spacing(1.5),
+                  gap: theme.spacingTokens.gap.md,
                   flexShrink: 0,
                 }}
               >
@@ -257,7 +257,7 @@ export function ScenarioRow({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: theme.spacing(1.5),
+                gap: theme.spacingTokens.gap.md,
               }}
             >
               <Typography variant="subtitle2">Key outcomes</Typography>
@@ -265,7 +265,7 @@ export function ScenarioRow({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: theme.spacing(2.5),
+                  gap: theme.spacingTokens.gap.lg,
                 }}
               >
                 {/* First 5 outcomes (multi-location) */}
@@ -276,7 +276,7 @@ export function ScenarioRow({
                       xs: "repeat(3, 1fr)",
                       sm: "repeat(5, 1fr)",
                     },
-                    gap: theme.spacing(1),
+                    gap: theme.spacingTokens.gap.sm,
                   }}
                 >
                   {outcomeNames.slice(0, 5).map(({ name, displayName }) =>
@@ -291,7 +291,7 @@ export function ScenarioRow({
                       xs: "repeat(3, 1fr)",
                       sm: "repeat(5, 1fr)",
                     },
-                    gap: theme.spacing(1),
+                    gap: theme.spacingTokens.gap.sm,
                   }}
                 >
                   {outcomeNames.slice(5).map(({ name, displayName }) =>
@@ -329,8 +329,8 @@ export function ScenarioRow({
                   xs: "repeat(3, 1fr)",
                   lg: "repeat(auto-fit, minmax(60px, 1fr))",
                 },
-                gap: theme.spacing(1),
-                mt: { xs: 2, lg: 0 },
+                gap: theme.spacingTokens.gap.sm,
+                mt: { xs: theme.spacingTokens.component.lg, lg: 0 },
                 maxWidth: "100%",
               }}
             >
@@ -354,10 +354,10 @@ export function ScenarioRow({
             },
             backgroundColor: theme.palette.grey[50],
             borderRadius: theme.borderRadius.md,
-            padding: theme.spacing(1.5),
-            gap: theme.spacing(1),
-            mt: -0.5,
-            mb: 0.5,
+            padding: theme.spacingTokens.component.md,
+            gap: theme.spacingTokens.gap.sm,
+            mt: -0.5, // intentional overlap
+            mb: theme.spacingTokens.component.xs,
           }}
         >
           <Box /> {/* Spacer for checkbox column */}

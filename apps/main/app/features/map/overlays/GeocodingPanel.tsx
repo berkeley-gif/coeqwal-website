@@ -197,7 +197,7 @@ export function GeocodingPanel({
               top: `calc(100% + ${theme.spacing(0.5)})`,
               left: 0,
               right: 0,
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.md,
               maxHeight: 300,
@@ -219,7 +219,7 @@ export function GeocodingPanel({
                     index < geocoding.results.length - 1
                       ? theme.border.light
                       : "none",
-                  backgroundColor: theme.palette.common.white,
+                  backgroundColor: theme.palette.background.paper,
                   cursor: "pointer",
                   textAlign: "left",
                   transition: theme.transition.quick,

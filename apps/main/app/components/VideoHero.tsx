@@ -191,7 +191,7 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
             display: "flex",
             flexDirection: "column",
             gap: "10px",
-            color: theme.palette.utility.white,
+            color: theme.palette.common.white,
           }}
         >
           <Typography
@@ -202,7 +202,7 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
           >
             {t("homePanel.content")}
           </Typography>
-          <ScrollToButton color={theme.palette.utility.white} size={70} />
+          <ScrollToButton color={theme.palette.common.white} size={70} />
         </div>
       </motion.div>
     </div>

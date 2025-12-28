@@ -137,9 +137,9 @@ export function OutcomeGlyphItem({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 0.5,
+        gap: theme.spacingTokens.gap.xs,
         cursor: isActive ? "pointer" : "default",
-        padding: 0.5,
+        padding: theme.spacingTokens.component.xs,
         borderRadius: theme.borderRadius.md,
         transition: theme.transition.default,
         opacity: isActive ? 1 : 0.7,
@@ -177,7 +177,7 @@ export function OutcomeGlyphItem({
             variant="outcomeLabel"
             sx={{
               color: theme.palette.text.primary,
-              px: 0.5,
+              px: theme.spacingTokens.component.xs,
             }}
           >
             No data at this time
@@ -193,7 +193,7 @@ export function OutcomeGlyphItem({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 0.25,
+            gap: 0.25, // 2px - intentionally tight for label spacing
             minHeight: "2rem",
             width: "100%",
           }}

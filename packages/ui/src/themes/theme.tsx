@@ -21,7 +21,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  */
 
 /* ===============================================================================
- * FONT CONFIGURATION SYSTEM
+ * FONT CONFIGURATION
  * ===============================================================================
  *
  * To switch fonts, change ACTIVE_FONT_PRESET below to one of the available presets.
@@ -114,11 +114,8 @@ const palette = {
     forest: "#7b9d3f", // Forest green
   },
 
-  // Utility colors
-  utility: {
-    white: "#FFFFFF",
-    black: "#000000",
-  },
+  // Note: Use palette.common.white and palette.common.black instead of utility colors
+  // utility colors removed - consolidated to MUI common colors
 
   // MUI greys
   grey: {
@@ -245,7 +242,7 @@ const border = {
   focus: `2px solid ${palette.blue.bright}`, // Selected/focus states
   focusLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
-  onDark: `2px solid ${palette.utility.white}`, // On dark backgrounds
+  onDark: "2px solid #FFFFFF", // On dark backgrounds
   subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
 }
 
@@ -354,26 +351,6 @@ export const themeValues = {
   },
 
   /* --------------------------------------------------------
-   * App-specific UI configuration
-   * Styles for specific features (cards, scenarios)
-   * -------------------------------------------------------- */
-
-  // Card spacing system
-  cards: {
-    spacing: {
-      standard: 3, // 24px - standardized spacing unit
-      // Compact spacing for cards, dialogs, tooltips, form controls
-      compact: {
-        xs: 0.25, // 2px
-        sm: 0.5, // 4px
-        md: 1, // 8px
-        lg: 1.5, // 12px
-        xl: 2, // 16px
-      },
-    },
-  },
-
-  /* --------------------------------------------------------
    * Scenario/strategy component styles
    * Used across Learn map and Scenario Explorer
    * -------------------------------------------------------- */
@@ -390,12 +367,12 @@ export const themeValues = {
           backgroundColor: palette.grey[50],
         },
         highlighted: {
-          backgroundColor: palette.utility.white,
+          backgroundColor: "#FFFFFF",
         },
       },
       states: {
         hover: {
-          backgroundColor: palette.utility.white,
+          backgroundColor: "#FFFFFF",
         },
         selected: {
           borderColor: palette.blue.bright,
@@ -502,8 +479,6 @@ const theme = createTheme({
   breakpoints: {
     values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
   },
-  // Card typography and spacing (from themeValues)
-  cards: themeValues.cards,
   // Palette - California Water theme (MUI integration)
   // Custom colors spread from themeValues, MUI standard colors mapped
   palette: {
@@ -512,8 +487,8 @@ const theme = createTheme({
 
     // MUI standard palette mappings
     common: {
-      black: themeValues.palette.utility.black,
-      white: themeValues.palette.utility.white,
+      black: "#000000",
+      white: "#FFFFFF",
     },
     primary: {
       main: themeValues.palette.blue.darkest,
@@ -540,19 +515,19 @@ const theme = createTheme({
     },
     // MUI standard colors
     background: {
-      default: themeValues.palette.utility.white,
-      paper: themeValues.palette.utility.white,
+      default: "#FFFFFF",
+      paper: "#FFFFFF", // Solid white for UI backgrounds
     },
     text: {
       primary: themeValues.palette.blue.darkest,
-      secondary: themeValues.palette.utility.white,
+      secondary: "#FFFFFF",
       disabled: themeValues.palette.blue.light,
     },
     action: {
       hover: themeValues.palette.grey[100],
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
-      disabledBackground: themeValues.palette.utility.white,
+      disabledBackground: "#FFFFFF",
     },
     interaction: {
       hoverBackground: themeValues.palette.grey[100],
@@ -597,7 +572,7 @@ const theme = createTheme({
     h5: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
-      fontWeight: 600, // Bumped from 500 - most uses need semibold
+      fontWeight: 600,
       letterSpacing: "0.02rem",
       lineHeight: 1.35,
     },
@@ -1342,7 +1317,7 @@ const theme = createTheme({
       },
       styleOverrides: {
         tooltip: ({ theme }) => ({
-          backgroundColor: theme.palette.common.white,
+          backgroundColor: theme.palette.background.paper,
           color: theme.palette.text.primary,
           border: `1px solid ${theme.palette.action.hover}`,
           borderRadius: theme.borderRadius.md,
@@ -1356,7 +1331,7 @@ const theme = createTheme({
           pointerEvents: "auto",
         }),
         arrow: ({ theme }) => ({
-          color: theme.palette.common.white,
+          color: theme.palette.background.paper,
           "&::before": {
             border: `1px solid ${theme.palette.action.hover}`,
           },
@@ -1427,7 +1402,6 @@ declare module "@mui/material/styles" {
     learn: { background: string; text: string }
     explore: { background: string; text: string }
     empower: { background: string; text: string }
-    utility: typeof themeValues.palette.utility
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
@@ -1444,7 +1418,6 @@ declare module "@mui/material/styles" {
     learn?: { background?: string; text?: string }
     explore?: { background?: string; text?: string }
     empower?: { background?: string; text?: string }
-    utility?: Partial<typeof themeValues.palette.utility>
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
@@ -1483,7 +1456,6 @@ declare module "@mui/material/styles" {
     borderRadius: typeof themeValues.borderRadius
     shadow: typeof themeValues.shadow
     transition: typeof themeValues.transition
-    cards: typeof themeValues.cards
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
     // Semantic spacing tokens
@@ -1504,7 +1476,6 @@ declare module "@mui/material/styles" {
     }
     shadow?: Partial<typeof themeValues.shadow>
     transition?: Partial<typeof themeValues.transition>
-    cards?: Partial<typeof themeValues.cards>
     spacingTokens?: Partial<typeof themeValues.spacing>
   }
 

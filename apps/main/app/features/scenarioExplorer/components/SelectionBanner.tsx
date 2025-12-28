@@ -25,7 +25,7 @@ export default function SelectionBanner() {
   return (
     <Box
       sx={{
-        backgroundColor: theme.palette.common.white,
+        backgroundColor: theme.palette.background.paper,
         borderBottom: theme.border.light,
         px: theme.spacingTokens.page.x,
         py: theme.spacingTokens.component.md,
@@ -89,7 +89,7 @@ export default function SelectionBanner() {
           sx={{
             color: theme.palette.grey[500],
             minWidth: "auto",
-            px: 1,
+            px: theme.spacingTokens.component.sm,
             "&:hover": {
               color: theme.palette.grey[700],
               backgroundColor: theme.palette.grey[100],

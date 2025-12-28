@@ -51,7 +51,7 @@ export function Header() {
       onLogoClick={handleLogoClick}
       onDataClick={handleDataClick}
       onAboutClick={handleAboutClick}
-      backgroundColor={theme.palette.utility.white}
+      backgroundColor={theme.palette.common.white}
       textColor={theme.palette.text.primary}
       zIndex={theme.zIndex.appBar}
       borderRadius={theme.borderRadius.none}

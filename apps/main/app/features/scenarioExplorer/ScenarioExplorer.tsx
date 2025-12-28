@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from "react"
-import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
+import { Box, Tabs, Tab, Typography, useTheme } from "@repo/ui/mui"
 import UnifiedExploreView, { type ExploreMode } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
@@ -57,9 +57,9 @@ export default function ScenarioExplorerNew() {
           {/* Tab navigation */}
           <Box
             sx={{
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: theme.palette.background.paper,
               borderBottom: theme.border.medium,
-              px: theme.spacing(theme.cards.spacing.standard),
+              px: theme.spacingTokens.component.xl,
             }}
           >
             <Tabs
@@ -109,7 +109,7 @@ export default function ScenarioExplorerNew() {
                 sx={{
                   width: exploreMode === "list" ? "100%" : "50%",
                   transition: theme.transition.layout,
-                  backgroundColor: theme.palette.common.white,
+                  backgroundColor: theme.palette.background.paper,
                 }}
               >
                 <SearchBar
@@ -125,12 +125,35 @@ export default function ScenarioExplorerNew() {
                 <Box
                   sx={{
                     width: "50%",
-                    backgroundColor: exploreMode === "map" ? "transparent" : theme.palette.common.white,
+                    position: "relative",
+                    backgroundColor: exploreMode === "map" ? "transparent" : theme.palette.background.paper,
                     borderLeft: exploreMode === "comparison" ? theme.border.medium : "none",
                     borderBottom: exploreMode === "comparison" ? theme.border.medium : "none",
                     pointerEvents: exploreMode === "map" ? "none" : "auto",
                   }}
                 >
+                  {exploreMode === "map" && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: theme.spacingTokens.component.lg,
+                        left: theme.spacingTokens.component.xl,
+                        backgroundColor: theme.background.whiteOverlay[95],
+                        borderRadius: theme.borderRadius.md,
+                        padding: theme.spacingTokens.component.md,
+                        maxWidth: "40%",
+                        zIndex: theme.zIndex.mapControls,
+                        pointerEvents: "auto",
+                      }}
+                    >
+                      <Typography
+                        variant="compactSubtitle"
+                        sx={{ color: theme.palette.text.primary }}
+                      >
+                        Click on a scenario outcome in the left panel to see outcomes at specific locations.
+                      </Typography>
+                    </Box>
+                  )}
                   {exploreMode === "comparison" && (
                     <ComparisonHeader
                       highlightedScenario={highlightedScenario}

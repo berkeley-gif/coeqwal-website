@@ -33,7 +33,7 @@ export default function AutoAdvanceFooter() {
         justifyContent: "center",
         gap: 12,
         backgroundColor: theme.palette.blue.darkest,
-        color: theme.palette.utility.white,
+        color: theme.palette.common.white,
         pointerEvents: "auto", // Ensure footer is clickable even when parent has pointerEvents: none
       }}
     >
@@ -44,7 +44,7 @@ export default function AutoAdvanceFooter() {
         rotation="-90deg"
         axis="horizontal"
         size={60}
-        color={theme.palette.utility.white}
+        color={theme.palette.common.white}
       />
     </div>
   )
