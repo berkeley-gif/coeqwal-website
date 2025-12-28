@@ -275,7 +275,7 @@ export function OutcomePolygonLayer({
             paint: {
               "line-color": outlineColor,
               "line-width": hasTierData ? 0.5 : 1,
-              "line-opacity": hasTierData ? 1 : 0.6,
+              "line-opacity": hasTierData ? 1 : 0.30,
               "line-offset": -0.25,
             },
             layout: { visibility: "none" },
@@ -297,7 +297,7 @@ export function OutcomePolygonLayer({
       // Loading state: thin white outline
       if (!hasTierData) {
         map.setPaintProperty(outlineId, "line-width", 1)
-        map.setPaintProperty(outlineId, "line-opacity", 0.6)
+        map.setPaintProperty(outlineId, "line-opacity", 0.30)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)

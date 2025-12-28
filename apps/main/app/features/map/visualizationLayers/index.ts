@@ -21,7 +21,9 @@ export type {
 // Hooks
 export { useOutcomeVisualization } from "./hooks/useOutcomeVisualization"
 export { useTierData, fetchTierLocations } from "./hooks/useTierData"
-export { useOutcomeTooltip, type UseOutcomeTooltipResult } from "./hooks/useOutcomeTooltip"
+export { usePolygonTooltip, type UsePolygonTooltipResult } from "./hooks/usePolygonTooltip"
+export { useTooltipState, type UseTooltipStateResult } from "./hooks/useTooltipState"
+export { useMapTooltips, type UseMapTooltipsResult } from "./hooks/useMapTooltips"
 export { useSalmonRiverColor } from "./hooks/useSalmonRiverColor"
 
 // Components

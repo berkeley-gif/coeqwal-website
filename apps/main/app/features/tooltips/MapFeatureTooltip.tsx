@@ -1,30 +1,8 @@
 "use client"
 
 /**
- * MapFeatureTooltip - Tooltip for map features (polygons and points)
- *
- * A reusable tooltip component for map features (demand-units, WBA, environmental flows, etc.)
- *
- * ## When to Use
- *
- * Use MapFeatureTooltip for map features where:
- * - Geographic positioning (lat/lng) is required (uses Mapbox Popup)
- * - Both hover and click-to-pin interactions are needed
- * - Layer-specific content rendering is required
- *
- * For non-map tooltips, use:
- * - HybridTooltip: Hover on desktop, click on touch (general purpose)
- * - ClickTooltip: Always click-to-open
- * - MapMarkerTooltip: Simple map marker hover hints (not geo-positioned)
- *
- * ## Features
- *
- * - Supports hover and pinned (click-to-pin) modes
- * - Renders appropriate fields based on layer type
- * - Includes tier badge with color indicator
- * - Close button for pinned tooltips
- *
- * @see MapMarkerTooltip - For simple map marker tooltips (not geo-positioned)
+ * Geo-positioned tooltip for map features (polygons and points).
+ * Supports hover and click-to-pin modes with layer-specific content.
  */
 
 import React from "react"
@@ -34,17 +12,11 @@ import { Popup } from "@repo/map"
 import type { HoveredFeatureInfo } from "../map/visualizationLayers"
 
 export interface MapFeatureTooltipProps {
-  /** Feature data to display */
   feature: HoveredFeatureInfo
-  /** Whether the tooltip is pinned (clicked) vs hovered */
   isPinned: boolean
-  /** Callback to close/clear the pinned tooltip */
   onClose: () => void
 }
 
-/**
- * Tier badge component showing tier level with color indicator
- */
 function TierBadge({ level, label }: { level: number; label: string }) {
   const theme = useTheme()
 
@@ -69,9 +41,6 @@ function TierBadge({ level, label }: { level: number; label: string }) {
   )
 }
 
-/**
- * WBA (Water Budget Area) layer tooltip content
- */
 function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
   const theme = useTheme()
 
@@ -126,9 +95,6 @@ function WBATooltipContent({ feature }: { feature: HoveredFeatureInfo }) {
   )
 }
 
-/**
- * Demand Units layer tooltip content
- */
 function DemandUnitsTooltipContent({
   feature,
 }: {
@@ -219,9 +185,6 @@ function DemandUnitsTooltipContent({
   )
 }
 
-/**
- * Point marker (environmental flows, etc.) tooltip content
- */
 function PointMarkerTooltipContent({
   feature,
 }: {
@@ -260,18 +223,11 @@ function PointMarkerTooltipContent({
   )
 }
 
-/**
- * Main tooltip component for map features
- *
- * Renders a Mapbox Popup with feature information based on layer type.
- * Supports both hover and pinned (click-to-stay) modes.
- */
 export function MapFeatureTooltip({
   feature,
   isPinned,
   onClose,
 }: MapFeatureTooltipProps) {
-  // Determine content renderer based on layer type
   const renderContent = () => {
     switch (feature.layerType) {
       case "wba":
@@ -291,8 +247,6 @@ export function MapFeatureTooltip({
       latitude={feature.latitude}
       anchor="bottom"
       closeButton={false}
-      // Don't use closeOnClick - it conflicts with click-to-pin behavior
-      // The pinned tooltip is closed via the X button or by clicking another feature
       closeOnClick={false}
       onClose={onClose}
       offset={15}
@@ -305,13 +259,8 @@ export function MapFeatureTooltip({
           position: "relative",
         }}
       >
-        {/* Close button for pinned tooltips */}
         {isPinned && <TooltipCloseButton onClick={onClose} offset={{ top: 0, right: 0 }} />}
-
-        {/* Layer-specific content */}
         {renderContent()}
-
-        {/* Tier badge (always present) */}
         <TierBadge level={feature.tierLevel} label={feature.tierLabel} />
       </Box>
     </Popup>
