@@ -9,25 +9,24 @@
  * - BasemapDimOverlay (dims the map when visualization is active)
  * - OutcomePolygonLayer (demand-units, WBA, delta, reservoir)
  * - TierMarkers (non-polygon outcomes)
- * - ReservoirLabels
+ * - TierLocationLabels (reservoirs, pumping plants, compliance stations)
  * - HotspotMarkers
- * - Tooltips
+ * - Tooltips (unified via useMapTooltips hook)
  */
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useMap, Source, Layer } from "@repo/map"
 
 // Components
 import TierMarkers from "./components/TierMarkers"
-import type { HoveredFeatureInfo } from "./types"
-import { ReservoirLabels } from "./components/ReservoirLabels"
+import { TierLocationLabels } from "./components/TierLocationLabels"
 import { HotspotMarkers } from "./components/HotspotMarkers"
 import { OutcomePolygonLayer } from "./components/OutcomePolygonLayer"
 import { PoiMarker } from "./components/PoiMarker"
 
 // Hooks
 import { useOutcomeVisualization } from "./hooks/useOutcomeVisualization"
-import { useOutcomeTooltip } from "./hooks/useOutcomeTooltip"
+import { useMapTooltips } from "./hooks/useMapTooltips"
 
 // Config
 import { BASEMAP_DIM_OPACITY } from "../config/outcomeLayerRegistry"
@@ -87,85 +86,20 @@ export default function VisualizationLayers() {
     featureIds,
   } = useOutcomeVisualization()
 
-  // Tooltip state for Mapbox layer interactions (polygons)
-  const { 
-    hoveredFeature: polygonHovered, 
-    pinnedFeatures: polygonPinnedFeatures, 
-    clearPinned: clearPolygonPinned,
-  } = useOutcomeTooltip({
-    config,
+  // Unified tooltip state for all map features (polygons + point markers)
+  const {
+    hoveredFeature,
+    pinnedFeatures,
+    isHoveredAlreadyPinned,
+    handlePointHover,
+    handlePointClick,
+    clearPinned,
+  } = useMapTooltips({
+    polygonConfig: config,
     tierLevelMap,
     locationData,
-    enabled: isVisualizationActive && usesMapboxLayers,
+    polygonEnabled: isVisualizationActive && usesMapboxLayers,
   })
-
-  // Tooltip state for point markers (TierMarkers)
-  const [pointHovered, setPointHovered] = useState<HoveredFeatureInfo | null>(null)
-  const [pointPinnedFeatures, setPointPinnedFeatures] = useState<HoveredFeatureInfo[]>([])
-  
-  // Track recently unpinned features to suppress hover tooltip
-  const suppressedFeaturesRef = useRef<Set<string>>(new Set())
-
-  // Clear point pinned when outcome changes
-  useEffect(() => {
-    setPointPinnedFeatures([])
-    suppressedFeaturesRef.current.clear()
-  }, [outcome])
-
-  // Handlers for TierMarkers
-  const handlePointHover = useCallback((feature: HoveredFeatureInfo | null) => {
-    // If mouse leaves, clear suppression for that feature
-    if (feature === null) {
-      // Clear all suppressions on mouse leave (user moved away)
-      suppressedFeaturesRef.current.clear()
-    }
-    setPointHovered(feature)
-  }, [])
-
-  const handlePointClick = useCallback((feature: HoveredFeatureInfo) => {
-    // Toggle: if already pinned, remove it; otherwise add it
-    setPointPinnedFeatures(prev => {
-      const existingIndex = prev.findIndex(f => f.featureId === feature.featureId)
-      if (existingIndex >= 0) {
-        // Unpinning: suppress hover tooltip for this feature
-        suppressedFeaturesRef.current.add(feature.featureId)
-        return prev.filter((_, i) => i !== existingIndex)
-      } else {
-        // Pinning: remove from suppression if it was there
-        suppressedFeaturesRef.current.delete(feature.featureId)
-        return [...prev, feature]
-      }
-    })
-  }, [])
-
-  const clearPointPinned = useCallback((featureId: string) => {
-    // Suppress hover tooltip when closing via X button
-    suppressedFeaturesRef.current.add(featureId)
-    setPointPinnedFeatures(prev => prev.filter(f => f.featureId !== featureId))
-  }, [])
-
-  // Combine hover from both sources (point hover takes precedence)
-  const hoveredFeature = pointHovered || polygonHovered
-  
-  // Combine all pinned features from both sources
-  const allPinnedFeatures = [...pointPinnedFeatures, ...polygonPinnedFeatures]
-  
-  // Check if hover target is already pinned (don't show duplicate)
-  const isHoveredAlreadyPinned = hoveredFeature 
-    ? allPinnedFeatures.some(f => f.featureId === hoveredFeature.featureId)
-    : false
-    
-  // Check if hover target was just unpinned (suppress hover tooltip)
-  const isHoveredSuppressed = hoveredFeature
-    ? suppressedFeaturesRef.current.has(hoveredFeature.featureId)
-    : false
-    
-  // Clear suppression when hover ends (for polygon features)
-  useEffect(() => {
-    if (!polygonHovered) {
-      suppressedFeaturesRef.current.clear()
-    }
-  }, [polygonHovered])
 
   // Tier location data for React-rendered markers (non-polygon outcomes)
   const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
@@ -191,8 +125,9 @@ export default function VisualizationLayers() {
         if (!cancelled) {
           setTierData(data)
 
-          // Zoom to show all markers
-          if (data.features.length > 0 && map.mapRef?.current) {
+          // Zoom to show all markers (skip if outcome has a cameraPreset - handled elsewhere)
+          const hasCameraPreset = config?.cameraPreset != null
+          if (!hasCameraPreset && data.features.length > 0 && map.mapRef?.current) {
             let minLng = Infinity,
               minLat = Infinity,
               maxLng = -Infinity,
@@ -240,7 +175,7 @@ export default function VisualizationLayers() {
     return () => {
       cancelled = true
     }
-  }, [outcome, strategy, usesMapboxLayers, map, mapMode])
+  }, [outcome, strategy, usesMapboxLayers, map, mapMode, config])
 
   const isLearnMode = mapMode === "learn"
 
@@ -282,8 +217,10 @@ export default function VisualizationLayers() {
         />
       )}
 
-      {/* React markers for non-Mapbox outcomes */}
-      {tierData && !usesMapboxLayers && (
+      {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
+      {tierData && !usesMapboxLayers && 
+        outcome !== "Freshwater for Delta exports" && 
+        outcome !== "Freshwater for in-Delta uses" && (
         <TierMarkers
           data={tierData}
           onHover={handlePointHover}
@@ -291,9 +228,12 @@ export default function VisualizationLayers() {
         />
       )}
 
-      {/* Reservoir labels */}
+      {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
       {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
-        <ReservoirLabels tierLookup={tierLevelMap} />
+        <TierLocationLabels tierLookup={tierLevelMap} />
+      )}
+      {(outcome === "Freshwater for Delta exports" || outcome === "Freshwater for in-Delta uses") && tierData && (
+        <TierLocationLabels data={tierData} />
       )}
 
       {/* Hotspot markers for tier 4 locations */}
@@ -307,26 +247,17 @@ export default function VisualizationLayers() {
       />
 
       {/* Pinned tooltips (multiple allowed) */}
-      {allPinnedFeatures.map((feature) => (
+      {pinnedFeatures.map((feature) => (
         <MapFeatureTooltip
           key={`pinned-${feature.featureId}`}
           feature={feature}
           isPinned={true}
-          onClose={() => {
-            // Suppress hover tooltip when closing via X button
-            suppressedFeaturesRef.current.add(feature.featureId)
-            // Clear from appropriate source based on geometry type
-            if (feature.geometryType === "point") {
-              clearPointPinned(feature.featureId)
-            } else {
-              clearPolygonPinned(feature.featureId)
-            }
-          }}
+          onClose={() => clearPinned(feature)}
         />
       ))}
 
-      {/* Hover tooltip (only if not already pinned and not just unpinned) */}
-      {hoveredFeature && !isHoveredAlreadyPinned && !isHoveredSuppressed && (
+      {/* Hover tooltip (only if not already pinned) */}
+      {hoveredFeature && !isHoveredAlreadyPinned && (
         <MapFeatureTooltip
           key="hover"
           feature={hoveredFeature}

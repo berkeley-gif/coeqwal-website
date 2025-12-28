@@ -7,6 +7,8 @@ import {
   DELTA_VIEW,
   SACRAMENTO_RIVER_VIEW,
   RESERVOIR_VIEW,
+  PUMPING_PLANTS_VIEW,
+  JERSEY_POINT_VIEW,
 } from "./cameraPresets"
 
 // ============================================================================
@@ -385,6 +387,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
+    cameraPreset: JERSEY_POINT_VIEW,
   },
 
   "Freshwater for Delta exports": {
@@ -403,6 +406,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
+    cameraPreset: PUMPING_PLANTS_VIEW,
   },
 }
 

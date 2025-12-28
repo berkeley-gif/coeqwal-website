@@ -28,9 +28,25 @@ export const CENTRAL_VALLEY_VIEW: CameraView = {
 }
 
 export const DELTA_VIEW: CameraView = {
-  longitude: -121.8,
-  latitude: 38.1,
-  zoom: 9.75,
+  longitude: -121.4,
+  latitude: 38.2,
+  zoom: 8.8,
+  bearing: 0,
+  pitch: 0,
+}
+
+export const PUMPING_PLANTS_VIEW: CameraView = {
+  longitude: -121.4,
+  latitude: 38.2,
+  zoom: 8.8,
+  bearing: 0,
+  pitch: 0,
+}
+
+export const JERSEY_POINT_VIEW: CameraView = {
+  longitude: -121.4,
+  latitude: 38.2,
+  zoom: 8.8,
   bearing: 0,
   pitch: 0,
 }
