@@ -58,7 +58,7 @@ export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) 
       <Divider />
 
       {/* View mode buttons */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: theme.spacingTokens.gap.md }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: theme.space.gap.md }}>
         <Typography
           variant="caption"
           sx={{
@@ -68,7 +68,7 @@ export function ViewModeControls({ mode, onModeChange }: ViewModeControlsProps) 
         >
           View
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.xs }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.xs }}>
           <Tooltip title="List view" arrow>
             <IconButton onClick={() => onModeChange("list")} sx={buttonSx(mode === "list")}>
               <ViewListIcon sx={{ fontSize: "1.5rem" }} />

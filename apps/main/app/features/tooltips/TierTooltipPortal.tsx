@@ -54,9 +54,9 @@ export function TierTooltipPortal({
               border: theme.border.light,
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.md,
-              padding: theme.spacing(theme.spacingTokens.component.xl),
+              p: theme.space.component.xl,
               width: "450px",
-              ...theme.typography.compact.subtitle,
+              ...theme.typography.compactSubtitle,
             }}
           >
             <TooltipCloseButton onClick={onForceClose} offset={{ top: 8, right: 8 }} />
@@ -66,7 +66,7 @@ export function TierTooltipPortal({
               sx={{
                 position: "absolute",
                 right: -15,
-                top: theme.spacing(theme.spacingTokens.component.md),
+                top: 12,
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",
@@ -79,7 +79,7 @@ export function TierTooltipPortal({
               sx={{
                 position: "absolute",
                 right: -16,
-                top: theme.spacing(theme.spacingTokens.component.md),
+                top: 12,
                 width: 0,
                 height: 0,
                 border: "8px solid transparent",

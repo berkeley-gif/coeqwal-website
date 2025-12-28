@@ -131,7 +131,7 @@ export function OutcomeGrid({
           variant="compactMicro"
           sx={{
             display: "block",
-            mb: theme.spacingTokens.component.sm,
+            mb: theme.space.component.sm,
             fontWeight: theme.typography.fontWeightMedium,
             color: theme.palette.grey[600],
             letterSpacing: "0.5px",
@@ -144,9 +144,9 @@ export function OutcomeGrid({
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(5, 1fr)" },
-          gap: theme.spacingTokens.gap.sm,
+          gap: theme.space.gap.sm,
           alignItems: "start",
-          mb: showSectionHeaders ? theme.spacingTokens.component.md : 0,
+          mb: showSectionHeaders ? theme.space.component.md : 0,
         }}
       >
         {multipleLocationOutcomes.map(renderOutcomeItem)}
@@ -158,7 +158,7 @@ export function OutcomeGrid({
           variant="compactMicro"
           sx={{
             display: "block",
-            mb: theme.spacingTokens.component.sm,
+            mb: theme.space.component.sm,
             fontWeight: theme.typography.fontWeightMedium,
             color: theme.palette.grey[600],
             letterSpacing: "0.5px",
@@ -171,7 +171,7 @@ export function OutcomeGrid({
         sx={{
           display: "grid",
           gridTemplateColumns: { xs: "repeat(3, 1fr)", sm: "repeat(4, 1fr)" },
-          gap: theme.spacingTokens.gap.sm,
+          gap: theme.space.gap.sm,
           alignItems: "start",
         }}
       >

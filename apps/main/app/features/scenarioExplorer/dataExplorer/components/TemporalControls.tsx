@@ -50,13 +50,13 @@ export default function TemporalControls({
   return (
     <Box
       sx={{
-        p: theme.spacingTokens.component.lg,
+        p: theme.space.component.lg,
         backgroundColor: theme.palette.grey[50],
         borderRadius: theme.borderRadius.md,
         border: theme.border.medium,
         display: "flex",
         flexDirection: "column",
-        gap: theme.spacingTokens.gap.lg,
+        gap: theme.space.gap.lg,
       }}
     >
       <Typography variant="subtitle2">Temporal Controls</Typography>

@@ -80,7 +80,7 @@ export function SmartSummary({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm, py: theme.spacingTokens.component.sm }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, py: theme.space.component.sm }}>
           <CircularProgress
             size={14}
             sx={{ color: theme.palette.blue.bright }}
@@ -107,9 +107,9 @@ export function SmartSummary({
       sx={{
         display: "flex",
         flexWrap: "wrap",
-        gap: theme.spacingTokens.gap.xs,
+        gap: theme.space.gap.xs,
         alignItems: "center",
-        mb: isInline ? 0 : theme.spacingTokens.component.md,
+        mb: isInline ? 0 : theme.space.component.md,
       }}
     >
       {Object.entries(summary.tierBreakdown).map(([tier, data]) => {
@@ -154,7 +154,7 @@ export function SmartSummary({
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: theme.spacingTokens.gap.xs,
+            gap: theme.space.gap.xs,
             alignItems: "center",
           }}
         >
@@ -164,7 +164,7 @@ export function SmartSummary({
             sx={{
               color: tierColors[4],
               fontWeight: theme.typography.fontWeightSemiBold,
-              mr: theme.spacingTokens.component.xs,
+              mr: theme.space.component.xs,
             }}
           >
             Critical:
@@ -183,19 +183,19 @@ export function SmartSummary({
     }
 
     return (
-      <Box sx={{ mb: theme.spacingTokens.component.md }}>
+      <Box sx={{ mb: theme.space.component.md }}>
         <Typography
           variant={isCompact ? "compactMicro" : "nav"}
           sx={{
             color: tierColors[4],
             fontWeight: theme.typography.fontWeightSemiBold,
             display: "block",
-            mb: theme.spacingTokens.component.xs,
+            mb: theme.space.component.xs,
           }}
         >
           Critical locations:
         </Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.xs }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}>
           {visibleLocations.map((loc) =>
             renderLocationChip(loc, "default", isCompact),
           )}
@@ -225,7 +225,7 @@ export function SmartSummary({
           sx={{
             display: "flex",
             flexWrap: "wrap",
-            gap: theme.spacingTokens.gap.xs,
+            gap: theme.space.gap.xs,
             alignItems: "center",
           }}
         >
@@ -235,7 +235,7 @@ export function SmartSummary({
             sx={{
               color: tierColors[3],
               fontWeight: theme.typography.fontWeightSemiBold,
-              mr: theme.spacingTokens.component.xs,
+              mr: theme.space.component.xs,
             }}
           >
             At-risk:
@@ -302,7 +302,7 @@ export function SmartSummary({
                 fontWeight: theme.typography.fontWeightSemiBold,
                 fontSize: isInline
                   ? theme.typography.body2.fontSize
-                  : theme.typography.compact.micro.fontSize,
+                  : theme.typography.compactMicro.fontSize,
                 letterSpacing: "0.5px",
                 display: "block",
                 mb: isInline ? 0.5 : isCompact ? 0.25 : 1,
@@ -316,7 +316,7 @@ export function SmartSummary({
           <Typography
             variant="dashboard"
             sx={{
-              fontSize: isCompact ? theme.typography.compact.caption.fontSize : undefined,
+              fontSize: isCompact ? theme.typography.compactCaption.fontSize : undefined,
               lineHeight: isCompact ? 1.3 : undefined, // dashboard default is 1.5
               color: theme.palette.grey[700],
               mb: isCompact ? 0.75 : 1.5,
@@ -331,7 +331,7 @@ export function SmartSummary({
               sx={{
                 display: "flex",
                 flexWrap: "wrap",
-                gap: theme.spacingTokens.gap.lg,
+                gap: theme.space.gap.lg,
                 alignItems: "flex-start",
               }}
             >

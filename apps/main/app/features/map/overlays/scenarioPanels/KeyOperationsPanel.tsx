@@ -54,7 +54,7 @@ export function KeyOperationsPanel({
         sx={{
           display: "flex",
           alignItems: "flex-start",
-          gap: theme.spacingTokens.gap.xl,
+          gap: theme.space.gap.xl,
           flexWrap: "nowrap",
         }}
       >
@@ -65,7 +65,7 @@ export function KeyOperationsPanel({
             onClick={onTitleClick}
             sx={{
               ...getScenarioPanelTitleStyles(theme),
-              mb: theme.spacingTokens.component.sm,
+              mb: theme.space.component.sm,
             }}
           >
             Key operations

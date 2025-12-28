@@ -94,19 +94,19 @@ export default function TableView() {
           alignItems: "center",
           justifyContent: "center",
           height: "100%",
-          p: theme.spacing(theme.spacingTokens.component.xl),
+          p: theme.space.component.xl,
           textAlign: "center",
         }}
       >
         <Typography
           variant="h6"
-          sx={{ color: theme.palette.grey[600], mb: theme.spacingTokens.component.lg }}
+          sx={{ color: theme.palette.grey[600], mb: theme.space.component.lg }}
         >
           No scenarios selected
         </Typography>
         <Typography
           variant="body2"
-          sx={{ color: theme.palette.grey[500], mb: theme.spacingTokens.section.sm, maxWidth: theme.layout.maxWidth.md }}
+          sx={{ color: theme.palette.grey[500], mb: theme.space.section.sm, maxWidth: theme.layout.maxWidth.md }}
         >
           Select scenarios in List View to view detailed metrics and export
           data.
@@ -136,12 +136,12 @@ export default function TableView() {
       {/* Filter Bar */}
       <Box
         sx={{
-          p: theme.spacingTokens.component.lg,
+          p: theme.space.component.lg,
           backgroundColor: theme.palette.background.paper,
           borderBottom: theme.border.medium,
           display: "flex",
           flexWrap: "wrap",
-          gap: theme.spacingTokens.gap.lg,
+          gap: theme.space.gap.lg,
         }}
       >
         {/* Search */}
@@ -192,7 +192,7 @@ export default function TableView() {
         </FormControl>
 
         {/* Quick Filters */}
-        <Box sx={{ display: "flex", gap: theme.spacingTokens.gap.sm, alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: theme.space.gap.sm, alignItems: "center" }}>
           <ToggleChip
             label="Outcomes only"
             active={showTiersOnly}
@@ -207,7 +207,7 @@ export default function TableView() {
 
         {/* Export buttons and results count */}
         <Box
-          sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: theme.spacingTokens.gap.sm }}
+          sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: theme.space.gap.sm }}
         >
           <Button
             variant="outlined"
@@ -233,14 +233,14 @@ export default function TableView() {
           >
             Export as JSON
           </Button>
-          <Typography variant="body2" sx={{ color: theme.palette.grey[600], ml: theme.spacingTokens.component.lg }}>
+          <Typography variant="body2" sx={{ color: theme.palette.grey[600], ml: theme.space.component.lg }}>
             Showing {filteredMetrics.length} of {outcomeMetrics.length} metrics
           </Typography>
         </Box>
       </Box>
 
       {/* Table */}
-      <Box sx={{ flex: 1, overflowY: "auto", p: theme.spacingTokens.component.lg }}>
+      <Box sx={{ flex: 1, overflowY: "auto", p: theme.space.component.lg }}>
         {filteredMetrics.length === 0 ? (
           <Box
             sx={{
@@ -254,7 +254,7 @@ export default function TableView() {
             <Typography variant="body2">No metrics match your filters</Typography>
           </Box>
         ) : (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: theme.spacingTokens.gap.md }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: theme.space.gap.md }}>
             {filteredMetrics.map((metric) => (
               <MetricRow
                 key={metric.id}
@@ -285,7 +285,7 @@ function MetricRow({
   return (
     <Box
       sx={{
-        p: theme.spacingTokens.component.lg,
+        p: theme.space.component.lg,
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.borderRadius.md,
         border: theme.border.light,
@@ -299,7 +299,7 @@ function MetricRow({
         },
       }}
     >
-      <Box sx={{ display: "flex", gap: theme.spacingTokens.gap.lg, alignItems: "flex-start" }}>
+      <Box sx={{ display: "flex", gap: theme.space.gap.lg, alignItems: "flex-start" }}>
         {/* Left: category icon */}
         <Box
           sx={{
@@ -322,13 +322,13 @@ function MetricRow({
         {/* Middle: Content */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           {/* Name and Unit */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: theme.spacingTokens.gap.sm, mb: theme.spacingTokens.component.xs }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm, mb: theme.space.component.xs }}>
             <Typography variant="subtitle1">{metric.name}</Typography>
             <Chip
               label={metric.unit}
               size="small"
               sx={{
-                ...theme.typography.compact.caption,
+                ...theme.typography.compactCaption,
                 height: theme.spacing(2.5),
               }}
             />
@@ -337,7 +337,7 @@ function MetricRow({
                 label="TIER"
                 size="small"
                 sx={{
-                  ...theme.typography.compact.caption,
+                  ...theme.typography.compactCaption,
                   backgroundColor: theme.palette.accent.orange,
                   color: theme.palette.common.white,
                   height: theme.spacing(2.5),
@@ -347,23 +347,23 @@ function MetricRow({
           </Box>
 
           {/* Description */}
-          <Typography variant="compactSubtitle" sx={{ color: theme.palette.grey[600], mb: theme.spacingTokens.component.sm }}>
+          <Typography variant="compactSubtitle" sx={{ color: theme.palette.grey[600], mb: theme.space.component.sm }}>
             {metric.description}
           </Typography>
 
           {/* Metadata Tags */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.spacingTokens.gap.xs }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: theme.space.gap.xs }}>
             <Chip
               label={category?.name || "Unknown"}
               size="small"
               variant="outlined"
-              sx={{ ...theme.typography.compact.caption }}
+              sx={{ ...theme.typography.compactCaption }}
             />
             <Chip
               label={metric.spatialType}
               size="small"
               variant="outlined"
-              sx={{ ...theme.typography.compact.caption }}
+              sx={{ ...theme.typography.compactCaption }}
             />
             {metric.temporal.map((t) => (
               <Chip
@@ -371,7 +371,7 @@ function MetricRow({
                 label={t}
                 size="small"
                 variant="outlined"
-                sx={{ ...theme.typography.compact.caption }}
+                sx={{ ...theme.typography.compactCaption }}
               />
             ))}
             {metric.showOnMap && (
@@ -379,7 +379,7 @@ function MetricRow({
                 label="📍"
                 size="small"
                 sx={{
-                  ...theme.typography.compact.caption,
+                  ...theme.typography.compactCaption,
                   backgroundColor: theme.palette.nature.earth,
                   color: theme.palette.common.white,
                   minWidth: "auto",
@@ -398,7 +398,7 @@ function MetricRow({
               alignItems: "center",
               justifyContent: "center",
               minWidth: "80px",
-              p: theme.spacingTokens.component.sm,
+              p: theme.space.component.sm,
               backgroundColor: theme.palette.grey[100],
               borderRadius: theme.borderRadius.md,
               flexShrink: 0,

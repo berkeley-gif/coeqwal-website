@@ -66,7 +66,7 @@ export function CallResponsePanel({
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
         // Responsive horizontal padding using page.x tokens (24px / 48px)
-        px: (theme: Theme) => theme.spacingTokens.page.x,
+        px: (theme: Theme) => theme.space.page.x,
       }}
     >
       <motion.div
@@ -102,7 +102,7 @@ export function CallResponsePanel({
             display: "flex",
             flexDirection: "column",
             // Responsive gap using panel.xs tokens (16px / 20px / 24px)
-            gap: (theme: Theme) => theme.spacingTokens.panel.xs,
+            gap: (theme: Theme) => theme.space.panel.xs,
             backgroundColor: "transparent",
             backdropFilter: "none",
             borderRadius: 0,

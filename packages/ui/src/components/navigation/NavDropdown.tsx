@@ -82,7 +82,7 @@ export function NavDropdown({
           "& .MuiPaper-root": {
             backgroundColor: (theme) => theme.palette.background.paper,
             borderRadius: (theme) => theme.borderRadius.md,
-            mt: (theme) => theme.spacingTokens.component.sm,
+            mt: (theme) => theme.space.component.sm,
             minWidth: "200px",
             boxShadow: (theme) => theme.shadow.md,
             border: (theme) => `1px solid ${theme.palette.action.hover}`,
@@ -97,8 +97,8 @@ export function NavDropdown({
               color: (theme) => theme.palette.blue.darkest,
               fontSize: (theme) => theme.typography.nav.fontSize,
               fontFamily: (theme) => theme.typography.fontFamily,
-              py: (theme) => theme.spacingTokens.component.md,
-              px: (theme) => theme.spacingTokens.component.lg,
+              py: (theme) => theme.space.component.md,
+              px: (theme) => theme.space.component.lg,
               "&:hover": {
                 backgroundColor: (theme) => theme.palette.action.hover,
                 color: (theme) => theme.palette.blue.darkest,

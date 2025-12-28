@@ -45,7 +45,7 @@ export function OperationsIconGroup({
       <Box
         sx={{
           display: "flex",
-          gap: { xs: theme.spacingTokens.gap.xs, md: theme.spacingTokens.gap.sm },
+          gap: { xs: theme.space.gap.xs, md: theme.space.gap.sm },
           alignItems: "flex-start",
           flexDirection: layout === "horizontal" ? "row" : "column",
           justifyContent: "flex-start",
@@ -57,8 +57,8 @@ export function OperationsIconGroup({
             <>
               <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                 {scenarioTheme === "groundwater"
-                  ? "SGMA Limits"
-                  : "Environmental Flows"}
+                  ? "SGMA limits"
+                  : "Environmental flows"}
               </Typography>
               {getThemeIconDescription(scenarioTheme, scenarioId)}
             </>
@@ -110,7 +110,7 @@ export function OperationsIconGroup({
           content={
             <>
               <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
-                TUCPs Allowed
+                TUCPs allowed
               </Typography>
               Temporary Urgent Change Petitions (TUCPs) permit changes during
               droughts to meet human health and safety needs and protect
@@ -144,7 +144,7 @@ export function OperationsIconGroup({
     <Box
       sx={{
         display: "flex",
-        gap: { xs: theme.spacingTokens.gap.xs, md: theme.spacingTokens.gap.sm },
+        gap: { xs: theme.space.gap.xs, md: theme.space.gap.sm },
         alignItems: "flex-start",
         flexDirection: layout === "horizontal" ? "row" : "column",
         justifyContent: "flex-start",

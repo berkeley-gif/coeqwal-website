@@ -189,7 +189,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 height: theme.spacing(5.5),
               }}
             >
-              <Typography variant="subtitle2" sx={{ ml: theme.spacingTokens.component.xs }}>
+              <Typography variant="subtitle2">
                 Choose scenarios
               </Typography>
               {compact && (
@@ -217,12 +217,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
                     justifyContent: "space-between",
-                    gap: theme.spacingTokens.gap.lg,
+                    gap: theme.space.gap.lg,
                     height: theme.spacing(5.5),
                   }}
                 >
                   {/* Align with center of first outcome label column */}
-                  <Typography variant="subtitle2" sx={{ ml: theme.spacingTokens.component.xl }}>
+                  <Typography variant="subtitle2" sx={{ ml: theme.space.component.xl }}>
                     Key outcomes
                   </Typography>
                   <GridControls
@@ -244,8 +244,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               gridColumn: "4 / -1",
               display: compact ? "none" : { xs: "none", lg: "grid" },
               gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
-              gap: theme.spacingTokens.gap.sm,
-              pb: theme.spacingTokens.component.md,
+              gap: theme.space.gap.sm,
+              pb: theme.space.component.md,
             }}
           >
             {outcomeNames.map(({ name, displayName }) => {
@@ -279,7 +279,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 0,
-                      mt: theme.spacingTokens.component.xs,
+                      mt: theme.space.component.xs,
                     }}
                   >
                     <InfoIconButton
@@ -345,8 +345,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       ? theme.palette.common.white
                       : "#faf8f5",
                     borderRadius: theme.borderRadius.md,
-                    padding: compact ? theme.spacingTokens.component.xl : theme.spacingTokens.component.md,
-                    gap: theme.spacingTokens.gap.sm,
+                    padding: compact ? theme.space.component.xl : theme.space.component.md,
+                    gap: theme.space.gap.sm,
                     alignItems: compact ? "stretch" : "start",
                     transition: theme.transition.default,
                     border: isHighlighted
@@ -355,7 +355,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     "&:hover": {
                       backgroundColor: theme.palette.background.paper,
                     },
-                    ...(index === 0 && { marginTop: theme.spacingTokens.component.sm }),
+                    ...(index === 0 && { marginTop: theme.space.component.sm }),
                   }}
                 >
                   {/* Column 1: Checkbox */}
@@ -382,7 +382,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         cursor: "pointer",
                         pointerEvents: "none",
                         position: "relative",
-                        top: theme.spacing(0.125),
+                        top: theme.spacing(0.375),
                         transform: "scale(0.9)",
                       }}
                     />
@@ -394,7 +394,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       sx={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: theme.spacingTokens.gap.md,
+                        gap: theme.space.gap.md,
                       }}
                     >
                       {/* First row: Title/description + Key operations */}
@@ -403,7 +403,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "stretch",
-                          gap: theme.spacingTokens.gap.lg,
+                          gap: theme.space.gap.lg,
                         }}
                       >
                         <StrategyHeader
@@ -415,7 +415,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: theme.spacingTokens.gap.md,
+                            gap: theme.space.gap.md,
                             flexShrink: 0,
                           }}
                         >
@@ -435,7 +435,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: theme.spacingTokens.gap.md,
+                          gap: theme.space.gap.md,
                         }}
                       >
                         <Typography variant="subtitle2">Key outcomes</Typography>
@@ -443,7 +443,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: theme.spacingTokens.gap.lg,
+                            gap: theme.space.gap.lg,
                           }}
                         >
                           <Box
@@ -453,7 +453,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                 xs: "repeat(3, 1fr)",
                                 sm: "repeat(5, 1fr)",
                               },
-                              gap: theme.spacingTokens.gap.sm,
+                              gap: theme.space.gap.sm,
                             }}
                           >
                             {outcomeNames.slice(0, 5).map(({ name, displayName }) =>
@@ -467,7 +467,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                                 xs: "repeat(3, 1fr)",
                                 sm: "repeat(5, 1fr)",
                               },
-                              gap: theme.spacingTokens.gap.sm,
+                              gap: theme.space.gap.sm,
                             }}
                           >
                             {outcomeNames.slice(5).map(({ name, displayName }) =>
@@ -505,8 +505,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             xs: "repeat(3, 1fr)",
                             lg: "repeat(auto-fit, minmax(60px, 1fr))",
                           },
-                          gap: theme.spacingTokens.gap.sm,
-                          mt: { xs: theme.spacingTokens.component.lg, lg: 0 },
+                          gap: theme.space.gap.sm,
+                          mt: { xs: theme.space.component.lg, lg: 0 },
                           maxWidth: "100%",
                         }}
                       >
@@ -532,10 +532,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         xs: "32px minmax(0, 1fr)",
                         lg: "32px minmax(0, 1fr)",
                       },
-                      gap: theme.spacingTokens.gap.sm,
-                      columnGap: theme.spacingTokens.gap.lg,
+                      gap: theme.space.gap.sm,
+                      columnGap: theme.space.gap.lg,
                       alignItems: "start",
-                      mb: theme.spacingTokens.component.sm,
+                      mb: theme.space.component.sm,
                     }}
                   >
                     <Box />
@@ -547,13 +547,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         }
                         sx={{
                           position: "absolute",
-                          top: theme.spacingTokens.component.sm,
-                          right: theme.spacingTokens.component.sm,
+                          top: theme.space.component.sm,
+                          right: theme.space.component.sm,
                           background: "none",
                           ...theme.typography.body2,
                           border: "none",
                           cursor: "pointer",
-                          padding: theme.spacingTokens.component.xs,
+                          padding: theme.space.component.xs,
                           display: "flex",
                           alignItems: "center",
                           color: theme.palette.grey[500],
@@ -586,7 +586,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     key={`divider-${scenario.scenarioId}`}
                     sx={{
                       gridColumn: "1 / -1",
-                      my: theme.spacingTokens.section.sm,
+                      my: theme.space.section.sm,
                       height: "1px",
                       backgroundColor: theme.palette.grey[300],
                     }}

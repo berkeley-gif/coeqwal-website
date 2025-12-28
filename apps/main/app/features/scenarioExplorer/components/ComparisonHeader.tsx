@@ -40,9 +40,9 @@ export function ComparisonHeader({
   return (
     <Box
       sx={{
-        px: theme.spacingTokens.component.lg,
-        pt: theme.spacingTokens.component.lg,
-        pb: theme.spacingTokens.component.sm,
+        px: theme.space.component.lg,
+        pt: theme.space.component.lg,
+        pb: theme.space.component.sm,
         backgroundColor: theme.palette.background.paper,
         borderBottom: theme.border.medium,
         height: "100%",
@@ -53,8 +53,8 @@ export function ComparisonHeader({
         sx={{
           display: "flex",
           alignItems: "baseline",
-          gap: theme.spacingTokens.gap.md,
-          mb: theme.spacingTokens.component.sm,
+          gap: theme.space.gap.md,
+          mb: theme.space.component.sm,
           flexWrap: "wrap",
         }}
       >
@@ -69,7 +69,7 @@ export function ComparisonHeader({
         sx={{
           display: "flex",
           flexWrap: "wrap",
-          gap: theme.spacingTokens.gap.sm,
+          gap: theme.space.gap.sm,
         }}
       >
         {comparisonData.map((scenario, index) => {
@@ -81,10 +81,10 @@ export function ComparisonHeader({
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: theme.spacingTokens.gap.xs,
+                gap: theme.space.gap.xs,
                 cursor: "pointer",
-                px: theme.spacingTokens.component.sm,
-                py: theme.spacingTokens.component.xs,
+                px: theme.space.component.sm,
+                py: theme.space.component.xs,
                 borderRadius: theme.borderRadius.xs,
                 backgroundColor: isHighlighted
                   ? theme.palette.grey[100]

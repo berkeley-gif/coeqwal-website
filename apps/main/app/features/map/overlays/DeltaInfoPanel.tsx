@@ -99,14 +99,14 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       sx={{
         backgroundColor: theme.background.whiteOverlay[95],
         borderRadius: theme.borderRadius.none,
-        padding: theme.spacingTokens.panel.xs,
+        padding: theme.space.panel.xs,
         boxShadow: theme.shadow.sm,
         pointerEvents: "auto",
       }}
     >
       <Typography
         variant="body1"
-        sx={{ mb: theme.spacingTokens.component.lg, color: theme.palette.grey[900] }}
+        sx={{ mb: theme.space.component.lg, color: theme.palette.grey[900] }}
       >
         What and where is &quot;The Delta&quot;?
       </Typography>
@@ -118,7 +118,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           display: "flex",
           alignItems: "center",
           ...theme.typography.subtitle2,
-          gap: theme.spacingTokens.gap.sm,
+          gap: theme.space.gap.sm,
           background: "none",
           border: "none",
           cursor: "pointer",
@@ -139,7 +139,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         <Typography
           variant="body2"
           sx={{
-            mt: theme.spacingTokens.component.lg,
+            mt: theme.space.component.lg,
           }}
         >
           The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the

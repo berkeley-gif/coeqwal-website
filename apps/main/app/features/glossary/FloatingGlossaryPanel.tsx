@@ -192,7 +192,7 @@ export function FloatingGlossaryPanel({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: theme.spacingTokens.section.sm,
+            padding: theme.space.section.sm,
             borderBottom: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
             position: "sticky",
@@ -216,10 +216,10 @@ export function FloatingGlossaryPanel({
           sx={{
             flex: 1,
             overflowY: "auto",
-            padding: theme.spacingTokens.section.sm,
+            padding: theme.space.section.sm,
           }}
         >
-          <Stack spacing={theme.spacingTokens.gap.lg}>
+          <Stack spacing={theme.space.gap.lg}>
             {glossaryTerms.map((term, index) => (
               <React.Fragment key={index}>
                 <Box
@@ -234,13 +234,13 @@ export function FloatingGlossaryPanel({
                             theme.palette.blue.bright,
                             0.08,
                           ),
-                          padding: theme.spacingTokens.component.lg,
+                          padding: theme.space.component.lg,
                           borderRadius: theme.borderRadius.md,
                           border: theme.border.focus,
                           transition: theme.transition.default,
                         }
                       : {
-                          padding: theme.spacingTokens.component.lg,
+                          padding: theme.space.component.lg,
                         }
                   }
                 >
@@ -250,8 +250,8 @@ export function FloatingGlossaryPanel({
                       display: "flex",
                       alignItems: "flex-start",
                       // Tighter spacing between header and definition
-                      mb: theme.spacingTokens.component.xs,
-gap: theme.spacingTokens.gap.sm,
+                      mb: theme.space.component.xs,
+gap: theme.space.gap.sm,
                     ml: -1, // intentional offset for icon alignment
                     }}
                   >
@@ -279,23 +279,23 @@ gap: theme.spacingTokens.gap.sm,
                   </Box>
 
                   {/* Definition */}
-                  <Box sx={{ ml: theme.spacingTokens.section.md }}>{renderDefinition(term.definition)}</Box>
+                  <Box sx={{ ml: theme.space.section.md }}>{renderDefinition(term.definition)}</Box>
 
                   {/* Tiers (if applicable) */}
                   {term.tiers && term.tiers.length > 0 && (
-                    <Box sx={{ ml: theme.spacingTokens.section.md, mt: theme.spacingTokens.component.lg }}>
+                    <Box sx={{ ml: theme.space.section.md, mt: theme.space.component.lg }}>
                       <Typography
                         variant="subtitle2"
                         sx={{
                           fontWeight: 600,
-                          mb: theme.spacingTokens.component.sm,
+                          mb: theme.space.component.sm,
                         }}
                       >
                         Tiers:
                       </Typography>
                       <Stack spacing={1}>
                         {term.tiers.map((tier, tierIndex) => (
-                          <Box key={tierIndex} sx={{ display: "flex", gap: theme.spacingTokens.gap.sm }}>
+                          <Box key={tierIndex} sx={{ display: "flex", gap: theme.space.gap.sm }}>
                             <Box
                               sx={{
                                 width: 16,
@@ -317,7 +317,7 @@ gap: theme.spacingTokens.gap.sm,
 
                   {/* See also */}
                   {term.seeAlso && (
-                    <Box sx={{ ml: theme.spacingTokens.section.md, mt: theme.spacingTokens.component.lg }}>
+                    <Box sx={{ ml: theme.space.section.md, mt: theme.space.component.lg }}>
                       <Typography variant="body2" color="text.secondary">
                         <em>See also: </em>
                         <Box

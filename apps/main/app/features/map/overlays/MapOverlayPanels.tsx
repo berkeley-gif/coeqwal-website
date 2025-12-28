@@ -385,7 +385,7 @@ export default function MapOverlayPanels() {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  mt: theme.spacingTokens.component.xl,
+                  mt: theme.space.component.xl,
                 }}
               >
                 <Box
@@ -559,7 +559,7 @@ export default function MapOverlayPanels() {
                 isVisible={isFirstPanelVisible}
                 sx={{ minHeight: "auto", mb: 0 }}
               >
-                <Typography variant="body1" sx={{ mb: theme.spacingTokens.component.lg }}>
+                <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
                   These waters flow to the Valley floor, where the{" "}
                   <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                     Sacramento River
@@ -651,7 +651,7 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1" sx={{ mb: theme.spacingTokens.component.lg }}>
+              <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
                 To do this water planning and accounting, the federal{" "}
                 <Box component="span" sx={{ fontWeight: theme.typography.fontWeightSemiBold }}>
                   U.S. Bureau of Reclamation
@@ -818,10 +818,10 @@ export default function MapOverlayPanels() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: theme.spacingTokens.gap.sm,
+                  gap: theme.space.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: theme.spacingTokens.page.x, // Match left panel padding
+                  pr: theme.space.page.x, // Match left panel padding
                   pointerEvents: "none",
                 }}
               >
@@ -884,7 +884,7 @@ export default function MapOverlayPanels() {
                             <>
                               <Typography
                                 variant="tooltipHeader"
-                                sx={{ mb: theme.spacingTokens.component.xs }}
+                                sx={{ mb: theme.space.component.xs }}
                               >
                                 Strategy
                               </Typography>
@@ -894,7 +894,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.spacingTokens.component.sm,
+                                  mt: theme.space.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >
@@ -979,7 +979,7 @@ export default function MapOverlayPanels() {
                             <>
                               <Typography
                                 variant="tooltipHeader"
-                                sx={{ mb: theme.spacingTokens.component.xs }}
+                                sx={{ mb: theme.space.component.xs }}
                               >
                                 Key operations
                               </Typography>
@@ -990,7 +990,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.spacingTokens.component.sm,
+                                  mt: theme.space.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >
@@ -1069,7 +1069,7 @@ export default function MapOverlayPanels() {
                             <>
                               <Typography
                                 variant="tooltipHeader"
-                                sx={{ mb: theme.spacingTokens.component.xs }}
+                                sx={{ mb: theme.space.component.xs }}
                               >
                                 Key outcomes
                               </Typography>
@@ -1078,7 +1078,7 @@ export default function MapOverlayPanels() {
                               communities.
                               <Box
                                 component="span"
-                                sx={{ display: "block", mt: theme.spacingTokens.component.sm }}
+                                sx={{ display: "block", mt: theme.space.component.sm }}
                               >
                                 Some outcomes record values from multiple
                                 locations in a bar chart that shows the number
@@ -1090,7 +1090,7 @@ export default function MapOverlayPanels() {
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.spacingTokens.component.sm,
+                                  mt: theme.space.component.sm,
                                   fontStyle: "italic",
                                 }}
                               >

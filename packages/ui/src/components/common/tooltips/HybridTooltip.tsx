@@ -113,8 +113,9 @@ const getTooltipSlotProps = (
       boxShadow: theme.shadow.md,
       width,
       maxWidth,
-      padding: theme.spacing(theme.spacingTokens.component.md, theme.spacingTokens.component.lg),
-      ...theme.typography.compact.subtitle,
+      py: theme.space.component.md,
+      px: theme.space.component.lg,
+      ...theme.typography.compactSubtitle,
     },
   },
   arrow: {
@@ -173,8 +174,9 @@ export function HybridTooltip({
             borderRadius: theme.borderRadius.md,
             width,
             maxWidth,
-            padding: theme.spacing(theme.spacingTokens.component.md, theme.spacingTokens.component.lg),
-            ...theme.typography.compact.subtitle,
+            py: theme.space.component.md,
+            px: theme.space.component.lg,
+            ...theme.typography.compactSubtitle,
           }}
         >
           <TooltipCloseButton onClick={handleClose} />
@@ -265,8 +267,9 @@ export function HybridTooltip({
               borderRadius: theme.borderRadius.md,
               width,
               maxWidth,
-              padding: theme.spacing(theme.spacingTokens.component.md, theme.spacingTokens.component.lg),
-              ...theme.typography.compact.subtitle,
+              py: theme.space.component.md,
+              px: theme.space.component.lg,
+              ...theme.typography.compactSubtitle,
               pointerEvents: "auto",
             }}
             onMouseEnter={() => setOpen(true)}

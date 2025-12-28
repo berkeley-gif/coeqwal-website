@@ -136,7 +136,7 @@ export default function LearnPanel() {
                 justifyContent: "center",
                 color: "theme.palette.common.white",
                 flexDirection: "column",
-                gap: theme.spacingTokens.gap.lg,
+                gap: theme.space.gap.lg,
                 pointerEvents: "none", // Don't block map panning while loading
               }}
             >
@@ -163,7 +163,7 @@ export default function LearnPanel() {
       <Box
         sx={{
           backgroundColor: theme.palette.learn.background,
-          padding: (theme) => theme.spacing(theme.spacingTokens.section.lg),
+          p: (theme) => theme.space.section.lg,
           paddingBottom: "100px", // Extended bottom padding for visual balance
           position: "relative",
           zIndex: theme.zIndex.appBar,
@@ -177,7 +177,7 @@ export default function LearnPanel() {
             alignItems: { sm: "flex-start", md: "center" },
             flexDirection: { sm: "column-reverse", lg: "row" },
             justifyContent: "center",
-            gap: (theme) => theme.spacingTokens.gap.lg,
+            gap: (theme) => theme.space.gap.lg,
             width: "100%",
             maxWidth: theme.layout.maxWidth.xl,
             margin: "0 auto",
@@ -206,8 +206,8 @@ export default function LearnPanel() {
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: (theme) => theme.spacingTokens.gap.md,
-                  mt: (theme) => theme.spacingTokens.section.xs,
+                  gap: (theme) => theme.space.gap.md,
+                  mt: (theme) => theme.space.section.xs,
                 }}
               >
                 <Card
@@ -221,7 +221,7 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
+                      p: (theme) => theme.space.component.lg,
                     }}
                   >
                     <CardContent sx={{ height: "100%" }}>
@@ -242,7 +242,7 @@ export default function LearnPanel() {
                 >
                   <CardActionArea
                     sx={{
-                      padding: (theme) => theme.spacing(theme.spacingTokens.component.lg),
+                      p: (theme) => theme.space.component.lg,
                     }}
                   >
                     <CardContent sx={{ height: "100%" }}>

@@ -34,8 +34,8 @@ export function LeadingMarkerText({
         display: "grid",
         gridTemplateColumns: "48px 1fr",
         gridTemplateRows: "auto auto",
-        columnGap: theme.spacing(theme.spacingTokens.gap.lg),
-        rowGap: theme.spacing(theme.spacingTokens.gap.sm),
+        columnGap: theme.space.gap.lg,
+        rowGap: theme.space.gap.sm,
         alignItems: "start",
       })}
     >
@@ -91,7 +91,7 @@ export function LeadingMarkerText({
           color: (theme) => theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
-          gap: (theme) => theme.spacingTokens.gap.lg,
+          gap: (theme) => theme.space.gap.lg,
         }}
       >
         {children}

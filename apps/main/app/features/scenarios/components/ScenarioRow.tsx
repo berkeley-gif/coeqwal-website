@@ -168,8 +168,8 @@ export function ScenarioRow({
             ? theme.palette.common.white
             : theme.palette.undertone.warm,
           borderRadius: theme.borderRadius.md,
-          padding: compact ? theme.spacingTokens.component.xl : theme.spacingTokens.component.md,
-          gap: theme.spacingTokens.gap.sm,
+          padding: compact ? theme.space.component.xl : theme.space.component.md,
+          gap: theme.space.gap.sm,
           alignItems: compact ? "stretch" : "start",
           transition: theme.transition.default,
           border: isHighlighted
@@ -218,7 +218,7 @@ export function ScenarioRow({
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: theme.spacingTokens.gap.md,
+              gap: theme.space.gap.md,
             }}
           >
             {/* First row: Title/description + Key operations */}
@@ -227,7 +227,7 @@ export function ScenarioRow({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "stretch",
-                gap: theme.spacingTokens.gap.lg,
+                gap: theme.space.gap.lg,
               }}
             >
               <StrategyHeader
@@ -239,7 +239,7 @@ export function ScenarioRow({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: theme.spacingTokens.gap.md,
+                  gap: theme.space.gap.md,
                   flexShrink: 0,
                 }}
               >
@@ -257,7 +257,7 @@ export function ScenarioRow({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: theme.spacingTokens.gap.md,
+                gap: theme.space.gap.md,
               }}
             >
               <Typography variant="subtitle2">Key outcomes</Typography>
@@ -265,7 +265,7 @@ export function ScenarioRow({
                 sx={{
                   display: "flex",
                   flexDirection: "column",
-                  gap: theme.spacingTokens.gap.lg,
+                  gap: theme.space.gap.lg,
                 }}
               >
                 {/* First 5 outcomes (multi-location) */}
@@ -276,7 +276,7 @@ export function ScenarioRow({
                       xs: "repeat(3, 1fr)",
                       sm: "repeat(5, 1fr)",
                     },
-                    gap: theme.spacingTokens.gap.sm,
+                    gap: theme.space.gap.sm,
                   }}
                 >
                   {outcomeNames.slice(0, 5).map(({ name, displayName }) =>
@@ -291,7 +291,7 @@ export function ScenarioRow({
                       xs: "repeat(3, 1fr)",
                       sm: "repeat(5, 1fr)",
                     },
-                    gap: theme.spacingTokens.gap.sm,
+                    gap: theme.space.gap.sm,
                   }}
                 >
                   {outcomeNames.slice(5).map(({ name, displayName }) =>
@@ -329,8 +329,8 @@ export function ScenarioRow({
                   xs: "repeat(3, 1fr)",
                   lg: "repeat(auto-fit, minmax(60px, 1fr))",
                 },
-                gap: theme.spacingTokens.gap.sm,
-                mt: { xs: theme.spacingTokens.component.lg, lg: 0 },
+                gap: theme.space.gap.sm,
+                mt: { xs: theme.space.component.lg, lg: 0 },
                 maxWidth: "100%",
               }}
             >
@@ -354,10 +354,10 @@ export function ScenarioRow({
             },
             backgroundColor: theme.palette.grey[50],
             borderRadius: theme.borderRadius.md,
-            padding: theme.spacingTokens.component.md,
-            gap: theme.spacingTokens.gap.sm,
+            padding: theme.space.component.md,
+            gap: theme.space.gap.sm,
             mt: -0.5, // intentional overlap
-            mb: theme.spacingTokens.component.xs,
+            mb: theme.space.component.xs,
           }}
         >
           <Box /> {/* Spacer for checkbox column */}

@@ -87,7 +87,7 @@ export default function DataExplorerView({
                 fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.grey[600],
                 px: 0,
-                mr: theme.spacingTokens.section.md,
+                mr: theme.space.section.md,
                 "&.Mui-selected": {
                   color: theme.palette.blue.darkest,
                 },
@@ -128,7 +128,7 @@ export default function DataExplorerView({
               sx={{
                 color: theme.palette.grey[600],
                 textAlign: "center",
-                mb: theme.spacingTokens.section.sm,
+                mb: theme.space.section.sm,
                 maxWidth: theme.layout.maxWidth.md,
               }}
             >

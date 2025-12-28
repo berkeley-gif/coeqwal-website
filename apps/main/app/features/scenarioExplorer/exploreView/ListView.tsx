@@ -124,7 +124,7 @@ export default function ListView({ compact = false, onTierClick }: ListViewProps
           justifyContent: "center",
           alignItems: "center",
           height: "100%",
-          p: theme.spacingTokens.component.xl,
+          p: theme.space.component.xl,
         }}
       >
         <Typography variant="body2">Loading scenarios...</Typography>
@@ -177,8 +177,8 @@ export default function ListView({ compact = false, onTierClick }: ListViewProps
         <Box
           sx={{
             flexShrink: 0,
-            px: theme.spacingTokens.component.xl,
-            pt: theme.spacingTokens.component.md,
+            px: theme.space.component.xl,
+            pt: theme.space.component.md,
             backgroundColor: theme.palette.grey[100],
           }}
         >
@@ -191,8 +191,8 @@ export default function ListView({ compact = false, onTierClick }: ListViewProps
             minHeight: 0,
             overflowY: "auto",
             overscrollBehavior: "contain",
-            px: theme.spacingTokens.component.xl,
-            pb: theme.spacingTokens.section.xl,
+            px: theme.space.component.xl,
+            pb: theme.space.section.xl,
           }}
         >
           <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
@@ -215,9 +215,9 @@ export default function ListView({ compact = false, onTierClick }: ListViewProps
           flex: 1,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          px: theme.spacingTokens.component.md,
-          pt: theme.spacingTokens.component.sm,
-          pb: theme.spacingTokens.section.xl,
+          px: theme.space.component.xl,
+          pt: theme.space.component.sm,
+          pb: theme.space.section.xl,
         }}
       >
         <StrategyGrid {...strategyGridProps} renderMode="all" />
