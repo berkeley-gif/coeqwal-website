@@ -28,18 +28,18 @@ import { createTheme, Theme } from "@mui/material/styles"
  * To switch fonts, change ACTIVE_FONT_PRESET below.
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "system" | "avenirNext"
+ * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
  */
 
 type FontPresetKey =
   | "neueHaas"
-  | "realPro"
   | "roboto"
   | "inter"
+  | "openSans"
   | "system"
   | "avenirNext"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "avenirNext" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   neueHaas: {
@@ -65,6 +65,12 @@ const FONT_PRESETS = {
     display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
     cssImport:
       '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+  },
+  openSans: {
+    text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
   },
   system: {
     text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
