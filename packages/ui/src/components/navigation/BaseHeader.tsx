@@ -204,10 +204,11 @@ export function BaseHeader({
 
   const shrink = useTransform(scrollY, [0, 120, 240], [0, 0.5, 1])
   // Always call hooks unconditionally
-  const headerHeightMotion = useTransform(shrink, [0, 1], [
-    "70px",
-    `${HEADER_SHRUNK_H}px`,
-  ])
+  const headerHeightMotion = useTransform(
+    shrink,
+    [0, 1],
+    ["70px", `${HEADER_SHRUNK_H}px`],
+  )
   const padYMotion = useTransform(shrink, [0, 1], ["12px", "4px"])
   const logoScale = useTransform(shrink, [0, 1], [1, 0.65])
 

@@ -432,9 +432,10 @@ export default function MapOverlayPanels() {
                   Central Valley
                 </Box>{" "}
                 is a long, low valley that collects much of California&apos;s
-                water. This water is stored, divided, and transported to farms
-                and cities across the state, supporting some of the most
-                productive agricultural land in the country.
+                water from surrounding mountains. This water is stored, divided
+                up, and used to irrigate the most productive farmland in the
+                world, to supply drinking water to millions of people, and to
+                protect sensitive species and ecosystems.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -646,11 +647,9 @@ export default function MapOverlayPanels() {
               isVisible={isFirstPanelVisible}
             >
               <Typography variant="body1">
-                Water is diverted and distributed from multiple points along
-                this system. Some water is released from reservoirs. Some is
-                pumped from the Delta to the San Joaquin Valley and Southern
-                California. Some is allowed to flow out to the Pacific Ocean.
-                All of it must be carefully planned and accounted for.
+                Water is stored, diverted and distributed to multiple points
+                throughout the Valley and to cities along the coast. All of it
+                must be carefully accounted for.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -697,10 +696,9 @@ export default function MapOverlayPanels() {
                 .
               </Typography>
               <Typography variant="body1">
-                CalSim models how water would move through the system based on
-                the water management decisions that are made. It models how much
-                water flows into reservoirs based on climate assumptions, how
-                much is stored or released, and where it gets delivered.
+                CalSim simulates how much water flows into reservoirs based on
+                climate, how much is stored or released, and where it gets
+                delivered.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -723,30 +721,17 @@ export default function MapOverlayPanels() {
               isVisible={isFirstPanelVisible}
             >
               <Typography variant="body1">
-                The{" "}
+                Until now, this tool has been inaccessible to many communities,
+                creating barriers to participation in water decision-making. The{" "}
                 <Box
                   component="span"
                   sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
                 >
                   COEQWAL
                 </Box>{" "}
-                project has received support from the{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  University of California
-                </Box>{" "}
-                and the{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  Bay-Delta Science Program
-                </Box>{" "}
-                to use CalSim to explore a broad range of water management
-                strategies. We evaluate the results under current and future
-                climate conditions.
+                project uses CalSim to explore a wide range of different water
+                management strategies and climate futures. We are making these
+                scenarios available to the public.
               </Typography>
             </CallResponsePanel>
           </Box>
