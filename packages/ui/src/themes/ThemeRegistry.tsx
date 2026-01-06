@@ -10,7 +10,8 @@
 import * as React from "react"
 import { ThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
-import baseTheme from "./theme"
+import GlobalStyles from "@mui/material/GlobalStyles"
+import baseTheme, { fontCssImport } from "./theme"
 import storyTheme from "./storyTheme"
 
 interface ThemeRegistryProps {
@@ -26,8 +27,10 @@ export function ThemeRegistry({
 
   return (
     <ThemeProvider theme={themeToUse}>
-      {children}
+      {/* Font import must come before all other styles */}
+      {fontCssImport && <GlobalStyles styles={fontCssImport} />}
       <CssBaseline />
+      {children}
     </ThemeProvider>
   )
 }
