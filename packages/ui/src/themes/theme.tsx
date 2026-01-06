@@ -35,13 +35,24 @@ type FontPresetKey =
   | "neueHaas"
   | "roboto"
   | "inter"
+  | "workSans"
   | "openSans"
+  | "firaSans"
   | "system"
   | "avenirNext"
+  | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "lato" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
+  // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
+  lato: {
+    text: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");',
+  },
+  // Adobe TypeKit fonts - weights depend on TypeKit project configuration
   neueHaas: {
     text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     display:
@@ -54,30 +65,49 @@ const FONT_PRESETS = {
       '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
+  // Roboto: Available weights 100, 300, 400, 500, 700, 900 (no 600)
   roboto: {
     text: '"Roboto", Helvetica, Arial, sans-serif',
     display: '"Roboto", Helvetica, Arial, sans-serif',
     cssImport:
       '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
   },
+  // Inter: Variable font with all weights 100-900
   inter: {
     text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
     display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
     cssImport:
       '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
   },
+  // Work Sans: Variable font with all weights 100-900
+  workSans: {
+    text: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap");',
+  },
+  // Open Sans: Available weights 300-800
   openSans: {
     text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
     display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
     cssImport:
       '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
   },
+  // Fira Sans: Available weights 100-900
+  firaSans: {
+    text: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+    display: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+    cssImport:
+      '@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap");',
+  },
+  // System fonts - no import needed
   system: {
     text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     display:
       "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
-    cssImport: "", // No import needed for system fonts
+    cssImport: "",
   },
+  // Adobe TypeKit
   avenirNext: {
     text: '"avenir-next-lt-pro", sans-serif',
     display: '"avenir-next-lt-pro", sans-serif',
@@ -86,6 +116,9 @@ const FONT_PRESETS = {
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
+
+// Export font CSS import for ThemeRegistry (must load before other styles)
+export const fontCssImport = activeFont.cssImport
 
 /* ========================================================
  * 2. Design tokens
@@ -752,8 +785,6 @@ const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: `
-        ${activeFont.cssImport}
-                
         *, *::before, *::after {
           box-sizing: border-box;
         }
