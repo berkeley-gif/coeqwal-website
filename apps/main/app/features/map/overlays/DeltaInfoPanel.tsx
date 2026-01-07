@@ -99,7 +99,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       sx={{
         backgroundColor: theme.background.whiteOverlay[95],
         borderRadius: theme.borderRadius.none,
-        padding: theme.space.panel.xs,
+        padding: theme.space.card.xs,
         boxShadow: theme.shadow.sm,
         pointerEvents: "auto",
       }}

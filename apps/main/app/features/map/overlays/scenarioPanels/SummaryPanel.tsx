@@ -325,7 +325,7 @@ export function SummaryPanel({
           ? theme.palette.grey[50]
           : "rgba(255, 255, 255, 0.95)",
         borderRadius: isInline ? theme.borderRadius.md : 0,
-        padding: isInline ? theme.space.panel.xs : theme.space.panel.sm,
+        padding: isInline ? theme.space.card.xs : theme.space.card.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
         maxWidth: isInline

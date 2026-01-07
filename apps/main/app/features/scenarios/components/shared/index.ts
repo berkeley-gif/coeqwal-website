@@ -35,6 +35,3 @@ export type { ScenarioIcon, ScenarioIconConfig } from "./strategyIcons"
 // Types
 export type { ChartDataPoint, OutcomeName, ScenarioForDisplay } from "./types"
 export { isSingleValueTier } from "./types"
-
-// Styles
-export { getScenarioPanelTitleStyles } from "./scenarioStyles"

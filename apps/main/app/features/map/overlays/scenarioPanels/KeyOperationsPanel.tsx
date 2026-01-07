@@ -11,8 +11,6 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { HydroclimateChooser } from "../../../scenarios/components"
 import { OperationsIconGroup } from "../../../scenarios/components/shared"
-import { getLearnPanelBaseStyles } from "./learnPanelStyles"
-import { getScenarioPanelTitleStyles } from "../../../scenarios/components/shared"
 
 interface KeyOperationsPanelProps {
   scenarioId?: string
@@ -30,7 +28,7 @@ export function KeyOperationsPanel({
   if (isLoading) {
     return (
       <Box
-        sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}
+        sx={{ ...theme.scenarios.learnPanel.base, boxShadow: theme.shadow.sm }}
       >
         <Typography variant="body2">Loading...</Typography>
       </Box>
@@ -45,7 +43,7 @@ export function KeyOperationsPanel({
   return (
     <Box
       sx={{
-        ...getLearnPanelBaseStyles(theme),
+        ...theme.scenarios.learnPanel.base,
         boxShadow: theme.shadow.sm,
         width: "fit-content",
         maxWidth: "100%",
@@ -66,7 +64,7 @@ export function KeyOperationsPanel({
             variant="subtitle2"
             onClick={onTitleClick}
             sx={{
-              ...getScenarioPanelTitleStyles(theme),
+              ...theme.scenarios.panelTitle,
               mb: theme.space.component.sm,
             }}
           >

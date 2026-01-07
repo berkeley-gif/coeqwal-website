@@ -29,8 +29,7 @@ import {
   formatOutcomeLabel,
 } from "../../scenarios/components/shared"
 
-// Import extracted types, styles, and components
-import { gridStyles } from "./styles"
+// Import extracted types and components
 import { type StrategyGridProps } from "./types"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 import { GridControls } from "./GridControls"
@@ -187,7 +186,24 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         onForceClose={forceCloseTooltip}
       />
 
-      <Box sx={gridStyles.container(showMapView, theme, compact)}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: theme.scenarios.grid.columns,
+          gap: compact
+            ? theme.scenarios.grid.gap.compact
+            : theme.scenarios.grid.gap.default,
+          columnGap: theme.space.gap.lg,
+          alignItems: "start",
+          width: "100%",
+          ...(showMapView && {
+            maxHeight: "40vh",
+            overflowY: "auto",
+            overflowX: "hidden",
+            pt: theme.space.component.sm,
+          }),
+        }}
+      >
         {/* Column header - only render if not contentOnly mode */}
         {renderMode !== "contentOnly" && !showMapView && (
           <>

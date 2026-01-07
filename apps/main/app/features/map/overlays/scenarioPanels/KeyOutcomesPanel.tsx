@@ -18,8 +18,6 @@ import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { mapActions, useActiveOutcomeVisualization } from "../../store"
-import { getLearnPanelBaseStyles, learnPanelMaxWidth } from "./learnPanelStyles"
-import { getScenarioPanelTitleStyles } from "../../../scenarios/components/shared"
 
 interface KeyOutcomesPanelProps {
   scenarioId?: string
@@ -142,17 +140,17 @@ export function KeyOutcomesPanel({
   return (
     <Box
       sx={{
-        ...getLearnPanelBaseStyles(theme),
+        ...theme.scenarios.learnPanel.base,
         boxShadow: theme.shadow.sm,
         width: "100%",
-        maxWidth: learnPanelMaxWidth,
+        maxWidth: theme.scenarios.learnPanel.maxWidth,
       }}
     >
       <Typography
         variant="subtitle2"
         onClick={onTitleClick}
         sx={{
-          ...getScenarioPanelTitleStyles(theme),
+          ...theme.scenarios.panelTitle,
           mb: theme.space.component.sm,
         }}
       >

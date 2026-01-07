@@ -7,7 +7,7 @@
  * and optional CTA button. Supports scroll-based shrinking animation.
  */
 
-import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
+import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
@@ -79,6 +79,9 @@ export interface BaseHeaderProps {
   hideOnScroll?: boolean
   shrinkOnScroll?: boolean
   showLanguageSwitcher?: boolean
+
+  // Border props
+  borderBottom?: string
 }
 
 const translations: TranslationsMap = {
@@ -133,25 +136,30 @@ export function BaseHeader({
   hideOnScroll = true,
   shrinkOnScroll = true,
   showLanguageSwitcher = true,
+  borderBottom,
 }: BaseHeaderProps) {
-  // Responsive breakpoints (using standard MUI breakpoints)
+  // Theme and responsive breakpoints
+  const theme = useTheme()
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
 
   const buttonStyle = {
-    fontSize: "1rem",
-    fontWeight: 500, // theme.typography.fontWeightMedium - no theme access in this scope
+    fontFamily: theme.typography.h1.fontFamily, // display font
+    fontSize: "1.0625rem", // 17px
+    fontWeight: 500,
     color: textColor,
-    letterSpacing: 0.5,
+    letterSpacing: "0.015em",
     textTransform: "none" as const,
-    padding: "8px 16px",
-    transition: "opacity 0.3s ease-out", // theme.transition.fade equivalent
+    padding: "8px 20px",
+    transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
+    textShadow: theme.textShadow.nav,
     "&:hover": {
       backgroundColor: "transparent",
-      opacity: 0.7,
+      color: "#FFFFFF",
+      textShadow: theme.textShadow.navHover,
     },
     "&:active": {
-      backgroundColor: "transparent", // Hack for capsule shape it wants to make
+      backgroundColor: "transparent",
     },
     "&.MuiButton-root": {
       minWidth: "auto",
@@ -237,6 +245,7 @@ export function BaseHeader({
           color: textColor,
           borderRadius,
           boxShadow,
+          borderBottom,
           ...(position !== "sticky" ? { top: 0, left: 0, right: 0 } : null),
           height: "var(--header-h)",
         }}

@@ -10,7 +10,6 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { StrategyHeader } from "../../../scenarios/components/shared"
-import { getLearnPanelBaseStyles, learnPanelMaxWidth } from "./learnPanelStyles"
 
 interface StrategyInfoPanelProps {
   scenarioId?: string
@@ -28,7 +27,7 @@ export function StrategyInfoPanel({
   if (isLoading) {
     return (
       <Box
-        sx={{ ...getLearnPanelBaseStyles(theme), boxShadow: theme.shadow.sm }}
+        sx={{ ...theme.scenarios.learnPanel.base, boxShadow: theme.shadow.sm }}
       >
         <Typography variant="body2">Loading...</Typography>
       </Box>
@@ -43,10 +42,10 @@ export function StrategyInfoPanel({
   return (
     <Box
       sx={{
-        ...getLearnPanelBaseStyles(theme),
+        ...theme.scenarios.learnPanel.base,
         boxShadow: theme.shadow.sm,
         width: "100%",
-        maxWidth: learnPanelMaxWidth,
+        maxWidth: theme.scenarios.learnPanel.maxWidth,
       }}
     >
       <StrategyHeader

@@ -39,6 +39,8 @@ export type { InfoOverlayProps } from "./common/InfoOverlay"
 
 // Panel components
 export { OneColumnPanel } from "./panels/OneColumnPanel"
+export { DisplayBlock } from "./panels/DisplayBlock"
+export type { DisplayBlockProps } from "./panels/DisplayBlock"
 
 // Custom icons
 export {
