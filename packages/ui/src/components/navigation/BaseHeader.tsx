@@ -5,6 +5,12 @@
  *
  * Provides a responsive header with logo, navigation links, language switcher,
  * and optional CTA button. Supports scroll-based shrinking animation.
+ *
+ * WCAG 2.0 AA Compliance:
+ * - WCAG 1.3.1: Semantic nav element for navigation region
+ * - WCAG 2.4.1: Skip link for keyboard users to bypass navigation
+ * - WCAG 2.4.7: Focus-visible styles on all interactive elements
+ * - WCAG 4.1.2: Proper ARIA attributes on controls
  */
 
 import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
@@ -164,6 +170,11 @@ export function BaseHeader({
     "&.MuiButton-root": {
       minWidth: "auto",
     },
+    // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
+    "&:focus-visible": {
+      outline: "2px solid currentColor",
+      outlineOffset: 2,
+    },
   }
 
   // i18n code
@@ -226,6 +237,38 @@ export function BaseHeader({
 
   return (
     <>
+      {/* WCAG 2.4.1: Skip link for keyboard users - DO NOT REMOVE */}
+      <Box
+        component="a"
+        href="#main-content"
+        sx={{
+          position: "absolute",
+          left: "-9999px",
+          top: "auto",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+          zIndex: zIndex + 1,
+          "&:focus": {
+            position: "fixed",
+            top: 8,
+            left: 8,
+            width: "auto",
+            height: "auto",
+            padding: "12px 24px",
+            backgroundColor: theme.palette.common.white,
+            color: theme.palette.common.black,
+            fontWeight: 600,
+            borderRadius: theme.borderRadius.md,
+            boxShadow: theme.shadow.lg,
+            outline: "2px solid",
+            outlineColor: theme.palette.blue.bright,
+            textDecoration: "none",
+          },
+        }}
+      >
+        Skip to main content
+      </Box>
       <MotionAppBar
         initial="visible" // Prevent hydration mismatch for SSG
         animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
@@ -325,12 +368,14 @@ export function BaseHeader({
                   activeSection === item.sectionId ||
                   sectionParentMap[activeSection || ""] === item.sectionId
 
-                return (
+                  return (
                   <Button
                     key={item.key}
                     variant="text"
                     disableRipple
                     onClick={() => onSectionClick?.(item.sectionId)}
+                    // WCAG 4.1.2: aria-current for active state
+                    aria-current={isActive ? "page" : undefined}
                     sx={{
                       color: textColor,
                       minWidth: "auto",
@@ -346,6 +391,11 @@ export function BaseHeader({
                       },
                       "&.MuiButtonBase-root:hover": {
                         backgroundColor: "transparent",
+                      },
+                      // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
+                      "&:focus-visible": {
+                        outline: "2px solid currentColor",
+                        outlineOffset: 2,
                       },
                     }}
                   >
@@ -379,60 +429,66 @@ export function BaseHeader({
             </Stack>
           )}
 
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            sx={{
-              pr: 2,
-            }}
+          {/* WCAG 1.3.1: Semantic nav element - DO NOT REMOVE */}
+          <Box
+            component="nav"
+            aria-label="Main navigation"
           >
-            {/* Tools dropdown */}
-            {onToolsClick && (
-              <NavDropdown
-                label={componentText.buttons.tools}
-                options={[
-                  {
-                    key: "scenario-explorer",
-                    label: componentText.tools.scenarioExplorer,
-                    onClick: () => onToolsClick("scenario-explorer"),
-                  },
-                  {
-                    key: "needs-search",
-                    label: componentText.tools.needsSearch,
-                    onClick: () => onToolsClick("needs-search"),
-                  },
-                ]}
-                variant="text"
-                sx={buttonStyle}
-              />
-            )}
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{
+                pr: 2,
+              }}
+            >
+              {/* Tools dropdown */}
+              {onToolsClick && (
+                <NavDropdown
+                  label={componentText.buttons.tools}
+                  options={[
+                    {
+                      key: "scenario-explorer",
+                      label: componentText.tools.scenarioExplorer,
+                      onClick: () => onToolsClick("scenario-explorer"),
+                    },
+                    {
+                      key: "needs-search",
+                      label: componentText.tools.needsSearch,
+                      onClick: () => onToolsClick("needs-search"),
+                    },
+                  ]}
+                  variant="text"
+                  sx={buttonStyle}
+                />
+              )}
 
-            {/* Data button */}
-            {onDataClick && (
+              {/* Data button */}
+              {onDataClick && (
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={onDataClick}
+                  sx={buttonStyle}
+                >
+                  {componentText.buttons.getData}
+                </Button>
+              )}
+
+              {/* About button */}
               <Button
                 variant="text"
                 disableRipple
-                onClick={onDataClick}
+                onClick={onAboutClick}
                 sx={buttonStyle}
               >
-                {componentText.buttons.getData}
+                {componentText.buttons.about}
               </Button>
-            )}
 
-            {/* About button */}
-            <Button
-              variant="text"
-              disableRipple
-              onClick={onAboutClick}
-              sx={buttonStyle}
-            >
-              {componentText.buttons.about}
-            </Button>
-
-            {/* Language switcher */}
-            {showLanguageSwitcher && <LanguageSwitcher />}
-          </Stack>
+              {/* Language switcher */}
+              {showLanguageSwitcher && <LanguageSwitcher />}
+            </Stack>
+          </Box>
         </Toolbar>
       </MotionAppBar>
     </>
