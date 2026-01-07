@@ -42,7 +42,7 @@ type FontPresetKey =
   | "avenirNext"
   | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "lato" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)

@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react"
-import { Typography, useTheme, Box } from "@repo/ui/mui"
+import React, { useEffect, useRef, useState } from "react"
+import Image from "next/image"
+import { Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
 import { ScrollToButton } from "@repo/ui"
 
-import { HEADER_EXPANDED_H } from "../../../../packages/ui/src/components/navigation/BaseHeader"
 
 export type VideoSource = { src: string; type: string }
 export interface VideoHeroProps {
@@ -75,11 +75,9 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
       id="homeHero"
       style={{
         position: "relative",
-        height: `calc(100vh - ${HEADER_EXPANDED_H}px)`,
+        height: "100vh",
         width: "100%",
         overflow: "hidden",
-        paddingTop: "75px",
-        marginTop: HEADER_EXPANDED_H,
       }}
     >
       {/** Video */}
@@ -92,11 +90,13 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
         }}
       >
         {showStaticImage ? (
-          <img
-            style={{
-              objectFit: "cover",
-            }}
-            src={fallbackImage}
+          <Image
+            src={fallbackImage || ""}
+            alt="Video fallback"
+            fill
+            style={{ objectFit: "cover" }}
+            unoptimized // Required for SSG/static export
+            priority
           />
         ) : (
           <video
@@ -110,6 +110,7 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
             loop
             playsInline
             autoPlay
+            poster={fallbackImage} // Shows while video loads
             onCanPlay={() => setCanPlay(true)}
             onError={(e) => {
               console.warn(
