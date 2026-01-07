@@ -198,7 +198,9 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
       {!showStaticImage && (
         <IconButton
           onClick={toggleVideoPlayback}
-          aria-label={isPlaying ? "Pause background video" : "Play background video"}
+          aria-label={
+            isPlaying ? "Pause background video" : "Play background video"
+          }
           aria-pressed={isPlaying}
           sx={{
             position: "absolute",
@@ -221,12 +223,24 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
         >
           {/* SVG icons with aria-hidden (label is on button) */}
           {isPlaying ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
               <rect x="6" y="4" width="4" height="16" />
               <rect x="14" y="4" width="4" height="16" />
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
               <polygon points="5,3 19,12 5,21" />
             </svg>
           )}
@@ -294,9 +308,7 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
             pointerEvents: "auto", // Re-enable for text selection
           }}
         >
-          <DisplayBlock>
-            {t("homePanel.content")}
-          </DisplayBlock>
+          <DisplayBlock>{t("homePanel.content")}</DisplayBlock>
         </MotionBox>
       </Box>
 

@@ -15,5 +15,7 @@ interface LogoProps {
  */
 export function Logo({ width = 200 }: LogoProps) {
   // WCAG 1.1.1: Alt text required - DO NOT REMOVE
-  return <img src="/images/coeqwal_logo_color.svg" width={width} alt="COEQWAL" />
+  return (
+    <img src="/images/coeqwal_logo_color.svg" width={width} alt="COEQWAL" />
+  )
 }

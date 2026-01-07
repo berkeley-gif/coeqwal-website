@@ -368,7 +368,7 @@ export function BaseHeader({
                   activeSection === item.sectionId ||
                   sectionParentMap[activeSection || ""] === item.sectionId
 
-                  return (
+                return (
                   <Button
                     key={item.key}
                     variant="text"
@@ -430,10 +430,7 @@ export function BaseHeader({
           )}
 
           {/* WCAG 1.3.1: Semantic nav element - DO NOT REMOVE */}
-          <Box
-            component="nav"
-            aria-label="Main navigation"
-          >
+          <Box component="nav" aria-label="Main navigation">
             <Stack
               direction="row"
               spacing={2}

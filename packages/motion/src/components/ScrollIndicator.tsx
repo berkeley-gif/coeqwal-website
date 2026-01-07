@@ -104,7 +104,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
         handleScrollClick()
       }
     },
-    [handleScrollClick]
+    [handleScrollClick],
   )
 
   useEffect(() => {
