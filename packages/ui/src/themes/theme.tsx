@@ -444,7 +444,7 @@ export const themeValues = {
 
     // Display block internal padding
     displayBlock: {
-      padding: "clamp(32px, 4vw, 56px)",
+      padding: "clamp(28px, 3.5vw, 44px)",
     },
   },
 
@@ -658,11 +658,13 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // At 1024px (iPad Pro): ~4.5rem, at 900px: ~4.2rem, at 600px: ~3.5rem
-      fontSize: "clamp(2.75rem, 2.25rem + 3.5vw, 5.5rem)",
+      // At 1024px: ~4.7rem, at 500px: ~3rem, min: 1.75rem
+      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
       fontWeight: 500,
       lineHeight: 1.05,
       letterSpacing: "-0.02em",
+      margin: 0, // Reset default margins
+      padding: 0, // Reset default padding
     },
     h2: {
       fontFamily: themeValues.fontFamily.display,
@@ -836,10 +838,10 @@ const theme = createTheme({
     // Display body - for hero/panel body text using display font
     displayBody: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.25rem", // Fixed 20px - never scales
+      fontSize: "1.4rem", // Fixed 22.4px - never scales
       fontWeight: 500,
-      lineHeight: 1.65,
-      letterSpacing: "0.015em",
+      lineHeight: 1.6,
+      letterSpacing: "0.01em",
     },
   },
   shape: {

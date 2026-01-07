@@ -26,11 +26,11 @@ export function DisplayBlock({
     <Box
       sx={{
         // Responsive width: fixed max on larger screens, full-width on mobile
-        maxWidth: { xs: "100%", sm: "520px" },
+        maxWidth: { xs: "100%", sm: "540px" },
         width: { xs: "100%", sm: "auto" },
         // Responsive padding: tighter on mobile
         padding: {
-          xs: "clamp(20px, 5vw, 32px)",
+          xs: "clamp(24px, 5vw, 36px)",
           sm: theme.space.displayBlock.padding,
         },
         background: "transparent",
