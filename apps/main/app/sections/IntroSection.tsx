@@ -1,4 +1,4 @@
-import { OneColumnPanel, ScrollToButton, GlossaryLinkedText } from "@repo/ui"
+import { OneColumnPanel, GlossaryLinkedText } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state/drawer"
@@ -6,6 +6,7 @@ import { useCallback } from "react"
 import { motion } from "@repo/motion"
 
 import VideoHero from "../components/VideoHero"
+import FrontmatterPanel from "../components/FrontmatterPanel"
 import type { VideoSource } from "../components/VideoHero"
 
 const VIDEO_SRCS: VideoSource[] = [
@@ -55,6 +56,17 @@ const IntroSection = () => {
       <VideoHero
         sources={VIDEO_SRCS}
         fallbackImage="/images/home_hero_fallback.png"
+      />
+
+      {/* Frontmatter Panel */}
+      <FrontmatterPanel
+        id="intro"
+        ariaLabel="What is COEQWAL"
+        backgroundColor={theme.palette.brand.sky}
+        headlineLine1="What is"
+        headlineLine2="COEQWAL?"
+        bodyText="COEQWAL – the Collaboratory for Equity in Water Allocation – is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California's water planning tools so that communities can meaningfully participate in shaping our water future."
+        textColor={theme.palette.common.white}
       />
 
       {/* Frontmatter panel(s) */}
