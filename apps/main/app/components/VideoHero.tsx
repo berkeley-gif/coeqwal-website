@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
-import { ScrollToButton } from "@repo/ui"
+import { ScrollToButton, DisplayBlock } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+
+// Motion-enabled MUI components
+const MotionBox = motion.create(Box)
 
 
 export type VideoSource = { src: string; type: string }
@@ -19,8 +22,8 @@ export interface VideoHeroProps {
 }
 
 export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
-  const theme = useTheme()
   const { t } = useTranslation()
+  const theme = useTheme()
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const [canPlay, setCanPlay] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -71,19 +74,19 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
   }
 
   return (
-    <div
+    <Box
       id="homeHero"
-      style={{
+      sx={{
         position: "relative",
         height: "100vh",
         width: "100%",
         overflow: "hidden",
       }}
     >
-      {/** Video */}
-      <div
+      {/* Video background */}
+      <Box
         id="homeHeroVid"
-        style={{
+        sx={{
           position: "absolute",
           inset: 0,
           zIndex: 0,
@@ -131,81 +134,98 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
             ))}
           </video>
         )}
-      </div>
-      {/** Title / Question */}
-      <motion.div
-        id="homeHeroTitle"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.5 }}
-        variants={heroIn}
-        style={{
-          position: "absolute",
-          left: 0,
-          width: "auto",
-          background: theme.palette.nature.earth,
-        }}
-      >
-        <Typography
-          variant="h1"
-          component="h1"
-          sx={{
-            fontSize: {
-              sm: "2.2rem",
-              md: "2.8rem",
-              lg: "2.6rem",
-              xl: "3.8rem",
-            }, // Custom for demo with new title
-            padding: { sm: "35px", md: "45px" },
-            lineHeight: "140%",
-            textAlign: "left",
-            fontWeight: 500,
-            width: "auto",
-            color: theme.palette.blue.darkest,
-            fontFamily: theme.typography.fontFamily,
-          }}
-        >
-          {t("homePanel.titleLine1")} <br />
-          {t("homePanel.titleLine2")}
-        </Typography>
-      </motion.div>
+      </Box>
 
-      {/** Body Text */}
-      <motion.div
-        id="homeHeroBody"
-        initial="hidden"
-        whileInView="show"
-        viewport={{ once: true, amount: 0.5 }}
-        variants={heroInRight}
-        style={{
+      {/* Content layout — flex space-between for diagonal positioning */}
+      <Box
+        sx={{
           position: "absolute",
-          right: 0,
-          bottom: 0,
-          minHeight: "auto",
-          maxWidth: "40vw",
-          background: theme.palette.blue.darkest,
-          padding: "50px",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          paddingTop: theme.space.panel.topOffset,
+          paddingBottom: theme.space.panel.bottomOffset,
+          paddingLeft: theme.space.panel.padding,
+          paddingRight: theme.space.panel.padding,
+          zIndex: 1,
+          pointerEvents: "auto",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-            color: theme.palette.common.white,
+        {/* Headline — top-left on desktop, centered on mobile */}
+        <MotionBox
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={heroIn}
+          sx={{
+            alignSelf: { xs: "stretch", md: "flex-start" },
+            display: { xs: "flex", md: "block" },
+            justifyContent: { xs: "center", md: "flex-start" },
           }}
         >
           <Typography
+            variant="h1"
             sx={{
-              fontSize: { md: "1.1rem", lg: "1.2rem", xl: "1.5rem" },
+              color: "common.white",
+              textShadow: theme.textShadow.display,
+              maxWidth: "16ch",
+              textAlign: { xs: "center", md: "left" }, // Centered on mobile, left on desktop
             }}
-            variant="body1"
           >
-            {t("homePanel.content")}
+            {t("homePanel.titleLine1")}
+            <br />
+            <Box component="span" sx={{ fontWeight: 700 }}>
+              {t("homePanel.titleLine2")}
+            </Box>
           </Typography>
-          <ScrollToButton color={theme.palette.common.white} size={70} />
-        </div>
-      </motion.div>
-    </div>
+        </MotionBox>
+
+        {/* Body — bottom-right on desktop, centered on mobile */}
+        <MotionBox
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={heroInRight}
+          sx={{
+            alignSelf: { xs: "stretch", md: "flex-end" },
+            display: { xs: "flex", md: "block" },
+            justifyContent: { xs: "center", md: "flex-end" },
+          }}
+        >
+          <DisplayBlock>
+            {t("homePanel.content")}
+          </DisplayBlock>
+        </MotionBox>
+      </Box>
+
+      {/* Scroll indicator — centered at bottom */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: "clamp(24px, 4vh, 48px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 2,
+        }}
+      >
+        <ScrollToButton
+          color="rgba(255, 255, 255, 0.85)"
+          size={52}
+        />
+      </Box>
+
+      {/* Gradient overlay — subtle vignette for depth */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.35) 80%, rgba(0, 0, 0, 0.55) 100%)",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+    </Box>
   )
 }

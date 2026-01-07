@@ -56,6 +56,7 @@ export function Header() {
       zIndex={theme.zIndex.appBar}
       borderRadius={theme.borderRadius.none}
       boxShadow="none"
+      borderBottom="1px solid rgba(255, 255, 255, 0.8)"
       hideOnScroll={false}
       showLanguageSwitcher={false}
     />

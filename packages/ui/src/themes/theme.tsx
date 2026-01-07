@@ -9,11 +9,11 @@ import { createTheme, Theme } from "@mui/material/styles"
  * 1. Font config      - Font presets and selection
  * 2. Design tokens    - Standalone token definitions
  *                       typeScale, palette, borderRadius, shadow,
- *                       transition, zIndex, border, background
+ *                       textShadow, transition, zIndex, border, background
  * 3. themeValues      - Assembled tokens + UI config
- *                       fontFamily, layout, spacing, scenarios
+ *                       fontFamily, layout, spacing (panel, displayBlock), scenarios
  * 4. createTheme()    - MUI theme configuration
- *                       palette, typography, components
+ *                       palette, typography (h1, displayBody), components
  * 5. Post-creation    - Attach tokens to theme object
  * 6. TypeScript       - Module augmentation for custom types
  *
@@ -158,6 +158,7 @@ const palette = {
     bright: "#449cd9", // Bright blue - links/interactive
     light: "#77a2d9", // Light blue
     pale: "#cef1f5", // Pale cyan/ice blue
+    softSky: "#B4D2F0", // Soft sky blue (compare to brand.sky...do we need both?)
   },
 
   // Accent colors - warm tones
@@ -280,6 +281,14 @@ const transition = {
   bouncy: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
 }
 
+// Text shadow presets for legibility on variable backgrounds
+const textShadow = {
+  display: "0 2px 40px rgba(0, 0, 0, 0.3)", // Display headlines
+  displayBody: "0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 20px rgba(0, 0, 0, 0.2)", // Display body text
+  nav: "0 1px 3px rgba(0, 0, 0, 0.2)", // Navigation baseline
+  navHover: "0 0 12px rgba(255, 255, 255, 0.6), 0 1px 4px rgba(0, 0, 0, 0.3)", // Nav hover glow
+}
+
 // Z-index
 const zIndex = {
   // Background layers
@@ -309,6 +318,7 @@ const border = {
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
   onDark: "2px solid #FFFFFF", // On dark backgrounds
   subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
+  rule: "1px solid rgba(255, 255, 255, 0.8)", // Primary design system rule (header, display blocks)
 }
 
 // Background styles
@@ -369,6 +379,7 @@ export const themeValues = {
   palette,
   borderRadius,
   shadow,
+  textShadow,
   transition,
   zIndex,
   border,
@@ -397,8 +408,8 @@ export const themeValues = {
       xl: 8, // 64px - page-level spacing
     },
 
-    // Panel/card padding
-    panel: {
+    // Card/small panel padding (MUI spacing multipliers)
+    card: {
       xs: { xs: 2, sm: 2.5, md: 3 }, // 16/20/24px - compact panels
       sm: { xs: 2.5, sm: 3, md: 4 }, // 20/24/32px - standard panels
     },
@@ -416,6 +427,18 @@ export const themeValues = {
     page: {
       x: { xs: 4, sm: 6, md: 8 }, // 32px / 48px / 64px horizontal (clears map controls)
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
+    },
+
+    // Full-panel spacing (CSS clamp values for viewport-responsive sizing)
+    panel: {
+      padding: "clamp(32px, 6vw, 80px)", // Responsive edge padding
+      topOffset: "clamp(140px, 22vh, 240px)", // Space below header
+      bottomOffset: "clamp(100px, 16vh, 180px)", // Space above bottom
+    },
+
+    // Display block internal padding
+    displayBlock: {
+      padding: "clamp(32px, 4vw, 56px)",
     },
   },
 
@@ -492,6 +515,32 @@ export const themeValues = {
         default: 1,
         compact: 2,
       },
+    },
+
+    // Learn mode panel styles
+    learnPanel: {
+      base: {
+        backgroundColor: background.whiteOverlay[95],
+        borderRadius: borderRadius.none,
+        pointerEvents: "auto" as const,
+        padding: { xs: 2, sm: 2.5, md: 3 }, // matches space.card.xs
+      },
+      maxWidth: {
+        xs: "100%",
+        sm: "360px",
+        md: "420px",
+        lg: "460px",
+        xl: "500px",
+      },
+    },
+
+    // Panel title typography (for section headers like "Key operations", "Key outcomes")
+    panelTitle: {
+      fontSize: "1rem",
+      fontWeight: 500,
+      lineHeight: 1.57,
+      letterSpacing: "0.00714em",
+      color: palette.grey[900],
     },
   },
 }
@@ -602,9 +651,12 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: typeScale.h1,
+      // Responsive hero headline
+      // At 1024px (iPad Pro): ~4.5rem, at 900px: ~4.2rem, at 600px: ~3.5rem
+      fontSize: "clamp(2.75rem, 2.25rem + 3.5vw, 5.5rem)",
       fontWeight: 500,
-      lineHeight: 1.0,
+      lineHeight: 1.05,
+      letterSpacing: "-0.02em",
     },
     h2: {
       fontFamily: themeValues.fontFamily.display,
@@ -774,6 +826,14 @@ const theme = createTheme({
       fontSize: "1.125rem", // 18px - matches subtitle1
       fontWeight: 400,
       lineHeight: 1.8,
+    },
+    // Display body - for hero/panel body text using display font
+    displayBody: {
+      fontFamily: themeValues.fontFamily.display,
+      fontSize: "1.25rem", // Fixed 20px - never scales
+      fontWeight: 500,
+      lineHeight: 1.65,
+      letterSpacing: "0.015em",
     },
   },
   shape: {
@@ -1400,6 +1460,7 @@ theme.border = themeValues.border
 theme.background = themeValues.background
 theme.borderRadius = themeValues.borderRadius
 theme.shadow = themeValues.shadow
+theme.textShadow = themeValues.textShadow
 theme.transition = themeValues.transition
 theme.scenarios = themeValues.scenarios
 theme.space = themeValues.spacing
@@ -1473,6 +1534,7 @@ declare module "@mui/material/styles" {
     background: typeof themeValues.background
     borderRadius: typeof themeValues.borderRadius
     shadow: typeof themeValues.shadow
+    textShadow: typeof themeValues.textShadow
     transition: typeof themeValues.transition
     // Scenario/strategy component styles
     scenarios: typeof themeValues.scenarios
@@ -1501,6 +1563,7 @@ declare module "@mui/material/styles" {
     fontWeightSemiBold: number
     nav: React.CSSProperties
     dashboard: React.CSSProperties
+    displayBody: React.CSSProperties
     smallSectionLabel: React.CSSProperties
     outcomeLabel: React.CSSProperties
     outcomeHeader: React.CSSProperties
@@ -1516,6 +1579,7 @@ declare module "@mui/material/styles" {
     fontWeightSemiBold?: number
     nav?: React.CSSProperties
     dashboard?: React.CSSProperties
+    displayBody?: React.CSSProperties
     smallSectionLabel?: React.CSSProperties
     outcomeLabel?: React.CSSProperties
     outcomeHeader?: React.CSSProperties
@@ -1542,6 +1606,7 @@ declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     nav: true
     dashboard: true
+    displayBody: true
     smallSectionLabel: true
     outcomeLabel: true
     outcomeHeader: true

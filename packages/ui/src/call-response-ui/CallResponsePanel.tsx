@@ -102,7 +102,7 @@ export function CallResponsePanel({
             display: "flex",
             flexDirection: "column",
             // Responsive gap using panel.xs tokens (16px / 20px / 24px)
-            gap: (theme: Theme) => theme.space.panel.xs,
+            gap: (theme: Theme) => theme.space.card.xs,
             backgroundColor: "transparent",
             backdropFilter: "none",
             borderRadius: 0,
