@@ -271,7 +271,9 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            {t("homePanel.titleLine1")}
+            <Box component="span" sx={{ fontSize: "0.8em" }}>
+              {t("homePanel.titleLine1")}
+            </Box>
             <br />
             <Box component="span" sx={{ fontWeight: 700 }}>
               {t("homePanel.titleLine2")}
