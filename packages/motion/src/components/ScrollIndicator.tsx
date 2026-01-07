@@ -1,4 +1,13 @@
-import React, { useEffect } from "react"
+/**
+ * ScrollIndicator - Animated scroll navigation indicator
+ *
+ * WCAG 2.0 AA Compliance Notes:
+ * - WCAG 2.1.1: Keyboard accessible (tabIndex, onKeyDown) - DO NOT REMOVE
+ * - WCAG 2.4.3: Focus moves to target element on activation
+ * - WCAG 4.1.2: role="button" and aria-label for screen readers
+ */
+
+import React, { useEffect, useCallback } from "react"
 import { motion, useAnimation } from "../index"
 import type { TargetAndTransition } from "framer-motion"
 
@@ -31,6 +40,8 @@ interface ScrollIndicatorProps {
   className?: string
   /** The direction of bounce */
   motionAxis?: MotionAxis
+  /** Accessible label for screen readers (WCAG 4.1.2) */
+  ariaLabel?: string
 }
 
 /**
@@ -51,13 +62,16 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   style = {},
   className,
   motionAxis = "vertical",
+  ariaLabel,
 }) => {
   const controls = useAnimation()
 
   const axisKey: "x" | "y" = motionAxis === "horizontal" ? "x" : "y"
 
+  const isInteractive = !!scrollToId || !!onClick
+
   // Handle scroll to target element
-  const handleScrollClick = () => {
+  const handleScrollClick = useCallback(() => {
     if (scrollToId) {
       const targetElement = document.getElementById(scrollToId)
       if (targetElement) {
@@ -72,12 +86,26 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
             behavior: "smooth",
           })
         })
+
+        // Move focus to target for screen readers (WCAG 2.4.3)
+        targetElement.focus({ preventScroll: true })
       }
     }
 
     // Call custom onClick if provided
     onClick?.()
-  }
+  }, [scrollToId, onClick])
+
+  // WCAG 2.1.1: Keyboard accessibility
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        handleScrollClick()
+      }
+    },
+    [handleScrollClick]
+  )
 
   useEffect(() => {
     let animationRunning = true
@@ -177,14 +205,25 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
       initial={initial}
       animate={controls}
       onClick={handleScrollClick}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
       className={className}
+      /*
+       * WCAG Accessibility Attributes - DO NOT REMOVE:
+       * - role="button": WCAG 4.1.2 - Identifies element as interactive
+       * - tabIndex={0}: WCAG 2.1.1 - Makes element keyboard focusable
+       * - aria-label: WCAG 4.1.2 - Provides accessible name
+       */
+      role={isInteractive ? "button" : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      aria-label={isInteractive ? ariaLabel : undefined}
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        cursor: onClick || scrollToId ? "pointer" : "default",
+        cursor: isInteractive ? "pointer" : "default",
         color,
         fontSize: size,
+        outline: "none",
         ...style,
       }}
     >

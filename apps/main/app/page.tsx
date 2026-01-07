@@ -31,8 +31,11 @@ export default function Home() {
         <TabsProvider>
           <Header />
           <FloatingGlossary />
+          {/* WCAG 2.4.1: Skip link target - id required for header skip link */}
           <Box
             component="main"
+            id="main-content"
+            tabIndex={-1} // Allows focus to move here programmatically
             sx={{
               position: "relative",
               overflowX: "clip",
@@ -42,6 +45,10 @@ export default function Home() {
               pointerEvents: "none",
               // Above map level so content appears on top
               zIndex: (theme) => theme.zIndex.pageContent,
+              // Remove focus outline when skip link targets this element
+              "&:focus": {
+                outline: "none",
+              },
             }}
           >
             <IntroSection />

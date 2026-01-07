@@ -3,6 +3,10 @@
  *
  * Circular arrow button that scrolls to a target element when clicked.
  * Includes a scroll indicator animation.
+ *
+ * WCAG 2.0 AA Compliance Notes:
+ * - WCAG 2.4.4: ariaLabel prop provides accessible link purpose
+ * - WCAG 4.1.2: Passes aria-label to child ScrollIndicator
  */
 
 import React from "react"
@@ -22,6 +26,8 @@ interface ScrollToButtonProps {
   //i.e rotation = "0deg",
   rotation?: string
   axis?: MotionAxis
+  /** Accessible label for screen readers (WCAG 4.1.2) */
+  ariaLabel?: string
 }
 
 export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
@@ -34,6 +40,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   size,
   rotation,
   axis,
+  ariaLabel = "Scroll down",
 }) => {
   const theme = useTheme()
   const buttonColor =
@@ -54,6 +61,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       animationComplete={animationComplete}
       delay={delay}
       motionAxis={axis}
+      ariaLabel={isInteractive ? ariaLabel : undefined}
       style={{
         ...style,
         // if no action, keep animation but disable interaction
@@ -65,9 +73,8 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
         size={size}
         color={buttonColor}
         rotation={rotation}
+        decorative={true} // Parent ScrollIndicator handles interaction
       />
     </ScrollIndicator>
   )
-
-  return null
 }

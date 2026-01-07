@@ -289,18 +289,24 @@ const textShadow = {
   navHover: "0 0 12px rgba(255, 255, 255, 0.6), 0 1px 4px rgba(0, 0, 0, 0.3)", // Nav hover glow
 }
 
-// Z-index
+// Z-index — Global stacking order
 const zIndex = {
   // Background layers
   basement: -1, // Storyline apps map background
   persistentMap: 1, // Main app's persistent map
 
-  // Content layers
-  mapOverlays: 5, // Map overlay panels (below page content)
+  // Hero layers (1-4)
+  heroBackground: 1, // Video/image background, gradient overlay
+  heroContent: 2, // Text content layer
+  heroScrollIndicator: 3, // Scroll-down button
+  heroControls: 4, // WCAG 2.2.2: Video pause/play control
+
+  // Map layers (5-20)
+  mapOverlays: 5, // Map overlay panels
   pageContent: 10, // Page-level content
   mapControls: 20, // Map controls
 
-  // UI layers
+  // UI layers (70+)
   floating: 70, // Floating elements (glossary)
   appBar: 80, // Header, sticky tabs
   dropdown: 90, // Dropdown menus (above header)
@@ -1517,6 +1523,10 @@ declare module "@mui/material/styles" {
   interface ZIndex {
     basement: number
     persistentMap: number
+    heroBackground: number
+    heroContent: number
+    heroScrollIndicator: number
+    heroControls: number
     mapOverlays: number
     pageContent: number
     mapControls: number

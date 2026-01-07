@@ -5,9 +5,10 @@
  *
  * Manages the floating glossary button and panel state.
  * Handles positioning and open/close behavior.
+ * Only appears after user scrolls past the hero section.
  */
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useDrawerStore } from "@repo/state/drawer"
 import { FloatingGlossaryButton } from "./FloatingGlossaryButton"
 import { FloatingGlossaryPanel } from "./FloatingGlossaryPanel"
@@ -32,12 +33,29 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const [currentSelectedTerm, setCurrentSelectedTerm] = useState<
     string | undefined
   >(selectedTerm)
+  const [isVisible, setIsVisible] = useState(false) // Hidden until scrolled past hero
   const dragStartRef = useRef<{
     x: number
     y: number
     bottom: number
     right: number
   } | null>(null)
+
+  // Track scroll position to show/hide glossary button
+  const checkScrollPosition = useCallback(() => {
+    // Show glossary after scrolling past 80% of viewport height (past hero)
+    const scrollThreshold = window.innerHeight * 0.8
+    setIsVisible(window.scrollY > scrollThreshold)
+  }, [])
+
+  useEffect(() => {
+    // Check initial position
+    checkScrollPosition()
+
+    // Listen for scroll events
+    window.addEventListener("scroll", checkScrollPosition, { passive: true })
+    return () => window.removeEventListener("scroll", checkScrollPosition)
+  }, [checkScrollPosition])
 
   // Connect to drawer store for external control (e.g., from IntroSection)
   const drawerStore = useDrawerStore()
@@ -102,6 +120,11 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     typeof window !== "undefined"
       ? window.innerWidth - position.right - 32 < window.innerWidth / 2
       : false
+
+  // Don't render until user scrolls past hero section
+  if (!isVisible && !isOpen) {
+    return null
+  }
 
   return (
     <>
