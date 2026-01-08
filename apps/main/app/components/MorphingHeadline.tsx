@@ -156,8 +156,8 @@ export default function MorphingHeadline({
     headlines.map((_, i) => (i === 0 ? 1 : 0)),
   )
 
-  // Track if the headline should be visible (hidden once scrolled past container)
-  const [isVisible, setIsVisible] = useState(true)
+  // Track dock offset (when scrolled past container, headline moves up with it)
+  const [dockOffset, setDockOffset] = useState(0)
 
   // Calculate opacity for a specific headline at a given scroll progress
   const calculateOpacity = useCallback(
@@ -169,12 +169,9 @@ export default function MorphingHeadline({
     [opacityKeyframes],
   )
 
-  // Update all opacities and visibility when scroll progress changes
+  // Update opacities when scroll progress changes
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (value) => {
-      // Hide headline once we've scrolled past the container (with small buffer)
-      setIsVisible(value < 0.98)
-
       const newOpacities = headlines.map((_, index) =>
         calculateOpacity(index, value),
       )
@@ -182,6 +179,29 @@ export default function MorphingHeadline({
     })
     return unsubscribe
   }, [scrollYProgress, headlines, calculateOpacity])
+
+  // Separate scroll listener for docking (works even when scrolled past container)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return
+
+      const rect = containerRef.current.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+
+      // When container bottom is above viewport bottom, we've scrolled past
+      if (rect.bottom < viewportHeight) {
+        // Calculate how much to offset (negative value moves headline up)
+        setDockOffset(rect.bottom - viewportHeight)
+      } else {
+        setDockOffset(0)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll() // Check initial state
+
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [containerRef])
 
   // Track which headline to show (for reduced motion and screen readers)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -218,8 +238,7 @@ export default function MorphingHeadline({
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
           display: { xs: "none", md: "block" },
-          opacity: isVisible ? 1 : 0,
-          transition: "opacity 0.2s ease-out",
+          transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
         }}
       >
         <Typography
@@ -259,8 +278,7 @@ export default function MorphingHeadline({
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
         display: { xs: "none", md: "block" },
-        opacity: isVisible ? 1 : 0,
-        transition: "opacity 0.2s ease-out",
+        transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
       }}
     >
       {/* Container for all headlines - they overlap via CSS grid */}
