@@ -36,9 +36,15 @@ export interface VideoHeroProps {
   title?: string
   paragraphs?: string[] // The paragraphs that appear underneath the title: Max 2
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
+  /** Hide the headline (for use with MorphingHeadline) */
+  hideHeadline?: boolean
 }
 
-export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
+export default function VideoHero({
+  sources,
+  fallbackImage,
+  hideHeadline = false,
+}: VideoHeroProps) {
   const { t } = useTranslation()
   const theme = useTheme()
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -275,36 +281,40 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
         }}
       >
         {/* Headline — top-left on desktop, centered on mobile */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroIn}
-          sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
-            display: { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-start" },
-            pointerEvents: "auto", // Re-enable for text selection
-          }}
-        >
-          <Typography
-            variant="h1"
+        {!hideHeadline && (
+          <MotionBox
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={heroIn}
             sx={{
-              color: "common.white",
-              textShadow: theme.textShadow.display,
-              maxWidth: "16ch",
-              textAlign: { xs: "center", md: "left" },
+              alignSelf: { xs: "stretch", md: "flex-start" },
+              display: { xs: "flex", md: "block" },
+              justifyContent: { xs: "center", md: "flex-start" },
+              pointerEvents: "auto", // Re-enable for text selection
             }}
           >
-            <Box component="span" sx={{ fontSize: "0.8em" }}>
-              {t("homePanel.titleLine1")}
-            </Box>
-            <br />
-            <Box component="span" sx={{ fontWeight: 700 }}>
-              {t("homePanel.titleLine2")}
-            </Box>
-          </Typography>
-        </MotionBox>
+            <Typography
+              variant="h1"
+              sx={{
+                color: "common.white",
+                textShadow: theme.textShadow.display,
+                maxWidth: "16ch",
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
+              <Box component="span" sx={{ fontSize: "0.8em" }}>
+                {t("homePanel.titleLine1")}
+              </Box>
+              <br />
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                {t("homePanel.titleLine2")}
+              </Box>
+            </Typography>
+          </MotionBox>
+        )}
+        {/* Spacer when headline is hidden (maintains layout) */}
+        {hideHeadline && <Box />}
 
         {/* Body — bottom-right on desktop, centered on mobile */}
         <MotionBox
