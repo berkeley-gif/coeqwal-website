@@ -189,17 +189,22 @@ export default function FrontmatterPanel({
                 textShadow: textShadow ? theme.textShadow.display : "none",
                 // fontSize needed for maxWidth "ch" unit to calculate correctly
                 fontSize: theme.typography.h1Bold.fontSize,
+                // lineHeight controls spacing between the two headline lines
+                lineHeight: 1.05,
                 maxWidth: "16ch",
                 textAlign: { xs: "center", md: "left" },
               }}
             >
-              <Typography variant="h2" component="span" sx={{ display: "block" }}>
+              <Typography variant="h2" component="span">
                 {headlineLine1}
               </Typography>
               {headlineLine2 && (
-                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
-                  {headlineLine2}
-                </Typography>
+                <>
+                  <br />
+                  <Typography variant="h1Bold" component="span">
+                    {headlineLine2}
+                  </Typography>
+                </>
               )}
             </Box>
           </MotionBox>
@@ -339,17 +344,22 @@ export default function FrontmatterPanel({
               textShadow: textShadow ? theme.textShadow.display : "none",
               // fontSize needed for maxWidth "ch" unit to calculate correctly
               fontSize: theme.typography.h1Bold.fontSize,
+              // lineHeight controls spacing between the two headline lines
+              lineHeight: 1.05,
               maxWidth: "16ch",
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2" component="span" sx={{ display: "block" }}>
+            <Typography variant="h2" component="span">
               {headlineLine1}
             </Typography>
             {headlineLine2 && (
-              <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
-                {headlineLine2}
-              </Typography>
+              <>
+                <br />
+                <Typography variant="h1Bold" component="span">
+                  {headlineLine2}
+                </Typography>
+              </>
             )}
           </Box>
         </MotionBox>

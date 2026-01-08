@@ -680,7 +680,10 @@ const theme = createTheme({
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
-      lineHeight: 1.1,
+      lineHeight: 1.05, // Match h1/h1Bold for tight headline pairing
+      letterSpacing: "-0.02em",
+      margin: 0,
+      padding: 0,
     },
     h3: {
       fontFamily: themeValues.fontFamily.display,
