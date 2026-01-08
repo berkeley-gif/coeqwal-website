@@ -73,10 +73,10 @@ export default function SmoothTabs() {
                 border: "none",
                 background: panelColor, // Keep individual tab colors
                 cursor: "pointer",
-                fontWeight: 600,
+                fontWeight: 600, // Consistent weight
                 textTransform: "uppercase",
                 color: theme.palette.blue.darkest,
-                transition: "padding 0.2s ease",
+                transition: "padding 0.2s ease, font-weight 0.2s ease",
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -105,7 +105,9 @@ export default function SmoothTabs() {
                 <Typography
                   variant="h4"
                   sx={{
-                    fontSize: isInTabsArea ? "1.3rem" : "1.6rem", // Slightly larger to compensate for dark-on-light optical effect
+                    // When docked: 1.3rem (not 1.1rem like header) to compensate for
+                    // optical illusion where dark text on light background appears smaller
+                    fontSize: isInTabsArea ? "1.3rem" : "1.6rem",
                     textTransform: "capitalize",
                     transition: "font-size 0.2s ease",
                   }}
