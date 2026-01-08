@@ -61,7 +61,7 @@ const IntroSection = () => {
         <FrontmatterPanel
           id="intro"
           ariaLabel="What is COEQWAL"
-          backgroundColor={theme.palette.blue.medium}
+          backgroundColor="#3D7DB5"
           headlineLine1="What is"
           headlineLine2="COEQWAL?"
           bodyText="COEQWAL &mdash; the Collaboratory for Equity in Water Allocation &mdash; is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California's water planning tools so that communities can meaningfully participate in shaping our water future."
@@ -73,12 +73,13 @@ const IntroSection = () => {
         <FrontmatterPanel
           id="water-issues"
           ariaLabel="What water issues matter to you"
-          backgroundColor={theme.palette.blue.darkest}
+          backgroundColor="transparent"
           headlineLine1="What water issues"
           headlineLine2="matter to you?"
-          bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Bay-Delta, from salmon habitats to urban water users – explore how different decisions impact different stakeholders."
+          bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
           textColor={theme.palette.common.white}
           hideHeadline
+          displayBlockBackground="rgba(42, 82, 135, 0.75)"
         />
 
         {/* Frontmatter Panel 3 - Actions variant */}
@@ -86,7 +87,7 @@ const IntroSection = () => {
           id="site-actions"
           ariaLabel="What you can do on this site"
           variant="actions"
-          backgroundColor={theme.palette.grey[900]}
+          backgroundColor="#193D6B"
           headlineLine1="On this site,"
           headlineLine2="you can"
           textColor={theme.palette.common.white}

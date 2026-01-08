@@ -109,9 +109,9 @@ export default function MorphingHeadline({
    * Calculate opacity keyframes for each headline based on number of panels.
    * Dynamically supports any number of headlines.
    * 
-   * Each panel gets equal scroll range, with crossfades at panel boundaries.
-   * The last headline stays visible at 100% scroll (no fade out).
-   * Scrolling up naturally reverses the effect via scroll progress tracking.
+   * Transition timing varies by position to account for visual perception:
+   * - Earlier transitions need slightly less delay (panel already scrolling in)
+   * - Later transitions need more delay (to sync with panel visibility)
    */
   const opacityKeyframes = useMemo(() => {
     const count = headlines.length
@@ -122,29 +122,45 @@ export default function MorphingHeadline({
     return headlines.map((_, index) => {
       const panelStart = index * panelSize
       const panelEnd = (index + 1) * panelSize
-      const transitionSize = panelSize * 0.2
-
-      const fadeInStart = Math.max(0, panelStart - transitionSize)
-      const fadeInEnd = panelStart + transitionSize
-      const fadeOutStart = panelEnd - transitionSize
-      const fadeOutEnd = Math.min(1, panelEnd + transitionSize)
+      
+      // Adjust timing based on transition position.
+      // Visual perception requires earlier transitions at the start of a scroll sequence
+      // and later transitions as the user settles into the scroll rhythm.
+      // These values are tuned by hand - adjust if adding more panels.
+      const getTransitionTiming = (transitionIndex: number) => {
+        if (transitionIndex === 0) return { start: 0.0, end: 0.10 }   // First: immediate
+        if (transitionIndex === 1) return { start: 0.10, end: 0.25 } // Middle: standard
+        return { start: 0.20, end: 0.35 }                            // Later: delayed
+      }
 
       if (index === 0) {
-        // First headline: visible at start, fades out
+        // First headline: visible at start, fades out into panel 2
+        const timing = getTransitionTiming(0)
+        const nextFadeStart = panelEnd + panelSize * timing.start
+        const nextFadeEnd = panelEnd + panelSize * timing.end
         return {
-          input: [0, fadeOutStart, fadeOutEnd],
+          input: [0, nextFadeStart, nextFadeEnd],
           output: [1, 1, 0],
         }
       } else if (index === count - 1) {
-        // Last headline: fades in, stays visible at end
+        // Last headline: fades in during this panel, stays visible
+        const timing = getTransitionTiming(index - 1)
+        const fadeStart = panelStart + panelSize * timing.start
+        const fadeEnd = panelStart + panelSize * timing.end
         return {
-          input: [fadeInStart, fadeInEnd, 1],
+          input: [fadeStart, fadeEnd, 1],
           output: [0, 1, 1],
         }
       } else {
-        // Middle headlines: fade in, stay visible, fade out
+        // Middle headlines: fade in during this panel, fade out into next panel
+        const fadeInTiming = getTransitionTiming(index - 1)
+        const fadeOutTiming = getTransitionTiming(index)
+        const fadeStart = panelStart + panelSize * fadeInTiming.start
+        const fadeEnd = panelStart + panelSize * fadeInTiming.end
+        const nextFadeStart = panelEnd + panelSize * fadeOutTiming.start
+        const nextFadeEnd = panelEnd + panelSize * fadeOutTiming.end
         return {
-          input: [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd],
+          input: [fadeStart, fadeEnd, nextFadeStart, nextFadeEnd],
           output: [0, 1, 1, 0],
         }
       }

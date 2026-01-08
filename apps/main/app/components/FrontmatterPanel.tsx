@@ -61,6 +61,8 @@ export interface FrontmatterPanelProps {
   textShadow?: boolean
   /** Hide the headline (for use with MorphingHeadline) */
   hideHeadline?: boolean
+  /** Background color for the DisplayBlock (for transparent panel backgrounds) */
+  displayBlockBackground?: string
 }
 
 export default function FrontmatterPanel({
@@ -76,6 +78,7 @@ export default function FrontmatterPanel({
   textColor = "common.white",
   textShadow = false,
   hideHeadline = false,
+  displayBlockBackground,
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
@@ -224,11 +227,6 @@ export default function FrontmatterPanel({
                     variant="h3"
                     sx={{
                       color: item.color,
-                      fontSize: { xs: "2rem", md: "2.5rem" },
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.02em",
-                      lineHeight: 1.2,
                     }}
                   >
                     {item.action}
@@ -357,7 +355,12 @@ export default function FrontmatterPanel({
             justifyContent: { xs: "center", md: "flex-end" },
           }}
         >
-          <DisplayBlock textShadow={textShadow}>{bodyText}</DisplayBlock>
+          <DisplayBlock
+            textShadow={textShadow}
+            sx={displayBlockBackground ? { background: displayBlockBackground } : undefined}
+          >
+            {bodyText}
+          </DisplayBlock>
         </MotionBox>
       </Box>
 
