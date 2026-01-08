@@ -7,7 +7,6 @@ import React, {
   useReducer,
   useRef,
   type ReactNode,
-  type RefObject,
 } from "react"
 
 import type { TabKey } from "../types/tabs"
@@ -55,11 +54,11 @@ const initialState: State = {
 type TabsContextShape = {
   state: State
   dispatch: React.Dispatch<Action>
-  tabsRef: React.MutableRefObject<HTMLDivElement | null>
-  panelRef: React.MutableRefObject<HTMLDivElement | null>
+  tabsRef: React.RefObject<HTMLDivElement | null>
+  panelRef: React.RefObject<HTMLDivElement | null>
   hasEnteredTabsFirstTime: boolean
   setHasEnteredTabsFirstTime: React.Dispatch<React.SetStateAction<boolean>>
-  scrollIntentRef: React.MutableRefObject<"none" | "user" | "sync">
+  scrollIntentRef: React.RefObject<"none" | "user" | "sync">
   isInTabsArea: boolean
   setIsInTabsArea: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -81,9 +80,6 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // checks if we are in the tabs area
   const [isInTabsArea, setIsInTabsArea] = React.useState(false)
 
-  // checks if are we currently in the tabs area
-  const isInTabsAreaRef = useRef<boolean>(false)
-
   const value = useMemo(
     () => ({
       state,
@@ -102,9 +98,30 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
 }
 
+/**
+ * Hook to access tabs context.
+ * Returns safe defaults when used outside TabsProvider (e.g., on /data page).
+ * This allows components like Header to use isInTabsArea without requiring
+ * every page to be wrapped in TabsProvider.
+ */
 export function useTabs() {
   const ctx = useContext(TabsContext)
-  if (!ctx) throw new Error("useTabs must be used inside <TabsProvider>")
+  
+  // Return safe defaults for pages without TabsProvider
+  if (!ctx) {
+    return {
+      state: initialState,
+      dispatch: () => {},
+      tabsRef: { current: null } as React.RefObject<HTMLDivElement | null>,
+      panelRef: { current: null } as React.RefObject<HTMLDivElement | null>,
+      hasEnteredTabsFirstTime: false,
+      setHasEnteredTabsFirstTime: () => {},
+      scrollIntentRef: { current: "none" as const } as React.RefObject<"none" | "user" | "sync">,
+      isInTabsArea: false,
+      setIsInTabsArea: () => {},
+    }
+  }
+  
   return ctx
 }
 
