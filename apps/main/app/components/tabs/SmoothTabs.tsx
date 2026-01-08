@@ -79,7 +79,8 @@ export default function SmoothTabs() {
                 transition: "padding 0.2s ease",
               }}
             >
-              {selected && (
+              {/* Active tab indicator - only show when expanded, hide when docked */}
+              {selected && !isInTabsArea && (
                 <motion.span
                   layoutId="seg-pill"
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
@@ -104,8 +105,9 @@ export default function SmoothTabs() {
                 <Typography
                   variant="h4"
                   sx={{
-                    fontSize: "1.6rem",
+                    fontSize: isInTabsArea ? "1.3rem" : "1.6rem", // Slightly larger to compensate for dark-on-light optical effect
                     textTransform: "capitalize",
+                    transition: "font-size 0.2s ease",
                   }}
                 >
                   {label}
