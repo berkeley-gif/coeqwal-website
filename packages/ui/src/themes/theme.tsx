@@ -222,9 +222,9 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#E8EEF5",    // Strong navy match - lightest
-    explore: "#C4D4E8",  // Strong navy match - medium
-    empower: "#96B2D4",  // Strong navy match - deepest
+    learn: "#D5EAF5",    // More saturated light blue
+    explore: "#C2D8EB",  // Shifted toward true blue
+    empower: "#94B8DA",  // Shifted toward true blue
   },
 
   // Data visualization colors for outcome categories
