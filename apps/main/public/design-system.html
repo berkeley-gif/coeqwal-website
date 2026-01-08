@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COEQWAL Design System</title>
+  <link rel="stylesheet" href="https://use.typekit.net/rxm7kha.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      /* Panel Colors */
+      --panel-1: #3D7DB5;
+      --panel-2: transparent;
+      --panel-3: #193D6B;
+      
+      /* Tab Colors */
+      --tab-learn: #D5EAF5;
+      --tab-explore: #C2D8EB;
+      --tab-share: #94B8DA;
+      
+      /* Theme Colors */
+      --blue-darkest: #0a1929;
+      --blue-dark: #1a293f;
+      --blue-bright: #2a5285;
+      
+      /* Typography */
+      --font-display: "neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif;
+      --font-text: "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    body {
+      font-family: var(--font-text);
+      background: #f5f5f5;
+      padding: 40px;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    header h1 {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--blue-darkest);
+    }
+    
+    header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .section {
+      max-width: 1200px;
+      margin: 0 auto 60px;
+    }
+    
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #ddd;
+      color: var(--blue-darkest);
+    }
+    
+    /* =========================
+       TYPOGRAPHY SECTION
+       ========================= */
+    
+    .type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+    
+    .type-card {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .type-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .type-sample {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .type-sample:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .type-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    
+    .type-name {
+      font-family: var(--font-text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .type-specs {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #999;
+    }
+    
+    /* Display font samples */
+    .sample-h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--blue-darkest);
+    }
+    
+    .sample-h2 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--blue-darkest);
+    }
+    
+    .sample-h3 {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1.1;
+      color: var(--blue-darkest);
+    }
+    
+    .sample-h4 {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--blue-darkest);
+    }
+    
+    /* Text font samples */
+    .sample-body1 {
+      font-family: var(--font-text);
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .sample-body2 {
+      font-family: var(--font-text);
+      font-size: 1.1rem;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+    
+    .sample-nav {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    
+    .sample-tabs-expanded {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    
+    .sample-tabs-docked {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    
+    /* =========================
+       COLOR SECTION
+       ========================= */
+    
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+    
+    .color-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .color-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .swatch {
+      height: 80px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .swatch.dark {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .swatch.light {
+      color: #333;
+    }
+    
+    .swatch-label {
+      font-family: var(--font-text);
+      font-weight: 400;
+      font-size: 0.85rem;
+    }
+    
+    .color-label {
+      text-align: right;
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    
+    /* Color flow */
+    .flow-card {
+      grid-column: 1 / -1;
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .flow-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    
+    .flow {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .flow-swatch {
+      flex: 1;
+      max-width: 160px;
+      height: 70px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .flow-swatch.dark {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .flow-swatch.light {
+      color: #333;
+    }
+    
+    .flow-swatch span {
+      font-family: var(--font-text);
+      font-size: 0.7rem;
+      font-weight: 400;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+    
+    .arrow {
+      font-size: 1.2rem;
+      color: #ccc;
+    }
+    
+    /* =========================
+       COMPONENTS SECTION
+       ========================= */
+    
+    .component-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    
+    .component-card {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .component-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--blue-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .component-desc {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 24px;
+    }
+    
+    /* DisplayBlock preview */
+    .display-block-preview {
+      max-width: 520px;
+      padding: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: var(--panel-1);
+      border-radius: 4px;
+    }
+    
+    .display-block-preview p {
+      font-family: var(--font-text);
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Tabs preview */
+    .tabs-preview {
+      display: flex;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .tab-preview {
+      flex: 1;
+      padding: 16px 24px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--blue-darkest);
+    }
+    
+    .tabs-preview-docked {
+      display: flex;
+      border-radius: 0;
+      margin-top: 16px;
+    }
+    
+    .tab-preview-docked {
+      flex: 1;
+      padding: 8px 20px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--blue-darkest);
+    }
+    
+    .tabs-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 8px;
+      text-align: center;
+    }
+    
+    /* Header preview */
+    .header-preview {
+      background: rgba(42, 82, 135, 0.75);
+      padding: 8px 20px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+    }
+    
+    .header-link {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Action items preview */
+    .action-preview {
+      background: var(--panel-3);
+      padding: 32px;
+      border-radius: 8px;
+      max-width: 520px;
+    }
+    
+    .action-item {
+      margin-bottom: 24px;
+    }
+    
+    .action-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .action-word {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 500;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 4px;
+    }
+    
+    .action-desc {
+      font-family: var(--font-text);
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.6;
+      color: white;
+    }
+    
+    /* =========================
+       FOOTER
+       ========================= */
+    
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      padding-top: 40px;
+      border-top: 1px solid #ddd;
+      color: #999;
+      font-size: 0.85rem;
+    }
+    
+    footer strong {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>COEQWAL Design System</h1>
+    <p>Typography, Color, and Component Reference</p>
+  </header>
+  
+  <!-- =====================
+       TYPOGRAPHY SECTION
+       ===================== -->
+  <div class="section">
+    <h2 class="section-title">Typography</h2>
+    
+    <div class="type-grid">
+      <!-- Display Font -->
+      <div class="type-card">
+        <h3>Display Font</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
+          <strong>neue-haas-grotesk-display</strong><br>
+          Used for headlines, action words, nav, and tabs
+        </p>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H1 (Hero)</span>
+            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.1</span>
+          </div>
+          <div class="sample-h1">California's Water</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H2</span>
+            <span class="type-specs">4.35rem / 500 / 1.1</span>
+          </div>
+          <div class="sample-h2">Section Header</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H3</span>
+            <span class="type-specs">3.26rem / 500 / 1.1</span>
+          </div>
+          <div class="sample-h3">Learn</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H4</span>
+            <span class="type-specs">2.45rem / 600 / 1.1</span>
+          </div>
+          <div class="sample-h4">Card Title</div>
+        </div>
+      </div>
+      
+      <!-- Text Font -->
+      <div class="type-card">
+        <h3>Text Font</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
+          <strong>neue-haas-grotesk-text</strong><br>
+          Used for body copy and UI text
+        </p>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">Body1</span>
+            <span class="type-specs">1.25rem (20px) / 400 / 1.6</span>
+          </div>
+          <div class="sample-body1">Primary body text for comfortable reading. Used in DisplayBlocks and descriptive content throughout the application.</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">Body2</span>
+            <span class="type-specs">1.1rem (17.6px) / 400 / 1.6</span>
+          </div>
+          <div class="sample-body2">Secondary body text. Used for header nav text and smaller reading contexts.</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">Header Nav</span>
+            <span class="type-specs">1.1rem / 600 / display font</span>
+          </div>
+          <div class="sample-nav">About COEQWAL</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">Tabs (Expanded)</span>
+            <span class="type-specs">1.6rem / 600 / display font</span>
+          </div>
+          <div class="sample-tabs-expanded">Learn</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">Tabs (Docked)</span>
+            <span class="type-specs">1.3rem / 600 / display font *</span>
+          </div>
+          <div class="sample-tabs-docked">Learn</div>
+          <p style="font-size: 0.75rem; color: #999; margin-top: 8px;">* Optically adjusted larger to compensate for dark-on-light appearance</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- =====================
+       COLOR SECTION
+       ===================== -->
+  <div class="section">
+    <h2 class="section-title">Color Palette</h2>
+    
+    <div class="color-grid">
+      <!-- Panel Backgrounds -->
+      <div class="color-card">
+        <h3>Panel Backgrounds</h3>
+        
+        <div class="swatch dark" style="background: #3D7DB5;">
+          <span class="swatch-label">Panel 1</span>
+          <span>#3D7DB5</span>
+        </div>
+        <div class="color-label">What is COEQWAL?</div>
+        
+        <div class="swatch light" style="background: transparent; border: 2px dashed #ccc;">
+          <span class="swatch-label">Panel 2</span>
+          <span>transparent</span>
+        </div>
+        <div class="color-label">What water issues matter to you?</div>
+        
+        <div class="swatch dark" style="background: #193D6B;">
+          <span class="swatch-label">Panel 3</span>
+          <span>#193D6B</span>
+        </div>
+        <div class="color-label">On this site, you can...</div>
+      </div>
+      
+      <!-- Tab Backgrounds -->
+      <div class="color-card">
+        <h3>Tab Backgrounds</h3>
+        
+        <div class="swatch light" style="background: #D5EAF5;">
+          <span class="swatch-label">Learn</span>
+          <span>#D5EAF5</span>
+        </div>
+        <div class="color-label">Lightest - entry point</div>
+        
+        <div class="swatch light" style="background: #C2D8EB;">
+          <span class="swatch-label">Explore</span>
+          <span>#C2D8EB</span>
+        </div>
+        <div class="color-label">Medium</div>
+        
+        <div class="swatch light" style="background: #94B8DA;">
+          <span class="swatch-label">Share</span>
+          <span>#94B8DA</span>
+        </div>
+        <div class="color-label">Deepest - engagement</div>
+      </div>
+      
+      <!-- Color Flow -->
+      <div class="flow-card">
+        <h3>Color Flow (Scroll Progression)</h3>
+        <div class="flow">
+          <div class="flow-swatch dark" style="background: #3D7DB5;">
+            #3D7DB5
+            <span>Panel 1</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-swatch dark" style="background: #193D6B;">
+            #193D6B
+            <span>Panel 3</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-swatch light" style="background: #D5EAF5;">
+            #D5EAF5
+            <span>Learn</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-swatch light" style="background: #C2D8EB;">
+            #C2D8EB
+            <span>Explore</span>
+          </div>
+          <div class="arrow">→</div>
+          <div class="flow-swatch light" style="background: #94B8DA;">
+            #94B8DA
+            <span>Share</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- =====================
+       COMPONENTS SECTION
+       ===================== -->
+  <div class="section">
+    <h2 class="section-title">Components</h2>
+    
+    <div class="component-grid">
+      <!-- DisplayBlock -->
+      <div class="component-card">
+        <h3>DisplayBlock</h3>
+        <p class="component-desc">Bordered text block for body content. Max-width 520px for optimal line length (45-75 characters).</p>
+        
+        <div class="display-block-preview">
+          <p>COEQWAL, the Collaboratory for Equity in Water Allocation, is a publicly-funded project that sheds light on how water is managed in California.</p>
+        </div>
+      </div>
+      
+      <!-- Tabs -->
+      <div class="component-card">
+        <h3>Tabs</h3>
+        <p class="component-desc">Navigation tabs with two states: expanded (prominent) and docked (integrated with header).</p>
+        
+        <div class="tabs-preview">
+          <div class="tab-preview" style="background: var(--tab-learn);">Learn</div>
+          <div class="tab-preview" style="background: var(--tab-explore);">Explore</div>
+          <div class="tab-preview" style="background: var(--tab-share);">Share</div>
+        </div>
+        <div class="tabs-label">Expanded (1.6rem)</div>
+        
+        <div class="tabs-preview-docked">
+          <div class="tab-preview-docked" style="background: var(--tab-learn);">Learn</div>
+          <div class="tab-preview-docked" style="background: var(--tab-explore);">Explore</div>
+          <div class="tab-preview-docked" style="background: var(--tab-share);">Share</div>
+        </div>
+        <div class="tabs-label">Docked (1.3rem - optically adjusted)</div>
+      </div>
+      
+      <!-- Header -->
+      <div class="component-card">
+        <h3>Header Navigation</h3>
+        <p class="component-desc">Fixed header with shrink-on-scroll. Background appears when tabs dock.</p>
+        
+        <div class="header-preview">
+          <span class="header-link">Tools</span>
+          <span class="header-link">Get Data</span>
+          <span class="header-link">About COEQWAL</span>
+        </div>
+        <div class="tabs-label" style="margin-top: 12px;">Background: rgba(42, 82, 135, 0.75)</div>
+      </div>
+      
+      <!-- Action Items -->
+      <div class="component-card">
+        <h3>Action Items</h3>
+        <p class="component-desc">Stacked action words (h3) with descriptions (body1). Used in Panel 3.</p>
+        
+        <div class="action-preview">
+          <div class="action-item">
+            <div class="action-word">Learn</div>
+            <div class="action-desc">how water in California's Central Valley is managed</div>
+          </div>
+          <div class="action-item">
+            <div class="action-word">Explore</div>
+            <div class="action-desc">how water outcomes shift under different scenarios</div>
+          </div>
+          <div class="action-item">
+            <div class="action-word">Share</div>
+            <div class="action-desc">your insights about California's water future</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <strong>COEQWAL Design System</strong> • Last updated January 8, 2026<br>
+    Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit
+  </footer>
+</body>
+</html>
