@@ -159,10 +159,9 @@ export default function DataPage() {
                 />
               </IconButton>
               <Typography
-                variant="h4"
+                variant="h5"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  fontWeight: 600,
                 }}
               >
                 Data & downloads
