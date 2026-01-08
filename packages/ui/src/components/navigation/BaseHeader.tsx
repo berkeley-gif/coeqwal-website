@@ -155,14 +155,14 @@ export function BaseHeader({
 
   const buttonStyle = {
     fontFamily: theme.typography.h4.fontFamily, // display font (matches tabs)
-    fontSize: "1.1rem", // Slightly smaller than tabs (1.6rem) but cohesive
-    fontWeight: 600, // Match tabs weight
+    fontSize: theme.typography.body2.fontSize, // body2 size (1.1rem)
+    fontWeight: 600, // one weight above body2 (400)
     color: textColor,
     letterSpacing: "0.01em",
     textTransform: "capitalize" as const, // Match tabs
     padding: "8px 20px",
     transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
-    textShadow: theme.textShadow.displayBody,
+    textShadow: theme.textShadow.nav, // lighter shadow for nav text
     "&:hover": {
       backgroundColor: "transparent",
       color: "#FFFFFF",

@@ -8,19 +8,16 @@ export interface DisplayBlockProps {
   children: React.ReactNode
   /** Override or extend the styles */
   sx?: SxProps<Theme>
-  /** Typography variant for the content */
-  variant?: "displayBody" | "body1" | "body2"
   /** Whether to apply text shadow (default: true) */
   textShadow?: boolean
 }
 
 /**
- * DisplayBlock - Bordered text block using the design system's display treatment.
+ * DisplayBlock - Bordered text block using the text font for comfortable reading.
  */
 export function DisplayBlock({
   children,
   sx,
-  variant = "displayBody",
   textShadow = true,
 }: DisplayBlockProps) {
   const theme = useTheme()
@@ -29,7 +26,7 @@ export function DisplayBlock({
     <Box
       sx={{
         // Responsive width: fixed max on larger screens, full-width on mobile
-        maxWidth: { xs: "100%", sm: "540px" },
+        maxWidth: { xs: "100%", sm: "600px" },
         width: { xs: "100%", sm: "auto" },
         // Responsive padding: tighter on mobile
         padding: {
@@ -43,12 +40,13 @@ export function DisplayBlock({
       }}
     >
       <Typography
-        variant={variant}
+        variant="body1"
         sx={{
           color: "rgba(255, 255, 255, 0.95)",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
           margin: 0,
-          textAlign: "left", // Always left-aligned text
+          textAlign: "left",
+          // Uses body1 (1.25rem) consistently
         }}
       >
         {children}

@@ -698,16 +698,16 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.4rem", // 22.4px - primary body text
+      fontSize: "1.25rem", // 20px - primary body text (comfortable reading size)
       fontWeight: 400,
       lineHeight: 1.6,
     },
     body2: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1rem", // 16px - dashboard interface text
+      fontSize: "1.1rem", // 17.6px - secondary body text (DisplayBlock mobile)
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,

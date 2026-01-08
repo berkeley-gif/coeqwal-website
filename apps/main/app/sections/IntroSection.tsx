@@ -64,7 +64,7 @@ const IntroSection = () => {
           backgroundColor="#3D7DB5"
           headlineLine1="What is"
           headlineLine2="COEQWAL?"
-          bodyText="COEQWAL &mdash; the Collaboratory for Equity in Water Allocation &mdash; is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California's water planning tools so that communities can meaningfully participate in shaping our water future."
+          bodyText="COEQWAL, the Collaboratory for Equity in Water Allocation, is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California's water planning tools so that communities can meaningfully participate in shaping our water future."
           textColor={theme.palette.common.white}
           hideHeadline
         />
