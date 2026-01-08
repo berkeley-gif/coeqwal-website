@@ -4,7 +4,6 @@ import { Box, useTheme } from "@repo/ui/mui"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
-import ActionPanel from "../components/ActionPanel"
 import MorphingHeadline from "../components/MorphingHeadline"
 import type { VideoSource } from "../components/VideoHero"
 
@@ -39,6 +38,11 @@ const IntroSection = () => {
           {
             line1: "What water issues",
             line2: "matter to you?",
+            textShadow: false,
+          },
+          {
+            line1: "On this site,",
+            line2: "you can",
             textShadow: false,
           },
         ]}
@@ -76,36 +80,39 @@ const IntroSection = () => {
           textColor={theme.palette.common.white}
           hideHeadline
         />
-      </Box>
 
-      {/* Action Panel - Site features */}
-      <ActionPanel
-        id="site-actions"
-        ariaLabel="What you can do on this site"
-        backgroundColor={theme.palette.grey[900]}
-        introText="On this site, you can"
-        textColor={theme.palette.common.white}
-        actions={[
-          {
-            action: "Learn",
-            color: theme.palette.common.white,
-            description:
-              "how water in California's Central Valley is managed",
-          },
-          {
-            action: "Explore",
-            color: theme.palette.common.white,
-            description:
-              "how water outcomes shift under different scenarios",
-          },
-          {
-            action: "Share",
-            color: theme.palette.common.white,
-            description:
-              "your insights about California's water future",
-          },
-        ]}
-      />
+        {/* Frontmatter Panel 3 - Actions variant */}
+        <FrontmatterPanel
+          id="site-actions"
+          ariaLabel="What you can do on this site"
+          variant="actions"
+          backgroundColor={theme.palette.grey[900]}
+          headlineLine1="On this site,"
+          headlineLine2="you can"
+          textColor={theme.palette.common.white}
+          hideHeadline
+          actions={[
+            {
+              action: "Learn",
+              color: theme.palette.common.white,
+              description:
+                "how water in California's Central Valley is managed",
+            },
+            {
+              action: "Explore",
+              color: theme.palette.common.white,
+              description:
+                "how water outcomes shift under different scenarios",
+            },
+            {
+              action: "Share",
+              color: theme.palette.common.white,
+              description:
+                "your insights about California's water future",
+            },
+          ]}
+        />
+      </Box>
     </Box>
   )
 }
