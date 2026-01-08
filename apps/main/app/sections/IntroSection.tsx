@@ -1,9 +1,4 @@
-import { OneColumnPanel, GlossaryLinkedText } from "@repo/ui"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { useTranslation } from "@repo/i18n"
-import { useDrawerStore } from "@repo/state/drawer"
-import { useCallback } from "react"
-import { motion } from "@repo/motion"
+import { Box, useTheme } from "@repo/ui/mui"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
@@ -18,37 +13,6 @@ const VIDEO_SRCS: VideoSource[] = [
 
 const IntroSection = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
-
-  // Handler to open glossary to specific entry
-  const handleGlossaryOpen = useCallback(
-    (term: string) => {
-      setDrawerContent({ selectedTerm: term })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  const slideIn = {
-    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
-
-  const slideInRight = {
-    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-    },
-  }
 
   return (
     <Box>
@@ -67,90 +31,6 @@ const IntroSection = () => {
         headlineLine2="COEQWAL?"
         bodyText="COEQWAL – the Collaboratory for Equity in Water Allocation – is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California's water planning tools so that communities can meaningfully participate in shaping our water future."
         textColor={theme.palette.common.white}
-      />
-
-      {/* Frontmatter panel(s) */}
-      <OneColumnPanel
-        id="frontmatter"
-        fullHeight={true}
-        fullWidth
-        backgroundColor={theme.palette.brand.sky}
-        includeHeaderSpacing={false}
-        contentAlignment={{
-          justifyContent: "center",
-          alignItems: "flex-start",
-        }}
-        sx={{
-          pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
-          backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
-          backgroundSize: "38% auto",
-          backgroundPosition: "right bottom",
-          backgroundRepeat: "no-repeat",
-          paddingLeft: "300px",
-        }}
-        content={
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: "70%",
-              textAlign: "left",
-              display: "flex",
-              flexDirection: "column",
-              gap: "60px",
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                textAlign: "left",
-                display: "flex",
-                flexDirection: "row",
-                gap: "20px",
-              }}
-            >
-              <motion.div
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: false, amount: 0.3 }}
-                variants={slideIn}
-              >
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: theme.typography.fontWeightBold,
-                    maxWidth: "80%",
-                  }}
-                >
-                  {t("frontmatterPanel.boldText")}
-                </Typography>
-              </motion.div>
-
-              <motion.div
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: false, amount: 0.3 }}
-                variants={slideInRight}
-              >
-                <Typography variant="body1">
-                  <GlossaryLinkedText
-                    text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
-                    terms={[
-                      { name: "CalSim", glossaryTerm: "CalSim" },
-                      {
-                        name: "water management strategies",
-                        glossaryTerm: "Water management strategies",
-                      },
-                      { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
-                    ]}
-                    onActivate={handleGlossaryOpen}
-                    color={theme.palette.text.primary}
-                    underlineColor={theme.palette.text.primary}
-                  />
-                </Typography>
-              </motion.div>
-            </Box>
-          </Box>
-        }
       />
 
       {/*       <OneColumnPanel

@@ -39,6 +39,8 @@ export interface FrontmatterPanelProps {
   scrollToId?: string
   /** Text color for headline (defaults to white) */
   textColor?: string
+  /** Whether to apply text shadows (default: false for solid backgrounds) */
+  textShadow?: boolean
 }
 
 export default function FrontmatterPanel({
@@ -50,6 +52,7 @@ export default function FrontmatterPanel({
   bodyText,
   scrollToId,
   textColor = "common.white",
+  textShadow = false,
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
@@ -160,7 +163,7 @@ export default function FrontmatterPanel({
             justifyContent: { xs: "center", md: "flex-end" },
           }}
         >
-          <DisplayBlock>{bodyText}</DisplayBlock>
+          <DisplayBlock textShadow={textShadow}>{bodyText}</DisplayBlock>
         </MotionBox>
       </Box>
 

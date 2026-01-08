@@ -10,6 +10,8 @@ export interface DisplayBlockProps {
   sx?: SxProps<Theme>
   /** Typography variant for the content */
   variant?: "displayBody" | "body1" | "body2"
+  /** Whether to apply text shadow (default: true) */
+  textShadow?: boolean
 }
 
 /**
@@ -19,6 +21,7 @@ export function DisplayBlock({
   children,
   sx,
   variant = "displayBody",
+  textShadow = true,
 }: DisplayBlockProps) {
   const theme = useTheme()
 
@@ -43,7 +46,7 @@ export function DisplayBlock({
         variant={variant}
         sx={{
           color: "rgba(255, 255, 255, 0.95)",
-          textShadow: theme.textShadow.displayBody,
+          textShadow: textShadow ? theme.textShadow.displayBody : "none",
           margin: 0,
           textAlign: "left", // Always left-aligned text
         }}
