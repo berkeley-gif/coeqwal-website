@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { BaseHeader } from "@repo/ui"
+import { useTabs } from "../context/Tabs"
 
 /**
  * Main application header with Next.js routing and theme integration
@@ -10,6 +11,7 @@ import { BaseHeader } from "@repo/ui"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
+  const { isInTabsArea } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
   // Native smooth scroll gets interrupted by React state changes during the tabs
@@ -51,7 +53,7 @@ export function Header() {
       onLogoClick={handleLogoClick}
       onDataClick={handleDataClick}
       onAboutClick={handleAboutClick}
-      backgroundColor="transparent"
+      backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
       textColor={theme.palette.common.white}
       zIndex={theme.zIndex.appBar}
       borderRadius={theme.borderRadius.none}

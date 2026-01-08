@@ -69,13 +69,14 @@ export default function SmoothTabs() {
               style={{
                 flex: 1,
                 position: "relative",
-                padding: "13px 12px",
+                padding: isInTabsArea ? "8px 20px" : "13px 12px", // Match header padding when sticky
                 border: "none",
-                background: panelColor,
+                background: panelColor, // Keep individual tab colors
                 cursor: "pointer",
                 fontWeight: 600,
                 textTransform: "uppercase",
                 color: theme.palette.blue.darkest,
+                transition: "padding 0.2s ease",
               }}
             >
               {selected && (
