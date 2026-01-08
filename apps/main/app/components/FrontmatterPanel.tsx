@@ -138,7 +138,7 @@ export default function FrontmatterPanel({
         },
       }
 
-  // Actions variant: centered layout with action items
+  // Actions variant: diagonal layout matching default variant (headline top-left, actions bottom-right)
   if (variant === "actions" && actions) {
     return (
       <Box
@@ -147,35 +147,40 @@ export default function FrontmatterPanel({
         aria-label={ariaLabel}
         sx={{
           position: "relative",
-          minHeight: "100vh",
+          height: "100vh",
           width: "100%",
+          overflow: "hidden",
           backgroundColor,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: { xs: 8, md: 12 },
-          px: theme.space.panel.padding,
           pointerEvents: "auto",
         }}
       >
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={staggerContainer}
+        {/* Content layout — flex space-between for diagonal positioning (matches default variant) */}
+        <Box
           sx={{
-            maxWidth: "900px",
-            width: "100%",
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            paddingTop: theme.space.panel.topOffset,
+            paddingBottom: theme.space.panel.bottomOffset,
+            paddingLeft: theme.space.panel.padding,
+            paddingRight: theme.space.panel.padding,
+            zIndex: theme.zIndex.heroContent,
           }}
         >
-          {/* Headline for actions variant */}
+          {/* Headline — top-left on desktop, centered on mobile */}
           <MotionBox
-            variants={fadeIn}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={heroIn}
             sx={{
+              alignSelf: { xs: "stretch", md: "flex-start" },
               display: hideHeadline
-                ? { xs: "block", md: "none" }
-                : "block",
-              mb: { xs: 6, md: 8 },
+                ? { xs: "flex", md: "none" }
+                : { xs: "flex", md: "block" },
+              justifyContent: { xs: "center", md: "flex-start" },
             }}
           >
             <Typography
@@ -183,6 +188,7 @@ export default function FrontmatterPanel({
               sx={{
                 color: textColor,
                 textShadow: textShadow ? theme.textShadow.display : "none",
+                maxWidth: "16ch",
                 textAlign: { xs: "center", md: "left" },
               }}
             >
@@ -199,56 +205,67 @@ export default function FrontmatterPanel({
               )}
             </Typography>
           </MotionBox>
+          {/* Desktop spacer when headline hidden (maintains action items position) */}
+          {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-          {/* Action items list */}
-          <Box
-            component="ul"
+          {/* Action items — bottom-right on desktop, centered on mobile */}
+          <MotionBox
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={staggerContainer}
             sx={{
-              listStyle: "none",
-              p: 0,
-              m: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: { xs: 5, md: 6 },
+              alignSelf: { xs: "stretch", md: "flex-end" },
+              display: { xs: "flex", md: "block" },
+              justifyContent: { xs: "center", md: "flex-end" },
             }}
           >
-            {actions.map((item, index) => (
-              <motion.li key={index} variants={fadeIn}>
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", md: "180px 1fr" },
-                    gap: { xs: 1, md: 4 },
-                    alignItems: "baseline",
-                  }}
-                >
-                  {/* Action word */}
-                  <Typography
-                    variant="h3"
+            <Box
+              component="ul"
+              sx={{
+                listStyle: "none",
+                p: 0,
+                m: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: { xs: 4, md: 4 },
+                maxWidth: "520px",
+              }}
+            >
+              {actions.map((item, index) => (
+                <motion.li key={index} variants={fadeIn}>
+                  <Box
                     sx={{
-                      color: item.color,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: { xs: 0.5, md: 0.5 },
                     }}
                   >
-                    {item.action}
-                  </Typography>
+                    {/* Action word */}
+                    <Typography
+                      variant="h3"
+                      sx={{
+                        color: item.color,
+                      }}
+                    >
+                      {item.action}
+                    </Typography>
 
-                  {/* Description */}
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: textColor,
-                      fontSize: { xs: "1.1rem", md: "1.25rem" },
-                      lineHeight: 1.6,
-                      maxWidth: "600px",
-                    }}
-                  >
-                    {item.description}
-                  </Typography>
-                </Box>
-              </motion.li>
-            ))}
-          </Box>
-        </MotionBox>
+                    {/* Description */}
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: textColor,
+                      }}
+                    >
+                      {item.description}
+                    </Typography>
+                  </Box>
+                </motion.li>
+              ))}
+            </Box>
+          </MotionBox>
+        </Box>
 
         {/* Scroll indicator (optional) */}
         {scrollToId && (
