@@ -302,14 +302,17 @@ export default function VideoHero({
               textShadow: theme.textShadow.display,
               // fontSize needed for maxWidth "ch" unit to calculate correctly
               fontSize: theme.typography.h1Bold.fontSize,
+              // lineHeight controls spacing between the two headline lines
+              lineHeight: 1.05,
               maxWidth: "16ch",
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2" component="span" sx={{ display: "block" }}>
+            <Typography variant="h2" component="span">
               {t("homePanel.titleLine1")}
             </Typography>
-            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+            <br />
+            <Typography variant="h1Bold" component="span">
               {t("homePanel.titleLine2")}
             </Typography>
           </Box>

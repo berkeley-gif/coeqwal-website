@@ -239,6 +239,8 @@ export default function MorphingHeadline({
     color: "common.white",
     // fontSize needed for maxWidth "ch" unit to calculate correctly
     fontSize: theme.typography.h1Bold.fontSize,
+    // lineHeight controls spacing between the two headline lines
+    lineHeight: 1.05,
     maxWidth: "16ch",
     textAlign: { xs: "center", md: "left" } as const,
   }
@@ -269,13 +271,16 @@ export default function MorphingHeadline({
                 : "none",
           }}
         >
-          <Typography variant="h2" component="span" sx={{ display: "block" }}>
+          <Typography variant="h2" component="span">
             {activeHeadline?.line1}
           </Typography>
           {activeHeadline?.line2 && (
-            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
-              {activeHeadline.line2}
-            </Typography>
+            <>
+              <br />
+              <Typography variant="h1Bold" component="span">
+                {activeHeadline.line2}
+              </Typography>
+            </>
           )}
         </Box>
       </Box>
@@ -320,13 +325,16 @@ export default function MorphingHeadline({
                     : "none",
               }}
             >
-              <Typography variant="h2" component="span" sx={{ display: "block" }}>
+              <Typography variant="h2" component="span">
                 {headline.line1}
               </Typography>
               {headline.line2 && (
-                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
-                  {headline.line2}
-                </Typography>
+                <>
+                  <br />
+                  <Typography variant="h1Bold" component="span">
+                    {headline.line2}
+                  </Typography>
+                </>
               )}
             </Box>
           </motion.div>
