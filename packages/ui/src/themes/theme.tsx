@@ -221,11 +221,10 @@ const palette = {
     tier4: "#CD5C5C", // Red, tier 4
   },
 
-  // Tab panel colors
   tabPanels: {
-    learn: "#68C3CE",
-    explore: "#F4BF4D",
-    empower: "#9EC33B",
+    learn: "#D9E7F0",    // 15% blue
+    explore: "#C4D9E8",  // 20% blue
+    empower: "#B0CCE0",  // 25% blue
   },
 
   // Data visualization colors for outcome categories
