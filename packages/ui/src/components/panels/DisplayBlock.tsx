@@ -26,7 +26,8 @@ export function DisplayBlock({
     <Box
       sx={{
         // Responsive width: fixed max on larger screens, full-width on mobile
-        maxWidth: { xs: "100%", sm: "600px" },
+        // 520px optimizes line length for content sentence wrapping
+        maxWidth: { xs: "100%", sm: "520px" },
         width: { xs: "100%", sm: "auto" },
         // Responsive padding: tighter on mobile
         padding: {

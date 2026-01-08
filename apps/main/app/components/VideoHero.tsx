@@ -330,7 +330,14 @@ export default function VideoHero({
             pointerEvents: "auto", // Re-enable for text selection
           }}
         >
-          <DisplayBlock>{t("homePanel.content")}</DisplayBlock>
+          <DisplayBlock
+            sx={{
+              // WCAG AA: Darkish transparent fill for text contrast against video
+              background: "rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            {t("homePanel.content")}
+          </DisplayBlock>
         </MotionBox>
       </Box>
 
