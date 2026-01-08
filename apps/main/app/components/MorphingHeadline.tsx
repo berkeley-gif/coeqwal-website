@@ -1,9 +1,9 @@
 /**
- * MorphingHeadline - Scroll-linked headline that morphs between two panels
+ * MorphingHeadline - Scroll-linked headline that morphs across multiple panels
  *
- * Creates a floating h1 that transitions between VideoHero and FrontmatterPanel
- * text content as the user scrolls. The headline stays visually pinned while
- * crossfading text and adjusting text-shadow.
+ * Creates a floating h1 that transitions between panel headlines as the user
+ * scrolls. The headline stays visually pinned while crossfading text and
+ * adjusting text-shadow.
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Single semantic h1 for screen readers (visual duplicates hidden)
@@ -17,7 +17,7 @@
 
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useMemo } from "react"
 import { useScroll, useTransform, motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
@@ -27,24 +27,24 @@ const getReducedMotionPreference = () =>
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
 
+export interface HeadlineText {
+  /** First line (smaller text) */
+  line1: string
+  /** Second line (bold text) */
+  line2?: string
+  /** Whether to show text shadow (default: true for first headline) */
+  textShadow?: boolean
+}
+
 export interface MorphingHeadlineProps {
-  /** First panel's headline - line 1 (smaller text) */
-  text1Line1: string
-  /** First panel's headline - line 2 (bold text) */
-  text1Line2: string
-  /** Second panel's headline - line 1 (smaller text) */
-  text2Line1: string
-  /** Second panel's headline - line 2 (bold text) */
-  text2Line2?: string
-  /** Container ref that spans both panels for scroll tracking */
+  /** Array of headline texts to morph through */
+  headlines: HeadlineText[]
+  /** Container ref that spans all panels for scroll tracking */
   containerRef: React.RefObject<HTMLElement | null>
 }
 
 export default function MorphingHeadline({
-  text1Line1,
-  text1Line2,
-  text2Line1,
-  text2Line2,
+  headlines,
   containerRef,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
@@ -60,11 +60,9 @@ export default function MorphingHeadline({
     return () => mediaQuery.removeEventListener("change", handleChange)
   }, [])
 
-  // Track scroll progress within the container (both panels)
+  // Track scroll progress within the container (all panels)
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    // Start when top of container hits top of viewport
-    // End when bottom of container hits bottom of viewport
     offset: ["start start", "end end"],
     /**
      * Required because ref is defined in parent component (IntroSection).
@@ -76,34 +74,89 @@ export default function MorphingHeadline({
     layoutEffect: false,
   })
 
-  // Transform scroll progress to opacity values
-  // Text 1: fully visible at 0%, starts fading at 40%, gone by 60%
-  // Text 2: invisible at 0%, starts appearing at 40%, fully visible by 60%
-  const text1Opacity = useTransform(scrollYProgress, [0, 0.4, 0.6], [1, 1, 0])
-  const text2Opacity = useTransform(scrollYProgress, [0, 0.4, 0.6], [0, 0, 1])
+  // Calculate opacity keyframes for each headline based on number of panels
+  // Each panel gets equal scroll range, with crossfades at panel boundaries
+  const opacityTransforms = useMemo(() => {
+    const count = headlines.length
+    if (count < 2) return []
 
-  // Track text shadow state (on over video, off over solid color)
-  const [showTextShadow, setShowTextShadow] = useState(true)
+    // For N panels, we have N-1 transition points
+    // Each panel occupies 1/N of the scroll range
+    const panelSize = 1 / count
 
-  // Update text shadow based on scroll progress
+    return headlines.map((_, index) => {
+      // Calculate when this headline should be visible
+      // Each headline fades in at its panel start and fades out at its panel end
+      const panelStart = index * panelSize
+      const panelEnd = (index + 1) * panelSize
+
+      // Transition zone is 20% of panel size, centered on boundary
+      const transitionSize = panelSize * 0.2
+
+      // Fade in: from previous panel end to this panel start + transition
+      const fadeInStart = Math.max(0, panelStart - transitionSize)
+      const fadeInEnd = panelStart + transitionSize
+
+      // Fade out: from this panel end - transition to next panel start + transition
+      const fadeOutStart = panelEnd - transitionSize
+      const fadeOutEnd = Math.min(1, panelEnd + transitionSize)
+
+      // Build keyframes
+      if (index === 0) {
+        // First headline: visible at start, fades out
+        return {
+          input: [0, fadeOutStart, fadeOutEnd],
+          output: [1, 1, 0],
+        }
+      } else if (index === count - 1) {
+        // Last headline: fades in, stays visible
+        return {
+          input: [fadeInStart, fadeInEnd, 1],
+          output: [0, 1, 1],
+        }
+      } else {
+        // Middle headlines: fade in, stay visible, fade out
+        return {
+          input: [fadeInStart, fadeInEnd, fadeOutStart, fadeOutEnd],
+          output: [0, 1, 1, 0],
+        }
+      }
+    })
+  }, [headlines])
+
+  // Create motion values for each headline opacity
+  const opacity0 = useTransform(
+    scrollYProgress,
+    opacityTransforms[0]?.input || [0, 1],
+    opacityTransforms[0]?.output || [1, 1],
+  )
+  const opacity1 = useTransform(
+    scrollYProgress,
+    opacityTransforms[1]?.input || [0, 1],
+    opacityTransforms[1]?.output || [0, 0],
+  )
+  const opacity2 = useTransform(
+    scrollYProgress,
+    opacityTransforms[2]?.input || [0, 1],
+    opacityTransforms[2]?.output || [0, 0],
+  )
+
+  const opacities = [opacity0, opacity1, opacity2]
+
+  // Track which headline to show (for reduced motion and screen readers)
+  const [activeIndex, setActiveIndex] = useState(0)
+
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (value) => {
-      setShowTextShadow(value < 0.5)
+      const panelSize = 1 / headlines.length
+      const newIndex = Math.min(
+        Math.floor(value / panelSize + 0.5),
+        headlines.length - 1,
+      )
+      setActiveIndex(newIndex)
     })
     return unsubscribe
-  }, [scrollYProgress])
-
-  // Track which text to show (for reduced motion visual and screen readers)
-  // Updates at 50% scroll progress
-  const [showText1, setShowText1] = useState(true)
-
-  // WCAG 4.1.2: Update screen reader text based on scroll position
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (value) => {
-      setShowText1(value < 0.5)
-    })
-    return unsubscribe
-  }, [scrollYProgress])
+  }, [scrollYProgress, headlines.length])
 
   // Shared headline styles
   const headlineStyles = {
@@ -113,8 +166,8 @@ export default function MorphingHeadline({
   }
 
   // If reduced motion, render static text without animation
-  // Hidden on mobile - panels show their native h1 instead (avoids overlap with DisplayBlock)
   if (prefersReducedMotion) {
+    const activeHeadline = headlines[activeIndex]
     return (
       <Box
         sx={{
@@ -124,7 +177,7 @@ export default function MorphingHeadline({
           right: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
-          display: { xs: "none", md: "block" }, // Hidden on mobile
+          display: { xs: "none", md: "block" },
         }}
       >
         <Typography
@@ -132,22 +185,28 @@ export default function MorphingHeadline({
           sx={{
             ...headlineStyles,
             position: "relative",
-            textShadow: showText1 ? theme.textShadow.display : "none",
+            textShadow:
+              activeHeadline?.textShadow !== false
+                ? theme.textShadow.display
+                : "none",
           }}
         >
           <Box component="span" sx={{ fontSize: "0.8em" }}>
-            {showText1 ? text1Line1 : text2Line1}
+            {activeHeadline?.line1}
           </Box>
-          <br />
-          <Box component="span" sx={{ fontWeight: 700 }}>
-            {showText1 ? text1Line2 : text2Line2 || ""}
-          </Box>
+          {activeHeadline?.line2 && (
+            <>
+              <br />
+              <Box component="span" sx={{ fontWeight: 700 }}>
+                {activeHeadline.line2}
+              </Box>
+            </>
+          )}
         </Typography>
       </Box>
     )
   }
 
-  // Hidden on mobile - panels show their native h1 instead (avoids overlap with DisplayBlock)
   return (
     <Box
       sx={{
@@ -157,58 +216,50 @@ export default function MorphingHeadline({
         right: theme.space.panel.padding,
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
-        display: { xs: "none", md: "block" }, // Hidden on mobile
+        display: { xs: "none", md: "block" },
       }}
     >
-      {/* Container for both headlines - they overlap via CSS grid */}
+      {/* Container for all headlines - they overlap via CSS grid */}
       <Box
         sx={{
           display: "grid",
-          // All children occupy same grid cell, creating overlap
           "& > *": {
             gridArea: "1 / 1",
           },
         }}
       >
-        {/* Text 1: VideoHero headline - WCAG 1.3.1: Hidden from screen readers */}
-        <motion.div style={{ opacity: text1Opacity }} aria-hidden="true">
-          <Typography
-            variant="h1"
-            component="span"
-            sx={{
-              ...headlineStyles,
-              textShadow: showTextShadow ? theme.textShadow.display : "none",
-            }}
+        {/* Render each headline with its opacity transform */}
+        {headlines.map((headline, index) => (
+          <motion.div
+            key={index}
+            style={{ opacity: opacities[index] }}
+            aria-hidden="true"
           >
-            <Box component="span" sx={{ fontSize: "0.8em", display: "block" }}>
-              {text1Line1}
-            </Box>
-            <Box component="span" sx={{ fontWeight: 700, display: "block" }}>
-              {text1Line2}
-            </Box>
-          </Typography>
-        </motion.div>
-
-        {/* Text 2: FrontmatterPanel headline - WCAG 1.3.1: Hidden from screen readers */}
-        <motion.div style={{ opacity: text2Opacity }} aria-hidden="true">
-          <Typography
-            variant="h1"
-            component="span"
-            sx={{
-              ...headlineStyles,
-              textShadow: "none",
-            }}
-          >
-            <Box component="span" sx={{ fontSize: "0.8em", display: "block" }}>
-              {text2Line1}
-            </Box>
-            {text2Line2 && (
-              <Box component="span" sx={{ fontWeight: 700, display: "block" }}>
-                {text2Line2}
+            <Typography
+              variant="h1"
+              component="span"
+              sx={{
+                ...headlineStyles,
+                textShadow:
+                  headline.textShadow !== false
+                    ? theme.textShadow.display
+                    : "none",
+              }}
+            >
+              <Box component="span" sx={{ fontSize: "0.8em", display: "block" }}>
+                {headline.line1}
               </Box>
-            )}
-          </Typography>
-        </motion.div>
+              {headline.line2 && (
+                <Box
+                  component="span"
+                  sx={{ fontWeight: 700, display: "block" }}
+                >
+                  {headline.line2}
+                </Box>
+              )}
+            </Typography>
+          </motion.div>
+        ))}
 
         {/*
           WCAG 1.3.1 & 4.1.2: Screen reader accessible h1 - DO NOT REMOVE
@@ -218,7 +269,6 @@ export default function MorphingHeadline({
         <Typography
           variant="h1"
           sx={{
-            // Visually hidden but accessible to screen readers
             clip: "rect(0 0 0 0)",
             clipPath: "inset(50%)",
             height: 1,
@@ -227,9 +277,7 @@ export default function MorphingHeadline({
             whiteSpace: "nowrap",
           }}
         >
-          {showText1
-            ? `${text1Line1} ${text1Line2}`
-            : `${text2Line1} ${text2Line2 || ""}`}
+          {`${headlines[activeIndex]?.line1 || ""} ${headlines[activeIndex]?.line2 || ""}`}
         </Typography>
       </Box>
     </Box>
