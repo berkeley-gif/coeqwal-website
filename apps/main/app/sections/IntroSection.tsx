@@ -88,19 +88,19 @@ const IntroSection = () => {
         actions={[
           {
             action: "Learn",
-            color: theme.palette.learn.background,
+            color: theme.palette.common.white,
             description:
               "how water in California's Central Valley is managed",
           },
           {
             action: "Explore",
-            color: theme.palette.explore.background,
+            color: theme.palette.common.white,
             description:
               "how water outcomes shift under different scenarios",
           },
           {
             action: "Share",
-            color: theme.palette.empower.background,
+            color: theme.palette.common.white,
             description:
               "your insights about California's water future",
           },
