@@ -66,6 +66,8 @@ export default function MorphingHeadline({
     // Start when top of container hits top of viewport
     // End when bottom of container hits bottom of viewport
     offset: ["start start", "end end"],
+    // Required because ref is defined in parent component
+    layoutEffect: false,
   })
 
   // Transform scroll progress to opacity values
@@ -102,9 +104,6 @@ export default function MorphingHeadline({
     color: "common.white",
     maxWidth: "16ch",
     textAlign: { xs: "center", md: "left" } as const,
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
   }
 
   // If reduced motion, render static text without animation
@@ -155,8 +154,16 @@ export default function MorphingHeadline({
         justifyContent: { xs: "center", md: "flex-start" },
       }}
     >
-      {/* Container for both headlines - they overlap */}
-      <Box sx={{ position: "relative" }}>
+      {/* Container for both headlines - they overlap via CSS grid */}
+      <Box
+        sx={{
+          display: "grid",
+          // All children occupy same grid cell, creating overlap
+          "& > *": {
+            gridArea: "1 / 1",
+          },
+        }}
+      >
         {/* Text 1: VideoHero headline - WCAG 1.3.1: Hidden from screen readers */}
         <motion.div style={{ opacity: text1Opacity }} aria-hidden="true">
           <Typography
@@ -164,7 +171,6 @@ export default function MorphingHeadline({
             component="span"
             sx={{
               ...headlineStyles,
-              position: "relative",
               textShadow: showTextShadow ? theme.textShadow.display : "none",
             }}
           >
@@ -178,21 +184,12 @@ export default function MorphingHeadline({
         </motion.div>
 
         {/* Text 2: FrontmatterPanel headline - WCAG 1.3.1: Hidden from screen readers */}
-        <motion.div
-          style={{
-            opacity: text2Opacity,
-            position: "absolute",
-            top: 0,
-            left: 0,
-          }}
-          aria-hidden="true"
-        >
+        <motion.div style={{ opacity: text2Opacity }} aria-hidden="true">
           <Typography
             variant="h1"
             component="span"
             sx={{
               ...headlineStyles,
-              position: "relative",
               textShadow: "none",
             }}
           >
@@ -215,8 +212,6 @@ export default function MorphingHeadline({
         <Typography
           variant="h1"
           sx={{
-            ...headlineStyles,
-            position: "absolute",
             // Visually hidden but accessible to screen readers
             clip: "rect(0 0 0 0)",
             clipPath: "inset(50%)",
