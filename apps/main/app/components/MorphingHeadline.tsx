@@ -113,6 +113,7 @@ export default function MorphingHeadline({
   }
 
   // If reduced motion, render static text without animation
+  // Hidden on mobile - panels show their native h1 instead (avoids overlap with DisplayBlock)
   if (prefersReducedMotion) {
     return (
       <Box
@@ -123,8 +124,7 @@ export default function MorphingHeadline({
           right: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
-          display: { xs: "flex", md: "block" },
-          justifyContent: { xs: "center", md: "flex-start" },
+          display: { xs: "none", md: "block" }, // Hidden on mobile
         }}
       >
         <Typography
@@ -147,6 +147,7 @@ export default function MorphingHeadline({
     )
   }
 
+  // Hidden on mobile - panels show their native h1 instead (avoids overlap with DisplayBlock)
   return (
     <Box
       sx={{
@@ -156,8 +157,7 @@ export default function MorphingHeadline({
         right: theme.space.panel.padding,
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
-        display: { xs: "flex", md: "block" },
-        justifyContent: { xs: "center", md: "flex-start" },
+        display: { xs: "none", md: "block" }, // Hidden on mobile
       }}
     >
       {/* Container for both headlines - they overlap via CSS grid */}
