@@ -41,6 +41,8 @@ export interface FrontmatterPanelProps {
   textColor?: string
   /** Whether to apply text shadows (default: false for solid backgrounds) */
   textShadow?: boolean
+  /** Hide the headline (for use with MorphingHeadline) */
+  hideHeadline?: boolean
 }
 
 export default function FrontmatterPanel({
@@ -53,6 +55,7 @@ export default function FrontmatterPanel({
   scrollToId,
   textColor = "common.white",
   textShadow = false,
+  hideHeadline = false,
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
@@ -117,39 +120,43 @@ export default function FrontmatterPanel({
         }}
       >
         {/* Headline — top-left on desktop, centered on mobile */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroIn}
-          sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
-            display: { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-start" },
-          }}
-        >
-          <Typography
-            variant="h1"
+        {!hideHeadline && (
+          <MotionBox
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={heroIn}
             sx={{
-              color: textColor,
-              textShadow: theme.textShadow.display,
-              maxWidth: "16ch",
-              textAlign: { xs: "center", md: "left" },
+              alignSelf: { xs: "stretch", md: "flex-start" },
+              display: { xs: "flex", md: "block" },
+              justifyContent: { xs: "center", md: "flex-start" },
             }}
           >
-            <Box component="span" sx={{ fontSize: "0.8em" }}>
-              {headlineLine1}
-            </Box>
-            {headlineLine2 && (
-              <>
-                <br />
-                <Box component="span" sx={{ fontWeight: 700 }}>
-                  {headlineLine2}
-                </Box>
-              </>
-            )}
-          </Typography>
-        </MotionBox>
+            <Typography
+              variant="h1"
+              sx={{
+                color: textColor,
+                textShadow: textShadow ? theme.textShadow.display : "none",
+                maxWidth: "16ch",
+                textAlign: { xs: "center", md: "left" },
+              }}
+            >
+              <Box component="span" sx={{ fontSize: "0.8em" }}>
+                {headlineLine1}
+              </Box>
+              {headlineLine2 && (
+                <>
+                  <br />
+                  <Box component="span" sx={{ fontWeight: 700 }}>
+                    {headlineLine2}
+                  </Box>
+                </>
+              )}
+            </Typography>
+          </MotionBox>
+        )}
+        {/* Spacer when headline is hidden (maintains layout) */}
+        {hideHeadline && <Box />}
 
         {/* Body — bottom-right on desktop, centered on mobile */}
         <MotionBox
