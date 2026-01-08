@@ -187,6 +187,8 @@ export default function FrontmatterPanel({
               sx={{
                 color: textColor,
                 textShadow: textShadow ? theme.textShadow.display : "none",
+                // fontSize needed for maxWidth "ch" unit to calculate correctly
+                fontSize: theme.typography.h1Bold.fontSize,
                 maxWidth: "16ch",
                 textAlign: { xs: "center", md: "left" },
               }}
@@ -335,6 +337,8 @@ export default function FrontmatterPanel({
             sx={{
               color: textColor,
               textShadow: textShadow ? theme.textShadow.display : "none",
+              // fontSize needed for maxWidth "ch" unit to calculate correctly
+              fontSize: theme.typography.h1Bold.fontSize,
               maxWidth: "16ch",
               textAlign: { xs: "center", md: "left" },
             }}
