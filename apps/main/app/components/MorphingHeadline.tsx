@@ -257,8 +257,7 @@ export default function MorphingHeadline({
           transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
         }}
       >
-        <Typography
-          variant="h1"
+        <Box
           sx={{
             ...headlineStyles,
             position: "relative",
@@ -268,18 +267,15 @@ export default function MorphingHeadline({
                 : "none",
           }}
         >
-          <Box component="span" sx={{ fontSize: "0.8em" }}>
+          <Typography variant="h2" component="span" sx={{ display: "block" }}>
             {activeHeadline?.line1}
-          </Box>
+          </Typography>
           {activeHeadline?.line2 && (
-            <>
-              <br />
-              <Box component="span" sx={{ fontWeight: 700 }}>
-                {activeHeadline.line2}
-              </Box>
-            </>
+            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+              {activeHeadline.line2}
+            </Typography>
           )}
-        </Typography>
+        </Box>
       </Box>
     )
   }
@@ -313,9 +309,7 @@ export default function MorphingHeadline({
             style={{ opacity: opacities[index] ?? 0 }}
             aria-hidden="true"
           >
-            <Typography
-              variant="h1"
-              component="span"
+            <Box
               sx={{
                 ...headlineStyles,
                 textShadow:
@@ -324,18 +318,15 @@ export default function MorphingHeadline({
                     : "none",
               }}
             >
-              <Box component="span" sx={{ fontSize: "0.8em", display: "block" }}>
+              <Typography variant="h2" component="span" sx={{ display: "block" }}>
                 {headline.line1}
-              </Box>
+              </Typography>
               {headline.line2 && (
-                <Box
-                  component="span"
-                  sx={{ fontWeight: 700, display: "block" }}
-                >
+                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
                   {headline.line2}
-                </Box>
+                </Typography>
               )}
-            </Typography>
+            </Box>
           </motion.div>
         ))}
 

@@ -154,12 +154,8 @@ export function BaseHeader({
   const isTablet = useMediaQuery("(max-width:900px)")
 
   const buttonStyle = {
-    fontFamily: theme.typography.h4.fontFamily, // display font (matches tabs)
-    fontSize: theme.typography.body2.fontSize, // body2 size (1.1rem)
-    fontWeight: 600, // one weight above body2 (400)
+    ...theme.typography.nav, // Uses nav variant from theme (display font, 1.1rem, 600, capitalize)
     color: textColor,
-    letterSpacing: "0.01em",
-    textTransform: "capitalize" as const, // Match tabs
     padding: "8px 20px",
     transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
     textShadow: theme.textShadow.nav, // lighter shadow for nav text

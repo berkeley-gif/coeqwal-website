@@ -183,8 +183,7 @@ export default function FrontmatterPanel({
               justifyContent: { xs: "center", md: "flex-start" },
             }}
           >
-            <Typography
-              variant="h1"
+            <Box
               sx={{
                 color: textColor,
                 textShadow: textShadow ? theme.textShadow.display : "none",
@@ -192,18 +191,15 @@ export default function FrontmatterPanel({
                 textAlign: { xs: "center", md: "left" },
               }}
             >
-              <Box component="span" sx={{ fontSize: "0.8em" }}>
+              <Typography variant="h2" component="span" sx={{ display: "block" }}>
                 {headlineLine1}
-              </Box>
+              </Typography>
               {headlineLine2 && (
-                <>
-                  <br />
-                  <Box component="span" sx={{ fontWeight: 700 }}>
-                    {headlineLine2}
-                  </Box>
-                </>
+                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+                  {headlineLine2}
+                </Typography>
               )}
-            </Typography>
+            </Box>
           </MotionBox>
           {/* Desktop spacer when headline hidden (maintains action items position) */}
           {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
@@ -335,8 +331,7 @@ export default function FrontmatterPanel({
             justifyContent: { xs: "center", md: "flex-start" },
           }}
         >
-          <Typography
-            variant="h1"
+          <Box
             sx={{
               color: textColor,
               textShadow: textShadow ? theme.textShadow.display : "none",
@@ -344,18 +339,15 @@ export default function FrontmatterPanel({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Box component="span" sx={{ fontSize: "0.8em" }}>
+            <Typography variant="h2" component="span" sx={{ display: "block" }}>
               {headlineLine1}
-            </Box>
+            </Typography>
             {headlineLine2 && (
-              <>
-                <br />
-                <Box component="span" sx={{ fontWeight: 700 }}>
-                  {headlineLine2}
-                </Box>
-              </>
+              <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+                {headlineLine2}
+              </Typography>
             )}
-          </Typography>
+          </Box>
         </MotionBox>
         {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
         {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}

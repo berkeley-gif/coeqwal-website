@@ -665,9 +665,20 @@ const theme = createTheme({
       margin: 0, // Reset default margins
       padding: 0, // Reset default padding
     },
+    // h1Bold - Bold emphasis variant for hero headlines (e.g., "Water" in "California's Water")
+    h1Bold: {
+      fontFamily: themeValues.fontFamily.display,
+      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
+      fontWeight: 700,
+      lineHeight: 1.05,
+      letterSpacing: "-0.02em",
+      margin: 0,
+      padding: 0,
+    },
     h2: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: typeScale.h2,
+      // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
+      fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
       lineHeight: 1.1,
     },
@@ -747,11 +758,30 @@ const theme = createTheme({
       textTransform: "uppercase",
     },
     nav: {
-      fontFamily: themeValues.fontFamily.text,
-      fontSize: "0.875rem",
-      fontWeight: 400,
+      fontFamily: themeValues.fontFamily.display,
+      fontSize: "1.1rem", // matches body2 size
+      fontWeight: 600,
       lineHeight: 1.4,
-      letterSpacing: "normal",
+      letterSpacing: "0.01em",
+      textTransform: "capitalize" as const,
+    },
+    // Tab labels - expanded state (prominent, before docking)
+    tabLabel: {
+      fontFamily: themeValues.fontFamily.display,
+      fontSize: "1.6rem",
+      fontWeight: 600,
+      lineHeight: 1.1,
+      textTransform: "capitalize" as const,
+    },
+    // Tab labels - docked state (with header)
+    // fontSize is 1.3rem (not 1.1rem) to optically compensate for
+    // dark text on light background appearing smaller
+    tabLabelDocked: {
+      fontFamily: themeValues.fontFamily.display,
+      fontSize: "1.3rem",
+      fontWeight: 600,
+      lineHeight: 1.1,
+      textTransform: "capitalize" as const,
     },
     dashboard: {
       fontFamily: themeValues.fontFamily.text,
@@ -1572,7 +1602,10 @@ declare module "@mui/material/styles" {
   // Add custom typography variant
   interface TypographyVariants {
     fontWeightSemiBold: number
+    h1Bold: React.CSSProperties
     nav: React.CSSProperties
+    tabLabel: React.CSSProperties
+    tabLabelDocked: React.CSSProperties
     dashboard: React.CSSProperties
     displayBody: React.CSSProperties
     smallSectionLabel: React.CSSProperties
@@ -1588,7 +1621,10 @@ declare module "@mui/material/styles" {
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
+    h1Bold?: React.CSSProperties
     nav?: React.CSSProperties
+    tabLabel?: React.CSSProperties
+    tabLabelDocked?: React.CSSProperties
     dashboard?: React.CSSProperties
     displayBody?: React.CSSProperties
     smallSectionLabel?: React.CSSProperties
@@ -1615,7 +1651,10 @@ declare module "@mui/material/Button" {
 
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
+    h1Bold: true
     nav: true
+    tabLabel: true
+    tabLabelDocked: true
     dashboard: true
     displayBody: true
     smallSectionLabel: true

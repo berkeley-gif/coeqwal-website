@@ -296,8 +296,7 @@ export default function VideoHero({
             pointerEvents: "auto", // Re-enable for text selection
           }}
         >
-          <Typography
-            variant="h1"
+          <Box
             sx={{
               color: "common.white",
               textShadow: theme.textShadow.display,
@@ -305,14 +304,13 @@ export default function VideoHero({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Box component="span" sx={{ fontSize: "0.8em" }}>
+            <Typography variant="h2" component="span" sx={{ display: "block" }}>
               {t("homePanel.titleLine1")}
-            </Box>
-            <br />
-            <Box component="span" sx={{ fontWeight: 700 }}>
+            </Typography>
+            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
               {t("homePanel.titleLine2")}
-            </Box>
-          </Typography>
+            </Typography>
+          </Box>
         </MotionBox>
         {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
         {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}

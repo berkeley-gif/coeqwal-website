@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, AnimatePresence } from "@repo/motion"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
@@ -102,9 +102,13 @@ export default function SmoothTabs() {
                   sticky: { gap: 0 },
                 }}
               >
-                <Typography
-                  variant="h4"
+                <Box
+                  component="span"
                   sx={{
+                    // Display font for tab labels
+                    fontFamily: theme.typography.h1.fontFamily,
+                    fontWeight: 600,
+                    lineHeight: 1.1,
                     // When docked: 1.3rem (not 1.1rem like header) to compensate for
                     // optical illusion where dark text on light background appears smaller
                     fontSize: isInTabsArea ? "1.3rem" : "1.6rem",
@@ -113,7 +117,7 @@ export default function SmoothTabs() {
                   }}
                 >
                   {label}
-                </Typography>
+                </Box>
                 <AnimatePresence initial={false}>
                   {!isInTabsArea && (
                     <motion.div
