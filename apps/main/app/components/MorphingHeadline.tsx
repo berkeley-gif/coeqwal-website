@@ -5,6 +5,9 @@
  * scrolls. The headline stays visually pinned while crossfading text and
  * adjusting text-shadow.
  *
+ * Supports any number of headlines - dynamically calculates opacity transitions.
+ * Scrolling up reverses the morph effect naturally via scroll progress tracking.
+ *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Single semantic h1 for screen readers (visual duplicates hidden)
  * - WCAG 2.3.3: Respects prefers-reduced-motion (instant switch, no crossfade)
@@ -17,8 +20,8 @@
 
 "use client"
 
-import React, { useEffect, useState, useMemo } from "react"
-import { useScroll, useTransform, motion } from "@repo/motion"
+import React, { useEffect, useState, useMemo, useCallback } from "react"
+import { useScroll, motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 // WCAG 2.3.3: Check for reduced motion preference
@@ -26,6 +29,34 @@ const getReducedMotionPreference = () =>
   typeof window !== "undefined"
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
+
+/**
+ * Interpolates a value within keyframe ranges
+ * Used to calculate opacity based on scroll progress
+ */
+function interpolate(
+  value: number,
+  inputRange: number[],
+  outputRange: number[],
+): number {
+  // Find the segment we're in
+  for (let i = 0; i < inputRange.length - 1; i++) {
+    const inputStart = inputRange[i] ?? 0
+    const inputEnd = inputRange[i + 1] ?? 1
+    const outputStart = outputRange[i] ?? 0
+    const outputEnd = outputRange[i + 1] ?? 0
+
+    if (value >= inputStart && value <= inputEnd) {
+      // Linear interpolation within this segment
+      const progress = (value - inputStart) / (inputEnd - inputStart)
+      return outputStart + progress * (outputEnd - outputStart)
+    }
+  }
+
+  // Outside range - clamp to nearest output
+  if (value <= (inputRange[0] ?? 0)) return outputRange[0] ?? 0
+  return outputRange[outputRange.length - 1] ?? 0
+}
 
 export interface HeadlineText {
   /** First line (smaller text) */
@@ -37,7 +68,7 @@ export interface HeadlineText {
 }
 
 export interface MorphingHeadlineProps {
-  /** Array of headline texts to morph through */
+  /** Array of headline texts to morph through (supports any number) */
   headlines: HeadlineText[]
   /** Container ref that spans all panels for scroll tracking */
   containerRef: React.RefObject<HTMLElement | null>
@@ -74,34 +105,30 @@ export default function MorphingHeadline({
     layoutEffect: false,
   })
 
-  // Calculate opacity keyframes for each headline based on number of panels
-  // Each panel gets equal scroll range, with crossfades at panel boundaries
-  const opacityTransforms = useMemo(() => {
+  /**
+   * Calculate opacity keyframes for each headline based on number of panels.
+   * Dynamically supports any number of headlines.
+   * 
+   * Each panel gets equal scroll range, with crossfades at panel boundaries.
+   * The last headline stays visible at 100% scroll (no fade out).
+   * Scrolling up naturally reverses the effect via scroll progress tracking.
+   */
+  const opacityKeyframes = useMemo(() => {
     const count = headlines.length
-    if (count < 2) return []
+    if (count < 2) return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
 
-    // For N panels, we have N-1 transition points
-    // Each panel occupies 1/N of the scroll range
     const panelSize = 1 / count
 
     return headlines.map((_, index) => {
-      // Calculate when this headline should be visible
-      // Each headline fades in at its panel start and fades out at its panel end
       const panelStart = index * panelSize
       const panelEnd = (index + 1) * panelSize
-
-      // Transition zone is 20% of panel size, centered on boundary
       const transitionSize = panelSize * 0.2
 
-      // Fade in: from previous panel end to this panel start + transition
       const fadeInStart = Math.max(0, panelStart - transitionSize)
       const fadeInEnd = panelStart + transitionSize
-
-      // Fade out: from this panel end - transition to next panel start + transition
       const fadeOutStart = panelEnd - transitionSize
       const fadeOutEnd = Math.min(1, panelEnd + transitionSize)
 
-      // Build keyframes
       if (index === 0) {
         // First headline: visible at start, fades out
         return {
@@ -109,7 +136,7 @@ export default function MorphingHeadline({
           output: [1, 1, 0],
         }
       } else if (index === count - 1) {
-        // Last headline: fades in, stays visible
+        // Last headline: fades in, stays visible at end
         return {
           input: [fadeInStart, fadeInEnd, 1],
           output: [0, 1, 1],
@@ -124,24 +151,37 @@ export default function MorphingHeadline({
     })
   }, [headlines])
 
-  // Create motion values for each headline opacity
-  const opacity0 = useTransform(
-    scrollYProgress,
-    opacityTransforms[0]?.input || [0, 1],
-    opacityTransforms[0]?.output || [1, 1],
-  )
-  const opacity1 = useTransform(
-    scrollYProgress,
-    opacityTransforms[1]?.input || [0, 1],
-    opacityTransforms[1]?.output || [0, 0],
-  )
-  const opacity2 = useTransform(
-    scrollYProgress,
-    opacityTransforms[2]?.input || [0, 1],
-    opacityTransforms[2]?.output || [0, 0],
+  // Track opacities for all headlines (dynamic array)
+  const [opacities, setOpacities] = useState<number[]>(() =>
+    headlines.map((_, i) => (i === 0 ? 1 : 0)),
   )
 
-  const opacities = [opacity0, opacity1, opacity2]
+  // Track if the headline should be visible (hidden once scrolled past container)
+  const [isVisible, setIsVisible] = useState(true)
+
+  // Calculate opacity for a specific headline at a given scroll progress
+  const calculateOpacity = useCallback(
+    (index: number, progress: number): number => {
+      const keyframes = opacityKeyframes[index]
+      if (!keyframes) return 0
+      return interpolate(progress, keyframes.input, keyframes.output)
+    },
+    [opacityKeyframes],
+  )
+
+  // Update all opacities and visibility when scroll progress changes
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (value) => {
+      // Hide headline once we've scrolled past the container (with small buffer)
+      setIsVisible(value < 0.98)
+
+      const newOpacities = headlines.map((_, index) =>
+        calculateOpacity(index, value),
+      )
+      setOpacities(newOpacities)
+    })
+    return unsubscribe
+  }, [scrollYProgress, headlines, calculateOpacity])
 
   // Track which headline to show (for reduced motion and screen readers)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -178,6 +218,8 @@ export default function MorphingHeadline({
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
           display: { xs: "none", md: "block" },
+          opacity: isVisible ? 1 : 0,
+          transition: "opacity 0.2s ease-out",
         }}
       >
         <Typography
@@ -217,6 +259,8 @@ export default function MorphingHeadline({
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
         display: { xs: "none", md: "block" },
+        opacity: isVisible ? 1 : 0,
+        transition: "opacity 0.2s ease-out",
       }}
     >
       {/* Container for all headlines - they overlap via CSS grid */}
@@ -232,7 +276,7 @@ export default function MorphingHeadline({
         {headlines.map((headline, index) => (
           <motion.div
             key={index}
-            style={{ opacity: opacities[index] }}
+            style={{ opacity: opacities[index] ?? 0 }}
             aria-hidden="true"
           >
             <Typography

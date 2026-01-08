@@ -40,6 +40,7 @@ export default function SmoothTabs() {
         position: "sticky",
         top: HEADER_SHRUNK_H,
         zIndex: theme.zIndex.appBar,
+        marginTop: "-80px", // Pull tabs up to appear at bottom of ActionPanel
       }}
     >
       <div
