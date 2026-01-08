@@ -88,6 +88,9 @@ export interface BaseHeaderProps {
 
   // Border props
   borderBottom?: string
+
+  // Logo variant
+  logoVariant?: "color" | "white"
 }
 
 const translations: TranslationsMap = {
@@ -143,6 +146,7 @@ export function BaseHeader({
   shrinkOnScroll = true,
   showLanguageSwitcher = true,
   borderBottom,
+  logoVariant = "color",
 }: BaseHeaderProps) {
   // Theme and responsive breakpoints
   const theme = useTheme()
@@ -151,14 +155,14 @@ export function BaseHeader({
 
   const buttonStyle = {
     fontFamily: theme.typography.h1.fontFamily, // display font
-    fontSize: "1.0625rem", // 17px
+    fontSize: "1rem", // 16px - matches body2 size
     fontWeight: 500,
     color: textColor,
-    letterSpacing: "0.015em",
+    letterSpacing: "0.01em",
     textTransform: "none" as const,
     padding: "8px 20px",
     transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
-    textShadow: theme.textShadow.nav,
+    textShadow: theme.textShadow.displayBody,
     "&:hover": {
       backgroundColor: "transparent",
       color: "#FFFFFF",
@@ -229,7 +233,7 @@ export function BaseHeader({
     ["70px", `${HEADER_SHRUNK_H}px`],
   )
   const padYMotion = useTransform(shrink, [0, 1], ["12px", "4px"])
-  const logoScale = useTransform(shrink, [0, 1], [1, 0.65])
+  const logoScale = useTransform(shrink, [0, 1], [1, 0.85])
 
   // Static fallbacks if shrink is disabled
   const staticHeaderH = "70px"
@@ -347,7 +351,7 @@ export function BaseHeader({
             }}
             aria-label="Scroll to top"
           >
-            <Logo />
+            <Logo variant={logoVariant} />
           </Box>
 
           {/* Optional secondary navigation menu */}

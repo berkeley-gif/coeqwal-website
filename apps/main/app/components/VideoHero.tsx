@@ -98,25 +98,36 @@ export default function VideoHero({ sources, fallbackImage }: VideoHeroProps) {
 
   const showStaticImage = failed
 
-  const heroIn = {
-    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
+  // WCAG 2.3.3: Reduced motion variants - simplified animations for accessibility
+  const heroIn = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+        show: {
+          opacity: 1,
+          x: 0,
+          filter: "blur(0px)",
+          transition: { duration: 0.6, ease: "easeOut" },
+        },
+      }
 
-  const heroInRight = {
-    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-    },
-  }
+  const heroInRight = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+        show: {
+          opacity: 1,
+          x: 0,
+          filter: "blur(0px)",
+          transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+        },
+      }
 
   return (
     // WCAG 1.3.1: Semantic section element with accessible name

@@ -3,6 +3,7 @@
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Semantic <section> with aria-label
+ * - WCAG 2.3.3: Respects prefers-reduced-motion preference
  * - WCAG 2.4.7: Focus-visible on scroll button (via ScrollToButton)
  * - WCAG 4.1.2: Proper aria-labels on interactive elements
  * - Responsive: Same layout behavior as VideoHero (centered on mobile <900px)
@@ -14,6 +15,12 @@ import { ScrollToButton, DisplayBlock } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 const MotionBox = motion.create(Box)
+
+// WCAG 2.3.3: Check for reduced motion preference
+const prefersReducedMotion =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false
 
 export interface FrontmatterPanelProps {
   /** Panel ID for navigation */
@@ -46,25 +53,36 @@ export default function FrontmatterPanel({
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
-  const heroIn = {
-    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
+  // WCAG 2.3.3: Reduced motion variants - simplified animations for accessibility
+  const heroIn = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+        show: {
+          opacity: 1,
+          x: 0,
+          filter: "blur(0px)",
+          transition: { duration: 0.6, ease: "easeOut" },
+        },
+      }
 
-  const heroInRight = {
-    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-    },
-  }
+  const heroInRight = prefersReducedMotion
+    ? {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+        show: {
+          opacity: 1,
+          x: 0,
+          filter: "blur(0px)",
+          transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+        },
+      }
 
   return (
     <Box

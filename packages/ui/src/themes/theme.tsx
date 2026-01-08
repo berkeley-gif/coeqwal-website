@@ -699,9 +699,9 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1.125rem", // 18px - primary body text
+      fontSize: "1.4rem", // 22.4px - primary body text
       fontWeight: 400,
-      lineHeight: 1.5, // 1.5x ratio (27px at 18px font size)
+      lineHeight: 1.6,
     },
     body2: {
       fontFamily: themeValues.fontFamily.text,
@@ -838,7 +838,7 @@ const theme = createTheme({
     // Display body - for hero/panel body text using display font
     displayBody: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.4rem", // Fixed 22.4px - never scales
+      fontSize: "1.4rem", // 22.4px - matches body1 size
       fontWeight: 500,
       lineHeight: 1.6,
       letterSpacing: "0.01em",
