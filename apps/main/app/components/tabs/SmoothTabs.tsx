@@ -101,9 +101,8 @@ export default function SmoothTabs() {
                 }}
               >
                 <Typography
-                  variant="h5"
-                  style={{
-                    fontWeight: 600,
+                  variant="h4"
+                  sx={{
                     fontSize: "1.6rem",
                     textTransform: "capitalize",
                   }}

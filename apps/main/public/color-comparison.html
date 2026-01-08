@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COEQWAL Color Palette - Design System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: #333;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 40px;
+      font-size: 1.1rem;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .section h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.4rem;
+      color: #333;
+    }
+    
+    .swatch {
+      height: 100px;
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+      font-family: monospace;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .swatch.dark {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .swatch.light {
+      color: #333;
+    }
+    
+    .label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    
+    .flow-section {
+      grid-column: 1 / -1;
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .flow-section h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.4rem;
+      color: #333;
+    }
+    
+    .flow {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .flow-swatch {
+      flex: 1;
+      max-width: 180px;
+      height: 80px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .flow-swatch.dark {
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    .flow-swatch.light {
+      color: #333;
+    }
+    
+    .flow-swatch span {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 400;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+    
+    .arrow {
+      font-size: 1.5rem;
+      color: #999;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #999;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>COEQWAL Color Palette</h1>
+  <p class="subtitle">Design System Reference</p>
+  
+  <div class="container">
+    <!-- Panel Backgrounds -->
+    <div class="section">
+      <h2>Panel Backgrounds</h2>
+      
+      <div class="swatch dark" style="background: #3D7DB5;">#3D7DB5</div>
+      <div class="label">Panel 1</div>
+      
+      <div class="swatch light" style="background: transparent; border: 2px dashed #ccc;">transparent</div>
+      <div class="label">Panel 2</div>
+      
+      <div class="swatch dark" style="background: #193D6B;">#193D6B</div>
+      <div class="label">Panel 3</div>
+    </div>
+    
+    <!-- Tab Backgrounds -->
+    <div class="section">
+      <h2>Tab Backgrounds</h2>
+      
+      <div class="swatch light" style="background: #EEF4F8;">#EEF4F8</div>
+      <div class="label">Learn Tab</div>
+      
+      <div class="swatch light" style="background: #D0E0EC;">#D0E0EC</div>
+      <div class="label">Explore Tab</div>
+      
+      <div class="swatch light" style="background: #A8C8DC;">#A8C8DC</div>
+      <div class="label">Share Tab</div>
+    </div>
+    
+    <!-- Color Flow -->
+    <div class="flow-section">
+      <h2>Color Flow (Scroll Progression)</h2>
+      <div class="flow">
+        <div class="flow-swatch dark" style="background: #3D7DB5;">
+          #3D7DB5
+          <span>Panel 1</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-swatch dark" style="background: #193D6B;">
+          #193D6B
+          <span>Panel 3</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-swatch light" style="background: #EEF4F8;">
+          #EEF4F8
+          <span>Learn</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-swatch light" style="background: #D0E0EC;">
+          #D0E0EC
+          <span>Explore</span>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-swatch light" style="background: #A8C8DC;">
+          #A8C8DC
+          <span>Share</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    COEQWAL Design System • Option B Panels + Wider Contrast Tabs
+  </footer>
+</body>
+</html>

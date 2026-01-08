@@ -222,9 +222,9 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#D9E7F0",    // 15% blue
-    explore: "#C4D9E8",  // 20% blue
-    empower: "#B0CCE0",  // 25% blue
+    learn: "#E8EEF5",    // Strong navy match - lightest
+    explore: "#C4D4E8",  // Strong navy match - medium
+    empower: "#96B2D4",  // Strong navy match - deepest
   },
 
   // Data visualization colors for outcome categories
@@ -675,13 +675,13 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h3,
       fontWeight: 500,
-      lineHeight: 1.15,
+      lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.text,
+      fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h4,
-      fontWeight: 400,
-      lineHeight: 1.25,
+      fontWeight: 600,
+      lineHeight: 1.1,
     },
     h5: {
       fontFamily: themeValues.fontFamily.display,

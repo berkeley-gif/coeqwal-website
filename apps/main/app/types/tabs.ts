@@ -16,9 +16,14 @@ const getFooterText = (k: TabKey) => {
 
 export const TAB_ORDER: TabKey[] = ["learn", "explore", "empower"]
 
+const getLabel = (k: TabKey) => {
+  if (k === "empower") return "Share"
+  return k
+}
+
 export const TABS = TAB_ORDER.map((k, i) => ({
   key: k,
-  label: k,
+  label: getLabel(k),
   panelColor: themeValues.palette.tabPanels[k],
   footerText: getFooterText(k),
 }))
