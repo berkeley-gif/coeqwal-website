@@ -66,7 +66,13 @@ export default function MorphingHeadline({
     // Start when top of container hits top of viewport
     // End when bottom of container hits bottom of viewport
     offset: ["start start", "end end"],
-    // Required because ref is defined in parent component
+    /**
+     * Required because ref is defined in parent component (IntroSection).
+     * When layoutEffect is true (default), useScroll uses useLayoutEffect which
+     * runs before the ref is attached to the DOM. Setting false switches to
+     * useEffect, ensuring the ref is hydrated before scroll tracking begins.
+     * @see https://github.com/motiondivision/motion/issues/2483
+     */
     layoutEffect: false,
   })
 
