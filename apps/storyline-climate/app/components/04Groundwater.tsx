@@ -109,9 +109,15 @@ function Groundwater() {
           paddingRight: "5rem",
         }}
       >
-        <Box width="100%" height="40%">
+        <Box width="100%" height="40%" sx={{marginBottom: '1rem'}}>
           <GroundwaterContainer scrollProgress={scrollYProgress} />
         </Box>
+        <Typography variant="h6" textAlign={'center'} gutterBottom sx={{fontSize: '1.5rem'}}>
+          {"Cumulative Groundwater Loss in Central Valley"}
+        </Typography>
+        <Typography variant="caption" textAlign={'center'} sx={{padding: "0 5rem"}}>
+          {"Groundwater losses estimated with Central Valley Hydrological Model, simplified for presentation. Source: Liu et al., 2022"}
+        </Typography>
       </Box>
     </StickyContainer>
   )

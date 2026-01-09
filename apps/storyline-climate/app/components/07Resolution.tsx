@@ -188,7 +188,7 @@ function ScenarioTransition({
       stickyRollHeight="100vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox="10 19 1128 1287">
+      <SVGLineContainer viewBox="10 157 1128 997">
         <motion.path
           className="svg-line"
           d="M-12.5 290C-12.5 290 173 285 394 279C615 273 969 480 908 692C847 904 865 1117 865 1117"

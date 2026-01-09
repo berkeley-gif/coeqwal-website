@@ -12,7 +12,7 @@ export type GroundwaterRow = {
 }
 
 type Margin = { top: number; right: number; bottom: number; left: number }
-const margin: Margin = { top: 64, right: 24, bottom: 40, left: 80 }
+const margin: Margin = { top: 64, right: 24, bottom: 50, left: 150 }
 const axisColor = "#f2f0ef"
 
 const tickLabelStyle: React.CSSProperties = {
@@ -21,7 +21,7 @@ const tickLabelStyle: React.CSSProperties = {
 }
 
 const axisLabelStyle: React.CSSProperties = {
-  fontSize: "1.25rem",
+  fontSize: "1.2rem",
   fill: OffWhiteColor,
   fontWeight: "bold",
 }
@@ -30,9 +30,9 @@ const axisLabelStyle: React.CSSProperties = {
 // Define drought bands (edit these dates)
 // --------------------------------------------
 const DROUGHT_BANDS: Array<{ start: Date; end: Date; opacity?: number }> = [
-  { start: new Date("1970-01-01"), end: new Date("1977-01-01"), opacity: 0.22 },
-  { start: new Date("1983-01-01"), end: new Date("1994-06-01"), opacity: 0.22 },
-  { start: new Date("1998-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
+  { start: new Date("1971-01-01"), end: new Date("1977-01-01"), opacity: 0.22 },
+  { start: new Date("1983-01-01"), end: new Date("1992-06-01"), opacity: 0.22 },
+  { start: new Date("1999-01-01"), end: new Date("2007-06-01"), opacity: 0.22 },
 ]
 
 type Props = {
@@ -298,6 +298,14 @@ function XAxis({
       >
         Year
       </motion.text>
+      <motion.text
+        x={(margin.left + size.width - margin.right) / 2}
+        y={yLine}
+        dy="-1em"
+        style={{ ...tickLabelStyle, textAnchor: "middle", opacity: 0.5 }}
+      >
+        Grayed area = drought period
+      </motion.text>
     </>
   )
 }
@@ -351,7 +359,13 @@ function YAxis({
   margin: Margin
   ticks: number[]
   scrollProgress: MotionValue<number>
-}) {
+  }) {
+  const annotationOpacity = usePlayAnimationOnce(
+    scrollProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+  
   return (
     <g transform={`translate(${margin.left},0)`}>
       {ticks.map((t, i) => (
@@ -363,6 +377,47 @@ function YAxis({
           scrollProgress={scrollProgress}
         />
       ))}
+
+      <motion.text
+        x={0}
+        y={yScale(50)}
+        dx="-5em"
+        dy="0.3em"
+        style={{
+          ...tickLabelStyle,
+          textAnchor: "middle",
+          opacity: annotationOpacity,
+        }}
+      >
+        Cumulative
+      </motion.text>
+      <motion.text
+        x={0}
+        y={yScale(50)}
+        dx="-5em"
+        dy="1.5em"
+        style={{
+          ...tickLabelStyle,
+          textAnchor: "middle",
+          opacity: annotationOpacity,
+        }}
+      >
+        groundwater
+      </motion.text>
+      <motion.text
+        x={0}
+        y={yScale(50)}
+        dx="-5em"
+        dy="2.7em"
+        style={{
+          ...tickLabelStyle,
+          textAnchor: "middle",
+          opacity: annotationOpacity,
+        }}
+      >
+        loss (km³)
+      </motion.text>
+
     </g>
   )
 }
@@ -398,7 +453,7 @@ function YTick({
         dx="-0.25em"
         style={{ ...tickLabelStyle, textAnchor: "end" }}
       >
-        {`${tick} ft`}
+        {`${tick}`}
       </text>
     </motion.g>
   )
