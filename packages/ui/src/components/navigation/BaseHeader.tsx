@@ -12,6 +12,13 @@
  * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
  * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
  *
+ * Background color modes:
+ * 1. Static: Pass `backgroundColor` for a fixed color
+ * 2. Scroll-based: Pass `backgroundColorScrolled` to transition from `backgroundColor`
+ *    to a new color after scrolling past `backgroundScrollThreshold` (default: 200px)
+ * 3. Custom: Main app uses its own scroll detection (isInTabsArea) and passes
+ *    dynamic `backgroundColor` directly
+ *
  * Navigation links (left to right):
  * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
  * - Get data: links to dev.coeqwal.org/data
@@ -34,7 +41,7 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
-import { motion, useScroll, useTransform } from "@repo/motion"
+import { motion, useScroll, useTransform, useMotionValueEvent } from "@repo/motion"
 
 /* ========================================
  * CONSTANTS & TYPES
@@ -63,25 +70,30 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
-// Main props interface
+/* ========================================
+ * PROPS INTERFACE
+ * ======================================== */
 export interface BaseHeaderProps {
-  // Action handlers (optional overrides)
-  onLogoClick?: () => void
-
-  // Styling props (theme tokens used as defaults)
+  /* --- Styling (theme tokens used as defaults) --- */
   backgroundColor?: string
   textColor?: string
-  zIndex?: number
-
-  // Layout props
-  shrinkOnScroll?: boolean
-  showLanguageSwitcher?: boolean
-
-  // Border props
   borderBottom?: string
-
-  // Logo variant
+  zIndex?: number
   logoVariant?: "color" | "light"
+
+  /* --- Scroll-based background color (optional) --- */
+  // If set, header auto-switches from backgroundColor → backgroundColorScrolled
+  // after user scrolls past backgroundScrollThreshold pixels.
+  // Leave unset if you want to control background color yourself (like main app does).
+  backgroundColorScrolled?: string
+  backgroundScrollThreshold?: number // default: 200px
+
+  /* --- Optional features --- */
+  shrinkOnScroll?: boolean // default: true
+  showLanguageSwitcher?: boolean // default: false
+
+  /* --- Action handlers (optional overrides) --- */
+  onLogoClick?: () => void
 }
 
 const translations: TranslationsMap = {
@@ -127,6 +139,8 @@ export function BaseHeader({
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
   zIndex,
+  backgroundColorScrolled,
+  backgroundScrollThreshold = 200,
   shrinkOnScroll = true,
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
@@ -169,19 +183,35 @@ export function BaseHeader({
   }, [])
 
   /* ========================================
-   * SCROLL-BASED SHRINK ANIMATION
-   * Animates header from expanded to collapsed as user scrolls
+   * SCROLL EFFECTS
+   * - Shrink animation: header shrinks from 70px to 40px as user scrolls
+   * - Background color: optionally transitions to backgroundColorScrolled
    * ======================================== */
   const { scrollY } = useScroll()
 
-  // Shrink progress: 0 (top) to 0.5 (shrinkStart) to 1 (shrinkEnd)
+  // --- Background color on scroll ---
+  // Only active when backgroundColorScrolled prop is provided
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (backgroundColorScrolled) {
+      setIsScrolled(latest > backgroundScrollThreshold)
+    }
+  })
+
+  // Use scrolled color if we're past threshold, otherwise use base color
+  const effectiveBackgroundColor =
+    backgroundColorScrolled && isScrolled
+      ? backgroundColorScrolled
+      : backgroundColor
+
+  // --- Shrink animation ---
   const shrinkProgress = useTransform(
     scrollY,
     [0, shrinkStart, shrinkEnd],
     [0, 0.5, 1],
   )
 
-  // Animated values driven by scroll
   const headerHeightMotion = useTransform(
     shrinkProgress,
     [0, 1],
@@ -230,10 +260,20 @@ export function BaseHeader({
 
   /* ========================================
    * RENDER
+   * Structure:
+   * - Skip link (accessibility)
+   * - AppBar container
+   *   - Toolbar
+   *     - Logo (left)
+   *     - Navigation: Water stories | Get data | About | Language switcher
    * ======================================== */
   return (
     <>
-      {/* WCAG 2.4.1: Skip link for keyboard users - DO NOT REMOVE */}
+      {/* ----------------------------------------
+       * ACCESSIBILITY: Skip link
+       * WCAG 2.4.1 - DO NOT REMOVE
+       * Allows keyboard users to bypass navigation
+       * ---------------------------------------- */}
       <Box
         component="a"
         href="#main-content"
@@ -265,12 +305,18 @@ export function BaseHeader({
       >
         Skip to main content
       </Box>
+
+      {/* ----------------------------------------
+       * HEADER CONTAINER
+       * ---------------------------------------- */}
       <MotionAppBar
         position="fixed"
         sx={{
           zIndex: resolvedZIndex,
-          backgroundColor,
+          backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
+          // Smooth background color transition when scrolling past threshold
+          transition: backgroundColorScrolled ? "background-color 0.3s ease" : undefined,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
@@ -347,7 +393,7 @@ export function BaseHeader({
               alignItems="center"
               sx={{ pr: 2 }}
             >
-              {/* Water stories dropdown */}
+              {/* 1. Water stories dropdown */}
               <NavDropdown
                 label={t.buttons.waterStories}
                 disableRipple
@@ -369,7 +415,7 @@ export function BaseHeader({
                 sx={buttonStyle}
               />
 
-              {/* Get data */}
+              {/* 2. Get data */}
               <Button
                 variant="text"
                 disableRipple
@@ -379,7 +425,7 @@ export function BaseHeader({
                 {t.buttons.getData}
               </Button>
 
-              {/* TODO: Add URLS.about when available and enable onClick */}
+              {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
               <Button
                 variant="text"
                 disableRipple
@@ -388,7 +434,7 @@ export function BaseHeader({
                 {t.buttons.about}
               </Button>
 
-              {/* OPTIONAL: Language switcher */}
+              {/* 4. Language switcher (OPTIONAL - controlled by showLanguageSwitcher prop) */}
               {showLanguageSwitcher && <LanguageSwitcher />}
             </Stack>
           </Box>
