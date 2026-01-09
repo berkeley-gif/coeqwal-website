@@ -3,8 +3,14 @@
 /**
  * BaseHeader - Shared header component with navigation and branding
  *
- * Provides a responsive header with logo, navigation links, language switcher,
- * and optional CTA button. Supports scroll-based shrinking animation.
+ * Provides a responsive header with logo, navigation links, optional language switcher,
+ * optional secondary navigation, optional scroll-based shrinking animation, and optional hide on scroll.
+ *
+ * Header dimensions (from theme.layout):
+ * - Expanded: 70px (theme.layout.headerHeight)
+ * - Collapsed: 40px (theme.layout.collapsedHeaderHeight)
+ * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
+ * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Semantic nav element for navigation region
@@ -13,6 +19,9 @@
  * - WCAG 4.1.2: Proper ARIA attributes on controls
  */
 
+/* ========================================
+ * IMPORTS
+ * ======================================== */
 import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
@@ -27,8 +36,17 @@ import {
   useTransform,
 } from "@repo/motion"
 import { useRef, useState, useEffect } from "react"
+import { themeValues } from "../../themes/theme"
 
+/* ========================================
+ * CONSTANTS & TYPES
+ * ======================================== */
 const MotionAppBar = motion.create(AppBar)
+
+// Header height constants (exported for components that need static values)
+// Prefer using theme.layout.headerHeight / theme.layout.collapsedHeaderHeight when possible
+export const HEADER_EXPANDED_H = themeValues.layout.headerHeight // 70px
+export const HEADER_SHRUNK_H = themeValues.layout.collapsedHeaderHeight // 40px
 
 // Translation types
 type HeaderTranslations = {
@@ -48,9 +66,6 @@ type TranslationsMap = {
   en: HeaderTranslations
   es: HeaderTranslations
 }
-
-export const HEADER_SHRUNK_H = 40
-export const HEADER_EXPANDED_H = 70
 
 // Secondary nav option (optional)
 export interface SecondaryNavItem {
@@ -142,17 +157,92 @@ export function BaseHeader({
   borderRadius = 0,
   boxShadow = "none",
   variant = "fixed",
-  hideOnScroll = true,
-  shrinkOnScroll = true,
+  hideOnScroll = false, // Optional: slides header out of view when scrolling down
+  shrinkOnScroll = true, // Default: shrinks header from 70px to 40px on scroll
   showLanguageSwitcher = true,
   borderBottom,
   logoVariant = "color",
 }: BaseHeaderProps) {
-  // Theme and responsive breakpoints
+  /* ========================================
+   * THEME & LAYOUT
+   * ======================================== */
   const theme = useTheme()
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
 
+  // Header dimensions from theme
+  const expandedHeight = theme.layout.headerHeight // 70px
+  const collapsedHeight = theme.layout.collapsedHeaderHeight // 40px
+  const shrinkStart = theme.layout.headerShrinkStart // 120px
+  const shrinkEnd = theme.layout.headerShrinkEnd // 240px
+
+  /* ========================================
+   * SCROLL-BASED SHRINK ANIMATION
+   * Animates header from expanded to collapsed as user scrolls
+   * ======================================== */
+  const { scrollY } = useScroll()
+
+  // Shrink progress: 0 (top) to 0.5 (shrinkStart) to 1 (shrinkEnd)
+  const shrinkProgress = useTransform(
+    scrollY,
+    [0, shrinkStart, shrinkEnd],
+    [0, 0.5, 1],
+  )
+
+  // Animated values driven by scroll
+  const headerHeightMotion = useTransform(
+    shrinkProgress,
+    [0, 1],
+    [`${expandedHeight}px`, `${collapsedHeight}px`],
+  )
+  const padYMotion = useTransform(shrinkProgress, [0, 1], ["12px", "4px"])
+  const logoScale = useTransform(shrinkProgress, [0, 1], [1, 0.85])
+
+  // Static fallbacks when shrinkOnScroll is disabled
+  const staticHeaderH = `${expandedHeight}px`
+  const staticPadY = "8px"
+
+  /* ========================================
+   * HIDE ON SCROLL (optional)
+   * ======================================== */
+  const [isMounted, setIsMounted] = useState(false)
+  const [isHidden, setIsHidden] = useState(false)
+  const lastYRef = useRef(0)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (!hideOnScroll || !isMounted) return
+
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
+
+  /* ========================================
+   * POSITION VARIANT
+   * ======================================== */
+  const positionMap = {
+    fixed: "fixed" as const,
+    overlay: "absolute" as const,
+    static: "static" as const,
+    sticky: "sticky" as const,
+  }
+  const position = positionMap[variant]
+
+  /* ========================================
+   * SECONDARY NAVIGATION (optional)
+   * ======================================== */
+  const displaySecondaryNav =
+    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
+
+  /* ========================================
+   * BUTTON STYLING
+   * ======================================== */
   const buttonStyle = {
     ...theme.typography.nav, // Uses nav variant from theme (display font, 1.1rem, 600, capitalize)
     color: textColor,
@@ -177,64 +267,17 @@ export function BaseHeader({
     },
   }
 
-  // i18n code
+  /* ========================================
+   * TRANSLATIONS (i18n)
+   * ======================================== */
   const { locale, isLoading } = useTranslation()
-  // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
-  // Track if component is mounted (client-side only)
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  // Scroll-based hide/show functionality
-  const { scrollY } = useScroll()
-
-  // hide on scroll direction
-  const [isHidden, setIsHidden] = useState(false)
-  const lastYRef = useRef(0)
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (!hideOnScroll || !isMounted) return
-
-    const difference = latest - lastYRef.current
-    if (Math.abs(difference) > 10) {
-      setIsHidden(difference > 0)
-    }
-    lastYRef.current = latest
-  })
-
-  // Map variant to CSS position
-  const positionMap = {
-    fixed: "fixed" as const,
-    overlay: "absolute" as const,
-    static: "static" as const,
-    sticky: "sticky" as const,
-  }
-  const position = positionMap[variant]
-
-  // Only show secondary navigation if explicitly enabled and not on mobile
-  const displaySecondaryNav =
-    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
-
-  const shrink = useTransform(scrollY, [0, 120, 240], [0, 0.5, 1])
-  // Always call hooks unconditionally
-  const headerHeightMotion = useTransform(
-    shrink,
-    [0, 1],
-    ["70px", `${HEADER_SHRUNK_H}px`],
-  )
-  const padYMotion = useTransform(shrink, [0, 1], ["12px", "4px"])
-  const logoScale = useTransform(shrink, [0, 1], [1, 0.85])
-
-  // Static fallbacks if shrink is disabled
-  const staticHeaderH = "70px"
-  const staticPadY = "8px"
-
+  /* ========================================
+   * RENDER
+   * ======================================== */
   return (
     <>
       {/* WCAG 2.4.1: Skip link for keyboard users - DO NOT REMOVE */}
