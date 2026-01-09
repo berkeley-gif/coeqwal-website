@@ -61,7 +61,7 @@ export function Header() {
       borderBottom="1px solid rgba(255, 255, 255, 0.8)"
       hideOnScroll={false}
       showLanguageSwitcher={false}
-      logoVariant="white"
+      logoVariant="transparent"
     />
   )
 }

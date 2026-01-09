@@ -90,7 +90,7 @@ export interface BaseHeaderProps {
   borderBottom?: string
 
   // Logo variant
-  logoVariant?: "color" | "white"
+  logoVariant?: "color" | "white" | "transparent"
 }
 
 const translations: TranslationsMap = {
