@@ -38,6 +38,8 @@ export { InfoOverlay } from "./common/InfoOverlay"
 export type { InfoOverlayProps } from "./common/InfoOverlay"
 
 // Panel components
+export { Panel } from "./panels/Panel"
+export type { PanelProps } from "./panels/Panel"
 export { OneColumnPanel } from "./panels/OneColumnPanel"
 export { DisplayBlock } from "./panels/DisplayBlock"
 export type { DisplayBlockProps } from "./panels/DisplayBlock"

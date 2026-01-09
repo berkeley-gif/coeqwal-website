@@ -7,7 +7,7 @@
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Semantic <section> with aria-label
- * - WCAG 2.3.3: Respects prefers-reduced-motion preference
+ * - WCAG 2.3.3: Reduced motion handled globally via MotionConfig in ThemeRegistry
  * - WCAG 2.4.7: Focus-visible on scroll button (via ScrollToButton)
  * - WCAG 4.1.2: Proper aria-labels on interactive elements
  * - Responsive: Same layout behavior as VideoHero (centered on mobile <900px)
@@ -15,16 +15,10 @@
 
 import React from "react"
 import { motion } from "@repo/motion"
-import { ScrollToButton, DisplayBlock } from "@repo/ui"
+import { ScrollToButton, DisplayBlock, Panel } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 const MotionBox = motion.create(Box)
-
-// WCAG 2.3.3: Check for reduced motion preference
-const prefersReducedMotion =
-  typeof window !== "undefined"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false
 
 /** Action item for the "actions" variant */
 export interface ActionItem {
@@ -82,249 +76,62 @@ export default function FrontmatterPanel({
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
-  // WCAG 2.3.3: Reduced motion variants - simplified animations for accessibility
-  const heroIn = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-        show: {
-          opacity: 1,
-          x: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.6, ease: "easeOut" },
-        },
-      }
+  // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
+  const heroIn = {
+    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  }
 
-  const heroInRight = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-        show: {
-          opacity: 1,
-          x: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-        },
-      }
+  const heroInRight = {
+    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+    },
+  }
 
   const staggerContainer = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.15,
-        delayChildren: prefersReducedMotion ? 0 : 0.2,
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
       },
     },
   }
 
-  const fadeIn = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, y: 20 },
-        show: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6, ease: "easeOut" },
-        },
-      }
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  }
 
   // Actions variant: diagonal layout matching default variant (headline top-left, actions bottom-right)
   if (variant === "actions" && actions) {
     return (
-      <Box
-        component="section"
+      <Panel
         id={id}
-        aria-label={ariaLabel}
+        ariaLabel={ariaLabel}
+        backgroundColor={backgroundColor}
         sx={{
-          position: "relative",
-          height: "100vh",
-          width: "100%",
-          overflow: "hidden",
-          backgroundColor,
           pointerEvents: "auto",
-        }}
-      >
-        {/* Content layout — flex space-between for diagonal positioning (matches default variant) */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            paddingTop: theme.space.panel.topOffset,
-            paddingBottom: theme.space.panel.bottomOffset,
-            paddingLeft: theme.space.panel.padding,
-            paddingRight: theme.space.panel.padding,
-            zIndex: theme.zIndex.heroContent,
-          }}
-        >
-          {/* Headline — top-left on desktop, centered on mobile */}
-          <MotionBox
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={heroIn}
-            sx={{
-              alignSelf: { xs: "stretch", md: "flex-start" },
-              display: hideHeadline
-                ? { xs: "flex", md: "none" }
-                : { xs: "flex", md: "block" },
-              justifyContent: { xs: "center", md: "flex-start" },
-            }}
-          >
-            <Box
-              sx={{
-                color: textColor,
-                textShadow: textShadow ? theme.textShadow.display : "none",
-                // fontSize needed for maxWidth "ch" unit to calculate correctly
-                fontSize: theme.typography.h1Bold.fontSize,
-                // lineHeight controls spacing between the two headline lines
-                lineHeight: 1.05,
-                maxWidth: "16ch",
-                textAlign: { xs: "center", md: "left" },
-              }}
-            >
-              <Typography variant="h2" component="span">
-                {headlineLine1}
-              </Typography>
-              {headlineLine2 && (
-                <>
-                  <br />
-                  <Typography variant="h1Bold" component="span">
-                    {headlineLine2}
-                  </Typography>
-                </>
-              )}
-            </Box>
-          </MotionBox>
-          {/* Desktop spacer when headline hidden (maintains action items position) */}
-          {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
-
-          {/* Action items — bottom-right on desktop, centered on mobile */}
-          <MotionBox
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
-            variants={staggerContainer}
-            sx={{
-              alignSelf: { xs: "stretch", md: "flex-end" },
-              display: { xs: "flex", md: "block" },
-              justifyContent: { xs: "center", md: "flex-end" },
-            }}
-          >
-            <Box
-              component="ul"
-              sx={{
-                listStyle: "none",
-                p: 0,
-                m: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: { xs: 4, md: 4 },
-                maxWidth: "520px",
-              }}
-            >
-              {actions.map((item, index) => (
-                <motion.li key={index} variants={fadeIn}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: { xs: 0.5, md: 0.5 },
-                    }}
-                  >
-                    {/* Action word */}
-                    <Typography
-                      variant="h3"
-                      sx={{
-                        color: item.color,
-                      }}
-                    >
-                      {item.action}
-                    </Typography>
-
-                    {/* Description */}
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: textColor,
-                      }}
-                    >
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </motion.li>
-              ))}
-            </Box>
-          </MotionBox>
-        </Box>
-
-        {/* Scroll indicator (optional) */}
-        {scrollToId && (
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: "clamp(24px, 4vh, 48px)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: theme.zIndex.heroScrollIndicator,
-            }}
-          >
-            <ScrollToButton
-              color="rgba(255, 255, 255, 0.85)"
-              size={52}
-              scrollToId={scrollToId}
-              ariaLabel="Scroll down to continue"
-            />
-          </Box>
-        )}
-      </Box>
-    )
-  }
-
-  // Default variant: diagonal layout with DisplayBlock
-  return (
-    <Box
-      component="section"
-      id={id}
-      aria-label={ariaLabel}
-      sx={{
-        position: "relative",
-        height: "100vh",
-        width: "100%",
-        overflow: "hidden",
-        backgroundColor,
-        pointerEvents: "auto",
-      }}
-    >
-      {/* Content layout — flex space-between for diagonal positioning */}
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          paddingTop: theme.space.panel.topOffset,
-          paddingBottom: theme.space.panel.bottomOffset,
-          paddingLeft: theme.space.panel.padding,
-          paddingRight: theme.space.panel.padding,
-          zIndex: theme.zIndex.heroContent,
         }}
       >
         {/* Headline — top-left on desktop, centered on mobile */}
-        {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
         <MotionBox
           initial="hidden"
           whileInView="show"
@@ -333,8 +140,8 @@ export default function FrontmatterPanel({
           sx={{
             alignSelf: { xs: "stretch", md: "flex-start" },
             display: hideHeadline
-              ? { xs: "flex", md: "none" } // Mobile: show, Desktop: hidden (MorphingHeadline)
-              : { xs: "flex", md: "block" }, // Always show when not using MorphingHeadline
+              ? { xs: "flex", md: "none" }
+              : { xs: "flex", md: "block" },
             justifyContent: { xs: "center", md: "flex-start" },
           }}
         >
@@ -363,29 +170,165 @@ export default function FrontmatterPanel({
             )}
           </Box>
         </MotionBox>
-        {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
+        {/* Desktop spacer when headline hidden (maintains action items position) */}
         {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-        {/* Body — bottom-right on desktop, centered on mobile */}
+        {/* Action items — bottom-right on desktop, centered on mobile */}
         <MotionBox
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
-          variants={heroInRight}
+          variants={staggerContainer}
           sx={{
             alignSelf: { xs: "stretch", md: "flex-end" },
             display: { xs: "flex", md: "block" },
             justifyContent: { xs: "center", md: "flex-end" },
           }}
         >
-          <DisplayBlock
-            textShadow={textShadow}
-            sx={displayBlockBackground ? { background: displayBlockBackground } : undefined}
+          <Box
+            component="ul"
+            sx={{
+              listStyle: "none",
+              p: 0,
+              m: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: { xs: 4, md: 4 },
+              maxWidth: "520px",
+            }}
           >
-            {bodyText}
-          </DisplayBlock>
+            {actions.map((item, index) => (
+              <motion.li key={index} variants={fadeIn}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: { xs: 0.5, md: 0.5 },
+                  }}
+                >
+                  {/* Action word */}
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      color: item.color,
+                    }}
+                  >
+                    {item.action}
+                  </Typography>
+
+                  {/* Description */}
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: textColor,
+                    }}
+                  >
+                    {item.description}
+                  </Typography>
+                </Box>
+              </motion.li>
+            ))}
+          </Box>
         </MotionBox>
-      </Box>
+
+        {/* Scroll indicator (optional) */}
+        {scrollToId && (
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "clamp(24px, 4vh, 48px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: theme.zIndex.heroScrollIndicator,
+            }}
+          >
+            <ScrollToButton
+              color="rgba(255, 255, 255, 0.85)"
+              size={52}
+              scrollToId={scrollToId}
+              ariaLabel="Scroll down to continue"
+            />
+          </Box>
+        )}
+      </Panel>
+    )
+  }
+
+  // Default variant: diagonal layout with DisplayBlock
+  return (
+    <Panel
+      id={id}
+      ariaLabel={ariaLabel}
+      backgroundColor={backgroundColor}
+      sx={{
+        pointerEvents: "auto",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
+      {/* Headline — top-left on desktop, centered on mobile */}
+      {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
+      <MotionBox
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={heroIn}
+        sx={{
+          alignSelf: { xs: "stretch", md: "flex-start" },
+          display: hideHeadline
+            ? { xs: "flex", md: "none" } // Mobile: show, Desktop: hidden (MorphingHeadline)
+            : { xs: "flex", md: "block" }, // Always show when not using MorphingHeadline
+          justifyContent: { xs: "center", md: "flex-start" },
+        }}
+      >
+        <Box
+          sx={{
+            color: textColor,
+            textShadow: textShadow ? theme.textShadow.display : "none",
+            // fontSize needed for maxWidth "ch" unit to calculate correctly
+            fontSize: theme.typography.h1Bold.fontSize,
+            // lineHeight controls spacing between the two headline lines
+            lineHeight: 1.05,
+            maxWidth: "16ch",
+            textAlign: { xs: "center", md: "left" },
+          }}
+        >
+          <Typography variant="h2" component="span">
+            {headlineLine1}
+          </Typography>
+          {headlineLine2 && (
+            <>
+              <br />
+              <Typography variant="h1Bold" component="span">
+                {headlineLine2}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </MotionBox>
+      {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
+      {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
+
+      {/* Body — bottom-right on desktop, centered on mobile */}
+      <MotionBox
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={heroInRight}
+        sx={{
+          alignSelf: { xs: "stretch", md: "flex-end" },
+          display: { xs: "flex", md: "block" },
+          justifyContent: { xs: "center", md: "flex-end" },
+        }}
+      >
+        <DisplayBlock
+          textShadow={textShadow}
+          sx={displayBlockBackground ? { background: displayBlockBackground } : undefined}
+        >
+          {bodyText}
+        </DisplayBlock>
+      </MotionBox>
 
       {/* Scroll indicator — centered at bottom (optional) */}
       {scrollToId && (
@@ -406,6 +349,6 @@ export default function FrontmatterPanel({
           />
         </Box>
       )}
-    </Box>
+    </Panel>
   )
 }

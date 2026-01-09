@@ -21,14 +21,8 @@
 "use client"
 
 import React, { useEffect, useState, useMemo, useCallback } from "react"
-import { useScroll, motion } from "@repo/motion"
+import { useScroll, motion, useReducedMotion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-
-// WCAG 2.3.3: Check for reduced motion preference
-const getReducedMotionPreference = () =>
-  typeof window !== "undefined"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false
 
 /**
  * Interpolates a value within keyframe ranges
@@ -79,17 +73,8 @@ export default function MorphingHeadline({
   containerRef,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    getReducedMotionPreference,
-  )
-
-  // Listen for changes to reduced motion preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches)
-    mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [])
+  // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
+  const prefersReducedMotion = useReducedMotion()
 
   // Track scroll progress within the container (all panels)
   const { scrollYProgress } = useScroll({
