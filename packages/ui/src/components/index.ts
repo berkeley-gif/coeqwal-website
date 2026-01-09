@@ -10,7 +10,7 @@ export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { ScrollToButton } from "./navigation/ScrollToButton"
 
 // Common components
-export { Logo } from "./common/Logo"
+export { Logo, LogoColor, LogoLight } from "./common/Logo"
 export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { LeadingMarkerText } from "./common/LeadingMarkerText"
 export { ArrowHead } from "./icons/ArrowHead"
