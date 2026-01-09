@@ -4,7 +4,7 @@
  * BaseHeader - Shared header component with navigation and branding
  *
  * Provides a responsive header with logo, navigation links, optional language switcher,
- * optional secondary navigation, optional scroll-based shrinking animation, and optional hide on scroll.
+ * optional tools dropdown, and scroll-based shrinking animation.
  *
  * Header dimensions (from theme.layout):
  * - Expanded: 70px (theme.layout.headerHeight)
@@ -23,30 +23,16 @@
  * IMPORTS
  * ======================================== */
 import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
-import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "@repo/motion"
-import { useRef, useState, useEffect } from "react"
-import { themeValues } from "../../themes/theme"
+import { motion, useScroll, useTransform } from "@repo/motion"
 
 /* ========================================
  * CONSTANTS & TYPES
  * ======================================== */
 const MotionAppBar = motion.create(AppBar)
-
-// Header height constants (exported for components that need static values)
-// Prefer using theme.layout.headerHeight / theme.layout.collapsedHeaderHeight when possible
-export const HEADER_EXPANDED_H = themeValues.layout.headerHeight // 70px
-export const HEADER_SHRUNK_H = themeValues.layout.collapsedHeaderHeight // 40px
 
 // Translation types
 type HeaderTranslations = {
@@ -67,37 +53,20 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
-// Secondary nav option (optional)
-export interface SecondaryNavItem {
-  key: string
-  label: string
-  sectionId: string
-}
-
 // Main props interface
 export interface BaseHeaderProps {
-  // Navigation props
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean
-  secondaryNavItems?: SecondaryNavItem[]
-
   // Action handlers
   onLogoClick?: () => void
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
 
-  // Styling props (theme-agnostic)
+  // Styling props
   backgroundColor?: string
   textColor?: string
   zIndex?: number
-  borderRadius?: string | number
-  boxShadow?: string
 
   // Layout props
-  variant?: "fixed" | "overlay" | "static" | "sticky"
-  hideOnScroll?: boolean
   shrinkOnScroll?: boolean
   showLanguageSwitcher?: boolean
 
@@ -135,18 +104,7 @@ const translations: TranslationsMap = {
   },
 }
 
-// This maps sections to their parent section in the UI
-// Used for arrow display when scrolling through combined sections
-const sectionParentMap: Record<string, string | undefined> = {
-  challenges: "managing-water", // Map challenges section to managing-water button
-  calsim: "managing-water",
-}
-
 export function BaseHeader({
-  activeSection,
-  onSectionClick,
-  showSecondaryNav = false,
-  secondaryNavItems = [],
   onLogoClick,
   onDataClick,
   onToolsClick,
@@ -154,11 +112,7 @@ export function BaseHeader({
   backgroundColor = "rgba(255, 255, 255, 0.95)",
   textColor = "#000000",
   zIndex = 1100,
-  borderRadius = 0,
-  boxShadow = "none",
-  variant = "fixed",
-  hideOnScroll = false, // Optional: slides header out of view when scrolling down
-  shrinkOnScroll = true, // Default: shrinks header from 70px to 40px on scroll
+  shrinkOnScroll = true, // Default: shrinks header from expanded to collapsed on scroll
   showLanguageSwitcher = true,
   borderBottom,
   logoVariant = "color",
@@ -167,8 +121,6 @@ export function BaseHeader({
    * THEME & LAYOUT
    * ======================================== */
   const theme = useTheme()
-  const isMobile = useMediaQuery("(max-width:600px)")
-  const isTablet = useMediaQuery("(max-width:900px)")
 
   // Header dimensions from theme
   const expandedHeight = theme.layout.headerHeight // 70px
@@ -201,44 +153,6 @@ export function BaseHeader({
   // Static fallbacks when shrinkOnScroll is disabled
   const staticHeaderH = `${expandedHeight}px`
   const staticPadY = "8px"
-
-  /* ========================================
-   * HIDE ON SCROLL (optional)
-   * ======================================== */
-  const [isMounted, setIsMounted] = useState(false)
-  const [isHidden, setIsHidden] = useState(false)
-  const lastYRef = useRef(0)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (!hideOnScroll || !isMounted) return
-
-    const difference = latest - lastYRef.current
-    if (Math.abs(difference) > 10) {
-      setIsHidden(difference > 0)
-    }
-    lastYRef.current = latest
-  })
-
-  /* ========================================
-   * POSITION VARIANT
-   * ======================================== */
-  const positionMap = {
-    fixed: "fixed" as const,
-    overlay: "absolute" as const,
-    static: "static" as const,
-    sticky: "sticky" as const,
-  }
-  const position = positionMap[variant]
-
-  /* ========================================
-   * SECONDARY NAVIGATION (optional)
-   * ======================================== */
-  const displaySecondaryNav =
-    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   /* ========================================
    * BUTTON STYLING
@@ -313,26 +227,15 @@ export function BaseHeader({
         Skip to main content
       </Box>
       <MotionAppBar
-        initial="visible" // Prevent hydration mismatch for SSG
-        animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
-        variants={{
-          hidden: {
-            y: "-100%",
-          },
-          visible: {
-            y: "0%",
-          },
-        }}
-        transition={{ duration: 0.3 }}
-        position={position}
+        position="fixed"
         sx={{
           zIndex,
           backgroundColor,
           color: textColor,
-          borderRadius,
-          boxShadow,
+          borderRadius: theme.borderRadius.none,
+          boxShadow: "none",
           borderBottom,
-          ...(position !== "sticky" ? { top: 0, left: 0, right: 0 } : null),
+          inset: "0 0 auto 0",
           height: "var(--header-h)",
         }}
         style={
@@ -342,8 +245,6 @@ export function BaseHeader({
             height: shrinkOnScroll ? headerHeightMotion : staticHeaderH,
           } as React.CSSProperties
         }
-        whileHover={isMounted ? "visible" : undefined}
-        onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
         elevation={0}
       >
         <Toolbar
@@ -392,85 +293,6 @@ export function BaseHeader({
           >
             <Logo variant={logoVariant} />
           </Box>
-
-          {/* Optional secondary navigation menu */}
-          {displaySecondaryNav && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                flexGrow: 1,
-                justifyContent: "center",
-                display: { xs: "none", md: "flex" },
-                mx: 2,
-              }}
-            >
-              {secondaryNavItems.map((item) => {
-                // Check if this section is directly active or if it's the parent of the active section
-                const isActive =
-                  activeSection === item.sectionId ||
-                  sectionParentMap[activeSection || ""] === item.sectionId
-
-                return (
-                  <Button
-                    key={item.key}
-                    variant="text"
-                    disableRipple
-                    onClick={() => onSectionClick?.(item.sectionId)}
-                    // WCAG 4.1.2: aria-current for active state
-                    aria-current={isActive ? "page" : undefined}
-                    sx={{
-                      color: textColor,
-                      minWidth: "auto",
-                      px: isTablet ? 1 : 2,
-                      fontSize: "0.875rem",
-                      position: "relative",
-                      letterSpacing: "0.03rem",
-                      fontWeight: isActive ? 600 : 500,
-                      transition: "color 0.3s ease", // theme.transition.color equivalent
-                      lineHeight: 1.1,
-                      "&:hover": {
-                        backgroundColor: "transparent",
-                      },
-                      "&.MuiButtonBase-root:hover": {
-                        backgroundColor: "transparent",
-                      },
-                      // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
-                      "&:focus-visible": {
-                        outline: "2px solid currentColor",
-                        outlineOffset: 2,
-                      },
-                    }}
-                  >
-                    {item.label}
-                    {isActive && (
-                      <ArrowDropDownIcon
-                        sx={{
-                          position: "absolute",
-                          bottom: -12,
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          fontSize: 24,
-                          color: textColor,
-                          animation: "fadeIn 0.3s ease-in-out",
-                          "@keyframes fadeIn": {
-                            "0%": {
-                              opacity: 0,
-                              transform: "translateX(-50%) translateY(-5px)",
-                            },
-                            "100%": {
-                              opacity: 1,
-                              transform: "translateX(-50%) translateY(0)",
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                  </Button>
-                )
-              })}
-            </Stack>
-          )}
 
           {/* WCAG 1.3.1: Semantic nav element - DO NOT REMOVE */}
           <Box component="nav" aria-label="Main navigation">

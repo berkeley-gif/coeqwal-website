@@ -9,6 +9,7 @@
 import { useMemo, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "@repo/motion"
+import { useTheme } from "@repo/ui/mui"
 
 import { useTabs } from "../../context/Tabs"
 import { TABS, TabKey } from "../../types/tabs"
@@ -27,9 +28,8 @@ const panelVariants = {
   exit: { opacity: 0, x: -30 },
 }
 
-import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
-
 export default function TabPanels() {
+  const theme = useTheme()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { state, panelRef, isInTabsArea } = useTabs()
@@ -39,12 +39,14 @@ export default function TabPanels() {
   // Const to track if we've already auto-scrolled from a URL Tab
   const didScrollFromUrlRef = useRef(false)
 
-  useMarkTabsInView(HEADER_SHRUNK_H)
+  const collapsedHeaderHeight = theme.layout.collapsedHeaderHeight
+
+  useMarkTabsInView(collapsedHeaderHeight)
 
   // Scroll to tab top on every tab change
   useScrollTabsIntoViewOnChange({
     behavior: "smooth",
-    offsetPx: HEADER_SHRUNK_H,
+    offsetPx: collapsedHeaderHeight,
   })
 
   useEffect(() => {
@@ -83,12 +85,7 @@ export default function TabPanels() {
       const rect = panelRef.current.getBoundingClientRect()
       const absoluteTop = window.scrollY + rect.top
 
-      const offsetPx =
-        typeof HEADER_SHRUNK_H === "number"
-          ? HEADER_SHRUNK_H
-          : parseFloat(HEADER_SHRUNK_H)
-
-      const targetY = absoluteTop - offsetPx
+      const targetY = absoluteTop - collapsedHeaderHeight
 
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }

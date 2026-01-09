@@ -1,6 +1,6 @@
 // Navigation components
 export { BaseHeader } from "./navigation/BaseHeader"
-export type { BaseHeaderProps, SecondaryNavItem } from "./navigation/BaseHeader"
+export type { BaseHeaderProps } from "./navigation/BaseHeader"
 export { NavDropdown } from "./navigation/NavDropdown"
 export type {
   NavDropdownProps,
