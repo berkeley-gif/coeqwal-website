@@ -36,7 +36,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
  * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
- * 
+ *
  * Note: we have decided to use Neue Haas Grotesk Display and Text for the site. I'm leaving this here
  * for a little while longer in case anyone want to test to be sure we made the right choice.
  */
@@ -230,9 +230,9 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#D5EAF5",    // More saturated light blue
-    explore: "#C2D8EB",  // Shifted toward true blue
-    empower: "#94B8DA",  // Shifted toward true blue
+    learn: "#D5EAF5", // More saturated light blue
+    explore: "#C2D8EB", // Shifted toward true blue
+    empower: "#94B8DA", // Shifted toward true blue
   },
 
   // Data visualization colors for outcome categories
@@ -669,7 +669,7 @@ const theme = createTheme({
       fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
       fontWeight: 500,
       lineHeight: 1.05,
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.016em",
       margin: 0, // Reset default margins
       padding: 0, // Reset default padding
     },
@@ -679,7 +679,7 @@ const theme = createTheme({
       fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
       fontWeight: 700,
       lineHeight: 1.05,
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.016em",
       margin: 0,
       padding: 0,
     },
@@ -689,7 +689,7 @@ const theme = createTheme({
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
       lineHeight: 1.05, // Match h1/h1Bold for tight headline pairing
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.016em",
       margin: 0,
       padding: 0,
     },
@@ -755,7 +755,7 @@ const theme = createTheme({
     },
     caption: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1rem", // align with body2 (dashboard interface size)
+      fontSize: "1rem",
       fontWeight: 400,
       lineHeight: 1.4,
       letterSpacing: "normal",
