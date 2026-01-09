@@ -168,6 +168,23 @@
       color: var(--blue-darkest);
     }
     
+    .sample-h5 {
+      font-family: var(--font-display);
+      font-size: 1.84rem;
+      font-weight: 600;
+      letter-spacing: 0.02rem;
+      line-height: 1.35;
+      color: var(--blue-darkest);
+    }
+    
+    .sample-h6 {
+      font-family: var(--font-display);
+      font-size: 1.38rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--blue-darkest);
+    }
+    
     /* Text font samples */
     .sample-body1 {
       font-family: var(--font-text);
@@ -571,6 +588,10 @@
   <div class="section">
     <h2 class="section-title">Typography</h2>
     
+    <p style="font-size: 0.85rem; color: #666; margin-bottom: 24px; padding: 12px 16px; background: #f8f8f8; border-radius: 6px; display: inline-block;">
+      <strong>Specs format:</strong> font-size / font-weight / line-height / letter-spacing
+    </p>
+    
     <div class="type-grid">
       <!-- Display Font - Headlines -->
       <div class="type-card">
@@ -583,27 +604,27 @@
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">H1</span>
-            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05</span>
+            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05 / -0.02em</span>
           </div>
           <div class="sample-h1">Water</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h1"</code>
-          <div class="type-usage">Base hero headline (not typically used alone)</div>
+          <div class="type-usage">Base hero headline</div>
         </div>
         
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">H1 Bold</span>
-            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05</span>
+            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05 / -0.02em</span>
           </div>
           <div class="sample-h1-bold">Water</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h1Bold"</code>
-          <div class="type-usage">Hero emphasis line (e.g., "Water" in "California's Water")</div>
+          <div class="type-usage">Hero emphasis line (e.g., "California's Water" in "What is the future of / California's water")</div>
         </div>
         
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">H2</span>
-            <span class="type-specs">clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05</span>
+            <span class="type-specs">clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05 / -0.02em</span>
           </div>
           <div class="sample-h2">California's</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h2"</code>
@@ -618,6 +639,36 @@
           <div class="sample-h3">Learn</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h3"</code>
           <div class="type-usage">Action words in Panel 3, subsection headers</div>
+        </div>
+        
+        <div class="type-sample" style="opacity: 0.5;">
+          <div class="type-label">
+            <span class="type-name">H4</span>
+            <span class="type-specs">2.45rem (39.2px) / 600 / 1.1</span>
+          </div>
+          <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--blue-darkest);">—</div>
+          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h4"</code>
+          <div class="type-usage" style="font-style: italic;">Unused</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H5</span>
+            <span class="type-specs">1.84rem (29.4px) / 600 / 1.35 / 0.02em</span>
+          </div>
+          <div class="sample-h5">Select scenarios to explore</div>
+          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h5"</code>
+          <div class="type-usage">Explorer titles</div>
+        </div>
+        
+        <div class="type-sample">
+          <div class="type-label">
+            <span class="type-name">H6</span>
+            <span class="type-specs">1.38rem (22.1px) / 600 / 1.0</span>
+          </div>
+          <div class="sample-h6">Category Label</div>
+          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h6"</code>
+          <div class="type-usage">Data explorer category headers, table/map labels</div>
         </div>
         
       </div>
@@ -635,9 +686,9 @@
             <span class="type-name">Body1</span>
             <span class="type-specs">1.25rem (20px) / 400 / 1.6</span>
           </div>
-          <div class="sample-body1">Primary body text for comfortable reading. Used in DisplayBlocks and descriptive content throughout the application.</div>
+          <div class="sample-body1">Primary body text for comfortable reading. Used in frontmatter body text blocks and descriptive content throughout the application.</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="body1"</code>
-          <div class="type-usage">DisplayBlocks, panel descriptions, action item descriptions</div>
+          <div class="type-usage">Text blocks in the frontmatter panel</div>
         </div>
         
         <div class="type-sample">
@@ -645,7 +696,7 @@
             <span class="type-name">storyBody</span>
             <span class="type-specs">1.125rem (18px) / 400 / 1.8</span>
           </div>
-          <div class="sample-story-body">Narrative text with generous line spacing for scrollytelling. The taller line height helps readability during scrolling experiences where text appears and disappears.</div>
+          <div class="sample-story-body">Narrative text with generous line spacing for scrollytelling. The taller line height helps readability during scrolling experiences.</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="storyBody"</code>
           <div class="type-usage">Scrollytelling narrative panels (Learn section)</div>
         </div>
@@ -672,7 +723,7 @@
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">Header Nav</span>
-            <span class="type-specs">1.1rem (17.6px) / 600 / capitalize</span>
+            <span class="type-specs">1.1rem (17.6px) / 600 / 1.4 / 0.01em</span>
           </div>
           <div class="sample-nav">About COEQWAL</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.nav</code>
@@ -682,7 +733,7 @@
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">Tabs (Expanded)</span>
-            <span class="type-specs">1.6rem (25.6px) / 600 / capitalize</span>
+            <span class="type-specs">1.6rem (25.6px) / 600 / 1.1</span>
           </div>
           <div class="sample-tabs-expanded">Learn</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.tabLabel</code>
@@ -692,7 +743,7 @@
         <div class="type-sample">
           <div class="type-label">
             <span class="type-name">Tabs (Docked)</span>
-            <span class="type-specs">1.3rem (20.8px) / 600 / capitalize *</span>
+            <span class="type-specs">1.3rem (20.8px) * / 600 / 1.1</span>
           </div>
           <div class="sample-tabs-docked">Learn</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.tabLabelDocked</code>
@@ -716,7 +767,7 @@
           </div>
           <div class="sample-subtitle1">Emphasized UI Label</div>
           <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="subtitle1"</code>
-          <div class="type-usage">Section titles in panels</div>
+          <div class="type-usage">Section titles in Explore vizzes, tables</div>
         </div>
         
         <div class="type-sample">
@@ -830,6 +881,179 @@
   </div>
   
   <!-- =====================
+       LAYOUT SECTION
+       ===================== -->
+  <div class="section">
+    <h2 class="section-title">Layout & Spacing</h2>
+    
+    <div class="type-grid">
+      <!-- Panel Spacing -->
+      <div class="type-card" style="grid-column: span 2;">
+        <h3>Full-Viewport Panel Spacing</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
+          These are CSS <strong>padding</strong> values applied to the panel container. 
+          Defined in the theme at <code>theme.space.panel</code>.
+          The <code>&lt;Panel&gt;</code> component in <code>@repo/ui</code> automatically applies this spacing.
+        </p>
+        
+        <!-- Spacing Tokens Table -->
+        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse; margin-bottom: 16px;">
+          <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5;">
+            <th style="padding: 12px 8px; text-align: left;">Position</th>
+            <th style="padding: 12px 8px; text-align: left;">Theme Token</th>
+            <th style="padding: 12px 8px; text-align: left;">Value</th>
+            <th style="padding: 12px 8px; text-align: left;">Why</th>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><strong>Top</strong><br><span style="font-size: 0.75rem; color: #888;">paddingTop</span></td>
+            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.topOffset</code></td>
+            <td style="padding: 10px 8px;">clamp(140px, 22vh, 240px)</td>
+            <td style="padding: 10px 8px; color: #666;">Clears the fixed header (70px) + breathing room for headline</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><strong>Bottom</strong><br><span style="font-size: 0.75rem; color: #888;">paddingBottom</span></td>
+            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.bottomOffset</code></td>
+            <td style="padding: 10px 8px;">clamp(100px, 16vh, 180px)</td>
+            <td style="padding: 10px 8px; color: #666;">Visual breathing room</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 8px;"><strong>Left / Right</strong><br><span style="font-size: 0.75rem; color: #888;">paddingLeft, paddingRight</span></td>
+            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.padding</code></td>
+            <td style="padding: 10px 8px;">clamp(32px, 6vw, 80px)</td>
+            <td style="padding: 10px 8px; color: #666;">Edge gutters, scales with viewport width</td>
+          </tr>
+        </table>
+        
+        <p style="font-size: 0.8rem; color: #888; margin-top: 16px;">
+          <strong>clamp() syntax:</strong> <code>clamp(min, preferred, max)</code> — scales responsively without media queries. The preferred value (vw/vh) adjusts with viewport, bounded by min and max.
+        </p>
+      </div>
+      
+      <!-- Global Layout -->
+      <div class="type-card">
+        <h3>Global Layout Constants</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px;">
+          Fixed values accessed via <code>theme.layout</code>
+        </p>
+        
+        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 12px 8px 12px 0;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">headerHeight</code></td>
+            <td style="padding: 12px 8px;">70px</td>
+            <td style="padding: 12px 0 12px 8px; color: #888;">Fixed header height</td>
+          </tr>
+          <tr>
+            <td style="padding: 12px 8px 12px 0;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">maxWidth.lg</code></td>
+            <td style="padding: 12px 8px;">600px</td>
+            <td style="padding: 12px 0 12px 8px; color: #888;">Text blocks (needs work/agreement, needs to be made responsive)</td>
+          </tr>
+        </table>
+      </div>
+      
+      <!-- Content Constraints -->
+      <div class="type-card">
+      </div>
+    </div>
+  </div>
+ 
+  </div>
+  
+  <!-- =====================
+       COMPONENTS SECTION
+       ===================== -->
+  <div class="section">
+    <h2 class="section-title">Components</h2>
+    
+    <div class="type-grid">
+      <!-- Panel Component -->
+      <div class="type-card" style="grid-column: span 2;">
+        <h3>Panel</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px;">
+          Base full-viewport panel with standard spacing. Provides consistent outer spacing from theme tokens.
+        </p>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 16px;">
+          <strong>Import:</strong> <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">import { Panel } from "@repo/ui"</code>
+        </p>
+        
+        <p style="font-size: 0.85rem; margin-bottom: 16px;">
+          <strong>Location:</strong> <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">packages/ui/src/components/panels/Panel.tsx</code>
+        </p>
+        
+        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse; margin-bottom: 16px;">
+          <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5;">
+            <th style="padding: 12px 8px; text-align: left;">Prop</th>
+            <th style="padding: 12px 8px; text-align: left;">Type</th>
+            <th style="padding: 12px 8px; text-align: left;">Default</th>
+            <th style="padding: 12px 8px; text-align: left;">Description</th>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>backgroundColor</code></td>
+            <td style="padding: 10px 8px;">string</td>
+            <td style="padding: 10px 8px;">"transparent"</td>
+            <td style="padding: 10px 8px;">Background color</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>backgroundImage</code></td>
+            <td style="padding: 10px 8px;">string</td>
+            <td style="padding: 10px 8px;">-</td>
+            <td style="padding: 10px 8px;">Optional image URL (enables grid stacking)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>fullHeight</code></td>
+            <td style="padding: 10px 8px;">boolean</td>
+            <td style="padding: 10px 8px;">true</td>
+            <td style="padding: 10px 8px;">Use 100vh height</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>includePadding</code></td>
+            <td style="padding: 10px 8px;">boolean</td>
+            <td style="padding: 10px 8px;">true</td>
+            <td style="padding: 10px 8px;">Apply standard panel spacing</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>id</code></td>
+            <td style="padding: 10px 8px;">string</td>
+            <td style="padding: 10px 8px;">-</td>
+            <td style="padding: 10px 8px;">Panel ID for navigation</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 10px 8px;"><code>ariaLabel</code></td>
+            <td style="padding: 10px 8px;">string</td>
+            <td style="padding: 10px 8px;">-</td>
+            <td style="padding: 10px 8px;">Accessible label for the section</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 8px;"><code>sx</code></td>
+            <td style="padding: 10px 8px;">SxProps</td>
+            <td style="padding: 10px 8px;">-</td>
+            <td style="padding: 10px 8px;">Additional MUI sx props</td>
+          </tr>
+        </table>
+        
+        <p style="font-size: 0.85rem; color: #333; margin-bottom: 8px;"><strong>Usage Example:</strong></p>
+        <pre style="font-family: monospace; font-size: 0.8rem; background: #f8f8f8; padding: 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5;">&lt;Panel
+  id="intro"
+  ariaLabel="Introduction"
+  backgroundColor="#3D7DB5"
+  sx={{
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  }}
+&gt;
+  &lt;Headline /&gt;
+  &lt;Body /&gt;
+&lt;/Panel&gt;</pre>
+        
+        <p style="font-size: 0.8rem; color: #888; margin-top: 16px;">
+          <strong>Features:</strong> Semantic &lt;section&gt; element, WCAG compliant, supports background images via CSS grid stacking.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- =====================
        COLOR SECTION
        ===================== -->
   <div class="section">
@@ -844,19 +1068,11 @@
           <span class="swatch-label">Panel 1</span>
           <span>#3D7DB5</span>
         </div>
-        <!-- <div class="color-label">What is COEQWAL?</div> -->
-        
-        <!-- <div class="swatch light" style="background: transparent; border: 2px dashed #ccc;">
-          <span class="swatch-label">Panel 2</span>
-          <span>transparent</span>
-        </div> -->
-        <!-- <div class="color-label">What water issues matter to you?</div> -->
         
         <div class="swatch dark" style="background: #193D6B;">
           <span class="swatch-label">Panel 3</span>
           <span>#193D6B</span>
         </div>
-        <!-- <div class="color-label">On this site, you can...</div> -->
       </div>
       
       <!-- Tab Backgrounds -->
@@ -867,58 +1083,22 @@
           <span class="swatch-label">Learn</span>
           <span>#D5EAF5</span>
         </div>
-        <!-- <div class="color-label">Lightest - entry point</div> -->
         
         <div class="swatch light" style="background: #C2D8EB;">
           <span class="swatch-label">Explore</span>
           <span>#C2D8EB</span>
         </div>
-        <!-- <div class="color-label">Medium</div> -->
         
         <div class="swatch light" style="background: #94B8DA;">
           <span class="swatch-label">Share</span>
           <span>#94B8DA</span>
         </div>
-        <!-- <div class="color-label">Deepest</div> -->
       </div>
-      
-      <!-- Color Flow -->
-      <!-- <div class="flow-card">
-        <h3>Color Flow (Scroll Progression)</h3>
-        <div class="flow">
-          <div class="flow-swatch dark" style="background: #3D7DB5;">
-            #3D7DB5
-            <span>Panel 1</span>
-          </div>
-          <div class="arrow">→</div>
-          <div class="flow-swatch dark" style="background: #193D6B;">
-            #193D6B
-            <span>Panel 3</span>
-          </div>
-          <div class="arrow">→</div>
-          <div class="flow-swatch light" style="background: #D5EAF5;">
-            #D5EAF5
-            <span>Learn</span>
-          </div>
-          <div class="arrow">→</div>
-          <div class="flow-swatch light" style="background: #C2D8EB;">
-            #C2D8EB
-            <span>Explore</span>
-          </div>
-          <div class="arrow">→</div>
-          <div class="flow-swatch light" style="background: #94B8DA;">
-            #94B8DA
-            <span>Share</span>
-          </div>
-        </div>
-      </div> -->
     </div>
-  </div>
- 
   </div>
   
   <footer>
-    <strong>COEQWAL Website Design System</strong> • Last updated January 8, 2026<br>
+    <strong>COEQWAL Website Design System</strong> • Last updated January 9, 2026<br>
     <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->
   </footer>
 </body>

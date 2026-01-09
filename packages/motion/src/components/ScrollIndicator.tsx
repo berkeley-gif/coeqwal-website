@@ -3,20 +3,14 @@
  *
  * WCAG 2.0 AA Compliance Notes:
  * - WCAG 2.1.1: Keyboard accessible (tabIndex, onKeyDown) - DO NOT REMOVE
- * - WCAG 2.3.3: Respects prefers-reduced-motion (disables bounce animation)
+ * - WCAG 2.3.3: Respects prefers-reduced-motion via useReducedMotion hook
  * - WCAG 2.4.3: Focus moves to target element on activation
  * - WCAG 4.1.2: role="button" and aria-label for screen readers
  */
 
-import React, { useEffect, useCallback, useState } from "react"
-import { motion, useAnimation } from "../index"
+import React, { useEffect, useCallback } from "react"
+import { motion, useAnimation, useReducedMotion } from "../index"
 import type { TargetAndTransition } from "framer-motion"
-
-// WCAG 2.3.3: Check for reduced motion preference
-const getReducedMotionPreference = () =>
-  typeof window !== "undefined"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false
 
 type MotionAxis = "vertical" | "horizontal"
 
@@ -72,19 +66,8 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   ariaLabel,
 }) => {
   const controls = useAnimation()
-  // WCAG 2.3.3: Track reduced motion preference
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    getReducedMotionPreference,
-  )
-
-  // Listen for changes to reduced motion preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches)
-
-    mediaQuery.addEventListener("change", handleChange)
-    return () => mediaQuery.removeEventListener("change", handleChange)
-  }, [])
+  // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
+  const prefersReducedMotion = useReducedMotion()
 
   const axisKey: "x" | "y" = motionAxis === "horizontal" ? "x" : "y"
 

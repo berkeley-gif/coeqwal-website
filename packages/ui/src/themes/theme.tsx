@@ -6,18 +6,25 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * TABLE OF CONTENTS
  * -----------------
- * 1. Font config      - Font presets and selection
- * 2. Design tokens    - Standalone token definitions
- *                       typeScale, palette, borderRadius, shadow,
- *                       textShadow, transition, zIndex, border, background
- * 3. themeValues      - Assembled tokens + UI config
- *                       fontFamily, layout, spacing (panel, displayBlock), scenarios
- * 4. createTheme()    - MUI theme configuration
- *                       palette, typography (h1, displayBody), components
- * 5. Post-creation    - Attach tokens to theme object
- * 6. TypeScript       - Module augmentation for custom types
+ * 1. Font config      - Font presets and ACTIVE_FONT_PRESET selection
  *
-
+ * 2. Design tokens    - Standalone token definitions
+ *                       typeScale, palette, borderRadius, shadow, transition,
+ *                       textShadow, zIndex, border, background
+ *
+ * 3. themeValues      - Assembled tokens + UI config (exported for direct access)
+ *                       fontFamily, layout, spacing, scenarios
+ *                       + re-exports design tokens
+ *
+ * 4. createTheme()    - MUI theme configuration
+ *                       palette, typography, components
+ *                       Typography variants: h1, h1Bold, h2–h6, body1, body2,
+ *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
+ *                       dashboard, panelTitle, subtitle1/2, caption, overline
+ *
+ * 5. Post-creation    - Attach design tokens to theme object (theme.space, etc.)
+ *
+ * 6. TypeScript       - Module augmentation for custom theme properties
  *
  */
 
@@ -29,6 +36,9 @@ import { createTheme, Theme } from "@mui/material/styles"
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
  * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
+ * 
+ * Note: we have decided to use Neue Haas Grotesk Display and Text for the site. I'm leaving this here
+ * for a little while longer in case anyone want to test to be sure we made the right choice.
  */
 
 type FontPresetKey =
@@ -125,14 +135,12 @@ export const fontCssImport = activeFont.cssImport
  * ======================================================== */
 
 // Type scale - headline and compact sizes
+// Note: h1/h2 use responsive clamp() values defined in typography section
 const typeScale = {
-  // Headline sizes using Perfect Fourth ratio (1.333)
-  h1: "5.8rem", // 92.8px - Hero size
-  h2: "4.35rem", // 69.6px - Major section headers
   h3: "3.26rem", // 52.2px - Subsection headers
-  h4: "2.45rem", // 39.2px - Card titles
-  h5: "1.84rem", // 29.4px - Minor headlines
-  h6: "1.38rem", // 22.1px - Section headers
+  h4: "2.45rem", // 39.2px - Unused in main app
+  h5: "1.84rem", // 29.4px - Explorer titles
+  h6: "1.38rem", // 22.1px - Category labels
 
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
@@ -356,17 +364,16 @@ export const themeValues = {
   /**
    * Layout dimensions for consistent sizing across the app
    *
-   * - headerHeight: Used by panels, page layouts, drawer positioning
-   * - drawer: Sidebar/drawer dimensions for glossary and navigation
-   * - maxWidth: Content width constraints (heavily used across tooltips, panels, forms)
-   * - controls: Form element sizes (used in MUI checkbox/radio overrides)
+   * - headerHeight: Used by panels, page layouts
+   * - drawer: Internal - used by MUI Drawer component overrides
+   * - maxWidth: Content width constraints (text blocks, needs work, needs to be made responsive)
+   * - controls: Form element sizes (MUI checkbox/radio overrides)
    */
   layout: {
     headerHeight: 70, // px - fixed header height
     drawer: {
-      width: 360, // px - open drawer width
-      closedWidth: 60, // px - collapsed drawer width
-      glossaryWidth: 360, // px - glossary panel width
+      width: 360, // px - open drawer width (used by MUI Drawer overrides)
+      closedWidth: 60, // px - collapsed drawer width (used by MUI Drawer overrides)
     },
     maxWidth: {
       xs: "70px", // Data viz labels (outcome display names)
@@ -434,11 +441,12 @@ export const themeValues = {
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
     },
 
-    // Full-panel spacing (CSS clamp values for viewport-responsive sizing)
+    // Full-panel spacing — CSS padding values applied by <Panel> component
+    // Uses clamp() for responsive scaling: clamp(min, preferred, max)
     panel: {
-      padding: "clamp(32px, 6vw, 80px)", // Responsive edge padding
-      topOffset: "clamp(140px, 22vh, 240px)", // Space below header
-      bottomOffset: "clamp(100px, 16vh, 180px)", // Space above bottom
+      padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight: edge gutters
+      topOffset: "clamp(140px, 22vh, 240px)", // paddingTop: clears header (70px) + headline breathing room
+      bottomOffset: "clamp(100px, 16vh, 180px)", // paddingBottom: visual breathing room
     },
 
     // Display block internal padding
@@ -701,7 +709,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h5,
       fontWeight: 600,
-      letterSpacing: "0.02rem",
+      letterSpacing: "0.02em",
       lineHeight: 1.35,
     },
     h6: {
@@ -812,7 +820,7 @@ const theme = createTheme({
       fontSize: typeScale.compact.micro, // 0.7rem (11px)
       fontWeight: 600,
       lineHeight: 1.3,
-      letterSpacing: "0.5px",
+      letterSpacing: "0.04em", // ~0.5px at 11px, using em for proportional scaling
       textTransform: "uppercase" as const,
     },
     /**

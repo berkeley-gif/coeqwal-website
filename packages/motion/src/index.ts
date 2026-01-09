@@ -11,6 +11,9 @@ export {
   useMotionValueEvent,
   animate,
   useSpring,
+  // WCAG 2.3.3: Reduced motion support
+  MotionConfig,
+  useReducedMotion,
 } from "framer-motion"
 
 export { interpolate as FlubberInterpolate } from "flubber"

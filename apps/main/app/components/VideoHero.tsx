@@ -5,7 +5,7 @@
  * - WCAG 1.1.1: Video/image marked as decorative (aria-hidden, empty alt)
  * - WCAG 1.3.1: Uses semantic <section> with aria-label
  * - WCAG 2.2.2: Pause/play control for autoplay video (DO NOT REMOVE)
- * - WCAG 2.3.3: Respects prefers-reduced-motion preference
+ * - WCAG 2.3.3: Animations handled via MotionConfig; video playback uses useReducedMotion hook
  * - WCAG 2.4.7: Focus-visible styles on interactive elements
  * - WCAG 4.1.2: Proper aria-labels on controls
  */
@@ -13,18 +13,12 @@
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
-import { motion } from "@repo/motion"
+import { motion, useReducedMotion } from "@repo/motion"
 import { ScrollToButton, DisplayBlock } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
 // Motion-enabled MUI components
 const MotionBox = motion.create(Box)
-
-// WCAG 2.3.3: Check for reduced motion preference
-const prefersReducedMotion =
-  typeof window !== "undefined"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false
 
 export type VideoSource = { src: string; type: string }
 export interface VideoHeroProps {
@@ -34,7 +28,7 @@ export interface VideoHeroProps {
   className?: string
   id?: string
   title?: string
-  paragraphs?: string[] // The paragraphs that appear underneath the title: Max 2
+  paragraphs?: string[] // The paragraphs that appear underneath the title
   children?: React.ReactNode // Custom content in case you don't want the title/paragraphs layout
   /** Hide the headline (for use with MorphingHeadline) */
   hideHeadline?: boolean
@@ -51,11 +45,19 @@ export default function VideoHero({
   const [canPlay, setCanPlay] = useState(false)
   const [failed, setFailed] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(!prefersReducedMotion)
 
+  // WCAG 2.3.3: Use hook to respect user's reduced motion preference for video playback
+  const prefersReducedMotion = useReducedMotion()
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Set initial playing state after mount (hook returns null on SSR)
   useEffect(() => {
     setMounted(true)
-  }, [])
+    // Start playing only if user doesn't prefer reduced motion
+    if (prefersReducedMotion === false) {
+      setIsPlaying(true)
+    }
+  }, [prefersReducedMotion])
 
   /**
    * WCAG 2.2.2: Pause, Stop, Hide
@@ -100,49 +102,43 @@ export default function VideoHero({
       }
     }
     if (canPlay && isPlaying) tryPlay()
-  }, [mounted, canPlay, failed, isPlaying])
+  }, [mounted, canPlay, failed, isPlaying, prefersReducedMotion])
 
   const showStaticImage = failed
 
-  // WCAG 2.3.3: Reduced motion variants - simplified animations for accessibility
-  const heroIn = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-        show: {
-          opacity: 1,
-          x: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.6, ease: "easeOut" },
-        },
-      }
+  // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
+  const heroIn = {
+    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  }
 
-  const heroInRight = prefersReducedMotion
-    ? {
-        hidden: { opacity: 0 },
-        show: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-        show: {
-          opacity: 1,
-          x: 0,
-          filter: "blur(0px)",
-          transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-        },
-      }
+  const heroInRight = {
+    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
+    show: {
+      opacity: 1,
+      x: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
+    },
+  }
 
   return (
     // WCAG 1.3.1: Semantic section element with accessible name
+    // Uses CSS Grid stacking for layering video behind content
     <Box
       component="section"
       id="homeHero"
       aria-label="Welcome to COEQWAL"
       sx={{
-        position: "relative",
+        position: "relative", // For absolute children (pause button, scroll indicator)
+        display: "grid",
+        gridTemplateAreas: '"stack"',
+        gridTemplateRows: "1fr",
         height: "100vh",
         width: "100%",
         overflow: "hidden",
@@ -150,13 +146,13 @@ export default function VideoHero({
         cursor: "default", // Override map's pan cursor
       }}
     >
-      {/* WCAG 1.1.1: Decorative video/image - hidden from assistive technology */}
+      {/* WCAG 1.1.1: Decorative video/image, hidden from assistive technology */}
+      {/* Grid stacking: all children with gridArea: "stack" occupy same cell */}
       <Box
         id="homeHeroVid"
         aria-hidden="true"
         sx={{
-          position: "absolute",
-          inset: 0,
+          gridArea: "stack",
           zIndex: theme.zIndex.heroBackground,
         }}
       >
@@ -264,11 +260,10 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content layout — flex space-between for diagonal positioning */}
+      {/* Content layout — grid stacking + flex for diagonal positioning */}
       <Box
         sx={{
-          position: "absolute",
-          inset: 0,
+          gridArea: "stack", // CSS Grid stacking: occupies same cell as video
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -366,8 +361,7 @@ export default function VideoHero({
       <Box
         aria-hidden="true"
         sx={{
-          position: "absolute",
-          inset: 0,
+          gridArea: "stack", // CSS Grid stacking
           background:
             "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.35) 80%, rgba(0, 0, 0, 0.55) 100%)",
           pointerEvents: "none",
