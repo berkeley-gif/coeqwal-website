@@ -20,6 +20,8 @@ export interface NavDropdownOption {
   key: string
   label: string
   onClick: () => void
+  /** Whether this option represents the current page/site */
+  active?: boolean
 }
 
 export interface NavDropdownProps {
@@ -109,22 +111,27 @@ export function NavDropdown({
           <MenuItem
             key={option.key}
             onClick={() => handleOptionClick(option)}
-            sx={{
-              color: (theme) => theme.palette.blue.darkest,
-              fontSize: (theme) => theme.typography.nav.fontSize,
-              fontFamily: (theme) => theme.typography.fontFamily,
-              py: (theme) => theme.space.component.md,
-              px: (theme) => theme.space.component.lg,
+            aria-current={option.active ? "page" : undefined}
+            sx={(theme) => ({
+              ...theme.typography.button,
+              color: theme.palette.blue.darkest,
+              py: theme.space.component.md,
+              px: theme.space.component.lg,
+              // Active state: background fill + heavier weight
+              ...(option.active && {
+                backgroundColor: theme.palette.action.hover,
+                fontWeight: 700,
+              }),
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.action.hover,
-                color: (theme) => theme.palette.blue.darkest,
+                backgroundColor: theme.palette.action.hover,
+                color: theme.palette.blue.darkest,
               },
               // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
               "&:focus-visible": {
-                backgroundColor: (theme) => theme.palette.action.hover,
+                backgroundColor: theme.palette.action.hover,
                 outline: "none",
               },
-            }}
+            })}
           >
             {option.label}
           </MenuItem>

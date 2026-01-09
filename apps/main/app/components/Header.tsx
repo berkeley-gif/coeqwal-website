@@ -1,16 +1,16 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useTheme } from "@repo/ui/mui"
 import { BaseHeader } from "@repo/ui"
 import { useTabs } from "../context/Tabs"
 
 /**
- * Main application header with Next.js routing and theme integration
+ * Main application header
+ *
+ * Wraps BaseHeader with app-specific behavior:
+ * - Dynamic background color based on scroll position
+ * - Custom smooth scroll to top for logo click
  */
 export function Header() {
-  const router = useRouter()
-  const theme = useTheme()
   const { isInTabsArea } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
@@ -40,25 +40,11 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const handleDataClick = () => {
-    router.push("/data")
-  }
-
-  const handleAboutClick = () => {
-    console.log("Navigate to about page")
-  }
-
   return (
     <BaseHeader
       onLogoClick={handleLogoClick}
-      onDataClick={handleDataClick}
-      onAboutClick={handleAboutClick}
+      // Dynamic background: solid when in tabs area, transparent otherwise
       backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
-      textColor={theme.palette.common.white}
-      zIndex={theme.zIndex.appBar}
-      borderBottom="1px solid rgba(255, 255, 255, 0.8)"
-      showLanguageSwitcher={false}
-      logoVariant="light"
     />
   )
 }

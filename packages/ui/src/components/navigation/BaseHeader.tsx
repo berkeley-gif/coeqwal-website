@@ -4,13 +4,19 @@
  * BaseHeader - Shared header component with navigation and branding
  *
  * Provides a responsive header with logo, navigation links, optional language switcher,
- * optional tools dropdown, and scroll-based shrinking animation.
+ * and scroll-based shrinking animation.
  *
  * Header dimensions (from theme.layout):
  * - Expanded: 70px (theme.layout.headerHeight)
  * - Collapsed: 40px (theme.layout.collapsedHeaderHeight)
  * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
  * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
+ *
+ * Navigation links (left to right):
+ * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
+ * - Get data: links to dev.coeqwal.org/data
+ * - About COEQWAL: placeholder (no link yet)
+ * - Language switcher (optional)
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: Semantic nav element for navigation region
@@ -22,6 +28,7 @@
 /* ========================================
  * IMPORTS
  * ======================================== */
+import { useEffect, useState } from "react"
 import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
@@ -34,17 +41,20 @@ import { motion, useScroll, useTransform } from "@repo/motion"
  * ======================================== */
 const MotionAppBar = motion.create(AppBar)
 
+// Active water story - determined by current URL hostname
+type ActiveWaterStory = "flow" | "climate" | null
+
 // Translation types
 type HeaderTranslations = {
   title: string
   buttons: {
-    tools: string
+    waterStories: string
     getData: string
     about: string
   }
-  tools: {
-    scenarioExplorer: string
-    needsSearch: string
+  waterStories: {
+    flow: string
+    climate: string
   }
 }
 
@@ -55,13 +65,10 @@ type TranslationsMap = {
 
 // Main props interface
 export interface BaseHeaderProps {
-  // Action handlers
+  // Action handlers (optional overrides)
   onLogoClick?: () => void
-  onDataClick?: () => void
-  onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
-  onAboutClick?: () => void
 
-  // Styling props
+  // Styling props (theme tokens used as defaults)
   backgroundColor?: string
   textColor?: string
   zIndex?: number
@@ -81,52 +88,85 @@ const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      tools: "Tools",
+      waterStories: "Water stories",
       getData: "Get data",
       about: "About COEQWAL",
     },
-    tools: {
-      scenarioExplorer: "Scenario data explorer",
-      needsSearch: "Needs-based search",
+    waterStories: {
+      flow: "How water flows through California",
+      climate: "Climate change",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      tools: "Herramientas",
+      waterStories: "Historias del agua",
       getData: "Descargar datos",
       about: "Sobre COEQWAL",
     },
-    tools: {
-      scenarioExplorer: "Explorador de datos de escenarios",
-      needsSearch: "Búsqueda basada en necesidades",
+    waterStories: {
+      flow: "Cómo fluye el agua a través de California",
+      climate: "Cambio climático",
     },
   },
 }
 
+/* ========================================
+ * URL CONFIGURATION
+ * ======================================== */
+const URLS = {
+  flow: "https://flow.coeqwal.org",
+  climate: "https://climate.coeqwal.org",
+  data: "https://dev.coeqwal.org/data",
+  // TODO: Add about URL when available
+  // about: "https://coeqwal.org/about",
+}
+
 export function BaseHeader({
   onLogoClick,
-  onDataClick,
-  onToolsClick,
-  onAboutClick,
-  backgroundColor = "rgba(255, 255, 255, 0.95)",
-  textColor = "#000000",
-  zIndex = 1100,
-  shrinkOnScroll = true, // Default: shrinks header from expanded to collapsed on scroll
-  showLanguageSwitcher = true,
-  borderBottom,
-  logoVariant = "color",
+  backgroundColor = "transparent",
+  textColor, // Default set after theme is available
+  zIndex,
+  shrinkOnScroll = true,
+  showLanguageSwitcher = false,
+  borderBottom, // Default set after theme is available
+  logoVariant = "light",
 }: BaseHeaderProps) {
   /* ========================================
    * THEME & LAYOUT
    * ======================================== */
   const theme = useTheme()
 
+  // Use theme tokens for defaults
+  const resolvedTextColor = textColor ?? theme.palette.common.white
+  const resolvedBorderBottom = borderBottom ?? theme.border.rule
+  const resolvedZIndex = zIndex ?? theme.zIndex.appBar
+
   // Header dimensions from theme
   const expandedHeight = theme.layout.headerHeight // 70px
   const collapsedHeight = theme.layout.collapsedHeaderHeight // 40px
   const shrinkStart = theme.layout.headerShrinkStart // 120px
   const shrinkEnd = theme.layout.headerShrinkEnd // 240px
+
+  /* ========================================
+   * ACTIVE WATER STORY DETECTION
+   * Auto-detect which water story site we're on based on hostname
+   * ======================================== */
+  const [activeWaterStory, setActiveWaterStory] = useState<ActiveWaterStory>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const hostname = window.location.hostname
+
+    // Detect which water story site we're on (production only)
+    if (hostname.includes("flow.coeqwal")) {
+      setActiveWaterStory("flow")
+    } else if (hostname.includes("climate.coeqwal")) {
+      setActiveWaterStory("climate")
+    }
+    // Note: On localhost, no water story is active (dev environment)
+  }, [])
 
   /* ========================================
    * SCROLL-BASED SHRINK ANIMATION
@@ -159,13 +199,13 @@ export function BaseHeader({
    * ======================================== */
   const buttonStyle = {
     ...theme.typography.nav, // Uses nav variant from theme (display font, 1.1rem, 600, capitalize)
-    color: textColor,
+    color: resolvedTextColor,
     padding: "8px 20px",
     transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
-    textShadow: theme.textShadow.nav, // lighter shadow for nav text
+    textShadow: theme.textShadow.nav,
     "&:hover": {
       backgroundColor: "transparent",
-      color: "#FFFFFF",
+      color: resolvedTextColor,
       textShadow: theme.textShadow.navHover,
     },
     "&:active": {
@@ -186,8 +226,7 @@ export function BaseHeader({
    * ======================================== */
   const { locale, isLoading } = useTranslation()
   const safeLocale = !locale || isLoading ? "en" : locale
-  const componentText =
-    translations[safeLocale as keyof TranslationsMap] || translations.en
+  const t = translations[safeLocale as keyof TranslationsMap] || translations.en
 
   /* ========================================
    * RENDER
@@ -205,7 +244,7 @@ export function BaseHeader({
           width: "1px",
           height: "1px",
           overflow: "hidden",
-          zIndex: zIndex + 1,
+          zIndex: resolvedZIndex + 1,
           "&:focus": {
             position: "fixed",
             top: 8,
@@ -229,12 +268,12 @@ export function BaseHeader({
       <MotionAppBar
         position="fixed"
         sx={{
-          zIndex,
+          zIndex: resolvedZIndex,
           backgroundColor,
-          color: textColor,
+          color: resolvedTextColor,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
-          borderBottom,
+          borderBottom: resolvedBorderBottom,
           inset: "0 0 auto 0",
           height: "var(--header-h)",
         }}
@@ -258,6 +297,9 @@ export function BaseHeader({
           }}
           style={{ minHeight: "var(--header-h)" }}
         >
+          {/* ----------------------------------------
+           * LOGO
+           * ---------------------------------------- */}
           <Box
             component={motion.button}
             type="button"
@@ -277,16 +319,16 @@ export function BaseHeader({
             sx={{
               display: "flex",
               alignItems: "center",
-              pl: 2,
-              width: 168,
+              // Reset default button styles
               background: "transparent",
               border: "none",
               padding: 0,
               cursor: "pointer",
+              // WCAG 2.4.7: Focus visible indicator with rounded corners
               "&:focus-visible": {
                 outline: "2px solid currentColor",
                 outlineOffset: "4px",
-                borderRadius: "6px", // Special case: between sm (4px) and md (8px)
+                borderRadius: theme.borderRadius.sm,
               },
             }}
             aria-label="Scroll to top"
@@ -294,60 +336,59 @@ export function BaseHeader({
             <Logo variant={logoVariant} />
           </Box>
 
-          {/* WCAG 1.3.1: Semantic nav element - DO NOT REMOVE */}
+          {/* ----------------------------------------
+           * NAVIGATION
+           * WCAG 1.3.1: Semantic nav element - DO NOT REMOVE
+           * ---------------------------------------- */}
           <Box component="nav" aria-label="Main navigation">
             <Stack
               direction="row"
               spacing={2}
               alignItems="center"
-              sx={{
-                pr: 2,
-              }}
+              sx={{ pr: 2 }}
             >
-              {/* Tools dropdown */}
-              {onToolsClick && (
-                <NavDropdown
-                  label={componentText.buttons.tools}
-                  options={[
-                    {
-                      key: "scenario-explorer",
-                      label: componentText.tools.scenarioExplorer,
-                      onClick: () => onToolsClick("scenario-explorer"),
-                    },
-                    {
-                      key: "needs-search",
-                      label: componentText.tools.needsSearch,
-                      onClick: () => onToolsClick("needs-search"),
-                    },
-                  ]}
-                  variant="text"
-                  sx={buttonStyle}
-                />
-              )}
+              {/* Water stories dropdown */}
+              <NavDropdown
+                label={t.buttons.waterStories}
+                disableRipple
+                options={[
+                  {
+                    key: "flow",
+                    label: t.waterStories.flow,
+                    onClick: () => (window.location.href = URLS.flow),
+                    active: activeWaterStory === "flow",
+                  },
+                  {
+                    key: "climate",
+                    label: t.waterStories.climate,
+                    onClick: () => (window.location.href = URLS.climate),
+                    active: activeWaterStory === "climate",
+                  },
+                ]}
+                variant="text"
+                sx={buttonStyle}
+              />
 
-              {/* Data button */}
-              {onDataClick && (
-                <Button
-                  variant="text"
-                  disableRipple
-                  onClick={onDataClick}
-                  sx={buttonStyle}
-                >
-                  {componentText.buttons.getData}
-                </Button>
-              )}
-
-              {/* About button */}
+              {/* Get data */}
               <Button
                 variant="text"
                 disableRipple
-                onClick={onAboutClick}
+                onClick={() => (window.location.href = URLS.data)}
                 sx={buttonStyle}
               >
-                {componentText.buttons.about}
+                {t.buttons.getData}
               </Button>
 
-              {/* Language switcher */}
+              {/* TODO: Add URLS.about when available and enable onClick */}
+              <Button
+                variant="text"
+                disableRipple
+                sx={buttonStyle}
+              >
+                {t.buttons.about}
+              </Button>
+
+              {/* OPTIONAL: Language switcher */}
               {showLanguageSwitcher && <LanguageSwitcher />}
             </Stack>
           </Box>
