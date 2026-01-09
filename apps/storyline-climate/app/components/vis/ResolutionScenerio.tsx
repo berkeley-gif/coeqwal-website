@@ -96,12 +96,6 @@ export default function ResolutionScenario({
         <tspan x={947} dy="1.4em">
           could change water exports and salinity in the Delta.{" "}
         </tspan>
-        <tspan x={947} dy="1.4em">
-          These help us see how the tunnel might affect farms,
-        </tspan>
-        <tspan x={947} dy="1.4em">
-          cities, and ecosystems across the state.{" "}
-        </tspan>
       </motion.text>
 
       <motion.text
