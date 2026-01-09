@@ -106,7 +106,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
  */
 export function useTabs() {
   const ctx = useContext(TabsContext)
-  
+
   // Return safe defaults for pages without TabsProvider
   if (!ctx) {
     return {
@@ -116,12 +116,14 @@ export function useTabs() {
       panelRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       hasEnteredTabsFirstTime: false,
       setHasEnteredTabsFirstTime: () => {},
-      scrollIntentRef: { current: "none" as const } as React.RefObject<"none" | "user" | "sync">,
+      scrollIntentRef: { current: "none" as const } as React.RefObject<
+        "none" | "user" | "sync"
+      >,
       isInTabsArea: false,
       setIsInTabsArea: () => {},
     }
   }
-  
+
   return ctx
 }
 

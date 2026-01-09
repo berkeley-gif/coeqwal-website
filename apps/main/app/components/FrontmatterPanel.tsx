@@ -324,7 +324,11 @@ export default function FrontmatterPanel({
       >
         <DisplayBlock
           textShadow={textShadow}
-          sx={displayBlockBackground ? { background: displayBlockBackground } : undefined}
+          sx={
+            displayBlockBackground
+              ? { background: displayBlockBackground }
+              : undefined
+          }
         >
           {bodyText}
         </DisplayBlock>

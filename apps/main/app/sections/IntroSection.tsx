@@ -102,14 +102,12 @@ const IntroSection = () => {
             {
               action: "Explore",
               color: theme.palette.common.white,
-              description:
-                "how water outcomes shift under different scenarios",
+              description: "how water outcomes shift under different scenarios",
             },
             {
               action: "Share",
               color: theme.palette.common.white,
-              description:
-                "your insights about California's water future",
+              description: "your insights about California's water future",
             },
           ]}
         />

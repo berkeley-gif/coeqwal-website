@@ -93,29 +93,30 @@ export default function MorphingHeadline({
   /**
    * Calculate opacity keyframes for each headline based on number of panels.
    * Dynamically supports any number of headlines.
-   * 
+   *
    * Transition timing varies by position to account for visual perception:
    * - Earlier transitions need slightly less delay (panel already scrolling in)
    * - Later transitions need more delay (to sync with panel visibility)
    */
   const opacityKeyframes = useMemo(() => {
     const count = headlines.length
-    if (count < 2) return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
+    if (count < 2)
+      return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
 
     const panelSize = 1 / count
 
     return headlines.map((_, index) => {
       const panelStart = index * panelSize
       const panelEnd = (index + 1) * panelSize
-      
+
       // Adjust timing based on transition position.
       // Visual perception requires earlier transitions at the start of a scroll sequence
       // and later transitions as the user settles into the scroll rhythm.
       // These values are tuned by hand - adjust if adding more panels.
       const getTransitionTiming = (transitionIndex: number) => {
-        if (transitionIndex === 0) return { start: 0.0, end: 0.10 }   // First: immediate
-        if (transitionIndex === 1) return { start: 0.10, end: 0.25 } // Middle: standard
-        return { start: 0.20, end: 0.35 }                            // Later: delayed
+        if (transitionIndex === 0) return { start: 0.0, end: 0.1 } // First: immediate
+        if (transitionIndex === 1) return { start: 0.1, end: 0.25 } // Middle: standard
+        return { start: 0.2, end: 0.35 } // Later: delayed
       }
 
       if (index === 0) {
