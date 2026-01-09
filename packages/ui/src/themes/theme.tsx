@@ -370,7 +370,10 @@ export const themeValues = {
    * - controls: Form element sizes (MUI checkbox/radio overrides)
    */
   layout: {
-    headerHeight: 70, // px - fixed header height
+    headerHeight: 70, // px - expanded header height
+    collapsedHeaderHeight: 40, // px - collapsed header height
+    headerShrinkStart: 120, // px - scroll position where header starts shrinking
+    headerShrinkEnd: 240, // px - scroll position where header is fully shrunk
     drawer: {
       width: 360, // px - open drawer width (used by MUI Drawer overrides)
       closedWidth: 60, // px - collapsed drawer width (used by MUI Drawer overrides)
