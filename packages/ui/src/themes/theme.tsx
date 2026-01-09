@@ -763,10 +763,11 @@ const theme = createTheme({
       lineHeight: 1.4,
       letterSpacing: "normal",
     },
+    // Overline - uppercase section labels (e.g., "MENU" in mobile nav drawer)
     overline: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "0.75rem",
-      fontWeight: 500,
+      fontSize: "0.875rem", // 14px
+      fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: "normal",
       textTransform: "uppercase",

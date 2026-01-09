@@ -12,6 +12,11 @@
  * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
  * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
  *
+ * Responsive behavior:
+ * - Desktop (≥750px): Horizontal nav links
+ * - Mobile (<750px): Hamburger menu with drawer from right
+ *   - Language switcher (if enabled) stays visible, left of hamburger
+ *
  * Background color modes:
  * 1. Static: Pass `backgroundColor` for a fixed color
  * 2. Scroll-based: Pass `backgroundColorScrolled` to transition from `backgroundColor`
@@ -36,7 +41,24 @@
  * IMPORTS
  * ======================================== */
 import { useEffect, useState } from "react"
-import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
+import {
+  AppBar,
+  Toolbar,
+  Stack,
+  Button,
+  Box,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material"
+import MenuIcon from "@mui/icons-material/Menu"
+import CloseIcon from "@mui/icons-material/Close"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
@@ -47,6 +69,9 @@ import { motion, useScroll, useTransform, useMotionValueEvent } from "@repo/moti
  * CONSTANTS & TYPES
  * ======================================== */
 const MotionAppBar = motion.create(AppBar)
+
+// Mobile breakpoint - below this width, show hamburger menu
+const MOBILE_BREAKPOINT = 750
 
 // Active water story - determined by current URL hostname
 type ActiveWaterStory = "flow" | "climate" | null
@@ -163,6 +188,15 @@ export function BaseHeader({
   const shrinkEnd = theme.layout.headerShrinkEnd // 240px
 
   /* ========================================
+   * RESPONSIVE: Mobile detection & drawer state
+   * ======================================== */
+  const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const handleMobileMenuOpen = () => setMobileMenuOpen(true)
+  const handleMobileMenuClose = () => setMobileMenuOpen(false)
+
+  /* ========================================
    * ACTIVE WATER STORY DETECTION
    * Auto-detect which water story site we're on based on hostname
    * ======================================== */
@@ -265,7 +299,9 @@ export function BaseHeader({
    * - AppBar container
    *   - Toolbar
    *     - Logo (left)
-   *     - Navigation: Water stories | Get data | About | Language switcher
+   *     - Desktop: Water stories | Get data | About | Language switcher
+   *     - Mobile: Language switcher (optional) | Hamburger → Drawer
+   * - Mobile drawer (slides from right)
    * ======================================== */
   return (
     <>
@@ -385,63 +421,245 @@ export function BaseHeader({
           </Box>
 
           {/* ----------------------------------------
-           * NAVIGATION
+           * NAVIGATION - Desktop
            * WCAG 1.3.1: Semantic nav element - DO NOT REMOVE
            * ---------------------------------------- */}
-          <Box component="nav" aria-label="Main navigation">
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              sx={{ pr: 2 }}
-            >
-              {/* 1. Water stories dropdown */}
-              <NavDropdown
-                label={t.buttons.waterStories}
-                disableRipple
-                options={[
-                  {
-                    key: "flow",
-                    label: t.waterStories.flow,
-                    onClick: () => (window.location.href = URLS.flow),
-                    active: activeWaterStory === "flow",
-                  },
-                  {
-                    key: "climate",
-                    label: t.waterStories.climate,
-                    onClick: () => (window.location.href = URLS.climate),
-                    active: activeWaterStory === "climate",
-                  },
-                ]}
-                variant="text"
-                sx={buttonStyle}
-              />
-
-              {/* 2. Get data */}
-              <Button
-                variant="text"
-                disableRipple
-                onClick={() => (window.location.href = URLS.data)}
-                sx={buttonStyle}
+          {!isMobile && (
+            <Box component="nav" aria-label="Main navigation">
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ pr: 2 }}
               >
-                {t.buttons.getData}
-              </Button>
+                {/* 1. Water stories dropdown */}
+                <NavDropdown
+                  label={t.buttons.waterStories}
+                  disableRipple
+                  options={[
+                    {
+                      key: "flow",
+                      label: t.waterStories.flow,
+                      onClick: () => (window.location.href = URLS.flow),
+                      active: activeWaterStory === "flow",
+                    },
+                    {
+                      key: "climate",
+                      label: t.waterStories.climate,
+                      onClick: () => (window.location.href = URLS.climate),
+                      active: activeWaterStory === "climate",
+                    },
+                  ]}
+                  variant="text"
+                  sx={buttonStyle}
+                />
 
-              {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
-              <Button
-                variant="text"
-                disableRipple
-                sx={buttonStyle}
-              >
-                {t.buttons.about}
-              </Button>
+                {/* 2. Get data */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  onClick={() => (window.location.href = URLS.data)}
+                  sx={buttonStyle}
+                >
+                  {t.buttons.getData}
+                </Button>
 
-              {/* 4. Language switcher (OPTIONAL - controlled by showLanguageSwitcher prop) */}
+                {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  sx={buttonStyle}
+                >
+                  {t.buttons.about}
+                </Button>
+
+                {/* 4. Language switcher (OPTIONAL) */}
+                {showLanguageSwitcher && <LanguageSwitcher />}
+              </Stack>
+            </Box>
+          )}
+
+          {/* ----------------------------------------
+           * NAVIGATION - Mobile
+           * Language switcher (if enabled) + hamburger menu
+           * ---------------------------------------- */}
+          {isMobile && (
+            <Stack direction="row" spacing={1} alignItems="center">
+              {/* Language switcher stays visible on mobile (if enabled) */}
               {showLanguageSwitcher && <LanguageSwitcher />}
+
+              {/* Hamburger menu button */}
+              <IconButton
+                onClick={handleMobileMenuOpen}
+                aria-label="Open navigation menu"
+                aria-expanded={mobileMenuOpen}
+                aria-haspopup="true"
+                sx={{
+                  color: resolvedTextColor,
+                  // WCAG 2.4.7: Focus visible indicator
+                  "&:focus-visible": {
+                    outline: "2px solid currentColor",
+                    outlineOffset: 2,
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
             </Stack>
-          </Box>
+          )}
         </Toolbar>
       </MotionAppBar>
+
+      {/* ----------------------------------------
+       * MOBILE DRAWER
+       * Slides from right, rounded corners on top-left and bottom-right
+       * ---------------------------------------- */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={handleMobileMenuClose}
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: "auto",
+            minWidth: 280,
+            maxWidth: "80vw",
+            backgroundColor: theme.palette.common.white,
+            borderTopLeftRadius: theme.borderRadius.lg,
+            borderBottomRightRadius: theme.borderRadius.lg,
+          },
+        }}
+      >
+        {/* Header row: MENU label + close button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 2,
+            pt: 2,
+            pb: 1,
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              ...theme.typography.overline,
+              color: theme.palette.text.primary,
+            }}
+          >
+            Menu
+          </Box>
+          <IconButton
+            onClick={handleMobileMenuClose}
+            aria-label="Close navigation menu"
+            size="small"
+            sx={{
+              color: theme.palette.text.primary,
+              "&:focus-visible": {
+                outline: "2px solid currentColor",
+                outlineOffset: 2,
+              },
+            }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <Divider />
+
+        {/* Navigation links */}
+        <Box
+          component="nav"
+          aria-label="Main navigation"
+          sx={{ color: theme.palette.text.primary, pt: 1 }}
+        >
+          <List disablePadding>
+            {/* Water Stories section */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  // Water Stories is a parent - clicking it could go to flow by default
+                  window.location.href = URLS.flow
+                  handleMobileMenuClose()
+                }}
+                sx={{ px: 2 }}
+              >
+                <ListItemText
+                  primary={t.buttons.waterStories}
+                  slotProps={{ primary: { sx: theme.typography.nav } }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Water story sub-items - indented */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  window.location.href = URLS.flow
+                  handleMobileMenuClose()
+                }}
+                selected={activeWaterStory === "flow"}
+                sx={{ pl: 4, pr: 2 }}
+              >
+                <ListItemText
+                  primary={t.waterStories.flow}
+                  slotProps={{ primary: { sx: theme.typography.caption } }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  window.location.href = URLS.climate
+                  handleMobileMenuClose()
+                }}
+                selected={activeWaterStory === "climate"}
+                sx={{ pl: 4, pr: 2 }}
+              >
+                <ListItemText
+                  primary={t.waterStories.climate}
+                  slotProps={{ primary: { sx: theme.typography.caption } }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Spacing between sections */}
+            <Box sx={{ height: theme.spacing(2) }} />
+
+            {/* Get data */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  window.location.href = URLS.data
+                  handleMobileMenuClose()
+                }}
+                sx={{ px: 2 }}
+              >
+                <ListItemText
+                  primary={t.buttons.getData}
+                  slotProps={{ primary: { sx: theme.typography.nav } }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            {/* About COEQWAL */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  // TODO: Add URLS.about when available
+                  handleMobileMenuClose()
+                }}
+                sx={{ px: 2 }}
+              >
+                <ListItemText
+                  primary={t.buttons.about}
+                  slotProps={{ primary: { sx: theme.typography.nav } }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
     </>
   )
 }
