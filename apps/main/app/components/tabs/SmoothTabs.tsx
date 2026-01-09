@@ -6,7 +6,6 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
 
 export default function SmoothTabs() {
   const { state, tabsRef, isInTabsArea } = useTabs()
@@ -38,7 +37,7 @@ export default function SmoothTabs() {
       ref={tabsRef}
       style={{
         position: "sticky",
-        top: HEADER_SHRUNK_H,
+        top: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
         marginTop: "-80px", // Pull tabs up to appear at bottom of ActionPanel
       }}

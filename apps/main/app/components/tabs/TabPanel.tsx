@@ -1,6 +1,7 @@
 "use client"
 
 import { forwardRef, type ReactNode } from "react"
+import { useTheme } from "@repo/ui/mui"
 import AutoAdvanceFooter from "./AutoAdvanceFooter"
 
 type TabPanelProps = {
@@ -10,24 +11,21 @@ type TabPanelProps = {
 
 const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
+    const theme = useTheme()
     const thisPanelId = `panel-${tabKey}`
 
-    // Meli, I implemented a different approach to the map, where the same map
-    // sits behind the tab panels. This way, the map preloads while visitors are
-    // in the IntroSection, and I and keep the same map throughout, instead of
-    // mounting and unmounting every time we switch tabs. In order to do this, the
-    // Learn and Explore tabs need transparent backgrounds and no padding
-    // so the persistent map shows through / content sits flush with tabs.
+    // Map tab panels (in Learn, Explore) need transparent backgrounds and no padding
+    // so the persistent map shows through and content sits flush with tabs.
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
     const backgroundColor = isMapTab ? "transparent" : undefined
     const padding = isMapTab ? "0" : "2rem 0"
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll
-    // 100px = header (40px) + SmoothTabs when collapsed (60px)
-    // TODO: Import HEADER_SHRUNK_H and define a tabs height constant in theme.
+    // Offset = collapsed header (40px) + SmoothTabs height (60px)
+    const headerAndTabsOffset = theme.layout.collapsedHeaderHeight + 60
     const exploreStyles: React.CSSProperties = isExploreTab
-      ? { height: "calc(100vh - 100px)", overflow: "hidden" }
+      ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
       : {}
 
     // Map tabs need pointerEvents: "none" so the persistent map behind them
