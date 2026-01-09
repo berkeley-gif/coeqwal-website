@@ -228,10 +228,10 @@ export function BaseHeader({
    * BUTTON STYLING
    * ======================================== */
   const buttonStyle = {
-    ...theme.typography.nav, // Uses nav variant from theme (display font, 1.1rem, 600, capitalize)
+    ...theme.typography.nav,
     color: resolvedTextColor,
     padding: "8px 20px",
-    transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
+    transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
     textShadow: theme.textShadow.nav,
     "&:hover": {
       backgroundColor: "transparent",
@@ -316,7 +316,9 @@ export function BaseHeader({
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
           // Smooth background color transition when scrolling past threshold
-          transition: backgroundColorScrolled ? "background-color 0.3s ease" : undefined,
+          transition: backgroundColorScrolled
+            ? `background-color ${theme.transition.standard} ease`
+            : undefined,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
