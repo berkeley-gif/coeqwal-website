@@ -74,7 +74,7 @@ export interface BaseHeaderProps {
   borderBottom?: string
 
   // Logo variant
-  logoVariant?: "color" | "white"
+  logoVariant?: "color" | "light"
 }
 
 const translations: TranslationsMap = {

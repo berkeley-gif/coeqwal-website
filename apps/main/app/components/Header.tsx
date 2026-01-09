@@ -58,7 +58,7 @@ export function Header() {
       zIndex={theme.zIndex.appBar}
       borderBottom="1px solid rgba(255, 255, 255, 0.8)"
       showLanguageSwitcher={false}
-      logoVariant="white"
+      logoVariant="light"
     />
   )
 }
