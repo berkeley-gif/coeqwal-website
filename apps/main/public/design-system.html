@@ -1,809 +1,1033 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COEQWAL Website Design System</title>
-  <link rel="stylesheet" href="https://use.typekit.net/rxm7kha.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    :root {
-      /* Panel Colors */
-      --panel-1: #3D7DB5;
-      --panel-2: transparent;
-      --panel-3: #193D6B;
-      
-      /* Tab Colors */
-      --tab-learn: #D5EAF5;
-      --tab-explore: #C2D8EB;
-      --tab-share: #94B8DA;
-      
-      /* Theme Colors */
-      --blue-darkest: #0a1929;
-      --blue-dark: #1a293f;
-      --blue-bright: #2a5285;
-      
-      /* Typography */
-      --font-display: "neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif;
-      --font-text: "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    body {
-      font-family: var(--font-text);
-      background: #f5f5f5;
-      padding: 40px;
-      color: #333;
-      line-height: 1.6;
-    }
-    
-    header {
-      text-align: center;
-      margin-bottom: 60px;
-    }
-    
-    header h1 {
-      font-family: var(--font-display);
-      font-size: 3rem;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: var(--blue-darkest);
-    }
-    
-    header p {
-      color: #666;
-      font-size: 1.1rem;
-    }
-    
-    .section {
-      max-width: 1200px;
-      margin: 0 auto 60px;
-    }
-    
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 500;
-      margin-bottom: 24px;
-      padding-bottom: 12px;
-      border-bottom: 2px solid #ddd;
-      color: var(--blue-darkest);
-    }
-    
-    /* =========================
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COEQWAL Website Design System</title>
+    <link rel="stylesheet" href="https://use.typekit.net/rxm7kha.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        /* Panel Colors */
+        --panel-1: #3d7db5;
+        --panel-2: transparent;
+        --panel-3: #193d6b;
+
+        /* Tab Colors */
+        --tab-learn: #d5eaf5;
+        --tab-explore: #c2d8eb;
+        --tab-share: #94b8da;
+
+        /* Theme Colors */
+        --blue-darkest: #0a1929;
+        --blue-dark: #1a293f;
+        --blue-bright: #2a5285;
+
+        /* Typography */
+        --font-display:
+          "neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-text:
+          "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        font-family: var(--font-text);
+        background: #f5f5f5;
+        padding: 40px;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
+
+      header h1 {
+        font-family: var(--font-display);
+        font-size: 3rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--blue-darkest);
+      }
+
+      header p {
+        color: #666;
+        font-size: 1.1rem;
+      }
+
+      .section {
+        max-width: 1200px;
+        margin: 0 auto 60px;
+      }
+
+      .section-title {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 500;
+        margin-bottom: 24px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #ddd;
+        color: var(--blue-darkest);
+      }
+
+      /* =========================
        TYPOGRAPHY SECTION
        ========================= */
-    
-    .type-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
-    
-    .type-card {
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .type-card h3 {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: var(--blue-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .type-sample {
-      margin-bottom: 24px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid #eee;
-    }
-    
-    .type-sample:last-child {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-    
-    .type-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-    
-    .type-name {
-      font-family: var(--font-text);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .type-specs {
-      font-family: monospace;
-      font-size: 0.75rem;
-      color: #999;
-    }
-    
-    /* Display font samples */
-    .sample-h1 {
-      font-family: var(--font-display);
-      font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
-      font-weight: 500;
-      line-height: 1.1;
-      color: var(--blue-darkest);
-    }
-    
-    .sample-h1-bold {
-      font-family: var(--font-display);
-      font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
-      font-weight: 700;
-      line-height: 1.05;
-      color: var(--blue-darkest);
-    }
-    
-    .sample-h2 {
-      font-family: var(--font-display);
-      font-size: clamp(1.4rem, 1.6rem + 1.6vw, 2.8rem);
-      font-weight: 500;
-      line-height: 1.05;
-      color: var(--blue-darkest);
-    }
-    
-    .sample-h3 {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 500;
-      line-height: 1.1;
-      color: var(--blue-darkest);
-    }
-    
-    .sample-h5 {
-      font-family: var(--font-display);
-      font-size: 1.84rem;
-      font-weight: 600;
-      letter-spacing: 0.02rem;
-      line-height: 1.35;
-      color: var(--blue-darkest);
-    }
-    
-    .sample-h6 {
-      font-family: var(--font-display);
-      font-size: 1.38rem;
-      font-weight: 600;
-      line-height: 1;
-      color: var(--blue-darkest);
-    }
-    
-    /* Text font samples */
-    .sample-body1 {
-      font-family: var(--font-text);
-      font-size: 1.25rem;
-      font-weight: 400;
-      line-height: 1.6;
-    }
-    
-    .sample-body2 {
-      font-family: var(--font-text);
-      font-size: 1.1rem;
-      font-weight: 400;
-      line-height: 1.6;
-    }
-    
-    .sample-story-body {
-      font-family: var(--font-text);
-      font-size: 1.125rem;
-      font-weight: 400;
-      line-height: 1.8;
-    }
-    
-    .sample-subtitle1 {
-      font-family: var(--font-text);
-      font-size: 1.125rem;
-      font-weight: 500;
-      line-height: 1.4;
-    }
-    
-    .sample-subtitle2 {
-      font-family: var(--font-text);
-      font-size: 1rem;
-      font-weight: 500;
-      line-height: 1.6;
-    }
-    
-    .sample-caption {
-      font-family: var(--font-text);
-      font-size: 1rem;
-      font-weight: 400;
-      line-height: 1.4;
-      color: #666;
-    }
-    
-    .sample-overline {
-      font-family: var(--font-text);
-      font-size: 0.75rem;
-      font-weight: 500;
-      line-height: 1.4;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--blue-bright);
-    }
-    
-    .sample-nav {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      text-transform: capitalize;
-    }
-    
-    .sample-tabs-expanded {
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 600;
-      text-transform: capitalize;
-    }
-    
-    .sample-tabs-docked {
-      font-family: var(--font-display);
-      font-size: 1.3rem;
-      font-weight: 600;
-      text-transform: capitalize;
-    }
-    
-    .type-card-full {
-      grid-column: 1 / -1;
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .type-card-full h3 {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: var(--blue-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .type-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-    }
-    
-    .type-usage {
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 8px;
-      font-style: italic;
-    }
-    
-    /* =========================
+
+      .type-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+
+      .type-card {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .type-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--blue-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .type-sample {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .type-sample:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .type-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .type-name {
+        font-family: var(--font-text);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .type-specs {
+        font-family: monospace;
+        font-size: 0.75rem;
+        color: #999;
+      }
+
+      /* Display font samples */
+      .sample-h1 {
+        font-family: var(--font-display);
+        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
+        font-weight: 500;
+        line-height: 1.1;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h1-bold {
+        font-family: var(--font-display);
+        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1.05;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h2 {
+        font-family: var(--font-display);
+        font-size: clamp(1.4rem, 1.6rem + 1.6vw, 2.8rem);
+        font-weight: 500;
+        line-height: 1.05;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h3 {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 500;
+        line-height: 1.1;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h5 {
+        font-family: var(--font-display);
+        font-size: 1.84rem;
+        font-weight: 600;
+        letter-spacing: 0.02rem;
+        line-height: 1.35;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h6 {
+        font-family: var(--font-display);
+        font-size: 1.38rem;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--blue-darkest);
+      }
+
+      /* Text font samples */
+      .sample-body1 {
+        font-family: var(--font-text);
+        font-size: 1.25rem;
+        font-weight: 400;
+        line-height: 1.6;
+      }
+
+      .sample-body2 {
+        font-family: var(--font-text);
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.6;
+      }
+
+      .sample-story-body {
+        font-family: var(--font-text);
+        font-size: 1.125rem;
+        font-weight: 400;
+        line-height: 1.8;
+      }
+
+      .sample-subtitle1 {
+        font-family: var(--font-text);
+        font-size: 1.125rem;
+        font-weight: 500;
+        line-height: 1.4;
+      }
+
+      .sample-subtitle2 {
+        font-family: var(--font-text);
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.6;
+      }
+
+      .sample-caption {
+        font-family: var(--font-text);
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.4;
+        color: #666;
+      }
+
+      .sample-overline {
+        font-family: var(--font-text);
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.4;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--blue-bright);
+      }
+
+      .sample-nav {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+
+      .sample-tabs-expanded {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+
+      .sample-tabs-docked {
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+
+      .type-card-full {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .type-card-full h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--blue-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .type-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+      }
+
+      .type-usage {
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 8px;
+        font-style: italic;
+      }
+
+      /* =========================
        COLOR SECTION
        ========================= */
-    
-    .color-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 40px;
-    }
-    
-    .color-card {
-      background: white;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .color-card h3 {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      color: var(--blue-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .swatch {
-      height: 80px;
-      border-radius: 8px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      padding: 12px 16px;
-      margin-bottom: 8px;
-      font-family: monospace;
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-    
-    .swatch.dark {
-      color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    
-    .swatch.light {
-      color: #333;
-    }
-    
-    .swatch-label {
-      font-family: var(--font-text);
-      font-weight: 400;
-      font-size: 0.85rem;
-    }
-    
-    .color-label {
-      text-align: right;
-      font-size: 0.85rem;
-      color: #666;
-      margin-bottom: 20px;
-    }
-    
-    /* Color flow */
-    .flow-card {
-      grid-column: 1 / -1;
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .flow-card h3 {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 24px;
-      color: var(--blue-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      text-align: center;
-    }
-    
-    .flow {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .flow-swatch {
-      flex: 1;
-      max-width: 160px;
-      height: 70px;
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: monospace;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    
-    .flow-swatch.dark {
-      color: white;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    
-    .flow-swatch.light {
-      color: #333;
-    }
-    
-    .flow-swatch span {
-      font-family: var(--font-text);
-      font-size: 0.7rem;
-      font-weight: 400;
-      margin-top: 4px;
-      opacity: 0.8;
-    }
-    
-    .arrow {
-      font-size: 1.2rem;
-      color: #ccc;
-    }
-    
-    /* =========================
+
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+      }
+
+      .color-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .color-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--blue-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .swatch {
+        height: 80px;
+        border-radius: 8px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .swatch.dark {
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .swatch.light {
+        color: #333;
+      }
+
+      .swatch-label {
+        font-family: var(--font-text);
+        font-weight: 400;
+        font-size: 0.85rem;
+      }
+
+      .color-label {
+        text-align: right;
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 20px;
+      }
+
+      /* Color flow */
+      .flow-card {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .flow-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        color: var(--blue-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: center;
+      }
+
+      .flow {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .flow-swatch {
+        flex: 1;
+        max-width: 160px;
+        height: 70px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .flow-swatch.dark {
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .flow-swatch.light {
+        color: #333;
+      }
+
+      .flow-swatch span {
+        font-family: var(--font-text);
+        font-size: 0.7rem;
+        font-weight: 400;
+        margin-top: 4px;
+        opacity: 0.8;
+      }
+
+      .arrow {
+        font-size: 1.2rem;
+        color: #ccc;
+      }
+
+      /* =========================
        COMPONENTS SECTION
        ========================= */
-    
-    .component-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 40px;
-    }
-    
-    .component-card {
-      background: white;
-      border-radius: 12px;
-      padding: 32px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .component-card h3 {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--blue-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .component-desc {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 24px;
-    }
-    
-    /* DisplayBlock preview */
-    .display-block-preview {
-      max-width: 520px;
-      padding: 32px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      background: var(--panel-1);
-      border-radius: 4px;
-    }
-    
-    .display-block-preview p {
-      font-family: var(--font-text);
-      font-size: 1.25rem;
-      font-weight: 400;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.95);
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 20px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Tabs preview */
-    .tabs-preview {
-      display: flex;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .tab-preview {
-      flex: 1;
-      padding: 16px 24px;
-      text-align: center;
-      font-family: var(--font-display);
-      font-size: 1.6rem;
-      font-weight: 600;
-      color: var(--blue-darkest);
-    }
-    
-    .tabs-preview-docked {
-      display: flex;
-      border-radius: 0;
-      margin-top: 16px;
-    }
-    
-    .tab-preview-docked {
-      flex: 1;
-      padding: 8px 20px;
-      text-align: center;
-      font-family: var(--font-display);
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: var(--blue-darkest);
-    }
-    
-    .tabs-label {
-      font-size: 0.85rem;
-      color: #666;
-      margin-top: 8px;
-      text-align: center;
-    }
-    
-    /* Header preview */
-    .header-preview {
-      background: rgba(42, 82, 135, 0.75);
-      padding: 8px 20px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 24px;
-    }
-    
-    .header-link {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: white;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Action items preview */
-    .action-preview {
-      background: var(--panel-3);
-      padding: 32px;
-      border-radius: 8px;
-      max-width: 520px;
-    }
-    
-    .action-item {
-      margin-bottom: 24px;
-    }
-    
-    .action-item:last-child {
-      margin-bottom: 0;
-    }
-    
-    .action-word {
-      font-family: var(--font-display);
-      font-size: 2rem;
-      font-weight: 500;
-      line-height: 1.1;
-      color: white;
-      margin-bottom: 4px;
-    }
-    
-    .action-desc {
-      font-family: var(--font-text);
-      font-size: 1.25rem;
-      font-weight: 400;
-      line-height: 1.6;
-      color: white;
-    }
-    
-    /* =========================
+
+      .component-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .component-card {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .component-card h3 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--blue-bright);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .component-desc {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 24px;
+      }
+
+      /* DisplayBlock preview */
+      .display-block-preview {
+        max-width: 520px;
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: var(--panel-1);
+        border-radius: 4px;
+      }
+
+      .display-block-preview p {
+        font-family: var(--font-text);
+        font-size: 1.25rem;
+        font-weight: 400;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.95);
+        text-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.3),
+          0 2px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Tabs preview */
+      .tabs-preview {
+        display: flex;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .tab-preview {
+        flex: 1;
+        padding: 16px 24px;
+        text-align: center;
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: var(--blue-darkest);
+      }
+
+      .tabs-preview-docked {
+        display: flex;
+        border-radius: 0;
+        margin-top: 16px;
+      }
+
+      .tab-preview-docked {
+        flex: 1;
+        padding: 8px 20px;
+        text-align: center;
+        font-family: var(--font-display);
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--blue-darkest);
+      }
+
+      .tabs-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 8px;
+        text-align: center;
+      }
+
+      /* Header preview */
+      .header-preview {
+        background: rgba(42, 82, 135, 0.75);
+        padding: 8px 20px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 24px;
+      }
+
+      .header-link {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Action items preview */
+      .action-preview {
+        background: var(--panel-3);
+        padding: 32px;
+        border-radius: 8px;
+        max-width: 520px;
+      }
+
+      .action-item {
+        margin-bottom: 24px;
+      }
+
+      .action-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .action-word {
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 500;
+        line-height: 1.1;
+        color: white;
+        margin-bottom: 4px;
+      }
+
+      .action-desc {
+        font-family: var(--font-text);
+        font-size: 1.25rem;
+        font-weight: 400;
+        line-height: 1.6;
+        color: white;
+      }
+
+      /* =========================
        FOOTER
        ========================= */
-    
-    footer {
-      text-align: center;
-      margin-top: 60px;
-      padding-top: 40px;
-      border-top: 1px solid #ddd;
-      color: #999;
-      font-size: 0.85rem;
-    }
-    
-    footer strong {
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>COEQWAL Website Design System</h1>
-    <p>Visual language & component reference</p>
-  </header>
-  
-  <!-- =====================
+
+      footer {
+        text-align: center;
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid #ddd;
+        color: #999;
+        font-size: 0.85rem;
+      }
+
+      footer strong {
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>COEQWAL Website Design System</h1>
+      <p>Visual language & component reference</p>
+    </header>
+
+    <!-- =====================
        TYPOGRAPHY SECTION
        ===================== -->
-  <div class="section">
-    <h2 class="section-title">Typography</h2>
-    
-    <p style="font-size: 0.85rem; color: #666; margin-bottom: 24px; padding: 12px 16px; background: #f8f8f8; border-radius: 6px; display: inline-block;">
-      <strong>Specs format:</strong> font-size / font-weight / line-height / letter-spacing
-    </p>
-    
-    <div class="type-grid">
-      <!-- Display Font - Headlines -->
-      <div class="type-card">
-        <h3>Display Font - Headlines</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
-          <strong>neue-haas-grotesk-display</strong><br>
-          Headlines
-        </p>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H1</span>
-            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05 / -0.016em</span>
+    <div class="section">
+      <h2 class="section-title">Typography</h2>
+
+      <p
+        style="
+          font-size: 0.85rem;
+          color: #666;
+          margin-bottom: 24px;
+          padding: 12px 16px;
+          background: #f8f8f8;
+          border-radius: 6px;
+          display: inline-block;
+        "
+      >
+        <strong>Specs format:</strong> font-size / font-weight / line-height /
+        letter-spacing
+      </p>
+
+      <div class="type-grid">
+        <!-- Display Font - Headlines -->
+        <div class="type-card">
+          <h3>Display Font - Headlines</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
+            <strong>neue-haas-grotesk-display</strong><br />
+            Headlines
+          </p>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H1</span>
+              <span class="type-specs"
+                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05 /
+                -0.016em</span
+              >
+            </div>
+            <div class="sample-h1">Water</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h1"</code
+            >
+            <div class="type-usage">Base hero headline</div>
           </div>
-          <div class="sample-h1">Water</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h1"</code>
-          <div class="type-usage">Base hero headline</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H1 Bold</span>
-            <span class="type-specs">clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05 / -0.016em</span>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H1 Bold</span>
+              <span class="type-specs"
+                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05 /
+                -0.016em</span
+              >
+            </div>
+            <div class="sample-h1-bold">Water</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h1Bold"</code
+            >
+            <div class="type-usage">
+              Hero emphasis line (e.g., "California's Water" in "What is the
+              future of / California's water")
+            </div>
           </div>
-          <div class="sample-h1-bold">Water</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h1Bold"</code>
-          <div class="type-usage">Hero emphasis line (e.g., "California's Water" in "What is the future of / California's water")</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H2</span>
-            <span class="type-specs">clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05 / -0.016em</span>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H2</span>
+              <span class="type-specs"
+                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05 /
+                -0.016em</span
+              >
+            </div>
+            <div class="sample-h2">California's</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h2"</code
+            >
+            <div class="type-usage">
+              Hero intro line (0.8× of h1, responsive)
+            </div>
           </div>
-          <div class="sample-h2">California's</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h2"</code>
-          <div class="type-usage">Hero intro line (0.8× of h1, responsive)</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H3</span>
-            <span class="type-specs">3.26rem (52.2px) / 500 / 1.1</span>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H3</span>
+              <span class="type-specs">3.26rem (52.2px) / 500 / 1.1</span>
+            </div>
+            <div class="sample-h3">Learn</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h3"</code
+            >
+            <div class="type-usage">
+              Action words in Panel 3, subsection headers
+            </div>
           </div>
-          <div class="sample-h3">Learn</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h3"</code>
-          <div class="type-usage">Action words in Panel 3, subsection headers</div>
-        </div>
-        
-        <div class="type-sample" style="opacity: 0.5;">
-          <div class="type-label">
-            <span class="type-name">H4</span>
-            <span class="type-specs">2.45rem (39.2px) / 600 / 1.1</span>
+
+          <div class="type-sample" style="opacity: 0.5">
+            <div class="type-label">
+              <span class="type-name">H4</span>
+              <span class="type-specs">2.45rem (39.2px) / 600 / 1.1</span>
+            </div>
+            <div
+              style="
+                font-family: var(--font-display);
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--blue-darkest);
+              "
+            >
+              —
+            </div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h4"</code
+            >
+            <div class="type-usage" style="font-style: italic">Unused</div>
           </div>
-          <div style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; color: var(--blue-darkest);">—</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h4"</code>
-          <div class="type-usage" style="font-style: italic;">Unused</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H5</span>
-            <span class="type-specs">1.84rem (29.4px) / 600 / 1.35 / 0.02em</span>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H5</span>
+              <span class="type-specs"
+                >1.84rem (29.4px) / 600 / 1.35 / 0.02em</span
+              >
+            </div>
+            <div class="sample-h5">Select scenarios to explore</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h5"</code
+            >
+            <div class="type-usage">Explorer titles</div>
           </div>
-          <div class="sample-h5">Select scenarios to explore</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h5"</code>
-          <div class="type-usage">Explorer titles</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">H6</span>
-            <span class="type-specs">1.38rem (22.1px) / 600 / 1.0</span>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H6</span>
+              <span class="type-specs">1.38rem (22.1px) / 600 / 1.0</span>
+            </div>
+            <div class="sample-h6">Category Label</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h6"</code
+            >
+            <div class="type-usage">
+              Data explorer category headers, table/map labels
+            </div>
           </div>
-          <div class="sample-h6">Category Label</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="h6"</code>
-          <div class="type-usage">Data explorer category headers, table/map labels</div>
         </div>
-        
+
+        <!-- Text Font - Body -->
+        <div class="type-card">
+          <h3>Text Font - Body</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
+            <strong>neue-haas-grotesk-text</strong><br />
+            Used for reading content
+          </p>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Body1</span>
+              <span class="type-specs">1.25rem (20px) / 400 / 1.6</span>
+            </div>
+            <div class="sample-body1">
+              Primary body text for comfortable reading. Used in frontmatter
+              body text blocks and descriptive content throughout the
+              application.
+            </div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="body1"</code
+            >
+            <div class="type-usage">Text blocks in the frontmatter panel</div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">storyBody</span>
+              <span class="type-specs">1.125rem (18px) / 400 / 1.8</span>
+            </div>
+            <div class="sample-story-body">
+              Narrative text with generous line spacing for scrollytelling. The
+              taller line height helps readability during scrolling experiences.
+            </div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="storyBody"</code
+            >
+            <div class="type-usage">
+              Scrollytelling narrative panels (Learn section)
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Body2</span>
+              <span class="type-specs">1.1rem (17.6px) / 400 / 1.6</span>
+            </div>
+            <div class="sample-body2">
+              Secondary body text for smaller reading contexts and supporting
+              information.
+            </div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="body2"</code
+            >
+            <div class="type-usage">Tab descriptions, secondary content</div>
+          </div>
+        </div>
+
+        <!-- Display Font - Navigation -->
+        <div class="type-card">
+          <h3>Display Font - Navigation</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
+            <strong>neue-haas-grotesk-display</strong><br />
+            Used for navigation and tabs
+          </p>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Header Nav</span>
+              <span class="type-specs"
+                >1.1rem (17.6px) / 600 / 1.4 / 0.01em</span
+              >
+            </div>
+            <div class="sample-nav">About COEQWAL</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >theme.typography.nav</code
+            >
+            <div class="type-usage">Header navigation links</div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Tabs (Expanded)</span>
+              <span class="type-specs">1.6rem (25.6px) / 600 / 1.1</span>
+            </div>
+            <div class="sample-tabs-expanded">Learn</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >theme.typography.tabLabel</code
+            >
+            <div class="type-usage">Tab buttons when visible/prominent</div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Tabs (Docked)</span>
+              <span class="type-specs">1.3rem (20.8px) * / 600 / 1.1</span>
+            </div>
+            <div class="sample-tabs-docked">Learn</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >theme.typography.tabLabelDocked</code
+            >
+            <div class="type-usage">Tab buttons when docked with header</div>
+            <p style="font-size: 0.75rem; color: #999; margin-top: 8px">
+              * Docked size is 1.3rem (not 1.1rem) to optically compensate for
+              dark-on-light appearance
+            </p>
+          </div>
+        </div>
+
+        <!-- Text Font - UI -->
+        <div class="type-card">
+          <h3>Text Font - UI Elements</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
+            <strong>neue-haas-grotesk-text</strong><br />
+            Used for interface elements
+          </p>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Subtitle1</span>
+              <span class="type-specs">1.125rem (18px) / 500 / 1.4</span>
+            </div>
+            <div class="sample-subtitle1">Emphasized UI Label</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="subtitle1"</code
+            >
+            <div class="type-usage">
+              Section titles in Explore vizzes, tables
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Subtitle2</span>
+              <span class="type-specs">1rem (16px) / 500 / 1.6</span>
+            </div>
+            <div class="sample-subtitle2">Sacramento River Basin</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="subtitle2"</code
+            >
+            <div class="type-usage">
+              Result names, selected items, emphasized labels
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Caption</span>
+              <span class="type-specs">1rem (16px) / 400 / 1.4</span>
+            </div>
+            <div class="sample-caption">
+              123 Main Street, Sacramento, CA 95814
+            </div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="caption"</code
+            >
+            <div class="type-usage">
+              Secondary text, place names, descriptions
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">Overline</span>
+              <span class="type-specs"
+                >0.75rem (12px) / 500 / 1.4 / uppercase</span
+              >
+            </div>
+            <div class="sample-overline">Selected Location</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="overline"</code
+            >
+            <div class="type-usage">Section labels, category headers</div>
+          </div>
+        </div>
       </div>
-      
-      <!-- Text Font - Body -->
-      <div class="type-card">
-        <h3>Text Font - Body</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
-          <strong>neue-haas-grotesk-text</strong><br>
-          Used for reading content
-        </p>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Body1</span>
-            <span class="type-specs">1.25rem (20px) / 400 / 1.6</span>
-          </div>
-          <div class="sample-body1">Primary body text for comfortable reading. Used in frontmatter body text blocks and descriptive content throughout the application.</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="body1"</code>
-          <div class="type-usage">Text blocks in the frontmatter panel</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">storyBody</span>
-            <span class="type-specs">1.125rem (18px) / 400 / 1.8</span>
-          </div>
-          <div class="sample-story-body">Narrative text with generous line spacing for scrollytelling. The taller line height helps readability during scrolling experiences.</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="storyBody"</code>
-          <div class="type-usage">Scrollytelling narrative panels (Learn section)</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Body2</span>
-            <span class="type-specs">1.1rem (17.6px) / 400 / 1.6</span>
-          </div>
-          <div class="sample-body2">Secondary body text for smaller reading contexts and supporting information.</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="body2"</code>
-          <div class="type-usage">Tab descriptions, secondary content</div>
-        </div>
-      </div>
-      
-      <!-- Display Font - Navigation -->
-      <div class="type-card">
-        <h3>Display Font - Navigation</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
-          <strong>neue-haas-grotesk-display</strong><br>
-          Used for navigation and tabs
-        </p>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Header Nav</span>
-            <span class="type-specs">1.1rem (17.6px) / 600 / 1.4 / 0.01em</span>
-          </div>
-          <div class="sample-nav">About COEQWAL</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.nav</code>
-          <div class="type-usage">Header navigation links</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Tabs (Expanded)</span>
-            <span class="type-specs">1.6rem (25.6px) / 600 / 1.1</span>
-          </div>
-          <div class="sample-tabs-expanded">Learn</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.tabLabel</code>
-          <div class="type-usage">Tab buttons when visible/prominent</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Tabs (Docked)</span>
-            <span class="type-specs">1.3rem (20.8px) * / 600 / 1.1</span>
-          </div>
-          <div class="sample-tabs-docked">Learn</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">theme.typography.tabLabelDocked</code>
-          <div class="type-usage">Tab buttons when docked with header</div>
-          <p style="font-size: 0.75rem; color: #999; margin-top: 8px;">* Docked size is 1.3rem (not 1.1rem) to optically compensate for dark-on-light appearance</p>
-        </div>
-      </div>
-      
-      <!-- Text Font - UI -->
-      <div class="type-card">
-        <h3>Text Font - UI Elements</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
-          <strong>neue-haas-grotesk-text</strong><br>
-          Used for interface elements
-        </p>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Subtitle1</span>
-            <span class="type-specs">1.125rem (18px) / 500 / 1.4</span>
-          </div>
-          <div class="sample-subtitle1">Emphasized UI Label</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="subtitle1"</code>
-          <div class="type-usage">Section titles in Explore vizzes, tables</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Subtitle2</span>
-            <span class="type-specs">1rem (16px) / 500 / 1.6</span>
-          </div>
-          <div class="sample-subtitle2">Sacramento River Basin</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="subtitle2"</code>
-          <div class="type-usage">Result names, selected items, emphasized labels</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Caption</span>
-            <span class="type-specs">1rem (16px) / 400 / 1.4</span>
-          </div>
-          <div class="sample-caption">123 Main Street, Sacramento, CA 95814</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="caption"</code>
-          <div class="type-usage">Secondary text, place names, descriptions</div>
-        </div>
-        
-        <div class="type-sample">
-          <div class="type-label">
-            <span class="type-name">Overline</span>
-            <span class="type-specs">0.75rem (12px) / 500 / 1.4 / uppercase</span>
-          </div>
-          <div class="sample-overline">Selected Location</div>
-          <code style="font-size: 0.75rem; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; color: #666;">variant="overline"</code>
-          <div class="type-usage">Section labels, category headers</div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Typography Scale Reference -->
-    <!-- <div class="type-card-full" style="margin-top: 40px;">
+
+      <!-- Typography Scale Reference -->
+      <!-- <div class="type-card-full" style="margin-top: 40px;">
       <h3>Typography Scale Reference</h3>
       <div class="type-row">
         <div>
@@ -878,159 +1102,274 @@
         </div>
       </div>
     </div> -->
-  </div>
-  
-  <!-- =====================
+    </div>
+
+    <!-- =====================
        LAYOUT SECTION
        ===================== -->
-  <div class="section">
-    <h2 class="section-title">Layout & Spacing</h2>
-    
-    <div class="type-grid">
-      <!-- Panel Spacing -->
-      <div class="type-card" style="grid-column: span 2;">
-        <h3>Full-Viewport Panel Spacing</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px;">
-          These are CSS <strong>padding</strong> values applied to the panel container. 
-          Defined in the theme at <code>theme.space.panel</code>.
-          The <code>&lt;Panel&gt;</code> component in <code>@repo/ui</code> automatically applies this spacing.
-        </p>
-        
-        <!-- Spacing Tokens Table -->
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse; margin-bottom: 16px;">
-          <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5;">
-            <th style="padding: 12px 8px; text-align: left;">Position</th>
-            <th style="padding: 12px 8px; text-align: left;">Theme Token</th>
-            <th style="padding: 12px 8px; text-align: left;">Value</th>
-            <th style="padding: 12px 8px; text-align: left;">Why</th>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><strong>Top</strong><br><span style="font-size: 0.75rem; color: #888;">paddingTop</span></td>
-            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.topOffset</code></td>
-            <td style="padding: 10px 8px;">clamp(140px, 22vh, 240px)</td>
-            <td style="padding: 10px 8px; color: #666;">Clears the fixed header (70px) + breathing room for headline</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><strong>Bottom</strong><br><span style="font-size: 0.75rem; color: #888;">paddingBottom</span></td>
-            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.bottomOffset</code></td>
-            <td style="padding: 10px 8px;">clamp(100px, 16vh, 180px)</td>
-            <td style="padding: 10px 8px; color: #666;">Visual breathing room</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 8px;"><strong>Left / Right</strong><br><span style="font-size: 0.75rem; color: #888;">paddingLeft, paddingRight</span></td>
-            <td style="padding: 10px 8px;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">theme.space.panel.padding</code></td>
-            <td style="padding: 10px 8px;">clamp(32px, 6vw, 80px)</td>
-            <td style="padding: 10px 8px; color: #666;">Edge gutters, scales with viewport width</td>
-          </tr>
-        </table>
-        
-        <p style="font-size: 0.8rem; color: #888; margin-top: 16px;">
-          <strong>clamp() syntax:</strong> <code>clamp(min, preferred, max)</code> — scales responsively without media queries. The preferred value (vw/vh) adjusts with viewport, bounded by min and max.
-        </p>
-      </div>
-      
-      <!-- Global Layout -->
-      <div class="type-card">
-        <h3>Global Layout Constants</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px;">
-          Fixed values accessed via <code>theme.layout</code>
-        </p>
-        
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 12px 8px 12px 0;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">headerHeight</code></td>
-            <td style="padding: 12px 8px;">70px</td>
-            <td style="padding: 12px 0 12px 8px; color: #888;">Fixed header height</td>
-          </tr>
-          <tr>
-            <td style="padding: 12px 8px 12px 0;"><code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">maxWidth.lg</code></td>
-            <td style="padding: 12px 8px;">600px</td>
-            <td style="padding: 12px 0 12px 8px; color: #888;">Text blocks (needs work/agreement, needs to be made responsive)</td>
-          </tr>
-        </table>
-      </div>
-      
-      <!-- Content Constraints -->
-      <div class="type-card">
+    <div class="section">
+      <h2 class="section-title">Layout & Spacing</h2>
+
+      <div class="type-grid">
+        <!-- Panel Spacing -->
+        <div class="type-card" style="grid-column: span 2">
+          <h3>Full-Viewport Panel Spacing</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 24px">
+            These are CSS <strong>padding</strong> values applied to the panel
+            container. Defined in the theme at <code>theme.space.panel</code>.
+            The <code>&lt;Panel&gt;</code> component in
+            <code>@repo/ui</code> automatically applies this spacing.
+          </p>
+
+          <!-- Spacing Tokens Table -->
+          <table
+            style="
+              width: 100%;
+              font-size: 0.85rem;
+              border-collapse: collapse;
+              margin-bottom: 16px;
+            "
+          >
+            <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5">
+              <th style="padding: 12px 8px; text-align: left">Position</th>
+              <th style="padding: 12px 8px; text-align: left">Theme Token</th>
+              <th style="padding: 12px 8px; text-align: left">Value</th>
+              <th style="padding: 12px 8px; text-align: left">Why</th>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px">
+                <strong>Top</strong><br /><span
+                  style="font-size: 0.75rem; color: #888"
+                  >paddingTop</span
+                >
+              </td>
+              <td style="padding: 10px 8px">
+                <code
+                  style="
+                    background: #f0f0f0;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                  "
+                  >theme.space.panel.topOffset</code
+                >
+              </td>
+              <td style="padding: 10px 8px">clamp(140px, 22vh, 240px)</td>
+              <td style="padding: 10px 8px; color: #666">
+                Clears the fixed header (70px) + breathing room for headline
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px">
+                <strong>Bottom</strong><br /><span
+                  style="font-size: 0.75rem; color: #888"
+                  >paddingBottom</span
+                >
+              </td>
+              <td style="padding: 10px 8px">
+                <code
+                  style="
+                    background: #f0f0f0;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                  "
+                  >theme.space.panel.bottomOffset</code
+                >
+              </td>
+              <td style="padding: 10px 8px">clamp(100px, 16vh, 180px)</td>
+              <td style="padding: 10px 8px; color: #666">
+                Visual breathing room
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 8px">
+                <strong>Left / Right</strong><br /><span
+                  style="font-size: 0.75rem; color: #888"
+                  >paddingLeft, paddingRight</span
+                >
+              </td>
+              <td style="padding: 10px 8px">
+                <code
+                  style="
+                    background: #f0f0f0;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                  "
+                  >theme.space.panel.padding</code
+                >
+              </td>
+              <td style="padding: 10px 8px">clamp(32px, 6vw, 80px)</td>
+              <td style="padding: 10px 8px; color: #666">
+                Edge gutters, scales with viewport width
+              </td>
+            </tr>
+          </table>
+
+          <p style="font-size: 0.8rem; color: #888; margin-top: 16px">
+            <strong>clamp() syntax:</strong>
+            <code>clamp(min, preferred, max)</code> — scales responsively
+            without media queries. The preferred value (vw/vh) adjusts with
+            viewport, bounded by min and max.
+          </p>
+        </div>
+
+        <!-- Global Layout -->
+        <div class="type-card">
+          <h3>Global Layout Constants</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px">
+            Fixed values accessed via <code>theme.layout</code>
+          </p>
+
+          <table
+            style="width: 100%; font-size: 0.85rem; border-collapse: collapse"
+          >
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 12px 8px 12px 0">
+                <code
+                  style="
+                    background: #f0f0f0;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                  "
+                  >headerHeight</code
+                >
+              </td>
+              <td style="padding: 12px 8px">70px</td>
+              <td style="padding: 12px 0 12px 8px; color: #888">
+                Fixed header height
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 8px 12px 0">
+                <code
+                  style="
+                    background: #f0f0f0;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                  "
+                  >maxWidth.lg</code
+                >
+              </td>
+              <td style="padding: 12px 8px">600px</td>
+              <td style="padding: 12px 0 12px 8px; color: #888">
+                Text blocks (needs work/agreement, needs to be made responsive)
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Content Constraints -->
+        <div class="type-card"></div>
       </div>
     </div>
-  </div>
-  
-  <!-- =====================
+
+    <!-- =====================
        COMPONENTS SECTION
        ===================== -->
-  <div class="section">
-    <h2 class="section-title">Components</h2>
-    
-    <div class="type-grid">
-      <!-- Panel Component -->
-      <div class="type-card" style="grid-column: span 2;">
-        <h3>Panel</h3>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px;">
-          Base full-viewport panel with standard spacing. Provides consistent outer spacing from theme tokens.
-        </p>
-        
-        <p style="font-size: 0.85rem; margin-bottom: 16px;">
-          <strong>Import:</strong> <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">import { Panel } from "@repo/ui"</code>
-        </p>
-        
-        <p style="font-size: 0.85rem; margin-bottom: 16px;">
-          <strong>Location:</strong> <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">packages/ui/src/components/panels/Panel.tsx</code>
-        </p>
-        
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse; margin-bottom: 16px;">
-          <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5;">
-            <th style="padding: 12px 8px; text-align: left;">Prop</th>
-            <th style="padding: 12px 8px; text-align: left;">Type</th>
-            <th style="padding: 12px 8px; text-align: left;">Default</th>
-            <th style="padding: 12px 8px; text-align: left;">Description</th>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>backgroundColor</code></td>
-            <td style="padding: 10px 8px;">string</td>
-            <td style="padding: 10px 8px;">"transparent"</td>
-            <td style="padding: 10px 8px;">Background color</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>backgroundImage</code></td>
-            <td style="padding: 10px 8px;">string</td>
-            <td style="padding: 10px 8px;">-</td>
-            <td style="padding: 10px 8px;">Optional image URL (enables grid stacking)</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>fullHeight</code></td>
-            <td style="padding: 10px 8px;">boolean</td>
-            <td style="padding: 10px 8px;">true</td>
-            <td style="padding: 10px 8px;">Use 100vh height</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>includePadding</code></td>
-            <td style="padding: 10px 8px;">boolean</td>
-            <td style="padding: 10px 8px;">true</td>
-            <td style="padding: 10px 8px;">Apply standard panel spacing</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>id</code></td>
-            <td style="padding: 10px 8px;">string</td>
-            <td style="padding: 10px 8px;">-</td>
-            <td style="padding: 10px 8px;">Panel ID for navigation</td>
-          </tr>
-          <tr style="border-bottom: 1px solid #eee;">
-            <td style="padding: 10px 8px;"><code>ariaLabel</code></td>
-            <td style="padding: 10px 8px;">string</td>
-            <td style="padding: 10px 8px;">-</td>
-            <td style="padding: 10px 8px;">Accessible label for the section</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 8px;"><code>sx</code></td>
-            <td style="padding: 10px 8px;">SxProps</td>
-            <td style="padding: 10px 8px;">-</td>
-            <td style="padding: 10px 8px;">Additional MUI sx props</td>
-          </tr>
-        </table>
-        
-        <p style="font-size: 0.85rem; color: #333; margin-bottom: 8px;"><strong>Usage Example:</strong></p>
-        <pre style="font-family: monospace; font-size: 0.8rem; background: #f8f8f8; padding: 16px; border-radius: 8px; overflow-x: auto; line-height: 1.5;">&lt;Panel
+    <div class="section">
+      <h2 class="section-title">Components</h2>
+
+      <div class="type-grid">
+        <!-- Panel Component -->
+        <div class="type-card" style="grid-column: span 2">
+          <h3>Panel</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px">
+            Base full-viewport panel with standard spacing. Provides consistent
+            outer spacing from theme tokens.
+          </p>
+
+          <p style="font-size: 0.85rem; margin-bottom: 16px">
+            <strong>Import:</strong>
+            <code
+              style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px"
+              >import { Panel } from "@repo/ui"</code
+            >
+          </p>
+
+          <p style="font-size: 0.85rem; margin-bottom: 16px">
+            <strong>Location:</strong>
+            <code
+              style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px"
+              >packages/ui/src/components/panels/Panel.tsx</code
+            >
+          </p>
+
+          <table
+            style="
+              width: 100%;
+              font-size: 0.85rem;
+              border-collapse: collapse;
+              margin-bottom: 16px;
+            "
+          >
+            <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5">
+              <th style="padding: 12px 8px; text-align: left">Prop</th>
+              <th style="padding: 12px 8px; text-align: left">Type</th>
+              <th style="padding: 12px 8px; text-align: left">Default</th>
+              <th style="padding: 12px 8px; text-align: left">Description</th>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>backgroundColor</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">"transparent"</td>
+              <td style="padding: 10px 8px">Background color</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>backgroundImage</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">-</td>
+              <td style="padding: 10px 8px">
+                Optional image URL (enables grid stacking)
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>fullHeight</code></td>
+              <td style="padding: 10px 8px">boolean</td>
+              <td style="padding: 10px 8px">true</td>
+              <td style="padding: 10px 8px">Use 100vh height</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>includePadding</code></td>
+              <td style="padding: 10px 8px">boolean</td>
+              <td style="padding: 10px 8px">true</td>
+              <td style="padding: 10px 8px">Apply standard panel spacing</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>id</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">-</td>
+              <td style="padding: 10px 8px">Panel ID for navigation</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>ariaLabel</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">-</td>
+              <td style="padding: 10px 8px">
+                Accessible label for the section
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 8px"><code>sx</code></td>
+              <td style="padding: 10px 8px">SxProps</td>
+              <td style="padding: 10px 8px">-</td>
+              <td style="padding: 10px 8px">Additional MUI sx props</td>
+            </tr>
+          </table>
+
+          <p style="font-size: 0.85rem; color: #333; margin-bottom: 8px">
+            <strong>Usage Example:</strong>
+          </p>
+          <pre
+            style="
+              font-family: monospace;
+              font-size: 0.8rem;
+              background: #f8f8f8;
+              padding: 16px;
+              border-radius: 8px;
+              overflow-x: auto;
+              line-height: 1.5;
+            "
+          >
+&lt;Panel
   id="intro"
   ariaLabel="Introduction"
   backgroundColor="#3D7DB5"
@@ -1042,62 +1381,65 @@
 &gt;
   &lt;Headline /&gt;
   &lt;Body /&gt;
-&lt;/Panel&gt;</pre>
-        
-        <p style="font-size: 0.8rem; color: #888; margin-top: 16px;">
-          <strong>Features:</strong> Semantic &lt;section&gt; element, WCAG compliant, supports background images via CSS grid stacking.
-        </p>
+&lt;/Panel&gt;</pre
+          >
+
+          <p style="font-size: 0.8rem; color: #888; margin-top: 16px">
+            <strong>Features:</strong> Semantic &lt;section&gt; element, WCAG
+            compliant, supports background images via CSS grid stacking.
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-  
-  <!-- =====================
+
+    <!-- =====================
        COLOR SECTION
        ===================== -->
-  <div class="section">
-    <h2 class="section-title">Color Palette</h2>
-    
-    <div class="color-grid">
-      <!-- Panel Backgrounds -->
-      <div class="color-card">
-        <h3>Panel Backgrounds</h3>
-        
-        <div class="swatch dark" style="background: #3D7DB5;">
-          <span class="swatch-label">Panel 1</span>
-          <span>#3D7DB5</span>
+    <div class="section">
+      <h2 class="section-title">Color Palette</h2>
+
+      <div class="color-grid">
+        <!-- Panel Backgrounds -->
+        <div class="color-card">
+          <h3>Panel Backgrounds</h3>
+
+          <div class="swatch dark" style="background: #3d7db5">
+            <span class="swatch-label">Panel 1</span>
+            <span>#3D7DB5</span>
+          </div>
+
+          <div class="swatch dark" style="background: #193d6b">
+            <span class="swatch-label">Panel 3</span>
+            <span>#193D6B</span>
+          </div>
         </div>
-        
-        <div class="swatch dark" style="background: #193D6B;">
-          <span class="swatch-label">Panel 3</span>
-          <span>#193D6B</span>
-        </div>
-      </div>
-      
-      <!-- Tab Backgrounds -->
-      <div class="color-card">
-        <h3>Tab Backgrounds</h3>
-        
-        <div class="swatch light" style="background: #D5EAF5;">
-          <span class="swatch-label">Learn</span>
-          <span>#D5EAF5</span>
-        </div>
-        
-        <div class="swatch light" style="background: #C2D8EB;">
-          <span class="swatch-label">Explore</span>
-          <span>#C2D8EB</span>
-        </div>
-        
-        <div class="swatch light" style="background: #94B8DA;">
-          <span class="swatch-label">Share</span>
-          <span>#94B8DA</span>
+
+        <!-- Tab Backgrounds -->
+        <div class="color-card">
+          <h3>Tab Backgrounds</h3>
+
+          <div class="swatch light" style="background: #d5eaf5">
+            <span class="swatch-label">Learn</span>
+            <span>#D5EAF5</span>
+          </div>
+
+          <div class="swatch light" style="background: #c2d8eb">
+            <span class="swatch-label">Explore</span>
+            <span>#C2D8EB</span>
+          </div>
+
+          <div class="swatch light" style="background: #94b8da">
+            <span class="swatch-label">Share</span>
+            <span>#94B8DA</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  
-  <footer>
-    <strong>COEQWAL Website Design System</strong> • Last updated January 9, 2026<br>
-    <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->
-  </footer>
-</body>
+
+    <footer>
+      <strong>COEQWAL Website Design System</strong> • Last updated January 9,
+      2026<br />
+      <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->
+    </footer>
+  </body>
 </html>
