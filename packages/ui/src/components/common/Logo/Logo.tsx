@@ -17,7 +17,9 @@ interface LogoProps {
  * The logo is bundled with the ui package.
  *
  * WCAG 2.0 AA Compliance:
- * - WCAG 1.1.1: Alt text provided via aria-label on SVG
+ * - WCAG 1.1.1: SVG is decorative (aria-hidden) by default.
+ *   The parent element (button/link) should provide the accessible name.
+ *   Example: <button aria-label="COEQWAL home"><Logo /></button>
  */
 export function Logo({ width = 150, variant = "color", className }: LogoProps) {
   // Drop shadow style for light variant to improve visibility

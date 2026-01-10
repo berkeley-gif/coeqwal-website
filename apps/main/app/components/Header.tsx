@@ -7,8 +7,12 @@ import { useTabs } from "../context/Tabs"
  * Main application header
  *
  * Wraps BaseHeader with app-specific behavior:
- * - Dynamic background color based on scroll position
+ * - Dynamic background color based on scroll position (tabs area detection)
  * - Custom smooth scroll to top for logo click
+ *
+ * WCAG 2.0 AA Compliance:
+ * - Inherits all accessibility features from BaseHeader
+ * - WCAG 2.3.3: Respects prefers-reduced-motion for scroll animation
  */
 export function Header() {
   const { isInTabsArea } = useTabs()
@@ -19,6 +23,17 @@ export function Header() {
   const handleLogoClick = () => {
     const start = window.scrollY
     if (start === 0) return // Already at top
+
+    // WCAG 2.3.3: Respect user's motion preferences
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches
+
+    if (prefersReducedMotion) {
+      // Instant scroll for users who prefer reduced motion
+      window.scrollTo(0, 0)
+      return
+    }
 
     const startTime = performance.now()
     const duration = 600 // ms

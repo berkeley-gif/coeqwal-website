@@ -7,11 +7,15 @@
  * Supports outline and text variants.
  *
  * WCAG 2.0 AA Compliance:
+ * - WCAG 1.4.1: Active state uses bold + background (not color alone)
+ * - WCAG 2.1.1: Full keyboard support (arrow keys, Enter, Escape)
+ * - WCAG 2.4.3: Focus returns to trigger button when menu closes
  * - WCAG 2.4.7: Focus-visible styles on button and menu items
- * - WCAG 4.1.2: aria-expanded, aria-haspopup for menu state
+ * - WCAG 2.4.8: aria-current="page" on active menu items
+ * - WCAG 4.1.2: aria-expanded, aria-haspopup, aria-controls for menu state
  */
 
-import React, { useState, useId } from "react"
+import React, { useState, useId, useRef } from "react"
 import { Button, Menu, MenuItem } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
@@ -44,12 +48,17 @@ export function NavDropdown({
   const isOpen = Boolean(anchorEl)
   const menuId = useId()
 
+  // WCAG 2.4.3: Ref for focus return when menu closes
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
     setAnchorEl(null)
+    // WCAG 2.4.3: Return focus to trigger button when menu closes
+    setTimeout(() => buttonRef.current?.focus(), 0)
   }
 
   const handleOptionClick = (option: NavDropdownOption) => {
@@ -69,6 +78,7 @@ export function NavDropdown({
   return (
     <>
       <Button
+        ref={buttonRef}
         variant={variant}
         disableRipple={disableRipple}
         onClick={handleClick}
