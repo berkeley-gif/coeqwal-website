@@ -37,7 +37,9 @@
  * - WCAG 2.1.1: All interactive elements keyboard accessible
  * - WCAG 2.1.2: No keyboard traps (MUI Drawer handles focus trap correctly)
  * - WCAG 2.3.3: Respects prefers-reduced-motion for animations
- * - WCAG 2.4.1: Skip link for keyboard users to bypass navigation
+ * - WCAG 2.4.1: Skip link is now a separate <SkipLink /> component that must be
+ *               placed FIRST in the page, before any other content including this header.
+ *               See: packages/ui/src/components/navigation/SkipLink.tsx
  * - WCAG 2.4.3: Focus returns to trigger when drawer/dropdown closes
  * - WCAG 2.4.6: Descriptive labels on all interactive elements
  * - WCAG 2.4.7: Focus-visible styles on all interactive elements
@@ -354,44 +356,10 @@ export function BaseHeader({
   return (
     <>
       {/* ----------------------------------------
-       * ACCESSIBILITY: Skip link
-       * WCAG 2.4.1 - DO NOT REMOVE
-       * Allows keyboard users to bypass navigation
-       * ---------------------------------------- */}
-      <Box
-        component="a"
-        href="#main-content"
-        sx={{
-          position: "absolute",
-          left: "-9999px",
-          top: "auto",
-          width: "1px",
-          height: "1px",
-          overflow: "hidden",
-          zIndex: resolvedZIndex + 1,
-          "&:focus": {
-            position: "fixed",
-            top: 8,
-            left: 8,
-            width: "auto",
-            height: "auto",
-            padding: "12px 24px",
-            backgroundColor: theme.palette.common.white,
-            color: theme.palette.common.black,
-            fontWeight: 600,
-            borderRadius: theme.borderRadius.md,
-            boxShadow: theme.shadow.lg,
-            outline: "2px solid",
-            outlineColor: theme.palette.blue.bright,
-            textDecoration: "none",
-          },
-        }}
-      >
-        Skip to main content
-      </Box>
-
-      {/* ----------------------------------------
        * HEADER CONTAINER
+       * Note: Skip link (WCAG 2.4.1) is now a separate component <SkipLink />
+       * that should be placed FIRST in the page, before any other content.
+       * See: packages/ui/src/components/navigation/SkipLink.tsx
        * ---------------------------------------- */}
       <MotionAppBar
         position="fixed"

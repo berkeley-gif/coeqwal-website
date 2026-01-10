@@ -8,6 +8,7 @@ export type {
 } from "./navigation/NavDropdown"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { ScrollToButton } from "./navigation/ScrollToButton"
+export { SkipLink } from "./navigation/SkipLink"
 
 // Common components
 export { Logo, LogoColor, LogoLight } from "./common/Logo"
