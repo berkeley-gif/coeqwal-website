@@ -234,11 +234,10 @@
 
       .sample-overline {
         font-family: var(--font-text);
-        font-size: 0.75rem;
-        font-weight: 500;
+        font-size: 0.875rem;
+        font-weight: 600;
         line-height: 1.4;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
         color: var(--blue-bright);
       }
 
@@ -1007,10 +1006,10 @@
             <div class="type-label">
               <span class="type-name">Overline</span>
               <span class="type-specs"
-                >0.75rem (12px) / 500 / 1.4 / uppercase</span
+                >0.875rem (14px) / 600 / 1.4 / uppercase</span
               >
             </div>
-            <div class="sample-overline">Selected Location</div>
+            <div class="sample-overline">Menu</div>
             <code
               style="
                 font-size: 0.75rem;
@@ -1021,7 +1020,9 @@
               "
               >variant="overline"</code
             >
-            <div class="type-usage">Section labels, category headers</div>
+            <div class="type-usage">
+              Uppercase section labels (e.g., "MENU" in mobile nav drawer)
+            </div>
           </div>
         </div>
       </div>
@@ -1269,6 +1270,254 @@
       <h2 class="section-title">Components</h2>
 
       <div class="type-grid">
+        <!-- BaseHeader Component -->
+        <div class="type-card" style="grid-column: span 2">
+          <h3>BaseHeader</h3>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 16px">
+            Shared header component with navigation, branding, and responsive
+            behavior. Provides logo, navigation links, optional language
+            switcher, and scroll-based shrinking animation.
+          </p>
+
+          <p style="font-size: 0.85rem; margin-bottom: 16px">
+            <strong>Import:</strong>
+            <code
+              style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px"
+              >import { BaseHeader } from "@repo/ui"</code
+            >
+          </p>
+
+          <p style="font-size: 0.85rem; margin-bottom: 16px">
+            <strong>Location:</strong>
+            <code
+              style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px"
+              >packages/ui/src/components/navigation/BaseHeader.tsx</code
+            >
+          </p>
+
+          <!-- Behavior -->
+          <div
+            style="
+              background: #f8f8f8;
+              padding: 16px;
+              border-radius: 8px;
+              margin-bottom: 16px;
+            "
+          >
+            <p style="font-size: 0.85rem; margin-bottom: 8px">
+              <strong>Responsive:</strong>
+            </p>
+            <ul
+              style="
+                font-size: 0.85rem;
+                color: #666;
+                margin: 0 0 12px 0;
+                padding-left: 20px;
+              "
+            >
+              <li>
+                <strong>Desktop (≥750px):</strong> Horizontal nav links with
+                dropdown
+              </li>
+              <li>
+                <strong>Mobile (&lt;750px):</strong> Hamburger menu with drawer
+                from right
+              </li>
+            </ul>
+            <p style="font-size: 0.85rem; margin-bottom: 8px">
+              <strong>Scroll:</strong>
+            </p>
+            <ul
+              style="
+                font-size: 0.85rem;
+                color: #666;
+                margin: 0;
+                padding-left: 20px;
+              "
+            >
+              <li>
+                Header shrinks from 70px to 40px as user scrolls (configurable via <code>shrinkOnScroll</code>)
+              </li>
+              <li>
+                Optional background color transition after scroll threshold
+              </li>
+            </ul>
+          </div>
+
+          <!-- Props Table -->
+          <table
+            style="
+              width: 100%;
+              font-size: 0.85rem;
+              border-collapse: collapse;
+              margin-bottom: 16px;
+            "
+          >
+            <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5">
+              <th style="padding: 12px 8px; text-align: left">Prop</th>
+              <th style="padding: 12px 8px; text-align: left">Type</th>
+              <th style="padding: 12px 8px; text-align: left">Default</th>
+              <th style="padding: 12px 8px; text-align: left">Description</th>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>backgroundColor</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">"transparent"</td>
+              <td style="padding: 10px 8px">Header background color</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>textColor</code></td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">theme.palette.common.white</td>
+              <td style="padding: 10px 8px">Text/icon color</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>logoVariant</code></td>
+              <td style="padding: 10px 8px">"color" | "light"</td>
+              <td style="padding: 10px 8px">"light"</td>
+              <td style="padding: 10px 8px">Logo color variant</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px"><code>shrinkOnScroll</code></td>
+              <td style="padding: 10px 8px">boolean</td>
+              <td style="padding: 10px 8px">true</td>
+              <td style="padding: 10px 8px">Enable scroll-based shrinking</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px">
+                <code>showLanguageSwitcher</code>
+              </td>
+              <td style="padding: 10px 8px">boolean</td>
+              <td style="padding: 10px 8px">false</td>
+              <td style="padding: 10px 8px">Show EN/ES language toggle</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px">
+                <code>backgroundColorScrolled</code>
+              </td>
+              <td style="padding: 10px 8px">string</td>
+              <td style="padding: 10px 8px">-</td>
+              <td style="padding: 10px 8px">
+                Color after scrolling past threshold
+              </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee">
+              <td style="padding: 10px 8px">
+                <code>backgroundScrollThreshold</code>
+              </td>
+              <td style="padding: 10px 8px">number</td>
+              <td style="padding: 10px 8px">200</td>
+              <td style="padding: 10px 8px">Pixels to scroll before color change</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 8px"><code>onLogoClick</code></td>
+              <td style="padding: 10px 8px">() =&gt; void</td>
+              <td style="padding: 10px 8px">scroll to top</td>
+              <td style="padding: 10px 8px">Custom logo click handler</td>
+            </tr>
+          </table>
+
+          <!-- App-specific wrapper recommendation -->
+          <div
+            style="
+              background: #fff8e6;
+              border-left: 4px solid #ffc107;
+              padding: 16px;
+              border-radius: 0 8px 8px 0;
+              margin-bottom: 16px;
+            "
+          >
+            <p
+              style="
+                font-size: 0.85rem;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #856404;
+              "
+            >
+              💡 Recommended: App-specific Header wrapper
+            </p>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 12px">
+              Create an app-specific <code>Header.tsx</code> wrapper that imports
+              <code>BaseHeader</code> and adds custom behavior (e.g., dynamic
+              background based on scroll position, custom navigation). This keeps
+              the base component reusable while allowing app-specific
+              customization.
+            </p>
+            <p style="font-size: 0.8rem; color: #888">
+              <strong>Example location:</strong>
+              <code>apps/main/app/components/Header.tsx</code>
+            </p>
+          </div>
+
+          <!-- Usage Example -->
+          <p style="font-size: 0.85rem; color: #333; margin-bottom: 8px">
+            <strong>Basic Usage:</strong>
+          </p>
+          <pre
+            style="
+              font-family: monospace;
+              font-size: 0.8rem;
+              background: #f8f8f8;
+              padding: 16px;
+              border-radius: 8px;
+              overflow-x: auto;
+              line-height: 1.5;
+              margin-bottom: 16px;
+            "
+          >
+// Direct usage (simple apps)
+&lt;BaseHeader showLanguageSwitcher /&gt;
+
+// With scroll-based background change
+&lt;BaseHeader
+  backgroundColor="transparent"
+  backgroundColorScrolled="rgba(42, 82, 135, 0.75)"
+  backgroundScrollThreshold={200}
+/&gt;</pre
+          >
+
+          <p style="font-size: 0.85rem; color: #333; margin-bottom: 8px">
+            <strong>App-specific wrapper example:</strong>
+          </p>
+          <pre
+            style="
+              font-family: monospace;
+              font-size: 0.8rem;
+              background: #f8f8f8;
+              padding: 16px;
+              border-radius: 8px;
+              overflow-x: auto;
+              line-height: 1.5;
+            "
+          >
+// apps/main/app/components/Header.tsx
+import { BaseHeader } from "@repo/ui"
+import { useTabs } from "../context/Tabs"
+
+export function Header() {
+  const { isInTabsArea } = useTabs()
+
+  return (
+    &lt;BaseHeader
+      backgroundColor={
+        isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"
+      }
+      onLogoClick={() =&gt; {
+        // Custom smooth scroll logic
+      }}
+    /&gt;
+  )
+}</pre
+          >
+
+          <p style="font-size: 0.8rem; color: #888; margin-top: 16px">
+            <strong>WCAG 2.0 AA:</strong> Skip link, keyboard navigation, focus
+            management, 44px touch targets, prefers-reduced-motion support,
+            aria-expanded/haspopup/controls on menus.
+          </p>
+        </div>
+
         <!-- Panel Component -->
         <div class="type-card" style="grid-column: span 2">
           <h3>Panel</h3>
@@ -1437,8 +1686,8 @@
     </div>
 
     <footer>
-      <strong>COEQWAL Website Design System</strong> • Last updated January 9,
-      2026<br />
+      <strong>COEQWAL Website Design System</strong> • Last updated December 28,
+      2025<br />
       <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->
     </footer>
   </body>
