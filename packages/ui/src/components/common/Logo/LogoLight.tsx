@@ -8,6 +8,10 @@ interface LogoLightProps {
 /**
  * COEQWAL Light Logo - Inline SVG
  * Drop shadow applied by parent Logo component
+ *
+ * WCAG 1.1.1: SVG is decorative by default (aria-hidden).
+ * When used inside a labeled button/link, the parent provides the accessible name.
+ * For standalone use, wrap in an element with appropriate aria-label.
  */
 export function LogoLight({ width = 150, className }: LogoLightProps) {
   return (
@@ -16,8 +20,9 @@ export function LogoLight({ width = 150, className }: LogoLightProps) {
       viewBox="0 0 164.1 32.1"
       width={width}
       className={className}
-      aria-label="COEQWAL"
-      role="img"
+      // Decorative when inside a labeled button; standalone use should override
+      aria-hidden="true"
+      focusable="false"
     >
       <path
         fill="#fff"

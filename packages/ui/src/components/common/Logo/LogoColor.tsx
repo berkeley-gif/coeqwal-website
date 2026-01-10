@@ -7,6 +7,10 @@ interface LogoColorProps {
 
 /**
  * COEQWAL Color Logo - Inline SVG
+ *
+ * WCAG 1.1.1: SVG is decorative by default (aria-hidden).
+ * When used inside a labeled button/link, the parent provides the accessible name.
+ * For standalone use, wrap in an element with appropriate aria-label.
  */
 export function LogoColor({ width = 150, className }: LogoColorProps) {
   return (
@@ -15,8 +19,9 @@ export function LogoColor({ width = 150, className }: LogoColorProps) {
       viewBox="0 0 164.1 32.1"
       width={width}
       className={className}
-      aria-label="COEQWAL"
-      role="img"
+      // Decorative when inside a labeled button; standalone use should wrap with aria-label
+      aria-hidden="true"
+      focusable="false"
     >
       <path
         fill="#135773"
