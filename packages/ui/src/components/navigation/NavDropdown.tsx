@@ -17,7 +17,6 @@
 
 import React, { useState, useId, useRef } from "react"
 import { Button, Menu, MenuItem } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 
 export interface NavDropdownOption {
@@ -43,7 +42,6 @@ export function NavDropdown({
   disableRipple = false,
   sx,
 }: NavDropdownProps) {
-  const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const isOpen = Boolean(anchorEl)
   const menuId = useId()
@@ -66,15 +64,6 @@ export function NavDropdown({
     handleClose()
   }
 
-  const buttonStyle = {
-    ...theme.typography.body2,
-    lineHeight: 1.1,
-    height: theme.spacing(4.5), // 36px to match other header buttons
-    minHeight: theme.spacing(4.5),
-    fontWeight: theme.typography.fontWeightMedium,
-    color: theme.palette.text.primary,
-  }
-
   return (
     <>
       <Button
@@ -83,13 +72,11 @@ export function NavDropdown({
         disableRipple={disableRipple}
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
-        // WCAG 4.1.2: ARIA attributes for menu state - DO NOT REMOVE
         aria-expanded={isOpen}
         aria-haspopup="menu"
         aria-controls={isOpen ? menuId : undefined}
         sx={{
-          ...buttonStyle,
-          // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
+          // WCAG 2.4.7: Focus visible indicator
           "&:focus-visible": {
             outline: "2px solid currentColor",
             outlineOffset: 2,
@@ -127,10 +114,10 @@ export function NavDropdown({
               color: theme.palette.blue.darkest,
               py: theme.space.component.md,
               px: theme.space.component.lg,
-              // Active state: background fill + heavier weight
+              // WCAG 1.4.1: Active state uses background + bold (not color alone)
               ...(option.active && {
                 backgroundColor: theme.palette.action.hover,
-                fontWeight: 700,
+                fontWeight: theme.typography.fontWeightBold,
               }),
               "&:hover": {
                 backgroundColor: theme.palette.action.hover,

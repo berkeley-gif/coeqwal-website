@@ -72,7 +72,12 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
-import { motion, useScroll, useTransform, useMotionValueEvent } from "@repo/motion"
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+} from "@repo/motion"
 
 /* ========================================
  * CONSTANTS & TYPES
@@ -93,7 +98,6 @@ type ActiveWaterStory = "flow" | "climate" | null
 
 // Translation types
 type HeaderTranslations = {
-  title: string
   buttons: {
     waterStories: string
     getData: string
@@ -109,6 +113,22 @@ type TranslationsMap = {
   en: HeaderTranslations
   es: HeaderTranslations
 }
+
+// Active state bullet indicator (WCAG 1.4.1: non-color indicator)
+const ActiveBullet = ({ color }: { color: string }) => (
+  <Box
+    component="span"
+    aria-hidden="true"
+    sx={{
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      backgroundColor: color,
+      mr: 1,
+      flexShrink: 0,
+    }}
+  />
+)
 
 /* ========================================
  * PROPS INTERFACE
@@ -138,7 +158,6 @@ export interface BaseHeaderProps {
 
 const translations: TranslationsMap = {
   en: {
-    title: "COEQWAL",
     buttons: {
       waterStories: "Water stories",
       getData: "Get data",
@@ -150,7 +169,6 @@ const translations: TranslationsMap = {
     },
   },
   es: {
-    title: "COEQWAL",
     buttons: {
       waterStories: "Historias del agua",
       getData: "Descargar datos",
@@ -224,7 +242,8 @@ export function BaseHeader({
    * ACTIVE WATER STORY DETECTION
    * Auto-detect which water story site we're on based on hostname
    * ======================================== */
-  const [activeWaterStory, setActiveWaterStory] = useState<ActiveWaterStory>(null)
+  const [activeWaterStory, setActiveWaterStory] =
+    useState<ActiveWaterStory>(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -445,7 +464,9 @@ export function BaseHeader({
                 borderRadius: theme.borderRadius.sm,
               },
             }}
-            aria-label={onLogoClick ? "COEQWAL home" : "COEQWAL - Scroll to top"}
+            aria-label={
+              onLogoClick ? "COEQWAL home" : "COEQWAL - Scroll to top"
+            }
           >
             <Logo variant={logoVariant} />
           </Box>
@@ -658,7 +679,9 @@ export function BaseHeader({
                     }}
                     selected={activeWaterStory === "flow"}
                     // WCAG 2.4.8: Current page indication
-                    aria-current={activeWaterStory === "flow" ? "page" : undefined}
+                    aria-current={
+                      activeWaterStory === "flow" ? "page" : undefined
+                    }
                     sx={{
                       pl: 4,
                       pr: 2,
@@ -675,20 +698,8 @@ export function BaseHeader({
                       }),
                     }}
                   >
-                    {/* WCAG 1.4.1: Visual bullet indicator for active state */}
                     {activeWaterStory === "flow" && (
-                      <Box
-                        component="span"
-                        aria-hidden="true"
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: theme.palette.text.primary,
-                          mr: 1,
-                          flexShrink: 0,
-                        }}
-                      />
+                      <ActiveBullet color={theme.palette.text.primary} />
                     )}
                     <ListItemText
                       primary={t.waterStories.flow}
@@ -730,20 +741,8 @@ export function BaseHeader({
                       },
                     }}
                   >
-                    {/* WCAG 1.4.1: Visual bullet indicator for active state */}
                     {activeWaterStory === "climate" && (
-                      <Box
-                        component="span"
-                        aria-hidden="true"
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: theme.palette.text.primary,
-                          mr: 1,
-                          flexShrink: 0,
-                        }}
-                      />
+                      <ActiveBullet color={theme.palette.text.primary} />
                     )}
                     <ListItemText
                       primary={t.waterStories.climate}
