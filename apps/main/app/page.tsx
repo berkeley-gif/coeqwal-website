@@ -8,6 +8,7 @@
 
 import { Suspense } from "react"
 import { Box } from "@repo/ui/mui"
+import { SkipLink } from "@repo/ui"
 import { MapProvider } from "@repo/map"
 import { Header } from "./components/Header"
 import { FloatingGlossary } from "./features/glossary"
@@ -21,15 +22,21 @@ import TabPanels from "./components/tabs/TabPanels"
 export default function Home() {
   return (
     <>
+      {/* WCAG 2.4.1: Skip link MUST be first focusable element in DOM */}
+      <SkipLink />
+
       {/* MapProvider at top level so both the map and overlays can access it */}
       <MapProvider>
-        {/* PersistentMapWrapper - renders once, stays mounted across tab switches */}
-        <Suspense fallback={null}>
-          <PersistentMapWrapper />
-        </Suspense>
-
         <TabsProvider>
+          {/* WCAG 2.4.3: Header MUST come before map in DOM for correct tab order
+              Tab order: Skip Link > Header nav > Map controls > Main content */}
           <Header />
+
+          {/* PersistentMapWrapper - renders once, stays mounted across tab switches */}
+          <Suspense fallback={null}>
+            <PersistentMapWrapper />
+          </Suspense>
+
           <FloatingGlossary />
           {/* WCAG 2.4.1: Skip link target - id required for header skip link */}
           <Box

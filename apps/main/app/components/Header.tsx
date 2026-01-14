@@ -1,16 +1,20 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { useTheme } from "@repo/ui/mui"
 import { BaseHeader } from "@repo/ui"
 import { useTabs } from "../context/Tabs"
 
 /**
- * Main application header with Next.js routing and theme integration
+ * Main application header
+ *
+ * Wraps BaseHeader with app-specific behavior:
+ * - Dynamic background color based on scroll position (tabs area detection)
+ * - Custom smooth scroll to top for logo click
+ *
+ * WCAG 2.0 AA Compliance:
+ * - Inherits all accessibility features from BaseHeader
+ * - WCAG 2.3.3: Respects prefers-reduced-motion for scroll animation
  */
 export function Header() {
-  const router = useRouter()
-  const theme = useTheme()
   const { isInTabsArea } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
@@ -19,6 +23,17 @@ export function Header() {
   const handleLogoClick = () => {
     const start = window.scrollY
     if (start === 0) return // Already at top
+
+    // WCAG 2.3.3: Respect user's motion preferences
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches
+
+    if (prefersReducedMotion) {
+      // Instant scroll for users who prefer reduced motion
+      window.scrollTo(0, 0)
+      return
+    }
 
     const startTime = performance.now()
     const duration = 600 // ms
@@ -40,28 +55,11 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const handleDataClick = () => {
-    router.push("/data")
-  }
-
-  const handleAboutClick = () => {
-    console.log("Navigate to about page")
-  }
-
   return (
     <BaseHeader
       onLogoClick={handleLogoClick}
-      onDataClick={handleDataClick}
-      onAboutClick={handleAboutClick}
+      // Dynamic background: solid when in tabs area, transparent otherwise
       backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
-      textColor={theme.palette.common.white}
-      zIndex={theme.zIndex.appBar}
-      borderRadius={theme.borderRadius.none}
-      boxShadow="none"
-      borderBottom="1px solid rgba(255, 255, 255, 0.8)"
-      hideOnScroll={false}
-      showLanguageSwitcher={false}
-      logoVariant="white"
     />
   )
 }
