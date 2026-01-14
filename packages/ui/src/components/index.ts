@@ -1,6 +1,6 @@
 // Navigation components
 export { BaseHeader } from "./navigation/BaseHeader"
-export type { BaseHeaderProps, SecondaryNavItem } from "./navigation/BaseHeader"
+export type { BaseHeaderProps } from "./navigation/BaseHeader"
 export { NavDropdown } from "./navigation/NavDropdown"
 export type {
   NavDropdownProps,
@@ -8,9 +8,10 @@ export type {
 } from "./navigation/NavDropdown"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { ScrollToButton } from "./navigation/ScrollToButton"
+export { SkipLink } from "./navigation/SkipLink"
 
 // Common components
-export { Logo } from "./common/Logo"
+export { Logo, LogoColor, LogoLight } from "./common/Logo"
 export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { LeadingMarkerText } from "./common/LeadingMarkerText"
 export { ArrowHead } from "./icons/ArrowHead"

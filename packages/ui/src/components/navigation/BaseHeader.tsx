@@ -3,44 +3,111 @@
 /**
  * BaseHeader - Shared header component with navigation and branding
  *
- * Provides a responsive header with logo, navigation links, language switcher,
- * and optional CTA button. Supports scroll-based shrinking animation.
+ * Provides a responsive header with logo, navigation links, optional language switcher,
+ * and scroll-based shrinking animation.
+ *
+ * Header dimensions (from theme.layout):
+ * - Expanded: 70px (theme.layout.headerHeight)
+ * - Collapsed: 40px (theme.layout.collapsedHeaderHeight)
+ * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
+ * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
+ *
+ * Responsive behavior:
+ * - Desktop (≥750px): Horizontal nav links
+ * - Mobile (<750px): Hamburger menu with drawer from right
+ *   - Language switcher (if enabled) stays visible, left of hamburger
+ *
+ * Background color modes:
+ * 1. Static: Pass `backgroundColor` for a fixed color
+ * 2. Scroll-based: Pass `backgroundColorScrolled` to transition from `backgroundColor`
+ *    to a new color after scrolling past `backgroundScrollThreshold` (default: 200px)
+ * 3. Custom: Main app uses its own scroll detection (isInTabsArea) and passes
+ *    dynamic `backgroundColor` directly
+ *
+ * Navigation links (left to right):
+ * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
+ * - Get data: links to dev.coeqwal.org/data
+ * - About COEQWAL: placeholder (no link yet)
+ * - Language switcher (optional)
  *
  * WCAG 2.0 AA Compliance:
- * - WCAG 1.3.1: Semantic nav element for navigation region
- * - WCAG 2.4.1: Skip link for keyboard users to bypass navigation
+ * - WCAG 1.3.1: Semantic nav element, heading structure, role="group" for nav sections
+ * - WCAG 1.4.1: Active states use bold text + bullet indicator (not color alone)
+ * - WCAG 1.4.3: Ensure 4.5:1 contrast ratio for text (verify with runtime colors)
+ * - WCAG 2.1.1: All interactive elements keyboard accessible
+ * - WCAG 2.1.2: No keyboard traps (MUI Drawer handles focus trap correctly)
+ * - WCAG 2.3.3: Respects prefers-reduced-motion for animations
+ * - WCAG 2.4.1: Skip link is now a separate <SkipLink /> component that must be
+ *               placed FIRST in the page, before any other content including this header.
+ *               See: packages/ui/src/components/navigation/SkipLink.tsx
+ * - WCAG 2.4.3: Focus returns to trigger when drawer/dropdown closes
+ * - WCAG 2.4.6: Descriptive labels on all interactive elements
  * - WCAG 2.4.7: Focus-visible styles on all interactive elements
- * - WCAG 4.1.2: Proper ARIA attributes on controls
+ * - WCAG 2.4.8: aria-current="page" on active navigation items
+ * - WCAG 2.5.5: Minimum 44x44px touch targets on mobile
+ * - WCAG 4.1.2: aria-expanded, aria-haspopup, aria-controls, aria-labelledby on menus
  */
 
-import { AppBar, Toolbar, Stack, Button, Box, useTheme } from "@mui/material"
-import { useMediaQuery } from "@mui/material"
+/* ========================================
+ * IMPORTS
+ * ======================================== */
+import { useEffect, useState, useRef } from "react"
+import {
+  AppBar,
+  Toolbar,
+  Stack,
+  Button,
+  Box,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material"
+import MenuIcon from "@mui/icons-material/Menu"
+import CloseIcon from "@mui/icons-material/Close"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import {
   motion,
-  useMotionValueEvent,
   useScroll,
   useTransform,
+  useMotionValueEvent,
 } from "@repo/motion"
-import { useRef, useState, useEffect } from "react"
 
+/* ========================================
+ * CONSTANTS & TYPES
+ * ======================================== */
 const MotionAppBar = motion.create(AppBar)
+
+// Mobile breakpoint - below this width, show hamburger menu
+const MOBILE_BREAKPOINT = 750
+
+// WCAG: Minimum touch target size (44x44px)
+const MIN_TOUCH_TARGET = 44
+
+// ID for drawer (used by aria-controls)
+const MOBILE_DRAWER_ID = "mobile-nav-drawer"
+
+// Active water story - determined by current URL hostname
+type ActiveWaterStory = "flow" | "climate" | null
 
 // Translation types
 type HeaderTranslations = {
-  title: string
   buttons: {
-    tools: string
+    waterStories: string
     getData: string
     about: string
   }
-  tools: {
-    scenarioExplorer: string
-    needsSearch: string
+  waterStories: {
+    flow: string
+    climate: string
   }
 }
 
@@ -49,119 +116,210 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
-export const HEADER_SHRUNK_H = 40
-export const HEADER_EXPANDED_H = 70
+// Active state bullet indicator (WCAG 1.4.1: non-color indicator)
+const ActiveBullet = ({ color }: { color: string }) => (
+  <Box
+    component="span"
+    aria-hidden="true"
+    sx={{
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      backgroundColor: color,
+      mr: 1,
+      flexShrink: 0,
+    }}
+  />
+)
 
-// Secondary nav option (optional)
-export interface SecondaryNavItem {
-  key: string
-  label: string
-  sectionId: string
-}
-
-// Main props interface
+/* ========================================
+ * PROPS INTERFACE
+ * ======================================== */
 export interface BaseHeaderProps {
-  // Navigation props
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean
-  secondaryNavItems?: SecondaryNavItem[]
-
-  // Action handlers
-  onLogoClick?: () => void
-  onDataClick?: () => void
-  onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
-  onAboutClick?: () => void
-
-  // Styling props (theme-agnostic)
+  /* --- Styling (theme tokens used as defaults) --- */
   backgroundColor?: string
   textColor?: string
-  zIndex?: number
-  borderRadius?: string | number
-  boxShadow?: string
-
-  // Layout props
-  variant?: "fixed" | "overlay" | "static" | "sticky"
-  hideOnScroll?: boolean
-  shrinkOnScroll?: boolean
-  showLanguageSwitcher?: boolean
-
-  // Border props
   borderBottom?: string
+  zIndex?: number
+  logoVariant?: "color" | "light"
 
-  // Logo variant
-  logoVariant?: "color" | "white"
+  /* --- Scroll-based background color (optional) --- */
+  // If set, header auto-switches from backgroundColor → backgroundColorScrolled
+  // after user scrolls past backgroundScrollThreshold pixels.
+  // Leave unset if you want to control background color yourself (like main app does).
+  backgroundColorScrolled?: string
+  backgroundScrollThreshold?: number // default: 200px
+
+  /* --- Optional features --- */
+  shrinkOnScroll?: boolean // default: true
+  showLanguageSwitcher?: boolean // default: false
+
+  /* --- Action handlers (optional overrides) --- */
+  onLogoClick?: () => void
 }
 
 const translations: TranslationsMap = {
   en: {
-    title: "COEQWAL",
     buttons: {
-      tools: "Tools",
+      waterStories: "Water stories",
       getData: "Get data",
       about: "About COEQWAL",
     },
-    tools: {
-      scenarioExplorer: "Scenario data explorer",
-      needsSearch: "Needs-based search",
+    waterStories: {
+      flow: "How water flows through California",
+      climate: "Climate change",
     },
   },
   es: {
-    title: "COEQWAL",
     buttons: {
-      tools: "Herramientas",
+      waterStories: "Historias del agua",
       getData: "Descargar datos",
       about: "Sobre COEQWAL",
     },
-    tools: {
-      scenarioExplorer: "Explorador de datos de escenarios",
-      needsSearch: "Búsqueda basada en necesidades",
+    waterStories: {
+      flow: "Cómo fluye el agua a través de California",
+      climate: "Cambio climático",
     },
   },
 }
 
-// This maps sections to their parent section in the UI
-// Used for arrow display when scrolling through combined sections
-const sectionParentMap: Record<string, string | undefined> = {
-  challenges: "managing-water", // Map challenges section to managing-water button
-  calsim: "managing-water",
+/* ========================================
+ * URL CONFIGURATION
+ * ======================================== */
+const URLS = {
+  flow: "https://flow.coeqwal.org",
+  climate: "https://climate.coeqwal.org",
+  data: "https://dev.coeqwal.org/data",
+  // TODO: Add about URL when available
+  // about: "https://coeqwal.org/about",
 }
 
 export function BaseHeader({
-  activeSection,
-  onSectionClick,
-  showSecondaryNav = false,
-  secondaryNavItems = [],
   onLogoClick,
-  onDataClick,
-  onToolsClick,
-  onAboutClick,
-  backgroundColor = "rgba(255, 255, 255, 0.95)",
-  textColor = "#000000",
-  zIndex = 1100,
-  borderRadius = 0,
-  boxShadow = "none",
-  variant = "fixed",
-  hideOnScroll = true,
+  backgroundColor = "transparent",
+  textColor, // Default set after theme is available
+  zIndex,
+  backgroundColorScrolled,
+  backgroundScrollThreshold = 200,
   shrinkOnScroll = true,
-  showLanguageSwitcher = true,
-  borderBottom,
-  logoVariant = "color",
+  showLanguageSwitcher = false,
+  borderBottom, // Default set after theme is available
+  logoVariant = "light",
 }: BaseHeaderProps) {
-  // Theme and responsive breakpoints
+  /* ========================================
+   * THEME & LAYOUT
+   * ======================================== */
   const theme = useTheme()
-  const isMobile = useMediaQuery("(max-width:600px)")
-  const isTablet = useMediaQuery("(max-width:900px)")
 
+  // Use theme tokens for defaults
+  const resolvedTextColor = textColor ?? theme.palette.common.white
+  const resolvedBorderBottom = borderBottom ?? theme.border.rule
+  const resolvedZIndex = zIndex ?? theme.zIndex.appBar
+
+  // Header dimensions from theme
+  const expandedHeight = theme.layout.headerHeight // 70px
+  const collapsedHeight = theme.layout.collapsedHeaderHeight // 40px
+  const shrinkStart = theme.layout.headerShrinkStart // 120px
+  const shrinkEnd = theme.layout.headerShrinkEnd // 240px
+
+  /* ========================================
+   * RESPONSIVE & MOTION PREFERENCES
+   * ======================================== */
+  const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+  // WCAG 2.3.3: Respect user's motion preferences
+  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // WCAG: Ref for focus return when drawer closes
+  const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
+
+  const handleMobileMenuOpen = () => setMobileMenuOpen(true)
+  const handleMobileMenuClose = () => {
+    setMobileMenuOpen(false)
+    // WCAG 2.4.3: Return focus to hamburger button when drawer closes
+    setTimeout(() => hamburgerButtonRef.current?.focus(), 0)
+  }
+
+  /* ========================================
+   * ACTIVE WATER STORY DETECTION
+   * Auto-detect which water story site we're on based on hostname
+   * ======================================== */
+  const [activeWaterStory, setActiveWaterStory] =
+    useState<ActiveWaterStory>(null)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const hostname = window.location.hostname
+
+    // Detect which water story site we're on (production only)
+    if (hostname.includes("flow.coeqwal")) {
+      setActiveWaterStory("flow")
+    } else if (hostname.includes("climate.coeqwal")) {
+      setActiveWaterStory("climate")
+    }
+    // Note: On localhost, no water story is active (dev environment)
+  }, [])
+
+  /* ========================================
+   * SCROLL EFFECTS
+   * - Shrink animation: header shrinks from 70px to 40px as user scrolls
+   * - Background color: optionally transitions to backgroundColorScrolled
+   * ======================================== */
+  const { scrollY } = useScroll()
+
+  // --- Background color on scroll ---
+  // Only active when backgroundColorScrolled prop is provided
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (backgroundColorScrolled) {
+      setIsScrolled(latest > backgroundScrollThreshold)
+    }
+  })
+
+  // Use scrolled color if we're past threshold, otherwise use base color
+  const effectiveBackgroundColor =
+    backgroundColorScrolled && isScrolled
+      ? backgroundColorScrolled
+      : backgroundColor
+
+  // --- Shrink animation ---
+  const shrinkProgress = useTransform(
+    scrollY,
+    [0, shrinkStart, shrinkEnd],
+    [0, 0.5, 1],
+  )
+
+  const headerHeightMotion = useTransform(
+    shrinkProgress,
+    [0, 1],
+    [`${expandedHeight}px`, `${collapsedHeight}px`],
+  )
+  const padYMotion = useTransform(shrinkProgress, [0, 1], ["12px", "4px"])
+  const logoScale = useTransform(shrinkProgress, [0, 1], [1, 0.85])
+
+  // Static fallbacks when shrinkOnScroll is disabled or user prefers reduced motion
+  const staticHeaderH = `${expandedHeight}px`
+  const staticPadY = "8px"
+
+  // WCAG 2.3.3: Disable animations if user prefers reduced motion
+  const shouldAnimate = shrinkOnScroll && !prefersReducedMotion
+
+  /* ========================================
+   * BUTTON STYLING
+   * ======================================== */
   const buttonStyle = {
-    ...theme.typography.nav, // Uses nav variant from theme (display font, 1.1rem, 600, capitalize)
-    color: textColor,
+    ...theme.typography.nav,
+    color: resolvedTextColor,
     padding: "8px 20px",
-    transition: "color 0.2s ease-out, text-shadow 0.2s ease-out",
-    textShadow: theme.textShadow.nav, // lighter shadow for nav text
+    // WCAG 2.5.5: Adequate click target size (36px minimum for desktop)
+    minHeight: 36,
+    transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
+    textShadow: theme.textShadow.nav,
     "&:hover": {
       backgroundColor: "transparent",
-      color: "#FFFFFF",
+      color: resolvedTextColor,
       textShadow: theme.textShadow.navHover,
     },
     "&:active": {
@@ -177,130 +335,55 @@ export function BaseHeader({
     },
   }
 
-  // i18n code
+  /* ========================================
+   * TRANSLATIONS (i18n)
+   * ======================================== */
   const { locale, isLoading } = useTranslation()
-  // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
-  const componentText =
-    translations[safeLocale as keyof TranslationsMap] || translations.en
+  const t = translations[safeLocale as keyof TranslationsMap] || translations.en
 
-  // Track if component is mounted (client-side only)
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  // Scroll-based hide/show functionality
-  const { scrollY } = useScroll()
-
-  // hide on scroll direction
-  const [isHidden, setIsHidden] = useState(false)
-  const lastYRef = useRef(0)
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (!hideOnScroll || !isMounted) return
-
-    const difference = latest - lastYRef.current
-    if (Math.abs(difference) > 10) {
-      setIsHidden(difference > 0)
-    }
-    lastYRef.current = latest
-  })
-
-  // Map variant to CSS position
-  const positionMap = {
-    fixed: "fixed" as const,
-    overlay: "absolute" as const,
-    static: "static" as const,
-    sticky: "sticky" as const,
-  }
-  const position = positionMap[variant]
-
-  // Only show secondary navigation if explicitly enabled and not on mobile
-  const displaySecondaryNav =
-    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
-
-  const shrink = useTransform(scrollY, [0, 120, 240], [0, 0.5, 1])
-  // Always call hooks unconditionally
-  const headerHeightMotion = useTransform(
-    shrink,
-    [0, 1],
-    ["70px", `${HEADER_SHRUNK_H}px`],
-  )
-  const padYMotion = useTransform(shrink, [0, 1], ["12px", "4px"])
-  const logoScale = useTransform(shrink, [0, 1], [1, 0.85])
-
-  // Static fallbacks if shrink is disabled
-  const staticHeaderH = "70px"
-  const staticPadY = "8px"
-
+  /* ========================================
+   * RENDER
+   * Structure:
+   * - Skip link (accessibility)
+   * - AppBar container
+   *   - Toolbar
+   *     - Logo (left)
+   *     - Desktop: Water stories | Get data | About | Language switcher
+   *     - Mobile: Language switcher (optional) | Hamburger → Drawer
+   * - Mobile drawer (slides from right)
+   * ======================================== */
   return (
     <>
-      {/* WCAG 2.4.1: Skip link for keyboard users - DO NOT REMOVE */}
-      <Box
-        component="a"
-        href="#main-content"
-        sx={{
-          position: "absolute",
-          left: "-9999px",
-          top: "auto",
-          width: "1px",
-          height: "1px",
-          overflow: "hidden",
-          zIndex: zIndex + 1,
-          "&:focus": {
-            position: "fixed",
-            top: 8,
-            left: 8,
-            width: "auto",
-            height: "auto",
-            padding: "12px 24px",
-            backgroundColor: theme.palette.common.white,
-            color: theme.palette.common.black,
-            fontWeight: 600,
-            borderRadius: theme.borderRadius.md,
-            boxShadow: theme.shadow.lg,
-            outline: "2px solid",
-            outlineColor: theme.palette.blue.bright,
-            textDecoration: "none",
-          },
-        }}
-      >
-        Skip to main content
-      </Box>
+      {/* ----------------------------------------
+       * HEADER CONTAINER
+       * Note: Skip link (WCAG 2.4.1) is now a separate component <SkipLink />
+       * that should be placed FIRST in the page, before any other content.
+       * See: packages/ui/src/components/navigation/SkipLink.tsx
+       * ---------------------------------------- */}
       <MotionAppBar
-        initial="visible" // Prevent hydration mismatch for SSG
-        animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
-        variants={{
-          hidden: {
-            y: "-100%",
-          },
-          visible: {
-            y: "0%",
-          },
-        }}
-        transition={{ duration: 0.3 }}
-        position={position}
+        position="fixed"
         sx={{
-          zIndex,
-          backgroundColor,
-          color: textColor,
-          borderRadius,
-          boxShadow,
-          borderBottom,
-          ...(position !== "sticky" ? { top: 0, left: 0, right: 0 } : null),
+          zIndex: resolvedZIndex,
+          backgroundColor: effectiveBackgroundColor,
+          color: resolvedTextColor,
+          // Smooth background color transition when scrolling past threshold
+          transition: backgroundColorScrolled
+            ? `background-color ${theme.transition.standard} ease`
+            : undefined,
+          borderRadius: theme.borderRadius.none,
+          boxShadow: "none",
+          borderBottom: resolvedBorderBottom,
+          inset: "0 0 auto 0",
           height: "var(--header-h)",
         }}
         style={
           {
-            "--header-h": shrinkOnScroll ? headerHeightMotion : staticHeaderH,
-            "--pad-y": shrinkOnScroll ? padYMotion : staticPadY,
-            height: shrinkOnScroll ? headerHeightMotion : staticHeaderH,
+            "--header-h": shouldAnimate ? headerHeightMotion : staticHeaderH,
+            "--pad-y": shouldAnimate ? padYMotion : staticPadY,
+            height: shouldAnimate ? headerHeightMotion : staticHeaderH,
           } as React.CSSProperties
         }
-        whileHover={isMounted ? "visible" : undefined}
-        onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
         elevation={0}
       >
         <Toolbar
@@ -314,6 +397,9 @@ export function BaseHeader({
           }}
           style={{ minHeight: "var(--header-h)" }}
         >
+          {/* ----------------------------------------
+           * LOGO
+           * ---------------------------------------- */}
           <Box
             component={motion.button}
             type="button"
@@ -325,169 +411,383 @@ export function BaseHeader({
               }
             }}
             style={{
-              scale: logoScale,
+              // WCAG 2.3.3: Only animate if user hasn't requested reduced motion
+              scale: shouldAnimate ? logoScale : 1,
               originX: 0,
               originY: 0.5,
-              willChange: "transform",
+              willChange: shouldAnimate ? "transform" : "auto",
             }}
             sx={{
               display: "flex",
               alignItems: "center",
-              pl: 2,
-              width: 168,
+              // Reset default button styles
               background: "transparent",
               border: "none",
               padding: 0,
               cursor: "pointer",
+              // WCAG 2.4.7: Focus visible indicator with rounded corners
               "&:focus-visible": {
                 outline: "2px solid currentColor",
                 outlineOffset: "4px",
-                borderRadius: "6px", // Special case: between sm (4px) and md (8px)
+                borderRadius: theme.borderRadius.sm,
               },
             }}
-            aria-label="Scroll to top"
+            aria-label={
+              onLogoClick ? "COEQWAL home" : "COEQWAL - Scroll to top"
+            }
           >
             <Logo variant={logoVariant} />
           </Box>
 
-          {/* Optional secondary navigation menu */}
-          {displaySecondaryNav && (
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                flexGrow: 1,
-                justifyContent: "center",
-                display: { xs: "none", md: "flex" },
-                mx: 2,
-              }}
-            >
-              {secondaryNavItems.map((item) => {
-                // Check if this section is directly active or if it's the parent of the active section
-                const isActive =
-                  activeSection === item.sectionId ||
-                  sectionParentMap[activeSection || ""] === item.sectionId
-
-                return (
-                  <Button
-                    key={item.key}
-                    variant="text"
-                    disableRipple
-                    onClick={() => onSectionClick?.(item.sectionId)}
-                    // WCAG 4.1.2: aria-current for active state
-                    aria-current={isActive ? "page" : undefined}
-                    sx={{
-                      color: textColor,
-                      minWidth: "auto",
-                      px: isTablet ? 1 : 2,
-                      fontSize: "0.875rem",
-                      position: "relative",
-                      letterSpacing: "0.03rem",
-                      fontWeight: isActive ? 600 : 500,
-                      transition: "color 0.3s ease", // theme.transition.color equivalent
-                      lineHeight: 1.1,
-                      "&:hover": {
-                        backgroundColor: "transparent",
-                      },
-                      "&.MuiButtonBase-root:hover": {
-                        backgroundColor: "transparent",
-                      },
-                      // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
-                      "&:focus-visible": {
-                        outline: "2px solid currentColor",
-                        outlineOffset: 2,
-                      },
-                    }}
-                  >
-                    {item.label}
-                    {isActive && (
-                      <ArrowDropDownIcon
-                        sx={{
-                          position: "absolute",
-                          bottom: -12,
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          fontSize: 24,
-                          color: textColor,
-                          animation: "fadeIn 0.3s ease-in-out",
-                          "@keyframes fadeIn": {
-                            "0%": {
-                              opacity: 0,
-                              transform: "translateX(-50%) translateY(-5px)",
-                            },
-                            "100%": {
-                              opacity: 1,
-                              transform: "translateX(-50%) translateY(0)",
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                  </Button>
-                )
-              })}
-            </Stack>
-          )}
-
-          {/* WCAG 1.3.1: Semantic nav element - DO NOT REMOVE */}
-          <Box component="nav" aria-label="Main navigation">
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              sx={{
-                pr: 2,
-              }}
-            >
-              {/* Tools dropdown */}
-              {onToolsClick && (
+          {/* ----------------------------------------
+           * NAVIGATION - Desktop
+           * WCAG 1.3.1: Semantic nav element - DO NOT REMOVE
+           * ---------------------------------------- */}
+          {!isMobile && (
+            <Box component="nav" aria-label="Main navigation">
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                sx={{ pr: 2 }}
+              >
+                {/* 1. Water stories dropdown */}
                 <NavDropdown
-                  label={componentText.buttons.tools}
+                  label={t.buttons.waterStories}
+                  disableRipple
                   options={[
                     {
-                      key: "scenario-explorer",
-                      label: componentText.tools.scenarioExplorer,
-                      onClick: () => onToolsClick("scenario-explorer"),
+                      key: "flow",
+                      label: t.waterStories.flow,
+                      onClick: () => (window.location.href = URLS.flow),
+                      active: activeWaterStory === "flow",
                     },
                     {
-                      key: "needs-search",
-                      label: componentText.tools.needsSearch,
-                      onClick: () => onToolsClick("needs-search"),
+                      key: "climate",
+                      label: t.waterStories.climate,
+                      onClick: () => (window.location.href = URLS.climate),
+                      active: activeWaterStory === "climate",
                     },
                   ]}
                   variant="text"
                   sx={buttonStyle}
                 />
-              )}
 
-              {/* Data button */}
-              {onDataClick && (
+                {/* 2. Get data */}
                 <Button
                   variant="text"
                   disableRipple
-                  onClick={onDataClick}
+                  onClick={() => (window.location.href = URLS.data)}
                   sx={buttonStyle}
                 >
-                  {componentText.buttons.getData}
+                  {t.buttons.getData}
                 </Button>
-              )}
 
-              {/* About button */}
-              <Button
-                variant="text"
-                disableRipple
-                onClick={onAboutClick}
-                sx={buttonStyle}
-              >
-                {componentText.buttons.about}
-              </Button>
+                {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
+                <Button
+                  variant="text"
+                  disableRipple
+                  // TODO: Remove disabled when URLS.about is available
+                  disabled
+                  sx={{
+                    ...buttonStyle,
+                    // Override disabled styles to maintain visual consistency
+                    "&.Mui-disabled": {
+                      color: resolvedTextColor,
+                      opacity: 0.6,
+                    },
+                  }}
+                >
+                  {t.buttons.about}
+                </Button>
 
-              {/* Language switcher */}
+                {/* 4. Language switcher (OPTIONAL) */}
+                {showLanguageSwitcher && <LanguageSwitcher />}
+              </Stack>
+            </Box>
+          )}
+
+          {/* ----------------------------------------
+           * NAVIGATION - Mobile
+           * Language switcher (if enabled) + hamburger menu
+           * ---------------------------------------- */}
+          {isMobile && (
+            <Stack direction="row" spacing={1} alignItems="center">
+              {/* Language switcher stays visible on mobile (if enabled) */}
               {showLanguageSwitcher && <LanguageSwitcher />}
+
+              {/* Hamburger menu button */}
+              <IconButton
+                ref={hamburgerButtonRef}
+                onClick={handleMobileMenuOpen}
+                aria-label="Open navigation menu"
+                aria-expanded={mobileMenuOpen}
+                aria-haspopup="dialog"
+                aria-controls={MOBILE_DRAWER_ID}
+                sx={{
+                  color: resolvedTextColor,
+                  // WCAG 2.5.5: Minimum 44x44px touch target
+                  minWidth: MIN_TOUCH_TARGET,
+                  minHeight: MIN_TOUCH_TARGET,
+                  // WCAG 2.4.7: Focus visible indicator
+                  "&:focus-visible": {
+                    outline: "2px solid currentColor",
+                    outlineOffset: 2,
+                  },
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
             </Stack>
-          </Box>
+          )}
         </Toolbar>
       </MotionAppBar>
+
+      {/* ----------------------------------------
+       * MOBILE DRAWER
+       * Slides from right, rounded corners on top-left and bottom-right
+       * ---------------------------------------- */}
+      <Drawer
+        id={MOBILE_DRAWER_ID}
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={handleMobileMenuClose}
+        // WCAG 2.4.6: Descriptive label for screen readers
+        aria-label="Navigation menu"
+        // WCAG: MUI Drawer handles focus trap, Escape key, and aria-modal automatically
+        sx={{
+          "& .MuiDrawer-paper": {
+            width: "auto",
+            minWidth: 280,
+            maxWidth: "80vw",
+            backgroundColor: theme.palette.common.white,
+            borderTopLeftRadius: theme.borderRadius.lg,
+            borderBottomRightRadius: theme.borderRadius.lg,
+          },
+        }}
+      >
+        {/* Header row: MENU label + close button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: 2,
+            pt: 2,
+            pb: 1,
+          }}
+        >
+          {/* WCAG 1.3.1: Heading for screen reader structure */}
+          <Box
+            component="h2"
+            sx={{
+              ...theme.typography.overline,
+              color: theme.palette.text.primary,
+              margin: 0,
+            }}
+          >
+            Menu
+          </Box>
+          <IconButton
+            onClick={handleMobileMenuClose}
+            aria-label="Close navigation menu"
+            sx={{
+              color: theme.palette.text.primary,
+              // WCAG 2.5.5: Minimum 44x44px touch target
+              minWidth: MIN_TOUCH_TARGET,
+              minHeight: MIN_TOUCH_TARGET,
+              "&:focus-visible": {
+                outline: "2px solid currentColor",
+                outlineOffset: 2,
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Divider />
+
+        {/* Navigation links */}
+        <Box
+          component="nav"
+          aria-label="Main navigation"
+          sx={{ color: theme.palette.text.primary, pt: 1 }}
+        >
+          <List disablePadding>
+            {/* WCAG 1.3.1: Water Stories section with group semantics */}
+            <ListItem
+              disablePadding
+              component="div"
+              role="group"
+              aria-labelledby="water-stories-label"
+              sx={{ flexDirection: "column", alignItems: "stretch" }}
+            >
+              {/* Section header - non-interactive label */}
+              <Box
+                id="water-stories-label"
+                component="span"
+                sx={{
+                  ...theme.typography.nav,
+                  display: "block",
+                  px: 2,
+                  py: 1,
+                }}
+              >
+                {t.buttons.waterStories}
+              </Box>
+
+              {/* Water story sub-items */}
+              <List disablePadding>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      window.location.href = URLS.flow
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "flow"}
+                    // WCAG 2.4.8: Current page indication
+                    aria-current={
+                      activeWaterStory === "flow" ? "page" : undefined
+                    }
+                    sx={{
+                      pl: 4,
+                      pr: 2,
+                      // WCAG 2.5.5: Minimum 44px touch target
+                      minHeight: MIN_TOUCH_TARGET,
+                      // WCAG 2.4.7: Focus visible indicator
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
+                      // WCAG 1.4.1: Active state uses bold text (not just color)
+                      ...(activeWaterStory === "flow" && {
+                        fontWeight: theme.typography.fontWeightBold,
+                      }),
+                    }}
+                  >
+                    {activeWaterStory === "flow" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
+                    <ListItemText
+                      primary={t.waterStories.flow}
+                      slotProps={{
+                        primary: {
+                          sx: {
+                            ...theme.typography.caption,
+                            // Bold when active (non-color indicator)
+                            fontWeight:
+                              activeWaterStory === "flow"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      window.location.href = URLS.climate
+                      handleMobileMenuClose()
+                    }}
+                    selected={activeWaterStory === "climate"}
+                    // WCAG 2.4.8: Current page indication
+                    aria-current={
+                      activeWaterStory === "climate" ? "page" : undefined
+                    }
+                    sx={{
+                      pl: 4,
+                      pr: 2,
+                      // WCAG 2.5.5: Minimum 44px touch target
+                      minHeight: MIN_TOUCH_TARGET,
+                      // WCAG 2.4.7: Focus visible indicator
+                      "&:focus-visible": {
+                        outline: `2px solid ${theme.palette.text.primary}`,
+                        outlineOffset: -2,
+                      },
+                    }}
+                  >
+                    {activeWaterStory === "climate" && (
+                      <ActiveBullet color={theme.palette.text.primary} />
+                    )}
+                    <ListItemText
+                      primary={t.waterStories.climate}
+                      slotProps={{
+                        primary: {
+                          sx: {
+                            ...theme.typography.caption,
+                            // Bold when active (non-color indicator)
+                            fontWeight:
+                              activeWaterStory === "climate"
+                                ? theme.typography.fontWeightBold
+                                : theme.typography.fontWeightRegular,
+                          },
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+            </ListItem>
+
+            {/* Spacing between sections */}
+            <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+
+            {/* Get data */}
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  window.location.href = URLS.data
+                  handleMobileMenuClose()
+                }}
+                sx={{
+                  px: 2,
+                  // WCAG 2.5.5: Minimum 44px touch target
+                  minHeight: MIN_TOUCH_TARGET,
+                  // WCAG 2.4.7: Focus visible indicator
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.text.primary}`,
+                    outlineOffset: -2,
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={t.buttons.getData}
+                  slotProps={{ primary: { sx: theme.typography.nav } }}
+                />
+              </ListItemButton>
+            </ListItem>
+
+            {/* About COEQWAL - TODO: Enable when URLS.about is available */}
+            <ListItem disablePadding>
+              <ListItemButton
+                disabled
+                sx={{
+                  px: 2,
+                  // WCAG 2.5.5: Minimum 44px touch target
+                  minHeight: MIN_TOUCH_TARGET,
+                  // Disabled state styling
+                  "&.Mui-disabled": {
+                    opacity: 0.6,
+                  },
+                  // WCAG 2.4.7: Focus visible indicator
+                  "&:focus-visible": {
+                    outline: `2px solid ${theme.palette.text.primary}`,
+                    outlineOffset: -2,
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={t.buttons.about}
+                  slotProps={{ primary: { sx: theme.typography.nav } }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
     </>
   )
 }

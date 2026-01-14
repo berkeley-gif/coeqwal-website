@@ -7,19 +7,24 @@
  * Supports outline and text variants.
  *
  * WCAG 2.0 AA Compliance:
+ * - WCAG 1.4.1: Active state uses bold + background (not color alone)
+ * - WCAG 2.1.1: Full keyboard support (arrow keys, Enter, Escape)
+ * - WCAG 2.4.3: Focus returns to trigger button when menu closes
  * - WCAG 2.4.7: Focus-visible styles on button and menu items
- * - WCAG 4.1.2: aria-expanded, aria-haspopup for menu state
+ * - WCAG 2.4.8: aria-current="page" on active menu items
+ * - WCAG 4.1.2: aria-expanded, aria-haspopup, aria-controls for menu state
  */
 
-import React, { useState, useId } from "react"
+import React, { useState, useId, useRef } from "react"
 import { Button, Menu, MenuItem } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 
 export interface NavDropdownOption {
   key: string
   label: string
   onClick: () => void
+  /** Whether this option represents the current page/site */
+  active?: boolean
 }
 
 export interface NavDropdownProps {
@@ -37,10 +42,12 @@ export function NavDropdown({
   disableRipple = false,
   sx,
 }: NavDropdownProps) {
-  const theme = useTheme()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const isOpen = Boolean(anchorEl)
   const menuId = useId()
+
+  // WCAG 2.4.3: Ref for focus return when menu closes
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
@@ -48,6 +55,8 @@ export function NavDropdown({
 
   const handleClose = () => {
     setAnchorEl(null)
+    // WCAG 2.4.3: Return focus to trigger button when menu closes
+    setTimeout(() => buttonRef.current?.focus(), 0)
   }
 
   const handleOptionClick = (option: NavDropdownOption) => {
@@ -55,29 +64,19 @@ export function NavDropdown({
     handleClose()
   }
 
-  const buttonStyle = {
-    ...theme.typography.body2,
-    lineHeight: 1.1,
-    height: theme.spacing(4.5), // 36px to match other header buttons
-    minHeight: theme.spacing(4.5),
-    fontWeight: theme.typography.fontWeightMedium,
-    color: theme.palette.text.primary,
-  }
-
   return (
     <>
       <Button
+        ref={buttonRef}
         variant={variant}
         disableRipple={disableRipple}
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
-        // WCAG 4.1.2: ARIA attributes for menu state - DO NOT REMOVE
         aria-expanded={isOpen}
         aria-haspopup="menu"
         aria-controls={isOpen ? menuId : undefined}
         sx={{
-          ...buttonStyle,
-          // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
+          // WCAG 2.4.7: Focus visible indicator
           "&:focus-visible": {
             outline: "2px solid currentColor",
             outlineOffset: 2,
@@ -109,22 +108,27 @@ export function NavDropdown({
           <MenuItem
             key={option.key}
             onClick={() => handleOptionClick(option)}
-            sx={{
-              color: (theme) => theme.palette.blue.darkest,
-              fontSize: (theme) => theme.typography.nav.fontSize,
-              fontFamily: (theme) => theme.typography.fontFamily,
-              py: (theme) => theme.space.component.md,
-              px: (theme) => theme.space.component.lg,
+            aria-current={option.active ? "page" : undefined}
+            sx={(theme) => ({
+              ...theme.typography.button,
+              color: theme.palette.blue.darkest,
+              py: theme.space.component.md,
+              px: theme.space.component.lg,
+              // WCAG 1.4.1: Active state uses background + bold (not color alone)
+              ...(option.active && {
+                backgroundColor: theme.palette.action.hover,
+                fontWeight: theme.typography.fontWeightBold,
+              }),
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.action.hover,
-                color: (theme) => theme.palette.blue.darkest,
+                backgroundColor: theme.palette.action.hover,
+                color: theme.palette.blue.darkest,
               },
               // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
               "&:focus-visible": {
-                backgroundColor: (theme) => theme.palette.action.hover,
+                backgroundColor: theme.palette.action.hover,
                 outline: "none",
               },
-            }}
+            })}
           >
             {option.label}
           </MenuItem>
