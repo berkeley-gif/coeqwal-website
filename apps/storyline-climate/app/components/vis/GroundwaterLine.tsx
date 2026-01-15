@@ -359,13 +359,13 @@ function YAxis({
   margin: Margin
   ticks: number[]
   scrollProgress: MotionValue<number>
-  }) {
+}) {
   const annotationOpacity = usePlayAnimationOnce(
     scrollProgress,
     [0.4, 0.6],
     [0, 1],
   )
-  
+
   return (
     <g transform={`translate(${margin.left},0)`}>
       {ticks.map((t, i) => (
@@ -417,7 +417,6 @@ function YAxis({
       >
         loss (km³)
       </motion.text>
-
     </g>
   )
 }

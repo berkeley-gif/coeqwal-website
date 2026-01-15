@@ -227,8 +227,14 @@ function Snowmelt() {
           <Typography variant="h6" align="center">
             {"Projected Change in Snowpack by 2050"}
           </Typography>
-          <Typography variant="caption" textAlign={'center'} sx={{padding: "0 4rem"}}>
-            {"Source: Cal-Adapt North Sierra, Fourth Assessment Climate Region modeled by CanESM2 in high emission scenario"}
+          <Typography
+            variant="caption"
+            textAlign={"center"}
+            sx={{ padding: "0 4rem" }}
+          >
+            {
+              "Source: Cal-Adapt North Sierra, Fourth Assessment Climate Region modeled by CanESM2 in high emission scenario"
+            }
           </Typography>
         </Box>
       </Box>
