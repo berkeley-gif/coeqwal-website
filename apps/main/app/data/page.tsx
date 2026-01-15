@@ -208,11 +208,14 @@ export default function DataPage() {
                   </Typography>
 
                   {loading ? (
-                    <Box
-                      sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    <Alert
+                      severity="info"
+                      icon={<CircularProgress size={20} />}
+                      sx={{ mb: 2 }}
                     >
-                      <CircularProgress />
-                    </Box>
+                      Loading available datasets... This may take a few moments
+                      on first visit as our servers wake up.
+                    </Alert>
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
@@ -285,11 +288,14 @@ export default function DataPage() {
                   </Typography>
 
                   {loading ? (
-                    <Box
-                      sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    <Alert
+                      severity="info"
+                      icon={<CircularProgress size={20} />}
+                      sx={{ mb: 2 }}
                     >
-                      <CircularProgress />
-                    </Box>
+                      Loading available datasets... This may take a few moments
+                      on first visit as our servers wake up.
+                    </Alert>
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
