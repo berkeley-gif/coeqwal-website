@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { useTranslation } from "@repo/i18n"
 import { Box, useTheme } from "@repo/ui/mui"
 
@@ -6,6 +6,7 @@ import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
 import MorphingHeadline from "../components/MorphingHeadline"
 import type { VideoSource } from "../components/VideoHero"
+import { mapActions, useMapStore } from "../features/map/store"
 
 const VIDEO_SRCS: VideoSource[] = [
   {
@@ -18,6 +19,41 @@ const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const introPanelsRef = useRef<HTMLElement>(null)
+  const waterIssuesRef = useRef<HTMLDivElement>(null)
+
+  // Show map when water-issues panel is in viewport
+  // This ensures the map is visible when scrolling back up from tabs
+  useEffect(() => {
+    const waterIssuesEl = waterIssuesRef.current
+    if (!waterIssuesEl) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Show the map when water-issues panel comes into view
+            // Always check current state (not stale closure) via getState()
+            const currentMode = useMapStore.getState().mapMode
+            if (currentMode === "hidden") {
+              mapActions.setMapMode("learn")
+            }
+          }
+        })
+      },
+      {
+        // Trigger when any part of the panel is visible
+        threshold: 0,
+        // Start observing slightly before the panel enters viewport
+        rootMargin: "100px 0px 0px 0px",
+      },
+    )
+
+    observer.observe(waterIssuesEl)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   return (
     <Box>
@@ -69,18 +105,21 @@ const IntroSection = () => {
           hideHeadline
         />
 
-        {/* Frontmatter Panel 2 */}
-        <FrontmatterPanel
-          id="water-issues"
-          ariaLabel="What water issues matter to you"
-          backgroundColor="transparent"
-          headlineLine1="What water issues"
-          headlineLine2="matter to you?"
-          bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
-          textColor={theme.palette.common.white}
-          hideHeadline
-          displayBlockBackground="rgba(42, 82, 135, 0.75)"
-        />
+        {/* Frontmatter Panel 2 - Map background panel */}
+        {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
+        <div ref={waterIssuesRef}>
+          <FrontmatterPanel
+            id="water-issues"
+            ariaLabel="What water issues matter to you"
+            backgroundColor="transparent"
+            headlineLine1="What water issues"
+            headlineLine2="matter to you?"
+            bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
+            textColor={theme.palette.common.white}
+            hideHeadline
+            displayBlockBackground="rgba(42, 82, 135, 0.75)"
+          />
+        </div>
 
         {/* Frontmatter Panel 3 - Actions variant */}
         <FrontmatterPanel
