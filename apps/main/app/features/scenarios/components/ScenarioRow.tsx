@@ -186,7 +186,7 @@ export function ScenarioRow({
           gap: theme.space.gap.sm,
           alignItems: compact ? "stretch" : "start",
           transition: theme.transition.default,
-          border: isHighlighted ? theme.border.focus : "2px solid transparent",
+          border: isHighlighted ? theme.border.active : "2px solid transparent",
           "&:hover": {
             backgroundColor: theme.palette.background.paper,
           },

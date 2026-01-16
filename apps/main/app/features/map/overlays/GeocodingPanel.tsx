@@ -274,7 +274,7 @@ export function GeocodingPanel({
               p: theme.space.component.lg,
               backgroundColor: theme.palette.grey[50],
               borderRadius: theme.borderRadius.md,
-              border: theme.border.focusLight,
+              border: theme.border.activeLight,
             }}
           >
             <Typography

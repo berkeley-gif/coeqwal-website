@@ -156,6 +156,8 @@ const palette = {
   brand: {
     sky: "#92C1D5", // Top of gradient - sky blue
     water: "#64A4D6", // Bottom of gradient - water blue
+    panelMedium: "#3D7DB5", // Panel 1 background
+    panelDark: "#193D6B", // Panel 3 background
   },
 
   // Text and UI blues
@@ -219,6 +221,7 @@ const palette = {
   overlay: {
     water: "rgba(42, 82, 135, 0.2)", // Semi-transparent blue for header and UI elements
     waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
+    waterDark: "rgba(42, 82, 135, 0.75)", // Dark blue overlay for map, header scrolled state
   },
 
   // Outcome tier colors
@@ -256,20 +259,21 @@ const borderRadius = {
   xs: "2px", // Very small (checkboxes, tiny indicators)
   sm: "4px", // Small (input fields, tags)
   md: "8px", // Standard (cards, panels, tooltips)
-  lg: "12px", // Larger cards, modals, overlay panels
-  xl: "16px", // Feature cards, hero elements
+  lg: "12px", // Mobile nav drawer corners (BaseHeader)
   pill: "999px", // Full pill/capsule shape
   circle: "50%", // Perfect circles
 }
 
-// Shadow/elevation system
+// Shadow/elevation system (geometric progression: y and blur double each step)
 const shadow = {
   none: "none",
-  subtle: "0 1px 3px rgba(0,0,0,0.12)", // Light cards, inputs
-  sm: "0 2px 4px rgba(0,0,0,0.15)", // Elevated cards, panels
-  md: "0 4px 12px rgba(0,0,0,0.15)", // Dropdowns, tooltips, overlays
-  lg: "0 8px 24px rgba(0,0,0,0.2)", // Modals, large panels
-  focus: "0 0 0 3px rgba(33, 150, 243, 0.25)", // Focus ring (blue)
+  subtle: "0 1px 2px rgba(0,0,0,0.08)", // Light cards, inputs
+  sm: "0 2px 4px rgba(0,0,0,0.10)", // Elevated cards, panels
+  md: "0 4px 8px rgba(0,0,0,0.12)", // Dropdowns, tooltips, overlays
+  lg: "0 8px 16px rgba(0,0,0,0.15)", // Modals, large panels
+  // Focus rings (accessibility) - 3:1+ contrast against their target background
+  focusOnLight: "0 0 0 3px rgba(25, 118, 210, 0.7)", // #1976D2 at 70% — 4.5:1 vs white
+  focusOnDark: "0 0 0 3px rgba(100, 181, 246, 0.85)", // #64B5F6 at 85% — 5:1 vs dark
 }
 
 // Transition/animation timing
@@ -326,8 +330,8 @@ const border = {
   none: "none",
   light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
   medium: `1px solid ${palette.grey[300]}`, // Standard borders
-  focus: `2px solid ${palette.blue.bright}`, // Selected/focus states
-  focusLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
+  active: `2px solid ${palette.blue.bright}`, // Selected/active states
+  activeLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
   onDark: "2px solid #FFFFFF", // On dark backgrounds
   subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline

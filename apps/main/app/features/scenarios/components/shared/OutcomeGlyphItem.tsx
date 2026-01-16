@@ -143,7 +143,7 @@ export function OutcomeGlyphItem({
         borderRadius: theme.borderRadius.md,
         transition: theme.transition.default,
         opacity: isActive ? 1 : 0.7,
-        border: isSelected ? theme.border.focus : "2px solid transparent",
+        border: isSelected ? theme.border.active : "2px solid transparent",
         minWidth: 0,
         overflow: "hidden",
         "&:hover": {

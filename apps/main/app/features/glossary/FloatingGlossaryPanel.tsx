@@ -233,7 +233,7 @@ export function FloatingGlossaryPanel({
                           ),
                           padding: theme.space.component.lg,
                           borderRadius: theme.borderRadius.md,
-                          border: theme.border.focus,
+                          border: theme.border.active,
                           transition: theme.transition.default,
                         }
                       : {
