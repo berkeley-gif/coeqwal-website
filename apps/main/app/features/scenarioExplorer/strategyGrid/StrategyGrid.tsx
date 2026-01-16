@@ -384,7 +384,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: compact ? "stretch" : "start",
                     transition: theme.transition.default,
                     border: isHighlighted
-                      ? theme.border.focus
+                      ? theme.border.active
                       : "2px solid transparent",
                     "&:hover": {
                       backgroundColor: theme.palette.background.paper,

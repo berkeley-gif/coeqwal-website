@@ -109,13 +109,13 @@ export function FloatingGlossaryButton({
         alignItems: "center",
         justifyContent: "center",
         cursor: isDragging ? "grabbing" : "grab",
-        boxShadow: isOpen ? theme.shadow.focus : theme.shadow.md,
+        boxShadow: isOpen ? theme.shadow.focusOnLight : theme.shadow.md,
         transition: isDragging ? "none" : theme.transition.default,
         zIndex: theme.zIndex.floating, // Above panel to remain clickable
         userSelect: "none",
         "&:hover": {
           transform: isOpen || isDragging ? "none" : "scale(1.1)",
-          boxShadow: isOpen ? theme.shadow.focus : theme.shadow.lg,
+          boxShadow: isOpen ? theme.shadow.focusOnLight : theme.shadow.lg,
         },
         "&:active": {
           transform: isDragging ? "none" : "scale(0.95)",
