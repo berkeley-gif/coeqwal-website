@@ -1,3 +1,5 @@
+"use client"
+
 import { useRef, useEffect } from "react"
 import { useTranslation } from "@repo/i18n"
 import { Box, useTheme } from "@repo/ui/mui"
