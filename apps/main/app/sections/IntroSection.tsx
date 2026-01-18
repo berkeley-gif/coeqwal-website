@@ -84,8 +84,8 @@ const IntroSection = () => {
         ]}
       />
 
-      {/* Container for scroll-linked headline animation */}
-      <Box ref={introPanelsRef}>
+      {/* position: relative required for Framer Motion useScroll offset calculations */}
+      <Box ref={introPanelsRef} sx={{ position: "relative" }}>
         {/* Video Hero */}
         <VideoHero
           sources={VIDEO_SRCS}

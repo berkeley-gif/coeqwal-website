@@ -23,8 +23,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body>
+    // position: relative on html AND body required for Framer Motion useScroll offset calculations
+    <html lang="en" style={{ position: "relative" }}>
+      <body style={{ position: "relative" }}>
         <StrictMode>
           <FontLoader kitId="rxm7kha" />
           <TranslationProvider initialLocale="en">
