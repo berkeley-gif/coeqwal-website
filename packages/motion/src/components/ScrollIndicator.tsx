@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * ScrollIndicator - Animated scroll navigation indicator
  *

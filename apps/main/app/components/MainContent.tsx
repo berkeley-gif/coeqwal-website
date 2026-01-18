@@ -1,4 +1,13 @@
-"use client"
+/**
+ * MainContent - Main content wrapper for the page
+ *
+ * This is a Server Component that provides the semantic <main> element
+ * and establishes the visual stacking context for content above the map.
+ *
+ * Note: We inline the zIndex value (10) instead of using theme.zIndex.pageContent
+ * to allow this to be a Server Component. This is a tradeoff between
+ * using MUI and SSG optimization. See theme.tsx for the canonical value.
+ */
 
 import { Box } from "@repo/ui/mui"
 
@@ -16,7 +25,8 @@ export function MainContent({ children }: { children: React.ReactNode }) {
         // Child components re-enable pointer events where needed
         pointerEvents: "none",
         // Above map level so content appears on top
-        zIndex: (theme) => theme.zIndex.pageContent,
+        // Value from theme.zIndex.pageContent (inlined for Server Component)
+        zIndex: 10,
         // Remove focus outline when skip link targets this element
         "&:focus": {
           outline: "none",
