@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * VideoHero - Full-viewport hero section with background video
  *

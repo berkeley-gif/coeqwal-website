@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * FrontmatterPanel - Full-viewport panel with headline and body content
  *
