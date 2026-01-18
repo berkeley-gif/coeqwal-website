@@ -139,6 +139,62 @@ This Turborepo has been customized to meet the needs of the COEQWAL project. Key
 - We have `ui`, `i18n`, and `map` packages. We can set up a shared data package, a common parameters library package, an api package, and a viz/D3 package.
 - The Viz Team should feel free to set up packages to support their common work.
 
+## React StrictMode
+
+The `main` app has React StrictMode enabled in `apps/main/app/layout.tsx`. StrictMode is a development tool that helps catch common bugs early.
+
+### Benefits
+
+- **Catches impure renders**: Identifies components that produce different output on re-render
+- **Detects missing effect cleanup**: Finds effects that don't properly clean up subscriptions, timers, or event listeners
+- **Warns about deprecated APIs**: Alerts you to legacy React patterns that will break in future versions
+- **Improves code quality**: Encourages patterns that work well with React's concurrent features
+
+### Side effects (development only)
+
+StrictMode intentionally double-invokes certain functions to help detect side effects:
+
+- **Double console logs**: You'll see console.log statements appear twice in development
+- **Effects run twice**: `useEffect` callbacks run twice to verify proper cleanup
+- **Render functions called twice**: Components render twice to detect impure renders
+
+These double invocations **only happen in development mode** — production builds are unaffected.
+
+### Example console output
+
+```
+// Development with StrictMode:
+"Component mounted"    // First invocation
+"Component mounted"    // Second invocation (StrictMode check)
+
+// In production:
+"Component mounted"    // Single invocation
+```
+
+### Implementation
+
+We encourage enabling StrictMode in other apps to maintain code quality. If you choose to do so, here are the steps:
+
+1. Add to your `layout.tsx`:
+
+```tsx
+import { StrictMode } from "react"
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <StrictMode>
+          {/* your providers and content */}
+        </StrictMode>
+      </body>
+    </html>
+  )
+}
+```
+
+That's it! If you encounter issues, you can temporarily disable StrictMode by removing the wrapper, fix the underlying problem, then re-enable it.
+
 ## Adding a new app
 
 To add a new app, cd into the `apps` directory and run
