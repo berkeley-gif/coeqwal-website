@@ -94,9 +94,11 @@ export default function TabPanels() {
   // Background color tied to active tab
   // Learn and Explore tabs use transparent - they manage their own backgrounds
   // (Learn uses persistent map, Explore uses DashboardPanel with conditional background)
+  // Note: Use rgba format for Framer Motion animation compatibility
   const panelColor: string = useMemo(() => {
-    if (activeTab === "learn" || activeTab === "explore") return "transparent"
-    return TABS.find((t) => t.key === activeTab)?.panelColor ?? "fffff"
+    if (activeTab === "learn" || activeTab === "explore")
+      return "rgba(0, 0, 0, 0)"
+    return TABS.find((t) => t.key === activeTab)?.panelColor ?? "#ffffff"
   }, [activeTab])
 
   // Map tabs need pointerEvents: "none" on wrapper so the persistent map
@@ -132,7 +134,7 @@ export default function TabPanels() {
     <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
       <AutoHeight>
         <motion.div
-          initial={{ backgroundColor: "transparent" }}
+          initial={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
           animate={{ backgroundColor: panelColor }}
           transition={{ type: "spring", stiffness: 180, damping: 26 }}
           style={{
