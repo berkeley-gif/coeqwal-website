@@ -132,6 +132,7 @@ export default function TabPanels() {
     <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
       <AutoHeight>
         <motion.div
+          initial={{ backgroundColor: "transparent" }}
           animate={{ backgroundColor: panelColor }}
           transition={{ type: "spring", stiffness: 180, damping: 26 }}
           style={{

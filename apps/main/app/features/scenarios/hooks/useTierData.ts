@@ -211,14 +211,15 @@ export function useScenarioTiers(scenarioId: string | null) {
 
     const desiredOrder = OUTCOME_DISPLAY_ORDER
 
-    // Quick lookup
+    // Quick lookup - apply UI display name overrides so lookup matches OUTCOME_DISPLAY_ORDER
     const tiersByDisplayName = new Map()
     allTiers.forEach((tier) => {
-      const displayName = mapShortCodeToDisplayName(
+      const apiDisplayName = mapShortCodeToDisplayName(
         tier.short_code,
         tierMapping,
       )
-      tiersByDisplayName.set(displayName, tier)
+      const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
+      tiersByDisplayName.set(uiDisplayName, tier)
     })
 
     // Return outcomes in order, including missing ones (as inactive)
@@ -331,13 +332,15 @@ export function useMultipleScenarioTiers() {
 
     const desiredOrder = OUTCOME_DISPLAY_ORDER
 
+    // Apply UI display name overrides so lookup matches OUTCOME_DISPLAY_ORDER
     const tiersByDisplayName = new Map()
     allTiers.forEach((tier) => {
-      const displayName = mapShortCodeToDisplayName(
+      const apiDisplayName = mapShortCodeToDisplayName(
         tier.short_code,
         tierMapping,
       )
-      tiersByDisplayName.set(displayName, tier)
+      const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
+      tiersByDisplayName.set(uiDisplayName, tier)
     })
 
     return desiredOrder.map((displayName): OutcomeInfo => {
