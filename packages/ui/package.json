@@ -30,10 +30,12 @@
     "@turbo/gen": "^2.4.4"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
+    "@mui/material-nextjs": "^7.3.7",
     "@mui/system": "^7.3.2",
     "@repo/i18n": "workspace:*",
     "@repo/motion": "workspace:*",
