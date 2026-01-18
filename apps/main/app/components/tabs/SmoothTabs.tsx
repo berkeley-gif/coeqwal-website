@@ -96,6 +96,7 @@ export default function SmoothTabs() {
               <motion.div
                 layout
                 animate={isInTabsArea ? "sticky" : "expanded"}
+                initial={{ gap: 0 }}
                 variants={{
                   expanded: { gap: 8 },
                   sticky: { gap: 0 },
