@@ -41,11 +41,15 @@ export const API_SHORT_CODE_TO_DISPLAY_NAME: Record<string, string> = {
 /**
  * UI Display Name Overrides
  * Maps API names to preferred UI display names
- * Use this when the API name differs from what we want to show users
+ * Keys are lowercase for case-insensitive matching
  */
 export const UI_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
-  "Delta ecology": "Delta estuary ecology",
-  "Community water system deliveries": "Community deliveries",
+  // API name -> UI display name
+  "delta ecology": "Delta estuary ecology",
+  "delta_eco": "Delta estuary ecology",
+  "community water system deliveries": "Community deliveries",
+  "cws deliveries": "Community deliveries",
+  "cws_del": "Community deliveries",
 } as const
 
 /**
@@ -87,9 +91,10 @@ export const METRIC_ID_TO_DISPLAY_NAME: Record<string, string> = {
 /**
  * Apply UI display name overrides
  * Converts API names to preferred UI display names
+ * Case-insensitive lookup
  */
 export function applyUIDisplayOverride(apiName: string): string {
-  return UI_DISPLAY_NAME_OVERRIDES[apiName] || apiName
+  return UI_DISPLAY_NAME_OVERRIDES[apiName.toLowerCase()] || apiName
 }
 
 /**
