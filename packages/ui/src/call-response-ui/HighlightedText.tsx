@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * HighlightedText - Text with animated highlight background
  *

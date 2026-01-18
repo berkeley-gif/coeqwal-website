@@ -193,6 +193,52 @@ export default function RootLayout({ children }) {
 
 That's it! If you encounter issues, you can temporarily disable StrictMode by removing the wrapper, fix the underlying problem, then re-enable it.
 
+## SSG and hydration boundaries
+
+The `main` app uses Next.js App Router with static export (SSG). Understanding the Server Component / Client Component boundary is essential for maintaining performance.
+
+### The MUI + SSG challenge
+
+MUI's `sx` prop uses Emotion CSS-in-JS, which processes styles at runtime. When you use theme functions, that code must run in the browser, requiring a Client Component.
+
+**Strategies we use:**
+
+1. **Inline known values**: If it's beneficial to make a component a static layout component, for example if it is the ancestor to many other components, we hardcode theme values with comments referencing the source:
+   ```tsx
+   // Value from theme.zIndex.pageContent (inlined for Server Component)
+   zIndex: 10,
+   ```
+
+2. **Explicit hydration boundaries**: We use wrapper components (`ClientProviders.tsx`) to establish clear boundaries between Server and Client Components.
+
+3. **Dynamic imports for heavy libraries**: The Mapbox map is dynamically imported with `ssr: false` to reduce initial bundle size.
+
+### Architecture
+
+```
+page.tsx (Server Component)
+└── ClientProviders (Client boundary - provides MapProvider, TabsProvider)
+    ├── SkipLink
+    ├── Header
+    ├── DynamicMap (dynamic import, ssr: false)
+    ├── FloatingGlossary
+    └── MainContent (Server Component - inlined theme values)
+        ├── IntroSection (Client - uses hooks)
+        ├── SmoothTabs (Client - uses hooks)
+        └── TabPanels (Client - uses hooks)
+```
+
+### Guidelines
+
+- **Add `"use client"` when**: Component uses React hooks, browser APIs, or event handlers
+- **Keep as Server Component when**: Component is purely presentational with static or inlined values
+- **Use dynamic imports for**: Heavy libraries that aren't needed for initial render (maps, charts)
+- **Document substituted inlined values**: Always comment where the value comes from (e.g., `// from theme.zIndex.pageContent`)
+
+### Future improvements
+
+MUI supports CSS variables mode (`cssVariables: true` in theme config), which would allow Server Components to use theme values via `var(--mui-zIndex-pageContent)`. This is a potential future optimization.
+
 ## Adding a new app
 
 To add a new app, cd into the `apps` directory and run
