@@ -184,9 +184,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <StrictMode>
-          {/* your providers and content */}
-        </StrictMode>
+        <StrictMode>{/* your providers and content */}</StrictMode>
       </body>
     </html>
   )
