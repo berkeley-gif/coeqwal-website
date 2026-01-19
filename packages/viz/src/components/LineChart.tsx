@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useRef, useEffect, useState } from "react"
 import * as d3 from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"

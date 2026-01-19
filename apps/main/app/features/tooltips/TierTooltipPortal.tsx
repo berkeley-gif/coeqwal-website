@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * TierTooltipPortal - Renders tier tooltip via Portal
  *

@@ -1,5 +1,3 @@
-"use client"
-
 import { LogoColor } from "./LogoColor"
 import { LogoLight } from "./LogoLight"
 

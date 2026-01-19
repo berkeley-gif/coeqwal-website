@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * StrategyHeader - Strategy title and description (with TUCP tooltip)
  *

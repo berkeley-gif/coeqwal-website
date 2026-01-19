@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * ArrowHead - Triangular arrow SVG icon with rounded corners
  */

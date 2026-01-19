@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * TierTooltipContent - Shared tier tooltip content
  *

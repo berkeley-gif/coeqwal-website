@@ -1,5 +1,3 @@
-"use client"
-
 interface LogoLightProps {
   width?: number
   className?: string

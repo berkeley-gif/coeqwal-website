@@ -1,3 +1,5 @@
+"use client"
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import * as d3 from "d3"

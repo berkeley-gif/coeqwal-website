@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * OutcomeGrid - Responsive grid of outcome glyph items
  *

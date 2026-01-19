@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * StrategyGrid: Displays scenarios in a grid with outcome visualizations
  *
