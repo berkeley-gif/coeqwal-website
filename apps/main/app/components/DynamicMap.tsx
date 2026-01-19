@@ -6,7 +6,7 @@ import dynamic from "next/dynamic"
 // Map is client-only and loads after hydration
 const PersistentMapWrapper = dynamic(
   () => import("../features/map/PersistentMapWrapper"),
-  { ssr: false, loading: () => null }
+  { ssr: false, loading: () => null },
 )
 
 export function DynamicMap() {

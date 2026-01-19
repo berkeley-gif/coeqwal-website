@@ -29,7 +29,6 @@ export interface VerticalParallelLinePlotProps {
   lineColors?: string[]
   showBaseline?: boolean
   baselineData?: VerticalParallelLineData
-  defineOutcome?: boolean
   overlayTiers?: boolean
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
@@ -54,7 +53,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   lineColors = [],
   showBaseline = false,
   baselineData,
-  defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
   onLineHover,
   onLineClick,

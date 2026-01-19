@@ -1,16 +1,16 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["NEXT_PUBLIC_MAPBOX_TOKEN"],
+  "globalEnv": ["NODE_ENV", "NEXT_PUBLIC_MAPBOX_TOKEN"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "out/**", "!.next/cache/**", "dist/**"],
-      "env": ["NEXT_PUBLIC_MAPBOX_TOKEN"]
+      "env": ["NODE_ENV", "NEXT_PUBLIC_MAPBOX_TOKEN"]
     },
     "lint": {
       "dependsOn": ["^lint"],
-      "env": ["NEXT_PUBLIC_MAPBOX_TOKEN"]
+      "env": ["NODE_ENV", "NEXT_PUBLIC_MAPBOX_TOKEN"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
