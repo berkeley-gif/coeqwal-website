@@ -204,6 +204,7 @@ MUI's `sx` prop uses Emotion CSS-in-JS, which processes styles at runtime. When 
 **Strategies we use:**
 
 1. **Inline known values**: If it's beneficial to make a component a static layout component, for example if it is the ancestor to many other components, we hardcode theme values with comments referencing the source:
+
    ```tsx
    // Value from theme.zIndex.pageContent (inlined for Server Component)
    zIndex: 10,
