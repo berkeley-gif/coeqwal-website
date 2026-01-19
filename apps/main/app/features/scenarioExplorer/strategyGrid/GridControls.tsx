@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * GridControls - Toggle controls for StrategyGrid
  *

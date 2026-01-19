@@ -1,5 +1,3 @@
-"use client"
-
 /**
  * RoundedDownArrow - SVG arrow icon pointing down
  */

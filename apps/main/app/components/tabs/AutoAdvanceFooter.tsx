@@ -1,3 +1,5 @@
+"use client"
+
 // A footer "sentinel" near the bottom of a tab panel
 
 import React from "react"

@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * TierLegend - Tier explanation legend panel
  *

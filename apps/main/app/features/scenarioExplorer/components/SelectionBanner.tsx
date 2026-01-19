@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * SelectionBanner - Scenario selection summary bar
  *

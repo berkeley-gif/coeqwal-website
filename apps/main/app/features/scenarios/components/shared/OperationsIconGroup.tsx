@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * OperationsIconGroup - Renders scenario operation icons with tooltips
  *

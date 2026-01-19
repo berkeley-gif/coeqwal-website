@@ -1,5 +1,3 @@
-"use client"
-
 interface LogoColorProps {
   width?: number
   className?: string

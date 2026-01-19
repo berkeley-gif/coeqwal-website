@@ -599,6 +599,10 @@ const createDrawerMixins = (
 
 // Create theme
 const theme = createTheme({
+  // Enable CSS Variables mode for SSG optimization
+  // This generates CSS custom properties (--mui-*) for theme values,
+  // allowing Server Components to reference theme values as static strings
+  cssVariables: true,
   ...baseTheme,
   // Custom layout values
   layout: themeValues.layout,

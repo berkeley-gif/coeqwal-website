@@ -1,3 +1,5 @@
+"use client"
+
 /**
  * OutcomeGlyphItem - Single outcome visualization with glyph and label
  *

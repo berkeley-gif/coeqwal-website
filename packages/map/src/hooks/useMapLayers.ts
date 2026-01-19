@@ -1,3 +1,5 @@
+"use client"
+
 import { useEffect, useRef } from "react"
 import { useMap } from "../context/MapContext"
 import type { MapLayerType, StyleValue, SourceSpecification } from "../types"
