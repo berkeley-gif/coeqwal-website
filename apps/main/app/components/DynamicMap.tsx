@@ -32,7 +32,7 @@ function MapErrorFallback() {
         width: "100vw",
         height: "100vh",
         zIndex: theme.zIndex.persistentMap,
-        backgroundColor: theme.palette.grey[200],
+        backgroundColor: "rgb(42, 82, 135)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -41,6 +41,7 @@ function MapErrorFallback() {
       <ErrorFallback
         title="Map couldn't load"
         message="This might be a temporary issue. Try refreshing the page."
+        textColor={theme.palette.common.white}
       />
     </Box>
   )

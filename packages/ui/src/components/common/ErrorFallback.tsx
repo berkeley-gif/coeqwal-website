@@ -19,6 +19,8 @@ export interface ErrorFallbackProps {
   showRefresh?: boolean
   /** Custom retry handler - defaults to page reload */
   onRetry?: () => void
+  /** Text color */
+  textColor?: string
 }
 
 export function ErrorFallback({
@@ -26,6 +28,7 @@ export function ErrorFallback({
   message = "Please try refreshing the page.",
   showRefresh = true,
   onRetry,
+  textColor,
 }: ErrorFallbackProps) {
   const handleRetry = () => {
     if (onRetry) {
@@ -47,14 +50,18 @@ export function ErrorFallback({
         minHeight: 200,
       }}
     >
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom sx={{ color: textColor }}>
         {title}
       </Typography>
-      <Typography color="text.primary" sx={{ mb: 2 }}>
+      <Typography sx={{ mb: 2, color: textColor || "text.primary" }}>
         {message}
       </Typography>
       {showRefresh && (
-        <Button variant="outlined" onClick={handleRetry}>
+        <Button
+          variant="outlined"
+          onClick={handleRetry}
+          sx={textColor ? { color: textColor, borderColor: textColor } : {}}
+        >
           Try again
         </Button>
       )}

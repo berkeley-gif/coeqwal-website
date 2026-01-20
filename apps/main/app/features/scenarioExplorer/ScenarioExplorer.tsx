@@ -23,7 +23,6 @@ export default function ScenarioExplorerNew() {
   const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
     null,
   )
-
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
 
   return (
