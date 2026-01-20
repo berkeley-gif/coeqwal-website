@@ -29,13 +29,21 @@
     "@types/node": "^22.13.10",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
-    "eslint": "^9.22.0",
+    "eslint": "^9.39.2",
     "prettier": "^3.5.3",
-    "turbo": "^2.4.4",
+    "turbo": "^2.7.5",
     "typescript": "5.8.2"
   },
   "packageManager": "pnpm@10.0.0",
   "engines": {
     "node": "22.x"
+  },
+  "pnpm": {
+    "overrides": {
+      "js-yaml": "^4.1.1",
+      "tmp": "^0.2.4",
+      "diff": "^8.0.3",
+      "brace-expansion": "^2.0.1"
+    }
   }
 }
