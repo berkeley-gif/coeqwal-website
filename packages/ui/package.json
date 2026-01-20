@@ -27,7 +27,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@turbo/gen": "^2.4.4"
+    "@turbo/gen": "^2.7.5"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
