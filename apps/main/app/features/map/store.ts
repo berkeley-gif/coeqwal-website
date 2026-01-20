@@ -32,6 +32,7 @@ interface MapState {
   // Core
   mapMode: MapMode
   mapReady: boolean
+  mapError: boolean
 
   // Learn mode
   activeSection: SectionId
@@ -50,6 +51,7 @@ interface MapState {
 const initialState: MapState = {
   mapMode: "hidden",
   mapReady: false,
+  mapError: false,
   activeSection: "california",
   riversProgress: 0,
   geocoderMarker: null,
@@ -82,6 +84,8 @@ export const mapActions = {
   },
 
   setMapReady: (ready: boolean) => useMapStore.setState({ mapReady: ready }),
+
+  setMapError: (error: boolean) => useMapStore.setState({ mapError: error }),
 
   // Learn mode
   setActiveSection: (section: SectionId) =>
@@ -134,6 +138,7 @@ export const mapActions = {
 // Core
 export const useMapMode = () => useMapStore((s) => s.mapMode)
 export const useMapReady = () => useMapStore((s) => s.mapReady)
+export const useMapError = () => useMapStore((s) => s.mapError)
 
 // Learn mode
 export const useActiveSection = (): SectionId =>

@@ -28,10 +28,11 @@ import {
 } from "@repo/ui/mui"
 import { LeadingMarkerText } from "@repo/ui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
-import { useMapReady, mapActions } from "../../features/map/store"
+import { useMapReady, useMapError, mapActions } from "../../features/map/store"
 
 export default function LearnPanel() {
   const mapReady = useMapReady()
+  const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
   const cardColor = theme.palette.blue.pale
@@ -125,7 +126,7 @@ export default function LearnPanel() {
             backgroundColor: "transparent",
           }}
         >
-          {mapReady ? (
+          {mapReady || mapError ? (
             <MapOverlayPanels />
           ) : (
             <Box
