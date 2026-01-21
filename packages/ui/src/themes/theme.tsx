@@ -530,13 +530,19 @@ export const themeValues = {
     // Uses inverse golden ratio (0.382:1)
     grid: {
       columns: {
-        xs: "32px minmax(0, 1fr) auto",
-        lg: "32px 0.382fr 160px 1fr", // Inverse golden ratio - prioritizes glyph space
+        /** Mobile (<600px): 2 columns (checkbox + content) */
+        xs: "32px minmax(0, 1fr)",
+        /** Tablet/desktop (600-1399px): 4 columns - scenario capped at 600px, operations auto, remaining space on right */
+        sm: "32px minmax(0, 600px) auto 1fr",
+        /** Large desktop (1400px+): Full 4 columns with outcomes inline */
+        full: "32px 0.382fr 160px 1fr",
       },
       gap: {
         default: 1, // 8px gap between columns
         compact: 2,
       },
+      /** Custom breakpoint for full 4-column layout */
+      fullBreakpoint: 1400,
     },
 
     // Learn mode panel styles
