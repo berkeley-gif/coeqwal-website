@@ -22,17 +22,17 @@ const nextConfig = {
     unoptimized: true,
   },
 
-  experimental: {
-    // Turbopack loader rules (Next 13.0.0–15.2.x)
-    turbo: {
-      rules: {
-        "*.geojson": {
-          loaders: [path.join(__dirname, "geojson-loader.cjs")],
-          as: "*.js",
-        },
+  // Turbopack loader rules (Next 15.3+)
+  turbopack: {
+    rules: {
+      "*.geojson": {
+        loaders: [path.join(__dirname, "geojson-loader.cjs")],
+        as: "*.js",
       },
     },
+  },
 
+  experimental: {
     optimizePackageImports: ["@mui/icons-material", "@mui/material"],
   },
 
