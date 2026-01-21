@@ -830,7 +830,7 @@ const theme = createTheme({
     },
     outcomeLabel: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: typeScale.compact.micro, // 0.7rem (11px)
+      fontSize: "0.75rem", // 12px (slightly larger than compact.micro 11px)
       fontWeight: 500,
       lineHeight: 1.2,
       textAlign: "center" as const,

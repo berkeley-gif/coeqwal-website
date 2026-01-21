@@ -134,6 +134,9 @@ import HistoryIcon from "@mui/icons-material/History"
 import WbSunnyIcon from "@mui/icons-material/WbSunny"
 import ThunderstormIcon from "@mui/icons-material/Thunderstorm"
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment"
+import SwapVertIcon from "@mui/icons-material/SwapVert"
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 
 // Export individually imported icons
 export {
@@ -192,6 +195,9 @@ export {
   WbSunnyIcon,
   ThunderstormIcon,
   LocalFireDepartmentIcon,
+  SwapVertIcon,
+  ArrowUpwardIcon,
+  ArrowDownwardIcon,
 }
 
 // Export the full icons library for access to other icons as needed

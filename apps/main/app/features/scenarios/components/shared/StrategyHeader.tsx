@@ -9,15 +9,15 @@
  * Handles clickable glossary links for terms like TUCP and SGMA
  * that open the glossary when mentioned in the strategy description.
  *
- * Uses react-truncate-markup for word-boundary-aware truncation with
- * inline "show more" toggle.
+ * Uses @re-dev/react-truncate for word-aware truncation with Framer Motion
+ * cross-fade animation for smooth expand/collapse transitions.
  */
 
 import React, { useState, useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
-import TruncateMarkup from "react-truncate-markup"
+import { Truncate } from "@re-dev/react-truncate"
 import type { ScenarioForDisplay } from "./types"
 
 export interface StrategyHeaderProps {
@@ -49,8 +49,8 @@ const GLOSSARY_TERMS = [
 
 /**
  * Renders strategy description with clickable glossary links and truncation.
- * Uses react-truncate-markup for word-boundary-aware truncation with inline
- * "… show more" toggle that appears at the end of the last visible line.
+ * Uses @re-dev/react-truncate for word-aware truncation with Framer Motion
+ * cross-fade animation for smooth expand/collapse transitions.
  */
 function DescriptionWithGlossaryLinks({
   description,
@@ -62,6 +62,7 @@ function DescriptionWithGlossaryLinks({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const [isExpanded, setIsExpanded] = useState(false)
+  const [isTruncated, setIsTruncated] = useState(false)
 
   // Handle glossary term click - opens glossary to specific entry
   const handleGlossaryClick = useCallback(
@@ -70,7 +71,7 @@ function DescriptionWithGlossaryLinks({
       setDrawerContent({ selectedTerm: glossaryTerm })
       openDrawer("glossary")
     },
-    [setDrawerContent, openDrawer]
+    [setDrawerContent, openDrawer],
   )
 
   // Toggle styles for show more/less
@@ -85,14 +86,12 @@ function DescriptionWithGlossaryLinks({
   }
 
   // Build text content with glossary links as React nodes
-  // Plain text segments are returned as strings (not spans) so react-truncate-markup
-  // can properly tokenize them by words. Only glossary links are wrapped in elements.
   const renderTextWithGlossaryLinks = useCallback(() => {
     // Build combined regex pattern for all glossary terms
     // Capture trailing punctuation in a separate group so it stays adjacent
     const combinedPattern = new RegExp(
       `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
-      "g"
+      "g",
     )
 
     const result: React.ReactNode[] = []
@@ -100,8 +99,7 @@ function DescriptionWithGlossaryLinks({
     let match: RegExpExecArray | null
 
     while ((match = combinedPattern.exec(description)) !== null) {
-      // Add text before the match as a plain string (not wrapped in span)
-      // This allows react-truncate-markup to tokenize it by words
+      // Add text before the match
       if (match.index > lastIndex) {
         result.push(description.slice(lastIndex, match.index))
       }
@@ -111,27 +109,30 @@ function DescriptionWithGlossaryLinks({
 
       // Find which glossary term this matches
       for (const term of GLOSSARY_TERMS) {
-        if (matchedTerm && new RegExp(`^${term.pattern.source}$`).test(matchedTerm)) {
-          // Wrap glossary link + punctuation in TruncateMarkup.Atom so they're not split
+        if (
+          matchedTerm &&
+          new RegExp(`^${term.pattern.source}$`).test(matchedTerm)
+        ) {
           result.push(
-            <TruncateMarkup.Atom key={`link-${match.index}`}>
-              <Box
-                component="span"
-                onClick={handleGlossaryClick(term.glossaryTerm)}
-                sx={{
-                  color: theme.palette.blue.bright,
-                  borderBottom: `2px solid ${theme.palette.blue.bright}`,
-                  cursor: "pointer",
-                  "&:hover": {
-                    borderBottomWidth: "3px",
-                  },
-                }}
-              >
-                {matchedTerm}
-              </Box>
-              {trailingPunct}
-            </TruncateMarkup.Atom>
+            <Box
+              component="span"
+              key={`link-${match.index}`}
+              onClick={handleGlossaryClick(term.glossaryTerm)}
+              sx={{
+                color: theme.palette.blue.bright,
+                borderBottom: `2px solid ${theme.palette.blue.bright}`,
+                cursor: "pointer",
+                "&:hover": {
+                  borderBottomWidth: "3px",
+                },
+              }}
+            >
+              {matchedTerm}
+            </Box>,
           )
+          if (trailingPunct) {
+            result.push(trailingPunct)
+          }
           break
         }
       }
@@ -139,7 +140,7 @@ function DescriptionWithGlossaryLinks({
       lastIndex = match.index + match[0].length
     }
 
-    // Add any remaining text after the last match as plain string
+    // Add any remaining text after the last match
     if (lastIndex < description.length) {
       result.push(description.slice(lastIndex))
     }
@@ -147,11 +148,10 @@ function DescriptionWithGlossaryLinks({
     return result
   }, [description, handleGlossaryClick, theme.palette.blue.bright])
 
-  // Custom ellipsis with inline "show more" toggle
-  // The ellipsis (…) is separate from the clickable "show more" link
+  // Ellipsis with "show more" link for truncated view
   const showMoreEllipsis = (
-    <span>
-      {"… "}
+    <Box component="span">
+      ...{" "}
       <Box
         component="span"
         onClick={(e) => {
@@ -162,7 +162,7 @@ function DescriptionWithGlossaryLinks({
       >
         show more
       </Box>
-    </span>
+    </Box>
   )
 
   return (
@@ -211,13 +211,13 @@ function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        <TruncateMarkup
+        <Truncate
           lines={3}
           ellipsis={showMoreEllipsis}
-          tokenize="words"
+          onTruncate={(truncated: boolean) => setIsTruncated(truncated)}
         >
-          <div>{renderTextWithGlossaryLinks()}</div>
-        </TruncateMarkup>
+          <span>{renderTextWithGlossaryLinks()}</span>
+        </Truncate>
       </motion.div>
     </Typography>
   )

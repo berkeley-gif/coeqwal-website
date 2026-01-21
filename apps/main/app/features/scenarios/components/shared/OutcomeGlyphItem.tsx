@@ -15,7 +15,7 @@
 
 import React from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
-import { InfoIconButton, SortButton } from "@repo/ui"
+import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 
@@ -76,10 +76,12 @@ export interface OutcomeGlyphItemProps {
   onGlyphClick?: () => void
   /** Called when info button is clicked */
   onInfoClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
-  /** Called when sort ascending is clicked */
+  /** Called when sort ascending is clicked (legacy) */
   onSortAsc?: (e: React.MouseEvent<HTMLButtonElement>) => void
-  /** Called when sort descending is clicked */
+  /** Called when sort descending is clicked (legacy) */
   onSortDesc?: (e: React.MouseEvent<HTMLButtonElement>) => void
+  /** Called when sort state changes (new toggle API) */
+  onSortToggle?: (newState: "asc" | "desc" | null) => void
 }
 
 export function OutcomeGlyphItem({
@@ -99,6 +101,7 @@ export function OutcomeGlyphItem({
   onInfoClick,
   onSortAsc,
   onSortDesc,
+  onSortToggle,
 }: OutcomeGlyphItemProps) {
   const theme = useTheme()
 
@@ -237,17 +240,10 @@ export function OutcomeGlyphItem({
                   title="Click for outcome details"
                 />
               )}
-              {showSortButton && onSortAsc && onSortDesc && (
-                <SortButton
+              {showSortButton && onSortToggle && (
+                <ToggleSortButton
                   sortState={sortState ?? null}
-                  onAscClick={(e) => {
-                    e.stopPropagation()
-                    onSortAsc(e)
-                  }}
-                  onDescClick={(e) => {
-                    e.stopPropagation()
-                    onSortDesc(e)
-                  }}
+                  onToggle={onSortToggle}
                   title="Sort by this outcome"
                 />
               )}

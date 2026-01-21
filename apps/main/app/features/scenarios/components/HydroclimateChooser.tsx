@@ -58,29 +58,25 @@ interface HydroclimateChooserProps {
   onChange?: (value: string) => void
   /** Layout variant: 'horizontal' for row, 'vertical' for column */
   layout?: "horizontal" | "vertical"
-  /** Size variant: 'small' for compact displays, 'default' for standard */
-  size?: "small" | "default"
   /** Whether to show labels below icons */
   showLabels?: boolean
   /** Whether to show the section title */
   showTitle?: boolean
 }
 
+// Fixed icon size - no responsive shrinking needed
+const ICON_SIZE = "40px"
+
 export function HydroclimateChooser({
   value = "historical",
   onChange,
   layout = "horizontal",
-  size = "default",
   showLabels = false,
   showTitle = true,
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
   const isVertical = layout === "vertical"
-  const iconSize =
-    size === "small"
-      ? { xs: theme.spacing(3.5), lg: theme.spacing(4) }
-      : { xs: theme.spacing(4), lg: theme.spacing(5) }
 
   const handleSelect = (optionValue: string) => {
     // Only allow selection of historical for now
@@ -96,6 +92,7 @@ export function HydroclimateChooser({
         flexDirection: "column",
         alignItems: "flex-start",
         gap: theme.space.gap.md,
+        flexShrink: 0,
       }}
     >
       {showTitle && (
@@ -114,7 +111,7 @@ export function HydroclimateChooser({
         sx={{
           display: "flex",
           flexDirection: isVertical ? "column" : "row",
-          gap: size === "small" ? 0.5 : 1,
+          gap: 1,
           alignItems: isVertical ? "flex-start" : "center",
         }}
       >
@@ -152,8 +149,11 @@ export function HydroclimateChooser({
                 >
                   <Box
                     sx={{
-                      width: iconSize,
-                      height: iconSize,
+                      width: ICON_SIZE,
+                      height: ICON_SIZE,
+                      minWidth: ICON_SIZE,
+                      minHeight: ICON_SIZE,
+                      flexShrink: 0,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -186,7 +186,7 @@ export function HydroclimateChooser({
                     <IconComponent
                       sx={{
                         color: theme.palette.common.white,
-                        fontSize: size === "small" ? "1.25rem" : "1.5rem",
+                        fontSize: "1.5rem",
                       }}
                     />
                   </Box>

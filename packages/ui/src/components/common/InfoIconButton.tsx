@@ -57,7 +57,7 @@ import { Theme } from "@mui/material/styles"
 // ============================================================================
 // CONFIGURABLE CONSTANTS
 // ============================================================================
-const BUTTON_ICON_SIZE = "1.2rem"
+const BUTTON_ICON_SIZE = "1.35rem"
 const INLINE_ICON_SIZE = "1.1rem"
 const CIRCLE_SIZE = "24px"
 const INLINE_TOUCH_TARGET = "20px"

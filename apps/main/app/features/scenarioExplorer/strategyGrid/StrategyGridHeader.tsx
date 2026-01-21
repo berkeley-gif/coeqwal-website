@@ -20,7 +20,7 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoIconButton, SortButton } from "@repo/ui"
+import { InfoIconButton, ToggleSortButton } from "@repo/ui"
 import { formatOutcomeLabel, type OutcomeName } from "../../scenarios/components/shared"
 import { LAYOUT } from "./layoutConfig"
 
@@ -351,20 +351,13 @@ function OutcomeCategoryLabels({
               />
 
               {sortEnabled && onSortChange && (
-                <SortButton
+                <ToggleSortButton
                   sortState={isSorted ? sortDirection : null}
-                  onAscClick={() => {
-                    if (sortDirection === "asc" && sortBy === displayName) {
+                  onToggle={(newState) => {
+                    if (newState === null) {
                       onSortChange(null, "asc")
                     } else {
-                      onSortChange(displayName, "asc")
-                    }
-                  }}
-                  onDescClick={() => {
-                    if (sortDirection === "desc" && sortBy === displayName) {
-                      onSortChange(null, "asc")
-                    } else {
-                      onSortChange(displayName, "desc")
+                      onSortChange(displayName, newState)
                     }
                   }}
                   title="Sort by this outcome"

@@ -108,20 +108,11 @@ export function OutcomeGrid({
         sortState={isSorted ? sortDirection : null}
         onGlyphClick={() => onGlyphClick?.(outcome)}
         onInfoClick={(e) => onInfoClick?.(outcome, e)}
-        onSortAsc={(e) => {
-          e.stopPropagation()
-          if (sortDirection === "asc" && sortBy === outcome) {
+        onSortToggle={(newState) => {
+          if (newState === null) {
             onSortChange?.(null, "asc") // Clear sort
           } else {
-            onSortChange?.(outcome, "asc")
-          }
-        }}
-        onSortDesc={(e) => {
-          e.stopPropagation()
-          if (sortDirection === "desc" && sortBy === outcome) {
-            onSortChange?.(null, "asc") // Clear sort
-          } else {
-            onSortChange?.(outcome, "desc")
+            onSortChange?.(outcome, newState)
           }
         }}
       />

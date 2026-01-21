@@ -93,7 +93,6 @@ export function KeyOperationsPanel({
         <Box>
           <HydroclimateChooser
             layout="horizontal"
-            size="default"
             showTitle={true}
             showLabels={false}
           />
