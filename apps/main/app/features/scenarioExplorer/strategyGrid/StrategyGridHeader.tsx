@@ -345,8 +345,8 @@ function OutcomeCategoryLabels({
               }}
             >
               <InfoIconButton
-                isActive={activeTooltip === name}
-                onClick={(e) => onTooltipToggle(name, e.currentTarget)}
+                isActive={activeTooltip === displayName}
+                onClick={(e) => onTooltipToggle(displayName, e.currentTarget)}
                 title="Click for outcome details"
               />
 
