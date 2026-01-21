@@ -34,7 +34,10 @@ export type { InfoIconButtonProps } from "./common/InfoIconButton"
 export { SortButton } from "./common/SortButton"
 export type { SortButtonProps } from "./common/SortButton"
 export { ToggleSortButton } from "./common/ToggleSortButton"
-export type { ToggleSortButtonProps, SortState } from "./common/ToggleSortButton"
+export type {
+  ToggleSortButtonProps,
+  SortState,
+} from "./common/ToggleSortButton"
 export { StyledTextInput } from "./common/StyledTextInput"
 export type { StyledTextInputProps } from "./common/StyledTextInput"
 export { InfoOverlay } from "./common/InfoOverlay"

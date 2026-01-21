@@ -541,8 +541,11 @@ export const themeValues = {
         default: 1, // 8px gap between columns
         compact: 2,
       },
-      /** Custom breakpoint for full 4-column layout */
       fullBreakpoint: 1400,
+      row: { padding: 3, firstOffset: 0.5, internalGap: 1 },
+      divider: { gap: 1.5, pullUp: -1 },
+      header: { standard: 2, outcomes: 1, categoryLabels: 1 },
+      glyphOffset: "14px",
     },
 
     // Learn mode panel styles

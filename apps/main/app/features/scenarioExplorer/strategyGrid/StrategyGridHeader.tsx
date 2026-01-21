@@ -21,8 +21,10 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
-import { formatOutcomeLabel, type OutcomeName } from "../../scenarios/components/shared"
-import { LAYOUT } from "./layoutConfig"
+import {
+  formatOutcomeLabel,
+  type OutcomeName,
+} from "../../scenarios/components/shared"
 
 /**
  * Layout mode for responsive grid behavior
@@ -158,8 +160,8 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
           alignItems: "flex-start",
           alignSelf: "stretch",
           // No pl - align with left edge of checkbox
-          pr: LAYOUT.spacing.dividerGap,
-          pb: LAYOUT.headerPadding.standard,
+          pr: theme.scenarios.grid.divider.gap,
+          pb: theme.scenarios.grid.header.standard,
         }}
       >
         <Typography
@@ -182,10 +184,12 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
           alignSelf: "stretch",
           // In wrapped mode, no divider and no left padding (aligns with icons below)
           // In full mode, divider with standard gap
-          pl: isFullMode ? LAYOUT.spacing.dividerGap : 0,
-          pb: LAYOUT.headerPadding.standard,
+          pl: isFullMode ? theme.scenarios.grid.divider.gap : 0,
+          pb: theme.scenarios.grid.header.standard,
           // Vertical divider only in full mode
-          borderLeft: isFullMode ? `1px solid ${theme.palette.grey[300]}` : "none",
+          borderLeft: isFullMode
+            ? `1px solid ${theme.palette.grey[300]}`
+            : "none",
         }}
       >
         <Typography
@@ -212,8 +216,8 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
              * Outcome category labels appear directly below this header,
              * so we use component.sm (8px) instead of component.lg (16px).
              */
-            pb: LAYOUT.headerPadding.outcomes,
-            pl: LAYOUT.spacing.dividerGap,
+            pb: theme.scenarios.grid.header.outcomes,
+            pl: theme.scenarios.grid.divider.gap,
             // Vertical divider at column boundary
             borderLeft: `1px solid ${theme.palette.grey[300]}`,
           }}
@@ -256,7 +260,7 @@ function DividerContinuation({ column }: DividerContinuationProps) {
          * Divider pull-up: negates the grid row gap (8px)
          * so the border appears continuous with the header above.
          */
-        mt: LAYOUT.dividerPullUp,
+        mt: theme.scenarios.grid.divider.pullUp,
         borderLeft: `1px solid ${theme.palette.grey[300]}`,
         alignSelf: "stretch",
       }}
@@ -298,18 +302,18 @@ function OutcomeCategoryLabels({
         display: { xs: "none", sm: "grid" },
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
-        pb: LAYOUT.headerPadding.categoryLabels,
-        pl: LAYOUT.spacing.dividerGap,
+        pb: theme.scenarios.grid.header.categoryLabels,
+        pl: theme.scenarios.grid.divider.gap,
         /**
          * Divider pull-up: negates the grid row gap (8px)
          * so the border appears continuous with the header above.
          */
-        mt: LAYOUT.dividerPullUp,
+        mt: theme.scenarios.grid.divider.pullUp,
         borderLeft: `1px solid ${theme.palette.grey[300]}`,
         alignSelf: "stretch",
       }}
     >
-      {outcomeNames.map(({ name, displayName }) => {
+      {outcomeNames.map(({ displayName }) => {
         const isSorted = sortBy === displayName
 
         return (

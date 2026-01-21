@@ -62,7 +62,6 @@ function DescriptionWithGlossaryLinks({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isTruncated, setIsTruncated] = useState(false)
 
   // Handle glossary term click - opens glossary to specific entry
   const handleGlossaryClick = useCallback(
@@ -211,11 +210,7 @@ function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        <Truncate
-          lines={3}
-          ellipsis={showMoreEllipsis}
-          onTruncate={(truncated: boolean) => setIsTruncated(truncated)}
-        >
+        <Truncate lines={2} ellipsis={showMoreEllipsis}>
           <span>{renderTextWithGlossaryLinks()}</span>
         </Truncate>
       </motion.div>

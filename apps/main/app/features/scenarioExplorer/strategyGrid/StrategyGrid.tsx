@@ -63,7 +63,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"))
   // Full 4-column layout at 1400px+ (custom breakpoint from theme)
   const isFullWidth = useMediaQuery(
-    `(min-width: ${theme.scenarios.grid.fullBreakpoint}px)`
+    `(min-width: ${theme.scenarios.grid.fullBreakpoint}px)`,
   )
 
   /**

@@ -146,7 +146,9 @@ export function StrategyGridContent({
             showDefinitions={showDefinitions}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
-            expandedSummaryOutcome={expandedSummaries[scenario.scenarioId] ?? null}
+            expandedSummaryOutcome={
+              expandedSummaries[scenario.scenarioId] ?? null
+            }
             selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
             hasTierClick={!!onTierClick}
             activeTooltip={activeTooltip}
@@ -172,7 +174,9 @@ export function StrategyGridContent({
               key={`summary-${scenario.scenarioId}`}
               scenarioId={scenario.scenarioId}
               outcome={selectedOutcomeForSummary}
-              onClose={() => onToggleSummary(scenario.scenarioId, selectedOutcomeForSummary)}
+              onClose={() =>
+                onToggleSummary(scenario.scenarioId, selectedOutcomeForSummary)
+              }
             />,
           )
         }
