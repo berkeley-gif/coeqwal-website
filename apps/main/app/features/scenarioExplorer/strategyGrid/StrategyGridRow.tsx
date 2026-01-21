@@ -444,8 +444,8 @@ function NonCompactRowContent({
           display: "flex",
           flexDirection: "column",
           gap: theme.space.gap.md,
-          // In wrapped mode, left-align; in full mode, center in fixed-width column
-          justifyContent: isWrappedMode ? "flex-start" : "center",
+          // Top-align in all modes
+          justifyContent: "flex-start",
           alignItems: "flex-start",
           // Responsive views: 8px top padding (+ 8px rowGap = 16px total, less than 24px outer)
           // Full mode: standard row padding
