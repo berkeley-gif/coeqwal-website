@@ -39,7 +39,9 @@ export function OperationsIconGroup({
   layout = "horizontal",
 }: OperationsIconGroupProps) {
   const theme = useTheme()
+  // Use the lg size consistently - icons should never shrink at smaller viewports
   const iconSize = getIconSize(size)
+  const fixedIconSize = theme.spacing(iconSize.lg)
 
   // Non-baseline themes use custom theme icons
   if (scenarioTheme && scenarioTheme !== "baseline") {
@@ -68,14 +70,8 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
-              height: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
+              width: fixedIconSize,
+              height: fixedIconSize,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -99,14 +95,8 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
-              height: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
+              width: fixedIconSize,
+              height: fixedIconSize,
               cursor: "pointer",
             }}
           >
@@ -134,14 +124,8 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
-              height: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
+              width: fixedIconSize,
+              height: fixedIconSize,
               cursor: "pointer",
             }}
           >
@@ -184,14 +168,8 @@ export function OperationsIconGroup({
         >
           <Box
             sx={{
-              width: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
-              height: {
-                xs: theme.spacing(iconSize.xs),
-                lg: theme.spacing(iconSize.lg),
-              },
+              width: fixedIconSize,
+              height: fixedIconSize,
               cursor: "pointer",
               display: "flex",
               alignItems: "center",

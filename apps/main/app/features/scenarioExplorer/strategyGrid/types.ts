@@ -35,11 +35,6 @@ export interface StrategyGridProps {
   compact?: boolean
   renderMode?: "all" | "headersOnly" | "contentOnly"
 
-  // UI control handlers
-  onMapViewChange: (enabled: boolean) => void
-  onShowOnlyChosenChange: (enabled: boolean) => void
-  onShowDefinitionsChange: (enabled: boolean) => void
-
   // Sorting (optional)
   sortBy?: string | null
   sortDirection?: "asc" | "desc"
