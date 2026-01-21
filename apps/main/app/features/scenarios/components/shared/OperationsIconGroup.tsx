@@ -50,7 +50,7 @@ export function OperationsIconGroup({
           gap: { xs: theme.space.gap.xs, md: theme.space.gap.sm },
           alignItems: "flex-start",
           flexDirection: layout === "horizontal" ? "row" : "column",
-          justifyContent: "flex-start",
+          justifyContent: "center",
         }}
       >
         {/* Theme icon (Groundwater/Environmental) */}
