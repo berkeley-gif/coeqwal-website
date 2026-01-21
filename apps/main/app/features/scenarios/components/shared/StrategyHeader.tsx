@@ -8,11 +8,15 @@
  *
  * Handles clickable glossary links for terms like TUCP and SGMA
  * that open the glossary when mentioned in the strategy description.
+ *
+ * Uses react-truncate-markup for word-boundary-aware truncation with
+ * inline "show more" toggle.
  */
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
+import TruncateMarkup from "react-truncate-markup"
 import type { ScenarioForDisplay } from "./types"
 
 export interface StrategyHeaderProps {
@@ -44,10 +48,8 @@ const GLOSSARY_TERMS = [
 
 /**
  * Renders strategy description with clickable glossary links and truncation.
- * Uses a float-based technique to place "… show more" at the end of line 3:
- * 1. A floated spacer reserves room at bottom-right for the toggle
- * 2. The toggle is positioned absolutely over that reserved space
- * 3. CSS line-clamp handles the actual truncation
+ * Uses react-truncate-markup for word-boundary-aware truncation with inline
+ * "… show more" toggle that appears at the end of the last visible line.
  */
 function DescriptionWithGlossaryLinks({
   description,
@@ -59,69 +61,18 @@ function DescriptionWithGlossaryLinks({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isTruncated, setIsTruncated] = useState(false)
-  const textRef = useRef<HTMLDivElement>(null)
-
-  // Check if text is truncated (exceeds 3 lines)
-  useEffect(() => {
-    const checkTruncation = () => {
-      if (textRef.current) {
-        const lineHeight = parseFloat(getComputedStyle(textRef.current).lineHeight)
-        const maxHeight = lineHeight * 3 // 3 lines
-        setIsTruncated(textRef.current.scrollHeight > maxHeight + 2) // +2 for rounding
-      }
-    }
-    checkTruncation()
-    window.addEventListener("resize", checkTruncation)
-    return () => window.removeEventListener("resize", checkTruncation)
-  }, [description])
 
   // Handle glossary term click - opens glossary to specific entry
-  const handleGlossaryClick = (glossaryTerm: string) => (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setDrawerContent({ selectedTerm: glossaryTerm })
-    openDrawer("glossary")
-  }
-
-  // Styled component for glossary link
-  const GlossaryLink = ({ text, glossaryTerm }: { text: string; glossaryTerm: string }) => (
-    <Box
-      component="span"
-      onClick={handleGlossaryClick(glossaryTerm)}
-      sx={{
-        color: theme.palette.blue.bright,
-        borderBottom: `2px solid ${theme.palette.blue.bright}`,
-        cursor: "pointer",
-        "&:hover": {
-          borderBottomWidth: "3px",
-        },
-      }}
-    >
-      {text}
-    </Box>
+  const handleGlossaryClick = useCallback(
+    (glossaryTerm: string) => (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setDrawerContent({ selectedTerm: glossaryTerm })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer]
   )
 
-  // Render text with glossary terms as clickable links
-  const renderTextWithGlossaryLinks = () => {
-    // Build combined regex pattern for all glossary terms
-    const combinedPattern = new RegExp(
-      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})`,
-      "g"
-    )
-
-    return description.split(combinedPattern).map((part, index) => {
-      // Check if this part matches any glossary term
-      for (const term of GLOSSARY_TERMS) {
-        if (new RegExp(`^${term.pattern.source}$`).test(part)) {
-          return (
-            <GlossaryLink key={index} text={part} glossaryTerm={term.glossaryTerm} />
-          )
-        }
-      }
-      return part
-    })
-  }
-
+  // Toggle styles for show more/less
   const toggleStyles = {
     color: theme.palette.blue.bright,
     fontStyle: "italic",
@@ -132,8 +83,86 @@ function DescriptionWithGlossaryLinks({
     },
   }
 
-  // Width of "… show more" text plus small buffer
-  const toggleWidth = "85px"
+  // Build text content with glossary links as React nodes
+  // Plain text segments are returned as strings (not spans) so react-truncate-markup
+  // can properly tokenize them by words. Only glossary links are wrapped in elements.
+  const renderTextWithGlossaryLinks = useCallback(() => {
+    // Build combined regex pattern for all glossary terms
+    // Capture trailing punctuation in a separate group so it stays adjacent
+    const combinedPattern = new RegExp(
+      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
+      "g"
+    )
+
+    const result: React.ReactNode[] = []
+    let lastIndex = 0
+    let match: RegExpExecArray | null
+
+    while ((match = combinedPattern.exec(description)) !== null) {
+      // Add text before the match as a plain string (not wrapped in span)
+      // This allows react-truncate-markup to tokenize it by words
+      if (match.index > lastIndex) {
+        result.push(description.slice(lastIndex, match.index))
+      }
+
+      const matchedTerm = match[1] ?? ""
+      const trailingPunct = match[2] ?? ""
+
+      // Find which glossary term this matches
+      for (const term of GLOSSARY_TERMS) {
+        if (matchedTerm && new RegExp(`^${term.pattern.source}$`).test(matchedTerm)) {
+          // Wrap glossary link + punctuation in TruncateMarkup.Atom so they're not split
+          result.push(
+            <TruncateMarkup.Atom key={`link-${match.index}`}>
+              <Box
+                component="span"
+                onClick={handleGlossaryClick(term.glossaryTerm)}
+                sx={{
+                  color: theme.palette.blue.bright,
+                  borderBottom: `2px solid ${theme.palette.blue.bright}`,
+                  cursor: "pointer",
+                  "&:hover": {
+                    borderBottomWidth: "3px",
+                  },
+                }}
+              >
+                {matchedTerm}
+              </Box>
+              {trailingPunct}
+            </TruncateMarkup.Atom>
+          )
+          break
+        }
+      }
+
+      lastIndex = match.index + match[0].length
+    }
+
+    // Add any remaining text after the last match as plain string
+    if (lastIndex < description.length) {
+      result.push(description.slice(lastIndex))
+    }
+
+    return result
+  }, [description, handleGlossaryClick, theme.palette.blue.bright])
+
+  // Custom ellipsis with inline "show more" toggle
+  // The ellipsis (…) is separate from the clickable "show more" link
+  const showMoreEllipsis = (
+    <span>
+      {"… "}
+      <Box
+        component="span"
+        onClick={(e) => {
+          e.stopPropagation()
+          setIsExpanded(true)
+        }}
+        sx={toggleStyles}
+      >
+        show more
+      </Box>
+    </span>
+  )
 
   return (
     <Typography
@@ -143,56 +172,32 @@ function DescriptionWithGlossaryLinks({
         color: theme.palette.grey[600],
         maxWidth: maxWidth ?? theme.layout.maxWidth.md,
         lineHeight: 1.6,
-        position: "relative",
       }}
     >
-      <Box
-        ref={textRef}
-        sx={{
-          display: "-webkit-box",
-          WebkitLineClamp: isExpanded ? "unset" : 3,
-          WebkitBoxOrient: "vertical",
-          overflow: isExpanded ? "visible" : "hidden",
-        }}
-      >
-        {/* Floated spacer that reserves space at end of line 3 for toggle */}
-        {!isExpanded && isTruncated && (
+      {isExpanded ? (
+        // Expanded view - show full text with "show less" at end
+        <>
+          {renderTextWithGlossaryLinks()}{" "}
           <Box
             component="span"
-            sx={{
-              float: "right",
-              width: toggleWidth,
-              height: "1.6em", // One line height
-              // Push down to line 3 by using shape-margin approach
-              shapeOutside: `inset(calc(1.6em * 2) 0 0 0)`,
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsExpanded(false)
             }}
-          />
-        )}
-        {renderTextWithGlossaryLinks()}
-      </Box>
-      {isTruncated && (
-        <Box
-          component="span"
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsExpanded(!isExpanded)
-          }}
-          sx={{
-            ...toggleStyles,
-            // When collapsed, position at bottom right over the floated spacer
-            ...(isExpanded
-              ? {}
-              : {
-                  position: "absolute",
-                  bottom: 0,
-                  right: 0,
-                  backgroundColor: "#faf8f5",
-                  paddingLeft: "4px",
-                }),
-          }}
+            sx={toggleStyles}
+          >
+            show less
+          </Box>
+        </>
+      ) : (
+        // Truncated view - use react-truncate-markup for word-aware truncation
+        <TruncateMarkup
+          lines={3}
+          ellipsis={showMoreEllipsis}
+          tokenize="words"
         >
-          {isExpanded ? "show less" : "… show more"}
-        </Box>
+          <div>{renderTextWithGlossaryLinks()}</div>
+        </TruncateMarkup>
       )}
     </Typography>
   )
