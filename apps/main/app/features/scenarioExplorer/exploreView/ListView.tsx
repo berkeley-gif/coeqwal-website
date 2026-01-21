@@ -225,7 +225,10 @@ export default function ListView({
             overflowY: "auto",
             overscrollBehavior: "contain",
             px: theme.space.section.md,
+            pt: "10px",
             pb: theme.space.section.xl,
+            // Top border to indicate scrollable area
+            borderTop: theme.border.medium,
           }}
         >
           {showNoResultsMessage && (
@@ -265,6 +268,8 @@ export default function ListView({
           px: theme.space.section.sm,
           pt: theme.space.component.md,
           pb: theme.space.section.xl,
+          // Top border to indicate scrollable area
+          borderTop: theme.border.medium,
         }}
       >
         {showNoResultsMessage && (
