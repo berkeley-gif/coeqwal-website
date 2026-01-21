@@ -261,7 +261,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
                     alignSelf: "stretch",
-                    pb: theme.space.section.xs,
+                    pb: theme.space.component.md,
                   }}
                 >
                   <Typography
@@ -282,7 +282,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: "flex-end",
                     justifyContent: "center", // Center content in fixed-width column
                     alignSelf: "stretch",
-                    pb: theme.space.section.xs,
+                    pb: theme.space.component.md,
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
                   }}
@@ -306,7 +306,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignSelf: "stretch",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
-                    pb: theme.space.section.xs,
+                    pb: theme.space.component.md,
                     pl: theme.space.component.lg, // Padding after divider
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,

@@ -205,7 +205,7 @@ export default function ListView({
           sx={{
             flexShrink: 0,
             px: theme.space.section.md,
-            pt: theme.space.section.xs,
+            pt: theme.space.component.sm, // Tighter than SearchBar to account for grid structure
             backgroundColor: theme.palette.grey[100],
           }}
         >
