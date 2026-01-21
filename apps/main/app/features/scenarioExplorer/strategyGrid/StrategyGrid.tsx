@@ -260,7 +260,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     gridColumn: "2",
                     display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
-                    pb: theme.space.component.md,
+                    alignSelf: "stretch",
+                    pb: theme.space.section.xs,
                   }}
                 >
                   <Typography
@@ -281,7 +282,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: "flex-end",
                     justifyContent: "center", // Center content in fixed-width column
                     alignSelf: "stretch",
-                    pb: theme.space.component.md,
+                    pb: theme.space.section.xs,
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
                   }}
@@ -305,7 +306,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignSelf: "stretch",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
-                    pb: theme.space.component.md,
+                    pb: theme.space.section.xs,
                     pl: theme.space.component.lg, // Padding after divider
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
@@ -356,7 +357,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               display: compact ? "none" : { xs: "none", lg: "grid" },
               gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
               gap: theme.space.gap.sm, // Match row's outcome grid gap
-              pb: theme.space.component.md,
+              pb: theme.space.component.sm,
               pl: theme.space.component.lg, // Padding after divider
               // Pull up to close gap with header row so dividers appear continuous
               mt: -1, // -8px (negates the grid row gap)
@@ -382,7 +383,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   <Typography
                     component="div"
                     sx={{
-                      fontSize: "0.71875rem", // 11.5px
+                      fontSize: "0.75rem", // 12px
                       fontWeight: 500,
                       color: theme.palette.grey[600],
                       textAlign: "center",
@@ -466,9 +467,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       ? theme.palette.common.white
                       : "#faf8f5",
                     borderRadius: theme.borderRadius.sm,
-                    py: theme.space.section.xs,
-                    // Only apply px padding in compact mode; non-compact uses grid alignment
-                    ...(compact && { px: theme.space.component.xl }),
+                    // Compact mode uses row-level padding; non-compact uses column-level padding
+                    ...(compact && {
+                      py: theme.space.section.sm,
+                      px: theme.space.component.xl,
+                    }),
                     // Match parent grid's columnGap for subgrid alignment
                     columnGap: theme.space.gap.lg,
                     rowGap: theme.space.gap.md,
@@ -487,7 +490,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     "&:last-child": {
                       borderBottom: "1px solid transparent",
                     },
-                    ...(index === 0 && { marginTop: theme.space.component.sm }),
+                    ...(index === 0 && { marginTop: theme.space.component.xs }),
                   }}
                 >
                   {/* Column 1: Checkbox */}
@@ -499,6 +502,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       alignSelf: "start", // Keep checkbox at top
                       pointerEvents: "auto",
                       cursor: "pointer",
+                      // Non-compact: pt matches column 2 for alignment with scenario title
+                      ...(!compact && {
+                        pt: theme.space.section.sm,
+                        pb: theme.space.section.sm,
+                      }),
                       ...(compact && { gridRow: "1 / -1" }),
                     }}
                     onClick={(event) => {
@@ -514,8 +522,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         margin: 0,
                         cursor: "pointer",
                         pointerEvents: "none",
-                        position: "relative",
-                        top: theme.spacing(0.375),
                         transform: "scale(0.9)",
                       }}
                     />
@@ -623,6 +629,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         sx={{
                           gridColumn: { lg: "2" },
                           pr: 1,
+                          pt: theme.space.section.sm,
+                          pb: theme.space.section.sm,
                           alignSelf: "start",
                         }}
                       >
@@ -646,6 +654,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "flex-start",
+                          pt: theme.space.section.sm,
+                          pb: theme.space.section.sm,
                         }}
                       >
                         <OperationsIconGroup
@@ -664,6 +674,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             lg: `1px solid ${theme.palette.grey[300]}`,
                           },
                           pl: { lg: theme.space.component.lg },
+                          // Glyphs have internal padding (8px) + border (2px) = 10px
+                          // So pt: 24px - 10px = 14px to align glyph content with scenario title
+                          pt: { lg: "14px" },
+                          pb: { lg: theme.space.section.sm },
                           // Content aligns to top within stretched column
                           display: "flex",
                           alignItems: "flex-start",
