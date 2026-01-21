@@ -219,45 +219,71 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         {/* Column headers */}
         {renderMode !== "contentOnly" && !showMapView && (
           <>
-            <Box
-              sx={{
-                gridColumn: compact ? "1 / -1" : "1 / 3",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: compact ? "space-between" : "flex-start",
-                pb: theme.space.component.md,
-              }}
-            >
-              <Typography
-                variant="subtitle2"
+            {compact ? (
+              <Box
                 sx={{
-                  color: theme.palette.grey[900],
-                  fontWeight: 500, // Medium - matches peer headers
+                  gridColumn: "1 / -1",
+                  display: "flex",
+                  alignItems: "flex-end",
+                  justifyContent: "space-between",
+                  pb: theme.space.component.md,
                 }}
               >
-                Choose scenarios
-              </Typography>
-              {compact && (
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    color: theme.palette.grey[900],
+                    fontWeight: 500,
+                  }}
+                >
+                  Choose scenarios
+                </Typography>
                 <GridControls
                   showOnlyChosen={showOnlyChosen}
                   showDefinitions={showDefinitions}
                   onShowOnlyChosenChange={onShowOnlyChosenChange}
                   onShowDefinitionsChange={onShowDefinitionsChange}
                 />
-              )}
-            </Box>
-            {!compact && (
+              </Box>
+            ) : (
               <>
+                {/* Column 1 header - empty spacer for checkbox column */}
                 <Box
                   sx={{
-                    display: "flex",
+                    gridColumn: "1",
+                    display: { xs: "none", lg: "block" },
+                  }}
+                />
+                {/* Column 2 header - Choose scenarios */}
+                <Box
+                  sx={{
+                    gridColumn: "2",
+                    display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
-                    alignSelf: "stretch", // Stretch to full header height for divider
                     pb: theme.space.component.md,
-                    // Vertical column divider
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: theme.palette.grey[900],
+                      fontWeight: 500,
+                    }}
+                  >
+                    Choose scenarios
+                  </Typography>
+                </Box>
+                {/* Column 3 header - Key operations */}
+                <Box
+                  sx={{
+                    gridColumn: "3",
+                    display: { xs: "none", lg: "flex" },
+                    alignItems: "flex-end",
+                    justifyContent: "center", // Center content in fixed-width column
+                    alignSelf: "stretch",
+                    pb: theme.space.component.md,
+                    // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
-                    pl: theme.space.section.xs,
-                    ml: theme.space.component.xl,
                   }}
                 >
                   <Typography
@@ -270,18 +296,19 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     Key operations
                   </Typography>
                 </Box>
+                {/* Column 4 header - Key outcomes */}
                 <Box
                   sx={{
+                    gridColumn: "4",
                     display: { xs: "none", lg: "flex" },
                     alignItems: "flex-end",
-                    alignSelf: "stretch", // Stretch to full header height for divider
+                    alignSelf: "stretch",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
                     pb: theme.space.component.md,
-                    // Vertical column divider
+                    pl: theme.space.component.lg, // Padding after divider
+                    // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
-                    pl: theme.space.section.xs,
-                    ml: theme.space.component.xl,
                   }}
                 >
                   <Typography
@@ -313,10 +340,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               display: { xs: "none", lg: "block" },
               // Pull up to close gap with header row so dividers appear continuous
               mt: -1, // -8px (negates the grid row gap)
-              // Vertical column divider - continues from Key operations header
+              // Vertical column divider at column boundary
               borderLeft: `1px solid ${theme.palette.grey[300]}`,
-              pl: theme.space.section.xs, // 24px
-              ml: theme.space.component.xl, // 20px
               // Stretch to match the height of the adjacent outcome headers
               alignSelf: "stretch",
             }}
@@ -327,18 +352,18 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         {renderMode !== "contentOnly" && (
           <Box
             sx={{
-              gridColumn: "4 / -1",
+              gridColumn: "4",
               display: compact ? "none" : { xs: "none", lg: "grid" },
               gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
               gap: theme.space.gap.sm, // Match row's outcome grid gap
               pb: theme.space.component.md,
+              pl: theme.space.component.lg, // Padding after divider
               // Pull up to close gap with header row so dividers appear continuous
-              // Grid gap is 1 (8px), so use negative margin to eliminate it
               mt: -1, // -8px (negates the grid row gap)
-              // Vertical column divider - continues from Key outcomes header
+              // Vertical column divider at column boundary
               borderLeft: `1px solid ${theme.palette.grey[300]}`,
-              pl: theme.space.section.xs, // 24px
-              ml: theme.space.component.xl, // 20px
+              // Stretch to match the height of the adjacent column 3 placeholder
+              alignSelf: "stretch",
             }}
           >
             {outcomeNames.map(({ name, displayName }) => {
@@ -442,16 +467,18 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       : "#faf8f5",
                     borderRadius: theme.borderRadius.sm,
                     py: theme.space.section.xs,
-                    px: compact
-                      ? theme.space.component.xl
-                      : theme.space.component.lg,
-                    gap: theme.space.gap.md,
+                    // Only apply px padding in compact mode; non-compact uses grid alignment
+                    ...(compact && { px: theme.space.component.xl }),
+                    // Match parent grid's columnGap for subgrid alignment
+                    columnGap: theme.space.gap.lg,
+                    rowGap: theme.space.gap.md,
                     alignItems: "stretch", // Stretch all columns so dividers span full height
                     transition:
                       "background-color 0.2s ease, border-color 0.2s ease",
-                    border: isHighlighted
+                    // Use outline instead of border to avoid shifting content
+                    outline: isHighlighted
                       ? `1px solid ${theme.palette.blue.bright}`
-                      : "1px solid transparent",
+                      : "none",
                     borderBottom: `1px solid ${theme.palette.grey[200]}`,
                     "&:hover": {
                       backgroundColor: theme.palette.background.paper,
@@ -592,7 +619,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   ) : (
                     <>
                       {/* Non-compact: Column 2 - Scenario name and description */}
-                      <Box sx={{ pr: 1, alignSelf: "start" }}>
+                      <Box
+                        sx={{
+                          gridColumn: { lg: "2" },
+                          pr: 1,
+                          alignSelf: "start",
+                        }}
+                      >
                         <StrategyHeader
                           strategy={scenario}
                           showDescription={showDefinitions}
@@ -604,14 +637,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       {/* Non-compact: Column 3 - Key operations */}
                       <Box
                         sx={{
-                          // Vertical column divider
+                          gridColumn: { lg: "3" },
+                          // Vertical column divider - must match headers exactly
                           borderLeft: {
                             lg: `1px solid ${theme.palette.grey[300]}`,
                           },
-                          pl: { lg: theme.space.section.xs }, // 24px
-                          ml: { lg: theme.space.component.xl }, // 20px
-                          // Content aligns to top within stretched column
+                          // Center icons in fixed-width column
                           display: "flex",
+                          justifyContent: "center",
                           alignItems: "flex-start",
                         }}
                       >
@@ -625,13 +658,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       {/* Non-compact: Column 4 - Outcome charts */}
                       <Box
                         sx={{
-                          gridColumn: { xs: "1 / -1", lg: "auto" },
-                          // Vertical column divider
+                          gridColumn: { xs: "1 / -1", lg: "4" },
+                          // Vertical column divider - must match headers exactly
                           borderLeft: {
                             lg: `1px solid ${theme.palette.grey[300]}`,
                           },
-                          pl: { lg: theme.space.section.xs }, // 24px
-                          ml: { lg: theme.space.component.xl }, // 20px
+                          pl: { lg: theme.space.component.lg },
                           // Content aligns to top within stretched column
                           display: "flex",
                           alignItems: "flex-start",

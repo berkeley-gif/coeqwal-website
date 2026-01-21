@@ -526,10 +526,11 @@ export const themeValues = {
     },
 
     // Grid layout configuration for strategy lists
+    // Columns: 1=checkbox, 2=scenario name, 3=key operations, 4=key outcomes
     grid: {
       columns: {
         xs: "32px minmax(0, 1fr) auto",
-        lg: "32px minmax(0, 0.8fr) auto minmax(0, 2fr)",
+        lg: "32px 0.4fr 184px 1fr", // Fixed col 1 & 3, flexible col 2 & 4
       },
       gap: {
         default: 1,
