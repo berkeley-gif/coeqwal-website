@@ -405,18 +405,21 @@ function NonCompactRowContent({
 
   // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
+  // Any responsive view below 1400px (wrapped or xs/compact layout modes)
+  const isResponsiveView = layoutMode !== "full"
 
   return (
     <>
       {/* Column 2: Scenario name and description */}
       <Box
         sx={{
-          gridColumn: { sm: "2" },
+          gridColumn: { xs: "2", sm: "2" },
           // Standard gap before divider
           pr: LAYOUT.spacing.dividerGap,
           pt: LAYOUT.spacing.rowPadding,
-          // In wrapped mode, reduce bottom padding since outcomes row follows
-          pb: isWrappedMode ? theme.space.component.sm : LAYOUT.spacing.rowPadding,
+          // In responsive views (<1400px), no bottom padding since content wraps below
+          // In full mode, standard row padding
+          pb: isResponsiveView ? 0 : LAYOUT.spacing.rowPadding,
           alignSelf: "start",
         }}
       >
@@ -428,10 +431,10 @@ function NonCompactRowContent({
         />
       </Box>
 
-      {/* Column 3: Key operations */}
+      {/* Column 3: Key operations - at xs, stacks in column 2 under scenario */}
       <Box
         sx={{
-          gridColumn: { sm: "3" },
+          gridColumn: { xs: "2", sm: "3" },
           // Vertical divider only in full mode
           borderLeft: isWrappedMode
             ? "none"
@@ -439,14 +442,30 @@ function NonCompactRowContent({
           // Standard gap after divider (only in full mode)
           pl: isWrappedMode ? 0 : { sm: LAYOUT.spacing.dividerGap },
           display: "flex",
+          flexDirection: "column",
+          gap: theme.space.gap.md,
           // In wrapped mode, left-align; in full mode, center in fixed-width column
           justifyContent: isWrappedMode ? "flex-start" : "center",
           alignItems: "flex-start",
-          pt: LAYOUT.spacing.rowPadding,
-          // In wrapped mode, reduce bottom padding since outcomes row follows
-          pb: isWrappedMode ? theme.space.component.sm : LAYOUT.spacing.rowPadding,
+          // Responsive views: 8px top padding (+ 8px rowGap = 16px total, less than 24px outer)
+          // Full mode: standard row padding
+          pt: isResponsiveView ? theme.space.gap.md : LAYOUT.spacing.rowPadding,
+          // Responsive views: no bottom padding (pt handles section spacing)
+          // Full mode: standard row padding
+          pb: isResponsiveView ? 0 : LAYOUT.spacing.rowPadding,
         }}
       >
+        {/* Key operations header - only at xs breakpoint */}
+        <Typography
+          variant="subtitle2"
+          sx={{
+            display: { xs: "block", sm: "none" },
+            color: theme.palette.grey[600],
+            fontWeight: 500,
+          }}
+        >
+          Key operations
+        </Typography>
         <OperationsIconGroup
           scenarioId={scenario.scenarioId}
           theme={scenario.theme}
@@ -457,18 +476,21 @@ function NonCompactRowContent({
       {/* Column 4: Outcome glyphs - wraps below in wrapped mode */}
       <Box
         sx={{
-          // In wrapped mode, start at column 2 (aligns with scenario title); in full mode, use column 4
+          // In wrapped mode and xs, start at column 2 (aligns with scenario title); in full mode, use column 4
           gridColumn: isWrappedMode
-            ? { xs: "1 / -1", sm: "2 / -1" }
-            : { xs: "1 / -1", sm: "4" },
+            ? { xs: "2", sm: "2 / -1" }
+            : { xs: "2", sm: "4" },
           // Vertical divider only in full mode
           borderLeft: isWrappedMode
             ? "none"
             : { sm: `1px solid ${theme.palette.grey[300]}` },
           // Padding adjustments based on mode
           pl: isWrappedMode ? 0 : { sm: LAYOUT.spacing.dividerGap },
-          pt: isWrappedMode
-            ? theme.space.component.md
+          // xs: 16px top padding for more separation from operations
+          // sm wrapped: 8px top padding (+ 8px rowGap = 16px total)
+          // Full mode: glyph alignment offset to align with scenario title
+          pt: isResponsiveView
+            ? { xs: theme.space.gap.lg, sm: theme.space.gap.md }
             : { sm: LAYOUT.glyphAlignmentOffset },
           pb: { sm: LAYOUT.spacing.rowPadding },
           display: "flex",
@@ -477,18 +499,21 @@ function NonCompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        {/* Key outcomes header - only in wrapped mode */}
-        {isWrappedMode && (
-          <Typography
-            variant="subtitle2"
-            sx={{
-              color: theme.palette.grey[600],
-              fontWeight: 500,
-            }}
-          >
-            Key outcomes
-          </Typography>
-        )}
+        {/* Key outcomes header - in wrapped mode and at xs */}
+        <Typography
+          variant="subtitle2"
+          sx={{
+            // Show at xs always, at sm only in wrapped mode
+            display: {
+              xs: "block",
+              sm: isWrappedMode ? "block" : "none",
+            },
+            color: theme.palette.grey[600],
+            fontWeight: 500,
+          }}
+        >
+          Key outcomes
+        </Typography>
         <Box
           sx={{
             display: "grid",
@@ -507,7 +532,8 @@ function NonCompactRowContent({
               },
             }),
             gap: theme.space.gap.sm,
-            mt: { xs: theme.space.component.lg, sm: 0 },
+            // No margin - gap handles header→content spacing
+            mt: 0,
             maxWidth: "100%",
             width: "100%",
           }}

@@ -54,9 +54,9 @@ export const LAYOUT = {
      * Row gap inside subgrid rows.
      * Controls vertical spacing between wrapped content within a single scenario row.
      *
-     * Value: 1.5 MUI units (12px)
+     * Value: 1 MUI unit (8px)
      */
-    internalRowGap: 1.5,
+    internalRowGap: 1,
   },
 
   /**
