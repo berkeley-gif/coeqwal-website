@@ -60,6 +60,16 @@ export function ViewModeControls({
     <>
       <Divider />
 
+      {/* Hydroclimate chooser */}
+      <HydroclimateChooser
+        layout="horizontal"
+        size="small"
+        showTitle={true}
+        showLabels={false}
+      />
+
+      <Divider />
+
       {/* View mode buttons */}
       <Box
         sx={{
@@ -75,7 +85,7 @@ export function ViewModeControls({
             color: theme.palette.grey[900],
           }}
         >
-          View
+          View data in different modes
         </Typography>
         <Box
           sx={{
@@ -116,16 +126,6 @@ export function ViewModeControls({
           </Tooltip>
         </Box>
       </Box>
-
-      <Divider />
-
-      {/* Hydroclimate chooser */}
-      <HydroclimateChooser
-        layout="horizontal"
-        size="small"
-        showTitle={true}
-        showLabels={false}
-      />
     </>
   )
 }

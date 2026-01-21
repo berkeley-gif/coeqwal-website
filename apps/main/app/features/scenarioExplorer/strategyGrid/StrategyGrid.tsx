@@ -115,6 +115,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const displayScenarios = scenariosProp ?? []
   const highlighted = highlightedScenarios || new Set<string>()
 
+  // Determine if we're in "aligned grid" mode (list view at lg+ where headers align with glyphs)
+  // In this mode, labels and info/sort buttons appear in the header row, not below glyphs
+  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"))
+  const isAlignedGrid = !compact && !showMapView && isLgUp
+
   // Render outcome item for a scenario
   const renderOutcomeItem = (
     scenario: {
@@ -134,6 +139,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
       (selectedOutcomes[scenario.scenarioId] === displayName && !!onTierClick)
     const isSorted = sortBy === displayName
 
+    // In aligned grid mode, labels and controls are in the header row
+    // In all other modes (compact, map view, xs-md responsive), show them below the glyph
+    const showLabelBelowGlyph = !isAlignedGrid
+    const showControlsBelowGlyph = !isAlignedGrid
+
     return (
       <OutcomeGlyphItem
         key={displayName}
@@ -144,9 +154,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         isSelected={isSelected}
         isTooltipActive={activeTooltip === name}
         size={glyphSize}
-        showLabel={compact}
-        showInfoButton={true}
-        showSortButton={!!onSortChange}
+        showLabel={showLabelBelowGlyph}
+        showInfoButton={showControlsBelowGlyph}
+        showSortButton={showControlsBelowGlyph && !!onSortChange}
         sortState={isSorted ? sortDirection : null}
         onGlyphClick={() => {
           if (isActive) {
@@ -222,10 +232,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             >
               <Typography
                 variant="subtitle2"
-                sx={{
-                  color: theme.palette.grey[600],
-                  fontWeight: 500,
-                }}
+                sx={{ color: theme.palette.grey[900] }}
               >
                 Choose scenarios
               </Typography>
@@ -251,11 +258,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 >
                   <Typography
                     variant="subtitle2"
-                    sx={{
-                      color: theme.palette.grey[600],
-                      fontWeight: 500,
-                      ml: -1,
-                    }}
+                    sx={{ color: theme.palette.grey[900], ml: -1 }}
                   >
                     Key operations
                   </Typography>
@@ -274,8 +277,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   <Typography
                     variant="subtitle2"
                     sx={{
-                      color: theme.palette.grey[600],
-                      fontWeight: 500,
+                      color: theme.palette.grey[900],
                       ml: theme.space.component.xl,
                     }}
                   >
@@ -319,14 +321,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   }}
                 >
                   <Typography
-                    variant="compactCaption"
+                    variant="outcomeLabel"
                     component="div"
-                    sx={{
-                      textAlign: "center",
-                      fontWeight: 500,
-                      color: theme.palette.grey[600],
-                      lineHeight: 1.3,
-                    }}
+                    sx={{ color: theme.palette.grey[600] }}
                   >
                     {formatOutcomeLabel(displayName)}
                   </Typography>
@@ -488,7 +485,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             flexShrink: 0,
                           }}
                         >
-                          <Typography variant="subtitle2">
+                          <Typography variant="smallSectionLabel">
                             Key operations
                           </Typography>
                           <OperationsIconGroup
@@ -507,7 +504,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           gap: theme.space.gap.md,
                         }}
                       >
-                        <Typography variant="subtitle2">
+                        <Typography variant="smallSectionLabel">
                           Key outcomes
                         </Typography>
                         <Box
