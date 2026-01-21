@@ -160,20 +160,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         onInfoClick={(e) => {
           onTooltipToggle(name, e.currentTarget)
         }}
-        onSortAsc={(e) => {
-          e.stopPropagation()
-          if (sortDirection === "asc" && sortBy === displayName) {
+        onSortToggle={(newState) => {
+          if (newState === null) {
             onSortChange?.(null, "asc")
           } else {
-            onSortChange?.(displayName, "asc")
-          }
-        }}
-        onSortDesc={(e) => {
-          e.stopPropagation()
-          if (sortDirection === "desc" && sortBy === displayName) {
-            onSortChange?.(null, "asc")
-          } else {
-            onSortChange?.(displayName, "desc")
+            onSortChange?.(displayName, newState)
           }
         }}
       />

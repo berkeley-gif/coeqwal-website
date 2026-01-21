@@ -17,6 +17,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@re-dev/react-truncate": "^0.5.2",
     "@repo/data": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
@@ -30,7 +31,6 @@
     "@types/geojson": "^7946.0.14",
     "next": "^15.5.9",
     "react-scrollama": "^2.4.2",
-    "react-truncate-markup": "^5.1.2",
     "swr": "^2.3.6"
   },
   "devDependencies": {

@@ -73,7 +73,6 @@ export function ViewModeControls({
       {/* Hydroclimate chooser */}
       <HydroclimateChooser
         layout="horizontal"
-        size="small"
         showTitle={true}
         showLabels={false}
       />
