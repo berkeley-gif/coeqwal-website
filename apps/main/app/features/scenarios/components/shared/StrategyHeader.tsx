@@ -99,8 +99,6 @@ export function StrategyHeader({
           maxWidth: theme.layout.maxWidth.sm,
           mb: showDescription ? theme.space.component.xs : 0,
           color: theme.palette.grey[900],
-          fontWeight: 500,
-          lineHeight: 1.4,
           cursor: onTitleClick ? "pointer" : "default",
         }}
       >
