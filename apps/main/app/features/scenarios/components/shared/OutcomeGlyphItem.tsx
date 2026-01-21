@@ -76,11 +76,7 @@ export interface OutcomeGlyphItemProps {
   onGlyphClick?: () => void
   /** Called when info button is clicked */
   onInfoClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
-  /** Called when sort ascending is clicked (legacy) */
-  onSortAsc?: (e: React.MouseEvent<HTMLButtonElement>) => void
-  /** Called when sort descending is clicked (legacy) */
-  onSortDesc?: (e: React.MouseEvent<HTMLButtonElement>) => void
-  /** Called when sort state changes (new toggle API) */
+  /** Called when sort state changes */
   onSortToggle?: (newState: "asc" | "desc" | null) => void
 }
 
@@ -99,8 +95,6 @@ export function OutcomeGlyphItem({
   sortState,
   onGlyphClick,
   onInfoClick,
-  onSortAsc,
-  onSortDesc,
   onSortToggle,
 }: OutcomeGlyphItemProps) {
   const theme = useTheme()
@@ -152,9 +146,7 @@ export function OutcomeGlyphItem({
         minWidth: 0,
         overflow: "hidden",
         "&:hover": {
-          backgroundColor: isActive
-            ? theme.palette.grey[100]
-            : "transparent",
+          backgroundColor: isActive ? theme.palette.grey[100] : "transparent",
         },
       }}
       onClick={isActive ? onGlyphClick : undefined}

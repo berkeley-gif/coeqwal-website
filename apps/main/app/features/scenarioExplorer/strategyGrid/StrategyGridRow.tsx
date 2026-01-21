@@ -25,7 +25,6 @@ import {
   type OutcomeName,
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
-import { LAYOUT } from "./layoutConfig"
 import type { LayoutMode } from "./StrategyGridHeader"
 
 export interface StrategyGridRowProps {
@@ -177,18 +176,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         gridColumn: "1 / -1",
         display: "grid",
         // Subgrid inherits parent's column tracks; compact uses simple 2-col
-        gridTemplateColumns: compact ? "32px 1fr" : { xs: "subgrid", sm: "subgrid" },
-        backgroundColor: isHighlighted
-          ? theme.palette.common.white
-          : "#faf8f5",
+        gridTemplateColumns: compact
+          ? "32px 1fr"
+          : { xs: "subgrid", sm: "subgrid" },
+        backgroundColor: isHighlighted ? theme.palette.common.white : "#faf8f5",
         borderRadius: theme.borderRadius.sm,
         // Compact mode uses row-level padding; non-compact uses column-level
         ...(compact && {
-          py: LAYOUT.spacing.rowPadding,
+          py: theme.scenarios.grid.row.padding,
           px: theme.space.component.xl,
         }),
         // Row gap for internal content; columnGap inherited from parent via subgrid
-        rowGap: LAYOUT.spacing.internalRowGap,
+        rowGap: theme.scenarios.grid.row.internalGap,
         alignItems: "stretch", // Stretch columns so dividers span full height
         transition: "background-color 0.2s ease, border-color 0.2s ease",
         // Outline (not border) to avoid shifting content
@@ -203,7 +202,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           borderBottom: "1px solid transparent",
         },
         // First row offset from headers
-        ...(isFirst && { marginTop: LAYOUT.spacing.firstRowOffset }),
+        ...(isFirst && { marginTop: theme.scenarios.grid.row.firstOffset }),
       }}
     >
       {/* Column 1: Checkbox */}
@@ -217,8 +216,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           cursor: "pointer",
           // Non-compact: vertical padding matches scenario title alignment
           ...(!compact && {
-            pt: LAYOUT.spacing.rowPadding,
-            pb: LAYOUT.spacing.rowPadding,
+            pt: theme.scenarios.grid.row.padding,
+            pb: theme.scenarios.grid.row.padding,
           }),
           // Compact: checkbox spans all rows
           ...(compact && { gridRow: "1 / -1" }),
@@ -348,7 +347,9 @@ function CompactRowContent({
           >
             {outcomeNames
               .slice(0, 5)
-              .map(({ name, displayName }) => renderOutcomeItem(displayName, name))}
+              .map(({ name, displayName }) =>
+                renderOutcomeItem(displayName, name),
+              )}
           </Box>
           {/* Remaining outcomes */}
           <Box
@@ -363,7 +364,9 @@ function CompactRowContent({
           >
             {outcomeNames
               .slice(5)
-              .map(({ name, displayName }) => renderOutcomeItem(displayName, name))}
+              .map(({ name, displayName }) =>
+                renderOutcomeItem(displayName, name),
+              )}
           </Box>
         </Box>
       </Box>
@@ -406,11 +409,11 @@ function NonCompactRowContent({
         sx={{
           gridColumn: { xs: "2", sm: "2" },
           // Standard gap before divider
-          pr: LAYOUT.spacing.dividerGap,
-          pt: LAYOUT.spacing.rowPadding,
+          pr: theme.scenarios.grid.divider.gap,
+          pt: theme.scenarios.grid.row.padding,
           // In responsive views (<1400px), no bottom padding since content wraps below
           // In full mode, standard row padding
-          pb: isResponsiveView ? 0 : LAYOUT.spacing.rowPadding,
+          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
           alignSelf: "start",
         }}
       >
@@ -430,20 +433,17 @@ function NonCompactRowContent({
           borderLeft: isWrappedMode
             ? "none"
             : { sm: `1px solid ${theme.palette.grey[300]}` },
-          // Standard gap after divider (only in full mode)
-          pl: isWrappedMode ? 0 : { sm: LAYOUT.spacing.dividerGap },
+          // Full mode: gap after divider; responsive: match scenario title padding
+          pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
+          pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
           display: "flex",
           flexDirection: "column",
           gap: theme.space.gap.md,
-          // Top-align in all modes
           justifyContent: "flex-start",
           alignItems: "flex-start",
-          // Responsive views: 8px top padding (+ 8px rowGap = 16px total, less than 24px outer)
-          // Full mode: standard row padding
-          pt: isResponsiveView ? theme.space.gap.md : LAYOUT.spacing.rowPadding,
-          // Responsive views: no bottom padding (pt handles section spacing)
-          // Full mode: standard row padding
-          pb: isResponsiveView ? 0 : LAYOUT.spacing.rowPadding,
+          // Full mode: row padding; responsive: match scenario title padding
+          pt: theme.scenarios.grid.row.padding,
+          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
         }}
       >
         {/* Key operations header - only at xs breakpoint */}
@@ -476,14 +476,14 @@ function NonCompactRowContent({
             ? "none"
             : { sm: `1px solid ${theme.palette.grey[300]}` },
           // Padding adjustments based on mode
-          pl: isWrappedMode ? 0 : { sm: LAYOUT.spacing.dividerGap },
+          pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
           // xs: 16px top padding for more separation from operations
           // sm wrapped: 8px top padding (+ 8px rowGap = 16px total)
           // Full mode: glyph alignment offset to align with scenario title
           pt: isResponsiveView
             ? { xs: theme.space.gap.lg, sm: theme.space.gap.md }
-            : { sm: LAYOUT.glyphAlignmentOffset },
-          pb: { sm: LAYOUT.spacing.rowPadding },
+            : { sm: theme.scenarios.grid.glyphOffset },
+          pb: { sm: theme.scenarios.grid.row.padding },
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",

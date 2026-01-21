@@ -167,8 +167,7 @@ export default function ListView({
   }
 
   // Show "no results" message when search is active but nothing matches
-  const showNoResultsMessage =
-    searchQuery.trim() !== "" && !hasSearchResults
+  const showNoResultsMessage = searchQuery.trim() !== "" && !hasSearchResults
 
   const strategyGridProps = {
     getChartDataForScenario,
