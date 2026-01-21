@@ -180,6 +180,12 @@ export const glossaryTerms: GlossaryTerm[] = [
       "A California law enacted in 2014 that requires local agencies to manage groundwater sustainably. SGMA establishes a framework for local groundwater management, requiring agencies to balance water use and recharge to avoid long-term depletion of aquifers. The law aims to achieve groundwater sustainability by 2040 in most parts of the Central Valleys.",
   },
   {
+    icon: <SettingsIcon />,
+    term: "Temporary Urgent Change Petitions (TUCPs)",
+    definition:
+      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+  },
+  {
     icon: <AccountBalanceIcon />,
     term: "U.S. Bureau of Reclamation",
     definition:
