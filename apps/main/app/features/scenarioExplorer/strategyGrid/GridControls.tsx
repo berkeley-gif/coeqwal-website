@@ -67,7 +67,7 @@ export function GridControls({
         sx={{
           width: "1px",
           height: "20px",
-          backgroundColor: theme.palette.grey[300],
+          backgroundColor: theme.palette.grey[200],
         }}
       />
 

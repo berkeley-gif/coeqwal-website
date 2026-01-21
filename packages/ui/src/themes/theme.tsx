@@ -873,10 +873,10 @@ const theme = createTheme({
       lineHeight: 1.3,
       display: "block",
     },
-    // Scenario/strategy title - tighter lineHeight for card headers
+    // Scenario/strategy title - headline for scenario cards/rows
     scenarioTitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1rem", // 16px - matches body2
+      fontSize: "1rem", // 16px
       fontWeight: 500,
       lineHeight: 1.3,
     },
@@ -1282,6 +1282,7 @@ const theme = createTheme({
           smallSectionLabel: "p",
           outcomeLabel: "div",
           outcomeHeader: "p",
+          scenarioTitle: "h3",
           // Inline variants (render as <span>)
           // These are inline by default for use within flex containers, chips, etc.
           // Use sx={{ display: "block" }} when standalone block display is needed.
