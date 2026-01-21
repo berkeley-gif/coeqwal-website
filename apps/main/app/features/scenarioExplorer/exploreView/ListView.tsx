@@ -200,24 +200,26 @@ export default function ListView({
           backgroundColor: theme.palette.grey[100],
         }}
       >
+        {/* Fixed header area */}
         <Box
           sx={{
             flexShrink: 0,
-            px: theme.space.component.xl,
-            pt: theme.space.component.md,
+            px: theme.space.section.md,
+            pt: theme.space.section.xs,
             backgroundColor: theme.palette.grey[100],
           }}
         >
           <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
         </Box>
 
+        {/* Scrollable content */}
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
             overflowY: "auto",
             overscrollBehavior: "contain",
-            px: theme.space.component.xl,
+            px: theme.space.section.md,
             pb: theme.space.section.xl,
           }}
         >
@@ -227,6 +229,7 @@ export default function ListView({
     )
   }
 
+  // Compact mode
   return (
     <Box
       sx={{
@@ -241,8 +244,8 @@ export default function ListView({
           flex: 1,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          px: theme.space.component.xl,
-          pt: theme.space.component.sm,
+          px: theme.space.section.sm,
+          pt: theme.space.component.md,
           pb: theme.space.section.xl,
         }}
       >

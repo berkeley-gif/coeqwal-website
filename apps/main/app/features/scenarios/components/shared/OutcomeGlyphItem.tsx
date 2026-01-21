@@ -139,17 +139,19 @@ export function OutcomeGlyphItem({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: theme.space.gap.xs,
+        gap: theme.space.gap.sm,
         cursor: isActive ? "pointer" : "default",
-        padding: theme.space.component.xs,
-        borderRadius: theme.borderRadius.md,
-        transition: theme.transition.default,
-        opacity: isActive ? 1 : 0.7,
+        padding: theme.space.component.sm,
+        borderRadius: theme.borderRadius.sm,
+        transition: "opacity 0.2s ease, background-color 0.2s ease",
+        opacity: isActive ? 1 : 0.5,
         border: isSelected ? theme.border.active : "2px solid transparent",
         minWidth: 0,
         overflow: "hidden",
         "&:hover": {
-          backgroundColor: isActive ? theme.palette.grey[100] : "transparent",
+          backgroundColor: isActive
+            ? theme.palette.grey[100]
+            : "transparent",
         },
       }}
       onClick={isActive ? onGlyphClick : undefined}
@@ -205,8 +207,10 @@ export function OutcomeGlyphItem({
               variant="outcomeLabel"
               sx={{
                 color: isActive
-                  ? theme.palette.blue.darkest
-                  : theme.palette.grey[500],
+                  ? theme.palette.grey[700]
+                  : theme.palette.grey[400],
+                textAlign: "center",
+                lineHeight: 1.3,
               }}
             >
               {formatOutcomeLabel(displayName)}

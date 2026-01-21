@@ -35,12 +35,16 @@ export function GridControls({
   showDefinitions,
   onShowOnlyChosenChange,
   onShowDefinitionsChange,
-  iconSize = 40,
+  iconSize = 36, // trying slightly smaller
 }: GridControlsProps) {
   const theme = useTheme()
   return (
     <Box
-      sx={{ display: "flex", gap: theme.space.gap.sm, alignItems: "center" }}
+      sx={{
+        display: "flex",
+        gap: theme.space.gap.md,
+        alignItems: "center",
+      }}
     >
       <InfoTooltip description="Show all strategies or only chosen ones">
         <Box>
@@ -53,10 +57,20 @@ export function GridControls({
             }
             onLeftClick={() => onShowOnlyChosenChange(false)}
             onRightClick={() => onShowOnlyChosenChange(true)}
-            gap={-0.5}
+            gap={0}
           />
         </Box>
       </InfoTooltip>
+
+      {/* Vertical divider */}
+      <Box
+        sx={{
+          width: "1px",
+          height: "20px",
+          backgroundColor: theme.palette.grey[300],
+        }}
+      />
+
       <InfoTooltip description="Show or hide strategy details">
         <Box>
           <TogglePair
@@ -71,7 +85,7 @@ export function GridControls({
             }
             onLeftClick={() => onShowDefinitionsChange(true)}
             onRightClick={() => onShowDefinitionsChange(false)}
-            gap={-0.5}
+            gap={0}
           />
         </Box>
       </InfoTooltip>
