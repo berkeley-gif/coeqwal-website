@@ -144,7 +144,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         chartData={chartData}
         isActive={isActive}
         isSelected={isSelected}
-        isTooltipActive={activeTooltip === name}
+        isTooltipActive={activeTooltip === displayName}
         size={glyphSize}
         showLabel={showLabelBelowGlyph}
         showInfoButton={showControlsBelowGlyph}
@@ -158,7 +158,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           }
         }}
         onInfoClick={(e) => {
-          onTooltipToggle(name, e.currentTarget)
+          onTooltipToggle(displayName, e.currentTarget)
         }}
         onSortToggle={(newState) => {
           if (newState === null) {
