@@ -205,7 +205,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           gap: compact
             ? theme.scenarios.grid.gap.compact
             : theme.scenarios.grid.gap.default,
-          columnGap: theme.space.gap.lg,
+          columnGap: theme.scenarios.grid.gap.default, // 8px - matches theme grid gap
           alignItems: "start",
           width: "100%",
           ...(showMapView && {
@@ -247,21 +247,17 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               </Box>
             ) : (
               <>
-                {/* Column 1 header - empty spacer for checkbox column */}
+                {/* Column 1-2 header - Choose scenarios (spans checkbox + scenario name) */}
                 <Box
                   sx={{
-                    gridColumn: "1",
-                    display: { xs: "none", lg: "block" },
-                  }}
-                />
-                {/* Column 2 header - Choose scenarios */}
-                <Box
-                  sx={{
-                    gridColumn: "2",
+                    gridColumn: "1 / 3", // Span checkbox + scenario columns
                     display: { xs: "none", lg: "flex" },
-                    alignItems: "flex-end",
+                    alignItems: "flex-start",
                     alignSelf: "stretch",
-                    pb: theme.space.component.md,
+                    // No pl - align with left edge of checkbox
+                    pr: theme.space.component.md, // 12px - standard gap before divider
+                    // Bottom padding only - top padding handled by ListView container
+                    pb: theme.space.component.lg,
                   }}
                 >
                   <Typography
@@ -279,10 +275,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   sx={{
                     gridColumn: "3",
                     display: { xs: "none", lg: "flex" },
-                    alignItems: "flex-end",
-                    justifyContent: "center", // Center content in fixed-width column
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start", // Left-align like Key outcomes
                     alignSelf: "stretch",
-                    pb: theme.space.component.md,
+                    // pl after divider; no pr needed since grid gap + col 4's borderLeft handles spacing
+                    pl: theme.space.component.md, // 12px - standard gap after divider
+                    // Bottom padding only - top padding handled by ListView container
+                    pb: theme.space.component.lg,
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
                   }}
@@ -302,12 +301,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   sx={{
                     gridColumn: "4",
                     display: { xs: "none", lg: "flex" },
-                    alignItems: "flex-end",
+                    alignItems: "flex-start",
                     alignSelf: "stretch",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
-                    pb: theme.space.component.md,
-                    pl: theme.space.component.lg, // Padding after divider
+                    // Tighter bottom padding for consistent spacing with category labels below
+                    pb: theme.space.component.sm,
+                    // Consistent gap: standard padding after divider
+                    pl: theme.space.component.md, // 12px - standard gap after divider
                     // Vertical column divider at column boundary
                     borderLeft: `1px solid ${theme.palette.grey[300]}`,
                   }}
@@ -358,7 +359,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
               gap: theme.space.gap.sm, // Match row's outcome grid gap
               pb: theme.space.component.sm,
-              pl: theme.space.component.lg, // Padding after divider
+              // Consistent gap: standard padding after divider
+              pl: theme.space.component.md, // 12px - standard gap after divider
               // Pull up to close gap with header row so dividers appear continuous
               mt: -1, // -8px (negates the grid row gap)
               // Vertical column divider at column boundary
@@ -473,7 +475,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       px: theme.space.component.xl,
                     }),
                     // Match parent grid's columnGap for subgrid alignment
-                    columnGap: theme.space.gap.lg,
+                    columnGap: theme.scenarios.grid.gap.default, // 8px
                     rowGap: theme.space.gap.md,
                     alignItems: "stretch", // Stretch all columns so dividers span full height
                     transition:
@@ -497,7 +499,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   <Box
                     sx={{
                       display: "flex",
-                      justifyContent: "center",
+                      justifyContent: "flex-end", // Align checkbox closer to scenario title
                       alignItems: "flex-start",
                       alignSelf: "start", // Keep checkbox at top
                       pointerEvents: "auto",
@@ -628,7 +630,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <Box
                         sx={{
                           gridColumn: { lg: "2" },
-                          pr: 1,
+                          // Minimal gap from checkbox (grid gap provides base spacing)
+                          pr: theme.space.component.md, // 12px - standard gap before divider
                           pt: theme.space.section.sm,
                           pb: theme.space.section.sm,
                           alignSelf: "start",
@@ -650,7 +653,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           borderLeft: {
                             lg: `1px solid ${theme.palette.grey[300]}`,
                           },
-                          // Center icons in fixed-width column
+                          // pl after divider; no pr needed since grid gap + col 4's borderLeft handles spacing
+                          pl: theme.space.component.md, // 12px - standard gap after divider
+                          // Center icons in available space
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "flex-start",
@@ -673,7 +678,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           borderLeft: {
                             lg: `1px solid ${theme.palette.grey[300]}`,
                           },
-                          pl: { lg: theme.space.component.lg },
+                          // Consistent gap: standard padding after divider
+                          pl: { lg: theme.space.component.md }, // 12px - standard gap after divider
                           // Glyphs have internal padding (8px) + border (2px) = 10px
                           // So pt: 24px - 10px = 14px to align glyph content with scenario title
                           pt: { lg: "14px" },

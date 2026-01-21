@@ -205,7 +205,8 @@ export default function ListView({
           sx={{
             flexShrink: 0,
             px: theme.space.section.md,
-            pt: theme.space.component.sm, // Tighter than SearchBar to account for grid structure
+            // Match SearchBar's py: component.lg so dividers start at same distance from top
+            pt: theme.space.component.lg,
             backgroundColor: theme.palette.grey[100],
           }}
         >

@@ -527,13 +527,14 @@ export const themeValues = {
 
     // Grid layout configuration for strategy lists
     // Columns: 1=checkbox, 2=scenario name, 3=key operations, 4=key outcomes
+    // Uses inverse golden ratio (0.382:1)
     grid: {
       columns: {
         xs: "32px minmax(0, 1fr) auto",
-        lg: "32px 0.4fr 184px 1fr", // Fixed col 1 & 3, flexible col 2 & 4
+        lg: "32px 0.382fr 160px 1fr", // Inverse golden ratio - prioritizes glyph space
       },
       gap: {
-        default: 1,
+        default: 1, // 8px gap between columns
         compact: 2,
       },
     },
