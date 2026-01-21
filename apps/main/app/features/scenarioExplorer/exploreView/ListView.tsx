@@ -166,6 +166,10 @@ export default function ListView({
     )
   }
 
+  // Show "no results" message when search is active but nothing matches
+  const showNoResultsMessage =
+    searchQuery.trim() !== "" && !hasSearchResults
+
   const strategyGridProps = {
     getChartDataForScenario,
     outcomeNames: outcomeNames || [],
@@ -224,6 +228,19 @@ export default function ListView({
             pb: theme.space.section.xl,
           }}
         >
+          {showNoResultsMessage && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: theme.palette.grey[600],
+                fontStyle: "italic",
+                mb: 2,
+                mt: 1,
+              }}
+            >
+              No scenarios match &ldquo;{searchQuery}&rdquo;
+            </Typography>
+          )}
           <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
         </Box>
       </Box>
@@ -250,6 +267,18 @@ export default function ListView({
           pb: theme.space.section.xl,
         }}
       >
+        {showNoResultsMessage && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: theme.palette.grey[600],
+              fontStyle: "italic",
+              mb: 2,
+            }}
+          >
+            No scenarios match &ldquo;{searchQuery}&rdquo;
+          </Typography>
+        )}
         <StrategyGrid {...strategyGridProps} renderMode="all" />
       </Box>
     </Box>

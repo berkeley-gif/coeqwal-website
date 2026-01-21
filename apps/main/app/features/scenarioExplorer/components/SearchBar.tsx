@@ -33,7 +33,13 @@ export default function SearchBar({
     <Box
       sx={{
         display: "flex",
-        alignItems: "flex-start",
+        // Stack vertically under 700px, horizontal at 700px+
+        flexDirection: "column",
+        alignItems: "stretch",
+        "@media (min-width: 700px)": {
+          flexDirection: "row",
+          alignItems: "flex-start",
+        },
         gap: theme.space.gap.xl,
         px: theme.space.component.xl,
         py: theme.space.component.lg,
@@ -44,9 +50,9 @@ export default function SearchBar({
       {/* Search section */}
       <Box
         sx={{
-          flex: 1,
-          minWidth: 0,
-          maxWidth: theme.spacing(40),
+          width: "100%",
+          maxWidth: "330px",
+          flexShrink: 0,
           display: "flex",
           flexDirection: "column",
           gap: theme.space.gap.md,

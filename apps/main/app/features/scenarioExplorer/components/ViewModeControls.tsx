@@ -58,7 +58,17 @@ export function ViewModeControls({
 
   return (
     <>
-      <Divider />
+      {/* Divider - hidden under 700px when layout is stacked */}
+      <Box
+        sx={{
+          display: "none",
+          "@media (min-width: 700px)": {
+            display: "contents",
+          },
+        }}
+      >
+        <Divider />
+      </Box>
 
       {/* Hydroclimate chooser */}
       <HydroclimateChooser
@@ -68,62 +78,71 @@ export function ViewModeControls({
         showLabels={false}
       />
 
-      <Divider />
-
-      {/* View mode buttons */}
+      {/* View mode buttons - hidden under 1400px */}
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space.gap.md,
+          display: "none",
+          // Only show at 1400px+ (matches theme.scenarios.grid.fullBreakpoint)
+          "@media (min-width: 1400px)": {
+            display: "contents",
+          },
         }}
       >
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: theme.typography.fontWeightMedium,
-            color: theme.palette.grey[900],
-          }}
-        >
-          View data in different modes
-        </Typography>
+        <Divider />
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            gap: theme.space.gap.xs,
+            flexDirection: "column",
+            gap: theme.space.gap.md,
           }}
         >
-          <Tooltip title="List view" arrow>
-            <IconButton
-              onClick={() => onModeChange("list")}
-              sx={buttonSx(mode === "list")}
-            >
-              <ViewListIcon sx={{ fontSize: "1.5rem" }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Map view" arrow>
-            <IconButton
-              onClick={() => onModeChange("map")}
-              sx={buttonSx(mode === "map", false)}
-            >
-              <Image
-                src="/images/icons/map.svg"
-                alt="Map view"
-                width={24}
-                height={24}
-                style={{ opacity: mode === "map" ? 1 : 0.6 }}
-              />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Comparison view" arrow>
-            <IconButton
-              onClick={() => onModeChange("comparison")}
-              sx={buttonSx(mode === "comparison")}
-            >
-              <CompareArrowsIcon sx={{ fontSize: "1.5rem" }} />
-            </IconButton>
-          </Tooltip>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: theme.typography.fontWeightMedium,
+              color: theme.palette.grey[900],
+            }}
+          >
+            View data in different modes
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: theme.space.gap.xs,
+            }}
+          >
+            <Tooltip title="List view" arrow>
+              <IconButton
+                onClick={() => onModeChange("list")}
+                sx={buttonSx(mode === "list")}
+              >
+                <ViewListIcon sx={{ fontSize: "1.5rem" }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Map view" arrow>
+              <IconButton
+                onClick={() => onModeChange("map")}
+                sx={buttonSx(mode === "map", false)}
+              >
+                <Image
+                  src="/images/icons/map.svg"
+                  alt="Map view"
+                  width={24}
+                  height={24}
+                  style={{ opacity: mode === "map" ? 1 : 0.6 }}
+                />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Comparison view" arrow>
+              <IconButton
+                onClick={() => onModeChange("comparison")}
+                sx={buttonSx(mode === "comparison")}
+              >
+                <CompareArrowsIcon sx={{ fontSize: "1.5rem" }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
     </>
