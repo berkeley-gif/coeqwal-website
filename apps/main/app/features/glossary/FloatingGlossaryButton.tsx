@@ -138,7 +138,9 @@ export function FloatingGlossaryButton({
             pointerEvents: "none",
           }}
         >
-          <RoundedRightArrow color={theme.palette.common.white} />
+          <RoundedRightArrow
+            color={isOpen ? theme.palette.blue.bright : theme.palette.common.black}
+          />
         </Box>
       )}
 
@@ -165,7 +167,9 @@ export function FloatingGlossaryButton({
             pointerEvents: "none",
           }}
         >
-          <RoundedRightArrow color={theme.palette.common.white} />
+          <RoundedRightArrow
+            color={isOpen ? theme.palette.blue.bright : theme.palette.common.black}
+          />
         </Box>
       )}
     </Box>
