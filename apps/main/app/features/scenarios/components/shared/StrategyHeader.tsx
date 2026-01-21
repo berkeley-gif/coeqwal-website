@@ -16,6 +16,7 @@
 import React, { useState, useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
+import { motion } from "@repo/motion"
 import TruncateMarkup from "react-truncate-markup"
 import type { ScenarioForDisplay } from "./types"
 
@@ -172,25 +173,44 @@ function DescriptionWithGlossaryLinks({
         color: theme.palette.grey[600],
         maxWidth: maxWidth ?? theme.layout.maxWidth.md,
         lineHeight: 1.6,
+        position: "relative",
       }}
     >
-      {isExpanded ? (
-        // Expanded view - show full text with "show less" at end
-        <>
-          {renderTextWithGlossaryLinks()}{" "}
-          <Box
-            component="span"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(false)
-            }}
-            sx={toggleStyles}
-          >
-            show less
-          </Box>
-        </>
-      ) : (
-        // Truncated view - use react-truncate-markup for word-aware truncation
+      {/* Expanded view - positioned absolutely when not active */}
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isExpanded ? 1 : 0,
+          position: isExpanded ? "relative" : "absolute",
+          pointerEvents: isExpanded ? "auto" : "none",
+        }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        style={{ top: 0, left: 0, right: 0 }}
+      >
+        {renderTextWithGlossaryLinks()}{" "}
+        <Box
+          component="span"
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsExpanded(false)
+          }}
+          sx={toggleStyles}
+        >
+          show less
+        </Box>
+      </motion.div>
+
+      {/* Truncated view - positioned absolutely when not active */}
+      <motion.div
+        initial={false}
+        animate={{
+          opacity: isExpanded ? 0 : 1,
+          position: isExpanded ? "absolute" : "relative",
+          pointerEvents: isExpanded ? "none" : "auto",
+        }}
+        transition={{ duration: 0.2, ease: "easeInOut" }}
+        style={{ top: 0, left: 0, right: 0 }}
+      >
         <TruncateMarkup
           lines={3}
           ellipsis={showMoreEllipsis}
@@ -198,7 +218,7 @@ function DescriptionWithGlossaryLinks({
         >
           <div>{renderTextWithGlossaryLinks()}</div>
         </TruncateMarkup>
-      )}
+      </motion.div>
     </Typography>
   )
 }
