@@ -215,6 +215,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: "flex",
                 alignItems: "flex-end",
                 justifyContent: compact ? "space-between" : "flex-start",
+                height: theme.spacing(5.5),
                 pb: theme.space.component.md,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
               }}
@@ -243,6 +244,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   sx={{
                     display: "flex",
                     alignItems: "flex-end",
+                    height: theme.spacing(5.5),
                     pb: theme.space.component.md,
                     borderBottom: `1px solid ${theme.palette.grey[200]}`,
                   }}
@@ -264,6 +266,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: "flex-end",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
+                    height: theme.spacing(5.5),
                     pb: theme.space.component.md,
                     borderBottom: `1px solid ${theme.palette.grey[200]}`,
                   }}
