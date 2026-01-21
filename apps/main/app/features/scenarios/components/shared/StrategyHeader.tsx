@@ -44,8 +44,9 @@ function DescriptionWithTUCPTooltip({
     <Typography
       variant="dashboard"
       sx={{
-        color: theme.palette.grey[700],
+        color: theme.palette.grey[600],
         maxWidth: maxWidth ?? theme.layout.maxWidth.md,
+        lineHeight: 1.6,
       }}
     >
       {description.split(/(\bTUCPs?\b)/g).map((part, index) => {
@@ -96,8 +97,11 @@ export function StrategyHeader({
         onClick={onTitleClick}
         sx={{
           maxWidth: theme.layout.maxWidth.sm,
-          mb: showDescription ? 0.5 : 0,
+          mb: showDescription ? theme.space.component.xs : 0,
           color: theme.palette.grey[900],
+          fontWeight: 500,
+          lineHeight: 1.4,
+          cursor: onTitleClick ? "pointer" : "default",
         }}
       >
         {displayLabel}

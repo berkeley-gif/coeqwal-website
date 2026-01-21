@@ -206,7 +206,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           }),
         }}
       >
-        {/* Column header - only render if not contentOnly mode */}
+        {/* Column headers */}
         {renderMode !== "contentOnly" && !showMapView && (
           <>
             <Box
@@ -215,10 +215,19 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: "flex",
                 alignItems: "flex-end",
                 justifyContent: compact ? "space-between" : "flex-start",
-                height: theme.spacing(5.5),
+                pb: theme.space.component.md,
+                borderBottom: `1px solid ${theme.palette.grey[200]}`,
               }}
             >
-              <Typography variant="subtitle2">Choose scenarios</Typography>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontWeight: 500,
+                }}
+              >
+                Choose scenarios
+              </Typography>
               {compact && (
                 <GridControls
                   showOnlyChosen={showOnlyChosen}
@@ -234,10 +243,18 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   sx={{
                     display: "flex",
                     alignItems: "flex-end",
-                    height: theme.spacing(5.5),
+                    pb: theme.space.component.md,
+                    borderBottom: `1px solid ${theme.palette.grey[200]}`,
                   }}
                 >
-                  <Typography variant="subtitle2" sx={{ ml: -1 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      color: theme.palette.grey[600],
+                      fontWeight: 500,
+                      ml: -1,
+                    }}
+                  >
                     Key operations
                   </Typography>
                 </Box>
@@ -247,13 +264,17 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     alignItems: "flex-end",
                     justifyContent: "space-between",
                     gap: theme.space.gap.lg,
-                    height: theme.spacing(5.5),
+                    pb: theme.space.component.md,
+                    borderBottom: `1px solid ${theme.palette.grey[200]}`,
                   }}
                 >
-                  {/* Align with center of first outcome label column */}
                   <Typography
                     variant="subtitle2"
-                    sx={{ ml: theme.space.component.xl }}
+                    sx={{
+                      color: theme.palette.grey[600],
+                      fontWeight: 500,
+                      ml: theme.space.component.xl,
+                    }}
                   >
                     Key outcomes
                   </Typography>
@@ -269,15 +290,16 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           </>
         )}
 
-        {/* Outcome name headers - only in full-width list view */}
+        {/* Outcome name headers, aligned with grid */}
         {renderMode !== "contentOnly" && (
           <Box
             sx={{
               gridColumn: "4 / -1",
               display: compact ? "none" : { xs: "none", lg: "grid" },
               gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
-              gap: theme.space.gap.sm,
+              gap: theme.space.gap.md,
               pb: theme.space.component.md,
+              borderBottom: `1px solid ${theme.palette.grey[200]}`,
             }}
           >
             {outcomeNames.map(({ name, displayName }) => {
@@ -290,7 +312,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: 0,
+                    gap: theme.space.gap.xs,
                   }}
                 >
                   <Typography
@@ -298,8 +320,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     component="div"
                     sx={{
                       textAlign: "center",
-                      fontWeight: theme.typography.fontWeightMedium,
-                      color: theme.palette.blue.darkest,
+                      fontWeight: 500,
+                      color: theme.palette.grey[600],
+                      lineHeight: 1.3,
                     }}
                   >
                     {formatOutcomeLabel(displayName)}
@@ -311,7 +334,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       alignItems: "center",
                       justifyContent: "center",
                       gap: 0,
-                      mt: theme.space.component.xs,
                     }}
                   >
                     <InfoIconButton
@@ -378,18 +400,26 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     backgroundColor: isHighlighted
                       ? theme.palette.common.white
                       : "#faf8f5",
-                    borderRadius: theme.borderRadius.md,
-                    padding: compact
+                    borderRadius: theme.borderRadius.sm,
+                    py: theme.space.section.xs,
+                    px: compact
                       ? theme.space.component.xl
-                      : theme.space.component.md,
-                    gap: theme.space.gap.sm,
+                      : theme.space.component.lg,
+                    gap: theme.space.gap.md,
                     alignItems: compact ? "stretch" : "start",
-                    transition: theme.transition.default,
+                    transition:
+                      "background-color 0.2s ease, border-color 0.2s ease",
                     border: isHighlighted
-                      ? theme.border.active
-                      : "2px solid transparent",
+                      ? `1px solid ${theme.palette.blue.bright}`
+                      : "1px solid transparent",
+                    borderBottom: `1px solid ${theme.palette.grey[200]}`,
+                    // Preserve row highlighting on hover
                     "&:hover": {
                       backgroundColor: theme.palette.background.paper,
+                    },
+                    // Remove bottom border on last item
+                    "&:last-child": {
+                      borderBottom: "1px solid transparent",
                     },
                     ...(index === 0 && { marginTop: theme.space.component.sm }),
                   }}
