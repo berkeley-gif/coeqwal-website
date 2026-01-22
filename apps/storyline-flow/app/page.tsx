@@ -16,10 +16,11 @@ import {
 import { DIVISION } from "./components/helpers/sectionDivision"
 import useStoryStore from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
-import { HeaderStory } from "@repo/motion/components"
+import { BaseHeader } from "@repo/ui"
+//import { HeaderStory } from "@repo/motion/components"
 import {
   OffWhiteColor,
-  RiverWaterColor,
+  FreshWaterColor,
 } from "./components/helpers/colorPalette"
 import SectionDelta from "./components/03NaturalFlow"
 import SectionHuman from "./components/04Human"
@@ -31,9 +32,12 @@ import { FloatImageTooltip } from "./components/helpers/Tooltip"
 
 const MotionBox = motion.create(Box)
 
+//NOTE: This page should be consistent with the main app, color-wise and typography-wise
+
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
 //IMPORTANT!: "overflowX: hidden" breaks the sticky behavior of delta section
+
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
@@ -51,7 +55,7 @@ export default function StoryContainer() {
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
-      <HeaderStory />
+      <BaseHeader backgroundColor="overlay.waterDark" />
       <SectionIndicator />
       {tooltipContent && (
         <>
@@ -91,6 +95,7 @@ export default function StoryContainer() {
             margin: 0,
           },
           pointerEvents: "none",
+          color: "common.white",
         }}
       >
         <Opener />
@@ -126,7 +131,7 @@ function SectionIndicator() {
       animate={isHidden ? "hidden" : "visible"}
       variants={{
         hidden: {
-          top: "10px",
+          top: "45px",
         },
         visible: {
           top: "74.5px",
@@ -138,6 +143,8 @@ function SectionIndicator() {
         display: "flex",
         flexDirection: "column",
         gap: 1,
+        color: "common.white",
+        backgroundColor: "overlay.waterDark"
       }}
     >
       {DIVISION.map((division, index) => {
@@ -152,10 +159,10 @@ function SectionIndicator() {
             transition={{ duration: 0.3 }}
           >
             <Box className="section-component" sx={{ gap: 1 }}>
-              <Typography variant="body2">{division.name}</Typography>
+              <Typography variant="caption">{division.name}</Typography>
               <Box className="section-circle">
                 <WaterDropIcon
-                  color={isActive ? RiverWaterColor : OffWhiteColor}
+                  color={isActive ? FreshWaterColor : OffWhiteColor}
                 />
               </Box>
             </Box>

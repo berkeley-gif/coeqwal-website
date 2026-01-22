@@ -424,7 +424,8 @@ export default function MapContainer({
     <Box sx={{ width: "100%", height: "100vh" }}>
       <Map
         mapboxToken={mapboxToken}
-        mapStyle="mapbox://styles/coeqwal/cmc0zhlcr008p01sof4ob61vg"
+        mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
+        //mapStyle="mapbox://styles/coeqwal/cmc0zhlcr008p01sof4ob61vg"
         initialViewState={mapViewState}
         style={{ width: "100%", height: "100%" }}
         interactive={false}

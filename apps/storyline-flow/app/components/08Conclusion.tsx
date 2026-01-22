@@ -101,7 +101,7 @@ function Resolution() {
               className="paragraph"
               style={{ margin: "1rem 0", opacity: firstSentenceOpacity }}
             >
-              <Typography variant="h3">
+              <Typography variant="h5">
                 {content?.transition.subtitle}
               </Typography>
             </motion.div>
@@ -110,7 +110,7 @@ function Resolution() {
                 className="paragraph"
                 style={{ opacity: secondSentenceOpacity }}
               >
-                <Typography variant="h3">
+                <Typography variant="h5">
                   {content?.transition.p11} <br />
                   {content?.transition.p12}
                 </Typography>
@@ -119,10 +119,10 @@ function Resolution() {
                 className="paragraph"
                 style={{ opacity: thirdSentenceOpacity }}
               >
-                <Typography variant="h3" gutterBottom>
+                <Typography variant="h5" gutterBottom>
                   {content?.transition.p2}
                 </Typography>
-                <Typography variant="h3">
+                <Typography variant="h5">
                   <span style={{ fontWeight: "bold" }}>
                     <u>{content?.ending.p11}</u>
                   </span>{" "}

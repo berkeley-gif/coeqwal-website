@@ -176,7 +176,7 @@ function Temperature() {
         }}
       >
         <Box className="paragraph">
-          <Typography variant="h4">
+          <Typography variant="h3">
             {"A "}
             <span className="highlight-text">Warmer</span>
             {" Future"}

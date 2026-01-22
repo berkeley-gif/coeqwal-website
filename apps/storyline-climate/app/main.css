@@ -5,7 +5,7 @@
   --dark-color: #021224;
   --light-color: #1a3a5c;
   --text-color: #f2f0ef;
-  --highlight-color: #f1b143;
+  --highlight-color: #FFB347; /* #f1b143;*/
 }
 
 header {
@@ -14,7 +14,8 @@ header {
 
 /* TODO: might need to set this in the story container */
 body {
-  background: var(--primary-color) !important;
+  background-color: #172a48 !important;
+  /* background: var(--primary-color) !important;*/
 }
 
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
@@ -86,7 +87,8 @@ html {
 }
 
 .filled-container {
-  background-color: var(--primary-color);
+  background-color: #172a48;
+  /* background-color: var(--primary-color); */
 }
 
 .sticky-container {

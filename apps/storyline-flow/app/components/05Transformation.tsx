@@ -108,7 +108,7 @@ function Transformation() {
     >
       <Stack spacing={12} direction="column" component="section" role="region">
         <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
-          <Typography variant="h2" gutterBottom>
+          <Typography variant="h3" gutterBottom>
             {content?.subtitle1}
             <br />
             {content?.subtitle2}
