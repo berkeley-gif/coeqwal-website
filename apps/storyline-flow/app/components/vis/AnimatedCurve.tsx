@@ -160,7 +160,7 @@ export default function AnimatedCurve({
 
         pathD = flatToMeltInterpolators[segmentIndex]?.(segmentT)
         // Continue color change from medium to steelblue
-        fillColor = d3.interpolateRgb("#a7bfd0", "#50B1E7")(phaseProgress)
+        fillColor = d3.interpolateRgb("#a7bfd0", FreshWaterColor)(phaseProgress)
       }
 
       g.innerHTML = ""

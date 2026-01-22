@@ -47,7 +47,7 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
         ×
       </button>
 
-      <Box sx={{ position: "relative", overflow: "hidden", width: "100%" }}>
+      <Box sx={{ position: "relative", overflow: "hidden", width: "100%", color: 'common.white' }}>
         <ImageContainer
           images={images as string[]}
           currentImgIndex={currentImgIndex}
@@ -65,8 +65,8 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
         )}
       </Box>
 
-      <Box>
-        <Typography variant="h4">{marker.name}</Typography>
+      <Box sx={{color: 'common.white', mt: 1, mb: 1 }}>
+        <Typography variant="h5">{marker.name}</Typography>
         <Typography variant="body2" sx={{ marginTop: 1 }}>
           {marker.captions ? marker.captions[currentImgIndex] || "" : ""}
         </Typography>

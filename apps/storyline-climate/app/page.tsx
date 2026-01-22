@@ -36,6 +36,7 @@ export default function StoryContainer() {
             margin: 0,
           },
           pointerEvents: "none",
+          color: "common.white",
         }}
       >
         <Opener />

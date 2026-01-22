@@ -5,7 +5,8 @@ import * as d3 from "d3"
 import { useBreakpoint } from "@repo/ui/hooks"
 
 const numWaves = 4
-const colors: string[] = ["#1f5b8c", "#2568a3", "#3092d1", "#00e5ff"] // blues
+const colors: string[] = ["#186b88", '#2d89b6', "#449cd9", "#77a2d9"]
+//const colors: string[] = ["#1f5b8c", "#2568a3", "#3092d1", "#00e5ff"] // blues
 
 //TODO: make the wave height also responsive
 const portion = {

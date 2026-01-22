@@ -1,3 +1,4 @@
+import { StrictMode } from "react"
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
@@ -9,8 +10,7 @@ export const metadata: Metadata = {
   description: "We have transformed the way how water moves through California",
 }
 
-//theme caused the bugs
-//TODO: check out client dynamic map
+//TODO: update how the map is provided to be consistent with the main app?
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,12 +19,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <FontLoader kitId="rxm7kha" />
-        <TranslationProvider initialLocale="en">
-          <ThemeRegistry theme="story">
-            <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
-          </ThemeRegistry>
-        </TranslationProvider>
+        <StrictMode>
+          <FontLoader kitId="rxm7kha" />
+          <TranslationProvider initialLocale="en">
+            <ThemeRegistry>
+              <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
+            </ThemeRegistry>
+          </TranslationProvider>
+        </StrictMode>
       </body>
     </html>
   )

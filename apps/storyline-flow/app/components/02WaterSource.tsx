@@ -223,7 +223,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
           className="paragraph"
           style={{ height: "fit-content", width: "100%" }}
         >
-          <MotionTypography variant="h4" style={{ opacity: titleOpacity }}>
+          <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
             California Rainfall Deviation from Average
           </MotionTypography>
           <MotionTypography
