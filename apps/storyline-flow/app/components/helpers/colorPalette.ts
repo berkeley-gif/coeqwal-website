@@ -16,17 +16,21 @@ const FreshWaterCandidates = {
   2: "#acdde9", // could be used for snow
   3: "#50B1E7", // too bright, but this is good for everything else other than map
   4: "#3d8ec9", // Original chosen color in alpha, only good for map
+  5: "#64a4d6", // main.app
 }
 
 const SnowWaterCandidates = {
   1: "#f2f0ef", // Original chosen color in alpha,
   2: "#acdde9",
+  3: "#92C1D5",
 }
 
 const InfrastructureCandidates = {
   1: "#F8A42D",
   2: "#F27322",
   3: "#FCB321",
+  4: '#FFA200',
+  5: "#E54545",
 }
 
 const WetlandCandidates = {
@@ -36,14 +40,14 @@ const WetlandCandidates = {
 }
 
 export const OceanWaterColor = OceanWaterCandidates[3]
-export const FreshWaterColor = FreshWaterCandidates[3] // Precipitation
+export const FreshWaterColor = FreshWaterCandidates[5] // Precipitation
 export const RiverWaterColor = RiverWaterCandidates[4]
-export const SnowWaterColor = SnowWaterCandidates[2]
+export const SnowWaterColor = SnowWaterCandidates[3]
 export const OffWhiteColor = "#f2f0ef" // Used to replace pure white color
 export const InfrastructureColor = InfrastructureCandidates[2] // Used for infrastructure
 export const WetlandColor = WetlandCandidates[2] // Used for wetland
 
-const MapFreshWaterColor = FreshWaterCandidates[4] // Used for map, but not for the website
+const MapFreshWaterColor = FreshWaterCandidates[5] // Used for map, but not for the website
 export const FreshWaterColorScale = [
   `${MapFreshWaterColor}30`,
   `${MapFreshWaterColor}70`,

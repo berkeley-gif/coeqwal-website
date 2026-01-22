@@ -94,7 +94,8 @@ html {
 }
 
 .filled-container {
-  background-color: var(--primary-color);
+  background-color: #172a48;
+  /* background-color: var(--primary-color); */
 }
 
 .sticky-container {

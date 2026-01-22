@@ -2,6 +2,7 @@ import {
   FreshWaterColor,
   InfrastructureColor,
   OffWhiteColor,
+  SnowWaterColor,
   WetlandColor,
 } from "./colorPalette"
 
@@ -87,16 +88,17 @@ export const cityBoundaryLayerStyle = {
   },
 }
 
+
 export const precipitationPaintStyle = {
   "fill-color": [
     "case",
     ["==", ["get", "contour"], "1"],
-    "rgba(77, 166, 255, 0.7)",
+    hexToRgb(FreshWaterColor, 0.7),
     ["==", ["get", "contour"], "2"],
-    "rgba(77, 166, 255, 0.5)",
+    hexToRgb(FreshWaterColor, 0.5),
     ["==", ["get", "contour"], "3"],
-    "rgba(77, 166, 255, 0.3)",
-    "rgba(77, 166, 255, 0.1)",
+    hexToRgb(FreshWaterColor, 0.3),
+    hexToRgb(FreshWaterColor, 0.1),
   ] as unknown as string,
   "fill-opacity": 0,
   "fill-opacity-transition": {
@@ -108,12 +110,12 @@ export const snowpackPaintStyle = {
   "fill-color": [
     "case",
     ["==", ["get", "contour"], "3"],
-    "rgba(172, 221, 233, 0.8)",
+    hexToRgb(SnowWaterColor, 0.8),
     ["==", ["get", "contour"], "2"],
-    "rgba(172, 221, 233, 0.6)",
+    hexToRgb(SnowWaterColor, 0.6),
     ["==", ["get", "contour"], "1"],
-    "rgba(172, 221, 233, 0.4)",
-    "rgba(172, 221, 233, 0.2)",
+    hexToRgb(SnowWaterColor, 0.4),
+    hexToRgb(SnowWaterColor, 0.2),
   ] as unknown as string,
   "fill-opacity": 0,
   "fill-opacity-transition": {
