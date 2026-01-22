@@ -22,7 +22,7 @@ export default function RootLayout({
       <body>
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
-          <ThemeRegistry theme="story">
+          <ThemeRegistry>
             <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
           </ThemeRegistry>
         </TranslationProvider>
