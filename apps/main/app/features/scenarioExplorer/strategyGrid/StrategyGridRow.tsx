@@ -3,19 +3,13 @@
 /**
  * StrategyGridRow - Single scenario row in the StrategyGrid
  *
- * Renders a full-width subgrid row containing:
- * - Column 1: Checkbox for scenario selection
- * - Column 2: Scenario name and description (StrategyHeader)
- * - Column 3: Key operations icons (OperationsIconGroup)
- * - Column 4: Outcome glyphs (OutcomeGlyphItem grid)
- *
  * Uses CSS subgrid to inherit column definitions from parent StrategyGrid,
- * ensuring vertical dividers align perfectly between header and content rows.
+ * (ensuring vertical alignment between components)
  *
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React from "react"
+import React, { useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import {
   OutcomeGlyphItem,
@@ -48,12 +42,8 @@ export interface StrategyGridRowProps {
   getChartDataForScenario: (
     scenarioId: string,
   ) => Record<string, ChartDataPoint[]>
-  /** Currently expanded summary outcome (if any) */
-  expandedSummaryOutcome: string | null
   /** Currently selected outcome for this scenario */
   selectedOutcome: string | null
-  /** Whether tier click handler exists */
-  hasTierClick: boolean
   /** Active tooltip outcome name */
   activeTooltip: string | null
   /** Current sort column */
@@ -68,12 +58,6 @@ export interface StrategyGridRowProps {
   isAlignedGrid: boolean
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
-  /** Select an outcome */
-  onOutcomeSelect: (scenarioId: string, outcome: string) => void
-  /** Tier click handler */
-  onTierClick?: (scenarioId: string, outcome: string) => void
-  /** Toggle summary panel */
-  onToggleSummary: (scenarioId: string, outcome: string) => void
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
@@ -82,10 +66,6 @@ export interface StrategyGridRowProps {
 
 /**
  * StrategyGridRow renders a single scenario as a grid row.
- *
- * In non-compact mode, uses CSS subgrid to inherit the parent's 4-column layout,
- * ensuring dividers align between header and content. In compact mode, uses a
- * simpler 2-column layout with flexbox content.
  */
 export const StrategyGridRow = React.memo(function StrategyGridRow({
   scenario,
@@ -97,9 +77,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   showDefinitions,
   outcomeNames,
   getChartDataForScenario,
-  expandedSummaryOutcome,
   selectedOutcome,
-  hasTierClick,
   activeTooltip,
   sortBy,
   sortDirection,
@@ -107,9 +85,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   glyphSize,
   isAlignedGrid,
   onToggleScenario,
-  onOutcomeSelect,
-  onTierClick,
-  onToggleSummary,
   onTooltipToggle,
   onSortChange,
 }: StrategyGridRowProps) {
@@ -118,16 +93,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
 
+  // Refs to store glyph container elements for tooltip anchoring
+  const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
   /**
    * Render a single outcome glyph item.
    * Handles all the display logic for labels, controls, and interaction.
+   * Clicking the glyph triggers the contextual tooltip with scenario data.
    */
   const renderOutcomeItem = (displayName: string, name: string) => {
     const chartData = scenarioChartData[displayName]
     const isActive = chartData !== undefined && chartData.length > 0
-    const isSelected =
-      expandedSummaryOutcome === displayName ||
-      (selectedOutcome === displayName && hasTierClick)
+    const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === displayName
 
     // In aligned grid mode, labels and controls are in the header row
@@ -136,37 +113,43 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const showControlsBelowGlyph = !isAlignedGrid
 
     return (
-      <OutcomeGlyphItem
+      <Box
         key={displayName}
-        displayName={displayName}
-        name={name}
-        chartData={chartData}
-        isActive={isActive}
-        isSelected={isSelected}
-        isTooltipActive={activeTooltip === displayName}
-        size={glyphSize}
-        showLabel={showLabelBelowGlyph}
-        showInfoButton={showControlsBelowGlyph}
-        showSortButton={showControlsBelowGlyph && sortEnabled}
-        sortState={isSorted ? sortDirection : null}
-        onGlyphClick={() => {
-          if (isActive) {
-            onOutcomeSelect(scenario.scenarioId, displayName)
-            if (onTierClick) onTierClick(scenario.scenarioId, displayName)
-            onToggleSummary(scenario.scenarioId, displayName)
-          }
+        ref={(el: HTMLDivElement | null) => {
+          glyphRefs.current[displayName] = el
         }}
-        onInfoClick={(e) => {
-          onTooltipToggle(displayName, e.currentTarget)
-        }}
-        onSortToggle={(newState) => {
-          if (newState === null) {
-            onSortChange?.(null, "asc")
-          } else {
-            onSortChange?.(displayName, newState)
-          }
-        }}
-      />
+      >
+        <OutcomeGlyphItem
+          displayName={displayName}
+          name={name}
+          chartData={chartData}
+          isActive={isActive}
+          isSelected={isSelected}
+          isTooltipActive={activeTooltip === displayName}
+          size={glyphSize}
+          showLabel={showLabelBelowGlyph}
+          showInfoButton={showControlsBelowGlyph}
+          showSortButton={showControlsBelowGlyph && sortEnabled}
+          sortState={isSorted ? sortDirection : null}
+          // Click glyph to open contextual tooltip
+          onGlyphClick={() => {
+            const anchor = glyphRefs.current[displayName]
+            if (anchor) {
+              onTooltipToggle(displayName, anchor)
+            }
+          }}
+          onInfoClick={(e) => {
+            onTooltipToggle(displayName, e.currentTarget)
+          }}
+          onSortToggle={(newState) => {
+            if (newState === null) {
+              onSortChange?.(null, "asc")
+            } else {
+              onSortChange?.(displayName, newState)
+            }
+          }}
+        />
+      </Box>
     )
   }
 
@@ -212,8 +195,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           justifyContent: "flex-end", // Align checkbox closer to scenario title
           alignItems: "flex-start",
           alignSelf: "start",
-          pointerEvents: "auto",
-          cursor: "pointer",
           // Non-compact: vertical padding matches scenario title alignment
           ...(!compact && {
             pt: theme.scenarios.grid.row.padding,
@@ -222,19 +203,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           // Compact: checkbox spans all rows
           ...(compact && { gridRow: "1 / -1" }),
         }}
-        onClick={(event) => {
-          event.stopPropagation()
-          onToggleScenario(scenario.scenarioId)
-        }}
       >
         <Checkbox
           checked={isChosen}
-          onChange={() => {}}
+          onChange={() => onToggleScenario(scenario.scenarioId)}
+          // WCAG 4.1.2: Provide context for which scenario this checkbox controls
+          inputProps={{
+            "aria-label": `Select ${scenario.label} scenario`,
+          }}
           sx={{
             padding: 0,
             margin: 0,
             cursor: "pointer",
-            pointerEvents: "none",
             transform: "scale(0.9)",
           }}
         />

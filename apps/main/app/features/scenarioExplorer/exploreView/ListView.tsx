@@ -171,6 +171,7 @@ export default function ListView({
 
   const strategyGridProps = {
     getChartDataForScenario,
+    allScoreData,
     outcomeNames: outcomeNames || [],
     scenarios: sortedScenarios,
     highlightedScenarios: matchingScenarioIds,

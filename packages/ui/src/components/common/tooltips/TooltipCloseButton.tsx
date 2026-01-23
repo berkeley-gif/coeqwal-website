@@ -5,7 +5,7 @@
  *
  * Used by HybridTooltip, ClickTooltip, TierTooltipPortal, and other
  * tooltip variants that need a dismissible close button.
- * - 24x24px touch target
+ * - WCAG 2.5.5: 44x44px touch target on mobile, 24x24px on desktop
  *
  * ## Usage
  *
@@ -54,10 +54,16 @@ export function TooltipCloseButton({
           offset?.right !== undefined
             ? `${offset.right}px`
             : (theme: Theme) => theme.spacing(CLOSE_BUTTON_OFFSET),
-        width: "24px",
-        height: "24px",
-        border: "none",
-        background: "transparent",
+        // WCAG 2.5.5: 44px touch target on mobile, 24px on desktop
+        width: { xs: "44px", sm: "24px" },
+        height: { xs: "44px", sm: "24px" },
+        // WCAG 1.4.11: Visible border for touch target
+        border: (theme: Theme) => `1px solid ${theme.palette.grey[400]}`,
+        // Visible background on mobile for touch target visibility
+        background: (theme: Theme) => ({
+          xs: `${theme.palette.grey[200]}60`,
+          sm: "transparent",
+        }),
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
@@ -67,6 +73,11 @@ export function TooltipCloseButton({
         "&:hover": {
           color: (theme: Theme) => theme.palette.grey[700],
           background: (theme: Theme) => theme.palette.grey[100],
+        },
+        // WCAG 2.4.7: Focus visible styles
+        "&:focus-visible": {
+          outline: (theme: Theme) => `2px solid ${theme.palette.blue.bright}`,
+          outlineOffset: "2px",
         },
       }}
       aria-label="Close tooltip"

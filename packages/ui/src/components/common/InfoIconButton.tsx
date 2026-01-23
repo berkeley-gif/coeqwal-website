@@ -59,8 +59,9 @@ import { Theme } from "@mui/material/styles"
 // ============================================================================
 const BUTTON_ICON_SIZE = "1.35rem"
 const INLINE_ICON_SIZE = "1.1rem"
-const CIRCLE_SIZE = "24px"
-const INLINE_TOUCH_TARGET = "20px"
+// WCAG 2.5.5: 44px minimum touch target on mobile, 24px on desktop
+const CIRCLE_SIZE = { xs: "44px", sm: "24px" }
+const INLINE_TOUCH_TARGET = { xs: "44px", sm: "20px" }
 
 // ============================================================================
 // TYPES
@@ -87,7 +88,8 @@ export interface InfoIconButtonProps {
 // ============================================================================
 // STYLES
 // ============================================================================
-const circleButtonStyles = {
+// Note: circleButtonStyles uses theme callback for responsive sizing
+const getCircleButtonStyles = (theme: Theme) => ({
   border: "none",
   cursor: "pointer",
   padding: 0,
@@ -95,15 +97,16 @@ const circleButtonStyles = {
   alignItems: "center",
   justifyContent: "center",
   borderRadius: "50%",
+  // WCAG 2.5.5: 44px touch target on mobile, 24px on desktop
   width: CIRCLE_SIZE,
   height: CIRCLE_SIZE,
   minWidth: CIRCLE_SIZE,
   minHeight: CIRCLE_SIZE,
-  transition: "all 0.15s ease", // theme.transition.quick equivalent
-}
+  transition: theme.transition.quick,
+})
 
-// NOTE: Using static object for performance
-const inlineButtonStyles = {
+// Note: inlineButtonStyles uses theme callback for responsive sizing
+const getInlineButtonStyles = (theme: Theme) => ({
   border: "none",
   cursor: "pointer",
   padding: 0,
@@ -112,11 +115,11 @@ const inlineButtonStyles = {
   alignItems: "center",
   justifyContent: "center",
   verticalAlign: "-3.5px",
-  transition: "color 0.15s ease", // theme.transition.quick timing
-  // Touch target sizing
+  transition: theme.transition.quick,
+  // WCAG 2.5.5: 44px touch target on mobile, 20px on desktop
   minWidth: INLINE_TOUCH_TARGET,
   minHeight: INLINE_TOUCH_TARGET,
-}
+})
 
 // ============================================================================
 // MAIN COMPONENT
@@ -155,24 +158,31 @@ export const InfoIconButton = forwardRef<
       ref={actualRef}
       onClick={onClick}
       onMouseDown={onMouseDown}
-      title={title}
-      sx={{
-        ...(isInline ? inlineButtonStyles : circleButtonStyles),
+      aria-label={title || "More information"}
+      aria-expanded={isActive}
+      sx={(theme: Theme) => ({
+        ...(isInline ? getInlineButtonStyles(theme) : getCircleButtonStyles(theme)),
+        // WCAG 1.4.11: Visible background and border for touch target
         background: isInline
           ? "none"
-          : (theme: Theme) =>
-              isActive
-                ? `${theme.palette.blue.bright}20`
-                : `${theme.palette.grey[500]}15`,
-        color: (theme: Theme) =>
-          isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
+          : isActive
+            ? `${theme.palette.blue.bright}25`
+            : { xs: `${theme.palette.grey[300]}40`, sm: `${theme.palette.grey[400]}18` },
+        border: isInline
+          ? "none"
+          : `1px solid ${theme.palette.grey[400]}`,
+        color: isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
         "&:hover": {
-          background: isInline
-            ? "none"
-            : (theme: Theme) => `${theme.palette.blue.bright}30`,
-          color: (theme: Theme) => theme.palette.blue.darkest,
+          background: isInline ? "none" : `${theme.palette.blue.bright}35`,
+          borderColor: theme.palette.blue.bright,
+          color: theme.palette.blue.darkest,
         },
-      }}
+        // WCAG 2.4.7: Focus visible styles
+        "&:focus-visible": {
+          outline: `2px solid ${theme.palette.blue.bright}`,
+          outlineOffset: "2px",
+        },
+      })}
     >
       <InfoIcon sx={{ fontSize: iconSize, ...sx }} />
     </Box>

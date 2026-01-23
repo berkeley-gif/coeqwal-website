@@ -35,12 +35,11 @@ import { StrategyGridContent } from "./StrategyGridContent"
  */
 const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForScenario,
+  allScoreData,
   outcomeNames,
   scenarios: scenariosProp,
   highlightedScenarios,
   showSearchDivider = false,
-  onOutcomeSelect,
-  onTierClick,
   onToggleScenario,
   selectedScenarios,
   selectedOutcomes,
@@ -85,7 +84,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const {
     openTooltip: activeTooltip,
     anchor: tooltipAnchor,
+    scenarioContext,
     handleToggleWithAnchor,
+    handleToggleWithContext,
     handleClose: closeTooltip,
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
@@ -109,28 +110,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   }, [tooltipAnchor])
 
   // =========================================================================
-  // Summary Panel State
-  // =========================================================================
-
-  // Track which scenarios have expanded summaries
-  const [expandedSummaries, setExpandedSummaries] = useState<
-    Record<string, string | null>
-  >({})
-
-  // Toggle summary for a scenario with a specific outcome
-  const toggleSummary = (scenarioId: string, outcome: string) => {
-    setExpandedSummaries((prev) => {
-      const currentOutcome = prev[scenarioId]
-      if (currentOutcome === outcome) {
-        const { [scenarioId]: _removed, ...rest } = prev
-        void _removed
-        return rest
-      }
-      return { ...prev, [scenarioId]: outcome }
-    })
-  }
-
-  // =========================================================================
   // Derived Values
   // =========================================================================
 
@@ -150,11 +129,19 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   return (
     <Box sx={{ position: "relative" }}>
       {/* Active outcome tooltip - rendered via Portal */}
+      {/* WCAG 4.1.2: Pass scenario score data and chart data for accessible text representation */}
       <TierTooltipPortal
         outcome={activeTooltip}
         position={tooltipPosition}
         onClose={closeTooltip}
         onForceClose={forceCloseTooltip}
+        scenarioScore={
+          scenarioContext && allScoreData && activeTooltip
+            ? allScoreData[scenarioContext.scenarioId]?.[activeTooltip]
+            : null
+        }
+        scenarioLabel={scenarioContext?.scenarioLabel}
+        chartData={scenarioContext?.chartData}
       />
 
       <Box
@@ -219,13 +206,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
             showDefinitions={showDefinitions}
-            showMapView={showMapView}
             compact={compact}
             layoutMode={layoutMode}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
             selectedOutcomes={selectedOutcomes}
-            expandedSummaries={expandedSummaries}
             activeTooltip={activeTooltip}
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}
@@ -233,10 +218,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             glyphSize={glyphSize}
             isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
-            onOutcomeSelect={onOutcomeSelect}
-            onTierClick={onTierClick}
-            onToggleSummary={toggleSummary}
             onTooltipToggle={handleToggleWithAnchor}
+            onTooltipToggleWithContext={handleToggleWithContext}
             onSortChange={onSortChange}
           />
         )}

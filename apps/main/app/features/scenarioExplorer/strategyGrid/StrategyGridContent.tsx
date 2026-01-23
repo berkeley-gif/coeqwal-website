@@ -5,7 +5,6 @@
  *
  * Maps scenarios to StrategyGridRow components and handles:
  * - Search result dividers between highlighted and non-highlighted rows
- * - Summary panel rendering when an outcome is expanded
  * - Filtering based on showOnlyChosen state
  *
  * This component is rendered when renderMode is "contentOnly" or "all".
@@ -14,9 +13,8 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React from "react"
+import React, { useCallback } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
-import { SummaryPanel } from "../../map/overlays/scenarioPanels"
 import type {
   ChartDataPoint,
   OutcomeName,
@@ -24,6 +22,7 @@ import type {
 } from "../../scenarios/components/shared"
 import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
+import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
 
 export interface StrategyGridContentProps {
   /** Scenarios to display */
@@ -38,8 +37,6 @@ export interface StrategyGridContentProps {
   showOnlyChosen: boolean
   /** Show scenario descriptions */
   showDefinitions: boolean
-  /** Map view mode */
-  showMapView: boolean
   /** Compact layout mode */
   compact: boolean
   /** Layout mode for responsive behavior */
@@ -52,8 +49,6 @@ export interface StrategyGridContentProps {
   ) => Record<string, ChartDataPoint[]>
   /** Currently selected outcomes per scenario */
   selectedOutcomes: Record<string, string | null>
-  /** Expanded summary outcomes per scenario */
-  expandedSummaries: Record<string, string | null>
   /** Active tooltip outcome name */
   activeTooltip: string | null
   /** Current sort column */
@@ -68,14 +63,14 @@ export interface StrategyGridContentProps {
   isAlignedGrid: boolean
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
-  /** Select outcome */
-  onOutcomeSelect: (scenarioId: string, outcome: string) => void
-  /** Tier click handler */
-  onTierClick?: (scenarioId: string, outcome: string) => void
-  /** Toggle summary panel */
-  onToggleSummary: (scenarioId: string, outcome: string) => void
-  /** Toggle tooltip */
+  /** Toggle tooltip (basic - no scenario context) */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
+  /** Toggle tooltip with scenario context (for accessibility) */
+  onTooltipToggleWithContext?: (
+    name: string,
+    anchor: HTMLElement,
+    context: TooltipScenarioContext,
+  ) => void
   /** Sort change handler */
   onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
 }
@@ -91,13 +86,11 @@ export function StrategyGridContent({
   selectedScenarios,
   showOnlyChosen,
   showDefinitions,
-  showMapView,
   compact,
   layoutMode,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcomes,
-  expandedSummaries,
   activeTooltip,
   sortBy,
   sortDirection,
@@ -105,10 +98,8 @@ export function StrategyGridContent({
   glyphSize,
   isAlignedGrid,
   onToggleScenario,
-  onOutcomeSelect,
-  onTierClick,
-  onToggleSummary,
   onTooltipToggle,
+  onTooltipToggleWithContext,
   onSortChange,
 }: StrategyGridContentProps) {
   const theme = useTheme()
@@ -117,6 +108,28 @@ export function StrategyGridContent({
   const displayScenarios = showOnlyChosen
     ? scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
     : scenarios
+
+  // Create context-aware tooltip handler for a specific scenario
+  // Includes chart data for accurate tier display in tooltips
+  const createTooltipHandler = useCallback(
+    (scenario: ScenarioForDisplay) =>
+      (name: string, anchor: HTMLElement) => {
+        if (onTooltipToggleWithContext) {
+          // Get chart data for this specific outcome to pass to tooltip
+          const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
+          const outcomeChartData = scenarioChartData[name]
+
+          onTooltipToggleWithContext(name, anchor, {
+            scenarioId: scenario.scenarioId,
+            scenarioLabel: scenario.label,
+            chartData: outcomeChartData,
+          })
+        } else {
+          onTooltipToggle(name, anchor)
+        }
+      },
+    [onTooltipToggle, onTooltipToggleWithContext, getChartDataForScenario],
+  )
 
   return (
     <>
@@ -134,6 +147,7 @@ export function StrategyGridContent({
         const rows: React.ReactNode[] = []
 
         // Main scenario row
+        // Use context-aware tooltip handler to include scenario info for accessibility
         rows.push(
           <StrategyGridRow
             key={scenario.scenarioId}
@@ -146,11 +160,7 @@ export function StrategyGridContent({
             showDefinitions={showDefinitions}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
-            expandedSummaryOutcome={
-              expandedSummaries[scenario.scenarioId] ?? null
-            }
             selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
-            hasTierClick={!!onTierClick}
             activeTooltip={activeTooltip}
             sortBy={sortBy}
             sortDirection={sortDirection}
@@ -158,28 +168,10 @@ export function StrategyGridContent({
             glyphSize={glyphSize}
             isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
-            onOutcomeSelect={onOutcomeSelect}
-            onTierClick={onTierClick}
-            onToggleSummary={onToggleSummary}
-            onTooltipToggle={onTooltipToggle}
+            onTooltipToggle={createTooltipHandler(scenario)}
             onSortChange={onSortChange}
           />,
         )
-
-        // Summary panel (shown when an outcome is expanded)
-        const selectedOutcomeForSummary = expandedSummaries[scenario.scenarioId]
-        if (selectedOutcomeForSummary && !showMapView) {
-          rows.push(
-            <SummaryRow
-              key={`summary-${scenario.scenarioId}`}
-              scenarioId={scenario.scenarioId}
-              outcome={selectedOutcomeForSummary}
-              onClose={() =>
-                onToggleSummary(scenario.scenarioId, selectedOutcomeForSummary)
-              }
-            />,
-          )
-        }
 
         // Search result divider
         if (shouldShowDivider) {
@@ -199,74 +191,6 @@ export function StrategyGridContent({
         return rows
       })}
     </>
-  )
-}
-
-/**
- * SummaryRow - Expandable summary panel for a scenario outcome
- */
-interface SummaryRowProps {
-  scenarioId: string
-  outcome: string
-  onClose: () => void
-}
-
-function SummaryRow({ scenarioId, outcome, onClose }: SummaryRowProps) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      sx={{
-        gridColumn: "1 / -1",
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "32px minmax(0, 1fr)",
-          lg: "32px minmax(0, 1fr)",
-        },
-        gap: theme.space.gap.sm,
-        columnGap: theme.space.gap.lg,
-        alignItems: "start",
-        mb: theme.space.component.sm,
-      }}
-    >
-      {/* Empty column for checkbox alignment */}
-      <Box />
-
-      {/* Summary content with close button */}
-      <Box sx={{ pr: 2, position: "relative" }}>
-        <Box
-          component="button"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            top: theme.space.component.sm,
-            right: theme.space.component.sm,
-            background: "none",
-            ...theme.typography.body2,
-            border: "none",
-            cursor: "pointer",
-            padding: theme.space.component.xs,
-            display: "flex",
-            alignItems: "center",
-            color: theme.palette.grey[500],
-            borderRadius: theme.borderRadius.circle,
-            zIndex: 1,
-            "&:hover": {
-              color: theme.palette.grey[700],
-              backgroundColor: theme.palette.grey[200],
-            },
-          }}
-          aria-label="Close summary"
-        >
-          ×
-        </Box>
-        <SummaryPanel
-          scenarioId={scenarioId}
-          outcome={outcome}
-          variant="inline"
-        />
-      </Box>
-    </Box>
   )
 }
 

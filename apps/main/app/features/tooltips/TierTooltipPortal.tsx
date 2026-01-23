@@ -5,12 +5,17 @@
  *
  * Renders the tooltip outside the normal DOM hierarchy to escape stacking context.
  *
+ * WCAG 4.1.2: When scenarioScore is provided, displays the scenario's actual
+ * tier level alongside tier definitions, making chart data accessible to
+ * screen reader users.
  */
 
-import React from "react"
+import React, { useEffect } from "react"
 import { Box, Portal, ClickAwayListener, useTheme } from "@repo/ui/mui"
 import { TooltipCloseButton } from "@repo/ui"
 import TierTooltipContent from "./TierTooltipContent"
+import type { OutcomeScoreData } from "../scenarios/hooks"
+import type { TooltipChartDataPoint } from "./useTierTooltipState"
 
 interface TierTooltipPortalProps {
   /** The outcome name to show tooltip for (null = hidden) */
@@ -21,6 +26,12 @@ interface TierTooltipPortalProps {
   onClose: () => void
   /** Called when user clicks close button */
   onForceClose: () => void
+  /** Optional: Current scenario's score data for this outcome (for accessibility) */
+  scenarioScore?: OutcomeScoreData | null
+  /** Optional: Scenario label for context */
+  scenarioLabel?: string
+  /** Optional: Chart data for tier distribution display */
+  chartData?: TooltipChartDataPoint[]
 }
 
 export function TierTooltipPortal({
@@ -28,8 +39,26 @@ export function TierTooltipPortal({
   position,
   onClose,
   onForceClose,
+  scenarioScore,
+  scenarioLabel,
+  chartData,
 }: TierTooltipPortalProps) {
   const theme = useTheme()
+
+  // WCAG 2.1.1: Close tooltip on Escape key
+  useEffect(() => {
+    if (!outcome) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        onForceClose()
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [outcome, onForceClose])
 
   if (!outcome || !position) return null
 
@@ -93,7 +122,13 @@ export function TierTooltipPortal({
               }}
             />
 
-            <TierTooltipContent outcome={outcome} showTitle={true} />
+            <TierTooltipContent
+              outcome={outcome}
+              showTitle={true}
+              scenarioScore={scenarioScore}
+              scenarioLabel={scenarioLabel}
+              chartData={chartData}
+            />
           </Box>
         </Box>
       </ClickAwayListener>

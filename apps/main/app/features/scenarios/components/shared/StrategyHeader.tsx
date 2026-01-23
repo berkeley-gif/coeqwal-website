@@ -13,7 +13,7 @@
  * cross-fade animation for smooth expand/collapse transitions.
  */
 
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
@@ -73,16 +73,65 @@ function DescriptionWithGlossaryLinks({
     [setDrawerContent, openDrawer],
   )
 
-  // Toggle styles for show more/less
-  const toggleStyles = {
+  // WCAG 2.1.1: Handle keyboard activation for glossary links
+  const handleGlossaryKeyDown = useCallback(
+    (glossaryTerm: string) => (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        e.stopPropagation()
+        setDrawerContent({ selectedTerm: glossaryTerm })
+        openDrawer("glossary")
+      }
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  // Toggle styles for show more/less - now as buttons
+  const toggleButtonStyles = {
     color: theme.palette.blue.bright,
     fontStyle: "italic",
     cursor: "pointer",
     userSelect: "none" as const,
+    background: "none",
+    border: "none",
+    padding: 0,
+    font: "inherit",
     "&:hover": {
       textDecoration: "underline",
     },
+    // WCAG 2.4.7: Focus visible styles
+    "&:focus-visible": {
+      outline: `2px solid ${theme.palette.blue.bright}`,
+      outlineOffset: "2px",
+      borderRadius: "2px",
+    },
   }
+
+  // Glossary link styles - now as buttons
+  const glossaryLinkStyles = useMemo(
+    () => ({
+      color: theme.palette.blue.bright,
+      borderBottom: `2px solid ${theme.palette.blue.bright}`,
+      cursor: "pointer",
+      background: "none",
+      border: "none",
+      borderBottomStyle: "solid" as const,
+      borderBottomWidth: "2px",
+      borderBottomColor: theme.palette.blue.bright,
+      padding: 0,
+      font: "inherit",
+      "&:hover": {
+        borderBottomWidth: "3px",
+      },
+      // WCAG 2.4.7: Focus visible styles
+      "&:focus-visible": {
+        outline: `2px solid ${theme.palette.blue.bright}`,
+        outlineOffset: "2px",
+        borderRadius: "2px",
+      },
+    }),
+    [theme.palette.blue.bright],
+  )
 
   // Build text content with glossary links as React nodes
   const renderTextWithGlossaryLinks = useCallback(() => {
@@ -114,17 +163,14 @@ function DescriptionWithGlossaryLinks({
         ) {
           result.push(
             <Box
-              component="span"
+              component="button"
+              type="button"
               key={`link-${match.index}`}
               onClick={handleGlossaryClick(term.glossaryTerm)}
-              sx={{
-                color: theme.palette.blue.bright,
-                borderBottom: `2px solid ${theme.palette.blue.bright}`,
-                cursor: "pointer",
-                "&:hover": {
-                  borderBottomWidth: "3px",
-                },
-              }}
+              onKeyDown={handleGlossaryKeyDown(term.glossaryTerm)}
+              tabIndex={0}
+              aria-label={`Open glossary for ${term.glossaryTerm}`}
+              sx={glossaryLinkStyles}
             >
               {matchedTerm}
             </Box>,
@@ -145,19 +191,29 @@ function DescriptionWithGlossaryLinks({
     }
 
     return result
-  }, [description, handleGlossaryClick, theme.palette.blue.bright])
+  }, [description, handleGlossaryClick, handleGlossaryKeyDown, glossaryLinkStyles])
 
   // Ellipsis with "show more" link for truncated view
   const showMoreEllipsis = (
     <Box component="span">
       ...{" "}
       <Box
-        component="span"
+        component="button"
+        type="button"
         onClick={(e) => {
           e.stopPropagation()
           setIsExpanded(true)
         }}
-        sx={toggleStyles}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsExpanded(true)
+          }
+        }}
+        aria-expanded={false}
+        aria-label="Show more description text"
+        sx={toggleButtonStyles}
       >
         show more
       </Box>
@@ -188,12 +244,22 @@ function DescriptionWithGlossaryLinks({
       >
         {renderTextWithGlossaryLinks()}{" "}
         <Box
-          component="span"
+          component="button"
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             setIsExpanded(false)
           }}
-          sx={toggleStyles}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsExpanded(false)
+            }
+          }}
+          aria-expanded={true}
+          aria-label="Show less description text"
+          sx={toggleButtonStyles}
         >
           show less
         </Box>

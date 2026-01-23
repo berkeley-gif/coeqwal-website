@@ -614,6 +614,8 @@ const theme = createTheme({
   // This generates CSS custom properties (--mui-*) for theme values,
   // allowing Server Components to reference theme values as static strings
   cssVariables: true,
+  // Force light mode - prevent auto-switching based on prefers-color-scheme
+  colorSchemes: { light: true, dark: false },
   ...baseTheme,
   // Custom layout values
   layout: themeValues.layout,
@@ -624,6 +626,8 @@ const theme = createTheme({
   // Palette - California Water theme (MUI integration)
   // Custom colors spread from themeValues, MUI standard colors mapped
   palette: {
+    // Force light mode - prevent iOS/Android dark mode from affecting the site
+    mode: "light",
     // Spread custom palette groups directly
     ...themeValues.palette,
 
@@ -1350,9 +1354,25 @@ const theme = createTheme({
             width: "0 !important",
             height: "0 !important",
           },
-          // Hide MUI's internal input element
+          // WCAG 2.5.5: Extend touch target to 44px on mobile while keeping visual size small
+          // The input extends beyond visual bounds to create larger touch area
           "& input[type='checkbox']": {
-            display: "none !important",
+            position: "absolute",
+            // Center the 44px touch target around the 20px visual checkbox
+            width: "44px",
+            height: "44px",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            opacity: 0,
+            margin: 0,
+            padding: 0,
+            cursor: "pointer",
+          },
+          // WCAG 2.4.7: Focus visible styles for keyboard users
+          "&:focus-within": {
+            outline: `2px solid ${themeValues.palette.blue.bright}`,
+            outlineOffset: "2px",
           },
           // Custom checkmark using CSS - centered in inline-block
           "&.Mui-checked::after": {
