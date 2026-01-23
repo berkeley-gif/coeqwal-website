@@ -88,11 +88,31 @@ export function FloatingGlossaryButton({
     document.addEventListener("mouseup", handleQuickClick)
   }
 
+  // WCAG 2.1.1: Handle keyboard activation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
   const showArrows = isHovered || isDragging
+
+  // WCAG 4.1.2: Provide accessible name based on state
+  const ariaLabel = isOpen ? "Close glossary" : "Open glossary"
 
   return (
     <Box
+      id="glossary-button"
+      component="button"
+      type="button"
+      role="button"
+      tabIndex={0}
+      aria-label={ariaLabel}
+      aria-expanded={isOpen}
+      aria-haspopup="dialog"
       onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       sx={{
@@ -120,6 +140,14 @@ export function FloatingGlossaryButton({
         "&:active": {
           transform: isDragging ? "none" : "scale(0.95)",
         },
+        // WCAG 2.4.7: Focus visible styles
+        "&:focus-visible": {
+          outline: `3px solid ${theme.palette.common.white}`,
+          outlineOffset: "3px",
+        },
+        // Remove default button styles
+        border: "none",
+        padding: 0,
       }}
     >
       {/* Left arrow */}
