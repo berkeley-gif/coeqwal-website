@@ -18,7 +18,7 @@ import {
   alpha,
 } from "@repo/ui/mui"
 import { glossaryTerms } from "../../content/glossary"
-import React, { useRef, useEffect, useState } from "react"
+import React, { useRef, useEffect, useState, useCallback } from "react"
 
 interface Position {
   bottom: number
@@ -70,6 +70,21 @@ export function FloatingGlossaryPanel({
     }
   }, [internalSelectedTerm])
 
+  // WCAG 2.1.1: Handle Escape key to close panel
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose()
+      }
+    },
+    [isOpen, onClose],
+  )
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [handleKeyDown])
+
   // Function to handle clicking on a term link within the glossary
   const handleTermClick = (termName: string) => {
     // Open the panel if it's not already open
@@ -93,13 +108,33 @@ export function FloatingGlossaryPanel({
     ) // Delay if opening, immediate if already open
   }
 
-  // Shared styles
+  // WCAG 2.1.1: Handle keyboard activation for term links
+  const handleTermKeyDown = (termName: string) => (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      handleTermClick(termName)
+    }
+  }
+
+  // Shared styles for clickable term links
   const termLinkStyle = {
     color: theme.palette.blue.bright,
     textDecoration: "underline",
     cursor: "pointer",
+    // Make focusable
+    display: "inline",
+    background: "none",
+    border: "none",
+    padding: 0,
+    font: "inherit",
     "&:hover": {
       color: theme.palette.blue.darkest,
+    },
+    // WCAG 2.4.7: Focus visible styles
+    "&:focus-visible": {
+      outline: `2px solid ${theme.palette.blue.bright}`,
+      outlineOffset: "2px",
+      borderRadius: "2px",
     },
   } as const
 
@@ -133,8 +168,12 @@ export function FloatingGlossaryPanel({
             return (
               <Box
                 key={index}
-                component="span"
+                component="button"
+                type="button"
                 onClick={() => handleTermClick(matchedTerm.term)}
+                onKeyDown={handleTermKeyDown(matchedTerm.term)}
+                tabIndex={isOpen ? 0 : -1}
+                aria-label={`Go to ${matchedTerm.term} definition`}
                 sx={termLinkStyle}
               >
                 {part}
@@ -147,10 +186,16 @@ export function FloatingGlossaryPanel({
     )
   }
 
+  const glossaryTitleId = "glossary-panel-title"
+
   return (
     <>
-      {/* Panel anchored to button position */}
+      {/* WCAG 4.1.2: Panel with dialog role and proper ARIA attributes */}
+      {/* Note: aria-hidden removed as it's prohibited on dialog roles with focusable content */}
       <Box
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby={glossaryTitleId}
         sx={{
           position: "fixed",
           bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
@@ -200,7 +245,12 @@ export function FloatingGlossaryPanel({
             zIndex: 1,
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          <Typography
+            id={glossaryTitleId}
+            variant="subtitle1"
+            component="h2"
+            sx={{ fontWeight: 600 }}
+          >
             Glossary
           </Typography>
           <IconButton onClick={onClose} size="small">

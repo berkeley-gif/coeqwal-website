@@ -64,8 +64,8 @@ interface HydroclimateChooserProps {
   showTitle?: boolean
 }
 
-// Fixed icon size - no responsive shrinking needed
-const ICON_SIZE = "40px"
+// WCAG 2.5.5: 44px minimum touch target
+const ICON_SIZE = "44px"
 
 export function HydroclimateChooser({
   value = "historical",
@@ -136,7 +136,12 @@ export function HydroclimateChooser({
                 }
               >
                 <Box
+                  component="button"
+                  type="button"
                   onClick={() => handleSelect(option.value)}
+                  disabled={isDisabled}
+                  aria-label={`${option.label}${isDisabled ? " (Coming soon)" : ""}${isSelected ? " (selected)" : ""}`}
+                  aria-pressed={isSelected}
                   sx={{
                     display: "flex",
                     flexDirection: "column",
@@ -145,6 +150,16 @@ export function HydroclimateChooser({
                     cursor: isDisabled ? "not-allowed" : "pointer",
                     opacity: isDisabled ? 0.4 : 1,
                     transition: theme.transition.default,
+                    // Remove default button styles
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    // WCAG 2.4.7: Focus visible styles
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "4px",
+                      borderRadius: theme.borderRadius.circle,
+                    },
                   }}
                 >
                   <Box
