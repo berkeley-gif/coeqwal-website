@@ -222,28 +222,10 @@ export function useScenarioTiers(scenarioId: string | null) {
       tiersByDisplayName.set(uiDisplayName, tier)
     })
 
-    // Debug: Log what names are in the map vs what we're looking for
-    if (process.env.NODE_ENV === "development") {
-      const mapKeys = Array.from(tiersByDisplayName.keys())
-      const missing = desiredOrder.filter(
-        (name) => !tiersByDisplayName.has(name),
-      )
-      if (missing.length > 0) {
-        console.log("Tier mapping debug:", {
-          mapKeys,
-          desiredOrder,
-          missing,
-        })
-      }
-    }
-
     // Return outcomes in order, including missing ones (as inactive)
     return desiredOrder.map((displayName) => {
       const tier = tiersByDisplayName.get(displayName)
       if (!tier) {
-        console.warn(
-          `Tier not found for: "${displayName}". Available: ${Array.from(tiersByDisplayName.keys()).join(", ")}`,
-        )
         // Return placeholder for missing API tiers
         return {
           shortCode: "MISSING",
@@ -363,12 +345,6 @@ export function useMultipleScenarioTiers() {
     return desiredOrder.map((displayName): OutcomeInfo => {
       const tier = tiersByDisplayName.get(displayName)
       if (!tier) {
-        // Debug: only log once per missing tier
-        if (process.env.NODE_ENV === "development") {
-          console.log(
-            `[useMultipleScenarioTiers] Missing tier: "${displayName}"`,
-          )
-        }
         return {
           shortCode: "MISSING",
           name: displayName,

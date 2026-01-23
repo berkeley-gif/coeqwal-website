@@ -7,12 +7,15 @@ import type {
   OutcomeName,
   ScenarioForDisplay,
 } from "../../scenarios/components/shared"
+import type { OutcomeScoreData } from "../../scenarios/hooks"
 
 export interface StrategyGridProps {
   // Data
   getChartDataForScenario: (
     scenarioId: string,
   ) => Record<string, ChartDataPoint[]>
+  /** Optional: Score data for all scenarios (for accessibility tooltip display) */
+  allScoreData?: Record<string, Record<string, OutcomeScoreData>>
   outcomeNames: OutcomeName[]
   /** Scenarios to display (from useScenarioList().scenarios) */
   scenarios: ScenarioForDisplay[]
