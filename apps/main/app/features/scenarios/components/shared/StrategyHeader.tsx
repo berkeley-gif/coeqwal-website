@@ -191,7 +191,12 @@ function DescriptionWithGlossaryLinks({
     }
 
     return result
-  }, [description, handleGlossaryClick, handleGlossaryKeyDown, glossaryLinkStyles])
+  }, [
+    description,
+    handleGlossaryClick,
+    handleGlossaryKeyDown,
+    glossaryLinkStyles,
+  ])
 
   // Ellipsis with "show more" link for truncated view
   const showMoreEllipsis = (

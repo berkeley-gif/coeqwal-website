@@ -149,7 +149,9 @@ export function OutcomeGlyphItem({
         minWidth: 0,
         overflow: "hidden",
         "&:hover": {
-          backgroundColor: isClickable ? theme.palette.grey[100] : "transparent",
+          backgroundColor: isClickable
+            ? theme.palette.grey[100]
+            : "transparent",
         },
         "&:focus-visible": {
           outline: `2px solid ${theme.palette.blue.bright}`,
