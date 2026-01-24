@@ -750,6 +750,12 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.6,
     },
+    body1Medium: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "1.25rem", // 20px - same as body1
+      fontWeight: 500,
+      lineHeight: 1.6,
+    },
     body2: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.1rem", // 17.6px - secondary body text (DisplayBlock mobile)
@@ -1658,6 +1664,7 @@ declare module "@mui/material/styles" {
   interface TypographyVariants {
     fontWeightSemiBold: number
     h1Bold: React.CSSProperties
+    body1Medium: React.CSSProperties
     nav: React.CSSProperties
     tabLabel: React.CSSProperties
     tabLabelDocked: React.CSSProperties
@@ -1677,6 +1684,7 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
     h1Bold?: React.CSSProperties
+    body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
     tabLabel?: React.CSSProperties
     tabLabelDocked?: React.CSSProperties
@@ -1707,6 +1715,7 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     h1Bold: true
+    body1Medium: true
     nav: true
     tabLabel: true
     tabLabelDocked: true

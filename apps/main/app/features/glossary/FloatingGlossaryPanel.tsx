@@ -49,6 +49,7 @@ export function FloatingGlossaryPanel({
 }: FloatingGlossaryPanelProps) {
   const theme = useTheme()
   const termRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const contentRef = useRef<HTMLDivElement>(null)
   const [internalSelectedTerm, setInternalSelectedTerm] = useState<
     string | undefined
   >(selectedTerm)
@@ -84,6 +85,16 @@ export function FloatingGlossaryPanel({
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
+
+  // WCAG 2.4.3: Focus content area when panel opens for keyboard scrolling
+  useEffect(() => {
+    if (isOpen && contentRef.current) {
+      // Small delay to allow animation to start
+      setTimeout(() => {
+        contentRef.current?.focus()
+      }, 100)
+    }
+  }, [isOpen])
 
   // Function to handle clicking on a term link within the glossary
   const handleTermClick = (termName: string) => {
@@ -247,23 +258,36 @@ export function FloatingGlossaryPanel({
         >
           <Typography
             id={glossaryTitleId}
-            variant="subtitle1"
+            variant="h6"
             component="h2"
-            sx={{ fontWeight: 600 }}
           >
             Glossary
           </Typography>
-          <IconButton onClick={onClose} size="small">
+          <IconButton
+            onClick={onClose}
+            size="small"
+            aria-label="Close glossary"
+            tabIndex={isOpen ? 0 : -1}
+          >
             <CloseIcon />
           </IconButton>
         </Box>
 
-        {/* Content */}
+        {/* Content - WCAG 2.1.1: Scrollable region is focusable for keyboard scrolling */}
         <Box
+          ref={contentRef}
+          tabIndex={isOpen ? 0 : -1}
+          role="region"
+          aria-label="Glossary terms"
           sx={{
             flex: 1,
             overflowY: "auto",
             padding: theme.space.section.sm,
+            // WCAG 2.4.7: Focus visible styles for scrollable region
+            "&:focus-visible": {
+              outline: `2px solid ${theme.palette.blue.bright}`,
+              outlineOffset: "-2px",
+            },
           }}
         >
           <Stack spacing={theme.space.gap.lg}>
@@ -315,11 +339,9 @@ export function FloatingGlossaryPanel({
                       {term.icon}
                     </Box>
                     <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 600,
-                        color: theme.palette.blue.darkest,
-                      }}
+                      variant="body1Medium"
+                      component="h3"
+                      color="blue.darkest"
                     >
                       {term.term}
                     </Typography>
@@ -340,10 +362,8 @@ export function FloatingGlossaryPanel({
                     >
                       <Typography
                         variant="subtitle2"
-                        sx={{
-                          fontWeight: 600,
-                          mb: theme.space.component.sm,
-                        }}
+                        fontWeight="semibold"
+                        sx={{ mb: theme.space.component.sm }}
                       >
                         Tiers:
                       </Typography>
@@ -383,8 +403,12 @@ export function FloatingGlossaryPanel({
                       <Typography variant="storyBody" color="text.secondary">
                         <em>See also: </em>
                         <Box
-                          component="span"
+                          component="button"
+                          type="button"
                           onClick={() => handleTermClick(term.seeAlso!)}
+                          onKeyDown={handleTermKeyDown(term.seeAlso!)}
+                          tabIndex={isOpen ? 0 : -1}
+                          aria-label={`Go to ${term.seeAlso} definition`}
                           sx={termLinkStyle}
                         >
                           {term.seeAlso}
