@@ -138,7 +138,7 @@ export function useScenarioSummary(
     if (!scenarioId) return null
     if (!scenario && !scenarioListLoading)
       return `Scenario "${scenarioId}" not found`
-    if (tiersError) return `Failed to load outcome data: ${tiersError.message}`
+    if (tiersError) return `Failed to load outcome data: ${tiersError}`
     return null
   }, [scenarioId, scenario, scenarioListLoading, tiersError])
 

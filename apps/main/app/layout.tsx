@@ -8,6 +8,7 @@ import { StrictMode } from "react"
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
+import { DataProvider } from "@repo/data/providers"
 import { FontLoader } from "./components/FontLoader"
 
 export const metadata: Metadata = {
@@ -27,7 +28,9 @@ export default function RootLayout({
         <StrictMode>
           <FontLoader kitId="rxm7kha" />
           <TranslationProvider initialLocale="en">
-            <ThemeRegistry>{children}</ThemeRegistry>
+            <DataProvider>
+              <ThemeRegistry>{children}</ThemeRegistry>
+            </DataProvider>
           </TranslationProvider>
         </StrictMode>
       </body>

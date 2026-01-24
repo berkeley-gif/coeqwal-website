@@ -5,15 +5,27 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./gis/*": "./src/gis/*"
+    "./gis/*": "./src/gis/*",
+    "./fetching": "./src/fetching/index.ts",
+    "./cache": "./src/cache/index.ts",
+    "./providers": "./src/providers/index.ts",
+    "./coeqwal": "./src/coeqwal/index.ts",
+    "./coeqwal/hooks": "./src/coeqwal/hooks/index.ts"
   },
   "scripts": {
     "lint": "echo \"No linting for data package\"",
     "check-types": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{ts,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "dependencies": {
+    "swr": "^2.2.5"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/geojson": "^7946.0.14"
+    "@types/geojson": "^7946.0.14",
+    "@types/react": "^19.0.0"
   }
 }
