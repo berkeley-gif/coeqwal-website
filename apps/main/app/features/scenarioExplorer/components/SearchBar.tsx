@@ -70,6 +70,7 @@ export default function SearchBar({
           </Typography>
         )}
         <StyledTextInput
+          id="scenario-search-input"
           size="small"
           placeholder={placeholder}
           value={searchQuery}
@@ -77,6 +78,7 @@ export default function SearchBar({
           showClearButton={!!searchQuery}
           onClear={() => setSearchQuery("")}
           fullWidth
+          aria-label="Search scenarios"
         />
       </Box>
       {rightContent && (

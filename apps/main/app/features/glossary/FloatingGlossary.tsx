@@ -78,6 +78,22 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     drawerStore,
   ])
 
+  // WCAG 2.1.1: Global keyboard shortcut (Alt+G) to toggle glossary from anywhere
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Alt+G to toggle glossary (use e.code for Mac compatibility where Alt produces special chars)
+      if (e.altKey && e.code === "KeyG") {
+        e.preventDefault()
+        // Force visibility when using keyboard shortcut
+        setIsVisible(true)
+        setIsOpen((prev) => !prev)
+      }
+    }
+
+    document.addEventListener("keydown", handleGlobalKeyDown)
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown)
+  }, [])
+
   const handleToggle = () => setIsOpen((prev) => !prev)
   const handleClose = () => {
     setIsOpen(false)

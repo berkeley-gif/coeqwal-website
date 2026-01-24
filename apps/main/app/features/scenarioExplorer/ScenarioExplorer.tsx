@@ -13,6 +13,7 @@ import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
 import { ComparisonHeader } from "./components/ComparisonHeader"
+import KeyboardShortcuts from "./components/KeyboardShortcuts"
 
 type MainView = "explorer" | "data"
 
@@ -196,6 +197,9 @@ export default function ScenarioExplorerNew() {
           )}
         </Box>
       </Box>
+
+      {/* Global keyboard shortcuts handler */}
+      <KeyboardShortcuts />
     </Box>
   )
 }
