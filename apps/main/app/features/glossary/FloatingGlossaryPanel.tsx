@@ -256,11 +256,7 @@ export function FloatingGlossaryPanel({
             zIndex: 1,
           }}
         >
-          <Typography
-            id={glossaryTitleId}
-            variant="h6"
-            component="h2"
-          >
+          <Typography id={glossaryTitleId} variant="h6" component="h2">
             Glossary
           </Typography>
           <IconButton

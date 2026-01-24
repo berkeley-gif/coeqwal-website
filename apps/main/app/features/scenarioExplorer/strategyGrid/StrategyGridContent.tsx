@@ -112,22 +112,21 @@ export function StrategyGridContent({
   // Create context-aware tooltip handler for a specific scenario
   // Includes chart data for accurate tier display in tooltips
   const createTooltipHandler = useCallback(
-    (scenario: ScenarioForDisplay) =>
-      (name: string, anchor: HTMLElement) => {
-        if (onTooltipToggleWithContext) {
-          // Get chart data for this specific outcome to pass to tooltip
-          const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
-          const outcomeChartData = scenarioChartData[name]
+    (scenario: ScenarioForDisplay) => (name: string, anchor: HTMLElement) => {
+      if (onTooltipToggleWithContext) {
+        // Get chart data for this specific outcome to pass to tooltip
+        const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
+        const outcomeChartData = scenarioChartData[name]
 
-          onTooltipToggleWithContext(name, anchor, {
-            scenarioId: scenario.scenarioId,
-            scenarioLabel: scenario.label,
-            chartData: outcomeChartData,
-          })
-        } else {
-          onTooltipToggle(name, anchor)
-        }
-      },
+        onTooltipToggleWithContext(name, anchor, {
+          scenarioId: scenario.scenarioId,
+          scenarioLabel: scenario.label,
+          chartData: outcomeChartData,
+        })
+      } else {
+        onTooltipToggle(name, anchor)
+      }
+    },
     [onTooltipToggle, onTooltipToggleWithContext, getChartDataForScenario],
   )
 

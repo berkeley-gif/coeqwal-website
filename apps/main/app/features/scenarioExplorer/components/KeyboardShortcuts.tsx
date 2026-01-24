@@ -191,11 +191,7 @@ export function KeyboardShortcuts() {
                     index < SHORTCUTS.length - 1 ? theme.border.light : "none",
                 }}
               >
-                <Typography
-                  component="dd"
-                  variant="storyBody"
-                  sx={{ m: 0 }}
-                >
+                <Typography component="dd" variant="storyBody" sx={{ m: 0 }}>
                   {shortcut.description}
                 </Typography>
                 <Box

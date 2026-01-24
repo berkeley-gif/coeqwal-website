@@ -91,7 +91,10 @@ export function ToggleSortButton({
         backgroundColor: (theme: Theme) =>
           isSorted
             ? `${theme.palette.blue.bright}25`
-            : { xs: `${theme.palette.grey[300]}40`, sm: `${theme.palette.grey[400]}15` },
+            : {
+                xs: `${theme.palette.grey[300]}40`,
+                sm: `${theme.palette.grey[400]}15`,
+              },
         border: (theme: Theme) => `1px solid ${theme.palette.grey[400]}`,
         color: (theme: Theme) =>
           isSorted ? theme.palette.blue.bright : theme.palette.grey[600],

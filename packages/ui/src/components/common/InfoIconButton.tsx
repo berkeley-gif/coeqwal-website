@@ -161,17 +161,22 @@ export const InfoIconButton = forwardRef<
       aria-label={title || "More information"}
       aria-expanded={isActive}
       sx={(theme: Theme) => ({
-        ...(isInline ? getInlineButtonStyles(theme) : getCircleButtonStyles(theme)),
+        ...(isInline
+          ? getInlineButtonStyles(theme)
+          : getCircleButtonStyles(theme)),
         // WCAG 1.4.11: Visible background and border for touch target
         background: isInline
           ? "none"
           : isActive
             ? `${theme.palette.blue.bright}25`
-            : { xs: `${theme.palette.grey[300]}40`, sm: `${theme.palette.grey[400]}18` },
-        border: isInline
-          ? "none"
-          : `1px solid ${theme.palette.grey[400]}`,
-        color: isActive ? theme.palette.blue.darkest : theme.palette.blue.bright,
+            : {
+                xs: `${theme.palette.grey[300]}40`,
+                sm: `${theme.palette.grey[400]}18`,
+              },
+        border: isInline ? "none" : `1px solid ${theme.palette.grey[400]}`,
+        color: isActive
+          ? theme.palette.blue.darkest
+          : theme.palette.blue.bright,
         "&:hover": {
           background: isInline ? "none" : `${theme.palette.blue.bright}35`,
           borderColor: theme.palette.blue.bright,

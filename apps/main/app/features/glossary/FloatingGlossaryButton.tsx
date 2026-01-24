@@ -100,9 +100,7 @@ export function FloatingGlossaryButton({
 
   // WCAG 4.1.2: Provide accessible name based on state
   // Include keyboard shortcut hint for discoverability
-  const ariaLabel = isOpen
-    ? "Close glossary (Alt+G)"
-    : "Open glossary (Alt+G)"
+  const ariaLabel = isOpen ? "Close glossary (Alt+G)" : "Open glossary (Alt+G)"
 
   return (
     <Box
