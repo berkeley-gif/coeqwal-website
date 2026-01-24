@@ -2,7 +2,6 @@
  * API functions for fetching tier data from COEQWAL API
  */
 
-import { API_SHORT_CODE_TO_DISPLAY_NAME } from "../constants/outcomeMappings"
 import { API_BASE } from "../constants/api"
 
 // Type definitions
@@ -120,32 +119,9 @@ export async function fetchAllScenarioTiers(
   return record
 }
 
-// Mapping from API
-let _tierMappingCache: Record<string, string> | null = null
-
-export async function getTierMapping(): Promise<Record<string, string>> {
-  if (_tierMappingCache) {
-    return _tierMappingCache
-  }
-
-  try {
-    const tierList = await fetchTierList()
-    _tierMappingCache = tierList.reduce(
-      (acc, tier) => {
-        acc[tier.short_code] = tier.name
-        return acc
-      },
-      {} as Record<string, string>,
-    )
-    return _tierMappingCache
-  } catch (error) {
-    console.error("Failed to fetch tier mapping, using fallback:", error)
-    // Fallback to centralized mapping if API fails
-    return API_SHORT_CODE_TO_DISPLAY_NAME
-  }
-}
-
 // Utility function to convert API short codes to display names
+// NOTE: For tier mapping, use useTierMapping() from @repo/data/coeqwal/hooks
+// which derives the mapping from the cached tier list (no extra API call)
 export function mapShortCodeToDisplayName(
   shortCode: string,
   mapping: Record<string, string>,

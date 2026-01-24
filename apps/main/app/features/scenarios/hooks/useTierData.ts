@@ -2,16 +2,17 @@ import { useMemo } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR from "swr"
 import {
+  useTierList,
+  useTierMapping,
+  useScenarios,
+  mapShortCodeToDisplayName,
+} from "@repo/data/coeqwal/hooks"
+import { fetchAllScenarioTiers } from "@repo/data/coeqwal"
+import type { ScenarioTiersResponse, TierScores } from "@repo/data/coeqwal"
+import {
   fetchScenarioTiers,
-  fetchScenarioList,
-  fetchAllScenarioTiers,
-  fetchTierList,
-  getTierMapping,
   convertMultiValueToChartData,
   convertSingleValueToChartData,
-  mapShortCodeToDisplayName,
-  type ScenarioTiersResponse,
-  type TierScores,
 } from "../../../lib/api/tierApi"
 import { applyUIDisplayOverride } from "../../../lib/constants/outcomeMappings"
 import { getThemeColorsForApi, type TierColors } from "../../../content/tiers"
@@ -168,6 +169,7 @@ export function useOutcomeDefinitions() {
 export function useScenarioTiers(scenarioId: string | null) {
   const theme = useTheme()
 
+  // Fetch scenario-specific tier data
   const {
     data: scenarioData,
     error: scenarioError,
@@ -177,17 +179,18 @@ export function useScenarioTiers(scenarioId: string | null) {
     () => (scenarioId ? fetchScenarioTiers(scenarioId) : null),
   )
 
+  // Use shared hooks for tier list and mapping (cached, deduplicated)
   const {
-    data: allTiers,
+    tierList: allTiers,
     error: tiersError,
     isLoading: tiersLoading,
-  } = useSWR("/api/tiers/list", fetchTierList)
+  } = useTierList()
 
   const {
-    data: tierMapping,
+    tierMapping,
     error: mappingError,
     isLoading: mappingLoading,
-  } = useSWR("/api/tiers/mapping", getTierMapping)
+  } = useTierMapping()
 
   // Convert API data to chart format with theme colors
   const chartData = useMemo(() => {
@@ -242,32 +245,45 @@ export function useScenarioTiers(scenarioId: string | null) {
     }) // Don't filter ...show all outcomes
   }, [allTiers, tierMapping])
 
+  // Normalize error to string (SWR returns Error, shared hooks return string)
+  const error = scenarioError
+    ? scenarioError instanceof Error
+      ? scenarioError.message
+      : String(scenarioError)
+    : tiersError || mappingError || null
+
   return {
     chartData,
     scoreData, // New: contains weighted_score, normalized_score, gini, band_upper, band_lower
     rawData: scenarioData,
     outcomeNames,
     isLoading: scenarioLoading || tiersLoading || mappingLoading,
-    error: scenarioError || tiersError || mappingError,
+    error,
   }
 }
 
 export function useMultipleScenarioTiers() {
   const theme = useTheme()
 
-  // Fetch scenario list from API - this is the source of truth
+  // Use shared hooks for scenarios, tier list, and mapping (cached, deduplicated)
   const {
-    data: apiScenarios,
+    scenarios: apiScenarios,
+    activeScenarioIds: scenarioIds,
     error: scenariosError,
     isLoading: scenariosLoading,
-  } = useSWR("/api/scenarios", fetchScenarioList)
+  } = useScenarios()
 
-  // Extract active scenario IDs
-  const scenarioIds = useMemo(
-    () =>
-      apiScenarios?.filter((s) => s.is_active).map((s) => s.scenario_id) ?? [],
-    [apiScenarios],
-  )
+  const {
+    tierList: allTiers,
+    error: tiersError,
+    isLoading: tiersLoading,
+  } = useTierList()
+
+  const {
+    tierMapping,
+    error: mappingError,
+    isLoading: mappingLoading,
+  } = useTierMapping()
 
   // Fetch all scenario tier data in a single batched request
   // SWR key includes scenario IDs so it refetches when list changes
@@ -279,18 +295,6 @@ export function useMultipleScenarioTiers() {
     scenarioIds.length > 0 ? ["all-scenario-tiers", ...scenarioIds] : null,
     () => fetchAllScenarioTiers(scenarioIds),
   )
-
-  const {
-    data: allTiers,
-    error: tiersError,
-    isLoading: tiersLoading,
-  } = useSWR("/api/tiers/list", fetchTierList)
-
-  const {
-    data: tierMapping,
-    error: mappingError,
-    isLoading: mappingLoading,
-  } = useSWR("/api/tiers/mapping", getTierMapping)
 
   // Memoize theme colors to prevent recalculation
   const themeColors = useMemo(() => getThemeColorsForApi(theme), [theme])
@@ -363,15 +367,18 @@ export function useMultipleScenarioTiers() {
   const isLoading =
     scenariosLoading || scenarioTiersLoading || tiersLoading || mappingLoading
 
-  // Combine errors
+  // Combine errors (shared hooks return string errors, SWR returns Error objects)
   const error = useMemo(() => {
-    if (scenariosError)
-      return `Failed to load scenarios: ${scenariosError.message}`
-    if (scenarioTiersError)
-      return `Failed to load scenario tier data: ${scenarioTiersError.message}`
-    if (tiersError) return `Failed to load tier list: ${tiersError.message}`
-    if (mappingError)
-      return `Failed to load tier mapping: ${mappingError.message}`
+    if (scenariosError) return `Failed to load scenarios: ${scenariosError}`
+    if (scenarioTiersError) {
+      const msg =
+        scenarioTiersError instanceof Error
+          ? scenarioTiersError.message
+          : String(scenarioTiersError)
+      return `Failed to load scenario tier data: ${msg}`
+    }
+    if (tiersError) return `Failed to load tier list: ${tiersError}`
+    if (mappingError) return `Failed to load tier mapping: ${mappingError}`
     return null
   }, [scenariosError, scenarioTiersError, tiersError, mappingError])
 
