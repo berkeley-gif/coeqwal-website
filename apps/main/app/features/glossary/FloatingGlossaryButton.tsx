@@ -7,7 +7,7 @@
  * Animates between states based on drawer visibility.
  */
 
-import { Box, useTheme, MenuBookIcon } from "@repo/ui/mui"
+import { Box, useTheme, useMediaQuery, MenuBookIcon } from "@repo/ui/mui"
 import { RoundedRightArrow } from "@repo/ui"
 import { useEffect, useState } from "react"
 
@@ -40,6 +40,7 @@ export function FloatingGlossaryButton({
   isDragging,
 }: FloatingGlossaryButtonProps) {
   const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const [isHovered, setIsHovered] = useState(false)
 
   // Set up global mouse event listeners for dragging
@@ -96,7 +97,8 @@ export function FloatingGlossaryButton({
     }
   }
 
-  const showArrows = isHovered || isDragging
+  // Hide arrows on mobile - no horizontal dragging on small screens
+  const showArrows = !isMobile && (isHovered || isDragging)
 
   // WCAG 4.1.2: Provide accessible name based on state
   // Include keyboard shortcut hint for discoverability
@@ -129,7 +131,7 @@ export function FloatingGlossaryButton({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isMobile ? "pointer" : isDragging ? "grabbing" : "grab",
         boxShadow: isOpen ? theme.shadow.focusOnLight : theme.shadow.md,
         transition: isDragging ? "none" : theme.transition.default,
         zIndex: theme.zIndex.floating, // Above panel to remain clickable
