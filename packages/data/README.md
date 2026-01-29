@@ -9,7 +9,7 @@ External API (api.coeqwal.org)
        ↓
 @repo/data (fetchers, types, caching)
        ↓
-App-level hooks (compose + enrich)
+App-level hooks (compose + enrich) ← import and use these
        ↓
 React components
 ```
@@ -39,7 +39,9 @@ pnpm install
 
 ## Usage
 
-### 1. Wrap your app with DataProvider
+### Setup
+
+Wrap your app with DataProvider:
 
 ```tsx
 // app/layout.tsx
@@ -50,72 +52,54 @@ export default function RootLayout({ children }) {
 }
 ```
 
-The DataProvider configures SWR with our config:
+The DataProvider configures SWR with:
 
-- 60-second deduplication window (our data is relatively static)
-- No revalidation on focus (same reason)
+- 60-second deduplication window (data is relatively static)
+- No revalidation on focus
 - Revalidate on reconnect
 - 2 retries with exponential backoff
 
-### 2. Use hooks in components
+### Using hooks
+
+Use hooks directly in components:
 
 ```tsx
-import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
+import { useTiers } from "@repo/data/coeqwal/hooks"
 
 function MyComponent() {
   const { tiers, isLoading, error } = useTiers()
-  const { scenarios } = useScenarios()
 
   if (isLoading) return <Spinner />
   if (error) return <Error message={error} />
 
-  return <div>{/* render data */}</div>
+  return <div>{/* render tiers */}</div>
 }
 ```
 
-### 3. Compose with app-level hooks
+## Package exports
 
-App-level hooks combine data package hooks with local state and transformations. See [useTierData.ts](apps/main/app/features/scenarios/hooks/useTierData.ts) for a full example:
-
-```tsx
-// apps/main/app/features/scenarios/hooks/useTierData.ts
-export function useScenarioTiers(scenarioId: string | null) {
-  // Use shared hooks (cached, deduplicated)
-  const { tiers } = useTiers()
-
-  // Fetch scenario-specific data
-  const { data: scenarioData } = useSWR(...)
-
-  // Transform API data for UI
-  const chartData = useMemo(() => {
-    if (!scenarioData || !tiers) return {}
-    return processScenarioData(scenarioData, tiers, themeColors)
-  }, [scenarioData, tiers, themeColors])
-
-  return { chartData, outcomeNames, isLoading, error }
-}
-```
-
-## API reference (truncated for sample)
-
-See also [api.coeqwal.org/docs](https://api.coeqwal.org/docs)
+For external API documentation, see [api.coeqwal.org/docs](https://api.coeqwal.org/docs).
 
 ### Hooks
 
 #### `useTiers()`
 
-Fetches tier definitions: names, descriptions, and types (single_value vs multi_value). Use this to populate dropdowns, labels, or create a list of tiers.
+Fetches tier definitions: short codes (e.g., `AG_REV`), names, and types.
 
 ```tsx
+import { useTiers } from "@repo/data/coeqwal/hooks"
+
 const { tiers, isLoading, error } = useTiers()
 // tiers: TierListItem[] — [{ short_code: "AG_REV", name: "Agricultural Revenue", ... }]
 ```
 
 #### `useScenarios()`
 
-Fetches scenario metadata: IDs, names, and descriptions.
+Fetches scenario definitions: IDs (e.g., `s0020`), names, and active status.
 
 ```tsx
+import { useScenarios } from "@repo/data/coeqwal/hooks"
+
 const { scenarios, isLoading, error } = useScenarios()
 // scenarios: ScenarioListItem[] — [{ scenario_id: "s0020", name: "Baseline", ... }]
 ```
@@ -125,13 +109,21 @@ const { scenarios, isLoading, error } = useScenarios()
 Fetches tier scores for a specific scenario.
 
 ```tsx
+import { useScenarioTiers } from "@repo/data/coeqwal/hooks"
+
 const { data, isLoading, error } = useScenarioTiers("s0020")
 // data: ScenarioTiersResponse — { scenario: "s0020", tiers: { AG_REV: { weighted_score, ... }, ... } }
 ```
 
 ### Fetchers
 
-For potential server-side data fetching or building custom hooks:
+**Prefer hooks** in React components — they handle caching, deduplication, loading states, and errors automatically.
+
+Use fetchers when you need to:
+
+- Fetch data server-side (Next.js Server Components, `getServerSideProps`)
+- Build custom hooks with different caching behavior
+- Fetch data outside of React (scripts, tests)
 
 ```tsx
 import {
@@ -145,6 +137,24 @@ const scenarios = await fetchScenarioList()
 const scenarioData = await fetchScenarioTiers("s0020")
 ```
 
+Fetchers throw `FetchError` on failure:
+
+```tsx
+import { FetchError } from "@repo/data/fetching"
+
+try {
+  const data = await fetchTierList()
+} catch (err) {
+  if (err instanceof FetchError) {
+    console.log(err.status) // HTTP status code
+    console.log(err.endpoint) // The endpoint that failed
+    console.log(err.retryable) // Whether retry might help (5xx, 429)
+  }
+}
+```
+
+Fetchers include automatic retry (2 attempts) with exponential backoff for 5xx and 429 errors.
+
 ### Cache keys
 
 Cache keys are unique identifiers that SWR uses to store and retrieve cached responses. When multiple components request data with the same key, SWR deduplicates the requests and shares the cached result. Centralizing keys here prevents typos and ensures consistency across the app.
@@ -157,8 +167,8 @@ CACHE_KEYS.TIER_LIST        // "/api/tiers/list"
 CACHE_KEYS.SCENARIOS        // "/api/scenarios"
 
 // Dynamic keys
-CACHE_KEYS.scenarioTiers("s0020")           // "/api/tiers/scenarios/s0020/tiers"
-CACHE_KEYS.allScenarioTiers(["s0020", ...]) // ["all-scenario-tiers", "s0020", ...]
+CACHE_KEYS.scenarioTiers("s0020")              // "/api/tiers/scenarios/s0020/tiers"
+CACHE_KEYS.allScenarioTiers(["s0020", ...])    // ["all-scenario-tiers", "s0020", ...]
 ```
 
 ### Types
@@ -175,30 +185,6 @@ import type {
   MultiValueTierData, // Distribution data for multi-value tiers (tier, value, normalized)
 } from "@repo/data/coeqwal"
 ```
-
-## Error handling
-
-The `apiFetcher` provides consistent error handling:
-
-```tsx
-import { FetchError } from "@repo/data/fetching"
-
-try {
-  const data = await apiFetcher(url)
-} catch (err) {
-  if (err instanceof FetchError) {
-    console.log(err.status) // HTTP status code
-    console.log(err.endpoint) // The URL that failed
-    console.log(err.retryable) // Whether retry might help (5xx, 429)
-  }
-}
-```
-
-Features:
-
-- Configurable timeout (default 10s)
-- Automatic retry on 5xx and 429 errors
-- Exponential backoff (1s, 2s, 4s...)
 
 ## To add new data sources
 

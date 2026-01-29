@@ -7,6 +7,8 @@
  * - Metric IDs (e.g., "env-delta-ecology-tier")
  *
  * Strategy/scenario mappings are now in content/scenarios.ts
+ * This content is currently under review by the project team and is in flux, hence the messyness.
+ * Final content will streamline variations.
  *
  * TODO: Improve API name synchronization between frontend and backend
  * The current approach requires manual updates when API names change.

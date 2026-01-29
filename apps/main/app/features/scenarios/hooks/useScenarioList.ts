@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import useSWR from "swr"
-import { fetchScenarioList } from "../../../lib/api/tierApi"
+import { fetchScenarioList } from "@repo/data/coeqwal"
+import { CACHE_KEYS } from "@repo/data/cache"
 import {
   getScenarioMetadata,
   type ScenarioTheme,
@@ -20,7 +21,10 @@ export type { Scenario, ScenarioTheme }
  * User-friendly labels and descriptions come from local metadata in content/scenarios.ts
  */
 export function useScenarioList() {
-  const { data, error, isLoading } = useSWR("/api/scenarios", fetchScenarioList)
+  const { data, error, isLoading } = useSWR(
+    CACHE_KEYS.SCENARIOS,
+    fetchScenarioList,
+  )
 
   // Enrich API data with local metadata (user-friendly labels, descriptions, themes, icons)
   const scenarios = useMemo<Scenario[]>(() => {
@@ -84,4 +88,4 @@ export function useScenarioList() {
 }
 
 // Re-export the API type for reference
-export type { ScenarioListItem } from "../../../lib/api/tierApi"
+export type { ScenarioListItem } from "@repo/data/coeqwal"
