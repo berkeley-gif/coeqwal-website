@@ -163,7 +163,9 @@ export function MobileModal({
                 alignItems: "center",
                 justifyContent: title ? "space-between" : "flex-end",
                 p: theme.space.section.sm,
-                borderBottom: title ? `1px solid ${theme.palette.divider}` : "none",
+                borderBottom: title
+                  ? `1px solid ${theme.palette.divider}`
+                  : "none",
                 flexShrink: 0,
               }}
             >
