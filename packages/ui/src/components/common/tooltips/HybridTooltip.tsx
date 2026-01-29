@@ -15,7 +15,7 @@
  * Use **HybridTooltip** when you want device-adaptive behavior: hover on desktop
  * for quick, frictionless access; click on touch devices for explicit control.
  * Best for: simple hints, definitions, icon descriptions, key operation icons,
- * toggle explanations—-anywhere hover feels natural on desktop.
+ * toggle explanations--anywhere hover feels natural on desktop.
  *
  * Use **ClickTooltip** when you need consistent click-to-open behavior on ALL
  * devices. The tooltip always shows X button regardless of device type.

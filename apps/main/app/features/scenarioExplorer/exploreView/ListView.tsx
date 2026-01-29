@@ -11,7 +11,6 @@ import React, { useMemo, useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
-import { useScenarioData } from "../hooks/useScenarioData"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
 import {
   useScenarioList,
@@ -29,12 +28,16 @@ export default function ListView({
 }: ListViewProps) {
   const theme = useTheme()
   const {
-    getChartDataForScenario,
+    allChartData,
     outcomeNames,
+    allScoreData,
     isLoading: dataLoading,
     error: dataError,
-  } = useScenarioData()
-  const { allScoreData } = useMultipleScenarioTiers()
+  } = useMultipleScenarioTiers()
+
+  // Helper to get chart data for a specific scenario
+  const getChartDataForScenario = (scenarioId: string) =>
+    allChartData[scenarioId] ?? {}
   const {
     scenarios,
     isLoading: scenariosLoading,
@@ -138,7 +141,7 @@ export default function ListView({
   }
 
   const isLoading = dataLoading || scenariosLoading
-  const error = dataError || (scenariosError ? scenariosError.message : null)
+  const error = dataError || scenariosError
 
   if (isLoading) {
     return (

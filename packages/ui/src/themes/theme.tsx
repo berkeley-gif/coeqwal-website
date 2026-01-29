@@ -272,8 +272,8 @@ const shadow = {
   md: "0 4px 8px rgba(0,0,0,0.12)", // Dropdowns, tooltips, overlays
   lg: "0 8px 16px rgba(0,0,0,0.15)", // Modals, large panels
   // Focus rings (accessibility) - 3:1+ contrast against their target background
-  focusOnLight: "0 0 0 3px rgba(25, 118, 210, 0.7)", // #1976D2 at 70% — 4.5:1 vs white
-  focusOnDark: "0 0 0 3px rgba(100, 181, 246, 0.85)", // #64B5F6 at 85% — 5:1 vs dark
+  focusOnLight: "0 0 0 3px rgba(25, 118, 210, 0.7)", // #1976D2 at 70% - 4.5:1 vs white
+  focusOnDark: "0 0 0 3px rgba(100, 181, 246, 0.85)", // #64B5F6 at 85% - 5:1 vs dark
 }
 
 // Transition/animation timing
@@ -300,7 +300,7 @@ const textShadow = {
   navHover: "0 0 12px rgba(255, 255, 255, 0.6), 0 1px 4px rgba(0, 0, 0, 0.3)", // Nav hover glow
 }
 
-// Z-index — Global stacking order
+// Z-index - Global stacking order
 const zIndex = {
   // Background layers
   basement: -1, // Storyline apps map background
@@ -448,7 +448,7 @@ export const themeValues = {
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
     },
 
-    // Full-panel spacing — CSS padding values applied by <Panel> component
+    // Full-panel spacing - CSS padding values applied by <Panel> component
     // Uses clamp() for responsive scaling: clamp(min, preferred, max)
     panel: {
       padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight: edge gutters

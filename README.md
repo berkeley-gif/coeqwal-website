@@ -158,7 +158,7 @@ StrictMode intentionally double-invokes certain functions to help detect side ef
 - **Effects run twice**: `useEffect` callbacks run twice to verify proper cleanup
 - **Render functions called twice**: Components render twice to detect impure renders
 
-These double invocations **only happen in development mode** — production builds are unaffected.
+These double invocations **only happen in development mode** Production builds are unaffected.
 
 ### Example console output
 
