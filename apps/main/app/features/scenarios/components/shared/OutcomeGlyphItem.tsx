@@ -20,6 +20,33 @@ import { ScenarioGlyph } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 
 /**
+ * Generate accessible description of chart data for screen readers
+ * WCAG 1.1.1: Provide text alternative for non-text content
+ */
+function generateChartAriaLabel(
+  displayName: string,
+  chartData: ChartDataPoint[] | undefined,
+): string {
+  if (!chartData || chartData.length === 0) {
+    return `${displayName}: No data available`
+  }
+
+  if (isSingleValueTier(chartData)) {
+    // Single-value tier: find the active tier (value > 0)
+    const activeTier = chartData.find((t) => t.value > 0)
+    return `${displayName}: ${activeTier?.label || "Unknown"} tier`
+  }
+
+  // Multi-value: describe distribution
+  const tierDescriptions = chartData
+    .filter((t) => t.value > 0)
+    .map((t) => `${Math.round(t.value)}% ${t.label}`)
+    .join(", ")
+
+  return `${displayName} tier distribution: ${tierDescriptions}`
+}
+
+/**
  * Format outcome label with consistent line breaks
  * Each outcome breaks at a specific point for visual consistency
  */
@@ -176,12 +203,17 @@ export function OutcomeGlyphItem({
     >
       {/* Glyph or placeholder */}
       {isActive ? (
-        <ScenarioGlyph
-          variant={variant}
-          values={values}
-          size={actualSize}
-          tierColors={tierColors}
-        />
+        <Box
+          role="img"
+          aria-label={generateChartAriaLabel(displayName, chartData)}
+        >
+          <ScenarioGlyph
+            variant={variant}
+            values={values}
+            size={actualSize}
+            tierColors={tierColors}
+          />
+        </Box>
       ) : (
         <Box
           sx={{
