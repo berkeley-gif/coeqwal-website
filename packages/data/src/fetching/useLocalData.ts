@@ -4,6 +4,17 @@
  * SWR-based hook for fetching local JSON/GeoJSON files
  *
  * Provides caching, loading states, and automatic deduplication via SWR.
+ * 
+ * ## For local static files
+ * The browser's HTTP cache already handles caching for local files.
+ * This hook adds React-level convenience (loading states, deduplication)
+ * but is not strictly necessary for static data.
+ *
+ * ## When to use this hook
+ * - Loading static JSON/GeoJSON
+ * - When you need built-in `isLoading` and `error` states
+ * - When multiple components need the same data (SWR deduplicates requests)
+ *
  */
 
 import useSWR from "swr"

@@ -1,5 +1,13 @@
 /**
  * Universal fetch wrapper with retry logic and error handling
+ *
+ * **Note:** This is a low-level utility for internal use.
+ * React component developers should use hooks from `@repo/data/coeqwal/hooks`:
+ * - `useTierList()` - fetch tier definitions
+ * - `useScenarios()` - fetch scenario list
+ * - `useTierMapping()` - get short_code -> name mapping
+ *
+ * This function is used internally by fetchers in `fetchers.ts`.
  */
 
 import { FetchError, type FetchOptions } from "./types"
@@ -8,7 +16,7 @@ const DEFAULT_TIMEOUT = 10000
 const DEFAULT_RETRIES = 2
 
 /**
- * Delay helper for retry backoff
+ * Delay helper for retry
  */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -24,6 +32,8 @@ function isRetryableStatus(status: number): boolean {
 
 /**
  * Universal fetch wrapper with timeout, retries, and error handling
+ * Documentation for maintainers adding to fetchers
+ * Developers would use the hooks that use this
  *
  * @param endpoint - API endpoint (will be appended to baseUrl if provided)
  * @param options - Fetch configuration options
@@ -32,12 +42,24 @@ function isRetryableStatus(status: number): boolean {
  *
  * @example
  * ```typescript
- * const data = await apiFetcher<UserData>("/users/123", {
- *   baseUrl: "https://api.example.com",
- *   timeout: 5000,
+ * import { DEFAULT_API_BASE, ENDPOINTS } from "../coeqwal/api"
+ * import type { TierListItem, ScenarioTiersResponse } from "../coeqwal/types"
+ * 
+ * // Fetch list of all tiers/outcomes
+ * const tiers = await apiFetcher<TierListItem[]>(ENDPOINTS.TIER_LIST, {
+ *  baseUrl: DEFAULT_API_BASE,
  * })
+ * // [{ short_code: "AG_REV", name: "Agricultural revenue", ... }, ...]
+ * 
+ * // Fetch tier data for a specific scenario
+ * const scenarioData = await apiFetcher<ScenarioTiersResponse>(
+ *   ENDPOINTS.scenarioTiers("s0020"),
+ *  { baseUrl: DEFAULT_API_BASE }
+ * )
+ * // { scenario: "s0020", tiers: { AG_REV: {...}, ENV_FLOW: {...} } }
  * ```
  */
+
 export async function apiFetcher<T>(
   endpoint: string,
   options: FetchOptions = {},

@@ -17,7 +17,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useState, useEffect } from "react"
+import React from "react"
 import { Box, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
@@ -91,24 +91,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
     forceClose: forceCloseTooltip,
   } = useTierTooltipState()
 
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    top: number
-    right: number
-  } | null>(null)
-
-  // Calculate tooltip position when anchor changes (for Portal positioning)
-  useEffect(() => {
-    if (tooltipAnchor) {
-      const rect = tooltipAnchor.getBoundingClientRect()
-      setTooltipPosition({
-        top: rect.top - 8,
-        right: window.innerWidth - rect.left + 24,
-      })
-    } else {
-      setTooltipPosition(null)
-    }
-  }, [tooltipAnchor])
-
   // =========================================================================
   // Derived Values
   // =========================================================================
@@ -128,11 +110,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   return (
     <Box sx={{ position: "relative" }}>
-      {/* Active outcome tooltip - rendered via Portal */}
+      {/* Active outcome tooltip - uses MUI Popper for viewport-aware positioning */}
       {/* WCAG 4.1.2: Pass scenario score data and chart data for accessible text representation */}
       <TierTooltipPortal
         outcome={activeTooltip}
-        position={tooltipPosition}
+        anchorEl={tooltipAnchor}
         onClose={closeTooltip}
         onForceClose={forceCloseTooltip}
         scenarioScore={
