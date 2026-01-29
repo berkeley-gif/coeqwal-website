@@ -17,6 +17,7 @@ import {
   CloseIcon,
   alpha,
 } from "@repo/ui/mui"
+import { MobileModal } from "@repo/ui"
 import { glossaryTerms } from "../../content/glossary"
 import React, { useRef, useEffect, useState, useCallback } from "react"
 
@@ -73,30 +74,32 @@ export function FloatingGlossaryPanel({
     }
   }, [internalSelectedTerm])
 
-  // WCAG 2.1.1: Handle Escape key to close panel
+  // WCAG 2.1.1: Handle Escape key to close panel (desktop only - MobileModal handles its own)
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (!isMobile && e.key === "Escape" && isOpen) {
         onClose()
       }
     },
-    [isOpen, onClose],
+    [isMobile, isOpen, onClose],
   )
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [handleKeyDown])
+    if (!isMobile) {
+      document.addEventListener("keydown", handleKeyDown)
+      return () => document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isMobile, handleKeyDown])
 
-  // WCAG 2.4.3: Focus content area when panel opens for keyboard scrolling
+  // WCAG 2.4.3: Focus content area when panel opens for keyboard scrolling (desktop only)
   useEffect(() => {
-    if (isOpen && contentRef.current) {
+    if (!isMobile && isOpen && contentRef.current) {
       // Small delay to allow animation to start
       setTimeout(() => {
         contentRef.current?.focus()
       }, 100)
     }
-  }, [isOpen])
+  }, [isMobile, isOpen])
 
   // Function to handle clicking on a term link within the glossary
   const handleTermClick = (termName: string) => {
@@ -201,266 +204,240 @@ export function FloatingGlossaryPanel({
 
   const glossaryTitleId = "glossary-panel-title"
 
-  // Mobile: centered modal with backdrop
-  // Desktop: positioned panel anchored to button
-  const panelStyles = isMobile
-    ? {
-        position: "fixed" as const,
-        top: "50%",
-        left: "50%",
-        transform: isOpen
-          ? "translate(-50%, -50%) scale(1)"
-          : "translate(-50%, -50%) scale(0.9)",
-        width: "calc(100vw - 32px)", // Full width minus padding
-        maxWidth: "500px",
-        maxHeight: "80vh",
-        transformOrigin: "center center",
-      }
-    : {
-        position: "fixed" as const,
+  // Shared content for both mobile and desktop
+  const glossaryContent = (
+    <Stack spacing={theme.space.gap.lg}>
+      {glossaryTerms.map((term, index) => (
+        <React.Fragment key={index}>
+          <Box
+            ref={(el) => {
+              termRefs.current[term.term] = el as HTMLDivElement | null
+            }}
+            sx={
+              internalSelectedTerm === term.term
+                ? {
+                    scrollMarginTop: "20px",
+                    backgroundColor: alpha(theme.palette.blue.bright, 0.08),
+                    padding: theme.space.component.lg,
+                    borderRadius: theme.borderRadius.md,
+                    border: theme.border.active,
+                    transition: theme.transition.default,
+                  }
+                : {
+                    padding: theme.space.component.lg,
+                  }
+            }
+          >
+            {/* Term header with icon */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                mb: theme.space.component.xs,
+                gap: theme.space.gap.sm,
+                ml: -1,
+              }}
+            >
+              <Box
+                sx={{
+                  color: theme.palette.blue.bright,
+                  mt: -0.25,
+                  flexShrink: 0,
+                  fontSize: "2rem",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {term.icon}
+              </Box>
+              <Typography
+                variant="body1Medium"
+                component="h3"
+                color="blue.darkest"
+              >
+                {term.term}
+              </Typography>
+            </Box>
+
+            {/* Definition */}
+            <Box sx={{ ml: theme.space.section.md }}>
+              {renderDefinition(term.definition)}
+            </Box>
+
+            {/* Tiers (if applicable) */}
+            {term.tiers && term.tiers.length > 0 && (
+              <Box
+                sx={{
+                  ml: theme.space.section.md,
+                  mt: theme.space.component.lg,
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  fontWeight="semibold"
+                  sx={{ mb: theme.space.component.sm }}
+                >
+                  Tiers:
+                </Typography>
+                <Stack spacing={1}>
+                  {term.tiers.map((tier, tierIndex) => (
+                    <Box
+                      key={tierIndex}
+                      sx={{ display: "flex", gap: theme.space.gap.sm }}
+                    >
+                      <Box
+                        sx={{
+                          width: 16,
+                          height: 16,
+                          borderRadius: theme.borderRadius.circle,
+                          backgroundColor: tier.color,
+                          flexShrink: 0,
+                          mt: 0.5,
+                        }}
+                      />
+                      <Typography variant="storyBody">
+                        <strong>{tier.tier}:</strong> {tier.description}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+
+            {/* See also */}
+            {term.seeAlso && (
+              <Box
+                sx={{
+                  ml: theme.space.section.md,
+                  mt: theme.space.component.lg,
+                }}
+              >
+                <Typography variant="storyBody" color="text.secondary">
+                  <em>See also: </em>
+                  <Box
+                    component="button"
+                    type="button"
+                    onClick={() => handleTermClick(term.seeAlso!)}
+                    onKeyDown={handleTermKeyDown(term.seeAlso!)}
+                    tabIndex={isOpen ? 0 : -1}
+                    aria-label={`Go to ${term.seeAlso} definition`}
+                    sx={termLinkStyle}
+                  >
+                    {term.seeAlso}
+                  </Box>
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* Divider between terms */}
+          {index < glossaryTerms.length - 1 && <Divider />}
+        </React.Fragment>
+      ))}
+    </Stack>
+  )
+
+  // Mobile: Use MobileModal for centered modal with backdrop
+  if (isMobile) {
+    return (
+      <MobileModal
+        open={isOpen}
+        onClose={onClose}
+        title="Glossary"
+        titleId={glossaryTitleId}
+        maxWidth={500}
+        maxHeight="80vh"
+        contentAriaLabel="Glossary terms"
+        zIndex={theme.zIndex.floating}
+      >
+        {glossaryContent}
+      </MobileModal>
+    )
+  }
+
+  // Desktop: Positioned panel anchored to button
+  return (
+    <Box
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby={glossaryTitleId}
+      sx={{
+        position: "fixed",
         bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
         // Position based on which half of screen the button is on
         ...(isOnLeftHalf
           ? {
-              // Button on left, then panel appears to the right
               left:
                 typeof window !== "undefined"
                   ? window.innerWidth - position.right
                   : position.right,
             }
           : {
-              // Button on right, then panel appears to the left
               right: position.right,
             }),
-        width: "33.333vw", // 1/3 of viewport width
+        width: "33.333vw",
         minWidth: "400px",
         maxWidth: theme.layout.maxWidth.lg,
         maxHeight: "70vh",
-        // Transform origin changes based on position
-        transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: theme.borderRadius.md,
+        boxShadow: theme.shadow.lg,
         transform: isOpen ? "scale(1)" : "scale(0.9)",
-      }
-
-  return (
-    <>
-      {/* Mobile backdrop */}
-      {isMobile && (
-        <Box
-          onClick={onClose}
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            opacity: isOpen ? 1 : 0,
-            pointerEvents: isOpen ? "auto" : "none",
-            transition: theme.transition.fade,
-            zIndex: theme.zIndex.floating - 1,
-          }}
-        />
-      )}
-
-      {/* WCAG 4.1.2: Panel with dialog role and proper ARIA attributes */}
-      {/* Note: aria-hidden removed as it's prohibited on dialog roles with focusable content */}
+        transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
+        opacity: isOpen ? 1 : 0,
+        transition: theme.transition.bouncy,
+        pointerEvents: isOpen ? "auto" : "none",
+        zIndex: theme.zIndex.floating,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
       <Box
-        role="dialog"
-        aria-modal={isMobile ? "true" : "false"}
-        aria-labelledby={glossaryTitleId}
         sx={{
-          ...panelStyles,
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          boxShadow: theme.shadow.lg,
-          opacity: isOpen ? 1 : 0,
-          transition: theme.transition.bouncy,
-          pointerEvents: isOpen ? "auto" : "none",
-          zIndex: theme.zIndex.floating,
           display: "flex",
-          flexDirection: "column",
-          overflow: "hidden", // Clip content to border radius
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: theme.space.section.sm,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: theme.space.section.sm,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-          }}
-        >
-          <Typography id={glossaryTitleId} variant="h6" component="h2">
-            Glossary
-          </Typography>
-          <IconButton
-            onClick={onClose}
-            size="small"
-            aria-label="Close glossary"
-            tabIndex={isOpen ? 0 : -1}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
-        {/* Content - WCAG 2.1.1: Scrollable region is focusable for keyboard scrolling */}
-        <Box
-          ref={contentRef}
+        <Typography id={glossaryTitleId} variant="h6" component="h2">
+          Glossary
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label="Close glossary"
           tabIndex={isOpen ? 0 : -1}
-          role="region"
-          aria-label="Glossary terms"
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            padding: theme.space.section.sm,
-            // WCAG 2.4.7: Focus visible styles for scrollable region
-            "&:focus-visible": {
-              outline: `2px solid ${theme.palette.blue.bright}`,
-              outlineOffset: "-2px",
-            },
-          }}
         >
-          <Stack spacing={theme.space.gap.lg}>
-            {glossaryTerms.map((term, index) => (
-              <React.Fragment key={index}>
-                <Box
-                  ref={(el) => {
-                    termRefs.current[term.term] = el as HTMLDivElement | null
-                  }}
-                  sx={
-                    internalSelectedTerm === term.term
-                      ? {
-                          scrollMarginTop: "20px",
-                          backgroundColor: alpha(
-                            theme.palette.blue.bright,
-                            0.08,
-                          ),
-                          padding: theme.space.component.lg,
-                          borderRadius: theme.borderRadius.md,
-                          border: theme.border.active,
-                          transition: theme.transition.default,
-                        }
-                      : {
-                          padding: theme.space.component.lg,
-                        }
-                  }
-                >
-                  {/* Term header with icon */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      // Tighter spacing between header and definition
-                      mb: theme.space.component.xs,
-                      gap: theme.space.gap.sm,
-                      ml: -1, // intentional offset for icon alignment
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        color: theme.palette.blue.bright,
-                        mt: -0.25,
-                        flexShrink: 0,
-                        fontSize: "2rem",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      {term.icon}
-                    </Box>
-                    <Typography
-                      variant="body1Medium"
-                      component="h3"
-                      color="blue.darkest"
-                    >
-                      {term.term}
-                    </Typography>
-                  </Box>
-
-                  {/* Definition */}
-                  <Box sx={{ ml: theme.space.section.md }}>
-                    {renderDefinition(term.definition)}
-                  </Box>
-
-                  {/* Tiers (if applicable) */}
-                  {term.tiers && term.tiers.length > 0 && (
-                    <Box
-                      sx={{
-                        ml: theme.space.section.md,
-                        mt: theme.space.component.lg,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        fontWeight="semibold"
-                        sx={{ mb: theme.space.component.sm }}
-                      >
-                        Tiers:
-                      </Typography>
-                      <Stack spacing={1}>
-                        {term.tiers.map((tier, tierIndex) => (
-                          <Box
-                            key={tierIndex}
-                            sx={{ display: "flex", gap: theme.space.gap.sm }}
-                          >
-                            <Box
-                              sx={{
-                                width: 16,
-                                height: 16,
-                                borderRadius: theme.borderRadius.circle,
-                                backgroundColor: tier.color,
-                                flexShrink: 0,
-                                mt: 0.5,
-                              }}
-                            />
-                            <Typography variant="storyBody">
-                              <strong>{tier.tier}:</strong> {tier.description}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {/* See also */}
-                  {term.seeAlso && (
-                    <Box
-                      sx={{
-                        ml: theme.space.section.md,
-                        mt: theme.space.component.lg,
-                      }}
-                    >
-                      <Typography variant="storyBody" color="text.secondary">
-                        <em>See also: </em>
-                        <Box
-                          component="button"
-                          type="button"
-                          onClick={() => handleTermClick(term.seeAlso!)}
-                          onKeyDown={handleTermKeyDown(term.seeAlso!)}
-                          tabIndex={isOpen ? 0 : -1}
-                          aria-label={`Go to ${term.seeAlso} definition`}
-                          sx={termLinkStyle}
-                        >
-                          {term.seeAlso}
-                        </Box>
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Divider between terms */}
-                {index < glossaryTerms.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </Stack>
-        </Box>
+          <CloseIcon />
+        </IconButton>
       </Box>
-    </>
+
+      {/* Content - WCAG 2.1.1: Scrollable region is focusable for keyboard scrolling */}
+      <Box
+        ref={contentRef}
+        tabIndex={isOpen ? 0 : -1}
+        role="region"
+        aria-label="Glossary terms"
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          padding: theme.space.section.sm,
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.blue.bright}`,
+            outlineOffset: "-2px",
+          },
+        }}
+      >
+        {glossaryContent}
+      </Box>
+    </Box>
   )
 }

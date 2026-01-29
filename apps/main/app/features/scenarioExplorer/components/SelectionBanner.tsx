@@ -46,64 +46,24 @@ export default function SelectionBanner() {
               py: theme.space.component.md,
             }}
           >
+            {/* Top row: count + Clear button */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: theme.space.gap.lg,
+                gap: theme.space.gap.md,
+                mb: selectedScenarios.length > 0 ? theme.space.gap.sm : 0,
               }}
             >
-              {/* Left: eyebrow + pills */}
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: theme.space.gap.lg,
-                  flexWrap: "wrap",
-                  flex: 1,
-                }}
+              <Typography
+                variant="overline"
+                sx={{ color: theme.palette.grey[500], flexShrink: 0 }}
               >
-                <Typography
-                  variant="overline"
-                  sx={{ color: theme.palette.grey[500], flexShrink: 0 }}
-                >
-                  {selectedScenarios.length} scenario
-                  {selectedScenarios.length !== 1 ? "s" : ""} selected
-                </Typography>
+                {selectedScenarios.length} scenario
+                {selectedScenarios.length !== 1 ? "s" : ""} selected
+              </Typography>
 
-                {/* Scenario chips with close buttons */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: theme.space.gap.sm,
-                  }}
-                >
-                  {selectedScenarios.map((scenarioId) => (
-                    <Chip
-                      key={scenarioId}
-                      label={getDisplayName(scenarioId)}
-                      onDelete={() => toggleScenario(scenarioId)}
-                      size="small"
-                      sx={{
-                        backgroundColor: theme.palette.grey[100],
-                        color: theme.palette.blue.darkest,
-                        fontWeight: theme.typography.fontWeightMedium,
-                        "& .MuiChip-deleteIcon": {
-                          color: theme.palette.grey[400],
-                          fontSize: "1rem",
-                          "&:hover": {
-                            color: theme.palette.grey[600],
-                          },
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
-              </Box>
-
-              {/* Right: Clear button */}
               <Button
                 variant="text"
                 size="small"
@@ -111,6 +71,7 @@ export default function SelectionBanner() {
                 sx={{
                   color: theme.palette.grey[500],
                   minWidth: "auto",
+                  flexShrink: 0,
                   px: theme.space.component.sm,
                   "&:hover": {
                     color: theme.palette.grey[700],
@@ -120,6 +81,36 @@ export default function SelectionBanner() {
               >
                 Clear
               </Button>
+            </Box>
+
+            {/* Scenario chips (wrap as needed) */}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: theme.space.gap.sm,
+              }}
+            >
+              {selectedScenarios.map((scenarioId) => (
+                <Chip
+                  key={scenarioId}
+                  label={getDisplayName(scenarioId)}
+                  onDelete={() => toggleScenario(scenarioId)}
+                  size="small"
+                  sx={{
+                    backgroundColor: theme.palette.grey[100],
+                    color: theme.palette.blue.darkest,
+                    fontWeight: theme.typography.fontWeightMedium,
+                    "& .MuiChip-deleteIcon": {
+                      color: theme.palette.grey[400],
+                      fontSize: "1rem",
+                      "&:hover": {
+                        color: theme.palette.grey[600],
+                      },
+                    },
+                  }}
+                />
+              ))}
             </Box>
           </Box>
         </motion.div>
