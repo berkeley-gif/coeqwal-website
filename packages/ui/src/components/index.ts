@@ -40,6 +40,8 @@ export type {
 } from "./common/ToggleSortButton"
 export { StyledTextInput } from "./common/StyledTextInput"
 export type { StyledTextInputProps } from "./common/StyledTextInput"
+export { CompactSearchBar } from "./common/CompactSearchBar"
+export type { CompactSearchBarProps } from "./common/CompactSearchBar"
 export { InfoOverlay } from "./common/InfoOverlay"
 export type { InfoOverlayProps } from "./common/InfoOverlay"
 

@@ -1,14 +1,13 @@
 "use client"
 
 /**
- * SearchBar - Strategy search input
+ * SearchBar - Strategy search input for Scenario Explorer
  *
- * Provides search functionality for filtering strategies in the explorer.
+ * Wrapper around CompactSearchBar that connects to the scenario explorer store.
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { StyledTextInput } from "@repo/ui"
+import { CompactSearchBar } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 
 interface SearchBarProps {
@@ -19,80 +18,25 @@ interface SearchBarProps {
 }
 
 /**
- * Reusable search bar for filtering scenarios
+ * Search bar connected to the scenario explorer store
  */
 export default function SearchBar({
   placeholder = "Search scenarios...",
   rightContent,
   showLabel = true,
 }: SearchBarProps) {
-  const theme = useTheme()
   const { searchQuery, setSearchQuery } = useScenarioExplorerStore()
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        // Stack vertically under 700px, horizontal at 700px+
-        flexDirection: "column",
-        alignItems: "stretch",
-        "@media (min-width: 700px)": {
-          flexDirection: "row",
-          alignItems: "flex-start",
-        },
-        gap: theme.space.gap.xl,
-        px: theme.space.component.xl,
-        py: theme.space.component.lg,
-        backgroundColor: theme.palette.background.paper,
-        borderBottom: theme.border.medium,
-      }}
-    >
-      {/* Search section */}
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: "330px",
-          flexShrink: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space.gap.md,
-        }}
-      >
-        {showLabel && (
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: theme.typography.fontWeightMedium,
-              color: theme.palette.grey[900],
-            }}
-          >
-            Search
-          </Typography>
-        )}
-        <StyledTextInput
-          id="scenario-search-input"
-          size="small"
-          placeholder={placeholder}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          showClearButton={!!searchQuery}
-          onClear={() => setSearchQuery("")}
-          fullWidth
-          aria-label="Search scenarios"
-        />
-      </Box>
-      {rightContent && (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexShrink: 0,
-            gap: theme.space.gap.xl,
-          }}
-        >
-          {rightContent}
-        </Box>
-      )}
-    </Box>
+    <CompactSearchBar
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder={placeholder}
+      rightContent={rightContent}
+      showLabel={showLabel}
+      label="Search"
+      inputId="scenario-search-input"
+      ariaLabel="Search scenarios"
+    />
   )
 }

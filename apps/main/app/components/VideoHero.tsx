@@ -262,7 +262,7 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content layout — grid stacking + flex for diagonal positioning */}
+      {/* Content layout - grid stacking + flex for diagonal positioning */}
       <Box
         sx={{
           gridArea: "stack", // CSS Grid stacking: occupies same cell as video
@@ -277,7 +277,7 @@ export default function VideoHero({
           pointerEvents: "none", // Let clicks pass through to pause button (WCAG 2.2.2)
         }}
       >
-        {/* Headline — top-left on desktop, centered on mobile */}
+        {/* Headline - top-left on desktop, centered on mobile */}
         {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
         <MotionBox
           initial="hidden"
@@ -317,7 +317,7 @@ export default function VideoHero({
         {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
         {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-        {/* Body — bottom-right on desktop, centered on mobile */}
+        {/* Body - bottom-right on desktop, centered on mobile */}
         <MotionBox
           initial="hidden"
           whileInView="show"
@@ -359,7 +359,7 @@ export default function VideoHero({
         />
       </Box>
 
-      {/* Gradient overlay — subtle vignette for depth (decorative) */}
+      {/* Gradient overlay - subtle vignette for depth (decorative) */}
       <Box
         aria-hidden="true"
         sx={{

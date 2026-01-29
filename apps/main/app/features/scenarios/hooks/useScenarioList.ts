@@ -1,7 +1,5 @@
 import { useMemo } from "react"
-import useSWR from "swr"
-import { fetchScenarioList } from "@repo/data/coeqwal"
-import { CACHE_KEYS } from "@repo/data/cache"
+import { useScenarios } from "@repo/data/coeqwal/hooks"
 import {
   getScenarioMetadata,
   type ScenarioTheme,
@@ -17,19 +15,17 @@ export type { Scenario, ScenarioTheme }
  * Hook to fetch and manage the list of available scenarios from the API
  * Provides scenario metadata enriched with local UI data (themes, icons, labels)
  *
- * Note: The API provides technical details (scenario IDs, short codes, technical names).
- * User-friendly labels and descriptions come from local metadata in content/scenarios.ts
+ * Uses useScenarios from @repo/data for the raw API data, then enriches
+ * with local metadata (themes, icons, user-friendly labels) from content/scenarios.ts
  */
 export function useScenarioList() {
-  const { data, error, isLoading } = useSWR(
-    CACHE_KEYS.SCENARIOS,
-    fetchScenarioList,
-  )
+  // Get raw scenario data from the data package
+  const { scenarios: rawScenarios, isLoading, error } = useScenarios()
 
   // Enrich API data with local metadata (user-friendly labels, descriptions, themes, icons)
   const scenarios = useMemo<Scenario[]>(() => {
-    if (!data) return []
-    return data.map((apiScenario) => {
+    if (!rawScenarios) return []
+    return rawScenarios.map((apiScenario) => {
       const metadata = getScenarioMetadata(apiScenario.scenario_id)
       return {
         // Identity
@@ -48,7 +44,7 @@ export function useScenarioList() {
         apiDescription: apiScenario.description,
       }
     })
-  }, [data])
+  }, [rawScenarios])
 
   // Extract just the scenario IDs for active scenarios
   const scenarioIds = useMemo(

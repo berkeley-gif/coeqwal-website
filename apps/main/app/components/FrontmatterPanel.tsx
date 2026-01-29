@@ -133,7 +133,7 @@ export default function FrontmatterPanel({
           justifyContent: "space-between",
         }}
       >
-        {/* Headline — top-left on desktop, centered on mobile */}
+        {/* Headline - top-left on desktop, centered on mobile */}
         <MotionBox
           initial="hidden"
           whileInView="show"
@@ -175,7 +175,7 @@ export default function FrontmatterPanel({
         {/* Desktop spacer when headline hidden (maintains action items position) */}
         {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-        {/* Action items — bottom-right on desktop, centered on mobile */}
+        {/* Action items - bottom-right on desktop, centered on mobile */}
         <MotionBox
           initial="hidden"
           whileInView="show"
@@ -269,7 +269,7 @@ export default function FrontmatterPanel({
         justifyContent: "space-between",
       }}
     >
-      {/* Headline — top-left on desktop, centered on mobile */}
+      {/* Headline - top-left on desktop, centered on mobile */}
       {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
       <MotionBox
         initial="hidden"
@@ -312,7 +312,7 @@ export default function FrontmatterPanel({
       {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
       {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-      {/* Body — bottom-right on desktop, centered on mobile */}
+      {/* Body - bottom-right on desktop, centered on mobile */}
       <MotionBox
         initial="hidden"
         whileInView="show"
@@ -336,7 +336,7 @@ export default function FrontmatterPanel({
         </DisplayBlock>
       </MotionBox>
 
-      {/* Scroll indicator — centered at bottom (optional) */}
+      {/* Scroll indicator - centered at bottom (optional) */}
       {scrollToId && (
         <Box
           sx={{

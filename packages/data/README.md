@@ -90,7 +90,7 @@ Fetches tier definitions: short codes (e.g., `AG_REV`), names, and types.
 import { useTiers } from "@repo/data/coeqwal/hooks"
 
 const { tiers, isLoading, error } = useTiers()
-// tiers: TierListItem[] — [{ short_code: "AG_REV", name: "Agricultural Revenue", ... }]
+// tiers: TierListItem[] - [{ short_code: "AG_REV", name: "Agricultural Revenue", ... }]
 ```
 
 #### `useScenarios()`
@@ -101,7 +101,7 @@ Fetches scenario definitions: IDs (e.g., `s0020`), names, and active status.
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 
 const { scenarios, isLoading, error } = useScenarios()
-// scenarios: ScenarioListItem[] — [{ scenario_id: "s0020", name: "Baseline", ... }]
+// scenarios: ScenarioListItem[] - [{ scenario_id: "s0020", name: "Baseline", ... }]
 ```
 
 #### `useScenarioTiers(scenarioId)`
@@ -112,12 +112,12 @@ Fetches tier scores for a specific scenario.
 import { useScenarioTiers } from "@repo/data/coeqwal/hooks"
 
 const { data, isLoading, error } = useScenarioTiers("s0020")
-// data: ScenarioTiersResponse — { scenario: "s0020", tiers: { AG_REV: { weighted_score, ... }, ... } }
+// data: ScenarioTiersResponse - { scenario: "s0020", tiers: { AG_REV: { weighted_score, ... }, ... } }
 ```
 
 ### Fetchers
 
-**Prefer hooks** in React components — they handle caching, deduplication, loading states, and errors automatically.
+**Prefer hooks** in React components. They handle caching, deduplication, loading states, and errors automatically.
 
 Use fetchers when you need to:
 
