@@ -185,8 +185,9 @@ export function OutcomeGlyphItem({
       ) : (
         <Box
           sx={{
-            width: actualSize,
-            height: actualSize,
+            // Fixed size - never scales with viewport
+            width: 60,
+            height: 60,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

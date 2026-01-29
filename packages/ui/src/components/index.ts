@@ -69,3 +69,7 @@ export type { ToggleChipProps, TierChipProps, LocationChipProps } from "./Chip"
 // Error handling
 export { ErrorFallback } from "./common/ErrorFallback"
 export type { ErrorFallbackProps } from "./common/ErrorFallback"
+
+// Modal components
+export { MobileModal } from "./common/MobileModal"
+export type { MobileModalProps } from "./common/MobileModal"

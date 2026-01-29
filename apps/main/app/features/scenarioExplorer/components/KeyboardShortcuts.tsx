@@ -13,17 +13,9 @@
  * native browser shortcuts or assistive technology.
  */
 
-import { useCallback, useEffect, useState, useRef } from "react"
-import {
-  Box,
-  Typography,
-  Portal,
-  ClickAwayListener,
-  IconButton,
-  CloseIcon,
-  Fade,
-  useTheme,
-} from "@repo/ui/mui"
+import { useCallback, useEffect, useState } from "react"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 
 interface ShortcutItem {
@@ -47,14 +39,6 @@ export function KeyboardShortcuts() {
   const theme = useTheme()
   const [isHelpOpen, setIsHelpOpen] = useState(false)
   const { clearScenarios, selectedScenarios } = useScenarioExplorerStore()
-  const closeButtonRef = useRef<HTMLButtonElement>(null)
-
-  // Focus close button when modal opens for accessibility
-  useEffect(() => {
-    if (isHelpOpen && closeButtonRef.current) {
-      closeButtonRef.current.focus()
-    }
-  }, [isHelpOpen])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -67,13 +51,9 @@ export function KeyboardShortcuts() {
         target.tagName === "TEXTAREA" ||
         target.isContentEditable
 
-      // Escape always works (to close modals)
-      if (e.key === "Escape") {
-        if (isHelpOpen) {
-          e.preventDefault()
-          setIsHelpOpen(false)
-        }
-        return
+      // Escape is handled by MobileModal when help is open
+      if (e.key === "Escape" && isHelpOpen) {
+        return // Let MobileModal handle it
       }
 
       // Don't intercept other keys when in text inputs
@@ -113,124 +93,66 @@ export function KeyboardShortcuts() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [handleKeyDown])
 
-  if (!isHelpOpen) return null
-
   return (
-    <Portal>
-      {/* Backdrop */}
-      <Fade in={isHelpOpen}>
-        <Box
-          sx={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: theme.zIndex.modal,
-          }}
-          onClick={() => setIsHelpOpen(false)}
-        />
-      </Fade>
-
-      {/* Modal content */}
-      <ClickAwayListener onClickAway={() => setIsHelpOpen(false)}>
-        <Box
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="keyboard-shortcuts-title"
-          sx={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            maxWidth: "90vw",
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: theme.borderRadius.lg,
-            boxShadow: theme.shadow.lg,
-            p: theme.space.section.md,
-            zIndex: theme.zIndex.modal + 1,
-            outline: "none",
-          }}
-        >
-          {/* Header */}
+    <MobileModal
+      open={isHelpOpen}
+      onClose={() => setIsHelpOpen(false)}
+      title="Keyboard Shortcuts"
+      titleId="keyboard-shortcuts-title"
+      maxWidth={400}
+    >
+      {/* Shortcuts list */}
+      <Box component="dl" sx={{ m: 0 }}>
+        {SHORTCUTS.map((shortcut, index) => (
           <Box
+            key={index}
             sx={{
               display: "flex",
-              alignItems: "center",
               justifyContent: "space-between",
-              mb: theme.space.component.md,
+              alignItems: "center",
+              py: theme.space.component.md,
+              borderBottom:
+                index < SHORTCUTS.length - 1 ? theme.border.light : "none",
             }}
           >
-            <Typography
-              id="keyboard-shortcuts-title"
-              variant="h6"
-              component="h2"
-            >
-              Keyboard Shortcuts
+            <Typography component="dd" variant="storyBody" sx={{ m: 0 }}>
+              {shortcut.description}
             </Typography>
-            <IconButton
-              ref={closeButtonRef}
-              onClick={() => setIsHelpOpen(false)}
-              size="small"
-              aria-label="Close keyboard shortcuts"
+            <Box
+              component="dt"
+              sx={{
+                display: "flex",
+                gap: theme.space.gap.xs,
+                m: 0,
+              }}
             >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-
-          {/* Shortcuts list */}
-          <Box component="dl" sx={{ m: 0 }}>
-            {SHORTCUTS.map((shortcut, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  py: theme.space.component.md,
-                  borderBottom:
-                    index < SHORTCUTS.length - 1 ? theme.border.light : "none",
-                }}
-              >
-                <Typography component="dd" variant="storyBody" sx={{ m: 0 }}>
-                  {shortcut.description}
-                </Typography>
-                <Box
-                  component="dt"
+              {shortcut.keys.map((key, keyIndex) => (
+                <Typography
+                  key={keyIndex}
+                  variant="caption"
+                  component="kbd"
+                  fontWeight="medium"
                   sx={{
-                    display: "flex",
-                    gap: theme.space.gap.xs,
-                    m: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: 28,
+                    height: 28,
+                    px: theme.space.component.sm,
+                    backgroundColor: theme.palette.grey[100],
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    borderRadius: theme.borderRadius.sm,
+                    boxShadow: `0 1px 0 ${theme.palette.grey[400]}`,
                   }}
                 >
-                  {shortcut.keys.map((key, keyIndex) => (
-                    <Typography
-                      key={keyIndex}
-                      variant="caption"
-                      component="kbd"
-                      fontWeight="medium"
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        minWidth: 28,
-                        height: 28,
-                        px: theme.space.component.sm,
-                        backgroundColor: theme.palette.grey[100],
-                        border: `1px solid ${theme.palette.grey[300]}`,
-                        borderRadius: theme.borderRadius.sm,
-                        boxShadow: `0 1px 0 ${theme.palette.grey[400]}`,
-                      }}
-                    >
-                      {key}
-                    </Typography>
-                  ))}
-                </Box>
-              </Box>
-            ))}
+                  {key}
+                </Typography>
+              ))}
+            </Box>
           </Box>
-        </Box>
-      </ClickAwayListener>
-    </Portal>
+        ))}
+      </Box>
+    </MobileModal>
   )
 }
 

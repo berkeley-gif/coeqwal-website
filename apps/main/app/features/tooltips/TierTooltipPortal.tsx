@@ -15,14 +15,12 @@ import React, { useEffect, useMemo, useState } from "react"
 import {
   Box,
   Popper,
-  Portal,
   ClickAwayListener,
   useTheme,
   useMediaQuery,
-  Fade,
 } from "@repo/ui/mui"
 import type { PopperProps } from "@repo/ui/mui"
-import { TooltipCloseButton } from "@repo/ui"
+import { TooltipCloseButton, MobileModal } from "@repo/ui"
 import TierTooltipContent from "./TierTooltipContent"
 import type { OutcomeScoreData } from "../scenarios/hooks"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
@@ -248,13 +246,14 @@ function DesktopTooltip({
 }
 
 // ============================================================================
-// MOBILE MODAL
+// MOBILE VIEW (uses shared MobileModal)
 // ============================================================================
 
 /**
- * Mobile modal - centered overlay with scroll support
+ * Mobile view - uses shared MobileModal with custom TooltipCloseButton
+ * TooltipCloseButton provides WCAG 2.5.5 compliant 44x44px touch targets
  */
-function MobileModal({
+function TierTooltipMobileView({
   outcome,
   anchorEl,
   onClose,
@@ -266,60 +265,34 @@ function MobileModal({
   const theme = useTheme()
   const isOpen = Boolean(outcome && anchorEl)
 
-  if (!isOpen) return null
-
   return (
-    <Portal>
-      {/* Backdrop */}
-      <Fade in={isOpen}>
-        <Box
-          onClick={onClose}
-          sx={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: theme.zIndex.modal,
-          }}
+    <MobileModal
+      open={isOpen}
+      onClose={onClose}
+      maxWidth={450}
+      maxHeight="calc(100vh - 64px)"
+      showCloseButton={false}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          ...theme.typography.compactSubtitle,
+        }}
+      >
+        <TooltipCloseButton
+          onClick={onForceClose}
+          offset={{ top: 0, right: 0 }}
         />
-      </Fade>
 
-      {/* Modal content */}
-      <Fade in={isOpen}>
-        <Box
-          sx={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: theme.zIndex.modal + 1,
-            width: "calc(100vw - 32px)",
-            maxWidth: "450px",
-            maxHeight: "calc(100vh - 64px)",
-            overflowY: "auto",
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            border: theme.border.light,
-            borderRadius: theme.borderRadius.md,
-            boxShadow: theme.shadow.lg,
-            p: theme.space.component.xl,
-            ...theme.typography.compactSubtitle,
-          }}
-        >
-          <TooltipCloseButton
-            onClick={onForceClose}
-            offset={{ top: 8, right: 8 }}
-          />
-
-          <TierTooltipContent
-            outcome={outcome!}
-            showTitle={true}
-            scenarioScore={scenarioScore}
-            scenarioLabel={scenarioLabel}
-            chartData={chartData}
-          />
-        </Box>
-      </Fade>
-    </Portal>
+        <TierTooltipContent
+          outcome={outcome!}
+          showTitle={true}
+          scenarioScore={scenarioScore}
+          scenarioLabel={scenarioLabel}
+          chartData={chartData}
+        />
+      </Box>
+    </MobileModal>
   )
 }
 
@@ -333,9 +306,9 @@ export function TierTooltipPortal(props: TierTooltipPortalProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const isOpen = Boolean(props.outcome && props.anchorEl)
 
-  // WCAG 2.1.1: Close tooltip on Escape key
+  // WCAG 2.1.1: Close tooltip on Escape key (desktop only - MobileModal handles its own)
   useEffect(() => {
-    if (!isOpen) return
+    if (isMobile || !isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -346,11 +319,11 @@ export function TierTooltipPortal(props: TierTooltipPortalProps) {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, onForceClose])
+  }, [isMobile, isOpen, onForceClose])
 
   // Render mobile modal or desktop Popper
   if (isMobile) {
-    return <MobileModal {...props} />
+    return <TierTooltipMobileView {...props} />
   }
 
   return <DesktopTooltip {...props} />
