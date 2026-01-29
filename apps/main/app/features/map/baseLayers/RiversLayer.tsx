@@ -23,7 +23,7 @@ export const RIVER_LAYER_IDS = [
   "san-joaquin-river-body",
 ] as const
 
-const DEFAULT_RIVER_BODY_COLOR = "#116bb0"
+const DEFAULT_RIVER_BODY_COLOR = "#042f67" // rgb(4, 47, 103)
 const RIVER_TROUGH_COLOR = "#1a3a52"
 const RIVER_OUTLINE_COLOR = "#ffffff"
 
