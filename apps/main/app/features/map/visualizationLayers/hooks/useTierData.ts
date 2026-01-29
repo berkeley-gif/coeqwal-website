@@ -27,7 +27,8 @@ import {
 import {
   fetchScenarioTiers,
   type ScenarioTiersResponse,
-} from "../../../../lib/api/tierApi"
+} from "@repo/data/coeqwal"
+import { CACHE_KEYS } from "@repo/data/cache"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
 import { API_BASE } from "../../../../lib/constants/api"
 import type {
@@ -181,16 +182,14 @@ export function useTierData(
   // ============================================================================
   // SWR for single-value outcomes (shares cache with glyphs)
   // ============================================================================
-  // Uses the same cache key as glyphs: /api/tiers/scenarios/{id}/tiers
+  // Uses the same cache key as glyphs: CACHE_KEYS.scenarioTiers(id)
   const {
     data: scenarioTiersData,
     error: swrError,
     isLoading: swrLoading,
   } = useSWR(
     // Only fetch if this is a single-value outcome with valid scenarioId
-    isSingleValue && scenarioId
-      ? `/api/tiers/scenarios/${scenarioId}/tiers`
-      : null,
+    isSingleValue && scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null,
     () => fetchScenarioTiers(scenarioId!),
   )
 

@@ -7,17 +7,23 @@ import {
   useScenarios,
   mapShortCodeToDisplayName,
 } from "@repo/data/coeqwal/hooks"
-import { fetchAllScenarioTiers } from "@repo/data/coeqwal"
+import { fetchAllScenarioTiers, fetchScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import type { ScenarioTiersResponse, TierScores } from "@repo/data/coeqwal"
 import {
-  fetchScenarioTiers,
   convertMultiValueToChartData,
   convertSingleValueToChartData,
 } from "../../../lib/api/tierApi"
 import { applyUIDisplayOverride } from "../../../lib/constants/outcomeMappings"
 import { getThemeColorsForApi, type TierColors } from "../../../content/tiers"
+import {
+  OUTCOME_DISPLAY_ORDER,
+  OUTCOME_DEFINITIONS,
+} from "../../../content/outcomes"
 import type { ChartDataPoint } from "../components/shared/types"
+
+// Re-export for backwards compatibility
+export { OUTCOME_DISPLAY_ORDER }
 
 interface OutcomeInfo {
   shortCode: string
@@ -33,19 +39,6 @@ export interface OutcomeScoreData extends TierScores {
   shortCode: string
   type: "single_value" | "multi_value"
 }
-
-// Constants - UI display names
-export const OUTCOME_DISPLAY_ORDER = [
-  "Community deliveries",
-  "Agricultural revenue",
-  "Environmental flows",
-  "Reservoir storage",
-  "Groundwater storage",
-  "Delta estuary ecology", // UI display name
-  "Freshwater for Delta exports",
-  "Freshwater for in-Delta uses",
-  "Salmon abundance",
-] as const
 
 const processScenarioData = (
   scenarioData: ScenarioTiersResponse,
@@ -81,6 +74,48 @@ const processScenarioData = (
 }
 
 /**
+ * Build outcome names list from tier data in display order
+ * Returns OutcomeInfo for each outcome, with placeholder for missing API tiers
+ */
+const buildOutcomeNames = (
+  allTiers: { short_code: string; name: string }[] | undefined,
+  tierMapping: Record<string, string> | undefined,
+): OutcomeInfo[] => {
+  if (!allTiers || !tierMapping) return []
+
+  // Build lookup by UI display name
+  const tiersByDisplayName = new Map<
+    string,
+    { short_code: string; name: string }
+  >()
+  allTiers.forEach((tier) => {
+    const apiDisplayName = mapShortCodeToDisplayName(
+      tier.short_code,
+      tierMapping,
+    )
+    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
+    tiersByDisplayName.set(uiDisplayName, tier)
+  })
+
+  // Return outcomes in display order, with placeholders for missing
+  return OUTCOME_DISPLAY_ORDER.map((displayName): OutcomeInfo => {
+    const tier = tiersByDisplayName.get(displayName)
+    if (!tier) {
+      return {
+        shortCode: "MISSING",
+        name: displayName,
+        displayName,
+      }
+    }
+    return {
+      shortCode: tier.short_code,
+      name: tier.name,
+      displayName,
+    }
+  })
+}
+
+/**
  * Extract score data from scenario API response
  * Used for sorting, parallel plots, and equity analysis
  */
@@ -110,58 +145,9 @@ const extractScoreData = (
 }
 
 export function useOutcomeDefinitions() {
-  // TODO: Re-enable database fetch when ready
-  /*
-  const {
-    data: definitions,
-    error: definitionsError,
-    isLoading: definitionsLoading,
-  } = useSWR("/api/tiers/definitions", fetchTierDefinitions)
-
-  const {
-    data: tierMapping,
-    error: mappingError,
-    isLoading: mappingLoading,
-  } = useSWR("/api/tiers/mapping", getTierMapping)
-
-  const convertedDefinitions = useMemo(() => {
-    if (!definitions || !tierMapping) return {}
-
-    const converted: Record<string, string> = {}
-    Object.entries(definitions).forEach(([shortCode, description]) => {
-      const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-      converted[displayName] = description
-    })
-
-    return converted
-  }, [definitions, tierMapping])
-  */
-
-  // Using hardcoded definitions from outcomes.ts
-  const hardcodedDefinitions = {
-    "Community deliveries":
-      "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for **140 community water systems**.",
-    "Agricultural revenue":
-      "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at **134 agricultural water districts** and evaluated relative to historical values.",
-    "Environmental flows":
-      "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at **17 locations** on the Sacramento and San Joaquin Rivers and their major tributaries.",
-    // UI display name
-    "Delta estuary ecology":
-      "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
-    "Freshwater for Delta exports":
-      "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the **Banks and Jones pumping plants**.",
-    "Freshwater for in-Delta uses":
-      "How often water in the Delta is fresh enough for in-Delta uses, assessed at **two compliance locations** in the western Delta.",
-    "Reservoir storage":
-      "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in **8 large reservoirs**.",
-    "Groundwater storage":
-      "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
-    "Salmon abundance":
-      "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
-  }
-
+  // Static content from outcomes.ts - no API call needed
   return {
-    definitions: hardcodedDefinitions,
+    definitions: OUTCOME_DEFINITIONS,
     isLoading: false,
     error: null,
   }
@@ -175,9 +161,8 @@ export function useScenarioTiers(scenarioId: string | null) {
     data: scenarioData,
     error: scenarioError,
     isLoading: scenarioLoading,
-  } = useSWR(
-    scenarioId ? `/api/tiers/scenarios/${scenarioId}/tiers` : null,
-    () => (scenarioId ? fetchScenarioTiers(scenarioId) : null),
+  } = useSWR(scenarioId ? CACHE_KEYS.scenarioTiers(scenarioId) : null, () =>
+    scenarioId ? fetchScenarioTiers(scenarioId) : null,
   )
 
   // Use shared hooks for tier list and mapping (cached, deduplicated)
@@ -210,41 +195,10 @@ export function useScenarioTiers(scenarioId: string | null) {
   }, [scenarioData, tierMapping])
 
   // Show outcomes in the specific order, some are inactive
-  const outcomeNames = useMemo(() => {
-    if (!allTiers || !tierMapping) return []
-
-    const desiredOrder = OUTCOME_DISPLAY_ORDER
-
-    // Quick lookup - apply UI display name overrides so lookup matches OUTCOME_DISPLAY_ORDER
-    const tiersByDisplayName = new Map()
-    allTiers.forEach((tier) => {
-      const apiDisplayName = mapShortCodeToDisplayName(
-        tier.short_code,
-        tierMapping,
-      )
-      const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
-      tiersByDisplayName.set(uiDisplayName, tier)
-    })
-
-    // Return outcomes in order, including missing ones (as inactive)
-    return desiredOrder.map((displayName) => {
-      const tier = tiersByDisplayName.get(displayName)
-      if (!tier) {
-        // Return placeholder for missing API tiers
-        return {
-          shortCode: "MISSING",
-          name: displayName, // Use display name as fallback
-          displayName,
-        }
-      }
-
-      return {
-        shortCode: tier.short_code,
-        name: tier.name,
-        displayName,
-      }
-    }) // Don't filter ...show all outcomes
-  }, [allTiers, tierMapping])
+  const outcomeNames = useMemo(
+    () => buildOutcomeNames(allTiers, tierMapping),
+    [allTiers, tierMapping],
+  )
 
   // Normalize error to string (SWR returns Error, shared hooks return string)
   const error = scenarioError
@@ -293,7 +247,7 @@ export function useMultipleScenarioTiers() {
     error: scenarioTiersError,
     isLoading: scenarioTiersLoading,
   } = useSWR(
-    scenarioIds.length > 0 ? ["all-scenario-tiers", ...scenarioIds] : null,
+    scenarioIds.length > 0 ? CACHE_KEYS.allScenarioTiers(scenarioIds) : null,
     () => fetchAllScenarioTiers(scenarioIds),
   )
 
@@ -341,39 +295,10 @@ export function useMultipleScenarioTiers() {
   }, [allScenariosData, tierMapping])
 
   // Get outcome names from tier list
-  const outcomeNames = useMemo(() => {
-    if (!allTiers || !tierMapping) return []
-
-    const desiredOrder = OUTCOME_DISPLAY_ORDER
-
-    // Apply UI display name overrides so lookup matches OUTCOME_DISPLAY_ORDER
-    const tiersByDisplayName = new Map()
-    allTiers.forEach((tier) => {
-      const apiDisplayName = mapShortCodeToDisplayName(
-        tier.short_code,
-        tierMapping,
-      )
-      const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
-      tiersByDisplayName.set(uiDisplayName, tier)
-    })
-
-    return desiredOrder.map((displayName): OutcomeInfo => {
-      const tier = tiersByDisplayName.get(displayName)
-      if (!tier) {
-        return {
-          shortCode: "MISSING",
-          name: displayName,
-          displayName,
-        }
-      }
-
-      return {
-        shortCode: tier.short_code,
-        name: tier.name,
-        displayName,
-      }
-    })
-  }, [allTiers, tierMapping])
+  const outcomeNames = useMemo(
+    () => buildOutcomeNames(allTiers, tierMapping),
+    [allTiers, tierMapping],
+  )
 
   const isLoading =
     scenariosLoading || scenarioTiersLoading || tiersLoading || mappingLoading

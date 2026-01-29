@@ -1,137 +1,14 @@
 /**
- * API functions for fetching tier data from COEQWAL API
+ * Chart data conversion utilities for tier visualization
+ *
+ * These functions convert API tier data to chart-ready format.
+ * For API fetching and types, use @repo/data/coeqwal
  */
 
-import { API_BASE } from "../constants/api"
-
-// Type definitions
-export interface TierListItem {
-  short_code: string
-  name: string
-  description: string
-  tier_type: "single_value" | "multi_value"
-  tier_count: number
-  is_active: boolean
-}
-
-export interface MultiValueTierData {
-  tier: "tier1" | "tier2" | "tier3" | "tier4"
-  value: number
-  normalized: number
-}
-
-export interface MultiValueTier {
-  name: string
-  type: "multi_value"
-  data: MultiValueTierData[]
-  total: number
-}
-
-/**
- * Calculated score fields returned by the API for each tier
- * These enable sorting, parallel plot visualization, and equity analysis
- */
-export interface TierScores {
-  /** Weighted average tier score (1.0-4.0, lower = better). Use for sorting. */
-  weighted_score: number
-  /** Normalized score (0.0-1.0, higher = better). Use for parallel plot Y-axis. */
-  normalized_score: number
-  /** Gini coefficient (0.0-1.0, lower = more equitable). Use for equity indicator. */
-  gini: number
-  /** Spread band top edge (0.0-1.0). Where best locations are. */
-  band_upper: number
-  /** Spread band bottom edge (0.0-1.0). Where worst locations are. */
-  band_lower: number
-}
-
-export interface TierInfo extends TierScores {
-  name: string
-  type: "single_value" | "multi_value"
-  level?: number // For single_value
-  data?: MultiValueTierData[] // For multi_value
-  total?: number // For multi_value
-}
-
-export interface ScenarioTiersResponse {
-  scenario: string
-  tiers: {
-    [tierCode: string]: TierInfo
-  }
-}
-
-/**
- * Scenario metadata from /api/scenarios endpoint
- */
-export interface ScenarioListItem {
-  scenario_id: string
-  short_code: string
-  name: string
-  short_title: string
-  description: string
-  is_active: boolean
-}
-
-// Helpers
-async function apiFetch<T>(endpoint: string, errorMessage: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`)
-  if (!response.ok) {
-    throw new Error(`${errorMessage}: ${response.statusText}`)
-  }
-  return response.json()
-}
-
-// API functions
-export async function fetchTierList(): Promise<TierListItem[]> {
-  return apiFetch("/tiers/list", "Failed to fetch tier list")
-}
-
-export async function fetchScenarioTiers(
-  scenarioId: string,
-): Promise<ScenarioTiersResponse> {
-  return apiFetch(
-    `/tiers/scenarios/${scenarioId}/tiers`,
-    "Failed to fetch scenario tiers",
-  )
-}
-
-/**
- * Fetch list of all scenarios with metadata
- */
-export async function fetchScenarioList(): Promise<ScenarioListItem[]> {
-  return apiFetch("/scenarios", "Failed to fetch scenario list")
-}
-
-/**
- * Fetch tier data for multiple scenarios in parallel
- * Returns a map of scenarioId -> ScenarioTiersResponse
- */
-export async function fetchAllScenarioTiers(
-  scenarioIds: string[],
-): Promise<Record<string, ScenarioTiersResponse>> {
-  const results = await Promise.all(
-    scenarioIds.map((id) => fetchScenarioTiers(id)),
-  )
-  const record: Record<string, ScenarioTiersResponse> = {}
-  scenarioIds.forEach((id, i) => {
-    // Safe: results array has same length as scenarioIds
-    record[id] = results[i]!
-  })
-  return record
-}
-
-// Utility function to convert API short codes to display names
-// NOTE: For tier mapping, use useTierMapping() from @repo/data/coeqwal/hooks
-// which derives the mapping from the cached tier list (no extra API call)
-export function mapShortCodeToDisplayName(
-  shortCode: string,
-  mapping: Record<string, string>,
-): string {
-  return mapping[shortCode] || shortCode
-}
-
-// TierColors type - imported from content/tiers.ts (single source of truth)
-// Colors should come from theme.palette.tiers - use getThemeColorsForApi() from content/tiers.ts
+import type { MultiValueTier } from "@repo/data/coeqwal"
 import type { TierColors } from "../../content/tiers"
+
+// Re-export for backwards compatibility
 export type { TierColors }
 
 type ChartDataPoint = {
@@ -141,11 +18,9 @@ type ChartDataPoint = {
   tierType?: "single_value" | "multi_value"
 }
 
-// Helpers
 const formatTierLabel = (tier: string) =>
   tier.charAt(0).toUpperCase() + tier.slice(1)
 
-// Utility functions
 /**
  * Convert multi-value tier data to chart format
  * @param tierData - Tier data from API

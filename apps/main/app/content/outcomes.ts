@@ -1,44 +1,50 @@
-import { OUTCOME_DISPLAY_ORDER } from "../features/scenarios/hooks"
+/**
+ * Outcome content - single source of truth for outcome display names and definitions
+ * This content is currently under review by the project team and is in flux.
+ */
+
+/**
+ * Ordered list of outcome display names
+ * This order is used throughout the UI for consistent presentation
+ */
+export const OUTCOME_DISPLAY_ORDER = [
+  "Community deliveries",
+  "Agricultural revenue",
+  "Environmental flows",
+  "Reservoir storage",
+  "Groundwater storage",
+  "Delta estuary ecology",
+  "Freshwater for Delta exports",
+  "Freshwater for in-Delta uses",
+  "Salmon abundance",
+] as const
 
 export type Outcome = (typeof OUTCOME_DISPLAY_ORDER)[number]
 
 /**
  * Outcome definitions
  * Maps outcome display names to their descriptions.
- * These definitions are also in the database. The thinking is that we want to
- * allow frontend developers to modify the definitions without having to wait
- * for a database update. TODO: re-evaluate this usage once project nears end.
  */
-export const OUTCOME_DEFINITIONS: Record<string, string> = {
+export const OUTCOME_DEFINITIONS: Record<Outcome, string> = {
   "Community deliveries":
-    "This chart reflects how much municipal & industrial water deliveries satisfy the demands of each region, under current plans and assumptions.",
+    "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for **140 community water systems**.",
   "Agricultural revenue":
-    "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
+    "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at **134 agricultural water districts** and evaluated relative to historical values.",
   "Environmental flows":
-    "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at **17 locations** on the Sacramento and San Joaquin Rivers and their major tributaries.",
+  "Reservoir storage":
+    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in **8 large reservoirs**.",
+  "Groundwater storage":
+    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
   "Delta estuary ecology":
     "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
   "Freshwater for Delta exports":
-    "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
+    "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the **Banks and Jones pumping plants**.",
   "Freshwater for in-Delta uses":
-    "How often water in the Delta is fresh enough for in-Delta uses, assessed at two compliance locations in the western Delta.",
-  "Reservoir storage":
-    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in XX large reservoirs.",
-  "Groundwater storage":
-    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
+    "How often water in the Delta is fresh enough for in-Delta uses, assessed at **two compliance locations** in the western Delta.",
   "Salmon abundance":
     "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
 }
-
-// Async version for backwards compatibility (wraps the constant)
-// TODO: Re-enable database fetch when ready
-export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
-  return OUTCOME_DEFINITIONS
-}
-
-// For backwards compatibility, export the function result
-// TODO: use React Query or SWR to call getOutcomeDefinitions()
-export const outcomeDefinitions = getOutcomeDefinitions()
 
 // Tier value definitions for each outcome
 export const outcomeTierValues: Record<
