@@ -336,7 +336,7 @@ export default function TierTooltipContent({
                       `tier${tierNum}` as keyof typeof theme.palette.tiers
                     ],
                   flexShrink: 0,
-                  mt: "3px", // Align with first line of text
+                  mt: "5px", // Align with first line of text
                   // Add ring around current tier
                   ...(isCurrentTier && {
                     outline: `2px solid ${theme.palette.tiers[`tier${tierNum}` as keyof typeof theme.palette.tiers]}`,

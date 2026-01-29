@@ -17,7 +17,7 @@ export interface FetchOptions {
 }
 
 /**
- * Custom error class for fetch failures with additional context
+ * Custom error class for fetch failures with additional context (apiFetcher)
  */
 export class FetchError extends Error {
   /** HTTP status code (0 if network error) */

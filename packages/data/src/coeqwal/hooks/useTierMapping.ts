@@ -3,11 +3,11 @@
 /**
  * Hook for getting tier short_code to display name mapping
  *
- * This hook derives the mapping from cached useTierList data
+ * This hook derives the mapping from cached useTiers data
  */
 
 import { useMemo } from "react"
-import { useTierList } from "./useTierList"
+import { useTiers } from "./useTiers"
 import type { TierMapping } from "../types"
 
 /**
@@ -28,17 +28,17 @@ import type { TierMapping } from "../types"
  * ```
  */
 export function useTierMapping() {
-  const { tierList, isLoading, error } = useTierList()
+  const { tiers, isLoading, error } = useTiers()
 
-  // Derive mapping from tier list - only recalculates when tierList changes
+  // Derive mapping from tier list - only recalculates when tiers changes
   const tierMapping = useMemo<TierMapping | undefined>(() => {
-    if (!tierList) return undefined
+    if (!tiers) return undefined
 
-    return tierList.reduce<TierMapping>((acc, tier) => {
+    return tiers.reduce<TierMapping>((acc, tier) => {
       acc[tier.short_code] = tier.name
       return acc
     }, {})
-  }, [tierList])
+  }, [tiers])
 
   return {
     tierMapping,

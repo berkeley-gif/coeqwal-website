@@ -87,8 +87,9 @@ function DescriptionWithGlossaryLinks({
   )
 
   // Toggle styles for show more/less - now as buttons
+  // Using blue.medium for WCAG AA contrast compliance (~4.5:1 vs bright's ~3:1)
   const toggleButtonStyles = {
-    color: theme.palette.blue.bright,
+    color: theme.palette.blue.medium,
     fontStyle: "italic",
     cursor: "pointer",
     userSelect: "none" as const,

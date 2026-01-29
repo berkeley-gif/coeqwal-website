@@ -69,6 +69,13 @@ export function OperationsIconGroup({
           }
         >
           <Box
+            tabIndex={0}
+            role="button"
+            aria-label={
+              scenarioTheme === "groundwater"
+                ? "SGMA limits - focus or click for details"
+                : "Environmental flows - focus or click for details"
+            }
             sx={{
               width: fixedIconSize,
               height: fixedIconSize,
@@ -76,6 +83,11 @@ export function OperationsIconGroup({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              borderRadius: theme.borderRadius.circle,
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.blue.bright}`,
+                outlineOffset: "2px",
+              },
             }}
           >
             {getThemeIcon(scenarioTheme)}
@@ -94,10 +106,18 @@ export function OperationsIconGroup({
           }
         >
           <Box
+            tabIndex={0}
+            role="button"
+            aria-label="2020 LandIQ land use - focus or click for details"
             sx={{
               width: fixedIconSize,
               height: fixedIconSize,
               cursor: "pointer",
+              borderRadius: theme.borderRadius.circle,
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.blue.bright}`,
+                outlineOffset: "2px",
+              },
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,10 +143,18 @@ export function OperationsIconGroup({
           }
         >
           <Box
+            tabIndex={0}
+            role="button"
+            aria-label="TUCPs allowed - focus or click for details"
             sx={{
               width: fixedIconSize,
               height: fixedIconSize,
               cursor: "pointer",
+              borderRadius: theme.borderRadius.circle,
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.blue.bright}`,
+                outlineOffset: "2px",
+              },
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -167,6 +195,9 @@ export function OperationsIconGroup({
           }
         >
           <Box
+            tabIndex={0}
+            role="button"
+            aria-label={`${icon.label.replace(/\n/g, " ")} - focus or click for details`}
             sx={{
               width: fixedIconSize,
               height: fixedIconSize,
@@ -174,6 +205,11 @@ export function OperationsIconGroup({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              borderRadius: theme.borderRadius.circle,
+              "&:focus-visible": {
+                outline: `2px solid ${theme.palette.blue.bright}`,
+                outlineOffset: "2px",
+              },
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,9 +1,7 @@
 "use client"
 
 /**
- * Hook for fetching the tier list
- *
- * The tier list is static data that rarely changes.
+ * Hook for fetching tier definitions
  */
 
 import useSWR from "swr"
@@ -12,24 +10,24 @@ import { fetchTierList } from "../fetchers"
 import type { TierListItem } from "../types"
 
 /**
- * Fetch and cache the tier list
+ * Fetch and cache tier definitions
  *
- * The tier list contains metadata for all outcomes (tiers) in the system.
+ * Returns metadata for all outcomes (tiers) in the system.
  * This data is static and cached indefinitely.
  *
- * @returns Tier list data with loading and error states
+ * @returns Tier data with loading and error states
  *
  * @example
  * ```typescript
  * function OutcomeSelector() {
- *   const { tierList, isLoading, error } = useTierList()
+ *   const { tiers, isLoading, error } = useTiers()
  *
  *   if (isLoading) return <Spinner />
  *   if (error) return <Error message={error} />
  *
  *   return (
  *     <ul>
- *       {tierList?.filter(t => t.is_active).map(tier => (
+ *       {tiers?.filter(t => t.is_active).map(tier => (
  *         <li key={tier.short_code}>{tier.name}</li>
  *       ))}
  *     </ul>
@@ -37,9 +35,9 @@ import type { TierListItem } from "../types"
  * }
  * ```
  */
-export function useTierList() {
+export function useTiers() {
   const {
-    data: tierList,
+    data: tiers,
     error: swrError,
     isLoading,
   } = useSWR<TierListItem[]>(CACHE_KEYS.TIER_LIST, fetchTierList, {
@@ -52,7 +50,7 @@ export function useTierList() {
   const error = swrError ? String(swrError.message || swrError) : null
 
   return {
-    tierList,
+    tiers,
     isLoading,
     error,
   }

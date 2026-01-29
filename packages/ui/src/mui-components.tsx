@@ -71,9 +71,10 @@ export {
   SvgIcon,
   ClickAwayListener,
   Portal,
+  Popper,
 } from "@mui/material"
 
-export type { BoxProps } from "@mui/material"
+export type { BoxProps, PopperProps } from "@mui/material"
 export type { TypographyProps } from "@mui/material/Typography"
 export type { ButtonProps } from "@mui/material/Button"
 export type { SelectChangeEvent } from "@mui/material/Select"

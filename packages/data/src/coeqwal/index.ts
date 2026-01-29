@@ -16,7 +16,7 @@
  * import { fetchTierList, fetchScenarioTiers } from "@repo/data/coeqwal"
  *
  * // React hooks (for client components)
- * import { useTierList, useTierMapping, useScenarios } from "@repo/data/coeqwal/hooks"
+ * import { useTiers, useTierMapping, useScenarios } from "@repo/data/coeqwal/hooks"
  * ```
  */
 
