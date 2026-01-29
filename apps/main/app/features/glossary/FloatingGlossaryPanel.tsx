@@ -32,6 +32,7 @@ interface FloatingGlossaryPanelProps {
   selectedTerm?: string
   position: Position
   isOnLeftHalf: boolean
+  isMobile?: boolean
 }
 
 /**
@@ -46,6 +47,7 @@ export function FloatingGlossaryPanel({
   selectedTerm,
   position,
   isOnLeftHalf,
+  isMobile = false,
 }: FloatingGlossaryPanelProps) {
   const theme = useTheme()
   const termRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -199,41 +201,79 @@ export function FloatingGlossaryPanel({
 
   const glossaryTitleId = "glossary-panel-title"
 
+  // Mobile: centered modal with backdrop
+  // Desktop: positioned panel anchored to button
+  const panelStyles = isMobile
+    ? {
+        position: "fixed" as const,
+        top: "50%",
+        left: "50%",
+        transform: isOpen
+          ? "translate(-50%, -50%) scale(1)"
+          : "translate(-50%, -50%) scale(0.9)",
+        width: "calc(100vw - 32px)", // Full width minus padding
+        maxWidth: "500px",
+        maxHeight: "80vh",
+        transformOrigin: "center center",
+      }
+    : {
+        position: "fixed" as const,
+        bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
+        // Position based on which half of screen the button is on
+        ...(isOnLeftHalf
+          ? {
+              // Button on left, then panel appears to the right
+              left:
+                typeof window !== "undefined"
+                  ? window.innerWidth - position.right
+                  : position.right,
+            }
+          : {
+              // Button on right, then panel appears to the left
+              right: position.right,
+            }),
+        width: "33.333vw", // 1/3 of viewport width
+        minWidth: "400px",
+        maxWidth: theme.layout.maxWidth.lg,
+        maxHeight: "70vh",
+        // Transform origin changes based on position
+        transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
+        transform: isOpen ? "scale(1)" : "scale(0.9)",
+      }
+
   return (
     <>
+      {/* Mobile backdrop */}
+      {isMobile && (
+        <Box
+          onClick={onClose}
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            opacity: isOpen ? 1 : 0,
+            pointerEvents: isOpen ? "auto" : "none",
+            transition: theme.transition.fade,
+            zIndex: theme.zIndex.floating - 1,
+          }}
+        />
+      )}
+
       {/* WCAG 4.1.2: Panel with dialog role and proper ARIA attributes */}
       {/* Note: aria-hidden removed as it's prohibited on dialog roles with focusable content */}
       <Box
         role="dialog"
-        aria-modal="false"
+        aria-modal={isMobile ? "true" : "false"}
         aria-labelledby={glossaryTitleId}
         sx={{
-          position: "fixed",
-          bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
-          // Position based on which half of screen the button is on
-          ...(isOnLeftHalf
-            ? {
-                // Button on left, then panel appears to the right
-                left:
-                  typeof window !== "undefined"
-                    ? window.innerWidth - position.right
-                    : position.right,
-              }
-            : {
-                // Button on right, then panel appears to the left
-                right: position.right,
-              }),
-          width: "33.333vw", // 1/3 of viewport width
-          minWidth: "400px",
-          maxWidth: theme.layout.maxWidth.lg,
-          maxHeight: "70vh", // Don't take up full height
+          ...panelStyles,
           backgroundColor: theme.palette.background.paper,
           borderRadius: theme.borderRadius.md,
           boxShadow: theme.shadow.lg,
-          transform: isOpen ? "scale(1)" : "scale(0.9)",
           opacity: isOpen ? 1 : 0,
-          // Transform origin changes based on position
-          transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
           transition: theme.transition.bouncy,
           pointerEvents: isOpen ? "auto" : "none",
           zIndex: theme.zIndex.floating,
