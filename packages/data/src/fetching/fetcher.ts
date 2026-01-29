@@ -44,13 +44,13 @@ function isRetryableStatus(status: number): boolean {
  * ```typescript
  * import { DEFAULT_API_BASE, ENDPOINTS } from "../coeqwal/api"
  * import type { TierListItem, ScenarioTiersResponse } from "../coeqwal/types"
- * 
+ *
  * // Fetch list of all tiers/outcomes
  * const tiers = await apiFetcher<TierListItem[]>(ENDPOINTS.TIER_LIST, {
  *  baseUrl: DEFAULT_API_BASE,
  * })
  * // [{ short_code: "AG_REV", name: "Agricultural revenue", ... }, ...]
- * 
+ *
  * // Fetch tier data for a specific scenario
  * const scenarioData = await apiFetcher<ScenarioTiersResponse>(
  *   ENDPOINTS.scenarioTiers("s0020"),
