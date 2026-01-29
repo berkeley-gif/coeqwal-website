@@ -15,6 +15,7 @@ React components
 ```
 
 **Features:**
+
 - **Deduplication**: Multiple components requesting the same data make only 1 API call
 - **Caching**: SWR caches responses with 60s deduplication window
 - **Type safety**: Typed fetchers and responses, i.e. no type assertions at consumer level
@@ -45,15 +46,12 @@ pnpm install
 import { DataProvider } from "@repo/data/providers"
 
 export default function RootLayout({ children }) {
-  return (
-    <DataProvider>
-      {children}
-    </DataProvider>
-  )
+  return <DataProvider>{children}</DataProvider>
 }
 ```
 
 The DataProvider configures SWR with our config:
+
 - 60-second deduplication window (our data is relatively static)
 - No revalidation on focus (same reason)
 - Revalidate on reconnect
@@ -105,6 +103,7 @@ See also [api.coeqwal.org/docs](https://api.coeqwal.org/docs)
 ### Hooks
 
 #### `useTiers()`
+
 Fetches tier definitions: names, descriptions, and types (single_value vs multi_value). Use this to populate dropdowns, labels, or create a list of tiers.
 
 ```tsx
@@ -113,6 +112,7 @@ const { tiers, isLoading, error } = useTiers()
 ```
 
 #### `useScenarios()`
+
 Fetches scenario metadata: IDs, names, and descriptions.
 
 ```tsx
@@ -121,6 +121,7 @@ const { scenarios, isLoading, error } = useScenarios()
 ```
 
 #### `useScenarioTiers(scenarioId)`
+
 Fetches tier scores for a specific scenario.
 
 ```tsx
@@ -133,7 +134,11 @@ const { data, isLoading, error } = useScenarioTiers("s0020")
 For potential server-side data fetching or building custom hooks:
 
 ```tsx
-import { fetchTierList, fetchScenarioTiers, fetchScenarioList } from "@repo/data/coeqwal"
+import {
+  fetchTierList,
+  fetchScenarioTiers,
+  fetchScenarioList,
+} from "@repo/data/coeqwal"
 
 const tiers = await fetchTierList()
 const scenarios = await fetchScenarioList()
@@ -160,14 +165,14 @@ CACHE_KEYS.allScenarioTiers(["s0020", ...]) // ["all-scenario-tiers", "s0020", .
 
 ```tsx
 import type {
-  TierListItem,        // Tier metadata from /api/tiers/list
-  TierInfo,            // Full tier data including scores
-  TierScores,          // weighted_score, normalized_score, gini, band_upper, band_lower
-  ScenarioTiersResponse,  // Response from scenario tiers endpoint
-  ScenarioListItem,    // Scenario metadata
-  TierMapping,         // Record<string, string> for lookups
-  MultiValueTier,      // Multi-value tier with name, type, data array, and total
-  MultiValueTierData,  // Distribution data for multi-value tiers (tier, value, normalized)
+  TierListItem, // Tier metadata from /api/tiers/list
+  TierInfo, // Full tier data including scores
+  TierScores, // weighted_score, normalized_score, gini, band_upper, band_lower
+  ScenarioTiersResponse, // Response from scenario tiers endpoint
+  ScenarioListItem, // Scenario metadata
+  TierMapping, // Record<string, string> for lookups
+  MultiValueTier, // Multi-value tier with name, type, data array, and total
+  MultiValueTierData, // Distribution data for multi-value tiers (tier, value, normalized)
 } from "@repo/data/coeqwal"
 ```
 
@@ -182,14 +187,15 @@ try {
   const data = await apiFetcher(url)
 } catch (err) {
   if (err instanceof FetchError) {
-    console.log(err.status)     // HTTP status code
-    console.log(err.endpoint)   // The URL that failed
-    console.log(err.retryable)  // Whether retry might help (5xx, 429)
+    console.log(err.status) // HTTP status code
+    console.log(err.endpoint) // The URL that failed
+    console.log(err.retryable) // Whether retry might help (5xx, 429)
   }
 }
 ```
 
 Features:
+
 - Configurable timeout (default 10s)
 - Automatic retry on 5xx and 429 errors
 - Exponential backoff (1s, 2s, 4s...)

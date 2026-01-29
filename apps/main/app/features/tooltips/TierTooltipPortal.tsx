@@ -79,7 +79,9 @@ function TooltipArrow({
           width: arrowSize,
           height: arrowSize,
           // Position on the edge of the tooltip
-          ...(pointsRight ? { right: -arrowSize / 2 } : { left: -arrowSize / 2 }),
+          ...(pointsRight
+            ? { right: -arrowSize / 2 }
+            : { left: -arrowSize / 2 }),
           "&::before": {
             content: '""',
             position: "absolute",
