@@ -41,6 +41,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   highlightedScenarios,
   showSearchDivider = false,
   onToggleScenario,
+  onTierClick,
   selectedScenarios,
   selectedOutcomes,
   showMapView,
@@ -200,6 +201,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             glyphSize={glyphSize}
             isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
+            onTierClick={onTierClick}
             onTooltipToggle={handleToggleWithAnchor}
             onTooltipToggleWithContext={handleToggleWithContext}
             onSortChange={onSortChange}

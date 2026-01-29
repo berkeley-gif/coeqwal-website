@@ -58,6 +58,8 @@ export interface StrategyGridRowProps {
   isAlignedGrid: boolean
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
+  /** Called when a tier glyph is clicked (for map visualization) */
+  onTierClick?: (scenarioId: string, outcome: string) => void
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
@@ -85,6 +87,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   glyphSize,
   isAlignedGrid,
   onToggleScenario,
+  onTierClick,
   onTooltipToggle,
   onSortChange,
 }: StrategyGridRowProps) {
@@ -131,12 +134,14 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           showInfoButton={showControlsBelowGlyph}
           showSortButton={showControlsBelowGlyph && sortEnabled}
           sortState={isSorted ? sortDirection : null}
-          // Click glyph to open contextual tooltip
+          // Click glyph to open contextual tooltip AND trigger map visualization
           onGlyphClick={() => {
             const anchor = glyphRefs.current[displayName]
             if (anchor) {
               onTooltipToggle(displayName, anchor)
             }
+            // Also trigger map visualization if handler provided
+            onTierClick?.(scenario.scenarioId, displayName)
           }}
           onInfoClick={(e) => {
             onTooltipToggle(displayName, e.currentTarget)

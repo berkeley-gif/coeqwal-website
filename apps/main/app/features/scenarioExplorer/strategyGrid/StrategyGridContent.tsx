@@ -63,6 +63,8 @@ export interface StrategyGridContentProps {
   isAlignedGrid: boolean
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
+  /** Called when a tier glyph is clicked (for map visualization) */
+  onTierClick?: (scenarioId: string, outcome: string) => void
   /** Toggle tooltip (basic - no scenario context) */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Toggle tooltip with scenario context (for accessibility) */
@@ -98,6 +100,7 @@ export function StrategyGridContent({
   glyphSize,
   isAlignedGrid,
   onToggleScenario,
+  onTierClick,
   onTooltipToggle,
   onTooltipToggleWithContext,
   onSortChange,
@@ -167,6 +170,7 @@ export function StrategyGridContent({
             glyphSize={glyphSize}
             isAlignedGrid={isAlignedGrid}
             onToggleScenario={onToggleScenario}
+            onTierClick={onTierClick}
             onTooltipToggle={createTooltipHandler(scenario)}
             onSortChange={onSortChange}
           />,
