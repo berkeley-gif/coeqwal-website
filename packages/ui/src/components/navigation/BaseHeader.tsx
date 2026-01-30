@@ -156,6 +156,8 @@ export interface BaseHeaderProps {
 
   /* --- Action handlers (optional overrides) --- */
   onLogoClick?: () => void
+  onGetDataClick?: () => void
+  onAboutClick?: () => void
 }
 
 const translations: TranslationsMap = {
@@ -190,12 +192,15 @@ const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
   data: "https://dev.coeqwal.org/data",
+  about: "http://dev.coeqwal.org/about"
   // TODO: Add about URL when available
   // about: "https://coeqwal.org/about",
 }
 
 export function BaseHeader({
   onLogoClick,
+  onGetDataClick,
+  onAboutClick,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
   zIndex,
@@ -477,7 +482,7 @@ export function BaseHeader({
                 <Button
                   variant="text"
                   disableRipple
-                  onClick={() => (window.location.href = URLS.data)}
+                  onClick={onGetDataClick ? onGetDataClick : undefined}
                   sx={buttonStyle}
                 >
                   {t.buttons.getData}
@@ -488,7 +493,7 @@ export function BaseHeader({
                   variant="text"
                   disableRipple
                   // TODO: Remove disabled when URLS.about is available
-                  disabled
+                  onClick={onAboutClick ? onAboutClick : undefined}
                   sx={{
                     ...buttonStyle,
                     // Override disabled styles to maintain visual consistency
