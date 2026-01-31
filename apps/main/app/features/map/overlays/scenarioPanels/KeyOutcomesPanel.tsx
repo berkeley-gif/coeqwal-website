@@ -11,13 +11,15 @@ import { useCallback } from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
 import {
-  OUTCOME_DISPLAY_ORDER,
+  OUTCOME_CODE_ORDER,
+  getOutcomeName,
   useScenarioTiers,
 } from "../../../scenarios/hooks"
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
 import { mapActions, useActiveOutcomeVisualization } from "../../store"
+import type { OutcomeCode } from "../../../../content/outcomes"
 
 interface KeyOutcomesPanelProps {
   scenarioId?: string
@@ -40,28 +42,29 @@ export function KeyOutcomesPanel({
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
 
-  // Get current visualization for toggle behavior
+  // Get current visualization for toggle behavior (using outcome codes)
   const activeVisualization = useActiveOutcomeVisualization()
-  const selectedOutcome = activeVisualization?.outcome ?? null
+  const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
   // Handler to show outcome data on the map (toggle behavior)
   const handleShowOnMap = useCallback(
-    (outcome: string) => {
+    (code: OutcomeCode) => {
       handleClose() // Close tooltip when showing on map
       mapActions.clearMapTooltips() // Clear any pinned map tooltips
+
       // Toggle: if same outcome is already selected, clear it; otherwise set it
-      if (selectedOutcome === outcome) {
+      if (selectedOutcomeCode === code) {
         mapActions.clearOutcomeVisualization()
       } else {
-        mapActions.setOutcomeVisualization(outcome, "s0020")
+        mapActions.setOutcomeVisualization(code, "s0020")
       }
     },
-    [handleClose, selectedOutcome],
+    [handleClose, selectedOutcomeCode],
   )
 
-  // Helper to check if outcome has valid data
-  const hasData = (outcome: string): boolean => {
-    const tierData = chartData[outcome]
+  // Helper to check if outcome has valid data (by code)
+  const hasData = (code: string): boolean => {
+    const tierData = chartData[code]
     return (
       tierData !== undefined &&
       tierData.length > 0 &&
@@ -69,21 +72,22 @@ export function KeyOutcomesPanel({
     )
   }
 
-  // Shared outcome item renderer with tooltip wrapper
-  const renderOutcomeItem = (outcome: string) => {
-    const isActive = hasData(outcome)
+  // Shared outcome item renderer with tooltip wrapper (iterates over codes)
+  const renderOutcomeItem = (code: OutcomeCode) => {
+    const displayName = getOutcomeName(code)
+    const isActive = hasData(code)
 
     return (
       <ClickTooltip
-        key={outcome}
-        open={openTooltip === outcome}
+        key={code}
+        open={openTooltip === code}
         onClose={handleClose}
         placement="left"
         width="450px"
         closeOnScroll
         content={
           <>
-            <TierTooltipContent outcome={outcome} showTitle={true} />
+            <TierTooltipContent outcomeCode={code} showTitle={true} />
             <Typography
               variant="compactSubtitle"
               sx={{
@@ -95,7 +99,7 @@ export function KeyOutcomesPanel({
               Click{" "}
               <Box
                 component="span"
-                onClick={() => handleShowOnMap(outcome)}
+                onClick={() => handleShowOnMap(code)}
                 sx={{
                   color: theme.palette.blue.bright,
                   textDecoration: "underline",
@@ -112,20 +116,20 @@ export function KeyOutcomesPanel({
       >
         <Box>
           <OutcomeGlyphItem
-            displayName={outcome}
-            name={outcome}
-            chartData={chartData[outcome]}
+            displayName={displayName}
+            name={displayName}
+            chartData={chartData[code]}
             isActive={!isLoading && isActive}
-            isSelected={selectedOutcome === outcome}
-            isTooltipActive={openTooltip === outcome}
+            isSelected={selectedOutcomeCode === code}
+            isTooltipActive={openTooltip === code}
             size={glyphSize}
             showLabel={true}
             showInfoButton={true}
             showSortButton={false}
-            onGlyphClick={() => handleShowOnMap(outcome)}
+            onGlyphClick={() => handleShowOnMap(code)}
             onInfoClick={(e) => {
               e.stopPropagation()
-              handleToggle(outcome)
+              handleToggle(code)
             }}
           />
         </Box>
@@ -134,8 +138,8 @@ export function KeyOutcomesPanel({
   }
 
   // Multiple location outcomes (first 5) and single location outcomes (remaining)
-  const multipleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(0, 5)
-  const singleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(5)
+  const multipleLocationOutcomes = OUTCOME_CODE_ORDER.slice(0, 5)
+  const singleLocationOutcomes = OUTCOME_CODE_ORDER.slice(5)
 
   return (
     <Box

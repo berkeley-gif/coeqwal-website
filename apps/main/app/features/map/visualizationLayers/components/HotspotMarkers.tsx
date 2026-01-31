@@ -12,13 +12,10 @@ import React, { useState, useEffect, useCallback } from "react"
 import { Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useTheme } from "@repo/ui/mui"
-import {
-  fetchTierLocationData,
-  type TierFeature,
-} from "../../../../lib/api/tierLocationApi"
+import { fetchTierLocationData, type TierFeature } from "@repo/data/coeqwal"
 import { getDemandUnitNameInfo } from "../../config/demandUnitNames"
 
-// Outcome configurations for hotspots
+// Outcome configurations for hotspots (keyed by outcome code)
 const HOTSPOT_CONFIGS: Record<
   string,
   {
@@ -27,12 +24,12 @@ const HOTSPOT_CONFIGS: Record<
     labelPrefix: string
   }
 > = {
-  "Community deliveries": {
+  CWS_DEL: {
     image: "/images/map_markers/drinking_water.png",
     imageAlt: "Community water system marker showing water system at risk",
     labelPrefix: "Water system at risk",
   },
-  "Salmon abundance": {
+  WRC_SALMON_AB: {
     image: "/images/map_markers/salmon.png",
     imageAlt: "Salmon habitat marker showing habitat at risk",
     labelPrefix: "Salmon habitat at risk",
@@ -40,8 +37,8 @@ const HOTSPOT_CONFIGS: Record<
 }
 
 interface HotspotMarkersProps {
-  /** The outcome to show hotspots for */
-  outcome: string | null
+  /** The outcome code to show hotspots for */
+  outcomeCode: string | null
   /** Scenario ID for API call */
   scenarioId?: string
   /** Whether markers are visible */
@@ -111,7 +108,7 @@ function getPolygonCenter(feature: TierFeature): [number, number] | null {
 }
 
 export function HotspotMarkers({
-  outcome,
+  outcomeCode,
   scenarioId = "s0020",
   visible = true,
 }: HotspotMarkersProps) {
@@ -134,19 +131,19 @@ export function HotspotMarkers({
     [mapAPI],
   )
 
-  // Get config for this outcome
-  const config = outcome ? HOTSPOT_CONFIGS[outcome] : null
+  // Get config for this outcome code
+  const config = outcomeCode ? HOTSPOT_CONFIGS[outcomeCode] : null
 
-  // Fetch tier 4 locations when outcome changes
+  // Fetch tier 4 locations when outcome code changes
   useEffect(() => {
-    if (!config || !outcome || !visible) {
+    if (!config || !outcomeCode || !visible) {
       setHotspots([])
       return
     }
 
     const loadHotspots = async () => {
       try {
-        const response = await fetchTierLocationData(scenarioId, outcome)
+        const response = await fetchTierLocationData(scenarioId, outcomeCode)
 
         // Filter for tier 4 features (Point, Polygon, or MultiPolygon)
         const tier4Features = response.features.filter(
@@ -358,7 +355,7 @@ export function HotspotMarkers({
     }
 
     loadHotspots()
-  }, [config, outcome, scenarioId, visible, mapAPI])
+  }, [config, outcomeCode, scenarioId, visible, mapAPI])
 
   // Don't render if no config or not visible
   if (!config || !visible || hotspots.length === 0) {

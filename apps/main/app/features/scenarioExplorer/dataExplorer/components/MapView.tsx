@@ -23,8 +23,8 @@ import {
 import {
   fetchTierLocationData,
   type TierLocationResponse,
-} from "../../../../lib/api/tierLocationApi"
-import { getDisplayNameFromMetricId } from "../../../../lib/constants/outcomeMappings"
+} from "@repo/data/coeqwal"
+import { getOutcomeCodeFromMetricId } from "../../../../content/outcomes"
 import TierMarkers from "../../../map/visualizationLayers/components/TierMarkers"
 import { TierLegend } from "../../../scenarios/components"
 import TemporalControls from "./TemporalControls"
@@ -115,20 +115,15 @@ function MapViewContent() {
         setIsLoadingMap(true)
         setMapError(null)
 
-        // Get UI display name, which will be converted to API name in tierLocationApi
-        const outcomeDisplayName = getDisplayNameFromMetricId(metric.id)
-
-        if (!outcomeDisplayName) {
-          console.warn(`No outcome mapping for metric: ${metric.id}`)
+        const tierCode = getOutcomeCodeFromMetricId(metric.id)
+        if (!tierCode || tierCode === metric.id) {
+          console.warn(`No tier code mapping for metric: ${metric.id}`)
           setTierLocationData(null)
           return
         }
 
-        // Use scenarioId directly (no need for strategy conversion)
-        const data = await fetchTierLocationData(
-          selectedScenario,
-          outcomeDisplayName,
-        )
+        // Fetch tier location data using the tier code
+        const data = await fetchTierLocationData(selectedScenario, tierCode)
 
         if (!cancelled) {
           setTierLocationData(data)
@@ -389,7 +384,10 @@ function MapViewContent() {
             >
               Outcome legend
             </Typography>
-            <TierLegend outcome={metric.name} onClose={() => {}} />
+            <TierLegend
+              outcomeCode={getOutcomeCodeFromMetricId(metric.id)}
+              onClose={() => {}}
+            />
           </Box>
         )}
 

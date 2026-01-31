@@ -19,7 +19,7 @@ import {
 
 interface ListViewProps {
   compact?: boolean
-  onTierClick?: (scenarioId: string, outcome: string) => void
+  onTierClick?: (scenarioId: string, outcomeCode: string) => void
 }
 
 export default function ListView({

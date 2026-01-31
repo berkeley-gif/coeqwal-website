@@ -38,7 +38,7 @@ import { MapFeatureTooltip } from "../../tooltips/MapFeatureTooltip"
 import {
   fetchTierLocationData,
   type TierLocationResponse,
-} from "../../../lib/api/tierLocationApi"
+} from "@repo/data/coeqwal"
 
 // Store
 import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
@@ -73,6 +73,7 @@ export default function VisualizationLayers() {
 
   // Get outcome visualization data
   const {
+    outcomeCode,
     outcome,
     scenarioId,
     config,
@@ -118,7 +119,7 @@ export default function VisualizationLayers() {
 
   // Fetch tier data for non-Mapbox outcomes
   useEffect(() => {
-    if (!outcome || !scenarioId || usesMapboxLayers) {
+    if (!config || !scenarioId || usesMapboxLayers) {
       setTierData(null)
       return
     }
@@ -128,16 +129,19 @@ export default function VisualizationLayers() {
       return
     }
 
+    const tierCode = config.tierCode
+
     let cancelled = false
 
     async function fetchData() {
       try {
         console.log("VisualizationLayers - Fetching tier data for:", {
           outcome,
+          tierCode,
           scenarioId,
           usesMapboxLayers,
         })
-        const data = await fetchTierLocationData(scenarioId, outcome!)
+        const data = await fetchTierLocationData(scenarioId, tierCode)
 
         if (!cancelled) {
           console.log(
@@ -249,8 +253,8 @@ export default function VisualizationLayers() {
       {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
       {tierData &&
         !usesMapboxLayers &&
-        outcome !== "Freshwater for Delta exports" &&
-        outcome !== "Freshwater for in-Delta uses" && (
+        outcomeCode !== "FW_EXP" &&
+        outcomeCode !== "FW_DELTA_USES" && (
           <TierMarkers
             data={tierData}
             onHover={handlePointHover}
@@ -262,17 +266,16 @@ export default function VisualizationLayers() {
       {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
-      {(outcome === "Freshwater for Delta exports" ||
-        outcome === "Freshwater for in-Delta uses") &&
+      {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
         tierData && <TierLocationLabels data={tierData} />}
 
       {/* Hotspot markers for tier 4 locations */}
       <HotspotMarkers
-        outcome={outcome}
+        outcomeCode={outcomeCode}
         scenarioId={scenarioId}
         visible={
-          !!outcome &&
-          (outcome === "Community deliveries" || outcome === "Salmon abundance")
+          !!outcomeCode &&
+          (outcomeCode === "CWS_DEL" || outcomeCode === "WRC_SALMON_AB")
         }
       />
 

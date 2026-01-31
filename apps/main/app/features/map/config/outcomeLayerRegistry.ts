@@ -147,14 +147,14 @@ export const RESERVOIR_CALSIM_TO_GNISIDLABEL: Record<string, string> = {
 // ============================================================================
 
 /**
- * Registry of all outcome layers
+ * Registry of all outcome layers, keyed by outcome code (e.g., "CWS_DEL")
  */
 export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // ═══════════════════════════════════════════════════════════════════════════
   // POLYGON LAYERS (Mapbox vector tiles with ID matching)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Community deliveries": {
+  CWS_DEL: {
     geometryType: "polygon",
     layerType: "demand-units",
     mapboxLayerId: "demand-units",
@@ -203,7 +203,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     idLabel: "CalSim ID",
   },
 
-  "Agricultural revenue": {
+  AG_REV: {
     geometryType: "polygon",
     layerType: "demand-units",
     mapboxLayerId: "demand-units",
@@ -245,7 +245,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     idLabel: "CalSim ID",
   },
 
-  "Groundwater storage": {
+  GW_STOR: {
     geometryType: "polygon",
     layerType: "wba",
     mapboxLayerId: "calsim-wba",
@@ -284,7 +284,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // RESERVOIR LAYER (polygon - represents reservoir footprints)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Reservoir storage": {
+  RES_STOR: {
     geometryType: "polygon",
     layerType: "reservoir",
     mapboxLayerId: "california-reservoir",
@@ -317,7 +317,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // SINGLE-FEATURE POLYGON LAYERS (no ID matching needed)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Delta estuary ecology": {
+  DELTA_ECO: {
     geometryType: "polygon",
     layerType: "delta",
     mapboxLayerId: "delta-water",
@@ -336,7 +336,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // LINE LAYERS (React-rendered, highlighting existing rivers)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Salmon abundance": {
+  WRC_SALMON_AB: {
     geometryType: "line",
     layerType: "river",
     mapboxLayerId: "sacramento-river-body", // Primary layer for interactions
@@ -353,7 +353,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   // REACT MARKER LAYERS (API-fetched points rendered as React components)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  "Environmental flows": {
+  ENV_FLOWS: {
     geometryType: "react-marker",
     layerType: "marker",
     mapboxLayerId: "", // No Mapbox layer - React rendered
@@ -371,7 +371,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     idLabel: "Station ID",
   },
 
-  "Freshwater for in-Delta uses": {
+  FW_DELTA_USES: {
     geometryType: "react-marker",
     layerType: "marker",
     mapboxLayerId: "", // No Mapbox layer - React rendered
@@ -390,7 +390,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     cameraPreset: JERSEY_POINT_VIEW,
   },
 
-  "Freshwater for Delta exports": {
+  FW_EXP: {
     geometryType: "react-marker",
     layerType: "marker",
     mapboxLayerId: "", // No Mapbox layer - React rendered
@@ -415,24 +415,26 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
 // ============================================================================
 
 /**
- * Get layer config by outcome name
+ * Get layer config by outcome code (e.g., "CWS_DEL")
  */
-export function getOutcomeConfig(outcome: string): OutcomeLayerConfig | null {
-  return OUTCOME_LAYER_REGISTRY[outcome] || null
+export function getOutcomeConfig(
+  outcomeCode: string,
+): OutcomeLayerConfig | null {
+  return OUTCOME_LAYER_REGISTRY[outcomeCode] || null
 }
 
 /**
  * Check if an outcome uses Mapbox layers (vs React markers)
  */
-export function outcomeUsesMapboxLayers(outcome: string): boolean {
-  const config = OUTCOME_LAYER_REGISTRY[outcome]
+export function outcomeUsesMapboxLayers(outcomeCode: string): boolean {
+  const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
   return config?.geometryType !== "react-marker"
 }
 
 /**
  * Check if an outcome uses polygon visualization
  */
-export function outcomeUsesPolygons(outcome: string): boolean {
-  const config = OUTCOME_LAYER_REGISTRY[outcome]
+export function outcomeUsesPolygons(outcomeCode: string): boolean {
+  const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
   return config?.geometryType === "polygon"
 }

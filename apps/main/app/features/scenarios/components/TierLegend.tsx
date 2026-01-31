@@ -10,9 +10,10 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import TierTooltipContent from "../../tooltips/TierTooltipContent"
+import { getOutcomeName } from "../../../content/outcomes"
 
 interface TierLegendProps {
-  outcome: string
+  outcomeCode: string
   onClose: () => void
 }
 
@@ -20,8 +21,9 @@ interface TierLegendProps {
  * TierLegend - Map overlay showing tier definitions
  * Reuses TierTooltipContent in a positioned map overlay
  */
-export default function TierLegend({ outcome, onClose }: TierLegendProps) {
+export default function TierLegend({ outcomeCode, onClose }: TierLegendProps) {
   const theme = useTheme()
+  const displayName = getOutcomeName(outcomeCode)
 
   return (
     <Box
@@ -47,7 +49,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
           mb: theme.space.component.lg,
         }}
       >
-        <Typography variant="subtitle1">{outcome}</Typography>
+        <Typography variant="subtitle1">{displayName}</Typography>
         <Box
           component="button"
           onClick={onClose}
@@ -69,7 +71,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         </Box>
       </Box>
 
-      <TierTooltipContent outcome={outcome} showTitle={false} />
+      <TierTooltipContent outcomeCode={outcomeCode} showTitle={false} />
     </Box>
   )
 }

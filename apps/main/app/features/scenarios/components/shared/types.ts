@@ -15,7 +15,6 @@ export interface ChartDataPoint {
 
 export interface OutcomeName {
   shortCode: string
-  name: string
   displayName: string
 }
 

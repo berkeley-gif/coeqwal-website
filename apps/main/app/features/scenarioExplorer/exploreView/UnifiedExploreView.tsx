@@ -57,16 +57,17 @@ export default function UnifiedExploreView({
     }
   }, [mode])
 
-  const handleTierClick = (strategy: string, outcome: string) => {
+  const handleTierClick = (scenarioId: string, outcomeCode: string) => {
     mapActions.clearMapTooltips() // Clear any pinned map tooltips
+
     const isSameSelection =
-      currentVisualization?.scenarioId === strategy &&
-      currentVisualization?.outcome === outcome
+      currentVisualization?.scenarioId === scenarioId &&
+      currentVisualization?.outcomeCode === outcomeCode
 
     if (isSameSelection) {
       mapActions.clearOutcomeVisualization()
     } else {
-      mapActions.setOutcomeVisualization(outcome, strategy)
+      mapActions.setOutcomeVisualization(outcomeCode, scenarioId)
     }
   }
 

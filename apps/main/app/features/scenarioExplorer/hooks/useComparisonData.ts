@@ -2,7 +2,8 @@ import { useMemo } from "react"
 import {
   useMultipleScenarioTiers,
   useScenarioList,
-  OUTCOME_DISPLAY_ORDER,
+  OUTCOME_CODE_ORDER,
+  getOutcomeName,
 } from "../../scenarios/hooks"
 import {
   createCategoricalColorScale,
@@ -44,13 +45,15 @@ export function useComparisonData() {
       .map(({ id: scenarioId, name }) => {
         const scenarioScores = allScoreData[scenarioId] || {}
 
+        // Use display names as keys for the parallel plot axes
         const values: Record<string, number> = {}
-        OUTCOME_DISPLAY_ORDER.forEach((outcome) => {
-          const outcomeScore = scenarioScores[outcome]
+        OUTCOME_CODE_ORDER.forEach((code) => {
+          const outcomeScore = scenarioScores[code]
+          const displayName = getOutcomeName(code)
           if (outcomeScore?.normalized_score !== undefined) {
-            values[outcome] = outcomeScore.normalized_score * 2 - 1
+            values[displayName] = outcomeScore.normalized_score * 2 - 1
           } else {
-            values[outcome] = 0
+            values[displayName] = 0
           }
         })
 
@@ -66,8 +69,9 @@ export function useComparisonData() {
       })
   }, [allScoreData, scenarios])
 
+  // Axes use display names for user-facing labels
   const axes = useMemo(() => {
-    return [...OUTCOME_DISPLAY_ORDER]
+    return OUTCOME_CODE_ORDER.map(getOutcomeName)
   }, [])
 
   const lineColors = useMemo(() => {

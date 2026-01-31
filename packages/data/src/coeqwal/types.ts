@@ -108,3 +108,59 @@ export interface ScenarioListItem {
  * Mapping from tier short_code to display name
  */
 export type TierMapping = Record<string, string>
+
+// ============================================================================
+// Tier Location Types (for map visualization)
+// ============================================================================
+
+/**
+ * A single feature in the tier location GeoJSON response
+ */
+export interface TierFeature {
+  type: "Feature"
+  geometry: {
+    type: "Point" | "Polygon" | "MultiPolygon"
+    coordinates: number[] | number[][][] | number[][][][]
+  }
+  properties: {
+    /** Location identifier (e.g., demand unit ID) */
+    location_id: string
+    /** Human-readable location name */
+    location_name: string
+    /** Type of location (e.g., "demand_unit", "river_reach") */
+    location_type: string
+    /** Display-friendly location type */
+    location_type_display: string
+    /** Tier level (1-4, where 1 is best, 4 is worst) */
+    tier_level: number
+    /** Raw tier value */
+    tier_value: number
+    /** Order for display purposes */
+    display_order: number
+    /** CSS class for tier color styling */
+    tier_color_class: string
+  }
+}
+
+/**
+ * Response from /api/tier-map/:scenarioId/:tierCode endpoint
+ * Returns GeoJSON FeatureCollection of tier locations
+ */
+export interface TierLocationResponse {
+  type: "FeatureCollection"
+  features: TierFeature[]
+  metadata: {
+    /** Scenario ID */
+    scenario: string
+    /** Tier short code (e.g., "AG_REV") */
+    tier_code: string
+    /** Tier display name */
+    tier_name: string
+    /** Whether tier has single or multiple values */
+    tier_type: "multi_value" | "single_value"
+    /** Number of features in response */
+    feature_count: number
+    /** Types of locations included */
+    location_types: string[]
+  }
+}

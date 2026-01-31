@@ -32,8 +32,8 @@ import {
   getTierColorsFromTheme,
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
-import { fetchTierLocationData } from "../../../../lib/api/tierLocationApi"
-import { DISPLAY_NAME_TO_API_SHORT_CODE } from "../../../../lib/constants/outcomeMappings"
+import { fetchTierLocationData } from "@repo/data/coeqwal"
+import { getOutcomeName } from "../../../../content/outcomes"
 import { useActiveOutcomeVisualization } from "../../store"
 import { useMap } from "@repo/map"
 
@@ -54,21 +54,29 @@ const flexWrapStyles: SxProps<Theme> = {
 
 interface SummaryPanelProps {
   scenarioId?: string
-  /** Optional outcome override - if not provided, reads from store (Learn mode) */
-  outcome?: string | null
+  /** Optional outcome code override - if not provided, reads from store (Learn mode) */
+  outcomeCode?: string | null
   /** Variant: 'overlay' for map overlay (narrow), 'inline' for strategy grid (full width) */
   variant?: "overlay" | "inline"
 }
 
 export function SummaryPanel({
   scenarioId = "s0020",
-  outcome: outcomeProp,
+  outcomeCode: outcomeCodeProp,
   variant = "overlay",
 }: SummaryPanelProps) {
   const theme = useTheme()
   const mapAPI = useMap()
   const activeVisualization = useActiveOutcomeVisualization()
-  const selectedOutcome = outcomeProp ?? activeVisualization?.outcome ?? null
+
+  // Get outcome code - prefer prop, fall back to store
+  const selectedOutcomeCode =
+    outcomeCodeProp ?? activeVisualization?.outcomeCode ?? null
+
+  // Display name for UI
+  const selectedOutcome = selectedOutcomeCode
+    ? getOutcomeName(selectedOutcomeCode)
+    : null
 
   // Get tier colors from theme
   const tierColors = getTierColorsFromTheme(theme)
@@ -88,13 +96,14 @@ export function SummaryPanel({
 
   // Fetch tier data and generate summary when outcome changes
   useEffect(() => {
-    if (!selectedOutcome) {
+    if (!selectedOutcomeCode) {
       setOutcomeSummary(null)
       return
     }
 
-    // Capture non-null value for use in async function
-    const outcome = selectedOutcome
+    // Capture non-null values for use in async function
+    const outcome = selectedOutcome!
+    const tierCode = selectedOutcomeCode
 
     let cancelled = false
 
@@ -102,11 +111,7 @@ export function SummaryPanel({
       setIsLoading(true)
 
       try {
-        if (!scenarioId) return
-
-        // Get tier code from outcome using the mapping
-        const tierCode = DISPLAY_NAME_TO_API_SHORT_CODE[outcome]
-        if (!tierCode) return
+        if (!scenarioId || !tierCode) return
 
         const tierData = await fetchTierLocations(scenarioId, tierCode)
 
@@ -115,7 +120,7 @@ export function SummaryPanel({
         // Also fetch GeoJSON data for reliable coordinates and API names
         const apiNamesMap = new Map<string, string>()
         try {
-          const geoJsonData = await fetchTierLocationData(scenarioId, outcome)
+          const geoJsonData = await fetchTierLocationData(scenarioId, tierCode)
           if (!cancelled) {
             const coordsMap = new Map<string, [number, number]>()
 
@@ -266,7 +271,7 @@ export function SummaryPanel({
     return () => {
       cancelled = true
     }
-  }, [selectedOutcome, scenarioId, mapAPI])
+  }, [selectedOutcomeCode, selectedOutcome, scenarioId, mapAPI])
 
   // Handle clicking on a location to zoom to it
   const handleLocationClick = useCallback(

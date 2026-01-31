@@ -59,11 +59,11 @@ export interface StrategyGridRowProps {
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
   /** Called when a tier glyph is clicked (for map visualization) */
-  onTierClick?: (scenarioId: string, outcome: string) => void
+  onTierClick?: (scenarioId: string, outcomeCode: string) => void
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 }
 
 /**
@@ -104,11 +104,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
    * Handles all the display logic for labels, controls, and interaction.
    * Clicking the glyph triggers the contextual tooltip with scenario data.
    */
-  const renderOutcomeItem = (displayName: string, name: string) => {
-    const chartData = scenarioChartData[displayName]
+  const renderOutcomeItem = (shortCode: string, displayName: string) => {
+    const chartData = scenarioChartData[shortCode]
     const isActive = chartData !== undefined && chartData.length > 0
     const isSelected = selectedOutcome === displayName
-    const isSorted = sortBy === displayName
+    const isSorted = sortBy === shortCode
 
     // In aligned grid mode, labels and controls are in the header row
     // In all other modes (compact, map view, xs-md responsive), show below glyph
@@ -117,18 +117,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
     return (
       <Box
-        key={displayName}
+        key={shortCode}
         ref={(el: HTMLDivElement | null) => {
-          glyphRefs.current[displayName] = el
+          glyphRefs.current[shortCode] = el
         }}
       >
         <OutcomeGlyphItem
           displayName={displayName}
-          name={name}
+          name={displayName}
           chartData={chartData}
           isActive={isActive}
           isSelected={isSelected}
-          isTooltipActive={activeTooltip === displayName}
+          isTooltipActive={activeTooltip === shortCode}
           size={glyphSize}
           showLabel={showLabelBelowGlyph}
           showInfoButton={showControlsBelowGlyph}
@@ -136,21 +136,21 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           sortState={isSorted ? sortDirection : null}
           // Click glyph to open contextual tooltip AND trigger map visualization
           onGlyphClick={() => {
-            const anchor = glyphRefs.current[displayName]
+            const anchor = glyphRefs.current[shortCode]
             if (anchor) {
-              onTooltipToggle(displayName, anchor)
+              onTooltipToggle(shortCode, anchor)
             }
-            // Also trigger map visualization if handler provided
-            onTierClick?.(scenario.scenarioId, displayName)
+            // Also trigger map visualization if handler provided (pass outcomeCode)
+            onTierClick?.(scenario.scenarioId, shortCode)
           }}
           onInfoClick={(e) => {
-            onTooltipToggle(displayName, e.currentTarget)
+            onTooltipToggle(shortCode, e.currentTarget)
           }}
           onSortToggle={(newState) => {
             if (newState === null) {
               onSortChange?.(null, "asc")
             } else {
-              onSortChange?.(displayName, newState)
+              onSortChange?.(shortCode, newState)
             }
           }}
         />
@@ -332,8 +332,8 @@ function CompactRowContent({
           >
             {outcomeNames
               .slice(0, 5)
-              .map(({ name, displayName }) =>
-                renderOutcomeItem(displayName, name),
+              .map(({ shortCode, displayName }) =>
+                renderOutcomeItem(shortCode, displayName),
               )}
           </Box>
           {/* Remaining outcomes */}
@@ -349,8 +349,8 @@ function CompactRowContent({
           >
             {outcomeNames
               .slice(5)
-              .map(({ name, displayName }) =>
-                renderOutcomeItem(displayName, name),
+              .map(({ shortCode, displayName }) =>
+                renderOutcomeItem(shortCode, displayName),
               )}
           </Box>
         </Box>
@@ -514,8 +514,8 @@ function NonCompactRowContent({
             width: "100%",
           }}
         >
-          {outcomeNames.map(({ name, displayName }) =>
-            renderOutcomeItem(displayName, name),
+          {outcomeNames.map(({ shortCode, displayName }) =>
+            renderOutcomeItem(shortCode, displayName),
           )}
         </Box>
       </Box>

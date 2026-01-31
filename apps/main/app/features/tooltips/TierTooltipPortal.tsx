@@ -26,8 +26,8 @@ import type { OutcomeScoreData } from "../scenarios/hooks"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
 
 interface TierTooltipPortalProps {
-  /** The outcome name to show tooltip for (null = hidden) */
-  outcome: string | null
+  /** The outcome code to show tooltip for (null = hidden) */
+  outcomeCode: string | null
   /** Anchor element for positioning (replaces manual position calculation) */
   anchorEl: HTMLElement | null
   /** Called when user clicks away */
@@ -147,7 +147,7 @@ function TooltipArrow({
  * Desktop tooltip using Popper with dynamic arrow positioning
  */
 function DesktopTooltip({
-  outcome,
+  outcomeCode,
   anchorEl,
   onClose,
   onForceClose,
@@ -158,7 +158,7 @@ function DesktopTooltip({
   const theme = useTheme()
   // Use state setter as callback ref - this updates synchronously when element mounts
   const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null)
-  const isOpen = Boolean(outcome && anchorEl)
+  const isOpen = Boolean(outcomeCode && anchorEl)
 
   // Memoize modifiers so they update when arrowElement changes
   const popperModifiers: PopperProps["modifiers"] = useMemo(
@@ -232,7 +232,7 @@ function DesktopTooltip({
             <TooltipArrow placement={placement} setRef={setArrowElement} />
 
             <TierTooltipContent
-              outcome={outcome!}
+              outcomeCode={outcomeCode!}
               showTitle={true}
               scenarioScore={scenarioScore}
               scenarioLabel={scenarioLabel}
@@ -254,7 +254,7 @@ function DesktopTooltip({
  * TooltipCloseButton provides WCAG 2.5.5 compliant 44x44px touch targets
  */
 function TierTooltipMobileView({
-  outcome,
+  outcomeCode,
   anchorEl,
   onClose,
   onForceClose,
@@ -263,7 +263,7 @@ function TierTooltipMobileView({
   chartData,
 }: TierTooltipPortalProps) {
   const theme = useTheme()
-  const isOpen = Boolean(outcome && anchorEl)
+  const isOpen = Boolean(outcomeCode && anchorEl)
 
   return (
     <MobileModal
@@ -285,7 +285,7 @@ function TierTooltipMobileView({
         />
 
         <TierTooltipContent
-          outcome={outcome!}
+          outcomeCode={outcomeCode!}
           showTitle={true}
           scenarioScore={scenarioScore}
           scenarioLabel={scenarioLabel}
@@ -304,7 +304,7 @@ export function TierTooltipPortal(props: TierTooltipPortalProps) {
   const { onForceClose } = props
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const isOpen = Boolean(props.outcome && props.anchorEl)
+  const isOpen = Boolean(props.outcomeCode && props.anchorEl)
 
   // WCAG 2.1.1: Close tooltip on Escape key (desktop only - MobileModal handles its own)
   useEffect(() => {

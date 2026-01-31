@@ -17,11 +17,16 @@ import {
   useOutcomeDefinitions,
   type OutcomeScoreData,
 } from "../scenarios/hooks"
-import { outcomeTierValues } from "../../content/outcomes"
+import {
+  OUTCOME_TIER_VALUES,
+  getOutcomeName,
+  type OutcomeCode,
+} from "../../content/outcomes"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
 
 interface TierTooltipContentProps {
-  outcome: string
+  /** Outcome code (e.g., "CWS_DEL") */
+  outcomeCode: string
   showTitle?: boolean
   /** Optional: Current scenario's score data for this outcome */
   scenarioScore?: OutcomeScoreData | null
@@ -137,7 +142,7 @@ const formatDistribution = (chartData: TooltipChartDataPoint[]): string[] => {
  * Shared tooltip/legend content for tier information
  */
 export default function TierTooltipContent({
-  outcome,
+  outcomeCode,
   showTitle = true,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   scenarioScore, // Reserved for future equity/gini display
@@ -146,6 +151,9 @@ export default function TierTooltipContent({
 }: TierTooltipContentProps) {
   const theme = useTheme()
   const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
+
+  // Derive display name from code
+  const displayName = getOutcomeName(outcomeCode)
 
   // Determine tier type and current tier from chart data (more accurate than score)
   const { tierType, currentTier } = getTierFromChartData(chartData)
@@ -166,13 +174,13 @@ export default function TierTooltipContent({
           variant="tooltipHeader"
           sx={{ mb: theme.space.component.sm }}
         >
-          {outcome}
+          {displayName}
         </Typography>
       )}
 
       <Typography variant="dashboard" sx={{ mb: theme.space.component.md }}>
         {formatDescription(
-          (outcomeDefinitions as Record<string, string>)[outcome] ||
+          (outcomeDefinitions as Record<string, string>)[displayName] ||
             "Definition not available",
           theme.typography.fontWeightMedium as number,
         )}
@@ -190,7 +198,7 @@ export default function TierTooltipContent({
             borderLeft: `4px solid ${theme.palette.tiers[`tier${currentTier}` as keyof typeof theme.palette.tiers]}`,
           }}
           role="region"
-          aria-label={`Current scenario performance for ${outcome}`}
+          aria-label={`Current scenario performance for ${displayName}`}
         >
           <Typography
             variant="dashboard"
@@ -239,7 +247,7 @@ export default function TierTooltipContent({
               borderLeft: `4px solid ${theme.palette.blue.bright}`,
             }}
             role="region"
-            aria-label={`Current scenario performance distribution for ${outcome}`}
+            aria-label={`Current scenario performance distribution for ${displayName}`}
           >
             <Typography
               variant="dashboard"
@@ -346,17 +354,7 @@ export default function TierTooltipContent({
               />
               <Typography variant="dashboard" component="span">
                 {formatTierText(
-                  (
-                    outcomeTierValues as Record<
-                      string,
-                      {
-                        tier1: string
-                        tier2: string
-                        tier3: string
-                        tier4: string
-                      }
-                    >
-                  )[outcome]?.[
+                  OUTCOME_TIER_VALUES[outcomeCode as OutcomeCode]?.[
                     `tier${tierNum}` as "tier1" | "tier2" | "tier3" | "tier4"
                   ] ||
                     ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||

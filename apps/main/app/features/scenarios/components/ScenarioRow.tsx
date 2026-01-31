@@ -43,10 +43,10 @@ export interface ScenarioRowProps {
     description: string
     theme?: ScenarioTheme
   }
-  /** Chart data for outcomes (keyed by display name) */
+  /** Chart data for outcomes (keyed by outcome code, e.g., "CWS_DEL") */
   chartData: Record<string, ChartDataPoint[]>
-  /** Outcome names in display order */
-  outcomeNames: Array<{ name: string; displayName: string }>
+  /** Outcome info in display order */
+  outcomeNames: Array<{ shortCode: string; displayName: string }>
   /** Whether this row is selected (checkbox checked) */
   isSelected?: boolean
   /** Whether this row is highlighted (search match) */
@@ -110,9 +110,9 @@ export function ScenarioRow({
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
   const glyphSize = isMdUp ? 60 : 50
 
-  // Helper to check if outcome has valid data
-  const hasData = (outcome: string): boolean => {
-    const tierData = chartData[outcome]
+  // Helper to check if outcome has valid data (by code)
+  const hasData = (code: string): boolean => {
+    const tierData = chartData[code]
     return (
       tierData !== undefined &&
       tierData.length > 0 &&
@@ -121,20 +121,20 @@ export function ScenarioRow({
   }
 
   // Render single outcome item
-  const renderOutcomeItem = (displayName: string, name: string) => {
-    const isActive = hasData(displayName)
+  const renderOutcomeItem = (shortCode: string, displayName: string) => {
+    const isActive = hasData(shortCode)
     const isOutcomeSelected = expandedOutcome === displayName
     const isSorted = sortBy === displayName
 
     return (
       <OutcomeGlyphItem
-        key={displayName}
+        key={shortCode}
         displayName={displayName}
-        name={name}
-        chartData={chartData[displayName]}
+        name={displayName}
+        chartData={chartData[shortCode]}
         isActive={isActive}
         isSelected={isOutcomeSelected}
-        isTooltipActive={activeTooltip === name}
+        isTooltipActive={activeTooltip === displayName}
         size={glyphSize}
         showLabel={true}
         showInfoButton={true}
@@ -145,7 +145,7 @@ export function ScenarioRow({
             onOutcomeClick(displayName)
           }
         }}
-        onInfoClick={(e) => onOutcomeInfoClick?.(name, e)}
+        onInfoClick={(e) => onOutcomeInfoClick?.(displayName, e)}
         onSortToggle={(newState) => {
           if (newState === null) {
             onSortChange?.(null, "asc")
@@ -284,8 +284,8 @@ export function ScenarioRow({
                 >
                   {outcomeNames
                     .slice(0, 5)
-                    .map(({ name, displayName }) =>
-                      renderOutcomeItem(displayName, name),
+                    .map(({ shortCode, displayName }) =>
+                      renderOutcomeItem(shortCode, displayName),
                     )}
                 </Box>
                 {/* Remaining outcomes (single-location) */}
@@ -301,8 +301,8 @@ export function ScenarioRow({
                 >
                   {outcomeNames
                     .slice(5)
-                    .map(({ name, displayName }) =>
-                      renderOutcomeItem(displayName, name),
+                    .map(({ shortCode, displayName }) =>
+                      renderOutcomeItem(shortCode, displayName),
                     )}
                 </Box>
               </Box>
@@ -341,8 +341,8 @@ export function ScenarioRow({
                 maxWidth: "100%",
               }}
             >
-              {outcomeNames.map(({ name, displayName }) =>
-                renderOutcomeItem(displayName, name),
+              {outcomeNames.map(({ shortCode, displayName }) =>
+                renderOutcomeItem(shortCode, displayName),
               )}
             </Box>
           </>

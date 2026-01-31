@@ -52,7 +52,7 @@ export interface StrategyGridHeaderProps {
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 }
 
 /**
@@ -281,7 +281,7 @@ interface OutcomeCategoryLabelsProps {
   sortDirection: "asc" | "desc"
   sortEnabled: boolean
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 }
 
 function OutcomeCategoryLabels({
@@ -313,12 +313,12 @@ function OutcomeCategoryLabels({
         alignSelf: "stretch",
       }}
     >
-      {outcomeNames.map(({ displayName }) => {
-        const isSorted = sortBy === displayName
+      {outcomeNames.map(({ shortCode, displayName }) => {
+        const isSorted = sortBy === shortCode
 
         return (
           <Box
-            key={displayName}
+            key={shortCode}
             sx={{
               display: "flex",
               flexDirection: "column",
@@ -349,8 +349,8 @@ function OutcomeCategoryLabels({
               }}
             >
               <InfoIconButton
-                isActive={activeTooltip === displayName}
-                onClick={(e) => onTooltipToggle(displayName, e.currentTarget)}
+                isActive={activeTooltip === shortCode}
+                onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
                 title="Click for outcome details"
               />
 
@@ -361,7 +361,7 @@ function OutcomeCategoryLabels({
                     if (newState === null) {
                       onSortChange(null, "asc")
                     } else {
-                      onSortChange(displayName, newState)
+                      onSortChange(shortCode, newState)
                     }
                   }}
                   title="Sort by this outcome"

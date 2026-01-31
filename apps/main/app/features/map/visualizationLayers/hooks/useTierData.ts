@@ -11,7 +11,7 @@
  *
  * Usage:
  * ```tsx
- * const { tierColorMap, isLoading, error } = useTierData("Reservoir storage", "s0020")
+ * const { tierColorMap, isLoading, error } = useTierData("RES_STOR", "s0020")
  *
  * <OutcomePolygonLayer tierColorMap={tierColorMap} ... />
  * ```
@@ -30,6 +30,7 @@ import {
 } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
+import { getOutcomeName } from "../../../../content/outcomes"
 import { API_BASE } from "../../../../lib/constants/api"
 import type {
   TierColorMap,
@@ -84,10 +85,9 @@ async function fetchTierLocations(
  */
 function convertScenarioTierToLocations(
   scenarioData: ScenarioTiersResponse,
-  tierCode: string,
-  outcomeName: string,
+  outcomeCode: string,
 ): TierLocationsResponse | null {
-  const tierInfo = scenarioData.tiers[tierCode]
+  const tierInfo = scenarioData.tiers[outcomeCode]
 
   if (
     !tierInfo ||
@@ -98,8 +98,8 @@ function convertScenarioTierToLocations(
   }
 
   const location: TierLocation = {
-    location_id: tierCode,
-    location_name: outcomeName,
+    location_id: outcomeCode,
+    location_name: getOutcomeName(outcomeCode),
     location_type: "single_value",
     tier_level: tierInfo.level,
     tier_value: null,
@@ -108,7 +108,7 @@ function convertScenarioTierToLocations(
 
   return {
     scenario: scenarioData.scenario,
-    tier_code: tierCode,
+    tier_code: outcomeCode,
     tier_name: tierInfo.name,
     tier_type: "single_value",
     locations: [location],
@@ -154,12 +154,12 @@ export interface UseTierDataResult {
  * For multi-value outcomes, uses the /tier-map/ endpoint which provides
  * location-specific tier data.
  *
- * @param outcome - Outcome name (e.g., "Reservoir storage")
+ * @param outcomeCode - Outcome code (e.g., "RES_STOR")
  * @param scenarioId - Scenario ID (e.g., "s0020")
  * @returns Tier data with pre-computed colors ready for visualization
  */
 export function useTierData(
-  outcome: string | null,
+  outcomeCode: string | null,
   scenarioId: string,
 ): UseTierDataResult {
   const theme = useTheme()
@@ -172,8 +172,8 @@ export function useTierData(
 
   // Get config for this outcome
   const config = useMemo(
-    () => (outcome ? getOutcomeConfig(outcome) : null),
-    [outcome],
+    () => (outcomeCode ? getOutcomeConfig(outcomeCode) : null),
+    [outcomeCode],
   )
 
   // Determine if this is a single-value outcome (uses shared SWR cache)
@@ -195,21 +195,17 @@ export function useTierData(
 
   // Convert SWR data to TierLocationsResponse format for single-value outcomes
   const singleValueResponse = useMemo(() => {
-    if (!isSingleValue || !scenarioTiersData || !config || !outcome) {
+    if (!isSingleValue || !scenarioTiersData || !config || !outcomeCode) {
       return null
     }
-    return convertScenarioTierToLocations(
-      scenarioTiersData,
-      config.tierCode,
-      outcome,
-    )
-  }, [isSingleValue, scenarioTiersData, config, outcome])
+    return convertScenarioTierToLocations(scenarioTiersData, outcomeCode)
+  }, [isSingleValue, scenarioTiersData, config, outcomeCode])
 
   // ============================================================================
   // Manual fetch for multi-value outcomes (uses /tier-map/ endpoint)
   // ============================================================================
   // Track previous values to detect changes and clear stale data synchronously
-  const prevOutcomeRef = useRef<string | null>(null)
+  const prevOutcomeCodeRef = useRef<string | null>(null)
   const prevScenarioIdRef = useRef<string>(scenarioId)
 
   // Store computed data in refs for stable access
@@ -220,13 +216,13 @@ export function useTierData(
   // CRITICAL: Clear refs synchronously when outcome or scenarioId changes
   // This prevents stale colors from flashing before new data loads
   if (
-    outcome !== prevOutcomeRef.current ||
+    outcomeCode !== prevOutcomeCodeRef.current ||
     scenarioId !== prevScenarioIdRef.current
   ) {
     tierLevelMapRef.current = {}
     locationDataRef.current = {}
     featureIdsRef.current = []
-    prevOutcomeRef.current = outcome
+    prevOutcomeCodeRef.current = outcomeCode
     prevScenarioIdRef.current = scenarioId
   }
 
@@ -240,7 +236,7 @@ export function useTierData(
   // Fetch multi-value data
   useEffect(() => {
     // Skip if no outcome, no config, or this is a single-value outcome (handled by SWR)
-    if (!outcome || !config || isSingleValue) {
+    if (!outcomeCode || !config || isSingleValue) {
       if (!isSingleValue) {
         reset()
         setMultiValueResponse(null)
@@ -303,7 +299,7 @@ export function useTierData(
     return () => {
       cancelled = true
     }
-  }, [outcome, scenarioId, config, isSingleValue, reset])
+  }, [outcomeCode, scenarioId, config, isSingleValue, reset])
 
   // ============================================================================
   // Unified output

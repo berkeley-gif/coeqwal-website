@@ -25,4 +25,12 @@ export const ENDPOINTS = {
    * @param scenarioId - Scenario ID (e.g., "s0020")
    */
   scenarioTiers: (scenarioId: string) => `/tiers/scenarios/${scenarioId}/tiers`,
+
+  /**
+   * Tier location data for map visualization
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param tierCode - Tier short code (e.g., "AG_REV")
+   */
+  tierLocations: (scenarioId: string, tierCode: string) =>
+    `/tier-map/${scenarioId}/${tierCode}`,
 } as const

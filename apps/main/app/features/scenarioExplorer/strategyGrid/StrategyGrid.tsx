@@ -114,7 +114,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
       {/* Active outcome tooltip - uses MUI Popper for viewport-aware positioning */}
       {/* WCAG 4.1.2: Pass scenario score data and chart data for accessible text representation */}
       <TierTooltipPortal
-        outcome={activeTooltip}
+        outcomeCode={activeTooltip}
         anchorEl={tooltipAnchor}
         onClose={closeTooltip}
         onForceClose={forceCloseTooltip}

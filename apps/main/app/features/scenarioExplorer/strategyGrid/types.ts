@@ -24,7 +24,7 @@ export interface StrategyGridProps {
 
   // Events
   onOutcomeSelect: (scenarioId: string, outcome: string) => void
-  onTierClick?: (scenarioId: string, outcome: string) => void
+  onTierClick?: (scenarioId: string, outcomeCode: string) => void
   onToggleScenario: (scenarioId: string) => void
 
   // State (fully controlled)
@@ -41,5 +41,5 @@ export interface StrategyGridProps {
   // Sorting (optional)
   sortBy?: string | null
   sortDirection?: "asc" | "desc"
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 }
