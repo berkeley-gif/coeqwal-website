@@ -20,7 +20,8 @@ export type MapMode = "hidden" | "learn" | "explore"
 
 /** Outcome visualization state used by both Learn and Explore modes */
 export interface OutcomeVisualization {
-  outcome: string
+  /** Outcome short code (e.g., "CWS_DEL", "AG_REV") */
+  outcomeCode: string
   scenarioId: string
 }
 
@@ -116,9 +117,11 @@ export const mapActions = {
     }),
 
   // Visualization
-  setOutcomeVisualization: (outcome: string | null, scenarioId = "s0020") =>
+  setOutcomeVisualization: (outcomeCode: string | null, scenarioId = "s0020") =>
     useMapStore.setState({
-      activeOutcomeVisualization: outcome ? { outcome, scenarioId } : null,
+      activeOutcomeVisualization: outcomeCode
+        ? { outcomeCode, scenarioId }
+        : null,
     }),
 
   clearOutcomeVisualization: () =>

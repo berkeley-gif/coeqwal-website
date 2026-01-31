@@ -64,7 +64,7 @@ export interface StrategyGridContentProps {
   /** Toggle scenario selection */
   onToggleScenario: (scenarioId: string) => void
   /** Called when a tier glyph is clicked (for map visualization) */
-  onTierClick?: (scenarioId: string, outcome: string) => void
+  onTierClick?: (scenarioId: string, outcomeCode: string) => void
   /** Toggle tooltip (basic - no scenario context) */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Toggle tooltip with scenario context (for accessibility) */
@@ -74,7 +74,7 @@ export interface StrategyGridContentProps {
     context: TooltipScenarioContext,
   ) => void
   /** Sort change handler */
-  onSortChange?: (outcome: string | null, direction: "asc" | "desc") => void
+  onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
 }
 
 /**

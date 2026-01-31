@@ -28,6 +28,7 @@ import { useMap } from "@repo/map"
 import { useMapMode, useActiveOutcomeVisualization } from "../../store"
 import { useTierData, type UseTierDataResult } from "./useTierData"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
+import { getOutcomeName } from "../../../../content/outcomes"
 import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 
 // ============================================================================
@@ -35,7 +36,9 @@ import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 // ============================================================================
 
 export interface UseOutcomeVisualizationResult extends UseTierDataResult {
-  /** Currently selected outcome name */
+  /** Currently selected outcome code (canonical identifier) */
+  outcomeCode: string | null
+  /** Currently selected outcome display name */
   outcome: string | null
   /** Currently selected scenario ID */
   scenarioId: string
@@ -70,14 +73,17 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   const mapMode = useMapMode()
   const activeVisualization = useActiveOutcomeVisualization()
 
-  // Extract outcome and scenarioId from store
-  const outcome = activeVisualization?.outcome ?? null
+  // Extract outcomeCode and scenarioId from store
+  const outcomeCode = activeVisualization?.outcomeCode ?? null
   const scenarioId = activeVisualization?.scenarioId ?? "s0020"
 
-  // Get configuration from registry
+  // Derive display name from code (for UI display purposes)
+  const outcome = outcomeCode ? getOutcomeName(outcomeCode) : null
+
+  // Get configuration from registry by code
   const config = useMemo(
-    () => (outcome ? getOutcomeConfig(outcome) : null),
-    [outcome],
+    () => (outcomeCode ? getOutcomeConfig(outcomeCode) : null),
+    [outcomeCode],
   )
 
   // Derived values from config
@@ -93,8 +99,8 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   const isActive =
     !!outcome && !!config && (mapMode === "learn" || mapMode === "explore")
 
-  // Fetch tier data
-  const tierDataResult = useTierData(isActive ? outcome : null, scenarioId)
+  // Fetch tier data (using outcomeCode)
+  const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)
 
   // Camera control - zoom to outcome when active
   useEffect(() => {
@@ -156,6 +162,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   ])
 
   return {
+    outcomeCode,
     outcome,
     scenarioId,
     config,

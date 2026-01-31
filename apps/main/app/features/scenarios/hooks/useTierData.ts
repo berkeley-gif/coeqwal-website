@@ -1,12 +1,7 @@
 import { useMemo, useEffect } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR, { useSWRConfig } from "swr"
-import {
-  useTiers,
-  useTierMapping,
-  useScenarios,
-  mapShortCodeToDisplayName,
-} from "@repo/data/coeqwal/hooks"
+import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
 import { fetchAllScenarioTiers, fetchScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import type { ScenarioTiersResponse, TierScores } from "@repo/data/coeqwal"
@@ -14,46 +9,42 @@ import {
   convertMultiValueToChartData,
   convertSingleValueToChartData,
 } from "../../../lib/api/tierApi"
-import { applyUIDisplayOverride } from "../../../lib/constants/outcomeMappings"
 import { getThemeColorsForApi, type TierColors } from "../../../content/tiers"
 import {
-  OUTCOME_DISPLAY_ORDER,
+  OUTCOME_CODE_ORDER,
   OUTCOME_DEFINITIONS,
+  getOutcomeName,
 } from "../../../content/outcomes"
 import type { ChartDataPoint } from "../components/shared/types"
 
-// Re-export for backwards compatibility
-export { OUTCOME_DISPLAY_ORDER }
-
 interface OutcomeInfo {
   shortCode: string
-  name: string
   displayName: string
 }
 
 /**
  * Score data for an outcome, used for sorting and visualization
+ * Keyed by short code (e.g., "CWS_DEL")
  */
 export interface OutcomeScoreData extends TierScores {
-  displayName: string
   shortCode: string
   type: "single_value" | "multi_value"
 }
 
+/**
+ * Process scenario tier data into chart format.
+ * Data is keyed by short code (e.g., "CWS_DEL").
+ */
 const processScenarioData = (
   scenarioData: ScenarioTiersResponse,
-  tierMapping: Record<string, string>,
   themeColors: TierColors,
 ): Record<string, Array<ChartDataPoint>> => {
   const converted: Record<string, Array<ChartDataPoint>> = {}
 
   Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-    // Get API display name first, then apply UI override when necessary TODO: fix this
-    const apiDisplayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
-
+    // Key directly by short code from API
     if (tierInfo.type === "multi_value" && tierInfo.data) {
-      converted[uiDisplayName] = convertMultiValueToChartData(
+      converted[shortCode] = convertMultiValueToChartData(
         {
           name: tierInfo.name,
           type: "multi_value",
@@ -63,7 +54,7 @@ const processScenarioData = (
         themeColors,
       )
     } else if (tierInfo.type === "single_value" && tierInfo.level) {
-      converted[uiDisplayName] = convertSingleValueToChartData(
+      converted[shortCode] = convertSingleValueToChartData(
         tierInfo.level,
         themeColors,
       )
@@ -74,63 +65,41 @@ const processScenarioData = (
 }
 
 /**
- * Build outcome names list from tier data in display order
- * Returns OutcomeInfo for each outcome, with placeholder for missing API tiers
+ * Build outcome info list in display order.
+ * Uses OUTCOME_CODE_ORDER as the canonical list, checking against API tiers for availability.
  */
 const buildOutcomeNames = (
   allTiers: { short_code: string; name: string }[] | undefined,
-  tierMapping: Record<string, string> | undefined,
 ): OutcomeInfo[] => {
-  if (!allTiers || !tierMapping) return []
+  if (!allTiers) return []
 
-  // Build lookup by UI display name
-  const tiersByDisplayName = new Map<
-    string,
-    { short_code: string; name: string }
-  >()
-  allTiers.forEach((tier) => {
-    const apiDisplayName = mapShortCodeToDisplayName(
-      tier.short_code,
-      tierMapping,
-    )
-    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
-    tiersByDisplayName.set(uiDisplayName, tier)
-  })
+  // Build lookup by short code
+  const tiersByCode = new Set(allTiers.map((tier) => tier.short_code))
 
   // Return outcomes in display order, with placeholders for missing
-  return OUTCOME_DISPLAY_ORDER.map((displayName): OutcomeInfo => {
-    const tier = tiersByDisplayName.get(displayName)
-    if (!tier) {
-      return {
-        shortCode: "MISSING",
-        name: displayName,
-        displayName,
-      }
-    }
+  return OUTCOME_CODE_ORDER.map((code): OutcomeInfo => {
+    const displayName = getOutcomeName(code)
+    const exists = tiersByCode.has(code)
     return {
-      shortCode: tier.short_code,
-      name: tier.name,
+      shortCode: exists ? code : "MISSING",
       displayName,
     }
   })
 }
 
 /**
- * Extract score data from scenario API response
- * Used for sorting, parallel plots, and equity analysis
+ * Extract score data from scenario API response.
+ * Data is keyed by short code (e.g., "CWS_DEL").
+ * Used for sorting, parallel plots, and equity analysis.
  */
 const extractScoreData = (
   scenarioData: ScenarioTiersResponse,
-  tierMapping: Record<string, string>,
 ): Record<string, OutcomeScoreData> => {
   const scores: Record<string, OutcomeScoreData> = {}
 
   Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-    const apiDisplayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
-
-    scores[uiDisplayName] = {
-      displayName: uiDisplayName,
+    // Key directly by short code from API
+    scores[shortCode] = {
       shortCode,
       type: tierInfo.type,
       weighted_score: tierInfo.weighted_score ?? 0,
@@ -165,54 +134,43 @@ export function useScenarioTiers(scenarioId: string | null) {
     scenarioId ? fetchScenarioTiers(scenarioId) : null,
   )
 
-  // Use shared hooks for tier list and mapping (cached, deduplicated)
+  // Use shared hooks for tier list (cached, deduplicated)
   const {
     tiers: allTiers,
     error: tiersError,
     isLoading: tiersLoading,
   } = useTiers()
 
-  const {
-    tierMapping,
-    error: mappingError,
-    isLoading: mappingLoading,
-  } = useTierMapping()
-
   // Convert API data to chart format with theme colors
+  // Data is keyed by short code (e.g., "CWS_DEL")
   const chartData = useMemo(() => {
-    if (!scenarioData || !tierMapping) return {}
-    return processScenarioData(
-      scenarioData,
-      tierMapping,
-      getThemeColorsForApi(theme),
-    )
-  }, [scenarioData, tierMapping, theme])
+    if (!scenarioData) return {}
+    return processScenarioData(scenarioData, getThemeColorsForApi(theme))
+  }, [scenarioData, theme])
 
   // Extract score data for sorting and parallel plots
+  // Data is keyed by short code (e.g., "CWS_DEL")
   const scoreData = useMemo(() => {
-    if (!scenarioData || !tierMapping) return {}
-    return extractScoreData(scenarioData, tierMapping)
-  }, [scenarioData, tierMapping])
+    if (!scenarioData) return {}
+    return extractScoreData(scenarioData)
+  }, [scenarioData])
 
   // Show outcomes in the specific order, some are inactive
-  const outcomeNames = useMemo(
-    () => buildOutcomeNames(allTiers, tierMapping),
-    [allTiers, tierMapping],
-  )
+  const outcomeNames = useMemo(() => buildOutcomeNames(allTiers), [allTiers])
 
   // Normalize error to string (SWR returns Error, shared hooks return string)
   const error = scenarioError
     ? scenarioError instanceof Error
       ? scenarioError.message
       : String(scenarioError)
-    : tiersError || mappingError || null
+    : tiersError || null
 
   return {
-    chartData,
-    scoreData, // New: contains weighted_score, normalized_score, gini, band_upper, band_lower
+    chartData, // Keyed by short code (e.g., chartData["CWS_DEL"])
+    scoreData, // Keyed by short code, contains weighted_score, normalized_score, gini, band_upper, band_lower
     rawData: scenarioData,
     outcomeNames,
-    isLoading: scenarioLoading || tiersLoading || mappingLoading,
+    isLoading: scenarioLoading || tiersLoading,
     error,
   }
 }
@@ -221,7 +179,7 @@ export function useMultipleScenarioTiers() {
   const theme = useTheme()
   const { mutate } = useSWRConfig()
 
-  // Use shared hooks for scenarios, tier list, and mapping (cached, deduplicated)
+  // Use shared hooks for scenarios and tier list (cached, deduplicated)
   const {
     activeScenarioIds: scenarioIds,
     error: scenariosError,
@@ -233,12 +191,6 @@ export function useMultipleScenarioTiers() {
     error: tiersError,
     isLoading: tiersLoading,
   } = useTiers()
-
-  const {
-    tierMapping,
-    error: mappingError,
-    isLoading: mappingLoading,
-  } = useTierMapping()
 
   // Fetch all scenario tier data in a single batched request
   // SWR key includes scenario IDs so it refetches when list changes
@@ -265,43 +217,37 @@ export function useMultipleScenarioTiers() {
   const themeColors = useMemo(() => getThemeColorsForApi(theme), [theme])
 
   // Convert all scenario data to chart format
+  // Data is keyed by short code (e.g., allChartData[scenarioId]["CWS_DEL"])
   const allChartData = useMemo(() => {
-    if (!allScenariosData || !tierMapping) return {}
+    if (!allScenariosData) return {}
 
     const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
 
     Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
-      result[scenarioId] = processScenarioData(
-        scenarioData,
-        tierMapping,
-        themeColors,
-      )
+      result[scenarioId] = processScenarioData(scenarioData, themeColors)
     })
 
     return result
-  }, [allScenariosData, tierMapping, themeColors])
+  }, [allScenariosData, themeColors])
 
   // Extract score data for all scenarios (for sorting and parallel plots)
+  // Data is keyed by short code (e.g., allScoreData[scenarioId]["CWS_DEL"])
   const allScoreData = useMemo(() => {
-    if (!allScenariosData || !tierMapping) return {}
+    if (!allScenariosData) return {}
 
     const result: Record<string, Record<string, OutcomeScoreData>> = {}
 
     Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
-      result[scenarioId] = extractScoreData(scenarioData, tierMapping)
+      result[scenarioId] = extractScoreData(scenarioData)
     })
 
     return result
-  }, [allScenariosData, tierMapping])
+  }, [allScenariosData])
 
   // Get outcome names from tier list
-  const outcomeNames = useMemo(
-    () => buildOutcomeNames(allTiers, tierMapping),
-    [allTiers, tierMapping],
-  )
+  const outcomeNames = useMemo(() => buildOutcomeNames(allTiers), [allTiers])
 
-  const isLoading =
-    scenariosLoading || scenarioTiersLoading || tiersLoading || mappingLoading
+  const isLoading = scenariosLoading || scenarioTiersLoading || tiersLoading
 
   // Combine errors (shared hooks return string errors, SWR returns Error objects)
   const error = useMemo(() => {
@@ -314,13 +260,12 @@ export function useMultipleScenarioTiers() {
       return `Failed to load scenario tier data: ${msg}`
     }
     if (tiersError) return `Failed to load tier list: ${tiersError}`
-    if (mappingError) return `Failed to load tier mapping: ${mappingError}`
     return null
-  }, [scenariosError, scenarioTiersError, tiersError, mappingError])
+  }, [scenariosError, scenarioTiersError, tiersError])
 
   return {
-    allChartData,
-    allScoreData,
+    allChartData, // Keyed by short code (e.g., allChartData[scenarioId]["CWS_DEL"])
+    allScoreData, // Keyed by short code (e.g., allScoreData[scenarioId]["CWS_DEL"])
     scenarioIds, // Export the dynamic list of scenario IDs
     outcomeNames,
     isLoading,
@@ -328,13 +273,20 @@ export function useMultipleScenarioTiers() {
   }
 }
 
-// Hook for getting tier data for a specific outcome
-export function useOutcomeTierData(scenarioId: string | null, outcome: string) {
+/**
+ * Hook for getting tier data for a specific outcome by code.
+ * @param scenarioId - The scenario ID
+ * @param outcomeCode - The outcome short code (e.g., "CWS_DEL")
+ */
+export function useOutcomeTierData(
+  scenarioId: string | null,
+  outcomeCode: string,
+) {
   const { chartData, isLoading, error } = useScenarioTiers(scenarioId)
 
   const tierData = useMemo(() => {
-    return chartData[outcome] || []
-  }, [chartData, outcome])
+    return chartData[outcomeCode] || []
+  }, [chartData, outcomeCode])
 
   return {
     tierData,

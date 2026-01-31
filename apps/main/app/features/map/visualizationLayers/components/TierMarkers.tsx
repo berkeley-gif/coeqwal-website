@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from "react"
 import { Marker, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import type { TierLocationResponse } from "../../../../lib/api/tierLocationApi"
+import type { TierLocationResponse } from "@repo/data/coeqwal"
 import type { HoveredFeatureInfo } from "../types"
 import { getTierLabel } from "../../../../content/tiers"
 

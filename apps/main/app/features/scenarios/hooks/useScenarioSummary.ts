@@ -20,7 +20,11 @@ import {
   getScenarioIcons,
   type ScenarioIcon,
 } from "../components/shared/strategyIcons"
-import { useScenarioTiers, OUTCOME_DISPLAY_ORDER } from "./useTierData"
+import { useScenarioTiers } from "./useTierData"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
+
+// Generate display names from codes
+const OUTCOME_NAMES_ORDERED = OUTCOME_CODE_ORDER.map(getOutcomeName)
 import type { ChartDataPoint } from "../components/shared/types"
 
 // =============================================================================
@@ -129,7 +133,7 @@ export function useScenarioSummary(
 
       // Outcomes
       outcomes: chartData,
-      outcomeNames: OUTCOME_DISPLAY_ORDER as unknown as string[],
+      outcomeNames: OUTCOME_NAMES_ORDERED,
     }
   }, [scenario, operations, chartData])
 
@@ -204,7 +208,7 @@ export function useMultipleScenarioSummaries(scenarioIds: string[]): {
         iconPath: scenario.iconPath,
         operations: operationsMap.get(scenarioId) || [],
         outcomes: {}, // Empty - use useMultipleScenarioTiers for outcome data
-        outcomeNames: OUTCOME_DISPLAY_ORDER as unknown as string[],
+        outcomeNames: OUTCOME_NAMES_ORDERED,
       })
     })
 

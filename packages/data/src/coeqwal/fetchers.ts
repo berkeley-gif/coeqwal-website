@@ -15,6 +15,7 @@ import type {
   TierListItem,
   ScenarioTiersResponse,
   ScenarioListItem,
+  TierLocationResponse,
 } from "./types"
 
 /**
@@ -102,4 +103,39 @@ export async function fetchAllScenarioTiers(
   })
 
   return record
+}
+
+/**
+ * Fetch tier location data for map visualization
+ *
+ * Returns GeoJSON FeatureCollection with location geometries and tier levels.
+ * Used for rendering tier-colored polygons and markers on the map.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param tierCode - Tier short code (e.g., "AG_REV", "CWS_DEL")
+ * @returns GeoJSON FeatureCollection with tier location data
+ *
+ * @example
+ * ```typescript
+ * const locations = await fetchTierLocationData("s0020", "CWS_DEL")
+ * const tier4Features = locations.features.filter(f => f.properties.tier_level === 4)
+ * ```
+ */
+export async function fetchTierLocationData(
+  scenarioId: string,
+  tierCode: string,
+): Promise<TierLocationResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!tierCode) {
+    throw new Error("Tier code is required")
+  }
+
+  return apiFetcher<TierLocationResponse>(
+    ENDPOINTS.tierLocations(scenarioId, tierCode),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
 }

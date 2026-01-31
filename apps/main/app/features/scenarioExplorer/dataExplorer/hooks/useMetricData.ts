@@ -4,7 +4,7 @@ import {
   useScenarioList,
 } from "../../../scenarios/hooks"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
-import { getDisplayNameFromMetricId } from "../../../../lib/constants/outcomeMappings"
+import { getOutcomeNameFromMetricId } from "../../../../content/outcomes"
 
 /**
  * Hook to fetch metric data for multiple scenarios
@@ -92,10 +92,10 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
 
 /**
  * Map Data Explorer metric IDs to tier outcome names
- * Applies UI display name overrides to match chartData keys
+ * Returns the display name to match chartData keys
  */
 function mapMetricToOutcome(metricId: string): string {
-  return getDisplayNameFromMetricId(metricId)
+  return getOutcomeNameFromMetricId(metricId)
 }
 
 /**
@@ -108,8 +108,8 @@ export function useMetricMapData(
   // Only fetch for metrics that can be shown on map
   const shouldFetch = scenarioId && metric.showOnMap && metric.isTier
 
-  // Uses the existing tier location API
-  // Note: Uses UI display name which will be converted to API name in tierLocationApi
+  // Returns metadata for map visualization
+  // Caller should use getOutcomeCodeFromMetricId to convert metric ID to tier code
   return {
     shouldFetch,
     scenarioId,

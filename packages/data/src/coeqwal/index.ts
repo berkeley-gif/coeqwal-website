@@ -30,6 +30,8 @@ export type {
   ScenarioTiersResponse,
   ScenarioListItem,
   TierMapping,
+  TierFeature,
+  TierLocationResponse,
 } from "./types"
 
 // API constants
@@ -41,6 +43,7 @@ export {
   fetchScenarioTiers,
   fetchScenarioList,
   fetchAllScenarioTiers,
+  fetchTierLocationData,
 } from "./fetchers"
 
 // Re-export hooks for convenience

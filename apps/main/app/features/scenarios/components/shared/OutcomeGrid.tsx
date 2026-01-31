@@ -15,12 +15,12 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { OUTCOME_DISPLAY_ORDER } from "../../hooks"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../hooks"
 import { OutcomeGlyphItem } from "./OutcomeGlyphItem"
 import type { ChartDataPoint } from "./types"
 
 export interface OutcomeGridProps {
-  /** Chart data keyed by outcome display name */
+  /** Chart data keyed by outcome code (e.g., "CWS_DEL") */
   chartData: Record<string, ChartDataPoint[]>
   /** Whether the grid is in a loading state */
   isLoading?: boolean
@@ -71,9 +71,9 @@ export function OutcomeGrid({
 }: OutcomeGridProps) {
   const theme = useTheme()
 
-  // Helper to check if outcome has valid data
-  const hasData = (outcome: string): boolean => {
-    const tierData = chartData[outcome]
+  // Helper to check if outcome has valid data (by code)
+  const hasData = (code: string): boolean => {
+    const tierData = chartData[code]
     return (
       tierData !== undefined &&
       tierData.length > 0 &&
@@ -82,21 +82,23 @@ export function OutcomeGrid({
   }
 
   // Multiple location outcomes (first 5) and single location outcomes (remaining)
-  const multipleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(0, 5)
-  const singleLocationOutcomes = OUTCOME_DISPLAY_ORDER.slice(5)
+  const multipleLocationOutcomes = OUTCOME_CODE_ORDER.slice(0, 5)
+  const singleLocationOutcomes = OUTCOME_CODE_ORDER.slice(5)
 
-  const renderOutcomeItem = (outcome: string) => {
-    const isSelected = selectedOutcome === outcome
-    const isTooltipActive = activeTooltip === outcome
-    const outcomeData = chartData[outcome]
-    const isActive = hasData(outcome)
-    const isSorted = sortBy === outcome
+  // Render outcome item by code
+  const renderOutcomeItem = (code: string) => {
+    const displayName = getOutcomeName(code)
+    const isSelected = selectedOutcome === displayName
+    const isTooltipActive = activeTooltip === displayName
+    const outcomeData = chartData[code]
+    const isActive = hasData(code)
+    const isSorted = sortBy === displayName
 
     return (
       <OutcomeGlyphItem
-        key={outcome}
-        displayName={outcome}
-        name={outcome}
+        key={code}
+        displayName={displayName}
+        name={displayName}
         chartData={outcomeData}
         isActive={!isLoading && isActive}
         isSelected={isSelected}
@@ -106,13 +108,13 @@ export function OutcomeGrid({
         showInfoButton={showInfoButtons}
         showSortButton={showSortButtons}
         sortState={isSorted ? sortDirection : null}
-        onGlyphClick={() => onGlyphClick?.(outcome)}
-        onInfoClick={(e) => onInfoClick?.(outcome, e)}
+        onGlyphClick={() => onGlyphClick?.(displayName)}
+        onInfoClick={(e) => onInfoClick?.(displayName, e)}
         onSortToggle={(newState) => {
           if (newState === null) {
             onSortChange?.(null, "asc") // Clear sort
           } else {
-            onSortChange?.(outcome, newState)
+            onSortChange?.(displayName, newState)
           }
         }}
       />

@@ -16,16 +16,16 @@ export function useSalmonRiverColor(): string | undefined {
   const mapMode = useMapMode()
   const activeVisualization = useActiveOutcomeVisualization()
 
-  const outcome = activeVisualization?.outcome ?? null
+  const outcomeCode = activeVisualization?.outcomeCode ?? null
   const scenarioId = activeVisualization?.scenarioId ?? "s0020"
 
-  // Only fetch tier data for Salmon abundance
-  const isSalmonAbundance = outcome === "Salmon abundance"
+  // Only fetch tier data for Salmon abundance (code: WRC_SALMON_AB)
+  const isSalmonAbundance = outcomeCode === "WRC_SALMON_AB"
   const isMapVisible = mapMode === "learn" || mapMode === "explore"
 
-  // Fetch tier data only when Salmon abundance is active
+  // Fetch tier data only when Salmon abundance is active (using outcomeCode)
   const { tierColorMap } = useTierData(
-    isSalmonAbundance && isMapVisible ? outcome : null,
+    isSalmonAbundance && isMapVisible ? outcomeCode : null,
     scenarioId,
   )
 

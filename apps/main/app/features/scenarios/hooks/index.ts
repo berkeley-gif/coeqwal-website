@@ -4,9 +4,11 @@ export {
   useMultipleScenarioTiers,
   useOutcomeDefinitions,
   useOutcomeTierData,
-  OUTCOME_DISPLAY_ORDER,
   type OutcomeScoreData,
 } from "./useTierData"
+
+// Re-export outcome constants for convenience
+export { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 
 export {
   useScenarioSummary,
