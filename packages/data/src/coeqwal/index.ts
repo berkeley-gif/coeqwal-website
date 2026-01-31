@@ -32,6 +32,15 @@ export type {
   TierMapping,
   TierFeature,
   TierLocationResponse,
+  // Statistics types
+  ReservoirInfo,
+  StatisticsScenarioInfo,
+  PercentileValues,
+  MonthlyPercentiles,
+  ReservoirPercentiles,
+  AllReservoirPercentilesResponse,
+  ReservoirListResponse,
+  StatisticsScenariosResponse,
 } from "./types"
 
 // API constants
@@ -44,6 +53,11 @@ export {
   fetchScenarioList,
   fetchAllScenarioTiers,
   fetchTierLocationData,
+  // Statistics fetchers
+  fetchReservoirList,
+  fetchScenariosWithPercentiles,
+  fetchReservoirPercentiles,
+  fetchAllReservoirPercentiles,
 } from "./fetchers"
 
 // Re-export hooks for convenience

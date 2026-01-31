@@ -55,6 +55,29 @@ export const CACHE_KEYS = {
    */
   tierLocations: (scenarioId: string, tierCode: string) =>
     `/tier-map/${scenarioId}/${tierCode}/locations`,
+
+  // Statistics cache keys (reservoir percentiles)
+
+  /** List of reservoirs with percentile data */
+  STATISTICS_RESERVOIRS: "/api/statistics/reservoirs",
+
+  /** List of scenarios with percentile data */
+  STATISTICS_SCENARIOS: "/api/statistics/scenarios",
+
+  /**
+   * Percentile data for a single reservoir in a scenario
+   * @param scenarioId - Scenario ID
+   * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
+   */
+  reservoirPercentiles: (scenarioId: string, reservoirId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/reservoirs/${reservoirId}/percentiles`,
+
+  /**
+   * Percentile data for all reservoirs in a scenario
+   * @param scenarioId - Scenario ID
+   */
+  allReservoirPercentiles: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
 } as const
 
 /**

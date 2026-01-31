@@ -164,3 +164,101 @@ export interface TierLocationResponse {
     location_types: string[]
   }
 }
+
+// ============================================================================
+// Statistics Types (for reservoir percentile charts)
+// ============================================================================
+
+/**
+ * Reservoir info from /api/statistics/reservoirs endpoint
+ */
+export interface ReservoirInfo {
+  /** Reservoir ID (e.g., "S_SHSTA") */
+  reservoir_id: string
+  /** Human-readable name (e.g., "Shasta") */
+  reservoir_name: string
+}
+
+/**
+ * Scenario with percentile data from /api/statistics/scenarios endpoint
+ */
+export interface StatisticsScenarioInfo {
+  /** Scenario ID (e.g., "s0020") */
+  scenario_id: string
+  /** Array of reservoir IDs with data */
+  reservoirs: string[]
+  /** Count of reservoirs */
+  reservoir_count: number
+}
+
+/**
+ * Percentile values for a single month
+ * All values are percentage of reservoir capacity (0-100+)
+ */
+export interface PercentileValues {
+  /** Minimum (0th percentile) */
+  q0: number
+  /** 10th percentile */
+  q10: number
+  /** 30th percentile */
+  q30: number
+  /** Median (50th percentile) */
+  q50: number
+  /** 70th percentile */
+  q70: number
+  /** 90th percentile */
+  q90: number
+  /** Maximum (100th percentile) */
+  q100: number
+  /** Mean value */
+  mean: number
+}
+
+/**
+ * Monthly percentile data keyed by water month (1=Oct, 12=Sep)
+ */
+export type MonthlyPercentiles = Record<string, PercentileValues>
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/reservoirs/:reservoirId/percentiles
+ */
+export interface ReservoirPercentiles {
+  /** Reservoir ID (e.g., "S_SHSTA") */
+  reservoir_id: string
+  /** Human-readable name (e.g., "Shasta") */
+  reservoir_name: string
+  /** Scenario ID */
+  scenario_id: string
+  /** Unit description */
+  unit: string
+  /** Total reservoir capacity in thousand acre-feet */
+  capacity_taf: number
+  /** Dead pool storage in thousand acre-feet */
+  dead_pool_taf: number
+  /** Monthly percentile data */
+  monthly_percentiles: MonthlyPercentiles
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/reservoir-percentiles
+ * Returns all reservoirs for a scenario
+ */
+export interface AllReservoirPercentilesResponse {
+  scenario_id: string
+  reservoirs: Record<string, Omit<ReservoirPercentiles, "scenario_id">>
+}
+
+/**
+ * Response from /api/statistics/reservoirs endpoint
+ */
+export interface ReservoirListResponse {
+  reservoirs: ReservoirInfo[]
+}
+
+/**
+ * Response from /api/statistics/scenarios endpoint
+ */
+export interface StatisticsScenariosResponse {
+  scenarios: StatisticsScenarioInfo[]
+  total: number
+}
