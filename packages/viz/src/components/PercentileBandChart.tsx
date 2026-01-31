@@ -7,6 +7,7 @@
  * across water years. Used for reservoir storage percentile charts.
  *
  * Water months: 1=October, 2=November, ..., 12=September
+ *
  */
 
 import React, { useRef, useEffect, useState } from "react"
@@ -37,8 +38,8 @@ export interface PercentileBandChartProps {
   yAxisLabel?: string
   /** Whether to show the mean line (dashed) */
   showMean?: boolean
-  /** Color scheme for bands (defaults to blues) */
-  colorScheme?: "blues" | "greens" | "oranges" | string
+  /** Color scheme for bands */
+  colorScheme?: "blues" | "greens" | "oranges" | "slate" | string
   /** Enable responsive sizing */
   responsive?: boolean
   /** Fixed width (when responsive=false) */
@@ -67,35 +68,52 @@ const WATER_MONTH_LABELS = [
   "Sep",
 ]
 
-// Color schemes for bands
+// Color schemes for bands - NYT-inspired muted palettes
 interface ColorScheme {
-  outer: string
-  inner: string
-  median: string
-  mean: string
+  outer: string // q10-q90 band
+  inner: string // q30-q70 band
+  median: string // q50 line
+  mean: string // mean line
+  range: string // min-max area (very subtle)
+  text: string // axis and label text
+  grid: string // gridline color
+  hover: string // hover line color
 }
 
-// Default color scheme (blues)
+// Sophisticated slate/blue palette (default)
 const DEFAULT_COLOR_SCHEME: ColorScheme = {
-  outer: "rgba(66, 133, 244, 0.2)", // q10-q90
-  inner: "rgba(66, 133, 244, 0.4)", // q30-q70
-  median: "#1a73e8", // q50 line
-  mean: "#5f6368", // mean line (gray)
+  outer: "rgba(99, 130, 150, 0.15)",
+  inner: "rgba(99, 130, 150, 0.28)",
+  median: "#3d5a6c",
+  mean: "#8b9da8",
+  range: "rgba(99, 130, 150, 0.06)",
+  text: "#5a6c7a",
+  grid: "#e8edf0",
+  hover: "#3d5a6c",
 }
 
 const COLOR_SCHEMES: Record<string, ColorScheme> = {
   blues: DEFAULT_COLOR_SCHEME,
+  slate: DEFAULT_COLOR_SCHEME,
   greens: {
-    outer: "rgba(52, 168, 83, 0.2)",
-    inner: "rgba(52, 168, 83, 0.4)",
-    median: "#1e8e3e",
-    mean: "#5f6368",
+    outer: "rgba(76, 127, 93, 0.15)",
+    inner: "rgba(76, 127, 93, 0.28)",
+    median: "#3a6b4a",
+    mean: "#8da898",
+    range: "rgba(76, 127, 93, 0.06)",
+    text: "#5a6c5e",
+    grid: "#e8f0ea",
+    hover: "#3a6b4a",
   },
   oranges: {
-    outer: "rgba(251, 188, 4, 0.2)",
-    inner: "rgba(251, 188, 4, 0.4)",
-    median: "#f9ab00",
-    mean: "#5f6368",
+    outer: "rgba(178, 120, 70, 0.15)",
+    inner: "rgba(178, 120, 70, 0.28)",
+    median: "#9a6840",
+    mean: "#c4a888",
+    range: "rgba(178, 120, 70, 0.06)",
+    text: "#6c5a4a",
+    grid: "#f0ebe8",
+    hover: "#9a6840",
   },
 }
 
@@ -108,8 +126,8 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
   responsive = true,
   width = 400,
   height = 250,
-  margin = { top: 30, right: 20, bottom: 40, left: 50 },
-  showLegend = true,
+  margin = { top: 20, right: 16, bottom: 32, left: 42 },
+  showLegend = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -124,7 +142,9 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
 
   // Process data into array sorted by water month
   const processData = (rawData: MonthlyPercentiles) => {
-    const result: Array<{ monthIndex: number; label: string } & PercentileValues> = []
+    const result: Array<
+      { monthIndex: number; label: string } & PercentileValues
+    > = []
 
     for (let i = 1; i <= 12; i++) {
       const monthStr = i.toString()
@@ -170,10 +190,7 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
     if (innerWidth <= 0 || innerHeight <= 0) return
 
     // Create scales
-    const xScale = d3
-      .scaleLinear()
-      .domain([0, 11])
-      .range([0, innerWidth])
+    const xScale = d3.scaleLinear().domain([0, 11]).range([0, innerWidth])
 
     const yScale = d3
       .scaleLinear()
@@ -185,59 +202,69 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
 
-    // Add title
-    if (title) {
-      g.append("text")
-        .attr("x", innerWidth / 2)
-        .attr("y", -margin.top / 2)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "0.9em")
-        .attr("font-weight", "600")
-        .attr("fill", "#202124")
-        .text(title)
-    }
-
-    // Add grid lines
+    // Add subtle horizontal gridlines (NYT style - very light, no vertical lines)
     g.append("g")
       .attr("class", "grid")
       .selectAll("line")
-      .data([0, 25, 50, 75, 100])
+      .data([25, 50, 75])
       .enter()
       .append("line")
       .attr("x1", 0)
       .attr("x2", innerWidth)
       .attr("y1", (d) => yScale(d))
       .attr("y2", (d) => yScale(d))
-      .attr("stroke", "#e0e0e0")
+      .attr("stroke", colors.grid)
+      .attr("stroke-width", 1)
+
+    // Add baseline at 0%
+    g.append("line")
+      .attr("x1", 0)
+      .attr("x2", innerWidth)
+      .attr("y1", yScale(0))
+      .attr("y2", yScale(0))
+      .attr("stroke", colors.grid)
       .attr("stroke-width", 1)
 
     // Create area generators for bands
+    const rangeArea = d3
+      .area<(typeof processedData)[0]>()
+      .x((d) => xScale(d.monthIndex))
+      .y0((d) => yScale(d.q0))
+      .y1((d) => yScale(d.q100))
+      .curve(d3.curveLinear)
+
     const outerArea = d3
-      .area<typeof processedData[0]>()
+      .area<(typeof processedData)[0]>()
       .x((d) => xScale(d.monthIndex))
       .y0((d) => yScale(d.q10))
       .y1((d) => yScale(d.q90))
-      .curve(d3.curveMonotoneX)
+      .curve(d3.curveLinear)
 
     const innerArea = d3
-      .area<typeof processedData[0]>()
+      .area<(typeof processedData)[0]>()
       .x((d) => xScale(d.monthIndex))
       .y0((d) => yScale(d.q30))
       .y1((d) => yScale(d.q70))
-      .curve(d3.curveMonotoneX)
+      .curve(d3.curveLinear)
 
     // Create line generators
     const medianLine = d3
-      .line<typeof processedData[0]>()
+      .line<(typeof processedData)[0]>()
       .x((d) => xScale(d.monthIndex))
       .y((d) => yScale(d.q50))
-      .curve(d3.curveMonotoneX)
+      .curve(d3.curveLinear)
 
     const meanLine = d3
-      .line<typeof processedData[0]>()
+      .line<(typeof processedData)[0]>()
       .x((d) => xScale(d.monthIndex))
       .y((d) => yScale(d.mean))
-      .curve(d3.curveMonotoneX)
+      .curve(d3.curveLinear)
+
+    // Draw range band (min-max) - very subtle background
+    g.append("path")
+      .datum(processedData)
+      .attr("fill", colors.range)
+      .attr("d", rangeArea)
 
     // Draw outer band (q10-q90)
     g.append("path")
@@ -251,153 +278,186 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
       .attr("fill", colors.inner)
       .attr("d", innerArea)
 
-    // Draw median line (q50)
+    // Draw median line (q50) - the hero line
     g.append("path")
       .datum(processedData)
       .attr("fill", "none")
       .attr("stroke", colors.median)
       .attr("stroke-width", 2)
+      .attr("stroke-linecap", "round")
+      .attr("stroke-linejoin", "round")
       .attr("d", medianLine)
 
-    // Draw mean line (optional, dashed)
+    // Draw mean line (optional, subtle dashed)
     if (showMean) {
       g.append("path")
         .datum(processedData)
         .attr("fill", "none")
         .attr("stroke", colors.mean)
         .attr("stroke-width", 1.5)
-        .attr("stroke-dasharray", "4,4")
+        .attr("stroke-dasharray", "3,3")
+        .attr("stroke-linecap", "round")
         .attr("d", meanLine)
     }
 
-    // Add X axis
+    // Add X axis - minimal style, no line, just labels
     const xAxis = g
       .append("g")
-      .attr("transform", `translate(0,${innerHeight})`)
+      .attr("transform", `translate(0,${innerHeight + 8})`)
       .call(
         d3
           .axisBottom(xScale)
           .ticks(12)
+          .tickSize(0)
           .tickFormat((d) => {
             const idx = Math.round(Number(d))
             return WATER_MONTH_LABELS[idx] || ""
           }),
       )
 
-    xAxis.selectAll("line").attr("stroke", "#bdbdbd")
-    xAxis.selectAll("path").attr("stroke", "#bdbdbd")
+    xAxis.select(".domain").remove() // Remove axis line
     xAxis
       .selectAll("text")
-      .attr("font-size", "0.7em")
-      .attr("fill", "#5f6368")
+      .attr("font-size", "10px")
+      .attr("font-family", "'Inter', -apple-system, sans-serif")
+      .attr("fill", colors.text)
+      .attr("font-weight", "400")
 
-    // Add Y axis
-    const yAxis = g.append("g").call(
+    // Add Y axis - minimal style
+    const yAxis = g.append("g").attr("transform", "translate(-8, 0)").call(
       d3
         .axisLeft(yScale)
-        .ticks(5)
+        .ticks(4)
+        .tickSize(0)
         .tickFormat((d) => `${d}%`),
     )
 
-    yAxis.selectAll("line").attr("stroke", "#bdbdbd")
-    yAxis.selectAll("path").attr("stroke", "#bdbdbd")
+    yAxis.select(".domain").remove() // Remove axis line
     yAxis
       .selectAll("text")
-      .attr("font-size", "0.7em")
-      .attr("fill", "#5f6368")
+      .attr("font-size", "10px")
+      .attr("font-family", "'Inter', -apple-system, sans-serif")
+      .attr("fill", colors.text)
+      .attr("font-weight", "400")
+      .attr("text-anchor", "end")
 
-    // Add Y axis label
+    // Add Y axis label (rotated, subtle)
     if (yAxisLabel) {
       g.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 15)
+        .attr("y", -margin.left + 12)
         .attr("text-anchor", "middle")
-        .attr("font-size", "0.75em")
-        .attr("fill", "#5f6368")
+        .attr("font-size", "10px")
+        .attr("font-family", "'Inter', -apple-system, sans-serif")
+        .attr("fill", colors.text)
+        .attr("font-weight", "500")
+        .attr("letter-spacing", "0.02em")
         .text(yAxisLabel)
     }
 
-    // Add legend
+    // Add title if provided
+    if (title) {
+      g.append("text")
+        .attr("x", 0)
+        .attr("y", -8)
+        .attr("text-anchor", "start")
+        .attr("font-size", "12px")
+        .attr("font-family", "'Inter', -apple-system, sans-serif")
+        .attr("font-weight", "600")
+        .attr("fill", colors.text)
+        .text(title)
+    }
+
+    // Elegant inline legend (if enabled)
     if (showLegend) {
-      const legendData = [
-        { label: "10th-90th percentile", color: colors.outer, type: "rect" },
-        { label: "30th-70th percentile", color: colors.inner, type: "rect" },
-        { label: "Median (50th)", color: colors.median, type: "line" },
-        ...(showMean
-          ? [{ label: "Mean", color: colors.mean, type: "dashed" }]
-          : []),
+      const legendY = -8
+      const legendItems = [
+        { label: "Median", color: colors.median, type: "line" },
+        { label: "30-70th", color: colors.inner, type: "rect" },
+        { label: "10-90th", color: colors.outer, type: "rect" },
       ]
 
-      const legend = g
-        .append("g")
-        .attr("transform", `translate(${innerWidth - 120}, 0)`)
+      let legendX = innerWidth
 
-      legendData.forEach((item, i) => {
-        const legendItem = legend
+      legendItems.reverse().forEach((item) => {
+        const itemWidth = item.label.length * 6 + 20
+        legendX -= itemWidth
+
+        const legendItem = g
           .append("g")
-          .attr("transform", `translate(0, ${i * 14})`)
+          .attr("transform", `translate(${legendX}, ${legendY})`)
 
-        if (item.type === "rect") {
+        if (item.type === "line") {
+          legendItem
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", 12)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", item.color)
+            .attr("stroke-width", 2)
+            .attr("stroke-linecap", "round")
+        } else {
           legendItem
             .append("rect")
+            .attr("x", 0)
+            .attr("y", -4)
             .attr("width", 12)
             .attr("height", 8)
             .attr("fill", item.color)
-        } else if (item.type === "line") {
-          legendItem
-            .append("line")
-            .attr("x1", 0)
-            .attr("x2", 12)
-            .attr("y1", 4)
-            .attr("y2", 4)
-            .attr("stroke", item.color)
-            .attr("stroke-width", 2)
-        } else if (item.type === "dashed") {
-          legendItem
-            .append("line")
-            .attr("x1", 0)
-            .attr("x2", 12)
-            .attr("y1", 4)
-            .attr("y2", 4)
-            .attr("stroke", item.color)
-            .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", "3,3")
+            .attr("rx", 1)
         }
 
         legendItem
           .append("text")
           .attr("x", 16)
-          .attr("y", 4)
-          .attr("dy", "0.35em")
-          .attr("font-size", "0.6em")
-          .attr("fill", "#5f6368")
+          .attr("y", 0)
+          .attr("dy", "0.32em")
+          .attr("font-size", "9px")
+          .attr("font-family", "'Inter', -apple-system, sans-serif")
+          .attr("fill", colors.text)
+          .attr("font-weight", "400")
           .text(item.label)
       })
     }
 
-    // Add invisible overlay for tooltip
+    // Create elegant tooltip
+    const tooltipId = `tooltip-${Math.random().toString(36).substr(2, 9)}`
     const tooltip = d3
       .select("body")
       .append("div")
+      .attr("id", tooltipId)
       .attr("class", "percentile-chart-tooltip")
       .style("position", "absolute")
       .style("visibility", "hidden")
-      .style("background", "rgba(255, 255, 255, 0.95)")
-      .style("border", "1px solid #dadce0")
-      .style("border-radius", "4px")
-      .style("padding", "8px 12px")
+      .style("background", "#fff")
+      .style("border", "none")
+      .style("border-radius", "6px")
+      .style("padding", "12px 16px")
       .style("font-size", "12px")
-      .style("box-shadow", "0 2px 6px rgba(0,0,0,0.15)")
+      .style("font-family", "'Inter', -apple-system, sans-serif")
+      .style("box-shadow", "0 4px 20px rgba(0,0,0,0.12)")
       .style("pointer-events", "none")
       .style("z-index", "1000")
+      .style("min-width", "140px")
+      .style("line-height", "1.5")
 
-    // Add vertical hover line
+    // Add focus dot for hover state
+    const focusDot = g
+      .append("circle")
+      .attr("r", 4)
+      .attr("fill", colors.median)
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
+      .style("visibility", "hidden")
+
+    // Add vertical hover line - subtle
     const hoverLine = g
       .append("line")
-      .attr("stroke", "#5f6368")
+      .attr("stroke", colors.hover)
       .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "4,4")
+      .attr("stroke-opacity", 0.3)
       .style("visibility", "hidden")
       .attr("y1", 0)
       .attr("y2", innerHeight)
@@ -407,45 +467,58 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
       .attr("width", innerWidth)
       .attr("height", innerHeight)
       .attr("fill", "transparent")
+      .style("cursor", "crosshair")
       .on("mousemove", (event) => {
         const [mouseX] = d3.pointer(event)
         const monthIndex = Math.round(xScale.invert(mouseX))
 
         if (monthIndex >= 0 && monthIndex < 12) {
-          const monthData = processedData.find((d) => d.monthIndex === monthIndex)
+          const monthData = processedData.find(
+            (d) => d.monthIndex === monthIndex,
+          )
 
           if (monthData) {
+            const xPos = xScale(monthIndex)
+
             hoverLine
-              .attr("x1", xScale(monthIndex))
-              .attr("x2", xScale(monthIndex))
+              .attr("x1", xPos)
+              .attr("x2", xPos)
+              .style("visibility", "visible")
+
+            focusDot
+              .attr("cx", xPos)
+              .attr("cy", yScale(monthData.q50))
               .style("visibility", "visible")
 
             tooltip
               .style("visibility", "visible")
-              .style("left", `${event.pageX + 10}px`)
-              .style("top", `${event.pageY - 10}px`)
-              .html(
-                `<strong>${monthData.label}</strong><br/>
-                Max: ${monthData.q100.toFixed(1)}%<br/>
-                90th: ${monthData.q90.toFixed(1)}%<br/>
-                70th: ${monthData.q70.toFixed(1)}%<br/>
-                <strong>Median: ${monthData.q50.toFixed(1)}%</strong><br/>
-                30th: ${monthData.q30.toFixed(1)}%<br/>
-                10th: ${monthData.q10.toFixed(1)}%<br/>
-                Min: ${monthData.q0.toFixed(1)}%<br/>
-                Mean: ${monthData.mean.toFixed(1)}%`,
-              )
+              .style("left", `${event.pageX + 16}px`)
+              .style("top", `${event.pageY - 16}px`).html(`
+                <div style="font-weight: 600; color: ${colors.text}; margin-bottom: 8px; font-size: 13px;">
+                  ${monthData.label}
+                </div>
+                <div style="display: grid; grid-template-columns: auto auto; gap: 2px 12px; color: #6b7785;">
+                  <span>Max</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q100.toFixed(0)}%</span>
+                  <span>90th</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q90.toFixed(0)}%</span>
+                  <span>70th</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q70.toFixed(0)}%</span>
+                  <span style="font-weight: 600; color: ${colors.median};">Median</span><span style="text-align: right; font-weight: 600; color: ${colors.median}; font-variant-numeric: tabular-nums;">${monthData.q50.toFixed(0)}%</span>
+                  <span>30th</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q30.toFixed(0)}%</span>
+                  <span>10th</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q10.toFixed(0)}%</span>
+                  <span>Min</span><span style="text-align: right; font-variant-numeric: tabular-nums;">${monthData.q0.toFixed(0)}%</span>
+                </div>
+              `)
           }
         }
       })
       .on("mouseout", () => {
         hoverLine.style("visibility", "hidden")
+        focusDot.style("visibility", "hidden")
         tooltip.style("visibility", "hidden")
       })
 
     // Cleanup tooltip on unmount
     return () => {
-      d3.select(".percentile-chart-tooltip").remove()
+      d3.select(`#${tooltipId}`).remove()
     }
   }, [
     data,
