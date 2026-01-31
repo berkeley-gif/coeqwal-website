@@ -180,7 +180,7 @@ export default function TierTooltipContent({
 
       <Typography variant="dashboard" sx={{ mb: theme.space.component.md }}>
         {formatDescription(
-          (outcomeDefinitions as Record<string, string>)[displayName] ||
+          (outcomeDefinitions as Record<string, string>)[outcomeCode] ||
             "Definition not available",
           theme.typography.fontWeightMedium as number,
         )}

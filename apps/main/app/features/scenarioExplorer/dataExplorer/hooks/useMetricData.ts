@@ -4,7 +4,10 @@ import {
   useScenarioList,
 } from "../../../scenarios/hooks"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
-import { getOutcomeNameFromMetricId } from "../../../../content/outcomes"
+import {
+  getOutcomeCodeFromMetricId,
+  getOutcomeNameFromMetricId,
+} from "../../../../content/outcomes"
 
 /**
  * Hook to fetch metric data for multiple scenarios
@@ -56,8 +59,8 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
     // Return null if no scenarios selected
     if (scenarioIds.length === 0) return null
 
-    // Map the metric name to the outcome name used in chartData
-    const outcomeKey = mapMetricToOutcome(metric.id)
+    // Map the metric ID to the outcome code used in chartData
+    const outcomeKey = mapMetricToOutcomeCode(metric.id)
 
     // Filter to only selected scenarios and transform data
     return scenarioIds
@@ -91,11 +94,11 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
 }
 
 /**
- * Map Data Explorer metric IDs to tier outcome names
- * Returns the display name to match chartData keys
+ * Map Data Explorer metric IDs to tier outcome codes
+ * Returns the outcome code to match chartData keys (e.g., "CWS_DEL")
  */
-function mapMetricToOutcome(metricId: string): string {
-  return getOutcomeNameFromMetricId(metricId)
+function mapMetricToOutcomeCode(metricId: string): string {
+  return getOutcomeCodeFromMetricId(metricId)
 }
 
 /**
@@ -109,11 +112,11 @@ export function useMetricMapData(
   const shouldFetch = scenarioId && metric.showOnMap && metric.isTier
 
   // Returns metadata for map visualization
-  // Caller should use getOutcomeCodeFromMetricId to convert metric ID to tier code
   return {
     shouldFetch,
     scenarioId,
     metricId: metric.id,
-    outcomeDisplayName: mapMetricToOutcome(metric.id),
+    outcomeCode: mapMetricToOutcomeCode(metric.id),
+    outcomeDisplayName: getOutcomeNameFromMetricId(metric.id),
   }
 }
