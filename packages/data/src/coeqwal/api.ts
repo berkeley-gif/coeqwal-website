@@ -33,4 +33,27 @@ export const ENDPOINTS = {
    */
   tierLocations: (scenarioId: string, tierCode: string) =>
     `/tier-map/${scenarioId}/${tierCode}`,
+
+  // Statistics endpoints (reservoir percentiles)
+
+  /** List of reservoirs with percentile data */
+  STATISTICS_RESERVOIRS: "/statistics/reservoirs",
+
+  /** List of scenarios with percentile data */
+  STATISTICS_SCENARIOS: "/statistics/scenarios",
+
+  /**
+   * Percentile data for a single reservoir
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
+   */
+  reservoirPercentiles: (scenarioId: string, reservoirId: string) =>
+    `/statistics/scenarios/${scenarioId}/reservoirs/${reservoirId}/percentiles`,
+
+  /**
+   * Percentile data for all reservoirs in a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  allReservoirPercentiles: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
 } as const

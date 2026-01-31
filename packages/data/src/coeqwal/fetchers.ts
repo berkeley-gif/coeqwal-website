@@ -16,6 +16,10 @@ import type {
   ScenarioTiersResponse,
   ScenarioListItem,
   TierLocationResponse,
+  ReservoirListResponse,
+  StatisticsScenariosResponse,
+  ReservoirPercentiles,
+  AllReservoirPercentilesResponse,
 } from "./types"
 
 /**
@@ -134,6 +138,106 @@ export async function fetchTierLocationData(
 
   return apiFetcher<TierLocationResponse>(
     ENDPOINTS.tierLocations(scenarioId, tierCode),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// Statistics API fetchers (reservoir percentiles)
+// ============================================================================
+
+/**
+ * Fetch list of all reservoirs with percentile data
+ *
+ * @returns Array of reservoir info
+ *
+ * @example
+ * ```typescript
+ * const { reservoirs } = await fetchReservoirList()
+ * // [{ reservoir_id: "S_SHSTA", reservoir_name: "Shasta" }, ...]
+ * ```
+ */
+export async function fetchReservoirList(): Promise<ReservoirListResponse> {
+  return apiFetcher<ReservoirListResponse>(ENDPOINTS.STATISTICS_RESERVOIRS, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch list of scenarios that have percentile data available
+ *
+ * @returns Scenarios with reservoir percentile data
+ *
+ * @example
+ * ```typescript
+ * const { scenarios, total } = await fetchScenariosWithPercentiles()
+ * // { scenarios: [{ scenario_id: "s0020", reservoirs: ["S_SHSTA", ...] }], total: 1 }
+ * ```
+ */
+export async function fetchScenariosWithPercentiles(): Promise<StatisticsScenariosResponse> {
+  return apiFetcher<StatisticsScenariosResponse>(
+    ENDPOINTS.STATISTICS_SCENARIOS,
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch percentile data for a single reservoir in a scenario
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param reservoirId - Reservoir ID (e.g., "S_SHSTA")
+ * @returns Reservoir percentile data with monthly distributions
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchReservoirPercentiles("s0020", "S_SHSTA")
+ * // { reservoir_id: "S_SHSTA", monthly_percentiles: { "1": { q10: 45.2, q50: 70.1, ... } } }
+ * ```
+ */
+export async function fetchReservoirPercentiles(
+  scenarioId: string,
+  reservoirId: string,
+): Promise<ReservoirPercentiles> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!reservoirId) {
+    throw new Error("Reservoir ID is required")
+  }
+
+  return apiFetcher<ReservoirPercentiles>(
+    ENDPOINTS.reservoirPercentiles(scenarioId, reservoirId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch percentile data for all reservoirs in a scenario
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns All reservoir percentile data for the scenario
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchAllReservoirPercentiles("s0020")
+ * // { scenario_id: "s0020", reservoirs: { "S_SHSTA": { ... }, "S_OROVL": { ... } } }
+ * ```
+ */
+export async function fetchAllReservoirPercentiles(
+  scenarioId: string,
+): Promise<AllReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AllReservoirPercentilesResponse>(
+    ENDPOINTS.allReservoirPercentiles(scenarioId),
     {
       baseUrl: DEFAULT_API_BASE,
     },

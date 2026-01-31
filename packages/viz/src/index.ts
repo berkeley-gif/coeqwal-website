@@ -36,6 +36,12 @@ export { default as VerticalOutcomeGlyph } from "./components/VerticalOutcomeGly
 export type { VerticalOutcomeGlyphProps } from "./components/VerticalOutcomeGlyph"
 export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
 export type { ScenarioGlyphProps } from "./components/ScenarioGlyph"
+export { default as PercentileBandChart } from "./components/PercentileBandChart"
+export type {
+  PercentileBandChartProps,
+  PercentileValues,
+  MonthlyPercentiles,
+} from "./components/PercentileBandChart"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"

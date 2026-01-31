@@ -29,6 +29,7 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+import ReservoirPercentilesSection from "./ReservoirPercentilesSection"
 
 /**
  * Helper function to detect if tier data represents a single value (vs a distribution)
@@ -197,6 +198,25 @@ export default function CategoryView() {
                   ))}
                 </Box>
               )}
+
+              {/* Reservoir Percentile Distribution (only for reservoir-storage category) */}
+              {category.id === "reservoir-storage" &&
+                selectedScenarios.length > 0 && (
+                  <Box sx={{ mb: theme.space.section.sm }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        mb: theme.space.component.lg,
+                        color: theme.palette.blue.dark,
+                      }}
+                    >
+                      Monthly percentile distribution
+                    </Typography>
+                    <ReservoirPercentilesSection
+                      scenarios={selectedScenarios}
+                    />
+                  </Box>
+                )}
 
               {/* Other metrics */}
               {nonTierMetrics.length > 0 && (
