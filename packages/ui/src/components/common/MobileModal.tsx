@@ -57,6 +57,8 @@ export interface MobileModalProps {
   zIndex?: number
   /** ARIA label for the content region (enables focusable scrolling) */
   contentAriaLabel?: string
+  /** Content to render in a fixed (non-scrolling) area below the title */
+  stickyHeader?: React.ReactNode
 }
 
 /**
@@ -75,6 +77,7 @@ export function MobileModal({
   closeOnEscape = true,
   zIndex: providedZIndex,
   contentAriaLabel,
+  stickyHeader,
 }: MobileModalProps) {
   const theme = useTheme()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -202,6 +205,27 @@ export function MobileModal({
                   <CloseIcon />
                 </IconButton>
               )}
+            </Box>
+          )}
+
+          {/* Sticky header area (non-scrolling) */}
+          {stickyHeader && (
+            <Box
+              sx={{
+                flexShrink: 0,
+                px: theme.space.section.sm,
+                py: theme.space.component.sm,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                // Reset child margins/borders since container handles them
+                "& > *": {
+                  mb: "0 !important",
+                  pb: "0 !important",
+                  borderBottom: "none !important",
+                },
+              }}
+            >
+              {stickyHeader}
             </Box>
           )}
 
