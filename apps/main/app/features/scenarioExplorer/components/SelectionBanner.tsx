@@ -92,10 +92,9 @@ export default function SelectionBanner() {
               style={{
                 display: "flex",
                 flexWrap: "wrap",
-                gap: theme.space.gap.sm,
                 listStyle: "none",
                 padding: 0,
-                margin: 0,
+                margin: -6,
               }}
             >
               {selectedScenarios.map((scenarioId) => (
@@ -103,7 +102,12 @@ export default function SelectionBanner() {
                   key={scenarioId}
                   value={scenarioId}
                   as="div"
-                  style={{ cursor: "grab" }}
+                  layout
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  style={{
+                    cursor: "grab",
+                    margin: 6,
+                  }}
                   whileDrag={{ scale: 1.05, cursor: "grabbing" }}
                 >
                   <Chip
