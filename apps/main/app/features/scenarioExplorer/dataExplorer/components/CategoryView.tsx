@@ -607,7 +607,9 @@ export default function CategoryView() {
 
             <AccordionDetails
               sx={{
-                p: theme.space.component.xl,
+                pt: theme.space.component.sm,
+                px: theme.space.component.xl,
+                pb: theme.space.component.xl,
               }}
             >
               {/* Special aligned layout for reservoir-storage category */}
