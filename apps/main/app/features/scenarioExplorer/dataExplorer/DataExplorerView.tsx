@@ -44,7 +44,7 @@ export default function DataExplorerView({
             backgroundColor: theme.palette.background.paper,
             borderBottom: theme.border.light,
             px: { xs: 3, md: 6 },
-            py: 2.5,
+            py: 2,
           }}
         >
           <Typography
@@ -120,38 +120,38 @@ export default function DataExplorerView({
               alignItems: "center",
               height: "100%",
               px: { xs: 3, md: 6 },
-              py: { xs: 6, md: 8 },
+              py: { xs: 4, md: 6 },
             }}
           >
             <Typography
-              variant="body1"
+              variant="body2"
               sx={{
-                display: "block",
-                color: theme.palette.grey[500],
+                color: theme.palette.grey[600],
                 textAlign: "center",
-                mb: theme.space.section.xs,
-                maxWidth: 340,
+                mb: theme.space.section.sm,
+                maxWidth: theme.layout.maxWidth.md,
               }}
             >
-              Select scenarios to view detailed charts, statistics, and export
-              data.
+              Choose scenarios to access detailed charts, aggregate statistics,
+              and data downloads.
             </Typography>
 
-            <Button
-              variant="text"
-              onClick={onNavigateToExplorer}
-              sx={{
-                ...theme.typography.dashboard,
-                textTransform: "none",
-                fontWeight: 500,
-                color: theme.palette.blue.dark,
-                "&:hover": {
-                  backgroundColor: theme.palette.blue.pale,
-                },
-              }}
-            >
-              Choose scenarios →
-            </Button>
+            <Box>
+              <Button
+                variant="contained"
+                onClick={onNavigateToExplorer}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: theme.typography.fontWeightMedium,
+                  backgroundColor: theme.palette.blue.darkest,
+                  "&:hover": {
+                    backgroundColor: theme.palette.blue.dark,
+                  },
+                }}
+              >
+                Choose scenarios
+              </Button>
+            </Box>
           </Box>
         ) : (
           // Data view content based on active sub-tab
