@@ -18,7 +18,7 @@ import {
   CircularProgress,
   Button,
 } from "@repo/ui/mui"
-import { InfoTooltip, CompactSelect } from "@repo/ui"
+import { InfoTooltip, CompactSelect, MobileModal } from "@repo/ui"
 import { ExpandMoreIcon, AddIcon } from "@repo/ui/mui"
 import useSWR from "swr"
 import { useScenarioExplorerStore } from "../../store"
@@ -327,6 +327,63 @@ function MonthlyStorageSection({
 }
 
 /**
+ * ReservoirStorageContent - Inner content for reservoir storage (used in both inline and modal views)
+ */
+function ReservoirStorageContent({
+  scenarios,
+  cellColors,
+}: {
+  scenarios: string[]
+  cellColors: Record<string, Record<string, string>>
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      {/* Storage distribution header */}
+      <Typography
+        variant="smallSectionLabel"
+        sx={{
+          display: "block",
+          mb: theme.space.component.lg,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}
+      >
+        Storage distribution (
+        <InfoTooltip
+          description={
+            <>
+              Shasta · Oroville · Folsom · Trinity
+              <br />
+              New Melones · Millerton · San Luis (CVP & SWP)
+            </>
+          }
+          placement="bottom"
+        >
+          <span
+            style={{
+              textDecoration: "underline",
+              textDecorationStyle: "dotted",
+              cursor: "help",
+            }}
+          >
+            major reservoirs
+          </span>
+        </InfoTooltip>
+        )
+      </Typography>
+
+      {/* Tier outcome visualization */}
+      <StorageTierRow scenarios={scenarios} />
+
+      {/* Percentile distribution section */}
+      <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+    </>
+  )
+}
+
+/**
  * ReservoirStorageSection - Special section for reservoir storage category
  * Fetches per-reservoir tier colors and passes them to the percentile charts
  */
@@ -339,11 +396,17 @@ function ReservoirStorageSection({
 }) {
   const theme = useTheme()
   const cellColors = useReservoirTierColors(scenarios)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <>
       {/* Sticky header outside bordered content for proper scroll behavior */}
-      <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} sticky />
+      <ScenarioHeader
+        scenarios={scenarios}
+        scenarioNames={scenarioNames}
+        sticky
+        onExpand={() => setIsExpanded(true)}
+      />
 
       {/* Content box with border */}
       <Box
@@ -354,46 +417,24 @@ function ReservoirStorageSection({
           p: theme.space.component.lg,
         }}
       >
-        {/* Storage distribution header */}
-        <Typography
-          variant="smallSectionLabel"
-          sx={{
-            display: "block",
-            mb: theme.space.component.lg,
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-          }}
-        >
-          Storage distribution (
-          <InfoTooltip
-            description={
-              <>
-                Shasta · Oroville · Folsom · Trinity
-                <br />
-                New Melones · Millerton · San Luis (CVP & SWP)
-              </>
-            }
-            placement="bottom"
-          >
-            <span
-              style={{
-                textDecoration: "underline",
-                textDecorationStyle: "dotted",
-                cursor: "help",
-              }}
-            >
-              major reservoirs
-            </span>
-          </InfoTooltip>
-          )
-        </Typography>
-
-        {/* Tier outcome visualization */}
-        <StorageTierRow scenarios={scenarios} />
-
-        {/* Percentile distribution section */}
-        <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+        <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
       </Box>
+
+      {/* Expanded modal view */}
+      <MobileModal
+        open={isExpanded}
+        onClose={() => setIsExpanded(false)}
+        title="Reservoir storage"
+        maxWidth="90vw"
+        maxHeight="90vh"
+        contentAriaLabel="Reservoir storage data visualization"
+      >
+        {/* Header row in modal (non-sticky) */}
+        <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
+
+        {/* Full content in modal */}
+        <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
+      </MobileModal>
     </>
   )
 }

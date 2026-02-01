@@ -8,7 +8,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, IconButton, Tooltip, useTheme, icons } from "@repo/ui/mui"
 
 // Layout constants - shared across all aligned components
 export const GRID_LAYOUT = {
@@ -35,11 +35,14 @@ export function ScenarioHeader({
   scenarios,
   scenarioNames,
   sticky = false,
+  onExpand,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
   /** Whether header should stick to top when scrolling */
   sticky?: boolean
+  /** Callback to expand the section in a larger modal view */
+  onExpand?: () => void
 }) {
   const theme = useTheme()
 
@@ -47,11 +50,12 @@ export function ScenarioHeader({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)`,
+        gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)${onExpand ? " auto" : ""}`,
         gap: 0,
         mb: theme.space.component.lg,
         pb: theme.space.component.md,
         borderBottom: theme.border.light,
+        alignItems: "center",
         // Sticky positioning for scroll persistence
         ...(sticky && {
           position: "sticky",
@@ -88,6 +92,27 @@ export function ScenarioHeader({
           </Typography>
         </Box>
       ))}
+
+      {/* Expand button */}
+      {onExpand && (
+        <Tooltip title="Expand view" placement="left">
+          <IconButton
+            size="small"
+            onClick={onExpand}
+            aria-label="Expand to larger view"
+            sx={{
+              ml: theme.space.component.sm,
+              color: theme.palette.grey[400],
+              "&:hover": {
+                color: theme.palette.grey[600],
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+          >
+            <icons.OpenInFull sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      )}
     </Box>
   )
 }
