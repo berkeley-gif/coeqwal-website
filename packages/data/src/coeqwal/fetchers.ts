@@ -20,6 +20,7 @@ import type {
   StatisticsScenariosResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
+  GroupedReservoirPercentilesResponse,
 } from "./types"
 
 /**
@@ -238,6 +239,38 @@ export async function fetchAllReservoirPercentiles(
 
   return apiFetcher<AllReservoirPercentilesResponse>(
     ENDPOINTS.allReservoirPercentiles(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch percentile data for a group of reservoirs in a scenario
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Grouped reservoir percentile data for the scenario
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchGroupedReservoirPercentiles("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "FOLSM": { ... }, "SHSTA": { ... } } }
+ * ```
+ */
+export async function fetchGroupedReservoirPercentiles(
+  scenarioId: string,
+  group: string,
+): Promise<GroupedReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.groupedReservoirPercentiles(scenarioId, group),
     {
       baseUrl: DEFAULT_API_BASE,
     },

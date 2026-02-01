@@ -78,6 +78,14 @@ export const CACHE_KEYS = {
    */
   allReservoirPercentiles: (scenarioId: string) =>
     `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
+
+  /**
+   * Percentile data for a group of reservoirs in a scenario
+   * @param scenarioId - Scenario ID
+   * @param group - Reservoir group (e.g., "major")
+   */
+  groupedReservoirPercentiles: (scenarioId: string, group: string) =>
+    `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
 } as const
 
 /**

@@ -25,4 +25,5 @@ export {
   useScenariosWithPercentiles,
   useReservoirPercentiles,
   useAllReservoirPercentiles,
+  useGroupedReservoirPercentiles,
 } from "./useReservoirPercentiles"

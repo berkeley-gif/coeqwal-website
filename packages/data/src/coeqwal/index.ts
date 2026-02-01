@@ -39,6 +39,8 @@ export type {
   MonthlyPercentiles,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
+  GroupedReservoirData,
+  GroupedReservoirPercentilesResponse,
   ReservoirListResponse,
   StatisticsScenariosResponse,
 } from "./types"
@@ -58,6 +60,7 @@ export {
   fetchScenariosWithPercentiles,
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
+  fetchGroupedReservoirPercentiles,
 } from "./fetchers"
 
 // Re-export hooks for convenience

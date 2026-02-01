@@ -12,7 +12,7 @@ import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
 import type { ReservoirData } from "@repo/viz"
 import type { MonthlyPercentiles } from "@repo/data/coeqwal"
-import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
+import { useGroupedReservoirPercentiles } from "@repo/data/coeqwal/hooks"
 
 interface ReservoirPercentilesSectionProps {
   scenarios: string[]
@@ -26,11 +26,12 @@ interface ReservoirPercentilesSectionProps {
 
 /**
  * Hook to fetch reservoir data for multiple scenarios
+ * Uses the grouped endpoint for major reservoirs
  */
 function useMultiScenarioReservoirData(scenarioIds: string[]) {
   const results = scenarioIds.map((scenarioId) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useAllReservoirPercentiles(scenarioId)
+    return useGroupedReservoirPercentiles(scenarioId, "major")
   })
 
   const isLoading = results.some((r) => r.isLoading)
@@ -50,11 +51,11 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
     Object.entries(result.reservoirs).forEach(([reservoirId, data]) => {
       if (!data) return
 
-      // Build reservoir info
+      // Build reservoir info (grouped API uses 'name' instead of 'reservoir_name')
       if (!reservoirMap[reservoirId]) {
         reservoirMap[reservoirId] = {
-          reservoirId: data.reservoir_id ?? reservoirId,
-          reservoirName: data.reservoir_name ?? reservoirId,
+          reservoirId: reservoirId,
+          reservoirName: data.name ?? reservoirId,
           capacityTaf: data.capacity_taf ?? 0,
           deadPoolTaf: data.dead_pool_taf ?? 0,
         }
