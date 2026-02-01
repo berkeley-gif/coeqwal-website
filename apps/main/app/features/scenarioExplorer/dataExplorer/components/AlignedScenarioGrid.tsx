@@ -49,13 +49,9 @@ export function ScenarioHeader({
   return (
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)${onExpand ? " auto" : ""}`,
-        gap: 0,
         mb: theme.space.component.lg,
         pb: theme.space.component.md,
         borderBottom: theme.border.light,
-        alignItems: "center",
         // Sticky positioning for scroll persistence
         ...(sticky && {
           position: "sticky",
@@ -68,54 +64,71 @@ export function ScenarioHeader({
         }),
       }}
     >
-      {/* Empty cell for label column */}
-      <Box />
-
-      {/* Scenario name headers */}
-      {scenarios.map((scenarioId) => (
+      {/* Expand button row - above scenario headers */}
+      {onExpand && (
         <Box
-          key={scenarioId}
           sx={{
-            textAlign: "center",
-            px: theme.space.component.sm,
+            display: "flex",
+            justifyContent: "flex-end",
+            mb: theme.space.component.sm,
           }}
         >
-          <Typography
-            variant="dashboard"
+          <Button
+            variant="text"
+            size="small"
+            onClick={onExpand}
+            startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
             sx={{
+              color: theme.palette.grey[500],
+              textTransform: "none",
+              ...theme.typography.dashboard,
               fontWeight: 500,
-              color: theme.palette.text.primary,
-              fontFeatureSettings: "'tnum' 1",
+              px: theme.space.component.md,
+              "&:hover": {
+                color: theme.palette.grey[700],
+                backgroundColor: theme.palette.grey[100],
+              },
             }}
           >
-            {scenarioNames[scenarioId] || scenarioId}
-          </Typography>
+            Expand
+          </Button>
         </Box>
-      ))}
-
-      {/* Expand button */}
-      {onExpand && (
-        <Button
-          variant="text"
-          size="small"
-          onClick={onExpand}
-          startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
-          sx={{
-            ml: theme.space.component.md,
-            color: theme.palette.grey[500],
-            textTransform: "none",
-            ...theme.typography.dashboard,
-            fontWeight: 500,
-            px: theme.space.component.md,
-            "&:hover": {
-              color: theme.palette.grey[700],
-              backgroundColor: theme.palette.grey[100],
-            },
-          }}
-        >
-          Expand
-        </Button>
       )}
+
+      {/* Grid for scenario names - matches content grid alignment */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)`,
+          gap: 0,
+          alignItems: "center",
+        }}
+      >
+        {/* Empty cell for label column */}
+        <Box />
+
+        {/* Scenario name headers */}
+        {scenarios.map((scenarioId) => (
+          <Box
+            key={scenarioId}
+            sx={{
+              textAlign: "center",
+              px: theme.space.component.sm,
+            }}
+          >
+            <Typography
+              variant="dashboard"
+              sx={{
+                fontWeight: 500,
+                color: theme.palette.text.primary,
+                fontFeatureSettings: "'tnum' 1",
+              }}
+            >
+              {scenarioNames[scenarioId] || scenarioId}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
     </Box>
   )
 }
