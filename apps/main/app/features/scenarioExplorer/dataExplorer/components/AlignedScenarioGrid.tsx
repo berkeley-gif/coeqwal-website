@@ -49,8 +49,8 @@ export function ScenarioHeader({
   return (
     <Box
       sx={{
-        mb: theme.space.component.lg,
-        pb: theme.space.component.md,
+        mb: theme.space.component.md,
+        pb: theme.space.component.sm,
         borderBottom: theme.border.light,
         // Sticky positioning for scroll persistence
         ...(sticky && {
@@ -58,7 +58,6 @@ export function ScenarioHeader({
           top: 0,
           backgroundColor: theme.palette.background.paper,
           zIndex: 10,
-          pt: theme.space.component.md,
           // Subtle shadow to indicate header is floating
           boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
         }),
@@ -70,7 +69,7 @@ export function ScenarioHeader({
           sx={{
             display: "flex",
             justifyContent: "flex-end",
-            mb: theme.space.component.sm,
+            mb: theme.space.component.xs,
           }}
         >
           <Button
