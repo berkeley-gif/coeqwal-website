@@ -428,10 +428,10 @@ function ReservoirStorageSection({
         maxWidth="90vw"
         maxHeight="90vh"
         contentAriaLabel="Reservoir storage data visualization"
+        stickyHeader={
+          <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
+        }
       >
-        {/* Header row in modal (non-sticky) */}
-        <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
-
         {/* Full content in modal */}
         <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
       </MobileModal>

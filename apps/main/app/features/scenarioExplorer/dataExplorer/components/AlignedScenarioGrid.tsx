@@ -8,7 +8,7 @@
  */
 
 import React from "react"
-import { Box, Typography, IconButton, Tooltip, useTheme, icons } from "@repo/ui/mui"
+import { Box, Typography, Button, useTheme, icons } from "@repo/ui/mui"
 
 // Layout constants - shared across all aligned components
 export const GRID_LAYOUT = {
@@ -95,23 +95,26 @@ export function ScenarioHeader({
 
       {/* Expand button */}
       {onExpand && (
-        <Tooltip title="Expand view" placement="left">
-          <IconButton
-            size="small"
-            onClick={onExpand}
-            aria-label="Expand to larger view"
-            sx={{
-              ml: theme.space.component.sm,
-              color: theme.palette.grey[400],
-              "&:hover": {
-                color: theme.palette.grey[600],
-                backgroundColor: theme.palette.grey[100],
-              },
-            }}
-          >
-            <icons.OpenInFull sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Tooltip>
+        <Button
+          variant="text"
+          size="small"
+          onClick={onExpand}
+          startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
+          sx={{
+            ml: theme.space.component.md,
+            color: theme.palette.grey[500],
+            textTransform: "none",
+            ...theme.typography.dashboard,
+            fontWeight: 500,
+            px: theme.space.component.md,
+            "&:hover": {
+              color: theme.palette.grey[700],
+              backgroundColor: theme.palette.grey[100],
+            },
+          }}
+        >
+          Expand
+        </Button>
       )}
     </Box>
   )
