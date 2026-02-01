@@ -42,6 +42,12 @@ export type {
   PercentileValues,
   MonthlyPercentiles,
 } from "./components/PercentileBandChart"
+export { default as PercentileMatrix } from "./components/PercentileMatrix"
+export type {
+  PercentileMatrixProps,
+  ReservoirData,
+  MatrixCell,
+} from "./components/PercentileMatrix"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"

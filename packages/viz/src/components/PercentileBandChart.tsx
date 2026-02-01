@@ -324,13 +324,16 @@ const PercentileBandChart: React.FC<PercentileBandChartProps> = ({
       .attr("font-weight", "400")
 
     // Add Y axis - minimal style
-    const yAxis = g.append("g").attr("transform", "translate(-8, 0)").call(
-      d3
-        .axisLeft(yScale)
-        .ticks(4)
-        .tickSize(0)
-        .tickFormat((d) => `${d}%`),
-    )
+    const yAxis = g
+      .append("g")
+      .attr("transform", "translate(-8, 0)")
+      .call(
+        d3
+          .axisLeft(yScale)
+          .ticks(4)
+          .tickSize(0)
+          .tickFormat((d) => `${d}%`),
+      )
 
     yAxis.select(".domain").remove() // Remove axis line
     yAxis

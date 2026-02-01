@@ -666,7 +666,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
   // RESERVOIR STORAGE
   {
     id: "reservoir-storage-tier",
-    name: "Reservoir storage tier",
+    name: "Reservoir storage",
     category: "reservoir-storage",
     unit: "tier",
     temporal: ["period-of-record"],

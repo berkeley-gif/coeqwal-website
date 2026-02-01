@@ -44,11 +44,11 @@ export default function DataExplorerView({
             backgroundColor: theme.palette.background.paper,
             borderBottom: theme.border.light,
             px: { xs: 3, md: 6 },
-            py: 2,
+            py: 2.5,
           }}
         >
           <Typography
-            variant="h5"
+            variant="subtitle2"
             sx={{
               color: theme.palette.text.primary,
             }}
@@ -74,25 +74,25 @@ export default function DataExplorerView({
               indicator: {
                 style: {
                   height: 2,
-                  backgroundColor: theme.palette.blue.darkest,
+                  backgroundColor: theme.palette.text.primary,
                 },
               },
             }}
             sx={{
-              minHeight: 48,
+              minHeight: 44,
               "& .MuiTab-root": {
-                ...theme.typography.nav,
-                minHeight: 48,
+                minHeight: 44,
                 textTransform: "none",
-                fontWeight: theme.typography.fontWeightMedium,
-                color: theme.palette.grey[600],
+                ...theme.typography.dashboard,
+                fontWeight: 500,
+                color: theme.palette.grey[500],
                 px: 0,
-                mr: theme.space.section.md,
+                mr: theme.space.section.sm,
                 "&.Mui-selected": {
-                  color: theme.palette.blue.darkest,
+                  color: theme.palette.text.primary,
                 },
                 "&:hover": {
-                  color: theme.palette.blue.darkest,
+                  color: theme.palette.text.primary,
                 },
               },
             }}
@@ -120,38 +120,38 @@ export default function DataExplorerView({
               alignItems: "center",
               height: "100%",
               px: { xs: 3, md: 6 },
-              py: { xs: 4, md: 6 },
+              py: { xs: 6, md: 8 },
             }}
           >
             <Typography
-              variant="body2"
+              variant="body1"
               sx={{
-                color: theme.palette.grey[600],
+                display: "block",
+                color: theme.palette.grey[500],
                 textAlign: "center",
-                mb: theme.space.section.sm,
-                maxWidth: theme.layout.maxWidth.md,
+                mb: theme.space.section.xs,
+                maxWidth: 340,
               }}
             >
-              Choose scenarios to access detailed charts, aggregate statistics,
-              and data downloads.
+              Select scenarios to view detailed charts, statistics, and export
+              data.
             </Typography>
 
-            <Box>
-              <Button
-                variant="contained"
-                onClick={onNavigateToExplorer}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: theme.typography.fontWeightMedium,
-                  backgroundColor: theme.palette.blue.darkest,
-                  "&:hover": {
-                    backgroundColor: theme.palette.blue.dark,
-                  },
-                }}
-              >
-                Choose scenarios
-              </Button>
-            </Box>
+            <Button
+              variant="text"
+              onClick={onNavigateToExplorer}
+              sx={{
+                ...theme.typography.dashboard,
+                textTransform: "none",
+                fontWeight: 500,
+                color: theme.palette.blue.dark,
+                "&:hover": {
+                  backgroundColor: theme.palette.blue.pale,
+                },
+              }}
+            >
+              Choose scenarios →
+            </Button>
           </Box>
         ) : (
           // Data view content based on active sub-tab

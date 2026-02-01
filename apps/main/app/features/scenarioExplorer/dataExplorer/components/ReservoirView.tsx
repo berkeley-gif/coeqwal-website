@@ -20,7 +20,10 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { PercentileBandChart } from "@repo/viz"
-import type { MonthlyPercentiles, ReservoirPercentiles } from "@repo/data/coeqwal"
+import type {
+  MonthlyPercentiles,
+  ReservoirPercentiles,
+} from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
 import { useScenarioExplorerStore } from "../../store"
 
