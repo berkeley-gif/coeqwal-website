@@ -76,7 +76,9 @@ export function CompactSelect<T extends string = string>({
           ...theme.typography.dashboard,
           py: 0.5,
           px: 1.5,
-          color: hasValue ? theme.palette.text.primary : theme.palette.grey[400],
+          color: hasValue
+            ? theme.palette.text.primary
+            : theme.palette.grey[400],
         },
         "& .MuiOutlinedInput-notchedOutline": {
           borderColor: theme.palette.grey[300],
