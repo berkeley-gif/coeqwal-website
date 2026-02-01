@@ -341,56 +341,60 @@ function ReservoirStorageSection({
   const cellColors = useReservoirTierColors(scenarios)
 
   return (
-    <Box
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: theme.borderRadius.md,
-        border: theme.border.light,
-        p: theme.space.component.lg,
-      }}
-    >
+    <>
+      {/* Sticky header outside bordered content for proper scroll behavior */}
       <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} sticky />
 
-      {/* Storage distribution header */}
-      <Typography
-        variant="smallSectionLabel"
+      {/* Content box with border */}
+      <Box
         sx={{
-          display: "block",
-          mb: theme.space.component.lg,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          p: theme.space.component.lg,
         }}
       >
-        Storage distribution (
-        <InfoTooltip
-          description={
-            <>
-              Shasta · Oroville · Folsom · Trinity
-              <br />
-              New Melones · Millerton · San Luis (CVP & SWP)
-            </>
-          }
-          placement="bottom"
+        {/* Storage distribution header */}
+        <Typography
+          variant="smallSectionLabel"
+          sx={{
+            display: "block",
+            mb: theme.space.component.lg,
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+          }}
         >
-          <span
-            style={{
-              textDecoration: "underline",
-              textDecorationStyle: "dotted",
-              cursor: "help",
-            }}
+          Storage distribution (
+          <InfoTooltip
+            description={
+              <>
+                Shasta · Oroville · Folsom · Trinity
+                <br />
+                New Melones · Millerton · San Luis (CVP & SWP)
+              </>
+            }
+            placement="bottom"
           >
-            major reservoirs
-          </span>
-        </InfoTooltip>
-        )
-      </Typography>
+            <span
+              style={{
+                textDecoration: "underline",
+                textDecorationStyle: "dotted",
+                cursor: "help",
+              }}
+            >
+              major reservoirs
+            </span>
+          </InfoTooltip>
+          )
+        </Typography>
 
-      {/* Tier outcome visualization */}
-      <StorageTierRow scenarios={scenarios} />
+        {/* Tier outcome visualization */}
+        <StorageTierRow scenarios={scenarios} />
 
-      {/* Percentile distribution section */}
-      <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
-    </Box>
+        {/* Percentile distribution section */}
+        <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+      </Box>
+    </>
   )
 }
 
