@@ -349,7 +349,7 @@ function ReservoirStorageSection({
         p: theme.space.component.lg,
       }}
     >
-      <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
+      <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} sticky />
 
       {/* Storage distribution header */}
       <Typography
