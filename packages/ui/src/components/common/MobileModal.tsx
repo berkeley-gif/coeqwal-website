@@ -1,5 +1,7 @@
 "use client"
 
+// TODO: rename. Not just a mobile modal component
+
 /**
  * MobileModal - Reusable mobile modal component
  *
