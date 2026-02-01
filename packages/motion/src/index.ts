@@ -14,6 +14,8 @@ export {
   // WCAG 2.3.3: Reduced motion support
   MotionConfig,
   useReducedMotion,
+  // Drag-to-reorder support
+  Reorder,
 } from "framer-motion"
 
 export { interpolate as FlubberInterpolate } from "flubber"

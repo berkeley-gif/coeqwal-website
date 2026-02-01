@@ -35,7 +35,7 @@ import { useMetricData } from "../hooks/useMetricData"
 import ReservoirPercentilesSection from "./ReservoirPercentilesSection"
 import { ScenarioHeader, GRID_LAYOUT } from "./AlignedScenarioGrid"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
-import { useScenarios } from "@repo/data/coeqwal/hooks"
+import { useScenarioList } from "../../../scenarios/hooks"
 
 /**
  * Helper function to detect if tier data represents a single value (vs a distribution)
@@ -333,26 +333,17 @@ export default function CategoryView() {
   const theme = useTheme()
   const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
   const [expanded, setExpanded] = React.useState<string[]>([])
-  // Scenario list is cached by SWR - multiple components share the same data
-  const { scenarios: scenarioList } = useScenarios()
-
-  // Pre-build a lookup map from the scenario list (O(n) once)
-  const scenarioLookup = useMemo(() => {
-    const lookup = new Map<string, string>()
-    scenarioList?.forEach((s) => {
-      lookup.set(s.scenario_id, s.short_title)
-    })
-    return lookup
-  }, [scenarioList])
+  // Use the same hook as SelectionBanner for consistent scenario names
+  const { getDisplayName } = useScenarioList()
 
   // Build scenario ID -> display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {
     const names: Record<string, string> = {}
     selectedScenarios.forEach((id) => {
-      names[id] = scenarioLookup.get(id) || id
+      names[id] = getDisplayName(id)
     })
     return names
-  }, [selectedScenarios, scenarioLookup])
+  }, [selectedScenarios, getDisplayName])
 
   const handleAccordionChange = (categoryId: string) => {
     setExpanded((prev) =>
