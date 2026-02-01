@@ -9,7 +9,7 @@
  */
 
 import { Box, Typography, Button, Chip, useTheme } from "@repo/ui/mui"
-import { motion, AnimatePresence } from "@repo/motion"
+import { motion, AnimatePresence, Reorder } from "@repo/motion"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 
@@ -18,7 +18,7 @@ import { useScenarioList } from "../../scenarios/hooks"
  */
 export default function SelectionBanner() {
   const theme = useTheme()
-  const { selectedScenarios, clearScenarios, toggleScenario } =
+  const { selectedScenarios, clearScenarios, toggleScenario, selectScenarios } =
     useScenarioExplorerStore()
   const { getDisplayName } = useScenarioList()
 
@@ -83,35 +83,49 @@ export default function SelectionBanner() {
               </Button>
             </Box>
 
-            {/* Scenario chips (wrap as needed) */}
-            <Box
-              sx={{
+            {/* Scenario chips (drag to reorder) */}
+            <Reorder.Group
+              axis="x"
+              values={selectedScenarios}
+              onReorder={selectScenarios}
+              as="div"
+              style={{
                 display: "flex",
                 flexWrap: "wrap",
                 gap: theme.space.gap.sm,
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
               }}
             >
               {selectedScenarios.map((scenarioId) => (
-                <Chip
+                <Reorder.Item
                   key={scenarioId}
-                  label={getDisplayName(scenarioId)}
-                  onDelete={() => toggleScenario(scenarioId)}
-                  size="small"
-                  sx={{
-                    backgroundColor: theme.palette.grey[100],
-                    color: theme.palette.blue.darkest,
-                    fontWeight: theme.typography.fontWeightMedium,
-                    "& .MuiChip-deleteIcon": {
-                      color: theme.palette.grey[400],
-                      fontSize: "1rem",
-                      "&:hover": {
-                        color: theme.palette.grey[600],
+                  value={scenarioId}
+                  as="div"
+                  style={{ cursor: "grab" }}
+                  whileDrag={{ scale: 1.05, cursor: "grabbing" }}
+                >
+                  <Chip
+                    label={getDisplayName(scenarioId)}
+                    onDelete={() => toggleScenario(scenarioId)}
+                    size="small"
+                    sx={{
+                      backgroundColor: theme.palette.grey[100],
+                      color: theme.palette.blue.darkest,
+                      fontWeight: theme.typography.fontWeightMedium,
+                      "& .MuiChip-deleteIcon": {
+                        color: theme.palette.grey[400],
+                        fontSize: "1rem",
+                        "&:hover": {
+                          color: theme.palette.grey[600],
+                        },
                       },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                </Reorder.Item>
               ))}
-            </Box>
+            </Reorder.Group>
           </Box>
         </motion.div>
       )}
