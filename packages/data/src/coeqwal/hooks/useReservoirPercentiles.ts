@@ -13,12 +13,14 @@ import {
   fetchScenariosWithPercentiles,
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
+  fetchGroupedReservoirPercentiles,
 } from "../fetchers"
 import type {
   ReservoirListResponse,
   StatisticsScenariosResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
+  GroupedReservoirPercentilesResponse,
 } from "../types"
 
 /**
@@ -205,6 +207,64 @@ export function useAllReservoirPercentiles(scenarioId: string | null) {
   return {
     data,
     scenarioId: data?.scenario_id,
+    reservoirs: data?.reservoirs ?? {},
+    isLoading,
+    error,
+    hasData: !!data && Object.keys(data.reservoirs).length > 0,
+  }
+}
+
+/**
+ * Fetch percentile data for a group of reservoirs in a scenario
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Grouped reservoir percentile data with loading and error states
+ *
+ * @example
+ * ```typescript
+ * function MajorReservoirGrid({ scenarioId }) {
+ *   const { data, isLoading } = useGroupedReservoirPercentiles(scenarioId, "major")
+ *
+ *   if (isLoading) return <Spinner />
+ *
+ *   return (
+ *     <Grid>
+ *       {Object.entries(data?.reservoirs ?? {}).map(([id, reservoir]) => (
+ *         <ReservoirCard key={id} name={reservoir.name} percentiles={reservoir.monthly_percentiles} />
+ *       ))}
+ *     </Grid>
+ *   )
+ * }
+ * ```
+ */
+export function useGroupedReservoirPercentiles(
+  scenarioId: string | null,
+  group: string | null,
+) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<GroupedReservoirPercentilesResponse>(
+    scenarioId && group
+      ? CACHE_KEYS.groupedReservoirPercentiles(scenarioId, group)
+      : null,
+    () =>
+      scenarioId && group
+        ? fetchGroupedReservoirPercentiles(scenarioId, group)
+        : Promise.reject(new Error("Missing parameters")),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    group: data?.group,
     reservoirs: data?.reservoirs ?? {},
     isLoading,
     error,

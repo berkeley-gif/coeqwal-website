@@ -249,6 +249,33 @@ export interface AllReservoirPercentilesResponse {
 }
 
 /**
+ * Reservoir data in grouped percentiles response
+ * Uses shorter reservoir IDs (e.g., "FOLSM" instead of "S_FOLSM")
+ */
+export interface GroupedReservoirData {
+  /** Human-readable name (e.g., "Folsom") */
+  name: string
+  /** Total reservoir capacity in thousand acre-feet */
+  capacity_taf: number
+  /** Dead pool storage in thousand acre-feet */
+  dead_pool_taf: number
+  /** Monthly percentile data */
+  monthly_percentiles: MonthlyPercentiles
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/reservoir-percentiles?group=:group
+ * Returns reservoirs for a specific group (e.g., "major")
+ */
+export interface GroupedReservoirPercentilesResponse {
+  scenario_id: string
+  /** Reservoir group (e.g., "major") */
+  group: string
+  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
+  reservoirs: Record<string, GroupedReservoirData>
+}
+
+/**
  * Response from /api/statistics/reservoirs endpoint
  */
 export interface ReservoirListResponse {

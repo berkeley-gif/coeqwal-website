@@ -56,4 +56,12 @@ export const ENDPOINTS = {
    */
   allReservoirPercentiles: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
+
+  /**
+   * Percentile data for a group of reservoirs in a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param group - Reservoir group (e.g., "major")
+   */
+  groupedReservoirPercentiles: (scenarioId: string, group: string) =>
+    `/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
 } as const
