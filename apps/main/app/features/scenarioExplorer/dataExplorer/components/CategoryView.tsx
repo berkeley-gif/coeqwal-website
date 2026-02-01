@@ -17,11 +17,9 @@ import {
   useTheme,
   CircularProgress,
   Button,
-  Select,
-  MenuItem,
 } from "@repo/ui/mui"
-import { InfoTooltip } from "@repo/ui"
-import { ExpandMoreIcon } from "@repo/ui/mui"
+import { InfoTooltip, CompactSelect } from "@repo/ui"
+import { ExpandMoreIcon, AddIcon } from "@repo/ui/mui"
 import useSWR from "swr"
 import { useScenarioExplorerStore } from "../../store"
 import { VerticalBarChart, TierCircles } from "@repo/viz"
@@ -35,6 +33,7 @@ import { useMetricData } from "../hooks/useMetricData"
 import ReservoirPercentilesSection from "./ReservoirPercentilesSection"
 import { ScenarioHeader, GRID_LAYOUT } from "./AlignedScenarioGrid"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
+import { useReservoirList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
 
 /**
@@ -199,6 +198,11 @@ type StorageDisplayMode = "percentage" | "volume"
  * MonthlyStorageSection - Section header with display mode dropdown
  * Wraps ReservoirPercentilesSection with a toggle for percentage vs volume display
  */
+const STORAGE_DISPLAY_OPTIONS = [
+  { value: "percentage" as const, label: "as percentage of capacity" },
+  { value: "volume" as const, label: "by volume" },
+]
+
 function MonthlyStorageSection({
   scenarios,
   cellColors,
@@ -209,43 +213,107 @@ function MonthlyStorageSection({
   const theme = useTheme()
   const [displayMode, setDisplayMode] =
     useState<StorageDisplayMode>("percentage")
+  const [selectedReservoir, setSelectedReservoir] = useState<string>("")
+  const { reservoirs, isLoading: reservoirsLoading } = useReservoirList()
+
+  // Build reservoir options for CompactSelect
+  const reservoirOptions = useMemo(
+    () =>
+      reservoirs.map((r) => ({
+        value: r.reservoir_id,
+        label: r.reservoir_name,
+      })),
+    [reservoirs],
+  )
+
+  const handleAddReservoir = () => {
+    if (selectedReservoir) {
+      // TODO: Add reservoir to the display list
+      console.log("Adding reservoir:", selectedReservoir)
+      setSelectedReservoir("")
+    }
+  }
 
   return (
     <Box sx={{ mt: theme.space.section.sm }}>
-      {/* Header with label and dropdown */}
+      {/* Header row with left controls and right add-reservoir */}
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
-          gap: theme.space.gap.md,
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: theme.space.gap.lg,
           mb: theme.space.component.lg,
         }}
       >
-        <Typography
-          variant="smallSectionLabel"
+        {/* Left side: label and display mode dropdown */}
+        <Box
           sx={{
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.gap.md,
           }}
         >
-          Monthly storage
-        </Typography>
-        <Select
-          value={displayMode}
-          onChange={(e) => setDisplayMode(e.target.value as StorageDisplayMode)}
-          size="small"
+          <Typography
+            variant="smallSectionLabel"
+            sx={{
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Monthly storage
+          </Typography>
+          <CompactSelect
+            value={displayMode}
+            onChange={setDisplayMode}
+            options={STORAGE_DISPLAY_OPTIONS}
+            aria-label="Storage display mode"
+          />
+        </Box>
+
+        {/* Right side: add reservoir dropdown and button */}
+        <Box
           sx={{
-            ...theme.typography.compactCaption,
-            minWidth: 180,
-            "& .MuiSelect-select": {
-              py: 0.5,
-              px: 1.5,
-            },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: theme.space.gap.sm,
           }}
         >
-          <MenuItem value="percentage">as percentage of capacity</MenuItem>
-          <MenuItem value="volume">by volume</MenuItem>
-        </Select>
+          <CompactSelect
+            value={selectedReservoir}
+            onChange={setSelectedReservoir}
+            options={reservoirOptions}
+            placeholder="add a reservoir"
+            disabled={reservoirsLoading}
+            minWidth={180}
+            maxMenuHeight={300}
+            aria-label="Select reservoir to add"
+          />
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+            onClick={handleAddReservoir}
+            disabled={!selectedReservoir}
+            sx={{
+              ...theme.typography.dashboard,
+              textTransform: "none",
+              color: selectedReservoir
+                ? theme.palette.blue.dark
+                : theme.palette.grey[400],
+              px: theme.space.component.md,
+              "&:hover": {
+                backgroundColor: theme.palette.blue.pale,
+              },
+              "&.Mui-disabled": {
+                color: theme.palette.grey[300],
+              },
+            }}
+          >
+            Add
+          </Button>
+        </Box>
       </Box>
 
       {/* The percentile charts */}

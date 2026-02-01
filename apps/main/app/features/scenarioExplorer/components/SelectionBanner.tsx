@@ -94,7 +94,7 @@ export default function SelectionBanner() {
                 flexWrap: "wrap",
                 listStyle: "none",
                 padding: 0,
-                margin: -6,
+                margin: -8,
               }}
             >
               {selectedScenarios.map((scenarioId) => (
@@ -103,10 +103,10 @@ export default function SelectionBanner() {
                   value={scenarioId}
                   as="div"
                   layout
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  transition={{ type: "spring", stiffness: 1200, damping: 60 }}
                   style={{
                     cursor: "grab",
-                    margin: 6,
+                    margin: 8,
                   }}
                   whileDrag={{ scale: 1.05, cursor: "grabbing" }}
                 >

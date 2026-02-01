@@ -44,6 +44,11 @@ export { CompactSearchBar } from "./common/CompactSearchBar"
 export type { CompactSearchBarProps } from "./common/CompactSearchBar"
 export { InfoOverlay } from "./common/InfoOverlay"
 export type { InfoOverlayProps } from "./common/InfoOverlay"
+export { CompactSelect } from "./common/CompactSelect"
+export type {
+  CompactSelectProps,
+  CompactSelectOption,
+} from "./common/CompactSelect"
 
 // Panel components
 export { Panel } from "./panels/Panel"
