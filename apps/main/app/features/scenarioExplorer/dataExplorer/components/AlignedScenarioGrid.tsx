@@ -34,9 +34,12 @@ interface AlignedScenarioGridProps {
 export function ScenarioHeader({
   scenarios,
   scenarioNames,
+  sticky = false,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Whether header should stick to top when scrolling */
+  sticky?: boolean
 }) {
   const theme = useTheme()
 
@@ -49,6 +52,16 @@ export function ScenarioHeader({
         mb: theme.space.component.lg,
         pb: theme.space.component.md,
         borderBottom: theme.border.light,
+        // Sticky positioning for scroll persistence
+        ...(sticky && {
+          position: "sticky",
+          top: 0,
+          backgroundColor: theme.palette.background.paper,
+          zIndex: 10,
+          pt: theme.space.component.md,
+          // Subtle shadow to indicate header is floating
+          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+        }),
       }}
     >
       {/* Empty cell for label column */}
