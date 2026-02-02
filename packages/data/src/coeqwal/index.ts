@@ -43,6 +43,9 @@ export type {
   GroupedReservoirPercentilesResponse,
   ReservoirListResponse,
   StatisticsScenariosResponse,
+  // Storage monthly types (dual-unit)
+  StorageMonthlyReservoirData,
+  StorageMonthlyResponse,
 } from "./types"
 
 // API constants
@@ -61,6 +64,7 @@ export {
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
+  fetchStorageMonthly,
 } from "./fetchers"
 
 // Re-export hooks for convenience

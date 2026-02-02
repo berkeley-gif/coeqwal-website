@@ -289,3 +289,34 @@ export interface StatisticsScenariosResponse {
   scenarios: StatisticsScenarioInfo[]
   total: number
 }
+
+// ============================================================================
+// Storage Monthly Types (for dual-unit percentile charts)
+// ============================================================================
+
+/**
+ * Reservoir data in storage-monthly response
+ * Contains both percentage and TAF values for percentile bands
+ */
+export interface StorageMonthlyReservoirData {
+  /** Human-readable name (e.g., "Shasta") */
+  name: string
+  /** Total reservoir capacity in thousand acre-feet */
+  capacity_taf: number
+  /** Monthly percentile data as percentage of capacity (0-100+) */
+  monthly_percent: MonthlyPercentiles
+  /** Monthly percentile data as volume in TAF */
+  monthly_taf: MonthlyPercentiles
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/storage-monthly?group=:group
+ * Returns reservoirs with both percentage and TAF percentile data
+ */
+export interface StorageMonthlyResponse {
+  scenario_id: string
+  /** Reservoir group (e.g., "major") */
+  group: string
+  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
+  reservoirs: Record<string, StorageMonthlyReservoirData>
+}

@@ -5,6 +5,7 @@
  *
  * Displays a matrix with scenarios as columns and reservoirs as rows.
  * Uses shared axes for efficient comparison across all combinations.
+ * Supports both percentage of capacity and absolute TAF display modes.
  */
 
 import React from "react"
@@ -12,7 +13,10 @@ import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
 import type { ReservoirData } from "@repo/viz"
 import type { MonthlyPercentiles } from "@repo/data/coeqwal"
-import { useGroupedReservoirPercentiles } from "@repo/data/coeqwal/hooks"
+import { useStorageMonthly } from "@repo/data/coeqwal/hooks"
+import { useChartGridLayout, CHART_GRID } from "./ChartGridContext"
+
+export type StorageDisplayMode = "percentage" | "volume"
 
 interface ReservoirPercentilesSectionProps {
   scenarios: string[]
@@ -22,16 +26,21 @@ interface ReservoirPercentilesSectionProps {
   showScenarioHeaders?: boolean
   /** Map of scenarioId -> reservoirId -> tier color (for coloring individual cells) */
   cellColors?: Record<string, Record<string, string>>
+  /** Display mode: percentage of capacity or volume in TAF */
+  displayMode?: StorageDisplayMode
 }
 
 /**
  * Hook to fetch reservoir data for multiple scenarios
- * Uses the grouped endpoint for major reservoirs
+ * Uses the storage-monthly endpoint which provides both percentage and TAF data
  */
-function useMultiScenarioReservoirData(scenarioIds: string[]) {
+function useMultiScenarioReservoirData(
+  scenarioIds: string[],
+  displayMode: StorageDisplayMode,
+) {
   const results = scenarioIds.map((scenarioId) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useGroupedReservoirPercentiles(scenarioId, "major")
+    return useStorageMonthly(scenarioId, "major")
   })
 
   const isLoading = results.some((r) => r.isLoading)
@@ -51,21 +60,23 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
     Object.entries(result.reservoirs).forEach(([reservoirId, data]) => {
       if (!data) return
 
-      // Build reservoir info (grouped API uses 'name' instead of 'reservoir_name')
+      // Build reservoir info
       if (!reservoirMap[reservoirId]) {
         reservoirMap[reservoirId] = {
           reservoirId: reservoirId,
           reservoirName: data.name ?? reservoirId,
           capacityTaf: data.capacity_taf ?? 0,
-          deadPoolTaf: data.dead_pool_taf ?? 0,
+          deadPoolTaf: 0, // storage-monthly doesn't include dead_pool_taf
         }
       }
 
       // Build matrix data: reservoirId -> scenarioId -> percentile data
+      // Select appropriate data based on display mode
       if (!matrixData[reservoirId]) {
         matrixData[reservoirId] = {}
       }
-      matrixData[reservoirId][scenarioId] = data.monthly_percentiles
+      matrixData[reservoirId][scenarioId] =
+        displayMode === "volume" ? data.monthly_taf : data.monthly_percent
     })
   })
 
@@ -82,11 +93,17 @@ export default function ReservoirPercentilesSection({
   labelColumnWidth = 100,
   showScenarioHeaders = true,
   cellColors,
+  displayMode = "percentage",
 }: ReservoirPercentilesSectionProps) {
   const theme = useTheme()
+  const gridLayout = useChartGridLayout()
 
   const { reservoirs, matrixData, isLoading, error } =
-    useMultiScenarioReservoirData(scenarios)
+    useMultiScenarioReservoirData(scenarios, displayMode)
+
+  // When inside a grid context, don't constrain cell width - let the matrix expand to fill
+  // Only apply maxCellWidth constraint when used standalone (no grid context)
+  const maxCellWidth = gridLayout ? undefined : CHART_GRID.maxCellWidth
 
   // Build scenario display names
   const scenarioNames: Record<string, string> = {}
@@ -166,19 +183,6 @@ export default function ReservoirPercentilesSection({
 
   return (
     <Box>
-      {/* Summary text */}
-      <Typography
-        variant="dashboard"
-        sx={{
-          display: "block",
-          color: theme.palette.grey[600],
-          mb: theme.space.component.lg,
-        }}
-      >
-        Water year (Oct–Sep) · {scenarios.length} scenario
-        {scenarios.length !== 1 ? "s" : ""} · {reservoirs.length} reservoirs
-      </Typography>
-
       {/* Matrix visualization */}
       <Box
         sx={{
@@ -197,6 +201,7 @@ export default function ReservoirPercentilesSection({
           labelColumnWidth={labelColumnWidth}
           showScenarioHeaders={showScenarioHeaders}
           cellColors={cellColors}
+          maxCellWidth={maxCellWidth}
         />
       </Box>
     </Box>

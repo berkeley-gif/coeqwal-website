@@ -26,4 +26,5 @@ export {
   useReservoirPercentiles,
   useAllReservoirPercentiles,
   useGroupedReservoirPercentiles,
+  useStorageMonthly,
 } from "./useReservoirPercentiles"
