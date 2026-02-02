@@ -52,6 +52,7 @@ export interface MatrixCell {
 }
 
 export type MatrixDisplayMode = "percentage" | "volume"
+export type VolumeScaleMode = "absolute" | "relative"
 
 export interface PercentileMatrixProps {
   /** Array of reservoir metadata */
@@ -78,6 +79,8 @@ export interface PercentileMatrixProps {
   maxCellWidth?: number
   /** Display mode: percentage (0-100% of capacity) or volume (TAF values) */
   displayMode?: MatrixDisplayMode
+  /** Y-axis scale mode for volume: absolute (shared scale) or relative (per-reservoir capacity) */
+  volumeScaleMode?: VolumeScaleMode
 }
 
 // Water month labels (short - for axis)
@@ -138,6 +141,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   cellColors,
   maxCellWidth = 250,
   displayMode = "percentage",
+  volumeScaleMode = "absolute",
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -150,11 +154,15 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   useEffect(() => {
     if (responsive && dimensions) {
       setCurrentWidth(dimensions.width)
-      // Calculate height based on number of reservoirs
-      const calculatedHeight = Math.max(
-        400,
-        reservoirs.length * 190 + 80, // 190px per row + header/footer
-      )
+      // Scale row height based on number of scenarios
+      // Fewer scenarios = taller rows (bigger charts)
+      const rowHeight =
+        scenarios.length <= 2
+          ? 280 // Large charts for 1-2 scenarios
+          : scenarios.length <= 4
+            ? 230 // Medium charts for 3-4 scenarios
+            : 190 // Compact charts for 5+ scenarios
+      const calculatedHeight = Math.max(400, reservoirs.length * rowHeight + 80)
       setCurrentHeight(
         Math.min(calculatedHeight, dimensions.height || calculatedHeight),
       )
@@ -185,10 +193,21 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Calculate cell dimensions with even distribution (space-evenly approach)
     // Each scenario gets an equal "slot" of the available width
     const slotWidth = innerWidth / scenarios.length
-    // When maxCellWidth is undefined, use full slot width (no constraint)
+    // Scale maxCellWidth based on scenario count - fewer scenarios = wider cells allowed
+    // With 1-2 scenarios, no constraint. With 3-4, generous limit. With 5+, compact.
+    const effectiveMaxCellWidth =
+      maxCellWidth !== undefined
+        ? maxCellWidth
+        : scenarios.length <= 2
+          ? undefined // No constraint for 1-2 scenarios
+          : scenarios.length <= 4
+            ? 400 // Generous limit for 3-4 scenarios
+            : 300 // Moderate limit for 5+ scenarios
     const cellWidth =
-      maxCellWidth !== undefined ? Math.min(slotWidth, maxCellWidth) : slotWidth
-    // Offset within each slot to center the cell
+      effectiveMaxCellWidth !== undefined
+        ? Math.min(slotWidth, effectiveMaxCellWidth)
+        : slotWidth
+    // Offset within each slot to center the cell (0 when cell fills slot)
     const cellOffsetInSlot = (slotWidth - cellWidth) / 2
     const cellHeight = (innerHeight - colHeaderHeight) / reservoirs.length
     const chartPadding = { top: 8, right: 8, bottom: 24, left: 4 }
@@ -203,35 +222,61 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
     if (chartWidth <= 0 || chartHeight <= 0) return
 
-    // Calculate Y domain based on display mode
-    let yDomain: [number, number]
+    // Calculate Y domain based on display mode and scale mode
+    // For volume + relative: each reservoir has its own domain (0 to capacity)
+    // For volume + absolute: shared domain based on max across all
+    // For percentage: shared domain (0-100)
+    let sharedYDomain: [number, number] = [0, 100]
+    const perReservoirYDomains: Record<string, [number, number]> = {}
+
     if (displayMode === "volume") {
-      // Find max value across all data for volume mode
-      let maxValue = 0
-      reservoirs.forEach((reservoir) => {
-        scenarios.forEach((scenarioId) => {
-          const cellData = data[reservoir.reservoirId]?.[scenarioId]
-          if (cellData) {
-            for (let i = 1; i <= 12; i++) {
-              const monthData = cellData[i.toString()]
-              if (monthData?.q100) {
-                maxValue = Math.max(maxValue, monthData.q100)
+      if (volumeScaleMode === "relative") {
+        // Each reservoir uses its own capacity as the max
+        reservoirs.forEach((reservoir) => {
+          const capacity = reservoir.capacityTaf
+          // Round up to a nice number
+          const maxY = Math.ceil((capacity * 1.05) / 500) * 500
+          perReservoirYDomains[reservoir.reservoirId] = [0, maxY]
+        })
+      } else {
+        // Absolute mode: find max value across all data
+        let maxValue = 0
+        reservoirs.forEach((reservoir) => {
+          scenarios.forEach((scenarioId) => {
+            const cellData = data[reservoir.reservoirId]?.[scenarioId]
+            if (cellData) {
+              for (let i = 1; i <= 12; i++) {
+                const monthData = cellData[i.toString()]
+                if (monthData?.q100) {
+                  maxValue = Math.max(maxValue, monthData.q100)
+                }
               }
             }
-          }
+          })
+          // Also consider capacity as a reference
+          maxValue = Math.max(maxValue, reservoir.capacityTaf)
         })
-        // Also consider capacity as a reference
-        maxValue = Math.max(maxValue, reservoir.capacityTaf)
-      })
-      // Round up to a nice number with 10% headroom
-      yDomain = [0, Math.ceil((maxValue * 1.1) / 500) * 500]
-    } else {
-      yDomain = [0, 100]
+        // Round up to a nice number with 10% headroom
+        sharedYDomain = [0, Math.ceil((maxValue * 1.1) / 500) * 500]
+      }
     }
 
-    // Scales (shared across all cells)
+    // Helper to get Y domain for a reservoir
+    const getYDomain = (reservoirId: string): [number, number] => {
+      if (displayMode === "volume" && volumeScaleMode === "relative") {
+        return perReservoirYDomains[reservoirId] || [0, 5000]
+      }
+      return sharedYDomain
+    }
+
+    // Helper to get Y scale for a reservoir
+    const getYScale = (reservoirId: string) => {
+      const domain = getYDomain(reservoirId)
+      return d3.scaleLinear().domain(domain).range([chartHeight, 0])
+    }
+
+    // X scale (shared across all cells)
     const xScale = d3.scaleLinear().domain([0, 11]).range([0, chartWidth])
-    const yScale = d3.scaleLinear().domain(yDomain).range([chartHeight, 0])
 
     // Main group
     const g = svg
@@ -392,25 +437,30 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       }
     })
 
-    // Y-axis tick values for gridlines within charts
-    const yAxisTicks =
-      displayMode === "volume"
-        ? d3.ticks(yDomain[0], yDomain[1], 5) // Generate ~5 nice tick values
-        : [0, 20, 40, 60, 80, 100] // Percentage gridlines at 20% intervals
-
     // Draw horizontal gridlines within chart cells
     const gridStartX = getCellX(0) // Start at first chart cell
     const gridEndX = getCellX(scenarios.length - 1) + cellWidth // End at last chart cell
     const fullLeftX = -margin.left + 5 // Full width for row dividers (aligned with title block)
-    yAxisTicks.forEach((val) => {
-      reservoirs.forEach((_, rowIndex) => {
+
+    // Draw per-reservoir gridlines and Y-axis labels
+    reservoirs.forEach((reservoir, rowIndex) => {
+      const reservoirYDomain = getYDomain(reservoir.reservoirId)
+      const reservoirYScale = getYScale(reservoir.reservoirId)
+
+      // Generate tick values for this reservoir
+      const yAxisTicks =
+        displayMode === "percentage"
+          ? [0, 20, 40, 60, 80, 100]
+          : d3.ticks(reservoirYDomain[0], reservoirYDomain[1], 5)
+
+      yAxisTicks.forEach((val) => {
         const y =
           colHeaderHeight +
           rowIndex * cellHeight +
           chartPadding.top +
-          yScale(val)
+          reservoirYScale(val)
 
-        // Gridline
+        // Gridline (spans all scenario columns for this row)
         g.append("line")
           .attr("x1", gridStartX)
           .attr("x2", gridEndX)
@@ -419,9 +469,11 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .attr("stroke", val === 50 ? COLORS.gridStrong : COLORS.grid)
           .attr("stroke-width", val === 50 ? 1 : 0.5)
 
-        // Y-axis label (for both percentage and volume modes)
+        // Y-axis label
         const labelText =
-          displayMode === "percentage" ? `${val}%` : `${val.toLocaleString()}`
+          displayMode === "percentage"
+            ? `${val}%`
+            : `${val.toLocaleString()}`
         g.append("text")
           .attr("x", gridStartX - 4)
           .attr("y", y)
@@ -543,6 +595,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
     // Draw each cell's chart
     reservoirs.forEach((reservoir, rowIndex) => {
+      // Get the Y scale for this reservoir (different for each in relative mode)
+      const cellYScale = getYScale(reservoir.reservoirId)
+
       scenarios.forEach((scenarioId, colIndex) => {
         const cellData = data[reservoir.reservoirId]?.[scenarioId]
         if (!cellData) return
@@ -579,32 +634,32 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
         if (processedData.length === 0) return
 
-        // Area generators
+        // Area generators (using per-reservoir Y scale)
         const rangeArea = d3
           .area<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
-          .y0((d) => yScale(d.q0))
-          .y1((d) => yScale(d.q100))
+          .y0((d) => cellYScale(d.q0))
+          .y1((d) => cellYScale(d.q100))
           .curve(d3.curveLinear)
 
         const outerArea = d3
           .area<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
-          .y0((d) => yScale(d.q10))
-          .y1((d) => yScale(d.q90))
+          .y0((d) => cellYScale(d.q10))
+          .y1((d) => cellYScale(d.q90))
           .curve(d3.curveLinear)
 
         const innerArea = d3
           .area<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
-          .y0((d) => yScale(d.q30))
-          .y1((d) => yScale(d.q70))
+          .y0((d) => cellYScale(d.q30))
+          .y1((d) => cellYScale(d.q70))
           .curve(d3.curveLinear)
 
         const medianLine = d3
           .line<(typeof processedData)[0]>()
           .x((d) => xScale(d.monthIndex))
-          .y((d) => yScale(d.q50))
+          .y((d) => cellYScale(d.q50))
           .curve(d3.curveLinear)
 
         // Bands and line with scenario-specific colors
@@ -748,6 +803,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     cellColors,
     maxCellWidth,
     displayMode,
+    volumeScaleMode,
   ])
 
   return (

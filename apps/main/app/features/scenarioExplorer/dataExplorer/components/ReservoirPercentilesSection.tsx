@@ -14,9 +14,9 @@ import { PercentileMatrix } from "@repo/viz"
 import type { ReservoirData } from "@repo/viz"
 import type { MonthlyPercentiles } from "@repo/data/coeqwal"
 import { useStorageMonthly } from "@repo/data/coeqwal/hooks"
-import { useChartGridLayout, CHART_GRID } from "./ChartGridContext"
 
 export type StorageDisplayMode = "percentage" | "volume"
+export type VolumeScaleMode = "absolute" | "relative"
 
 interface ReservoirPercentilesSectionProps {
   scenarios: string[]
@@ -28,6 +28,8 @@ interface ReservoirPercentilesSectionProps {
   cellColors?: Record<string, Record<string, string>>
   /** Display mode: percentage of capacity or volume in TAF */
   displayMode?: StorageDisplayMode
+  /** Y-axis scale mode for volume display: absolute (shared) or relative (per-reservoir) */
+  volumeScaleMode?: VolumeScaleMode
 }
 
 /**
@@ -94,16 +96,12 @@ export default function ReservoirPercentilesSection({
   showScenarioHeaders = true,
   cellColors,
   displayMode = "percentage",
+  volumeScaleMode = "absolute",
 }: ReservoirPercentilesSectionProps) {
   const theme = useTheme()
-  const gridLayout = useChartGridLayout()
 
   const { reservoirs, matrixData, isLoading, error } =
     useMultiScenarioReservoirData(scenarios, displayMode)
-
-  // When inside a grid context, don't constrain cell width - let the matrix expand to fill
-  // Only apply maxCellWidth constraint when used standalone (no grid context)
-  const maxCellWidth = gridLayout ? undefined : CHART_GRID.maxCellWidth
 
   // Build scenario display names
   const scenarioNames: Record<string, string> = {}
@@ -178,8 +176,15 @@ export default function ReservoirPercentilesSection({
     )
   }
 
-  // Calculate height based on number of reservoirs
-  const matrixHeight = Math.max(500, reservoirs.length * 190 + 100)
+  // Calculate height based on number of reservoirs and scenarios
+  // Fewer scenarios = taller rows (bigger charts)
+  const rowHeight =
+    scenarios.length <= 2
+      ? 280 // Large charts for 1-2 scenarios
+      : scenarios.length <= 4
+        ? 230 // Medium charts for 3-4 scenarios
+        : 190 // Compact charts for 5+ scenarios
+  const matrixHeight = Math.max(500, reservoirs.length * rowHeight + 100)
 
   return (
     <Box>
@@ -201,8 +206,8 @@ export default function ReservoirPercentilesSection({
           labelColumnWidth={labelColumnWidth}
           showScenarioHeaders={showScenarioHeaders}
           cellColors={cellColors}
-          maxCellWidth={maxCellWidth}
           displayMode={displayMode}
+          volumeScaleMode={volumeScaleMode}
         />
       </Box>
     </Box>

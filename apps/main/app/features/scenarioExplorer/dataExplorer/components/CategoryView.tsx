@@ -376,6 +376,14 @@ const STORAGE_DISPLAY_OPTIONS = [
   { value: "volume" as const, label: "by volume" },
 ]
 
+// Y-axis scale options for volume mode
+const VOLUME_SCALE_OPTIONS = [
+  { value: "absolute" as const, label: "absolute scale" },
+  { value: "relative" as const, label: "relative to capacity" },
+]
+
+export type VolumeScaleMode = "absolute" | "relative"
+
 /**
  * MonthlyStorageSection - Section for monthly percentile charts
  * Uses CSS Grid positioning (spans all scenario columns)
@@ -390,6 +398,8 @@ function MonthlyStorageSection({
   const theme = useTheme()
   const [displayMode, setDisplayMode] =
     useState<StorageDisplayMode>("percentage")
+  const [volumeScaleMode, setVolumeScaleMode] =
+    useState<VolumeScaleMode>("absolute")
   const [selectedReservoir, setSelectedReservoir] = useState<string>("")
   const { reservoirs, isLoading: reservoirsLoading } = useReservoirList()
 
@@ -427,12 +437,30 @@ function MonthlyStorageSection({
         <SectionHeader
           title="Monthly storage"
           titleAdornment={
-            <CompactSelect
-              value={displayMode}
-              onChange={setDisplayMode}
-              options={STORAGE_DISPLAY_OPTIONS}
-              aria-label="Storage display mode"
-            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CompactSelect
+                value={displayMode}
+                onChange={setDisplayMode}
+                options={STORAGE_DISPLAY_OPTIONS}
+                aria-label="Storage display mode"
+              />
+              {displayMode === "volume" && (
+                <>
+                  <Typography
+                    component="span"
+                    sx={{ color: "grey.400", fontSize: "0.875rem" }}
+                  >
+                    ·
+                  </Typography>
+                  <CompactSelect
+                    value={volumeScaleMode}
+                    onChange={setVolumeScaleMode}
+                    options={VOLUME_SCALE_OPTIONS}
+                    aria-label="Y-axis scale mode"
+                  />
+                </>
+              )}
+            </Box>
           }
           description={
             <>
@@ -513,6 +541,7 @@ function MonthlyStorageSection({
           showScenarioHeaders={false}
           cellColors={cellColors}
           displayMode={displayMode}
+          volumeScaleMode={volumeScaleMode}
         />
       </Box>
     </>
@@ -565,6 +594,7 @@ function ReservoirStorageContent({
                       textDecoration: "underline",
                       textDecorationStyle: "dotted",
                       cursor: "help",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     major reservoirs

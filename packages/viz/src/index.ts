@@ -48,6 +48,7 @@ export type {
   ReservoirData,
   MatrixCell,
   MatrixDisplayMode,
+  VolumeScaleMode,
 } from "./components/PercentileMatrix"
 
 // Export hooks
