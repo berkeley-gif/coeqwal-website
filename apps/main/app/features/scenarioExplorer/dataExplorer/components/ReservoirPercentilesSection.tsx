@@ -179,7 +179,7 @@ export default function ReservoirPercentilesSection({
   }
 
   // Calculate height based on number of reservoirs
-  const matrixHeight = Math.max(500, reservoirs.length * 100 + 100)
+  const matrixHeight = Math.max(500, reservoirs.length * 190 + 100)
 
   return (
     <Box>
@@ -202,6 +202,7 @@ export default function ReservoirPercentilesSection({
           showScenarioHeaders={showScenarioHeaders}
           cellColors={cellColors}
           maxCellWidth={maxCellWidth}
+          displayMode={displayMode}
         />
       </Box>
     </Box>
