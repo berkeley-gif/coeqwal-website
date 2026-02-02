@@ -155,7 +155,9 @@ export default function DataExplorerView({
           </Box>
         ) : (
           // Data view content based on active sub-tab
-          <Box sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}>
+          <Box
+            sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}
+          >
             {subView === "category" && <CategoryView />}
             {subView === "map" && <MapView />}
             {subView === "table" && <TableView />}

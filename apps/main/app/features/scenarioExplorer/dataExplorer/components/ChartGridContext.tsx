@@ -122,13 +122,16 @@ export function ChartGridProvider({
       // Clamp cell width between min and max
       const cellWidth = Math.max(
         CHART_GRID.minCellWidth,
-        Math.min(CHART_GRID.maxCellWidth, naturalCellWidth)
+        Math.min(CHART_GRID.maxCellWidth, naturalCellWidth),
       )
 
       // Calculate optimal chart size based on cell width
       const chartSize = Math.max(
         CHART_SIZING.minSize,
-        Math.min(CHART_SIZING.maxSize, Math.floor(cellWidth * CHART_SIZING.cellRatio))
+        Math.min(
+          CHART_SIZING.maxSize,
+          Math.floor(cellWidth * CHART_SIZING.cellRatio),
+        ),
       )
 
       setLayout({

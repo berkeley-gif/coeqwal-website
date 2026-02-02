@@ -47,6 +47,7 @@ export type {
   PercentileMatrixProps,
   ReservoirData,
   MatrixCell,
+  MatrixDisplayMode,
 } from "./components/PercentileMatrix"
 
 // Export hooks

@@ -34,7 +34,11 @@ import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
-import { ChartGridProvider, useChartGridLayout, CHART_SIZING } from "./ChartGridContext"
+import {
+  ChartGridProvider,
+  useChartGridLayout,
+  CHART_SIZING,
+} from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { useReservoirList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
@@ -92,16 +96,15 @@ function SectionHeader({
 
       {/* Description line */}
       {description && (
-        <Typography
-          variant="dashboard"
+        <Box
           sx={{
             color: theme.palette.grey[600],
             mt: 0.5,
-            whiteSpace: "nowrap",
+            ...theme.typography.dashboard,
           }}
         >
           {description}
-        </Typography>
+        </Box>
       )}
     </Box>
   )
@@ -269,12 +272,98 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
             {isSingleValueTierData(scenarioData.tierData) ? (
               <TierCircles tiers={scenarioData.tierData} size={chartSize} />
             ) : (
-              <VerticalBarChart tiers={scenarioData.tierData} size={chartSize} />
+              <VerticalBarChart
+                tiers={scenarioData.tierData}
+                size={chartSize}
+              />
             )}
           </Box>
         )
       })}
     </>
+  )
+}
+
+/**
+ * PercentileBandLegend - Compact horizontal legend for percentile bands
+ */
+const PERCENTILE_BAND_COLORS = {
+  range: "#d9eafb", // q0-q100 (lightest)
+  outer: "#c5dbf3", // q10-q90
+  inner: "#a2bee1", // q30-q70
+  median: "#2c5aa0", // q50 (darkest)
+}
+
+function PercentileBandLegend() {
+  return (
+    <Box
+      component="span"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 1,
+        ml: 1,
+      }}
+    >
+      {/* Min-Max (0-100th) band */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: PERCENTILE_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Minimum to maximum range
+      </Box>
+
+      {/* 10-90th band */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: PERCENTILE_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th percentile
+      </Box>
+
+      {/* 30-70th band */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: PERCENTILE_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th percentile
+      </Box>
+
+      {/* Median line */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: PERCENTILE_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
+    </Box>
   )
 }
 
@@ -345,7 +434,32 @@ function MonthlyStorageSection({
               aria-label="Storage display mode"
             />
           }
-          description={`Water year (Oct–Sep) · ${scenarios.length} scenario${scenarios.length !== 1 ? "s" : ""}`}
+          description={
+            <>
+              Water year (Oct–Sep) · {scenarios.length} scenario
+              {scenarios.length !== 1 ? "s" : ""}
+              <Box
+                component="span"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mt: 1.5,
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    color: "grey.500",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                  }}
+                >
+                  Overlapping percentile bands:
+                </Box>
+                <PercentileBandLegend />
+              </Box>
+            </>
+          }
         />
 
         {/* Add reservoir controls */}
@@ -462,7 +576,10 @@ function ReservoirStorageContent({
 
           {/* Empty cells for the header row (scenario columns) */}
           {scenarios.map((_, index) => (
-            <Box key={`header-spacer-${index}`} sx={{ gridColumn: index + 2 }} />
+            <Box
+              key={`header-spacer-${index}`}
+              sx={{ gridColumn: index + 2 }}
+            />
           ))}
 
           {/* Tier outcome visualization */}
@@ -480,7 +597,10 @@ function ReservoirStorageContent({
         }}
       >
         <ChartGridProvider scenarios={scenarios}>
-          <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+          <MonthlyStorageSection
+            scenarios={scenarios}
+            cellColors={cellColors}
+          />
         </ChartGridProvider>
       </Box>
     </>
@@ -529,7 +649,10 @@ function ReservoirStorageSection({
 
       {/* Content sections (each in their own container) */}
       <Box sx={{ mt: theme.space.component.md }}>
-        <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
+        <ReservoirStorageContent
+          scenarios={scenarios}
+          cellColors={cellColors}
+        />
       </Box>
 
       {/* Expanded modal view */}
@@ -557,7 +680,10 @@ function ReservoirStorageSection({
                 fontSize: 20,
               }}
             >
-              {outcomeCategories.find((c) => c.id === "reservoir-storage")?.icon}
+              {
+                outcomeCategories.find((c) => c.id === "reservoir-storage")
+                  ?.icon
+              }
             </Box>
             <Typography
               variant="subtitle2"
@@ -580,7 +706,10 @@ function ReservoirStorageSection({
         }
       >
         {/* Full content in modal */}
-        <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
+        <ReservoirStorageContent
+          scenarios={scenarios}
+          cellColors={cellColors}
+        />
       </MobileModal>
     </>
   )
