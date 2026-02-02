@@ -14,6 +14,7 @@ import {
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
+  fetchStorageMonthly,
 } from "../fetchers"
 import type {
   ReservoirListResponse,
@@ -21,6 +22,7 @@ import type {
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
   GroupedReservoirPercentilesResponse,
+  StorageMonthlyResponse,
 } from "../types"
 
 /**
@@ -253,6 +255,66 @@ export function useGroupedReservoirPercentiles(
     () =>
       scenarioId && group
         ? fetchGroupedReservoirPercentiles(scenarioId, group)
+        : Promise.reject(new Error("Missing parameters")),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    group: data?.group,
+    reservoirs: data?.reservoirs ?? {},
+    isLoading,
+    error,
+    hasData: !!data && Object.keys(data.reservoirs).length > 0,
+  }
+}
+
+/**
+ * Fetch monthly storage data with both percentage and TAF values
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Storage data with monthly_percent and monthly_taf for each reservoir
+ *
+ * @example
+ * ```typescript
+ * function StorageChart({ scenarioId, displayMode }) {
+ *   const { reservoirs, isLoading } = useStorageMonthly(scenarioId, "major")
+ *
+ *   if (isLoading) return <Spinner />
+ *
+ *   return (
+ *     <Grid>
+ *       {Object.entries(reservoirs).map(([id, data]) => (
+ *         <PercentileChart
+ *           key={id}
+ *           name={data.name}
+ *           percentiles={displayMode === "taf" ? data.monthly_taf : data.monthly_percent}
+ *         />
+ *       ))}
+ *     </Grid>
+ *   )
+ * }
+ * ```
+ */
+export function useStorageMonthly(
+  scenarioId: string | null,
+  group: string | null,
+) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<StorageMonthlyResponse>(
+    scenarioId && group ? CACHE_KEYS.storageMonthly(scenarioId, group) : null,
+    () =>
+      scenarioId && group
+        ? fetchStorageMonthly(scenarioId, group)
         : Promise.reject(new Error("Missing parameters")),
     {
       revalidateOnFocus: false,

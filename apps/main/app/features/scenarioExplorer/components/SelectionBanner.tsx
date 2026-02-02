@@ -10,7 +10,7 @@
  */
 
 import React from "react"
-import { Box, Typography, Button, Chip, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Button, Chip, useTheme, icons } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import {
   DndContext,
@@ -210,13 +210,14 @@ export default function SelectionBanner() {
                 variant="text"
                 size="small"
                 onClick={clearScenarios}
+                startIcon={<icons.Close sx={{ fontSize: 16 }} />}
                 sx={{
-                  color: theme.palette.grey[500],
+                  color: theme.palette.grey[400],
                   minWidth: "auto",
                   flexShrink: 0,
                   px: theme.space.component.sm,
                   "&:hover": {
-                    color: theme.palette.grey[700],
+                    color: theme.palette.grey[600],
                     backgroundColor: theme.palette.grey[100],
                   },
                 }}

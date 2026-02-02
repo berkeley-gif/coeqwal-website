@@ -21,6 +21,7 @@ import type {
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
   GroupedReservoirPercentilesResponse,
+  StorageMonthlyResponse,
 } from "./types"
 
 /**
@@ -271,6 +272,38 @@ export async function fetchGroupedReservoirPercentiles(
 
   return apiFetcher<GroupedReservoirPercentilesResponse>(
     ENDPOINTS.groupedReservoirPercentiles(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly storage data with both percentage and TAF values
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Storage data with both monthly_percent and monthly_taf
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchStorageMonthly("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "SHSTA": { monthly_percent: {...}, monthly_taf: {...} } } }
+ * ```
+ */
+export async function fetchStorageMonthly(
+  scenarioId: string,
+  group: string,
+): Promise<StorageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<StorageMonthlyResponse>(
+    ENDPOINTS.storageMonthly(scenarioId, group),
     {
       baseUrl: DEFAULT_API_BASE,
     },

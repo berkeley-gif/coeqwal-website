@@ -5,15 +5,21 @@
  *
  * Provides consistent column alignment across different visualization types.
  * Used to ensure tier charts and percentile matrices align vertically.
+ *
+ * This module provides two sets of components:
+ * 1. Original flexbox-based (ScenarioHeader, AlignedRow) - for standalone use
+ * 2. CSS Grid-based (GridScenarioHeader, GridRow) - for use within ChartGridProvider
  */
 
 import React from "react"
 import { Box, Typography, Button, useTheme, icons } from "@repo/ui/mui"
+import { CHART_GRID, useChartGridLayout } from "./ChartGridContext"
 
-// Layout constants - shared across all aligned components
+// Layout constants - shared across all aligned components (legacy, kept for compatibility)
 export const GRID_LAYOUT = {
-  labelColumnWidth: 100, // Width of the left label column in pixels
-  minCellWidth: 120, // Minimum width per scenario cell
+  labelColumnWidth: CHART_GRID.labelColumnWidth,
+  minCellWidth: CHART_GRID.minCellWidth,
+  maxCellWidth: CHART_GRID.maxCellWidth,
   headerHeight: 40, // Height of the scenario header row
 }
 
@@ -36,6 +42,7 @@ export function ScenarioHeader({
   scenarioNames,
   sticky = false,
   onExpand,
+  maxCellWidth = GRID_LAYOUT.maxCellWidth,
 }: {
   scenarios: string[]
   scenarioNames: Record<string, string>
@@ -43,15 +50,16 @@ export function ScenarioHeader({
   sticky?: boolean
   /** Callback to expand the section in a larger modal view */
   onExpand?: () => void
+  /** Maximum width per scenario cell (for alignment with charts) */
+  maxCellWidth?: number
 }) {
   const theme = useTheme()
 
   return (
     <Box
       sx={{
-        mb: theme.space.component.md,
-        pb: theme.space.component.sm,
-        borderBottom: theme.border.light,
+        mb: theme.space.component.sm,
+        pb: theme.space.component.xs,
         // Sticky positioning for scroll persistence
         ...(sticky && {
           position: "sticky",
@@ -94,39 +102,47 @@ export function ScenarioHeader({
         </Box>
       )}
 
-      {/* Grid for scenario names - matches content grid alignment */}
+      {/* Layout: label column + evenly distributed scenario cells */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)`,
-          gap: 0,
+          display: "flex",
           alignItems: "center",
         }}
       >
-        {/* Empty cell for label column */}
-        <Box />
+        {/* Fixed-width label column spacer */}
+        <Box sx={{ width: GRID_LAYOUT.labelColumnWidth, flexShrink: 0 }} />
 
-        {/* Scenario name headers */}
-        {scenarios.map((scenarioId) => (
-          <Box
-            key={scenarioId}
-            sx={{
-              textAlign: "center",
-              px: theme.space.component.sm,
-            }}
-          >
-            <Typography
-              variant="dashboard"
+        {/* Scenario names container - spread evenly with max cell width */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "space-evenly",
+          }}
+        >
+          {scenarios.map((scenarioId) => (
+            <Box
+              key={scenarioId}
               sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                fontFeatureSettings: "'tnum' 1",
+                flex: "0 1 auto",
+                width: maxCellWidth,
+                textAlign: "center",
+                px: theme.space.component.sm,
               }}
             >
-              {scenarioNames[scenarioId] || scenarioId}
-            </Typography>
-          </Box>
-        ))}
+              <Typography
+                variant="dashboard"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  fontFeatureSettings: "'tnum' 1",
+                }}
+              >
+                {scenarioNames[scenarioId] || scenarioId}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Box>
   )
@@ -140,27 +156,26 @@ export function AlignedRow({
   sublabel,
   scenarios,
   children,
+  maxCellWidth = GRID_LAYOUT.maxCellWidth,
 }: {
   label: string
   sublabel?: string
   scenarios: string[]
   children: (scenarioId: string, index: number) => React.ReactNode
+  /** Maximum width per scenario cell (for alignment with charts) */
+  maxCellWidth?: number
 }) {
   const theme = useTheme()
 
   return (
     <Box
       sx={{
-        display: "grid",
-        gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)`,
-        gap: 0,
+        display: "flex",
         alignItems: "center",
-        mb: theme.space.component.lg,
+        mb: theme.space.component.md,
         minHeight: 80,
-        py: theme.space.component.sm,
-        borderBottom: `1px solid ${theme.palette.grey[100]}`,
+        py: theme.space.component.xs,
         "&:last-child": {
-          borderBottom: "none",
           mb: 0,
         },
       }}
@@ -168,6 +183,8 @@ export function AlignedRow({
       {/* Label column */}
       <Box
         sx={{
+          width: GRID_LAYOUT.labelColumnWidth,
+          flexShrink: 0,
           pr: theme.space.component.lg,
           display: "flex",
           flexDirection: "column",
@@ -199,23 +216,262 @@ export function AlignedRow({
         )}
       </Box>
 
-      {/* Scenario cells */}
+      {/* Scenario cells - spread evenly with max cell width */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "space-evenly",
+        }}
+      >
+        {scenarios.map((scenarioId, index) => (
+          <Box
+            key={scenarioId}
+            sx={{
+              flex: "0 1 auto",
+              width: maxCellWidth,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              px: theme.space.component.xs,
+            }}
+          >
+            {children(scenarioId, index)}
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  )
+}
+
+// =============================================================================
+// CSS Grid-based components (for use within ChartGridProvider)
+// =============================================================================
+
+/**
+ * GridScenarioHeader - Scenario names that align with CSS Grid columns
+ *
+ * Must be used within a ChartGridProvider. Renders directly as grid cells.
+ */
+export function GridScenarioHeader({
+  scenarios,
+  scenarioNames,
+  onExpand,
+}: {
+  scenarios: string[]
+  scenarioNames: Record<string, string>
+  /** Callback to expand the section in a larger modal view */
+  onExpand?: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      {/* Label column - contains expand button if provided */}
+      <Box
+        sx={{
+          gridColumn: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: onExpand ? "flex-end" : "flex-start",
+          pr: 1,
+        }}
+      >
+        {onExpand && (
+          <Button
+            variant="text"
+            size="small"
+            onClick={onExpand}
+            startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
+            sx={{
+              color: theme.palette.grey[400],
+              textTransform: "none",
+              minWidth: "auto",
+              px: theme.space.component.sm,
+              "&:hover": {
+                color: theme.palette.grey[600],
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+          >
+            Expand
+          </Button>
+        )}
+      </Box>
+
+      {/* Scenario name cells */}
       {scenarios.map((scenarioId, index) => (
         <Box
           key={scenarioId}
           sx={{
+            gridColumn: index + 2,
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            px: theme.space.component.xs,
+            py: 1,
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: "0.9286rem", // 14.8571px
+              fontWeight: theme.typography.fontWeightMedium,
+              color: theme.palette.blue.darkest,
+              textAlign: "center",
+              fontFeatureSettings: "'tnum' 1",
+            }}
+          >
+            {scenarioNames[scenarioId] || scenarioId}
+          </Typography>
+        </Box>
+      ))}
+    </>
+  )
+}
+
+/**
+ * GridRow - A row of content that aligns with CSS Grid columns
+ *
+ * Must be used within a ChartGridProvider. Renders directly as grid cells.
+ */
+export function GridRow({
+  label,
+  sublabel,
+  scenarios,
+  children,
+}: {
+  label?: string
+  sublabel?: string
+  scenarios: string[]
+  children: (scenarioId: string, index: number) => React.ReactNode
+}) {
+  const theme = useTheme()
+  const layout = useChartGridLayout()
+
+  // Calculate min height based on chart size
+  const minHeight = layout ? layout.chartSize + 16 : 96
+
+  return (
+    <>
+      {/* Label column */}
+      <Box
+        sx={{
+          gridColumn: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          minHeight,
+          pr: theme.space.component.md,
+        }}
+      >
+        {label && (
+          <Typography
+            variant="dashboard"
+            sx={{
+              display: "block",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+            }}
+          >
+            {label}
+          </Typography>
+        )}
+        {sublabel && (
+          <Typography
+            variant="compactMicro"
+            sx={{
+              display: "block",
+              color: theme.palette.grey[400],
+              mt: 0.25,
+              textTransform: "lowercase",
+            }}
+          >
+            {sublabel}
+          </Typography>
+        )}
+      </Box>
+
+      {/* Content cells */}
+      {scenarios.map((scenarioId, index) => (
+        <Box
+          key={scenarioId}
+          sx={{
+            gridColumn: index + 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight,
           }}
         >
           {children(scenarioId, index)}
         </Box>
       ))}
-    </Box>
+    </>
   )
 }
+
+/**
+ * GridSpanRow - A row that spans all scenario columns (for full-width content like matrices)
+ *
+ * Must be used within a ChartGridProvider.
+ */
+export function GridSpanRow({
+  label,
+  sublabel,
+  children,
+}: {
+  label?: string
+  sublabel?: string
+  children: React.ReactNode
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      {/* Label column */}
+      <Box
+        sx={{
+          gridColumn: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          pt: 1,
+          pr: theme.space.component.md,
+        }}
+      >
+        {label && (
+          <Typography
+            variant="smallSectionLabel"
+            sx={{
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            {label}
+          </Typography>
+        )}
+        {sublabel && (
+          <Typography
+            variant="compactMicro"
+            sx={{
+              display: "block",
+              color: theme.palette.grey[400],
+              mt: 0.25,
+            }}
+          >
+            {sublabel}
+          </Typography>
+        )}
+      </Box>
+
+      {/* Content spans all scenario columns */}
+      <Box sx={{ gridColumn: "2 / -1" }}>{children}</Box>
+    </>
+  )
+}
+
+// =============================================================================
+// Legacy flexbox-based components (for standalone use without ChartGridProvider)
+// =============================================================================
 
 /**
  * AlignedScenarioGrid - Container with consistent grid structure

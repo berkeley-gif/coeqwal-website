@@ -51,6 +51,8 @@ export interface PercentileMatrixProps {
   showScenarioHeaders?: boolean
   /** Map of scenarioId -> reservoirId -> tier color (for coloring individual cells) */
   cellColors?: Record<string, Record<string, string>>
+  /** Maximum width per scenario cell to prevent elongated charts (default: 250) */
+  maxCellWidth?: number
 }
 
 // Water month labels
@@ -93,6 +95,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   labelColumnWidth = 100,
   showScenarioHeaders = true,
   cellColors,
+  maxCellWidth = 250,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -137,14 +140,22 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     const innerWidth = currentWidth - margin.left - margin.right
     const innerHeight = currentHeight - margin.top - margin.bottom
 
-    // Calculate cell dimensions
-    const cellWidth = innerWidth / scenarios.length
+    // Calculate cell dimensions with even distribution (space-evenly approach)
+    // Each scenario gets an equal "slot" of the available width
+    const slotWidth = innerWidth / scenarios.length
+    // When maxCellWidth is undefined, use full slot width (no constraint)
+    const cellWidth = maxCellWidth !== undefined ? Math.min(slotWidth, maxCellWidth) : slotWidth
+    // Offset within each slot to center the cell
+    const cellOffsetInSlot = (slotWidth - cellWidth) / 2
     const cellHeight = (innerHeight - colHeaderHeight) / reservoirs.length
     const chartPadding = { top: 8, right: 8, bottom: 4, left: 4 }
 
     // Chart area within each cell
     const chartWidth = cellWidth - chartPadding.left - chartPadding.right
     const chartHeight = cellHeight - chartPadding.top - chartPadding.bottom
+
+    // Helper to get cell X position (evenly distributed)
+    const getCellX = (colIndex: number) => slotWidth * colIndex + cellOffsetInSlot
 
     if (chartWidth <= 0 || chartHeight <= 0) return
 
@@ -160,7 +171,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Draw column headers (scenario names) - only if enabled
     if (showScenarioHeaders) {
       scenarios.forEach((scenarioId, colIndex) => {
-        const x = colIndex * cellWidth + cellWidth / 2
+        const x = getCellX(colIndex) + cellWidth / 2
         g.append("text")
           .attr("x", x)
           .attr("y", -15)
@@ -216,7 +227,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         .text(`${val}%`)
     })
 
-    // Draw horizontal gridlines (extend across all columns)
+    // Draw horizontal gridlines (extend across chart area only)
     yAxisLabels.forEach((val) => {
       reservoirs.forEach((_, rowIndex) => {
         const y =
@@ -234,9 +245,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       })
     })
 
-    // Draw vertical gridlines at cell boundaries
+    // Draw vertical gridlines at cell boundaries (at each slot edge)
     for (let i = 0; i <= scenarios.length; i++) {
-      const x = i * cellWidth
+      const x = i < scenarios.length ? getCellX(i) : getCellX(i - 1) + cellWidth
       g.append("line")
         .attr("x1", x)
         .attr("x2", x)
@@ -258,10 +269,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         .attr("stroke-width", 0.5)
     }
 
-    // Draw shared X-axis labels at the bottom
+    // Draw shared X-axis labels at the bottom (aligned with first column)
     WATER_MONTH_LABELS.forEach((label, i) => {
-      const x = chartPadding.left + xScale(i)
-      // Only draw for first column, but position to align with grid
+      const x = getCellX(0) + chartPadding.left + xScale(i)
       g.append("text")
         .attr("x", x)
         .attr("y", innerHeight + 15)
@@ -275,7 +285,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Draw vertical month gridlines (subtle, extend across all rows)
     for (let i = 0; i < 12; i++) {
       scenarios.forEach((_, colIndex) => {
-        const x = colIndex * cellWidth + chartPadding.left + xScale(i)
+        const x = getCellX(colIndex) + chartPadding.left + xScale(i)
         g.append("line")
           .attr("x1", x)
           .attr("x2", x)
@@ -325,7 +335,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         const cellData = data[reservoir.reservoirId]?.[scenarioId]
         if (!cellData) return
 
-        const cellX = colIndex * cellWidth + chartPadding.left
+        const cellX = getCellX(colIndex) + chartPadding.left
         const cellY = colHeaderHeight + rowIndex * cellHeight + chartPadding.top
 
         const cellG = g
@@ -435,7 +445,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         const cellData = data[reservoir.reservoirId]?.[scenarioId]
         if (!cellData) return
 
-        const cellX = colIndex * cellWidth
+        const cellX = getCellX(colIndex)
         const cellY = colHeaderHeight + rowIndex * cellHeight
 
         g.append("rect")
@@ -496,6 +506,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     labelColumnWidth,
     showScenarioHeaders,
     cellColors,
+    maxCellWidth,
   ])
 
   return (

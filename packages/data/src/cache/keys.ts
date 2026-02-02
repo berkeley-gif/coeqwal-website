@@ -86,6 +86,14 @@ export const CACHE_KEYS = {
    */
   groupedReservoirPercentiles: (scenarioId: string, group: string) =>
     `/api/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
+
+  /**
+   * Monthly storage data with both percentage and TAF values
+   * @param scenarioId - Scenario ID
+   * @param group - Reservoir group (e.g., "major")
+   */
+  storageMonthly: (scenarioId: string, group: string) =>
+    `/api/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
 } as const
 
 /**

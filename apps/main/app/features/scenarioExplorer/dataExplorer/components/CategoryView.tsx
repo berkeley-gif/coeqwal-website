@@ -30,11 +30,82 @@ import {
   type OutcomeMetric,
 } from "../../config/outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
-import ReservoirPercentilesSection from "./ReservoirPercentilesSection"
-import { ScenarioHeader, GRID_LAYOUT } from "./AlignedScenarioGrid"
+import ReservoirPercentilesSection, {
+  type StorageDisplayMode,
+} from "./ReservoirPercentilesSection"
+import { GridScenarioHeader } from "./AlignedScenarioGrid"
+import { ChartGridProvider, useChartGridLayout, CHART_SIZING } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { useReservoirList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
+
+/**
+ * SectionHeader - Reusable header for chart sections
+ *
+ * Displays a section title with optional inline adornment (e.g., dropdown)
+ * and a description line below. Used for "Storage distribution", "Monthly storage", etc.
+ *
+ * Layout:
+ * ┌─────────────────────────────────────────┐
+ * │ TITLE [titleAdornment]                  │
+ * │ description text                        │
+ * └─────────────────────────────────────────┘
+ */
+interface SectionHeaderProps {
+  /** Section title (e.g., "Storage distribution") */
+  title: string
+  /** Inline element after title (e.g., dropdown) - displayed on same line */
+  titleAdornment?: React.ReactNode
+  /** Description text below title (can be string or ReactNode for tooltips) */
+  description?: React.ReactNode
+}
+
+function SectionHeader({
+  title,
+  titleAdornment,
+  description,
+}: SectionHeaderProps) {
+  const theme = useTheme()
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      {/* Title row with optional inline adornment */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: theme.space.gap.sm,
+        }}
+      >
+        <Typography
+          variant="overline"
+          sx={{
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {title}
+        </Typography>
+        {titleAdornment}
+      </Box>
+
+      {/* Description line */}
+      {description && (
+        <Typography
+          variant="dashboard"
+          sx={{
+            color: theme.palette.grey[600],
+            mt: 0.5,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {description}
+        </Typography>
+      )}
+    </Box>
+  )
+}
 
 /**
  * Helper function to detect if tier data represents a single value (vs a distribution)
@@ -115,7 +186,8 @@ function useReservoirTierColors(scenarios: string[]) {
 }
 
 /**
- * StorageTierRow - Displays tier bar charts for reservoir storage without a label
+ * StorageTierRow - Displays tier bar charts for reservoir storage
+ * Uses CSS Grid positioning (must be inside ChartGridProvider)
  */
 // Get the reservoir-storage tier metric (constant, safe to call outside component)
 const RESERVOIR_TIER_METRIC = getMetricsByCategory("reservoir-storage").find(
@@ -124,47 +196,54 @@ const RESERVOIR_TIER_METRIC = getMetricsByCategory("reservoir-storage").find(
 
 function StorageTierRow({ scenarios }: { scenarios: string[] }) {
   const theme = useTheme()
+  const layout = useChartGridLayout()
   const { data, isLoading } = useMetricData(
     scenarios,
     RESERVOIR_TIER_METRIC as OutcomeMetric,
   )
 
+  // Dynamic chart size from layout context, with fallback
+  const chartSize = layout?.chartSize ?? CHART_SIZING.defaultSize
+  const minHeight = chartSize + 16
+
   if (!RESERVOIR_TIER_METRIC) return null
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: `${GRID_LAYOUT.labelColumnWidth}px repeat(${scenarios.length}, 1fr)`,
-        gap: 0,
-        alignItems: "center",
-        mb: theme.space.component.lg,
-        minHeight: 80,
-        py: theme.space.component.sm,
-        borderBottom: `1px solid ${theme.palette.grey[100]}`,
-      }}
-    >
-      {/* Empty label column for alignment */}
-      <Box />
+    <>
+      {/* Label column (empty for this row) */}
+      <Box sx={{ gridColumn: 1, minHeight }} />
 
-      {/* Scenario cells */}
-      {scenarios.map((scenarioId) => {
+      {/* Chart cells - one per scenario */}
+      {scenarios.map((scenarioId, index) => {
         if (isLoading) {
           return (
             <Box
               key={scenarioId}
-              sx={{ display: "flex", justifyContent: "center", py: 2 }}
+              sx={{
+                gridColumn: index + 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight,
+              }}
             >
               <CircularProgress size={20} />
             </Box>
           )
         }
+
         const scenarioData = data?.find((d) => d.scenarioId === scenarioId)
         if (!scenarioData?.tierData) {
           return (
             <Box
               key={scenarioId}
-              sx={{ display: "flex", justifyContent: "center", py: 2 }}
+              sx={{
+                gridColumn: index + 2,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight,
+              }}
             >
               <Typography
                 variant="caption"
@@ -175,24 +254,29 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
             </Box>
           )
         }
+
         return (
           <Box
             key={scenarioId}
-            sx={{ display: "flex", justifyContent: "center" }}
+            sx={{
+              gridColumn: index + 2,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight,
+            }}
           >
             {isSingleValueTierData(scenarioData.tierData) ? (
-              <TierCircles tiers={scenarioData.tierData} size={80} />
+              <TierCircles tiers={scenarioData.tierData} size={chartSize} />
             ) : (
-              <VerticalBarChart tiers={scenarioData.tierData} size={80} />
+              <VerticalBarChart tiers={scenarioData.tierData} size={chartSize} />
             )}
           </Box>
         )
       })}
-    </Box>
+    </>
   )
 }
-
-type StorageDisplayMode = "percentage" | "volume"
 
 /**
  * MonthlyStorageSection - Section header with display mode dropdown
@@ -203,13 +287,17 @@ const STORAGE_DISPLAY_OPTIONS = [
   { value: "volume" as const, label: "by volume" },
 ]
 
+/**
+ * MonthlyStorageSection - Section for monthly percentile charts
+ * Uses CSS Grid positioning (spans all scenario columns)
+ */
 function MonthlyStorageSection({
   scenarios,
   cellColors,
 }: {
   scenarios: string[]
   cellColors?: Record<string, Record<string, string>>
-}) {
+}): React.ReactElement {
   const theme = useTheme()
   const [displayMode, setDisplayMode] =
     useState<StorageDisplayMode>("percentage")
@@ -235,48 +323,36 @@ function MonthlyStorageSection({
   }
 
   return (
-    <Box sx={{ mt: theme.space.section.sm }}>
-      {/* Header row with left controls and right add-reservoir */}
+    <>
+      {/* Header row - spans all columns with title on left, controls on right */}
       <Box
         sx={{
+          gridColumn: "1 / -1",
           display: "flex",
-          alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: theme.space.gap.lg,
-          mb: theme.space.component.lg,
+          alignItems: "flex-start",
+          mb: theme.space.component.sm,
         }}
       >
-        {/* Left side: label and display mode dropdown */}
+        {/* Title with inline display mode selector and description */}
+        <SectionHeader
+          title="Monthly storage"
+          titleAdornment={
+            <CompactSelect
+              value={displayMode}
+              onChange={setDisplayMode}
+              options={STORAGE_DISPLAY_OPTIONS}
+              aria-label="Storage display mode"
+            />
+          }
+          description={`Water year (Oct–Sep) · ${scenarios.length} scenario${scenarios.length !== 1 ? "s" : ""}`}
+        />
+
+        {/* Add reservoir controls */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: theme.space.gap.md,
-          }}
-        >
-          <Typography
-            variant="smallSectionLabel"
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Monthly storage
-          </Typography>
-          <CompactSelect
-            value={displayMode}
-            onChange={setDisplayMode}
-            options={STORAGE_DISPLAY_OPTIONS}
-            aria-label="Storage display mode"
-          />
-        </Box>
-
-        {/* Right side: add reservoir dropdown and button */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
             gap: theme.space.gap.sm,
           }}
         >
@@ -316,18 +392,22 @@ function MonthlyStorageSection({
         </Box>
       </Box>
 
-      {/* The percentile charts */}
-      <ReservoirPercentilesSection
-        scenarios={scenarios}
-        showScenarioHeaders={false}
-        cellColors={cellColors}
-      />
-    </Box>
+      {/* Percentile matrix - spans all columns so internal layout aligns with grid */}
+      <Box sx={{ gridColumn: "1 / -1" }}>
+        <ReservoirPercentilesSection
+          scenarios={scenarios}
+          showScenarioHeaders={false}
+          cellColors={cellColors}
+          displayMode={displayMode}
+        />
+      </Box>
+    </>
   )
 }
 
 /**
  * ReservoirStorageContent - Inner content for reservoir storage (used in both inline and modal views)
+ * Uses CSS Grid layout via ChartGridProvider for consistent alignment
  */
 function ReservoirStorageContent({
   scenarios,
@@ -340,45 +420,69 @@ function ReservoirStorageContent({
 
   return (
     <>
-      {/* Storage distribution header */}
-      <Typography
-        variant="smallSectionLabel"
+      {/* Storage distribution section - in its own container */}
+      <Box
         sx={{
-          display: "block",
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          p: theme.space.component.lg,
           mb: theme.space.component.lg,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
         }}
       >
-        Storage distribution (
-        <InfoTooltip
-          description={
-            <>
-              Shasta · Oroville · Folsom · Trinity
-              <br />
-              New Melones · Millerton · San Luis (CVP & SWP)
-            </>
-          }
-          placement="bottom"
-        >
-          <span
-            style={{
-              textDecoration: "underline",
-              textDecorationStyle: "dotted",
-              cursor: "help",
-            }}
-          >
-            major reservoirs
-          </span>
-        </InfoTooltip>
-        )
-      </Typography>
+        <ChartGridProvider scenarios={scenarios}>
+          {/* Storage distribution header - spans label column */}
+          <Box sx={{ gridColumn: 1, mb: theme.space.component.sm }}>
+            <SectionHeader
+              title="Storage distribution"
+              description={
+                <InfoTooltip
+                  description={
+                    <>
+                      Shasta · Oroville · Folsom · Trinity
+                      <br />
+                      New Melones · Millerton · San Luis (CVP & SWP)
+                    </>
+                  }
+                  placement="bottom"
+                >
+                  <span
+                    style={{
+                      textDecoration: "underline",
+                      textDecorationStyle: "dotted",
+                      cursor: "help",
+                    }}
+                  >
+                    major reservoirs
+                  </span>
+                </InfoTooltip>
+              }
+            />
+          </Box>
 
-      {/* Tier outcome visualization */}
-      <StorageTierRow scenarios={scenarios} />
+          {/* Empty cells for the header row (scenario columns) */}
+          {scenarios.map((_, index) => (
+            <Box key={`header-spacer-${index}`} sx={{ gridColumn: index + 2 }} />
+          ))}
 
-      {/* Percentile distribution section */}
-      <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+          {/* Tier outcome visualization */}
+          <StorageTierRow scenarios={scenarios} />
+        </ChartGridProvider>
+      </Box>
+
+      {/* Monthly storage section - in its own container */}
+      <Box
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          p: theme.space.component.lg,
+        }}
+      >
+        <ChartGridProvider scenarios={scenarios}>
+          <MonthlyStorageSection scenarios={scenarios} cellColors={cellColors} />
+        </ChartGridProvider>
+      </Box>
     </>
   )
 }
@@ -386,6 +490,7 @@ function ReservoirStorageContent({
 /**
  * ReservoirStorageSection - Special section for reservoir storage category
  * Fetches per-reservoir tier colors and passes them to the percentile charts
+ * Uses CSS Grid layout for consistent alignment between header and charts
  */
 function ReservoirStorageSection({
   scenarios,
@@ -400,23 +505,30 @@ function ReservoirStorageSection({
 
   return (
     <>
-      {/* Sticky header outside bordered content for proper scroll behavior */}
-      <ScenarioHeader
-        scenarios={scenarios}
-        scenarioNames={scenarioNames}
-        sticky
-        onExpand={() => setIsExpanded(true)}
-      />
-
-      {/* Content box with border */}
+      {/* Sticky scenario header row */}
       <Box
         sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          p: theme.space.component.lg,
+          position: "sticky",
+          top: 64, // Below the accordion header (minHeight: 64)
+          zIndex: 9,
+          backgroundColor: theme.palette.background.default,
+          py: theme.space.component.sm,
+          mx: -theme.space.component.xl, // Extend to edges
+          px: theme.space.component.xl,
         }}
       >
+        <ChartGridProvider scenarios={scenarios}>
+          {/* Scenario header row - uses grid columns for alignment */}
+          <GridScenarioHeader
+            scenarios={scenarios}
+            scenarioNames={scenarioNames}
+            onExpand={() => setIsExpanded(true)}
+          />
+        </ChartGridProvider>
+      </Box>
+
+      {/* Content sections (each in their own container) */}
+      <Box sx={{ mt: theme.space.component.md }}>
         <ReservoirStorageContent scenarios={scenarios} cellColors={cellColors} />
       </Box>
 
@@ -424,12 +536,47 @@ function ReservoirStorageSection({
       <MobileModal
         open={isExpanded}
         onClose={() => setIsExpanded(false)}
-        title="Reservoir storage"
+        title={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: theme.space.gap.lg,
+            }}
+          >
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: theme.borderRadius.sm,
+                backgroundColor: `${getOutcomeCategoryColor(theme, "reservoir-storage")}15`,
+                color: getOutcomeCategoryColor(theme, "reservoir-storage"),
+                fontSize: 20,
+              }}
+            >
+              {outcomeCategories.find((c) => c.id === "reservoir-storage")?.icon}
+            </Box>
+            <Typography
+              variant="subtitle2"
+              sx={{ color: theme.palette.text.primary }}
+            >
+              Reservoir storage
+            </Typography>
+          </Box>
+        }
         maxWidth="90vw"
         maxHeight="90vh"
         contentAriaLabel="Reservoir storage data visualization"
         stickyHeader={
-          <ScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
+          <ChartGridProvider scenarios={scenarios}>
+            <GridScenarioHeader
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+            />
+          </ChartGridProvider>
         }
       >
         {/* Full content in modal */}
@@ -560,6 +707,12 @@ export default function CategoryView() {
                 "& .MuiAccordionSummary-content": {
                   my: 1.5,
                 },
+                // Sticky positioning when expanded
+                ...(expanded.includes(category.id) && {
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 10,
+                }),
               }}
             >
               <Box
