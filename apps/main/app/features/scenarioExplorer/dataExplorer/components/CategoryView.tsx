@@ -429,9 +429,12 @@ export type VolumeScaleMode = "absolute" | "relative"
 function MonthlyStorageSection({
   scenarios,
   cellColors,
+  isModal = false,
 }: {
   scenarios: string[]
   cellColors?: Record<string, Record<string, string>>
+  /** Whether this section is inside a modal (affects dropdown z-index) */
+  isModal?: boolean
 }): React.ReactElement {
   const theme = useTheme()
   const [displayMode, setDisplayMode] =
@@ -495,6 +498,7 @@ function MonthlyStorageSection({
                 onChange={setDisplayMode}
                 options={STORAGE_DISPLAY_OPTIONS}
                 aria-label="Storage display mode"
+                menuZIndex={isModal ? 9999 : undefined}
               />
               {displayMode === "volume" && (
                 <>
@@ -509,6 +513,7 @@ function MonthlyStorageSection({
                     onChange={setVolumeScaleMode}
                     options={VOLUME_SCALE_OPTIONS}
                     aria-label="Y-axis scale mode"
+                    menuZIndex={isModal ? 9999 : undefined}
                   />
                 </>
               )}
@@ -582,6 +587,7 @@ function MonthlyStorageSection({
             minWidth={180}
             maxMenuHeight={300}
             aria-label="Select reservoir to add"
+            menuZIndex={isModal ? 9999 : undefined}
           />
           <Button
             variant="text"
@@ -692,9 +698,12 @@ function MonthlyStorageSection({
 function ReservoirStorageContent({
   scenarios,
   cellColors,
+  isModal = false,
 }: {
   scenarios: string[]
   cellColors: Record<string, Record<string, string>>
+  /** Whether this content is inside a modal (affects dropdown z-index) */
+  isModal?: boolean
 }) {
   const theme = useTheme()
 
@@ -767,6 +776,7 @@ function ReservoirStorageContent({
           <MonthlyStorageSection
             scenarios={scenarios}
             cellColors={cellColors}
+            isModal={isModal}
           />
         </ChartGridProvider>
       </Box>
@@ -876,6 +886,7 @@ function ReservoirStorageSection({
         <ReservoirStorageContent
           scenarios={scenarios}
           cellColors={cellColors}
+          isModal
         />
       </MobileModal>
     </>

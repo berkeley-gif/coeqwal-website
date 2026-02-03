@@ -49,6 +49,8 @@ export type {
   MatrixCell,
   MatrixDisplayMode,
   VolumeScaleMode,
+  CellStats,
+  CellStatsMap,
 } from "./components/PercentileMatrix"
 
 // Export hooks
