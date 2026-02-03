@@ -58,8 +58,11 @@ export const CACHE_KEYS = {
 
   // Statistics cache keys (reservoir percentiles)
 
-  /** List of reservoirs with percentile data */
+  /** List of reservoirs with percentile data (grouped) */
   STATISTICS_RESERVOIRS: "/api/statistics/reservoirs",
+
+  /** List of all reservoirs with statistics data */
+  STATISTICS_RESERVOIRS_ALL: "/api/statistics/reservoirs/all",
 
   /** List of scenarios with percentile data */
   STATISTICS_SCENARIOS: "/api/statistics/scenarios",
@@ -94,6 +97,14 @@ export const CACHE_KEYS = {
    */
   storageMonthly: (scenarioId: string, group: string) =>
     `/api/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
+
+  /**
+   * Monthly spill statistics for reservoirs
+   * @param scenarioId - Scenario ID
+   * @param group - Reservoir group (e.g., "major")
+   */
+  spillMonthly: (scenarioId: string, group: string) =>
+    `/api/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
 } as const
 
 /**

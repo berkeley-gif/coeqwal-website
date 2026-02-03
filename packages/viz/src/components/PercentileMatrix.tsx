@@ -125,6 +125,8 @@ const COLORS = {
   grid: "#e8edf0",
   gridStrong: "#d0d8dd",
   header: "#3d5a6c",
+  capacity: "#4a7c59", // Green for capacity reference line
+  deadPool: "#b85c38", // Rust/brown for dead pool reference line
   headerBg: "#f5f7f9",
 }
 
@@ -362,10 +364,41 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         .attr("fill", COLORS.header)
         .text(`${reservoir.capacityTaf.toLocaleString()} TAF`)
 
+      // Dead pool - shown if value exists
+      const deadPoolY = capacityY + 32
+      if (reservoir.deadPoolTaf > 0) {
+        // Label
+        g.append("text")
+          .attr("x", labelX)
+          .attr("y", deadPoolY)
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "hanging")
+          .attr("font-size", "0.6875rem") // 11px - small label
+          .attr("font-family", "'Inter', -apple-system, sans-serif")
+          .attr("font-weight", "400")
+          .attr("fill", COLORS.text)
+          .attr("text-transform", "uppercase")
+          .attr("letter-spacing", "0.05em")
+          .text("Dead pool")
+        // Value
+        g.append("text")
+          .attr("x", labelX)
+          .attr("y", deadPoolY + 14)
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "hanging")
+          .attr("font-size", "0.875rem") // 14px
+          .attr("font-family", "'Inter', -apple-system, sans-serif")
+          .attr("font-weight", "600")
+          .attr("font-feature-settings", "'tnum' 1") // Tabular numbers
+          .attr("fill", COLORS.header)
+          .text(`${reservoir.deadPoolTaf.toLocaleString()} TAF`)
+      }
+
       // Context note with tooltip (for reservoirs with special context)
       const contextNote = RESERVOIR_CONTEXT[reservoir.reservoirId]
       if (contextNote) {
-        const contextY = capacityY + 34
+        const contextY =
+          reservoir.deadPoolTaf > 0 ? deadPoolY + 34 : capacityY + 34
         const contextText = g
           .append("text")
           .attr("x", labelX)
@@ -471,9 +504,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
         // Y-axis label
         const labelText =
-          displayMode === "percentage"
-            ? `${val}%`
-            : `${val.toLocaleString()}`
+          displayMode === "percentage" ? `${val}%` : `${val.toLocaleString()}`
         g.append("text")
           .attr("x", gridStartX - 4)
           .attr("y", y)
@@ -686,6 +717,55 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .attr("stroke-width", 1.5)
           .attr("d", medianLine)
       })
+    })
+
+    // Draw capacity and dead pool reference lines for each reservoir
+    // Drawn AFTER chart shapes so they appear on top and aren't occluded
+    reservoirs.forEach((reservoir, rowIndex) => {
+      const reservoirYScale = getYScale(reservoir.reservoirId)
+      const cellTop = colHeaderHeight + rowIndex * cellHeight + chartPadding.top
+
+      // Calculate capacity and dead pool values based on display mode
+      const capacityValue =
+        displayMode === "percentage" ? 100 : reservoir.capacityTaf
+      const deadPoolValue =
+        displayMode === "percentage"
+          ? reservoir.capacityTaf > 0
+            ? (reservoir.deadPoolTaf / reservoir.capacityTaf) * 100
+            : 0
+          : reservoir.deadPoolTaf
+
+      // Draw capacity line (spans all scenario columns)
+      const capacityY = cellTop + reservoirYScale(capacityValue)
+      // Only draw if capacity line is within visible chart area
+      if (capacityY >= cellTop && capacityY <= cellTop + chartHeight) {
+        g.append("line")
+          .attr("x1", gridStartX + chartPadding.left)
+          .attr("x2", gridEndX - chartPadding.right)
+          .attr("y1", capacityY)
+          .attr("y2", capacityY)
+          .attr("stroke", COLORS.capacity)
+          .attr("stroke-width", 1.5)
+          .attr("stroke-dasharray", "6,3")
+          .attr("opacity", 0.8)
+      }
+
+      // Draw dead pool line if dead pool value exists
+      if (reservoir.deadPoolTaf > 0) {
+        const deadPoolY = cellTop + reservoirYScale(deadPoolValue)
+        // Only draw if dead pool line is within visible chart area
+        if (deadPoolY >= cellTop && deadPoolY <= cellTop + chartHeight) {
+          g.append("line")
+            .attr("x1", gridStartX + chartPadding.left)
+            .attr("x2", gridEndX - chartPadding.right)
+            .attr("y1", deadPoolY)
+            .attr("y2", deadPoolY)
+            .attr("stroke", COLORS.deadPool)
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "4,2")
+            .attr("opacity", 0.8)
+        }
+      }
     })
 
     // Tooltip functionality

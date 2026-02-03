@@ -22,9 +22,12 @@ export { useScenarios } from "./useScenarios"
 export { useScenarioTiers } from "./useScenarioTiers"
 export {
   useReservoirList,
+  useAllReservoirsList,
   useScenariosWithPercentiles,
   useReservoirPercentiles,
   useAllReservoirPercentiles,
   useGroupedReservoirPercentiles,
   useStorageMonthly,
+  useSpillMonthly,
+  useMultipleReservoirPercentiles,
 } from "./useReservoirPercentiles"

@@ -36,8 +36,11 @@ export const ENDPOINTS = {
 
   // Statistics endpoints (reservoir percentiles)
 
-  /** List of reservoirs with percentile data */
+  /** List of reservoirs with percentile data (grouped) */
   STATISTICS_RESERVOIRS: "/statistics/reservoirs",
+
+  /** List of all reservoirs with statistics data */
+  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
 
   /** List of scenarios with percentile data */
   STATISTICS_SCENARIOS: "/statistics/scenarios",
@@ -72,4 +75,12 @@ export const ENDPOINTS = {
    */
   storageMonthly: (scenarioId: string, group: string) =>
     `/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
+
+  /**
+   * Monthly spill statistics for reservoirs
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param group - Reservoir group (e.g., "major")
+   */
+  spillMonthly: (scenarioId: string, group: string) =>
+    `/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
 } as const

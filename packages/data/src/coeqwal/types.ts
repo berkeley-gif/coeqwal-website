@@ -283,6 +283,31 @@ export interface ReservoirListResponse {
 }
 
 /**
+ * Reservoir info from /api/statistics/reservoirs/all endpoint
+ * Includes capacity information for all available reservoirs
+ */
+export interface AllReservoirInfo {
+  /** Reservoir ID (e.g., "SHSTA") */
+  reservoir_id: string
+  /** Human-readable name (e.g., "Shasta") */
+  name: string
+  /** Total reservoir capacity in thousand acre-feet */
+  capacity_taf: number
+}
+
+/**
+ * Response from /api/statistics/reservoirs/all endpoint
+ */
+export interface AllReservoirsListResponse {
+  /** Array of major reservoir IDs */
+  major: string[]
+  /** Array of all reservoir info */
+  all: AllReservoirInfo[]
+  /** Total count of reservoirs */
+  total: number
+}
+
+/**
  * Response from /api/statistics/scenarios endpoint
  */
 export interface StatisticsScenariosResponse {
@@ -319,4 +344,59 @@ export interface StorageMonthlyResponse {
   group: string
   /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
   reservoirs: Record<string, StorageMonthlyReservoirData>
+}
+
+// ============================================================================
+// Spill Monthly Types (for spill frequency charts)
+// ============================================================================
+
+/**
+ * Monthly spill statistics for a single month
+ */
+export interface SpillMonthlyStats {
+  /** Number of months with spill events */
+  spill_months_count: number
+  /** Total months in the record */
+  total_months: number
+  /** Spill frequency as percentage for this month */
+  spill_frequency_pct: number
+  /** Average spill in CFS */
+  spill_avg_cfs: number
+  /** Maximum spill in CFS */
+  spill_max_cfs: number
+  /** 50th percentile spill */
+  spill_q50: number
+  /** 90th percentile spill */
+  spill_q90: number
+  /** 100th percentile (max) spill */
+  spill_q100: number
+  /** Average storage at time of spill (percentage), null if no spills */
+  storage_at_spill_avg_pct: number | null
+}
+
+/**
+ * Monthly spill data keyed by month (1-12)
+ */
+export type MonthlySpillData = Record<string, SpillMonthlyStats>
+
+/**
+ * Reservoir data in spill-monthly response
+ */
+export interface SpillMonthlyReservoirData {
+  /** Human-readable name (e.g., "Shasta") */
+  name: string
+  /** Monthly spill statistics keyed by month number */
+  monthly: MonthlySpillData
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/spill-monthly?group=:group
+ * Returns reservoirs with spill statistics
+ */
+export interface SpillMonthlyResponse {
+  scenario_id: string
+  /** Reservoir group (e.g., "major") */
+  group: string
+  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
+  reservoirs: Record<string, SpillMonthlyReservoirData>
 }
