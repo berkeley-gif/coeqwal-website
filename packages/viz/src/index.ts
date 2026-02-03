@@ -51,6 +51,9 @@ export type {
   VolumeScaleMode,
   CellStats,
   CellStatsMap,
+  BreakdownComponent,
+  BreakdownDataMap,
+  BreakdownComponentsMap,
 } from "./components/PercentileMatrix"
 
 // Export hooks

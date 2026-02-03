@@ -14,7 +14,13 @@ import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { CompactSelect, MobileModal } from "@repo/ui"
 import { VerticalBarChart, TierCircles, PercentileMatrix } from "@repo/viz"
-import type { ReservoirData, MonthlyPercentiles, VolumeScaleMode } from "@repo/viz"
+import type {
+  ReservoirData,
+  MonthlyPercentiles,
+  VolumeScaleMode,
+  BreakdownDataMap,
+  BreakdownComponentsMap,
+} from "@repo/viz"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import {
   ChartGridProvider,
@@ -93,6 +99,17 @@ const CWS_AGGREGATE_LABEL_MAP: Record<string, string> = {
   "CVP South": "CVP\nSouth of Delta",
   "SWP North": "SWP\nNorth of Delta",
   "SWP South": "SWP\nSouth of Delta",
+}
+
+/** Custom sort order for CWS aggregates (short_code -> sort index) */
+const CWS_AGGREGATE_SORT_ORDER: Record<string, number> = {
+  swp_nod: 0,
+  swp_sod: 1,
+  mwd: 2,
+  swp_sod_breakdown: 3, // Synthetic row showing MWD + Other SWP = SWP SOD
+  swp_total: 4,
+  cvp_nod: 5,
+  cvp_sod: 6,
 }
 
 // ============================================================================
@@ -457,6 +474,7 @@ export interface CellStats {
 /** Cell stats mapping: entityId -> scenarioId -> stats */
 export type CellStatsMap = Record<string, Record<string, CellStats>>
 
+
 /**
  * Hook to fetch CWS aggregate data for multiple scenarios
  */
@@ -576,11 +594,107 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     )
   })
 
-  const entities = Object.values(entityMap).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  )
+  // Compute synthetic "Other SWP" data = SWP SOD - MWD for breakdown row
+  const breakdownData: BreakdownDataMap = {}
+  const breakdownComponents: BreakdownComponentsMap = {}
 
-  return { entities, matrixData, cellStats, isLoading, error }
+  // Only add breakdown if we have both swp_sod and mwd data
+  if (matrixData["swp_sod"] && matrixData["mwd"]) {
+    const breakdownId = "swp_sod_breakdown"
+
+    // Define components with colors
+    breakdownComponents[breakdownId] = [
+      { id: "mwd", label: "MWD", color: "#5b9bd5" }, // Blue for MWD
+      { id: "other_swp", label: "Other SWP", color: "#70ad47" }, // Green for Other SWP
+    ]
+
+    // Add synthetic entity info
+    entityMap[breakdownId] = {
+      shortCode: breakdownId,
+      label: "MWD portion\nof SWP SOD",
+    }
+
+    // Compute breakdown data for each scenario
+    breakdownData[breakdownId] = {}
+    const breakdownEntry = breakdownData[breakdownId]
+    if (breakdownEntry) {
+      scenarios.forEach((scenarioId) => {
+        const swpSodData = matrixData["swp_sod"]?.[scenarioId]
+        const mwdData = matrixData["mwd"]?.[scenarioId]
+
+        if (!swpSodData || !mwdData) return
+
+        breakdownEntry[scenarioId] = {
+          // MWD component (just use MWD data directly)
+          mwd: mwdData.delivery,
+          // Other SWP component = SWP SOD - MWD
+          other_swp: computeOtherSwp(swpSodData.delivery, mwdData.delivery),
+        }
+      })
+    }
+
+    // Add empty entry to matrixData so the row renders
+    // (actual rendering will use breakdownData)
+    matrixData[breakdownId] = {}
+    scenarios.forEach((scenarioId) => {
+      const breakdownEntry = matrixData[breakdownId]
+      if (breakdownEntry) {
+        breakdownEntry[scenarioId] = {
+          delivery: {}, // Empty - actual data from breakdownData
+          shortage: {},
+        }
+      }
+    })
+  }
+
+  const entities = Object.values(entityMap).sort((a, b) => {
+    // Use custom sort order for aggregates, fall back to alphabetical
+    const orderA = CWS_AGGREGATE_SORT_ORDER[a.shortCode] ?? 999
+    const orderB = CWS_AGGREGATE_SORT_ORDER[b.shortCode] ?? 999
+    if (orderA !== orderB) return orderA - orderB
+    return a.label.localeCompare(b.label)
+  })
+
+  return {
+    entities,
+    matrixData,
+    cellStats,
+    breakdownData,
+    breakdownComponents,
+    isLoading,
+    error,
+  }
+}
+
+/**
+ * Compute "Other SWP" = SWP SOD - MWD for each percentile
+ */
+function computeOtherSwp(
+  swpSod: MonthlyPercentiles,
+  mwd: MonthlyPercentiles,
+): MonthlyPercentiles {
+  const result: MonthlyPercentiles = {}
+
+  for (let month = 1; month <= 12; month++) {
+    const monthStr = month.toString()
+    const swpSodMonth = swpSod[monthStr]
+    const mwdMonth = mwd[monthStr]
+
+    if (swpSodMonth && mwdMonth) {
+      result[monthStr] = {
+        q0: Math.max(0, swpSodMonth.q0 - mwdMonth.q0),
+        q10: Math.max(0, swpSodMonth.q10 - mwdMonth.q10),
+        q30: Math.max(0, swpSodMonth.q30 - mwdMonth.q30),
+        q50: Math.max(0, swpSodMonth.q50 - mwdMonth.q50),
+        q70: Math.max(0, swpSodMonth.q70 - mwdMonth.q70),
+        q90: Math.max(0, swpSodMonth.q90 - mwdMonth.q90),
+        q100: Math.max(0, swpSodMonth.q100 - mwdMonth.q100),
+        mean: Math.max(0, (swpSodMonth.mean ?? 0) - (mwdMonth.mean ?? 0)),
+      }
+    }
+  }
+
+  return result
 }
 
 /**
@@ -841,6 +955,8 @@ function useMultiScenarioCwsData(
         aggregates: contractorsData.entities,
         matrixData: contractorsData.matrixData,
         cellStats: contractorsData.cellStats,
+        breakdownData: undefined as BreakdownDataMap | undefined,
+        breakdownComponents: undefined as BreakdownComponentsMap | undefined,
         isLoading: contractorsData.isLoading,
         error: contractorsData.error,
       }
@@ -849,6 +965,8 @@ function useMultiScenarioCwsData(
         aggregates: demandUnitsData.entities,
         matrixData: demandUnitsData.matrixData,
         cellStats: demandUnitsData.cellStats,
+        breakdownData: undefined as BreakdownDataMap | undefined,
+        breakdownComponents: undefined as BreakdownComponentsMap | undefined,
         isLoading: demandUnitsData.isLoading,
         error: demandUnitsData.error,
       }
@@ -858,6 +976,8 @@ function useMultiScenarioCwsData(
         aggregates: aggregatesData.entities,
         matrixData: aggregatesData.matrixData,
         cellStats: aggregatesData.cellStats,
+        breakdownData: aggregatesData.breakdownData,
+        breakdownComponents: aggregatesData.breakdownComponents,
         isLoading: aggregatesData.isLoading,
         error: aggregatesData.error,
       }
@@ -886,8 +1006,15 @@ function MonthlyCwsSection({
     useState<CwsEntityLevel>("aggregates")
   const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
 
-  const { aggregates, matrixData, cellStats, isLoading, error } =
-    useMultiScenarioCwsData(scenarios, entityLevel)
+  const {
+    aggregates,
+    matrixData,
+    cellStats,
+    breakdownData,
+    breakdownComponents,
+    isLoading,
+    error,
+  } = useMultiScenarioCwsData(scenarios, entityLevel)
 
   // Convert to PercentileMatrix format
   // Note: We don't pass summary stats in reservoirData because they vary by scenario.
@@ -1067,6 +1194,8 @@ function MonthlyCwsSection({
             volumeScaleMode={scaleMode}
             colorScheme={displayMode}
             cellStats={cellStats}
+            breakdownData={breakdownData}
+            breakdownComponents={breakdownComponents}
           />
         </Box>
       )}
