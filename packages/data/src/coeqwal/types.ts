@@ -400,3 +400,318 @@ export interface SpillMonthlyResponse {
   /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
   reservoirs: Record<string, SpillMonthlyReservoirData>
 }
+
+// ============================================================================
+// CWS Aggregate Types (for M&I delivery/shortage statistics)
+// ============================================================================
+
+/**
+ * CWS aggregate entity from /api/statistics/cws-aggregates endpoint
+ */
+export interface CwsAggregate {
+  /** Short code identifier (e.g., "swp_total", "cvp_nod") */
+  short_code: string
+  /** Display label (e.g., "SWP Total M&I", "CVP North") */
+  label: string
+}
+
+/**
+ * Response from /api/statistics/cws-aggregates endpoint
+ */
+export interface CwsAggregatesListResponse {
+  aggregates: CwsAggregate[]
+}
+
+/**
+ * Monthly delivery statistics for a single month
+ * Used for CWS aggregates, M&I contractors, and demand units
+ */
+export interface CwsDeliveryMonthlyStats {
+  /** Average delivery in thousand acre-feet */
+  avg_taf: number
+  /** Coefficient of variation */
+  cv: number
+  /** Minimum (0th percentile) */
+  q0: number
+  /** 10th percentile */
+  q10: number
+  /** 30th percentile */
+  q30: number
+  /** Median (50th percentile) */
+  q50: number
+  /** 70th percentile */
+  q70: number
+  /** 90th percentile */
+  q90: number
+  /** Maximum (100th percentile) */
+  q100: number
+  /** Value exceeded 5% of time (wet conditions) */
+  exc_p5?: number
+  /** Value exceeded 10% of time */
+  exc_p10?: number
+  /** Value exceeded 25% of time */
+  exc_p25?: number
+  /** Value exceeded 50% of time (median) */
+  exc_p50?: number
+  /** Value exceeded 75% of time */
+  exc_p75?: number
+  /** Value exceeded 90% of time */
+  exc_p90?: number
+  /** Value exceeded 95% of time (dry conditions) */
+  exc_p95?: number
+}
+
+/**
+ * Monthly shortage statistics for a single month
+ * Extends delivery stats with shortage frequency
+ */
+export interface CwsShortageMonthlyStats extends CwsDeliveryMonthlyStats {
+  /** Percentage of months/years with shortage > 0 */
+  frequency_pct: number
+}
+
+/**
+ * CWS aggregate data with monthly delivery and shortage statistics
+ */
+export interface CwsAggregateData {
+  /** Display label (e.g., "SWP Total M&I") */
+  label: string
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/cws-aggregates/monthly
+ */
+export interface CwsAggregateMonthlyResponse {
+  scenario_id: string
+  /** Aggregate data keyed by short_code (e.g., "swp_total", "cvp_nod") */
+  aggregates: Record<string, CwsAggregateData>
+}
+
+/**
+ * Period-of-record summary for a CWS aggregate
+ */
+export interface CwsAggregatePeriodSummary {
+  /** Display label */
+  label: string
+  /** First year of simulation */
+  simulation_start_year: number
+  /** Last year of simulation */
+  simulation_end_year: number
+  /** Total years in record */
+  total_years: number
+  /** Annual average delivery in TAF */
+  annual_delivery_avg_taf: number
+  /** Coefficient of variation for annual delivery */
+  annual_delivery_cv: number
+  /** Minimum annual delivery in TAF */
+  annual_delivery_min_taf: number
+  /** Maximum annual delivery in TAF */
+  annual_delivery_max_taf: number
+  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  delivery_exceedance: Record<string, number>
+  /** Annual average shortage in TAF */
+  annual_shortage_avg_taf: number
+  /** Number of years with shortage > 0 */
+  shortage_years_count: number
+  /** Percentage of years with shortage > 0 */
+  shortage_frequency_pct: number
+  /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  shortage_exceedance: Record<string, number>
+  /** Percentage of months meeting full demand (shortage = 0) */
+  reliability_pct: number
+  /** Average (delivery / demand) × 100 across all months */
+  avg_pct_allocation_met: number
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/cws-aggregates/period-summary
+ */
+export interface CwsAggregatePeriodResponse {
+  scenario_id: string
+  /** Period summary data keyed by short_code */
+  aggregates: Record<string, CwsAggregatePeriodSummary>
+}
+
+// ============================================================================
+// M&I Contractors Types (30 SWP water agency contractors)
+// ============================================================================
+
+/**
+ * M&I contractor entity from /api/statistics/mi-contractors endpoint
+ */
+export interface MiContractor {
+  /** Short code identifier (e.g., "mwd_mi", "acwd_mi") */
+  short_code: string
+  /** Display label (e.g., "Metropolitan Water District", "Alameda County WD") */
+  label: string
+  /** Group identifier (e.g., "swp") */
+  group?: string
+}
+
+/**
+ * Response from /api/statistics/mi-contractors endpoint
+ */
+export interface MiContractorsListResponse {
+  contractors: MiContractor[]
+}
+
+/**
+ * M&I contractor data with monthly delivery and shortage statistics
+ * Same structure as CwsAggregateData
+ */
+export interface MiContractorData {
+  /** Display label */
+  label: string
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/mi-contractors/delivery-monthly
+ */
+export interface MiContractorMonthlyResponse {
+  scenario_id: string
+  /** Contractor data keyed by short_code */
+  contractors: Record<string, MiContractorData>
+}
+
+/**
+ * Period summary for an M&I contractor
+ * Same structure as CwsAggregatePeriodSummary
+ */
+export interface MiContractorPeriodSummary {
+  /** Display label */
+  label: string
+  /** First year of simulation */
+  simulation_start_year: number
+  /** Last year of simulation */
+  simulation_end_year: number
+  /** Total years in record */
+  total_years: number
+  /** Annual average delivery in TAF */
+  annual_delivery_avg_taf: number
+  /** Coefficient of variation for annual delivery */
+  annual_delivery_cv: number
+  /** Minimum annual delivery in TAF */
+  annual_delivery_min_taf: number
+  /** Maximum annual delivery in TAF */
+  annual_delivery_max_taf: number
+  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  delivery_exceedance: Record<string, number>
+  /** Annual average shortage in TAF */
+  annual_shortage_avg_taf: number
+  /** Number of years with shortage > 0 */
+  shortage_years_count: number
+  /** Percentage of years with shortage > 0 */
+  shortage_frequency_pct: number
+  /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  shortage_exceedance: Record<string, number>
+  /** Percentage of months meeting full demand (shortage = 0) */
+  reliability_pct: number
+  /** Average (delivery / demand) × 100 across all months */
+  avg_pct_allocation_met: number
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/mi-contractors/period-summary
+ */
+export interface MiContractorPeriodResponse {
+  scenario_id: string
+  /** Period summary data keyed by short_code */
+  contractors: Record<string, MiContractorPeriodSummary>
+}
+
+// ============================================================================
+// Urban Demand Units Types (46 demand units)
+// ============================================================================
+
+/**
+ * Urban demand unit entity from /api/statistics/demand-units endpoint
+ */
+export interface DemandUnit {
+  /** Demand unit ID (e.g., "UD_ACWD", "UD_MWD") */
+  du_id: string
+  /** Display label (e.g., "Alameda County Water District", "Metropolitan Water District") */
+  label: string
+  /** Group identifier (e.g., "swp", "cvp") */
+  group?: string
+}
+
+/**
+ * Response from /api/statistics/demand-units endpoint
+ */
+export interface DemandUnitsListResponse {
+  demand_units: DemandUnit[]
+}
+
+/**
+ * Urban demand unit data with monthly delivery and shortage statistics
+ */
+export interface DemandUnitData {
+  /** Display label */
+  label: string
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/demand-units/delivery-monthly
+ */
+export interface DemandUnitMonthlyResponse {
+  scenario_id: string
+  /** Demand unit data keyed by du_id */
+  demand_units: Record<string, DemandUnitData>
+}
+
+/**
+ * Period summary for an urban demand unit
+ */
+export interface DemandUnitPeriodSummary {
+  /** Display label */
+  label: string
+  /** First year of simulation */
+  simulation_start_year: number
+  /** Last year of simulation */
+  simulation_end_year: number
+  /** Total years in record */
+  total_years: number
+  /** Annual average delivery in TAF */
+  annual_delivery_avg_taf: number
+  /** Coefficient of variation for annual delivery */
+  annual_delivery_cv: number
+  /** Minimum annual delivery in TAF */
+  annual_delivery_min_taf: number
+  /** Maximum annual delivery in TAF */
+  annual_delivery_max_taf: number
+  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  delivery_exceedance: Record<string, number>
+  /** Annual average shortage in TAF */
+  annual_shortage_avg_taf: number
+  /** Number of years with shortage > 0 */
+  shortage_years_count: number
+  /** Percentage of years with shortage > 0 */
+  shortage_frequency_pct: number
+  /** Shortage exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  shortage_exceedance: Record<string, number>
+  /** Percentage of months meeting full demand (shortage = 0) */
+  reliability_pct: number
+  /** Average (delivery / demand) × 100 across all months */
+  avg_pct_allocation_met: number
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/demand-units/period-summary
+ */
+export interface DemandUnitPeriodResponse {
+  scenario_id: string
+  /** Period summary data keyed by du_id */
+  demand_units: Record<string, DemandUnitPeriodSummary>
+}

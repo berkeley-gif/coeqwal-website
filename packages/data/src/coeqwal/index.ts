@@ -53,6 +53,29 @@ export type {
   MonthlySpillData,
   SpillMonthlyReservoirData,
   SpillMonthlyResponse,
+  // CWS Aggregate types (M&I delivery/shortage)
+  CwsAggregate,
+  CwsAggregatesListResponse,
+  CwsDeliveryMonthlyStats,
+  CwsShortageMonthlyStats,
+  CwsAggregateData,
+  CwsAggregateMonthlyResponse,
+  CwsAggregatePeriodSummary,
+  CwsAggregatePeriodResponse,
+  // M&I Contractors types
+  MiContractor,
+  MiContractorsListResponse,
+  MiContractorData,
+  MiContractorMonthlyResponse,
+  MiContractorPeriodSummary,
+  MiContractorPeriodResponse,
+  // Urban Demand Units types
+  DemandUnit,
+  DemandUnitsListResponse,
+  DemandUnitData,
+  DemandUnitMonthlyResponse,
+  DemandUnitPeriodSummary,
+  DemandUnitPeriodResponse,
 } from "./types"
 
 // API constants
@@ -74,6 +97,18 @@ export {
   fetchGroupedReservoirPercentiles,
   fetchStorageMonthly,
   fetchSpillMonthly,
+  // CWS Aggregate fetchers
+  fetchCwsAggregatesList,
+  fetchCwsAggregatesMonthly,
+  fetchCwsAggregatesPeriod,
+  // M&I Contractors fetchers
+  fetchMiContractorsList,
+  fetchMiContractorsMonthly,
+  fetchMiContractorsPeriod,
+  // Urban Demand Units fetchers
+  fetchDemandUnitsList,
+  fetchDemandUnitsMonthly,
+  fetchDemandUnitsPeriod,
 } from "./fetchers"
 
 // Re-export hooks for convenience

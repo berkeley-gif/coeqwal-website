@@ -35,6 +35,7 @@ import ReservoirPercentilesSection, {
 } from "./ReservoirPercentilesSection"
 // Spill frequency hidden until API data is available
 // import SpillFrequencySection from "./SpillFrequencySection"
+import CwsSection from "./CwsSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import {
   ChartGridProvider,
@@ -1056,6 +1057,12 @@ export default function CategoryView() {
               {category.id === "reservoir-storage" &&
               selectedScenarios.length > 0 ? (
                 <ReservoirStorageSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
+              ) : category.id === "community-water" &&
+                selectedScenarios.length > 0 ? (
+                <CwsSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
                 />

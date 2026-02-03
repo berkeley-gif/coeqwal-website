@@ -23,6 +23,12 @@ export interface ReservoirData {
   deadPoolTaf: number
   /** Water system: "CVP", "SWP", or "CVP & SWP" */
   system?: string
+  /** CWS-specific: Annual average delivery in TAF (shown instead of capacity when > 0) */
+  annualAvgTaf?: number
+  /** CWS-specific: Reliability percentage (shown when annualAvgTaf is set) */
+  reliabilityPct?: number
+  /** CWS-specific: Shortage frequency percentage (shown when annualAvgTaf is set) */
+  shortageFrequencyPct?: number
 }
 
 // Mapping of reservoir IDs to water systems (for major California reservoirs)
@@ -81,6 +87,8 @@ export interface PercentileMatrixProps {
   displayMode?: MatrixDisplayMode
   /** Y-axis scale mode for volume: absolute (shared scale) or relative (per-reservoir capacity) */
   volumeScaleMode?: VolumeScaleMode
+  /** Color scheme: delivery (blue) or shortage (orange/amber) */
+  colorScheme?: PercentileColorScheme
 }
 
 // Water month labels (short - for axis)
@@ -115,7 +123,7 @@ const WATER_MONTH_NAMES = [
   "September",
 ]
 
-// Color scheme for percentile bands
+// Color scheme for percentile bands (delivery - blue)
 const COLORS = {
   range: "#d9eafb", // q0-q100 (lightest)
   outer: "#c5dbf3", // q10-q90
@@ -129,6 +137,23 @@ const COLORS = {
   deadPool: "#b85c38", // Rust/brown for dead pool reference line
   headerBg: "#f5f7f9",
 }
+
+// Color scheme for shortage - orange/amber
+const COLORS_SHORTAGE = {
+  range: "#fef3e2", // q0-q100 (lightest amber)
+  outer: "#fdd49e", // q10-q90
+  inner: "#fdae6b", // q30-q70
+  median: "#e6550d", // q50 (darkest orange)
+  text: "#5a6c7a",
+  grid: "#e8edf0",
+  gridStrong: "#d0d8dd",
+  header: "#3d5a6c",
+  capacity: "#4a7c59",
+  deadPool: "#b85c38",
+  headerBg: "#f5f7f9",
+}
+
+export type PercentileColorScheme = "delivery" | "shortage"
 
 const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   reservoirs,
@@ -144,6 +169,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   maxCellWidth = 250,
   displayMode = "percentage",
   volumeScaleMode = "absolute",
+  colorScheme = "delivery",
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -301,7 +327,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       })
     }
 
-    // Draw row headers (reservoir names, system, and capacity)
+    // Draw row headers (reservoir names, system, and capacity/CWS stats)
     // Positioned at far left to align with section header above
     const labelX = -margin.left + 5 // Start at left edge of SVG with small padding
     reservoirs.forEach((reservoir, rowIndex) => {
@@ -319,58 +345,124 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         .attr("fill", COLORS.header)
         .text(reservoir.reservoirName)
 
-      // System info (SWP/CVP) - secondary metadata
-      const system =
-        reservoir.system || RESERVOIR_SYSTEMS[reservoir.reservoirId] || ""
-      if (system) {
+      // Check if this is CWS data (has annualAvgTaf) vs reservoir data
+      const isCwsData =
+        reservoir.annualAvgTaf !== undefined && reservoir.annualAvgTaf > 0
+
+      if (isCwsData) {
+        // CWS-specific labels: Annual average, Reliability, Shortage frequency
+        let currentY = rowTop + 20
+
+        // Annual average delivery
         g.append("text")
           .attr("x", labelX)
-          .attr("y", rowTop + 20)
+          .attr("y", currentY)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "hanging")
-          .attr("font-size", "0.75rem") // 12px - smaller for metadata
+          .attr("font-size", "0.6875rem")
           .attr("font-family", "'Inter', -apple-system, sans-serif")
-          .attr("font-weight", "500")
+          .attr("font-weight", "400")
           .attr("fill", COLORS.text)
-          .attr("letter-spacing", "0.02em")
-          .text(system)
-      }
-
-      // Capacity - key metric with value emphasis
-      const capacityY = rowTop + (system ? 38 : 20)
-      // Label in lighter weight
-      g.append("text")
-        .attr("x", labelX)
-        .attr("y", capacityY)
-        .attr("text-anchor", "start")
-        .attr("dominant-baseline", "hanging")
-        .attr("font-size", "0.6875rem") // 11px - small label
-        .attr("font-family", "'Inter', -apple-system, sans-serif")
-        .attr("font-weight", "400")
-        .attr("fill", COLORS.text)
-        .attr("text-transform", "uppercase")
-        .attr("letter-spacing", "0.05em")
-        .text("Capacity")
-      // Value in tabular figures, prominent
-      g.append("text")
-        .attr("x", labelX)
-        .attr("y", capacityY + 14)
-        .attr("text-anchor", "start")
-        .attr("dominant-baseline", "hanging")
-        .attr("font-size", "0.875rem") // 14px
-        .attr("font-family", "'Inter', -apple-system, sans-serif")
-        .attr("font-weight", "600")
-        .attr("font-feature-settings", "'tnum' 1") // Tabular numbers
-        .attr("fill", COLORS.header)
-        .text(`${reservoir.capacityTaf.toLocaleString()} TAF`)
-
-      // Dead pool - shown if value exists
-      const deadPoolY = capacityY + 32
-      if (reservoir.deadPoolTaf > 0) {
-        // Label
+          .attr("text-transform", "uppercase")
+          .attr("letter-spacing", "0.05em")
+          .text("Avg delivery")
         g.append("text")
           .attr("x", labelX)
-          .attr("y", deadPoolY)
+          .attr("y", currentY + 14)
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "hanging")
+          .attr("font-size", "0.875rem")
+          .attr("font-family", "'Inter', -apple-system, sans-serif")
+          .attr("font-weight", "600")
+          .attr("font-feature-settings", "'tnum' 1")
+          .attr("fill", COLORS.header)
+          .text(
+            `${Math.round(reservoir.annualAvgTaf!).toLocaleString()} TAF/yr`,
+          )
+        currentY += 32
+
+        // Reliability percentage
+        if (reservoir.reliabilityPct !== undefined) {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", currentY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.6875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "400")
+            .attr("fill", COLORS.text)
+            .attr("text-transform", "uppercase")
+            .attr("letter-spacing", "0.05em")
+            .text("Reliability")
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", currentY + 14)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "600")
+            .attr("font-feature-settings", "'tnum' 1")
+            .attr("fill", COLORS.capacity) // Green for good metric
+            .text(`${Math.round(reservoir.reliabilityPct)}%`)
+          currentY += 32
+        }
+
+        // Shortage frequency percentage
+        if (
+          reservoir.shortageFrequencyPct !== undefined &&
+          reservoir.shortageFrequencyPct > 0
+        ) {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", currentY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.6875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "400")
+            .attr("fill", COLORS.text)
+            .attr("text-transform", "uppercase")
+            .attr("letter-spacing", "0.05em")
+            .text("Shortage freq")
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", currentY + 14)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "600")
+            .attr("font-feature-settings", "'tnum' 1")
+            .attr("fill", COLORS.deadPool) // Orange/red for concerning metric
+            .text(`${Math.round(reservoir.shortageFrequencyPct)}%`)
+        }
+      } else {
+        // Standard reservoir labels: System, Capacity, Dead pool
+        // System info (SWP/CVP) - secondary metadata
+        const system =
+          reservoir.system || RESERVOIR_SYSTEMS[reservoir.reservoirId] || ""
+        if (system) {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", rowTop + 20)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.75rem") // 12px - smaller for metadata
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "500")
+            .attr("fill", COLORS.text)
+            .attr("letter-spacing", "0.02em")
+            .text(system)
+        }
+
+        // Capacity - key metric with value emphasis
+        const capacityY = rowTop + (system ? 38 : 20)
+        // Label in lighter weight
+        g.append("text")
+          .attr("x", labelX)
+          .attr("y", capacityY)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "hanging")
           .attr("font-size", "0.6875rem") // 11px - small label
@@ -379,11 +471,11 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .attr("fill", COLORS.text)
           .attr("text-transform", "uppercase")
           .attr("letter-spacing", "0.05em")
-          .text("Dead pool")
-        // Value
+          .text("Capacity")
+        // Value in tabular figures, prominent
         g.append("text")
           .attr("x", labelX)
-          .attr("y", deadPoolY + 14)
+          .attr("y", capacityY + 14)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "hanging")
           .attr("font-size", "0.875rem") // 14px
@@ -391,82 +483,112 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .attr("font-weight", "600")
           .attr("font-feature-settings", "'tnum' 1") // Tabular numbers
           .attr("fill", COLORS.header)
-          .text(`${reservoir.deadPoolTaf.toLocaleString()} TAF`)
-      }
+          .text(`${reservoir.capacityTaf.toLocaleString()} TAF`)
 
-      // Context note with tooltip (for reservoirs with special context)
-      const contextNote = RESERVOIR_CONTEXT[reservoir.reservoirId]
-      if (contextNote) {
-        const contextY =
-          reservoir.deadPoolTaf > 0 ? deadPoolY + 34 : capacityY + 34
-        const contextText = g
-          .append("text")
-          .attr("x", labelX)
-          .attr("y", contextY)
-          .attr("text-anchor", "start")
-          .attr("dominant-baseline", "hanging")
-          .attr("font-size", "0.75rem") // 12px
-          .attr("font-family", "'Inter', -apple-system, sans-serif")
-          .attr("font-weight", "500")
-          .attr("fill", COLORS.text)
-          .attr("cursor", "help")
-          .text("Context")
+        // Dead pool - shown if value exists
+        const deadPoolY = capacityY + 32
+        if (reservoir.deadPoolTaf > 0) {
+          // Label
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", deadPoolY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.6875rem") // 11px - small label
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "400")
+            .attr("fill", COLORS.text)
+            .attr("text-transform", "uppercase")
+            .attr("letter-spacing", "0.05em")
+            .text("Dead pool")
+          // Value
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", deadPoolY + 14)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.875rem") // 14px
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "600")
+            .attr("font-feature-settings", "'tnum' 1") // Tabular numbers
+            .attr("fill", COLORS.header)
+            .text(`${reservoir.deadPoolTaf.toLocaleString()} TAF`)
+        }
 
-        // Add dotted underline
-        const textWidth = contextText.node()?.getBBox().width ?? 40
-        g.append("line")
-          .attr("x1", labelX)
-          .attr("x2", labelX + textWidth)
-          .attr("y1", contextY + 14)
-          .attr("y2", contextY + 14)
-          .attr("stroke", COLORS.text)
-          .attr("stroke-width", 1)
-          .attr("stroke-dasharray", "2,2")
-          .attr("cursor", "help")
+        // Context note with tooltip (for reservoirs with special context)
+        const contextNote = RESERVOIR_CONTEXT[reservoir.reservoirId]
+        if (contextNote) {
+          const contextY =
+            reservoir.deadPoolTaf > 0 ? deadPoolY + 34 : capacityY + 34
+          const contextText = g
+            .append("text")
+            .attr("x", labelX)
+            .attr("y", contextY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.75rem") // 12px
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "500")
+            .attr("fill", COLORS.text)
+            .attr("cursor", "help")
+            .text("Context")
 
-        // Invisible hover area for tooltip
-        g.append("rect")
-          .attr("x", labelX - 2)
-          .attr("y", contextY - 2)
-          .attr("width", textWidth + 4)
-          .attr("height", 18)
-          .attr("fill", "transparent")
-          .attr("cursor", "help")
-          .on("mouseenter", (event) => {
-            // Create or show tooltip
-            let tooltipEl = d3.select<HTMLDivElement, unknown>(
-              "#context-tooltip",
-            )
-            if (tooltipEl.empty()) {
-              tooltipEl = d3
-                .select("body")
-                .append<HTMLDivElement>("div")
-                .attr("id", "context-tooltip")
-                .style("position", "absolute")
-                .style("background", "#fff")
-                .style("border-radius", "6px")
-                .style("padding", "12px 16px")
-                .style("font-size", "13px")
-                .style("font-family", "'Inter', -apple-system, sans-serif")
-                .style("box-shadow", "0 4px 20px rgba(0,0,0,0.15)")
-                .style("pointer-events", "none")
-                .style("z-index", "1000")
-                .style("max-width", "320px")
-                .style("line-height", "1.5")
-                .style("color", COLORS.text)
-            }
-            tooltipEl
-              .style("visibility", "visible")
-              .style("left", `${event.pageX + 12}px`)
-              .style("top", `${event.pageY - 10}px`)
-              .text(contextNote)
-          })
-          .on("mouseleave", () => {
-            d3.select<HTMLDivElement, unknown>("#context-tooltip").style(
-              "visibility",
-              "hidden",
-            )
-          })
+          // Add dotted underline
+          const textWidth = contextText.node()?.getBBox().width ?? 40
+          g.append("line")
+            .attr("x1", labelX)
+            .attr("x2", labelX + textWidth)
+            .attr("y1", contextY + 14)
+            .attr("y2", contextY + 14)
+            .attr("stroke", COLORS.text)
+            .attr("stroke-width", 1)
+            .attr("stroke-dasharray", "2,2")
+            .attr("cursor", "help")
+
+          // Invisible hover area for tooltip
+          g.append("rect")
+            .attr("x", labelX - 2)
+            .attr("y", contextY - 2)
+            .attr("width", textWidth + 4)
+            .attr("height", 18)
+            .attr("fill", "transparent")
+            .attr("cursor", "help")
+            .on("mouseenter", (event) => {
+              // Create or show tooltip
+              let tooltipEl = d3.select<HTMLDivElement, unknown>(
+                "#context-tooltip",
+              )
+              if (tooltipEl.empty()) {
+                tooltipEl = d3
+                  .select("body")
+                  .append<HTMLDivElement>("div")
+                  .attr("id", "context-tooltip")
+                  .style("position", "absolute")
+                  .style("background", "#fff")
+                  .style("border-radius", "6px")
+                  .style("padding", "12px 16px")
+                  .style("font-size", "13px")
+                  .style("font-family", "'Inter', -apple-system, sans-serif")
+                  .style("box-shadow", "0 4px 20px rgba(0,0,0,0.15)")
+                  .style("pointer-events", "none")
+                  .style("z-index", "1000")
+                  .style("max-width", "320px")
+                  .style("line-height", "1.5")
+                  .style("color", COLORS.text)
+              }
+              tooltipEl
+                .style("visibility", "visible")
+                .style("left", `${event.pageX + 12}px`)
+                .style("top", `${event.pageY - 10}px`)
+                .text(contextNote)
+            })
+            .on("mouseleave", () => {
+              d3.select<HTMLDivElement, unknown>("#context-tooltip").style(
+                "visibility",
+                "hidden",
+              )
+            })
+        }
       }
     })
 
@@ -603,6 +725,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       return `rgba(${r}, ${g}, ${b}, ${alpha})`
     }
 
+    // Select base color scheme based on colorScheme prop
+    const baseColors = colorScheme === "shortage" ? COLORS_SHORTAGE : COLORS
+
     // Helper to get colors for a specific cell (scenario + reservoir)
     const getCellColors = (scenarioId: string, reservoirId: string) => {
       const tierColor = cellColors?.[scenarioId]?.[reservoirId]
@@ -615,12 +740,12 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           median: tierColor, // Full color for median line
         }
       }
-      // Default colors if no tier color provided
+      // Default colors based on selected color scheme
       return {
-        range: COLORS.range,
-        outer: COLORS.outer,
-        inner: COLORS.inner,
-        median: COLORS.median,
+        range: baseColors.range,
+        outer: baseColors.outer,
+        inner: baseColors.inner,
+        median: baseColors.median,
       }
     }
 
@@ -790,7 +915,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     const playhead = g
       .append("line")
       .attr("class", "playhead")
-      .attr("stroke", COLORS.median)
+      .attr("stroke", baseColors.median)
       .attr("stroke-width", 1.5)
       .attr("stroke-dasharray", "4,2")
       .style("visibility", "hidden")
@@ -849,8 +974,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                     </div>
                     <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785;">
                       <span>90th</span><span style="text-align: right;">${formatValue(monthData.q90)}${unit}</span>
-                      <span style="font-weight: 600; color: ${COLORS.median};">Median</span>
-                      <span style="text-align: right; font-weight: 600; color: ${COLORS.median};">${formatValue(monthData.q50)}${unit}</span>
+                      <span style="font-weight: 600; color: ${baseColors.median};">Median</span>
+                      <span style="text-align: right; font-weight: 600; color: ${baseColors.median};">${formatValue(monthData.q50)}${unit}</span>
                       <span>10th</span><span style="text-align: right;">${formatValue(monthData.q10)}${unit}</span>
                     </div>
                   `)

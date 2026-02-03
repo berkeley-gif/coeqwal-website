@@ -105,6 +105,99 @@ export const CACHE_KEYS = {
    */
   spillMonthly: (scenarioId: string, group: string) =>
     `/api/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
+
+  // CWS Aggregate cache keys (M&I delivery/shortage statistics)
+
+  /** List of CWS aggregate entities */
+  CWS_AGGREGATES_LIST: "/api/statistics/cws-aggregates",
+
+  /**
+   * Monthly delivery and shortage statistics for CWS aggregates
+   * @param scenarioId - Scenario ID
+   * @param aggregate - Optional aggregate short_code filter
+   */
+  cwsAggregatesMonthly: (scenarioId: string, aggregate?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/cws-aggregates/monthly${aggregate ? `?aggregate=${aggregate}` : ""}`,
+
+  /**
+   * Period-of-record summary for CWS aggregates
+   * @param scenarioId - Scenario ID
+   * @param aggregate - Optional aggregate short_code filter
+   */
+  cwsAggregatesPeriod: (scenarioId: string, aggregate?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/cws-aggregates/period-summary${aggregate ? `?aggregate=${aggregate}` : ""}`,
+
+  // M&I Contractors cache keys (30 SWP water agency contractors)
+
+  /** List of M&I contractors */
+  MI_CONTRACTORS_LIST: "/api/statistics/mi-contractors",
+
+  /**
+   * List of M&I contractors with optional group filter
+   * @param group - Optional group filter (e.g., "swp")
+   */
+  miContractorsList: (group?: string) =>
+    `/api/statistics/mi-contractors${group ? `?group=${group}` : ""}`,
+
+  /**
+   * Monthly delivery and shortage statistics for M&I contractors
+   * @param scenarioId - Scenario ID
+   * @param contractor - Optional contractor short_code filter
+   */
+  miContractorsMonthly: (scenarioId: string, contractor?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/mi-contractors/delivery-monthly${contractor ? `?contractor=${contractor}` : ""}`,
+
+  /**
+   * Period-of-record summary for M&I contractors
+   * @param scenarioId - Scenario ID
+   * @param contractor - Optional contractor short_code filter
+   */
+  miContractorsPeriod: (scenarioId: string, contractor?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/mi-contractors/period-summary${contractor ? `?contractor=${contractor}` : ""}`,
+
+  // Urban Demand Units cache keys (46 demand units)
+
+  /** List of urban demand units */
+  DEMAND_UNITS_LIST: "/api/statistics/demand-units",
+
+  /**
+   * List of urban demand units with optional group filter
+   * @param group - Optional group filter (e.g., "swp", "cvp")
+   */
+  demandUnitsList: (group?: string) =>
+    `/api/statistics/demand-units${group ? `?group=${group}` : ""}`,
+
+  /**
+   * Monthly delivery and shortage statistics for urban demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   * @param group - Optional group filter
+   */
+  demandUnitsMonthly: (scenarioId: string, duId?: string, group?: string) => {
+    const params = [
+      duId && `du_id=${duId}`,
+      group && `group=${group}`,
+    ]
+      .filter(Boolean)
+      .join("&")
+    return `/api/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Period-of-record summary for urban demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   * @param group - Optional group filter
+   */
+  demandUnitsPeriod: (scenarioId: string, duId?: string, group?: string) => {
+    const params = [
+      duId && `du_id=${duId}`,
+      group && `group=${group}`,
+    ]
+      .filter(Boolean)
+      .join("&")
+    return `/api/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
+  },
 } as const
 
 /**

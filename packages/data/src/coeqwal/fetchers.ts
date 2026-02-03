@@ -24,6 +24,15 @@ import type {
   GroupedReservoirPercentilesResponse,
   StorageMonthlyResponse,
   SpillMonthlyResponse,
+  CwsAggregatesListResponse,
+  CwsAggregateMonthlyResponse,
+  CwsAggregatePeriodResponse,
+  MiContractorsListResponse,
+  MiContractorMonthlyResponse,
+  MiContractorPeriodResponse,
+  DemandUnitsListResponse,
+  DemandUnitMonthlyResponse,
+  DemandUnitPeriodResponse,
 } from "./types"
 
 /**
@@ -359,6 +368,256 @@ export async function fetchSpillMonthly(
 
   return apiFetcher<SpillMonthlyResponse>(
     ENDPOINTS.spillMonthly(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// CWS Aggregate API fetchers (M&I delivery/shortage statistics)
+// ============================================================================
+
+/**
+ * Fetch list of CWS aggregate entities
+ *
+ * @returns Array of CWS aggregates (SWP Total, CVP North, CVP South, MWD)
+ *
+ * @example
+ * ```typescript
+ * const { aggregates } = await fetchCwsAggregatesList()
+ * // [{ short_code: "swp_total", label: "SWP Total M&I" }, ...]
+ * ```
+ */
+export async function fetchCwsAggregatesList(): Promise<CwsAggregatesListResponse> {
+  return apiFetcher<CwsAggregatesListResponse>(ENDPOINTS.CWS_AGGREGATES_LIST, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for CWS aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param aggregate - Optional filter by aggregate short_code (e.g., "swp_total")
+ * @returns Monthly statistics for CWS aggregates
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchCwsAggregatesMonthly("s0020")
+ * // { scenario_id: "s0020", aggregates: { "swp_total": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchCwsAggregatesMonthly(
+  scenarioId: string,
+  aggregate?: string,
+): Promise<CwsAggregateMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<CwsAggregateMonthlyResponse>(
+    ENDPOINTS.cwsAggregatesMonthly(scenarioId, aggregate),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for CWS aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param aggregate - Optional filter by aggregate short_code
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchCwsAggregatesPeriod("s0020")
+ * // { scenario_id: "s0020", aggregates: { "swp_total": { annual_delivery_avg_taf: 1506, reliability_pct: 90, ... } } }
+ * ```
+ */
+export async function fetchCwsAggregatesPeriod(
+  scenarioId: string,
+  aggregate?: string,
+): Promise<CwsAggregatePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<CwsAggregatePeriodResponse>(
+    ENDPOINTS.cwsAggregatesPeriod(scenarioId, aggregate),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// M&I Contractors API fetchers (30 SWP water agency contractors)
+// ============================================================================
+
+/**
+ * Fetch list of M&I contractors
+ *
+ * @param group - Optional filter by group (e.g., "swp")
+ * @returns Array of M&I contractors
+ *
+ * @example
+ * ```typescript
+ * const { contractors } = await fetchMiContractorsList()
+ * // [{ short_code: "mwd_mi", label: "Metropolitan Water District" }, ...]
+ * ```
+ */
+export async function fetchMiContractorsList(
+  group?: string,
+): Promise<MiContractorsListResponse> {
+  return apiFetcher<MiContractorsListResponse>(
+    ENDPOINTS.miContractorsList(group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for M&I contractors
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param contractor - Optional filter by contractor short_code
+ * @returns Monthly statistics for M&I contractors
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchMiContractorsMonthly("s0020")
+ * // { scenario_id: "s0020", contractors: { "mwd_mi": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchMiContractorsMonthly(
+  scenarioId: string,
+  contractor?: string,
+): Promise<MiContractorMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<MiContractorMonthlyResponse>(
+    ENDPOINTS.miContractorsMonthly(scenarioId, contractor),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for M&I contractors
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param contractor - Optional filter by contractor short_code
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchMiContractorsPeriod("s0020")
+ * // { scenario_id: "s0020", contractors: { "mwd_mi": { annual_delivery_avg_taf: 1506, reliability_pct: 90, ... } } }
+ * ```
+ */
+export async function fetchMiContractorsPeriod(
+  scenarioId: string,
+  contractor?: string,
+): Promise<MiContractorPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<MiContractorPeriodResponse>(
+    ENDPOINTS.miContractorsPeriod(scenarioId, contractor),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// Urban Demand Units API fetchers (46 demand units)
+// ============================================================================
+
+/**
+ * Fetch list of urban demand units
+ *
+ * @param group - Optional filter by group (e.g., "swp", "cvp")
+ * @returns Array of urban demand units
+ *
+ * @example
+ * ```typescript
+ * const { demand_units } = await fetchDemandUnitsList()
+ * // [{ du_id: "UD_ACWD", label: "Alameda County Water District" }, ...]
+ * ```
+ */
+export async function fetchDemandUnitsList(
+  group?: string,
+): Promise<DemandUnitsListResponse> {
+  return apiFetcher<DemandUnitsListResponse>(ENDPOINTS.demandUnitsList(group), {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for urban demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID (e.g., "UD_ACWD")
+ * @param group - Optional group filter (e.g., "swp")
+ * @returns Monthly statistics for urban demand units
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitsMonthly("s0020")
+ * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchDemandUnitsMonthly(
+  scenarioId: string,
+  duId?: string,
+  group?: string,
+): Promise<DemandUnitMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<DemandUnitMonthlyResponse>(
+    ENDPOINTS.demandUnitsMonthly(scenarioId, duId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for urban demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID
+ * @param group - Optional group filter
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitsPeriod("s0020")
+ * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { annual_delivery_avg_taf: 50, reliability_pct: 85, ... } } }
+ * ```
+ */
+export async function fetchDemandUnitsPeriod(
+  scenarioId: string,
+  duId?: string,
+  group?: string,
+): Promise<DemandUnitPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<DemandUnitPeriodResponse>(
+    ENDPOINTS.demandUnitsPeriod(scenarioId, duId, group),
     {
       baseUrl: DEFAULT_API_BASE,
     },
