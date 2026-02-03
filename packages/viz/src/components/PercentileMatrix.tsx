@@ -70,6 +70,22 @@ export interface CellStats {
 /** Cell stats mapping: entityId -> scenarioId -> stats */
 export type CellStatsMap = Record<string, Record<string, CellStats>>
 
+/** Breakdown component definition for stacked charts */
+export interface BreakdownComponent {
+  id: string
+  label: string
+  color: string
+}
+
+/** Breakdown data: entityId -> scenarioId -> componentId -> percentile data */
+export type BreakdownDataMap = Record<
+  string,
+  Record<string, Record<string, MonthlyPercentiles | undefined>>
+>
+
+/** Breakdown components: entityId -> array of components */
+export type BreakdownComponentsMap = Record<string, BreakdownComponent[]>
+
 export interface PercentileMatrixProps {
   /** Array of reservoir metadata */
   reservoirs: ReservoirData[]
@@ -101,6 +117,10 @@ export interface PercentileMatrixProps {
   colorScheme?: PercentileColorScheme
   /** Per-cell summary statistics (entityId -> scenarioId -> stats) */
   cellStats?: CellStatsMap
+  /** Breakdown data for stacked charts (entityId -> scenarioId -> componentId -> data) */
+  breakdownData?: BreakdownDataMap
+  /** Breakdown component definitions (entityId -> components with id, label, color) */
+  breakdownComponents?: BreakdownComponentsMap
 }
 
 // Water month labels (short - for axis)
@@ -183,6 +203,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   volumeScaleMode = "absolute",
   colorScheme = "delivery",
   cellStats,
+  breakdownData,
+  breakdownComponents,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -816,9 +838,6 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       const cellYScale = getYScale(reservoir.reservoirId)
 
       scenarios.forEach((scenarioId, colIndex) => {
-        const cellData = data[reservoir.reservoirId]?.[scenarioId]
-        if (!cellData) return
-
         const cellX = getCellX(colIndex) + chartPadding.left
         const cellY = colHeaderHeight + rowIndex * cellHeight + chartPadding.top
 
@@ -826,82 +845,298 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .append("g")
           .attr("transform", `translate(${cellX},${cellY})`)
 
-        // Get colors for this specific cell (scenario + reservoir)
-        const colors = getCellColors(scenarioId, reservoir.reservoirId)
+        // Check if this is a breakdown row (stacked chart)
+        const components = breakdownComponents?.[reservoir.reservoirId]
+        const componentData = breakdownData?.[reservoir.reservoirId]?.[scenarioId]
 
-        // Process data
-        const processedData: Array<
-          { monthIndex: number } & {
-            q0: number
-            q10: number
-            q30: number
-            q50: number
-            q70: number
-            q90: number
-            q100: number
-            mean: number
+        if (components && componentData && components.length >= 2) {
+          // Render stacked percentile bands
+          // Components are rendered bottom-to-top, so first component is at y=0
+          const bottomComponent = components[0]
+          const topComponent = components[1]
+
+          // Type guard - these should exist since we checked length >= 2
+          if (!bottomComponent || !topComponent) return
+
+          const bottomData = componentData[bottomComponent.id]
+          const topData = componentData[topComponent.id]
+
+          if (bottomData && topData) {
+            // Overlay chart: Gray SWP SOD shadow with blue MWD overlay
+            // This shows MWD as a portion of total SWP SOD
+
+            // Get SWP SOD total data (MWD + Other SWP = SWP SOD)
+            // bottomData = MWD, topData = Other SWP
+            type OverlayDataItem = {
+              monthIndex: number
+              // SWP SOD totals (gray background)
+              totalQ100: number
+              totalMedian: number
+              // MWD values (blue overlay)
+              mwdQ100: number
+              mwdMedian: number
+            }
+            const overlayData: OverlayDataItem[] = []
+
+            for (let i = 1; i <= 12; i++) {
+              const monthStr = i.toString()
+              const mwdMonth = bottomData[monthStr]
+              const otherSwpMonth = topData[monthStr]
+              if (mwdMonth && otherSwpMonth) {
+                overlayData.push({
+                  monthIndex: i - 1,
+                  // Total SWP SOD = MWD + Other SWP
+                  totalQ100: mwdMonth.q100 + otherSwpMonth.q100,
+                  totalMedian: mwdMonth.q50 + otherSwpMonth.q50,
+                  // MWD values
+                  mwdQ100: mwdMonth.q100,
+                  mwdMedian: mwdMonth.q50,
+                })
+              }
+            }
+
+            if (overlayData.length > 0) {
+              const mwdColor = bottomComponent.color // Blue for MWD
+              const swpSodColor = topComponent.color // Green for SWP SOD
+
+              // 1. Draw SWP SOD total as green shadow (0 to q100)
+              const totalArea = d3
+                .area<OverlayDataItem>()
+                .x((d) => xScale(d.monthIndex))
+                .y0(() => cellYScale(0))
+                .y1((d) => cellYScale(d.totalQ100))
+                .curve(d3.curveLinear)
+
+              cellG
+                .append("path")
+                .datum(overlayData)
+                .attr("fill", hexToRgba(swpSodColor, 0.2))
+                .attr("d", totalArea)
+
+              // 2. Draw SWP SOD median line (green, dashed)
+              const totalMedianLine = d3
+                .line<OverlayDataItem>()
+                .x((d) => xScale(d.monthIndex))
+                .y((d) => cellYScale(d.totalMedian))
+                .curve(d3.curveLinear)
+
+              cellG
+                .append("path")
+                .datum(overlayData)
+                .attr("fill", "none")
+                .attr("stroke", swpSodColor)
+                .attr("stroke-width", 1.5)
+                .attr("stroke-dasharray", "4,2")
+                .attr("d", totalMedianLine)
+
+              // 3. Draw MWD as blue overlay (0 to q100)
+              const mwdArea = d3
+                .area<OverlayDataItem>()
+                .x((d) => xScale(d.monthIndex))
+                .y0(() => cellYScale(0))
+                .y1((d) => cellYScale(d.mwdQ100))
+                .curve(d3.curveLinear)
+
+              cellG
+                .append("path")
+                .datum(overlayData)
+                .attr("fill", hexToRgba(mwdColor, 0.4))
+                .attr("d", mwdArea)
+
+              // 4. Draw MWD median line (blue, solid)
+              const mwdMedianLine = d3
+                .line<OverlayDataItem>()
+                .x((d) => xScale(d.monthIndex))
+                .y((d) => cellYScale(d.mwdMedian))
+                .curve(d3.curveLinear)
+
+              cellG
+                .append("path")
+                .datum(overlayData)
+                .attr("fill", "none")
+                .attr("stroke", mwdColor)
+                .attr("stroke-width", 1.5)
+                .attr("d", mwdMedianLine)
+
+              // 5. Add legend with 2x2 grid layout
+              const legendPadding = 8
+              const legendY = chartHeight + 16 + legendPadding
+              const rowHeight = 18
+              const col1X = legendPadding
+              const col2X = 115 // Fixed column for alignment
+              const iconWidth = 18
+              const labelGap = 6
+              const legendFontSize = "10px"
+
+              // Draw legend background
+              cellG
+                .append("rect")
+                .attr("x", 0)
+                .attr("y", chartHeight + 14)
+                .attr("width", chartWidth)
+                .attr("height", rowHeight * 2 + legendPadding * 2 + 4)
+                .attr("fill", hexToRgba("#f8f9fa", 0.9))
+                .attr("rx", 4)
+
+              // Row 1, Col 1: SWP SOD range
+              cellG
+                .append("rect")
+                .attr("x", col1X)
+                .attr("y", legendY)
+                .attr("width", iconWidth)
+                .attr("height", 10)
+                .attr("fill", hexToRgba(swpSodColor, 0.2))
+                .attr("stroke", swpSodColor)
+                .attr("stroke-width", 0.5)
+              cellG
+                .append("text")
+                .attr("x", col1X + iconWidth + labelGap)
+                .attr("y", legendY + 8)
+                .attr("font-size", legendFontSize)
+                .attr("font-family", "'Inter', -apple-system, sans-serif")
+                .attr("fill", COLORS.text)
+                .text("SWP SOD range")
+
+              // Row 1, Col 2: SWP SOD median
+              cellG
+                .append("line")
+                .attr("x1", col2X)
+                .attr("x2", col2X + iconWidth)
+                .attr("y1", legendY + 5)
+                .attr("y2", legendY + 5)
+                .attr("stroke", swpSodColor)
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "4,2")
+              cellG
+                .append("text")
+                .attr("x", col2X + iconWidth + labelGap)
+                .attr("y", legendY + 8)
+                .attr("font-size", legendFontSize)
+                .attr("font-family", "'Inter', -apple-system, sans-serif")
+                .attr("fill", COLORS.text)
+                .text("SWP SOD median")
+
+              // Row 2, Col 1: MWD range
+              const row2Y = legendY + rowHeight
+              cellG
+                .append("rect")
+                .attr("x", col1X)
+                .attr("y", row2Y)
+                .attr("width", iconWidth)
+                .attr("height", 10)
+                .attr("fill", hexToRgba(mwdColor, 0.4))
+                .attr("stroke", mwdColor)
+                .attr("stroke-width", 0.5)
+              cellG
+                .append("text")
+                .attr("x", col1X + iconWidth + labelGap)
+                .attr("y", row2Y + 8)
+                .attr("font-size", legendFontSize)
+                .attr("font-family", "'Inter', -apple-system, sans-serif")
+                .attr("fill", COLORS.text)
+                .text("MWD range")
+
+              // Row 2, Col 2: MWD median
+              cellG
+                .append("line")
+                .attr("x1", col2X)
+                .attr("x2", col2X + iconWidth)
+                .attr("y1", row2Y + 5)
+                .attr("y2", row2Y + 5)
+                .attr("stroke", mwdColor)
+                .attr("stroke-width", 2)
+              cellG
+                .append("text")
+                .attr("x", col2X + iconWidth + labelGap)
+                .attr("y", row2Y + 8)
+                .attr("font-size", legendFontSize)
+                .attr("font-family", "'Inter', -apple-system, sans-serif")
+                .attr("fill", COLORS.text)
+                .text("MWD median")
+            }
           }
-        > = []
-        for (let i = 1; i <= 12; i++) {
-          const monthData = cellData[i.toString()]
-          if (monthData) {
-            processedData.push({ monthIndex: i - 1, ...monthData })
+        } else {
+          // Standard single-entity percentile band rendering
+          const cellData = data[reservoir.reservoirId]?.[scenarioId]
+          if (!cellData) return
+
+          // Get colors for this specific cell (scenario + reservoir)
+          const colors = getCellColors(scenarioId, reservoir.reservoirId)
+
+          // Process data
+          const processedData: Array<
+            { monthIndex: number } & {
+              q0: number
+              q10: number
+              q30: number
+              q50: number
+              q70: number
+              q90: number
+              q100: number
+              mean: number
+            }
+          > = []
+          for (let i = 1; i <= 12; i++) {
+            const monthData = cellData[i.toString()]
+            if (monthData) {
+              processedData.push({ monthIndex: i - 1, ...monthData })
+            }
           }
+
+          if (processedData.length === 0) return
+
+          // Area generators (using per-reservoir Y scale)
+          const rangeArea = d3
+            .area<(typeof processedData)[0]>()
+            .x((d) => xScale(d.monthIndex))
+            .y0((d) => cellYScale(d.q0))
+            .y1((d) => cellYScale(d.q100))
+            .curve(d3.curveLinear)
+
+          const outerArea = d3
+            .area<(typeof processedData)[0]>()
+            .x((d) => xScale(d.monthIndex))
+            .y0((d) => cellYScale(d.q10))
+            .y1((d) => cellYScale(d.q90))
+            .curve(d3.curveLinear)
+
+          const innerArea = d3
+            .area<(typeof processedData)[0]>()
+            .x((d) => xScale(d.monthIndex))
+            .y0((d) => cellYScale(d.q30))
+            .y1((d) => cellYScale(d.q70))
+            .curve(d3.curveLinear)
+
+          const medianLine = d3
+            .line<(typeof processedData)[0]>()
+            .x((d) => xScale(d.monthIndex))
+            .y((d) => cellYScale(d.q50))
+            .curve(d3.curveLinear)
+
+          // Bands and line with scenario-specific colors
+          cellG
+            .append("path")
+            .datum(processedData)
+            .attr("fill", colors.range)
+            .attr("d", rangeArea)
+          cellG
+            .append("path")
+            .datum(processedData)
+            .attr("fill", colors.outer)
+            .attr("d", outerArea)
+          cellG
+            .append("path")
+            .datum(processedData)
+            .attr("fill", colors.inner)
+            .attr("d", innerArea)
+          cellG
+            .append("path")
+            .datum(processedData)
+            .attr("fill", "none")
+            .attr("stroke", colors.median)
+            .attr("stroke-width", 1.5)
+            .attr("d", medianLine)
         }
-
-        if (processedData.length === 0) return
-
-        // Area generators (using per-reservoir Y scale)
-        const rangeArea = d3
-          .area<(typeof processedData)[0]>()
-          .x((d) => xScale(d.monthIndex))
-          .y0((d) => cellYScale(d.q0))
-          .y1((d) => cellYScale(d.q100))
-          .curve(d3.curveLinear)
-
-        const outerArea = d3
-          .area<(typeof processedData)[0]>()
-          .x((d) => xScale(d.monthIndex))
-          .y0((d) => cellYScale(d.q10))
-          .y1((d) => cellYScale(d.q90))
-          .curve(d3.curveLinear)
-
-        const innerArea = d3
-          .area<(typeof processedData)[0]>()
-          .x((d) => xScale(d.monthIndex))
-          .y0((d) => cellYScale(d.q30))
-          .y1((d) => cellYScale(d.q70))
-          .curve(d3.curveLinear)
-
-        const medianLine = d3
-          .line<(typeof processedData)[0]>()
-          .x((d) => xScale(d.monthIndex))
-          .y((d) => cellYScale(d.q50))
-          .curve(d3.curveLinear)
-
-        // Bands and line with scenario-specific colors
-        cellG
-          .append("path")
-          .datum(processedData)
-          .attr("fill", colors.range)
-          .attr("d", rangeArea)
-        cellG
-          .append("path")
-          .datum(processedData)
-          .attr("fill", colors.outer)
-          .attr("d", outerArea)
-        cellG
-          .append("path")
-          .datum(processedData)
-          .attr("fill", colors.inner)
-          .attr("d", innerArea)
-        cellG
-          .append("path")
-          .datum(processedData)
-          .attr("fill", "none")
-          .attr("stroke", colors.median)
-          .attr("stroke-width", 1.5)
-          .attr("d", medianLine)
       })
     })
 
@@ -1015,6 +1250,22 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           }
 
           // Context tooltip for CWS statistics explanation
+          // Build dynamic context text based on entity and stats
+          let cwsContextNote: string
+          if (reservoir.reservoirId === "cvp_sod") {
+            // CVP South of Delta has a special context explaining its frequent but tiny shortages
+            const shortageYears = Math.round(stats.shortageFrequencyPct ?? 0)
+            const avgDelivery = stats.annualAvgTaf ?? 0
+            const reliability = stats.reliabilityPct ?? 100
+            // Calculate avg shortage: avgShortage = avgDelivery * (1 - reliability/100)
+            const avgShortage = avgDelivery * (1 - reliability / 100)
+            const shortagePct = (100 - reliability).toFixed(2)
+            cwsContextNote = `CVP South of Delta has frequent but tiny shortages. ${shortageYears} out of 100 years have some shortage (>0.1 TAF). But avg shortage is only ${avgShortage.toFixed(2)} TAF/yr out of ${Math.round(avgDelivery).toLocaleString()} TAF delivered. That's only ${shortagePct}% of delivery! To see shortage amounts toggle the controls above.`
+          } else {
+            cwsContextNote =
+              "Reliability = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %). Shortage frequency = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages."
+          }
+
           const contextText = statsG
             .append("text")
             .attr("x", 0)
@@ -1042,8 +1293,6 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("cursor", "help")
 
           // Invisible hover area for tooltip
-          const cwsContextNote =
-            "Reliability = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %). Shortage frequency = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages."
           statsG
             .append("rect")
             .attr("x", -2)
@@ -1265,6 +1514,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     volumeScaleMode,
     colorScheme,
     cellStats,
+    breakdownData,
+    breakdownComponents,
   ])
 
   return (
