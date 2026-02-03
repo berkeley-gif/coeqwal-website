@@ -125,8 +125,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
     temporal: ["period-of-record"],
     aggregations: [],
     spatialType: "demand-unit",
-    description:
-      "Tier  of water supply reliability determined by impact thresholds",
+    description: "Tier of water supply reliability",
     isTier: true,
     showOnMap: true,
   },
@@ -259,8 +258,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
     temporal: ["period-of-record"],
     aggregations: [],
     spatialType: "ag-demand-unit",
-    description:
-      "Tier  of agricultural productivity (revenue) determined by impact thresholds",
+    description: "Tier of agricultural productivity (revenue)",
     isTier: true,
     showOnMap: true,
   },

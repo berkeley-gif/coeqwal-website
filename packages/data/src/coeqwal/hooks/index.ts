@@ -31,3 +31,14 @@ export {
   useSpillMonthly,
   useMultipleReservoirPercentiles,
 } from "./useReservoirPercentiles"
+export {
+  useCwsAggregatesList,
+  useCwsAggregatesMonthly,
+  useCwsAggregatesPeriod,
+  useMiContractorsList,
+  useMiContractorsMonthly,
+  useMiContractorsPeriod,
+  useDemandUnitsList,
+  useDemandUnitsMonthly,
+  useDemandUnitsPeriod,
+} from "./useCwsStatistics"
