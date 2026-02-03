@@ -897,9 +897,13 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
             if (overlayData.length > 0) {
               const mwdColor = bottomComponent.color // Blue for MWD
-              const swpSodColor = topComponent.color // Green for SWP SOD
+              const totalColor = topComponent.color // Green for total (SWP SOD or SWP Total)
 
-              // 1. Draw SWP SOD total as green shadow (0 to q100)
+              // Derive total label from reservoir name (e.g., "MWD portion\nof SWP SOD" -> "SWP SOD")
+              const totalLabel =
+                reservoir.reservoirName.split("of ").pop()?.trim() || "Total"
+
+              // 1. Draw total as green shadow (0 to q100)
               const totalArea = d3
                 .area<OverlayDataItem>()
                 .x((d) => xScale(d.monthIndex))
@@ -910,7 +914,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               cellG
                 .append("path")
                 .datum(overlayData)
-                .attr("fill", hexToRgba(swpSodColor, 0.2))
+                .attr("fill", hexToRgba(totalColor, 0.2))
                 .attr("d", totalArea)
 
               // 2. Draw SWP SOD median line (green, dashed)
@@ -924,7 +928,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .append("path")
                 .datum(overlayData)
                 .attr("fill", "none")
-                .attr("stroke", swpSodColor)
+                .attr("stroke", totalColor)
                 .attr("stroke-width", 1.5)
                 .attr("stroke-dasharray", "4,2")
                 .attr("d", totalMedianLine)
@@ -978,15 +982,15 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .attr("fill", hexToRgba("#f8f9fa", 0.9))
                 .attr("rx", 4)
 
-              // Row 1, Col 1: SWP SOD range
+              // Row 1, Col 1: Total range (e.g., "SWP SOD range" or "SWP Total range")
               cellG
                 .append("rect")
                 .attr("x", col1X)
                 .attr("y", legendY)
                 .attr("width", iconWidth)
                 .attr("height", 10)
-                .attr("fill", hexToRgba(swpSodColor, 0.2))
-                .attr("stroke", swpSodColor)
+                .attr("fill", hexToRgba(totalColor, 0.2))
+                .attr("stroke", totalColor)
                 .attr("stroke-width", 0.5)
               cellG
                 .append("text")
@@ -995,16 +999,16 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .attr("font-size", legendFontSize)
                 .attr("font-family", "'Inter', -apple-system, sans-serif")
                 .attr("fill", COLORS.text)
-                .text("SWP SOD range")
+                .text(`${totalLabel} range`)
 
-              // Row 1, Col 2: SWP SOD median
+              // Row 1, Col 2: Total median (e.g., "SWP SOD median" or "SWP Total median")
               cellG
                 .append("line")
                 .attr("x1", col2X)
                 .attr("x2", col2X + iconWidth)
                 .attr("y1", legendY + 5)
                 .attr("y2", legendY + 5)
-                .attr("stroke", swpSodColor)
+                .attr("stroke", totalColor)
                 .attr("stroke-width", 2)
                 .attr("stroke-dasharray", "4,2")
               cellG
@@ -1014,7 +1018,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .attr("font-size", legendFontSize)
                 .attr("font-family", "'Inter', -apple-system, sans-serif")
                 .attr("fill", COLORS.text)
-                .text("SWP SOD median")
+                .text(`${totalLabel} median`)
 
               // Row 2, Col 1: MWD range
               const row2Y = legendY + rowHeight
@@ -1483,27 +1487,32 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
                 if (mwdMonth && otherSwpMonth) {
                   const mwdColor = bottomComponent.color
-                  const swpSodColor = topComponent.color
+                  const totalColor = topComponent.color
                   const totalMedian = mwdMonth.q50 + otherSwpMonth.q50
                   const totalQ90 = mwdMonth.q90 + otherSwpMonth.q90
                   const totalQ10 = mwdMonth.q10 + otherSwpMonth.q10
+
+                  // Derive total label from reservoir name (e.g., "MWD portion\nof SWP SOD" -> "SWP SOD")
+                  const totalLabel =
+                    reservoir.reservoirName.split("of ").pop()?.trim() ||
+                    "Total"
 
                   tooltip
                     .style("visibility", "visible")
                     .style("left", `${event.pageX + 12}px`)
                     .style("top", `${event.pageY - 10}px`).html(`
                       <div style="font-weight: 600; color: ${COLORS.header}; margin-bottom: 6px;">
-                        MWD portion of SWP SOD · ${WATER_MONTH_NAMES[monthIndex]}
+                        MWD portion of ${totalLabel} · ${WATER_MONTH_NAMES[monthIndex]}
                       </div>
                       <div style="color: ${COLORS.text}; font-size: 10px; margin-bottom: 8px;">
                         ${scenarioNames[scenarioId] || scenarioId}
                       </div>
                       <div style="margin-bottom: 6px;">
-                        <div style="font-weight: 600; color: ${swpSodColor}; margin-bottom: 2px;">SWP SOD Total</div>
+                        <div style="font-weight: 600; color: ${totalColor}; margin-bottom: 2px;">${totalLabel}</div>
                         <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785; padding-left: 8px;">
                           <span>90th</span><span style="text-align: right;">${formatValue(totalQ90)}${unit}</span>
-                          <span style="font-weight: 600; color: ${swpSodColor};">Median</span>
-                          <span style="text-align: right; font-weight: 600; color: ${swpSodColor};">${formatValue(totalMedian)}${unit}</span>
+                          <span style="font-weight: 600; color: ${totalColor};">Median</span>
+                          <span style="text-align: right; font-weight: 600; color: ${totalColor};">${formatValue(totalMedian)}${unit}</span>
                           <span>10th</span><span style="text-align: right;">${formatValue(totalQ10)}${unit}</span>
                         </div>
                       </div>
