@@ -38,6 +38,8 @@ export interface CompactSelectProps<T extends string = string> {
   disabled?: boolean
   /** Maximum height of the dropdown menu */
   maxMenuHeight?: number
+  /** z-index for the dropdown menu (useful when inside modals) */
+  menuZIndex?: number
 }
 
 export function CompactSelect<T extends string = string>({
@@ -49,6 +51,7 @@ export function CompactSelect<T extends string = string>({
   minWidth = 160,
   disabled = false,
   maxMenuHeight,
+  menuZIndex,
 }: CompactSelectProps<T>) {
   const theme = useTheme()
 
@@ -92,6 +95,7 @@ export function CompactSelect<T extends string = string>({
         },
       }}
       MenuProps={{
+        ...(menuZIndex && { sx: { zIndex: menuZIndex } }),
         PaperProps: {
           sx: {
             mt: 0.5,

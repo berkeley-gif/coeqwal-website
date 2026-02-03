@@ -14,7 +14,7 @@ import React, { useState, useMemo } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { CompactSelect, MobileModal } from "@repo/ui"
 import { VerticalBarChart, TierCircles, PercentileMatrix } from "@repo/viz"
-import type { ReservoirData, MonthlyPercentiles } from "@repo/viz"
+import type { ReservoirData, MonthlyPercentiles, VolumeScaleMode } from "@repo/viz"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import {
   ChartGridProvider,
@@ -61,9 +61,14 @@ const CWS_DISPLAY_OPTIONS = [
 ]
 
 const CWS_ENTITY_LEVEL_OPTIONS = [
-  { value: "aggregates" as const, label: "Project totals (4)" },
-  { value: "contractors" as const, label: "M&I Contractors (30)" },
-  { value: "demand-units" as const, label: "Demand Units (46)" },
+  { value: "aggregates" as const, label: "Large totals" },
+  { value: "contractors" as const, label: "M&I Contractors" },
+  { value: "demand-units" as const, label: "Demand units" },
+]
+
+const CWS_SCALE_OPTIONS = [
+  { value: "absolute" as const, label: "Absolute scale" },
+  { value: "relative" as const, label: "Relative scale" },
 ]
 
 /** Color scheme for delivery percentile bands (blue) */
@@ -80,6 +85,14 @@ const SHORTAGE_BAND_COLORS = {
   outer: "#fdd49e", // q10-q90
   inner: "#fdae6b", // q30-q70
   median: "#e6550d", // q50 (darkest orange)
+}
+
+/** Display label overrides for CWS aggregates (API label -> display label) */
+const CWS_AGGREGATE_LABEL_MAP: Record<string, string> = {
+  "CVP North": "CVP\nNorth of Delta",
+  "CVP South": "CVP\nSouth of Delta",
+  "SWP North": "SWP\nNorth of Delta",
+  "SWP South": "SWP\nSouth of Delta",
 }
 
 // ============================================================================
@@ -434,6 +447,16 @@ type MatrixDataType = Record<
   >
 >
 
+/** Per-cell summary statistics for CWS entities */
+export interface CellStats {
+  annualAvgTaf?: number
+  reliabilityPct?: number
+  shortageFrequencyPct?: number
+}
+
+/** Cell stats mapping: entityId -> scenarioId -> stats */
+export type CellStatsMap = Record<string, Record<string, CellStats>>
+
 /**
  * Hook to fetch CWS aggregate data for multiple scenarios
  */
@@ -444,31 +467,56 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     return useCwsAggregatesMonthly(scenarioId)
   })
 
-  // Fetch period summary for first scenario (for metadata like annual averages)
-  const periodResult = useCwsAggregatesPeriod(scenarios[0] ?? null)
+  // Fetch period summary for ALL scenarios (for per-cell stats)
+  const periodResults = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useCwsAggregatesPeriod(scenarioId)
+  })
 
   const isLoading =
-    monthlyResults.some((r) => r.isLoading) || periodResult.isLoading
+    monthlyResults.some((r) => r.isLoading) ||
+    periodResults.some((r) => r.isLoading)
   const error =
-    monthlyResults.find((r) => r.error)?.error ?? periodResult.error ?? null
+    monthlyResults.find((r) => r.error)?.error ??
+    periodResults.find((r) => r.error)?.error ??
+    null
 
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
+  const cellStats: CellStatsMap = {}
 
-  // Process first scenario to get entity metadata
-  if (periodResult.aggregates) {
+  // Process period summaries for all scenarios to build cell stats
+  periodResults.forEach((periodResult, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !periodResult.aggregates) return
+
     Object.entries(periodResult.aggregates).forEach(
       ([shortCode, summary]: [string, CwsAggregatePeriodSummary]) => {
-        entityMap[shortCode] = {
-          shortCode,
-          label: summary.label,
-          annualDeliveryAvg: summary.annual_delivery_avg_taf,
+        // Build entity metadata from first scenario that has data
+        if (!entityMap[shortCode]) {
+          const displayLabel =
+            CWS_AGGREGATE_LABEL_MAP[summary.label] ?? summary.label
+          entityMap[shortCode] = {
+            shortCode,
+            label: displayLabel,
+            annualDeliveryAvg: summary.annual_delivery_avg_taf,
+            reliabilityPct: summary.reliability_pct,
+            shortageFrequencyPct: summary.shortage_frequency_pct,
+          }
+        }
+
+        // Build per-cell stats: entityId -> scenarioId -> stats
+        if (!cellStats[shortCode]) {
+          cellStats[shortCode] = {}
+        }
+        cellStats[shortCode][scenarioId] = {
+          annualAvgTaf: summary.annual_delivery_avg_taf,
           reliabilityPct: summary.reliability_pct,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
     )
-  }
+  })
 
   // Process monthly data for each scenario
   monthlyResults.forEach((result, index) => {
@@ -478,7 +526,10 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     Object.entries(result.aggregates).forEach(
       ([shortCode, data]: [string, CwsAggregateData]) => {
         if (!entityMap[shortCode]) {
-          entityMap[shortCode] = { shortCode, label: data.label }
+          // Apply label mapping if available, otherwise use API label
+          const displayLabel =
+            CWS_AGGREGATE_LABEL_MAP[data.label] ?? data.label
+          entityMap[shortCode] = { shortCode, label: displayLabel }
         }
         if (!matrixData[shortCode]) {
           matrixData[shortCode] = {}
@@ -529,7 +580,7 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     a.label.localeCompare(b.label),
   )
 
-  return { entities, matrixData, isLoading, error }
+  return { entities, matrixData, cellStats, isLoading, error }
 }
 
 /**
@@ -542,31 +593,53 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
     return useMiContractorsMonthly(scenarioId)
   })
 
-  // Fetch period summary for first scenario
-  const periodResult = useMiContractorsPeriod(scenarios[0] ?? null)
+  // Fetch period summary for ALL scenarios (for per-cell stats)
+  const periodResults = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useMiContractorsPeriod(scenarioId)
+  })
 
   const isLoading =
-    monthlyResults.some((r) => r.isLoading) || periodResult.isLoading
+    monthlyResults.some((r) => r.isLoading) ||
+    periodResults.some((r) => r.isLoading)
   const error =
-    monthlyResults.find((r) => r.error)?.error ?? periodResult.error ?? null
+    monthlyResults.find((r) => r.error)?.error ??
+    periodResults.find((r) => r.error)?.error ??
+    null
 
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
+  const cellStats: CellStatsMap = {}
 
-  // Process first scenario to get entity metadata
-  if (periodResult.contractors) {
+  // Process period summaries for all scenarios to build cell stats
+  periodResults.forEach((periodResult, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !periodResult.contractors) return
+
     Object.entries(periodResult.contractors).forEach(
       ([shortCode, summary]: [string, MiContractorPeriodSummary]) => {
-        entityMap[shortCode] = {
-          shortCode,
-          label: summary.label,
-          annualDeliveryAvg: summary.annual_delivery_avg_taf,
+        if (!entityMap[shortCode]) {
+          entityMap[shortCode] = {
+            shortCode,
+            label: summary.label,
+            annualDeliveryAvg: summary.annual_delivery_avg_taf,
+            reliabilityPct: summary.reliability_pct,
+            shortageFrequencyPct: summary.shortage_frequency_pct,
+          }
+        }
+
+        // Build per-cell stats
+        if (!cellStats[shortCode]) {
+          cellStats[shortCode] = {}
+        }
+        cellStats[shortCode][scenarioId] = {
+          annualAvgTaf: summary.annual_delivery_avg_taf,
           reliabilityPct: summary.reliability_pct,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
     )
-  }
+  })
 
   // Process monthly data for each scenario
   monthlyResults.forEach((result, index) => {
@@ -627,7 +700,7 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
     a.label.localeCompare(b.label),
   )
 
-  return { entities, matrixData, isLoading, error }
+  return { entities, matrixData, cellStats, isLoading, error }
 }
 
 /**
@@ -640,31 +713,53 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
     return useDemandUnitsMonthly(scenarioId)
   })
 
-  // Fetch period summary for first scenario
-  const periodResult = useDemandUnitsPeriod(scenarios[0] ?? null)
+  // Fetch period summary for ALL scenarios (for per-cell stats)
+  const periodResults = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useDemandUnitsPeriod(scenarioId)
+  })
 
   const isLoading =
-    monthlyResults.some((r) => r.isLoading) || periodResult.isLoading
+    monthlyResults.some((r) => r.isLoading) ||
+    periodResults.some((r) => r.isLoading)
   const error =
-    monthlyResults.find((r) => r.error)?.error ?? periodResult.error ?? null
+    monthlyResults.find((r) => r.error)?.error ??
+    periodResults.find((r) => r.error)?.error ??
+    null
 
   const entityMap: Record<string, EntityInfo> = {}
   const matrixData: MatrixDataType = {}
+  const cellStats: CellStatsMap = {}
 
-  // Process first scenario to get entity metadata
-  if (periodResult.demandUnits) {
+  // Process period summaries for all scenarios to build cell stats
+  periodResults.forEach((periodResult, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !periodResult.demandUnits) return
+
     Object.entries(periodResult.demandUnits).forEach(
       ([duId, summary]: [string, DemandUnitPeriodSummary]) => {
-        entityMap[duId] = {
-          shortCode: duId,
-          label: summary.label,
-          annualDeliveryAvg: summary.annual_delivery_avg_taf,
+        if (!entityMap[duId]) {
+          entityMap[duId] = {
+            shortCode: duId,
+            label: summary.label,
+            annualDeliveryAvg: summary.annual_delivery_avg_taf,
+            reliabilityPct: summary.reliability_pct,
+            shortageFrequencyPct: summary.shortage_frequency_pct,
+          }
+        }
+
+        // Build per-cell stats
+        if (!cellStats[duId]) {
+          cellStats[duId] = {}
+        }
+        cellStats[duId][scenarioId] = {
+          annualAvgTaf: summary.annual_delivery_avg_taf,
           reliabilityPct: summary.reliability_pct,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
     )
-  }
+  })
 
   // Process monthly data for each scenario
   monthlyResults.forEach((result, index) => {
@@ -725,7 +820,7 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
     a.label.localeCompare(b.label),
   )
 
-  return { entities, matrixData, isLoading, error }
+  return { entities, matrixData, cellStats, isLoading, error }
 }
 
 /**
@@ -745,6 +840,7 @@ function useMultiScenarioCwsData(
       return {
         aggregates: contractorsData.entities,
         matrixData: contractorsData.matrixData,
+        cellStats: contractorsData.cellStats,
         isLoading: contractorsData.isLoading,
         error: contractorsData.error,
       }
@@ -752,6 +848,7 @@ function useMultiScenarioCwsData(
       return {
         aggregates: demandUnitsData.entities,
         matrixData: demandUnitsData.matrixData,
+        cellStats: demandUnitsData.cellStats,
         isLoading: demandUnitsData.isLoading,
         error: demandUnitsData.error,
       }
@@ -760,6 +857,7 @@ function useMultiScenarioCwsData(
       return {
         aggregates: aggregatesData.entities,
         matrixData: aggregatesData.matrixData,
+        cellStats: aggregatesData.cellStats,
         isLoading: aggregatesData.isLoading,
         error: aggregatesData.error,
       }
@@ -773,20 +871,27 @@ function useMultiScenarioCwsData(
 interface MonthlyCwsSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Whether this section is inside a modal (affects dropdown z-index) */
+  isModal?: boolean
 }
 
-function MonthlyCwsSection({ scenarios, scenarioNames }: MonthlyCwsSectionProps) {
+function MonthlyCwsSection({
+  scenarios,
+  scenarioNames,
+  isModal = false,
+}: MonthlyCwsSectionProps) {
   const theme = useTheme()
   const [displayMode, setDisplayMode] = useState<CwsDisplayMode>("delivery")
   const [entityLevel, setEntityLevel] =
     useState<CwsEntityLevel>("aggregates")
+  const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
 
-  const { aggregates, matrixData, isLoading, error } = useMultiScenarioCwsData(
-    scenarios,
-    entityLevel,
-  )
+  const { aggregates, matrixData, cellStats, isLoading, error } =
+    useMultiScenarioCwsData(scenarios, entityLevel)
 
-  // Convert to PercentileMatrix format with CWS summary stats
+  // Convert to PercentileMatrix format
+  // Note: We don't pass summary stats in reservoirData because they vary by scenario.
+  // Instead, we pass cellStats separately for per-cell rendering below each chart.
   const reservoirData: ReservoirData[] = useMemo(
     () =>
       aggregates.map((agg) => ({
@@ -794,10 +899,6 @@ function MonthlyCwsSection({ scenarios, scenarioNames }: MonthlyCwsSectionProps)
         reservoirName: agg.label,
         capacityTaf: 0, // Not applicable for CWS
         deadPoolTaf: 0, // Not applicable for CWS
-        // CWS-specific summary statistics (displayed in label column)
-        annualAvgTaf: agg.annualDeliveryAvg,
-        reliabilityPct: agg.reliabilityPct,
-        shortageFrequencyPct: agg.shortageFrequencyPct,
       })),
     [aggregates],
   )
@@ -834,20 +935,35 @@ function MonthlyCwsSection({ scenarios, scenarioNames }: MonthlyCwsSectionProps)
         }}
       >
         <SectionHeader
-          title="Monthly project deliveries"
+          title="Monthly deliveries"
           titleAdornment={
-            <Box sx={{ display: "flex", gap: theme.space.gap.sm }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
               <CompactSelect
                 value={entityLevel}
                 onChange={setEntityLevel}
                 options={CWS_ENTITY_LEVEL_OPTIONS}
                 aria-label="Entity level"
+                menuZIndex={isModal ? 9999 : undefined}
               />
               <CompactSelect
                 value={displayMode}
                 onChange={setDisplayMode}
                 options={CWS_DISPLAY_OPTIONS}
                 aria-label="Display mode"
+                menuZIndex={isModal ? 9999 : undefined}
+              />
+              <Typography
+                variant="compactCaption"
+                sx={{ color: theme.palette.grey[500], ml: theme.space.gap.sm }}
+              >
+                shown on
+              </Typography>
+              <CompactSelect
+                value={scaleMode}
+                onChange={setScaleMode}
+                options={CWS_SCALE_OPTIONS}
+                aria-label="Scale mode"
+                menuZIndex={isModal ? 9999 : undefined}
               />
             </Box>
           }
@@ -945,10 +1061,12 @@ function MonthlyCwsSection({ scenarios, scenarioNames }: MonthlyCwsSectionProps)
             scenarioNames={scenarioNames}
             data={percentileData}
             responsive
-            labelColumnWidth={100}
+            labelColumnWidth={140}
             showScenarioHeaders={false}
             displayMode="volume"
+            volumeScaleMode={scaleMode}
             colorScheme={displayMode}
+            cellStats={cellStats}
           />
         </Box>
       )}
@@ -1108,12 +1226,50 @@ export default function CwsSection({
         }
       >
         <Box sx={{ p: theme.space.component.lg }}>
-          <ChartGridProvider scenarios={scenarios}>
-            <MonthlyCwsSection
-              scenarios={scenarios}
-              scenarioNames={scenarioNames}
-            />
-          </ChartGridProvider>
+          {/* Delivery tier section */}
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: theme.borderRadius.md,
+              border: theme.border.light,
+              p: theme.space.component.lg,
+              mb: theme.space.component.lg,
+            }}
+          >
+            <ChartGridProvider scenarios={scenarios}>
+              <Box sx={{ gridColumn: 1, mb: theme.space.component.sm }}>
+                <SectionHeader
+                  title="Delivery distribution"
+                  description="140 community water systems"
+                />
+              </Box>
+              {scenarios.map((_, index) => (
+                <Box
+                  key={`modal-header-spacer-${index}`}
+                  sx={{ gridColumn: index + 2 }}
+                />
+              ))}
+              <CwsTierRow scenarios={scenarios} />
+            </ChartGridProvider>
+          </Box>
+
+          {/* Monthly delivery/shortage section */}
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: theme.borderRadius.md,
+              border: theme.border.light,
+              p: theme.space.component.lg,
+            }}
+          >
+            <ChartGridProvider scenarios={scenarios}>
+              <MonthlyCwsSection
+                scenarios={scenarios}
+                scenarioNames={scenarioNames}
+                isModal
+              />
+            </ChartGridProvider>
+          </Box>
         </Box>
       </MobileModal>
     </>

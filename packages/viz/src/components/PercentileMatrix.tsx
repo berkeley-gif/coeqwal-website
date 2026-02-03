@@ -60,6 +60,16 @@ export interface MatrixCell {
 export type MatrixDisplayMode = "percentage" | "volume"
 export type VolumeScaleMode = "absolute" | "relative"
 
+/** Per-cell summary statistics (for CWS entities) */
+export interface CellStats {
+  annualAvgTaf?: number
+  reliabilityPct?: number
+  shortageFrequencyPct?: number
+}
+
+/** Cell stats mapping: entityId -> scenarioId -> stats */
+export type CellStatsMap = Record<string, Record<string, CellStats>>
+
 export interface PercentileMatrixProps {
   /** Array of reservoir metadata */
   reservoirs: ReservoirData[]
@@ -89,6 +99,8 @@ export interface PercentileMatrixProps {
   volumeScaleMode?: VolumeScaleMode
   /** Color scheme: delivery (blue) or shortage (orange/amber) */
   colorScheme?: PercentileColorScheme
+  /** Per-cell summary statistics (entityId -> scenarioId -> stats) */
+  cellStats?: CellStatsMap
 }
 
 // Water month labels (short - for axis)
@@ -170,6 +182,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   displayMode = "percentage",
   volumeScaleMode = "absolute",
   colorScheme = "delivery",
+  cellStats,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -184,16 +197,19 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       setCurrentWidth(dimensions.width)
       // Scale row height based on number of scenarios
       // Fewer scenarios = taller rows (bigger charts)
-      const rowHeight =
+      // CWS charts (with cellStats) add extra height for statistics below the chart
+      const baseRowHeight =
         scenarios.length <= 2
           ? 280 // Large charts for 1-2 scenarios
           : scenarios.length <= 4
             ? 230 // Medium charts for 3-4 scenarios
             : 190 // Compact charts for 5+ scenarios
+      const statsExtraHeight = cellStats ? 70 : 0
+      const rowHeight = baseRowHeight + statsExtraHeight
       const calculatedHeight = Math.max(400, reservoirs.length * rowHeight + 80)
-      setCurrentHeight(
-        Math.min(calculatedHeight, dimensions.height || calculatedHeight),
-      )
+      // Use full calculated height - let parent scroll container handle overflow
+      // This prevents charts from being "smooshed" in modal/expanded views
+      setCurrentHeight(calculatedHeight)
     } else {
       setCurrentWidth(width)
       setCurrentHeight(height)
@@ -238,7 +254,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Offset within each slot to center the cell (0 when cell fills slot)
     const cellOffsetInSlot = (slotWidth - cellWidth) / 2
     const cellHeight = (innerHeight - colHeaderHeight) / reservoirs.length
-    const chartPadding = { top: 8, right: 8, bottom: 24, left: 4 }
+    // Bottom padding: 24 for x-axis labels + 70 for per-cell stats (when cellStats provided)
+    const statsAreaHeight = cellStats ? 70 : 0
+    const chartPadding = { top: 8, right: 8, bottom: 24 + statsAreaHeight, left: 4 }
 
     // Chart area within each cell
     const chartWidth = cellWidth - chartPadding.left - chartPadding.right
@@ -251,7 +269,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     if (chartWidth <= 0 || chartHeight <= 0) return
 
     // Calculate Y domain based on display mode and scale mode
-    // For volume + relative: each reservoir has its own domain (0 to capacity)
+    // For volume + relative: each entity has its own domain based on its max data value
     // For volume + absolute: shared domain based on max across all
     // For percentage: shared domain (0-100)
     let sharedYDomain: [number, number] = [0, 100]
@@ -259,11 +277,31 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
     if (displayMode === "volume") {
       if (volumeScaleMode === "relative") {
-        // Each reservoir uses its own capacity as the max
+        // Each entity uses its own max value from the data
         reservoirs.forEach((reservoir) => {
-          const capacity = reservoir.capacityTaf
-          // Round up to a nice number
-          const maxY = Math.ceil((capacity * 1.05) / 500) * 500
+          let maxValue = 0
+          // Find max across all scenarios for this entity
+          scenarios.forEach((scenarioId) => {
+            const cellData = data[reservoir.reservoirId]?.[scenarioId]
+            if (cellData) {
+              for (let i = 1; i <= 12; i++) {
+                const monthData = cellData[i.toString()]
+                if (monthData?.q100) {
+                  maxValue = Math.max(maxValue, monthData.q100)
+                }
+              }
+            }
+          })
+          // Also consider capacity if available (for reservoir charts)
+          if (reservoir.capacityTaf > 0) {
+            maxValue = Math.max(maxValue, reservoir.capacityTaf)
+          }
+          // Minimum max of 100 TAF, then round up to a nice number with 5% headroom
+          const minMax = 100
+          maxValue = Math.max(maxValue, minMax)
+          // Round to nice increments based on magnitude
+          const increment = maxValue > 1000 ? 500 : maxValue > 100 ? 50 : 10
+          const maxY = Math.ceil((maxValue * 1.05) / increment) * increment
           perReservoirYDomains[reservoir.reservoirId] = [0, maxY]
         })
       } else {
@@ -284,7 +322,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           // Also consider capacity as a reference
           maxValue = Math.max(maxValue, reservoir.capacityTaf)
         })
-        // Round up to a nice number with 10% headroom
+        // Minimum max of 100 TAF, round up to a nice number with 10% headroom
+        maxValue = Math.max(maxValue, 100)
         sharedYDomain = [0, Math.ceil((maxValue * 1.1) / 500) * 500]
       }
     }
@@ -330,28 +369,44 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Draw row headers (reservoir names, system, and capacity/CWS stats)
     // Positioned at far left to align with section header above
     const labelX = -margin.left + 5 // Start at left edge of SVG with small padding
+    // Max width for entity names - leave room for Y-axis labels (approx 35px)
+    const entityNameMaxWidth = labelColumnWidth - 40
     reservoirs.forEach((reservoir, rowIndex) => {
       const rowTop = colHeaderHeight + rowIndex * cellHeight + chartPadding.top
 
-      // Reservoir name - primary label, bold
-      g.append("text")
+      // Reservoir/entity name - use foreignObject for text wrapping on long names
+      const nameGroup = g
+        .append("foreignObject")
         .attr("x", labelX)
-        .attr("y", rowTop + 2)
-        .attr("text-anchor", "start")
-        .attr("dominant-baseline", "hanging")
-        .attr("font-size", "0.875rem") // 14px
-        .attr("font-family", "'Inter', -apple-system, sans-serif")
-        .attr("font-weight", "600")
-        .attr("fill", COLORS.header)
+        .attr("y", rowTop)
+        .attr("width", entityNameMaxWidth)
+        .attr("height", 40) // Allow up to 2 lines of text
+
+      nameGroup
+        .append("xhtml:div")
+        .style("font-size", "0.875rem")
+        .style("font-family", "'Inter', -apple-system, sans-serif")
+        .style("font-weight", "600")
+        .style("color", COLORS.header)
+        .style("line-height", "1.2")
+        .style("white-space", "pre-line") // Respect newline characters in label
+        .style("overflow", "hidden")
         .text(reservoir.reservoirName)
 
-      // Check if this is CWS data (has annualAvgTaf) vs reservoir data
-      const isCwsData =
+      // Check data type:
+      // - CWS with stats: has annualAvgTaf > 0 (show delivery/reliability/shortage)
+      // - CWS without stats: capacityTaf === 0 and no annualAvgTaf (show name only)
+      // - Reservoir: has capacityTaf > 0 (show system/capacity/dead pool)
+      const isCwsWithStats =
         reservoir.annualAvgTaf !== undefined && reservoir.annualAvgTaf > 0
+      const isCwsWithoutStats =
+        reservoir.capacityTaf === 0 &&
+        (reservoir.annualAvgTaf === undefined || reservoir.annualAvgTaf === 0)
 
-      if (isCwsData) {
+      if (isCwsWithStats) {
         // CWS-specific labels: Annual average, Reliability, Shortage frequency
-        let currentY = rowTop + 20
+        // Start below the entity name (which can wrap to 2 lines, ~40px)
+        let currentY = rowTop + 42
 
         // Annual average delivery
         g.append("text")
@@ -438,15 +493,20 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.deadPool) // Orange/red for concerning metric
             .text(`${Math.round(reservoir.shortageFrequencyPct)}%`)
         }
+      } else if (isCwsWithoutStats) {
+        // CWS entity without per-scenario stats - just show name (already rendered above)
+        // No additional labels needed since stats vary by scenario
       } else {
         // Standard reservoir labels: System, Capacity, Dead pool
+        // Start below the entity name (which can wrap to 2 lines, ~40px)
+        const labelStartY = rowTop + 42
         // System info (SWP/CVP) - secondary metadata
         const system =
           reservoir.system || RESERVOIR_SYSTEMS[reservoir.reservoirId] || ""
         if (system) {
           g.append("text")
             .attr("x", labelX)
-            .attr("y", rowTop + 20)
+            .attr("y", labelStartY)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
             .attr("font-size", "0.75rem") // 12px - smaller for metadata
@@ -458,7 +518,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         }
 
         // Capacity - key metric with value emphasis
-        const capacityY = rowTop + (system ? 38 : 20)
+        // Position below system label if present, otherwise at labelStartY
+        const capacityY = system ? labelStartY + 18 : labelStartY
         // Label in lighter weight
         g.append("text")
           .attr("x", labelX)
@@ -844,54 +905,243 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       })
     })
 
+    // Draw per-cell summary statistics below each chart (when cellStats provided)
+    if (cellStats) {
+      reservoirs.forEach((reservoir, rowIndex) => {
+        scenarios.forEach((scenarioId, colIndex) => {
+          const stats = cellStats[reservoir.reservoirId]?.[scenarioId]
+          if (!stats) return
+
+          const cellX = getCellX(colIndex) + chartPadding.left
+          // Position stats below x-axis labels
+          const statsY =
+            colHeaderHeight +
+            rowIndex * cellHeight +
+            chartPadding.top +
+            chartHeight +
+            22 // Below x-axis month labels
+
+          const statsG = g
+            .append("g")
+            .attr("transform", `translate(${cellX},${statsY})`)
+
+          let currentY = 0
+          const lineHeight = 18
+          const labelFontSize = "10px"
+          const valueFontSize = "11px"
+
+          // Avg delivery
+          if (stats.annualAvgTaf !== undefined && stats.annualAvgTaf > 0) {
+            statsG
+              .append("text")
+              .attr("x", 0)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", labelFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("fill", COLORS.text)
+              .text("Avg delivery")
+            statsG
+              .append("text")
+              .attr("x", 68)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", valueFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("font-weight", "600")
+              .attr("font-feature-settings", "'tnum' 1")
+              .attr("fill", COLORS.header)
+              .text(`${Math.round(stats.annualAvgTaf).toLocaleString()} TAF/yr`)
+            currentY += lineHeight
+          }
+
+          // Reliability (green for good metric)
+          if (stats.reliabilityPct !== undefined) {
+            statsG
+              .append("text")
+              .attr("x", 0)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", labelFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("fill", COLORS.text)
+              .text("Reliability")
+            statsG
+              .append("text")
+              .attr("x", 68)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", valueFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("font-weight", "600")
+              .attr("font-feature-settings", "'tnum' 1")
+              .attr("fill", COLORS.capacity) // Green
+              .text(`${Math.round(stats.reliabilityPct)}%`)
+            currentY += lineHeight
+          }
+
+          // Shortage frequency (orange/red for concerning metric)
+          if (
+            stats.shortageFrequencyPct !== undefined &&
+            stats.shortageFrequencyPct > 0
+          ) {
+            statsG
+              .append("text")
+              .attr("x", 0)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", labelFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("fill", COLORS.text)
+              .text("Shortage freq")
+            statsG
+              .append("text")
+              .attr("x", 68)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", valueFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("font-weight", "600")
+              .attr("font-feature-settings", "'tnum' 1")
+              .attr("fill", COLORS.deadPool) // Orange/red
+              .text(`${Math.round(stats.shortageFrequencyPct)}%`)
+            currentY += lineHeight
+          }
+
+          // Context tooltip for CWS statistics explanation
+          const contextText = statsG
+            .append("text")
+            .attr("x", 0)
+            .attr("y", currentY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "9px")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "500")
+            .attr("fill", COLORS.text)
+            .attr("cursor", "help")
+            .text("Context")
+
+          // Add dotted underline
+          const textWidth = contextText.node()?.getBBox().width ?? 36
+          statsG
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", textWidth)
+            .attr("y1", currentY + 11)
+            .attr("y2", currentY + 11)
+            .attr("stroke", COLORS.text)
+            .attr("stroke-width", 1)
+            .attr("stroke-dasharray", "2,2")
+            .attr("cursor", "help")
+
+          // Invisible hover area for tooltip
+          const cwsContextNote =
+            "Reliability = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %). Shortage frequency = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages."
+          statsG
+            .append("rect")
+            .attr("x", -2)
+            .attr("y", currentY - 2)
+            .attr("width", textWidth + 4)
+            .attr("height", 15)
+            .attr("fill", "transparent")
+            .attr("cursor", "help")
+            .on("mouseenter", (event) => {
+              let tooltipEl = d3.select<HTMLDivElement, unknown>(
+                "#cws-context-tooltip",
+              )
+              if (tooltipEl.empty()) {
+                tooltipEl = d3
+                  .select("body")
+                  .append<HTMLDivElement>("div")
+                  .attr("id", "cws-context-tooltip")
+                  .style("position", "absolute")
+                  .style("background", "#fff")
+                  .style("border-radius", "6px")
+                  .style("padding", "12px 16px")
+                  .style("font-size", "13px")
+                  .style("font-family", "'Inter', -apple-system, sans-serif")
+                  .style("box-shadow", "0 4px 20px rgba(0,0,0,0.15)")
+                  .style("pointer-events", "none")
+                  .style("z-index", "1000")
+                  .style("max-width", "320px")
+                  .style("line-height", "1.5")
+                  .style("color", COLORS.text)
+              }
+              tooltipEl
+                .style("visibility", "visible")
+                .style("left", `${event.pageX + 12}px`)
+                .style("top", `${event.pageY - 10}px`)
+                .text(cwsContextNote)
+            })
+            .on("mouseleave", () => {
+              d3.select<HTMLDivElement, unknown>("#cws-context-tooltip").style(
+                "visibility",
+                "hidden",
+              )
+            })
+        })
+      })
+    }
+
     // Draw capacity and dead pool reference lines for each reservoir
+    // Only for reservoir storage charts (not CWS charts which have cellStats)
     // Drawn AFTER chart shapes so they appear on top and aren't occluded
-    reservoirs.forEach((reservoir, rowIndex) => {
-      const reservoirYScale = getYScale(reservoir.reservoirId)
-      const cellTop = colHeaderHeight + rowIndex * cellHeight + chartPadding.top
+    if (!cellStats) {
+      reservoirs.forEach((reservoir, rowIndex) => {
+        const reservoirYScale = getYScale(reservoir.reservoirId)
+        const cellTop =
+          colHeaderHeight + rowIndex * cellHeight + chartPadding.top
 
-      // Calculate capacity and dead pool values based on display mode
-      const capacityValue =
-        displayMode === "percentage" ? 100 : reservoir.capacityTaf
-      const deadPoolValue =
-        displayMode === "percentage"
-          ? reservoir.capacityTaf > 0
-            ? (reservoir.deadPoolTaf / reservoir.capacityTaf) * 100
-            : 0
-          : reservoir.deadPoolTaf
+        // Calculate capacity and dead pool values based on display mode
+        const capacityValue =
+          displayMode === "percentage" ? 100 : reservoir.capacityTaf
+        const deadPoolValue =
+          displayMode === "percentage"
+            ? reservoir.capacityTaf > 0
+              ? (reservoir.deadPoolTaf / reservoir.capacityTaf) * 100
+              : 0
+            : reservoir.deadPoolTaf
 
-      // Draw capacity line (spans all scenario columns)
-      const capacityY = cellTop + reservoirYScale(capacityValue)
-      // Only draw if capacity line is within visible chart area
-      if (capacityY >= cellTop && capacityY <= cellTop + chartHeight) {
-        g.append("line")
-          .attr("x1", gridStartX + chartPadding.left)
-          .attr("x2", gridEndX - chartPadding.right)
-          .attr("y1", capacityY)
-          .attr("y2", capacityY)
-          .attr("stroke", COLORS.capacity)
-          .attr("stroke-width", 1.5)
-          .attr("stroke-dasharray", "6,3")
-          .attr("opacity", 0.8)
-      }
-
-      // Draw dead pool line if dead pool value exists
-      if (reservoir.deadPoolTaf > 0) {
-        const deadPoolY = cellTop + reservoirYScale(deadPoolValue)
-        // Only draw if dead pool line is within visible chart area
-        if (deadPoolY >= cellTop && deadPoolY <= cellTop + chartHeight) {
+        // Draw capacity line (spans all scenario columns)
+        const capacityY = cellTop + reservoirYScale(capacityValue)
+        // Only draw if capacity line is within visible chart area
+        if (capacityY >= cellTop && capacityY <= cellTop + chartHeight) {
           g.append("line")
             .attr("x1", gridStartX + chartPadding.left)
             .attr("x2", gridEndX - chartPadding.right)
-            .attr("y1", deadPoolY)
-            .attr("y2", deadPoolY)
-            .attr("stroke", COLORS.deadPool)
+            .attr("y1", capacityY)
+            .attr("y2", capacityY)
+            .attr("stroke", COLORS.capacity)
             .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", "4,2")
+            .attr("stroke-dasharray", "6,3")
             .attr("opacity", 0.8)
         }
-      }
-    })
+
+        // Draw dead pool line if dead pool value exists
+        if (reservoir.deadPoolTaf > 0) {
+          const deadPoolY = cellTop + reservoirYScale(deadPoolValue)
+          // Only draw if dead pool line is within visible chart area
+          if (deadPoolY >= cellTop && deadPoolY <= cellTop + chartHeight) {
+            g.append("line")
+              .attr("x1", gridStartX + chartPadding.left)
+              .attr("x2", gridEndX - chartPadding.right)
+              .attr("y1", deadPoolY)
+              .attr("y2", deadPoolY)
+              .attr("stroke", COLORS.deadPool)
+              .attr("stroke-width", 1.5)
+              .attr("stroke-dasharray", "4,2")
+              .attr("opacity", 0.8)
+          }
+        }
+      })
+    }
 
     // Tooltip functionality
     const tooltipId = `matrix-tooltip-${Math.random().toString(36).substr(2, 9)}`
@@ -932,11 +1182,15 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         const cellTop = cellY + chartPadding.top
         const cellBottom = cellTop + chartHeight
 
+        // Only cover the chart area, not the stats area below (where "Context" link is)
+        const hoverHeight = cellStats
+          ? chartPadding.top + chartHeight + 20 // Just chart + x-axis labels
+          : cellHeight // Full cell for non-CWS charts
         g.append("rect")
           .attr("x", cellX)
           .attr("y", cellY)
           .attr("width", cellWidth)
-          .attr("height", cellHeight)
+          .attr("height", hoverHeight)
           .attr("fill", "transparent")
           .style("cursor", "crosshair")
           .on("mousemove", (event) => {
@@ -1009,6 +1263,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     maxCellWidth,
     displayMode,
     volumeScaleMode,
+    colorScheme,
+    cellStats,
   ])
 
   return (
@@ -1016,7 +1272,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       ref={containerRef}
       style={{
         width: "100%",
-        height: responsive ? "100%" : `${height}px`,
+        // Use auto height to allow content to determine size, letting parent scroll
+        // This ensures charts aren't compressed in modal/expanded views
+        height: responsive ? "auto" : `${height}px`,
         minHeight: responsive
           ? `${reservoirs.length * 100 + 100}px`
           : undefined,
