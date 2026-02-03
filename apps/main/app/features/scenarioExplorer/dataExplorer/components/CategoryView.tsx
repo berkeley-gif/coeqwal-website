@@ -33,6 +33,8 @@ import { useMetricData } from "../hooks/useMetricData"
 import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
+// Spill frequency hidden until API data is available
+// import SpillFrequencySection from "./SpillFrequencySection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import {
   ChartGridProvider,
@@ -40,7 +42,7 @@ import {
   CHART_SIZING,
 } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
-import { useReservoirList } from "@repo/data/coeqwal/hooks"
+import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
 
 /**
@@ -294,17 +296,12 @@ const PERCENTILE_BAND_COLORS = {
   median: "#2c5aa0", // q50 (darkest)
 }
 
-function PercentileBandLegend() {
+/**
+ * PercentileBandsLegend - Just the percentile band items (no reference lines)
+ */
+function PercentileBandsLegend() {
   return (
-    <Box
-      component="span"
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 1,
-        ml: 1,
-      }}
-    >
+    <>
       {/* Min-Max (0-100th) band */}
       <Box
         component="span"
@@ -363,7 +360,47 @@ function PercentileBandLegend() {
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
         Median
       </Box>
-    </Box>
+    </>
+  )
+}
+
+/**
+ * ReferenceLinesLegend - Capacity and dead pool reference lines
+ */
+function ReferenceLinesLegend() {
+  return (
+    <>
+      {/* Capacity reference line */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 2,
+          backgroundImage:
+            "linear-gradient(to right, #4a7c59 60%, transparent 40%)",
+          backgroundSize: "6px 2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Capacity
+      </Box>
+
+      {/* Dead pool reference line */}
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 2,
+          backgroundImage:
+            "linear-gradient(to right, #b85c38 60%, transparent 40%)",
+          backgroundSize: "4px 2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Dead pool
+      </Box>
+    </>
   )
 }
 
@@ -401,24 +438,38 @@ function MonthlyStorageSection({
   const [volumeScaleMode, setVolumeScaleMode] =
     useState<VolumeScaleMode>("absolute")
   const [selectedReservoir, setSelectedReservoir] = useState<string>("")
-  const { reservoirs, isLoading: reservoirsLoading } = useReservoirList()
+  const [additionalReservoirs, setAdditionalReservoirs] = useState<string[]>([])
+  const {
+    reservoirs,
+    majorReservoirIds,
+    isLoading: reservoirsLoading,
+  } = useAllReservoirsList()
 
-  // Build reservoir options for CompactSelect
-  const reservoirOptions = useMemo(
-    () =>
-      reservoirs.map((r) => ({
+  // Build reservoir options for CompactSelect, excluding major reservoirs and already-added ones
+  const reservoirOptions = useMemo(() => {
+    const majorSet = new Set(majorReservoirIds)
+    const excludedIds = new Set([...majorSet, ...additionalReservoirs])
+    return reservoirs
+      .filter((r) => !excludedIds.has(r.reservoir_id))
+      .map((r) => ({
         value: r.reservoir_id,
         label: r.reservoir_name,
-      })),
-    [reservoirs],
-  )
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [reservoirs, majorReservoirIds, additionalReservoirs])
 
   const handleAddReservoir = () => {
-    if (selectedReservoir) {
-      // TODO: Add reservoir to the display list
-      console.log("Adding reservoir:", selectedReservoir)
+    if (
+      selectedReservoir &&
+      !additionalReservoirs.includes(selectedReservoir)
+    ) {
+      setAdditionalReservoirs((prev) => [...prev, selectedReservoir])
       setSelectedReservoir("")
     }
+  }
+
+  const handleRemoveReservoir = (reservoirId: string) => {
+    setAdditionalReservoirs((prev) => prev.filter((id) => id !== reservoirId))
   }
 
   return (
@@ -470,21 +521,44 @@ function MonthlyStorageSection({
                 component="span"
                 sx={{
                   display: "flex",
-                  alignItems: "center",
+                  flexDirection: "column",
+                  gap: 0.5,
                   mt: 1.5,
                 }}
               >
+                {/* First line: label + all percentile bands */}
                 <Box
                   component="span"
                   sx={{
-                    color: "grey.500",
-                    fontSize: "0.875rem",
-                    fontWeight: 600,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                    flexWrap: "wrap",
                   }}
                 >
-                  Overlapping percentile bands:
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "grey.500",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Overlapping percentile bands:
+                  </Box>
+                  <PercentileBandsLegend />
                 </Box>
-                <PercentileBandLegend />
+                {/* Second line: reference lines */}
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <ReferenceLinesLegend />
+                </Box>
               </Box>
             </>
           }
@@ -534,6 +608,67 @@ function MonthlyStorageSection({
         </Box>
       </Box>
 
+      {/* Show added reservoir chips */}
+      {additionalReservoirs.length > 0 && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1,
+            mb: theme.space.component.sm,
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{
+              color: theme.palette.grey[500],
+              mr: 0.5,
+              alignSelf: "center",
+            }}
+          >
+            Added:
+          </Typography>
+          {additionalReservoirs.map((id) => {
+            const reservoir = reservoirs.find((r) => r.reservoir_id === id)
+            return (
+              <Box
+                key={id}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  backgroundColor: theme.palette.grey[100],
+                  borderRadius: theme.borderRadius.sm,
+                  fontSize: "0.75rem",
+                }}
+              >
+                {reservoir?.reservoir_name ?? id}
+                <Box
+                  component="button"
+                  onClick={() => handleRemoveReservoir(id)}
+                  sx={{
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    color: theme.palette.grey[500],
+                    "&:hover": { color: theme.palette.grey[700] },
+                  }}
+                  aria-label={`Remove ${reservoir?.reservoir_name ?? id}`}
+                >
+                  ×
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
       {/* Percentile matrix - spans all columns so internal layout aligns with grid */}
       <Box sx={{ gridColumn: "1 / -1" }}>
         <ReservoirPercentilesSection
@@ -542,6 +677,7 @@ function MonthlyStorageSection({
           cellColors={cellColors}
           displayMode={displayMode}
           volumeScaleMode={volumeScaleMode}
+          additionalReservoirs={additionalReservoirs}
         />
       </Box>
     </>
@@ -905,14 +1041,6 @@ export default function CategoryView() {
                   }}
                 >
                   {category.name}
-                </Typography>
-                <Typography
-                  variant="compactCaption"
-                  sx={{
-                    color: theme.palette.grey[400],
-                  }}
-                >
-                  {metrics.length} metric{metrics.length !== 1 ? "s" : ""}
                 </Typography>
               </Box>
             </AccordionSummary>

@@ -34,6 +34,7 @@ export type {
   TierLocationResponse,
   // Statistics types
   ReservoirInfo,
+  AllReservoirInfo,
   StatisticsScenarioInfo,
   PercentileValues,
   MonthlyPercentiles,
@@ -42,10 +43,16 @@ export type {
   GroupedReservoirData,
   GroupedReservoirPercentilesResponse,
   ReservoirListResponse,
+  AllReservoirsListResponse,
   StatisticsScenariosResponse,
   // Storage monthly types (dual-unit)
   StorageMonthlyReservoirData,
   StorageMonthlyResponse,
+  // Spill monthly types
+  SpillMonthlyStats,
+  MonthlySpillData,
+  SpillMonthlyReservoirData,
+  SpillMonthlyResponse,
 } from "./types"
 
 // API constants
@@ -60,11 +67,13 @@ export {
   fetchTierLocationData,
   // Statistics fetchers
   fetchReservoirList,
+  fetchAllReservoirsList,
   fetchScenariosWithPercentiles,
   fetchReservoirPercentiles,
   fetchAllReservoirPercentiles,
   fetchGroupedReservoirPercentiles,
   fetchStorageMonthly,
+  fetchSpillMonthly,
 } from "./fetchers"
 
 // Re-export hooks for convenience

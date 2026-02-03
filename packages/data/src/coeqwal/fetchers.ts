@@ -17,11 +17,13 @@ import type {
   ScenarioListItem,
   TierLocationResponse,
   ReservoirListResponse,
+  AllReservoirsListResponse,
   StatisticsScenariosResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
   GroupedReservoirPercentilesResponse,
   StorageMonthlyResponse,
+  SpillMonthlyResponse,
 } from "./types"
 
 /**
@@ -168,6 +170,27 @@ export async function fetchReservoirList(): Promise<ReservoirListResponse> {
 }
 
 /**
+ * Fetch list of all reservoirs with statistics data
+ * Returns all available reservoirs including capacity information
+ *
+ * @returns Array of reservoir info with capacity
+ *
+ * @example
+ * ```typescript
+ * const { reservoirs } = await fetchAllReservoirsList()
+ * // [{ reservoir_id: "SHSTA", reservoir_name: "Shasta", capacity_taf: 4552 }, ...]
+ * ```
+ */
+export async function fetchAllReservoirsList(): Promise<AllReservoirsListResponse> {
+  return apiFetcher<AllReservoirsListResponse>(
+    ENDPOINTS.STATISTICS_RESERVOIRS_ALL,
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
  * Fetch list of scenarios that have percentile data available
  *
  * @returns Scenarios with reservoir percentile data
@@ -304,6 +327,38 @@ export async function fetchStorageMonthly(
 
   return apiFetcher<StorageMonthlyResponse>(
     ENDPOINTS.storageMonthly(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly spill statistics for reservoirs
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Spill data with monthly percentiles and frequency
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchSpillMonthly("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "SHSTA": { spill_frequency: 45.2, ... } } }
+ * ```
+ */
+export async function fetchSpillMonthly(
+  scenarioId: string,
+  group: string,
+): Promise<SpillMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<SpillMonthlyResponse>(
+    ENDPOINTS.spillMonthly(scenarioId, group),
     {
       baseUrl: DEFAULT_API_BASE,
     },

@@ -13,7 +13,11 @@ import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
 import type { ReservoirData } from "@repo/viz"
 import type { MonthlyPercentiles } from "@repo/data/coeqwal"
-import { useStorageMonthly } from "@repo/data/coeqwal/hooks"
+import {
+  useStorageMonthly,
+  useMultipleReservoirPercentiles,
+  useGroupedReservoirPercentiles,
+} from "@repo/data/coeqwal/hooks"
 
 export type StorageDisplayMode = "percentage" | "volume"
 export type VolumeScaleMode = "absolute" | "relative"
@@ -30,11 +34,37 @@ interface ReservoirPercentilesSectionProps {
   displayMode?: StorageDisplayMode
   /** Y-axis scale mode for volume display: absolute (shared) or relative (per-reservoir) */
   volumeScaleMode?: VolumeScaleMode
+  /** Additional reservoir IDs to display (beyond the major group) */
+  additionalReservoirs?: string[]
+}
+
+/**
+ * Helper to convert percentage percentiles to TAF using capacity
+ */
+function convertPercentToTaf(
+  percentData: MonthlyPercentiles,
+  capacityTaf: number,
+): MonthlyPercentiles {
+  const tafData: MonthlyPercentiles = {}
+  Object.entries(percentData).forEach(([month, values]) => {
+    tafData[month] = {
+      q0: (values.q0 * capacityTaf) / 100,
+      q10: (values.q10 * capacityTaf) / 100,
+      q30: (values.q30 * capacityTaf) / 100,
+      q50: (values.q50 * capacityTaf) / 100,
+      q70: (values.q70 * capacityTaf) / 100,
+      q90: (values.q90 * capacityTaf) / 100,
+      q100: (values.q100 * capacityTaf) / 100,
+      mean: (values.mean * capacityTaf) / 100,
+    }
+  })
+  return tafData
 }
 
 /**
  * Hook to fetch reservoir data for multiple scenarios
  * Uses the storage-monthly endpoint which provides both percentage and TAF data
+ * Also fetches dead pool metadata from grouped percentiles endpoint
  */
 function useMultiScenarioReservoirData(
   scenarioIds: string[],
@@ -45,7 +75,19 @@ function useMultiScenarioReservoirData(
     return useStorageMonthly(scenarioId, "major")
   })
 
-  const isLoading = results.some((r) => r.isLoading)
+  // Fetch dead pool metadata from grouped percentiles (using first scenario)
+  // The dead pool values are the same across scenarios, so we only need one fetch
+  const firstScenarioId = scenarioIds[0] ?? null
+  const { reservoirs: groupedReservoirs, isLoading: deadPoolLoading } =
+    useGroupedReservoirPercentiles(firstScenarioId, "major")
+
+  // Build dead pool lookup from grouped percentiles response
+  const deadPoolLookup: Record<string, number> = {}
+  Object.entries(groupedReservoirs).forEach(([reservoirId, data]) => {
+    deadPoolLookup[reservoirId] = data.dead_pool_taf ?? 0
+  })
+
+  const isLoading = results.some((r) => r.isLoading) || deadPoolLoading
   const error = results.find((r) => r.error)?.error ?? null
 
   // Build reservoir list and data structure for matrix
@@ -62,13 +104,13 @@ function useMultiScenarioReservoirData(
     Object.entries(result.reservoirs).forEach(([reservoirId, data]) => {
       if (!data) return
 
-      // Build reservoir info
+      // Build reservoir info with dead pool from grouped percentiles lookup
       if (!reservoirMap[reservoirId]) {
         reservoirMap[reservoirId] = {
           reservoirId: reservoirId,
           reservoirName: data.name ?? reservoirId,
           capacityTaf: data.capacity_taf ?? 0,
-          deadPoolTaf: 0, // storage-monthly doesn't include dead_pool_taf
+          deadPoolTaf: deadPoolLookup[reservoirId] ?? 0,
         }
       }
 
@@ -90,6 +132,67 @@ function useMultiScenarioReservoirData(
   return { reservoirs, matrixData, isLoading, error }
 }
 
+/**
+ * Hook to fetch data for additional (non-major) reservoirs
+ * Uses the data package hook to avoid Rules of Hooks violations
+ */
+function useAdditionalReservoirData(
+  scenarioIds: string[],
+  additionalReservoirIds: string[],
+  displayMode: StorageDisplayMode,
+) {
+  const { data, isLoading, error } = useMultipleReservoirPercentiles(
+    scenarioIds,
+    additionalReservoirIds,
+  )
+
+  // Build reservoir list and data structure from fetched data
+  const reservoirMap: Record<string, ReservoirData> = {}
+  const matrixData: Record<
+    string,
+    Record<string, MonthlyPercentiles | undefined>
+  > = {}
+
+  if (data) {
+    Object.entries(data).forEach(([reservoirId, scenarioData]) => {
+      Object.entries(scenarioData).forEach(([scenarioId, percentileData]) => {
+        // Build reservoir info
+        if (!reservoirMap[reservoirId]) {
+          reservoirMap[reservoirId] = {
+            reservoirId: reservoirId,
+            reservoirName: percentileData.reservoir_name ?? reservoirId,
+            capacityTaf: percentileData.capacity_taf ?? 0,
+            deadPoolTaf: percentileData.dead_pool_taf ?? 0,
+          }
+        }
+
+        // Build matrix data
+        if (!matrixData[reservoirId]) {
+          matrixData[reservoirId] = {}
+        }
+
+        // The individual endpoint returns percentage data
+        // For volume mode, convert to TAF using capacity
+        if (displayMode === "volume" && percentileData.monthly_percentiles) {
+          matrixData[reservoirId][scenarioId] = convertPercentToTaf(
+            percentileData.monthly_percentiles,
+            percentileData.capacity_taf,
+          )
+        } else {
+          matrixData[reservoirId][scenarioId] =
+            percentileData.monthly_percentiles
+        }
+      })
+    })
+  }
+
+  const reservoirs = Object.values(reservoirMap).sort((a, b) =>
+    (a.reservoirName ?? "").localeCompare(b.reservoirName ?? ""),
+  )
+
+  return { reservoirs, matrixData, isLoading, error }
+}
+
 export default function ReservoirPercentilesSection({
   scenarios,
   labelColumnWidth = 100,
@@ -97,11 +200,31 @@ export default function ReservoirPercentilesSection({
   cellColors,
   displayMode = "percentage",
   volumeScaleMode = "absolute",
+  additionalReservoirs = [],
 }: ReservoirPercentilesSectionProps) {
   const theme = useTheme()
 
-  const { reservoirs, matrixData, isLoading, error } =
-    useMultiScenarioReservoirData(scenarios, displayMode)
+  // Fetch major group data
+  const {
+    reservoirs: majorReservoirs,
+    matrixData: majorMatrixData,
+    isLoading: majorLoading,
+    error: majorError,
+  } = useMultiScenarioReservoirData(scenarios, displayMode)
+
+  // Fetch additional reservoir data
+  const {
+    reservoirs: additionalReservoirData,
+    matrixData: additionalMatrixData,
+    isLoading: additionalLoading,
+    error: additionalError,
+  } = useAdditionalReservoirData(scenarios, additionalReservoirs, displayMode)
+
+  // Merge reservoirs and data (additional reservoirs first, then major)
+  const reservoirs = [...additionalReservoirData, ...majorReservoirs]
+  const matrixData = { ...majorMatrixData, ...additionalMatrixData }
+  const isLoading = majorLoading || additionalLoading
+  const error = majorError || additionalError
 
   // Build scenario display names
   const scenarioNames: Record<string, string> = {}
