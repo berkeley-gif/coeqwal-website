@@ -11,7 +11,8 @@
  */
 
 import React, { useState, useMemo } from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import { Box, Typography, useTheme, CircularProgress, Button } from "@repo/ui/mui"
+import { AddIcon } from "@repo/ui/mui"
 import { CompactSelect, MobileModal } from "@repo/ui"
 import { VerticalBarChart, TierCircles, PercentileMatrix } from "@repo/viz"
 import type {
@@ -32,6 +33,7 @@ import {
   useCwsAggregatesPeriod,
   useMiContractorsMonthly,
   useMiContractorsPeriod,
+  useDemandUnitsList,
   useDemandUnitsMonthly,
   useDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
@@ -992,48 +994,98 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
 
 /**
  * Combined hook that delegates to the appropriate entity-level hook
+ * Also supports adding individual demand units from any entity level
  */
 function useMultiScenarioCwsData(
   scenarios: string[],
   entityLevel: CwsEntityLevel,
+  additionalDemandUnitIds: string[] = [],
 ) {
   const aggregatesData = useMultiScenarioCwsAggregates(scenarios)
   const contractorsData = useMultiScenarioMiContractors(scenarios)
   const demandUnitsData = useMultiScenarioDemandUnits(scenarios)
 
-  // Return data based on selected entity level
+  // Get base data for the selected entity level
+  let baseEntities: EntityInfo[]
+  let baseMatrixData: MatrixDataType
+  let baseCellStats: CellStatsMap
+  let breakdownData: BreakdownDataMap | undefined
+  let breakdownComponents: BreakdownComponentsMap | undefined
+  let isLoading: boolean
+  let error: string | null
+
   switch (entityLevel) {
     case "contractors":
-      return {
-        aggregates: contractorsData.entities,
-        matrixData: contractorsData.matrixData,
-        cellStats: contractorsData.cellStats,
-        breakdownData: undefined as BreakdownDataMap | undefined,
-        breakdownComponents: undefined as BreakdownComponentsMap | undefined,
-        isLoading: contractorsData.isLoading,
-        error: contractorsData.error,
-      }
+      baseEntities = contractorsData.entities
+      baseMatrixData = contractorsData.matrixData
+      baseCellStats = contractorsData.cellStats
+      breakdownData = undefined
+      breakdownComponents = undefined
+      isLoading = contractorsData.isLoading || demandUnitsData.isLoading
+      error = contractorsData.error ?? demandUnitsData.error ?? null
+      break
     case "demand-units":
-      return {
-        aggregates: demandUnitsData.entities,
-        matrixData: demandUnitsData.matrixData,
-        cellStats: demandUnitsData.cellStats,
-        breakdownData: undefined as BreakdownDataMap | undefined,
-        breakdownComponents: undefined as BreakdownComponentsMap | undefined,
-        isLoading: demandUnitsData.isLoading,
-        error: demandUnitsData.error,
-      }
+      baseEntities = demandUnitsData.entities
+      baseMatrixData = demandUnitsData.matrixData
+      baseCellStats = demandUnitsData.cellStats
+      breakdownData = undefined
+      breakdownComponents = undefined
+      isLoading = demandUnitsData.isLoading
+      error = demandUnitsData.error ?? null
+      break
     case "aggregates":
     default:
-      return {
-        aggregates: aggregatesData.entities,
-        matrixData: aggregatesData.matrixData,
-        cellStats: aggregatesData.cellStats,
-        breakdownData: aggregatesData.breakdownData,
-        breakdownComponents: aggregatesData.breakdownComponents,
-        isLoading: aggregatesData.isLoading,
-        error: aggregatesData.error,
+      baseEntities = aggregatesData.entities
+      baseMatrixData = aggregatesData.matrixData
+      baseCellStats = aggregatesData.cellStats
+      breakdownData = aggregatesData.breakdownData
+      breakdownComponents = aggregatesData.breakdownComponents
+      isLoading = aggregatesData.isLoading || demandUnitsData.isLoading
+      error = aggregatesData.error ?? demandUnitsData.error ?? null
+      break
+  }
+
+  // If there are additional demand units and we're not in demand-units view,
+  // append them to the entity list
+  if (additionalDemandUnitIds.length > 0 && entityLevel !== "demand-units") {
+    // Filter demand units to only include the additional ones
+    const additionalEntities = demandUnitsData.entities.filter((entity) =>
+      additionalDemandUnitIds.includes(entity.shortCode),
+    )
+
+    // Build additional matrix data and cell stats for these demand units
+    const additionalMatrixData: MatrixDataType = {}
+    const additionalCellStats: CellStatsMap = {}
+
+    additionalDemandUnitIds.forEach((duId) => {
+      if (demandUnitsData.matrixData[duId]) {
+        additionalMatrixData[duId] = demandUnitsData.matrixData[duId]
       }
+      if (demandUnitsData.cellStats[duId]) {
+        additionalCellStats[duId] = demandUnitsData.cellStats[duId]
+      }
+    })
+
+    // Merge additional demand units with base data
+    return {
+      aggregates: [...baseEntities, ...additionalEntities],
+      matrixData: { ...baseMatrixData, ...additionalMatrixData },
+      cellStats: { ...baseCellStats, ...additionalCellStats },
+      breakdownData,
+      breakdownComponents,
+      isLoading,
+      error,
+    }
+  }
+
+  return {
+    aggregates: baseEntities,
+    matrixData: baseMatrixData,
+    cellStats: baseCellStats,
+    breakdownData,
+    breakdownComponents,
+    isLoading,
+    error,
   }
 }
 
@@ -1058,6 +1110,14 @@ function MonthlyCwsSection({
   const [entityLevel, setEntityLevel] =
     useState<CwsEntityLevel>("aggregates")
   const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
+  const [selectedDemandUnit, setSelectedDemandUnit] = useState<string>("")
+  const [additionalDemandUnits, setAdditionalDemandUnits] = useState<string[]>(
+    [],
+  )
+
+  // Fetch list of demand units for the dropdown
+  const { demandUnits: demandUnitsList, isLoading: demandUnitsLoading } =
+    useDemandUnitsList()
 
   const {
     aggregates,
@@ -1067,7 +1127,7 @@ function MonthlyCwsSection({
     breakdownComponents,
     isLoading,
     error,
-  } = useMultiScenarioCwsData(scenarios, entityLevel)
+  } = useMultiScenarioCwsData(scenarios, entityLevel, additionalDemandUnits)
 
   // Convert to PercentileMatrix format
   // Note: We don't pass summary stats in reservoirData because they vary by scenario.
@@ -1101,6 +1161,32 @@ function MonthlyCwsSection({
 
   const bandColors =
     displayMode === "delivery" ? DELIVERY_BAND_COLORS : SHORTAGE_BAND_COLORS
+
+  // Build demand unit options for CompactSelect, excluding already-added ones
+  const demandUnitOptions = useMemo(() => {
+    const excludedIds = new Set(additionalDemandUnits)
+    return demandUnitsList
+      .filter((du) => !excludedIds.has(du.du_id))
+      .map((du) => ({
+        value: du.du_id,
+        label: du.label,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label))
+  }, [demandUnitsList, additionalDemandUnits])
+
+  const handleAddDemandUnit = () => {
+    if (
+      selectedDemandUnit &&
+      !additionalDemandUnits.includes(selectedDemandUnit)
+    ) {
+      setAdditionalDemandUnits((prev) => [...prev, selectedDemandUnit])
+      setSelectedDemandUnit("")
+    }
+  }
+
+  const handleRemoveDemandUnit = (duId: string) => {
+    setAdditionalDemandUnits((prev) => prev.filter((id) => id !== duId))
+  }
 
   return (
     <>
@@ -1189,7 +1275,112 @@ function MonthlyCwsSection({
             </>
           }
         />
+
+        {/* Add demand unit controls */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: theme.space.gap.sm,
+          }}
+        >
+          <CompactSelect
+            value={selectedDemandUnit}
+            onChange={setSelectedDemandUnit}
+            options={demandUnitOptions}
+            placeholder="add a demand unit"
+            disabled={demandUnitsLoading}
+            minWidth={180}
+            maxMenuHeight={300}
+            aria-label="Select demand unit to add"
+            menuZIndex={isModal ? 9999 : undefined}
+          />
+          <Button
+            variant="text"
+            size="small"
+            startIcon={<AddIcon sx={{ fontSize: 16 }} />}
+            onClick={handleAddDemandUnit}
+            disabled={!selectedDemandUnit}
+            sx={{
+              ...theme.typography.dashboard,
+              textTransform: "none",
+              color: selectedDemandUnit
+                ? theme.palette.blue.dark
+                : theme.palette.grey[400],
+              px: theme.space.component.md,
+              "&:hover": {
+                backgroundColor: theme.palette.blue.pale,
+              },
+              "&.Mui-disabled": {
+                color: theme.palette.grey[300],
+              },
+            }}
+          >
+            Add
+          </Button>
+        </Box>
       </Box>
+
+      {/* Show added demand unit chips */}
+      {additionalDemandUnits.length > 0 && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1,
+            mb: theme.space.component.sm,
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{
+              color: theme.palette.grey[500],
+              mr: 0.5,
+              alignSelf: "center",
+            }}
+          >
+            Added:
+          </Typography>
+          {additionalDemandUnits.map((id) => {
+            const demandUnit = demandUnitsList.find((du) => du.du_id === id)
+            return (
+              <Box
+                key={id}
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  px: 1,
+                  py: 0.25,
+                  backgroundColor: theme.palette.grey[100],
+                  borderRadius: theme.borderRadius.sm,
+                  fontSize: "0.75rem",
+                }}
+              >
+                {demandUnit?.label ?? id}
+                <Box
+                  component="button"
+                  onClick={() => handleRemoveDemandUnit(id)}
+                  sx={{
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    color: theme.palette.grey[500],
+                    "&:hover": { color: theme.palette.grey[700] },
+                  }}
+                  aria-label={`Remove ${demandUnit?.label ?? id}`}
+                >
+                  ×
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+      )}
 
       {/* Loading state */}
       {isLoading && aggregates.length === 0 && (
