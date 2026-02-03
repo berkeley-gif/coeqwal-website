@@ -1424,7 +1424,13 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     reservoirs.forEach((reservoir, rowIndex) => {
       scenarios.forEach((scenarioId, colIndex) => {
         const cellData = data[reservoir.reservoirId]?.[scenarioId]
-        if (!cellData) return
+        const components = breakdownComponents?.[reservoir.reservoirId]
+        const componentData = breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+        const isBreakdownRow =
+          components && componentData && components.length >= 2
+
+        // Skip if no data (but allow breakdown rows)
+        if (!cellData && !isBreakdownRow) return
 
         const cellX = getCellX(colIndex)
         const cellY = colHeaderHeight + rowIndex * cellHeight
@@ -1448,40 +1454,92 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const monthIndex = Math.round(xScale.invert(relativeX))
 
             if (monthIndex >= 0 && monthIndex < 12) {
-              const monthData = cellData[(monthIndex + 1).toString()]
-              if (monthData) {
-                const unit = displayMode === "volume" ? " TAF" : "%"
-                const formatValue = (v: number) =>
-                  displayMode === "volume"
-                    ? v.toLocaleString(undefined, { maximumFractionDigits: 0 })
-                    : v.toFixed(0)
+              const unit = displayMode === "volume" ? " TAF" : "%"
+              const formatValue = (v: number) =>
+                displayMode === "volume"
+                  ? v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                  : v.toFixed(0)
 
-                // Update playhead position (snapped to month)
-                const playheadX = cellX + chartPadding.left + xScale(monthIndex)
-                playhead
-                  .attr("x1", playheadX)
-                  .attr("x2", playheadX)
-                  .attr("y1", cellTop)
-                  .attr("y2", cellBottom)
-                  .style("visibility", "visible")
+              // Update playhead position (snapped to month)
+              const playheadX = cellX + chartPadding.left + xScale(monthIndex)
+              playhead
+                .attr("x1", playheadX)
+                .attr("x2", playheadX)
+                .attr("y1", cellTop)
+                .attr("y2", cellBottom)
+                .style("visibility", "visible")
 
-                tooltip
-                  .style("visibility", "visible")
-                  .style("left", `${event.pageX + 12}px`)
-                  .style("top", `${event.pageY - 10}px`).html(`
-                    <div style="font-weight: 600; color: ${COLORS.header}; margin-bottom: 6px;">
-                      ${reservoir.reservoirName} · ${WATER_MONTH_NAMES[monthIndex]}
-                    </div>
-                    <div style="color: ${COLORS.text}; font-size: 10px; margin-bottom: 4px;">
-                      ${scenarioNames[scenarioId] || scenarioId}
-                    </div>
-                    <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785;">
-                      <span>90th</span><span style="text-align: right;">${formatValue(monthData.q90)}${unit}</span>
-                      <span style="font-weight: 600; color: ${baseColors.median};">Median</span>
-                      <span style="text-align: right; font-weight: 600; color: ${baseColors.median};">${formatValue(monthData.q50)}${unit}</span>
-                      <span>10th</span><span style="text-align: right;">${formatValue(monthData.q10)}${unit}</span>
-                    </div>
-                  `)
+              if (isBreakdownRow && components && componentData) {
+                // Breakdown row tooltip: show SWP SOD total and MWD values
+                const bottomComponent = components[0]
+                const topComponent = components[1]
+                if (!bottomComponent || !topComponent) return
+
+                const mwdData = componentData[bottomComponent.id]
+                const otherSwpData = componentData[topComponent.id]
+                const monthStr = (monthIndex + 1).toString()
+                const mwdMonth = mwdData?.[monthStr]
+                const otherSwpMonth = otherSwpData?.[monthStr]
+
+                if (mwdMonth && otherSwpMonth) {
+                  const mwdColor = bottomComponent.color
+                  const swpSodColor = topComponent.color
+                  const totalMedian = mwdMonth.q50 + otherSwpMonth.q50
+                  const totalQ90 = mwdMonth.q90 + otherSwpMonth.q90
+                  const totalQ10 = mwdMonth.q10 + otherSwpMonth.q10
+
+                  tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${event.pageX + 12}px`)
+                    .style("top", `${event.pageY - 10}px`).html(`
+                      <div style="font-weight: 600; color: ${COLORS.header}; margin-bottom: 6px;">
+                        MWD portion of SWP SOD · ${WATER_MONTH_NAMES[monthIndex]}
+                      </div>
+                      <div style="color: ${COLORS.text}; font-size: 10px; margin-bottom: 8px;">
+                        ${scenarioNames[scenarioId] || scenarioId}
+                      </div>
+                      <div style="margin-bottom: 6px;">
+                        <div style="font-weight: 600; color: ${swpSodColor}; margin-bottom: 2px;">SWP SOD Total</div>
+                        <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785; padding-left: 8px;">
+                          <span>90th</span><span style="text-align: right;">${formatValue(totalQ90)}${unit}</span>
+                          <span style="font-weight: 600; color: ${swpSodColor};">Median</span>
+                          <span style="text-align: right; font-weight: 600; color: ${swpSodColor};">${formatValue(totalMedian)}${unit}</span>
+                          <span>10th</span><span style="text-align: right;">${formatValue(totalQ10)}${unit}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-weight: 600; color: ${mwdColor}; margin-bottom: 2px;">MWD</div>
+                        <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785; padding-left: 8px;">
+                          <span>90th</span><span style="text-align: right;">${formatValue(mwdMonth.q90)}${unit}</span>
+                          <span style="font-weight: 600; color: ${mwdColor};">Median</span>
+                          <span style="text-align: right; font-weight: 600; color: ${mwdColor};">${formatValue(mwdMonth.q50)}${unit}</span>
+                          <span>10th</span><span style="text-align: right;">${formatValue(mwdMonth.q10)}${unit}</span>
+                        </div>
+                      </div>
+                    `)
+                }
+              } else if (cellData) {
+                // Standard cell tooltip
+                const monthData = cellData[(monthIndex + 1).toString()]
+                if (monthData) {
+                  tooltip
+                    .style("visibility", "visible")
+                    .style("left", `${event.pageX + 12}px`)
+                    .style("top", `${event.pageY - 10}px`).html(`
+                      <div style="font-weight: 600; color: ${COLORS.header}; margin-bottom: 6px;">
+                        ${reservoir.reservoirName} · ${WATER_MONTH_NAMES[monthIndex]}
+                      </div>
+                      <div style="color: ${COLORS.text}; font-size: 10px; margin-bottom: 4px;">
+                        ${scenarioNames[scenarioId] || scenarioId}
+                      </div>
+                      <div style="display: grid; grid-template-columns: auto auto; gap: 1px 10px; color: #6b7785;">
+                        <span>90th</span><span style="text-align: right;">${formatValue(monthData.q90)}${unit}</span>
+                        <span style="font-weight: 600; color: ${baseColors.median};">Median</span>
+                        <span style="text-align: right; font-weight: 600; color: ${baseColors.median};">${formatValue(monthData.q50)}${unit}</span>
+                        <span>10th</span><span style="text-align: right;">${formatValue(monthData.q10)}${unit}</span>
+                      </div>
+                    `)
+                }
               }
             }
           })
