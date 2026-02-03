@@ -99,17 +99,19 @@ const CWS_AGGREGATE_LABEL_MAP: Record<string, string> = {
   "CVP South": "CVP\nSouth of Delta",
   "SWP North": "SWP\nNorth of Delta",
   "SWP South": "SWP\nSouth of Delta",
+  "SWP Total M&I": "SWP Total",
 }
 
 /** Custom sort order for CWS aggregates (short_code -> sort index) */
 const CWS_AGGREGATE_SORT_ORDER: Record<string, number> = {
   swp_nod: 0,
   swp_sod: 1,
-  mwd: 2,
-  swp_sod_breakdown: 3, // Synthetic row showing MWD + Other SWP = SWP SOD
+  swp_sod_breakdown: 2, // Synthetic row showing MWD portion of SWP SOD
+  mwd: 3,
   swp_total: 4,
-  cvp_nod: 5,
-  cvp_sod: 6,
+  swp_total_breakdown: 5, // Synthetic row showing MWD portion of SWP Total
+  cvp_nod: 6,
+  cvp_sod: 7,
 }
 
 // ============================================================================
@@ -611,7 +613,7 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     // Add synthetic entity info
     entityMap[breakdownId] = {
       shortCode: breakdownId,
-      label: "MWD portion\nof SWP SOD",
+      label: "MWD portion of\nSWP South of Delta",
     }
 
     // Compute breakdown data for each scenario
@@ -641,6 +643,57 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
       if (breakdownEntry) {
         breakdownEntry[scenarioId] = {
           delivery: {}, // Empty - actual data from breakdownData
+          shortage: {},
+        }
+      }
+    })
+  }
+
+  // Add second breakdown: MWD as part of SWP Total (all SWP deliveries)
+  if (matrixData["swp_total"] && matrixData["mwd"]) {
+    const breakdownId = "swp_total_breakdown"
+
+    // Define components with colors
+    breakdownComponents[breakdownId] = [
+      { id: "mwd", label: "MWD", color: "#5b9bd5" }, // Blue for MWD
+      { id: "other_swp_total", label: "Other SWP", color: "#70ad47" }, // Green for SWP Total
+    ]
+
+    // Add synthetic entity info
+    entityMap[breakdownId] = {
+      shortCode: breakdownId,
+      label: "MWD portion\nof SWP Total",
+    }
+
+    // Compute breakdown data for each scenario
+    breakdownData[breakdownId] = {}
+    const breakdownEntry = breakdownData[breakdownId]
+    if (breakdownEntry) {
+      scenarios.forEach((scenarioId) => {
+        const swpTotalData = matrixData["swp_total"]?.[scenarioId]
+        const mwdData = matrixData["mwd"]?.[scenarioId]
+
+        if (!swpTotalData || !mwdData) return
+
+        breakdownEntry[scenarioId] = {
+          // MWD component (just use MWD data directly)
+          mwd: mwdData.delivery,
+          // Other SWP Total component = SWP Total - MWD
+          other_swp_total: computeOtherSwp(
+            swpTotalData.delivery,
+            mwdData.delivery,
+          ),
+        }
+      })
+    }
+
+    // Add empty entry to matrixData so the row renders
+    matrixData[breakdownId] = {}
+    scenarios.forEach((scenarioId) => {
+      const breakdownEntry = matrixData[breakdownId]
+      if (breakdownEntry) {
+        breakdownEntry[scenarioId] = {
+          delivery: {},
           shortage: {},
         }
       }
