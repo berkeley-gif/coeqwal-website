@@ -62,7 +62,6 @@ export const getOutcomeCategoryColor = (
   const colorMap: Record<string, string> = {
     "community-water": theme.palette.outcomes.communityWater,
     "agricultural-water": theme.palette.outcomes.agriculturalWater,
-    "agricultural-rice": theme.palette.outcomes.agriculturalRice,
     "environmental-water": theme.palette.outcomes.environmentalWater,
     "delta-salinity": theme.palette.outcomes.deltaSalinity,
     "reservoir-storage": theme.palette.outcomes.reservoirStorage,
@@ -81,11 +80,6 @@ export const outcomeCategories = [
   {
     id: "agricultural-water",
     name: "Agricultural water",
-    icon: <AgricultureIcon fontSize="small" />,
-  },
-  {
-    id: "agricultural-rice",
-    name: "Agricultural economic model - Rice",
     icon: <AgricultureIcon fontSize="small" />,
   },
   {
@@ -384,63 +378,6 @@ export const outcomeMetrics: OutcomeMetric[] = [
     aggregations: ["annual-average", "annual-cv"],
     spatialType: "ag-demand-unit",
     description: "Gross domestic product per demand unit",
-    isTier: false,
-    showOnMap: true,
-  },
-
-  // AGRICULTURAL ECONOMIC MODEL - Rice
-  {
-    id: "rice-sw-delivery-volume-regional",
-    name: "Agricultural surface water delivery volume (regional)",
-    category: "agricultural-rice",
-    unit: "Acre-Feet",
-    temporal: ["annual"],
-    aggregations: ["annual-average", "annual-cv", "minimum"],
-    spatialType: "regional",
-    spatialLocation: "Glenn, Colusa, Sutter",
-    description:
-      "Volumetric surface water deliveries to Glenn, Colusa and Sutter counties",
-    isTier: false,
-    showOnMap: true,
-  },
-  {
-    id: "rice-sw-delivery-volume-unit",
-    name: "Agricultural surface water delivery volume",
-    category: "agricultural-rice",
-    unit: "Acre-Feet",
-    temporal: ["annual"],
-    aggregations: ["annual-average", "annual-cv", "minimum"],
-    spatialType: "ag-demand-unit",
-    description:
-      "Volumetric surface water deliveries to agricultural demand units",
-    isTier: false,
-    showOnMap: true,
-  },
-  {
-    id: "rice-harvested-acreage",
-    name: "Crop harvested acreage - Rice",
-    category: "agricultural-rice",
-    unit: "Acres",
-    temporal: ["annual"],
-    aggregations: ["annual-average", "annual-cv", "minimum"],
-    spatialType: "regional",
-    spatialLocation: "Glenn, Colusa, Sutter",
-    description:
-      "Harvested acres of Rice crop in Glenn, Colusa and Sutter counties",
-    isTier: false,
-    showOnMap: true,
-  },
-  {
-    id: "rice-projected-acreage",
-    name: "Projected crop acreage - Rice",
-    category: "agricultural-rice",
-    unit: "Acres",
-    temporal: ["annual"],
-    aggregations: ["annual-average", "annual-cv", "minimum"],
-    spatialType: "regional",
-    spatialLocation: "Glenn, Colusa, Sutter",
-    description:
-      "Projected acres of Rice crop in Glenn, Colusa and Sutter counties",
     isTier: false,
     showOnMap: true,
   },
