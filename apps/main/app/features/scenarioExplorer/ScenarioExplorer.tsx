@@ -12,7 +12,6 @@ import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
-import { ComparisonHeader } from "./components/ComparisonHeader"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 
 type MainView = "explorer" | "data"
@@ -144,10 +143,6 @@ export default function ScenarioExplorerNew() {
                       exploreMode === "comparison"
                         ? theme.border.medium
                         : "none",
-                    borderBottom:
-                      exploreMode === "comparison"
-                        ? theme.border.medium
-                        : "none",
                     pointerEvents: exploreMode === "map" ? "none" : "auto",
                   }}
                 >
@@ -156,16 +151,6 @@ export default function ScenarioExplorerNew() {
                       Click on a scenario outcome in the left panel to see
                       outcomes at specific locations.
                     </InfoOverlay>
-                  )}
-                  {exploreMode === "comparison" && (
-                    <ComparisonHeader
-                      highlightedScenario={highlightedScenario}
-                      onScenarioClick={(id) =>
-                        setHighlightedScenario((prev) =>
-                          prev === id ? null : id,
-                        )
-                      }
-                    />
                   )}
                 </Box>
               )}
