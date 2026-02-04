@@ -10,11 +10,19 @@
  * Uses the same CSS Grid layout patterns as ReservoirStorageSection.
  */
 
-import React, { useState, useMemo } from "react"
-import { Box, Typography, useTheme, CircularProgress, Button } from "@repo/ui/mui"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
+import {
+  Box,
+  Typography,
+  useTheme,
+  CircularProgress,
+  Button,
+} from "@repo/ui/mui"
 import { AddIcon } from "@repo/ui/mui"
 import { CompactSelect, MobileModal } from "@repo/ui"
-import { VerticalBarChart, TierCircles, PercentileMatrix } from "@repo/viz"
+import { TierGlyphWithTooltip } from "../../../tooltips/TierGlyphWithTooltip"
+import { PercentileMatrix } from "@repo/viz"
+import type { ChartDataPoint } from "../../../scenarios/components/shared"
 import type {
   ReservoirData,
   MonthlyPercentiles,
@@ -23,11 +31,9 @@ import type {
   BreakdownComponentsMap,
 } from "@repo/viz"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
-import {
-  ChartGridProvider,
-  useChartGridLayout,
-  CHART_SIZING,
-} from "./ChartGridContext"
+import { ChartGridProvider } from "./ChartGridContext"
+import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
+import useSWR from "swr"
 import {
   useCwsAggregatesMonthly,
   useCwsAggregatesPeriod,
@@ -37,6 +43,7 @@ import {
   useDemandUnitsMonthly,
   useDemandUnitsPeriod,
 } from "@repo/data/coeqwal/hooks"
+import { fetchDemandUnitStatistics } from "@repo/data/coeqwal"
 import type {
   CwsAggregateData,
   CwsAggregatePeriodSummary,
@@ -44,6 +51,7 @@ import type {
   MiContractorPeriodSummary,
   DemandUnitData,
   DemandUnitPeriodSummary,
+  DemandUnitStatisticsResponse,
 } from "@repo/data/coeqwal"
 import {
   outcomeCategories,
@@ -71,7 +79,6 @@ const CWS_DISPLAY_OPTIONS = [
 const CWS_ENTITY_LEVEL_OPTIONS = [
   { value: "aggregates" as const, label: "Large totals" },
   { value: "contractors" as const, label: "M&I Contractors" },
-  { value: "demand-units" as const, label: "Demand units" },
 ]
 
 const CWS_SCALE_OPTIONS = [
@@ -301,44 +308,30 @@ const CWS_TIER_METRIC = getMetricsByCategory("community-water").find(
   (m) => m.isTier,
 )
 
+/** Compact chart size for tier distribution (1.5x scenario-explorer size) */
+const TIER_CHART_SIZE = 90
+
 /**
- * Helper to check if tier data is single-value type
+ * CwsTierCharts - Inline tier distribution charts for CWS
+ * Renders charts horizontally to sit alongside section header
+ * Uses TierGlyphWithTooltip for self-contained tooltip behavior
  */
-function isSingleValueTierData(
-  tierData: Array<{
-    label: string
-    color: string
-    value: number
-    tierType?: "single_value" | "multi_value"
-  }>,
-): boolean {
-  if (!tierData || tierData.length === 0) return false
-  return tierData[0]?.tierType === "single_value"
-}
-
-interface CwsTierRowProps {
+interface CwsTierChartsProps {
   scenarios: string[]
+  scenarioNames: Record<string, string>
 }
 
-function CwsTierRow({ scenarios }: CwsTierRowProps) {
+function CwsTierCharts({ scenarios, scenarioNames }: CwsTierChartsProps) {
   const theme = useTheme()
-  const layout = useChartGridLayout()
   const { data, isLoading } = useMetricData(
     scenarios,
     CWS_TIER_METRIC as OutcomeMetric,
   )
 
-  const chartSize = layout?.chartSize ?? CHART_SIZING.defaultSize
-  const minHeight = chartSize + 16
-
   if (!CWS_TIER_METRIC) return null
 
   return (
     <>
-      {/* Label column (empty for this row) */}
-      <Box sx={{ gridColumn: 1, minHeight }} />
-
-      {/* Chart cells - one per scenario */}
       {scenarios.map((scenarioId, index) => {
         if (isLoading) {
           return (
@@ -349,7 +342,6 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight,
               }}
             >
               <CircularProgress size={20} />
@@ -367,7 +359,6 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight,
               }}
             >
               <Box
@@ -376,21 +367,22 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
                   alignItems: "center",
                   justifyContent: "center",
                   backgroundColor: theme.palette.grey[100],
-                  borderRadius: theme.borderRadius.md,
+                  borderRadius: theme.borderRadius.sm,
                   border: theme.border.medium,
-                  width: chartSize,
-                  height: chartSize,
+                  width: TIER_CHART_SIZE,
+                  height: TIER_CHART_SIZE,
+                  px: theme.space.component.xs,
                 }}
               >
                 <Typography
-                  variant="outcomeLabel"
+                  variant="compactMicro"
                   sx={{
-                    color: theme.palette.grey[700],
-                    px: theme.space.component.xs,
+                    color: theme.palette.grey[500],
                     textAlign: "center",
+                    lineHeight: 1.3,
                   }}
                 >
-                  Baseline for comparison
+                  Baseline
                 </Typography>
               </Box>
             </Box>
@@ -407,7 +399,6 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight,
               }}
             >
               <Typography
@@ -420,6 +411,16 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
           )
         }
 
+        // Convert tier data to ChartDataPoint format
+        const chartData: ChartDataPoint[] = scenarioData.tierData.map(
+          (tier) => ({
+            label: tier.label,
+            color: tier.color,
+            value: tier.value,
+            tierType: tier.tierType,
+          }),
+        )
+
         return (
           <Box
             key={scenarioId}
@@ -428,17 +429,14 @@ function CwsTierRow({ scenarios }: CwsTierRowProps) {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              minHeight,
             }}
           >
-            {isSingleValueTierData(scenarioData.tierData) ? (
-              <TierCircles tiers={scenarioData.tierData} size={chartSize} />
-            ) : (
-              <VerticalBarChart
-                tiers={scenarioData.tierData}
-                size={chartSize}
-              />
-            )}
+            <TierGlyphWithTooltip
+              outcomeCode="CWS_DEL"
+              chartData={chartData}
+              scenarioLabel={scenarioNames[scenarioId] || scenarioId}
+              size={TIER_CHART_SIZE}
+            />
           </Box>
         )
       })}
@@ -473,11 +471,12 @@ export interface CellStats {
   annualAvgTaf?: number
   reliabilityPct?: number
   shortageFrequencyPct?: number
+  /** True if any month has q0=0 (contractor may receive no allocation in dry years) */
+  hasDryYearMonths?: boolean
 }
 
 /** Cell stats mapping: entityId -> scenarioId -> stats */
 export type CellStatsMap = Record<string, Record<string, CellStats>>
-
 
 /**
  * Hook to fetch CWS aggregate data for multiple scenarios
@@ -547,10 +546,10 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
 
     Object.entries(result.aggregates).forEach(
       ([shortCode, data]: [string, CwsAggregateData]) => {
+        if (!data) return // Skip if data is null/undefined
         if (!entityMap[shortCode]) {
           // Apply label mapping if available, otherwise use API label
-          const displayLabel =
-            CWS_AGGREGATE_LABEL_MAP[data.label] ?? data.label
+          const displayLabel = CWS_AGGREGATE_LABEL_MAP[data.label] ?? data.label
           entityMap[shortCode] = { shortCode, label: displayLabel }
         }
         if (!matrixData[shortCode]) {
@@ -560,35 +559,39 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
         const deliveryPercentiles: MonthlyPercentiles = {}
         const shortagePercentiles: MonthlyPercentiles = {}
 
-        Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-          // Skip if stats are null
-          if (stats.q0 == null) return
-          deliveryPercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_delivery) {
+          Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            deliveryPercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
-        Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-          // Skip if stats are null (e.g., MWD has no shortage data)
-          if (stats.q0 == null) return
-          shortagePercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_shortage) {
+          Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            shortagePercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
         matrixData[shortCode][scenarioId] = {
           delivery: deliveryPercentiles,
@@ -702,13 +705,15 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     })
   }
 
-  const entities = Object.values(entityMap).sort((a, b) => {
-    // Use custom sort order for aggregates, fall back to alphabetical
-    const orderA = CWS_AGGREGATE_SORT_ORDER[a.shortCode] ?? 999
-    const orderB = CWS_AGGREGATE_SORT_ORDER[b.shortCode] ?? 999
-    if (orderA !== orderB) return orderA - orderB
-    return a.label.localeCompare(b.label)
-  })
+  const entities = Object.values(entityMap)
+    .filter((e) => e && e.label) // Filter out entries with null labels
+    .sort((a, b) => {
+      // Use custom sort order for aggregates, fall back to alphabetical
+      const orderA = CWS_AGGREGATE_SORT_ORDER[a.shortCode] ?? 999
+      const orderB = CWS_AGGREGATE_SORT_ORDER[b.shortCode] ?? 999
+      if (orderA !== orderB) return orderA - orderB
+      return (a.label ?? "").localeCompare(b.label ?? "")
+    })
 
   return {
     entities,
@@ -817,6 +822,7 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
 
     Object.entries(result.contractors).forEach(
       ([shortCode, data]: [string, MiContractorData]) => {
+        if (!data) return // Skip if data is null/undefined
         if (!entityMap[shortCode]) {
           entityMap[shortCode] = { shortCode, label: data.label }
         }
@@ -826,48 +832,68 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
 
         const deliveryPercentiles: MonthlyPercentiles = {}
         const shortagePercentiles: MonthlyPercentiles = {}
+        let hasDryYearMonths = false
 
-        Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-          // Skip if stats are null
-          if (stats.q0 == null) return
-          deliveryPercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_delivery) {
+          Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            // Detect dry-year months: q0=0 means no allocation in the driest years
+            if ((stats.q0 ?? 0) === 0) {
+              hasDryYearMonths = true
+            }
+            deliveryPercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
-        Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-          // Skip if stats are null
-          if (stats.q0 == null) return
-          shortagePercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_shortage) {
+          Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            shortagePercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
         matrixData[shortCode][scenarioId] = {
           delivery: deliveryPercentiles,
           shortage: shortagePercentiles,
         }
+
+        // Update cellStats with dry-year flag if detected
+        if (hasDryYearMonths) {
+          if (!cellStats[shortCode]) {
+            cellStats[shortCode] = {}
+          }
+          if (!cellStats[shortCode][scenarioId]) {
+            cellStats[shortCode][scenarioId] = {}
+          }
+          cellStats[shortCode][scenarioId].hasDryYearMonths = true
+        }
       },
     )
   })
 
-  const entities = Object.values(entityMap).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  )
+  const entities = Object.values(entityMap)
+    .filter((e) => e && e.label) // Filter out entries with null labels
+    .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 
   return { entities, matrixData, cellStats, isLoading, error }
 }
@@ -937,6 +963,7 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
 
     Object.entries(result.demandUnits).forEach(
       ([duId, data]: [string, DemandUnitData]) => {
+        if (!data) return // Skip if data is null/undefined
         if (!entityMap[duId]) {
           entityMap[duId] = { shortCode: duId, label: data.label }
         }
@@ -947,35 +974,39 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
         const deliveryPercentiles: MonthlyPercentiles = {}
         const shortagePercentiles: MonthlyPercentiles = {}
 
-        Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
-          // Skip if stats are null
-          if (stats.q0 == null) return
-          deliveryPercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_delivery) {
+          Object.entries(data.monthly_delivery).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            deliveryPercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
-        Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
-          // Skip if stats are null
-          if (stats.q0 == null) return
-          shortagePercentiles[month] = {
-            q0: stats.q0,
-            q10: stats.q10,
-            q30: stats.q30,
-            q50: stats.q50,
-            q70: stats.q70,
-            q90: stats.q90,
-            q100: stats.q100,
-            mean: stats.avg_taf,
-          }
-        })
+        if (data.monthly_shortage) {
+          Object.entries(data.monthly_shortage).forEach(([month, stats]) => {
+            // Skip only if no data at all (q50 is null means no data)
+            if (stats?.q50 == null) return
+            shortagePercentiles[month] = {
+              q0: stats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+              q10: stats.q10,
+              q30: stats.q30,
+              q50: stats.q50,
+              q70: stats.q70,
+              q90: stats.q90,
+              q100: stats.q100,
+              mean: stats.avg_taf,
+            }
+          })
+        }
 
         matrixData[duId][scenarioId] = {
           delivery: deliveryPercentiles,
@@ -985,11 +1016,184 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
     )
   })
 
-  const entities = Object.values(entityMap).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  )
+  const entities = Object.values(entityMap)
+    .filter((e) => e && e.label) // Filter out entries with null labels
+    .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 
   return { entities, matrixData, cellStats, isLoading, error }
+}
+
+/**
+ * Hook to fetch individual demand unit statistics across multiple scenarios
+ * Uses the single-unit endpoint for each (scenario, duId) combination
+ *
+ * @param scenarios - Array of scenario IDs to fetch data for
+ * @param demandUnitIds - Array of demand unit IDs to fetch
+ * @param demandUnitsList - Optional list of demand units with labels for immediate display
+ */
+function useIndividualDemandUnitsData(
+  scenarios: string[],
+  demandUnitIds: string[],
+  demandUnitsList: Array<{ du_id: string; label: string; group?: string }> = [],
+) {
+  // Create a stable cache key based on scenarios and demand unit IDs
+  const cacheKey = useMemo(() => {
+    if (demandUnitIds.length === 0) return null
+    return ["individual-demand-units", ...scenarios, ...demandUnitIds].join("|")
+  }, [scenarios, demandUnitIds])
+
+  // Create a stable fetcher function that SWR can reliably call
+  const fetcher = useCallback(async () => {
+    // Fetch all combinations in parallel
+    const results: Record<
+      string,
+      Record<string, DemandUnitStatisticsResponse>
+    > = {}
+
+    const fetchPromises = demandUnitIds.flatMap((duId) =>
+      scenarios.map(async (scenarioId) => {
+        try {
+          const data = await fetchDemandUnitStatistics(scenarioId, duId)
+          return { duId, scenarioId, data }
+        } catch (err) {
+          console.warn(`Failed to fetch stats for ${duId}/${scenarioId}:`, err)
+          return { duId, scenarioId, data: null }
+        }
+      }),
+    )
+
+    const responses = await Promise.all(fetchPromises)
+
+    responses.forEach(({ duId, scenarioId, data }) => {
+      if (data) {
+        if (!results[duId]) {
+          results[duId] = {}
+        }
+        results[duId][scenarioId] = data
+      }
+    })
+
+    return results
+  }, [demandUnitIds, scenarios])
+
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<Record<string, Record<string, DemandUnitStatisticsResponse>>>(
+    cacheKey,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  // Transform data into the format expected by useMultiScenarioCwsData
+  const entityMap: Record<string, EntityInfo> = {}
+  const matrixData: MatrixDataType = {}
+  const cellStats: CellStatsMap = {}
+  // Track whether shortage data is available from the API
+  let hasShortageData = false
+
+  // ALWAYS pre-populate entities for all requested demand unit IDs
+  // This ensures rows appear immediately, even before API data loads.
+  // Use demandUnitsList for labels if available, otherwise use duId as fallback.
+  demandUnitIds.forEach((duId) => {
+    const duInfo = demandUnitsList.find((du) => du.du_id === duId)
+    entityMap[duId] = {
+      shortCode: duId,
+      // Use label from demandUnitsList if available, otherwise use the duId
+      label: duInfo?.label ?? duId,
+      // Stats will be populated when data loads
+    }
+  })
+
+  if (data) {
+    Object.entries(data).forEach(([duId, scenarioData]) => {
+      Object.entries(scenarioData).forEach(([scenarioId, stats]) => {
+        // Update entity info with actual data (overwrite placeholder)
+        entityMap[duId] = {
+          shortCode: duId,
+          label: stats.community_agency,
+          annualDeliveryAvg: stats.period_summary?.annual_delivery_avg_taf,
+          reliabilityPct: stats.period_summary?.reliability_pct,
+          shortageFrequencyPct: stats.period_summary?.shortage_frequency_pct,
+        }
+
+        // Build per-cell stats
+        if (!cellStats[duId]) {
+          cellStats[duId] = {}
+        }
+        cellStats[duId][scenarioId] = {
+          annualAvgTaf: stats.period_summary?.annual_delivery_avg_taf,
+          reliabilityPct: stats.period_summary?.reliability_pct,
+          shortageFrequencyPct: stats.period_summary?.shortage_frequency_pct,
+        }
+
+        // Build matrix data
+        if (!matrixData[duId]) {
+          matrixData[duId] = {}
+        }
+
+        const deliveryPercentiles: MonthlyPercentiles = {}
+        const shortagePercentiles: MonthlyPercentiles = {}
+
+        if (stats.monthly_delivery) {
+          Object.entries(stats.monthly_delivery).forEach(
+            ([month, monthStats]) => {
+              // Skip only if no data at all (q50 is null means no data)
+              if (monthStats?.q50 == null) return
+              deliveryPercentiles[month] = {
+                q0: monthStats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+                q10: monthStats.q10,
+                q30: monthStats.q30,
+                q50: monthStats.q50,
+                q70: monthStats.q70,
+                q90: monthStats.q90,
+                q100: monthStats.q100,
+                mean: monthStats.avg_taf,
+              }
+            },
+          )
+        }
+
+        if (stats.monthly_shortage) {
+          Object.entries(stats.monthly_shortage).forEach(
+            ([month, monthStats]) => {
+              // Skip only if no data at all (q50 is null means no data)
+              if (monthStats?.q50 == null) return
+              hasShortageData = true // Mark that we found shortage data
+              shortagePercentiles[month] = {
+                q0: monthStats.q0 ?? 0, // q0=0 is valid (minimum can be zero)
+                q10: monthStats.q10,
+                q30: monthStats.q30,
+                q50: monthStats.q50,
+                q70: monthStats.q70,
+                q90: monthStats.q90,
+                q100: monthStats.q100,
+                mean: monthStats.avg_taf,
+              }
+            },
+          )
+        }
+
+        matrixData[duId][scenarioId] = {
+          delivery: deliveryPercentiles,
+          shortage: shortagePercentiles,
+        }
+      })
+    })
+  }
+
+  // Preserve the order from demandUnitIds (user's add order) instead of sorting alphabetically
+  // Include all requested demand units, using duId as fallback label if not in demandUnitsList
+  const entities = demandUnitIds
+    .map((duId) => entityMap[duId] ?? { shortCode: duId, label: duId })
+    .filter((e): e is EntityInfo => e != null && !!e.label)
+
+  return { entities, matrixData, cellStats, isLoading, error, hasShortageData }
 }
 
 /**
@@ -1000,10 +1204,20 @@ function useMultiScenarioCwsData(
   scenarios: string[],
   entityLevel: CwsEntityLevel,
   additionalDemandUnitIds: string[] = [],
+  demandUnitsList: Array<{ du_id: string; label: string; group?: string }> = [],
 ) {
   const aggregatesData = useMultiScenarioCwsAggregates(scenarios)
   const contractorsData = useMultiScenarioMiContractors(scenarios)
   const demandUnitsData = useMultiScenarioDemandUnits(scenarios)
+
+  // Fetch individual demand unit data for additional demand units
+  // This uses the single-unit endpoint which returns actual data
+  // Pass demandUnitsList so entities appear immediately (before API data loads)
+  const individualDemandUnitsData = useIndividualDemandUnitsData(
+    scenarios,
+    additionalDemandUnitIds,
+    demandUnitsList,
+  )
 
   // Get base data for the selected entity level
   let baseEntities: EntityInfo[]
@@ -1021,8 +1235,9 @@ function useMultiScenarioCwsData(
       baseCellStats = contractorsData.cellStats
       breakdownData = undefined
       breakdownComponents = undefined
-      isLoading = contractorsData.isLoading || demandUnitsData.isLoading
-      error = contractorsData.error ?? demandUnitsData.error ?? null
+      isLoading =
+        contractorsData.isLoading || individualDemandUnitsData.isLoading
+      error = contractorsData.error ?? individualDemandUnitsData.error ?? null
       break
     case "demand-units":
       baseEntities = demandUnitsData.entities
@@ -1040,41 +1255,33 @@ function useMultiScenarioCwsData(
       baseCellStats = aggregatesData.cellStats
       breakdownData = aggregatesData.breakdownData
       breakdownComponents = aggregatesData.breakdownComponents
-      isLoading = aggregatesData.isLoading || demandUnitsData.isLoading
-      error = aggregatesData.error ?? demandUnitsData.error ?? null
+      isLoading =
+        aggregatesData.isLoading || individualDemandUnitsData.isLoading
+      error = aggregatesData.error ?? individualDemandUnitsData.error ?? null
       break
   }
 
+  // Track whether added demand units have shortage data available
+  // The individual demand unit API endpoint doesn't return monthly_shortage data
+  const addedDemandUnitsHaveShortageData =
+    individualDemandUnitsData.hasShortageData
+
   // If there are additional demand units and we're not in demand-units view,
-  // append them to the entity list
+  // prepend them (at top) using data from the individual demand unit fetch
   if (additionalDemandUnitIds.length > 0 && entityLevel !== "demand-units") {
-    // Filter demand units to only include the additional ones
-    const additionalEntities = demandUnitsData.entities.filter((entity) =>
-      additionalDemandUnitIds.includes(entity.shortCode),
-    )
-
-    // Build additional matrix data and cell stats for these demand units
-    const additionalMatrixData: MatrixDataType = {}
-    const additionalCellStats: CellStatsMap = {}
-
-    additionalDemandUnitIds.forEach((duId) => {
-      if (demandUnitsData.matrixData[duId]) {
-        additionalMatrixData[duId] = demandUnitsData.matrixData[duId]
-      }
-      if (demandUnitsData.cellStats[duId]) {
-        additionalCellStats[duId] = demandUnitsData.cellStats[duId]
-      }
-    })
-
-    // Merge additional demand units with base data
+    // Merge additional demand units with base data (demand units first, at top)
     return {
-      aggregates: [...baseEntities, ...additionalEntities],
-      matrixData: { ...baseMatrixData, ...additionalMatrixData },
-      cellStats: { ...baseCellStats, ...additionalCellStats },
+      aggregates: [...individualDemandUnitsData.entities, ...baseEntities],
+      matrixData: {
+        ...baseMatrixData,
+        ...individualDemandUnitsData.matrixData,
+      },
+      cellStats: { ...baseCellStats, ...individualDemandUnitsData.cellStats },
       breakdownData,
       breakdownComponents,
       isLoading,
       error,
+      addedDemandUnitsHaveShortageData,
     }
   }
 
@@ -1086,6 +1293,7 @@ function useMultiScenarioCwsData(
     breakdownComponents,
     isLoading,
     error,
+    addedDemandUnitsHaveShortageData,
   }
 }
 
@@ -1107,8 +1315,7 @@ function MonthlyCwsSection({
 }: MonthlyCwsSectionProps) {
   const theme = useTheme()
   const [displayMode, setDisplayMode] = useState<CwsDisplayMode>("delivery")
-  const [entityLevel, setEntityLevel] =
-    useState<CwsEntityLevel>("aggregates")
+  const [entityLevel, setEntityLevel] = useState<CwsEntityLevel>("aggregates")
   const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
   const [selectedDemandUnit, setSelectedDemandUnit] = useState<string>("")
   const [additionalDemandUnits, setAdditionalDemandUnits] = useState<string[]>(
@@ -1116,6 +1323,7 @@ function MonthlyCwsSection({
   )
 
   // Fetch list of demand units for the dropdown
+  // Uses flat list endpoint and groups client-side by the 'group' field
   const { demandUnits: demandUnitsList, isLoading: demandUnitsLoading } =
     useDemandUnitsList()
 
@@ -1125,9 +1333,22 @@ function MonthlyCwsSection({
     cellStats,
     breakdownData,
     breakdownComponents,
-    isLoading,
     error,
-  } = useMultiScenarioCwsData(scenarios, entityLevel, additionalDemandUnits)
+    addedDemandUnitsHaveShortageData,
+  } = useMultiScenarioCwsData(
+    scenarios,
+    entityLevel,
+    additionalDemandUnits,
+    demandUnitsList,
+  )
+
+  // Track when data first arrives to ensure skeleton shows on initial mount
+  const [hasReceivedData, setHasReceivedData] = useState(false)
+  useEffect(() => {
+    if (aggregates.length > 0) {
+      setHasReceivedData(true)
+    }
+  }, [aggregates.length])
 
   // Convert to PercentileMatrix format
   // Note: We don't pass summary stats in reservoirData because they vary by scenario.
@@ -1144,8 +1365,10 @@ function MonthlyCwsSection({
   )
 
   const percentileData = useMemo(() => {
-    const data: Record<string, Record<string, MonthlyPercentiles | undefined>> =
-      {}
+    const data: Record<
+      string,
+      Record<string, MonthlyPercentiles | undefined>
+    > = {}
     Object.entries(matrixData).forEach(([shortCode, scenarioData]) => {
       const shortCodeData: Record<string, MonthlyPercentiles | undefined> = {}
       Object.entries(scenarioData).forEach(([scenarioId, monthlyData]) => {
@@ -1162,16 +1385,42 @@ function MonthlyCwsSection({
   const bandColors =
     displayMode === "delivery" ? DELIVERY_BAND_COLORS : SHORTAGE_BAND_COLORS
 
-  // Build demand unit options for CompactSelect, excluding already-added ones
-  const demandUnitOptions = useMemo(() => {
+  // Build grouped demand unit options for CompactSelect, excluding already-added ones
+  // Groups the flat list by the 'group' field on each demand unit
+  const demandUnitGroups = useMemo(() => {
     const excludedIds = new Set(additionalDemandUnits)
-    return demandUnitsList
-      .filter((du) => !excludedIds.has(du.du_id))
-      .map((du) => ({
-        value: du.du_id,
-        label: du.label,
+
+    if (demandUnitsList.length === 0) {
+      return []
+    }
+
+    // Group demand units by their 'group' field (hydrologic region)
+    const groupedByField: Record<string, typeof demandUnitsList> = {}
+    demandUnitsList.forEach((du) => {
+      if (!du) return // Skip null/undefined entries
+      const groupKey = du.group ?? "Other"
+      if (!groupedByField[groupKey]) {
+        groupedByField[groupKey] = []
+      }
+      groupedByField[groupKey].push(du)
+    })
+
+    return Object.entries(groupedByField)
+      .map(([groupKey, units]) => ({
+        label: groupKey,
+        options: units
+          .filter((du) => du && du.du_id && !excludedIds.has(du.du_id))
+          .map((du) => {
+            const displayLabel = du.label ?? du.du_id
+            return {
+              value: du.du_id,
+              label: `${displayLabel} (${du.du_id})`,
+            }
+          })
+          .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? "")),
       }))
-      .sort((a, b) => a.label.localeCompare(b.label))
+      .filter((group) => group.options.length > 0)
+      .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
   }, [demandUnitsList, additionalDemandUnits])
 
   const handleAddDemandUnit = () => {
@@ -1203,7 +1452,13 @@ function MonthlyCwsSection({
         <SectionHeader
           title="Monthly deliveries"
           titleAdornment={
-            <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: theme.space.gap.sm,
+              }}
+            >
               <CompactSelect
                 value={entityLevel}
                 onChange={setEntityLevel}
@@ -1287,11 +1542,11 @@ function MonthlyCwsSection({
           <CompactSelect
             value={selectedDemandUnit}
             onChange={setSelectedDemandUnit}
-            options={demandUnitOptions}
+            groups={demandUnitGroups}
             placeholder="add a demand unit"
             disabled={demandUnitsLoading}
-            minWidth={180}
-            maxMenuHeight={300}
+            minWidth={220}
+            maxMenuHeight={400}
             aria-label="Select demand unit to add"
             menuZIndex={isModal ? 9999 : undefined}
           />
@@ -1382,24 +1637,68 @@ function MonthlyCwsSection({
         </Box>
       )}
 
-      {/* Loading state */}
-      {isLoading && aggregates.length === 0 && (
+      {/* Notice when shortage is selected but current view doesn't have shortage data */}
+      {displayMode === "shortage" && entityLevel !== "aggregates" && (
         <Box
           sx={{
             gridColumn: "1 / -1",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            py: theme.space.section.md,
+            gap: 1,
+            px: theme.space.component.md,
+            py: theme.space.component.sm,
+            backgroundColor: "#fef3c7", // amber-100
+            borderRadius: theme.borderRadius.sm,
+            mb: theme.space.component.sm,
           }}
         >
-          <CircularProgress size={20} sx={{ color: theme.palette.grey[300] }} />
           <Typography
             variant="compactCaption"
-            sx={{ ml: theme.space.component.md, color: theme.palette.grey[400] }}
+            sx={{ color: "#92400e" }} // amber-800
           >
-            Loading CWS data...
+            Monthly shortage data is only available in the "Large totals" view.
+            Switch to Large totals to see shortage charts.
           </Typography>
+        </Box>
+      )}
+
+      {/* Notice when shortage is selected in aggregates but added demand units don't have shortage data */}
+      {displayMode === "shortage" &&
+        entityLevel === "aggregates" &&
+        additionalDemandUnits.length > 0 &&
+        !addedDemandUnitsHaveShortageData && (
+          <Box
+            sx={{
+              gridColumn: "1 / -1",
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: theme.space.component.md,
+              py: theme.space.component.sm,
+              backgroundColor: "#fef3c7", // amber-100
+              borderRadius: theme.borderRadius.sm,
+              mb: theme.space.component.sm,
+            }}
+          >
+            <Typography
+              variant="compactCaption"
+              sx={{ color: "#92400e" }} // amber-800
+            >
+              Monthly shortage data is not available for the individually added
+              demand units. Shortage charts for these units will appear empty.
+            </Typography>
+          </Box>
+        )}
+
+      {/* Loading state with skeleton - show until we've received data */}
+      {!hasReceivedData && !error && (
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <PercentileMatrixSkeleton
+            scenarios={scenarios}
+            rowCount={8}
+            message="Loading CWS data..."
+            labelColumnWidth={140}
+          />
         </Box>
       )}
 
@@ -1423,8 +1722,8 @@ function MonthlyCwsSection({
         </Box>
       )}
 
-      {/* Matrix visualization - show if we have data, even with partial errors */}
-      {!isLoading && aggregates.length > 0 && (
+      {/* Matrix visualization - show once we've received data */}
+      {hasReceivedData && aggregates.length > 0 && (
         <Box sx={{ gridColumn: "1 / -1" }}>
           <PercentileMatrix
             reservoirs={reservoirData}
@@ -1442,22 +1741,6 @@ function MonthlyCwsSection({
             breakdownComponents={breakdownComponents}
           />
         </Box>
-      )}
-
-      {/* No data state */}
-      {!isLoading && aggregates.length === 0 && !error && (
-        <Typography
-          variant="compactCaption"
-          sx={{
-            gridColumn: "1 / -1",
-            color: theme.palette.grey[400],
-            fontStyle: "italic",
-            textAlign: "center",
-            py: theme.space.section.sm,
-          }}
-        >
-          No CWS data available for the selected scenarios.
-        </Typography>
       )}
     </>
   )
@@ -1514,19 +1797,17 @@ export default function CwsSection({
           }}
         >
           <ChartGridProvider scenarios={scenarios}>
-            <Box sx={{ gridColumn: 1, mb: theme.space.component.sm }}>
+            {/* Title in column 1, charts in scenario columns - all on same row */}
+            <Box sx={{ gridColumn: 1, display: "flex", alignItems: "center" }}>
               <SectionHeader
                 title="Delivery distribution"
                 description="140 community water systems"
               />
             </Box>
-            {scenarios.map((_, index) => (
-              <Box
-                key={`header-spacer-${index}`}
-                sx={{ gridColumn: index + 2 }}
-              />
-            ))}
-            <CwsTierRow scenarios={scenarios} />
+            <CwsTierCharts
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+            />
           </ChartGridProvider>
         </Box>
 
@@ -1573,10 +1854,7 @@ export default function CwsSection({
                 fontSize: 20,
               }}
             >
-              {
-                outcomeCategories.find((c) => c.id === "community-water")
-                  ?.icon
-              }
+              {outcomeCategories.find((c) => c.id === "community-water")?.icon}
             </Box>
             <Typography
               variant="subtitle2"
@@ -1610,19 +1888,19 @@ export default function CwsSection({
             }}
           >
             <ChartGridProvider scenarios={scenarios}>
-              <Box sx={{ gridColumn: 1, mb: theme.space.component.sm }}>
+              {/* Title in column 1, charts in scenario columns - all on same row */}
+              <Box
+                sx={{ gridColumn: 1, display: "flex", alignItems: "center" }}
+              >
                 <SectionHeader
                   title="Delivery distribution"
                   description="140 community water systems"
                 />
               </Box>
-              {scenarios.map((_, index) => (
-                <Box
-                  key={`modal-header-spacer-${index}`}
-                  sx={{ gridColumn: index + 2 }}
-                />
-              ))}
-              <CwsTierRow scenarios={scenarios} />
+              <CwsTierCharts
+                scenarios={scenarios}
+                scenarioNames={scenarioNames}
+              />
             </ChartGridProvider>
           </Box>
 

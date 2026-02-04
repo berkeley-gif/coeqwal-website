@@ -72,10 +72,13 @@ export type {
   // Urban Demand Units types
   DemandUnit,
   DemandUnitsListResponse,
+  DemandUnitsGroupedResponse,
   DemandUnitData,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodSummary,
   DemandUnitPeriodResponse,
+  DemandUnitMonthlyStats,
+  DemandUnitStatisticsResponse,
 } from "./types"
 
 // API constants
@@ -107,6 +110,8 @@ export {
   fetchMiContractorsPeriod,
   // Urban Demand Units fetchers
   fetchDemandUnitsList,
+  fetchDemandUnitsGroups,
+  fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsPeriod,
 } from "./fetchers"

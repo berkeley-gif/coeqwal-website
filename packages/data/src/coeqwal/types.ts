@@ -651,6 +651,15 @@ export interface DemandUnitsListResponse {
 }
 
 /**
+ * Response from /api/statistics/demand-units/groups endpoint
+ * Returns demand units organized by group (e.g., "swp", "cvp")
+ */
+export interface DemandUnitsGroupedResponse {
+  /** Demand units organized by group key */
+  groups: Record<string, DemandUnit[]>
+}
+
+/**
  * Urban demand unit data with monthly delivery and shortage statistics
  */
 export interface DemandUnitData {
@@ -714,4 +723,37 @@ export interface DemandUnitPeriodResponse {
   scenario_id: string
   /** Period summary data keyed by du_id */
   demand_units: Record<string, DemandUnitPeriodSummary>
+}
+
+/**
+ * Monthly delivery statistics for a demand unit
+ */
+export interface DemandUnitMonthlyStats {
+  avg_taf: number
+  cv: number
+  q0: number
+  q10: number
+  q30: number
+  q50: number
+  q70: number
+  q90: number
+  q100: number
+  sample_count: number
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/demand-units/:duId/statistics
+ * Returns complete statistics for a single demand unit
+ */
+export interface DemandUnitStatisticsResponse {
+  scenario_id: string
+  du_id: string
+  community_agency: string
+  hydrologic_region: string
+  /** Period summary with annual averages and exceedance values */
+  period_summary: DemandUnitPeriodSummary
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, DemandUnitMonthlyStats> | null
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, DemandUnitMonthlyStats> | null
 }

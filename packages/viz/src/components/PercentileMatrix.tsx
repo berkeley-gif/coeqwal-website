@@ -65,6 +65,8 @@ export interface CellStats {
   annualAvgTaf?: number
   reliabilityPct?: number
   shortageFrequencyPct?: number
+  /** True if any month has q0=0 (contractor may receive no allocation in dry years) */
+  hasDryYearMonths?: boolean
 }
 
 /** Cell stats mapping: entityId -> scenarioId -> stats */
@@ -226,7 +228,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           : scenarios.length <= 4
             ? 230 // Medium charts for 3-4 scenarios
             : 190 // Compact charts for 5+ scenarios
-      const statsExtraHeight = cellStats ? 70 : 0
+      const statsExtraHeight = cellStats ? 96 : 0
       const rowHeight = baseRowHeight + statsExtraHeight
       const calculatedHeight = Math.max(400, reservoirs.length * rowHeight + 80)
       // Use full calculated height - let parent scroll container handle overflow
@@ -276,9 +278,15 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     // Offset within each slot to center the cell (0 when cell fills slot)
     const cellOffsetInSlot = (slotWidth - cellWidth) / 2
     const cellHeight = (innerHeight - colHeaderHeight) / reservoirs.length
-    // Bottom padding: 24 for x-axis labels + 70 for per-cell stats (when cellStats provided)
-    const statsAreaHeight = cellStats ? 70 : 0
-    const chartPadding = { top: 8, right: 8, bottom: 24 + statsAreaHeight, left: 4 }
+    // Bottom padding: 24 for x-axis labels + 96 for per-cell stats (when cellStats provided)
+    // Stats: 4 lines × 20px = 80px content + 16px breathing room = 96px
+    const statsAreaHeight = cellStats ? 96 : 0
+    const chartPadding = {
+      top: 8,
+      right: 8,
+      bottom: 24 + statsAreaHeight,
+      left: 4,
+    }
 
     // Chart area within each cell
     const chartWidth = cellWidth - chartPadding.left - chartPadding.right
@@ -313,6 +321,23 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 }
               }
             }
+
+            // Also check breakdownData for breakdown rows (MWD breakdown charts)
+            // Breakdown rows have empty main data but store values in breakdownData
+            const componentData =
+              breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+            if (componentData) {
+              Object.values(componentData).forEach((monthlyData) => {
+                if (monthlyData) {
+                  for (let i = 1; i <= 12; i++) {
+                    const monthData = monthlyData[i.toString()]
+                    if (monthData?.q100) {
+                      maxValue = Math.max(maxValue, monthData.q100)
+                    }
+                  }
+                }
+              })
+            }
           })
           // Also consider capacity if available (for reservoir charts)
           if (reservoir.capacityTaf > 0) {
@@ -339,6 +364,22 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                   maxValue = Math.max(maxValue, monthData.q100)
                 }
               }
+            }
+
+            // Also check breakdownData for breakdown rows
+            const componentData =
+              breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+            if (componentData) {
+              Object.values(componentData).forEach((monthlyData) => {
+                if (monthlyData) {
+                  for (let i = 1; i <= 12; i++) {
+                    const monthData = monthlyData[i.toString()]
+                    if (monthData?.q100) {
+                      maxValue = Math.max(maxValue, monthData.q100)
+                    }
+                  }
+                }
+              })
             }
           })
           // Also consider capacity as a reference
@@ -402,7 +443,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         .attr("x", labelX)
         .attr("y", rowTop)
         .attr("width", entityNameMaxWidth)
-        .attr("height", 40) // Allow up to 2 lines of text
+        .attr("height", 66) // Allow up to 4 lines of text for long entity names
 
       nameGroup
         .append("xhtml:div")
@@ -427,8 +468,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
       if (isCwsWithStats) {
         // CWS-specific labels: Annual average, Reliability, Shortage frequency
-        // Start below the entity name (which can wrap to 2 lines, ~40px)
-        let currentY = rowTop + 42
+        // Start below the entity name (which can wrap to 3 lines, ~54px)
+        let currentY = rowTop + 68
 
         // Annual average delivery
         g.append("text")
@@ -520,8 +561,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         // No additional labels needed since stats vary by scenario
       } else {
         // Standard reservoir labels: System, Capacity, Dead pool
-        // Start below the entity name (which can wrap to 2 lines, ~40px)
-        const labelStartY = rowTop + 42
+        // Start below the entity name (which can wrap to 3 lines, ~54px)
+        const labelStartY = rowTop + 68
         // System info (SWP/CVP) - secondary metadata
         const system =
           reservoir.system || RESERVOIR_SYSTEMS[reservoir.reservoirId] || ""
@@ -847,7 +888,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
         // Check if this is a breakdown row (stacked chart)
         const components = breakdownComponents?.[reservoir.reservoirId]
-        const componentData = breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+        const componentData =
+          breakdownData?.[reservoir.reservoirId]?.[scenarioId]
 
         if (components && componentData && components.length >= 2) {
           // Render stacked percentile bands
@@ -965,12 +1007,12 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               // 5. Add legend with 2x2 grid layout
               const legendPadding = 8
               const legendY = chartHeight + 16 + legendPadding
-              const rowHeight = 18
+              const legendRowHeight = 20
               const col1X = legendPadding
-              const col2X = 115 // Fixed column for alignment
+              const col2X = 120 // Fixed column for alignment (adjusted for larger font)
               const iconWidth = 18
               const labelGap = 6
-              const legendFontSize = "10px"
+              const legendFontSize = "12px"
 
               // Draw legend background
               cellG
@@ -978,7 +1020,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .attr("x", 0)
                 .attr("y", chartHeight + 14)
                 .attr("width", chartWidth)
-                .attr("height", rowHeight * 2 + legendPadding * 2 + 4)
+                .attr("height", legendRowHeight * 2 + legendPadding * 2 + 4)
                 .attr("fill", hexToRgba("#f8f9fa", 0.9))
                 .attr("rx", 4)
 
@@ -1021,7 +1063,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .text(`${totalLabel} median`)
 
               // Row 2, Col 1: MWD range
-              const row2Y = legendY + rowHeight
+              const row2Y = legendY + legendRowHeight
               cellG
                 .append("rect")
                 .attr("x", col1X)
@@ -1165,9 +1207,12 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("transform", `translate(${cellX},${statsY})`)
 
           let currentY = 0
-          const lineHeight = 18
-          const labelFontSize = "10px"
-          const valueFontSize = "11px"
+          const lineHeight = 20
+          const labelFontSize = "12px"
+          const valueFontSize = "13px"
+
+          // Layout: labels on left, values aligned on right
+          const valueX = 90 // Right-aligned value column
 
           // Avg delivery
           if (stats.annualAvgTaf !== undefined && stats.annualAvgTaf > 0) {
@@ -1183,7 +1228,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .text("Avg delivery")
             statsG
               .append("text")
-              .attr("x", 68)
+              .attr("x", valueX)
               .attr("y", currentY)
               .attr("text-anchor", "start")
               .attr("dominant-baseline", "hanging")
@@ -1210,7 +1255,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .text("Reliability")
             statsG
               .append("text")
-              .attr("x", 68)
+              .attr("x", valueX)
               .attr("y", currentY)
               .attr("text-anchor", "start")
               .attr("dominant-baseline", "hanging")
@@ -1240,7 +1285,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .text("Shortage freq")
             statsG
               .append("text")
-              .attr("x", 68)
+              .attr("x", valueX)
               .attr("y", currentY)
               .attr("text-anchor", "start")
               .attr("dominant-baseline", "hanging")
@@ -1253,8 +1298,86 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             currentY += lineHeight
           }
 
+          // Dry-year indicator with tooltip (for M&I contractors with q0=0 months)
+          if (stats.hasDryYearMonths) {
+            const dryYearText = statsG
+              .append("text")
+              .attr("x", 0)
+              .attr("y", currentY)
+              .attr("text-anchor", "start")
+              .attr("dominant-baseline", "hanging")
+              .attr("font-size", labelFontSize)
+              .attr("font-family", "'Inter', -apple-system, sans-serif")
+              .attr("font-weight", "500")
+              .attr("fill", "#b45309") // Amber-700 for warning
+              .attr("cursor", "help")
+              .text("⚠ Dry year note")
+
+            // Add dotted underline
+            const dryYearTextWidth = dryYearText.node()?.getBBox().width ?? 85
+            statsG
+              .append("line")
+              .attr("x1", 14) // Start after the warning icon
+              .attr("x2", dryYearTextWidth)
+              .attr("y1", currentY + 14)
+              .attr("y2", currentY + 14)
+              .attr("stroke", "#b45309")
+              .attr("stroke-width", 1)
+              .attr("stroke-dasharray", "2,2")
+              .attr("cursor", "help")
+
+            // Invisible hover area for tooltip
+            statsG
+              .append("rect")
+              .attr("x", -2)
+              .attr("y", currentY - 2)
+              .attr("width", dryYearTextWidth + 4)
+              .attr("height", 18)
+              .attr("fill", "transparent")
+              .attr("cursor", "help")
+              .on("mouseenter", (event) => {
+                let tooltipEl = d3.select<HTMLDivElement, unknown>(
+                  "#dry-year-tooltip",
+                )
+                if (tooltipEl.empty()) {
+                  tooltipEl = d3
+                    .select("body")
+                    .append<HTMLDivElement>("div")
+                    .attr("id", "dry-year-tooltip")
+                    .style("position", "absolute")
+                    .style("background", "#fffbeb") // Amber-50 background
+                    .style("border", "1px solid #fcd34d") // Amber-300 border
+                    .style("border-radius", "6px")
+                    .style("padding", "12px 16px")
+                    .style("font-size", "13px")
+                    .style("font-family", "'Inter', -apple-system, sans-serif")
+                    .style("box-shadow", "0 4px 20px rgba(0,0,0,0.15)")
+                    .style("pointer-events", "none")
+                    .style("z-index", "1000")
+                    .style("max-width", "320px")
+                    .style("line-height", "1.5")
+                    .style("color", "#92400e") // Amber-800 text
+                }
+                tooltipEl
+                  .style("visibility", "visible")
+                  .style("left", `${event.pageX + 12}px`)
+                  .style("top", `${event.pageY - 10}px`)
+                  .text(
+                    "In dry years, this contractor may receive no Table A allocation for some months. The chart's lower band touching zero reflects these zero-delivery months in the driest historical scenarios.",
+                  )
+              })
+              .on("mouseleave", () => {
+                d3.select<HTMLDivElement, unknown>("#dry-year-tooltip").style(
+                  "visibility",
+                  "hidden",
+                )
+              })
+
+            currentY += lineHeight
+          }
+
           // Context tooltip for CWS statistics explanation
-          // Build dynamic context text based on entity and stats
+          // Build dynamic context text based on entity and stats (HTML formatted)
           let cwsContextNote: string
           if (reservoir.reservoirId === "cvp_sod") {
             // CVP South of Delta has a special context explaining its frequent but tiny shortages
@@ -1266,8 +1389,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const shortagePct = (100 - reliability).toFixed(2)
             cwsContextNote = `CVP South of Delta has frequent but tiny shortages. ${shortageYears} out of 100 years have some shortage (>0.1 TAF). But avg shortage is only ${avgShortage.toFixed(2)} TAF/yr out of ${Math.round(avgDelivery).toLocaleString()} TAF delivered. That's only ${shortagePct}% of delivery! To see shortage amounts toggle the controls above.`
           } else {
-            cwsContextNote =
-              "Reliability = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %). Shortage frequency = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages."
+            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>Reliability</strong> = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %).</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages.</p>`
           }
 
           const contextText = statsG
@@ -1276,7 +1398,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("y", currentY)
             .attr("text-anchor", "start")
             .attr("dominant-baseline", "hanging")
-            .attr("font-size", "9px")
+            .attr("font-size", labelFontSize)
             .attr("font-family", "'Inter', -apple-system, sans-serif")
             .attr("font-weight", "500")
             .attr("fill", COLORS.text)
@@ -1284,13 +1406,13 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .text("Context")
 
           // Add dotted underline
-          const textWidth = contextText.node()?.getBBox().width ?? 36
+          const textWidth = contextText.node()?.getBBox().width ?? 42
           statsG
             .append("line")
             .attr("x1", 0)
             .attr("x2", textWidth)
-            .attr("y1", currentY + 11)
-            .attr("y2", currentY + 11)
+            .attr("y1", currentY + 14)
+            .attr("y2", currentY + 14)
             .attr("stroke", COLORS.text)
             .attr("stroke-width", 1)
             .attr("stroke-dasharray", "2,2")
@@ -1302,7 +1424,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("x", -2)
             .attr("y", currentY - 2)
             .attr("width", textWidth + 4)
-            .attr("height", 15)
+            .attr("height", 18)
             .attr("fill", "transparent")
             .attr("cursor", "help")
             .on("mouseenter", (event) => {
@@ -1331,7 +1453,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 .style("visibility", "visible")
                 .style("left", `${event.pageX + 12}px`)
                 .style("top", `${event.pageY - 10}px`)
-                .text(cwsContextNote)
+                .html(cwsContextNote)
             })
             .on("mouseleave", () => {
               d3.select<HTMLDivElement, unknown>("#cws-context-tooltip").style(
@@ -1429,7 +1551,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       scenarios.forEach((scenarioId, colIndex) => {
         const cellData = data[reservoir.reservoirId]?.[scenarioId]
         const components = breakdownComponents?.[reservoir.reservoirId]
-        const componentData = breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+        const componentData =
+          breakdownData?.[reservoir.reservoirId]?.[scenarioId]
         const isBreakdownRow =
           components && componentData && components.length >= 2
 

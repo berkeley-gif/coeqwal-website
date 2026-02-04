@@ -48,6 +48,7 @@ export { CompactSelect } from "./common/CompactSelect"
 export type {
   CompactSelectProps,
   CompactSelectOption,
+  CompactSelectGroup,
 } from "./common/CompactSelect"
 
 // Panel components

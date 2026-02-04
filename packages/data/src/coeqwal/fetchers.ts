@@ -31,6 +31,8 @@ import type {
   MiContractorMonthlyResponse,
   MiContractorPeriodResponse,
   DemandUnitsListResponse,
+  DemandUnitsGroupedResponse,
+  DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodResponse,
 } from "./types"
@@ -560,6 +562,55 @@ export async function fetchDemandUnitsList(
   return apiFetcher<DemandUnitsListResponse>(ENDPOINTS.demandUnitsList(group), {
     baseUrl: DEFAULT_API_BASE,
   })
+}
+
+/**
+ * Fetch list of urban demand units organized by group
+ *
+ * @returns Demand units grouped by category (e.g., "swp", "cvp")
+ *
+ * @example
+ * ```typescript
+ * const { groups } = await fetchDemandUnitsGroups()
+ * // { swp: [{ du_id: "UD_MWD", label: "Metropolitan Water District" }, ...], cvp: [...] }
+ * ```
+ */
+export async function fetchDemandUnitsGroups(): Promise<DemandUnitsGroupedResponse> {
+  return apiFetcher<DemandUnitsGroupedResponse>(ENDPOINTS.DEMAND_UNITS_GROUPS, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch complete statistics for a single demand unit
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
+ * @returns Complete statistics including monthly delivery/shortage and period summary
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitStatistics("s0020", "MWD")
+ * // { scenario_id: "s0020", du_id: "MWD", monthly_delivery: {...}, period_summary: {...} }
+ * ```
+ */
+export async function fetchDemandUnitStatistics(
+  scenarioId: string,
+  duId: string,
+): Promise<DemandUnitStatisticsResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!duId) {
+    throw new Error("Demand unit ID is required")
+  }
+
+  return apiFetcher<DemandUnitStatisticsResponse>(
+    ENDPOINTS.demandUnitStatistics(scenarioId, duId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
 }
 
 /**

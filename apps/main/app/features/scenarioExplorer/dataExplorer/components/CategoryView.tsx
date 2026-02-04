@@ -18,10 +18,18 @@ import {
   CircularProgress,
   Button,
 } from "@repo/ui/mui"
-import { InfoTooltip, CompactSelect, MobileModal } from "@repo/ui"
+import { CompactSelect, MobileModal, InfoTooltip } from "@repo/ui"
+import { TierGlyphWithTooltip } from "../../../tooltips/TierGlyphWithTooltip"
+
+/** Compact chart size for tier distribution (1.5x scenario-explorer size) */
+const TIER_CHART_SIZE = 90
 import { ExpandMoreIcon, AddIcon } from "@repo/ui/mui"
 import useSWR from "swr"
 import { useScenarioExplorerStore } from "../../store"
+import {
+  isSingleValueTier,
+  type ChartDataPoint,
+} from "../../../scenarios/components/shared"
 import { VerticalBarChart, TierCircles } from "@repo/viz"
 import {
   outcomeCategories,
@@ -37,11 +45,7 @@ import ReservoirPercentilesSection, {
 // import SpillFrequencySection from "./SpillFrequencySection"
 import CwsSection from "./CwsSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
-import {
-  ChartGridProvider,
-  useChartGridLayout,
-  CHART_SIZING,
-} from "./ChartGridContext"
+import { ChartGridProvider } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
@@ -111,22 +115,6 @@ function SectionHeader({
       )}
     </Box>
   )
-}
-
-/**
- * Helper function to detect if tier data represents a single value (vs a distribution)
- * Uses the tierType metadata from the API
- */
-function isSingleValueTierData(
-  tierData: Array<{
-    label: string
-    color: string
-    value: number
-    tierType?: string
-  }>,
-): boolean {
-  if (!tierData || tierData.length === 0) return false
-  return tierData[0]?.tierType === "single_value"
 }
 
 /**
@@ -200,26 +188,30 @@ const RESERVOIR_TIER_METRIC = getMetricsByCategory("reservoir-storage").find(
   (m) => m.isTier,
 )
 
-function StorageTierRow({ scenarios }: { scenarios: string[] }) {
+/**
+ * StorageTierCharts - Inline tier distribution charts for reservoir storage
+ * Renders charts horizontally to sit alongside section header
+ * Uses TierGlyphWithTooltip for self-contained tooltip behavior
+ */
+interface StorageTierChartsProps {
+  scenarios: string[]
+  scenarioNames: Record<string, string>
+}
+
+function StorageTierCharts({
+  scenarios,
+  scenarioNames,
+}: StorageTierChartsProps) {
   const theme = useTheme()
-  const layout = useChartGridLayout()
   const { data, isLoading } = useMetricData(
     scenarios,
     RESERVOIR_TIER_METRIC as OutcomeMetric,
   )
 
-  // Dynamic chart size from layout context, with fallback
-  const chartSize = layout?.chartSize ?? CHART_SIZING.defaultSize
-  const minHeight = chartSize + 16
-
   if (!RESERVOIR_TIER_METRIC) return null
 
   return (
     <>
-      {/* Label column (empty for this row) */}
-      <Box sx={{ gridColumn: 1, minHeight }} />
-
-      {/* Chart cells - one per scenario */}
       {scenarios.map((scenarioId, index) => {
         if (isLoading) {
           return (
@@ -230,7 +222,6 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight,
               }}
             >
               <CircularProgress size={20} />
@@ -248,7 +239,6 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                minHeight,
               }}
             >
               <Typography
@@ -261,6 +251,16 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
           )
         }
 
+        // Convert tier data to ChartDataPoint format
+        const chartData: ChartDataPoint[] = scenarioData.tierData.map(
+          (tier) => ({
+            label: tier.label,
+            color: tier.color,
+            value: tier.value,
+            tierType: tier.tierType,
+          }),
+        )
+
         return (
           <Box
             key={scenarioId}
@@ -269,17 +269,14 @@ function StorageTierRow({ scenarios }: { scenarios: string[] }) {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              minHeight,
             }}
           >
-            {isSingleValueTierData(scenarioData.tierData) ? (
-              <TierCircles tiers={scenarioData.tierData} size={chartSize} />
-            ) : (
-              <VerticalBarChart
-                tiers={scenarioData.tierData}
-                size={chartSize}
-              />
-            )}
+            <TierGlyphWithTooltip
+              outcomeCode="RES_STOR"
+              chartData={chartData}
+              scenarioLabel={scenarioNames[scenarioId] || scenarioId}
+              size={TIER_CHART_SIZE}
+            />
           </Box>
         )
       })}
@@ -697,10 +694,12 @@ function MonthlyStorageSection({
  */
 function ReservoirStorageContent({
   scenarios,
+  scenarioNames,
   cellColors,
   isModal = false,
 }: {
   scenarios: string[]
+  scenarioNames: Record<string, string>
   cellColors: Record<string, Record<string, string>>
   /** Whether this content is inside a modal (affects dropdown z-index) */
   isModal?: boolean
@@ -720,8 +719,8 @@ function ReservoirStorageContent({
         }}
       >
         <ChartGridProvider scenarios={scenarios}>
-          {/* Storage distribution header - spans label column */}
-          <Box sx={{ gridColumn: 1, mb: theme.space.component.sm }}>
+          {/* Title in column 1, charts in scenario columns - all on same row */}
+          <Box sx={{ gridColumn: 1, display: "flex", alignItems: "center" }}>
             <SectionHeader
               title="Storage distribution"
               description={
@@ -749,17 +748,10 @@ function ReservoirStorageContent({
               }
             />
           </Box>
-
-          {/* Empty cells for the header row (scenario columns) */}
-          {scenarios.map((_, index) => (
-            <Box
-              key={`header-spacer-${index}`}
-              sx={{ gridColumn: index + 2 }}
-            />
-          ))}
-
-          {/* Tier outcome visualization */}
-          <StorageTierRow scenarios={scenarios} />
+          <StorageTierCharts
+            scenarios={scenarios}
+            scenarioNames={scenarioNames}
+          />
         </ChartGridProvider>
       </Box>
 
@@ -828,6 +820,7 @@ function ReservoirStorageSection({
       <Box sx={{ mt: theme.space.component.md }}>
         <ReservoirStorageContent
           scenarios={scenarios}
+          scenarioNames={scenarioNames}
           cellColors={cellColors}
         />
       </Box>
@@ -885,6 +878,7 @@ function ReservoirStorageSection({
         {/* Full content in modal */}
         <ReservoirStorageContent
           scenarios={scenarios}
+          scenarioNames={scenarioNames}
           cellColors={cellColors}
           isModal
         />
@@ -1105,31 +1099,33 @@ export default function CategoryView() {
                 </>
               )}
 
-              {/* Other metrics */}
-              {nonTierMetrics.length > 0 && (
-                <Box>
-                  {tierMetrics.length > 0 && (
-                    <Typography
-                      variant="smallSectionLabel"
-                      sx={{
-                        display: "block",
-                        mb: theme.space.component.lg,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                      }}
-                    >
-                      Additional Metrics
-                    </Typography>
-                  )}
-                  {nonTierMetrics.map((metric) => (
-                    <MetricCard
-                      key={metric.id}
-                      metric={metric}
-                      scenarios={selectedScenarios}
-                    />
-                  ))}
-                </Box>
-              )}
+              {/* Other metrics - skip for categories with custom sections (reservoir-storage, community-water) */}
+              {nonTierMetrics.length > 0 &&
+                category.id !== "reservoir-storage" &&
+                category.id !== "community-water" && (
+                  <Box>
+                    {tierMetrics.length > 0 && (
+                      <Typography
+                        variant="smallSectionLabel"
+                        sx={{
+                          display: "block",
+                          mb: theme.space.component.lg,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Additional Metrics
+                      </Typography>
+                    )}
+                    {nonTierMetrics.map((metric) => (
+                      <MetricCard
+                        key={metric.id}
+                        metric={metric}
+                        scenarios={selectedScenarios}
+                      />
+                    ))}
+                  </Box>
+                )}
             </AccordionDetails>
           </Accordion>
         )
@@ -1339,7 +1335,7 @@ function MetricCard({
                   >
                     {scenario.scenarioName}
                   </Typography>
-                  {isSingleValueTierData(scenario.tierData) ? (
+                  {isSingleValueTier(scenario.tierData) ? (
                     <TierCircles tiers={scenario.tierData} size={140} />
                   ) : (
                     <VerticalBarChart tiers={scenario.tierData} size={140} />

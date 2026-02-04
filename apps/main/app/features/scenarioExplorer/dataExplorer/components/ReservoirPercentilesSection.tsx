@@ -8,9 +8,10 @@
  * Supports both percentage of capacity and absolute TAF display modes.
  */
 
-import React from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import React, { useState, useEffect } from "react"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
+import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
 import type { ReservoirData } from "@repo/viz"
 import type { MonthlyPercentiles } from "@repo/data/coeqwal"
 import {
@@ -208,7 +209,6 @@ export default function ReservoirPercentilesSection({
   const {
     reservoirs: majorReservoirs,
     matrixData: majorMatrixData,
-    isLoading: majorLoading,
     error: majorError,
   } = useMultiScenarioReservoirData(scenarios, displayMode)
 
@@ -216,15 +216,21 @@ export default function ReservoirPercentilesSection({
   const {
     reservoirs: additionalReservoirData,
     matrixData: additionalMatrixData,
-    isLoading: additionalLoading,
     error: additionalError,
   } = useAdditionalReservoirData(scenarios, additionalReservoirs, displayMode)
 
   // Merge reservoirs and data (additional reservoirs first, then major)
   const reservoirs = [...additionalReservoirData, ...majorReservoirs]
   const matrixData = { ...majorMatrixData, ...additionalMatrixData }
-  const isLoading = majorLoading || additionalLoading
   const error = majorError || additionalError
+
+  // Track when data first arrives to ensure skeleton shows on initial mount
+  const [hasReceivedData, setHasReceivedData] = useState(false)
+  useEffect(() => {
+    if (reservoirs.length > 0) {
+      setHasReceivedData(true)
+    }
+  }, [reservoirs.length])
 
   // Build scenario display names
   const scenarioNames: Record<string, string> = {}
@@ -232,28 +238,15 @@ export default function ReservoirPercentilesSection({
     scenarioNames[id] = id
   })
 
-  // Loading state
-  if (isLoading && reservoirs.length === 0) {
+  // Loading state with skeleton - show until we've received data
+  if (!hasReceivedData && !error) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          py: theme.space.section.md,
-        }}
-      >
-        <CircularProgress size={20} sx={{ color: theme.palette.grey[300] }} />
-        <Typography
-          variant="compactCaption"
-          sx={{
-            ml: theme.space.component.md,
-            color: theme.palette.grey[400],
-          }}
-        >
-          Loading...
-        </Typography>
-      </Box>
+      <PercentileMatrixSkeleton
+        scenarios={scenarios}
+        rowCount={8}
+        message="Loading reservoir data..."
+        labelColumnWidth={labelColumnWidth}
+      />
     )
   }
 
@@ -278,24 +271,6 @@ export default function ReservoirPercentilesSection({
           Could not load data: {error}
         </Typography>
       </Box>
-    )
-  }
-
-  // No data available
-  if (reservoirs.length === 0) {
-    return (
-      <Typography
-        variant="compactCaption"
-        sx={{
-          display: "block",
-          color: theme.palette.grey[400],
-          fontStyle: "italic",
-          textAlign: "center",
-          py: theme.space.section.sm,
-        }}
-      >
-        No data available for the selected scenarios.
-      </Typography>
     )
   }
 

@@ -144,11 +144,25 @@ export const ENDPOINTS = {
   DEMAND_UNITS_LIST: "/statistics/demand-units",
 
   /**
+   * List of urban demand units organized by group
+   * Returns units grouped by "swp", "cvp", etc.
+   */
+  DEMAND_UNITS_GROUPS: "/statistics/demand-units/groups",
+
+  /**
    * List of urban demand units with optional group filter
    * @param group - Optional group filter (e.g., "swp", "cvp")
    */
   demandUnitsList: (group?: string) =>
     `/statistics/demand-units${group ? `?group=${group}` : ""}`,
+
+  /**
+   * Statistics for a single demand unit (includes both monthly and period data)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
+   */
+  demandUnitStatistics: (scenarioId: string, duId: string) =>
+    `/statistics/scenarios/${scenarioId}/demand-units/${duId}/statistics`,
 
   /**
    * Monthly delivery statistics for urban demand units
@@ -157,10 +171,7 @@ export const ENDPOINTS = {
    * @param group - Optional group filter (e.g., "swp")
    */
   demandUnitsMonthly: (scenarioId: string, duId?: string, group?: string) => {
-    const params = [
-      duId && `du_id=${duId}`,
-      group && `group=${group}`,
-    ]
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
     return `/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
@@ -173,10 +184,7 @@ export const ENDPOINTS = {
    * @param group - Optional group filter
    */
   demandUnitsPeriod: (scenarioId: string, duId?: string, group?: string) => {
-    const params = [
-      duId && `du_id=${duId}`,
-      group && `group=${group}`,
-    ]
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
     return `/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
