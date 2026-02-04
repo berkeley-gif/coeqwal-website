@@ -26,6 +26,8 @@ export interface TierGlyphWithTooltipProps {
   scenarioLabel: string
   /** Glyph size in pixels */
   size?: number
+  /** Override z-index for tooltip (use theme.zIndex.tooltipAboveModal when inside a modal) */
+  zIndex?: number
 }
 
 export function TierGlyphWithTooltip({
@@ -33,6 +35,7 @@ export function TierGlyphWithTooltip({
   chartData,
   scenarioLabel,
   size = 90,
+  zIndex,
 }: TierGlyphWithTooltipProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -84,6 +87,7 @@ export function TierGlyphWithTooltip({
         onForceClose={handleClose}
         scenarioLabel={scenarioLabel}
         chartData={chartData}
+        zIndex={zIndex}
       />
     </>
   )

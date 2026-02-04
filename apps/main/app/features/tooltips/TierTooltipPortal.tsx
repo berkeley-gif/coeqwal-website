@@ -40,6 +40,8 @@ interface TierTooltipPortalProps {
   scenarioLabel?: string
   /** Optional: Chart data for tier distribution display */
   chartData?: TooltipChartDataPoint[]
+  /** Optional: Override z-index (use theme.zIndex.tooltipAboveModal when inside a modal) */
+  zIndex?: number
 }
 
 // ============================================================================
@@ -154,11 +156,13 @@ function DesktopTooltip({
   scenarioScore,
   scenarioLabel,
   chartData,
+  zIndex: providedZIndex,
 }: TierTooltipPortalProps) {
   const theme = useTheme()
   // Use state setter as callback ref - this updates synchronously when element mounts
   const [arrowElement, setArrowElement] = useState<HTMLDivElement | null>(null)
   const isOpen = Boolean(outcomeCode && anchorEl)
+  const resolvedZIndex = providedZIndex ?? theme.zIndex.tooltip
 
   // Memoize modifiers so they update when arrowElement changes
   const popperModifiers: PopperProps["modifiers"] = useMemo(
@@ -202,7 +206,7 @@ function DesktopTooltip({
       anchorEl={anchorEl}
       placement="left"
       modifiers={popperModifiers}
-      sx={{ zIndex: theme.zIndex.tooltip }}
+      sx={{ zIndex: resolvedZIndex }}
     >
       {({ placement }) => (
         <ClickAwayListener

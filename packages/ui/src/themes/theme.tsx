@@ -323,6 +323,7 @@ const zIndex = {
   dropdown: 90, // Dropdown menus (above header)
   tooltip: 100, // Tooltips and help text
   modal: 110, // Modal dialogs (reserved)
+  tooltipAboveModal: 120, // Tooltips that need to appear above modals
 }
 
 // Border styles
@@ -1627,6 +1628,7 @@ declare module "@mui/material/styles" {
     dropdown: number
     tooltip: number
     modal: number
+    tooltipAboveModal: number
   }
 
   // Theme interface - types derived from themeValues

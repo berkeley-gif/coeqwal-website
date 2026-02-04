@@ -44,6 +44,7 @@ import ReservoirPercentilesSection, {
 // Spill frequency hidden until API data is available
 // import SpillFrequencySection from "./SpillFrequencySection"
 import CwsSection from "./CwsSection"
+import AgSection from "./AgSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
@@ -196,11 +197,14 @@ const RESERVOIR_TIER_METRIC = getMetricsByCategory("reservoir-storage").find(
 interface StorageTierChartsProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Whether this is inside a modal (affects tooltip z-index) */
+  isModal?: boolean
 }
 
 function StorageTierCharts({
   scenarios,
   scenarioNames,
+  isModal = false,
 }: StorageTierChartsProps) {
   const theme = useTheme()
   const { data, isLoading } = useMetricData(
@@ -276,6 +280,7 @@ function StorageTierCharts({
               chartData={chartData}
               scenarioLabel={scenarioNames[scenarioId] || scenarioId}
               size={TIER_CHART_SIZE}
+              zIndex={isModal ? theme.zIndex.tooltipAboveModal : undefined}
             />
           </Box>
         )
@@ -751,6 +756,7 @@ function ReservoirStorageContent({
           <StorageTierCharts
             scenarios={scenarios}
             scenarioNames={scenarioNames}
+            isModal={isModal}
           />
         </ChartGridProvider>
       </Box>
@@ -1071,6 +1077,12 @@ export default function CategoryView() {
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
                 />
+              ) : category.id === "agricultural-water" &&
+                selectedScenarios.length > 0 ? (
+                <AgSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
               ) : (
                 <>
                   {/* Standard tier metrics for non-reservoir categories */}
@@ -1099,10 +1111,11 @@ export default function CategoryView() {
                 </>
               )}
 
-              {/* Other metrics - skip for categories with custom sections (reservoir-storage, community-water) */}
+              {/* Other metrics - skip for categories with custom sections (reservoir-storage, community-water, agricultural-water) */}
               {nonTierMetrics.length > 0 &&
                 category.id !== "reservoir-storage" &&
-                category.id !== "community-water" && (
+                category.id !== "community-water" &&
+                category.id !== "agricultural-water" && (
                   <Box>
                     {tierMetrics.length > 0 && (
                       <Typography

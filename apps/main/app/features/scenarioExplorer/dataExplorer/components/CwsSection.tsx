@@ -319,9 +319,11 @@ const TIER_CHART_SIZE = 90
 interface CwsTierChartsProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Whether this is inside a modal (affects tooltip z-index) */
+  isModal?: boolean
 }
 
-function CwsTierCharts({ scenarios, scenarioNames }: CwsTierChartsProps) {
+function CwsTierCharts({ scenarios, scenarioNames, isModal = false }: CwsTierChartsProps) {
   const theme = useTheme()
   const { data, isLoading } = useMetricData(
     scenarios,
@@ -436,6 +438,7 @@ function CwsTierCharts({ scenarios, scenarioNames }: CwsTierChartsProps) {
               chartData={chartData}
               scenarioLabel={scenarioNames[scenarioId] || scenarioId}
               size={TIER_CHART_SIZE}
+              zIndex={isModal ? theme.zIndex.tooltipAboveModal : undefined}
             />
           </Box>
         )
@@ -1900,6 +1903,7 @@ export default function CwsSection({
               <CwsTierCharts
                 scenarios={scenarios}
                 scenarioNames={scenarioNames}
+                isModal
               />
             </ChartGridProvider>
           </Box>
