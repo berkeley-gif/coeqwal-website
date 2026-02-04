@@ -82,11 +82,17 @@ export function useComparisonData() {
     return parallelPlotData.map((data) => colorMap.get(data.id) || "#666666")
   }, [parallelPlotData, scenarios])
 
+  const baselineScenario = useMemo(
+    () => parallelPlotData.find((d) => d.id === "s0011") || null,
+    [parallelPlotData],
+  )
+
   return {
     data: parallelPlotData,
     axes,
     lineColors,
     scenarios,
+    baselineScenario,
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,
