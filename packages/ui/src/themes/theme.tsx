@@ -226,10 +226,10 @@ const palette = {
 
   // Outcome tier colors
   tiers: {
-    tier1: "#7b9d3f", // Green, tier 1
-    tier2: "#60aacb", // Blue, tier 2
-    tier3: "#FFB347", // Orange, tier 3
-    tier4: "#CD5C5C", // Red, tier 4
+    tier1: "#1ca367", // Green, tier 1
+    tier2: "#31b2c5", // Blue, tier 2
+    tier3: "#f2944f", // Orange, tier 3
+    tier4: "#ee5d32", // Red, tier 4
   },
 
   tabPanels: {
