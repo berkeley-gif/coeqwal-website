@@ -5,6 +5,7 @@
  *
  *
  * WCAG 2.0 AA Compliance:
+ * - WCAG 1.1.1: Alt text for images
  * - WCAG 1.3.1: Semantic <section> with aria-label
  * - WCAG 2.3.3: Reduced motion handled globally via MotionConfig in ThemeRegistry
  * - WCAG 2.4.7: Focus-visible on scroll button (via ScrollToButton)
@@ -40,6 +41,8 @@ export interface CenterImageTextProps {
     textShadow?: boolean
     /** Image source */
     imgSrc: string
+    /** Image alt text */
+    imgAlt: string
 }
 
 export function CenterImageText({
@@ -52,7 +55,8 @@ export function CenterImageText({
     paddingTop = 0,
     textColor = "common.white",
     textShadow = false,
-    imgSrc = ''
+    imgSrc = '', 
+    imgAlt = '',
 }: CenterImageTextProps) {
     const theme = useTheme()
 
@@ -89,7 +93,7 @@ export function CenterImageText({
             <Box
                 component="img"
                 src={imgSrc}
-                alt="Collage featuring"
+                alt={imgAlt}
                 sx={{ width: "100%", maxWidth: "33vw", height: "auto", }}
             />
 
