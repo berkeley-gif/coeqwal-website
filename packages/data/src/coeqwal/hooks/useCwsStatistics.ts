@@ -16,6 +16,8 @@ import {
   fetchMiContractorsMonthly,
   fetchMiContractorsPeriod,
   fetchDemandUnitsList,
+  fetchDemandUnitsGroups,
+  fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsPeriod,
 } from "../fetchers"
@@ -27,6 +29,8 @@ import type {
   MiContractorMonthlyResponse,
   MiContractorPeriodResponse,
   DemandUnitsListResponse,
+  DemandUnitsGroupedResponse,
+  DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodResponse,
 } from "../types"
@@ -371,6 +375,20 @@ export function useMiContractorsPeriod(
 // ============================================================================
 
 /**
+ * Map hydrologic region codes to display groups
+ * API returns: SAC, SJR, SOD, TULARE
+ */
+function mapRegionToGroup(region: string): string {
+  const regionMap: Record<string, string> = {
+    SAC: "Sacramento Region",
+    SJR: "San Joaquin Region",
+    SOD: "South of Delta",
+    TULARE: "Tulare Region",
+  }
+  return regionMap[region.toUpperCase()] ?? region
+}
+
+/**
  * Fetch and cache the list of urban demand units
  *
  * @param group - Optional filter by group (e.g., "swp", "cvp")
@@ -410,9 +428,117 @@ export function useDemandUnitsList(group?: string) {
 
   const error = swrError ? String(swrError.message || swrError) : null
 
+  // Handle both possible API response structures:
+  // 1. { demand_units: [...] } - wrapped format
+  // 2. [...] - direct array format
+  // Also normalize field names (API may use 'name' instead of 'label', etc.)
+  let demandUnits: Array<{ du_id: string; label: string; group?: string }> = []
+
+  if (data) {
+    let rawUnits: unknown[] = []
+
+    if (Array.isArray(data.demand_units)) {
+      rawUnits = data.demand_units
+    } else if (Array.isArray(data)) {
+      rawUnits = data as unknown[]
+    }
+
+    // Normalize field names from API response
+    // API returns: du_id, community_agency, hydrologic_region
+    demandUnits = rawUnits
+      .filter(
+        (item): item is Record<string, unknown> =>
+          item != null && typeof item === "object",
+      )
+      .map((item) => ({
+        du_id: String(item.du_id ?? item.id ?? ""),
+        // API uses 'community_agency' for the display name
+        label: String(
+          item.label ?? item.community_agency ?? item.name ?? item.du_id ?? "",
+        ),
+        // API uses 'hydrologic_region' (SAC, SJR, SOD, TULARE) - map to SWP/CVP based on region
+        group: mapRegionToGroup(
+          String(item.group ?? item.hydrologic_region ?? "other"),
+        ),
+      }))
+      .filter((du) => du.du_id) // Filter out entries without an ID
+  }
+
   return {
     data,
-    demandUnits: data?.demand_units ?? [],
+    demandUnits,
+    isLoading,
+    error,
+  }
+}
+
+/**
+ * Fetch and cache the list of urban demand units organized by group
+ *
+ * @returns Demand units grouped by category with loading and error states
+ *
+ * @example
+ * ```typescript
+ * function GroupedDemandUnitSelector() {
+ *   const { groups, isLoading } = useDemandUnitsGroups()
+ *
+ *   if (isLoading) return <Spinner />
+ *
+ *   return (
+ *     <Select>
+ *       {Object.entries(groups).map(([groupName, units]) => (
+ *         <OptGroup key={groupName} label={groupName}>
+ *           {units.map((du) => (
+ *             <Option key={du.du_id} value={du.du_id}>
+ *               {du.label}
+ *             </Option>
+ *           ))}
+ *         </OptGroup>
+ *       ))}
+ *     </Select>
+ *   )
+ * }
+ * ```
+ */
+export function useDemandUnitsGroups() {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<DemandUnitsGroupedResponse>(
+    CACHE_KEYS.DEMAND_UNITS_GROUPS,
+    fetchDemandUnitsGroups,
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  // Handle both possible API response structures:
+  // 1. { groups: { swp: [...], cvp: [...] } } - wrapped format
+  // 2. { swp: [...], cvp: [...] } - direct format (groups at top level)
+  let groups: Record<string, Array<{ du_id: string; label: string }>> = {}
+
+  if (data) {
+    if (data.groups && typeof data.groups === "object") {
+      // Wrapped format: { groups: { swp: [...], cvp: [...] } }
+      groups = data.groups
+    } else {
+      // Direct format: { swp: [...], cvp: [...] }
+      // Filter out non-array properties (like metadata fields)
+      const directData = data as unknown as Record<string, unknown>
+      Object.entries(directData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          groups[key] = value as Array<{ du_id: string; label: string }>
+        }
+      })
+    }
+  }
+
+  return {
+    data,
+    groups,
     isLoading,
     error,
   }
@@ -537,5 +663,65 @@ export function useDemandUnitsPeriod(
     isLoading,
     error,
     hasData: !!data && Object.keys(data.demand_units).length > 0,
+  }
+}
+
+/**
+ * Fetch complete statistics for a single demand unit
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
+ * @returns Complete statistics including monthly delivery/shortage and period summary
+ *
+ * @example
+ * ```typescript
+ * function DemandUnitChart({ scenarioId, duId }) {
+ *   const { data, isLoading } = useDemandUnitStatistics(scenarioId, duId)
+ *
+ *   if (isLoading) return <Spinner />
+ *
+ *   return (
+ *     <PercentileChart
+ *       label={data.community_agency}
+ *       monthlyData={data.monthly_delivery}
+ *     />
+ *   )
+ * }
+ * ```
+ */
+export function useDemandUnitStatistics(
+  scenarioId: string | null,
+  duId: string | null,
+) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<DemandUnitStatisticsResponse>(
+    scenarioId && duId
+      ? CACHE_KEYS.demandUnitStatistics(scenarioId, duId)
+      : null,
+    () =>
+      scenarioId && duId
+        ? fetchDemandUnitStatistics(scenarioId, duId)
+        : Promise.reject(new Error("Missing scenario or demand unit ID")),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    duId: data?.du_id,
+    label: data?.community_agency,
+    monthlyDelivery: data?.monthly_delivery ?? null,
+    monthlyShortage: data?.monthly_shortage ?? null,
+    periodSummary: data?.period_summary ?? null,
+    isLoading,
+    error,
+    hasData: !!data,
   }
 }

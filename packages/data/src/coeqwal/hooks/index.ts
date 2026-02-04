@@ -39,6 +39,8 @@ export {
   useMiContractorsMonthly,
   useMiContractorsPeriod,
   useDemandUnitsList,
+  useDemandUnitsGroups,
+  useDemandUnitStatistics,
   useDemandUnitsMonthly,
   useDemandUnitsPeriod,
 } from "./useCwsStatistics"

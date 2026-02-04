@@ -160,6 +160,9 @@ export const CACHE_KEYS = {
   /** List of urban demand units */
   DEMAND_UNITS_LIST: "/api/statistics/demand-units",
 
+  /** List of urban demand units organized by group */
+  DEMAND_UNITS_GROUPS: "/api/statistics/demand-units/groups",
+
   /**
    * List of urban demand units with optional group filter
    * @param group - Optional group filter (e.g., "swp", "cvp")
@@ -168,16 +171,21 @@ export const CACHE_KEYS = {
     `/api/statistics/demand-units${group ? `?group=${group}` : ""}`,
 
   /**
+   * Statistics for a single demand unit
+   * @param scenarioId - Scenario ID
+   * @param duId - Demand unit ID
+   */
+  demandUnitStatistics: (scenarioId: string, duId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/demand-units/${duId}/statistics`,
+
+  /**
    * Monthly delivery and shortage statistics for urban demand units
    * @param scenarioId - Scenario ID
    * @param duId - Optional demand unit ID filter
    * @param group - Optional group filter
    */
   demandUnitsMonthly: (scenarioId: string, duId?: string, group?: string) => {
-    const params = [
-      duId && `du_id=${duId}`,
-      group && `group=${group}`,
-    ]
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
     return `/api/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
@@ -190,10 +198,7 @@ export const CACHE_KEYS = {
    * @param group - Optional group filter
    */
   demandUnitsPeriod: (scenarioId: string, duId?: string, group?: string) => {
-    const params = [
-      duId && `du_id=${duId}`,
-      group && `group=${group}`,
-    ]
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
       .filter(Boolean)
       .join("&")
     return `/api/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`

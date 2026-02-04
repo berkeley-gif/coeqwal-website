@@ -13,7 +13,7 @@
  */
 
 import React from "react"
-import { Select, MenuItem, useTheme } from "@mui/material"
+import { Select, MenuItem, ListSubheader, useTheme } from "@mui/material"
 import type { SelectChangeEvent } from "@mui/material/Select"
 
 export interface CompactSelectOption<T extends string = string> {
@@ -21,13 +21,20 @@ export interface CompactSelectOption<T extends string = string> {
   label: string
 }
 
+export interface CompactSelectGroup<T extends string = string> {
+  label: string
+  options: CompactSelectOption<T>[]
+}
+
 export interface CompactSelectProps<T extends string = string> {
   /** Current selected value (empty string for placeholder) */
   value: T | ""
   /** Callback when selection changes */
   onChange: (value: T) => void
-  /** Available options */
-  options: CompactSelectOption<T>[]
+  /** Available options (flat list) */
+  options?: CompactSelectOption<T>[]
+  /** Grouped options (alternative to options) */
+  groups?: CompactSelectGroup<T>[]
   /** Placeholder text when no value selected */
   placeholder?: string
   /** Accessible label for screen readers */
@@ -45,7 +52,8 @@ export interface CompactSelectProps<T extends string = string> {
 export function CompactSelect<T extends string = string>({
   value,
   onChange,
-  options,
+  options = [],
+  groups,
   placeholder,
   "aria-label": ariaLabel,
   minWidth = 160,
@@ -63,6 +71,39 @@ export function CompactSelect<T extends string = string>({
   }
 
   const hasValue = value !== ""
+
+  // Render grouped options or flat options
+  const renderOptions = () => {
+    if (groups && groups.length > 0) {
+      return groups.flatMap((group) => [
+        <ListSubheader
+          key={`group-${group.label}`}
+          sx={{
+            ...theme.typography.compactCaption,
+            fontWeight: 600,
+            color: theme.palette.grey[600],
+            backgroundColor: theme.palette.grey[50],
+            lineHeight: 2.5,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          {group.label}
+        </ListSubheader>,
+        ...group.options.map((option) => (
+          <MenuItem key={option.value} value={option.value}>
+            {option.label}
+          </MenuItem>
+        )),
+      ])
+    }
+
+    return options.map((option) => (
+      <MenuItem key={option.value} value={option.value}>
+        {option.label}
+      </MenuItem>
+    ))
+  }
 
   return (
     <Select
@@ -101,10 +142,13 @@ export function CompactSelect<T extends string = string>({
             mt: 0.5,
             boxShadow: theme.shadow.sm,
             border: `1px solid ${theme.palette.grey[200]}`,
+            maxWidth: 400,
             ...(maxMenuHeight && { maxHeight: maxMenuHeight }),
             "& .MuiMenuItem-root": {
               ...theme.typography.dashboard,
               py: 0.75,
+              whiteSpace: "normal",
+              wordBreak: "break-word",
               "&:hover": {
                 backgroundColor: theme.palette.grey[100],
               },
@@ -124,11 +168,7 @@ export function CompactSelect<T extends string = string>({
           {placeholder}
         </MenuItem>
       )}
-      {options.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
+      {renderOptions()}
     </Select>
   )
 }
