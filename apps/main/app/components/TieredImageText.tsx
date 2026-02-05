@@ -70,8 +70,9 @@ export function TieredImageText({
             }}
         >
             {/* Title and text */}
-            <motion.div
-                style={{
+            <Box
+                component={motion.div}
+                sx={{
                     listStyle: "none",
                     padding: 0,
                     margin: 0,
@@ -79,7 +80,7 @@ export function TieredImageText({
                     flexDirection: "row",
                     gap: "45px",
                     color: theme.palette.blue.darkest,
-                    width: "50vw",
+                    width: { md: "50vw", xl: "40vw" },
                 }}
                 initial="hidden"
                 whileInView="show"
@@ -132,7 +133,7 @@ export function TieredImageText({
 
                 </Box>
 
-            </motion.div>
+            </Box>
 
 
 
@@ -180,10 +181,11 @@ export function TieredImageText({
                 <Box
                     component="div"
                     sx={{
-                        maxWidth: "60vw",
+                        maxWidth: { md: "60vw", xl: "50vw" },
                         display: "flex",
                         flexDirection: "row",
                         justifyContent: "center",
+                        gap: "25px",
                         margin: "75px 0",
                     }}
                 >
