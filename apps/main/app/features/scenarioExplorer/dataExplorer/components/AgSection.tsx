@@ -720,28 +720,12 @@ function MonthlyAgSection({
                 gap: theme.space.gap.sm,
               }}
             >
-              <CompactSelect
-                value={entityLevel}
-                onChange={(val: AgEntityLevel) => {
-                  setEntityLevel(val)
-                  // Reset region filter when switching away from demand units
-                  if (val !== "demand-units") {
-                    setRegionFilter("all")
-                  }
-                }}
-                options={AG_ENTITY_LEVEL_OPTIONS}
-                aria-label="Entity level"
-                menuZIndex={isModal ? 9999 : undefined}
-              />
-              {entityLevel === "demand-units" && (
-                <CompactSelect
-                  value={regionFilter}
-                  onChange={setRegionFilter}
-                  options={AG_REGION_OPTIONS}
-                  aria-label="Region filter"
-                  menuZIndex={isModal ? 9999 : undefined}
-                />
-              )}
+              <Typography
+                variant="compactCaption"
+                sx={{ fontWeight: 500 }}
+              >
+                Project totals
+              </Typography>
               <Typography
                 variant="compactCaption"
                 sx={{ color: theme.palette.grey[500], ml: theme.space.gap.sm }}
@@ -760,13 +744,8 @@ function MonthlyAgSection({
           description={
             <>
               Water year (Oct-Sep) · {scenarios.length} scenario
-              {scenarios.length !== 1 ? "s" : ""}
-              {entityLevel === "demand-units" && (
-                <> · {filteredEntities.length} demand units</>
-              )}
-              {entityLevel === "aggregates" && (
-                <> · {filteredEntities.length} project aggregates</>
-              )}
+              {scenarios.length !== 1 ? "s" : ""} · {filteredEntities.length}{" "}
+              project aggregates
               <Box
                 component="span"
                 sx={{
