@@ -1,6 +1,7 @@
 "use client"
 
 import { BaseHeader } from "@repo/ui"
+import { useRouter } from "next/navigation"
 import { useTabs } from "../context/Tabs"
 
 /**
@@ -16,6 +17,7 @@ import { useTabs } from "../context/Tabs"
  */
 export function Header() {
   const { isInTabsArea } = useTabs()
+  const router = useRouter()
 
   // Smooth scroll to top using requestAnimationFrame
   // Native smooth scroll gets interrupted by React state changes during the tabs
@@ -58,6 +60,8 @@ export function Header() {
   return (
     <BaseHeader
       onLogoClick={handleLogoClick}
+      onAboutClick={() => router.push("about")}
+      onGetDataClick={() => router.push("data")}
       // Dynamic background: solid when in tabs area, transparent otherwise
       backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
     />
