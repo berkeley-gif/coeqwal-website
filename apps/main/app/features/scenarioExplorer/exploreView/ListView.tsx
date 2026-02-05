@@ -98,7 +98,7 @@ export default function ListView({
           (s) => s.scenarioId === pinnedScenarioId,
         )
         if (pinnedIndex <= 0) return scenarioList // Already at top or not found
-        const pinned = scenarioList[pinnedIndex]
+        const pinned = scenarioList[pinnedIndex]!
         return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
       }
 
