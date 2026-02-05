@@ -8,7 +8,8 @@
  */
 
 import React, { useMemo, useState } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Button, icons } from "@repo/ui/mui"
+import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
@@ -148,6 +149,7 @@ export default function ListView({
   const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
     Record<string, string>
   >({})
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const handleOutcomeSelect = (scenarioId: string, outcome: string) => {
     setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
@@ -211,37 +213,209 @@ export default function ListView({
 
   if (!compact) {
     return (
+      <>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "calc(100vh - 220px)",
+            overflow: "hidden",
+            backgroundColor: theme.palette.grey[100],
+          }}
+        >
+          {/* Fixed header area */}
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: theme.space.section.md,
+              // Match SearchBar's py: component.lg so dividers start at same distance from top
+              pt: theme.space.component.lg,
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            {/* Expand button row */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                mb: theme.space.component.xs,
+              }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => setIsExpanded(true)}
+                startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
+                sx={{
+                  color: theme.palette.grey[400],
+                  textTransform: "none",
+                  minWidth: "auto",
+                  px: theme.space.component.sm,
+                  "&:hover": {
+                    color: theme.palette.grey[600],
+                    backgroundColor: theme.palette.grey[100],
+                  },
+                }}
+              >
+                Expand
+              </Button>
+            </Box>
+            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+          </Box>
+
+          {/* Scrollable content */}
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              px: theme.space.section.md,
+              pt: "10px",
+              pb: theme.space.section.xl,
+              // Top border to indicate scrollable area
+              borderTop: theme.border.medium,
+            }}
+          >
+            {showNoResultsMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontStyle: "italic",
+                  mb: 2,
+                  mt: 1,
+                }}
+              >
+                No scenarios match &ldquo;{searchQuery}&rdquo;
+              </Typography>
+            )}
+            <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+          </Box>
+        </Box>
+
+        {/* Expanded modal view */}
+        <MobileModal
+          open={isExpanded}
+          onClose={() => setIsExpanded(false)}
+          title={
+            <Box
+              component="span"
+              sx={{
+                ...theme.typography.subtitle2,
+                color: theme.palette.text.primary,
+              }}
+            >
+              Scenario Explorer
+            </Box>
+          }
+          maxWidth="95vw"
+          maxHeight="95vh"
+          contentAriaLabel="Scenario list expanded view"
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "85vh",
+              overflow: "hidden",
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            {/* Fixed header area */}
+            <Box
+              sx={{
+                flexShrink: 0,
+                px: theme.space.section.md,
+                pt: theme.space.component.lg,
+                backgroundColor: theme.palette.grey[100],
+              }}
+            >
+              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+            </Box>
+
+            {/* Scrollable content */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                overscrollBehavior: "contain",
+                px: theme.space.section.md,
+                pt: "10px",
+                pb: theme.space.section.xl,
+                borderTop: theme.border.medium,
+              }}
+            >
+              {showNoResultsMessage && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    fontStyle: "italic",
+                    mb: 2,
+                    mt: 1,
+                  }}
+                >
+                  No scenarios match &ldquo;{searchQuery}&rdquo;
+                </Typography>
+              )}
+              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+            </Box>
+          </Box>
+        </MobileModal>
+      </>
+    )
+  }
+
+  // Compact mode
+  return (
+    <>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 220px)",
-          overflow: "hidden",
+          height: "100%",
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        {/* Fixed header area */}
+        {/* Expand button header */}
         <Box
           sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            px: theme.space.section.sm,
+            pt: theme.space.component.sm,
             flexShrink: 0,
-            px: theme.space.section.md,
-            // Match SearchBar's py: component.lg so dividers start at same distance from top
-            pt: theme.space.component.lg,
-            backgroundColor: theme.palette.grey[100],
           }}
         >
-          <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => setIsExpanded(true)}
+            startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
+            sx={{
+              color: theme.palette.grey[400],
+              textTransform: "none",
+              minWidth: "auto",
+              px: theme.space.component.sm,
+              "&:hover": {
+                color: theme.palette.grey[600],
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+          >
+            Expand
+          </Button>
         </Box>
 
-        {/* Scrollable content */}
         <Box
           sx={{
             flex: 1,
-            minHeight: 0,
             overflowY: "auto",
             overscrollBehavior: "contain",
-            px: theme.space.section.md,
-            pt: "10px",
+            px: theme.space.section.sm,
+            pt: theme.space.component.md,
             pb: theme.space.section.xl,
             // Top border to indicate scrollable area
             borderTop: theme.border.medium,
@@ -254,54 +428,89 @@ export default function ListView({
                 color: theme.palette.grey[600],
                 fontStyle: "italic",
                 mb: 2,
-                mt: 1,
               }}
             >
               No scenarios match &ldquo;{searchQuery}&rdquo;
             </Typography>
           )}
-          <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+          <StrategyGrid {...strategyGridProps} renderMode="all" />
         </Box>
       </Box>
-    )
-  }
 
-  // Compact mode
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        backgroundColor: theme.palette.grey[100],
-      }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          overflowY: "auto",
-          overscrollBehavior: "contain",
-          px: theme.space.section.sm,
-          pt: theme.space.component.md,
-          pb: theme.space.section.xl,
-          // Top border to indicate scrollable area
-          borderTop: theme.border.medium,
-        }}
-      >
-        {showNoResultsMessage && (
-          <Typography
-            variant="body2"
+      {/* Expanded modal view */}
+      <MobileModal
+        open={isExpanded}
+        onClose={() => setIsExpanded(false)}
+        title={
+          <Box
+            component="span"
             sx={{
-              color: theme.palette.grey[600],
-              fontStyle: "italic",
-              mb: 2,
+              ...theme.typography.subtitle2,
+              color: theme.palette.text.primary,
             }}
           >
-            No scenarios match &ldquo;{searchQuery}&rdquo;
-          </Typography>
-        )}
-        <StrategyGrid {...strategyGridProps} renderMode="all" />
-      </Box>
-    </Box>
+            Scenario Explorer
+          </Box>
+        }
+        maxWidth="95vw"
+        maxHeight="95vh"
+        contentAriaLabel="Scenario list expanded view"
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "85vh",
+            overflow: "hidden",
+          }}
+        >
+          {/* Fixed header area */}
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: theme.space.section.md,
+              pt: theme.space.component.lg,
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+          </Box>
+
+          {/* Scrollable content */}
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              px: theme.space.section.md,
+              pt: "10px",
+              pb: theme.space.section.xl,
+              borderTop: theme.border.medium,
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            {showNoResultsMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontStyle: "italic",
+                  mb: 2,
+                  mt: 1,
+                }}
+              >
+                No scenarios match &ldquo;{searchQuery}&rdquo;
+              </Typography>
+            )}
+            <StrategyGrid
+              {...strategyGridProps}
+              compact={false}
+              renderMode="contentOnly"
+            />
+          </Box>
+        </Box>
+      </MobileModal>
+    </>
   )
 }
