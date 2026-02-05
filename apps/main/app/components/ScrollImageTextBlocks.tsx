@@ -13,6 +13,11 @@ import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn, fadeInRight } from "../lib/constants/motionAnimations"
 
+const IMAGE_WIDTH = 450
+const TEXT_WIDTH = 485  // Change this to 500, 600, etc.
+const OFFSET = 15 // The 15px offset from center
+const GAP = 30
+
 export interface ImageTextBlock {
     imgSrc: string,
     imgAlt: string,
@@ -108,54 +113,115 @@ function renderImageTextBlocks(rawBlocks: ImageTextBlock[]) {
                 display: "flex",
                 width: "100%",
                 flexDirection: "column",
-                gap: "175px", // Spacing between blocks
+                gap: "175px",
             }}
         >
             {rawBlocks?.map((block, index) => (
                 <Box
-                    component={motion.div}
-                    initial="hidden"
-                    whileInView="show"
-                    variants={fadeInRight}
                     key={index}
+                    component="div"
                     sx={{
                         display: "flex",
                         width: "100%",
-                        flexDirection: block.imagePosition === "left" ? "row" : "row-reverse",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: "30px", // 30px gap = 15px on each side of center
+                        gap: `${GAP}px`,
                         zIndex: 1,
+                        position: "relative",
+                        minHeight: "400px", // Give space for absolute positioning
                     }}
                 >
-                    <Box
-                        component="img"
-                        src={block.imgSrc}
-                        alt={block.imgAlt}
-                        sx={{
-                            width: "450px",
-                            height: "auto",
-                            objectFit: "contain",
-                            marginRight: block.imagePosition === "left" ? "-15px" : "0",
-                            marginLeft: block.imagePosition === "right" ? "-15px" : "0",
-                        }}
-                    />
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            width: "420px",
-                            flexShrink: 0, // Prevents it from shrinking below 420px
-                            textAlign: "left",
-                            background: block.imagePosition === "right" ? theme.palette.common.white : '',
-                            paddingTop: block.imagePosition === "right" ? '25px' : '',
-                            paddingLeft: block.imagePosition === "left" ? "15px" : "0",
-                            paddingRight: block.imagePosition === "right" ? "15px" : "0",
-                            fontSize: "1.125rem", // Only change this - increases text size
-                            lineHeight: 1.7, // Adjust line spacing for readability
-                        }}
-                    >
-                        {block.text}
-                    </Typography>
+                    {/* Image on LEFT */}
+                    {block.imagePosition === "left" && (
+                        <>
+                            <Box
+                                component={motion.img}
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: false, amount: 0.3 }}
+                                variants={fadeInRight}
+                                src={block.imgSrc}
+                                alt={block.imgAlt}
+                                sx={{
+                                    width: `${IMAGE_WIDTH}px`,
+                                    height: "auto",
+                                    objectFit: "contain",
+                                    position: "absolute",
+                                    right: `calc(50% - ${OFFSET}px)`, // Right edge at 15px left of center
+                                }}
+                            />
+                            <Box
+                                component={motion.div}
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: false, amount: 0.3 }}
+                                variants={fadeInRight}
+                                sx={{
+                                    width: `${TEXT_WIDTH}px`,
+                                    position: "absolute",
+                                    left: `calc(50% + ${GAP - OFFSET}px)`, // Starts GAP away from image
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        textAlign: "left",
+                                        paddingLeft: `${OFFSET}px`,
+                                        paddingRight: `${OFFSET}px`,
+                                    }}
+                                >
+                                    {block.text}
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+
+                    {/* Image on RIGHT */}
+                    {block.imagePosition === "right" && (
+                        <>
+                            <Box
+                                component={motion.div}
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: false, amount: 0.3 }}
+                                variants={fadeInRight}
+                                sx={{
+                                    width: `${TEXT_WIDTH}px`,
+                                    position: "absolute",
+                                    right: `calc(50% + ${GAP - OFFSET}px)`, // Ends GAP away from image
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        textAlign: "left",
+                                        background: theme.palette.common.white,
+                                        paddingTop: '25px',
+                                        paddingLeft: `${OFFSET}px`,
+                                        paddingRight: `${OFFSET}px`,
+                                    }}
+                                >
+                                    {block.text}
+                                </Typography>
+                            </Box>
+                            <Box
+                                component={motion.img}
+                                initial="hidden"
+                                whileInView="show"
+                                viewport={{ once: false, amount: 0.3 }}
+                                variants={fadeInRight}
+                                src={block.imgSrc}
+                                alt={block.imgAlt}
+                                sx={{
+                                    width: `${IMAGE_WIDTH}px`,
+                                    height: "auto",
+                                    objectFit: "contain",
+                                    position: "absolute",
+                                    left: `calc(50% - ${OFFSET}px)`, // Left edge at 15px left of center
+                                }}
+                            />
+                        </>
+                    )}
                 </Box>
             ))}
         </Box>
