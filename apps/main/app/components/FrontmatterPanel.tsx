@@ -20,6 +20,8 @@ import { motion } from "@repo/motion"
 import { ScrollToButton, DisplayBlock, Panel } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
+import { fadeIn } from "../lib/constants/motionAnimations"
+
 const MotionBox = motion.create(Box)
 
 /** Action item for the "actions" variant */
@@ -107,15 +109,6 @@ export default function FrontmatterPanel({
         staggerChildren: 0.15,
         delayChildren: 0.2,
       },
-    },
-  }
-
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
     },
   }
 
