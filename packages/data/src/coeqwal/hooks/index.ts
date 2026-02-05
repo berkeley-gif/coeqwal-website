@@ -30,6 +30,7 @@ export {
   useStorageMonthly,
   useSpillMonthly,
   useMultipleReservoirPercentiles,
+  useReservoirPeriodSummary,
 } from "./useReservoirPercentiles"
 export {
   useCwsAggregatesList,
@@ -44,3 +45,10 @@ export {
   useDemandUnitsMonthly,
   useDemandUnitsPeriod,
 } from "./useCwsStatistics"
+export {
+  useAgAggregatesMonthly,
+  useAgAggregatesPeriod,
+  useAgDemandUnitsDeliveryMonthly,
+  useAgDemandUnitsShortageMonthly,
+  useAgDemandUnitsPeriod,
+} from "./useAgStatistics"

@@ -77,7 +77,7 @@ const CWS_DISPLAY_OPTIONS = [
 ]
 
 const CWS_ENTITY_LEVEL_OPTIONS = [
-  { value: "aggregates" as const, label: "Large totals" },
+  { value: "aggregates" as const, label: "Project totals" },
   { value: "contractors" as const, label: "M&I Contractors" },
 ]
 
@@ -718,6 +718,11 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
       return (a.label ?? "").localeCompare(b.label ?? "")
     })
 
+  // Track which scenarios are still loading
+  const loadingScenarios = scenarios.filter(
+    (_, index) => monthlyResults[index]?.isLoading ?? false,
+  )
+
   return {
     entities,
     matrixData,
@@ -726,6 +731,7 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
     breakdownComponents,
     isLoading,
     error,
+    loadingScenarios,
   }
 }
 
@@ -894,11 +900,16 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
     )
   })
 
+  // Track which scenarios are still loading
+  const loadingScenarios = scenarios.filter(
+    (_, index) => monthlyResults[index]?.isLoading ?? false,
+  )
+
   const entities = Object.values(entityMap)
     .filter((e) => e && e.label) // Filter out entries with null labels
     .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 
-  return { entities, matrixData, cellStats, isLoading, error }
+  return { entities, matrixData, cellStats, isLoading, error, loadingScenarios }
 }
 
 /**
@@ -1019,11 +1030,16 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
     )
   })
 
+  // Track which scenarios are still loading
+  const loadingScenarios = scenarios.filter(
+    (_, index) => monthlyResults[index]?.isLoading ?? false,
+  )
+
   const entities = Object.values(entityMap)
     .filter((e) => e && e.label) // Filter out entries with null labels
     .sort((a, b) => (a.label ?? "").localeCompare(b.label ?? ""))
 
-  return { entities, matrixData, cellStats, isLoading, error }
+  return { entities, matrixData, cellStats, isLoading, error, loadingScenarios }
 }
 
 /**
@@ -1230,6 +1246,7 @@ function useMultiScenarioCwsData(
   let breakdownComponents: BreakdownComponentsMap | undefined
   let isLoading: boolean
   let error: string | null
+  let loadingScenarios: string[]
 
   switch (entityLevel) {
     case "contractors":
@@ -1241,6 +1258,7 @@ function useMultiScenarioCwsData(
       isLoading =
         contractorsData.isLoading || individualDemandUnitsData.isLoading
       error = contractorsData.error ?? individualDemandUnitsData.error ?? null
+      loadingScenarios = contractorsData.loadingScenarios
       break
     case "demand-units":
       baseEntities = demandUnitsData.entities
@@ -1250,6 +1268,7 @@ function useMultiScenarioCwsData(
       breakdownComponents = undefined
       isLoading = demandUnitsData.isLoading
       error = demandUnitsData.error ?? null
+      loadingScenarios = demandUnitsData.loadingScenarios
       break
     case "aggregates":
     default:
@@ -1261,6 +1280,7 @@ function useMultiScenarioCwsData(
       isLoading =
         aggregatesData.isLoading || individualDemandUnitsData.isLoading
       error = aggregatesData.error ?? individualDemandUnitsData.error ?? null
+      loadingScenarios = aggregatesData.loadingScenarios
       break
   }
 
@@ -1285,6 +1305,7 @@ function useMultiScenarioCwsData(
       isLoading,
       error,
       addedDemandUnitsHaveShortageData,
+      loadingScenarios,
     }
   }
 
@@ -1297,6 +1318,7 @@ function useMultiScenarioCwsData(
     isLoading,
     error,
     addedDemandUnitsHaveShortageData,
+    loadingScenarios,
   }
 }
 
@@ -1338,6 +1360,7 @@ function MonthlyCwsSection({
     breakdownComponents,
     error,
     addedDemandUnitsHaveShortageData,
+    loadingScenarios,
   } = useMultiScenarioCwsData(
     scenarios,
     entityLevel,
@@ -1659,8 +1682,8 @@ function MonthlyCwsSection({
             variant="compactCaption"
             sx={{ color: "#92400e" }} // amber-800
           >
-            Monthly shortage data is only available in the "Large totals" view.
-            Switch to Large totals to see shortage charts.
+            Monthly shortage data is only available in the "Project totals" view.
+            Switch to Project totals to see shortage charts.
           </Typography>
         </Box>
       )}
@@ -1742,6 +1765,7 @@ function MonthlyCwsSection({
             cellStats={cellStats}
             breakdownData={breakdownData}
             breakdownComponents={breakdownComponents}
+            loadingScenarios={loadingScenarios}
           />
         </Box>
       )}

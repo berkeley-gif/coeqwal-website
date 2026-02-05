@@ -30,7 +30,8 @@ import {
   isSingleValueTier,
   type ChartDataPoint,
 } from "../../../scenarios/components/shared"
-import { VerticalBarChart, TierCircles } from "@repo/viz"
+import { VerticalBarChart, TierCircles, SpillMatrix } from "@repo/viz"
+import type { MonthlySpillData } from "@repo/viz"
 import {
   outcomeCategories,
   getMetricsByCategory,
@@ -41,8 +42,8 @@ import { useMetricData } from "../hooks/useMetricData"
 import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
-// Spill frequency hidden until API data is available
-// import SpillFrequencySection from "./SpillFrequencySection"
+import { useSpillMonthly } from "@repo/data/coeqwal/hooks"
+import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
 import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
@@ -693,6 +694,160 @@ function MonthlyStorageSection({
   )
 }
 
+// ============================================================================
+// Spill Frequency Section
+// ============================================================================
+
+/**
+ * Hook to fetch spill data for multiple scenarios
+ * Calls useSpillMonthly for each scenario and merges results
+ */
+function useMultiScenarioSpillData(scenarios: string[]) {
+  const results = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useSpillMonthly(scenarioId, "major")
+  })
+
+  const isLoading = results.some((r) => r.isLoading)
+  const error = results.find((r) => r.error)?.error ?? null
+
+  // Build reservoir list and data matrix
+  const reservoirMap: Record<string, { reservoirId: string; reservoirName: string }> = {}
+  const matrixData: Record<string, Record<string, MonthlySpillData | undefined>> = {}
+
+  results.forEach((result, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !result.reservoirs) return
+
+    Object.entries(result.reservoirs).forEach(
+      ([reservoirId, data]: [string, SpillMonthlyReservoirData]) => {
+        if (!data) return
+
+        if (!reservoirMap[reservoirId]) {
+          reservoirMap[reservoirId] = {
+            reservoirId,
+            reservoirName: data.name ?? reservoirId,
+          }
+        }
+
+        if (!matrixData[reservoirId]) {
+          matrixData[reservoirId] = {}
+        }
+        matrixData[reservoirId][scenarioId] = data.monthly
+      },
+    )
+  })
+
+  const reservoirs = Object.values(reservoirMap).sort((a, b) =>
+    a.reservoirName.localeCompare(b.reservoirName),
+  )
+
+  // Track which scenarios are still loading
+  const loadingScenarios = scenarios.filter(
+    (_, index) => results[index]?.isLoading ?? false,
+  )
+
+  return { reservoirs, matrixData, isLoading, error, loadingScenarios }
+}
+
+/**
+ * SpillFrequencySection - Monthly spill frequency & magnitude charts
+ * Rendered inside a CSS Grid (ChartGridProvider), spans all columns
+ */
+function SpillFrequencySection({
+  scenarios,
+  scenarioNames,
+}: {
+  scenarios: string[]
+  scenarioNames: Record<string, string>
+}) {
+  const theme = useTheme()
+  const { reservoirs, matrixData, isLoading, error, loadingScenarios } =
+    useMultiScenarioSpillData(scenarios)
+
+  return (
+    <>
+      {/* Header row */}
+      <Box
+        sx={{
+          gridColumn: "1 / -1",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          mb: theme.space.component.sm,
+        }}
+      >
+        <SectionHeader
+          title="Spill frequency & magnitude"
+          description={
+            <>
+              Top: monthly spill frequency (% of years) · Bottom: spill
+              magnitude (median to max CFS)
+            </>
+          }
+        />
+      </Box>
+
+      {/* Loading state */}
+      {isLoading && reservoirs.length === 0 && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: 200,
+          }}
+        >
+          <CircularProgress size={20} sx={{ mr: 1 }} />
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[400] }}
+          >
+            Loading spill data...
+          </Typography>
+        </Box>
+      )}
+
+      {/* Error state */}
+      {error && reservoirs.length === 0 && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            py: theme.space.component.lg,
+            px: theme.space.component.md,
+            backgroundColor: theme.palette.grey[50],
+            borderRadius: theme.borderRadius.sm,
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[500] }}
+          >
+            Could not load spill data: {error}
+          </Typography>
+        </Box>
+      )}
+
+      {/* SpillMatrix */}
+      {reservoirs.length > 0 && (
+        <Box sx={{ gridColumn: "1 / -1" }}>
+          <SpillMatrix
+            reservoirs={reservoirs}
+            scenarios={scenarios}
+            scenarioNames={scenarioNames}
+            data={matrixData}
+            responsive
+            showScenarioHeaders={false}
+            labelColumnWidth={120}
+            loadingScenarios={loadingScenarios}
+          />
+        </Box>
+      )}
+    </>
+  )
+}
+
 /**
  * ReservoirStorageContent - Inner content for reservoir storage (used in both inline and modal views)
  * Uses CSS Grid layout via ChartGridProvider for consistent alignment
@@ -775,6 +930,24 @@ function ReservoirStorageContent({
             scenarios={scenarios}
             cellColors={cellColors}
             isModal={isModal}
+          />
+        </ChartGridProvider>
+      </Box>
+
+      {/* Spill frequency section - in its own container */}
+      <Box
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: theme.borderRadius.md,
+          border: theme.border.light,
+          p: theme.space.component.lg,
+          mt: theme.space.component.lg,
+        }}
+      >
+        <ChartGridProvider scenarios={scenarios}>
+          <SpillFrequencySection
+            scenarios={scenarios}
+            scenarioNames={scenarioNames}
           />
         </ChartGridProvider>
       </Box>

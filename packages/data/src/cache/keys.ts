@@ -203,6 +203,54 @@ export const CACHE_KEYS = {
       .join("&")
     return `/api/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
   },
+
+  // AG Aggregate cache keys (Agricultural delivery statistics)
+
+  /**
+   * Monthly delivery statistics for AG aggregates
+   * @param scenarioId - Scenario ID
+   */
+  agAggregatesMonthly: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/ag-aggregates/monthly`,
+
+  /**
+   * Period-of-record summary for AG aggregates
+   * @param scenarioId - Scenario ID
+   */
+  agAggregatesPeriod: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/ag-aggregates/period-summary`,
+
+  // AG Demand Units cache keys (150 agricultural demand units)
+
+  /**
+   * Monthly delivery statistics for AG demand units
+   * @param scenarioId - Scenario ID
+   */
+  agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/delivery-monthly`,
+
+  /**
+   * Monthly shortage statistics for AG demand units
+   * @param scenarioId - Scenario ID
+   */
+  agDemandUnitsShortageMonthly: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
+
+  /**
+   * Period-of-record summary for AG demand units
+   * @param scenarioId - Scenario ID
+   */
+  agDemandUnitsPeriod: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
+
+  // Reservoir period summary cache key
+
+  /**
+   * Period-of-record summary for all reservoirs (storage exceedance + spill stats)
+   * @param scenarioId - Scenario ID
+   */
+  reservoirPeriodSummary: (scenarioId: string) =>
+    `/api/statistics/scenarios/${scenarioId}/period-summary`,
 } as const
 
 /**

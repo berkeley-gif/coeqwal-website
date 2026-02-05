@@ -79,6 +79,21 @@ export type {
   DemandUnitPeriodResponse,
   DemandUnitMonthlyStats,
   DemandUnitStatisticsResponse,
+  // AG Aggregate types
+  AgAggregateData,
+  AgAggregateMonthlyResponse,
+  AgAggregatePeriodSummary,
+  AgAggregatePeriodResponse,
+  // AG Demand Unit types
+  AgDemandUnitDeliveryData,
+  AgDemandUnitDeliveryMonthlyResponse,
+  AgDemandUnitShortageData,
+  AgDemandUnitShortageMonthlyResponse,
+  AgDemandUnitPeriodSummary,
+  AgDemandUnitPeriodResponse,
+  // Reservoir period summary types
+  ReservoirPeriodData,
+  ReservoirPeriodSummaryResponse,
 } from "./types"
 
 // API constants
@@ -114,6 +129,14 @@ export {
   fetchDemandUnitStatistics,
   fetchDemandUnitsMonthly,
   fetchDemandUnitsPeriod,
+  // AG fetchers
+  fetchAgAggregatesMonthly,
+  fetchAgAggregatesPeriod,
+  fetchAgDemandUnitsDeliveryMonthly,
+  fetchAgDemandUnitsShortageMonthly,
+  fetchAgDemandUnitsPeriod,
+  // Reservoir period summary fetcher
+  fetchReservoirPeriodSummary,
 } from "./fetchers"
 
 // Re-export hooks for convenience

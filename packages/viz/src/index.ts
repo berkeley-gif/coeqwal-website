@@ -44,6 +44,14 @@ export type {
   MonthlyPercentiles,
 } from "./components/PercentileBandChart"
 export { default as PercentileMatrix } from "./components/PercentileMatrix"
+export { default as SpillChart } from "./components/SpillChart"
+export type {
+  SpillChartProps,
+  SpillMonthlyStats,
+  MonthlySpillData,
+} from "./components/SpillChart"
+export { default as SpillMatrix } from "./components/SpillMatrix"
+export type { SpillMatrixProps } from "./components/SpillMatrix"
 export type {
   PercentileMatrixProps,
   ReservoirData,

@@ -35,6 +35,12 @@ import type {
   DemandUnitStatisticsResponse,
   DemandUnitMonthlyResponse,
   DemandUnitPeriodResponse,
+  AgAggregateMonthlyResponse,
+  AgAggregatePeriodResponse,
+  AgDemandUnitDeliveryMonthlyResponse,
+  AgDemandUnitShortageMonthlyResponse,
+  AgDemandUnitPeriodResponse,
+  ReservoirPeriodSummaryResponse,
 } from "./types"
 
 /**
@@ -669,6 +675,147 @@ export async function fetchDemandUnitsPeriod(
 
   return apiFetcher<DemandUnitPeriodResponse>(
     ENDPOINTS.demandUnitsPeriod(scenarioId, duId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// AG Aggregate API fetchers (Agricultural delivery statistics)
+// ============================================================================
+
+/**
+ * Fetch monthly delivery statistics for AG aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly statistics for AG aggregates (5 project totals)
+ */
+export async function fetchAgAggregatesMonthly(
+  scenarioId: string,
+): Promise<AgAggregateMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgAggregateMonthlyResponse>(
+    ENDPOINTS.agAggregatesMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for AG aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Period summary with annual averages and delivery exceedance
+ */
+export async function fetchAgAggregatesPeriod(
+  scenarioId: string,
+): Promise<AgAggregatePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgAggregatePeriodResponse>(
+    ENDPOINTS.agAggregatesPeriod(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// AG Demand Units API fetchers (150 agricultural demand units)
+// ============================================================================
+
+/**
+ * Fetch monthly delivery statistics for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly delivery statistics for 150 AG demand units
+ */
+export async function fetchAgDemandUnitsDeliveryMonthly(
+  scenarioId: string,
+): Promise<AgDemandUnitDeliveryMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitDeliveryMonthlyResponse>(
+    ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // 150 DUs × 12 months = large payload
+    },
+  )
+}
+
+/**
+ * Fetch monthly shortage statistics for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly shortage statistics for AG demand units
+ */
+export async function fetchAgDemandUnitsShortageMonthly(
+  scenarioId: string,
+): Promise<AgDemandUnitShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitShortageMonthlyResponse>(
+    ENDPOINTS.agDemandUnitsShortageMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // large payload
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Period summary with delivery exceedance for 150 AG demand units
+ */
+export async function fetchAgDemandUnitsPeriod(
+  scenarioId: string,
+): Promise<AgDemandUnitPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitPeriodResponse>(
+    ENDPOINTS.agDemandUnitsPeriod(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // 150 DUs = large payload
+    },
+  )
+}
+
+// ============================================================================
+// Reservoir Period Summary API fetcher
+// ============================================================================
+
+/**
+ * Fetch period-of-record summary for all reservoirs
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Storage exceedance and annual spill stats for all reservoirs
+ */
+export async function fetchReservoirPeriodSummary(
+  scenarioId: string,
+): Promise<ReservoirPeriodSummaryResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<ReservoirPeriodSummaryResponse>(
+    ENDPOINTS.reservoirPeriodSummary(scenarioId),
     {
       baseUrl: DEFAULT_API_BASE,
     },
