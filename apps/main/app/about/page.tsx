@@ -102,8 +102,21 @@ export default function AboutPage() {
 
     ]
 
+    // This effect keeps motion from creating a margin with fadeIn of the first section
     useEffect(() => {
-        console.log('about page')
+        // Prevent scroll restoration
+        window.history.scrollRestoration = 'manual'
+
+        // Force scroll to top immediately
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+
+        // Double-check after a tick (after animations initialize)
+        setTimeout(() => {
+            if (window.scrollY > 0) {
+                console.log('Page shifted! Scroll position:', window.scrollY)
+                window.scrollTo(0, 0)
+            }
+        }, 100)
     }, [])
 
     return (
@@ -118,7 +131,7 @@ export default function AboutPage() {
                     bodyText="- is a collaborative, community-engaged research project aimed at delivering actionable information for water management planning in California. 
                     Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. 
                     COEQWAL is working to change that. "
-                    scrollToId=""
+                    scrollToId="projectGoals"
                     imgSrc="/images/about/collage-intro.png"
                     imgAlt="A collage showing a person advocating on a podium, birds flying, a river flowing, a farmer holding grapes and a child looking at a salmon inside a fish tank"
                     paddingTop={theme.layout.headerHeight}

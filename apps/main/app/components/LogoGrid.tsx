@@ -94,6 +94,7 @@ export function LogoGrid({
                         component="img"
                         src={logo.src}
                         alt={logo.alt}
+                        key={logo.src}
                         sx={{
                             height: "auto",
                             maxWidth: "100%", // Prevents overflow

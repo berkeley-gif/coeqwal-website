@@ -56,7 +56,6 @@ export function CenterImageText({
     scrollToId,
     paddingTop = 0,
     textColor = "common.white",
-    textShadow = false,
     imgSrc = '',
     imgAlt = '',
 }: CenterImageTextProps) {
@@ -70,18 +69,18 @@ export function CenterImageText({
             variants={fadeIn}
             id={id}
             aria-label={ariaLabel}
-            backgroundColor={backgroundColor}
             sx={{
                 pointerEvents: "auto",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                paddingTop: `${paddingTop + 25}px`,
-                paddingBottom: `${paddingTop + 25}px`,
                 boxSizing: "border-box",
-                height: "auto",
-                gap: "55px"
+                height: "100vh",
+                maxHeight: "100vh",
+                gap: "55px",
+                backgroundColor: backgroundColor,
+                paddingTop: `${paddingTop}px`,
             }}
         >
             {/* Image — centered on mobile and desktop */}
@@ -89,21 +88,25 @@ export function CenterImageText({
                 component="img"
                 src={imgSrc}
                 alt={imgAlt}
-                sx={{ width: "100%", maxWidth: "33vw", height: "auto", }}
+                sx={{
+                    width: { lg: "300px", xl: "600px" },
+                    height: "auto",
+                    objectFit: "contain",
+                }}
             />
 
-            {/* Action items — bottom-right on desktop, centered on mobile */}
+            {/* Text */}
             <Box
                 component="div"
-
                 sx={{
                     listStyle: "none",
-                    p: 0,
-                    m: 0,
+                    m: "0 auto",
                     display: "flex",
                     flexDirection: "column",
                     gap: { xs: 4, md: 4 },
-                    maxWidth: "600px",
+                    textAlign: "left",
+                    paddingLeft: "55px",
+                    maxWidth: { sm: "55%", xl: "40%" },
                 }}
             >
 
@@ -125,11 +128,10 @@ export function CenterImageText({
                 scrollToId && (
                     <Box
                         sx={{
-                            position: "absolute",
+                            margin: "0 auto",
                             bottom: "clamp(24px, 4vh, 48px)",
                             left: "50%",
                             transform: "translateX(-50%)",
-                            zIndex: theme.zIndex.heroScrollIndicator,
                         }}
                     >
                         <ScrollToButton
