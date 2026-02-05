@@ -70,7 +70,7 @@ export function CenterImageText({
             id={id}
             aria-label={ariaLabel}
             sx={{
-                pointerEvents: "auto",
+                pointerEvents: "none",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
@@ -128,6 +128,7 @@ export function CenterImageText({
                 scrollToId && (
                     <Box
                         sx={{
+                            pointerEvents: "auto",
                             margin: "0 auto",
                             bottom: "clamp(24px, 4vh, 48px)",
                             left: "50%",
