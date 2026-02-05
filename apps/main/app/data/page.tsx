@@ -21,10 +21,12 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Alert,
+  useTheme
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
+import { ContactSection } from "../components/ContactSection"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
@@ -37,6 +39,8 @@ export default function DataPage() {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const theme = useTheme()
 
   useEffect(() => {
     let alive = true
@@ -107,6 +111,7 @@ export default function DataPage() {
           overflowX: "hidden",
           width: "100%",
           pointerEvents: "auto",
+          backgroundColor: theme.palette.brand.panelMedium,
         }}
       >
         <Box
@@ -120,8 +125,7 @@ export default function DataPage() {
             overflowX: "hidden",
             width: "100%",
             minHeight: "100vh",
-            backgroundColor: (theme) => theme.palette.background.paper,
-            color: (theme) => theme.palette.blue.darkest,
+            color: (theme) => theme.palette.common.white,
           }}
         >
           <Container
@@ -145,7 +149,7 @@ export default function DataPage() {
                   position: "absolute",
                   left: -56,
                   top: 4,
-                  color: (theme) => theme.palette.blue.darkest,
+                  color: (theme) => theme.palette.common.white,
                   width: 40,
                   height: 40,
                 }}
@@ -159,10 +163,7 @@ export default function DataPage() {
                 />
               </IconButton>
               <Typography
-                variant="h5"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                }}
+                variant="h4"
               >
                 Data & downloads
               </Typography>
@@ -200,7 +201,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.section.sm,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Access complete CalSim3 model run files in zipped format,
@@ -280,7 +280,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.section.sm,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Download CalSim3 scenario input and output data in csv
@@ -391,7 +390,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
@@ -402,7 +400,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -423,7 +421,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Peer-reviewed publications and research papers related to
@@ -433,7 +430,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -454,7 +451,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     REST API endpoints for programmatic access to scenario data,
@@ -464,38 +460,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Support & contact section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Support & contact
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Contact our team for technical support, questions about the
-                    data, or collaboration opportunities.
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -505,6 +470,15 @@ export default function DataPage() {
             </Grid>
           </Container>
         </Box>
+        <ContactSection
+          title="Get Involved"
+          id="getInvolved"
+          ariaLabel="get involved"
+          text="Do you have questions or feedback about our project? 
+                            Would you like to be involved in future phases of this work? Please email: "
+          email="coeqwal@berkeley.edu"
+        />
+
       </Box>
     </>
   )
