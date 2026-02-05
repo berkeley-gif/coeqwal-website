@@ -934,23 +934,6 @@ function ReservoirStorageContent({
         </ChartGridProvider>
       </Box>
 
-      {/* Spill frequency section - in its own container */}
-      <Box
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderRadius: theme.borderRadius.md,
-          border: theme.border.light,
-          p: theme.space.component.lg,
-          mt: theme.space.component.lg,
-        }}
-      >
-        <ChartGridProvider scenarios={scenarios}>
-          <SpillFrequencySection
-            scenarios={scenarios}
-            scenarioNames={scenarioNames}
-          />
-        </ChartGridProvider>
-      </Box>
     </>
   )
 }
@@ -1284,11 +1267,15 @@ export default function CategoryView() {
                 </>
               )}
 
-              {/* Other metrics - skip for categories with custom sections (reservoir-storage, community-water, agricultural-water) */}
+              {/* Other metrics - skip for categories with custom sections or incomplete data */}
               {nonTierMetrics.length > 0 &&
                 category.id !== "reservoir-storage" &&
                 category.id !== "community-water" &&
-                category.id !== "agricultural-water" && (
+                category.id !== "agricultural-water" &&
+                category.id !== "environmental-water" &&
+                category.id !== "delta-salinity" &&
+                category.id !== "groundwater-storage" &&
+                category.id !== "salmon-abundance" && (
                   <Box>
                     {tierMetrics.length > 0 && (
                       <Typography
