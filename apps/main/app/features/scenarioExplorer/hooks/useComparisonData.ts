@@ -46,14 +46,15 @@ export function useComparisonData() {
         const scenarioScores = allScoreData[scenarioId] || {}
 
         // Use display names as keys for the parallel plot axes
-        const values: Record<string, number> = {}
+        // Use null for missing data (creates gaps in the chart)
+        const values: Record<string, number | null> = {}
         OUTCOME_CODE_ORDER.forEach((code) => {
           const outcomeScore = scenarioScores[code]
           const displayName = getOutcomeName(code)
           if (outcomeScore?.normalized_score !== undefined) {
             values[displayName] = outcomeScore.normalized_score * 2 - 1
           } else {
-            values[displayName] = 0
+            values[displayName] = null
           }
         })
 

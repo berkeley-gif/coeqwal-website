@@ -28,6 +28,8 @@ export default function ScenarioExplorerNew() {
   const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
     null,
   )
+  // Pinned scenario appears at top of list when clicked in comparison chart
+  const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(null)
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
   const needsSplit = mainView === "explorer" && exploreMode !== "list"
 
@@ -150,7 +152,10 @@ export default function ScenarioExplorerNew() {
             }}
           >
             {mainView === "explorer" && (
-              <UnifiedExploreView mode={exploreMode} />
+              <UnifiedExploreView
+                mode={exploreMode}
+                pinnedScenarioId={pinnedScenarioId}
+              />
             )}
             {mainView === "data" && (
               <DataExplorerView
@@ -176,11 +181,11 @@ export default function ScenarioExplorerNew() {
           {exploreMode === "comparison" && (
             <ComparisonPanel
               highlightedScenario={highlightedScenario}
-              onScenarioClick={(id) =>
-                setHighlightedScenario((prev) =>
-                  prev === id ? null : id,
-                )
-              }
+              onScenarioClick={(id) => {
+                setHighlightedScenario((prev) => (prev === id ? null : id))
+                // Bring clicked scenario to top of list
+                setPinnedScenarioId(id)
+              }}
             />
           )}
           {exploreMode === "map" && (

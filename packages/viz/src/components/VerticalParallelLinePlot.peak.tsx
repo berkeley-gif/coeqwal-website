@@ -7,7 +7,7 @@ import { useResizeObserver } from "../hooks/useResizeObserver"
 export interface VerticalParallelLineData {
   id: string
   name: string
-  values: Record<string, number>
+  values: Record<string, number | null>
   highlighted?: boolean
 }
 
@@ -76,7 +76,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const filter = filterRanges.current[axis]
         if (!filter) return true
 
-        const value = scenario.values[axis] || 0
+        const value = scenario.values[axis]
+        if (value === null) return true // Null values pass filters
         return value >= filter[0] && value <= filter[1]
       })
 
@@ -104,7 +105,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const filter = filterRanges.current[axis]
         if (!filter) return true
 
-        const value = scenario.values[axis] || 0
+        const value = scenario.values[axis]
+        if (value === null) return true // Null values pass filters
         return value >= filter[0] && value <= filter[1]
       })
     },
@@ -679,11 +681,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       // Update data lines with original styling
       // Line generator (no curves - original styling)
+      // Uses .defined() to skip null values, creating gaps in the line
       const lineGenerator = d3
-        .line<[string, number]>()
-        .x(([axis, value]) => scales[axis]!(value))
+        .line<[string, number | null]>()
+        .defined(([, value]) => value !== null)
+        .x(([axis, value]) => scales[axis]!(value as number))
         .y(([axis]) => yScale(axis)!)
       // No curve - use straight angular lines (original)
+
 
     data.forEach((d, dataIndex) => {
         const lineColor =
@@ -698,7 +703,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const filter = filterRanges.current[axis]
           if (!filter) return true
 
-          const value = d.values[axis] || 0
+          const value = d.values[axis]
+          if (value === null) return true // Null values pass filters
           return value >= filter[0] && value <= filter[1]
         })
 
@@ -706,8 +712,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const lineOpacity = getScenarioOpacity(d, "line")
         const circleOpacity = getScenarioOpacity(d, "circle")
 
+        // Path data includes nulls (will be skipped by .defined(), creating gaps)
         const pathData = axes.map(
-          (axis) => [axis, d.values[axis] || 0] as [string, number],
+          (axis) => [axis, d.values[axis]] as [string, number | null],
         )
 
         let path = g.select<SVGPathElement>(`.line-${dataIndex}`)
@@ -770,11 +777,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("opacity", lineOpacity) // Lines semi-transparent
 
         // Update circles at intersection points (original styling)
+        // Skip circles for null values (missing data)
         axes.forEach((axis) => {
-          const value = d.values[axis] || 0
-          let circle = g.select<SVGCircleElement>(
-            `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`,
-          )
+          const value = d.values[axis]
+          const circleClass = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
+
+          // If value is null, remove any existing circle and skip
+          if (value === null) {
+            g.select(circleClass).remove()
+            return
+          }
+
+          let circle = g.select<SVGCircleElement>(circleClass)
 
           if (circle.empty()) {
             circle = g

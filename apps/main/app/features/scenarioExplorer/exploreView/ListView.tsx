@@ -20,11 +20,13 @@ import {
 interface ListViewProps {
   compact?: boolean
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
+  pinnedScenarioId?: string | null
 }
 
 export default function ListView({
   compact = false,
   onTierClick,
+  pinnedScenarioId,
 }: ListViewProps) {
   const theme = useTheme()
   const {
@@ -89,9 +91,20 @@ export default function ListView({
         })
       }
 
+      // Helper to move pinned scenario to top
+      const applyPinning = (scenarioList: typeof baseScenarios) => {
+        if (!pinnedScenarioId) return scenarioList
+        const pinnedIndex = scenarioList.findIndex(
+          (s) => s.scenarioId === pinnedScenarioId,
+        )
+        if (pinnedIndex <= 0) return scenarioList // Already at top or not found
+        const pinned = scenarioList[pinnedIndex]
+        return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
+      }
+
       if (!searchQuery.trim()) {
         return {
-          sortedScenarios: baseScenarios,
+          sortedScenarios: applyPinning(baseScenarios),
           matchingScenarioIds: new Set<string>(),
           hasSearchResults: false,
         }
@@ -122,11 +135,11 @@ export default function ListView({
       })
 
       return {
-        sortedScenarios: [...matches, ...nonMatches],
+        sortedScenarios: applyPinning([...matches, ...nonMatches]),
         matchingScenarioIds: matchingIds,
         hasSearchResults: matches.length > 0,
       }
-    }, [searchQuery, sortBy, sortDirection, allScoreData, scenarios])
+    }, [searchQuery, sortBy, sortDirection, allScoreData, scenarios, pinnedScenarioId])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
