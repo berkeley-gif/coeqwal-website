@@ -18,6 +18,8 @@ import { motion } from "@repo/motion"
 import { ScrollToButton, DisplayBlock, Panel } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
+import { fadeIn } from "../lib/constants/motionAnimations"
+
 const MotionBox = motion.create(Box)
 
 export interface CenterImageTextProps {
@@ -55,26 +57,19 @@ export function CenterImageText({
     paddingTop = 0,
     textColor = "common.white",
     textShadow = false,
-    imgSrc = '', 
+    imgSrc = '',
     imgAlt = '',
 }: CenterImageTextProps) {
     const theme = useTheme()
 
-    // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
-    const fadeIn = {
-        hidden: { opacity: 0, y: 20 },
-        show: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, ease: "easeOut" },
-        },
-    }
-
-
     return (
-        <Panel
+        <Box
+            component={motion.div}
+            initial="hidden"
+            whileInView="show"
+            variants={fadeIn}
             id={id}
-            ariaLabel={ariaLabel}
+            aria-label={ariaLabel}
             backgroundColor={backgroundColor}
             sx={{
                 pointerEvents: "auto",
@@ -83,12 +78,12 @@ export function CenterImageText({
                 justifyContent: "center",
                 alignItems: "center",
                 paddingTop: `${paddingTop + 25}px`,
+                paddingBottom: `${paddingTop + 25}px`,
                 boxSizing: "border-box",
                 height: "auto",
                 gap: "55px"
             }}
         >
-
             {/* Image — centered on mobile and desktop */}
             <Box
                 component="img"
@@ -99,7 +94,8 @@ export function CenterImageText({
 
             {/* Action items — bottom-right on desktop, centered on mobile */}
             <Box
-                component="ul"
+                component="div"
+
                 sx={{
                     listStyle: "none",
                     p: 0,
@@ -111,20 +107,16 @@ export function CenterImageText({
                 }}
             >
 
-                <motion.div variants={fadeIn}>
-
-                    {/* Body */}
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            color: textColor,
-                        }}
-                    >
-                        <strong>{bodyTextBold}</strong>
-                        {bodyText}
-                    </Typography>
-
-                </motion.div>
+                {/* Body */}
+                <Typography
+                    variant="body1"
+                    sx={{
+                        color: textColor,
+                    }}
+                >
+                    <strong>{bodyTextBold}</strong>
+                    {bodyText}
+                </Typography>
 
             </Box>
 
@@ -149,6 +141,6 @@ export function CenterImageText({
                     </Box>
                 )
             }
-        </Panel >
+        </Box>
     )
 }
