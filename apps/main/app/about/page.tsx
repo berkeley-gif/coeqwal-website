@@ -29,6 +29,7 @@ import { useTheme } from "@repo/ui/mui"
 import { MainContent } from "../components/MainContent"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
 import { LogoGrid } from "../components/LogoGrid"
+import { ContactSection } from "../components/ContactSection"
 import type { ImageTextBlock } from "../components/ScrollImageTextBlocks"
 import type { GridLogo } from "../components/LogoGrid"
 
@@ -152,6 +153,14 @@ export default function AboutPage() {
                     title="Our Partners"
                     id="ourPartners"
                     ariaLabel="our partners"
+                />
+                <ContactSection
+                    title="Get Involved"
+                    id="getInvolved"
+                    ariaLabel="get involved"
+                    text="Do you have questions or feedback about our project? 
+                    Would you like to be involved in future phases of this work? Please email: "
+                    email="coeqwal@berkeley.edu"
                 />
             </MainContent >
         </>
