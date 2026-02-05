@@ -123,6 +123,8 @@ export interface PercentileMatrixProps {
   breakdownData?: BreakdownDataMap
   /** Breakdown component definitions (entityId -> components with id, label, color) */
   breakdownComponents?: BreakdownComponentsMap
+  /** Scenario IDs that are still loading data (shows spinner in empty cells) */
+  loadingScenarios?: string[]
 }
 
 // Water month labels (short - for axis)
@@ -207,6 +209,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   cellStats,
   breakdownData,
   breakdownComponents,
+  loadingScenarios,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -885,6 +888,46 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         const cellG = g
           .append("g")
           .attr("transform", `translate(${cellX},${cellY})`)
+
+        // Check if this scenario is still loading and has no data for this cell
+        if (loadingScenarios?.includes(scenarioId)) {
+          const mainCellData = data[reservoir.reservoirId]?.[scenarioId]
+          const breakdownCellData =
+            breakdownData?.[reservoir.reservoirId]?.[scenarioId]
+          const hasMainData =
+            mainCellData && Object.keys(mainCellData).length > 0
+          const hasBreakdown =
+            breakdownCellData && Object.keys(breakdownCellData).length > 0
+
+          if (!hasMainData && !hasBreakdown) {
+            // Draw animated loading spinner (SVG-native animation)
+            const cx = chartWidth / 2
+            const cy = chartHeight / 2
+            const spinnerR = 8
+
+            const spinner = cellG
+              .append("circle")
+              .attr("cx", cx)
+              .attr("cy", cy)
+              .attr("r", spinnerR)
+              .attr("fill", "none")
+              .attr("stroke", COLORS.gridStrong)
+              .attr("stroke-width", 2)
+              .attr("stroke-dasharray", `${spinnerR * 1.5} ${spinnerR * 4.7}`)
+              .attr("stroke-linecap", "round")
+
+            spinner
+              .append("animateTransform")
+              .attr("attributeName", "transform")
+              .attr("type", "rotate")
+              .attr("from", `0 ${cx} ${cy}`)
+              .attr("to", `360 ${cx} ${cy}`)
+              .attr("dur", "1s")
+              .attr("repeatCount", "indefinite")
+
+            return
+          }
+        }
 
         // Check if this is a breakdown row (stacked chart)
         const components = breakdownComponents?.[reservoir.reservoirId]
@@ -1706,6 +1749,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     cellStats,
     breakdownData,
     breakdownComponents,
+    loadingScenarios,
   ])
 
   return (

@@ -189,4 +189,52 @@ export const ENDPOINTS = {
       .join("&")
     return `/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
   },
+
+  // AG Aggregate endpoints (Agricultural delivery statistics)
+
+  /**
+   * Monthly delivery statistics for AG aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agAggregatesMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-aggregates/monthly`,
+
+  /**
+   * Period-of-record summary for AG aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agAggregatesPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-aggregates/period-summary`,
+
+  // AG Demand Units endpoints (150 agricultural demand units)
+
+  /**
+   * Monthly delivery statistics for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/delivery-monthly`,
+
+  /**
+   * Monthly shortage statistics for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsShortageMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
+
+  /**
+   * Period-of-record summary for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
+
+  // Reservoir period summary endpoint
+
+  /**
+   * Period-of-record summary for all reservoirs (storage exceedance + spill stats)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  reservoirPeriodSummary: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/period-summary`,
 } as const

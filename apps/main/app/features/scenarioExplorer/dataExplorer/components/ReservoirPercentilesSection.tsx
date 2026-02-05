@@ -130,7 +130,12 @@ function useMultiScenarioReservoirData(
     (a.reservoirName ?? "").localeCompare(b.reservoirName ?? ""),
   )
 
-  return { reservoirs, matrixData, isLoading, error }
+  // Track which scenarios are still loading
+  const loadingScenarios = scenarioIds.filter(
+    (_, index) => results[index]?.isLoading ?? false,
+  )
+
+  return { reservoirs, matrixData, isLoading, error, loadingScenarios }
 }
 
 /**
@@ -210,6 +215,7 @@ export default function ReservoirPercentilesSection({
     reservoirs: majorReservoirs,
     matrixData: majorMatrixData,
     error: majorError,
+    loadingScenarios: majorLoadingScenarios,
   } = useMultiScenarioReservoirData(scenarios, displayMode)
 
   // Fetch additional reservoir data
@@ -306,6 +312,7 @@ export default function ReservoirPercentilesSection({
           cellColors={cellColors}
           displayMode={displayMode}
           volumeScaleMode={volumeScaleMode}
+          loadingScenarios={majorLoadingScenarios}
         />
       </Box>
     </Box>

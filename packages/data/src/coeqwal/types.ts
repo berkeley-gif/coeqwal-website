@@ -757,3 +757,209 @@ export interface DemandUnitStatisticsResponse {
   /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
   monthly_shortage: Record<string, DemandUnitMonthlyStats> | null
 }
+
+// ============================================================================
+// AG Aggregate Types (Agricultural delivery statistics)
+// ============================================================================
+
+/**
+ * AG aggregate data with monthly delivery statistics
+ * Reuses CwsDeliveryMonthlyStats for per-month shape (q*, exc_p*, avg_taf, cv)
+ */
+export interface AgAggregateData {
+  /** Display label (e.g., "SWP Project AG") */
+  label: string
+  /** Project (e.g., "SWP", "CVP") */
+  project: string
+  /** Region (e.g., "TOTAL", "NOD", "SOD") */
+  region: string
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-aggregates/monthly
+ */
+export interface AgAggregateMonthlyResponse {
+  scenario_id: string
+  /** Aggregate data keyed by short_code (e.g., "swp_pag", "cvp_pag_n") */
+  aggregates: Record<string, AgAggregateData>
+}
+
+/**
+ * Period-of-record summary for an AG aggregate
+ */
+export interface AgAggregatePeriodSummary {
+  /** Display label */
+  label: string
+  /** Project */
+  project: string
+  /** Region */
+  region: string
+  /** First year of simulation */
+  simulation_start_year: number
+  /** Last year of simulation */
+  simulation_end_year: number
+  /** Total years in record */
+  total_years: number
+  /** Annual average delivery in TAF */
+  annual_delivery_avg_taf: number
+  /** Coefficient of variation for annual delivery */
+  annual_delivery_cv: number
+  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  delivery_exceedance: Record<string, number>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-aggregates/period-summary
+ */
+export interface AgAggregatePeriodResponse {
+  scenario_id: string
+  /** Period summary data keyed by short_code */
+  aggregates: Record<string, AgAggregatePeriodSummary>
+}
+
+// ============================================================================
+// AG Demand Unit Types (150 agricultural demand units)
+// ============================================================================
+
+/**
+ * AG demand unit delivery data with monthly statistics
+ */
+export interface AgDemandUnitDeliveryData {
+  /** Agency name */
+  agency: string
+  /** Hydrologic region ("SAC", "SJR", "TULARE", or null) */
+  hydrologic_region: string | null
+  /** CS3 contractor type ("PA", "SA", "XA", or null) */
+  cs3_type: string | null
+  /** Water provider ("CVP", "SWP", or null) */
+  provider: string | null
+  /** Monthly delivery statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_delivery: Record<string, CwsDeliveryMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/delivery-monthly
+ */
+export interface AgDemandUnitDeliveryMonthlyResponse {
+  scenario_id: string
+  /** Demand unit data keyed by DU ID (e.g., "02_NA", "50_PA1") */
+  demand_units: Record<string, AgDemandUnitDeliveryData>
+}
+
+/**
+ * AG demand unit shortage data with monthly statistics
+ */
+export interface AgDemandUnitShortageData {
+  /** Agency name */
+  agency: string
+  /** Hydrologic region */
+  hydrologic_region: string | null
+  /** CS3 contractor type */
+  cs3_type: string | null
+  /** Monthly shortage statistics keyed by water month (1=Oct, 12=Sep) */
+  monthly_shortage: Record<string, CwsShortageMonthlyStats>
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/shortage-monthly
+ */
+export interface AgDemandUnitShortageMonthlyResponse {
+  scenario_id: string
+  /** Demand unit data keyed by DU ID */
+  demand_units: Record<string, AgDemandUnitShortageData>
+}
+
+/**
+ * Period summary for an AG demand unit
+ */
+export interface AgDemandUnitPeriodSummary {
+  /** Agency name */
+  agency: string
+  /** Hydrologic region */
+  hydrologic_region: string | null
+  /** CS3 contractor type */
+  cs3_type: string | null
+  /** Water provider */
+  provider: string | null
+  /** First year of simulation */
+  simulation_start_year: number
+  /** Last year of simulation */
+  simulation_end_year: number
+  /** Total years in record */
+  total_years: number
+  /** Annual average delivery in TAF */
+  annual_delivery_avg_taf: number
+  /** Coefficient of variation for annual delivery */
+  annual_delivery_cv: number
+  /** Delivery exceedance values (p5, p10, p25, p50, p75, p90, p95) */
+  delivery_exceedance: Record<string, number>
+  /** Annual average shortage in TAF (null if no shortage data) */
+  annual_shortage_avg_taf: number | null
+  /** Number of years with shortage > 0 */
+  shortage_years_count: number | null
+  /** Percentage of years with shortage > 0 */
+  shortage_frequency_pct: number | null
+  /** Average shortage as percentage of demand */
+  annual_shortage_pct_of_demand: number | null
+  /** Percentage of months meeting full demand */
+  reliability_pct: number | null
+  /** Average percent of demand met */
+  avg_pct_demand_met: number | null
+  /** Annual average demand in TAF */
+  annual_demand_avg_taf: number | null
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/ag-demand-units/period-summary
+ */
+export interface AgDemandUnitPeriodResponse {
+  scenario_id: string
+  /** Period summary data keyed by DU ID */
+  demand_units: Record<string, AgDemandUnitPeriodSummary>
+}
+
+// ============================================================================
+// Reservoir Period Summary Types
+// ============================================================================
+
+/**
+ * Period-of-record data for a single reservoir
+ */
+export interface ReservoirPeriodData {
+  /** Human-readable name */
+  name: string
+  /** Total reservoir capacity in TAF */
+  capacity_taf: number
+  /** Storage exceedance values as % of capacity (p5, p10, p25, p50, p75, p90, p95) */
+  storage_exceedance: Record<string, number>
+  /** Threshold levels */
+  thresholds: {
+    dead_pool_taf: number
+    dead_pool_pct: number
+    spill_threshold_pct: number | null
+  }
+  /** Annual spill summary statistics */
+  spill: {
+    years_count: number
+    frequency_pct: number
+    mean_cfs: number
+    peak_cfs: number
+    annual_avg_taf: number
+    annual_cv: number
+    annual_max_taf: number
+    annual_max_q50: number
+    annual_max_q90: number
+    annual_max_q100: number
+  }
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/period-summary
+ */
+export interface ReservoirPeriodSummaryResponse {
+  scenario_id: string
+  /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
+  reservoirs: Record<string, ReservoirPeriodData>
+}

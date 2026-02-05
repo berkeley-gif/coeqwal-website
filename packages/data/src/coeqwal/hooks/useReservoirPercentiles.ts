@@ -17,6 +17,7 @@ import {
   fetchGroupedReservoirPercentiles,
   fetchStorageMonthly,
   fetchSpillMonthly,
+  fetchReservoirPeriodSummary,
 } from "../fetchers"
 import type {
   ReservoirListResponse,
@@ -27,6 +28,7 @@ import type {
   GroupedReservoirPercentilesResponse,
   StorageMonthlyResponse,
   SpillMonthlyResponse,
+  ReservoirPeriodSummaryResponse,
 } from "../types"
 
 /**
@@ -549,5 +551,40 @@ export function useMultipleReservoirPercentiles(
     isLoading,
     error,
     hasData: !!data && Object.keys(data).length > 0,
+  }
+}
+
+/**
+ * Fetch period-of-record summary for all reservoirs
+ * Returns storage exceedance and annual spill statistics
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Period summary with storage exceedance and spill stats
+ */
+export function useReservoirPeriodSummary(scenarioId: string | null) {
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<ReservoirPeriodSummaryResponse>(
+    scenarioId ? CACHE_KEYS.reservoirPeriodSummary(scenarioId) : null,
+    () =>
+      scenarioId
+        ? fetchReservoirPeriodSummary(scenarioId)
+        : Promise.reject(new Error("Missing scenario ID")),
+    {
+      revalidateOnFocus: false,
+    },
+  )
+
+  const error = swrError ? String(swrError.message || swrError) : null
+
+  return {
+    data,
+    scenarioId: data?.scenario_id,
+    reservoirs: data?.reservoirs ?? {},
+    isLoading,
+    error,
+    hasData: !!data && Object.keys(data.reservoirs).length > 0,
   }
 }
