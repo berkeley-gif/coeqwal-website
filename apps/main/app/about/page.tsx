@@ -121,12 +121,11 @@ export default function AboutPage() {
 
     return (
         <>
-
             <Header />
             <CenterImageText
                 id="intro"
                 ariaLabel="intro"
-                backgroundColor="#3D7DB5"
+                backgroundColor={theme.palette.brand.panelMedium}
                 bodyTextBold="COEQWAL – the Collaboratory for Equity in Water Allocation"
                 bodyText="- is a collaborative, community-engaged research project aimed at delivering actionable information for water management planning in California. 
                     Until now, water planning tools used by the state have been inaccessible to most communities, especially to those historically excluded from decision-making. 
