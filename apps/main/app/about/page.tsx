@@ -28,7 +28,9 @@ import { ArrowHead } from "@repo/ui"
 import { useTheme } from "@repo/ui/mui"
 import { MainContent } from "../components/MainContent"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
+import { LogoGrid } from "../components/LogoGrid"
 import type { ImageTextBlock } from "../components/ScrollImageTextBlocks"
+import type { GridLogo } from "../components/LogoGrid"
 
 export default function AboutPage() {
     const theme = useTheme()
@@ -52,6 +54,51 @@ export default function AboutPage() {
             text: 'Community feedback is then used to refine our scenarios and inform the next phase of work, which again, is shared with our partners for additional input. This is an intensive, collaborative process that has involved engagement with over 60 representatives from state and federal agencies, water districts, NGOs, community-based organizations, academic institutions, and Native American Tribes. ',
             imagePosition: 'left'
         },
+    ]
+
+    const logos: GridLogo[] = [
+        {
+            src: '/images/about/logos/agwa.png',
+            alt: 'AGWA logo',
+            width: 311,
+        },
+        {
+            src: '/images/about/logos/cwc.png',
+            alt: 'CWC logo',
+            width: 380,
+        },
+        {
+            src: '/images/about/logos/noaa_fisheries.png',
+            alt: 'AGWA logo',
+            width: 201,
+        },
+        {
+            src: '/images/about/logos/ucdavisunofficialseal_blk.png',
+            alt: 'UC Davis logo',
+            width: 120,
+        },
+
+        {
+            src: '/images/about/logos/trout-unlimited.png',
+            alt: 'Trout unlimited logo',
+            width: 350,
+        },
+        {
+            src: '/images/about/logos/california-department-of-water-resources.png',
+            alt: 'Department of water resources logo',
+            width: 101,
+        },
+        {
+            src: '/images/about/logos/california-water-boards.png',
+            alt: 'California Water Boards logo',
+            width: 330,
+        },
+        {
+            src: '/images/about/logos/union-concerned-scientists.png',
+            alt: 'Union of Concerned Scientists logo',
+            width: 205,
+        },
+
     ]
 
     useEffect(() => {
@@ -99,6 +146,12 @@ export default function AboutPage() {
                     title="Our Approach"
                     backgroundSrc="/images/about/image-text-bg"
                     imageTextBlocks={imageTextBlocks}
+                />
+                <LogoGrid
+                    logos={logos}
+                    title="Our Partners"
+                    id="ourPartners"
+                    ariaLabel="our partners"
                 />
             </MainContent >
         </>

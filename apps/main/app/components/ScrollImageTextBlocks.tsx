@@ -8,7 +8,7 @@
  * - WCAG 1.3.1: Semantic <section> with aria-label
  */
 
-import React, { useMemo } from "react"
+import React from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { fadeIn, fadeInRight } from "../lib/constants/motionAnimations"
@@ -67,7 +67,6 @@ export function ScrollImageTextBlocks({
                 initial="hidden"
                 whileInView="show"
                 sx={{
-                    listStyle: "none",
                     width: "50%",
                     paddingTop: `${theme.layout.headerHeight + 25}px`,
                     paddingBottom: `70px`,
@@ -78,7 +77,6 @@ export function ScrollImageTextBlocks({
                     zIndex: 0,
                 }}
                 variants={fadeIn}
-
             >
                 <Typography
                     variant="h4"
