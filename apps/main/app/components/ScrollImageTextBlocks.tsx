@@ -11,6 +11,7 @@
 import React, { useMemo } from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { fadeIn, fadeInRight } from "../lib/constants/motionAnimations"
 
 export interface ImageTextBlock {
     imgSrc: string,
@@ -32,9 +33,6 @@ export interface ScrollImageTextBlocksProps {
     backgroundSrc: string
 }
 
-
-
-
 export function ScrollImageTextBlocks({
     id,
     ariaLabel,
@@ -43,17 +41,6 @@ export function ScrollImageTextBlocks({
     backgroundSrc,
 }: ScrollImageTextBlocksProps) {
     const theme = useTheme()
-
-    // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
-    const fadeIn = {
-        hidden: { opacity: 0, y: 20 },
-        show: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, ease: "easeOut" },
-        },
-    }
-
     return (
         <Box
             component="section"
@@ -72,6 +59,8 @@ export function ScrollImageTextBlocks({
             {/* Title */}
             <Box
                 component={motion.div}
+                initial="hidden"
+                whileInView="show"
                 sx={{
                     listStyle: "none",
                     width: "50%",
@@ -111,7 +100,7 @@ export function ScrollImageTextBlocks({
 
 function renderImageTextBlocks(rawBlocks: ImageTextBlock[]) {
     const theme = useTheme()
-    
+
     return (
         <Box
             component="div"
@@ -119,13 +108,16 @@ function renderImageTextBlocks(rawBlocks: ImageTextBlock[]) {
                 display: "flex",
                 width: "100%",
                 flexDirection: "column",
-                gap: "150px", // Spacing between blocks
+                gap: "175px", // Spacing between blocks
             }}
         >
             {rawBlocks?.map((block, index) => (
                 <Box
+                    component={motion.div}
+                    initial="hidden"
+                    whileInView="show"
+                    variants={fadeInRight}
                     key={index}
-                    component="div"
                     sx={{
                         display: "flex",
                         width: "100%",
@@ -144,14 +136,22 @@ function renderImageTextBlocks(rawBlocks: ImageTextBlock[]) {
                             width: "450px",
                             height: "auto",
                             objectFit: "contain",
+                            marginRight: block.imagePosition === "left" ? "-15px" : "0",
+                            marginLeft: block.imagePosition === "right" ? "-15px" : "0",
                         }}
                     />
                     <Typography
                         variant="body1"
                         sx={{
-                            maxWidth: "400px",
+                            width: "420px",
+                            flexShrink: 0, // Prevents it from shrinking below 420px
                             textAlign: "left",
                             background: block.imagePosition === "right" ? theme.palette.common.white : '',
+                            paddingTop: block.imagePosition === "right" ? '25px' : '',
+                            paddingLeft: block.imagePosition === "left" ? "15px" : "0",
+                            paddingRight: block.imagePosition === "right" ? "15px" : "0",
+                            fontSize: "1.125rem", // Only change this - increases text size
+                            lineHeight: 1.7, // Adjust line spacing for readability
                         }}
                     >
                         {block.text}

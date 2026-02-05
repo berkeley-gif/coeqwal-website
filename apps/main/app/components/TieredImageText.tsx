@@ -13,6 +13,7 @@
 import React from "react"
 import { motion } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { fadeIn } from "../lib/constants/motionAnimations"
 
 export interface TieredImageTextProps {
     /** Panel ID for navigation */
@@ -51,17 +52,6 @@ export function TieredImageText({
 }: TieredImageTextProps) {
     const theme = useTheme()
 
-    // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
-    const fadeIn = {
-        hidden: { opacity: 0, y: 20 },
-        show: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, ease: "easeOut" },
-        },
-    }
-
-
     return (
         <Box
             component="section"
@@ -80,8 +70,6 @@ export function TieredImageText({
             }}
         >
             {/* Title and text */}
-
-
             <motion.div
                 style={{
                     listStyle: "none",
@@ -93,8 +81,9 @@ export function TieredImageText({
                     color: theme.palette.blue.darkest,
                     width: "50vw",
                 }}
+                initial="hidden"
+                whileInView="show"
                 variants={fadeIn}
-
             >
 
                 {/* Title */}
