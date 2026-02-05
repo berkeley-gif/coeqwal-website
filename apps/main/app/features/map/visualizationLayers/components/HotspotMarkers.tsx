@@ -34,6 +34,11 @@ const HOTSPOT_CONFIGS: Record<
     imageAlt: "Salmon habitat marker showing habitat at risk",
     labelPrefix: "Salmon habitat at risk",
   },
+  AG_REV: {
+    image: "/images/map_markers/2008_03_24_PH_0262_Victoria_Island.png",
+    imageAlt: "Agricultural area marker showing farm at risk",
+    labelPrefix: "Farm at risk",
+  },
 }
 
 interface HotspotMarkersProps {
@@ -347,7 +352,11 @@ export function HotspotMarkers({
           })
           .filter((h): h is HotspotData => h !== null)
 
-        setHotspots(hotspotsData)
+        // Limit to 5 markers to avoid overwhelming the map
+        const MAX_HOTSPOT_MARKERS = 5
+        const limitedHotspots = hotspotsData.slice(0, MAX_HOTSPOT_MARKERS)
+
+        setHotspots(limitedHotspots)
       } catch {
         // Silently handle errors
         setHotspots([])

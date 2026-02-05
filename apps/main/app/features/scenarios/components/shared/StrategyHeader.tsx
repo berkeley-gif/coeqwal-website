@@ -232,7 +232,7 @@ function DescriptionWithGlossaryLinks({
       variant="dashboard"
       sx={{
         color: theme.palette.grey[600],
-        maxWidth: maxWidth ?? theme.layout.maxWidth.md,
+        ...(maxWidth && { maxWidth }),
         lineHeight: 1.6,
         position: "relative",
       }}
@@ -311,7 +311,6 @@ export function StrategyHeader({
         variant="scenarioTitle"
         onClick={onTitleClick}
         sx={{
-          maxWidth: theme.layout.maxWidth.sm,
           mb: showDescription ? theme.space.component.xs : 0,
           color: theme.palette.grey[900],
           cursor: onTitleClick ? "pointer" : "default",

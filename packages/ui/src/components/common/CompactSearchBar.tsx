@@ -31,6 +31,8 @@ export interface CompactSearchBarProps {
   inputId?: string
   /** aria-label for the input when label is hidden */
   ariaLabel?: string
+  /** Max width for the search input container (defaults to 330px) */
+  inputMaxWidth?: string | number
 }
 
 /**
@@ -45,6 +47,7 @@ export function CompactSearchBar({
   label = "Search",
   inputId = "compact-search-input",
   ariaLabel,
+  inputMaxWidth = "330px",
 }: CompactSearchBarProps) {
   const theme = useTheme()
 
@@ -70,7 +73,7 @@ export function CompactSearchBar({
       <Box
         sx={{
           width: "100%",
-          maxWidth: "330px",
+          maxWidth: inputMaxWidth,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",

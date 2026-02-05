@@ -15,7 +15,13 @@
 // =============================================================================
 
 /** Scenario theme for visual categorization */
-export type ScenarioTheme = "baseline" | "groundwater" | "environmental"
+export type ScenarioTheme =
+  | "baseline"
+  | "groundwater"
+  | "flows"
+  | "cws"
+  | "delta"
+  | "environmental" // deprecated ? use "flows" for new scenarios if it makes sense
 
 /** UI metadata for a scenario (not available from API) */
 export interface ScenarioMetadata {
@@ -96,7 +102,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   },
   s0021: {
     theme: "baseline",
-    iconPath: "/images/icons/no_tucp.svg",
+    iconPath: "/images/icons/current_ops.svg",
     label: "Current operations without TUCPs",
     description:
       "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
@@ -104,7 +110,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   },
   s0023: {
     theme: "baseline",
-    iconPath: "/images/icons/no_tucp.svg",
+    iconPath: "/images/icons/current_ops.svg",
     label: "2024 USBR BiOps without TUCPs",
     description:
       "Updated baseline scenario using 2024 USBR Proposed Action (Alt2V1) with 2020 LandIQ land use. TUCPs are not active. This scenario reflects the latest federal biological opinions and updated land use data.",
@@ -125,30 +131,146 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0025: {
     theme: "groundwater",
     iconPath: "/images/icons/groundwater.svg",
-    label: "SGMA: San Joaquin Valley limits",
+    label: "SGMA: San Joaquin Valley pumping limits",
     description:
-      "Groundwater pumping limits applied to the San Joaquin Valley region, reflecting potential SGMA sustainability requirements. Based on current operations (s0020) with 2020 LandIQ land use and TUCPs active.",
-    shortLabel: "SGMA: SJ Valley",
+      "Groundwater pumping limits applied to the San Joaquin Valley region, reflecting potential SGMA sustainability requirements. Based on current operations with 2020 LandIQ land use and TUCPs active.",
+    shortLabel: "SGMA: SJ pumping",
+  },
+  s0026: {
+    theme: "groundwater",
+    iconPath: "/images/icons/groundwater.svg",
+    label: "SGMA: San Joaquin Valley reduced acreage",
+    description:
+      "Reduced agricultural acreage to improve groundwater conditions in the San Joaquin Valley. Uses SGMA-adjusted land use to explore how land fallowing affects groundwater sustainability and water allocations.",
+    shortLabel: "SGMA: SJ reduced ag",
   },
   s0027: {
     theme: "groundwater",
     iconPath: "/images/icons/groundwater.svg",
-    label: "SGMA: Central Valley limits",
+    label: "SGMA: Central Valley pumping limits",
     description:
-      "Groundwater pumping limits applied across the entire Central Valley, reflecting comprehensive SGMA sustainability requirements. Based on current operations (s0020) with 2020 LandIQ land use and TUCPs active.",
-    shortLabel: "SGMA: Central Valley",
+      "Groundwater pumping limits applied across the entire Central Valley, reflecting comprehensive SGMA sustainability requirements. Based on current operations with 2020 LandIQ land use and TUCPs active.",
+    shortLabel: "SGMA: CV pumping",
+  },
+  s0028: {
+    theme: "groundwater",
+    iconPath: "/images/icons/groundwater.svg",
+    label: "SGMA: Central Valley reduced acreage",
+    description:
+      "Reduced agricultural acreage to improve groundwater conditions across the entire Central Valley. Uses SGMA-adjusted land use with TUCPs active to explore how land fallowing affects groundwater sustainability.",
+    shortLabel: "SGMA: CV reduced ag",
   },
 
   // ---------------------------------------------------------------------------
-  // ENVIRONMENTAL SCENARIOS - Flow and ecosystem-focused scenarios
+  // FLOW SCENARIOS - Environmental and ecosystem-focused flow changes
   // ---------------------------------------------------------------------------
   s0029: {
-    theme: "environmental",
+    theme: "flows",
     iconPath: "/images/icons/environmental.svg",
     label: "Functional flows",
     description:
-      "Environmental flows scenario implementing functional flow requirements on tributaries and the Delta. Uses 2020 LandIQ land use to explore how enhanced environmental flow protections affect water allocation and ecosystem outcomes.",
+      "Functional flow requirements at 17 tributary and Delta outflow points. Uses 2020 LandIQ land use to explore how enhanced environmental flow protections affect water allocation and ecosystem outcomes.",
     shortLabel: "Functional flows",
+  },
+  s0030: {
+    theme: "flows",
+    iconPath: "/images/icons/environmental.svg",
+    label: "No flow requirements",
+    description:
+      "Removes minimum flow requirements in the Central Valley to explore impacts on water supply and ecosystem outcomes. Uses 2020 LandIQ land use.",
+    shortLabel: "No flow req.",
+  },
+  s0031: {
+    theme: "flows",
+    iconPath: "/images/icons/environmental.svg",
+    label: "Salmon-friendly flows",
+    description:
+      "Salmon-friendly flow requirements and Shasta storage protection to support salmon lifecycle needs. Uses 2020 LandIQ land use.",
+    shortLabel: "Salmon flows",
+  },
+  s0032: {
+    theme: "flows",
+    iconPath: "/images/icons/environmental.svg",
+    label: "Functional flows with reduced ag acreage",
+    description:
+      "Combines functional flow requirements with reduced Central Valley agricultural acreage, exploring how both changes interact to affect water allocation and ecosystem outcomes.",
+    shortLabel: "Func. flows + reduced ag",
+  },
+  s0033: {
+    theme: "flows",
+    iconPath: "/images/icons/environmental.svg",
+    label: "Salmon-friendly flows with reduced ag acreage",
+    description:
+      "Combines salmon-friendly flow requirements with reduced Central Valley agricultural acreage, exploring how both changes interact to support salmon and water supply.",
+    shortLabel: "Salmon flows + reduced ag",
+  },
+  s0046: {
+    theme: "flows",
+    iconPath: "/images/icons/environmental.svg",
+    label: "Functional flows (variant)",
+    description:
+      "Variant of the functional flows scenario implementing flow requirements at 17 tributary and Delta outflow points. Uses 2020 LandIQ land use.",
+    shortLabel: "Func. flows (v2)",
+  },
+
+  // ---------------------------------------------------------------------------
+  // DELTA SCENARIOS - Delta operations, conveyance, and regulatory changes
+  // ---------------------------------------------------------------------------
+  s0039: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "USBR Alt 3: 65% unimpaired Delta outflow",
+    description:
+      "USBR Alternative 3 with allocation reductions and 65% unimpaired Delta outflow requirement. Explores how higher environmental flow commitments affect water supply.",
+    shortLabel: "Alt 3: 65% unimp.",
+  },
+  s0040: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "USBR Alt 3: 35% unimpaired Delta outflow",
+    description:
+      "USBR Alternative 3 with allocation reductions and 35% unimpaired Delta outflow requirement. Lower environmental flow commitment compared to other Alt 3 variants.",
+    shortLabel: "Alt 3: 35% unimp.",
+  },
+  s0041: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "USBR Alt 3: 45% unimpaired Delta outflow",
+    description:
+      "USBR Alternative 3 with allocation reductions and 45% unimpaired Delta outflow requirement.",
+    shortLabel: "Alt 3: 45% unimp.",
+  },
+  s0042: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "USBR Alt 3: 55% unimpaired Delta outflow",
+    description:
+      "USBR Alternative 3 with allocation reductions and 55% unimpaired Delta outflow requirement.",
+    shortLabel: "Alt 3: 55% unimp.",
+  },
+  s0044: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "Increased Shasta carryover target",
+    description:
+      "Increases Shasta Reservoir carryover storage target by 20% compared to current operations, exploring how higher reservoir storage requirements affect downstream allocations.",
+    shortLabel: "Shasta +20% carryover",
+  },
+  s0045: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "No fall X2 salinity requirement",
+    description:
+      "Removes the fall X2 salinity standard in the Delta, exploring how relaxing this requirement affects Delta outflows and upstream water allocations.",
+    shortLabel: "No fall X2",
+  },
+  s0065: {
+    theme: "delta",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "DWR 2025 Delta Conveyance Project",
+    description:
+      "DWR's 2025 Delta Conveyance Project scenario with 2020 LandIQ land use and voluntary agreements, exploring how new Delta infrastructure affects water supply and ecosystem outcomes.",
+    shortLabel: "DWR 2025 DCP",
   },
 }
 
