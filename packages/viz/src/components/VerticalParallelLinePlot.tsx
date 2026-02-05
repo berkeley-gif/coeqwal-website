@@ -94,7 +94,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const val1 = scenario.values[axis]
           const val2 = representative.values[axis]
           // If either value is missing, consider them not overlapping on this axis
-          if (val1 === undefined || val2 === undefined) return true
+          if (val1 == null || val2 == null) return true
           return Math.abs(val1 - val2) < SIMILARITY_THRESHOLD
         })
         if (isSimilar) {
@@ -139,7 +139,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         if (!filter) return true
 
         const value = scenario.values[axis]
-        if (value === undefined) return true // Skip missing values
+        if (value == null) return true // Skip missing/null values
         return value >= filter[0] && value <= filter[1]
       })
 
@@ -166,7 +166,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         if (!filter) return true
 
         const value = scenario.values[axis]
-        if (value === undefined) return true // Skip missing values
+        if (value == null) return true // Skip missing/null values
         return value >= filter[0] && value <= filter[1]
       })
     },
@@ -868,7 +868,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           if (!filter) return true
 
           const value = d.values[axis]
-          if (value === undefined) return true // Skip missing values in filter check
+          if (value == null) return true // Skip missing/null values in filter check
           return value >= filter[0] && value <= filter[1]
         })
 
@@ -953,7 +953,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const value = d.values[axis]
           const circleSelector = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
 
-          if (value === undefined) {
+          if (value == null) {
             // Remove circle if no value exists
             g.select(circleSelector).remove()
             return
