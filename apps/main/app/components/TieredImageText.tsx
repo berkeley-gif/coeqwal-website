@@ -8,18 +8,11 @@
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.1.1: Alt text for images
  * - WCAG 1.3.1: Semantic <section> with aria-label
- * - WCAG 2.3.3: Reduced motion handled globally via MotionConfig in ThemeRegistry
- * - WCAG 2.4.7: Focus-visible on scroll button (via ScrollToButton)
- * - WCAG 4.1.2: Proper aria-labels on interactive elements
- * - Responsive: Same layout behavior as VideoHero (centered on mobile <900px)
  */
 
 import React from "react"
 import { motion } from "@repo/motion"
-import { ScrollToButton, DisplayBlock, Panel } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-
-const MotionBox = motion.create(Box)
 
 export interface TieredImageTextProps {
     /** Panel ID for navigation */
@@ -71,8 +64,9 @@ export function TieredImageText({
 
     return (
         <Box
-            component="div"
+            component="section"
             id={id}
+            aria-label={ariaLabel}
             sx={{
                 pointerEvents: "auto",
                 display: "flex",
@@ -120,7 +114,7 @@ export function TieredImageText({
                         display: "flex",
                         alignItems: "center",
                         flexDirection: "column",
-                        gap: "3px",
+                        gap: "30px",
                     }}
                 >
                     {/* Body text 1 */}
@@ -171,7 +165,7 @@ export function TieredImageText({
                     sx={{
                         width: "100%",
                         inset: 0,
-                        height: "150%",
+                        height: { md: "150%", lg: "215%" },
                         objectFit: "cover",
                         objectPosition: "center-bottom",
                         position: "absolute",
@@ -218,7 +212,6 @@ export function TieredImageText({
                     <Typography
                         variant="body1"
                     >
-
                         {logoText}
                     </Typography>
                 </Box>
