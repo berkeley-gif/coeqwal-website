@@ -22,15 +22,18 @@ export { SmartSummary } from "./SmartSummary"
 export type { SmartSummaryProps } from "./SmartSummary"
 
 // Utilities
-export {
-  getScenarioIcons,
-  getThemeIcon,
-  getThemeIconDescription,
-  getIconSize,
-  SGMAIcon,
-  EnvironmentalIcon,
-} from "./strategyIcons"
+export { getIconSize } from "./strategyIcons"
 export type { ScenarioIcon, ScenarioIconConfig } from "./strategyIcons"
+
+// Icon system
+export {
+  OpsCircleIcon,
+  getScenarioIconDefs,
+  renderIconDef,
+  ICON_REGISTRY,
+  SCENARIO_ICONS,
+} from "./opsIcons"
+export type { IconDef, OpsCircleIconProps } from "./opsIcons"
 
 // Types
 export type { ChartDataPoint, OutcomeName, ScenarioForDisplay } from "./types"

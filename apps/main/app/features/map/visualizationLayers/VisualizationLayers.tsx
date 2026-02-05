@@ -275,7 +275,9 @@ export default function VisualizationLayers() {
         scenarioId={scenarioId}
         visible={
           !!outcomeCode &&
-          (outcomeCode === "CWS_DEL" || outcomeCode === "WRC_SALMON_AB")
+          (outcomeCode === "CWS_DEL" ||
+            outcomeCode === "WRC_SALMON_AB" ||
+            outcomeCode === "AG_REV")
         }
       />
 

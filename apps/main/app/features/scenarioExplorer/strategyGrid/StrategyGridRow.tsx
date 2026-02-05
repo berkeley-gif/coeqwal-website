@@ -270,6 +270,7 @@ function CompactRowContent({
         display: "flex",
         flexDirection: "column",
         gap: theme.space.gap.md,
+        pl: 0.5,
       }}
     >
       {/* First row: Title/description + Key operations */}
@@ -294,7 +295,7 @@ function CompactRowContent({
             flexShrink: 0,
           }}
         >
-          <Typography variant="smallSectionLabel">Key operations</Typography>
+          <Typography variant="subtitle2">Key operations</Typography>
           <OperationsIconGroup
             scenarioId={scenario.scenarioId}
             theme={scenario.theme}
@@ -311,7 +312,7 @@ function CompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        <Typography variant="smallSectionLabel">Key outcomes</Typography>
+        <Typography variant="subtitle2">Key outcomes</Typography>
         <Box
           sx={{
             display: "flex",

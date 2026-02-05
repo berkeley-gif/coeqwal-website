@@ -131,6 +131,7 @@ export default function ScenarioExplorerNew() {
             >
               <SearchBar
                 placeholder="Search scenarios by name or description"
+                inputMaxWidth={needsSplit ? "165px" : "330px"}
                 rightContent={
                   <ViewModeControls
                     mode={exploreMode}

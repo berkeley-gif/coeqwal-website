@@ -17,9 +17,9 @@ import {
   type ScenarioTheme,
 } from "./useScenarioList"
 import {
-  getScenarioIcons,
-  type ScenarioIcon,
-} from "../components/shared/strategyIcons"
+  getScenarioIconDefs,
+  type IconDef,
+} from "../components/shared/opsIcons"
 import { useScenarioTiers } from "./useTierData"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 
@@ -41,7 +41,7 @@ export interface ScenarioSummaryData {
   iconPath: string
 
   // Operations icons
-  operations: ScenarioIcon[]
+  operations: IconDef[]
 
   // Outcomes (from tier API)
   outcomes: Record<string, ChartDataPoint[]>
@@ -111,7 +111,7 @@ export function useScenarioSummary(
 
   // Get operations icons for this scenario
   const operations = useMemo(
-    () => (scenarioId ? getScenarioIcons(scenarioId) : []),
+    () => (scenarioId ? getScenarioIconDefs(scenarioId) : []),
     [scenarioId],
   )
 
@@ -182,9 +182,9 @@ export function useMultipleScenarioSummaries(scenarioIds: string[]): {
 
   // Build operations for each scenario
   const operationsMap = useMemo(() => {
-    const map = new Map<string, ScenarioIcon[]>()
+    const map = new Map<string, IconDef[]>()
     scenarios.forEach(({ scenarioId }) => {
-      map.set(scenarioId, getScenarioIcons(scenarioId))
+      map.set(scenarioId, getScenarioIconDefs(scenarioId))
     })
     return map
   }, [scenarios])

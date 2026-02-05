@@ -15,6 +15,8 @@ interface SearchBarProps {
   rightContent?: React.ReactNode
   /** Whether to show a label above the search input */
   showLabel?: boolean
+  /** Max width for the search input (defaults to 330px) */
+  inputMaxWidth?: string | number
 }
 
 /**
@@ -24,6 +26,7 @@ export default function SearchBar({
   placeholder = "Search scenarios...",
   rightContent,
   showLabel = true,
+  inputMaxWidth,
 }: SearchBarProps) {
   const { searchQuery, setSearchQuery } = useScenarioExplorerStore()
 
@@ -37,6 +40,7 @@ export default function SearchBar({
       label="Search"
       inputId="scenario-search-input"
       ariaLabel="Search scenarios"
+      inputMaxWidth={inputMaxWidth}
     />
   )
 }
