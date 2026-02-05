@@ -2,12 +2,17 @@
 
 /**
  * ScenarioExplorer - Main scenario exploration interface
+ *
+ * Layout: Tabs span full width at top. Below tabs, a flex row splits into
+ * left column (banner, search, content) and right column (comparison chart
+ * or map). The right column spans full height below tabs when active.
  */
 
 import React, { useState } from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
 import { InfoOverlay } from "@repo/ui"
 import UnifiedExploreView, { type ExploreMode } from "./exploreView"
+import { ComparisonPanel } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
@@ -24,6 +29,7 @@ export default function ScenarioExplorerNew() {
     null,
   )
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
+  const needsSplit = mainView === "explorer" && exploreMode !== "list"
 
   return (
     <Box
@@ -39,146 +45,148 @@ export default function ScenarioExplorerNew() {
         pointerEvents: needsTransparentBg ? "none" : "auto",
       }}
     >
+      {/* Tab navigation — full width */}
+      <Box
+        sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: theme.zIndex.pageContent,
+          flexShrink: 0,
+          pointerEvents: "auto",
+          backgroundColor: theme.palette.background.paper,
+          borderBottom: theme.border.medium,
+          px: theme.space.component.xl,
+        }}
+      >
+        <Tabs
+          value={mainView}
+          onChange={(_e, v: MainView) => setMainView(v)}
+          sx={{
+            minHeight: theme.spacing(7),
+            "& .MuiTabs-indicator": {
+              height: 3,
+              backgroundColor: theme.palette.blue.bright,
+            },
+            "& .MuiTab-root": {
+              ...theme.typography.body2,
+              minHeight: theme.spacing(7),
+              textTransform: "none",
+              fontWeight: theme.typography.fontWeightMedium,
+              color: theme.palette.text.primary,
+              transition: theme.transition.default,
+              borderTopLeftRadius: theme.shape.borderRadius,
+              borderTopRightRadius: theme.shape.borderRadius,
+              mt: theme.space.component.sm,
+              mr: theme.space.component.xs,
+              px: theme.space.component.xl,
+              "&.Mui-selected": {
+                color: theme.palette.blue.bright,
+                fontWeight: theme.typography.fontWeightBold,
+                backgroundColor:
+                  theme.palette.interaction.selectedBackground,
+              },
+              "&:hover:not(.Mui-selected)": {
+                color: theme.palette.blue.dark,
+                backgroundColor:
+                  theme.palette.interaction.selectedBackground,
+              },
+            },
+          }}
+        >
+          <Tab label="Choose scenarios by summary" value="explorer" />
+          <Tab label="Explore data in depth" value="data" />
+        </Tabs>
+      </Box>
+
+      {/* Below tabs: flex row with left/right columns */}
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          height: "100%",
+          flex: 1,
           overflow: "hidden",
           pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Header */}
+        {/* Left column */}
         <Box
           sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: theme.zIndex.pageContent,
-            flexShrink: 0,
+            width: needsSplit ? "50%" : "100%",
+            transition: theme.transition.layout,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            borderRight: needsSplit ? theme.border.medium : "none",
             pointerEvents: "auto",
           }}
         >
-          {/* Tab navigation */}
-          <Box
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderBottom: theme.border.medium,
-              px: theme.space.component.xl,
-            }}
-          >
-            <Tabs
-              value={mainView}
-              onChange={(_e, v: MainView) => setMainView(v)}
-              sx={{
-                minHeight: theme.spacing(7),
-                "& .MuiTabs-indicator": {
-                  height: 3,
-                  backgroundColor: theme.palette.blue.bright,
-                },
-                "& .MuiTab-root": {
-                  ...theme.typography.body2,
-                  minHeight: theme.spacing(7),
-                  textTransform: "none",
-                  fontWeight: theme.typography.fontWeightMedium,
-                  color: theme.palette.text.primary,
-                  transition: theme.transition.default,
-                  borderTopLeftRadius: theme.shape.borderRadius,
-                  borderTopRightRadius: theme.shape.borderRadius,
-                  mt: theme.space.component.sm,
-                  mr: theme.space.component.xs,
-                  px: theme.space.component.xl,
-                  "&.Mui-selected": {
-                    color: theme.palette.blue.bright,
-                    fontWeight: theme.typography.fontWeightBold,
-                    backgroundColor:
-                      theme.palette.interaction.selectedBackground,
-                  },
-                  "&:hover:not(.Mui-selected)": {
-                    color: theme.palette.blue.dark,
-                    backgroundColor:
-                      theme.palette.interaction.selectedBackground,
-                  },
-                },
-              }}
-            >
-              <Tab label="Choose scenarios by summary" value="explorer" />
-              <Tab label="Explore data in depth" value="data" />
-            </Tabs>
-          </Box>
-
           <SelectionBanner />
 
           {/* Search toolbar (explorer view only) */}
           {mainView === "explorer" && (
-            <Box sx={{ display: "flex", width: "100%" }}>
-              <Box
-                sx={{
-                  width: exploreMode === "list" ? "100%" : "50%",
-                  transition: theme.transition.layout,
-                  backgroundColor: theme.palette.background.paper,
-                }}
-              >
-                <SearchBar
-                  placeholder="Search scenarios by name or description"
-                  rightContent={
-                    <ViewModeControls
-                      mode={exploreMode}
-                      onModeChange={setExploreMode}
-                    />
-                  }
-                />
-              </Box>
-
-              {/* Right panel header (map/comparison modes) */}
-              {exploreMode !== "list" && (
-                <Box
-                  sx={{
-                    width: "50%",
-                    position: "relative",
-                    backgroundColor:
-                      exploreMode === "map"
-                        ? "transparent"
-                        : theme.palette.background.paper,
-                    borderLeft:
-                      exploreMode === "comparison"
-                        ? theme.border.medium
-                        : "none",
-                    pointerEvents: exploreMode === "map" ? "none" : "auto",
-                  }}
-                >
-                  {exploreMode === "map" && (
-                    <InfoOverlay right={theme.space.component.lg}>
-                      Click on a scenario outcome in the left panel to see
-                      outcomes at specific locations.
-                    </InfoOverlay>
-                  )}
-                </Box>
-              )}
+            <Box
+              sx={{
+                flexShrink: 0,
+                backgroundColor: theme.palette.background.paper,
+              }}
+            >
+              <SearchBar
+                placeholder="Search scenarios by name or description"
+                rightContent={
+                  <ViewModeControls
+                    mode={exploreMode}
+                    onModeChange={setExploreMode}
+                  />
+                }
+              />
             </Box>
           )}
+
+          {/* Content */}
+          <Box
+            sx={{
+              flex: 1,
+              overflow: "hidden",
+            }}
+          >
+            {mainView === "explorer" && (
+              <UnifiedExploreView mode={exploreMode} />
+            )}
+            {mainView === "data" && (
+              <DataExplorerView
+                onNavigateToExplorer={() => setMainView("explorer")}
+              />
+            )}
+          </Box>
         </Box>
 
-        {/* Content */}
+        {/* Right column — full height below tabs */}
         <Box
           sx={{
-            flex: 1,
+            width: needsSplit ? "50%" : "0%",
+            transition: theme.transition.layout,
             overflow: "hidden",
-            pointerEvents: needsTransparentBg ? "none" : "auto",
+            backgroundColor:
+              exploreMode === "comparison"
+                ? theme.palette.grey[100]
+                : "transparent",
+            pointerEvents: exploreMode === "map" ? "none" : "auto",
           }}
         >
-          {mainView === "explorer" && (
-            <UnifiedExploreView
-              mode={exploreMode}
+          {exploreMode === "comparison" && (
+            <ComparisonPanel
               highlightedScenario={highlightedScenario}
               onScenarioClick={(id) =>
-                setHighlightedScenario((prev) => (prev === id ? null : id))
+                setHighlightedScenario((prev) =>
+                  prev === id ? null : id,
+                )
               }
             />
           )}
-          {mainView === "data" && (
-            <DataExplorerView
-              onNavigateToExplorer={() => setMainView("explorer")}
-            />
+          {exploreMode === "map" && (
+            <InfoOverlay right={theme.space.component.lg}>
+              Click on a scenario outcome in the left panel to see outcomes
+              at specific locations.
+            </InfoOverlay>
           )}
         </Box>
       </Box>
