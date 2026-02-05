@@ -18,7 +18,10 @@ import {
   Button,
   icons,
 } from "@repo/ui/mui"
-import { VerticalParallelLinePlotPeak } from "@repo/viz"
+import {
+  VerticalParallelLinePlotPeak,
+  type VerticalParallelLineData,
+} from "@repo/viz"
 import { MobileModal } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 
@@ -39,6 +42,11 @@ export default function ComparisonPanel({
   const [relativeToBaseline, setRelativeToBaseline] = useState(true)
   const [defineOutcome, setDefineOutcome] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
+
+  // Hover state for tooltip
+  const [hoveredScenario, setHoveredScenario] =
+    useState<VerticalParallelLineData | null>(null)
+
 
   const {
     data: comparisonData,
@@ -64,7 +72,8 @@ export default function ComparisonPanel({
       values: Object.fromEntries(
         Object.entries(scenario.values).map(([axis, value]) => [
           axis,
-          value - (baselineScenario.values[axis] || 0),
+          // Keep null values as null (missing data stays missing)
+          value === null ? null : value - (baselineScenario.values[axis] || 0),
         ]),
       ),
     }))
@@ -142,6 +151,8 @@ export default function ComparisonPanel({
         label={
           <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
             define an outcome
+            <br />
+            (coming soon)
           </Typography>
         }
         sx={{ mr: 1.5 }}
@@ -165,22 +176,49 @@ export default function ComparisonPanel({
   )
 
   const chartElement = (
-    <VerticalParallelLinePlotPeak
-      data={chartData}
-      axes={axes}
-      responsive={true}
-      showBaseline={highlightBaseline}
-      baselineData={baselineDataForChart}
-      overlayTiers={overlayTiers}
-      defineOutcome={defineOutcome}
-      colors={{
-        default: theme.palette.grey[600],
-        highlighted: theme.palette.blue.darkest,
-        background: theme.palette.grey[50],
-      }}
-      lineColors={lineColors}
-      onLineClick={(scenario) => onScenarioClick?.(scenario.id)}
-    />
+    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+      <VerticalParallelLinePlotPeak
+        data={chartData}
+        axes={axes}
+        responsive={true}
+        showBaseline={highlightBaseline}
+        baselineData={baselineDataForChart}
+        overlayTiers={overlayTiers}
+        defineOutcome={defineOutcome}
+        colors={{
+          default: theme.palette.grey[600],
+          highlighted: theme.palette.blue.darkest,
+          background: theme.palette.grey[50],
+        }}
+        lineColors={lineColors}
+        onLineHover={setHoveredScenario}
+        onLineClick={(scenario) => onScenarioClick?.(scenario.id)}
+      />
+      {/* Hover tooltip showing scenario name */}
+      {hoveredScenario && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: -12,
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+            boxShadow: theme.shadows[2],
+            pointerEvents: "none",
+            zIndex: 10,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <Typography variant="caption" sx={{ fontWeight: 400 }}>
+            {hoveredScenario.name}
+          </Typography>
+        </Box>
+      )}
+    </Box>
   )
 
   if (isLoading) {

@@ -8,7 +8,7 @@ import { useResizeObserver } from "../hooks/useResizeObserver"
 export interface VerticalParallelLineData {
   id: string
   name: string
-  values: Record<string, number>
+  values: Record<string, number | null>
   highlighted?: boolean
 }
 

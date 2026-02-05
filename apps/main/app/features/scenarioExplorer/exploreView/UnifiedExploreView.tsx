@@ -17,10 +17,12 @@ export type ExploreMode = "list" | "map" | "comparison"
 
 interface UnifiedExploreViewProps {
   mode: ExploreMode
+  pinnedScenarioId?: string | null
 }
 
 export default function UnifiedExploreView({
   mode,
+  pinnedScenarioId,
 }: UnifiedExploreViewProps) {
   const theme = useTheme()
 
@@ -70,6 +72,7 @@ export default function UnifiedExploreView({
       <ListView
         compact={mode !== "list"}
         onTierClick={mode === "map" ? handleTierClick : undefined}
+        pinnedScenarioId={pinnedScenarioId}
       />
     </Box>
   )
