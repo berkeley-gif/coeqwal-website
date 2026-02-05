@@ -77,7 +77,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         if (!filter) return true
 
         const value = scenario.values[axis]
-        if (value === null) return true // Null values pass filters
+        if (value == null) return true // Null/undefined values pass filters
         return value >= filter[0] && value <= filter[1]
       })
 
@@ -106,7 +106,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         if (!filter) return true
 
         const value = scenario.values[axis]
-        if (value === null) return true // Null values pass filters
+        if (value == null) return true // Null/undefined values pass filters
         return value >= filter[0] && value <= filter[1]
       })
     },
@@ -704,7 +704,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           if (!filter) return true
 
           const value = d.values[axis]
-          if (value === null) return true // Null values pass filters
+          if (value == null) return true // Null/undefined values pass filters
           return value >= filter[0] && value <= filter[1]
         })
 
@@ -782,8 +782,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const value = d.values[axis]
           const circleClass = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
 
-          // If value is null, remove any existing circle and skip
-          if (value === null) {
+          // If value is null/undefined, remove any existing circle and skip
+          if (value == null) {
             g.select(circleClass).remove()
             return
           }
