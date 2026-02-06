@@ -877,6 +877,7 @@ interface AgSectionProps {
 export default function AgSection({
   scenarios,
   scenarioNames,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   batchData,
 }: AgSectionProps) {
   const theme = useTheme()

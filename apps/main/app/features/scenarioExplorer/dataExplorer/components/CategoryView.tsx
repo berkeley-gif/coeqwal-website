@@ -53,6 +53,12 @@ import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
 
 /**
+ * Feature flag: Use batch API for fetching statistics
+ * Set to true to test the batch endpoint, false for existing individual-request behavior
+ */
+const USE_BATCH_API = false
+
+/**
  * SectionHeader - Reusable header for chart sections
  *
  * Displays a section title with optional inline adornment (e.g., dropdown)
@@ -1062,9 +1068,10 @@ export default function CategoryView() {
   // Prefetch batch statistics data for all selected scenarios
   // This dramatically improves load time by fetching storage, CWS, and AG data
   // in a single request instead of N×M individual requests
-  const { data: batchData, isLoading: batchLoading } = useBatchStatistics(
+  // Controlled by USE_BATCH_API flag at top of file
+  const { data: batchData } = useBatchStatistics(
     selectedScenarios,
-    { types: ["storage", "cws", "ag"] },
+    { types: ["storage", "cws", "ag"], enabled: USE_BATCH_API },
   )
 
   // Build scenario ID -> display name mapping for selected scenarios
@@ -1240,14 +1247,14 @@ export default function CategoryView() {
                 <CwsSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
-                  batchData={batchData}
+                  batchData={USE_BATCH_API ? batchData : undefined}
                 />
               ) : category.id === "agricultural-water" &&
                 selectedScenarios.length > 0 ? (
                 <AgSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
-                  batchData={batchData}
+                  batchData={USE_BATCH_API ? batchData : undefined}
                 />
               ) : (
                 <>

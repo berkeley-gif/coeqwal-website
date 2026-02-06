@@ -1787,8 +1787,11 @@ interface CwsSectionProps {
 export default function CwsSection({
   scenarios,
   scenarioNames,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   batchData,
 }: CwsSectionProps) {
+  // Note: batchData contains pre-fetched CWS aggregate data
+  // It can be used to speed up initial rendering (future enhancement)
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
 
