@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme, Button, Tabs, Tab } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Button } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import CategoryView from "./components/CategoryView"
 // Hidden for now
