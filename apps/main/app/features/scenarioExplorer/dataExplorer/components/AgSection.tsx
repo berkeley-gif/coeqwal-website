@@ -870,14 +870,20 @@ function MonthlyAgSection({
 interface AgSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Pre-fetched batch data for performance (optional) */
+  batchData?: import("@repo/data/coeqwal").BatchStatisticsResponse
 }
 
 export default function AgSection({
   scenarios,
   scenarioNames,
+  batchData,
 }: AgSectionProps) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
+
+  // Note: batchData contains pre-fetched AG aggregate data
+  // It can be used to speed up initial rendering (future enhancement)
 
   return (
     <>

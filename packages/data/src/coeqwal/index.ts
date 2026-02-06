@@ -94,6 +94,11 @@ export type {
   // Reservoir period summary types
   ReservoirPeriodData,
   ReservoirPeriodSummaryResponse,
+  // Batch statistics types
+  BatchStorageData,
+  BatchCwsData,
+  BatchAgData,
+  BatchStatisticsResponse,
 } from "./types"
 
 // API constants
@@ -137,6 +142,8 @@ export {
   fetchAgDemandUnitsPeriod,
   // Reservoir period summary fetcher
   fetchReservoirPeriodSummary,
+  // Batch statistics fetcher
+  fetchBatchStatistics,
 } from "./fetchers"
 
 // Re-export hooks for convenience

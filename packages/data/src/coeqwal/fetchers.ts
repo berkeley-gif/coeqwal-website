@@ -41,6 +41,7 @@ import type {
   AgDemandUnitShortageMonthlyResponse,
   AgDemandUnitPeriodResponse,
   ReservoirPeriodSummaryResponse,
+  BatchStatisticsResponse,
 } from "./types"
 
 /**
@@ -818,6 +819,43 @@ export async function fetchReservoirPeriodSummary(
     ENDPOINTS.reservoirPeriodSummary(scenarioId),
     {
       baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// Batch Statistics API fetcher
+// ============================================================================
+
+/**
+ * Fetch batch statistics for multiple scenarios
+ *
+ * This dramatically improves Data Explorer load time by fetching all data
+ * in a single request instead of N×M individual requests.
+ *
+ * @param scenarios - Array of scenario IDs (e.g., ["s0020", "s0021"])
+ * @param types - Data types to fetch (default: ["storage", "cws", "ag"])
+ * @returns Combined statistics for all scenarios
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchBatchStatistics(["s0020", "s0021"])
+ * // { scenarios: ["s0020", "s0021"], storage: {...}, cws: {...}, ag: {...} }
+ * ```
+ */
+export async function fetchBatchStatistics(
+  scenarios: string[],
+  types: string[] = ["storage", "cws", "ag"],
+): Promise<BatchStatisticsResponse> {
+  if (!scenarios || scenarios.length === 0) {
+    throw new Error("At least one scenario is required")
+  }
+
+  return apiFetcher<BatchStatisticsResponse>(
+    ENDPOINTS.batchStatistics(scenarios, types),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 60000, // Larger timeout for batch requests
     },
   )
 }

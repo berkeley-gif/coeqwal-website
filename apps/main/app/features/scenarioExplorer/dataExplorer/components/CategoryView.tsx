@@ -42,7 +42,7 @@ import { useMetricData } from "../hooks/useMetricData"
 import ReservoirPercentilesSection, {
   type StorageDisplayMode,
 } from "./ReservoirPercentilesSection"
-import { useSpillMonthly } from "@repo/data/coeqwal/hooks"
+import { useSpillMonthly, useBatchStatistics } from "@repo/data/coeqwal/hooks"
 import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
 import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
@@ -1059,6 +1059,14 @@ export default function CategoryView() {
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
+  // Prefetch batch statistics data for all selected scenarios
+  // This dramatically improves load time by fetching storage, CWS, and AG data
+  // in a single request instead of N×M individual requests
+  const { data: batchData, isLoading: batchLoading } = useBatchStatistics(
+    selectedScenarios,
+    { types: ["storage", "cws", "ag"] },
+  )
+
   // Build scenario ID -> display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {
     const names: Record<string, string> = {}
@@ -1232,12 +1240,14 @@ export default function CategoryView() {
                 <CwsSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
+                  batchData={batchData}
                 />
               ) : category.id === "agricultural-water" &&
                 selectedScenarios.length > 0 ? (
                 <AgSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
+                  batchData={batchData}
                 />
               ) : (
                 <>
