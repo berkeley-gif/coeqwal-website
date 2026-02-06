@@ -251,6 +251,16 @@ export const CACHE_KEYS = {
    */
   reservoirPeriodSummary: (scenarioId: string) =>
     `/api/statistics/scenarios/${scenarioId}/period-summary`,
+
+  // Batch statistics cache key (for Data Explorer performance)
+
+  /**
+   * Batch statistics for multiple scenarios
+   * @param scenarios - Array of scenario IDs
+   * @param types - Data types to fetch (storage, cws, ag)
+   */
+  batchStatistics: (scenarios: string[], types: string[] = ["storage", "cws", "ag"]) =>
+    ["batch-statistics", ...scenarios, ...types] as const,
 } as const
 
 /**

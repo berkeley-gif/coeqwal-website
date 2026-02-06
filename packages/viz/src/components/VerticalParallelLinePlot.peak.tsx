@@ -68,6 +68,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Track if any axis is currently being dragged (for connector line opacity)
   const isDragging = useRef<boolean>(false)
 
+  // Track currently hovered scenario for dimming other lines
+  const hoveredScenarioRef = useRef<number | null>(null)
+
   // Centralized filtering function - separate opacity for lines vs circles
   const getScenarioOpacity = useCallback(
     (scenario: VerticalParallelLineData, elementType: "line" | "circle") => {
@@ -87,12 +90,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           ? 1.0 // Active dots: always full opacity (highlighted or not)
           : 0.15 // Filtered dots: faint but visible for experimentation
       } else {
-        // Lines: Two distinct opacity levels - active vs inactive
+        // Lines: Full opacity for active, faint for filtered
         return passesAllFilters
-          ? scenario.highlighted
-            ? 0.7
-            : 0.35 // Active lines: highlighted=70%, normal=35% (more elegant)
-          : 0.08 // Filtered lines: faint but visible for experimentation
+          ? 1.0 // Active lines: full opacity
+          : 0.2 // Filtered lines: faint but visible
       }
     },
     [axes],
@@ -139,6 +140,62 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
     },
     [data, axes, getScenarioOpacity],
+  )
+
+  // Apply hover dimming: dim all lines except the hovered one
+  const applyHoverDimming = useCallback(
+    (
+      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      hoveredIndex: number | null
+    ) => {
+      data.forEach((scenario, scenarioIndex) => {
+        const isHovered = hoveredIndex === scenarioIndex
+        const isActive = isScenarioActive(scenario)
+
+        // Calculate opacity based on hover state
+        let lineOpacity: number
+        let circleOpacity: number
+
+        if (hoveredIndex === null) {
+          // No hover - use normal opacity
+          lineOpacity = getScenarioOpacity(scenario, "line")
+          circleOpacity = getScenarioOpacity(scenario, "circle")
+        } else if (isHovered) {
+          // This is the hovered line - keep fully visible
+          lineOpacity = 1.0
+          circleOpacity = 1.0
+        } else {
+          // Not hovered - dim this line significantly
+          lineOpacity = isActive ? 0.15 : 0.05
+          circleOpacity = isActive ? 0.2 : 0.1
+        }
+
+        // Calculate stroke width
+        const strokeWidth = isHovered
+          ? 3.5
+          : isActive
+            ? (scenario.highlighted ? 3 : 2.5)
+            : 1.5
+
+        // Apply to line (no transition for responsiveness)
+        g.select(`.line-${scenarioIndex}`)
+          .attr("opacity", lineOpacity)
+          .attr("stroke-width", strokeWidth)
+
+        // Calculate circle radius
+        const circleRadius = isHovered
+          ? (scenario.highlighted ? 6 : 5)
+          : (scenario.highlighted ? 5 : 4)
+
+        // Apply to circles
+        axes.forEach((axisName) => {
+          g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, "-")}`)
+            .attr("opacity", circleOpacity)
+            .attr("r", circleRadius)
+        })
+      })
+    },
+    [data, axes, getScenarioOpacity, isScenarioActive]
   )
 
   // Handle responsive sizing
@@ -726,45 +783,24 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", lineColor)
             .attr(
               "stroke-width",
-              passesAllFilters ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-            ) // More elegant thickness for active scenarios
-            .attr("opacity", lineOpacity) // Lines semi-transparent
+              passesAllFilters ? (d.highlighted ? 3 : 2.5) : 1.5,
+            ) // Thicker lines for better visibility
+            .attr("opacity", lineOpacity)
             .style("cursor", "pointer")
             .on("mouseover", function () {
               // Only allow hover highlighting for active (unfiltered) scenarios
               if (!isScenarioActive(d)) return
 
+              hoveredScenarioRef.current = dataIndex
               onLineHover?.(d)
-              d3.select(this).attr("stroke-width", 3.5).attr("opacity", 1) // Elegant thickness on hover
-
-              // Highlight all corresponding circles for this line
-              axes.forEach((axis) => {
-                g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-                  .attr("r", d.highlighted ? 6 : 5)
-                  .attr("opacity", 1)
-              })
+              // Dim all other lines, keep this one prominent
+              applyHoverDimming(g, dataIndex)
             })
             .on("mouseout", function () {
+              hoveredScenarioRef.current = null
               onLineHover?.(null)
-              const lineOpacity = getScenarioOpacity(d, "line")
-              const circleOpacity = getScenarioOpacity(d, "circle")
-
-              // Check if scenario is currently active for stroke width
-              const isActive = isScenarioActive(d)
-
-              d3.select(this)
-                .attr(
-                  "stroke-width",
-                  isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-                ) // Return to elegant active thickness
-                .attr("opacity", lineOpacity) // Respect current filter state for lines
-
-              // Reset all corresponding circles for this line
-              axes.forEach((axis) => {
-                g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-                  .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", circleOpacity) // Respect current filter state for circles
-              })
+              // Restore all lines to normal state
+              applyHoverDimming(g, null)
             })
             .on("click", function () {
               onLineClick?.(d)
@@ -805,50 +841,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 // Only allow hover highlighting for active (unfiltered) scenarios
                 if (!isScenarioActive(d)) return
 
-            onLineHover?.(d)
-            d3.select(this)
-              .attr("r", d.highlighted ? 6 : 5)
-              .attr("opacity", 1)
-
-                // Highlight the corresponding line for this circle
-                g.select(`.line-${dataIndex}`)
-                  .attr("stroke-width", 4) // Thicker on hover
-                  .attr("opacity", 1)
-
-                // Highlight all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
-                  g.select(
-                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
-                  )
-                    .attr("r", d.highlighted ? 6 : 5)
-              .attr("opacity", 1)
-                })
+                hoveredScenarioRef.current = dataIndex
+                onLineHover?.(d)
+                // Dim all other lines, keep this one prominent
+                applyHoverDimming(g, dataIndex)
           })
           .on("mouseout", function () {
-            onLineHover?.(null)
-                const lineOpacity = getScenarioOpacity(d, "line")
-                const circleOpacity = getScenarioOpacity(d, "circle")
-            d3.select(this)
-              .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", circleOpacity) // Respect current filter state for circles
-
-                // Reset the corresponding line for this circle
-                const isActive = isScenarioActive(d)
-                g.select(`.line-${dataIndex}`)
-                  .attr(
-                    "stroke-width",
-                    isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-                  ) // Return to elegant active thickness
-                  .attr("opacity", lineOpacity) // Respect current filter state for lines
-
-                // Reset all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
-                  g.select(
-                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
-                  )
-                    .attr("r", d.highlighted ? 5 : 4)
-                    .attr("opacity", circleOpacity) // Respect current filter state for circles
-                })
+                hoveredScenarioRef.current = null
+                onLineHover?.(null)
+                // Restore all lines to normal state
+                applyHoverDimming(g, null)
           })
           .on("click", function () {
             onLineClick?.(d)
@@ -895,6 +897,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       isScenarioActive,
       overlayTiers,
       updateScenarioVisibility,
+      applyHoverDimming,
     ],
   )
 

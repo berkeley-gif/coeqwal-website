@@ -237,4 +237,14 @@ export const ENDPOINTS = {
    */
   reservoirPeriodSummary: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/period-summary`,
+
+  // Batch statistics endpoint (for Data Explorer performance)
+
+  /**
+   * Batch fetch statistics for multiple scenarios
+   * @param scenarios - Comma-separated scenario IDs (e.g., "s0020,s0021,s0022")
+   * @param types - Comma-separated data types (e.g., "storage,cws,ag")
+   */
+  batchStatistics: (scenarios: string[], types: string[] = ["storage", "cws", "ag"]) =>
+    `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
 } as const

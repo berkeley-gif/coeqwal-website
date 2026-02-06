@@ -52,3 +52,9 @@ export {
   useAgDemandUnitsShortageMonthly,
   useAgDemandUnitsPeriod,
 } from "./useAgStatistics"
+export {
+  useBatchStatistics,
+  getStorageForScenario,
+  getCwsForScenario,
+  getAgForScenario,
+} from "./useBatchStatistics"

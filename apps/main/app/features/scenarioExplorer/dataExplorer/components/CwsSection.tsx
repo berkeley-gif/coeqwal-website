@@ -1780,11 +1780,14 @@ function MonthlyCwsSection({
 interface CwsSectionProps {
   scenarios: string[]
   scenarioNames: Record<string, string>
+  /** Pre-fetched batch data for performance (optional) */
+  batchData?: import("@repo/data/coeqwal").BatchStatisticsResponse
 }
 
 export default function CwsSection({
   scenarios,
   scenarioNames,
+  batchData,
 }: CwsSectionProps) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)

@@ -4,8 +4,9 @@ import React from "react"
 import { Box, Typography, useTheme, Button, Tabs, Tab } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import CategoryView from "./components/CategoryView"
-import MapView from "./components/MapView"
-import TableView from "./components/TableView"
+// Hidden for now
+// import MapView from "./components/MapView"
+// import TableView from "./components/TableView"
 
 interface DataExplorerViewProps {
   /** Callback to navigate back to explorer view */
@@ -15,16 +16,13 @@ interface DataExplorerViewProps {
 /**
  * DataExplorerView
  *
- * Three sub-views: category, map, table
+ * Displays outcome data by category. Map and table views are hidden for now.
  */
 export default function DataExplorerView({
   onNavigateToExplorer,
 }: DataExplorerViewProps) {
   const theme = useTheme()
   const { selectedScenarios } = useScenarioExplorerStore()
-  const [subView, setSubView] = React.useState<"category" | "map" | "table">(
-    "category",
-  )
 
   const hasData = selectedScenarios.length > 0
 
@@ -58,7 +56,7 @@ export default function DataExplorerView({
         </Box>
       )}
 
-      {/* Sub-navigation tabs */}
+      {/* Sub-navigation tabs 
       {hasData && (
         <Box
           sx={{
@@ -103,6 +101,7 @@ export default function DataExplorerView({
           </Tabs>
         </Box>
       )}
+        */}
 
       {/* Main Content */}
       <Box
@@ -154,13 +153,11 @@ export default function DataExplorerView({
             </Box>
           </Box>
         ) : (
-          // Data view content based on active sub-tab
+          // Category view content
           <Box
             sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}
           >
-            {subView === "category" && <CategoryView />}
-            {subView === "map" && <MapView />}
-            {subView === "table" && <TableView />}
+            <CategoryView />
           </Box>
         )}
       </Box>

@@ -963,3 +963,52 @@ export interface ReservoirPeriodSummaryResponse {
   /** Reservoir data keyed by short ID (e.g., "FOLSM", "SHSTA") */
   reservoirs: Record<string, ReservoirPeriodData>
 }
+
+// ============================================================================
+// Batch Statistics Types
+// ============================================================================
+
+/**
+ * Storage data for a single scenario in batch response
+ */
+export interface BatchStorageData {
+  scenario_id: string
+  reservoirs: Record<
+    string,
+    {
+      name: string
+      capacity_taf: number | null
+      dead_pool_taf: number | null
+      monthly_percent: Record<string, MonthlyPercentiles>
+      monthly_taf: Record<string, MonthlyPercentiles>
+    }
+  >
+}
+
+/**
+ * CWS data for a single scenario in batch response
+ */
+export interface BatchCwsData {
+  monthly: CwsAggregateMonthlyResponse
+  period: CwsAggregatePeriodResponse
+}
+
+/**
+ * AG data for a single scenario in batch response
+ */
+export interface BatchAgData {
+  monthly: AgAggregateMonthlyResponse
+  period: AgAggregatePeriodResponse
+}
+
+/**
+ * Response from /api/statistics/batch
+ *
+ * Combines storage, CWS, and AG data for multiple scenarios in a single response.
+ */
+export interface BatchStatisticsResponse {
+  scenarios: string[]
+  storage?: Record<string, BatchStorageData>
+  cws?: Record<string, BatchCwsData>
+  ag?: Record<string, BatchAgData>
+}
