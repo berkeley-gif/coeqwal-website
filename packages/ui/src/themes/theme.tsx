@@ -692,8 +692,8 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // At 1024px: ~4.7rem, at 500px: ~3rem, min: 1.75rem
-      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
+      // Mobile (3.5rem / 56px), Desktop (4.5rem / 72px)
+      fontSize: "clamp(3.5rem, 2.5rem + 3vw, 4.5rem)",
       fontWeight: 500,
       lineHeight: 1.05,
       letterSpacing: "-0.016em",
@@ -703,7 +703,7 @@ const theme = createTheme({
     // h1Bold - Bold emphasis variant for hero headlines (e.g., "Water" in "California's Water")
     h1Bold: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
+      fontSize: "clamp(3.5rem, 2.5rem + 3vw, 4.5rem)",
       fontWeight: 700,
       lineHeight: 1.05,
       letterSpacing: "-0.016em",
@@ -716,6 +716,17 @@ const theme = createTheme({
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
       lineHeight: 1.05, // Match h1/h1Bold for tight headline pairing
+      letterSpacing: "-0.016em",
+      margin: 0,
+      padding: 0,
+    },
+    // h2Main - Main site specific h2 variant with larger mobile size
+    h2Main: {
+      fontFamily: themeValues.fontFamily.display,
+      // Larger minimum for main site (2.8rem / 44.8px on mobile)
+      fontSize: "clamp(2.8rem, 2rem + 2.4vw, 3.6rem)",
+      fontWeight: 500,
+      lineHeight: 1.05,
       letterSpacing: "-0.016em",
       margin: 0,
       padding: 0,
@@ -1666,6 +1677,7 @@ declare module "@mui/material/styles" {
   interface TypographyVariants {
     fontWeightSemiBold: number
     h1Bold: React.CSSProperties
+    h2Main: React.CSSProperties
     body1Medium: React.CSSProperties
     nav: React.CSSProperties
     tabLabel: React.CSSProperties
@@ -1686,6 +1698,7 @@ declare module "@mui/material/styles" {
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
     h1Bold?: React.CSSProperties
+    h2Main?: React.CSSProperties
     body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
     tabLabel?: React.CSSProperties
@@ -1717,6 +1730,7 @@ declare module "@mui/material/Button" {
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     h1Bold: true
+    h2Main: true
     body1Medium: true
     nav: true
     tabLabel: true

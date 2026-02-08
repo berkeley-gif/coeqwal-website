@@ -6,7 +6,7 @@
  *
  * Note: We inline the zIndex value (10) instead of using theme.zIndex.pageContent
  * to allow this to be a Server Component. This is a tradeoff between
- * using MUI and SSG optimization. See theme.tsx for the canonical value.
+ * using MUI and SSG optimization.
  */
 
 import { Box } from "@repo/ui/mui"

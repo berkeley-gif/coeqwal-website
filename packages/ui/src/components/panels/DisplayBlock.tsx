@@ -29,11 +29,8 @@ export function DisplayBlock({
         // 520px optimizes line length for content sentence wrapping
         maxWidth: { xs: "100%", sm: "520px" },
         width: { xs: "100%", sm: "auto" },
-        // Responsive padding: tighter on mobile
-        padding: {
-          xs: "clamp(24px, 5vw, 36px)",
-          sm: theme.space.displayBlock.padding,
-        },
+        // Non-responsive padding: same as mobile view throughout
+        padding: "clamp(24px, 5vw, 36px)",
         background: "transparent",
         border: theme.border.rule,
         boxSizing: "border-box",

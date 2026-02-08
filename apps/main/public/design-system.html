@@ -141,7 +141,7 @@
       /* Display font samples */
       .sample-h1 {
         font-family: var(--font-display);
-        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
+        font-size: clamp(3.5rem, 2.5rem + 3vw, 4.5rem);
         font-weight: 500;
         line-height: 1.1;
         color: var(--blue-darkest);
@@ -149,7 +149,7 @@
 
       .sample-h1-bold {
         font-family: var(--font-display);
-        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
+        font-size: clamp(3.5rem, 2.5rem + 3vw, 4.5rem);
         font-weight: 700;
         line-height: 1.05;
         color: var(--blue-darkest);
@@ -157,7 +157,15 @@
 
       .sample-h2 {
         font-family: var(--font-display);
-        font-size: clamp(1.4rem, 1.6rem + 1.6vw, 2.8rem);
+        font-size: clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem);
+        font-weight: 500;
+        line-height: 1.05;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h2-main {
+        font-family: var(--font-display);
+        font-size: clamp(2.8rem, 2rem + 2.4vw, 3.6rem);
         font-weight: 500;
         line-height: 1.05;
         color: var(--blue-darkest);
@@ -620,7 +628,7 @@
             <div class="type-label">
               <span class="type-name">H1</span>
               <span class="type-specs"
-                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05 /
+                >clamp(3.5rem, 2.5rem + 3vw, 4.5rem) / 500 / 1.05 /
                 -0.016em</span
               >
             </div>
@@ -642,7 +650,7 @@
             <div class="type-label">
               <span class="type-name">H1 Bold</span>
               <span class="type-specs"
-                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05 /
+                >clamp(3.5rem, 2.5rem + 3vw, 4.5rem) / 700 / 1.05 /
                 -0.016em</span
               >
             </div>
@@ -683,7 +691,31 @@
               >variant="h2"</code
             >
             <div class="type-usage">
-              Hero intro line (0.8× of h1, responsive)
+              Hero intro line (0.8× of h1, responsive) - Used by storylines
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H2 Main</span>
+              <span class="type-specs"
+                >clamp(2.8rem, 2rem + 2.4vw, 3.6rem) / 500 / 1.05 /
+                -0.016em</span
+              >
+            </div>
+            <div class="sample-h2-main">California's</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h2Main"</code
+            >
+            <div class="type-usage">
+              Main site hero intro line (larger mobile size)
             </div>
           </div>
 
@@ -1037,18 +1069,23 @@
           <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H1</strong></td>
-              <td>clamp(1.75rem, 2rem + 4vw, 5.5rem)</td>
+              <td>clamp(3.5rem, 2.5rem + 3vw, 4.5rem)</td>
               <td style="color: #888;">Hero base (500)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H1 Bold</strong></td>
-              <td>clamp(1.75rem, 2rem + 4vw, 5.5rem)</td>
+              <td>clamp(3.5rem, 2.5rem + 3vw, 4.5rem)</td>
               <td style="color: #888;">Hero emphasis (700)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H2</strong></td>
               <td>clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)</td>
-              <td style="color: #888;">Hero intro (0.8×)</td>
+              <td style="color: #888;">Hero intro (storylines)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 8px 0;"><strong>H2 Main</strong></td>
+              <td>clamp(2.8rem, 2rem + 2.4vw, 3.6rem)</td>
+              <td style="color: #888;">Hero intro (main site)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H3</strong></td>

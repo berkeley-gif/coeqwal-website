@@ -43,7 +43,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <AgricultureIcon />,
     term: "Agricultural deliveries",
     definition:
-      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agriculture uses the largest share of California's developed water supply.",
+      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agriculture uses the largest share of California&rsquo;s developed water supply.",
   },
   {
     icon: <AgricultureIcon />,
@@ -61,7 +61,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <AccountBalanceIcon />,
     term: "California Department of Water Resources (DWR)",
     definition:
-      "A state agency that manages California's water resources. DWR operates the State Water Project and plays a central role in planning, modeling, and allocating water in California.",
+      "A state agency that manages California&rsquo;s water resources. DWR operates the State Water Project and plays a central role in planning, modeling, and allocating water in California.",
   },
   {
     icon: <EngineeringIcon />,
@@ -73,31 +73,31 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <EngineeringIcon />,
     term: "CalSim",
     definition:
-      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim3 is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
+      "A computational water planning model used to simulate how water moves through California&rsquo;s Central Valley water system. CalSim3 is used by the state&rsquo;s Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
   },
   {
     icon: <LocationOnIcon />,
     term: "Central Valley",
     definition:
-      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California.  It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water to farms through the Central Valley, but also to cities within the Valley and along the coast, including in the San Francisco Bay Area and Southern California.",
+      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California.  It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California&rsquo;s complex water infrastructure is designed to move water to farms through the Central Valley, but also to cities within the Valley and along the coast, including in the San Francisco Bay Area and Southern California.",
   },
   {
     icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
-      'A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California\'s water under a changing climate. See "About COEQWAL" for more information.',
+      "A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California&rsquo;s water under a changing climate. See \"About COEQWAL\" for more information.",
   },
   {
     icon: <LocalShippingIcon />,
     term: "Conveyance",
     definition:
-      "The movement of water through managed infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
+      "The movement of water through managed infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California&rsquo;s water system, which transports water hundreds of miles between regions.",
   },
   {
     icon: <SettingsIcon />,
     term: "Current operations",
     definition:
-      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated. This water management strategy uses a current operations scenario developed by the Department of Water Resources in 2020, with a representation of current agricultural land use (2020) and Temporary Use Change Petitions (TUCPs). Current operations serve as a baseline to help us understand how and why water is allocated to different users and how water allocations shift with changes in water management strategies.",
+      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California&rsquo;s water supply is allocated. This water management strategy uses a current operations scenario developed by the Department of Water Resources in 2020, with a representation of current agricultural land use (2020) and Temporary Use Change Petitions (TUCPs). Current operations serve as a baseline to help us understand how and why water is allocated to different users and how water allocations shift with changes in water management strategies.",
   },
   {
     icon: <LocalShippingIcon />,
@@ -138,13 +138,13 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <WaterIcon />,
     term: "Groundwater",
     definition:
-      "Water that is stored underground in aquifers—layers of rock, sand, and soil that hold water. Groundwater is pumped from wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
+      "Water that is stored underground in aquifers—layers of rock, sand, and soil that hold water. Groundwater is pumped from wells and provides a significant portion of California&rsquo;s water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
   },
   {
     icon: <CloudIcon />,
     term: "Hydroclimate",
     definition:
-      "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with water management strategies to see how water allocation outcomes change under different conditions.",
+      "Current and projected shifts in California&rsquo;s climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California&rsquo;s water. These hydroclimate futures can be combined with water management strategies to see how water allocation outcomes change under different conditions.",
   },
   {
     icon: <WavesIcon />,
@@ -155,7 +155,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <TimelineIcon />,
     term: "Scenarios",
     definition:
-      "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California's water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
+      "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California&rsquo;s water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
   },
   {
     icon: (
@@ -171,7 +171,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <WaterIcon />,
     term: "Surface water",
     definition:
-      "Surface water is water that flows over, or is stored on, the Earth's surface. It includes water flowing in rivers and artificial channels and water stored in lakes and reservoirs. Surface water plays a key role in supporting ecosystems, agriculture, and communities.",
+      "Surface water is water that flows over, or is stored on, the Earth&rsquo;s surface. It includes water flowing in rivers and artificial channels and water stored in lakes and reservoirs. Surface water plays a key role in supporting ecosystems, agriculture, and communities.",
   },
   {
     icon: <WaterIcon />,

@@ -152,7 +152,7 @@ export default function FrontmatterPanel({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2" component="span">
+            <Typography variant="h2Main" component="span">
               {headlineLine1}
             </Typography>
             {headlineLine2 && (
@@ -289,7 +289,7 @@ export default function FrontmatterPanel({
             textAlign: { xs: "center", md: "left" },
           }}
         >
-          <Typography variant="h2" component="span">
+          <Typography variant="h2Main" component="span">
             {headlineLine1}
           </Typography>
           {headlineLine2 && (

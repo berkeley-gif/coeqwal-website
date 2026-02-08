@@ -18,7 +18,7 @@ export default function GlobalError({
   return (
     <ErrorFallback
       title="Something went wrong"
-      message="We've encountered an unexpected error. Please try again."
+      message="We&rsquo;ve encountered an unexpected error. Please try again."
       onRetry={reset}
     />
   )

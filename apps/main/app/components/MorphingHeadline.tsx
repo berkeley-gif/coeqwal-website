@@ -257,7 +257,7 @@ export default function MorphingHeadline({
                 : "none",
           }}
         >
-          <Typography variant="h2" component="span">
+          <Typography variant="h2Main" component="span">
             {activeHeadline?.line1}
           </Typography>
           {activeHeadline?.line2 && (
@@ -311,7 +311,7 @@ export default function MorphingHeadline({
                     : "none",
               }}
             >
-              <Typography variant="h2" component="span">
+              <Typography variant="h2Main" component="span">
                 {headline.line1}
               </Typography>
               {headline.line2 && (
