@@ -22,8 +22,8 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const padding = isMapTab ? "0" : "2rem 0"
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll
-    // Offset = collapsed header (40px) + SmoothTabs height (60px)
-    const headerAndTabsOffset = theme.layout.collapsedHeaderHeight + 60
+    // Offset = collapsed header (40px) + docked SmoothTabs height (~40px)
+    const headerAndTabsOffset = theme.layout.collapsedHeaderHeight + 40
     const exploreStyles: React.CSSProperties = isExploreTab
       ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
       : {}
@@ -38,7 +38,16 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         role="tabpanel"
         id={thisPanelId}
         aria-labelledby={`tab-${tabKey}`}
-        style={{ padding, backgroundColor, pointerEvents, ...exploreStyles }}
+        style={{
+          padding,
+          backgroundColor,
+          pointerEvents,
+          // Minimum height ensures enough page content for sticky tabs to work.
+          // Without this, shorter panels cause the browser to clamp scrollY,
+          // pushing the tab row from 40px to ~60px.
+          minHeight: `calc(100vh - ${headerAndTabsOffset}px)`,
+          ...exploreStyles,
+        }}
       >
         {children}
         <AutoAdvanceFooter />
