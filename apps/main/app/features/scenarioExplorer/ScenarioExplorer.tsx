@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from "react"
-import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { InfoOverlay } from "@repo/ui"
 import UnifiedExploreView, { type ExploreMode } from "./exploreView"
 import { ComparisonPanel } from "./exploreView"
@@ -47,57 +47,60 @@ export default function ScenarioExplorerNew() {
         pointerEvents: needsTransparentBg ? "none" : "auto",
       }}
     >
-      {/* Tab navigation — full width */}
+      {/* Tab navigation — styled to match main SmoothTabs (Learn/Explore/Share) */}
       <Box
+        component="div"
+        role="tablist"
+        aria-label="Explore section tabs"
         sx={{
           position: "sticky",
           top: 0,
           zIndex: theme.zIndex.pageContent,
           flexShrink: 0,
           pointerEvents: "auto",
-          backgroundColor: theme.palette.background.paper,
-          borderBottom: theme.border.medium,
-          px: theme.space.component.xl,
+          display: "flex",
+          width: "100%",
         }}
       >
-        <Tabs
-          value={mainView}
-          onChange={(_e, v: MainView) => setMainView(v)}
-          sx={{
-            minHeight: theme.spacing(7),
-            "& .MuiTabs-indicator": {
-              height: 3,
-              backgroundColor: theme.palette.blue.bright,
-            },
-            "& .MuiTab-root": {
-              ...theme.typography.body2,
-              minHeight: theme.spacing(7),
-              textTransform: "none",
-              fontWeight: theme.typography.fontWeightMedium,
-              color: theme.palette.text.primary,
-              transition: theme.transition.default,
-              borderTopLeftRadius: theme.shape.borderRadius,
-              borderTopRightRadius: theme.shape.borderRadius,
-              mt: theme.space.component.sm,
-              mr: theme.space.component.xs,
-              px: theme.space.component.xl,
-              "&.Mui-selected": {
-                color: theme.palette.blue.bright,
-                fontWeight: theme.typography.fontWeightBold,
-                backgroundColor:
-                  theme.palette.interaction.selectedBackground,
-              },
-              "&:hover:not(.Mui-selected)": {
-                color: theme.palette.blue.dark,
-                backgroundColor:
-                  theme.palette.interaction.selectedBackground,
-              },
-            },
-          }}
-        >
-          <Tab label="Choose scenarios by summary" value="explorer" />
-          <Tab label="Explore data in depth" value="data" />
-        </Tabs>
+        {(
+          [
+            { key: "explorer" as MainView, label: "Choose scenarios", color: theme.palette.explore.background },
+            { key: "data" as MainView, label: "Explore data in depth", color: theme.palette.empower.background },
+          ] as const
+        ).map(({ key, label, color }) => {
+          const selected = mainView === key
+          return (
+            <Box
+              key={key}
+              component="button"
+              role="tab"
+              aria-selected={selected}
+              tabIndex={selected ? 0 : -1}
+              onClick={() => setMainView(key)}
+              sx={{
+                flex: 1,
+                position: "relative",
+                padding: "8px 20px",
+                border: "none",
+                background: color,
+                cursor: "pointer",
+                fontFamily: theme.typography.h1.fontFamily,
+                fontWeight: 600,
+                fontSize: "1.3rem",
+                lineHeight: 1.1,
+                textTransform: "capitalize",
+                color: theme.palette.blue.darkest,
+                transition: "opacity 0.15s ease",
+                opacity: selected ? 1 : 0.7,
+                "&:hover": {
+                  opacity: 1,
+                },
+              }}
+            >
+              {label}
+            </Box>
+          )
+        })}
       </Box>
 
       {/* Below tabs: flex row with left/right columns */}
