@@ -305,7 +305,7 @@ export default function VideoHero({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2" component="span">
+            <Typography variant="h2Main" component="span">
               {t("homePanel.titleLine1")}
             </Typography>
             <br />

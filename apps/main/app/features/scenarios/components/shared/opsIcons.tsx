@@ -248,7 +248,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     customSvg: BaselineGearSvg,
     label: "Current operations",
     description:
-      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
+      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California&rsquo;s water supply is allocated.",
   },
   theme_groundwater: {
     id: "theme_groundwater",

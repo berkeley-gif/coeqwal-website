@@ -16,8 +16,8 @@ import { useTabs } from "../context/Tabs"
  * - WCAG 2.3.3: Respects prefers-reduced-motion for scroll animation
  */
 export function Header() {
-  const { isInTabsArea } = useTabs()
   const router = useRouter()
+  const { isInTabsArea } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
   // Native smooth scroll gets interrupted by React state changes during the tabs
@@ -53,7 +53,6 @@ export function Header() {
         requestAnimationFrame(animateScroll)
       }
     }
-
     requestAnimationFrame(animateScroll)
   }
 

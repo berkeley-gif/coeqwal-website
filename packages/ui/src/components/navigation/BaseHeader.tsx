@@ -27,7 +27,7 @@
  * Navigation links (left to right):
  * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
  * - Get data: links to dev.coeqwal.org/data
- * - About COEQWAL: placeholder (no link yet)
+ * - About COEQWAL
  * - Language switcher (optional)
  *
  * WCAG 2.0 AA Compliance:
@@ -37,7 +37,7 @@
  * - WCAG 2.1.1: All interactive elements keyboard accessible
  * - WCAG 2.1.2: No keyboard traps (MUI Drawer handles focus trap correctly)
  * - WCAG 2.3.3: Respects prefers-reduced-motion for animations
- * - WCAG 2.4.1: Skip link is now a separate <SkipLink /> component that must be
+ * - WCAG 2.4.1: Skip link is a separate <SkipLink /> component that must be
  *               placed FIRST in the page, before any other content including this header.
  *               See: packages/ui/src/components/navigation/SkipLink.tsx
  * - WCAG 2.4.3: Focus returns to trigger when drawer/dropdown closes
@@ -88,13 +88,10 @@ const MotionAppBar = motion.create(AppBar)
 
 // Mobile breakpoint - below this width, show hamburger menu
 const MOBILE_BREAKPOINT = 750
-
 // WCAG: Minimum touch target size (44x44px)
 const MIN_TOUCH_TARGET = 44
-
 // ID for drawer (used by aria-controls)
 const MOBILE_DRAWER_ID = "mobile-nav-drawer"
-
 // Active water story - determined by current URL hostname
 type ActiveWaterStory = "flow" | "climate" | null
 
@@ -144,7 +141,7 @@ export interface BaseHeaderProps {
   logoVariant?: "color" | "light"
 
   /* --- Scroll-based background color (optional) --- */
-  // If set, header auto-switches from backgroundColor → backgroundColorScrolled
+  // If set, header auto-switches from backgroundColor to backgroundColorScrolled
   // after user scrolls past backgroundScrollThreshold pixels.
   // Leave unset if you want to control background color yourself (like main app does).
   backgroundColorScrolled?: string
@@ -211,6 +208,7 @@ export function BaseHeader({
   borderBottom, // Default set after theme is available
   logoVariant = "light",
 }: BaseHeaderProps) {
+  
   /* ========================================
    * THEME & LAYOUT
    * ======================================== */

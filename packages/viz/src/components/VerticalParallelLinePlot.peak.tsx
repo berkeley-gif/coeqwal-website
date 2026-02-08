@@ -85,15 +85,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
 
       if (elementType === "circle") {
-        // Dots: Full opacity when active, faint when filtered
-        return passesAllFilters
-          ? 1.0 // Active dots: always full opacity (highlighted or not)
-          : 0.15 // Filtered dots: faint but visible for experimentation
+        // Dots: Full opacity if passes filters, dimmed if not
+        return passesAllFilters ? 1.0 : 0.15
       } else {
-        // Lines: Full opacity for active, faint for filtered
-        return passesAllFilters
-          ? 1.0 // Active lines: full opacity
-          : 0.2 // Filtered lines: faint but visible
+        // Lines: Full opacity if passes filters, dimmed if not
+        return passesAllFilters ? 1.0 : 0.2
       }
     },
     [axes],
@@ -258,6 +254,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const selection = animate ? g.transition(t as any) : g
         selection.attr("transform", `translate(${margin.left},${margin.top})`)
       }
+
+      // Clean up ALL scenario lines and circles from previous renders
+      // This ensures stale elements don't persist when data changes
+      g.selectAll("[class^='line-']").remove()
+      g.selectAll("[class^='circle-']").remove()
 
       // Update background
       let background = g.select<SVGRectElement>(".chart-background")
@@ -746,7 +747,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .y(([axis]) => yScale(axis)!)
       // No curve - use straight angular lines (original)
 
-
     data.forEach((d, dataIndex) => {
         const lineColor =
           lineColors.length > dataIndex
@@ -774,18 +774,54 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           (axis) => [axis, d.values[axis]] as [string, number | null],
         )
 
-        let path = g.select<SVGPathElement>(`.line-${dataIndex}`)
-        if (path.empty()) {
-          path = g
-            .append("path")
-            .attr("class", `line-${dataIndex}`)
-            .attr("fill", "none")
-            .attr("stroke", lineColor)
-            .attr(
-              "stroke-width",
-              passesAllFilters ? (d.highlighted ? 3 : 2.5) : 1.5,
-            ) // Thicker lines for better visibility
-            .attr("opacity", lineOpacity)
+        // Create fresh path element (old ones were removed at start of render)
+        const path = g
+          .append("path")
+          .attr("class", `line-${dataIndex}`)
+          .attr("fill", "none")
+          .attr("stroke", lineColor)
+          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 3 : 2.5) : 1.5)
+          .attr("opacity", lineOpacity)
+          .attr("d", lineGenerator(pathData))
+          .style("cursor", "pointer")
+          .on("mouseover", function () {
+            // Only allow hover highlighting for active (unfiltered) scenarios
+            if (!isScenarioActive(d)) return
+
+            hoveredScenarioRef.current = dataIndex
+            onLineHover?.(d)
+            // Dim all other lines, keep this one prominent
+            applyHoverDimming(g, dataIndex)
+          })
+          .on("mouseout", function () {
+            hoveredScenarioRef.current = null
+            onLineHover?.(null)
+            // Restore all lines to normal state
+            applyHoverDimming(g, null)
+          })
+          .on("click", function () {
+            onLineClick?.(d)
+          })
+
+        // Create circles at intersection points (old ones were removed at start of render)
+        // Skip circles for null values (missing data)
+        axes.forEach((axis) => {
+          const value = d.values[axis]
+
+          // Skip null/undefined values
+          if (value == null) return
+
+          // Create fresh circle element
+          g.append("circle")
+            .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
+            .datum(d as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+            .attr("fill", lineColor)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1.5)
+            .attr("r", d.highlighted ? 5 : 4)
+            .attr("opacity", circleOpacity)
+            .attr("cx", scales[axis]!(value))
+            .attr("cy", yScale(axis)!)
             .style("cursor", "pointer")
             .on("mouseover", function () {
               // Only allow hover highlighting for active (unfiltered) scenarios
@@ -805,64 +841,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .on("click", function () {
               onLineClick?.(d)
             })
-        }
-
-        const pathSelection = animate ? path.transition(t as any) : path // eslint-disable-line @typescript-eslint/no-explicit-any
-        ;(pathSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-          .attr("d", lineGenerator(pathData))
-          .attr("opacity", lineOpacity) // Lines semi-transparent
-
-        // Update circles at intersection points (original styling)
-        // Skip circles for null values (missing data)
-        axes.forEach((axis) => {
-          const value = d.values[axis]
-          const circleClass = `.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`
-
-          // If value is null/undefined, remove any existing circle and skip
-          if (value == null) {
-            g.select(circleClass).remove()
-            return
-          }
-
-          let circle = g.select<SVGCircleElement>(circleClass)
-
-          if (circle.empty()) {
-            circle = g
-              .append("circle")
-              .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-              .datum(d as any) // Store data reference for filtering (original) // eslint-disable-line @typescript-eslint/no-explicit-any
-              .attr("fill", lineColor)
-          .attr("stroke", "white")
-              .attr("stroke-width", 1.5) // Original width
-              .attr("r", d.highlighted ? 5 : 4) // Original sizes
-              .attr("opacity", circleOpacity) // Dots opaque
-          .style("cursor", "pointer")
-          .on("mouseover", function () {
-                // Only allow hover highlighting for active (unfiltered) scenarios
-                if (!isScenarioActive(d)) return
-
-                hoveredScenarioRef.current = dataIndex
-                onLineHover?.(d)
-                // Dim all other lines, keep this one prominent
-                applyHoverDimming(g, dataIndex)
-          })
-          .on("mouseout", function () {
-                hoveredScenarioRef.current = null
-                onLineHover?.(null)
-                // Restore all lines to normal state
-                applyHoverDimming(g, null)
-          })
-          .on("click", function () {
-            onLineClick?.(d)
-              })
-          }
-
-          const circleSelection = animate ? circle.transition(t as any) : circle // eslint-disable-line @typescript-eslint/no-explicit-any
-          ;(circleSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-            .attr("cx", scales[axis]!(value))
-            .attr("cy", yScale(axis)!)
-            .attr("opacity", circleOpacity) // Dots opaque
-      })
+        })
     })
 
     // Add title if provided
