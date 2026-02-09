@@ -167,7 +167,8 @@ export function MobileModal({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: title ? "space-between" : "flex-end",
-                p: theme.space.section.sm,
+                // No title: zero padding since close button is absolutely positioned
+                p: title ? theme.space.section.sm : 0,
                 borderBottom: title
                   ? `1px solid ${theme.palette.divider}`
                   : "none",

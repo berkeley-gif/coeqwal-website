@@ -12,6 +12,8 @@ import { useScenarioExplorerStore } from "../store"
 
 interface SearchBarProps {
   placeholder?: string
+  /** Content to render to the left of the search input */
+  leftContent?: React.ReactNode
   rightContent?: React.ReactNode
   /** Whether to show a label above the search input */
   showLabel?: boolean
@@ -24,6 +26,7 @@ interface SearchBarProps {
  */
 export default function SearchBar({
   placeholder = "Search scenarios...",
+  leftContent,
   rightContent,
   showLabel = true,
   inputMaxWidth,
@@ -35,6 +38,7 @@ export default function SearchBar({
       value={searchQuery}
       onChange={setSearchQuery}
       placeholder={placeholder}
+      leftContent={leftContent}
       rightContent={rightContent}
       showLabel={showLabel}
       label="Search"

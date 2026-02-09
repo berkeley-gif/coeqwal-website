@@ -21,6 +21,8 @@ export interface CompactSearchBarProps {
   onChange: (value: string) => void
   /** Placeholder text */
   placeholder?: string
+  /** Content to render to the left of the search input (e.g., expand button) */
+  leftContent?: React.ReactNode
   /** Content to render on the right side (e.g., filters, toggles) */
   rightContent?: React.ReactNode
   /** Whether to show a label above the search input */
@@ -42,6 +44,7 @@ export function CompactSearchBar({
   value,
   onChange,
   placeholder = "Search...",
+  leftContent,
   rightContent,
   showLabel = true,
   label = "Search",
@@ -69,6 +72,17 @@ export function CompactSearchBar({
         borderBottom: theme.border.medium,
       }}
     >
+      {leftContent && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
+          {leftContent}
+        </Box>
+      )}
       {/* Search section */}
       <Box
         sx={{

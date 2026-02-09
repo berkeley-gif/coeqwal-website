@@ -208,7 +208,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const applyHoverDimming = useCallback(
     (
       g: d3.Selection<SVGGElement, unknown, null, undefined>,
-      hoveredIndex: number | null
+      hoveredIndex: number | null,
     ) => {
       data.forEach((scenario, scenarioIndex) => {
         const isHovered = hoveredIndex === scenarioIndex
@@ -236,7 +236,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const strokeWidth = isHovered
           ? 3.5
           : isActive
-            ? (scenario.highlighted ? 4 : 2)
+            ? scenario.highlighted
+              ? 4
+              : 2
             : 1.5
 
         // Apply to line (no transition for responsiveness)
@@ -246,8 +248,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         // Calculate circle radius
         const circleRadius = isHovered
-          ? (scenario.highlighted ? 8 : 6)
-          : (scenario.highlighted ? 7 : 4)
+          ? scenario.highlighted
+            ? 8
+            : 6
+          : scenario.highlighted
+            ? 7
+            : 4
 
         // Apply to circles
         currentAxes.forEach((axisName) => {
@@ -257,7 +263,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         })
       })
     },
-    [data, currentAxes, getScenarioOpacity, isScenarioActive]
+    [data, currentAxes, getScenarioOpacity, isScenarioActive],
   )
 
   // Handle responsive sizing

@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState } from "react"
-import { Box, Typography, useTheme, Button, icons } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
@@ -22,12 +22,21 @@ interface ListViewProps {
   compact?: boolean
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
   pinnedScenarioId?: string | null
+  /** When provided, controls the expanded modal externally */
+  isExpanded?: boolean
+  /** Callback to close the expanded modal */
+  onCloseExpand?: () => void
+  /** Toolbar content to render inside the expanded modal (e.g. search bar, controls) */
+  modalToolbar?: React.ReactNode
 }
 
 export default function ListView({
   compact = false,
   onTierClick,
   pinnedScenarioId,
+  isExpanded: isExpandedProp,
+  onCloseExpand,
+  modalToolbar,
 }: ListViewProps) {
   const theme = useTheme()
   const {
@@ -140,7 +149,14 @@ export default function ListView({
         matchingScenarioIds: matchingIds,
         hasSearchResults: matches.length > 0,
       }
-    }, [searchQuery, sortBy, sortDirection, allScoreData, scenarios, pinnedScenarioId])
+    }, [
+      searchQuery,
+      sortBy,
+      sortDirection,
+      allScoreData,
+      scenarios,
+      pinnedScenarioId,
+    ])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
@@ -149,7 +165,13 @@ export default function ListView({
   const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
     Record<string, string>
   >({})
-  const [isExpanded, setIsExpanded] = useState(false)
+  // Use external expand control when provided, otherwise internal state
+  const [isExpandedInternal, setIsExpandedInternal] = useState(false)
+  const externallyControlled = isExpandedProp !== undefined
+  const isExpanded = externallyControlled ? isExpandedProp : isExpandedInternal
+  const closeExpand = externallyControlled
+    ? () => onCloseExpand?.()
+    : () => setIsExpandedInternal(false)
 
   const handleOutcomeSelect = (scenarioId: string, outcome: string) => {
     setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
@@ -233,33 +255,6 @@ export default function ListView({
               backgroundColor: theme.palette.grey[100],
             }}
           >
-            {/* Expand button row */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                mb: theme.space.component.xs,
-              }}
-            >
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => setIsExpanded(true)}
-                startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
-                sx={{
-                  color: theme.palette.grey[400],
-                  textTransform: "none",
-                  minWidth: "auto",
-                  px: theme.space.component.sm,
-                  "&:hover": {
-                    color: theme.palette.grey[600],
-                    backgroundColor: theme.palette.grey[100],
-                  },
-                }}
-              >
-                Expand
-              </Button>
-            </Box>
             <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
           </Box>
 
@@ -297,18 +292,7 @@ export default function ListView({
         {/* Expanded modal view */}
         <MobileModal
           open={isExpanded}
-          onClose={() => setIsExpanded(false)}
-          title={
-            <Box
-              component="span"
-              sx={{
-                ...theme.typography.subtitle2,
-                color: theme.palette.text.primary,
-              }}
-            >
-              Scenario Explorer
-            </Box>
-          }
+          onClose={closeExpand}
           maxWidth="95vw"
           maxHeight="95vh"
           contentAriaLabel="Scenario list expanded view"
@@ -322,6 +306,9 @@ export default function ListView({
               backgroundColor: theme.palette.grey[100],
             }}
           >
+            {/* Toolbar (search, controls) */}
+            {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
+
             {/* Fixed header area */}
             <Box
               sx={{
@@ -379,36 +366,6 @@ export default function ListView({
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        {/* Expand button header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            px: theme.space.section.sm,
-            pt: theme.space.component.sm,
-            flexShrink: 0,
-          }}
-        >
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => setIsExpanded(true)}
-            startIcon={<icons.OpenInFull sx={{ fontSize: 16 }} />}
-            sx={{
-              color: theme.palette.grey[400],
-              textTransform: "none",
-              minWidth: "auto",
-              px: theme.space.component.sm,
-              "&:hover": {
-                color: theme.palette.grey[600],
-                backgroundColor: theme.palette.grey[100],
-              },
-            }}
-          >
-            Expand
-          </Button>
-        </Box>
-
         <Box
           sx={{
             flex: 1,
@@ -440,18 +397,7 @@ export default function ListView({
       {/* Expanded modal view */}
       <MobileModal
         open={isExpanded}
-        onClose={() => setIsExpanded(false)}
-        title={
-          <Box
-            component="span"
-            sx={{
-              ...theme.typography.subtitle2,
-              color: theme.palette.text.primary,
-            }}
-          >
-            Scenario Explorer
-          </Box>
-        }
+        onClose={closeExpand}
         maxWidth="95vw"
         maxHeight="95vh"
         contentAriaLabel="Scenario list expanded view"
@@ -464,6 +410,9 @@ export default function ListView({
             overflow: "hidden",
           }}
         >
+          {/* Toolbar (search, controls) */}
+          {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
+
           {/* Fixed header area */}
           <Box
             sx={{

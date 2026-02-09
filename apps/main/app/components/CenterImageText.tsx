@@ -23,127 +23,123 @@ import { fadeIn } from "../lib/constants/motionAnimations"
 const MotionBox = motion.create(Box)
 
 export interface CenterImageTextProps {
-    /** Panel ID for navigation */
-    id: string
-    /** Accessible label for the section */
-    ariaLabel: string
-    /** Background color (theme color or CSS value) */
-    backgroundColor: string
-    /** Padding for the top (optional) */
-    paddingTop: number
-    /** Body text bolded section (optional) */
-    bodyTextBold?: string
-    /** Body text for the DisplayBlock (required for "default" variant) */
-    bodyText?: string
-    /** ID of element to scroll to (optional) */
-    scrollToId?: string
-    /** Text color for headline (defaults to white) */
-    textColor?: string
-    /** Whether to apply text shadows (default: false for solid backgrounds) */
-    textShadow?: boolean
-    /** Image source */
-    imgSrc: string
-    /** Image alt text */
-    imgAlt: string
+  /** Panel ID for navigation */
+  id: string
+  /** Accessible label for the section */
+  ariaLabel: string
+  /** Background color (theme color or CSS value) */
+  backgroundColor: string
+  /** Padding for the top (optional) */
+  paddingTop: number
+  /** Body text bolded section (optional) */
+  bodyTextBold?: string
+  /** Body text for the DisplayBlock (required for "default" variant) */
+  bodyText?: string
+  /** ID of element to scroll to (optional) */
+  scrollToId?: string
+  /** Text color for headline (defaults to white) */
+  textColor?: string
+  /** Whether to apply text shadows (default: false for solid backgrounds) */
+  textShadow?: boolean
+  /** Image source */
+  imgSrc: string
+  /** Image alt text */
+  imgAlt: string
 }
 
 export function CenterImageText({
-    id,
-    ariaLabel,
-    backgroundColor,
-    bodyTextBold,
-    bodyText,
-    scrollToId,
-    paddingTop = 0,
-    textColor = "common.white",
-    imgSrc = '',
-    imgAlt = '',
+  id,
+  ariaLabel,
+  backgroundColor,
+  bodyTextBold,
+  bodyText,
+  scrollToId,
+  paddingTop = 0,
+  textColor = "common.white",
+  imgSrc = "",
+  imgAlt = "",
 }: CenterImageTextProps) {
-    const theme = useTheme()
+  const theme = useTheme()
 
-    return (
-        <Box
-            component={motion.div}
-            initial="hidden"
-            whileInView="show"
-            variants={fadeIn}
-            id={id}
-            aria-label={ariaLabel}
-            sx={{
-                pointerEvents: "none",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                boxSizing: "border-box",
-                height: "100vh",
-                maxHeight: "100vh",
-                gap: "55px",
-                backgroundColor: backgroundColor,
-                paddingTop: `${paddingTop}px`,
-            }}
+  return (
+    <Box
+      component={motion.div}
+      initial="hidden"
+      whileInView="show"
+      variants={fadeIn}
+      id={id}
+      aria-label={ariaLabel}
+      sx={{
+        pointerEvents: "none",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        boxSizing: "border-box",
+        height: "100vh",
+        maxHeight: "100vh",
+        gap: "55px",
+        backgroundColor: backgroundColor,
+        paddingTop: `${paddingTop}px`,
+      }}
+    >
+      {/* Image — centered on mobile and desktop */}
+      <Box
+        component="img"
+        src={imgSrc}
+        alt={imgAlt}
+        sx={{
+          width: { lg: "300px", xl: "600px" },
+          height: "auto",
+          objectFit: "contain",
+        }}
+      />
+
+      {/* Text */}
+      <Box
+        component="div"
+        sx={{
+          listStyle: "none",
+          m: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: { xs: 4, md: 4 },
+          textAlign: "left",
+          paddingLeft: "55px",
+          maxWidth: { sm: "55%", xl: "40%" },
+        }}
+      >
+        {/* Body */}
+        <Typography
+          variant="body1"
+          sx={{
+            color: textColor,
+          }}
         >
-            {/* Image — centered on mobile and desktop */}
-            <Box
-                component="img"
-                src={imgSrc}
-                alt={imgAlt}
-                sx={{
-                    width: { lg: "300px", xl: "600px" },
-                    height: "auto",
-                    objectFit: "contain",
-                }}
-            />
+          <strong>{bodyTextBold}</strong>
+          {bodyText}
+        </Typography>
+      </Box>
 
-            {/* Text */}
-            <Box
-                component="div"
-                sx={{
-                    listStyle: "none",
-                    m: "0 auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: { xs: 4, md: 4 },
-                    textAlign: "left",
-                    paddingLeft: "55px",
-                    maxWidth: { sm: "55%", xl: "40%" },
-                }}
-            >
-
-                {/* Body */}
-                <Typography
-                    variant="body1"
-                    sx={{
-                        color: textColor,
-                    }}
-                >
-                    <strong>{bodyTextBold}</strong>
-                    {bodyText}
-                </Typography>
-
-            </Box>
-
-            {/* Scroll indicator (optional) */}
-            {
-                scrollToId && (
-                    <Box
-                        sx={{
-                            pointerEvents: "auto",
-                            margin: "0 auto",
-                            bottom: "clamp(24px, 4vh, 48px)",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                        }}
-                    >
-                        <ScrollToButton
-                            color="rgba(255, 255, 255, 0.85)"
-                            size={52}
-                            scrollToId={scrollToId}
-                            ariaLabel="Scroll down to continue"
-                        />
-                    </Box>
-                )
-            }
+      {/* Scroll indicator (optional) */}
+      {scrollToId && (
+        <Box
+          sx={{
+            pointerEvents: "auto",
+            margin: "0 auto",
+            bottom: "clamp(24px, 4vh, 48px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        >
+          <ScrollToButton
+            color="rgba(255, 255, 255, 0.85)"
+            size={52}
+            scrollToId={scrollToId}
+            ariaLabel="Scroll down to continue"
+          />
         </Box>
-    )
+      )}
+    </Box>
+  )
 }

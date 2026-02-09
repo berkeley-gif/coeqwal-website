@@ -89,7 +89,7 @@ export default function TabPanels() {
 
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Background color tied to active tab

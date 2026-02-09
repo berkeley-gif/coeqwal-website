@@ -205,7 +205,10 @@ export default function TestVplpPage() {
           flexShrink: 0,
         }}
       >
-        <Typography variant="compactCaption" sx={{ color: theme.palette.grey[500] }}>
+        <Typography
+          variant="compactCaption"
+          sx={{ color: theme.palette.grey[500] }}
+        >
           Click a line to highlight it in both charts. Both have overlayTiers
           enabled.
         </Typography>

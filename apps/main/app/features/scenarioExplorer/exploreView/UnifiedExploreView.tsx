@@ -18,11 +18,20 @@ export type ExploreMode = "list" | "map" | "comparison"
 interface UnifiedExploreViewProps {
   mode: ExploreMode
   pinnedScenarioId?: string | null
+  /** When provided, controls the expanded modal externally */
+  isExpanded?: boolean
+  /** Callback to close the expanded modal */
+  onCloseExpand?: () => void
+  /** Toolbar content to render inside the expanded modal */
+  modalToolbar?: React.ReactNode
 }
 
 export default function UnifiedExploreView({
   mode,
   pinnedScenarioId,
+  isExpanded,
+  onCloseExpand,
+  modalToolbar,
 }: UnifiedExploreViewProps) {
   const theme = useTheme()
 
@@ -73,6 +82,9 @@ export default function UnifiedExploreView({
         compact={mode !== "list"}
         onTierClick={mode === "map" ? handleTierClick : undefined}
         pinnedScenarioId={pinnedScenarioId}
+        isExpanded={isExpanded}
+        onCloseExpand={onCloseExpand}
+        modalToolbar={modalToolbar}
       />
     </Box>
   )

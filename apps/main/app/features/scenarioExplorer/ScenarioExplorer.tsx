@@ -9,7 +9,16 @@
  */
 
 import React, { useState } from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import {
+  Box,
+  IconButton,
+  Tooltip,
+  useTheme,
+  icons,
+  ViewListIcon,
+  CompareArrowsIcon,
+} from "@repo/ui/mui"
+import Image from "next/image"
 import { InfoOverlay } from "@repo/ui"
 import UnifiedExploreView, { type ExploreMode } from "./exploreView"
 import { ComparisonPanel } from "./exploreView"
@@ -30,6 +39,8 @@ export default function ScenarioExplorerNew() {
   )
   // Pinned scenario appears at top of list when clicked in comparison chart
   const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(null)
+  // Expand modal for list view (lifted from ListView)
+  const [isListExpanded, setIsListExpanded] = useState(false)
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
   const needsSplit = mainView === "explorer" && exploreMode !== "list"
 
@@ -62,45 +73,142 @@ export default function ScenarioExplorerNew() {
           width: "100%",
         }}
       >
-        {(
-          [
-            { key: "explorer" as MainView, label: "Choose scenarios", color: theme.palette.explore.background },
-            { key: "data" as MainView, label: "Explore data in depth", color: theme.palette.empower.background },
-          ] as const
-        ).map(({ key, label, color }) => {
-          const selected = mainView === key
-          return (
+        {/* "Choose scenarios" tab with inline view mode icons */}
+        {/* Uses div (not button) because it contains clickable icon children */}
+        <Box
+          role="tab"
+          aria-selected={mainView === "explorer"}
+          tabIndex={mainView === "explorer" ? 0 : -1}
+          onClick={() => setMainView("explorer")}
+          sx={{
+            flex: 1,
+            position: "relative",
+            padding: "8px 20px",
+            border: "none",
+            background: theme.palette.explore.background,
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            fontFamily: theme.typography.h1.fontFamily,
+            fontWeight: 600,
+            fontSize: "1.3rem",
+            lineHeight: 1.1,
+            textTransform: "capitalize",
+            color: theme.palette.blue.darkest,
+            transition: "opacity 0.15s ease",
+            opacity: mainView === "explorer" ? 1 : 0.7,
+            "&:hover": {
+              opacity: 1,
+            },
+          }}
+        >
+          Choose scenarios
+          {/* View mode icons — only when this tab is selected */}
+          {mainView === "explorer" && (
             <Box
-              key={key}
-              component="button"
-              role="tab"
-              aria-selected={selected}
-              tabIndex={selected ? 0 : -1}
-              onClick={() => setMainView(key)}
               sx={{
-                flex: 1,
-                position: "relative",
-                padding: "8px 20px",
-                border: "none",
-                background: color,
-                cursor: "pointer",
-                fontFamily: theme.typography.h1.fontFamily,
-                fontWeight: 600,
-                fontSize: "1.3rem",
-                lineHeight: 1.1,
-                textTransform: "capitalize",
-                color: theme.palette.blue.darkest,
-                transition: "opacity 0.15s ease",
-                opacity: selected ? 1 : 0.7,
-                "&:hover": {
-                  opacity: 1,
-                },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
               }}
+              onClick={(e) => e.stopPropagation()}
             >
-              {label}
+              {[
+                {
+                  mode: "list" as ExploreMode,
+                  icon: <ViewListIcon sx={{ fontSize: "1.2rem" }} />,
+                  tip: "List view",
+                },
+                {
+                  mode: "map" as ExploreMode,
+                  icon: (
+                    <Image
+                      src="/images/icons/map.svg"
+                      alt="Map view"
+                      width={18}
+                      height={18}
+                      style={{ opacity: exploreMode === "map" ? 1 : 0.5 }}
+                    />
+                  ),
+                  tip: "Map view",
+                },
+                {
+                  mode: "comparison" as ExploreMode,
+                  icon: <CompareArrowsIcon sx={{ fontSize: "1.2rem" }} />,
+                  tip: "Comparison view",
+                },
+              ].map(({ mode, icon, tip }) => (
+                <Tooltip key={mode} title={tip} arrow>
+                  <Box
+                    component="span"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={tip}
+                    onClick={() => setExploreMode(mode)}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 28,
+                      height: 28,
+                      borderRadius: "50%",
+                      cursor: "pointer",
+                      color:
+                        exploreMode === mode
+                          ? theme.palette.blue.bright
+                          : theme.palette.blue.darkest,
+                      opacity: exploreMode === mode ? 1 : 0.5,
+                      backgroundColor:
+                        exploreMode === mode
+                          ? theme.palette.interaction.selectedBackground
+                          : theme.palette.common.white,
+                      transition: "opacity 0.15s, background-color 0.15s",
+                      "&:hover": {
+                        opacity: 1,
+                        backgroundColor:
+                          theme.palette.interaction.selectedBackground,
+                      },
+                    }}
+                  >
+                    {icon}
+                  </Box>
+                </Tooltip>
+              ))}
             </Box>
-          )
-        })}
+          )}
+        </Box>
+
+        {/* "Explore data in depth" tab */}
+        <Box
+          component="button"
+          role="tab"
+          aria-selected={mainView === "data"}
+          tabIndex={mainView === "data" ? 0 : -1}
+          onClick={() => setMainView("data")}
+          sx={{
+            flex: 1,
+            position: "relative",
+            padding: "8px 20px",
+            border: "none",
+            background: theme.palette.empower.background,
+            cursor: "pointer",
+            textAlign: "left",
+            fontFamily: theme.typography.h1.fontFamily,
+            fontWeight: 600,
+            fontSize: "1.3rem",
+            lineHeight: 1.1,
+            textTransform: "capitalize",
+            color: theme.palette.blue.darkest,
+            transition: "opacity 0.15s ease",
+            opacity: mainView === "data" ? 1 : 0.7,
+            "&:hover": {
+              opacity: 1,
+            },
+          }}
+        >
+          Explore data in depth
+        </Box>
       </Box>
 
       {/* Below tabs: flex row with left/right columns */}
@@ -137,12 +245,24 @@ export default function ScenarioExplorerNew() {
               <SearchBar
                 placeholder="Search scenarios by name or description"
                 inputMaxWidth={needsSplit ? "165px" : "330px"}
-                rightContent={
-                  <ViewModeControls
-                    mode={exploreMode}
-                    onModeChange={setExploreMode}
-                  />
+                leftContent={
+                  <Tooltip title="Expand" arrow>
+                    <IconButton
+                      size="small"
+                      onClick={() => setIsListExpanded(true)}
+                      sx={{
+                        color: theme.palette.grey[500],
+                        "&:hover": {
+                          color: theme.palette.grey[700],
+                          backgroundColor: "rgba(0,0,0,0.04)",
+                        },
+                      }}
+                    >
+                      <icons.OpenInFull sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Tooltip>
                 }
+                rightContent={<ViewModeControls />}
               />
             </Box>
           )}
@@ -158,6 +278,14 @@ export default function ScenarioExplorerNew() {
               <UnifiedExploreView
                 mode={exploreMode}
                 pinnedScenarioId={pinnedScenarioId}
+                isExpanded={isListExpanded}
+                onCloseExpand={() => setIsListExpanded(false)}
+                modalToolbar={
+                  <SearchBar
+                    placeholder="Search scenarios by name or description"
+                    rightContent={<ViewModeControls />}
+                  />
+                }
               />
             )}
             {mainView === "data" && (
@@ -193,8 +321,8 @@ export default function ScenarioExplorerNew() {
           )}
           {exploreMode === "map" && (
             <InfoOverlay right={theme.space.component.lg}>
-              Click on a scenario outcome in the left panel to see outcomes
-              at specific locations.
+              Click on a scenario outcome in the left panel to see outcomes at
+              specific locations.
             </InfoOverlay>
           )}
         </Box>

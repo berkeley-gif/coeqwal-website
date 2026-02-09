@@ -161,8 +161,7 @@ const SpillMatrix: React.FC<SpillMatrixProps> = ({
 
             {/* Cells */}
             {scenarios.map((scenarioId) => {
-              const monthlyData =
-                data[reservoir.reservoirId]?.[scenarioId]
+              const monthlyData = data[reservoir.reservoirId]?.[scenarioId]
 
               return (
                 <div
