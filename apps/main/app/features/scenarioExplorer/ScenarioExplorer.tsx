@@ -191,7 +191,7 @@ export default function ScenarioExplorerNew() {
             position: "relative",
             padding: "8px 20px",
             border: "none",
-            background: theme.palette.empower.background,
+            background: theme.palette.share.background,
             cursor: "pointer",
             textAlign: "left",
             fontFamily: theme.typography.h1.fontFamily,
