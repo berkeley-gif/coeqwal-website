@@ -1,11 +1,20 @@
 "use client"
 
 import { motion, AnimatePresence } from "@repo/motion"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme } from "@repo/ui/mui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+
+const descriptions: Record<TabKey, string> = {
+  learn:
+    "Did you know that California has one of the most complex water systems in the world? Learn about how water flows through California\u2019s Central Valley and how we manage it to support diverse needs.",
+  explore:
+    "What if we managed water differently? Explore how water allocations change under different water management scenarios and discover new possibilities.",
+  empower:
+    "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future. Tools coming soon.",
+}
 
 export default function SmoothTabs() {
   const { state, tabsRef, isInTabsArea } = useTabs()
@@ -30,6 +39,8 @@ export default function SmoothTabs() {
     if (e.key === "Home") onSelect(TAB_ORDER[0])
     if (e.key === "End") onSelect(TAB_ORDER[TAB_ORDER.length - 1])
   }
+
+  const activeTabColor = TABS.find((t) => t.key === activeTab)?.panelColor
 
   return (
     <div
@@ -93,74 +104,55 @@ export default function SmoothTabs() {
                   }}
                 />
               )}
-              <motion.div
-                layout
-                animate={isInTabsArea ? "sticky" : "expanded"}
-                initial={{ gap: 0 }}
-                variants={{
-                  expanded: { gap: 8 },
-                  sticky: { gap: 0 },
-                }}
+              <Typography
+                component="span"
+                variant={isInTabsArea ? "tabLabelDocked" : "tabLabel"}
+                sx={{ transition: theme.transition.quick }}
               >
-                <Box
-                  component="span"
-                  sx={{
-                    // Display font for tab labels
-                    fontFamily: theme.typography.h1.fontFamily,
-                    fontWeight: 600,
-                    lineHeight: 1.1,
-                    // When docked: 1.3rem (not 1.1rem like header) to compensate for
-                    // optical illusion where dark text on light background appears smaller
-                    fontSize: isInTabsArea ? "1.3rem" : "1.6rem",
-                    textTransform: "capitalize",
-                    transition: "font-size 0.2s ease",
-                  }}
-                >
-                  {label}
-                </Box>
-                <AnimatePresence initial={false}>
-                  {!isInTabsArea && (
-                    <motion.div
-                      key="tab-description"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                      style={{
-                        overflow: "hidden",
-                      }}
-                    >
-                      {/* Inner wrapper with min-height ensures all tabs have equal description height */}
-                      {/* Responsive: narrower viewports need more height for text wrapping */}
-                      {/* Formula: 410px - 23vw, clamped between 125px and 340px */}
-                      <div
-                        style={{
-                          minHeight: "clamp(125px, calc(410px - 23vw), 340px)",
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          style={{
-                            textTransform: "none",
-                            margin: 20,
-                          }}
-                        >
-                          {key === "learn" &&
-                            "Did you know that California has one of the most complex water systems in the world? Learn about how water flows through California&rsquo;s Central Valley and how we manage it to support diverse needs."}
-                          {key === "explore" &&
-                            "What if we managed water differently? Explore how water allocations change under different water management scenarios and discover new possibilities."}
-                          {key === "empower" &&
-                            "What scenarios align with your interests? Share scenario data to empower people and communities to shape our water future. Tools coming soon."}
-                        </Typography>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+                {label}
+              </Typography>
             </button>
           )
         })}
       </div>
+
+      {/* Full-width tab description — only in expanded (non-docked) state */}
+      <AnimatePresence initial={false}>
+        {!isInTabsArea && (
+          <motion.div
+            key="tab-desc-wrapper"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            style={{ overflow: "hidden", width: "100%", background: activeTabColor }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  width: "100%",
+                  background: activeTabColor,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  style={{
+                    textTransform: "none",
+                    padding: 20,
+                  }}
+                >
+                  {descriptions[activeTab]}
+                </Typography>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
