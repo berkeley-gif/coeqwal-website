@@ -57,6 +57,11 @@ export type { PanelProps } from "./panels/Panel"
 export { OneColumnPanel } from "./panels/OneColumnPanel"
 export { DisplayBlock } from "./panels/DisplayBlock"
 export type { DisplayBlockProps } from "./panels/DisplayBlock"
+export { TwoColumnInterstitial } from "./panels/TwoColumnInterstitial"
+export type {
+  TwoColumnInterstitialProps,
+  InterstitialLink,
+} from "./panels/TwoColumnInterstitial"
 
 // Custom icons
 export {

@@ -235,7 +235,7 @@ const palette = {
   tabPanels: {
     learn: "#D5EAF5", // More saturated light blue
     explore: "#C2D8EB", // Shifted toward true blue
-    empower: "#94B8DA", // Shifted toward true blue
+    share: "#94B8DA", // Shifted toward true blue
   },
 
   // Data visualization colors for outcome categories
@@ -653,8 +653,8 @@ const theme = createTheme({
       background: themeValues.palette.tabPanels.explore,
       text: themeValues.palette.blue.darkest,
     },
-    empower: {
-      background: themeValues.palette.tabPanels.empower,
+    share: {
+      background: themeValues.palette.tabPanels.share,
       text: themeValues.palette.blue.darkest,
     },
     // MUI standard colors
@@ -1599,7 +1599,7 @@ declare module "@mui/material/styles" {
     nature: typeof themeValues.palette.nature
     learn: { background: string; text: string }
     explore: { background: string; text: string }
-    empower: { background: string; text: string }
+    share: { background: string; text: string }
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
@@ -1615,7 +1615,7 @@ declare module "@mui/material/styles" {
     nature?: Partial<typeof themeValues.palette.nature>
     learn?: { background?: string; text?: string }
     explore?: { background?: string; text?: string }
-    empower?: { background?: string; text?: string }
+    share?: { background?: string; text?: string }
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>

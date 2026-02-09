@@ -121,10 +121,10 @@ export default function TabPanels() {
             <ExplorePanel />
           </TabPanel>
         )
-      case "empower":
+      case "share":
         return (
-          <TabPanel tabKey="empower" ref={panelRef}>
-            <h2>Empower</h2>
+          <TabPanel tabKey="share" ref={panelRef}>
+            <h2>Share</h2>
             <p style={{ height: "500px" }}>Coming soon...</p>
           </TabPanel>
         )

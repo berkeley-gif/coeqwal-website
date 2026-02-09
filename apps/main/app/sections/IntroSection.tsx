@@ -99,7 +99,7 @@ const IntroSection = () => {
         <FrontmatterPanel
           id="intro"
           ariaLabel="What is COEQWAL"
-          backgroundColor="#3D7DB5"
+          backgroundColor={theme.palette.brand.panelMedium}
           headlineLine1="What is"
           headlineLine2="COEQWAL?"
           bodyText="COEQWAL, the Collaboratory for Equity in Water Allocation, is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California&rsquo;s water planning tools so that communities can meaningfully participate in shaping our water future."
@@ -128,7 +128,7 @@ const IntroSection = () => {
           id="site-actions"
           ariaLabel="What you can do on this site"
           variant="actions"
-          backgroundColor="#193D6B"
+          backgroundColor={theme.palette.brand.panelDark}
           headlineLine1="On this site,"
           headlineLine2="you can"
           textColor={theme.palette.common.white}
