@@ -356,6 +356,8 @@ export default function ListView({
   }
 
   // Compact mode
+  const isMapMode = !!onTierClick
+
   return (
     <>
       <Box
@@ -390,7 +392,29 @@ export default function ListView({
               No scenarios match &ldquo;{searchQuery}&rdquo;
             </Typography>
           )}
-          <StrategyGrid {...strategyGridProps} renderMode="all" />
+          {isMapMode ? (
+            <>
+              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+              {/* Map mode instructions — below "Choose scenarios" header */}
+              <Box sx={{ mb: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[500], display: "block" }}
+                >
+                  Click on an outcome to see on the map
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[500], display: "block" }}
+                >
+                  Add a location to view its outcome under different scenarios
+                </Typography>
+              </Box>
+              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+            </>
+          ) : (
+            <StrategyGrid {...strategyGridProps} renderMode="all" />
+          )}
         </Box>
       </Box>
 

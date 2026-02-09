@@ -243,12 +243,12 @@ export default function ScenarioExplorerNew() {
               }}
             />
           )}
-          {exploreMode === "map" && (
+          {/* {exploreMode === "map" && (
             <InfoOverlay right={theme.space.component.lg}>
               Click on a scenario outcome in the left panel to see outcomes at
               specific locations.
             </InfoOverlay>
-          )}
+          )} */}
         </Box>
 
         {/* Right column — scenario list, search, banner */}
