@@ -148,7 +148,8 @@ const IntroSection = () => {
             {
               action: "Share",
               color: theme.palette.common.white,
-              description: "your insights about California&rsquo;s water future",
+              description:
+                "your insights about California&rsquo;s water future",
             },
           ]}
         />

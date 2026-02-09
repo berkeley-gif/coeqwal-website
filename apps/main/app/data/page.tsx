@@ -21,7 +21,7 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Alert,
-  useTheme
+  useTheme,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { ArrowHead } from "@repo/ui"
@@ -162,11 +162,7 @@ export default function DataPage() {
                   }}
                 />
               </IconButton>
-              <Typography
-                variant="h4"
-              >
-                Data & downloads
-              </Typography>
+              <Typography variant="h4">Data & downloads</Typography>
             </Box>
 
             {error && (
@@ -478,7 +474,6 @@ export default function DataPage() {
                             Would you like to be involved in future phases of this work? Please email: "
           email="coeqwal@berkeley.edu"
         />
-
       </Box>
     </>
   )

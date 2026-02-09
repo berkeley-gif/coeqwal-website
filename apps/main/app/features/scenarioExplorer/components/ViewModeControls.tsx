@@ -1,26 +1,14 @@
 "use client"
 
 /**
- * ViewModeControls - View mode buttons and hydroclimate chooser for explorer toolbar
+ * ViewModeControls - Hydroclimate chooser for explorer toolbar
+ *
+ * View mode buttons (list/map/comparison) have been moved inline
+ * into the "Choose scenarios" tab header in ScenarioExplorer.
  */
 
-import {
-  Box,
-  IconButton,
-  Tooltip,
-  Typography,
-  useTheme,
-  ViewListIcon,
-  CompareArrowsIcon,
-} from "@repo/ui/mui"
-import Image from "next/image"
+import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
-import type { ExploreMode } from "../exploreView"
-
-interface ViewModeControlsProps {
-  mode: ExploreMode
-  onModeChange: (mode: ExploreMode) => void
-}
 
 function Divider() {
   const theme = useTheme()
@@ -36,26 +24,7 @@ function Divider() {
   )
 }
 
-export function ViewModeControls({
-  mode,
-  onModeChange,
-}: ViewModeControlsProps) {
-  const theme = useTheme()
-
-  const buttonSx = (isActive: boolean, includeColor = true) => ({
-    width: { xs: 32, lg: 36 },
-    height: { xs: 32, lg: 36 },
-    backgroundColor: isActive
-      ? theme.palette.interaction.selectedBackground
-      : "transparent",
-    ...(includeColor && {
-      color: isActive ? theme.palette.blue.bright : theme.palette.grey[600],
-    }),
-    "&:hover": {
-      backgroundColor: theme.palette.interaction.selectedBackground,
-    },
-  })
-
+export function ViewModeControls() {
   return (
     <>
       {/* Divider - hidden under 700px when layout is stacked */}
@@ -76,74 +45,6 @@ export function ViewModeControls({
         showTitle={true}
         showLabels={false}
       />
-
-      {/* View mode buttons - hidden under 1400px */}
-      <Box
-        sx={{
-          display: "none",
-          // Only show at 1400px+ (matches theme.scenarios.grid.fullBreakpoint)
-          "@media (min-width: 1400px)": {
-            display: "contents",
-          },
-        }}
-      >
-        <Divider />
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: theme.space.gap.md,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: theme.typography.fontWeightMedium,
-              color: theme.palette.grey[900],
-            }}
-          >
-            View data in different modes
-          </Typography>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: theme.space.gap.xs,
-            }}
-          >
-            <Tooltip title="List view" arrow>
-              <IconButton
-                onClick={() => onModeChange("list")}
-                sx={buttonSx(mode === "list")}
-              >
-                <ViewListIcon sx={{ fontSize: "1.5rem" }} />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Map view" arrow>
-              <IconButton
-                onClick={() => onModeChange("map")}
-                sx={buttonSx(mode === "map", false)}
-              >
-                <Image
-                  src="/images/icons/map.svg"
-                  alt="Map view"
-                  width={24}
-                  height={24}
-                  style={{ opacity: mode === "map" ? 1 : 0.6 }}
-                />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Comparison view" arrow>
-              <IconButton
-                onClick={() => onModeChange("comparison")}
-                sx={buttonSx(mode === "comparison")}
-              >
-                <CompareArrowsIcon sx={{ fontSize: "1.5rem" }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-      </Box>
     </>
   )
 }

@@ -259,8 +259,10 @@ export const CACHE_KEYS = {
    * @param scenarios - Array of scenario IDs
    * @param types - Data types to fetch (storage, cws, ag)
    */
-  batchStatistics: (scenarios: string[], types: string[] = ["storage", "cws", "ag"]) =>
-    ["batch-statistics", ...scenarios, ...types] as const,
+  batchStatistics: (
+    scenarios: string[],
+    types: string[] = ["storage", "cws", "ag"],
+  ) => ["batch-statistics", ...scenarios, ...types] as const,
 } as const
 
 /**

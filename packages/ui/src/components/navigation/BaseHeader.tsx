@@ -189,7 +189,7 @@ const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
   data: "https://dev.coeqwal.org/data",
-  about: "http://dev.coeqwal.org/about"
+  about: "http://dev.coeqwal.org/about",
   // TODO: Add about URL when available
   // about: "https://coeqwal.org/about",
 }
@@ -208,7 +208,6 @@ export function BaseHeader({
   borderBottom, // Default set after theme is available
   logoVariant = "light",
 }: BaseHeaderProps) {
-  
   /* ========================================
    * THEME & LAYOUT
    * ======================================== */

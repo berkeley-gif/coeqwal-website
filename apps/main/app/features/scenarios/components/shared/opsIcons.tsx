@@ -108,7 +108,7 @@ function getAutoFontSize(lines: string[]): number {
   const n = lines.length
 
   const a = maxLineW * SAFETY
-  const b = (n - 1) * LINE_HEIGHT / 2
+  const b = ((n - 1) * LINE_HEIGHT) / 2
 
   // Horizontal + vertical combined constraint
   const fromCircle = (2 * R) / Math.sqrt(a * a + 4 * b * b)
@@ -389,7 +389,8 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     lines: ["Limit", "Delta", "exports"],
     color: OPS_BLUE,
     label: "Limit Delta exports",
-    description: "Limits on water exports from the Sacramento-San Joaquin Delta.",
+    description:
+      "Limits on water exports from the Sacramento-San Joaquin Delta.",
   },
   tunnel: {
     id: "tunnel",
@@ -397,8 +398,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     lines: ["Tunnel"],
     color: OPS_BLUE,
     label: "Delta Tunnel",
-    description:
-      "Delta conveyance tunnel infrastructure for water transport.",
+    description: "Delta conveyance tunnel infrastructure for water transport.",
   },
 
   // ── New circle icons — Unimpaired flow ───────────────────────────────────
@@ -641,13 +641,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "land_use_2020",
     "biops_2019",
   ],
-  s0030: [
-    "theme_flows",
-    "no_flow_req",
-    "tucp",
-    "land_use_2020",
-    "biops_2019",
-  ],
+  s0030: ["theme_flows", "no_flow_req", "tucp", "land_use_2020", "biops_2019"],
   s0039: [
     "theme_delta",
     "usbr_alt3",

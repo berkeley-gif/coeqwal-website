@@ -85,7 +85,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
-      "A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California&rsquo;s water under a changing climate. See \"About COEQWAL\" for more information.",
+      'A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California&rsquo;s water under a changing climate. See "About COEQWAL" for more information.',
   },
   {
     icon: <LocalShippingIcon />,

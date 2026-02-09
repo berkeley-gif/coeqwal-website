@@ -718,8 +718,14 @@ function useMultiScenarioSpillData(scenarios: string[]) {
   const error = results.find((r) => r.error)?.error ?? null
 
   // Build reservoir list and data matrix
-  const reservoirMap: Record<string, { reservoirId: string; reservoirName: string }> = {}
-  const matrixData: Record<string, Record<string, MonthlySpillData | undefined>> = {}
+  const reservoirMap: Record<
+    string,
+    { reservoirId: string; reservoirName: string }
+  > = {}
+  const matrixData: Record<
+    string,
+    Record<string, MonthlySpillData | undefined>
+  > = {}
 
   results.forEach((result, index) => {
     const scenarioId = scenarios[index]
@@ -939,7 +945,6 @@ function ReservoirStorageContent({
           />
         </ChartGridProvider>
       </Box>
-
     </>
   )
 }
@@ -1069,10 +1074,10 @@ export default function CategoryView() {
   // This dramatically improves load time by fetching storage, CWS, and AG data
   // in a single request instead of N×M individual requests
   // Controlled by USE_BATCH_API flag at top of file
-  const { data: batchData } = useBatchStatistics(
-    selectedScenarios,
-    { types: ["storage", "cws", "ag"], enabled: USE_BATCH_API },
-  )
+  const { data: batchData } = useBatchStatistics(selectedScenarios, {
+    types: ["storage", "cws", "ag"],
+    enabled: USE_BATCH_API,
+  })
 
   // Build scenario ID -> display name mapping for selected scenarios
   const scenarioNames = useMemo(() => {

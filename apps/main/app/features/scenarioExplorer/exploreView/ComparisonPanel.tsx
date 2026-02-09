@@ -47,7 +47,6 @@ export default function ComparisonPanel({
   const [hoveredScenario, setHoveredScenario] =
     useState<VerticalParallelLineData | null>(null)
 
-
   const {
     data: comparisonData,
     axes,

@@ -478,8 +478,7 @@ function useMultiScenarioAgAggregates(scenarios: string[]) {
       ([shortCode, data]: [string, AgAggregateData]) => {
         if (!data) return
         if (!entityMap[shortCode]) {
-          const displayLabel =
-            AG_AGGREGATE_LABEL_MAP[data.label] ?? data.label
+          const displayLabel = AG_AGGREGATE_LABEL_MAP[data.label] ?? data.label
           entityMap[shortCode] = { shortCode, label: displayLabel }
         }
         if (!matrixData[shortCode]) {
@@ -720,10 +719,7 @@ function MonthlyAgSection({
                 gap: theme.space.gap.sm,
               }}
             >
-              <Typography
-                variant="compactCaption"
-                sx={{ fontWeight: 500 }}
-              >
+              <Typography variant="compactCaption" sx={{ fontWeight: 500 }}>
                 Project totals
               </Typography>
               <Typography
@@ -928,10 +924,7 @@ export default function AgSection({
                 description="134 agricultural demand units"
               />
             </Box>
-            <AgTierCharts
-              scenarios={scenarios}
-              scenarioNames={scenarioNames}
-            />
+            <AgTierCharts scenarios={scenarios} scenarioNames={scenarioNames} />
           </ChartGridProvider>
         </Box>
 

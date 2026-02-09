@@ -323,7 +323,11 @@ interface CwsTierChartsProps {
   isModal?: boolean
 }
 
-function CwsTierCharts({ scenarios, scenarioNames, isModal = false }: CwsTierChartsProps) {
+function CwsTierCharts({
+  scenarios,
+  scenarioNames,
+  isModal = false,
+}: CwsTierChartsProps) {
   const theme = useTheme()
   const { data, isLoading } = useMetricData(
     scenarios,
@@ -1682,8 +1686,8 @@ function MonthlyCwsSection({
             variant="compactCaption"
             sx={{ color: "#92400e" }} // amber-800
           >
-            Monthly shortage data is only available in the "Project totals" view.
-            Switch to Project totals to see shortage charts.
+            Monthly shortage data is only available in the "Project totals"
+            view. Switch to Project totals to see shortage charts.
           </Typography>
         </Box>
       )}
