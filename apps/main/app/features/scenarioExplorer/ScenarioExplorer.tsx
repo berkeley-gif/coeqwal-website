@@ -220,7 +220,38 @@ export default function ScenarioExplorerNew() {
           pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Left column */}
+        {/* Left column — map or comparison panel */}
+        <Box
+          sx={{
+            width: needsSplit ? "50%" : "0%",
+            transition: theme.transition.layout,
+            overflow: "hidden",
+            backgroundColor:
+              exploreMode === "comparison"
+                ? theme.palette.grey[100]
+                : "transparent",
+            pointerEvents: exploreMode === "map" ? "none" : "auto",
+          }}
+        >
+          {exploreMode === "comparison" && (
+            <ComparisonPanel
+              highlightedScenario={highlightedScenario}
+              onScenarioClick={(id) => {
+                setHighlightedScenario((prev) => (prev === id ? null : id))
+                // Bring clicked scenario to top of list
+                setPinnedScenarioId(id)
+              }}
+            />
+          )}
+          {exploreMode === "map" && (
+            <InfoOverlay right={theme.space.component.lg}>
+              Click on a scenario outcome in the left panel to see outcomes at
+              specific locations.
+            </InfoOverlay>
+          )}
+        </Box>
+
+        {/* Right column — scenario list, search, banner */}
         <Box
           sx={{
             width: needsSplit ? "50%" : "100%",
@@ -228,7 +259,7 @@ export default function ScenarioExplorerNew() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            borderRight: needsSplit ? theme.border.medium : "none",
+            borderLeft: needsSplit ? theme.border.medium : "none",
             pointerEvents: "auto",
           }}
         >
@@ -294,37 +325,6 @@ export default function ScenarioExplorerNew() {
               />
             )}
           </Box>
-        </Box>
-
-        {/* Right column — full height below tabs */}
-        <Box
-          sx={{
-            width: needsSplit ? "50%" : "0%",
-            transition: theme.transition.layout,
-            overflow: "hidden",
-            backgroundColor:
-              exploreMode === "comparison"
-                ? theme.palette.grey[100]
-                : "transparent",
-            pointerEvents: exploreMode === "map" ? "none" : "auto",
-          }}
-        >
-          {exploreMode === "comparison" && (
-            <ComparisonPanel
-              highlightedScenario={highlightedScenario}
-              onScenarioClick={(id) => {
-                setHighlightedScenario((prev) => (prev === id ? null : id))
-                // Bring clicked scenario to top of list
-                setPinnedScenarioId(id)
-              }}
-            />
-          )}
-          {exploreMode === "map" && (
-            <InfoOverlay right={theme.space.component.lg}>
-              Click on a scenario outcome in the left panel to see outcomes at
-              specific locations.
-            </InfoOverlay>
-          )}
         </Box>
       </Box>
 
