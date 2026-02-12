@@ -42,6 +42,10 @@ interface MapState {
   geocodingResetCounter: number
   learnMapScrollOffset: number
 
+  // Explore mode layout
+  /** Percentage of viewport width occupied by the left panel (0-100). Default: 50 */
+  explorePanelWidth: number
+
   // Visualization
   activeOutcomeVisualization: OutcomeVisualization | null
 
@@ -58,6 +62,7 @@ const initialState: MapState = {
   geocoderMarker: null,
   geocodingResetCounter: 0,
   learnMapScrollOffset: 0,
+  explorePanelWidth: 50,
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
 }
@@ -106,6 +111,10 @@ export const mapActions = {
 
   setLearnMapScrollOffset: (offset: number) =>
     useMapStore.setState({ learnMapScrollOffset: offset }),
+
+  // Explore mode layout
+  setExplorePanelWidth: (width: number) =>
+    useMapStore.setState({ explorePanelWidth: width }),
 
   resetLearnState: () =>
     useMapStore.setState({
@@ -156,6 +165,10 @@ export const useGeocodingResetCounter = () =>
 
 export const useLearnMapScrollOffset = () =>
   useMapStore((s) => s.learnMapScrollOffset)
+
+// Explore mode layout
+export const useExplorePanelWidth = () =>
+  useMapStore((s) => s.explorePanelWidth)
 
 // Derived layer visibility selectors
 const createLayerSelector = (key: keyof SectionLayerConfig) => () =>

@@ -33,12 +33,15 @@ export default function EquityPanel() {
   const [searchQuery, setSearchQuery] = useState("")
 
   // Activate map when this panel is mounted
+  // Set panel width to 66.67% (2/3) so map centers in remaining 1/3
   useEffect(() => {
+    mapActions.setExplorePanelWidth(66.67)
     mapActions.setMapMode("explore")
 
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setExplorePanelWidth(50) // Reset to default
     }
   }, [])
 
