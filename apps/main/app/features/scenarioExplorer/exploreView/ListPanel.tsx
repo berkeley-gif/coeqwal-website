@@ -1,23 +1,24 @@
 "use client"
 
 /**
- * UnifiedExploreView - Left panel content for scenario exploration
+ * ListPanel - Container for the scenario list in explore view
  *
- * Renders the ListView and manages map mode effects.
- * The right panel (comparison chart / map) is rendered separately
- * by ScenarioExplorer at a higher layout level.
+ * This panel wraps ListView and manages map mode effects. In the explore view:
+ * - List mode: ListPanel fills the full width
+ * - Map mode: ListPanel shows in compact mode on the right, map appears on the left
+ * - Comparison mode: ComparisonPanel shows on the left, ListPanel shows on the right
+ *
+ * The actual map visualization is rendered at a higher level in the app and
+ * controlled via mapActions from the map store.
  */
 
 import React, { useEffect } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import ListView from "./ListView"
 import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
+import { useScenarioExplorerStore } from "../store"
 
-export type ExploreMode = "list" | "map" | "comparison"
-
-interface UnifiedExploreViewProps {
-  mode: ExploreMode
-  pinnedScenarioId?: string | null
+interface ListPanelProps {
   /** When provided, controls the expanded modal externally */
   isExpanded?: boolean
   /** Callback to close the expanded modal */
@@ -26,19 +27,20 @@ interface UnifiedExploreViewProps {
   modalToolbar?: React.ReactNode
 }
 
-export default function UnifiedExploreView({
-  mode,
-  pinnedScenarioId,
+export default function ListPanel({
   isExpanded,
   onCloseExpand,
   modalToolbar,
-}: UnifiedExploreViewProps) {
+}: ListPanelProps) {
   const theme = useTheme()
+
+  // Get state from store
+  const { exploreMode } = useScenarioExplorerStore()
 
   const currentVisualization = useActiveOutcomeVisualization()
 
   useEffect(() => {
-    if (mode === "map") {
+    if (exploreMode === "map") {
       mapActions.setMapMode("explore")
     } else {
       mapActions.setMapMode("hidden")
@@ -49,7 +51,7 @@ export default function UnifiedExploreView({
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
     }
-  }, [mode])
+  }, [exploreMode])
 
   const handleTierClick = (scenarioId: string, outcomeCode: string) => {
     mapActions.clearMapTooltips()
@@ -73,15 +75,14 @@ export default function UnifiedExploreView({
         height: "100%",
         overflow: "hidden",
         backgroundColor:
-          mode === "list"
+          exploreMode === "list"
             ? theme.palette.grey[100]
             : theme.palette.background.paper,
       }}
     >
       <ListView
-        compact={mode !== "list"}
-        onTierClick={mode === "map" ? handleTierClick : undefined}
-        pinnedScenarioId={pinnedScenarioId}
+        compact={exploreMode !== "list"}
+        onTierClick={exploreMode === "map" ? handleTierClick : undefined}
         isExpanded={isExpanded}
         onCloseExpand={onCloseExpand}
         modalToolbar={modalToolbar}

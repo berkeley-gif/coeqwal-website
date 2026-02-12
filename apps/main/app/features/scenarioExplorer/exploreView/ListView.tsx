@@ -21,7 +21,6 @@ import {
 interface ListViewProps {
   compact?: boolean
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  pinnedScenarioId?: string | null
   /** When provided, controls the expanded modal externally */
   isExpanded?: boolean
   /** Callback to close the expanded modal */
@@ -33,7 +32,6 @@ interface ListViewProps {
 export default function ListView({
   compact = false,
   onTierClick,
-  pinnedScenarioId,
   isExpanded: isExpandedProp,
   onCloseExpand,
   modalToolbar,
@@ -75,6 +73,7 @@ export default function ListView({
     setShowOnlyChosen,
     setShowDefinitions,
     searchQuery,
+    pinnedScenarioId,
   } = useScenarioExplorerStore()
 
   const { sortedScenarios, matchingScenarioIds, hasSearchResults } =

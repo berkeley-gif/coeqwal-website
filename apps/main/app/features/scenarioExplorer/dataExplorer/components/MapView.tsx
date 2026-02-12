@@ -42,7 +42,7 @@ import {
  */
 function MapViewContent() {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
   const mapMetrics = getMapMetrics()
 
   const [selectedMetric, setSelectedMetric] = React.useState<string>(
@@ -183,7 +183,10 @@ function MapViewContent() {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setActiveView("list")}
+          onClick={() => {
+            setMainView("explorer")
+            setExploreMode("list")
+          }}
           sx={{
             backgroundColor: theme.palette.blue.darkest,
             color: theme.palette.common.white,

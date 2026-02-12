@@ -19,28 +19,32 @@ import {
   CompareArrowsIcon,
 } from "@repo/ui/mui"
 import Image from "next/image"
-import { InfoOverlay } from "@repo/ui"
-import UnifiedExploreView, { type ExploreMode } from "./exploreView"
+import ListPanel from "./exploreView"
 import { ComparisonPanel } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
-
-type MainView = "explorer" | "data"
+import {
+  useScenarioExplorerStore,
+  type ExploreMode,
+} from "./store"
 
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
-  const [mainView, setMainView] = useState<MainView>("explorer")
-  const [exploreMode, setExploreMode] = useState<ExploreMode>("list")
-  const [highlightedScenario, setHighlightedScenario] = useState<string | null>(
-    null,
-  )
-  // Pinned scenario appears at top of list when clicked in comparison chart
-  const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(null)
-  // Expand modal for list view (lifted from ListView)
+
+  // Get state and actions from store
+  const {
+    mainView,
+    setMainView,
+    exploreMode,
+    setExploreMode,
+  } = useScenarioExplorerStore()
+
+  // Local UI state (modal open/close is component-specific)
   const [isListExpanded, setIsListExpanded] = useState(false)
+
   const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
   const needsSplit = mainView === "explorer" && exploreMode !== "list"
 
@@ -233,22 +237,7 @@ export default function ScenarioExplorerNew() {
             pointerEvents: exploreMode === "map" ? "none" : "auto",
           }}
         >
-          {exploreMode === "comparison" && (
-            <ComparisonPanel
-              highlightedScenario={highlightedScenario}
-              onScenarioClick={(id) => {
-                setHighlightedScenario((prev) => (prev === id ? null : id))
-                // Bring clicked scenario to top of list
-                setPinnedScenarioId(id)
-              }}
-            />
-          )}
-          {/* {exploreMode === "map" && (
-            <InfoOverlay right={theme.space.component.lg}>
-              Click on a scenario outcome in the left panel to see outcomes at
-              specific locations.
-            </InfoOverlay>
-          )} */}
+          {exploreMode === "comparison" && <ComparisonPanel />}
         </Box>
 
         {/* Right column — scenario list, search, banner */}
@@ -306,9 +295,7 @@ export default function ScenarioExplorerNew() {
             }}
           >
             {mainView === "explorer" && (
-              <UnifiedExploreView
-                mode={exploreMode}
-                pinnedScenarioId={pinnedScenarioId}
+              <ListPanel
                 isExpanded={isListExpanded}
                 onCloseExpand={() => setIsListExpanded(false)}
                 modalToolbar={

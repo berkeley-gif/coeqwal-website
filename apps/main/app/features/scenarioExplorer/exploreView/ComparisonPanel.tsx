@@ -24,19 +24,19 @@ import {
 } from "@repo/viz"
 import { MobileModal } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
+import { useScenarioExplorerStore } from "../store"
 
-interface ComparisonPanelProps {
-  highlightedScenario: string | null
-  onScenarioClick?: (scenarioId: string) => void
-}
-
-export default function ComparisonPanel({
-  highlightedScenario,
-  onScenarioClick,
-}: ComparisonPanelProps) {
+export default function ComparisonPanel() {
   const theme = useTheme()
 
-  // Toggle states
+  // Get state and actions from store
+  const {
+    highlightedScenario,
+    setHighlightedScenario,
+    setPinnedScenarioId,
+  } = useScenarioExplorerStore()
+
+  // Toggle states (local UI state)
   const [overlayTiers, setOverlayTiers] = useState(false)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [relativeToBaseline, setRelativeToBaseline] = useState(true)
@@ -91,6 +91,16 @@ export default function ComparisonPanel({
     }
     return baselineScenario
   }, [baselineScenario, relativeToBaseline])
+
+  // Handle scenario click in chart
+  const handleScenarioClick = (scenarioId: string) => {
+    // Toggle highlight
+    setHighlightedScenario(
+      highlightedScenario === scenarioId ? null : scenarioId,
+    )
+    // Bring clicked scenario to top of list
+    setPinnedScenarioId(scenarioId)
+  }
 
   const checkboxSx = {
     padding: 0,
@@ -191,7 +201,7 @@ export default function ComparisonPanel({
         }}
         lineColors={lineColors}
         onLineHover={setHoveredScenario}
-        onLineClick={(scenario) => onScenarioClick?.(scenario.id)}
+        onLineClick={(scenario) => handleScenarioClick(scenario.id)}
       />
       {/* Hover tooltip showing scenario name */}
       {hoveredScenario && (

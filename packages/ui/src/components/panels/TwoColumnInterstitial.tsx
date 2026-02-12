@@ -103,8 +103,7 @@ export function TwoColumnInterstitial({
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Typography
             variant="h4"
-            component="h3"
-            sx={{ maxWidth: "22ch", lineHeight: 1.2 }}
+            sx={{ maxWidth: "22ch" }}
           >
             {headline}
           </Typography>

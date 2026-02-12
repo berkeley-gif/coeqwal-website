@@ -39,7 +39,7 @@ function MapErrorFallback() {
       }}
     >
       <ErrorFallback
-        title="Map couldn&rsquo;t load"
+        title="Map couldn\u2019t load"
         message="This might be a temporary issue. Try refreshing the page."
         textColor={theme.palette.common.white}
       />
