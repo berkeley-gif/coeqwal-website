@@ -284,7 +284,8 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
  */
 export default function ReservoirView() {
   const theme = useTheme()
-  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
 
   // Fetch data for all selected scenarios
   const { dataByReservoir, isLoading, error } =

@@ -27,28 +27,22 @@ import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
-import {
-  useScenarioExplorerStore,
-  type ExploreMode,
-} from "./store"
+import { useScenarioExplorerStore, type ExploreMode } from "./store"
 
 export default function ScenarioExplorerNew() {
   const theme = useTheme()
 
   // Get state and actions from store
-  const {
-    mainView,
-    setMainView,
-    exploreMode,
-    setExploreMode,
-  } = useScenarioExplorerStore()
+  const { mainView, setMainView, exploreMode, setExploreMode } =
+    useScenarioExplorerStore()
 
   // Local UI state (modal open/close is component-specific)
   const [isListExpanded, setIsListExpanded] = useState(false)
 
   // Layout helpers
   const needsTransparentBg =
-    mainView === "explorer" && (exploreMode === "map" || exploreMode === "equity")
+    mainView === "explorer" &&
+    (exploreMode === "map" || exploreMode === "equity")
   const needsSplit = mainView === "explorer" && exploreMode !== "list"
   // Equity mode has panel on left, map on right (opposite of other split modes)
   const isEquityMode = mainView === "explorer" && exploreMode === "equity"
@@ -261,7 +255,8 @@ export default function ScenarioExplorerNew() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            borderLeft: needsSplit && !isEquityMode ? theme.border.medium : "none",
+            borderLeft:
+              needsSplit && !isEquityMode ? theme.border.medium : "none",
             pointerEvents: isEquityMode ? "none" : "auto",
             // For equity mode, this side is transparent for the map
             backgroundColor: isEquityMode ? "transparent" : undefined,

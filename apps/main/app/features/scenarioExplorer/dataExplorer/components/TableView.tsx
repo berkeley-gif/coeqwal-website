@@ -33,7 +33,8 @@ import {
  */
 export default function TableView() {
   const theme = useTheme()
-  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
 
   const [searchQuery, setSearchQuery] = React.useState("")
   const [categoryFilter, setCategoryFilter] = React.useState<string>("all")

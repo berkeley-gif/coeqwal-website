@@ -42,7 +42,8 @@ import {
  */
 function MapViewContent() {
   const theme = useTheme()
-  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
   const mapMetrics = getMapMetrics()
 
   const [selectedMetric, setSelectedMetric] = React.useState<string>(

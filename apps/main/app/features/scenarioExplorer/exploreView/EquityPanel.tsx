@@ -7,6 +7,10 @@
  * - Search bar
  * - Hydroclimate chooser
  * - Expandable modal view
+ * - Selection banner, for already selected scenarios
+ *
+ * But you can use whatever you like. It's like moving into a new apartment,
+ * with some take it or leave it furniture left behind by the previous tenant.
  *
  * The map is displayed on the right side (handled by ScenarioExplorer layout).
  */
@@ -119,10 +123,7 @@ export default function EquityPanel() {
           >
             Equity tool
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: theme.palette.grey[400] }}
-          >
+          <Typography variant="body2" sx={{ color: theme.palette.grey[400] }}>
             Awesome tool stuff will go here.
             <br />
             Map should be on the right.

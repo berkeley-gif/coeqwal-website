@@ -1065,7 +1065,8 @@ function ReservoirStorageSection({
  */
 export default function CategoryView() {
   const theme = useTheme()
-  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
   const [expanded, setExpanded] = React.useState<string[]>([])
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
