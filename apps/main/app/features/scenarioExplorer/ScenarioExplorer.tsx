@@ -17,10 +17,11 @@ import {
   icons,
   ViewListIcon,
   CompareArrowsIcon,
+  AppsIcon,
 } from "@repo/ui/mui"
 import Image from "next/image"
 import ListPanel from "./exploreView"
-import { ComparisonPanel } from "./exploreView"
+import { ComparisonPanel, EquityPanel } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
@@ -45,8 +46,12 @@ export default function ScenarioExplorerNew() {
   // Local UI state (modal open/close is component-specific)
   const [isListExpanded, setIsListExpanded] = useState(false)
 
-  const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
+  // Layout helpers
+  const needsTransparentBg =
+    mainView === "explorer" && (exploreMode === "map" || exploreMode === "equity")
   const needsSplit = mainView === "explorer" && exploreMode !== "list"
+  // Equity mode has panel on left, map on right (opposite of other split modes)
+  const isEquityMode = mainView === "explorer" && exploreMode === "equity"
 
   return (
     <Box
@@ -142,6 +147,11 @@ export default function ScenarioExplorerNew() {
                   icon: <CompareArrowsIcon sx={{ fontSize: "1.2rem" }} />,
                   tip: "Comparison view",
                 },
+                {
+                  mode: "equity" as ExploreMode,
+                  icon: <AppsIcon sx={{ fontSize: "1.2rem" }} />,
+                  tip: "Equity tool",
+                },
               ].map(({ mode, icon, tip }) => (
                 <Tooltip key={mode} title={tip} arrow>
                   <Box
@@ -224,23 +234,24 @@ export default function ScenarioExplorerNew() {
           pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Left column — map or comparison panel */}
+        {/* Left column — comparison panel, equity panel, or empty for map */}
         <Box
           sx={{
             width: needsSplit ? "50%" : "0%",
             transition: theme.transition.layout,
             overflow: "hidden",
             backgroundColor:
-              exploreMode === "comparison"
+              exploreMode === "comparison" || exploreMode === "equity"
                 ? theme.palette.grey[100]
                 : "transparent",
             pointerEvents: exploreMode === "map" ? "none" : "auto",
           }}
         >
           {exploreMode === "comparison" && <ComparisonPanel />}
+          {exploreMode === "equity" && <EquityPanel />}
         </Box>
 
-        {/* Right column — scenario list, search, banner */}
+        {/* Right column — scenario list, search, banner (or map area for equity) */}
         <Box
           sx={{
             width: needsSplit ? "50%" : "100%",
@@ -248,70 +259,77 @@ export default function ScenarioExplorerNew() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            borderLeft: needsSplit ? theme.border.medium : "none",
-            pointerEvents: "auto",
+            borderLeft: needsSplit && !isEquityMode ? theme.border.medium : "none",
+            pointerEvents: isEquityMode ? "none" : "auto",
+            // For equity mode, this side is transparent for the map
+            backgroundColor: isEquityMode ? "transparent" : undefined,
           }}
         >
-          <SelectionBanner />
+          {/* Hide selection banner and content in equity mode (map shows here) */}
+          {!isEquityMode && (
+            <>
+              <SelectionBanner />
 
-          {/* Search toolbar (explorer view only) */}
-          {mainView === "explorer" && (
-            <Box
-              sx={{
-                flexShrink: 0,
-                backgroundColor: theme.palette.background.paper,
-              }}
-            >
-              <SearchBar
-                placeholder="Search scenarios by name or description"
-                inputMaxWidth={needsSplit ? "165px" : "330px"}
-                leftContent={
-                  <Tooltip title="Expand" arrow>
-                    <IconButton
-                      size="small"
-                      onClick={() => setIsListExpanded(true)}
-                      sx={{
-                        color: theme.palette.grey[500],
-                        "&:hover": {
-                          color: theme.palette.grey[700],
-                          backgroundColor: "rgba(0,0,0,0.04)",
-                        },
-                      }}
-                    >
-                      <icons.OpenInFull sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </Tooltip>
-                }
-                rightContent={<ViewModeControls />}
-              />
-            </Box>
-          )}
-
-          {/* Content */}
-          <Box
-            sx={{
-              flex: 1,
-              overflow: "hidden",
-            }}
-          >
-            {mainView === "explorer" && (
-              <ListPanel
-                isExpanded={isListExpanded}
-                onCloseExpand={() => setIsListExpanded(false)}
-                modalToolbar={
+              {/* Search toolbar (explorer view only, not in equity mode) */}
+              {mainView === "explorer" && (
+                <Box
+                  sx={{
+                    flexShrink: 0,
+                    backgroundColor: theme.palette.background.paper,
+                  }}
+                >
                   <SearchBar
                     placeholder="Search scenarios by name or description"
+                    inputMaxWidth={needsSplit ? "165px" : "330px"}
+                    leftContent={
+                      <Tooltip title="Expand" arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => setIsListExpanded(true)}
+                          sx={{
+                            color: theme.palette.grey[500],
+                            "&:hover": {
+                              color: theme.palette.grey[700],
+                              backgroundColor: "rgba(0,0,0,0.04)",
+                            },
+                          }}
+                        >
+                          <icons.OpenInFull sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Tooltip>
+                    }
                     rightContent={<ViewModeControls />}
                   />
-                }
-              />
-            )}
-            {mainView === "data" && (
-              <DataExplorerView
-                onNavigateToExplorer={() => setMainView("explorer")}
-              />
-            )}
-          </Box>
+                </Box>
+              )}
+
+              {/* Content */}
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: "hidden",
+                }}
+              >
+                {mainView === "explorer" && (
+                  <ListPanel
+                    isExpanded={isListExpanded}
+                    onCloseExpand={() => setIsListExpanded(false)}
+                    modalToolbar={
+                      <SearchBar
+                        placeholder="Search scenarios by name or description"
+                        rightContent={<ViewModeControls />}
+                      />
+                    }
+                  />
+                )}
+                {mainView === "data" && (
+                  <DataExplorerView
+                    onNavigateToExplorer={() => setMainView("explorer")}
+                  />
+                )}
+              </Box>
+            </>
+          )}
         </Box>
       </Box>
 

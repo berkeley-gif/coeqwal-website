@@ -17,8 +17,9 @@ import { create, immer } from "@repo/state/zustand"
  * - list: Default grid view of all scenarios
  * - map: Spatial visualization with map overlay
  * - comparison: Parallel coordinates chart comparison
+ * - equity: Equity analysis tool with map on right
  */
-export type ExploreMode = "list" | "map" | "comparison"
+export type ExploreMode = "list" | "map" | "comparison" | "equity"
 
 /**
  * The main view within the Explore section.
