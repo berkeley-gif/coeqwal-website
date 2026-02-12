@@ -237,7 +237,8 @@ export default function ScenarioExplorerNew() {
         {/* Left column — comparison panel, equity panel, or empty for map */}
         <Box
           sx={{
-            width: needsSplit ? "50%" : "0%",
+            // Equity mode: 2/3 width, other split modes: 50%
+            width: isEquityMode ? "66.67%" : needsSplit ? "50%" : "0%",
             transition: theme.transition.layout,
             overflow: "hidden",
             backgroundColor:
@@ -254,7 +255,8 @@ export default function ScenarioExplorerNew() {
         {/* Right column — scenario list, search, banner (or map area for equity) */}
         <Box
           sx={{
-            width: needsSplit ? "50%" : "100%",
+            // Equity mode: 1/3 width for map, other split modes: 50%
+            width: isEquityMode ? "33.33%" : needsSplit ? "50%" : "100%",
             transition: theme.transition.layout,
             display: "flex",
             flexDirection: "column",
