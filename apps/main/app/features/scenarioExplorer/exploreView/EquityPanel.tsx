@@ -20,8 +20,7 @@ import {
   Tooltip,
   icons,
 } from "@repo/ui/mui"
-import { MobileModal } from "@repo/ui"
-import SearchBar from "../components/SearchBar"
+import { MobileModal, CompactSearchBar } from "@repo/ui"
 import SelectionBanner from "../components/SelectionBanner"
 import { ViewModeControls } from "../components/ViewModeControls"
 import { mapActions } from "../../map/store"
@@ -31,6 +30,7 @@ export default function EquityPanel() {
 
   // Local UI state
   const [isExpanded, setIsExpanded] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Activate map when this panel is mounted
   useEffect(() => {
@@ -44,8 +44,10 @@ export default function EquityPanel() {
 
   // Toolbar with search + hydroclimate chooser
   const toolbar = (
-    <SearchBar
-      placeholder="Search scenarios..."
+    <CompactSearchBar
+      value={searchQuery}
+      onChange={setSearchQuery}
+      placeholder="Search..."
       inputMaxWidth="165px"
       leftContent={
         !isExpanded && (
