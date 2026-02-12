@@ -284,7 +284,7 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
  */
 export default function ReservoirView() {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } = useScenarioExplorerStore()
 
   // Fetch data for all selected scenarios
   const { dataByReservoir, isLoading, error } =
@@ -329,7 +329,10 @@ export default function ReservoirView() {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setActiveView("list")}
+          onClick={() => {
+            setMainView("explorer")
+            setExploreMode("list")
+          }}
           sx={{
             backgroundColor: theme.palette.blue.darkest,
             "&:hover": { backgroundColor: theme.palette.blue.bright },
