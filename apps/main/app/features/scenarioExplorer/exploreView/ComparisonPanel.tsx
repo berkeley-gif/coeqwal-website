@@ -30,11 +30,8 @@ export default function ComparisonPanel() {
   const theme = useTheme()
 
   // Get state and actions from store
-  const {
-    highlightedScenario,
-    setHighlightedScenario,
-    setPinnedScenarioId,
-  } = useScenarioExplorerStore()
+  const { highlightedScenario, setHighlightedScenario, setPinnedScenarioId } =
+    useScenarioExplorerStore()
 
   // Toggle states (local UI state)
   const [overlayTiers, setOverlayTiers] = useState(false)
