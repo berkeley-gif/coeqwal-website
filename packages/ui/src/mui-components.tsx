@@ -138,6 +138,7 @@ import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment"
 import SwapVertIcon from "@mui/icons-material/SwapVert"
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
+import AppsIcon from "@mui/icons-material/Apps"
 
 // Export individually imported icons
 export {
@@ -199,6 +200,7 @@ export {
   SwapVertIcon,
   ArrowUpwardIcon,
   ArrowDownwardIcon,
+  AppsIcon,
 }
 
 // Export the full icons library for access to other icons as needed
