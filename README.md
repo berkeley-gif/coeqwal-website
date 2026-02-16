@@ -6,6 +6,87 @@ This repository uses Turborepo to streamline development workflows, allowing sha
 
 Dependencies and configurations set at the root level are overriden by local dependencies and configurations. For example, if you'd like to set a different linting configuration or a different dependency version for a specific app, you can configure these using that app's `package.json` and configuration files.
 
+## Overview
+
+### Monorepo structure
+
+The repository is managed with **Turborepo + pnpm workspaces** and split into two top-level directories:
+
+- `apps/` -- standalone Next.js applications
+- `packages/` -- shared libraries consumed by the apps
+
+```mermaid
+graph TD
+    subgraph apps [apps]
+        Main["main"]
+        Flow["storyline-flow"]
+        Climate["storyline-climate"]
+    end
+
+    subgraph packages [packages]
+        UI["@repo/ui"]
+        Data["@repo/data"]
+        Viz["@repo/viz"]
+        MapPkg["@repo/map"]
+        State["@repo/state"]
+        Motion["@repo/motion"]
+        I18n["@repo/i18n"]
+        Utils["@repo/utils"]
+    end
+
+    Main --> UI
+    Main --> Data
+    Main --> Viz
+    Main --> MapPkg
+    Main --> State
+    Main --> Motion
+    Main --> I18n
+    Main --> Utils
+    Flow --> UI
+    Flow --> Data
+    Climate --> UI
+    Climate --> Data
+```
+
+### Applications
+
+- **`apps/main`** -- The primary COEQWAL website. A Next.js 15 (App Router) application with an interactive Mapbox map, a scenario explorer, data visualizations, and a three-tab system (Learn / Explore / Share). All pages are statically exported.
+- **`apps/storyline-flow`** -- A standalone storyline app focused on water flow narratives (Next.js 15, static export).
+- **`apps/storyline-climate`** -- A standalone storyline app focused on climate scenarios (Next.js 15, static export).
+
+### Shared packages
+
+- **`@repo/ui`** -- Shared UI component library built on MUI v7 and Emotion. Exports components (header, panels, chips, tooltips, inputs, modals), a centralized MUI re-export entry point, theme configuration, and UI hooks.
+- **`@repo/data`** -- Data fetching and caching layer using SWR. Provides COEQWAL API types, fetch functions, React hooks, cache key management, a `DataProvider`, and static GIS data (GeoJSON files).
+- **`@repo/viz`** -- D3-based visualization components for water data: bar charts, line charts, percentile band charts, rose charts, spill charts, parallel line plots, glyph components, and shared D3 utilities.
+- **`@repo/map`** -- Mapbox GL mapping components via react-map-gl. Includes the core `Map` component, `MapProvider` context, geocoding control, declarative layer management hooks, spatial query hooks (point-in-polygon), and transition utilities.
+- **`@repo/state`** -- Shared state management utilities. Re-exports Zustand and Immer, and provides a shared drawer store.
+- **`@repo/motion`** -- Animation wrapper around Framer Motion.
+- **`@repo/i18n`** -- Internationalization provider and translation hooks.
+- **`@repo/utils`** -- General utilities including an `ErrorBoundary` component.
+- **`@repo/typescript-config`** -- Shared TypeScript configuration presets (base, Next.js, React library).
+- **`@repo/eslint-config`** -- Shared ESLint configuration.
+
+### Main app architecture
+
+The main app (`apps/main`) has three routes:
+
+- `/` -- Home page with a video hero, intro section, and the three-tab system overlaid on a persistent Mapbox map
+- `/about` -- Project information, partner logos, and contact details
+- `/data` -- Scenario data downloads (ZIP and CSV)
+
+Key features live in `apps/main/app/features/`:
+
+- **`map/`** -- Mapbox instance with base layers (rivers, basins), visualization layers (outcomes, tier markers), overlay panels, camera presets, and its own Zustand store
+- **`scenarioExplorer/`** -- Multi-view scenario explorer with list, comparison, equity, and data explorer views
+- **`scenarios/`** -- Scenario selection components and data hooks
+- **`glossary/`** -- Floating glossary panel
+- **`tooltips/`** -- Tier tooltips, map feature tooltips, and scroll tooltips
+
+Styling uses **MUI v7 with Emotion** (CSS-in-JS via the `sx` prop and a shared theme from `@repo/ui/themes`). There is no Tailwind or CSS Modules.
+
+State management combines **Zustand** stores (map state, scenario explorer state) with **React Context** (tab state) and URL query-parameter sync for the active tab.
+
 ## Stack
 
 - [Next.js](https://nextjs.org/)
