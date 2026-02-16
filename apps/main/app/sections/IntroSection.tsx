@@ -86,8 +86,6 @@ function Panel1Paragraph() {
         opacity,
         gridColumn: 2,
         alignSelf: "start",
-        display: "flex",
-        justifyContent: "flex-end",
       }}
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
@@ -158,8 +156,6 @@ function Panel2Paragraph({
         opacity,
         gridColumn: 2,
         alignSelf: "start",
-        display: "flex",
-        justifyContent: "flex-end",
       }}
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
