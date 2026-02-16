@@ -25,7 +25,7 @@ const VIDEO_SRCS: VideoSource[] = [
 const WATER_TOPICS: Topic[] = [
   {
     id: "communities",
-    label: "Communities and drinking water",
+    label: "Community water systems",
     description:
       "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
   },
@@ -117,10 +117,8 @@ function Panel1Paragraph() {
  */
 function Panel2Paragraph({
   selectedTopic,
-  setSelectedTopic,
 }: {
   selectedTopic: string | null
-  setSelectedTopic: (id: string | null) => void
 }) {
   const theme = useTheme()
   const progress = useScrollProgress()
@@ -139,21 +137,44 @@ function Panel2Paragraph({
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
         <Typography variant="displayBody" component="div">
-          <Box>
-            {WATER_TOPICS.find((t) => t.id === selectedTopic)?.description ||
-              INTRO_TEXT}
-          </Box>
-          <TopicCircles
-            topics={WATER_TOPICS}
-            selectedId={selectedTopic}
-            onSelect={setSelectedTopic}
-            progress={progress}
-            revealStart={0.4}
-            revealEnd={0.9}
-          />
+          {WATER_TOPICS.find((t) => t.id === selectedTopic)?.description ||
+            INTRO_TEXT}
         </Typography>
       </Box>
     </motion.div>
+  )
+}
+
+/**
+ * Panel2TopicCircles - Scroll-linked staggered reveal of topic circles.
+ * Must be inside Panel 2's ScrollSection. Spans full width at the bottom.
+ */
+function Panel2TopicCircles({
+  selectedTopic,
+  setSelectedTopic,
+}: {
+  selectedTopic: string | null
+  setSelectedTopic: (id: string | null) => void
+}) {
+  const progress = useScrollProgress()
+
+  return (
+    <Box
+      sx={{
+        gridColumn: { lg: "1 / -1" },
+        alignSelf: "end",
+        pointerEvents: "auto",
+      }}
+    >
+      <TopicCircles
+        topics={WATER_TOPICS}
+        selectedId={selectedTopic}
+        onSelect={setSelectedTopic}
+        progress={progress}
+        revealStart={0.4}
+        revealEnd={0.9}
+      />
+    </Box>
   )
 }
 
@@ -368,8 +389,13 @@ const IntroSection = () => {
                 </Box>
               </Box>
 
-              {/* Paragraph + topic circles - scroll-linked */}
+              {/* Paragraph - scroll-linked */}
               <Panel2Paragraph
+                selectedTopic={selectedTopic}
+              />
+
+              {/* Topic circles - staggered reveal, spans full width */}
+              <Panel2TopicCircles
                 selectedTopic={selectedTopic}
                 setSelectedTopic={setSelectedTopic}
               />

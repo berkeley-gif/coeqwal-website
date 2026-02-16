@@ -33,7 +33,7 @@ function TabDescription({ tab }: { tab: TabKey }) {
           body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California\u2019s water future."
           linkListLabel="Explore how critical water issues are addressed"
           links={[
-            { label: "Communities and drinking water" },
+            { label: "Community water systems" },
             { label: "Farms, groundwater, and food systems" },
             { label: "Rivers, salmon, and ecosystems" },
             { label: "The Delta as a living place" },
