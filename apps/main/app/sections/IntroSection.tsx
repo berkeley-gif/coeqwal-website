@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform } from "@repo/motion"
 import { ScrollSection, useScrollProgress, useScrollValue } from "@repo/scrollytelling"
 
@@ -88,17 +88,7 @@ function Panel1Paragraph() {
       }}
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
-        <Box
-          sx={{
-            fontFamily: theme.typography.body1.fontFamily,
-            fontSize: "1.4rem",
-            fontWeight: 400,
-            lineHeight: 1.6,
-            letterSpacing: "0.005em",
-            textRendering: "optimizeLegibility",
-            WebkitFontSmoothing: "antialiased",
-          }}
-        >
+        <Typography variant="displayBody" component="div">
           COEQWAL – the Collaboratory for Equity in Water Allocation – is a
           publicly-funded project that works with communities to model
           alternative water management scenarios.
@@ -115,7 +105,7 @@ function Panel1Paragraph() {
           >
             About COEQWAL{"."}
           </Link>
-        </Box>
+        </Typography>
       </Box>
     </motion.div>
   )
@@ -148,17 +138,7 @@ function Panel2Paragraph({
       }}
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
-        <Box
-          sx={{
-            fontFamily: theme.typography.body1.fontFamily,
-            fontSize: "1.4rem",
-            fontWeight: 400,
-            lineHeight: 1.6,
-            letterSpacing: "0.005em",
-            textRendering: "optimizeLegibility",
-            WebkitFontSmoothing: "antialiased",
-          }}
-        >
+        <Typography variant="displayBody" component="div">
           <Box>
             {WATER_TOPICS.find((t) => t.id === selectedTopic)?.description ||
               INTRO_TEXT}
@@ -171,7 +151,7 @@ function Panel2Paragraph({
             revealStart={0.4}
             revealEnd={0.9}
           />
-        </Box>
+        </Typography>
       </Box>
     </motion.div>
   )

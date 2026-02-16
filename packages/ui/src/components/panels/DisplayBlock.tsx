@@ -34,13 +34,9 @@ export function DisplayBlock({
       }}
     >
       <Typography
+        variant="displayBody"
         component="div"
         sx={{
-          fontFamily: theme.typography.body1.fontFamily,
-          fontSize: "1.4rem",
-          fontWeight: 400,
-          lineHeight: 1.6,
-          letterSpacing: "0.005em",
           color: "inherit",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
           textRendering: "optimizeLegibility",
@@ -49,7 +45,7 @@ export function DisplayBlock({
           margin: 0,
           textAlign: "left",
           "& strong, & b": {
-            fontWeight: 600,
+            fontWeight: 700,
           },
         }}
       >

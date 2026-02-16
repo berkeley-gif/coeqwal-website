@@ -716,7 +716,7 @@ const theme = createTheme({
       paper: "#FFFFFF", // Solid white for UI backgrounds
     },
     text: {
-      primary: themeValues.palette.blue.darkest,
+      primary: themeValues.palette.brand.panelDark,
       secondary: themeValues.palette.common.white,
       disabled: themeValues.palette.blue.light,
     },
@@ -963,13 +963,13 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.8,
     },
-    // Display body - for hero/panel body text using display font
+    // Display body - for hero/panel body text (frontmatter, video hero)
     displayBody: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.4rem", // 22.4px - matches body1 size
-      fontWeight: 500,
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "1.4rem", // 22.4px
+      fontWeight: 400,
       lineHeight: 1.6,
-      letterSpacing: "0.01em",
+      letterSpacing: "0.005em",
     },
   },
   shape: {
