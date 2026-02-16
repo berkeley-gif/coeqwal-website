@@ -15,12 +15,11 @@
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
-import { motion, useReducedMotion } from "@repo/motion"
+import { useReducedMotion } from "@repo/motion"
 import { ScrollToButton, DisplayBlock } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
-// Motion-enabled MUI components
-const MotionBox = motion.create(Box)
+
 
 export type VideoSource = { src: string; type: string }
 export interface VideoHeroProps {
@@ -107,27 +106,6 @@ export default function VideoHero({
   }, [mounted, canPlay, failed, isPlaying, prefersReducedMotion])
 
   const showStaticImage = failed
-
-  // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
-  const heroIn = {
-    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
-
-  const heroInRight = {
-    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-    },
-  }
 
   return (
     // WCAG 1.3.1: Semantic section element with accessible name
@@ -219,13 +197,13 @@ export default function VideoHero({
           aria-pressed={isPlaying}
           sx={{
             position: "absolute",
-            bottom: 16,
+            bottom: "clamp(24px, 4vh, 48px)",
             right: 16,
             zIndex: theme.zIndex.heroControls,
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             color: "common.white",
-            width: 44, // WCAG 2.5.5: Minimum 44x44px touch target
-            height: 44,
+            width: 52,
+            height: 52,
             "&:hover": {
               backgroundColor: "rgba(0, 0, 0, 0.7)",
             },
@@ -265,74 +243,68 @@ export default function VideoHero({
       {/* Content layout - grid stacking + flex for diagonal positioning */}
       <Box
         sx={{
-          gridArea: "stack", // CSS Grid stacking: occupies same cell as video
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
+          gridArea: "stack",
+          // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
+          display: { xs: "flex", lg: "grid" },
+          gridTemplateColumns: { lg: "3fr 2fr" },
+          flexDirection: { xs: "column" },
+          justifyContent: { xs: "space-between" },
           paddingTop: theme.space.panel.topOffset,
-          paddingBottom: theme.space.panel.bottomOffset,
+          paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
           paddingLeft: theme.space.panel.padding,
           paddingRight: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent,
-          pointerEvents: "none", // Let clicks pass through to pause button (WCAG 2.2.2)
+          pointerEvents: "none",
         }}
       >
-        {/* Headline - top-left on desktop, centered on mobile */}
-        {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroIn}
+        {/* Headline - column 1, top-aligned */}
+        <Box
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
+            gridColumn: { lg: 1 },
+            alignSelf: { xs: "stretch", lg: "start" },
             display: hideHeadline
-              ? { xs: "flex", md: "none" } // Mobile: show, Desktop: hidden (MorphingHeadline)
-              : { xs: "flex", md: "block" }, // Always show when not using MorphingHeadline
-            justifyContent: { xs: "center", md: "flex-start" },
-            pointerEvents: "auto", // Re-enable for text selection
+              ? { xs: "flex", lg: "none" }
+              : { xs: "flex", lg: "block" },
+            justifyContent: { xs: "center", lg: "flex-start" },
+            pointerEvents: "auto",
           }}
         >
           <Box
             sx={{
               color: "common.white",
               textShadow: theme.textShadow.display,
-              // fontSize needed for maxWidth "ch" unit to calculate correctly
-              fontSize: theme.typography.h1Bold.fontSize,
-              // lineHeight controls spacing between the two headline lines
+              fontSize: theme.typography.h1.fontSize,
               lineHeight: 1,
               maxWidth: "16ch",
-              textAlign: { xs: "center", md: "left" },
+              textAlign: { xs: "center", lg: "left" },
             }}
           >
             <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
               {t("homePanel.titleLine1")}
             </Typography>
-            <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
+            <Typography variant="h1" component="h1" sx={{ display: "block" }}>
               {t("homePanel.titleLine2")}
             </Typography>
           </Box>
-        </MotionBox>
-        {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
-        {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
+        </Box>
 
-        {/* Body - bottom-right on desktop, centered on mobile */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroInRight}
+        {/* Body - centered below 1200px, column 2 bottom-aligned above */}
+        <Box
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-end" },
-            display: { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-end" },
-            pointerEvents: "auto", // Re-enable for text selection
+            gridColumn: { lg: 2 },
+            alignSelf: { xs: "center", lg: "end" },
+            pointerEvents: "auto",
           }}
         >
-          <DisplayBlock>
+          <DisplayBlock
+            sx={{
+              background: "rgba(0, 0, 0, 0.2)",
+              padding: "20px 24px",
+            }}
+          >
             {t("homePanel.content")}
           </DisplayBlock>
-        </MotionBox>
+        </Box>
       </Box>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}

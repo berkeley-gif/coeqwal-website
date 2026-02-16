@@ -228,6 +228,7 @@ export function BaseHeader({
    * RESPONSIVE & MOTION PREFERENCES
    * ======================================== */
   const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+  const isWideDesktop = useMediaQuery("(min-width: 1200px)")
   // WCAG 2.3.3: Respect user's motion preferences
   const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -391,11 +392,12 @@ export function BaseHeader({
         <Toolbar
           sx={{
             py: "var(--pad-y) !important",
-            px: 2,
+            px: isWideDesktop ? theme.space.panel.padding : 2,
             minHeight: "var(--header-h) !important",
-            display: "flex",
+            display: isWideDesktop ? "grid" : "flex",
+            gridTemplateColumns: isWideDesktop ? "3fr 2fr" : undefined,
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: isWideDesktop ? undefined : "space-between",
           }}
           style={{ minHeight: "var(--header-h)" }}
         >
@@ -446,12 +448,18 @@ export function BaseHeader({
            * WCAG 1.3.1: Semantic nav element - DO NOT REMOVE
            * ---------------------------------------- */}
           {!isMobile && (
-            <Box component="nav" aria-label="Main navigation">
+            <Box
+              component="nav"
+              aria-label="Main navigation"
+              sx={{
+                justifySelf: isWideDesktop ? "start" : undefined,
+                ml: isWideDesktop ? "-30px" : 0,
+              }}
+            >
               <Stack
                 direction="row"
                 spacing={2}
                 alignItems="center"
-                sx={{ pr: 2 }}
               >
                 {/* 1. Water stories dropdown */}
                 <NavDropdown

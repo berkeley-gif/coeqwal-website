@@ -28,22 +28,23 @@ export function DisplayBlock({
   return (
     <Box
       sx={{
-        maxWidth: { xs: "100%", sm: "520px" },
+        maxWidth: { xs: "100%", sm: "540px" },
         width: { xs: "100%", sm: "auto" },
         ...sx,
       }}
     >
       <Typography
         sx={{
-          fontFamily: theme.typography.fontFamily,
+          fontFamily: theme.typography.body1.fontFamily,
           fontSize: "1.4rem",
           fontWeight: 400,
-          lineHeight: 1.1,
-          letterSpacing: "-0.02em",
-          color: "rgba(255, 255, 255, 0.82)",
+          lineHeight: 1.6,
+          letterSpacing: "0.005em",
+          color: "rgba(255, 255, 255, 1)",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
           textRendering: "optimizeLegibility",
           WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
           margin: 0,
           textAlign: "left",
           "& strong, & b": {

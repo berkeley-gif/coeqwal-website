@@ -9,9 +9,8 @@
  */
 
 import React from "react"
-import { IconButton, useTheme } from "../../mui-components"
+import { IconButton, useTheme, ArrowDownwardIcon } from "../../mui-components"
 import type { SxProps, Theme } from "@mui/material/styles"
-import { RoundedDownArrow } from "../icons/RoundedDownArrow"
 
 interface CircularArrowButtonProps {
   onClick?: () => void
@@ -45,13 +44,18 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
           width: size,
           height: size,
           borderRadius: "50%",
+          border: `2px solid ${buttonColor}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           color: buttonColor,
         }}
       >
-        <RoundedDownArrow style={{ transform: `rotate(${rotation})` }} />
+        <ArrowDownwardIcon
+          sx={{
+            transform: rotation ? `rotate(${rotation})` : undefined,
+          }}
+        />
       </div>
     )
   }
@@ -64,7 +68,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
         width: size,
         height: size,
         borderRadius: theme.borderRadius.circle,
-        border: "none",
+        border: `2px solid ${buttonColor}`,
         color: buttonColor,
         // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
         "&:focus-visible": {
@@ -74,7 +78,11 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
         ...sx,
       }}
     >
-      <RoundedDownArrow style={{ transform: `rotate(${rotation})` }} />
+      <ArrowDownwardIcon
+        sx={{
+          transform: rotation ? `rotate(${rotation})` : undefined,
+        }}
+      />
     </IconButton>
   )
 }

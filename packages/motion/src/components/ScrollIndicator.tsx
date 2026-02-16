@@ -56,7 +56,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   delay = 1.0,
   color = "currentColor",
   size = 28,
-  pulseIntensity = 1.2,
+  pulseIntensity = 1,
   showDuration = 1.5,
   hideDuration = 0.8,
   onClick,
@@ -116,7 +116,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
     let animationRunning = true
     let timeoutId: NodeJS.Timeout | null = null
 
-    const bounce = [0, 10, 0, 10, 0, 10, 0]
+    const bounce = [0, 0, 0]
 
     const animateIndicator = async () => {
       if (!animationRunning) return
