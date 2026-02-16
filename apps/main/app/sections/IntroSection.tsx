@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
-import { Box, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
+import { Box, useTheme } from "@repo/ui/mui"
 import { motion, useTransform } from "@repo/motion"
 import { ScrollSection, useScrollProgress, useScrollValue } from "@repo/scrollytelling"
 
@@ -104,7 +104,7 @@ function Panel1Paragraph() {
           alternative water management scenarios.
           <br />
           <br />
-          To learn more, go to{" "}
+          To learn more, see{" "}
           <Link
             href="/about"
             style={{
@@ -113,17 +113,7 @@ function Panel1Paragraph() {
               fontWeight: 500,
             }}
           >
-            About COEQWAL{" "}
-            <ArrowForwardIcon
-              sx={{
-                fontSize: "1.5rem",
-                verticalAlign: "middle",
-                position: "relative",
-                top: "-3px",
-                strokeWidth: 1,
-                stroke: "currentColor",
-              }}
-            />
+            About COEQWAL{"."}
           </Link>
         </Box>
       </Box>
@@ -273,7 +263,7 @@ const IntroSection = () => {
           id="intro"
           ariaLabel="What is COEQWAL"
           style={{
-            background: `linear-gradient(to bottom, #2a649b, ${theme.palette.learn.background})`,
+            background: `linear-gradient(to bottom, #2a649b, #D5EAF5)`,
           }}
         >
           {/* Sticky viewport - pins 100vh content while scrolling through 200vh section */}
@@ -333,11 +323,6 @@ const IntroSection = () => {
             ariaLabel="What water issues matter to you"
             style={{
               backgroundColor: theme.palette.learn.background,
-              backgroundImage:
-                "url(/images/about/tiered-image-text-hills.png)",
-              backgroundPosition: "center bottom",
-              backgroundSize: "100% 40%",
-              backgroundRepeat: "no-repeat",
             }}
           >
             {/* Sticky viewport */}
@@ -347,6 +332,12 @@ const IntroSection = () => {
                 top: 0,
                 height: "100vh",
                 overflow: "hidden",
+                backgroundColor: theme.palette.learn.background,
+                backgroundImage:
+                  "url(/images/about/tiered-image-text-hills.png)",
+                backgroundPosition: "center bottom",
+                backgroundSize: "100% 30%",
+                backgroundRepeat: "no-repeat",
                 display: { xs: "flex", lg: "grid" },
                 gridTemplateColumns: { lg: "3fr 2fr" },
                 flexDirection: { xs: "column" },
