@@ -125,7 +125,7 @@ export default function MorphingHeadline({
       // Adjust timing based on transition position.
       // Visual perception requires earlier transitions at the start of a scroll sequence
       // and later transitions as the user settles into the scroll rhythm.
-      // These values are tuned by hand - adjust if adding more panels.
+      // These values are tuned by hand. Adjust if adding more panels.
       const getTransitionTiming = (transitionIndex: number) => {
         if (transitionIndex === 0) return { start: -0.05, end: 0.05 } // First: starts slightly before boundary
         if (transitionIndex === 1) return { start: 0.05, end: 0.2 } // Middle: standard
