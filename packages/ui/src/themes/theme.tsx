@@ -35,12 +35,12 @@ import { createTheme, Theme } from "@mui/material/styles"
  * To switch fonts, change ACTIVE_FONT_PRESET below.
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Active: "neueHaasUnica"
+ * Active: "neueHaas"
  * Other presets are commented out below but preserved for comparison.
  */
 
-type FontPresetKey = "neueHaasUnica"
-  // | "neueHaas"
+type FontPresetKey = "neueHaas"
+  // | "neueHaasUnica"
   // | "ffDagny"
   // | "larsseit"
   // | "roboto"
@@ -52,20 +52,20 @@ type FontPresetKey = "neueHaasUnica"
   // | "avenirNext"
   // | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaasUnica"
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas"
 
 const FONT_PRESETS = {
-  // Neue Haas Unica: single-family font (no display/text split)
-  neueHaasUnica: {
-    text: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
-    display: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+  // Adobe TypeKit fonts - weights depend on TypeKit project configuration
+  neueHaas: {
+    text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+    display:
+      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
-  // // Adobe TypeKit fonts - weights depend on TypeKit project configuration
-  // neueHaas: {
-  //   text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
-  //   display:
-  //     '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+  // // Neue Haas Unica: single-family font (no display/text split)
+  // neueHaasUnica: {
+  //   text: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
   //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   // },
   // // FF Dagny Web Pro: single-family font
@@ -741,18 +741,18 @@ const theme = createTheme({
       // Responsive hero headline
       // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
       fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
-      fontWeight: 600,
-      letterSpacing: "-0.025em",
+      fontWeight: 500,
+      letterSpacing: "-0.015em",
       margin: 0, // Reset default margins
       padding: 0, // Reset default padding
     },
-    // h1Bold - Bold emphasis variant for hero headlines (e.g., "water?" in "California's water?")
+    // h1Bold - Bold emphasis variant for hero headlines (e.g., "water" in "California's water?")
     h1Bold: {
       fontFamily: themeValues.fontFamily.display,
       // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
       fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
-      letterSpacing: "-0.025em",
+      letterSpacing: "-0.015em",
       margin: 0,
       padding: 0,
     },
@@ -761,17 +761,17 @@ const theme = createTheme({
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
     },
     // h2Main - Main site specific h2 variant with larger mobile size
     h2Main: {
       fontFamily: themeValues.fontFamily.display,
-      // Mobile (2.6rem / 41.6px) → Desktop (4rem / 64px)
-      fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 4rem)",
+      // Mobile (2.6rem / 41.6px) → Desktop (3.6rem / 57.6px)
+      fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)",
       fontWeight: 400,
-      letterSpacing: "-0.02em",
+      letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
     },
@@ -804,15 +804,13 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - primary body text (comfortable reading size)
       fontWeight: 400,
-      lineHeight: 1.7,
-      letterSpacing: "0.005em",
+      lineHeight: 1.6,
     },
     body1Medium: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - same as body1
       fontWeight: 500,
-      lineHeight: 1.7,
-      letterSpacing: "0.005em",
+      lineHeight: 1.6,
     },
     body2: {
       fontFamily: themeValues.fontFamily.text,

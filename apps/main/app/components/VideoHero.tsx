@@ -305,11 +305,10 @@ export default function VideoHero({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2Main" component="span">
+            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
               {t("homePanel.titleLine1")}
             </Typography>
-            <br />
-            <Typography variant="h1Bold" component="span">
+            <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
               {t("homePanel.titleLine2")}
             </Typography>
           </Box>
@@ -330,12 +329,7 @@ export default function VideoHero({
             pointerEvents: "auto", // Re-enable for text selection
           }}
         >
-          <DisplayBlock
-            sx={{
-              // WCAG AA: Darkish transparent fill for text contrast against video
-              background: "rgba(0, 0, 0, 0.2)",
-            }}
-          >
+          <DisplayBlock>
             {t("homePanel.content")}
           </DisplayBlock>
         </MotionBox>
