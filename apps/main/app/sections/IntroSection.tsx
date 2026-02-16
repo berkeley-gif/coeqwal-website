@@ -4,6 +4,8 @@ import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
+import { motion, useTransform } from "@repo/motion"
+import { ScrollSection, useScrollProgress, useScrollValue } from "@repo/scrollytelling"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
@@ -62,6 +64,76 @@ const WATER_TOPICS: Topic[] = [
 const INTRO_TEXT =
   "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how different decisions affect uses of water that people care about."
 
+/**
+ * Panel1Paragraph - Scroll-linked paragraph for frontmatter panel 1.
+ * Must be inside a ScrollSection. Starts 100% below its position and
+ * translates up to 0 as the user scrolls through the first half of the section.
+ */
+function Panel1Paragraph() {
+  const theme = useTheme()
+  const progress = useScrollProgress()
+  // Translate from well below into final position, then hold
+  // 50vh travel distance puts paragraph at bottom of viewport initially,
+  // rising to the headline's vertical level
+  const yNum = useScrollValue(progress, [0, 0.45, 1], [80, 0, 0])
+  const y = useTransform(yNum, (v) => `${v}vh`)
+  const opacity = useScrollValue(progress, [0, 0.2, 1], [0, 1, 1])
+
+  return (
+    <motion.div
+      style={{
+        y,
+        opacity,
+        gridColumn: 2,
+        alignSelf: "start",
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
+        <Box
+          sx={{
+            fontFamily: theme.typography.body1.fontFamily,
+            fontSize: "1.4rem",
+            fontWeight: 400,
+            lineHeight: 1.6,
+            letterSpacing: "0.005em",
+            textRendering: "optimizeLegibility",
+            WebkitFontSmoothing: "antialiased",
+          }}
+        >
+          COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+          publicly-funded project that works with communities to model
+          alternative water management scenarios.
+          <br />
+          <br />
+          To learn more, go to{" "}
+          <Link
+            href="/about"
+            style={{
+              color: "inherit",
+              textDecoration: "none",
+              fontWeight: 500,
+            }}
+          >
+            About COEQWAL{" "}
+            <ArrowForwardIcon
+              sx={{
+                fontSize: "1.5rem",
+                verticalAlign: "middle",
+                position: "relative",
+                top: "-3px",
+                strokeWidth: 1,
+                stroke: "currentColor",
+              }}
+            />
+          </Link>
+        </Box>
+      </Box>
+    </motion.div>
+  )
+}
+
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -108,6 +180,7 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
+        weights={[1, 2, 1, 1]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -144,52 +217,63 @@ const IntroSection = () => {
           hideHeadline
         />
 
-        {/* Frontmatter Panel 1 - gradient from panel color to learn background */}
-        <Box
-          sx={{
+        {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
+        <ScrollSection
+          height="200vh"
+          id="intro"
+          ariaLabel="What is COEQWAL"
+          style={{
             background: `linear-gradient(to bottom, #2a649b, ${theme.palette.learn.background})`,
           }}
         >
-        <FrontmatterPanel
-          id="intro"
-          ariaLabel="What is COEQWAL"
-          backgroundColor="transparent"
-          headlineLine1="What is"
-          headlineLine2="COEQWAL?"
-          bodyText={
-            <>
-              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
-              publicly-funded project that works with communities to model
-              alternative water management scenarios.
-              <br />
-              <br />
-              To learn more, go to{" "}
-              <Link
-                href="/about"
-                style={{
-                  color: "inherit",
-                  textDecoration: "none",
-                  fontWeight: 500,
+          {/* Sticky viewport - pins 100vh content while scrolling through 200vh section */}
+          <Box
+            sx={{
+              position: "sticky",
+              top: 0,
+              height: "100vh",
+              overflow: "hidden",
+              display: { xs: "flex", lg: "grid" },
+              gridTemplateColumns: { lg: "3fr 2fr" },
+              flexDirection: { xs: "column" },
+              justifyContent: { xs: "space-between" },
+              paddingTop: theme.space.panel.topOffset,
+              paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+              paddingLeft: theme.space.panel.padding,
+              paddingRight: theme.space.panel.padding,
+              pointerEvents: "auto",
+            }}
+          >
+            {/* Headline - column 1 (hidden on lg, MorphingHeadline handles it) */}
+            <Box
+              sx={{
+                gridColumn: { lg: 1 },
+                alignSelf: { xs: "stretch", lg: "start" },
+                display: { xs: "flex", lg: "none" },
+                justifyContent: { xs: "center", lg: "flex-start" },
+              }}
+            >
+              <Box
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontSize: theme.typography.h1.fontSize,
+                  maxWidth: "16ch",
+                  textAlign: { xs: "center", lg: "left" },
                 }}
               >
-                About COEQWAL{" "}
-                <ArrowForwardIcon
-                  sx={{
-                    fontSize: "1.5rem",
-                    verticalAlign: "middle",
-                    position: "relative",
-                    top: "-3px",
-                    strokeWidth: 1,
-                    stroke: "currentColor",
-                  }}
-                />
-              </Link>
-            </>
-          }
-          textColor={theme.palette.text.primary}
-          hideHeadline
-        />
-        </Box>
+                <Box component="h2" sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}>
+                  What is
+                </Box>
+                <Box component="h1" sx={{ ...theme.typography.h1, display: "block", m: 0 }}>
+                  COEQWAL?
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Paragraph - scroll-linked translateY from below into position */}
+            <Panel1Paragraph />
+          </Box>
+        </ScrollSection>
 
         {/* Frontmatter Panel 2 - background image */}
         {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}

@@ -291,7 +291,7 @@ export default function FrontmatterPanel({
         paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
       }}
     >
-      {/* Headline - column 1, top-aligned */}
+      {/* Headline - column 1, top-aligned (sticky when choreography enabled) */}
       <MotionBox
         initial="hidden"
         whileInView="show"
@@ -326,7 +326,7 @@ export default function FrontmatterPanel({
         </Box>
       </MotionBox>
 
-      {/* Body - column 2, bottom-aligned */}
+      {/* Body - column 2, bottom-aligned (sticky when choreography enabled) */}
       <MotionBox
         initial="hidden"
         whileInView="show"

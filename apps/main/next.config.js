@@ -14,6 +14,7 @@ const nextConfig = {
     "@repo/viz",
     "@repo/ui",
     "@repo/motion",
+    "@repo/scrollytelling",
     "@repo/i18n",
     "@repo/data",
   ],
