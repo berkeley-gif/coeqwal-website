@@ -123,6 +123,22 @@ function StaggeredCircle({
             justifyContent: "center",
           }}
         />
+
+        {/* Description text - appears below circle when selected */}
+        {isSelected && (
+          <Typography
+            variant="compactSubtitle"
+            component="div"
+            sx={{
+              textAlign: "center",
+              color: theme.palette.text.primary,
+              mt: 1,
+              maxWidth: "180px",
+            }}
+          >
+            {topic.description}
+          </Typography>
+        )}
       </Box>
     </motion.div>
   )
@@ -150,7 +166,7 @@ export default function TopicCircles({
           lg: "repeat(6, 1fr)",
         },
         gap: { xs: 3, lg: 3 },
-        mt: 4,
+        mt: 0,
       }}
     >
       {topics.map((topic, index) => {
