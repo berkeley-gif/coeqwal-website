@@ -328,7 +328,7 @@ export function SummaryPanel({
         // Match the styling of other panels (StrategyRow, KeyOperationsPanel, KeyOutcomesPanel)
         backgroundColor: isInline
           ? theme.palette.grey[50]
-          : "rgba(255, 255, 255, 0.95)",
+          : `${theme.palette.common.white}F2`,
         borderRadius: isInline ? theme.borderRadius.md : 0,
         padding: isInline ? theme.space.card.xs : theme.space.card.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,

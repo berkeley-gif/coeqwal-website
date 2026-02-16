@@ -214,7 +214,7 @@ export function TierLocationLabels({
                   y1={10}
                   x2={0}
                   y2={10 + armDy}
-                  stroke="rgba(255, 255, 255, 0.8)"
+                  stroke={`${theme.palette.common.white}CC`}
                   strokeWidth="1.5"
                 />
               </svg>

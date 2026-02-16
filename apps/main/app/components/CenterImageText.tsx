@@ -133,7 +133,7 @@ export function CenterImageText({
           }}
         >
           <ScrollToButton
-            color="rgba(255, 255, 255, 0.85)"
+            color={`${theme.palette.common.white}D9`}
             size={52}
             scrollToId={scrollToId}
             ariaLabel="Scroll down to continue"
