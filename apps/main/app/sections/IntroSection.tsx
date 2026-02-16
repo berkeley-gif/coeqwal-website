@@ -96,65 +96,70 @@ const IntroSection = () => {
           hideHeadline
         />
 
-        {/* Frontmatter Panel 1 */}
-        <FrontmatterPanel
-          id="intro"
-          ariaLabel="What is COEQWAL"
-          backgroundColor="#2a649b"
-          // backgroundColor={theme.palette.brand.panelMedium}
-          headlineLine1="What is"
-          headlineLine2="COEQWAL?"
-          bodyText={
-            <>
-              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
-              publicly-funded project that works with communities to model
-              alternative water management scenarios.
-              <br />
-              <br />
-              To learn more, go to{" "}
-              <Link
-                href="/about"
-                style={{
-                  color: "inherit",
-                  textDecoration: "none",
-                  fontWeight: 500,
-                }}
-              >
-                About COEQWAL{" "}
-                <ArrowForwardIcon
-                  sx={{
-                    fontSize: "1.5rem",
-                    verticalAlign: "middle",
-                    position: "relative",
-                    top: "-3px",
-                    strokeWidth: 1,
-                    stroke: "currentColor",
-                  }}
-                />
-              </Link>
-            </>
-          }
-          textColor={theme.palette.common.white}
-          hideHeadline
-          scrollToId="water-issues"
-        />
-
-        {/* Frontmatter Panel 2 - Map background panel */}
-        {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
-        <div ref={waterIssuesRef}>
+        {/* Gradient wrapper: panels 1-2 */}
+        <Box
+          sx={{
+            background: `linear-gradient(to bottom, #2a649b, ${theme.palette.learn.background})`,
+          }}
+        >
+          {/* Frontmatter Panel 1 */}
           <FrontmatterPanel
-            id="water-issues"
-            ariaLabel="What water issues matter to you"
+            id="intro"
+            ariaLabel="What is COEQWAL"
             backgroundColor="transparent"
-            headlineLine1="What water issues"
-            headlineLine2="matter to you?"
-            bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
+            headlineLine1="What is"
+            headlineLine2="COEQWAL?"
+            bodyText={
+              <>
+                COEQWAL – the Collaboratory for Equity in Water Allocation – is
+                a publicly-funded project that works with communities to model
+                alternative water management scenarios.
+                <br />
+                <br />
+                To learn more, go to{" "}
+                <Link
+                  href="/about"
+                  style={{
+                    color: "inherit",
+                    textDecoration: "none",
+                    fontWeight: 500,
+                  }}
+                >
+                  About COEQWAL{" "}
+                  <ArrowForwardIcon
+                    sx={{
+                      fontSize: "1.5rem",
+                      verticalAlign: "middle",
+                      position: "relative",
+                      top: "-3px",
+                      strokeWidth: 1,
+                      stroke: "currentColor",
+                    }}
+                  />
+                </Link>
+              </>
+            }
             textColor={theme.palette.common.white}
             hideHeadline
-            displayBlockBackground="rgba(42, 82, 135, 0.75)"
-            scrollToId="site-actions"
+            scrollToId="water-issues"
           />
-        </div>
+
+          {/* Frontmatter Panel 2 */}
+          {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
+          <div ref={waterIssuesRef}>
+            <FrontmatterPanel
+              id="water-issues"
+              ariaLabel="What water issues matter to you"
+              backgroundColor="transparent"
+              headlineLine1="What water issues"
+              headlineLine2="matter to you?"
+              bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
+              textColor={theme.palette.common.white}
+              hideHeadline
+              scrollToId="site-actions"
+            />
+          </div>
+        </Box>
 
         {/* Frontmatter Panel 3 - Actions variant */}
         <FrontmatterPanel
