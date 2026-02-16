@@ -83,7 +83,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
         const rect = targetElement.getBoundingClientRect()
         const currentScrollTop =
           window.pageYOffset || document.documentElement.scrollTop
-        const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
+        const targetPosition = rect.top + currentScrollTop
 
         requestAnimationFrame(() => {
           window.scrollTo({
