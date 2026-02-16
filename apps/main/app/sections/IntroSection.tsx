@@ -117,16 +117,16 @@ const IntroSection = () => {
                 style={{
                   color: "inherit",
                   textDecoration: "none",
-                  fontWeight: 600,
+                  fontWeight: 500,
                 }}
               >
                 About COEQWAL{" "}
                 <ArrowForwardIcon
                   sx={{
-                    fontSize: "1rem",
+                    fontSize: "1.5rem",
                     verticalAlign: "middle",
                     position: "relative",
-                    top: "-1.5px",
+                    top: "-3px",
                     strokeWidth: 1,
                     stroke: "currentColor",
                   }}
