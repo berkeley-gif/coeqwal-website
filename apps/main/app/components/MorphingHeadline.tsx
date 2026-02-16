@@ -21,7 +21,7 @@
 "use client"
 
 import React, { useEffect, useState, useMemo, useCallback } from "react"
-import { useScroll, motion, useReducedMotion } from "@repo/motion"
+import { useScroll, motion, useReducedMotion, useTransform } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 /**
@@ -71,12 +71,15 @@ export interface MorphingHeadlineProps {
   /** Relative weights for each panel's scroll height (default: equal distribution).
    *  e.g., [1, 2, 1, 1] means the second panel takes 2x the scroll distance. */
   weights?: number[]
+  /** Overall scroll progress range [start, end] where headline translates upward and exits */
+  exitRange?: [number, number]
 }
 
 export default function MorphingHeadline({
   headlines,
   containerRef,
   weights,
+  exitRange,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
@@ -95,6 +98,18 @@ export default function MorphingHeadline({
      */
     layoutEffect: false,
   })
+
+  // Exit animation: translate upward and fade out during exitRange
+  const exitY = useTransform(
+    scrollYProgress,
+    exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
+    exitRange ? [0, -300] : [0, 0],
+  )
+  const exitOpacity = useTransform(
+    scrollYProgress,
+    exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
+    exitRange ? [1, 0] : [1, 1],
+  )
 
   /**
    * Calculate opacity keyframes for each headline based on number of panels.
@@ -292,6 +307,11 @@ export default function MorphingHeadline({
 
   return (
     <Box
+      component={motion.div}
+      style={{
+        y: exitY,
+        opacity: exitOpacity,
+      }}
       sx={{
         position: "fixed",
         top: theme.space.panel.topOffset,

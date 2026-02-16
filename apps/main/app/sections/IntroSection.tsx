@@ -118,9 +118,10 @@ function Panel1Paragraph() {
 function Panel2Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  const yNum = useScrollValue(progress, [0, 0.35, 1], [60, 0, 0])
+  // Enter from below, hold, then exit upward after circles appear
+  const yNum = useScrollValue(progress, [0, 0.35, 0.85, 1], [60, 0, 0, -50])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.1, 1], [0, 1, 1])
+  const opacity = useScrollValue(progress, [0, 0.1, 0.85, 1], [0, 1, 1, 0])
 
   return (
     <motion.div
@@ -135,6 +136,57 @@ function Panel2Paragraph() {
         <Typography variant="displayBody" component="div">
           {INTRO_TEXT}
         </Typography>
+      </Box>
+    </motion.div>
+  )
+}
+
+/**
+ * Panel2Headline - Exits upward after circles appear.
+ */
+function Panel2Headline() {
+  const theme = useTheme()
+  const progress = useScrollProgress()
+  const yNum = useScrollValue(progress, [0, 0.85, 1], [0, 0, -50])
+  const y = useTransform(yNum, (v) => `${v}vh`)
+  const opacity = useScrollValue(progress, [0, 0.85, 1], [1, 1, 0])
+
+  return (
+    <motion.div
+      style={{
+        y,
+        opacity,
+        gridColumn: 1,
+        alignSelf: "start",
+      }}
+    >
+      <Box
+        sx={{
+          display: { xs: "flex", lg: "none" },
+          justifyContent: { xs: "center", lg: "flex-start" },
+        }}
+      >
+        <Box
+          sx={{
+            color: theme.palette.text.primary,
+            fontSize: theme.typography.h1.fontSize,
+            maxWidth: "16ch",
+            textAlign: { xs: "center", lg: "left" },
+          }}
+        >
+          <Box
+            component="h2"
+            sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}
+          >
+            What water issues
+          </Box>
+          <Box
+            component="h1"
+            sx={{ ...theme.typography.h1, display: "block", m: 0 }}
+          >
+            matter to you?
+          </Box>
+        </Box>
       </Box>
     </motion.div>
   )
@@ -220,6 +272,7 @@ const IntroSection = () => {
       <MorphingHeadline
         containerRef={introPanelsRef}
         weights={[1, 1.6, 3, 1]}
+        exitRange={[0.78, 0.85]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -348,41 +401,8 @@ const IntroSection = () => {
                 pointerEvents: "auto",
               }}
             >
-              {/* Headline - column 1 (hidden on lg, MorphingHeadline handles it) */}
-              <Box
-                sx={{
-                  gridColumn: { lg: 1 },
-                  alignSelf: { xs: "stretch", lg: "start" },
-                  display: { xs: "flex", lg: "none" },
-                  justifyContent: { xs: "center", lg: "flex-start" },
-                }}
-              >
-                <Box
-                  sx={{
-                    color: theme.palette.text.primary,
-                    fontSize: theme.typography.h1.fontSize,
-                    maxWidth: "16ch",
-                    textAlign: { xs: "center", lg: "left" },
-                  }}
-                >
-                  <Box
-                    component="h2"
-                    sx={{
-                      ...theme.typography.h2Main,
-                      display: "block",
-                      m: 0,
-                    }}
-                  >
-                    What water issues
-                  </Box>
-                  <Box
-                    component="h1"
-                    sx={{ ...theme.typography.h1, display: "block", m: 0 }}
-                  >
-                    matter to you?
-                  </Box>
-                </Box>
-              </Box>
+              {/* Headline - exits upward with paragraph after circles appear */}
+              <Panel2Headline />
 
               {/* Paragraph - scroll-linked */}
               <Panel2Paragraph />

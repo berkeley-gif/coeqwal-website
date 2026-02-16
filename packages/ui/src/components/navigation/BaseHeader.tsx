@@ -147,6 +147,9 @@ export interface BaseHeaderProps {
   backgroundColorScrolled?: string
   backgroundScrollThreshold?: number // default: 200px
 
+  /** Text color to transition to when header shrinks (default: same as textColor) */
+  textColorScrolled?: string
+
   /* --- Optional features --- */
   shrinkOnScroll?: boolean // default: true
   showLanguageSwitcher?: boolean // default: false
@@ -203,6 +206,7 @@ export function BaseHeader({
   zIndex,
   backgroundColorScrolled,
   backgroundScrollThreshold = 200,
+  textColorScrolled,
   shrinkOnScroll = true,
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
@@ -213,9 +217,9 @@ export function BaseHeader({
    * ======================================== */
   const theme = useTheme()
 
-  // Use theme tokens for defaults
-  const resolvedTextColor = textColor ?? theme.palette.common.white
-  const resolvedBorderBottom = borderBottom ?? theme.border.rule
+  // Use theme tokens for defaults (resolvedTextColor set after isScrolled)
+  const baseTextColor = textColor ?? theme.palette.common.white
+  const baseBorderBottom = borderBottom ?? theme.border.rule
   const resolvedZIndex = zIndex ?? theme.zIndex.appBar
 
   // Header dimensions from theme
@@ -276,7 +280,7 @@ export function BaseHeader({
   const [isScrolled, setIsScrolled] = useState(false)
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (backgroundColorScrolled) {
+    if (backgroundColorScrolled || textColorScrolled) {
       setIsScrolled(latest > backgroundScrollThreshold)
     }
   })
@@ -286,6 +290,23 @@ export function BaseHeader({
     backgroundColorScrolled && isScrolled
       ? backgroundColorScrolled
       : backgroundColor
+
+  // Resolve text color, border, text shadow, and logo (transitions when scrolled)
+  const resolvedTextColor = textColorScrolled && isScrolled
+    ? textColorScrolled
+    : baseTextColor
+  const resolvedBorderBottom = textColorScrolled && isScrolled
+    ? `${theme.strokeWidth.rule}px solid ${textColorScrolled}CC`
+    : baseBorderBottom
+  const resolvedTextShadow = textColorScrolled && isScrolled
+    ? "none"
+    : theme.textShadow.nav
+  const resolvedTextShadowHover = textColorScrolled && isScrolled
+    ? "none"
+    : theme.textShadow.navHover
+  const resolvedLogoVariant = textColorScrolled && isScrolled
+    ? "color" as const
+    : logoVariant
 
   // --- Shrink animation ---
   const shrinkProgress = useTransform(
@@ -319,11 +340,11 @@ export function BaseHeader({
     // WCAG 2.5.5: Adequate click target size
     minHeight: 28,
     transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
-    textShadow: theme.textShadow.nav,
+    textShadow: resolvedTextShadow,
     "&:hover": {
       backgroundColor: "transparent",
       color: resolvedTextColor,
-      textShadow: theme.textShadow.navHover,
+      textShadow: resolvedTextShadowHover,
     },
     "&:active": {
       backgroundColor: "transparent",
@@ -370,9 +391,9 @@ export function BaseHeader({
           zIndex: resolvedZIndex,
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
-          // Smooth background color transition when scrolling past threshold
-          transition: backgroundColorScrolled
-            ? `background-color ${theme.transition.standard} ease`
+          // Smooth color transitions when scrolling past threshold
+          transition: (backgroundColorScrolled || textColorScrolled)
+            ? `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`
             : undefined,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
@@ -440,7 +461,7 @@ export function BaseHeader({
               onLogoClick ? "COEQWAL home" : "COEQWAL - Scroll to top"
             }
           >
-            <Logo variant={logoVariant} />
+            <Logo variant={resolvedLogoVariant} />
           </Box>
 
           {/* ----------------------------------------
