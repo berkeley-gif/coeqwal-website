@@ -104,7 +104,7 @@ export function PointMarkerLabels({ data }: PointMarkerLabelsProps) {
                 y1="10"
                 x2="0"
                 y2={point.lineY2}
-                stroke="rgba(255, 255, 255, 0.8)"
+                stroke={`${theme.palette.common.white}CC`}
                 strokeWidth="1.5"
               />
             </svg>

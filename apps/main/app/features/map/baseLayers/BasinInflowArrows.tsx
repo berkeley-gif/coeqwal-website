@@ -9,6 +9,7 @@
 
 import { Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 
 interface BasinInflowArrowsProps {
   visible?: boolean
@@ -147,7 +148,7 @@ export default function BasinInflowArrows({
                   y="35"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fill="white"
+                  fill={themeValues.palette.common.white}
                   fontSize="16"
                   fontWeight="bold"
                   style={{ pointerEvents: "none" }}

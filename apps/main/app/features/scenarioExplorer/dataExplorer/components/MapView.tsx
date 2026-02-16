@@ -457,7 +457,7 @@ function MapViewContent() {
               left: theme.space.component.lg,
               right: theme.space.component.lg,
               p: theme.space.component.lg,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              backgroundColor: `${theme.palette.common.white}F2`,
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.sm,
             }}

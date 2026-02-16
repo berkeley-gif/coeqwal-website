@@ -223,7 +223,7 @@ export default function VideoHero({
             right: 16,
             zIndex: theme.zIndex.heroControls,
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "white",
+            color: "common.white",
             width: 44, // WCAG 2.5.5: Minimum 44x44px touch target
             height: 44,
             "&:hover": {
@@ -231,7 +231,7 @@ export default function VideoHero({
             },
             // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
             "&:focus-visible": {
-              outline: "2px solid white",
+              outline: `2px solid ${theme.palette.common.white}`,
               outlineOffset: 2,
             },
           }}
@@ -352,7 +352,7 @@ export default function VideoHero({
         }}
       >
         <ScrollToButton
-          color="rgba(255, 255, 255, 0.85)"
+          color={`${theme.palette.common.white}D9`}
           size={52}
           scrollToId="intro"
           ariaLabel="Scroll down to learn more"

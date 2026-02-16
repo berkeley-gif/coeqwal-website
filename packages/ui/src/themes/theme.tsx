@@ -35,108 +35,141 @@ import { createTheme, Theme } from "@mui/material/styles"
  * To switch fonts, change ACTIVE_FONT_PRESET below.
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Available: "neueHaas" | "neueHaasUnica" | "ffDagny" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
- *
- * Note: we have decided to use Neue Haas Grotesk Display and Text for the site. I'm leaving this here
- * for a little while longer in case anyone want to test to be sure we made the right choice.
+ * Active: "neueHaasUnica"
+ * Other presets are commented out below but preserved for comparison.
  */
 
-type FontPresetKey =
-  | "neueHaas"
-  | "neueHaasUnica"
-  | "ffDagny"
-  | "roboto"
-  | "inter"
-  | "workSans"
-  | "openSans"
-  | "firaSans"
-  | "system"
-  | "avenirNext"
-  | "lato"
+type FontPresetKey = "neueHaasUnica"
+  // | "neueHaas"
+  // | "ffDagny"
+  // | "larsseit"
+  // | "roboto"
+  // | "inter"
+  // | "workSans"
+  // | "openSans"
+  // | "firaSans"
+  // | "system"
+  // | "avenirNext"
+  // | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "ffDagny" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaasUnica"
 
 const FONT_PRESETS = {
-  // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
-  lato: {
-    text: '"Lato", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Lato", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");',
-  },
-  // Adobe TypeKit fonts - weights depend on TypeKit project configuration
-  neueHaas: {
-    text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
   // Neue Haas Unica: single-family font (no display/text split)
   neueHaasUnica: {
     text: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
     display: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
-  // FF Dagny Web Pro: single-family font
-  ffDagny: {
-    text: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
-    display: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
-  realPro: {
-    text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
-  // Roboto: Available weights 100, 300, 400, 500, 700, 900 (no 600)
-  roboto: {
-    text: '"Roboto", Helvetica, Arial, sans-serif',
-    display: '"Roboto", Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
-  },
-  // Inter: Variable font with all weights 100-900
-  inter: {
-    text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
-  },
-  // Work Sans: Variable font with all weights 100-900
-  workSans: {
-    text: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // Open Sans: Available weights 300-800
-  openSans: {
-    text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // Fira Sans: Available weights 100-900
-  firaSans: {
-    text: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // System fonts - no import needed
-  system: {
-    text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
-    cssImport: "",
-  },
-  // Adobe TypeKit
-  avenirNext: {
-    text: '"avenir-next-lt-pro", sans-serif',
-    display: '"avenir-next-lt-pro", sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
+  // // Adobe TypeKit fonts - weights depend on TypeKit project configuration
+  // neueHaas: {
+  //   text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+  //   display:
+  //     '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // FF Dagny Web Pro: single-family font
+  // ffDagny: {
+  //   text: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Larsseit: local .woff files in apps/main/public/fonts/
+  // larsseit: {
+  //   text: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: `
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Light.woff") format("woff");
+  //       font-weight: 300;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit.woff") format("woff");
+  //       font-weight: 400;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Medium.woff") format("woff");
+  //       font-weight: 500;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Bold.woff") format("woff");
+  //       font-weight: 700;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //   `,
+  // },
+  // realPro: {
+  //   text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   display:
+  //     '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Roboto: Available weights 100, 300, 400, 500, 700, 900 (no 600)
+  // roboto: {
+  //   text: '"Roboto", Helvetica, Arial, sans-serif',
+  //   display: '"Roboto", Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+  // },
+  // // Inter: Variable font with all weights 100-900
+  // inter: {
+  //   text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Work Sans: Variable font with all weights 100-900
+  // workSans: {
+  //   text: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Open Sans: Available weights 300-800
+  // openSans: {
+  //   text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Fira Sans: Available weights 100-900
+  // firaSans: {
+  //   text: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // System fonts - no import needed
+  // system: {
+  //   text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  //   display:
+  //     "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
+  //   cssImport: "",
+  // },
+  // // Adobe TypeKit
+  // avenirNext: {
+  //   text: '"avenir-next-lt-pro", sans-serif',
+  //   display: '"avenir-next-lt-pro", sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
+  // lato: {
+  //   text: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");',
+  // },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
@@ -201,7 +234,7 @@ const palette = {
 
   // Common colors (mirrored in MUI palette.common for consistency)
   common: {
-    white: "#FFFFFF",
+    white: "#f2f0ef", // Off-white
     black: "#000000",
   },
 
@@ -348,9 +381,9 @@ const border = {
   active: `2px solid ${palette.blue.bright}`, // Selected/active states
   activeLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
-  onDark: "2px solid #FFFFFF", // On dark backgrounds
-  subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
-  rule: "1px solid rgba(255, 255, 255, 0.8)", // Primary design system rule (header, display blocks)
+  onDark: `2px solid ${palette.common.white}`, // On dark backgrounds
+  subtleOutline: `1px solid ${palette.common.white}4D`, // Semi-transparent white outline (30% opacity)
+  rule: `1px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
 }
 
 // Background styles
@@ -706,19 +739,20 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // Mobile (3.5rem / 56px), Desktop (4.5rem / 72px)
-      fontSize: "clamp(3.5rem, 2.5rem + 3vw, 4.5rem)",
-      fontWeight: 500,
+      // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
+      fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
+      fontWeight: 600,
       lineHeight: 1.05,
       letterSpacing: "-0.016em",
       margin: 0, // Reset default margins
       padding: 0, // Reset default padding
     },
-    // h1Bold - Bold emphasis variant for hero headlines (e.g., "Water" in "California's Water")
+    // h1Bold - Bold emphasis variant for hero headlines (e.g., "water?" in "California's water?")
     h1Bold: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "clamp(3.5rem, 2.5rem + 3vw, 4.5rem)",
-      fontWeight: 700,
+      // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
+      fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
+      fontWeight: 600,
       lineHeight: 1.05,
       letterSpacing: "-0.016em",
       margin: 0,
@@ -737,9 +771,9 @@ const theme = createTheme({
     // h2Main - Main site specific h2 variant with larger mobile size
     h2Main: {
       fontFamily: themeValues.fontFamily.display,
-      // Larger minimum for main site (2.8rem / 44.8px on mobile)
-      fontSize: "clamp(2.8rem, 2rem + 2.4vw, 3.6rem)",
-      fontWeight: 500,
+      // Mobile (2.6rem / 41.6px) → Desktop (4rem / 64px)
+      fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 4rem)",
+      fontWeight: 400,
       lineHeight: 1.05,
       letterSpacing: "-0.016em",
       margin: 0,
