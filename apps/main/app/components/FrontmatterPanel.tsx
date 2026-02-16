@@ -150,7 +150,6 @@ export default function FrontmatterPanel({
               color: textColor,
               textShadow: textShadow ? theme.textShadow.display : "none",
               fontSize: theme.typography.h1.fontSize,
-              lineHeight: 1,
               maxWidth: "16ch",
               textAlign: { xs: "center", lg: "left" },
             }}
@@ -283,7 +282,6 @@ export default function FrontmatterPanel({
             color: textColor,
             textShadow: textShadow ? theme.textShadow.display : "none",
             fontSize: theme.typography.h1.fontSize,
-            lineHeight: 1,
             maxWidth: "16ch",
             textAlign: { xs: "center", lg: "left" },
           }}

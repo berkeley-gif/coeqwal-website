@@ -225,8 +225,6 @@ export default function MorphingHeadline({
     color: "common.white",
     // fontSize needed for maxWidth "ch" unit to calculate correctly
     fontSize: theme.typography.h1.fontSize,
-    // lineHeight controls spacing between the two headline lines
-    lineHeight: 1,
     maxWidth: "16ch",
     textAlign: { xs: "center", lg: "left" } as const,
   }
