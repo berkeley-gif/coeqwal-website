@@ -68,11 +68,15 @@ export interface MorphingHeadlineProps {
   headlines: HeadlineText[]
   /** Container ref that spans all panels for scroll tracking */
   containerRef: React.RefObject<HTMLElement | null>
+  /** Relative weights for each panel's scroll height (default: equal distribution).
+   *  e.g., [1, 2, 1, 1] means the second panel takes 2x the scroll distance. */
+  weights?: number[]
 }
 
 export default function MorphingHeadline({
   headlines,
   containerRef,
+  weights,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
@@ -105,20 +109,27 @@ export default function MorphingHeadline({
     if (count < 2)
       return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
 
-    const panelSize = 1 / count
+    // Calculate panel boundaries from weights (or equal distribution)
+    const w = weights || headlines.map(() => 1)
+    const totalWeight = w.reduce((sum, v) => sum + v, 0)
+    const panelBoundaries = w.reduce<number[]>(
+      (acc, weight) => [...acc, (acc[acc.length - 1] ?? 0) + weight / totalWeight],
+      [0],
+    )
 
     return headlines.map((_, index) => {
-      const panelStart = index * panelSize
-      const panelEnd = (index + 1) * panelSize
+      const panelStart = panelBoundaries[index] ?? 0
+      const panelEnd = panelBoundaries[index + 1] ?? 1
+      const panelSize = panelEnd - panelStart
 
       // Adjust timing based on transition position.
       // Visual perception requires earlier transitions at the start of a scroll sequence
       // and later transitions as the user settles into the scroll rhythm.
       // These values are tuned by hand - adjust if adding more panels.
       const getTransitionTiming = (transitionIndex: number) => {
-        if (transitionIndex === 0) return { start: 0.0, end: 0.1 } // First: immediate
-        if (transitionIndex === 1) return { start: 0.1, end: 0.25 } // Middle: standard
-        return { start: 0.2, end: 0.35 } // Later: delayed
+        if (transitionIndex === 0) return { start: -0.05, end: 0.05 } // First: starts slightly before boundary
+        if (transitionIndex === 1) return { start: 0.05, end: 0.2 } // Middle: standard
+        return { start: 0.15, end: 0.3 } // Later: delayed
       }
 
       if (index === 0) {
@@ -211,16 +222,24 @@ export default function MorphingHeadline({
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
+    const w = weights || headlines.map(() => 1)
+    const totalWeight = w.reduce((sum, v) => sum + v, 0)
+    const boundaries = w.reduce<number[]>(
+      (acc, weight) => [...acc, (acc[acc.length - 1] ?? 0) + weight / totalWeight],
+      [0],
+    )
+
     const unsubscribe = scrollYProgress.on("change", (value) => {
-      const panelSize = 1 / headlines.length
-      const newIndex = Math.min(
-        Math.floor(value / panelSize + 0.5),
-        headlines.length - 1,
-      )
+      // Find which panel the scroll position falls in
+      let newIndex = 0
+      for (let i = 0; i < boundaries.length - 1; i++) {
+        const mid = ((boundaries[i] ?? 0) + (boundaries[i + 1] ?? 1)) / 2
+        if (value >= mid) newIndex = Math.min(i + 1, headlines.length - 1)
+      }
       setActiveIndex(newIndex)
     })
     return unsubscribe
-  }, [scrollYProgress, headlines.length])
+  }, [scrollYProgress, headlines.length, weights])
 
   // Shared headline styles
   const headlineStyles = {

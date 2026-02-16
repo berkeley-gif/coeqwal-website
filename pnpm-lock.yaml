@@ -78,6 +78,9 @@ importers:
       '@repo/motion':
         specifier: workspace:*
         version: link:../../packages/motion
+      '@repo/scrollytelling':
+        specifier: workspace:^
+        version: link:../../packages/scrollytelling
       '@repo/state':
         specifier: workspace:*
         version: link:../../packages/state
@@ -372,6 +375,40 @@ importers:
       '@repo/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+
+  packages/scrollytelling:
+    dependencies:
+      '@repo/motion':
+        specifier: workspace:*
+        version: link:../motion
+      '@types/node':
+        specifier: '>=22.13.10'
+        version: 22.13.17
+      '@types/react':
+        specifier: '>=19.0.10'
+        version: 19.0.10
+      '@types/react-dom':
+        specifier: '>=19.0.4'
+        version: 19.0.4(@types/react@19.0.10)
+      eslint:
+        specifier: '>=9.22.0'
+        version: 9.39.2
+      react:
+        specifier: '>=19'
+        version: 19.1.0
+      react-dom:
+        specifier: '>=19'
+        version: 19.1.0(react@19.1.0)
+      typescript:
+        specifier: '>=5.8.2'
+        version: 5.8.2
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
