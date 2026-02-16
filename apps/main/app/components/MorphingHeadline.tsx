@@ -257,16 +257,13 @@ export default function MorphingHeadline({
                 : "none",
           }}
         >
-          <Typography variant="h2Main" component="span">
+          <Typography variant="h2Main" component="span" sx={{ display: "block" }}>
             {activeHeadline?.line1}
           </Typography>
           {activeHeadline?.line2 && (
-            <>
-              <br />
-              <Typography variant="h1Bold" component="span">
-                {activeHeadline.line2}
-              </Typography>
-            </>
+            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+              {activeHeadline.line2}
+            </Typography>
           )}
         </Box>
       </Box>
@@ -311,16 +308,13 @@ export default function MorphingHeadline({
                     : "none",
               }}
             >
-              <Typography variant="h2Main" component="span">
+              <Typography variant="h2Main" component="span" sx={{ display: "block" }}>
                 {headline.line1}
               </Typography>
               {headline.line2 && (
-                <>
-                  <br />
-                  <Typography variant="h1Bold" component="span">
-                    {headline.line2}
-                  </Typography>
-                </>
+                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+                  {headline.line2}
+                </Typography>
               )}
             </Box>
           </motion.div>

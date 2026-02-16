@@ -152,16 +152,13 @@ export default function FrontmatterPanel({
               textAlign: { xs: "center", md: "left" },
             }}
           >
-            <Typography variant="h2Main" component="span">
+            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
               {headlineLine1}
             </Typography>
             {headlineLine2 && (
-              <>
-                <br />
-                <Typography variant="h1Bold" component="span">
-                  {headlineLine2}
-                </Typography>
-              </>
+              <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
+                {headlineLine2}
+              </Typography>
             )}
           </Box>
         </MotionBox>
@@ -289,16 +286,13 @@ export default function FrontmatterPanel({
             textAlign: { xs: "center", md: "left" },
           }}
         >
-          <Typography variant="h2Main" component="span">
+          <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
             {headlineLine1}
           </Typography>
           {headlineLine2 && (
-            <>
-              <br />
-              <Typography variant="h1Bold" component="span">
-                {headlineLine2}
-              </Typography>
-            </>
+            <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
+              {headlineLine2}
+            </Typography>
           )}
         </Box>
       </MotionBox>
