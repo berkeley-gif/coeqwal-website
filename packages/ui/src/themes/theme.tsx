@@ -35,7 +35,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  * To switch fonts, change ACTIVE_FONT_PRESET below.
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
+ * Available: "neueHaas" | "neueHaasUnica" | "ffDagny" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
  *
  * Note: we have decided to use Neue Haas Grotesk Display and Text for the site. I'm leaving this here
  * for a little while longer in case anyone want to test to be sure we made the right choice.
@@ -43,6 +43,8 @@ import { createTheme, Theme } from "@mui/material/styles"
 
 type FontPresetKey =
   | "neueHaas"
+  | "neueHaasUnica"
+  | "ffDagny"
   | "roboto"
   | "inter"
   | "workSans"
@@ -52,7 +54,7 @@ type FontPresetKey =
   | "avenirNext"
   | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "ffDagny" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
 
 const FONT_PRESETS = {
   // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
@@ -67,6 +69,18 @@ const FONT_PRESETS = {
     text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     display:
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
+  // Neue Haas Unica: single-family font (no display/text split)
+  neueHaasUnica: {
+    text: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+    display: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  },
+  // FF Dagny Web Pro: single-family font
+  ffDagny: {
+    text: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
+    display: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
   realPro: {
