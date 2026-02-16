@@ -72,12 +72,11 @@ const INTRO_TEXT =
 function Panel1Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  // Translate from well below into final position, then hold
-  // 50vh travel distance puts paragraph at bottom of viewport initially,
-  // rising to the headline's vertical level
-  const yNum = useScrollValue(progress, [0, 0.45, 1], [80, 0, 0])
+  // Translate from below into final position, then hold
+  // Spread over 70% of scroll for gentle pacing
+  const yNum = useScrollValue(progress, [0, 0.7, 1], [60, 0, 0])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.2, 1], [0, 1, 1])
+  const opacity = useScrollValue(progress, [0, 0.15, 1], [0, 1, 1])
 
   return (
     <motion.div
@@ -88,7 +87,7 @@ function Panel1Paragraph() {
         alignSelf: "start",
       }}
     >
-      <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
+      <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
         <Box
           sx={{
             fontFamily: theme.typography.body1.fontFamily,
@@ -145,9 +144,9 @@ function Panel2Paragraph({
 }) {
   const theme = useTheme()
   const progress = useScrollProgress()
-  const yNum = useScrollValue(progress, [0, 0.45, 1], [80, 0, 0])
+  const yNum = useScrollValue(progress, [0, 0.7, 1], [60, 0, 0])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.2, 1], [0, 1, 1])
+  const opacity = useScrollValue(progress, [0, 0.15, 1], [0, 1, 1])
 
   return (
     <motion.div
@@ -158,7 +157,7 @@ function Panel2Paragraph({
         alignSelf: "start",
       }}
     >
-      <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
+      <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
         <Box
           sx={{
             fontFamily: theme.typography.body1.fontFamily,
@@ -231,7 +230,7 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 2, 2, 1]}
+        weights={[1, 1.6, 2, 1]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -270,7 +269,7 @@ const IntroSection = () => {
 
         {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
         <ScrollSection
-          height="200vh"
+          height="160vh"
           id="intro"
           ariaLabel="What is COEQWAL"
           style={{
