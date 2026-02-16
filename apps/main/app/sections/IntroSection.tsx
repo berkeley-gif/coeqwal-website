@@ -115,11 +115,7 @@ function Panel1Paragraph() {
  * Panel2Paragraph - Scroll-linked paragraph for frontmatter panel 2.
  * Same pattern as Panel1Paragraph but with topic circles content.
  */
-function Panel2Paragraph({
-  selectedTopic,
-}: {
-  selectedTopic: string | null
-}) {
+function Panel2Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
   const yNum = useScrollValue(progress, [0, 0.35, 1], [60, 0, 0])
@@ -137,8 +133,7 @@ function Panel2Paragraph({
     >
       <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
         <Typography variant="displayBody" component="div">
-          {WATER_TOPICS.find((t) => t.id === selectedTopic)?.description ||
-            INTRO_TEXT}
+          {INTRO_TEXT}
         </Typography>
       </Box>
     </motion.div>
@@ -162,7 +157,7 @@ function Panel2TopicCircles({
     <Box
       sx={{
         gridColumn: { lg: "1 / -1" },
-        alignSelf: "end",
+        alignSelf: "start",
         pointerEvents: "auto",
       }}
     >
@@ -390,9 +385,7 @@ const IntroSection = () => {
               </Box>
 
               {/* Paragraph - scroll-linked */}
-              <Panel2Paragraph
-                selectedTopic={selectedTopic}
-              />
+              <Panel2Paragraph />
 
               {/* Topic circles - staggered reveal, spans full width */}
               <Panel2TopicCircles
