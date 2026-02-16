@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
@@ -8,6 +8,8 @@ import { Box, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
 import MorphingHeadline from "../components/MorphingHeadline"
+import TopicCircles from "../components/TopicCircles"
+import type { Topic } from "../components/TopicCircles"
 import type { VideoSource } from "../components/VideoHero"
 import { mapActions, useMapStore } from "../features/map/store"
 
@@ -18,11 +20,54 @@ const VIDEO_SRCS: VideoSource[] = [
   },
 ]
 
+const WATER_TOPICS: Topic[] = [
+  {
+    id: "communities",
+    label: "Communities and drinking water",
+    description:
+      "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
+  },
+  {
+    id: "farms",
+    label: "Farms, groundwater and food systems",
+    description:
+      "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
+  },
+  {
+    id: "rivers",
+    label: "Rivers, salmon and ecosystems",
+    description:
+      "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
+  },
+  {
+    id: "delta",
+    label: "The Delta as a living place",
+    description:
+      "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
+  },
+  {
+    id: "climate",
+    label: "Climate risk, reliability and resilience",
+    description:
+      "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
+  },
+  {
+    id: "governance",
+    label: "Water governance and decision-making",
+    description:
+      "How evidence, trade-offs, and equity considerations inform water-management decisions.",
+  },
+]
+
+const INTRO_TEXT =
+  "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how different decisions affect uses of water that people care about."
+
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const introPanelsRef = useRef<HTMLElement>(null)
   const waterIssuesRef = useRef<HTMLDivElement>(null)
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
 
   // Show map when water-issues panel is in viewport
   // This ensures the map is visible when scrolling back up from tabs
@@ -154,11 +199,23 @@ const IntroSection = () => {
             ariaLabel="What water issues matter to you"
             backgroundColor={theme.palette.learn.background}
             backgroundImage="/images/about/tiered-image-text-hills.png"
-            backgroundPosition="bottom"
-            backgroundSize="100% auto"
+            backgroundPosition="center bottom"
+            backgroundSize="100% 40%"
             headlineLine1="What water issues"
             headlineLine2="matter to you?"
-            bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
+            bodyText={
+              <>
+                <Box>
+                  {WATER_TOPICS.find((t) => t.id === selectedTopic)
+                    ?.description || INTRO_TEXT}
+                </Box>
+                <TopicCircles
+                  topics={WATER_TOPICS}
+                  selectedId={selectedTopic}
+                  onSelect={setSelectedTopic}
+                />
+              </>
+            }
             textColor={theme.palette.text.primary}
             hideHeadline
             scrollToId="site-actions"
