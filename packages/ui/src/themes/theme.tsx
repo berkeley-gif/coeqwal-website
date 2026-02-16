@@ -373,17 +373,22 @@ const zIndex = {
   tooltipAboveModal: 120, // Tooltips that need to appear above modals
 }
 
+// Stroke width - design system line weight
+const strokeWidth = {
+  rule: 2, // Primary line weight (px) used for borders, outlines, and SVG strokes
+}
+
 // Border styles
 const border = {
   none: "none",
   light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
   medium: `1px solid ${palette.grey[300]}`, // Standard borders
-  active: `2px solid ${palette.blue.bright}`, // Selected/active states
+  active: `${strokeWidth.rule}px solid ${palette.blue.bright}`, // Selected/active states
   activeLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
-  onDark: `2px solid ${palette.common.white}`, // On dark backgrounds
+  onDark: `${strokeWidth.rule}px solid ${palette.common.white}`, // On dark backgrounds
   subtleOutline: `1px solid ${palette.common.white}4D`, // Semi-transparent white outline (30% opacity)
-  rule: `2px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
+  rule: `${strokeWidth.rule}px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
 }
 
 // Background styles
@@ -444,6 +449,7 @@ export const themeValues = {
 
   // Design tokens (from above)
   palette,
+  strokeWidth,
   borderRadius,
   shadow,
   textShadow,
@@ -742,6 +748,7 @@ const theme = createTheme({
       // Mobile (3.5rem / 56px) → Desktop (5rem / 80px)
       fontSize: "clamp(3.6rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
+      lineHeight: 1,
       letterSpacing: "-0.015em",
       margin: 0,
       padding: 0,
@@ -751,6 +758,7 @@ const theme = createTheme({
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
+      lineHeight: 1.05,
       letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
@@ -761,6 +769,7 @@ const theme = createTheme({
       // Mobile (2.6rem / 41.6px) → Desktop (3.6rem / 57.6px)
       fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)",
       fontWeight: 500,
+      lineHeight: 1.05,
       letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
@@ -1600,6 +1609,7 @@ const theme = createTheme({
  * ======================================================== */
 
 // Attach all design tokens from themeValues
+theme.strokeWidth = themeValues.strokeWidth
 theme.border = themeValues.border
 theme.background = themeValues.background
 theme.borderRadius = themeValues.borderRadius
@@ -1679,6 +1689,7 @@ declare module "@mui/material/styles" {
   // Theme interface - types derived from themeValues
   interface Theme {
     layout: typeof themeValues.layout
+    strokeWidth: typeof themeValues.strokeWidth
     border: typeof themeValues.border
     background: typeof themeValues.background
     borderRadius: typeof themeValues.borderRadius

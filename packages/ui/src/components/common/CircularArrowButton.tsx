@@ -44,7 +44,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
           width: size,
           height: size,
           borderRadius: "50%",
-          border: `2px solid ${buttonColor}`,
+          border: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -68,11 +68,11 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
         width: size,
         height: size,
         borderRadius: theme.borderRadius.circle,
-        border: `2px solid ${buttonColor}`,
+        border: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
         color: buttonColor,
         // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
         "&:focus-visible": {
-          outline: `2px solid ${buttonColor}`,
+          outline: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
           outlineOffset: 2,
         },
         ...sx,

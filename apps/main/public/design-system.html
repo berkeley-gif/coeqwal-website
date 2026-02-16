@@ -141,8 +141,10 @@
       /* Display font samples */
       .sample-h1 {
         font-family: var(--font-display);
-        font-size: clamp(3.5rem, 1.5rem + 4vw, 5rem);
+        font-size: clamp(3.6rem, 1.5rem + 4vw, 5rem);
         font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.015em;
         color: var(--blue-darkest);
       }
 
@@ -150,15 +152,17 @@
         font-family: var(--font-display);
         font-size: clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem);
         font-weight: 500;
-        line-height: 1.05;
+        line-height: 1;
+        letter-spacing: -0.01em;
         color: var(--blue-darkest);
       }
 
       .sample-h2-main {
         font-family: var(--font-display);
-        font-size: clamp(2.8rem, 2rem + 2.4vw, 3.6rem);
+        font-size: clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem);
         font-weight: 500;
-        line-height: 1.05;
+        line-height: 1;
+        letter-spacing: -0.01em;
         color: var(--blue-darkest);
       }
 
@@ -242,8 +246,9 @@
 
       .sample-nav {
         font-family: var(--font-display);
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 600;
+        letter-spacing: 0.01em;
         text-transform: capitalize;
       }
 
@@ -619,8 +624,8 @@
             <div class="type-label">
               <span class="type-name">H1</span>
               <span class="type-specs"
-                >clamp(3.5rem, 2.5rem + 3vw, 4.5rem) / 500 / 1.05 /
-                -0.016em</span
+                >clamp(3.6rem, 1.5rem + 4vw, 5rem) / 600 / 1 /
+                -0.015em</span
               >
             </div>
             <div class="sample-h1">Water</div>
@@ -641,8 +646,8 @@
             <div class="type-label">
               <span class="type-name">H2</span>
               <span class="type-specs"
-                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05 /
-                -0.016em</span
+                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1 /
+                -0.01em</span
               >
             </div>
             <div class="sample-h2">California's</div>
@@ -665,8 +670,8 @@
             <div class="type-label">
               <span class="type-name">H2 Main</span>
               <span class="type-specs"
-                >clamp(2.8rem, 2rem + 2.4vw, 3.6rem) / 500 / 1.05 /
-                -0.016em</span
+                >clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem) / 500 / 1 /
+                -0.01em</span
               >
             </div>
             <div class="sample-h2-main">California's</div>
@@ -872,7 +877,7 @@
             <div class="type-label">
               <span class="type-name">Header Nav</span>
               <span class="type-specs"
-                >1.1rem (17.6px) / 600 / 1.4 / 0.01em</span
+                >1.25rem (20px) / 600 / 1.4 / 0.01em</span
               >
             </div>
             <div class="sample-nav">About COEQWAL</div>
@@ -1039,8 +1044,8 @@
           <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H1</strong></td>
-              <td>clamp(3.5rem, 1.5rem + 4vw, 5rem)</td>
-              <td style="color: #888;">Hero headline (600)</td>
+              <td>clamp(3.6rem, 1.5rem + 4vw, 5rem)</td>
+              <td style="color: #888;">Hero headline (600, lineHeight: 1)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H2</strong></td>
@@ -1049,8 +1054,8 @@
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H2 Main</strong></td>
-              <td>clamp(2.8rem, 2rem + 2.4vw, 3.6rem)</td>
-              <td style="color: #888;">Hero intro (main site)</td>
+              <td>clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)</td>
+              <td style="color: #888;">Hero intro (main site, 500)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H3</strong></td>
@@ -1576,6 +1581,31 @@
       <h2 class="section-title">Color Palette</h2>
 
       <div class="color-grid">
+        <!-- Common Colors -->
+        <div class="color-card">
+          <h3>Common colors</h3>
+          <p
+            style="
+              font-size: 0.8rem;
+              color: #666;
+              margin-bottom: 16px;
+              line-height: 1.4;
+            "
+          >
+            Core color tokens. Access via <code>theme.palette.common</code>
+          </p>
+
+          <div class="swatch" style="background: #f2f0ef; border: 1px solid #ddd;">
+            <span class="swatch-label" style="color: #333;">common.white</span>
+            <span style="color: #333;">#f2f0ef</span>
+          </div>
+
+          <div class="swatch dark" style="background: #000000">
+            <span class="swatch-label">common.black</span>
+            <span>#000000</span>
+          </div>
+        </div>
+
         <!-- Panel Backgrounds -->
         <div class="color-card">
           <h3>Panel Backgrounds</h3>
@@ -2267,6 +2297,32 @@ sx={{
             <span style="color: #666">Storyline apps map background</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- =====================
+       STROKE WIDTH SECTION
+       ===================== -->
+    <div class="section">
+      <h2 class="section-title">Stroke width</h2>
+      <p style="margin-bottom: 24px; color: #666">
+        Primary line weight for borders, outlines, and SVG strokes.
+        Access via <code>theme.strokeWidth.rule</code> (numeric) or
+        use pre-composed borders via <code>theme.border.*</code>
+      </p>
+      <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+        <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 12px 0; font-weight: 500; width: 120px;">rule</td>
+            <td style="padding: 12px 0;"><code>2</code> px</td>
+            <td style="padding: 12px 0;">
+              <div style="width: 80px; height: 0; border-top: 2px solid #0a1929; display: inline-block; vertical-align: middle; margin-right: 12px;"></div>
+            </td>
+            <td style="padding: 12px 0; color: #888; font-size: 0.85rem;">
+              Used in border.rule, border.onDark, border.active, scroll button circle
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
 
@@ -5259,7 +5315,7 @@ sx={{
     <!-- end hidden sections -->
 
     <footer>
-      <strong>COEQWAL Website Design System</strong> • Last updated January 15,
+      <strong>COEQWAL Website Design System</strong> • Last updated February 16,
       2026<br />
       Source: <code>packages/ui/src/themes/theme.tsx</code> •
       <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->

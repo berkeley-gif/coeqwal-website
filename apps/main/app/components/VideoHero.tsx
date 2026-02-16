@@ -274,7 +274,6 @@ export default function VideoHero({
               color: "common.white",
               textShadow: theme.textShadow.display,
               fontSize: theme.typography.h1.fontSize,
-              lineHeight: 1,
               maxWidth: "16ch",
               textAlign: { xs: "center", lg: "left" },
             }}
@@ -300,6 +299,7 @@ export default function VideoHero({
             sx={{
               background: "rgba(0, 0, 0, 0.2)",
               padding: "20px 24px",
+              ml: "-24px",
             }}
           >
             {t("homePanel.content")}
