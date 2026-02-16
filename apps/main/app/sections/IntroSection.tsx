@@ -119,14 +119,18 @@ const IntroSection = () => {
                   fontWeight: 600,
                 }}
               >
-                About COEQWAL
-              </Link>{" "}
-              <ArrowForwardIcon
-                sx={{
-                  fontSize: "1.1rem",
-                  verticalAlign: "middle",
-                }}
-              />
+                About COEQWAL{" "}
+                <ArrowForwardIcon
+                  sx={{
+                    fontSize: "1rem",
+                    verticalAlign: "middle",
+                    position: "relative",
+                    top: "-1.5px",
+                    strokeWidth: 1,
+                    stroke: "currentColor",
+                  }}
+                />
+              </Link>
             </>
           }
           textColor={theme.palette.common.white}
