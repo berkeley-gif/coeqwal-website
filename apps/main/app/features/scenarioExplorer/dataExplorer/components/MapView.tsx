@@ -431,12 +431,11 @@ function MapViewContent() {
           touchZoom={true}
           doubleClickZoom={true}
           dragPan={true}
-          dragRotate={false}
+          dragRotate={true}
           touchRotate={false}
           keyboard={false}
           style={{ width: "100%", height: "100%" }}
-          projection={{ name: "mercator" }}
-          terrain={undefined}
+          projection={{ name: "globe" }}
         >
           <NavigationControl position="bottom-right" />
 
