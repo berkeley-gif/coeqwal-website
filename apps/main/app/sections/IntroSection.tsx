@@ -134,6 +134,61 @@ function Panel1Paragraph() {
   )
 }
 
+/**
+ * Panel2Paragraph - Scroll-linked paragraph for frontmatter panel 2.
+ * Same pattern as Panel1Paragraph but with topic circles content.
+ */
+function Panel2Paragraph({
+  selectedTopic,
+  setSelectedTopic,
+}: {
+  selectedTopic: string | null
+  setSelectedTopic: (id: string | null) => void
+}) {
+  const theme = useTheme()
+  const progress = useScrollProgress()
+  const yNum = useScrollValue(progress, [0, 0.45, 1], [80, 0, 0])
+  const y = useTransform(yNum, (v) => `${v}vh`)
+  const opacity = useScrollValue(progress, [0, 0.2, 1], [0, 1, 1])
+
+  return (
+    <motion.div
+      style={{
+        y,
+        opacity,
+        gridColumn: 2,
+        alignSelf: "start",
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      <Box sx={{ maxWidth: { xs: "100%", sm: "440px" }, color: theme.palette.text.primary }}>
+        <Box
+          sx={{
+            fontFamily: theme.typography.body1.fontFamily,
+            fontSize: "1.4rem",
+            fontWeight: 400,
+            lineHeight: 1.6,
+            letterSpacing: "0.005em",
+            textRendering: "optimizeLegibility",
+            WebkitFontSmoothing: "antialiased",
+          }}
+        >
+          <Box>
+            {WATER_TOPICS.find((t) => t.id === selectedTopic)?.description ||
+              INTRO_TEXT}
+          </Box>
+          <TopicCircles
+            topics={WATER_TOPICS}
+            selectedId={selectedTopic}
+            onSelect={setSelectedTopic}
+          />
+        </Box>
+      </Box>
+    </motion.div>
+  )
+}
+
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -180,7 +235,7 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 2, 1, 1]}
+        weights={[1, 2, 2, 1]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -275,35 +330,82 @@ const IntroSection = () => {
           </Box>
         </ScrollSection>
 
-        {/* Frontmatter Panel 2 - background image */}
-        {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
+        {/* Frontmatter Panel 2 - scroll choreography with background image */}
         <div ref={waterIssuesRef}>
-          <FrontmatterPanel
+          <ScrollSection
+            height="200vh"
             id="water-issues"
             ariaLabel="What water issues matter to you"
-            backgroundColor={theme.palette.learn.background}
-            backgroundImage="/images/about/tiered-image-text-hills.png"
-            backgroundPosition="center bottom"
-            backgroundSize="100% 40%"
-            headlineLine1="What water issues"
-            headlineLine2="matter to you?"
-            bodyText={
-              <>
-                <Box>
-                  {WATER_TOPICS.find((t) => t.id === selectedTopic)
-                    ?.description || INTRO_TEXT}
+            style={{
+              backgroundColor: theme.palette.learn.background,
+              backgroundImage:
+                "url(/images/about/tiered-image-text-hills.png)",
+              backgroundPosition: "center bottom",
+              backgroundSize: "100% 40%",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            {/* Sticky viewport */}
+            <Box
+              sx={{
+                position: "sticky",
+                top: 0,
+                height: "100vh",
+                overflow: "hidden",
+                display: { xs: "flex", lg: "grid" },
+                gridTemplateColumns: { lg: "3fr 2fr" },
+                flexDirection: { xs: "column" },
+                justifyContent: { xs: "space-between" },
+                paddingTop: theme.space.panel.topOffset,
+                paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+                paddingLeft: theme.space.panel.padding,
+                paddingRight: theme.space.panel.padding,
+                pointerEvents: "auto",
+              }}
+            >
+              {/* Headline - column 1 (hidden on lg, MorphingHeadline handles it) */}
+              <Box
+                sx={{
+                  gridColumn: { lg: 1 },
+                  alignSelf: { xs: "stretch", lg: "start" },
+                  display: { xs: "flex", lg: "none" },
+                  justifyContent: { xs: "center", lg: "flex-start" },
+                }}
+              >
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    fontSize: theme.typography.h1.fontSize,
+                    maxWidth: "16ch",
+                    textAlign: { xs: "center", lg: "left" },
+                  }}
+                >
+                  <Box
+                    component="h2"
+                    sx={{
+                      ...theme.typography.h2Main,
+                      display: "block",
+                      m: 0,
+                    }}
+                  >
+                    What water issues
+                  </Box>
+                  <Box
+                    component="h1"
+                    sx={{ ...theme.typography.h1, display: "block", m: 0 }}
+                  >
+                    matter to you?
+                  </Box>
                 </Box>
-                <TopicCircles
-                  topics={WATER_TOPICS}
-                  selectedId={selectedTopic}
-                  onSelect={setSelectedTopic}
-                />
-              </>
-            }
-            textColor={theme.palette.text.primary}
-            hideHeadline
-            scrollToId="site-actions"
-          />
+              </Box>
+
+              {/* Paragraph + topic circles - scroll-linked */}
+              <Panel2Paragraph
+                selectedTopic={selectedTopic}
+                setSelectedTopic={setSelectedTopic}
+              />
+            </Box>
+          </ScrollSection>
         </div>
 
         {/* Frontmatter Panel 3 - Actions variant */}
