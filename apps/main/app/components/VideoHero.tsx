@@ -201,7 +201,7 @@ export default function VideoHero({
             right: 16,
             zIndex: theme.zIndex.heroControls,
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "common.white",
+            color: "text.secondary",
             width: 52,
             height: 52,
             "&:hover": {
@@ -209,7 +209,7 @@ export default function VideoHero({
             },
             // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
             "&:focus-visible": {
-              outline: `2px solid ${theme.palette.common.white}`,
+              outline: `2px solid ${theme.palette.text.secondary}`,
               outlineOffset: 2,
             },
           }}
@@ -244,6 +244,7 @@ export default function VideoHero({
       <Box
         sx={{
           gridArea: "stack",
+          color: "text.secondary",
           // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
           display: { xs: "flex", lg: "grid" },
           gridTemplateColumns: { lg: "3fr 2fr" },
@@ -271,7 +272,7 @@ export default function VideoHero({
         >
           <Box
             sx={{
-              color: "common.white",
+              color: "text.secondary",
               textShadow: theme.textShadow.display,
               fontSize: theme.typography.h1.fontSize,
               maxWidth: "16ch",
@@ -318,7 +319,7 @@ export default function VideoHero({
         }}
       >
         <ScrollToButton
-          color={`${theme.palette.common.white}D9`}
+          color={`${theme.palette.text.secondary}D9`}
           size={52}
           scrollToId="intro"
           ariaLabel="Scroll down to learn more"

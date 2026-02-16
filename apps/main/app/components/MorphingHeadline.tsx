@@ -59,6 +59,8 @@ export interface HeadlineText {
   line2?: string
   /** Whether to show text shadow (default: true for first headline) */
   textShadow?: boolean
+  /** Text color (default: "text.secondary") */
+  textColor?: string
 }
 
 export interface MorphingHeadlineProps {
@@ -222,7 +224,7 @@ export default function MorphingHeadline({
 
   // Shared headline styles
   const headlineStyles = {
-    color: "common.white",
+    color: "text.secondary",
     // fontSize needed for maxWidth "ch" unit to calculate correctly
     fontSize: theme.typography.h1.fontSize,
     maxWidth: "16ch",
@@ -249,6 +251,7 @@ export default function MorphingHeadline({
           sx={{
             ...headlineStyles,
             position: "relative",
+            color: activeHeadline?.textColor || "text.secondary",
             textShadow:
               activeHeadline?.textShadow !== false
                 ? theme.textShadow.display
@@ -300,6 +303,7 @@ export default function MorphingHeadline({
             <Box
               sx={{
                 ...headlineStyles,
+                color: headline.textColor || "text.secondary",
                 textShadow:
                   headline.textShadow !== false
                     ? theme.textShadow.display
