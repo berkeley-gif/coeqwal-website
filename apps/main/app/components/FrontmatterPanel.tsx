@@ -48,7 +48,7 @@ export interface FrontmatterPanelProps {
   /** Panel variant: "default" for DisplayBlock, "actions" for action items */
   variant?: "default" | "actions"
   /** Body text for the DisplayBlock (required for "default" variant) */
-  bodyText?: string
+  bodyText?: React.ReactNode
   /** Action items (required for "actions" variant) */
   actions?: ActionItem[]
   /** ID of element to scroll to (optional) */
@@ -147,7 +147,7 @@ export default function FrontmatterPanel({
               // fontSize needed for maxWidth "ch" unit to calculate correctly
               fontSize: theme.typography.h1Bold.fontSize,
               // lineHeight controls spacing between the two headline lines
-              lineHeight: 1.05,
+              lineHeight: 1.1,
               maxWidth: "16ch",
               textAlign: { xs: "center", md: "left" },
             }}
@@ -284,7 +284,7 @@ export default function FrontmatterPanel({
             // fontSize needed for maxWidth "ch" unit to calculate correctly
             fontSize: theme.typography.h1Bold.fontSize,
             // lineHeight controls spacing between the two headline lines
-            lineHeight: 1.05,
+            lineHeight: 1.1,
             maxWidth: "16ch",
             textAlign: { xs: "center", md: "left" },
           }}
