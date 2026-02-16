@@ -126,6 +126,8 @@ export default function FrontmatterPanel({
           gridTemplateColumns: { lg: "3fr 2fr" },
           flexDirection: { xs: "column" },
           justifyContent: { xs: "space-between" },
+          // Extra bottom padding to clear glossary button, matching VideoHero
+          paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
         }}
       >
         {/* Headline - column 1, top-aligned */}
@@ -257,6 +259,8 @@ export default function FrontmatterPanel({
         gridTemplateColumns: { lg: "3fr 2fr" },
         flexDirection: { xs: "column" },
         justifyContent: { xs: "space-between" },
+        // Extra bottom padding to clear glossary button, matching VideoHero
+        paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
       }}
     >
       {/* Headline - column 1, top-aligned */}
