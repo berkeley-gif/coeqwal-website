@@ -61,6 +61,12 @@ export interface FrontmatterPanelProps {
   hideHeadline?: boolean
   /** Background color for the DisplayBlock (for transparent panel backgrounds) */
   displayBlockBackground?: string
+  /** Optional background image URL */
+  backgroundImage?: string
+  /** Background image position (default: "center") */
+  backgroundPosition?: string
+  /** Background image sizing (default: "cover") */
+  backgroundSize?: string
 }
 
 export default function FrontmatterPanel({
@@ -77,6 +83,9 @@ export default function FrontmatterPanel({
   textShadow = false,
   hideHeadline = false,
   displayBlockBackground,
+  backgroundImage,
+  backgroundPosition,
+  backgroundSize,
 }: FrontmatterPanelProps) {
   const theme = useTheme()
 
@@ -119,14 +128,24 @@ export default function FrontmatterPanel({
         id={id}
         ariaLabel={ariaLabel}
         backgroundColor={backgroundColor}
+        backgroundImage={backgroundImage}
+        backgroundPosition={backgroundPosition}
+        backgroundSize={backgroundSize}
         sx={{
           pointerEvents: "auto",
-          // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
+          ...(!backgroundImage && {
+            display: { xs: "flex", lg: "grid" },
+            gridTemplateColumns: { lg: "3fr 2fr" },
+            flexDirection: { xs: "column" },
+            justifyContent: { xs: "space-between" },
+            paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+          }),
+        }}
+        contentSx={{
           display: { xs: "flex", lg: "grid" },
           gridTemplateColumns: { lg: "3fr 2fr" },
           flexDirection: { xs: "column" },
           justifyContent: { xs: "space-between" },
-          // Extra bottom padding to clear glossary button, matching VideoHero
           paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
         }}
       >
@@ -251,14 +270,24 @@ export default function FrontmatterPanel({
       id={id}
       ariaLabel={ariaLabel}
       backgroundColor={backgroundColor}
+      backgroundImage={backgroundImage}
+      backgroundPosition={backgroundPosition}
+      backgroundSize={backgroundSize}
       sx={{
         pointerEvents: "auto",
-        // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
+        ...(!backgroundImage && {
+          display: { xs: "flex", lg: "grid" },
+          gridTemplateColumns: { lg: "3fr 2fr" },
+          flexDirection: { xs: "column" },
+          justifyContent: { xs: "space-between" },
+          paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+        }),
+      }}
+      contentSx={{
         display: { xs: "flex", lg: "grid" },
         gridTemplateColumns: { lg: "3fr 2fr" },
         flexDirection: { xs: "column" },
         justifyContent: { xs: "space-between" },
-        // Extra bottom padding to clear glossary button, matching VideoHero
         paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
       }}
     >

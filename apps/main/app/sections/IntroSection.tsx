@@ -96,70 +96,72 @@ const IntroSection = () => {
           hideHeadline
         />
 
-        {/* Gradient wrapper: panels 1-2 */}
+        {/* Frontmatter Panel 1 - gradient from panel color to learn background */}
         <Box
           sx={{
             background: `linear-gradient(to bottom, #2a649b, ${theme.palette.learn.background})`,
           }}
         >
-          {/* Frontmatter Panel 1 */}
-          <FrontmatterPanel
-            id="intro"
-            ariaLabel="What is COEQWAL"
-            backgroundColor="transparent"
-            headlineLine1="What is"
-            headlineLine2="COEQWAL?"
-            bodyText={
-              <>
-                COEQWAL – the Collaboratory for Equity in Water Allocation – is
-                a publicly-funded project that works with communities to model
-                alternative water management scenarios.
-                <br />
-                <br />
-                To learn more, go to{" "}
-                <Link
-                  href="/about"
-                  style={{
-                    color: "inherit",
-                    textDecoration: "none",
-                    fontWeight: 500,
+        <FrontmatterPanel
+          id="intro"
+          ariaLabel="What is COEQWAL"
+          backgroundColor="transparent"
+          headlineLine1="What is"
+          headlineLine2="COEQWAL?"
+          bodyText={
+            <>
+              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+              publicly-funded project that works with communities to model
+              alternative water management scenarios.
+              <br />
+              <br />
+              To learn more, go to{" "}
+              <Link
+                href="/about"
+                style={{
+                  color: "inherit",
+                  textDecoration: "none",
+                  fontWeight: 500,
+                }}
+              >
+                About COEQWAL{" "}
+                <ArrowForwardIcon
+                  sx={{
+                    fontSize: "1.5rem",
+                    verticalAlign: "middle",
+                    position: "relative",
+                    top: "-3px",
+                    strokeWidth: 1,
+                    stroke: "currentColor",
                   }}
-                >
-                  About COEQWAL{" "}
-                  <ArrowForwardIcon
-                    sx={{
-                      fontSize: "1.5rem",
-                      verticalAlign: "middle",
-                      position: "relative",
-                      top: "-3px",
-                      strokeWidth: 1,
-                      stroke: "currentColor",
-                    }}
-                  />
-                </Link>
-              </>
-            }
+                />
+              </Link>
+            </>
+          }
+          textColor={theme.palette.common.white}
+          hideHeadline
+          scrollToId="water-issues"
+        />
+        </Box>
+
+        {/* Frontmatter Panel 2 - background image */}
+        {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
+        <div ref={waterIssuesRef}>
+          <FrontmatterPanel
+            id="water-issues"
+            ariaLabel="What water issues matter to you"
+            backgroundColor={theme.palette.learn.background}
+            backgroundImage="/images/about/tiered-image-text-hills.png"
+            backgroundPosition="bottom"
+            backgroundSize="100% auto"
+            headlineLine1="What water issues"
+            headlineLine2="matter to you?"
+            bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
             textColor={theme.palette.common.white}
             hideHeadline
-            scrollToId="water-issues"
+            scrollToId="site-actions"
           />
-
-          {/* Frontmatter Panel 2 */}
-          {/* Wrapper div for IntersectionObserver to detect when this panel is in view */}
-          <div ref={waterIssuesRef}>
-            <FrontmatterPanel
-              id="water-issues"
-              ariaLabel="What water issues matter to you"
-              backgroundColor="transparent"
-              headlineLine1="What water issues"
-              headlineLine2="matter to you?"
-              bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
-              textColor={theme.palette.common.white}
-              hideHeadline
-              scrollToId="site-actions"
-            />
-          </div>
-        </Box>
+        </div>
 
         {/* Frontmatter Panel 3 - Actions variant */}
         <FrontmatterPanel
