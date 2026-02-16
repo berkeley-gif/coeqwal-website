@@ -134,9 +134,9 @@ function Panel2Paragraph({
 }) {
   const theme = useTheme()
   const progress = useScrollProgress()
-  const yNum = useScrollValue(progress, [0, 0.7, 1], [60, 0, 0])
+  const yNum = useScrollValue(progress, [0, 0.35, 1], [60, 0, 0])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.15, 1], [0, 1, 1])
+  const opacity = useScrollValue(progress, [0, 0.1, 1], [0, 1, 1])
 
   return (
     <motion.div
@@ -167,6 +167,9 @@ function Panel2Paragraph({
             topics={WATER_TOPICS}
             selectedId={selectedTopic}
             onSelect={setSelectedTopic}
+            progress={progress}
+            revealStart={0.4}
+            revealEnd={0.9}
           />
         </Box>
       </Box>
@@ -220,7 +223,7 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 1.6, 2, 1]}
+        weights={[1, 1.6, 3, 1]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -318,7 +321,7 @@ const IntroSection = () => {
         {/* Frontmatter Panel 2 - scroll choreography with background image */}
         <div ref={waterIssuesRef}>
           <ScrollSection
-            height="200vh"
+            height="300vh"
             id="water-issues"
             ariaLabel="What water issues matter to you"
             style={{
