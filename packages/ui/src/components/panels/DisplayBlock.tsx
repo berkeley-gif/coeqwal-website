@@ -40,7 +40,7 @@ export function DisplayBlock({
           fontWeight: 400,
           lineHeight: 1.6,
           letterSpacing: "0.005em",
-          color: "rgba(255, 255, 255, 1)",
+          color: "inherit",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
           textRendering: "optimizeLegibility",
           WebkitFontSmoothing: "antialiased",

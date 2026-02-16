@@ -73,16 +73,19 @@ const IntroSection = () => {
             line1: "What is",
             line2: "COEQWAL?",
             textShadow: false,
+            textColor: theme.palette.text.primary,
           },
           {
             line1: "What water issues",
             line2: "matter to you?",
             textShadow: false,
+            textColor: theme.palette.text.primary,
           },
           {
             line1: "On this site,",
             line2: "you can",
             textShadow: false,
+            textColor: theme.palette.text.secondary,
           },
         ]}
       />
@@ -138,9 +141,8 @@ const IntroSection = () => {
               </Link>
             </>
           }
-          textColor={theme.palette.common.white}
+          textColor={theme.palette.text.primary}
           hideHeadline
-          scrollToId="water-issues"
         />
         </Box>
 
@@ -157,7 +159,7 @@ const IntroSection = () => {
             headlineLine1="What water issues"
             headlineLine2="matter to you?"
             bodyText="Water management affects everyone differently. From farmers in the Central Valley to communities in the Delta, from salmon habitats to urban water users, we can explore how different decisions impact different communities."
-            textColor={theme.palette.common.white}
+            textColor={theme.palette.text.primary}
             hideHeadline
             scrollToId="site-actions"
           />
@@ -171,24 +173,24 @@ const IntroSection = () => {
           backgroundColor={theme.palette.brand.panelDark}
           headlineLine1="On this site,"
           headlineLine2="you can"
-          textColor={theme.palette.common.white}
+          textColor={theme.palette.text.secondary}
           hideHeadline
           scrollToId="tabs"
           actions={[
             {
               action: "Learn",
-              color: theme.palette.common.white,
+              color: theme.palette.text.secondary,
               description:
                 "how water in California\u2019s Central Valley is managed",
             },
             {
               action: "Explore",
-              color: theme.palette.common.white,
+              color: theme.palette.text.secondary,
               description: "how water outcomes shift under different scenarios",
             },
             {
               action: "Share",
-              color: theme.palette.common.white,
+              color: theme.palette.text.secondary,
               description: "your insights about California\u2019s water future",
             },
           ]}

@@ -79,7 +79,7 @@ export default function FrontmatterPanel({
   bodyText,
   actions,
   scrollToId,
-  textColor = "common.white",
+  textColor = "text.secondary",
   textShadow = false,
   hideHeadline = false,
   displayBlockBackground,
@@ -335,6 +335,7 @@ export default function FrontmatterPanel({
         sx={{
           gridColumn: { lg: 2 },
           alignSelf: { xs: "center", lg: "end" },
+          color: textColor,
         }}
       >
         <DisplayBlock
@@ -361,7 +362,7 @@ export default function FrontmatterPanel({
           }}
         >
           <ScrollToButton
-            color={`${theme.palette.common.white}D9`}
+            color={`${theme.palette.text.secondary}D9`}
             size={52}
             scrollToId={scrollToId}
             ariaLabel="Scroll down to continue"

@@ -717,7 +717,7 @@ const theme = createTheme({
     },
     text: {
       primary: themeValues.palette.blue.darkest,
-      secondary: "#FFFFFF",
+      secondary: themeValues.palette.common.white,
       disabled: themeValues.palette.blue.light,
     },
     action: {
