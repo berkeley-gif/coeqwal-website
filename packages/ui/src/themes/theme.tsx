@@ -742,8 +742,8 @@ const theme = createTheme({
       // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
       fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
-      lineHeight: 1.05,
-      letterSpacing: "-0.016em",
+      lineHeight: 1.1,
+      letterSpacing: "-0.025em",
       margin: 0, // Reset default margins
       padding: 0, // Reset default padding
     },
@@ -753,8 +753,8 @@ const theme = createTheme({
       // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
       fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
-      lineHeight: 1.05,
-      letterSpacing: "-0.016em",
+      lineHeight: 1.1,
+      letterSpacing: "-0.025em",
       margin: 0,
       padding: 0,
     },
@@ -763,8 +763,8 @@ const theme = createTheme({
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
       fontWeight: 500,
-      lineHeight: 1.05, // Match h1/h1Bold for tight headline pairing
-      letterSpacing: "-0.016em",
+      lineHeight: 1.1, // Match h1/h1Bold for headline pairing
+      letterSpacing: "-0.02em",
       margin: 0,
       padding: 0,
     },
@@ -774,8 +774,8 @@ const theme = createTheme({
       // Mobile (2.6rem / 41.6px) → Desktop (4rem / 64px)
       fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 4rem)",
       fontWeight: 400,
-      lineHeight: 1.05,
-      letterSpacing: "-0.016em",
+      lineHeight: 1.1,
+      letterSpacing: "-0.02em",
       margin: 0,
       padding: 0,
     },
@@ -808,13 +808,15 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - primary body text (comfortable reading size)
       fontWeight: 400,
-      lineHeight: 1.6,
+      lineHeight: 1.7,
+      letterSpacing: "0.005em",
     },
     body1Medium: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - same as body1
       fontWeight: 500,
-      lineHeight: 1.6,
+      lineHeight: 1.7,
+      letterSpacing: "0.005em",
     },
     body2: {
       fontFamily: themeValues.fontFamily.text,

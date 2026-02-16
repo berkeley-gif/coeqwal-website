@@ -1,8 +1,9 @@
 "use client"
 
 import { useRef, useEffect } from "react"
+import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, useTheme, ArrowForwardIcon } from "@repo/ui/mui"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
@@ -102,7 +103,32 @@ const IntroSection = () => {
           backgroundColor={theme.palette.brand.panelMedium}
           headlineLine1="What is"
           headlineLine2="COEQWAL?"
-          bodyText="COEQWAL, the Collaboratory for Equity in Water Allocation, is a publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future. COEQWAL opens California\u2019s water planning tools so that communities can meaningfully participate in shaping our water future."
+          bodyText={
+            <>
+              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+              publicly-funded project that works with communities to model
+              alternative water management scenarios.
+              <br />
+              <br />
+              To learn more, go to{" "}
+              <Link
+                href="/about"
+                style={{
+                  color: "inherit",
+                  textDecoration: "none",
+                  fontWeight: 600,
+                }}
+              >
+                About COEQWAL
+              </Link>{" "}
+              <ArrowForwardIcon
+                sx={{
+                  fontSize: "1.1rem",
+                  verticalAlign: "middle",
+                }}
+              />
+            </>
+          }
           textColor={theme.palette.common.white}
           hideHeadline
         />

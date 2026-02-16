@@ -40,7 +40,7 @@ export function DisplayBlock({
       <Typography
         variant="body1"
         sx={{
-          color: "rgba(255, 255, 255, 0.95)",
+          color: "rgba(255, 255, 255, 0.85)",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
           margin: 0,
           textAlign: "left",
