@@ -315,9 +315,9 @@ export function BaseHeader({
   const buttonStyle = {
     ...theme.typography.nav,
     color: resolvedTextColor,
-    padding: "8px 20px",
-    // WCAG 2.5.5: Adequate click target size (36px minimum for desktop)
-    minHeight: 36,
+    padding: "4px 20px",
+    // WCAG 2.5.5: Adequate click target size
+    minHeight: 28,
     transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
     textShadow: theme.textShadow.nav,
     "&:hover": {

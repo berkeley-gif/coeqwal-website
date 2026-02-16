@@ -100,7 +100,8 @@ const IntroSection = () => {
         <FrontmatterPanel
           id="intro"
           ariaLabel="What is COEQWAL"
-          backgroundColor={theme.palette.brand.panelMedium}
+          backgroundColor="#2a649b"
+          // backgroundColor={theme.palette.brand.panelMedium}
           headlineLine1="What is"
           headlineLine2="COEQWAL?"
           bodyText={
@@ -135,6 +136,7 @@ const IntroSection = () => {
           }
           textColor={theme.palette.common.white}
           hideHeadline
+          scrollToId="water-issues"
         />
 
         {/* Frontmatter Panel 2 - Map background panel */}
@@ -150,6 +152,7 @@ const IntroSection = () => {
             textColor={theme.palette.common.white}
             hideHeadline
             displayBlockBackground="rgba(42, 82, 135, 0.75)"
+            scrollToId="site-actions"
           />
         </div>
 
@@ -163,6 +166,7 @@ const IntroSection = () => {
           headlineLine2="you can"
           textColor={theme.palette.common.white}
           hideHeadline
+          scrollToId="tabs"
           actions={[
             {
               action: "Learn",
