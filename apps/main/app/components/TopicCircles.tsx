@@ -37,7 +37,6 @@ interface TopicCirclesProps {
  */
 function StaggeredCircle({
   topic,
-  index,
   isSelected,
   onSelect,
   progress,
@@ -45,7 +44,6 @@ function StaggeredCircle({
   fadeEnd,
 }: {
   topic: Topic
-  index: number
   isSelected: boolean
   onSelect: (id: string | null) => void
   progress?: MotionValue<number>
@@ -53,15 +51,18 @@ function StaggeredCircle({
   fadeEnd: number
 }) {
   const theme = useTheme()
-  const opacity = progress
-    ? useTransform(progress, [fadeStart, fadeEnd], [0, 1])
-    : undefined
+  // Always call useTransform (hooks can't be conditional), use fallback range when no progress
+  const fallbackProgress = progress || ({ get: () => 1 } as MotionValue<number>)
+  const opacity = useTransform(
+    fallbackProgress,
+    [fadeStart, fadeEnd],
+    progress ? [0, 1] : [1, 1],
+  )
 
   return (
     <motion.div
       style={{
-        opacity: opacity ?? 1,
-        pointerEvents: opacity ? undefined : "auto",
+        opacity,
       }}
     >
       <Box
@@ -80,6 +81,31 @@ function StaggeredCircle({
           },
         }}
       >
+        {/* Label banner - above circle */}
+        <Box
+          sx={{
+            backgroundColor: theme.palette.text.primary,
+            color: theme.palette.common.white,
+            px: 1.5,
+            py: "3px",
+            borderRadius: "4px",
+            lineHeight: 1.1,
+            transition: "all 0.2s ease",
+          }}
+        >
+          <Typography
+            variant="compactTitle"
+            component="div"
+            sx={{
+              textAlign: "center",
+              color: "inherit",
+              lineHeight: "inherit",
+            }}
+          >
+            {topic.label}
+          </Typography>
+        </Box>
+
         {/* Circle */}
         <Box
           className="topic-circle"
@@ -97,21 +123,6 @@ function StaggeredCircle({
             justifyContent: "center",
           }}
         />
-
-        {/* Label */}
-        <Typography
-          sx={{
-            fontSize: "0.8rem",
-            fontWeight: isSelected ? 600 : 400,
-            lineHeight: 1.3,
-            textAlign: "center",
-            color: "inherit",
-            maxWidth: "120px",
-            transition: "font-weight 0.2s ease",
-          }}
-        >
-          {topic.label}
-        </Typography>
       </Box>
     </motion.div>
   )
@@ -136,8 +147,9 @@ export default function TopicCircles({
         gridTemplateColumns: {
           xs: "repeat(2, 1fr)",
           sm: "repeat(3, 1fr)",
+          lg: "repeat(6, 1fr)",
         },
-        gap: { xs: 3, lg: 4 },
+        gap: { xs: 3, lg: 3 },
         mt: 4,
       }}
     >
@@ -149,7 +161,6 @@ export default function TopicCircles({
           <StaggeredCircle
             key={topic.id}
             topic={topic}
-            index={index}
             isSelected={selectedId === topic.id}
             onSelect={onSelect}
             progress={progress}
