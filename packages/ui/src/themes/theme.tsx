@@ -383,7 +383,7 @@ const border = {
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
   onDark: `2px solid ${palette.common.white}`, // On dark backgrounds
   subtleOutline: `1px solid ${palette.common.white}4D`, // Semi-transparent white outline (30% opacity)
-  rule: `1px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
+  rule: `2px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
 }
 
 // Background styles
@@ -849,7 +849,7 @@ const theme = createTheme({
     },
     nav: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.1rem", // matches body2 size
+      fontSize: "1.25rem",
       fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: "0.01em",
