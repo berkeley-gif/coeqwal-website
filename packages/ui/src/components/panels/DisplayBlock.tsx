@@ -34,6 +34,7 @@ export function DisplayBlock({
       }}
     >
       <Typography
+        component="div"
         sx={{
           fontFamily: theme.typography.body1.fontFamily,
           fontSize: "1.4rem",
