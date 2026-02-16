@@ -2,6 +2,7 @@
 
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
+import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 
 /**
@@ -17,6 +18,7 @@ import { useTabs } from "../context/Tabs"
  */
 export function Header() {
   const router = useRouter()
+  const theme = useTheme()
   const { isInTabsArea } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
@@ -63,6 +65,8 @@ export function Header() {
       onGetDataClick={() => router.push("data")}
       // Dynamic background: solid when in tabs area, transparent otherwise
       backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
+      // Text transitions from white to primary blue when header shrinks
+      textColorScrolled={theme.palette.text.primary}
     />
   )
 }
