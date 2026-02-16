@@ -224,11 +224,11 @@ export default function MorphingHeadline({
   const headlineStyles = {
     color: "common.white",
     // fontSize needed for maxWidth "ch" unit to calculate correctly
-    fontSize: theme.typography.h1Bold.fontSize,
+    fontSize: theme.typography.h1.fontSize,
     // lineHeight controls spacing between the two headline lines
     lineHeight: 1,
     maxWidth: "16ch",
-    textAlign: { xs: "center", md: "left" } as const,
+    textAlign: { xs: "center", lg: "left" } as const,
   }
 
   // If reduced motion, render static text without animation
@@ -243,7 +243,7 @@ export default function MorphingHeadline({
           right: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
-          display: { xs: "none", md: "block" },
+          display: { xs: "none", lg: "block" },
           transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
         }}
       >
@@ -261,7 +261,7 @@ export default function MorphingHeadline({
             {activeHeadline?.line1}
           </Typography>
           {activeHeadline?.line2 && (
-            <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+            <Typography variant="h1" component="span" sx={{ display: "block" }}>
               {activeHeadline.line2}
             </Typography>
           )}
@@ -279,7 +279,7 @@ export default function MorphingHeadline({
         right: theme.space.panel.padding,
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
-        display: { xs: "none", md: "block" },
+        display: { xs: "none", lg: "block" },
         transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
       }}
     >
@@ -312,7 +312,7 @@ export default function MorphingHeadline({
                 {headline.line1}
               </Typography>
               {headline.line2 && (
-                <Typography variant="h1Bold" component="span" sx={{ display: "block" }}>
+                <Typography variant="h1" component="span" sx={{ display: "block" }}>
                   {headline.line2}
                 </Typography>
               )}

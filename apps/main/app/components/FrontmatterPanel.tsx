@@ -121,60 +121,58 @@ export default function FrontmatterPanel({
         backgroundColor={backgroundColor}
         sx={{
           pointerEvents: "auto",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
+          // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
+          display: { xs: "flex", lg: "grid" },
+          gridTemplateColumns: { lg: "3fr 2fr" },
+          flexDirection: { xs: "column" },
+          justifyContent: { xs: "space-between" },
         }}
       >
-        {/* Headline - top-left on desktop, centered on mobile */}
+        {/* Headline - column 1, top-aligned */}
         <MotionBox
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
           variants={heroIn}
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
+            gridColumn: { lg: 1 },
+            alignSelf: { xs: "stretch", lg: "start" },
             display: hideHeadline
-              ? { xs: "flex", md: "none" }
-              : { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-start" },
+              ? { xs: "flex", lg: "none" }
+              : { xs: "flex", lg: "block" },
+            justifyContent: { xs: "center", lg: "flex-start" },
           }}
         >
           <Box
             sx={{
               color: textColor,
               textShadow: textShadow ? theme.textShadow.display : "none",
-              // fontSize needed for maxWidth "ch" unit to calculate correctly
-              fontSize: theme.typography.h1Bold.fontSize,
-              // lineHeight controls spacing between the two headline lines
+              fontSize: theme.typography.h1.fontSize,
               lineHeight: 1,
               maxWidth: "16ch",
-              textAlign: { xs: "center", md: "left" },
+              textAlign: { xs: "center", lg: "left" },
             }}
           >
             <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
               {headlineLine1}
             </Typography>
             {headlineLine2 && (
-              <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
+              <Typography variant="h1" component="h1" sx={{ display: "block" }}>
                 {headlineLine2}
               </Typography>
             )}
           </Box>
         </MotionBox>
-        {/* Desktop spacer when headline hidden (maintains action items position) */}
-        {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-        {/* Action items - bottom-right on desktop, centered on mobile */}
+        {/* Action items - column 2, bottom-aligned */}
         <MotionBox
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.3 }}
           variants={staggerContainer}
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-end" },
-            display: { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-end" },
+            gridColumn: { lg: 2 },
+            alignSelf: { xs: "center", lg: "end" },
           }}
         >
           <Box
@@ -254,61 +252,58 @@ export default function FrontmatterPanel({
       backgroundColor={backgroundColor}
       sx={{
         pointerEvents: "auto",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
+        display: { xs: "flex", lg: "grid" },
+        gridTemplateColumns: { lg: "3fr 2fr" },
+        flexDirection: { xs: "column" },
+        justifyContent: { xs: "space-between" },
       }}
     >
-      {/* Headline - top-left on desktop, centered on mobile */}
-      {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
+      {/* Headline - column 1, top-aligned */}
       <MotionBox
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         variants={heroIn}
         sx={{
-          alignSelf: { xs: "stretch", md: "flex-start" },
+          gridColumn: { lg: 1 },
+          alignSelf: { xs: "stretch", lg: "start" },
           display: hideHeadline
-            ? { xs: "flex", md: "none" } // Mobile: show, Desktop: hidden (MorphingHeadline)
-            : { xs: "flex", md: "block" }, // Always show when not using MorphingHeadline
-          justifyContent: { xs: "center", md: "flex-start" },
+            ? { xs: "flex", lg: "none" }
+            : { xs: "flex", lg: "block" },
+          justifyContent: { xs: "center", lg: "flex-start" },
         }}
       >
         <Box
           sx={{
             color: textColor,
             textShadow: textShadow ? theme.textShadow.display : "none",
-            // fontSize needed for maxWidth "ch" unit to calculate correctly
-            fontSize: theme.typography.h1Bold.fontSize,
-            // lineHeight controls spacing between the two headline lines
+            fontSize: theme.typography.h1.fontSize,
             lineHeight: 1,
             maxWidth: "16ch",
-            textAlign: { xs: "center", md: "left" },
+            textAlign: { xs: "center", lg: "left" },
           }}
         >
           <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
             {headlineLine1}
           </Typography>
           {headlineLine2 && (
-            <Typography variant="h1Bold" component="h1" sx={{ display: "block" }}>
+            <Typography variant="h1" component="h1" sx={{ display: "block" }}>
               {headlineLine2}
             </Typography>
           )}
         </Box>
       </MotionBox>
-      {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
-      {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
 
-      {/* Body - bottom-right on desktop, centered on mobile */}
+      {/* Body - column 2, bottom-aligned */}
       <MotionBox
         initial="hidden"
         whileInView="show"
         viewport={{ once: true, amount: 0.3 }}
         variants={heroInRight}
         sx={{
-          alignSelf: { xs: "stretch", md: "flex-end" },
-          display: { xs: "flex", md: "block" },
-          justifyContent: { xs: "center", md: "flex-end" },
+          gridColumn: { lg: 2 },
+          alignSelf: { xs: "center", lg: "end" },
         }}
       >
         <DisplayBlock

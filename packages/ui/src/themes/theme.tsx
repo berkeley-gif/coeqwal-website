@@ -18,7 +18,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
- *                       Typography variants: h1, h1Bold, h2–h6, body1, body2,
+ *                       Typography variants: h1, h2–h6, body1, body2,
  *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline
  *
@@ -739,18 +739,8 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
-      fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
-      fontWeight: 500,
-      letterSpacing: "-0.015em",
-      margin: 0, // Reset default margins
-      padding: 0, // Reset default padding
-    },
-    // h1Bold - Bold emphasis variant for hero headlines (e.g., "water" in "California's water?")
-    h1Bold: {
-      fontFamily: themeValues.fontFamily.display,
-      // Mobile (3.25rem / 52px) → Desktop (5rem / 80px)
-      fontSize: "clamp(3.25rem, 1.5rem + 4vw, 5rem)",
+      // Mobile (3.5rem / 56px) → Desktop (5rem / 80px)
+      fontSize: "clamp(3.6rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
       letterSpacing: "-0.015em",
       margin: 0,
@@ -770,7 +760,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       // Mobile (2.6rem / 41.6px) → Desktop (3.6rem / 57.6px)
       fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)",
-      fontWeight: 400,
+      fontWeight: 500,
       letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
@@ -1720,7 +1710,6 @@ declare module "@mui/material/styles" {
   // Add custom typography variant
   interface TypographyVariants {
     fontWeightSemiBold: number
-    h1Bold: React.CSSProperties
     h2Main: React.CSSProperties
     body1Medium: React.CSSProperties
     nav: React.CSSProperties
@@ -1741,7 +1730,6 @@ declare module "@mui/material/styles" {
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
-    h1Bold?: React.CSSProperties
     h2Main?: React.CSSProperties
     body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
@@ -1773,7 +1761,6 @@ declare module "@mui/material/Button" {
 
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
-    h1Bold: true
     h2Main: true
     body1Medium: true
     nav: true
