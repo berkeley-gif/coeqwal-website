@@ -968,8 +968,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.4rem", // 22.4px
       fontWeight: 400,
-      lineHeight: 1.6,
-      letterSpacing: "0.005em",
+      lineHeight: 1.5,
     },
   },
   shape: {
