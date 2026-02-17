@@ -22,7 +22,7 @@ import { hydroclimateOptions } from "../../../content/scenarios"
 
 // Icon and background color configuration for each hydroclimate
 // Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
-const HYDROCLIMATE_CONFIG: Record<
+export const HYDROCLIMATE_CONFIG: Record<
   string,
   {
     icon: React.ElementType
@@ -48,6 +48,10 @@ const HYDROCLIMATE_CONFIG: Record<
   "warmer-drier-iii": {
     icon: LocalFireDepartmentIcon,
     bgColor: "#bf360c", // Red-orange - severe dry
+  },
+  "warmer-drier-iv": {
+    icon: LocalFireDepartmentIcon,
+    bgColor: "#8b0000", // Dark red - extreme dry
   },
 }
 

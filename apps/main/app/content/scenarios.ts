@@ -393,37 +393,37 @@ export const hydroclimateOptions: HydroclimateOption[] = [
     value: "historical",
     label: "Historical",
     description:
-      "Based on historical climate patterns from the observational record. This represents the baseline climate conditions used for comparison with future projections.",
+      "Historical temperature and precipitation over CV inflow basins according to a 100-year observational record",
   },
   {
     value: "warmer-wetter",
-    label: "Warmer Wetter",
+    label: "Warmer & Wetter",
     description:
-      "Climate scenario with increased temperatures and higher precipitation. This represents a future where California experiences warmer conditions with more rainfall and snowpack.",
+      "1.2\u00B0C temperature increase and 4% precipitation increase, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
   },
   {
     value: "warmer-drier-i",
-    label: "Warmer Drier I",
+    label: "Warmer & Drier I",
     description:
-      "Moderate warming and drying scenario. Represents initial stages of climate change impacts with reduced precipitation and increased temperatures.",
+      "1.5\u00B0C temperature increase and 3% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
   },
   {
     value: "warmer-drier-ii",
-    label: "Warmer Drier II",
+    label: "Warmer & Drier II",
     description:
-      "Intermediate warming and drying scenario. More pronounced climate change effects with further reductions in water availability.",
+      "1.8\u00B0C temperature increase and 9% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
   },
   {
     value: "warmer-drier-iii",
-    label: "Warmer Drier III",
+    label: "Warmer & Drier III",
     description:
-      "Advanced warming and drying scenario. Significant climate change impacts with substantial reductions in precipitation and increased evapotranspiration.",
+      "1.9\u00B0C temperature increase and 7% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
   },
   {
     value: "warmer-drier-iv",
-    label: "Warmer Drier IV",
+    label: "Warmer & Drier IV",
     description:
-      "Extreme warming and drying scenario. Most severe climate change projection with dramatic reductions in water resources and increased temperature stress.",
+      "1.4\u00B0C temperature increase and 12% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
   },
 ]
 
