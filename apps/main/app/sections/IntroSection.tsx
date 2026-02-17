@@ -21,6 +21,7 @@ import type { Category } from "../components/CategoryCircles"
 import type { VideoSource } from "../components/VideoHero"
 import { ScrollToButton } from "@repo/ui"
 import { mapActions, useMapStore } from "../features/map/store"
+import { useTabs } from "../context/Tabs"
 
 const VIDEO_SRCS: VideoSource[] = [
   {
@@ -89,7 +90,7 @@ const CATEGORY_SCENARIOS: Record<string, string[]> = {
 }
 
 const INTRO_TEXT =
-  "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how different decisions affect uses of water that people care about."
+  "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the water issues that people care about."
 
 /**
  * Panel1Paragraph - Scroll-linked paragraph for frontmatter panel 1.
@@ -479,6 +480,22 @@ const IntroSection = () => {
     [],
   )
   const boundaries = usePanelBoundaries(introPanelsRef, panelRefs)
+
+  // Switch header text from white to dark when Panel 1 top nears viewport top
+  const { setIsHeaderDark } = useTabs()
+  useEffect(() => {
+    const handleScroll = () => {
+      const panel1El = panel2Ref.current // panel2Ref = Panel 1 (What is COEQWAL)
+      if (!panel1El) return
+      const rect = panel1El.getBoundingClientRect()
+      // Switch when Panel 1's top is at or above the viewport top
+      setIsHeaderDark(rect.top <= 0)
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    handleScroll() // Check initial state
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [setIsHeaderDark])
 
   // Show map when water-issues panel is in viewport
   // This ensures the map is visible when scrolling back up from tabs
