@@ -4,8 +4,10 @@
  * CategoryCircles - Interactive category selection circles
  *
  * Renders a responsive grid of dashed circles with labels.
- * Clicking a circle selects it (fills in) and triggers a callback.
- * Clicking the same circle again deselects it.
+ * Labels are always clickable to toggle selection and show descriptions.
+ *
+ * When `showScenarios` is true, circles display packed scenario dots
+ * (via ScenarioDots) and the circle click-to-select behavior is disabled.
  *
  * Supports optional scroll-linked staggered reveal via a progress MotionValue.
  */
@@ -13,6 +15,7 @@
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
+import ScenarioDots from "./ScenarioDots"
 
 export interface Category {
   id: string
@@ -32,6 +35,10 @@ interface CategoryCirclesProps {
   revealEnd?: number
   /** Override color for circle strokes, labels, and description text. Defaults to text.primary. */
   strokeColor?: string
+  /** Maps category ID to scenario IDs for dot visualization */
+  scenarioMap?: Record<string, string[]>
+  /** When true, show scenario dots inside circles and disable circle click-to-select */
+  showScenarios?: boolean
 }
 
 /**
@@ -45,6 +52,8 @@ function StaggeredCircle({
   fadeStart,
   fadeEnd,
   strokeColor,
+  scenarioIds,
+  showScenarios,
 }: {
   category: Category
   isSelected: boolean
@@ -53,6 +62,8 @@ function StaggeredCircle({
   fadeStart: number
   fadeEnd: number
   strokeColor: string
+  scenarioIds?: string[]
+  showScenarios?: boolean
 }) {
   const theme = useTheme()
   // Always call useTransform (hooks can't be conditional), use fallback range when no progress
@@ -63,6 +74,9 @@ function StaggeredCircle({
     progress ? [0, 1] : [1, 1],
   )
 
+  const circleSize = { xs: 64, lg: 80 }
+  const hasScenarios = showScenarios && scenarioIds && scenarioIds.length > 0
+
   return (
     <motion.div
       style={{
@@ -70,24 +84,17 @@ function StaggeredCircle({
       }}
     >
       <Box
-        onClick={() => onSelect(isSelected ? null : category.id)}
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 1.5,
-          cursor: "pointer",
           transition: "all 0.3s ease",
-          "&:hover .category-circle": {
-            borderColor: strokeColor,
-            backgroundColor: isSelected
-              ? strokeColor
-              : "rgba(255, 255, 255, 0.1)",
-          },
         }}
       >
-        {/* Label banner - above circle (always text.primary) */}
+        {/* Label banner - always clickable for selection */}
         <Box
+          onClick={() => onSelect(isSelected ? null : category.id)}
           sx={{
             backgroundColor: theme.palette.text.primary,
             color: theme.palette.common.white,
@@ -95,6 +102,10 @@ function StaggeredCircle({
             py: "3px",
             borderRadius: "4px",
             lineHeight: 1.1,
+            cursor: "pointer",
+            "&:hover": {
+              opacity: 0.85,
+            },
           }}
         >
           <Typography
@@ -110,25 +121,49 @@ function StaggeredCircle({
           </Typography>
         </Box>
 
-        {/* Circle */}
+        {/* Circle - clickable when not showing scenarios */}
         <Box
           className="category-circle"
+          onClick={
+            !showScenarios
+              ? () => onSelect(isSelected ? null : category.id)
+              : undefined
+          }
           sx={{
-            width: { xs: 64, lg: 80 },
-            height: { xs: 64, lg: 80 },
+            width: circleSize,
+            height: circleSize,
             borderRadius: "50%",
-            border: `${theme.strokeWidth.rule}px ${isSelected ? "solid" : "dashed"} ${strokeColor}`,
-            backgroundColor: isSelected
-              ? strokeColor
-              : "transparent",
+            border: `${theme.strokeWidth.rule}px ${isSelected && !showScenarios ? "solid" : "dashed"} ${strokeColor}`,
+            backgroundColor:
+              isSelected && !showScenarios ? strokeColor : "transparent",
             transition: "all 0.3s ease",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            position: "relative",
+            overflow: "hidden",
+            cursor: !showScenarios ? "pointer" : "default",
+            ...(!showScenarios && {
+              "&:hover": {
+                borderColor: strokeColor,
+                backgroundColor: isSelected
+                  ? strokeColor
+                  : "rgba(255, 255, 255, 0.1)",
+              },
+            }),
           }}
-        />
+        >
+          {/* Scenario dots - shown when showScenarios is true */}
+          {hasScenarios && (
+            <ScenarioDots
+              scenarioIds={scenarioIds}
+              size={80}
+              fillColor="#ffffff"
+            />
+          )}
+        </Box>
 
-        {/* Description text - appears below circle when selected */}
+        {/* Description text - appears below circle when selected (via label) */}
         {isSelected && (
           <Typography
             variant="compactSubtitle"
@@ -157,6 +192,8 @@ export default function CategoryCircles({
   revealStart = 0.7,
   revealEnd = 0.95,
   strokeColor,
+  scenarioMap,
+  showScenarios,
 }: CategoryCirclesProps) {
   const theme = useTheme()
   const resolvedColor = strokeColor ?? theme.palette.text.primary
@@ -192,6 +229,8 @@ export default function CategoryCircles({
             fadeStart={fadeStart}
             fadeEnd={fadeEnd}
             strokeColor={resolvedColor}
+            scenarioIds={scenarioMap?.[category.id]}
+            showScenarios={showScenarios}
           />
         )
       })}

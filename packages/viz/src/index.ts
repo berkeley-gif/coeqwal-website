@@ -65,6 +65,9 @@ export type {
   BreakdownComponentsMap,
 } from "./components/PercentileMatrix"
 
+export { default as PackedDots } from "./components/PackedDots"
+export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
+
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
 

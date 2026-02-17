@@ -68,6 +68,19 @@ const WATER_CATEGORIES: Category[] = [
   },
 ]
 
+/** Maps each category to its scenario IDs (deduplicated) */
+const CATEGORY_SCENARIOS: Record<string, string[]> = {
+  communities: ["s0035", "s0036", "s0037"],
+  farms: ["s0011", "s0025", "s0026", "s0027", "s0028"],
+  rivers: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
+  delta: [
+    "s0040", "s0041", "s0042", "s0039", "s0044",
+    "s0045", "s0028", "s0065", "s0030",
+  ],
+  climate: [],
+  governance: ["s0020", "s0021", "s0023", "s0024"],
+}
+
 const INTRO_TEXT =
   "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how different decisions affect uses of water that people care about."
 
@@ -385,12 +398,17 @@ function FloatingCategoryCircles({
   const lightColor = theme.palette.common.white
   const [circleColor, setCircleColor] = useState(darkColor)
 
+  // Show scenario dots after Panel 3 text fades in (at p3.start)
+  const scenarioThreshold = p3 ? p3.start : 0.848
+  const [showScenarios, setShowScenarios] = useState(false)
+
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (v) => {
       setCircleColor(v >= darkBgStart ? lightColor : darkColor)
+      setShowScenarios(v >= scenarioThreshold)
     })
     return unsubscribe
-  }, [scrollYProgress, darkColor, lightColor, darkBgStart])
+  }, [scrollYProgress, darkColor, lightColor, darkBgStart, scenarioThreshold])
 
   return (
     <motion.div
@@ -415,6 +433,8 @@ function FloatingCategoryCircles({
         revealStart={0}
         revealEnd={0.8}
         strokeColor={circleColor}
+        scenarioMap={CATEGORY_SCENARIOS}
+        showScenarios={showScenarios}
       />
     </motion.div>
   )
