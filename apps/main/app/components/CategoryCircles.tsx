@@ -17,6 +17,8 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
 import ScenarioDots from "./ScenarioDots"
 import ScenarioList from "./ScenarioList"
+import HydroclimateIcons from "./HydroclimateIcons"
+import HydroclimateList from "./HydroclimateList"
 
 export interface Category {
   id: string
@@ -77,6 +79,7 @@ function StaggeredCircle({
 
   const circleSize = { xs: 64, lg: 80 }
   const hasScenarios = showScenarios && scenarioIds && scenarioIds.length > 0
+  const isClimate = category.id === "climate"
 
   return (
     <motion.div
@@ -161,13 +164,16 @@ function StaggeredCircle({
             }),
           }}
         >
-          {/* Scenario dots - shown when showScenarios is true */}
+          {/* Scenario dots or hydroclimate icons - shown when showScenarios is true */}
           {hasScenarios && (
             <ScenarioDots
               scenarioIds={scenarioIds}
               size={80}
               fillColor="#ffffff"
             />
+          )}
+          {showScenarios && isClimate && (
+            <HydroclimateIcons size={80} />
           )}
         </Box>
 
@@ -198,8 +204,8 @@ function StaggeredCircle({
           </Box>
         )}
 
-        {/* Scenario list - fades in when showScenarios becomes true */}
-        {scenarioIds && scenarioIds.length > 0 && (
+        {/* Scenario list or hydroclimate list - fades in when showScenarios becomes true */}
+        {(hasScenarios || isClimate) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showScenarios ? 1 : 0 }}
@@ -210,7 +216,11 @@ function StaggeredCircle({
               pointerEvents: showScenarios ? "auto" : "none",
             }}
           >
-            <ScenarioList scenarioIds={scenarioIds} color={strokeColor} />
+            {isClimate ? (
+              <HydroclimateList color={strokeColor} />
+            ) : (
+              <ScenarioList scenarioIds={scenarioIds!} color={strokeColor} />
+            )}
           </motion.div>
         )}
       </Box>
