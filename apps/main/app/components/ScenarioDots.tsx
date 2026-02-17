@@ -28,6 +28,8 @@ interface ScenarioDotsProps {
   size: number
   /** Fill color for dots (default: white) */
   fillColor?: string
+  /** Called when the hovered scenario changes (null = no hover) */
+  onHoverChange?: (id: string | null) => void
 }
 
 /**
@@ -45,6 +47,7 @@ export default function ScenarioDots({
   scenarioIds,
   size,
   fillColor = "#ffffff",
+  onHoverChange,
 }: ScenarioDotsProps) {
   const dots: DotDatum[] = useMemo(
     () =>
@@ -78,8 +81,9 @@ export default function ScenarioDots({
         setVirtualAnchor(createVirtualAnchor(rect))
       }
       setActiveDot(dot)
+      onHoverChange?.(dot?.id ?? null)
     },
-    [],
+    [onHoverChange],
   )
 
   const handleDotClick = useCallback(
@@ -87,9 +91,14 @@ export default function ScenarioDots({
       const el = event.target as SVGCircleElement
       const rect = el.getBoundingClientRect()
       setVirtualAnchor(createVirtualAnchor(rect))
-      setActiveDot((prev) => (prev?.id === dot.id ? null : dot))
+      setActiveDot((prev) => {
+        const next = prev?.id === dot.id ? null : dot
+        // Schedule parent update outside the updater to avoid setState-during-render
+        queueMicrotask(() => onHoverChange?.(next?.id ?? null))
+        return next
+      })
     },
-    [],
+    [onHoverChange],
   )
 
   if (dots.length === 0) return null
@@ -108,6 +117,20 @@ export default function ScenarioDots({
           open
           title={
             <Box sx={{ p: 0.5 }}>
+              <Typography
+                variant="compactSubtitle"
+                component="div"
+                sx={{
+                  color: "inherit",
+                  opacity: 0.6,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  fontSize: "0.65rem",
+                  mb: 0.25,
+                }}
+              >
+                {activeDot.id}
+              </Typography>
               <Typography
                 variant="compactTitle"
                 component="div"
