@@ -78,7 +78,8 @@ export default function ScenarioList({
                 : "3px solid transparent",
               pl: isHighlighted ? 1 : 0,
               borderRadius: "2px",
-              transition: "border-left 0.15s ease, padding-left 0.15s ease, opacity 0.15s ease",
+              transition:
+                "border-left 0.15s ease, padding-left 0.15s ease, opacity 0.15s ease",
               // Dim non-highlighted rows when something is highlighted
               opacity: highlightedId && !isHighlighted ? 0.4 : 1,
             }}

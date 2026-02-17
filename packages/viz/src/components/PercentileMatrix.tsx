@@ -255,7 +255,6 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       bottom: 45,
       left: labelColumnWidth,
     }
-    const rowHeaderWidth = labelColumnWidth - 10 // Width for reservoir names
     const colHeaderHeight = showScenarioHeaders ? 40 : 10 // Height for scenario names
 
     const innerWidth = currentWidth - margin.left - margin.right

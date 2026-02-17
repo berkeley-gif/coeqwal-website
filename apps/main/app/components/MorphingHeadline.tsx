@@ -74,7 +74,10 @@ export interface MorphingHeadlineProps {
   weights?: number[]
   /** DOM-measured panel boundaries from usePanelBoundaries. If provided, uses these
    *  instead of weight-based calculations for more accurate scroll tracking. */
-  panelBoundaries?: { panels: { start: number; end: number; mid: number }[]; ready: boolean }
+  panelBoundaries?: {
+    panels: { start: number; end: number; mid: number }[]
+    ready: boolean
+  }
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
   exitRange?: [number, number]
 }
@@ -104,12 +107,7 @@ export default function MorphingHeadline({
     layoutEffect: false,
   })
 
-  // Exit animation: translate upward and fade out during exitRange
-  const exitY = useTransform(
-    scrollYProgress,
-    exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
-    exitRange ? [0, -300] : [0, 0],
-  )
+  // Exit opacity: fade out during exitRange
   const exitOpacity = useTransform(
     scrollYProgress,
     exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
@@ -159,8 +157,8 @@ export default function MorphingHeadline({
       // These values are tuned by hand. Adjust if adding more panels.
       const getTransitionTiming = (transitionIndex: number) => {
         if (transitionIndex === 0) return { start: -0.05, end: 0.05 } // First: starts slightly before boundary
-        if (transitionIndex === 1) return { start: 0.05, end: 0.2 } // Middle: standard
-        return { start: 0.15, end: 0.3 } // Later: delayed
+        if (transitionIndex === 1) return { start: 0.0, end: 0.15 } // Middle: standard
+        return { start: -0.1, end: 0.05 } // Later: starts before boundary so it exits in time
       }
 
       if (index === 0) {
@@ -173,13 +171,16 @@ export default function MorphingHeadline({
           output: [1, 1, 0],
         }
       } else if (index === count - 1) {
-        // Last headline: fades in during this panel, stays visible
-        const timing = getTransitionTiming(index - 1)
-        const fadeStart = panelStart + panelSize * timing.start
-        const fadeEnd = panelStart + panelSize * timing.end
+        // Last headline: fades in during this panel, fades out at end
+        const fadeInTiming = getTransitionTiming(index - 1)
+        const fadeStart = panelStart + panelSize * fadeInTiming.start
+        const fadeEnd = panelStart + panelSize * fadeInTiming.end
+        // Fade out at 85% through the panel (matches paragraph exit timing)
+        const fadeOutStart = panelStart + panelSize * 0.85
+        const fadeOutEnd = panelEnd
         return {
-          input: [fadeStart, fadeEnd, 1],
-          output: [0, 1, 1],
+          input: [fadeStart, fadeEnd, fadeOutStart, fadeOutEnd],
+          output: [0, 1, 1, 0],
         }
       } else {
         // Middle headlines: fade in during this panel, fade out into next panel
@@ -204,6 +205,9 @@ export default function MorphingHeadline({
 
   // Track dock offset (when scrolled past container, headline moves up with it)
   const [dockOffset, setDockOffset] = useState(0)
+
+  // Exit Y: not used for translation (exit is opacity-only), but needed for dockOffset
+  const exitY = dockOffset
 
   // Calculate opacity for a specific headline at a given scroll progress
   const calculateOpacity = useCallback(
@@ -255,11 +259,11 @@ export default function MorphingHeadline({
   useEffect(() => {
     // Use DOM-measured boundaries if available, otherwise fall back to weights
     let computedBoundaries: number[]
-    if (panelBoundaries?.ready && panelBoundaries.panels.length === headlines.length) {
-      computedBoundaries = [
-        0,
-        ...panelBoundaries.panels.map((p) => p.start),
-      ]
+    if (
+      panelBoundaries?.ready &&
+      panelBoundaries.panels.length === headlines.length
+    ) {
+      computedBoundaries = [0, ...panelBoundaries.panels.map((p) => p.start)]
     } else {
       const w = weights || headlines.map(() => 1)
       const totalWeight = w.reduce((sum, v) => sum + v, 0)
@@ -276,7 +280,8 @@ export default function MorphingHeadline({
       // Find which panel the scroll position falls in
       let newIndex = 0
       for (let i = 0; i < computedBoundaries.length - 1; i++) {
-        const mid = ((computedBoundaries[i] ?? 0) + (computedBoundaries[i + 1] ?? 1)) / 2
+        const mid =
+          ((computedBoundaries[i] ?? 0) + (computedBoundaries[i + 1] ?? 1)) / 2
         if (value >= mid) newIndex = Math.min(i + 1, headlines.length - 1)
       }
       setActiveIndex(newIndex)
@@ -306,7 +311,7 @@ export default function MorphingHeadline({
           zIndex: theme.zIndex.heroContent + 10,
           pointerEvents: "none",
           display: { xs: "none", lg: "block" },
-          transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
+          ...(dockOffset !== 0 && { transform: `translateY(${dockOffset}px)` }),
         }}
       >
         <Box
@@ -352,7 +357,6 @@ export default function MorphingHeadline({
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
         display: { xs: "none", lg: "block" },
-        transform: dockOffset !== 0 ? `translateY(${dockOffset}px)` : "none",
       }}
     >
       {/* Container for all headlines - they overlap via CSS grid */}

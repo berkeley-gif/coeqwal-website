@@ -74,8 +74,15 @@ const CATEGORY_SCENARIOS: Record<string, string[]> = {
   farms: ["s0011", "s0025", "s0026", "s0027", "s0028"],
   rivers: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
   delta: [
-    "s0040", "s0041", "s0042", "s0039", "s0044",
-    "s0045", "s0028", "s0065", "s0030",
+    "s0040",
+    "s0041",
+    "s0042",
+    "s0039",
+    "s0044",
+    "s0045",
+    "s0028",
+    "s0065",
+    "s0030",
   ],
   climate: [],
   governance: ["s0020", "s0021", "s0023", "s0024"],
@@ -243,73 +250,79 @@ function Panel3Text({
 
   const p3 = boundaries.panels[3]
   const p3Span = p3 ? p3.end - p3.start : 0.15
-  // Fade in slightly before Panel 3 top reaches viewport top
-  const fadeStart = (p3 ? p3.start : 0.848) - p3Span * 0.15
-  const fadeEnd = fadeStart + 0.03
+  // Fade in well before Panel 3 top reaches viewport top
+  const fadeStart = (p3 ? p3.start : 0.848) - p3Span * 0.3
+  const fadeEnd = fadeStart + 0.02
 
-  const opacity = useTransform(
-    scrollYProgress,
-    [fadeStart, fadeEnd],
-    [0, 1],
-  )
+  const opacity = useTransform(scrollYProgress, [fadeStart, fadeEnd], [0, 1])
 
   return (
-    <motion.div
-      style={{ opacity }}
-    >
-    <Box
-      sx={{
-        display: { xs: "flex", lg: "grid" },
-        gridTemplateColumns: { lg: "3fr 2fr" },
-        flexDirection: { xs: "column" },
-        gap: { xs: 3, lg: 0 },
-        alignItems: { xs: "center", lg: "start" },
-        color: theme.palette.text.secondary,
-      }}
-    >
-      {/* Headline block - column 1 */}
+    <motion.div style={{ opacity }}>
       <Box
         sx={{
-          gridColumn: { lg: 1 },
-          alignSelf: { lg: "start" },
-          textAlign: { xs: "center", lg: "left" },
+          display: { xs: "flex", lg: "grid" },
+          gridTemplateColumns: { lg: "3fr 2fr" },
+          flexDirection: { xs: "column" },
+          gap: { xs: 3, lg: 0 },
+          alignItems: { xs: "center", lg: "start" },
+          color: theme.palette.text.secondary,
         }}
       >
+        {/* Headline block - column 1 */}
         <Box
-          component="h2"
-          sx={{ ...theme.typography.h5, display: "block", m: 0, color: "inherit", fontWeight: 500, fontSize: "1.76rem" }}
+          sx={{
+            gridColumn: { lg: 1 },
+            alignSelf: { lg: "start" },
+            textAlign: { xs: "center", lg: "left" },
+          }}
         >
-          COEQWAL library of Central Valley
+          <Box
+            component="h2"
+            sx={{
+              ...theme.typography.h5,
+              display: "block",
+              m: 0,
+              color: "inherit",
+              fontWeight: 500,
+              fontSize: "1.76rem",
+            }}
+          >
+            COEQWAL library of Central Valley
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              ...theme.typography.h4,
+              display: "block",
+              m: 0,
+              color: "inherit",
+              fontWeight: 600,
+            }}
+          >
+            water management scenarios
+          </Box>
         </Box>
-        <Box
-          component="span"
-          sx={{ ...theme.typography.h4, display: "block", m: 0, color: "inherit", fontWeight: 600 }}
-        >
-          water management scenarios
-        </Box>
-      </Box>
 
-      {/* Paragraph block - column 2 */}
-      <Box
-        sx={{
-          gridColumn: { lg: 2 },
-          alignSelf: { lg: "start" },
-          maxWidth: { xs: "540px", lg: "none" },
-          textAlign: { xs: "center", lg: "left" },
-        }}
-      >
-        <Typography
-          variant="body2"
-          component="p"
-          sx={{ m: 0, color: "inherit" }}
+        {/* Paragraph block - column 2 */}
+        <Box
+          sx={{
+            gridColumn: { lg: 2 },
+            alignSelf: { lg: "start" },
+            maxWidth: { xs: "540px", lg: "none" },
+            textAlign: { xs: "center", lg: "left" },
+          }}
         >
-          COEQWAL has used a computational model called CalSim to run a
-          broad range of alternative water management scenarios. These
-          scenarios are represented here, clustered according to the
-          issues they address.
-        </Typography>
+          <Typography
+            variant="body2"
+            component="p"
+            sx={{ m: 0, color: "inherit" }}
+          >
+            COEQWAL has used a computational model called CalSim to run a broad
+            range of alternative water management scenarios. These scenarios are
+            represented here, clustered according to the issues they address.
+          </Typography>
+        </Box>
       </Box>
-    </Box>
     </motion.div>
   )
 }
@@ -358,10 +371,10 @@ function FloatingCategoryCircles({
   const staggerEnd = p2 ? p2.start + (p2.end - p2.start) * 0.75 : 0.66
 
   // The circles sit at ~50vh from the viewport top. The dark background reaches
-  // them before Panel 3's top hits the viewport top. Offset by 28% of Panel 3's
-  // height in progress units (circles sit at 28vh).
+  // them before Panel 3's top hits the viewport top. Offset by 33% of Panel 3's
+  // height in progress units (circles sit at 33vh).
   const p3Span = p3 ? p3.end - p3.start : 0.15
-  const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.28
+  const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.33
 
   // Opacity: invisible before mid Panel 2, stay visible once revealed
   const opacity = useTransform(
@@ -370,14 +383,15 @@ function FloatingCategoryCircles({
     [0, 0, 1],
   )
 
-  // Y position: start at bottom (60vh), glide to below text blocks (~28vh) by p3.start,
-  // then scroll with Panel 3 (from 28vh to -72vh over Panel 3's height)
+  // Y position: start at bottom (60vh), glide to below text blocks (~33vh) by p3.start,
+  // hold at 33vh while lists fade in, then scroll with Panel 3
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
+  const p3HoldEnd = p3Start + (p3End - p3Start) * 0.4
   const yNum = useTransform(
     scrollYProgress,
-    [appearStart, p2 ? p2.mid : 0.62, p3Start, p3End],
-    [60, 45, 28, -72],
+    [appearStart, p2 ? p2.mid : 0.62, p3Start, p3HoldEnd, p3End],
+    [60, 45, 33, 33, -167],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
@@ -398,8 +412,8 @@ function FloatingCategoryCircles({
   const lightColor = theme.palette.common.white
   const [circleColor, setCircleColor] = useState(darkColor)
 
-  // Show scenario dots after Panel 3 text fades in (at p3.start)
-  const scenarioThreshold = p3 ? p3.start : 0.848
+  // Show scenario lists after circles hold for a moment (10% into hold period)
+  const scenarioThreshold = p3Start + (p3End - p3Start) * 0.1
   const [showScenarios, setShowScenarios] = useState(false)
 
   useEffect(() => {
@@ -505,9 +519,26 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 1.6, 3, 1, 1]}
-        panelBoundaries={boundaries}
-        exitRange={[0.72, 0.78]}
+        weights={[1, 1.6, 3]}
+        panelBoundaries={
+          boundaries.ready
+            ? {
+                panels: boundaries.panels.slice(0, 3),
+                ready: true,
+              }
+            : boundaries
+        }
+        exitRange={
+          boundaries.ready && boundaries.panels[2]
+            ? [
+                // Exit at 85% through Panel 2 (same timing as Panel2Paragraph)
+                boundaries.panels[2].start +
+                  (boundaries.panels[2].end - boundaries.panels[2].start) *
+                    0.85,
+                boundaries.panels[2].end,
+              ]
+            : [0.68, 0.74]
+        }
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -525,18 +556,6 @@ const IntroSection = () => {
             line2: "matter to you?",
             textShadow: false,
             textColor: theme.palette.text.primary,
-          },
-          {
-            line1: "COEQWAL library of Central Valley",
-            line2: "water management scenarios",
-            textShadow: false,
-            textColor: theme.palette.text.secondary,
-          },
-          {
-            line1: "On this site,",
-            line2: "you can",
-            textShadow: false,
-            textColor: theme.palette.text.secondary,
           },
         ]}
       />
@@ -562,94 +581,21 @@ const IntroSection = () => {
 
         {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
         <div ref={panel2Ref}>
-        <ScrollSection
-          height="160vh"
-          id="intro"
-          ariaLabel="What is COEQWAL"
-          style={{
-            background: `linear-gradient(to bottom, #2a649b, #D5EAF5)`,
-          }}
-        >
-          {/* Sticky viewport - pins 100vh content while scrolling through 200vh section */}
-          <Box
-            sx={{
-              position: "sticky",
-              top: 0,
-              height: "100vh",
-              overflow: "hidden",
-              display: { xs: "flex", lg: "grid" },
-              gridTemplateColumns: { lg: "3fr 2fr" },
-              flexDirection: { xs: "column" },
-              justifyContent: { xs: "space-between" },
-              paddingTop: theme.space.panel.topOffset,
-              paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
-              paddingLeft: theme.space.panel.padding,
-              paddingRight: theme.space.panel.padding,
-              pointerEvents: "auto",
-            }}
-          >
-            {/* Headline - column 1 (hidden on lg, MorphingHeadline handles it) */}
-            <Box
-              sx={{
-                gridColumn: { lg: 1 },
-                alignSelf: { xs: "stretch", lg: "start" },
-                display: { xs: "flex", lg: "none" },
-                justifyContent: { xs: "center", lg: "flex-start" },
-              }}
-            >
-              <Box
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontSize: theme.typography.h1.fontSize,
-                  maxWidth: "16ch",
-                  textAlign: { xs: "center", lg: "left" },
-                }}
-              >
-                <Box
-                  component="h2"
-                  sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}
-                >
-                  What is
-                </Box>
-                <Box
-                  component="h1"
-                  sx={{ ...theme.typography.h1, display: "block", m: 0 }}
-                >
-                  COEQWAL?
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Paragraph - scroll-linked translateY from below into position */}
-            <Panel1Paragraph />
-          </Box>
-        </ScrollSection>
-        </div>
-
-        {/* Frontmatter Panel 2 - scroll choreography with background image */}
-        <div ref={panel3Ref}>
-        <div ref={waterIssuesRef}>
           <ScrollSection
-            height="300vh"
-            id="water-issues"
-            ariaLabel="What water issues matter to you"
+            height="160vh"
+            id="intro"
+            ariaLabel="What is COEQWAL"
             style={{
-              backgroundColor: theme.palette.learn.background,
+              background: `linear-gradient(to bottom, #2a649b, #D5EAF5)`,
             }}
           >
-            {/* Sticky viewport */}
+            {/* Sticky viewport - pins 100vh content while scrolling through 200vh section */}
             <Box
               sx={{
                 position: "sticky",
                 top: 0,
                 height: "100vh",
                 overflow: "hidden",
-                backgroundColor: theme.palette.learn.background,
-                backgroundImage:
-                  "url(/images/about/tiered-image-text-hills.png)",
-                backgroundPosition: "center bottom",
-                backgroundSize: "100% 30%",
-                backgroundRepeat: "no-repeat",
                 display: { xs: "flex", lg: "grid" },
                 gridTemplateColumns: { lg: "3fr 2fr" },
                 flexDirection: { xs: "column" },
@@ -661,16 +607,89 @@ const IntroSection = () => {
                 pointerEvents: "auto",
               }}
             >
-              {/* Headline - exits upward with paragraph after circles appear */}
-              <Panel2Headline />
+              {/* Headline - column 1 (hidden on lg, MorphingHeadline handles it) */}
+              <Box
+                sx={{
+                  gridColumn: { lg: 1 },
+                  alignSelf: { xs: "stretch", lg: "start" },
+                  display: { xs: "flex", lg: "none" },
+                  justifyContent: { xs: "center", lg: "flex-start" },
+                }}
+              >
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    fontSize: theme.typography.h1.fontSize,
+                    maxWidth: "16ch",
+                    textAlign: { xs: "center", lg: "left" },
+                  }}
+                >
+                  <Box
+                    component="h2"
+                    sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}
+                  >
+                    What is
+                  </Box>
+                  <Box
+                    component="h1"
+                    sx={{ ...theme.typography.h1, display: "block", m: 0 }}
+                  >
+                    COEQWAL?
+                  </Box>
+                </Box>
+              </Box>
 
-              {/* Paragraph - scroll-linked */}
-              <Panel2Paragraph />
-
-              {/* Category circles moved to FloatingCategoryCircles (fixed-position overlay) */}
+              {/* Paragraph - scroll-linked translateY from below into position */}
+              <Panel1Paragraph />
             </Box>
           </ScrollSection>
         </div>
+
+        {/* Frontmatter Panel 2 - scroll choreography with background image */}
+        <div ref={panel3Ref}>
+          <div ref={waterIssuesRef}>
+            <ScrollSection
+              height="300vh"
+              id="water-issues"
+              ariaLabel="What water issues matter to you"
+              style={{
+                backgroundColor: theme.palette.learn.background,
+              }}
+            >
+              {/* Sticky viewport */}
+              <Box
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  height: "100vh",
+                  overflow: "hidden",
+                  backgroundColor: theme.palette.learn.background,
+                  backgroundImage:
+                    "url(/images/about/tiered-image-text-hills.png)",
+                  backgroundPosition: "center bottom",
+                  backgroundSize: "100% 30%",
+                  backgroundRepeat: "no-repeat",
+                  display: { xs: "flex", lg: "grid" },
+                  gridTemplateColumns: { lg: "3fr 2fr" },
+                  flexDirection: { xs: "column" },
+                  justifyContent: { xs: "space-between" },
+                  paddingTop: theme.space.panel.topOffset,
+                  paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+                  paddingLeft: theme.space.panel.padding,
+                  paddingRight: theme.space.panel.padding,
+                  pointerEvents: "auto",
+                }}
+              >
+                {/* Headline - exits upward with paragraph after circles appear */}
+                <Panel2Headline />
+
+                {/* Paragraph - scroll-linked */}
+                <Panel2Paragraph />
+
+                {/* Category circles moved to FloatingCategoryCircles (fixed-position overlay) */}
+              </Box>
+            </ScrollSection>
+          </div>
         </div>
 
         {/* Panel 3 - Dark background for floating category circles overlay */}
@@ -679,7 +698,7 @@ const IntroSection = () => {
           id="scenarios"
           aria-label="COEQWAL library of Central Valley water management scenarios"
           sx={{
-            height: "100vh",
+            minHeight: "200vh",
             backgroundColor: theme.palette.brand.panelDark,
             position: "relative",
             display: "flex",
@@ -721,35 +740,36 @@ const IntroSection = () => {
 
         {/* Panel 4 - Learn / Explore / Share actions */}
         <div ref={panel5Ref}>
-        <FrontmatterPanel
-          id="site-actions"
-          ariaLabel="What you can do on this site"
-          variant="actions"
-          backgroundColor={theme.palette.brand.panelDark}
-          headlineLine1="On this site,"
-          headlineLine2="you can"
-          textColor={theme.palette.text.secondary}
-          hideHeadline
-          scrollToId="tabs"
-          actions={[
-            {
-              action: "Learn",
-              color: theme.palette.text.secondary,
-              description:
-                "how water in California's Central Valley is managed",
-            },
-            {
-              action: "Explore",
-              color: theme.palette.text.secondary,
-              description: "how water outcomes shift under different scenarios",
-            },
-            {
-              action: "Share",
-              color: theme.palette.text.secondary,
-              description: "your insights about California's water future",
-            },
-          ]}
-        />
+          <FrontmatterPanel
+            id="site-actions"
+            ariaLabel="What you can do on this site"
+            variant="actions"
+            backgroundColor={theme.palette.brand.panelDark}
+            headlineLine1="On this site,"
+            headlineLine2="you can"
+            textColor={theme.palette.text.secondary}
+            hideHeadline
+            scrollToId="tabs"
+            actions={[
+              {
+                action: "Learn",
+                color: theme.palette.text.secondary,
+                description:
+                  "how water in California's Central Valley is managed",
+              },
+              {
+                action: "Explore",
+                color: theme.palette.text.secondary,
+                description:
+                  "how water outcomes shift under different scenarios",
+              },
+              {
+                action: "Share",
+                color: theme.palette.text.secondary,
+                description: "your insights about California's water future",
+              },
+            ]}
+          />
         </div>
       </Box>
     </Box>

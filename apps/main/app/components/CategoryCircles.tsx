@@ -80,7 +80,9 @@ function StaggeredCircle({
   const circleSize = { xs: 64, lg: 80 }
   const hasScenarios = showScenarios && scenarioIds && scenarioIds.length > 0
   const isClimate = category.id === "climate"
-  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(null)
+  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
+    null,
+  )
 
   return (
     <motion.div
@@ -174,9 +176,7 @@ function StaggeredCircle({
               onHoverChange={setHoveredScenarioId}
             />
           )}
-          {showScenarios && isClimate && (
-            <HydroclimateIcons size={80} />
-          )}
+          {showScenarios && isClimate && <HydroclimateIcons size={80} />}
         </Box>
 
         {/* Description text - appears below circle when selected, hidden in scenario mode */}
@@ -190,10 +190,7 @@ function StaggeredCircle({
               transition: "color 0.3s ease",
             }}
           >
-            <Typography
-              variant="compactSubtitle"
-              component="div"
-            >
+            <Typography variant="compactSubtitle" component="div">
               {category.description}
             </Typography>
             <Typography
@@ -211,7 +208,11 @@ function StaggeredCircle({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: showScenarios ? 1 : 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: showScenarios ? 0.3 : 0 }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+              delay: showScenarios ? 0.3 : 0,
+            }}
             style={{
               marginTop: 12,
               width: "100%",
