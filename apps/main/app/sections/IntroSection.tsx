@@ -100,11 +100,10 @@ const INTRO_TEXT =
 function Panel1Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  // Translate from below into final position, then hold
-  // Spread over 70% of scroll for gentle pacing
-  const yNum = useScrollValue(progress, [0, 0.7, 1], [60, 0, 0])
+  // Scroll in from below, hold aligned with headline, then scroll out
+  const yNum = useScrollValue(progress, [0, 0.6, 0.8, 1], [30, 0, 0, -30])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.15, 1], [0, 1, 1])
+  const opacity = useScrollValue(progress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
 
   return (
     <motion.div
@@ -151,10 +150,10 @@ function Panel1Paragraph() {
 function Panel2Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  // Enter from below, hold, then exit upward after circles appear
-  const yNum = useScrollValue(progress, [0, 0.35, 0.85, 1], [60, 0, 0, -50])
+  // Scroll in gently, hold, shift up ~100px for circles, hold with circles, then exit
+  const yNum = useScrollValue(progress, [0, 0.35, 0.5, 0.6, 0.85, 1], [30, 0, 0, -12, -12, -30])
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.1, 0.85, 1], [0, 1, 1, 0])
+  const opacity = useScrollValue(progress, [0, 0.15, 0.85, 1], [0, 1, 1, 0])
 
   return (
     <motion.div
@@ -185,7 +184,8 @@ function Panel2Paragraph() {
 function Panel2Headline() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  const yNum = useScrollValue(progress, [0, 0.85, 1], [0, 0, -50])
+  // Hold, shift up ~100px for circles, hold with circles, then exit
+  const yNum = useScrollValue(progress, [0, 0.5, 0.6, 0.85, 1], [0, 0, -12, -12, -30])
   const y = useTransform(yNum, (v) => `${v}vh`)
   const opacity = useScrollValue(progress, [0, 0.85, 1], [1, 1, 0])
 
@@ -541,7 +541,7 @@ const IntroSection = () => {
         exitRange={
           boundaries.ready && boundaries.panels[2]
             ? [
-                // Exit at 85% through Panel 2 (same timing as Panel2Paragraph)
+                // Fade out in the last 15% of Panel 2's scroll distance
                 boundaries.panels[2].start +
                   (boundaries.panels[2].end - boundaries.panels[2].start) *
                     0.85,
@@ -549,6 +549,20 @@ const IntroSection = () => {
               ]
             : [0.68, 0.74]
         }
+        shiftRange={
+          boundaries.ready && boundaries.panels[2]
+            ? [
+                // Shift up at 50-60% of Panel 2 (make room for circles)
+                boundaries.panels[2].start +
+                  (boundaries.panels[2].end - boundaries.panels[2].start) *
+                    0.50,
+                boundaries.panels[2].start +
+                  (boundaries.panels[2].end - boundaries.panels[2].start) *
+                    0.60,
+              ]
+            : undefined
+        }
+        shiftAmount={100}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -759,7 +773,6 @@ const IntroSection = () => {
             headlineLine2="you can"
             textColor={theme.palette.text.secondary}
             hideHeadline
-            scrollToId="tabs"
             actions={[
               {
                 action: "Learn",

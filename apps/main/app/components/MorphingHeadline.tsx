@@ -80,6 +80,10 @@ export interface MorphingHeadlineProps {
   }
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
   exitRange?: [number, number]
+  /** Scroll progress range [start, end] where headline shifts up to make room (e.g., for circles) */
+  shiftRange?: [number, number]
+  /** Pixels to shift up during shiftRange (default: 100) */
+  shiftAmount?: number
 }
 
 export default function MorphingHeadline({
@@ -88,6 +92,8 @@ export default function MorphingHeadline({
   weights,
   panelBoundaries,
   exitRange,
+  shiftRange,
+  shiftAmount = 100,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
@@ -206,12 +212,35 @@ export default function MorphingHeadline({
   // Track dock offset (when scrolled past container, headline moves up with it)
   const [dockOffset, setDockOffset] = useState(0)
 
-  // Exit Y: scroll upward during exitRange (matches Panel2Paragraph's -50vh exit)
-  const exitY = useTransform(
-    scrollYProgress,
-    exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
-    exitRange ? [0, -800] : [0, 0],
-  )
+  // Y transform: combines mid-panel shift (for circles) and exit scroll-away
+  // Builds a multi-keyframe sequence: 0 → shift up → hold → exit
+  const exitYInput: number[] = []
+  const exitYOutput: number[] = []
+
+  if (shiftRange && exitRange) {
+    // Before shift: 0
+    exitYInput.push(shiftRange[0])
+    exitYOutput.push(0)
+    // After shift: -shiftAmount
+    exitYInput.push(shiftRange[1])
+    exitYOutput.push(-shiftAmount)
+    // Hold at -shiftAmount until exit starts
+    if (exitRange[0] > shiftRange[1]) {
+      exitYInput.push(exitRange[0])
+      exitYOutput.push(-shiftAmount)
+    }
+    // Exit: from -shiftAmount to far off screen
+    exitYInput.push(exitRange[1])
+    exitYOutput.push(-shiftAmount - 800)
+  } else if (exitRange) {
+    exitYInput.push(exitRange[0], exitRange[1])
+    exitYOutput.push(0, -800)
+  } else {
+    exitYInput.push(0, 1)
+    exitYOutput.push(0, 0)
+  }
+
+  const exitY = useTransform(scrollYProgress, exitYInput, exitYOutput)
 
   // Calculate opacity for a specific headline at a given scroll progress
   const calculateOpacity = useCallback(
