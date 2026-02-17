@@ -92,9 +92,13 @@ function StaggeredCircle({
           transition: "all 0.3s ease",
         }}
       >
-        {/* Label banner - always clickable for selection */}
+        {/* Label banner - clickable for selection when not showing scenarios */}
         <Box
-          onClick={() => onSelect(isSelected ? null : category.id)}
+          onClick={
+            !showScenarios
+              ? () => onSelect(isSelected ? null : category.id)
+              : undefined
+          }
           sx={{
             backgroundColor: theme.palette.text.primary,
             color: theme.palette.common.white,
@@ -102,10 +106,12 @@ function StaggeredCircle({
             py: "3px",
             borderRadius: "4px",
             lineHeight: 1.1,
-            cursor: "pointer",
-            "&:hover": {
-              opacity: 0.85,
-            },
+            cursor: !showScenarios ? "pointer" : "default",
+            ...(!showScenarios && {
+              "&:hover": {
+                opacity: 0.85,
+              },
+            }),
           }}
         >
           <Typography
@@ -163,11 +169,9 @@ function StaggeredCircle({
           )}
         </Box>
 
-        {/* Description text - appears below circle when selected (via label) */}
-        {isSelected && (
-          <Typography
-            variant="compactSubtitle"
-            component="div"
+        {/* Description text - appears below circle when selected, hidden in scenario mode */}
+        {isSelected && !showScenarios && (
+          <Box
             sx={{
               textAlign: "center",
               color: strokeColor,
@@ -176,8 +180,20 @@ function StaggeredCircle({
               transition: "color 0.3s ease",
             }}
           >
-            {category.description}
-          </Typography>
+            <Typography
+              variant="compactSubtitle"
+              component="div"
+            >
+              {category.description}
+            </Typography>
+            <Typography
+              variant="compactSubtitle"
+              component="div"
+              sx={{ mt: 0.5, fontWeight: 500 }}
+            >
+              Learn more about this theme
+            </Typography>
+          </Box>
         )}
       </Box>
     </motion.div>
