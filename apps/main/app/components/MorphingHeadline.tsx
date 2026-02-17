@@ -134,11 +134,13 @@ export default function MorphingHeadline({
       return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
 
     // Use DOM-measured boundaries if available, otherwise fall back to weights
+    // Include ALL panel boundaries (not just headline count) so the last headline
+    // can reference panels beyond its "slot" (e.g., headline 3 maps to panel 4)
     let panelStarts: number[]
     if (panelBoundaries?.ready && panelBoundaries.panels.length >= count) {
       panelStarts = [
-        ...panelBoundaries.panels.slice(0, count).map((p) => p.start),
-        panelBoundaries.panels[count - 1]?.end ?? 1,
+        ...panelBoundaries.panels.map((p) => p.start),
+        panelBoundaries.panels[panelBoundaries.panels.length - 1]?.end ?? 1,
       ]
     } else {
       const w = weights || headlines.map(() => 1)
@@ -152,54 +154,44 @@ export default function MorphingHeadline({
       )
     }
 
+    // Crossfade width: how much progress the crossfade takes (as fraction of panel size)
+    const cw = 0.05
+
     return headlines.map((_, index) => {
       const panelStart = panelStarts[index] ?? 0
       const panelEnd = panelStarts[index + 1] ?? 1
       const panelSize = panelEnd - panelStart
 
-      // Adjust timing based on transition position.
-      // Visual perception requires earlier transitions at the start of a scroll sequence
-      // and later transitions as the user settles into the scroll rhythm.
-      // These values are tuned by hand. Adjust if adding more panels.
-      const getTransitionTiming = (transitionIndex: number) => {
-        if (transitionIndex === 0) return { start: -0.05, end: 0.05 } // First: starts slightly before boundary
-        if (transitionIndex === 1) return { start: 0.0, end: 0.15 } // Middle: standard
-        return { start: -0.1, end: 0.05 } // Later: starts before boundary so it exits in time
-      }
-
       if (index === 0) {
-        // First headline: visible at start, fades out into panel 2
-        const timing = getTransitionTiming(0)
-        const nextFadeStart = panelEnd + panelSize * timing.start
-        const nextFadeEnd = panelEnd + panelSize * timing.end
+        // Video hero: visible at start, fades out at Panel 1 boundary
         return {
-          input: [0, nextFadeStart, nextFadeEnd],
+          input: [0, panelEnd - cw * panelSize, panelEnd + cw * panelSize],
           output: [1, 1, 0],
         }
-      } else if (index === count - 1) {
-        // Last headline: fades in during this panel, fades out at end
-        const fadeInTiming = getTransitionTiming(index - 1)
-        const fadeStart = panelStart + panelSize * fadeInTiming.start
-        const fadeEnd = panelStart + panelSize * fadeInTiming.end
-        // Fade out at 85% through the panel (matches paragraph exit timing)
-        const fadeOutStart = panelStart + panelSize * 0.85
-        const fadeOutEnd = panelEnd
+      }
+
+      if (index === count - 1) {
+        // Last headline ("On this site"): appears when Panel 4 enters viewport.
+        // Panel 4 is the last panel, so its top is at scroll progress ≈ 1.0.
+        // Fade in earlier — when Panel 3's content is ~90% scrolled through.
+        // panelEnd = panelStarts[count] ≈ Panel 3 end.
+        // Use a range well before panelEnd to ensure it's reachable.
+        const fadeIn = panelEnd - 0.06
         return {
-          input: [fadeStart, fadeEnd, fadeOutStart, fadeOutEnd],
-          output: [0, 1, 1, 0],
+          input: [fadeIn, fadeIn + 0.03, 1],
+          output: [0, 1, 1],
         }
-      } else {
-        // Middle headlines: fade in during this panel, fade out into next panel
-        const fadeInTiming = getTransitionTiming(index - 1)
-        const fadeOutTiming = getTransitionTiming(index)
-        const fadeStart = panelStart + panelSize * fadeInTiming.start
-        const fadeEnd = panelStart + panelSize * fadeInTiming.end
-        const nextFadeStart = panelEnd + panelSize * fadeOutTiming.start
-        const nextFadeEnd = panelEnd + panelSize * fadeOutTiming.end
-        return {
-          input: [fadeStart, fadeEnd, nextFadeStart, nextFadeEnd],
-          output: [0, 1, 1, 0],
-        }
+      }
+
+      // Middle headlines: fade in at panel start, fade out sharply before panel end
+      return {
+        input: [
+          panelStart - cw * panelSize,
+          panelStart + cw * panelSize,
+          panelEnd - 0.15 * panelSize,
+          panelEnd - 0.05 * panelSize,
+        ],
+        output: [0, 1, 1, 0],
       }
     })
   }, [headlines, weights, panelBoundaries])
