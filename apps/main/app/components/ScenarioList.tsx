@@ -29,9 +29,6 @@ interface ScenarioListProps {
   highlightedId?: string | null
 }
 
-/** Fixed width for the ID column so descriptions align across rows */
-const ID_COLUMN_WIDTH = "3.2em"
-const ID_GAP = "0.5em"
 
 export default function ScenarioList({
   scenarioIds,
@@ -84,39 +81,37 @@ export default function ScenarioList({
               opacity: highlightedId && !isHighlighted ? 0.4 : 1,
             }}
           >
-            {/* ID + Name row */}
-            <Box sx={{ display: "flex", alignItems: "baseline", gap: ID_GAP }}>
-              <Typography
-                variant="compactTitle"
-                component="span"
-                sx={{
-                  color,
-                  opacity: isHighlighted ? 0.8 : 0.5,
-                  fontVariantNumeric: "tabular-nums",
-                  flexShrink: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  fontSize: "0.75rem",
-                  width: ID_COLUMN_WIDTH,
-                  transition: "opacity 0.15s ease",
-                }}
-              >
-                {id}
-              </Typography>
-              <Typography
-                variant="compactTitle"
-                component="span"
-                sx={{
-                  color,
-                  fontWeight: isHighlighted ? 600 : 500,
-                  transition: "font-weight 0.15s ease",
-                }}
-              >
-                {name}
-              </Typography>
-            </Box>
+            {/* Scenario ID */}
+            <Typography
+              variant="compactTitle"
+              component="span"
+              sx={{
+                color,
+                opacity: isHighlighted ? 0.8 : 0.5,
+                fontVariantNumeric: "tabular-nums",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                fontSize: "0.75rem",
+                transition: "opacity 0.15s ease",
+              }}
+            >
+              {id}
+            </Typography>
 
-            {/* Description - indented to align with name, not ID */}
+            {/* Scenario name */}
+            <Typography
+              variant="compactTitle"
+              component="span"
+              sx={{
+                color,
+                fontWeight: isHighlighted ? 600 : 500,
+                transition: "font-weight 0.15s ease",
+              }}
+            >
+              {name}
+            </Typography>
+
+            {/* Description - full width, no indent */}
             {desc && (
               <TruncatedText
                 variant="compactTitle"
@@ -126,7 +121,6 @@ export default function ScenarioList({
                   opacity: 0.75,
                   fontWeight: 400,
                   lineHeight: 1.3,
-                  pl: `calc(${ID_COLUMN_WIDTH} + ${ID_GAP})`,
                 }}
               >
                 {desc}

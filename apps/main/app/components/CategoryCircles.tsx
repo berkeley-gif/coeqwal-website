@@ -262,7 +262,7 @@ export default function CategoryCircles({
           sm: "repeat(3, 1fr)",
           lg: "repeat(6, 1fr)",
         },
-        gap: { xs: 3, lg: 4 },
+        gap: { xs: 3, lg: 5 },
         alignItems: "start",
         mt: 0,
       }}

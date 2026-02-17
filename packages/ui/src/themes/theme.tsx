@@ -280,9 +280,9 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#D5EAF5", // More saturated light blue
-    explore: "#C2D8EB", // Shifted toward true blue
-    share: "#94B8DA", // Shifted toward true blue
+    learn: "#1E4A7A", // Dark blue - learn
+    explore: "#24567E", // Medium dark blue - explore
+    share: "#2A6289", // Lighter dark blue - share
   },
 
   // Data visualization colors for outcome categories
@@ -697,17 +697,17 @@ const theme = createTheme({
       light: themeValues.palette.brand.sky,
       dark: themeValues.palette.blue.medium,
     },
-    // Tab panel colors
+    // Section colors (used for frontmatter panel backgrounds)
     learn: {
-      background: themeValues.palette.tabPanels.learn,
+      background: "#D5EAF5",
       text: themeValues.palette.blue.darkest,
     },
     explore: {
-      background: themeValues.palette.tabPanels.explore,
+      background: "#C2D8EB",
       text: themeValues.palette.blue.darkest,
     },
     share: {
-      background: themeValues.palette.tabPanels.share,
+      background: "#94B8DA",
       text: themeValues.palette.blue.darkest,
     },
     // MUI standard colors

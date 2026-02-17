@@ -19,7 +19,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
     const backgroundColor = isMapTab ? "transparent" : undefined
-    const padding = isMapTab ? "0" : "2rem 0"
+    const padding = isMapTab ? "0" : `2rem ${theme.space.panel.padding}`
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll
     // Offset = collapsed header (40px) + docked SmoothTabs height (~40px)
