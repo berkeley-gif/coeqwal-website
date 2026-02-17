@@ -137,9 +137,12 @@ export default function SmoothTabs() {
         className="tab-container"
         style={{
           display: "flex",
-          gap: isInTabsArea ? 0 : 48,
+          gap: 0,
           width: "100%",
           pointerEvents: "auto",
+          paddingLeft: 0,
+          paddingRight: 0,
+          transition: "padding 0.3s ease",
         }}
       >
         {TABS.map(({ key, label, panelColor }) => {
@@ -160,7 +163,7 @@ export default function SmoothTabs() {
                 border: "none",
                 background: panelColor,
                 cursor: "pointer",
-                color: theme.palette.blue.darkest,
+                color: theme.palette.common.white,
                 transition: "padding 0.3s ease",
                 display: "flex",
                 flexDirection: "column",
@@ -168,7 +171,9 @@ export default function SmoothTabs() {
                 alignItems: isInTabsArea ? "center" : "flex-start",
                 justifyContent: "flex-start",
                 textAlign: isInTabsArea ? "center" : "left",
-                padding: isInTabsArea ? "8px 20px" : "24px 24px",
+                padding: isInTabsArea
+                  ? "8px 20px"
+                  : `24px ${theme.space.panel.padding}`,
                 borderTop: isInTabsArea
                   ? "none"
                   : `${theme.strokeWidth.rule}px solid ${theme.palette.blue.darkest}22`,

@@ -79,7 +79,7 @@ export function TwoColumnInterstitial({
   color: colorProp,
 }: TwoColumnInterstitialProps) {
   const theme = useTheme()
-  const color = colorProp ?? theme.palette.blue.darkest
+  const color = colorProp ?? theme.palette.common.white
 
   return (
     <Box
@@ -87,7 +87,8 @@ export function TwoColumnInterstitial({
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         gap: { xs: 3, md: 6 },
-        p: { xs: 3, md: 4 },
+        py: { xs: 3, md: 4 },
+        px: theme.space.panel.padding,
         color,
       }}
     >
@@ -105,9 +106,9 @@ export function TwoColumnInterstitial({
             {headline}
           </Typography>
           <Typography
-            variant="subtitle2"
+            variant="body2"
             component="p"
-            sx={{ maxWidth: "40ch", opacity: 0.7, lineHeight: 1.5 }}
+            sx={{ maxWidth: "40ch", opacity: 0.85, lineHeight: 1.5 }}
           >
             {body}
           </Typography>
