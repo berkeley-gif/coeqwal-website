@@ -51,6 +51,10 @@ export type {
   CompactSelectGroup,
 } from "./common/CompactSelect"
 
+// Text utilities
+export { TruncatedText } from "./common/TruncatedText"
+export type { TruncatedTextProps } from "./common/TruncatedText"
+
 // Panel components
 export { Panel } from "./panels/Panel"
 export type { PanelProps } from "./panels/Panel"
