@@ -624,8 +624,7 @@
             <div class="type-label">
               <span class="type-name">H1</span>
               <span class="type-specs"
-                >clamp(3.6rem, 1.5rem + 4vw, 5rem) / 600 / 1 /
-                -0.015em</span
+                >clamp(3.6rem, 1.5rem + 4vw, 5rem) / 600 / 1 / -0.015em</span
               >
             </div>
             <div class="sample-h1">Water</div>
@@ -646,8 +645,7 @@
             <div class="type-label">
               <span class="type-name">H2</span>
               <span class="type-specs"
-                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1 /
-                -0.01em</span
+                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1 / -0.01em</span
               >
             </div>
             <div class="sample-h2">California's</div>
@@ -670,8 +668,7 @@
             <div class="type-label">
               <span class="type-name">H2 Main</span>
               <span class="type-specs"
-                >clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem) / 500 / 1 /
-                -0.01em</span
+                >clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem) / 500 / 1 / -0.01em</span
               >
             </div>
             <div class="sample-h2-main">California's</div>
@@ -1595,9 +1592,12 @@
             Core color tokens. Access via <code>theme.palette.common</code>
           </p>
 
-          <div class="swatch" style="background: #f2f0ef; border: 1px solid #ddd;">
-            <span class="swatch-label" style="color: #333;">common.white</span>
-            <span style="color: #333;">#f2f0ef</span>
+          <div
+            class="swatch"
+            style="background: #f2f0ef; border: 1px solid #ddd"
+          >
+            <span class="swatch-label" style="color: #333">common.white</span>
+            <span style="color: #333">#f2f0ef</span>
           </div>
 
           <div class="swatch dark" style="background: #000000">
@@ -1620,14 +1620,19 @@
             Access via <code>theme.palette.text</code>
           </p>
 
-          <div class="swatch dark" style="background: #193D6B">
+          <div class="swatch dark" style="background: #193d6b">
             <span class="swatch-label">text.primary (brand.panelDark)</span>
             <span>#193D6B</span>
           </div>
 
-          <div class="swatch" style="background: #f2f0ef; border: 1px solid #ddd;">
-            <span class="swatch-label" style="color: #333;">text.secondary (common.white)</span>
-            <span style="color: #333;">#f2f0ef</span>
+          <div
+            class="swatch"
+            style="background: #f2f0ef; border: 1px solid #ddd"
+          >
+            <span class="swatch-label" style="color: #333"
+              >text.secondary (common.white)</span
+            >
+            <span style="color: #333">#f2f0ef</span>
           </div>
 
           <div class="swatch dark" style="background: #77a2d9">
@@ -2336,20 +2341,41 @@ sx={{
     <div class="section">
       <h2 class="section-title">Stroke width</h2>
       <p style="margin-bottom: 24px; color: #666">
-        Primary line weight for borders, outlines, and SVG strokes.
-        Access via <code>theme.strokeWidth.rule</code> (numeric) or
-        use pre-composed borders via <code>theme.border.*</code>
+        Primary line weight for borders, outlines, and SVG strokes. Access via
+        <code>theme.strokeWidth.rule</code> (numeric) or use pre-composed
+        borders via <code>theme.border.*</code>
       </p>
-      <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
-        <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse;">
+      <div
+        style="
+          background: white;
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        "
+      >
+        <table
+          style="width: 100%; font-size: 0.9rem; border-collapse: collapse"
+        >
           <tr>
-            <td style="padding: 12px 0; font-weight: 500; width: 120px;">rule</td>
-            <td style="padding: 12px 0;"><code>2</code> px</td>
-            <td style="padding: 12px 0;">
-              <div style="width: 80px; height: 0; border-top: 2px solid #0a1929; display: inline-block; vertical-align: middle; margin-right: 12px;"></div>
+            <td style="padding: 12px 0; font-weight: 500; width: 120px">
+              rule
             </td>
-            <td style="padding: 12px 0; color: #888; font-size: 0.85rem;">
-              Used in border.rule, border.onDark, border.active, scroll button circle
+            <td style="padding: 12px 0"><code>2</code> px</td>
+            <td style="padding: 12px 0">
+              <div
+                style="
+                  width: 80px;
+                  height: 0;
+                  border-top: 2px solid #0a1929;
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 12px;
+                "
+              ></div>
+            </td>
+            <td style="padding: 12px 0; color: #888; font-size: 0.85rem">
+              Used in border.rule, border.onDark, border.active, scroll button
+              circle
             </td>
           </tr>
         </table>

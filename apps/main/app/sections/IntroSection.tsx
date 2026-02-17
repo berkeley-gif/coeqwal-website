@@ -5,7 +5,11 @@ import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform } from "@repo/motion"
-import { ScrollSection, useScrollProgress, useScrollValue } from "@repo/scrollytelling"
+import {
+  ScrollSection,
+  useScrollProgress,
+  useScrollValue,
+} from "@repo/scrollytelling"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
@@ -87,7 +91,12 @@ function Panel1Paragraph() {
         alignSelf: "start",
       }}
     >
-      <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
+      <Box
+        sx={{
+          maxWidth: { xs: "100%", sm: "492px" },
+          color: theme.palette.text.primary,
+        }}
+      >
         <Typography variant="displayBody" component="div">
           COEQWAL – the Collaboratory for Equity in Water Allocation – is a
           publicly-funded project that works with communities to model
@@ -132,7 +141,12 @@ function Panel2Paragraph() {
         alignSelf: "start",
       }}
     >
-      <Box sx={{ maxWidth: { xs: "100%", sm: "492px" }, color: theme.palette.text.primary }}>
+      <Box
+        sx={{
+          maxWidth: { xs: "100%", sm: "492px" },
+          color: theme.palette.text.primary,
+        }}
+      >
         <Typography variant="displayBody" component="div">
           {INTRO_TEXT}
         </Typography>
@@ -353,10 +367,16 @@ const IntroSection = () => {
                   textAlign: { xs: "center", lg: "left" },
                 }}
               >
-                <Box component="h2" sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}>
+                <Box
+                  component="h2"
+                  sx={{ ...theme.typography.h2Main, display: "block", m: 0 }}
+                >
                   What is
                 </Box>
-                <Box component="h1" sx={{ ...theme.typography.h1, display: "block", m: 0 }}>
+                <Box
+                  component="h1"
+                  sx={{ ...theme.typography.h1, display: "block", m: 0 }}
+                >
                   COEQWAL?
                 </Box>
               </Box>

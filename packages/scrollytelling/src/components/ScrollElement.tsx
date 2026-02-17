@@ -26,7 +26,6 @@
 
 import React, { useContext, useMemo } from "react"
 import { motion, useTransform, useReducedMotion } from "@repo/motion"
-import type { MotionValue } from "framer-motion"
 import type { ProgressRange, AnimationType } from "../types"
 import { ScrollSectionContext } from "./ScrollSection"
 

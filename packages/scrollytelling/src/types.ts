@@ -1,5 +1,5 @@
-import type { MotionValue } from "framer-motion"
 import type { RefObject } from "react"
+import type { MotionValue } from "@repo/motion"
 
 /** Progress range as [start, end] where values are 0-1 */
 export type ProgressRange = [number, number]
@@ -20,8 +20,9 @@ export interface PhaseThresholds {
 /** Animation type for ScrollElement */
 export type AnimationType = "fade" | "slideUp" | "slideLeft" | "none"
 
-/** Framer Motion scroll offset tuple */
-export type ScrollOffset = [string, string]
+/** Framer Motion scroll offset - use string tuples like ["start start", "end end"] */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ScrollOffset = any
 
 /** Options for useScrollProgress hook */
 export interface ScrollProgressOptions {

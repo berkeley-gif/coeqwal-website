@@ -128,7 +128,10 @@ export default function MorphingHeadline({
     const w = weights || headlines.map(() => 1)
     const totalWeight = w.reduce((sum, v) => sum + v, 0)
     const panelBoundaries = w.reduce<number[]>(
-      (acc, weight) => [...acc, (acc[acc.length - 1] ?? 0) + weight / totalWeight],
+      (acc, weight) => [
+        ...acc,
+        (acc[acc.length - 1] ?? 0) + weight / totalWeight,
+      ],
       [0],
     )
 
@@ -179,7 +182,7 @@ export default function MorphingHeadline({
         }
       }
     })
-  }, [headlines])
+  }, [headlines, weights])
 
   // Track opacities for all headlines (dynamic array)
   const [opacities, setOpacities] = useState<number[]>(() =>
@@ -240,7 +243,10 @@ export default function MorphingHeadline({
     const w = weights || headlines.map(() => 1)
     const totalWeight = w.reduce((sum, v) => sum + v, 0)
     const boundaries = w.reduce<number[]>(
-      (acc, weight) => [...acc, (acc[acc.length - 1] ?? 0) + weight / totalWeight],
+      (acc, weight) => [
+        ...acc,
+        (acc[acc.length - 1] ?? 0) + weight / totalWeight,
+      ],
       [0],
     )
 
@@ -254,7 +260,7 @@ export default function MorphingHeadline({
       setActiveIndex(newIndex)
     })
     return unsubscribe
-  }, [scrollYProgress, headlines.length, weights])
+  }, [scrollYProgress, headlines, weights])
 
   // Shared headline styles
   const headlineStyles = {
@@ -292,7 +298,11 @@ export default function MorphingHeadline({
                 : "none",
           }}
         >
-          <Typography variant="h2Main" component="span" sx={{ display: "block" }}>
+          <Typography
+            variant="h2Main"
+            component="span"
+            sx={{ display: "block" }}
+          >
             {activeHeadline?.line1}
           </Typography>
           {activeHeadline?.line2 && (
@@ -349,11 +359,19 @@ export default function MorphingHeadline({
                     : "none",
               }}
             >
-              <Typography variant="h2Main" component="span" sx={{ display: "block" }}>
+              <Typography
+                variant="h2Main"
+                component="span"
+                sx={{ display: "block" }}
+              >
                 {headline.line1}
               </Typography>
               {headline.line2 && (
-                <Typography variant="h1" component="span" sx={{ display: "block" }}>
+                <Typography
+                  variant="h1"
+                  component="span"
+                  sx={{ display: "block" }}
+                >
                   {headline.line2}
                 </Typography>
               )}

@@ -292,21 +292,18 @@ export function BaseHeader({
       : backgroundColor
 
   // Resolve text color, border, text shadow, and logo (transitions when scrolled)
-  const resolvedTextColor = textColorScrolled && isScrolled
-    ? textColorScrolled
-    : baseTextColor
-  const resolvedBorderBottom = textColorScrolled && isScrolled
-    ? `${theme.strokeWidth.rule}px solid ${textColorScrolled}CC`
-    : baseBorderBottom
-  const resolvedTextShadow = textColorScrolled && isScrolled
-    ? "none"
-    : theme.textShadow.nav
-  const resolvedTextShadowHover = textColorScrolled && isScrolled
-    ? "none"
-    : theme.textShadow.navHover
-  const resolvedLogoVariant = textColorScrolled && isScrolled
-    ? "color" as const
-    : logoVariant
+  const resolvedTextColor =
+    textColorScrolled && isScrolled ? textColorScrolled : baseTextColor
+  const resolvedBorderBottom =
+    textColorScrolled && isScrolled
+      ? `${theme.strokeWidth.rule}px solid ${textColorScrolled}CC`
+      : baseBorderBottom
+  const resolvedTextShadow =
+    textColorScrolled && isScrolled ? "none" : theme.textShadow.nav
+  const resolvedTextShadowHover =
+    textColorScrolled && isScrolled ? "none" : theme.textShadow.navHover
+  const resolvedLogoVariant =
+    textColorScrolled && isScrolled ? ("color" as const) : logoVariant
 
   // --- Shrink animation ---
   const shrinkProgress = useTransform(
@@ -392,9 +389,10 @@ export function BaseHeader({
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
           // Smooth color transitions when scrolling past threshold
-          transition: (backgroundColorScrolled || textColorScrolled)
-            ? `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`
-            : undefined,
+          transition:
+            backgroundColorScrolled || textColorScrolled
+              ? `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`
+              : undefined,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
@@ -477,11 +475,7 @@ export function BaseHeader({
                 ml: isWideDesktop ? "-30px" : 0,
               }}
             >
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-              >
+              <Stack direction="row" spacing={2} alignItems="center">
                 {/* 1. Water stories dropdown */}
                 <NavDropdown
                   label={t.buttons.waterStories}

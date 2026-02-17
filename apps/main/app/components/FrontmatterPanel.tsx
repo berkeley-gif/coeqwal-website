@@ -173,7 +173,11 @@ export default function FrontmatterPanel({
               textAlign: { xs: "center", lg: "left" },
             }}
           >
-            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
+            <Typography
+              variant="h2Main"
+              component="h2"
+              sx={{ display: "block" }}
+            >
               {headlineLine1}
             </Typography>
             {headlineLine2 && (
