@@ -30,6 +30,8 @@ interface TopicCirclesProps {
   revealStart?: number
   /** Progress value by which all circles are visible (default: 0.95) */
   revealEnd?: number
+  /** Override color for circle strokes, labels, and description text. Defaults to text.primary. */
+  strokeColor?: string
 }
 
 /**
@@ -42,6 +44,7 @@ function StaggeredCircle({
   progress,
   fadeStart,
   fadeEnd,
+  strokeColor,
 }: {
   topic: Topic
   isSelected: boolean
@@ -49,6 +52,7 @@ function StaggeredCircle({
   progress?: MotionValue<number>
   fadeStart: number
   fadeEnd: number
+  strokeColor: string
 }) {
   const theme = useTheme()
   // Always call useTransform (hooks can't be conditional), use fallback range when no progress
@@ -73,15 +77,16 @@ function StaggeredCircle({
           alignItems: "center",
           gap: 1.5,
           cursor: "pointer",
+          transition: "all 0.3s ease",
           "&:hover .topic-circle": {
-            borderColor: theme.palette.text.primary,
+            borderColor: strokeColor,
             backgroundColor: isSelected
-              ? theme.palette.text.primary
+              ? strokeColor
               : "rgba(255, 255, 255, 0.1)",
           },
         }}
       >
-        {/* Label banner - above circle */}
+        {/* Label banner - above circle (always text.primary) */}
         <Box
           sx={{
             backgroundColor: theme.palette.text.primary,
@@ -90,7 +95,6 @@ function StaggeredCircle({
             py: "3px",
             borderRadius: "4px",
             lineHeight: 1.1,
-            transition: "all 0.2s ease",
           }}
         >
           <Typography
@@ -113,11 +117,11 @@ function StaggeredCircle({
             width: { xs: 64, lg: 80 },
             height: { xs: 64, lg: 80 },
             borderRadius: "50%",
-            border: `${theme.strokeWidth.rule}px ${isSelected ? "solid" : "dashed"} ${theme.palette.text.primary}`,
+            border: `${theme.strokeWidth.rule}px ${isSelected ? "solid" : "dashed"} ${strokeColor}`,
             backgroundColor: isSelected
-              ? theme.palette.text.primary
+              ? strokeColor
               : "transparent",
-            transition: "all 0.2s ease",
+            transition: "all 0.3s ease",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -131,9 +135,10 @@ function StaggeredCircle({
             component="div"
             sx={{
               textAlign: "center",
-              color: theme.palette.text.primary,
+              color: strokeColor,
               mt: 1,
               maxWidth: "180px",
+              transition: "color 0.3s ease",
             }}
           >
             {topic.description}
@@ -151,7 +156,11 @@ export default function TopicCircles({
   progress,
   revealStart = 0.7,
   revealEnd = 0.95,
+  strokeColor,
 }: TopicCirclesProps) {
+  const theme = useTheme()
+  const resolvedColor = strokeColor ?? theme.palette.text.primary
+
   // Calculate staggered fade ranges for each circle
   const totalRange = revealEnd - revealStart
   const staggerStep = totalRange / topics.length
@@ -182,6 +191,7 @@ export default function TopicCircles({
             progress={progress}
             fadeStart={fadeStart}
             fadeEnd={fadeEnd}
+            strokeColor={resolvedColor}
           />
         )
       })}

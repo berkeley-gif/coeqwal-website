@@ -69,8 +69,12 @@ export interface MorphingHeadlineProps {
   /** Container ref that spans all panels for scroll tracking */
   containerRef: React.RefObject<HTMLElement | null>
   /** Relative weights for each panel's scroll height (default: equal distribution).
-   *  e.g., [1, 2, 1, 1] means the second panel takes 2x the scroll distance. */
+   *  e.g., [1, 2, 1, 1] means the second panel takes 2x the scroll distance.
+   *  Ignored if panelBoundaries is provided. */
   weights?: number[]
+  /** DOM-measured panel boundaries from usePanelBoundaries. If provided, uses these
+   *  instead of weight-based calculations for more accurate scroll tracking. */
+  panelBoundaries?: { panels: { start: number; end: number; mid: number }[]; ready: boolean }
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
   exitRange?: [number, number]
 }
@@ -79,6 +83,7 @@ export default function MorphingHeadline({
   headlines,
   containerRef,
   weights,
+  panelBoundaries,
   exitRange,
 }: MorphingHeadlineProps) {
   const theme = useTheme()
@@ -124,20 +129,28 @@ export default function MorphingHeadline({
     if (count < 2)
       return headlines.map(() => ({ input: [0, 1], output: [1, 1] }))
 
-    // Calculate panel boundaries from weights (or equal distribution)
-    const w = weights || headlines.map(() => 1)
-    const totalWeight = w.reduce((sum, v) => sum + v, 0)
-    const panelBoundaries = w.reduce<number[]>(
-      (acc, weight) => [
-        ...acc,
-        (acc[acc.length - 1] ?? 0) + weight / totalWeight,
-      ],
-      [0],
-    )
+    // Use DOM-measured boundaries if available, otherwise fall back to weights
+    let panelStarts: number[]
+    if (panelBoundaries?.ready && panelBoundaries.panels.length === count) {
+      panelStarts = [
+        ...panelBoundaries.panels.map((p) => p.start),
+        panelBoundaries.panels[count - 1]?.end ?? 1,
+      ]
+    } else {
+      const w = weights || headlines.map(() => 1)
+      const totalWeight = w.reduce((sum, v) => sum + v, 0)
+      panelStarts = w.reduce<number[]>(
+        (acc, weight) => [
+          ...acc,
+          (acc[acc.length - 1] ?? 0) + weight / totalWeight,
+        ],
+        [0],
+      )
+    }
 
     return headlines.map((_, index) => {
-      const panelStart = panelBoundaries[index] ?? 0
-      const panelEnd = panelBoundaries[index + 1] ?? 1
+      const panelStart = panelStarts[index] ?? 0
+      const panelEnd = panelStarts[index + 1] ?? 1
       const panelSize = panelEnd - panelStart
 
       // Adjust timing based on transition position.
@@ -182,7 +195,7 @@ export default function MorphingHeadline({
         }
       }
     })
-  }, [headlines, weights])
+  }, [headlines, weights, panelBoundaries])
 
   // Track opacities for all headlines (dynamic array)
   const [opacities, setOpacities] = useState<number[]>(() =>
@@ -240,27 +253,36 @@ export default function MorphingHeadline({
   const [activeIndex, setActiveIndex] = useState(0)
 
   useEffect(() => {
-    const w = weights || headlines.map(() => 1)
-    const totalWeight = w.reduce((sum, v) => sum + v, 0)
-    const boundaries = w.reduce<number[]>(
-      (acc, weight) => [
-        ...acc,
-        (acc[acc.length - 1] ?? 0) + weight / totalWeight,
-      ],
-      [0],
-    )
+    // Use DOM-measured boundaries if available, otherwise fall back to weights
+    let computedBoundaries: number[]
+    if (panelBoundaries?.ready && panelBoundaries.panels.length === headlines.length) {
+      computedBoundaries = [
+        0,
+        ...panelBoundaries.panels.map((p) => p.start),
+      ]
+    } else {
+      const w = weights || headlines.map(() => 1)
+      const totalWeight = w.reduce((sum, v) => sum + v, 0)
+      computedBoundaries = w.reduce<number[]>(
+        (acc, weight) => [
+          ...acc,
+          (acc[acc.length - 1] ?? 0) + weight / totalWeight,
+        ],
+        [0],
+      )
+    }
 
     const unsubscribe = scrollYProgress.on("change", (value) => {
       // Find which panel the scroll position falls in
       let newIndex = 0
-      for (let i = 0; i < boundaries.length - 1; i++) {
-        const mid = ((boundaries[i] ?? 0) + (boundaries[i + 1] ?? 1)) / 2
+      for (let i = 0; i < computedBoundaries.length - 1; i++) {
+        const mid = ((computedBoundaries[i] ?? 0) + (computedBoundaries[i + 1] ?? 1)) / 2
         if (value >= mid) newIndex = Math.min(i + 1, headlines.length - 1)
       }
       setActiveIndex(newIndex)
     })
     return unsubscribe
-  }, [scrollYProgress, headlines, weights])
+  }, [scrollYProgress, headlines, weights, panelBoundaries])
 
   // Shared headline styles
   const headlineStyles = {

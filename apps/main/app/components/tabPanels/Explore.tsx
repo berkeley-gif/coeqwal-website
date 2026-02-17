@@ -30,7 +30,7 @@ function ExplorerErrorFallback() {
       }}
     >
       <ErrorFallback
-        title="Explorer couldn\u2019t load"
+        title="Explorer couldn't load"
         message="This might be a temporary issue. Try refreshing the page."
       />
     </Box>
