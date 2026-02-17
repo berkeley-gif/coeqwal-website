@@ -9,6 +9,16 @@ import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 
+/** Action descriptions shown in expanded tab buttons (matches Panel 4 columns) */
+const TAB_DESCRIPTIONS: Record<TabKey, string> = {
+  learn:
+    "the basics of Central Valley water management and how to read our scenario data",
+  explore:
+    "the scenarios. Use tools to understand and compare them. Look at the data through the lenses of tradeoffs, equity, and resilience.",
+  share:
+    "your findings by capturing data and charts as you explore and exporting them as files.",
+}
+
 /** Renders the active tab's description panel content */
 function TabDescription({ tab }: { tab: TabKey }) {
   switch (tab) {
@@ -127,6 +137,7 @@ export default function SmoothTabs() {
         className="tab-container"
         style={{
           display: "flex",
+          gap: isInTabsArea ? 0 : 48,
           width: "100%",
           pointerEvents: "auto",
         }}
@@ -146,14 +157,21 @@ export default function SmoothTabs() {
               style={{
                 flex: 1,
                 position: "relative",
-                padding: isInTabsArea ? "8px 20px" : "13px 12px", // Match header padding when sticky
                 border: "none",
-                background: panelColor, // Keep individual tab colors
+                background: panelColor,
                 cursor: "pointer",
-                fontWeight: 600,
-                textTransform: "uppercase",
                 color: theme.palette.blue.darkest,
-                transition: "padding 0.2s ease, font-weight 0.2s ease",
+                transition: "padding 0.3s ease",
+                display: "flex",
+                flexDirection: "column",
+                gap: isInTabsArea ? 0 : 12,
+                alignItems: isInTabsArea ? "center" : "flex-start",
+                justifyContent: "flex-start",
+                textAlign: isInTabsArea ? "center" : "left",
+                padding: isInTabsArea ? "8px 20px" : "24px 24px",
+                borderTop: isInTabsArea
+                  ? "none"
+                  : `${theme.strokeWidth.rule}px solid ${theme.palette.blue.darkest}22`,
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -173,11 +191,29 @@ export default function SmoothTabs() {
               )}
               <Typography
                 component="span"
-                variant={isInTabsArea ? "tabLabelDocked" : "tabLabel"}
-                sx={{ transition: theme.transition.quick }}
+                variant={isInTabsArea ? "tabLabelDocked" : "h4"}
+                sx={{
+                  transition: theme.transition.quick,
+                  fontWeight: 600,
+                }}
               >
-                {label}
+                {label.charAt(0).toUpperCase() + label.slice(1)}
               </Typography>
+              {/* Description - only when expanded, matches Panel 4 column style */}
+              {!isInTabsArea && (
+                <Typography
+                  component="span"
+                  variant="body2"
+                  sx={{
+                    fontWeight: 400,
+                    opacity: 0.85,
+                    textTransform: "none",
+                    m: 0,
+                  }}
+                >
+                  {TAB_DESCRIPTIONS[key]}
+                </Typography>
+              )}
             </button>
           )
         })}
