@@ -129,9 +129,9 @@ export default function MorphingHeadline({
 
     // Use DOM-measured boundaries if available, otherwise fall back to weights
     let panelStarts: number[]
-    if (panelBoundaries?.ready && panelBoundaries.panels.length === count) {
+    if (panelBoundaries?.ready && panelBoundaries.panels.length >= count) {
       panelStarts = [
-        ...panelBoundaries.panels.map((p) => p.start),
+        ...panelBoundaries.panels.slice(0, count).map((p) => p.start),
         panelBoundaries.panels[count - 1]?.end ?? 1,
       ]
     } else {
@@ -206,8 +206,12 @@ export default function MorphingHeadline({
   // Track dock offset (when scrolled past container, headline moves up with it)
   const [dockOffset, setDockOffset] = useState(0)
 
-  // Exit Y: not used for translation (exit is opacity-only), but needed for dockOffset
-  const exitY = dockOffset
+  // Exit Y: scroll upward during exitRange (matches Panel2Paragraph's -50vh exit)
+  const exitY = useTransform(
+    scrollYProgress,
+    exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
+    exitRange ? [0, -800] : [0, 0],
+  )
 
   // Calculate opacity for a specific headline at a given scroll progress
   const calculateOpacity = useCallback(
@@ -261,9 +265,12 @@ export default function MorphingHeadline({
     let computedBoundaries: number[]
     if (
       panelBoundaries?.ready &&
-      panelBoundaries.panels.length === headlines.length
+      panelBoundaries.panels.length >= headlines.length
     ) {
-      computedBoundaries = [0, ...panelBoundaries.panels.map((p) => p.start)]
+      computedBoundaries = [
+        0,
+        ...panelBoundaries.panels.slice(0, headlines.length).map((p) => p.start),
+      ]
     } else {
       const w = weights || headlines.map(() => 1)
       const totalWeight = w.reduce((sum, v) => sum + v, 0)
@@ -343,19 +350,20 @@ export default function MorphingHeadline({
   }
 
   return (
-    <Box
-      component={motion.div}
+    <motion.div
       style={{
         y: exitY,
         opacity: exitOpacity,
-      }}
-      sx={{
         position: "fixed",
         top: theme.space.panel.topOffset,
         left: theme.space.panel.padding,
         right: theme.space.panel.padding,
         zIndex: theme.zIndex.heroContent + 10,
         pointerEvents: "none",
+      }}
+    >
+    <Box
+      sx={{
         display: { xs: "none", lg: "block" },
       }}
     >
@@ -425,5 +433,6 @@ export default function MorphingHeadline({
         </Typography>
       </Box>
     </Box>
+    </motion.div>
   )
 }

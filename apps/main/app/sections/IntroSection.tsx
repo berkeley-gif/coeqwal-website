@@ -519,15 +519,8 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 1.6, 3]}
-        panelBoundaries={
-          boundaries.ready
-            ? {
-                panels: boundaries.panels.slice(0, 3),
-                ready: true,
-              }
-            : boundaries
-        }
+        weights={[1, 1.6, 3, 2, 1]}
+        panelBoundaries={boundaries}
         exitRange={
           boundaries.ready && boundaries.panels[2]
             ? [
