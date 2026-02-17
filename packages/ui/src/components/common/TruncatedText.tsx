@@ -43,27 +43,33 @@ export interface TruncatedTextProps {
   variant?: string
   /** Maximum lines before truncation (default: 2) */
   lines?: number
-  /** Label for the expand trigger (default: "show more") */
+  /** Label for the expand trigger (default: "more") */
   showMoreLabel?: string
-  /** Label for the collapse trigger (default: "show less") */
+  /** Label for the collapse trigger (default: "less") */
   showLessLabel?: string
   /** Style overrides for the root Typography container */
   sx?: SxProps<Theme>
+  /** Color for the "more"/"less" toggle text. Defaults to blue.bright on dark backgrounds. */
+  toggleColor?: string
 }
 
 export function TruncatedText({
   children,
   variant = "body2",
   lines = 2,
-  showMoreLabel = "show more",
-  showLessLabel = "show less",
+  showMoreLabel = "more",
+  showLessLabel = "less",
   sx,
+  toggleColor,
 }: TruncatedTextProps) {
   const theme = useTheme()
   const [isExpanded, setIsExpanded] = useState(false)
 
+  const resolvedToggleColor =
+    toggleColor ?? theme.palette.blue?.bright ?? theme.palette.primary.light
+
   const toggleButtonStyles = {
-    color: theme.palette.blue?.medium ?? theme.palette.primary.main,
+    color: resolvedToggleColor,
     fontStyle: "italic",
     cursor: "pointer",
     userSelect: "none" as const,
@@ -75,7 +81,7 @@ export function TruncatedText({
       textDecoration: "underline",
     },
     "&:focus-visible": {
-      outline: `2px solid ${theme.palette.blue?.bright ?? theme.palette.primary.light}`,
+      outline: `2px solid ${resolvedToggleColor}`,
       outlineOffset: "2px",
       borderRadius: "2px",
     },
