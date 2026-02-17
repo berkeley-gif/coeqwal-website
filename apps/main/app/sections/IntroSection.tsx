@@ -16,8 +16,8 @@ import type { PanelBoundaries } from "@repo/scrollytelling"
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
 import MorphingHeadline from "../components/MorphingHeadline"
-import TopicCircles from "../components/TopicCircles"
-import type { Topic } from "../components/TopicCircles"
+import CategoryCircles from "../components/CategoryCircles"
+import type { Category } from "../components/CategoryCircles"
 import type { VideoSource } from "../components/VideoHero"
 import { ScrollToButton } from "@repo/ui"
 import { mapActions, useMapStore } from "../features/map/store"
@@ -29,7 +29,7 @@ const VIDEO_SRCS: VideoSource[] = [
   },
 ]
 
-const WATER_TOPICS: Topic[] = [
+const WATER_CATEGORIES: Category[] = [
   {
     id: "communities",
     label: "Community water systems",
@@ -125,7 +125,7 @@ function Panel1Paragraph() {
 
 /**
  * Panel2Paragraph - Scroll-linked paragraph for frontmatter panel 2.
- * Same pattern as Panel1Paragraph but with topic circles content.
+ * Same pattern as Panel1Paragraph but with category circles content.
  */
 function Panel2Paragraph() {
   const theme = useTheme()
@@ -302,7 +302,7 @@ function Panel3Text({
 }
 
 /**
- * FloatingTopicCircles - Fixed-position topic circles that persist across panels 2-4.
+ * FloatingCategoryCircles - Fixed-position category circles that persist across panels 2-4.
  *
  * Uses DOM-measured panel boundaries (via usePanelBoundaries) instead of hardcoded
  * magic numbers, so thresholds are always correct regardless of viewport size or
@@ -313,16 +313,16 @@ function Panel3Text({
  * - Glide upward during Panel 2 → Panel 3 (index 3) transition
  * - Hold in position during Panel 3
  */
-function FloatingTopicCircles({
+function FloatingCategoryCircles({
   containerRef,
   boundaries,
-  selectedTopic,
-  setSelectedTopic,
+  selectedCategory,
+  setSelectedCategory,
 }: {
   containerRef: React.RefObject<HTMLElement | null>
   boundaries: PanelBoundaries
-  selectedTopic: string | null
-  setSelectedTopic: (id: string | null) => void
+  selectedCategory: string | null
+  setSelectedCategory: (id: string | null) => void
 }) {
   const theme = useTheme()
 
@@ -407,10 +407,10 @@ function FloatingTopicCircles({
         paddingRight: theme.space.panel.padding,
       }}
     >
-      <TopicCircles
-        topics={WATER_TOPICS}
-        selectedId={selectedTopic}
-        onSelect={setSelectedTopic}
+      <CategoryCircles
+        categories={WATER_CATEGORIES}
+        selectedId={selectedCategory}
+        onSelect={setSelectedCategory}
         progress={circleProgress}
         revealStart={0}
         revealEnd={0.8}
@@ -425,7 +425,7 @@ const IntroSection = () => {
   const { t } = useTranslation()
   const introPanelsRef = useRef<HTMLElement>(null)
   const waterIssuesRef = useRef<HTMLDivElement>(null)
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   // Panel refs for DOM-measured scroll boundaries
   const panel1Ref = useRef<HTMLDivElement>(null) // VideoHero
@@ -516,12 +516,12 @@ const IntroSection = () => {
         ]}
       />
 
-      {/* Floating topic circles - fixed-position overlay that persists across panels 2 and 3 */}
-      <FloatingTopicCircles
+      {/* Floating category circles - fixed-position overlay that persists across panels 2 and 3 */}
+      <FloatingCategoryCircles
         containerRef={introPanelsRef}
         boundaries={boundaries}
-        selectedTopic={selectedTopic}
-        setSelectedTopic={setSelectedTopic}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
       />
 
       {/* position: relative required for Framer Motion useScroll offset calculations */}
@@ -642,13 +642,13 @@ const IntroSection = () => {
               {/* Paragraph - scroll-linked */}
               <Panel2Paragraph />
 
-              {/* Topic circles moved to FloatingTopicCircles (fixed-position overlay) */}
+              {/* Category circles moved to FloatingCategoryCircles (fixed-position overlay) */}
             </Box>
           </ScrollSection>
         </div>
         </div>
 
-        {/* Panel 3 - Dark background for floating topic circles overlay */}
+        {/* Panel 3 - Dark background for floating category circles overlay */}
         <Box
           ref={panel4Ref}
           id="scenarios"
@@ -683,6 +683,7 @@ const IntroSection = () => {
               scrollToId="site-actions"
               ariaLabel="Scroll to continue"
               color={theme.palette.text.secondary}
+              size={52}
             />
           </Box>
         </Box>
