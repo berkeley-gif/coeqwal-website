@@ -2,7 +2,7 @@
 
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
-import { useTheme } from "@repo/ui/mui"
+import { useTheme, Box } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 
 /**
@@ -19,7 +19,7 @@ import { useTabs } from "../context/Tabs"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
-  const { isInTabsArea } = useTabs()
+  const { isInTabsArea, isHeaderDark } = useTabs()
 
   // Smooth scroll to top using requestAnimationFrame
   // Native smooth scroll gets interrupted by React state changes during the tabs
@@ -59,14 +59,35 @@ export function Header() {
   }
 
   return (
-    <BaseHeader
-      onLogoClick={handleLogoClick}
-      onAboutClick={() => router.push("about")}
-      onGetDataClick={() => router.push("data")}
-      // Dynamic background: solid when in tabs area, transparent otherwise
-      backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
-      // Text transitions from white to primary blue when header shrinks
-      textColorScrolled={theme.palette.text.primary}
-    />
+    <Box
+      sx={{
+        // Remove text shadow when header is in dark/flat mode
+        ...(isHeaderDark && {
+          "& .MuiButton-root, & .MuiToolbar-root": {
+            textShadow: "none !important",
+          },
+        }),
+      }}
+    >
+      <BaseHeader
+        onLogoClick={handleLogoClick}
+        onAboutClick={() => router.push("about")}
+        onGetDataClick={() => router.push("data")}
+        // Dynamic background: solid when in tabs area, transparent otherwise
+        backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
+        // Text color and logo controlled by IntroSection via context
+        textColor={
+          isHeaderDark
+            ? theme.palette.text.primary
+            : theme.palette.common.white
+        }
+        borderBottom={
+          isHeaderDark
+            ? `${theme.strokeWidth.rule}px solid ${theme.palette.text.primary}CC`
+            : `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}CC`
+        }
+        logoVariant={isHeaderDark ? "color" : "light"}
+      />
+    </Box>
   )
 }

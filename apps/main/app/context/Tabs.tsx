@@ -61,6 +61,8 @@ type TabsContextShape = {
   scrollIntentRef: React.RefObject<"none" | "user" | "sync">
   isInTabsArea: boolean
   setIsInTabsArea: React.Dispatch<React.SetStateAction<boolean>>
+  isHeaderDark: boolean
+  setIsHeaderDark: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
@@ -80,6 +82,9 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // checks if we are in the tabs area
   const [isInTabsArea, setIsInTabsArea] = React.useState(false)
 
+  // tracks whether header should use dark (blue) text instead of white
+  const [isHeaderDark, setIsHeaderDark] = React.useState(false)
+
   const value = useMemo(
     () => ({
       state,
@@ -91,8 +96,10 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       setHasEnteredTabsFirstTime,
       isInTabsArea,
       setIsInTabsArea,
+      isHeaderDark,
+      setIsHeaderDark,
     }),
-    [state, hasEnteredTabsFirstTime, isInTabsArea],
+    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark],
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
@@ -121,6 +128,8 @@ export function useTabs() {
       >,
       isInTabsArea: false,
       setIsInTabsArea: () => {},
+      isHeaderDark: false,
+      setIsHeaderDark: () => {},
     }
   }
 
