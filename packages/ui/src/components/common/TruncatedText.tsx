@@ -31,6 +31,7 @@
 
 import React, { useState } from "react"
 import { Box, Typography, useTheme } from "../../mui-components"
+import type { TypographyProps } from "@mui/material"
 import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
 import type { SxProps } from "@mui/system"
@@ -40,7 +41,7 @@ export interface TruncatedTextProps {
   /** The text content to truncate (plain text or inline elements) */
   children: React.ReactNode
   /** MUI Typography variant (default: "body2"). Accepts standard and custom variants. */
-  variant?: string
+  variant?: TypographyProps["variant"]
   /** Maximum lines before truncation (default: 2) */
   lines?: number
   /** Label for the expand trigger (default: "more") */
@@ -116,7 +117,7 @@ export function TruncatedText({
   return (
     <Typography
       component="div"
-      variant={variant as any}
+      variant={variant}
       sx={{
         position: "relative",
         ...sx,

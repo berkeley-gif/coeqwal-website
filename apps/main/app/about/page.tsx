@@ -6,27 +6,11 @@
  * Provides background information on funding and methodology
  */
 
-import React, { useState, useEffect } from "react"
-import {
-  Box,
-  Typography,
-  Container,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
-  IconButton,
-  CircularProgress,
-  SelectChangeEvent,
-  Alert,
-} from "@repo/ui/mui"
+import React, { useEffect } from "react"
+import { useTheme } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { CenterImageText } from "../components/CenterImageText"
 import { TieredImageText } from "../components/TieredImageText"
-import { ArrowHead } from "@repo/ui"
-import { useTheme } from "@repo/ui/mui"
-import { MainContent } from "../components/MainContent"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
 import { LogoGrid } from "../components/LogoGrid"
 import { ContactSection } from "../components/ContactSection"

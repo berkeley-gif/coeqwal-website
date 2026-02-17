@@ -111,13 +111,9 @@ export default function PackedDots({
           fill={fillColor}
           style={{ cursor: onDotClick || onDotHover ? "pointer" : "default" }}
           onMouseEnter={
-            onDotHover
-              ? (e) => onDotHover(circle.datum, e)
-              : undefined
+            onDotHover ? (e) => onDotHover(circle.datum, e) : undefined
           }
-          onMouseLeave={
-            onDotHover ? (e) => onDotHover(null, e) : undefined
-          }
+          onMouseLeave={onDotHover ? (e) => onDotHover(null, e) : undefined}
           onClick={
             onDotClick
               ? (e) => {

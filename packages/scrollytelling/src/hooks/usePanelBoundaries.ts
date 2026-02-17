@@ -45,7 +45,8 @@ export function usePanelBoundaries(
   containerRef: RefObject<HTMLElement | null>,
   panelRefs: RefObject<HTMLElement | null>[],
 ): PanelBoundaries {
-  const [boundaries, setBoundaries] = useState<PanelBoundaries>(EMPTY_BOUNDARIES)
+  const [boundaries, setBoundaries] =
+    useState<PanelBoundaries>(EMPTY_BOUNDARIES)
 
   // Store panelRefs in a stable ref so the effect doesn't re-run when the array is recreated
   const panelRefsRef = useRef(panelRefs)
