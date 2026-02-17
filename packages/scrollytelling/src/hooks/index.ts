@@ -1,3 +1,5 @@
 export { useScrollProgress } from "./useScrollProgress"
 export { useScrollPhase } from "./useScrollPhase"
 export { useScrollValue, useScrollString } from "./useScrollValue"
+export { usePanelBoundaries } from "./usePanelBoundaries"
+export type { PanelBoundary, PanelBoundaries } from "./usePanelBoundaries"

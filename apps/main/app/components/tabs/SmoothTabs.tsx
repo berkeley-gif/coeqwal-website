@@ -16,7 +16,7 @@ function TabDescription({ tab }: { tab: TabKey }) {
       return (
         <TwoColumnInterstitial
           headline="Did you know that California has one of the most complex water systems in the world?"
-          body="Learn how water flows through California\u2019s Central Valley and the tools we use for water planning and decision-making"
+          body="Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making"
           linkListLabel="Learn more about"
           links={[
             { label: "How water moves through California" },
@@ -30,7 +30,7 @@ function TabDescription({ tab }: { tab: TabKey }) {
       return (
         <TwoColumnInterstitial
           headline="What if we managed water differently?"
-          body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California\u2019s water future."
+          body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California's water future."
           linkListLabel="Explore how critical water issues are addressed"
           links={[
             { label: "Community water systems" },
@@ -46,7 +46,7 @@ function TabDescription({ tab }: { tab: TabKey }) {
       return (
         <TwoColumnInterstitial
           headline="What scenarios align with your interests?"
-          body="Select scenario data and share what you\u2019ve learned to shape our water future."
+          body="Select scenario data and share what you've learned to shape our water future."
           linkListLabel=""
           links={[]}
           scrollPrompt={null}

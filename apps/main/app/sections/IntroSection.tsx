@@ -1,15 +1,17 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { motion, useTransform } from "@repo/motion"
+import { motion, useTransform, useScroll } from "@repo/motion"
 import {
   ScrollSection,
   useScrollProgress,
   useScrollValue,
+  usePanelBoundaries,
 } from "@repo/scrollytelling"
+import type { PanelBoundaries } from "@repo/scrollytelling"
 
 import VideoHero from "../components/VideoHero"
 import FrontmatterPanel from "../components/FrontmatterPanel"
@@ -17,6 +19,7 @@ import MorphingHeadline from "../components/MorphingHeadline"
 import TopicCircles from "../components/TopicCircles"
 import type { Topic } from "../components/TopicCircles"
 import type { VideoSource } from "../components/VideoHero"
+import { ScrollToButton } from "@repo/ui"
 import { mapActions, useMapStore } from "../features/map/store"
 
 const VIDEO_SRCS: VideoSource[] = [
@@ -207,35 +210,213 @@ function Panel2Headline() {
 }
 
 /**
- * Panel2TopicCircles - Scroll-linked staggered reveal of topic circles.
- * Must be inside Panel 2's ScrollSection. Spans full width at the bottom.
+ * Panel3Text - Scroll-linked fade-in headline and paragraph for the scenarios panel.
+ * Fades in once Panel 3's top reaches the viewport top (p3.start).
  */
-function Panel2TopicCircles({
+function Panel3Text({
+  containerRef,
+  boundaries,
+}: {
+  containerRef: React.RefObject<HTMLElement | null>
+  boundaries: PanelBoundaries
+}) {
+  const theme = useTheme()
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+    layoutEffect: false,
+  })
+
+  const p3 = boundaries.panels[3]
+  const p3Span = p3 ? p3.end - p3.start : 0.15
+  // Fade in slightly before Panel 3 top reaches viewport top
+  const fadeStart = (p3 ? p3.start : 0.848) - p3Span * 0.15
+  const fadeEnd = fadeStart + 0.03
+
+  const opacity = useTransform(
+    scrollYProgress,
+    [fadeStart, fadeEnd],
+    [0, 1],
+  )
+
+  return (
+    <motion.div
+      style={{ opacity }}
+    >
+    <Box
+      sx={{
+        display: { xs: "flex", lg: "grid" },
+        gridTemplateColumns: { lg: "3fr 2fr" },
+        flexDirection: { xs: "column" },
+        gap: { xs: 3, lg: 0 },
+        alignItems: { xs: "center", lg: "start" },
+        color: theme.palette.text.secondary,
+      }}
+    >
+      {/* Headline block - column 1 */}
+      <Box
+        sx={{
+          gridColumn: { lg: 1 },
+          alignSelf: { lg: "start" },
+          textAlign: { xs: "center", lg: "left" },
+        }}
+      >
+        <Box
+          component="h2"
+          sx={{ ...theme.typography.h5, display: "block", m: 0, color: "inherit", fontWeight: 500, fontSize: "1.76rem" }}
+        >
+          COEQWAL library of Central Valley
+        </Box>
+        <Box
+          component="span"
+          sx={{ ...theme.typography.h4, display: "block", m: 0, color: "inherit", fontWeight: 600 }}
+        >
+          water management scenarios
+        </Box>
+      </Box>
+
+      {/* Paragraph block - column 2 */}
+      <Box
+        sx={{
+          gridColumn: { lg: 2 },
+          alignSelf: { lg: "start" },
+          maxWidth: { xs: "540px", lg: "none" },
+          textAlign: { xs: "center", lg: "left" },
+        }}
+      >
+        <Typography
+          variant="body2"
+          component="p"
+          sx={{ m: 0, color: "inherit" }}
+        >
+          COEQWAL has used a computational model called CalSim to run a
+          broad range of alternative water management scenarios. These
+          scenarios are represented here, clustered according to the
+          issues they address.
+        </Typography>
+      </Box>
+    </Box>
+    </motion.div>
+  )
+}
+
+/**
+ * FloatingTopicCircles - Fixed-position topic circles that persist across panels 2-4.
+ *
+ * Uses DOM-measured panel boundaries (via usePanelBoundaries) instead of hardcoded
+ * magic numbers, so thresholds are always correct regardless of viewport size or
+ * panel count.
+ *
+ * Phases:
+ * - Stagger in at bottom of viewport during mid Panel 2 (index 2)
+ * - Glide upward during Panel 2 → Panel 3 (index 3) transition
+ * - Hold in position during Panel 3
+ */
+function FloatingTopicCircles({
+  containerRef,
+  boundaries,
   selectedTopic,
   setSelectedTopic,
 }: {
+  containerRef: React.RefObject<HTMLElement | null>
+  boundaries: PanelBoundaries
   selectedTopic: string | null
   setSelectedTopic: (id: string | null) => void
 }) {
-  const progress = useScrollProgress()
+  const theme = useTheme()
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+    layoutEffect: false,
+  })
+
+  // Panel indices: 0=VideoHero, 1=Panel1, 2=Panel2, 3=Panel3(scenarios), 4=Panel4(actions)
+  const p2 = boundaries.panels[2] // Panel 2 (water issues)
+  const p3 = boundaries.panels[3] // Panel 3 (scenarios, dark bg)
+
+  // Derive thresholds from measured boundaries
+  // Circles appear at mid Panel 2, fully visible slightly after
+  const appearStart = p2 ? p2.start + (p2.end - p2.start) * 0.35 : 0.43
+  const appearEnd = appearStart + 0.05
+
+  // Stagger reveal completes at ~75% through Panel 2
+  const staggerEnd = p2 ? p2.start + (p2.end - p2.start) * 0.75 : 0.66
+
+  // The circles sit at ~50vh from the viewport top. The dark background reaches
+  // them before Panel 3's top hits the viewport top. Offset by 50% of Panel 3's
+  // height in progress units (Panel 3 is 100vh, so 50vh = 0.50 of its span).
+  const p3Span = p3 ? p3.end - p3.start : 0.15
+  const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.50
+
+  // Opacity: invisible before mid Panel 2, stay visible once revealed
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, appearStart, appearEnd],
+    [0, 0, 1],
+  )
+
+  // Y position: start at bottom (60vh), glide to panel middle (50vh) by p3.start,
+  // then scroll with Panel 3 (from 50vh to -50vh over Panel 3's height)
+  const p3Start = p3 ? p3.start : 0.848
+  const p3End = p3 ? p3.end : 1.0
+  const yNum = useTransform(
+    scrollYProgress,
+    [appearStart, p2 ? p2.mid : 0.62, p3Start, p3End],
+    [60, 45, 50, -50],
+  )
+  const y = useTransform(yNum, (v: number) => `${v}vh`)
+
+  // Pointer events: only interactive when visible
+  const pointerEvents = useTransform(opacity, (v: number) =>
+    v > 0.5 ? "auto" : "none",
+  )
+
+  // Create a MotionValue-based progress for stagger reveal
+  const circleProgress = useTransform(
+    scrollYProgress,
+    [appearStart, staggerEnd],
+    [0, 1],
+  )
+
+  // Switch stroke color to white when circles cross into Panel 3 (dark background)
+  const darkColor = theme.palette.text.primary
+  const lightColor = theme.palette.common.white
+  const [circleColor, setCircleColor] = useState(darkColor)
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      setCircleColor(v >= darkBgStart ? lightColor : darkColor)
+    })
+    return unsubscribe
+  }, [scrollYProgress, darkColor, lightColor, darkBgStart])
 
   return (
-    <Box
-      sx={{
-        gridColumn: { lg: "1 / -1" },
-        alignSelf: "start",
-        pointerEvents: "auto",
+    <motion.div
+      style={{
+        position: "fixed",
+        left: 0,
+        right: 0,
+        top: 0,
+        y,
+        opacity,
+        pointerEvents,
+        zIndex: theme.zIndex.heroContent + 5,
+        paddingLeft: theme.space.panel.padding,
+        paddingRight: theme.space.panel.padding,
       }}
     >
       <TopicCircles
         topics={WATER_TOPICS}
         selectedId={selectedTopic}
         onSelect={setSelectedTopic}
-        progress={progress}
-        revealStart={0.4}
-        revealEnd={0.9}
+        progress={circleProgress}
+        revealStart={0}
+        revealEnd={0.8}
+        strokeColor={circleColor}
       />
-    </Box>
+    </motion.div>
   )
 }
 
@@ -245,6 +426,20 @@ const IntroSection = () => {
   const introPanelsRef = useRef<HTMLElement>(null)
   const waterIssuesRef = useRef<HTMLDivElement>(null)
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
+
+  // Panel refs for DOM-measured scroll boundaries
+  const panel1Ref = useRef<HTMLDivElement>(null) // VideoHero
+  const panel2Ref = useRef<HTMLDivElement>(null) // Panel 1 (What is COEQWAL)
+  const panel3Ref = useRef<HTMLDivElement>(null) // Panel 2 (Water issues)
+  const panel4Ref = useRef<HTMLDivElement>(null) // Panel 3 (Scenarios)
+  const panel5Ref = useRef<HTMLDivElement>(null) // Panel 4 (Actions)
+
+  // Memoize to avoid recreating the array on every render
+  const panelRefs = useMemo(
+    () => [panel1Ref, panel2Ref, panel3Ref, panel4Ref, panel5Ref],
+    [],
+  )
+  const boundaries = usePanelBoundaries(introPanelsRef, panelRefs)
 
   // Show map when water-issues panel is in viewport
   // This ensures the map is visible when scrolling back up from tabs
@@ -285,8 +480,9 @@ const IntroSection = () => {
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
         containerRef={introPanelsRef}
-        weights={[1, 1.6, 3, 1]}
-        exitRange={[0.78, 0.85]}
+        weights={[1, 1.6, 3, 1, 1]}
+        panelBoundaries={boundaries}
+        exitRange={[0.72, 0.78]}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -306,6 +502,12 @@ const IntroSection = () => {
             textColor: theme.palette.text.primary,
           },
           {
+            line1: "COEQWAL library of Central Valley",
+            line2: "water management scenarios",
+            textShadow: false,
+            textColor: theme.palette.text.secondary,
+          },
+          {
             line1: "On this site,",
             line2: "you can",
             textShadow: false,
@@ -314,16 +516,27 @@ const IntroSection = () => {
         ]}
       />
 
+      {/* Floating topic circles - fixed-position overlay that persists across panels 2 and 3 */}
+      <FloatingTopicCircles
+        containerRef={introPanelsRef}
+        boundaries={boundaries}
+        selectedTopic={selectedTopic}
+        setSelectedTopic={setSelectedTopic}
+      />
+
       {/* position: relative required for Framer Motion useScroll offset calculations */}
       <Box ref={introPanelsRef} sx={{ position: "relative" }}>
         {/* Video Hero */}
-        <VideoHero
-          sources={VIDEO_SRCS}
-          fallbackImage="/images/home_hero_fallback.png"
-          hideHeadline
-        />
+        <div ref={panel1Ref}>
+          <VideoHero
+            sources={VIDEO_SRCS}
+            fallbackImage="/images/home_hero_fallback.png"
+            hideHeadline
+          />
+        </div>
 
         {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
+        <div ref={panel2Ref}>
         <ScrollSection
           height="160vh"
           id="intro"
@@ -386,8 +599,10 @@ const IntroSection = () => {
             <Panel1Paragraph />
           </Box>
         </ScrollSection>
+        </div>
 
         {/* Frontmatter Panel 2 - scroll choreography with background image */}
+        <div ref={panel3Ref}>
         <div ref={waterIssuesRef}>
           <ScrollSection
             height="300vh"
@@ -427,16 +642,53 @@ const IntroSection = () => {
               {/* Paragraph - scroll-linked */}
               <Panel2Paragraph />
 
-              {/* Topic circles - staggered reveal, spans full width */}
-              <Panel2TopicCircles
-                selectedTopic={selectedTopic}
-                setSelectedTopic={setSelectedTopic}
-              />
+              {/* Topic circles moved to FloatingTopicCircles (fixed-position overlay) */}
             </Box>
           </ScrollSection>
         </div>
+        </div>
 
-        {/* Frontmatter Panel 3 - Actions variant */}
+        {/* Panel 3 - Dark background for floating topic circles overlay */}
+        <Box
+          ref={panel4Ref}
+          id="scenarios"
+          aria-label="COEQWAL library of Central Valley water management scenarios"
+          sx={{
+            height: "100vh",
+            backgroundColor: theme.palette.brand.panelDark,
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            paddingTop: theme.space.panel.topOffset,
+            paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+            paddingLeft: theme.space.panel.padding,
+            paddingRight: theme.space.panel.padding,
+          }}
+        >
+          {/* Headline and paragraph - fade in when panel top reaches viewport top */}
+          <Panel3Text containerRef={introPanelsRef} boundaries={boundaries} />
+
+          {/* Scroll-down arrow to Panel 4 */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "clamp(16px, 4vh, 40px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 2,
+            }}
+          >
+            <ScrollToButton
+              scrollToId="site-actions"
+              ariaLabel="Scroll to continue"
+              color={theme.palette.text.secondary}
+            />
+          </Box>
+        </Box>
+
+        {/* Panel 4 - Learn / Explore / Share actions */}
+        <div ref={panel5Ref}>
         <FrontmatterPanel
           id="site-actions"
           ariaLabel="What you can do on this site"
@@ -452,7 +704,7 @@ const IntroSection = () => {
               action: "Learn",
               color: theme.palette.text.secondary,
               description:
-                "how water in California\u2019s Central Valley is managed",
+                "how water in California's Central Valley is managed",
             },
             {
               action: "Explore",
@@ -462,10 +714,11 @@ const IntroSection = () => {
             {
               action: "Share",
               color: theme.palette.text.secondary,
-              description: "your insights about California\u2019s water future",
+              description: "your insights about California's water future",
             },
           ]}
         />
+        </div>
       </Box>
     </Box>
   )

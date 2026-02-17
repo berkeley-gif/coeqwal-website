@@ -7,6 +7,8 @@ export { StickyElement } from "./components/StickyElement"
 export { useScrollProgress } from "./hooks/useScrollProgress"
 export { useScrollPhase } from "./hooks/useScrollPhase"
 export { useScrollValue, useScrollString } from "./hooks/useScrollValue"
+export { usePanelBoundaries } from "./hooks/usePanelBoundaries"
+export type { PanelBoundary, PanelBoundaries } from "./hooks/usePanelBoundaries"
 
 // Types
 export type {
