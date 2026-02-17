@@ -457,6 +457,9 @@ importers:
       '@mui/system':
         specifier: ^7.3.2
         version: 7.3.2(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0))(@types/react@19.0.10)(react@19.1.0)
+      '@re-dev/react-truncate':
+        specifier: ^0.5.2
+        version: 0.5.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@repo/i18n':
         specifier: workspace:*
         version: link:../i18n

@@ -16,6 +16,7 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
 import ScenarioDots from "./ScenarioDots"
+import ScenarioList from "./ScenarioList"
 
 export interface Category {
   id: string
@@ -193,6 +194,13 @@ function StaggeredCircle({
             >
               Learn more about this theme
             </Typography>
+          </Box>
+        )}
+
+        {/* Scenario list - always visible when showScenarios is true */}
+        {showScenarios && scenarioIds && scenarioIds.length > 0 && (
+          <Box sx={{ mt: 1.5, width: "100%" }}>
+            <ScenarioList scenarioIds={scenarioIds} color={strokeColor} />
           </Box>
         )}
       </Box>
