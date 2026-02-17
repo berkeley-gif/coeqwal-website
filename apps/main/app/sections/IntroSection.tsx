@@ -817,9 +817,10 @@ const IntroSection = () => {
             </Box>
           </Box>
 
-          {/* Three action columns */}
+          {/* Three action columns — hidden but space preserved */}
           <Box
             sx={{
+              visibility: "hidden",
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
               gap: { xs: 4, md: 6 },
