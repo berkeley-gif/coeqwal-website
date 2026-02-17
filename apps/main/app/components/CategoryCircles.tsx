@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * TopicCircles - Interactive topic selection circles
+ * CategoryCircles - Interactive category selection circles
  *
  * Renders a responsive grid of dashed circles with labels.
  * Clicking a circle selects it (fills in) and triggers a callback.
@@ -14,14 +14,14 @@ import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
 
-export interface Topic {
+export interface Category {
   id: string
   label: string
   description: string
 }
 
-interface TopicCirclesProps {
-  topics: Topic[]
+interface CategoryCirclesProps {
+  categories: Category[]
   selectedId: string | null
   onSelect: (id: string | null) => void
   /** Optional scroll progress (0-1) for staggered reveal. If not provided, all circles are visible. */
@@ -38,7 +38,7 @@ interface TopicCirclesProps {
  * Individual circle that fades in based on scroll progress
  */
 function StaggeredCircle({
-  topic,
+  category,
   isSelected,
   onSelect,
   progress,
@@ -46,7 +46,7 @@ function StaggeredCircle({
   fadeEnd,
   strokeColor,
 }: {
-  topic: Topic
+  category: Category
   isSelected: boolean
   onSelect: (id: string | null) => void
   progress?: MotionValue<number>
@@ -70,7 +70,7 @@ function StaggeredCircle({
       }}
     >
       <Box
-        onClick={() => onSelect(isSelected ? null : topic.id)}
+        onClick={() => onSelect(isSelected ? null : category.id)}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -78,7 +78,7 @@ function StaggeredCircle({
           gap: 1.5,
           cursor: "pointer",
           transition: "all 0.3s ease",
-          "&:hover .topic-circle": {
+          "&:hover .category-circle": {
             borderColor: strokeColor,
             backgroundColor: isSelected
               ? strokeColor
@@ -106,13 +106,13 @@ function StaggeredCircle({
               lineHeight: "inherit",
             }}
           >
-            {topic.label}
+            {category.label}
           </Typography>
         </Box>
 
         {/* Circle */}
         <Box
-          className="topic-circle"
+          className="category-circle"
           sx={{
             width: { xs: 64, lg: 80 },
             height: { xs: 64, lg: 80 },
@@ -141,7 +141,7 @@ function StaggeredCircle({
               transition: "color 0.3s ease",
             }}
           >
-            {topic.description}
+            {category.description}
           </Typography>
         )}
       </Box>
@@ -149,21 +149,21 @@ function StaggeredCircle({
   )
 }
 
-export default function TopicCircles({
-  topics,
+export default function CategoryCircles({
+  categories,
   selectedId,
   onSelect,
   progress,
   revealStart = 0.7,
   revealEnd = 0.95,
   strokeColor,
-}: TopicCirclesProps) {
+}: CategoryCirclesProps) {
   const theme = useTheme()
   const resolvedColor = strokeColor ?? theme.palette.text.primary
 
   // Calculate staggered fade ranges for each circle
   const totalRange = revealEnd - revealStart
-  const staggerStep = totalRange / topics.length
+  const staggerStep = totalRange / categories.length
 
   return (
     <Box
@@ -178,15 +178,15 @@ export default function TopicCircles({
         mt: 0,
       }}
     >
-      {topics.map((topic, index) => {
+      {categories.map((category, index) => {
         const fadeStart = revealStart + index * staggerStep
         const fadeEnd = fadeStart + staggerStep
 
         return (
           <StaggeredCircle
-            key={topic.id}
-            topic={topic}
-            isSelected={selectedId === topic.id}
+            key={category.id}
+            category={category}
+            isSelected={selectedId === category.id}
             onSelect={onSelect}
             progress={progress}
             fadeStart={fadeStart}
