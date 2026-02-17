@@ -12,7 +12,7 @@
  * Supports optional scroll-linked staggered reveal via a progress MotionValue.
  */
 
-import React from "react"
+import React, { useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
 import ScenarioDots from "./ScenarioDots"
@@ -80,6 +80,7 @@ function StaggeredCircle({
   const circleSize = { xs: 64, lg: 80 }
   const hasScenarios = showScenarios && scenarioIds && scenarioIds.length > 0
   const isClimate = category.id === "climate"
+  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(null)
 
   return (
     <motion.div
@@ -170,6 +171,7 @@ function StaggeredCircle({
               scenarioIds={scenarioIds}
               size={80}
               fillColor="#ffffff"
+              onHoverChange={setHoveredScenarioId}
             />
           )}
           {showScenarios && isClimate && (
@@ -219,7 +221,11 @@ function StaggeredCircle({
             {isClimate ? (
               <HydroclimateList color={strokeColor} />
             ) : (
-              <ScenarioList scenarioIds={scenarioIds!} color={strokeColor} />
+              <ScenarioList
+                scenarioIds={scenarioIds!}
+                color={strokeColor}
+                highlightedId={hoveredScenarioId}
+              />
             )}
           </motion.div>
         )}

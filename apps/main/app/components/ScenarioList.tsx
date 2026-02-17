@@ -25,6 +25,8 @@ interface ScenarioListProps {
   scenarioIds: string[]
   /** Text and border color (adapts to light/dark backgrounds) */
   color?: string
+  /** ID of the currently highlighted scenario (from dot hover) */
+  highlightedId?: string | null
 }
 
 /** Fixed width for the ID column so descriptions align across rows */
@@ -34,6 +36,7 @@ const ID_GAP = "0.5em"
 export default function ScenarioList({
   scenarioIds,
   color = "inherit",
+  highlightedId,
 }: ScenarioListProps) {
   if (scenarioIds.length === 0) return null
 
@@ -54,6 +57,7 @@ export default function ScenarioList({
         const known = hasScenarioMetadata(id)
         const name = known ? getScenarioLabel(id) : "(coming soon)"
         const desc = known ? getScenarioDescription(id) : ""
+        const isHighlighted = highlightedId === id
 
         return (
           <Box
@@ -68,6 +72,15 @@ export default function ScenarioList({
               pb: 1.5,
               mb: 0.5,
               "&:last-child": { borderBottom: "none", pb: 0, mb: 0 },
+              // Highlight styling
+              borderLeft: isHighlighted
+                ? `3px solid ${color}`
+                : "3px solid transparent",
+              pl: isHighlighted ? 1 : 0,
+              borderRadius: "2px",
+              transition: "border-left 0.15s ease, padding-left 0.15s ease, opacity 0.15s ease",
+              // Dim non-highlighted rows when something is highlighted
+              opacity: highlightedId && !isHighlighted ? 0.4 : 1,
             }}
           >
             {/* ID + Name row */}
@@ -77,13 +90,14 @@ export default function ScenarioList({
                 component="span"
                 sx={{
                   color,
-                  opacity: 0.5,
+                  opacity: isHighlighted ? 0.8 : 0.5,
                   fontVariantNumeric: "tabular-nums",
                   flexShrink: 0,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                   fontSize: "0.75rem",
                   width: ID_COLUMN_WIDTH,
+                  transition: "opacity 0.15s ease",
                 }}
               >
                 {id}
@@ -93,7 +107,8 @@ export default function ScenarioList({
                 component="span"
                 sx={{
                   color,
-                  fontWeight: 500,
+                  fontWeight: isHighlighted ? 600 : 500,
+                  transition: "font-weight 0.15s ease",
                 }}
               >
                 {name}
