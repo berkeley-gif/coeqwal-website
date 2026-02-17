@@ -14,7 +14,6 @@ import {
 import type { PanelBoundaries } from "@repo/scrollytelling"
 
 import VideoHero from "../components/VideoHero"
-import FrontmatterPanel from "../components/FrontmatterPanel"
 import MorphingHeadline from "../components/MorphingHeadline"
 import CategoryCircles from "../components/CategoryCircles"
 import type { Category } from "../components/CategoryCircles"
@@ -762,38 +761,122 @@ const IntroSection = () => {
           </Box>
         </Box>
 
-        {/* Panel 4 - Learn / Explore / Share actions */}
-        <div ref={panel5Ref}>
-          <FrontmatterPanel
-            id="site-actions"
-            ariaLabel="What you can do on this site"
-            variant="actions"
-            backgroundColor={theme.palette.brand.panelDark}
-            headlineLine1="On this site,"
-            headlineLine2="you can"
-            textColor={theme.palette.text.secondary}
-            hideHeadline
-            actions={[
+        {/* Panel 4 - Learn / Explore / Share — three-column layout */}
+        <Box
+          component="section"
+          ref={panel5Ref}
+          id="site-actions"
+          aria-label="What you can do on this site"
+          sx={{
+            minHeight: "100vh",
+            backgroundColor: theme.palette.brand.panelDark,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            paddingTop: theme.space.panel.topOffset,
+            paddingBottom: "clamp(80px, 12vh, 160px)",
+            paddingLeft: theme.space.panel.padding,
+            paddingRight: theme.space.panel.padding,
+            color: theme.palette.text.secondary,
+          }}
+        >
+          {/* Headline */}
+          <Box
+            sx={{
+              mb: { xs: 4, lg: 6 },
+              textAlign: { xs: "center", lg: "left" },
+            }}
+          >
+            <Box
+              sx={{
+                fontSize: theme.typography.h1.fontSize,
+                maxWidth: "16ch",
+              }}
+            >
+              <Typography
+                variant="h2Main"
+                component="h2"
+                sx={{ display: "block", color: "inherit" }}
+              >
+                On this site,
+              </Typography>
+              <Typography
+                variant="h1"
+                component="span"
+                sx={{ display: "block", color: "inherit" }}
+              >
+                you can
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Three action columns */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+              gap: { xs: 4, md: 6 },
+            }}
+          >
+            {[
               {
                 action: "Learn",
-                color: theme.palette.text.secondary,
                 description:
-                  "how water in California's Central Valley is managed",
+                  "the basics of Central Valley water management and how to read our scenario data",
+                tabId: "learn" as const,
               },
               {
                 action: "Explore",
-                color: theme.palette.text.secondary,
                 description:
-                  "how water outcomes shift under different scenarios",
+                  "the scenarios. Use tools to understand and compare them. Look at the data through the lenses of tradeoffs, equity, and resilience.",
+                tabId: "explore" as const,
               },
               {
                 action: "Share",
-                color: theme.palette.text.secondary,
-                description: "your insights about California's water future",
+                description:
+                  "your findings by capturing data and charts as you explore and exporting them as files.",
+                tabId: "share" as const,
               },
-            ]}
-          />
-        </div>
+            ].map((item) => (
+              <Box
+                key={item.action}
+                onClick={() => {
+                  const tabsEl = document.getElementById("tabs")
+                  if (tabsEl) {
+                    tabsEl.scrollIntoView({ behavior: "smooth" })
+                  }
+                }}
+                sx={{
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1.5,
+                  borderTop: `${theme.strokeWidth.rule}px solid ${theme.palette.text.secondary}44`,
+                  pt: 3,
+                  transition: "opacity 0.2s ease",
+                  "&:hover": {
+                    opacity: 0.8,
+                  },
+                }}
+              >
+                <Typography
+                  variant="h4"
+                  component="h3"
+                  sx={{ color: "inherit", fontWeight: 600 }}
+                >
+                  {item.action}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  component="p"
+                  sx={{ color: "inherit", opacity: 0.85, m: 0 }}
+                >
+                  {item.description}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       </Box>
     </Box>
   )
