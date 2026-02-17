@@ -72,7 +72,7 @@ export default function ScenarioList({
             {/* ID + Name row */}
             <Box sx={{ display: "flex", alignItems: "baseline", gap: ID_GAP }}>
               <Typography
-                variant="compactSubtitle"
+                variant="compactTitle"
                 component="span"
                 sx={{
                   color,
@@ -81,14 +81,14 @@ export default function ScenarioList({
                   flexShrink: 0,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
-                  fontSize: "0.65rem",
+                  fontSize: "0.75rem",
                   width: ID_COLUMN_WIDTH,
                 }}
               >
                 {id}
               </Typography>
               <Typography
-                variant="compactSubtitle"
+                variant="compactTitle"
                 component="span"
                 sx={{
                   color,
@@ -101,24 +101,19 @@ export default function ScenarioList({
 
             {/* Description - indented to align with name, not ID */}
             {desc && (
-              <Box
+              <TruncatedText
+                variant="compactTitle"
+                lines={2}
                 sx={{
+                  color,
+                  opacity: 0.75,
+                  fontWeight: 400,
+                  lineHeight: 1.35,
                   pl: `calc(${ID_COLUMN_WIDTH} + ${ID_GAP})`,
                 }}
               >
-                <TruncatedText
-                  variant="compactSubtitle"
-                  lines={2}
-                  sx={{
-                    color,
-                    opacity: 0.75,
-                    fontSize: "0.7rem",
-                    lineHeight: 1.35,
-                  }}
-                >
-                  {desc}
-                </TruncatedText>
-              </Box>
+                {desc}
+              </TruncatedText>
             )}
           </Box>
         )
