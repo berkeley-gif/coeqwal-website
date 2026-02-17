@@ -12,8 +12,7 @@
  * const y = useScrollValue(progress, [0, 0.3], [100, 0])
  */
 
-import { useTransform } from "@repo/motion"
-import type { MotionValue } from "framer-motion"
+import { useTransform, MotionValue } from "@repo/motion"
 
 export function useScrollValue(
   progress: MotionValue<number>,

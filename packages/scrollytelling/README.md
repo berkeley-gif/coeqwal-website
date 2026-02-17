@@ -5,7 +5,11 @@ Composable scroll-linked animation primitives for the COEQWAL website. Built on 
 ## Quick start
 
 ```tsx
-import { ScrollSection, ScrollElement, StickyElement } from "@repo/scrollytelling"
+import {
+  ScrollSection,
+  ScrollElement,
+  StickyElement,
+} from "@repo/scrollytelling"
 
 function MyScrollStory() {
   return (
@@ -47,34 +51,34 @@ A **ScrollSection** tracks scroll progress (0-1) through its height. Its childre
 
 Container that tracks scroll progress and provides it to children via React Context.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `height` | `string` | `"100vh"` | Total scroll distance |
-| `as` | `React.ElementType` | `"section"` | HTML element to render |
-| `offset` | `[string, string]` | `["start start", "end end"]` | Framer Motion scroll offset |
-| `debug` | `boolean` | `false` | Show progress overlay |
-| `id` | `string` | — | Section ID |
-| `ariaLabel` | `string` | — | Accessible label |
+| Prop        | Type                | Default                      | Description                 |
+| ----------- | ------------------- | ---------------------------- | --------------------------- |
+| `height`    | `string`            | `"100vh"`                    | Total scroll distance       |
+| `as`        | `React.ElementType` | `"section"`                  | HTML element to render      |
+| `offset`    | `[string, string]`  | `["start start", "end end"]` | Framer Motion scroll offset |
+| `debug`     | `boolean`           | `false`                      | Show progress overlay       |
+| `id`        | `string`            | —                            | Section ID                  |
+| `ariaLabel` | `string`            | —                            | Accessible label            |
 
 #### `<ScrollElement>`
 
 Animated child that responds to parent section's scroll progress.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `enter` | `[number, number]` | **(required)** | Progress range for fade-in |
-| `hold` | `[number, number]` | — | Progress range to stay visible |
-| `exit` | `[number, number]` | — | Progress range for fade-out |
-| `animation` | `"fade" \| "slideUp" \| "slideLeft" \| "none"` | `"fade"` | Animation type |
+| Prop        | Type                                           | Default        | Description                    |
+| ----------- | ---------------------------------------------- | -------------- | ------------------------------ |
+| `enter`     | `[number, number]`                             | **(required)** | Progress range for fade-in     |
+| `hold`      | `[number, number]`                             | —              | Progress range to stay visible |
+| `exit`      | `[number, number]`                             | —              | Progress range for fade-out    |
+| `animation` | `"fade" \| "slideUp" \| "slideLeft" \| "none"` | `"fade"`       | Animation type                 |
 
 #### `<StickyElement>`
 
 CSS sticky wrapper that pins content during scroll.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `top` | `string \| number` | `0` | Sticky top offset |
-| `zIndex` | `number` | `1` | Stacking order |
+| Prop     | Type               | Default | Description       |
+| -------- | ------------------ | ------- | ----------------- |
+| `top`    | `string \| number` | `0`     | Sticky top offset |
+| `zIndex` | `number`           | `1`     | Stacking order    |
 
 ### Hooks
 
@@ -117,6 +121,7 @@ const y = useScrollValue(progress, [0, 0.3], [100, 0])
 ## WCAG compliance
 
 All animations respect `prefers-reduced-motion`:
+
 - `ScrollElement` renders at final state without animation
 - `useScrollProgress` still tracks progress for non-visual logic
 - `StickyElement` works without animation (CSS only)
@@ -172,9 +177,7 @@ function CustomScrollEffect() {
 
   return (
     <div ref={sectionRef} style={{ height: "200vh" }}>
-      <motion.div style={{ rotate: rotation }}>
-        Phase: {phase}
-      </motion.div>
+      <motion.div style={{ rotate: rotation }}>Phase: {phase}</motion.div>
     </div>
   )
 }
@@ -182,10 +185,10 @@ function CustomScrollEffect() {
 
 ## Migration from existing patterns
 
-| Existing pattern | Scrollytelling equivalent |
-|---|---|
-| Manual `useScroll` + `useTransform` for opacity | `<ScrollElement enter={...}>` |
-| CSS `position: sticky` in a tall container | `<StickyElement top={...}>` inside `<ScrollSection height="200vh">` |
-| `IntersectionObserver` for visibility toggle | `useScrollPhase` with `phase === "hold"` |
-| `react-scrollama` step detection | `useScrollPhase` with multiple threshold configs |
-| `useScrollOpacity` from `@repo/motion` | `useScrollProgress` + `useScrollValue` |
+| Existing pattern                                | Scrollytelling equivalent                                           |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| Manual `useScroll` + `useTransform` for opacity | `<ScrollElement enter={...}>`                                       |
+| CSS `position: sticky` in a tall container      | `<StickyElement top={...}>` inside `<ScrollSection height="200vh">` |
+| `IntersectionObserver` for visibility toggle    | `useScrollPhase` with `phase === "hold"`                            |
+| `react-scrollama` step detection                | `useScrollPhase` with multiple threshold configs                    |
+| `useScrollOpacity` from `@repo/motion`          | `useScrollProgress` + `useScrollValue`                              |

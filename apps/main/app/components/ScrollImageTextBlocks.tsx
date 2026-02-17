@@ -91,13 +91,13 @@ export function ScrollImageTextBlocks({
         }}
       >
         {/* Image Text Blocks */}
-        {renderImageTextBlocks(imageTextBlocks)}
+        <RenderImageTextBlocks rawBlocks={imageTextBlocks} />
       </Box>
     </Box>
   )
 }
 
-function renderImageTextBlocks(rawBlocks: ImageTextBlock[]) {
+function RenderImageTextBlocks({ rawBlocks }: { rawBlocks: ImageTextBlock[] }) {
   const theme = useTheme()
 
   return (

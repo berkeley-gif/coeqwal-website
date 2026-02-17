@@ -19,8 +19,6 @@ import { useReducedMotion } from "@repo/motion"
 import { ScrollToButton, DisplayBlock } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
-
-
 export type VideoSource = { src: string; type: string }
 export interface VideoHeroProps {
   sources: VideoSource[]
@@ -279,7 +277,11 @@ export default function VideoHero({
               textAlign: { xs: "center", lg: "left" },
             }}
           >
-            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
+            <Typography
+              variant="h2Main"
+              component="h2"
+              sx={{ display: "block" }}
+            >
               {t("homePanel.titleLine1")}
             </Typography>
             <Typography variant="h1" component="h1" sx={{ display: "block" }}>

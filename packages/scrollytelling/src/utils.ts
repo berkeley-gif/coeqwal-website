@@ -23,10 +23,7 @@ export function getPhase(
 /**
  * Calculate sub-progress (0-1) within a given range.
  */
-export function getSubProgress(
-  progress: number,
-  range: ProgressRange,
-): number {
+export function getSubProgress(progress: number, range: ProgressRange): number {
   const [start, end] = range
   if (end === start) return progress >= start ? 1 : 0
   return Math.max(0, Math.min(1, (progress - start) / (end - start)))

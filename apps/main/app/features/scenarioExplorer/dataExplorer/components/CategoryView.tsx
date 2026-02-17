@@ -133,14 +133,6 @@ function SectionHeader({
 function useReservoirTierColors(scenarios: string[]) {
   const theme = useTheme()
 
-  // Tier level to color mapping from theme
-  const tierLevelColors: Record<number, string> = {
-    1: theme.palette.tiers.tier1,
-    2: theme.palette.tiers.tier2,
-    3: theme.palette.tiers.tier3,
-    4: theme.palette.tiers.tier4,
-  }
-
   // Fetch tier location data for each scenario
   // Using a combined SWR key for all scenarios
   const { data: allLocationData } = useSWR(
@@ -158,6 +150,14 @@ function useReservoirTierColors(scenarios: string[]) {
 
   // Build the cell color mapping: scenarioId -> reservoirId -> color
   const cellColors = useMemo(() => {
+    // Tier level to color mapping from theme
+    const tierLevelColors: Record<number, string> = {
+      1: theme.palette.tiers.tier1,
+      2: theme.palette.tiers.tier2,
+      3: theme.palette.tiers.tier3,
+      4: theme.palette.tiers.tier4,
+    }
+
     const colors: Record<string, Record<string, string>> = {}
 
     if (!allLocationData) return colors
@@ -182,7 +182,7 @@ function useReservoirTierColors(scenarios: string[]) {
     })
 
     return colors
-  }, [allLocationData, scenarios, tierLevelColors, theme.palette.tiers.tier3])
+  }, [allLocationData, scenarios, theme.palette.tiers])
 
   return cellColors
 }

@@ -20,7 +20,6 @@
 
 import React, { createContext, useRef, useState, useEffect } from "react"
 import { useScroll } from "@repo/motion"
-import type { MotionValue } from "framer-motion"
 import type { ScrollOffset, ScrollSectionContextValue } from "../types"
 
 export const ScrollSectionContext =

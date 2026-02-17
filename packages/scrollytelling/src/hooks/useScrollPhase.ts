@@ -17,7 +17,7 @@
  */
 
 import { useState, useEffect } from "react"
-import type { MotionValue } from "framer-motion"
+import { MotionValue } from "@repo/motion"
 import type { ScrollPhase, PhaseThresholds } from "../types"
 import { getPhase, getSubProgress } from "../utils"
 
@@ -41,7 +41,7 @@ export function useScrollPhase(
   })
 
   useEffect(() => {
-    const unsubscribe = scrollProgress.on("change", (value) => {
+    const unsubscribe = scrollProgress.on("change", (value: number) => {
       const phase = getPhase(value, thresholds)
 
       let phaseProgress = 0
