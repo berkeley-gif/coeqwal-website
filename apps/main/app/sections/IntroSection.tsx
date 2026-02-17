@@ -538,15 +538,15 @@ const IntroSection = () => {
         weights={[1, 1.6, 3, 2, 1]}
         panelBoundaries={boundaries}
         exitRange={
-          boundaries.ready && boundaries.panels[2]
+          boundaries.ready && boundaries.panels[4]
             ? [
-                // Fade out in the last 15% of Panel 2's scroll distance
-                boundaries.panels[2].start +
-                  (boundaries.panels[2].end - boundaries.panels[2].start) *
+                // Fade out in the last 15% of Panel 4's scroll distance
+                boundaries.panels[4].start +
+                  (boundaries.panels[4].end - boundaries.panels[4].start) *
                     0.85,
-                boundaries.panels[2].end,
+                boundaries.panels[4].end,
               ]
-            : [0.68, 0.74]
+            : [0.92, 0.98]
         }
         shiftRange={
           boundaries.ready && boundaries.panels[2]
@@ -579,6 +579,12 @@ const IntroSection = () => {
             line2: "matter to you?",
             textShadow: false,
             textColor: theme.palette.text.primary,
+          },
+          {
+            line1: "On this site,",
+            line2: "you can",
+            textShadow: false,
+            textColor: theme.palette.text.secondary,
           },
         ]}
       />
@@ -780,11 +786,12 @@ const IntroSection = () => {
             color: theme.palette.text.secondary,
           }}
         >
-          {/* Headline */}
+          {/* Headline - hidden on lg where MorphingHeadline handles it */}
           <Box
             sx={{
               mb: { xs: 4, lg: 6 },
               textAlign: { xs: "center", lg: "left" },
+              display: { xs: "block", lg: "none" },
             }}
           >
             <Box
