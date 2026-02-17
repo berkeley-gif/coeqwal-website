@@ -122,6 +122,7 @@ function StaggeredCircle({
               textAlign: "center",
               color: "inherit",
               lineHeight: "inherit",
+              whiteSpace: "pre-line",
             }}
           >
             {category.label}
@@ -197,11 +198,20 @@ function StaggeredCircle({
           </Box>
         )}
 
-        {/* Scenario list - always visible when showScenarios is true */}
-        {showScenarios && scenarioIds && scenarioIds.length > 0 && (
-          <Box sx={{ mt: 1.5, width: "100%" }}>
+        {/* Scenario list - fades in when showScenarios becomes true */}
+        {scenarioIds && scenarioIds.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showScenarios ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: showScenarios ? 0.3 : 0 }}
+            style={{
+              marginTop: 12,
+              width: "100%",
+              pointerEvents: showScenarios ? "auto" : "none",
+            }}
+          >
             <ScenarioList scenarioIds={scenarioIds} color={strokeColor} />
-          </Box>
+          </motion.div>
         )}
       </Box>
     </motion.div>
@@ -235,7 +245,8 @@ export default function CategoryCircles({
           sm: "repeat(3, 1fr)",
           lg: "repeat(6, 1fr)",
         },
-        gap: { xs: 3, lg: 3 },
+        gap: { xs: 3, lg: 4 },
+        alignItems: "start",
         mt: 0,
       }}
     >

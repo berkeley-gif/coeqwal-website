@@ -46,7 +46,7 @@ export default function ScenarioList({
         p: 0,
         display: "flex",
         flexDirection: "column",
-        gap: 1,
+        gap: 0.75,
         width: "100%",
       }}
     >
@@ -62,11 +62,12 @@ export default function ScenarioList({
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 0.25,
+              gap: 0.5,
               borderBottom: "1px solid",
-              borderColor: `${color}22`,
-              pb: 1,
-              "&:last-child": { borderBottom: "none", pb: 0 },
+              borderColor: `${color}18`,
+              pb: 1.5,
+              mb: 0.5,
+              "&:last-child": { borderBottom: "none", pb: 0, mb: 0 },
             }}
           >
             {/* ID + Name row */}
@@ -108,7 +109,7 @@ export default function ScenarioList({
                   color,
                   opacity: 0.75,
                   fontWeight: 400,
-                  lineHeight: 1.35,
+                  lineHeight: 1.3,
                   pl: `calc(${ID_COLUMN_WIDTH} + ${ID_GAP})`,
                 }}
               >

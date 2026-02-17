@@ -32,37 +32,37 @@ const VIDEO_SRCS: VideoSource[] = [
 const WATER_CATEGORIES: Category[] = [
   {
     id: "communities",
-    label: "Community water systems",
+    label: "Community\nwater systems",
     description:
       "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
   },
   {
     id: "farms",
-    label: "Farms, groundwater and food systems",
+    label: "Farms, groundwater\n& food systems",
     description:
       "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
   },
   {
     id: "rivers",
-    label: "Rivers, salmon and ecosystems",
+    label: "Rivers, salmon\n& ecosystems",
     description:
       "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
   },
   {
     id: "delta",
-    label: "The Delta as a living place",
+    label: "The Delta as\na living place",
     description:
       "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
   },
   {
     id: "climate",
-    label: "Climate risk, reliability and resilience",
+    label: "Climate risk,\nreliability & resilience",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
   },
   {
     id: "governance",
-    label: "Water governance and decision-making",
+    label: "Water governance\n& decision-making",
     description:
       "How evidence, trade-offs, and equity considerations inform water-management decisions.",
   },
@@ -358,10 +358,10 @@ function FloatingCategoryCircles({
   const staggerEnd = p2 ? p2.start + (p2.end - p2.start) * 0.75 : 0.66
 
   // The circles sit at ~50vh from the viewport top. The dark background reaches
-  // them before Panel 3's top hits the viewport top. Offset by 50% of Panel 3's
-  // height in progress units (Panel 3 is 100vh, so 50vh = 0.50 of its span).
+  // them before Panel 3's top hits the viewport top. Offset by 28% of Panel 3's
+  // height in progress units (circles sit at 28vh).
   const p3Span = p3 ? p3.end - p3.start : 0.15
-  const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.50
+  const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.28
 
   // Opacity: invisible before mid Panel 2, stay visible once revealed
   const opacity = useTransform(
@@ -370,14 +370,14 @@ function FloatingCategoryCircles({
     [0, 0, 1],
   )
 
-  // Y position: start at bottom (60vh), glide to panel middle (50vh) by p3.start,
-  // then scroll with Panel 3 (from 50vh to -50vh over Panel 3's height)
+  // Y position: start at bottom (60vh), glide to below text blocks (~28vh) by p3.start,
+  // then scroll with Panel 3 (from 28vh to -72vh over Panel 3's height)
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
   const yNum = useTransform(
     scrollYProgress,
     [appearStart, p2 ? p2.mid : 0.62, p3Start, p3End],
-    [60, 45, 50, -50],
+    [60, 45, 28, -72],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
@@ -421,8 +421,13 @@ function FloatingCategoryCircles({
         opacity,
         pointerEvents,
         zIndex: theme.zIndex.heroContent + 5,
-        paddingLeft: theme.space.panel.padding,
-        paddingRight: theme.space.panel.padding,
+        paddingLeft: showScenarios
+          ? theme.spacing(theme.space.section.md)
+          : theme.space.panel.padding,
+        paddingRight: showScenarios
+          ? theme.spacing(theme.space.section.md)
+          : theme.space.panel.padding,
+        transition: "padding 0.6s ease",
       }}
     >
       <CategoryCircles
@@ -680,10 +685,16 @@ const IntroSection = () => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
-            paddingTop: theme.space.panel.topOffset,
-            paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
-            paddingLeft: theme.space.panel.padding,
-            paddingRight: theme.space.panel.padding,
+            paddingTop: "clamp(90px, 12vh, 140px)",
+            paddingBottom: "clamp(80px, calc(16vh - 18px), 160px)",
+            paddingLeft: {
+              xs: theme.space.panel.padding,
+              lg: `${theme.spacing(theme.space.section.md)}`,
+            },
+            paddingRight: {
+              xs: theme.space.panel.padding,
+              lg: `${theme.spacing(theme.space.section.md)}`,
+            },
           }}
         >
           {/* Headline and paragraph - fade in when panel top reaches viewport top */}
