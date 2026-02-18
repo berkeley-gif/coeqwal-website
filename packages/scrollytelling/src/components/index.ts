@@ -1,3 +1,5 @@
 export { ScrollSection, ScrollSectionContext } from "./ScrollSection"
 export { ScrollElement } from "./ScrollElement"
 export { StickyElement } from "./StickyElement"
+export { StickyScrollSection } from "./StickyScrollSection"
+export { ScrollReveal } from "./ScrollReveal"

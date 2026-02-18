@@ -2,6 +2,8 @@
 export { ScrollSection, ScrollSectionContext } from "./components/ScrollSection"
 export { ScrollElement } from "./components/ScrollElement"
 export { StickyElement } from "./components/StickyElement"
+export { StickyScrollSection } from "./components/StickyScrollSection"
+export { ScrollReveal } from "./components/ScrollReveal"
 
 // Hooks
 export { useScrollProgress } from "./hooks/useScrollProgress"
@@ -9,6 +11,7 @@ export { useScrollPhase } from "./hooks/useScrollPhase"
 export { useScrollValue, useScrollString } from "./hooks/useScrollValue"
 export { usePanelBoundaries } from "./hooks/usePanelBoundaries"
 export type { PanelBoundary, PanelBoundaries } from "./hooks/usePanelBoundaries"
+export { useScrollSideEffect } from "./hooks/useScrollSideEffect"
 
 // Types
 export type {

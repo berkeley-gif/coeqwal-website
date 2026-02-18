@@ -1,0 +1,18 @@
+{
+  "opener": {
+    "title": "Your Storyline Title",
+    "subtitle": "A brief description of what this storyline covers."
+  },
+  "sections": {
+    "sticky": {
+      "title": "Sticky Section",
+      "paragraph1": "This paragraph fades in and slides up as you scroll through the sticky section.",
+      "paragraph2": "A second paragraph appears shortly after, demonstrating staggered scroll-linked animations."
+    },
+    "sideEffect": {
+      "title": "Side Effect Section",
+      "paragraph1": "As you scroll through this section, map markers appear and disappear at specific progress thresholds.",
+      "paragraph2": "This demonstrates the useScrollSideEffect hook for triggering imperative actions from scroll progress."
+    }
+  }
+}
