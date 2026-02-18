@@ -171,14 +171,17 @@ export default function MorphingHeadline({
       }
 
       if (index === count - 1) {
-        // Last headline ("On this site"): appears when Panel 4 enters viewport.
-        // Panel 4 is the last panel, so its top is at scroll progress ≈ 1.0.
-        // Fade in earlier — when Panel 3's content is ~90% scrolled through.
-        // panelEnd = panelStarts[count] ≈ Panel 3 end.
-        // Use a range well before panelEnd to ensure it's reachable.
-        const fadeIn = panelEnd - 0.06
+        // Last headline ("On this site"): appears when the site-actions panel
+        // enters viewport. panelEnd = panels[count-1].start = the start of the
+        // last panel. Fading in at exactly panelEnd ensures the headline is not
+        // visible during the previous (scenarios) panel.
+        const fadeIn = panelEnd
+        const fadeInEnd = Math.min(fadeIn + 0.02, 0.99)
+
+        // Outer exitRange in the consumer (IntroSection) handles the final
+        // fade-out, so we only need to define the fade-in here.
         return {
-          input: [fadeIn, fadeIn + 0.03, 1],
+          input: [fadeIn, fadeInEnd, 1.0],
           output: [0, 1, 1],
         }
       }

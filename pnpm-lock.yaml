@@ -217,6 +217,37 @@ importers:
         specifier: ^4.17.16
         version: 4.17.16
 
+  apps/storyline-template:
+    dependencies:
+      '@repo/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@repo/map':
+        specifier: workspace:*
+        version: link:../../packages/map
+      '@repo/motion':
+        specifier: workspace:*
+        version: link:../../packages/motion
+      '@repo/scrollytelling':
+        specifier: workspace:*
+        version: link:../../packages/scrollytelling
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      next:
+        specifier: ^15.2.1
+        version: 15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+      zustand:
+        specifier: ^5.0.3
+        version: 5.0.3(@types/react@19.0.10)(immer@10.1.1)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+
   packages/data:
     dependencies:
       react:

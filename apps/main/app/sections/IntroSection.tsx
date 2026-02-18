@@ -540,11 +540,16 @@ const IntroSection = () => {
         exitRange={
           boundaries.ready && boundaries.panels[4]
             ? [
-                // Fade out in the last 15% of Panel 4's scroll distance
-                boundaries.panels[4].start +
-                  (boundaries.panels[4].end - boundaries.panels[4].start) *
-                    0.85,
-                boundaries.panels[4].end,
+                // panels[4].start ≈ 1.0 and panels[4].end > 1.0 (the last panel
+                // always overflows the scroll range). Cap both values to [0, 1]
+                // so the fade-out is actually reachable by scrollYProgress.
+                Math.min(
+                  boundaries.panels[4].start +
+                    (boundaries.panels[4].end - boundaries.panels[4].start) *
+                      0.85,
+                  0.97,
+                ),
+                Math.min(boundaries.panels[4].end, 1.0),
               ]
             : [0.92, 0.98]
         }
