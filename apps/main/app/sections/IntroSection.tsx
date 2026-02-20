@@ -438,6 +438,26 @@ const IntroSection = () => {
   )
   const boundaries = usePanelBoundaries(introPanelsRef, panelRefs)
 
+  // Shared scroll progress for the introPanelsRef container, used by Panel 5
+  // headline to fade in after the category circles have fully exited.
+  const { scrollYProgress: introProgress } = useScroll({
+    target: introPanelsRef,
+    offset: ["start start", "end end"],
+    layoutEffect: false,
+  })
+
+  // Replicated the same p4ExitEnd formula used in FloatingCategoryCircles so the
+  // headline fades in exactly when the circles finish their opacity exit.
+  const p4Boundaries = boundaries.panels[4]
+  const p4ExitEnd = p4Boundaries
+    ? Math.min(p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.62, 0.99)
+    : 0.95
+  const panel5HeadlineOpacity = useTransform(
+    introProgress,
+    [p4ExitEnd, Math.min(p4ExitEnd + 0.04, 0.99)],
+    [0, 1],
+  )
+
   // Geometry-driven crossfade: scroll progress when VideoHero's bottom
   // meets the MorphingHeadline's top edge.
   const crossfadeAt = useMeetingProgress(
@@ -731,12 +751,6 @@ const IntroSection = () => {
                 zIndex: 2,
               }}
             >
-              <ScrollToButton
-                scrollToId="site-actions"
-                ariaLabel="Scroll to continue"
-                color={theme.palette.text.secondary}
-                size={52}
-              />
             </Box>
           </Box>
         </Box>
@@ -766,102 +780,36 @@ const IntroSection = () => {
             color: theme.palette.text.secondary,
           }}
         >
-          {/* Headline */}
-          <Box
-            sx={{
-              mb: { xs: 4, lg: 6 },
-              textAlign: { xs: "center", lg: "left" },
-            }}
-          >
+          {/* Headline — fades in once category circles have fully exited */}
+          <motion.div style={{ opacity: panel5HeadlineOpacity }}>
             <Box
               sx={{
-                fontSize: theme.typography.h1.fontSize,
-                maxWidth: "16ch",
+                textAlign: { xs: "center", lg: "left" },
               }}
             >
-              <Typography
-                variant="h2Main"
-                component="h2"
-                sx={{ display: "block", color: "inherit" }}
-              >
-                On this site,
-              </Typography>
-              <Typography
-                variant="h1"
-                component="span"
-                sx={{ display: "block", color: "inherit" }}
-              >
-                you can
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Three action columns */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
-              gap: { xs: 4, md: 6 },
-            }}
-          >
-            {[
-              {
-                action: "Learn",
-                description:
-                  "the basics of Central Valley water management and how to read our scenario data",
-                tabId: "learn" as const,
-              },
-              {
-                action: "Explore",
-                description:
-                  "the scenarios. Use tools to understand and compare them. Look at the data through the lenses of tradeoffs, equity, and resilience.",
-                tabId: "explore" as const,
-              },
-              {
-                action: "Share",
-                description:
-                  "your findings by capturing data and charts as you explore and exporting them as files.",
-                tabId: "share" as const,
-              },
-            ].map((item) => (
               <Box
-                key={item.action}
-                onClick={() => {
-                  const tabsEl = document.getElementById("tabs")
-                  if (tabsEl) {
-                    tabsEl.scrollIntoView({ behavior: "smooth" })
-                  }
-                }}
                 sx={{
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                  borderTop: `${theme.strokeWidth.rule}px solid ${theme.palette.text.secondary}44`,
-                  pt: 3,
-                  transition: "opacity 0.2s ease",
-                  "&:hover": {
-                    opacity: 0.8,
-                  },
+                  fontSize: theme.typography.h1.fontSize,
+                  maxWidth: "16ch",
                 }}
               >
                 <Typography
-                  variant="h4"
-                  component="h3"
-                  sx={{ color: "inherit", fontWeight: 600 }}
+                  variant="h2Main"
+                  component="h2"
+                  sx={{ display: "block", color: "inherit" }}
                 >
-                  {item.action}
+                  On this site,
                 </Typography>
                 <Typography
-                  variant="body2"
-                  component="p"
-                  sx={{ color: "inherit", opacity: 0.85, m: 0 }}
+                  variant="h1"
+                  component="span"
+                  sx={{ display: "block", color: "inherit" }}
                 >
-                  {item.description}
+                  you can
                 </Typography>
               </Box>
-            ))}
-          </Box>
+            </Box>
+          </motion.div>
         </Box>
         </Box>{/* end panel5Ref scroll runway wrapper */}
       </Box>
