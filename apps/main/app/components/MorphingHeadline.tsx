@@ -111,6 +111,16 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
   const prefersReducedMotion = useReducedMotion()
 
+  // Viewport height in pixels — updated on resize so the exit Y distance always
+  // matches the 1:1 natural scroll rate of the sticky paragraph that exits alongside it.
+  const [windowHeight, setWindowHeight] = useState(900)
+  useEffect(() => {
+    setWindowHeight(window.innerHeight)
+    const onResize = () => setWindowHeight(window.innerHeight)
+    window.addEventListener("resize", onResize, { passive: true })
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
   // Track scroll progress within the container (all panels)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -125,11 +135,13 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
     layoutEffect: false,
   })
 
-  // Exit opacity: fade out during exitRange
+  // Exit opacity: easeOut mirrors Panel3Text's paragraph fade — fast at first,
+  // slowing near zero, so both elements visually exit at the same perceived rate.
   const exitOpacity = useTransform(
     scrollYProgress,
     exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
     exitRange ? [1, 0] : [1, 1],
+    { ease: (t: number) => 1 - (1 - t) * (1 - t) },
   )
 
   /**
@@ -238,35 +250,41 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
   // Track dock offset (when scrolled past container, headline moves up with it)
   const [dockOffset, setDockOffset] = useState(0)
 
-  // Y transform: combines mid-panel shift (for circles) and exit scroll-away
-  // Builds a multi-keyframe sequence: 0 → shift up → hold → exit
+  // Y transform: combines mid-panel shift (for circles) and exit scroll-away.
+  // The exit segment uses easeIn (quadratic) so the headline starts slowly —
+  // matching the circles' gradual upward glide — then builds momentum off-screen.
+  // Shift and hold segments stay linear.
   const exitYInput: number[] = []
   const exitYOutput: number[] = []
+  const exitYEase: ((t: number) => number)[] = []
+  const linear = (t: number) => t
+  const easeInQuad = (t: number) => t * t
 
   if (shiftRange && exitRange) {
-    // Before shift: 0
     exitYInput.push(shiftRange[0])
     exitYOutput.push(0)
-    // After shift: -shiftAmount
     exitYInput.push(shiftRange[1])
     exitYOutput.push(-shiftAmount)
-    // Hold at -shiftAmount until exit starts
+    exitYEase.push(linear)
     if (exitRange[0] > shiftRange[1]) {
       exitYInput.push(exitRange[0])
       exitYOutput.push(-shiftAmount)
+      exitYEase.push(linear)
     }
-    // Exit: from -shiftAmount to far off screen
     exitYInput.push(exitRange[1])
-    exitYOutput.push(-shiftAmount - 800)
+    exitYOutput.push(-shiftAmount - windowHeight)
+    exitYEase.push(easeInQuad)
   } else if (exitRange) {
     exitYInput.push(exitRange[0], exitRange[1])
-    exitYOutput.push(0, -800)
+    exitYOutput.push(0, -windowHeight)
+    exitYEase.push(easeInQuad)
   } else {
     exitYInput.push(0, 1)
     exitYOutput.push(0, 0)
+    exitYEase.push(linear)
   }
 
-  const exitY = useTransform(scrollYProgress, exitYInput, exitYOutput)
+  const exitY = useTransform(scrollYProgress, exitYInput, exitYOutput, { ease: exitYEase })
 
   // Calculate opacity for a specific headline at a given scroll progress
   const calculateOpacity = useCallback(
