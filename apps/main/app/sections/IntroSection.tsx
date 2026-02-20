@@ -320,7 +320,9 @@ function FloatingCategoryCircles({
   // Y/exit thresholds derived from measured boundaries
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
-  const p3Mid = p3Start + (p3End - p3Start) * 0.5
+  // Hold start: circles are stationary at 50vh from p3HoldStart → p3StickyRelease.
+  // Old value was 0.50 (hold = 0.167 × span). New value 0.584 halves it to 0.083 × span.
+  const p3HoldStart = p3Start + (p3End - p3Start) * 0.584
   // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE ≈ 0.667).
   const p3StickyRelease = p3Start + (p3End - p3Start) * PANEL4_STICKY_RELEASE
   // Float finishes at 0.85: circles glide 30vh over ~55vh of scroll (≈ 0.55× natural
@@ -331,10 +333,13 @@ function FloatingCategoryCircles({
   // keeps the post-sticky-release runway constraint (always 100vh) from rushing the exit.
   const p4Start = p4 ? p4.start : p3End
   const p4Span = p4 ? p4.end - p4.start : 0.18
-  // Opacity fades over the last 20% of Panel 5's progress range.
+  // Opacity fades over 42%→62% of P4 (unchanged).
   // Cap at 0.99 so the fade always completes before the scroll container ends.
   const p4ExitStart = p4Start + p4Span * 0.42
   const p4ExitEnd = Math.min(p4Start + p4Span * 0.62, 0.99)
+  // Y endpoint is extended to 82% of P4: same 120vh drift (20→-100) over a longer
+  // scroll runway → circles scroll more slowly once the lists are visible.
+  const p4YEnd = Math.min(p4Start + p4Span * 0.82, 0.99)
 
   // Opacity: fade in at appear, stay fully opaque while drifting, fade during Panel 5 exit
   const opacity = useTransform(
@@ -343,12 +348,12 @@ function FloatingCategoryCircles({
     [0, 0, 1, 1, 0],
   )
 
-  // Y: glide in → arrive at midscreen → hold while headline visible → sticky releases →
-  // slow float to 20vh → immediately begin slow drift upward (no hold plateau) → off screen.
+  // Y: glide in → arrive at midscreen → hold (halved) while headline visible →
+  // sticky releases → slow float to 20vh → slow drift upward (extended runway) → off screen.
   const yNum = useTransform(
     scrollYProgress,
-    [appearStart, p2 ? p2.mid : 0.62, p3Mid, p3StickyRelease, p3ListsUp, p4ExitEnd],
-    [60,          45,                  50,    50,               20,         -100     ],
+    [appearStart, p2 ? p2.mid : 0.62, p3HoldStart, p3StickyRelease, p3ListsUp, p4YEnd],
+    [60,          45,                  50,           50,              20,         -100  ],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
