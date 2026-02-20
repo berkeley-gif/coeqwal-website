@@ -296,15 +296,16 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
     [opacityKeyframes],
   )
 
-  // Update opacities when scroll progress changes
+  // Update opacities when scroll progress changes.
+  // Also recalculate immediately for the current position whenever calculateOpacity
+  // changes (e.g. after panelBoundaries/crossfadeAt arrive while the page is already
+  // scrolled) — without this, opacities stay stale until the next scroll event.
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (value) => {
-      const newOpacities = headlines.map((_, index) =>
-        calculateOpacity(index, value),
-      )
-      setOpacities(newOpacities)
-    })
-    return unsubscribe
+    const recalculate = (value: number) => {
+      setOpacities(headlines.map((_, index) => calculateOpacity(index, value)))
+    }
+    recalculate(scrollYProgress.get())
+    return scrollYProgress.on("change", recalculate)
   }, [scrollYProgress, headlines, calculateOpacity])
 
   // Separate scroll listener for docking (works even when scrolled past container)
@@ -356,17 +357,19 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
       )
     }
 
-    const unsubscribe = scrollYProgress.on("change", (value) => {
-      // Find which panel the scroll position falls in
-      let newIndex = 0
+    const findIndex = (value: number) => {
+      let idx = 0
       for (let i = 0; i < computedBoundaries.length - 1; i++) {
         const mid =
           ((computedBoundaries[i] ?? 0) + (computedBoundaries[i + 1] ?? 1)) / 2
-        if (value >= mid) newIndex = Math.min(i + 1, headlines.length - 1)
+        if (value >= mid) idx = Math.min(i + 1, headlines.length - 1)
       }
-      setActiveIndex(newIndex)
-    })
-    return unsubscribe
+      return idx
+    }
+    // Recalculate immediately so activeIndex is correct when boundaries arrive
+    // while the page is already scrolled (same staleness fix as opacities above).
+    setActiveIndex(findIndex(scrollYProgress.get()))
+    return scrollYProgress.on("change", (value) => setActiveIndex(findIndex(value)))
   }, [scrollYProgress, headlines, weights, panelBoundaries])
 
   // Shared headline styles
