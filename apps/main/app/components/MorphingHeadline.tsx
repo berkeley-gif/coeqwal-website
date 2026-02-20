@@ -299,7 +299,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(funct
   // Update opacities when scroll progress changes.
   // Also recalculate immediately for the current position whenever calculateOpacity
   // changes (e.g. after panelBoundaries/crossfadeAt arrive while the page is already
-  // scrolled) — without this, opacities stay stale until the next scroll event.
+  // scrolled). Without this, opacities stay stale until the next scroll event.
   useEffect(() => {
     const recalculate = (value: number) => {
       setOpacities(headlines.map((_, index) => calculateOpacity(index, value)))
