@@ -446,15 +446,20 @@ const IntroSection = () => {
     layoutEffect: false,
   })
 
-  // Replicated the same p4ExitEnd formula used in FloatingCategoryCircles so the
-  // headline fades in exactly when the circles finish their opacity exit.
+  // Mirror the same p4ExitStart/p4ExitEnd fractions used in FloatingCategoryCircles.
+  // The headline cross-fades WITH the circles' opacity exit (starts at p4ExitStart,
+  // fully visible by p4ExitEnd) so there is no gap between circles disappearing
+  // and the headline appearing — without touching any circle timing.
   const p4Boundaries = boundaries.panels[4]
+  const p4ExitStart = p4Boundaries
+    ? p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.42
+    : 0.93
   const p4ExitEnd = p4Boundaries
     ? Math.min(p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.62, 0.99)
     : 0.95
   const panel5HeadlineOpacity = useTransform(
     introProgress,
-    [p4ExitEnd, Math.min(p4ExitEnd + 0.04, 0.99)],
+    [p4ExitStart, p4ExitEnd],
     [0, 1],
   )
 
