@@ -20,7 +20,7 @@
 
 "use client"
 
-import React, { useEffect, useState, useMemo, useCallback } from "react"
+import React, { useEffect, useState, useMemo, useCallback, forwardRef } from "react"
 import { useScroll, motion, useReducedMotion, useTransform } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
@@ -78,6 +78,17 @@ export interface MorphingHeadlineProps {
     panels: { start: number; end: number; mid: number }[]
     ready: boolean
   }
+  /**
+   * Scroll progress at which the first headline (index 0) should be fully gone
+   * and the second headline (index 1) should be fully visible.
+   *
+   * Computed via useMeetingProgress() in the consumer — e.g. pass the progress
+   * value when VideoHero's bottom meets the MorphingHeadline's top. The crossfade
+   * spans from crossfadeAt * 0.5 (midpoint of Panel 0) to crossfadeAt.
+   *
+   * Falls back to weight/boundary-based timing when not provided.
+   */
+  crossfadeAt?: number
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
   exitRange?: [number, number]
   /** Scroll progress range [start, end] where headline shifts up to make room (e.g., for circles) */
@@ -86,15 +97,16 @@ export interface MorphingHeadlineProps {
   shiftAmount?: number
 }
 
-export default function MorphingHeadline({
+const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(function MorphingHeadline({
   headlines,
   containerRef,
   weights,
   panelBoundaries,
+  crossfadeAt,
   exitRange,
   shiftRange,
   shiftAmount = 100,
-}: MorphingHeadlineProps) {
+}, ref) {
   const theme = useTheme()
   // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
   const prefersReducedMotion = useReducedMotion()
@@ -163,41 +175,60 @@ export default function MorphingHeadline({
       const panelSize = panelEnd - panelStart
 
       if (index === 0) {
-        // Video hero: visible at start, fades out at Panel 1 boundary
+        // Video hero: fade out toward Panel 1 boundary.
+        // If crossfadeAt is provided (geometry-driven), the crossfade completes
+        // exactly when the two elements meet; it starts at the midpoint.
+        // Otherwise fall back to a narrow window around panelEnd.
+        const fadeOutEnd = crossfadeAt ?? panelEnd
+        const fadeOutStart = crossfadeAt
+          ? crossfadeAt * 0.5
+          : panelEnd - cw * panelSize
         return {
-          input: [0, panelEnd - cw * panelSize, panelEnd + cw * panelSize],
+          input: [0, fadeOutStart, fadeOutEnd],
           output: [1, 1, 0],
         }
       }
 
-      if (index === count - 1) {
-        // Last headline ("On this site"): appears when the site-actions panel
-        // enters viewport. panelEnd = panels[count-1].start = the start of the
-        // last panel. Fading in at exactly panelEnd ensures the headline is not
-        // visible during the previous (scenarios) panel.
-        const fadeIn = panelEnd
-        const fadeInEnd = Math.min(fadeIn + 0.02, 0.99)
-
-        // Outer exitRange in the consumer (IntroSection) handles the final
-        // fade-out, so we only need to define the fade-in here.
+      if (index === 1 && crossfadeAt !== undefined) {
+        // "What is COEQWAL?" — fade in synchronized with Panel 0 fade-out.
+        // Starts at crossfadeAt * 0.5, completes at crossfadeAt.
+        const fadeInStart = crossfadeAt * 0.5
+        const fadeInEnd = crossfadeAt
         return {
-          input: [fadeIn, fadeInEnd, 1.0],
+          input: [
+            fadeInStart,
+            fadeInEnd,
+            panelEnd - 0.15 * panelSize,
+            panelEnd - 0.05 * panelSize,
+          ],
+          output: [0, 1, 1, 0],
+        }
+      }
+
+      if (index === count - 1) {
+        const fadeInEnd = Math.min(panelStart + 0.02, 0.99)
+        return {
+          input: [panelStart, fadeInEnd, 1.0],
           output: [0, 1, 1],
         }
       }
 
-      // Middle headlines: fade in at panel start, fade out sharply before panel end
+      // Middle headlines: fade in mirroring the previous headline's fade-out window
+      // (based on the previous panel's size), fade out before this panel ends.
+      // Using the previous panel's size ensures the crossfade is simultaneous —
+      // both headlines are animating over the exact same scroll range.
+      const prevPanelSize = panelStart - (panelStarts[index - 1] ?? 0)
       return {
         input: [
-          panelStart - cw * panelSize,
-          panelStart + cw * panelSize,
+          panelStart - 0.15 * prevPanelSize,
+          panelStart - 0.05 * prevPanelSize,
           panelEnd - 0.15 * panelSize,
           panelEnd - 0.05 * panelSize,
         ],
         output: [0, 1, 1, 0],
       }
     })
-  }, [headlines, weights, panelBoundaries])
+  }, [headlines, weights, panelBoundaries, crossfadeAt])
 
   // Track opacities for all headlines (dynamic array)
   const [opacities, setOpacities] = useState<number[]>(() =>
@@ -334,6 +365,7 @@ export default function MorphingHeadline({
     const activeHeadline = headlines[activeIndex]
     return (
       <Box
+        ref={ref}
         sx={{
           position: "fixed",
           top: theme.space.panel.topOffset,
@@ -375,6 +407,7 @@ export default function MorphingHeadline({
 
   return (
     <motion.div
+      ref={ref}
       style={{
         y: exitY,
         opacity: exitOpacity,
@@ -459,4 +492,6 @@ export default function MorphingHeadline({
     </Box>
     </motion.div>
   )
-}
+})
+
+export default MorphingHeadline
