@@ -42,6 +42,17 @@ const PARA_LEAVE = 0.8
  *  Panel 4's sticky viewport subtracts this so its paragraph stays aligned with the headline. */
 const HEADLINE_SHIFT_PX = 100
 
+/** Panel 4 outer container height (scroll runway). */
+const PANEL4_HEIGHT_VH = 300
+/** Sticky viewport height (always 100vh). */
+const PANEL4_STICKY_VH = 100
+/**
+ * Local-progress fraction at which Panel 4's sticky viewport releases.
+ * = 1 − sticky_height / container_height = 1 − 100/300 ≈ 0.667.
+ * The MorphingHeadline and the paragraph both start their upward exit at this moment.
+ */
+const PANEL4_STICKY_RELEASE = 1 - PANEL4_STICKY_VH / PANEL4_HEIGHT_VH
+
 /**
  * Panel1Paragraph - Scroll-linked paragraph for frontmatter panel 1.
  * Must be inside a ScrollSection. Starts 100% below its position and
@@ -223,9 +234,16 @@ function Panel3Text({
   // Remap global scroll progress to a 0→1 local progress for Panel 4
   const localProgress = useTransform(scrollYProgress, [p3Start, p3End], [0, 1])
 
-  const opacity = useScrollValue(localProgress, [0, PARA_APPEAR, PARA_LEAVE, 1], [0, 1, 1, 0], {
-    ease: easeOut,
-  })
+  // Start the fade at PANEL4_STICKY_RELEASE (≈0.667) — the same moment the CSS sticky
+  // viewport physically releases and the paragraph begins scrolling upward.
+  // Synchronizing the opacity fade with the scroll onset prevents the jarring gap
+  // where the paragraph is already moving but still fully opaque.
+  const opacity = useScrollValue(
+    localProgress,
+    [0, PARA_APPEAR, PANEL4_STICKY_RELEASE, 1],
+    [0, 1, 1, 0],
+    { ease: easeOut },
+  )
 
   return (
     <motion.div
@@ -283,6 +301,7 @@ function FloatingCategoryCircles({
   // Panel indices: 0=VideoHero, 1=Panel1, 2=Panel2, 3=Panel3(scenarios), 4=Panel4(actions)
   const p2 = boundaries.panels[2] // Panel 2 (water issues)
   const p3 = boundaries.panels[3] // Panel 3 (scenarios, dark bg)
+  const p4 = boundaries.panels[4] // Panel 4 (site-actions) — circles borrow this for exit
 
   // Derive thresholds from measured boundaries
   // Circles appear at mid Panel 2, fully visible slightly after
@@ -298,23 +317,38 @@ function FloatingCategoryCircles({
   const p3Span = p3 ? p3.end - p3.start : 0.15
   const darkBgStart = (p3 ? p3.start : 0.848) - p3Span * 0.33
 
-  // Opacity: invisible before mid Panel 2, stay visible once revealed
-  const opacity = useTransform(
-    scrollYProgress,
-    [0, appearStart, appearEnd],
-    [0, 0, 1],
-  )
-
-  // Y position: start at bottom (60vh), glide to mid-screen (~50vh) by mid Panel 4,
-  // hold at 50vh while scenario lists are visible, then exit upward
+  // Y/exit thresholds derived from measured boundaries
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
-  const p3Mid = p3Start + (p3End - p3Start) * 0.5   // arrival = scenarioThreshold
-  const p3HoldEnd = p3Start + (p3End - p3Start) * 0.8
+  const p3Mid = p3Start + (p3End - p3Start) * 0.5
+  // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE ≈ 0.667).
+  const p3StickyRelease = p3Start + (p3End - p3Start) * PANEL4_STICKY_RELEASE
+  // Float finishes at 0.85: circles glide 30vh over ~55vh of scroll (≈ 0.55× natural
+  // scroll speed), which eliminates the abrupt "pop" a short range causes.
+  const p3ListsUp = p3Start + (p3End - p3Start) * 0.85
+
+  // Circles drift slowly upward through Panel 5.  Borrowing Panel 5's scroll runway
+  // keeps the post-sticky-release runway constraint (always 100vh) from rushing the exit.
+  const p4Start = p4 ? p4.start : p3End
+  const p4Span = p4 ? p4.end - p4.start : 0.18
+  // Opacity fades over the last 20% of Panel 5's progress range.
+  // Cap at 0.99 so the fade always completes before the scroll container ends.
+  const p4ExitStart = p4Start + p4Span * 0.42
+  const p4ExitEnd = Math.min(p4Start + p4Span * 0.62, 0.99)
+
+  // Opacity: fade in at appear, stay fully opaque while drifting, fade during Panel 5 exit
+  const opacity = useTransform(
+    scrollYProgress,
+    [0, appearStart, appearEnd, p4ExitStart, p4ExitEnd],
+    [0, 0, 1, 1, 0],
+  )
+
+  // Y: glide in → arrive at midscreen → hold while headline visible → sticky releases →
+  // slow float to 20vh → immediately begin slow drift upward (no hold plateau) → off screen.
   const yNum = useTransform(
     scrollYProgress,
-    [appearStart, p2 ? p2.mid : 0.62, p3Mid, p3HoldEnd, p3End],
-    [60, 45, 50, 50, -150],
+    [appearStart, p2 ? p2.mid : 0.62, p3Mid, p3StickyRelease, p3ListsUp, p4ExitEnd],
+    [60,          45,                  50,    50,               20,         -100     ],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
@@ -335,8 +369,10 @@ function FloatingCategoryCircles({
   const lightColor = theme.palette.common.white
   const [circleColor, setCircleColor] = useState(darkColor)
 
-  // Show scenario lists after circles hold for a moment (10% into hold period)
-  const scenarioThreshold = p3Start + (p3End - p3Start) * 0.5
+  // Reveal lists exactly when circles settle at their final Y position (p3ListsUp).
+  // This is after PANEL4_STICKY_RELEASE (≈0.667), so the headline and paragraph
+  // have already scrolled off screen before the lists appear.
+  const scenarioThreshold = p3ListsUp
   const [showScenarios, setShowScenarios] = useState(false)
 
   useEffect(() => {
@@ -467,24 +503,21 @@ const IntroSection = () => {
       <MorphingHeadline
         ref={headlineRef}
         containerRef={introPanelsRef}
-        weights={[1, 1.6, 3, 2, 1]}
+        weights={[1, 1.6, 3, 2]}
         panelBoundaries={boundaries}
         crossfadeAt={crossfadeAt > 0 ? crossfadeAt : undefined}
         exitRange={
-          boundaries.ready && boundaries.panels[4]
+          boundaries.ready && boundaries.panels[3]
             ? [
-                // panels[4].end overflows scroll range (last panel's bottom is past
-                // the scroll container end). Cap both values so the fade-out is
-                // reachable by scrollYProgress.
-                Math.min(
-                  boundaries.panels[4].start +
-                    (boundaries.panels[4].end - boundaries.panels[4].start) *
-                      0.85,
-                  0.97,
-                ),
-                Math.min(boundaries.panels[4].end, 1.0),
+                // Start exit exactly when the Panel 4 sticky viewport releases
+                // (PANEL4_STICKY_RELEASE = 1 − sticky_vh / container_vh ≈ 0.667),
+                // so the fixed headline and the unsticking paragraph move upward together.
+                boundaries.panels[3].start +
+                  (boundaries.panels[3].end - boundaries.panels[3].start) *
+                    PANEL4_STICKY_RELEASE,
+                Math.min(boundaries.panels[3].end, 1.0),
               ]
-            : [0.92, 0.98]
+            : [0.82, 0.91]
         }
         shiftRange={
           boundaries.ready && boundaries.panels[2]
@@ -521,12 +554,6 @@ const IntroSection = () => {
           {
             line1: "Water management",
             line2: "scenarios",
-            textShadow: false,
-            textColor: theme.palette.text.secondary,
-          },
-          {
-            line1: "On this site,",
-            line2: "you can",
             textShadow: false,
             textColor: theme.palette.text.secondary,
           },
@@ -671,7 +698,7 @@ const IntroSection = () => {
           ref={panel4Ref}
           id="scenarios"
           aria-label="COEQWAL library of Central Valley water management scenarios"
-          sx={{ minHeight: "200vh", position: "relative" }}
+          sx={{ minHeight: `${PANEL4_HEIGHT_VH}vh`, position: "relative" }}
         >
           <Box
             sx={{
@@ -715,12 +742,11 @@ const IntroSection = () => {
         </Box>
 
         {/* Panel 4 - Learn / Explore / Share
-            Outer div gives panel5Ref 200vh of total height so usePanelBoundaries
-            measures panels[4].start well below 1.0, giving the MorphingHeadline
-            ("On this site, you can") a scroll runway to appear before the container
-            ends. The inner section is sticky so the content stays pinned while the
-            user scrolls through that extra runway. */}
-        <Box ref={panel5Ref} sx={{ position: "relative", height: "200vh" }}>
+            350vh outer container: the category circles borrow the first ~42% of this
+            runway (≈147vh) as an extended inspect window before they exit. The inner
+            section is sticky so the "On this site, you can" content stays pinned while
+            the circles are still visible overhead. */}
+        <Box ref={panel5Ref} sx={{ position: "relative", height: "350vh" }}>
         <Box
           component="section"
           id="site-actions"
@@ -740,12 +766,11 @@ const IntroSection = () => {
             color: theme.palette.text.secondary,
           }}
         >
-          {/* Headline - hidden on lg where MorphingHeadline handles it */}
+          {/* Headline */}
           <Box
             sx={{
               mb: { xs: 4, lg: 6 },
               textAlign: { xs: "center", lg: "left" },
-              display: { xs: "block", lg: "none" },
             }}
           >
             <Box
