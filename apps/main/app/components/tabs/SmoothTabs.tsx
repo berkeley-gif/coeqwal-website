@@ -177,6 +177,8 @@ export default function SmoothTabs() {
                 borderTop: isInTabsArea
                   ? "none"
                   : `${theme.strokeWidth.rule}px solid ${theme.palette.blue.darkest}22`,
+                // File-tab shape: triangle cut from upper-right corner with equal legs (80px × 80px).
+                clipPath: "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -188,7 +190,7 @@ export default function SmoothTabs() {
                     position: "absolute",
                     left: 0,
                     right: 0,
-                    bottom: -5,
+                    bottom: 0,
                     height: 5,
                     background: `var(--accent, ${panelColor})`,
                   }}
