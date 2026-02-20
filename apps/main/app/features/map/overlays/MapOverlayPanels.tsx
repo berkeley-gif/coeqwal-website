@@ -325,20 +325,22 @@ export default function MapOverlayPanels() {
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
   // visibility tracking in useMotionValueEvent above
 
-  // First panel entrance animation
+  // First panel entrance animation — triggered when the central-valley panel enters view.
+  // Threshold 0.01: fire as soon as a single pixel of the element is visible so the
+  // slide-in animation starts the moment the element arrives in the viewport, whether
+  // from the auto-scroll in Learn.tsx or from the user's own manual scroll.
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target.id === "california-call" && entry.isIntersecting) {
-            setIsFirstPanelVisible(true)
-          }
-        })
+        if (entries[0]?.isIntersecting) {
+          setIsFirstPanelVisible(true)
+          observer.disconnect()
+        }
       },
-      { threshold: 0.5, rootMargin: "0px 0px -200px 0px" },
+      { threshold: 0.01 },
     )
 
-    const mapPanel = document.getElementById("california-call")
+    const mapPanel = document.getElementById("central-valley-call")
     if (mapPanel) observer.observe(mapPanel)
 
     return () => observer.disconnect()
@@ -360,51 +362,14 @@ export default function MapOverlayPanels() {
         offset={SCROLLAMA_CONFIG.offset}
         debug={SCROLLAMA_CONFIG.debug}
       >
-        {/* ==================== SECTION 1: California overview ==================== */}
+        {/* ==================== SECTION 1: California overview ====================
+            Short scroll runway — no visible content.
+            Fires the Scrollama "california" step as soon as the section enters
+            the viewport, triggering the Central Valley zoom via useLearnScrollama.
+            50vh gives the zoom animation time to play and the momentum of an
+            active scroll to settle before the central-valley paragraph slides in. */}
         <Step data={"california" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="california-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                Did you know that California has one of the most complex water
-                systems in the world?
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  mt: theme.space.component.xl,
-                }}
-              >
-                <Box
-                  component="span"
-                  sx={{
-                    fontSize: "1.5rem",
-                    color: theme.palette.common.white,
-                    animation: "bounce 2s ease-in-out infinite",
-                    "@keyframes bounce": {
-                      "0%, 100%": { transform: "translateY(0)" },
-                      "50%": { transform: "translateY(-8px)" },
-                    },
-                  }}
-                >
-                  ↓
-                </Box>
-              </Box>
-            </CallResponsePanel>
-          </Box>
+          <Box sx={{ height: "50vh", pointerEvents: "none" }} />
         </Step>
 
         {/* ==================== SECTION 2: Central Valley ==================== */}
@@ -731,40 +696,8 @@ export default function MapOverlayPanels() {
                 </Box>{" "}
                 project uses CalSim to explore a wide range of different water
                 management strategies and climate futures. We are making these
-                scenarios available to the public.
-              </Typography>
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 11: Public Data ==================== */}
-        <Step data={"public-data" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="public-data-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                We are making these{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  alternative water management scenarios
-                </Box>{" "}
-                available to the public so that communities can envision
-                alternative water futures for California and understand the
-                consequences that different water management strategies can
-                bring.
+                scenarios available to the public so that communities can
+                envision alternative water futures for California.
               </Typography>
             </CallResponsePanel>
           </Box>
@@ -848,7 +781,7 @@ export default function MapOverlayPanels() {
                   gap: theme.space.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: theme.space.page.x, // Match left panel padding
+                  pr: theme.space.panel.padding, // Match left panel padding
                   pointerEvents: "none",
                 }}
               >
@@ -913,7 +846,7 @@ export default function MapOverlayPanels() {
                                 variant="tooltipHeader"
                                 sx={{ mb: theme.space.component.xs }}
                               >
-                                Strategy
+                                1. Strategy
                               </Typography>
                               This describes the water management strategy being
                               modeled.
@@ -924,18 +857,7 @@ export default function MapOverlayPanels() {
                                   mt: theme.space.component.sm,
                                   fontStyle: "italic",
                                 }}
-                              >
-                                Click the{" "}
-                                <InfoIcon
-                                  sx={{
-                                    fontSize: "1rem",
-                                    verticalAlign: "text-top",
-                                    mx: 0.25,
-                                    color: "blue.bright",
-                                  }}
-                                />{" "}
-                                icon to see definitions of terms.
-                              </Box>
+                              ></Box>
                             </>
                           }
                           position="left"
@@ -1008,7 +930,7 @@ export default function MapOverlayPanels() {
                                 variant="tooltipHeader"
                                 sx={{ mb: theme.space.component.xs }}
                               >
-                                Key operations
+                                2. Key operations
                               </Typography>
                               These icons represent the key operational
                               decisions that define this water management
