@@ -15,12 +15,10 @@
 
 import React from "react"
 import { motion } from "@repo/motion"
-import { ScrollToButton, DisplayBlock, Panel } from "@repo/ui"
+import { ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 import { fadeIn } from "../lib/constants/motionAnimations"
-
-const MotionBox = motion.create(Box)
 
 export interface CenterImageTextProps {
   /** Panel ID for navigation */

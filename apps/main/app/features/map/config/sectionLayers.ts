@@ -21,7 +21,6 @@ export type SectionId =
   | "distribution"
   | "calsim"
   | "coeqwal"
-  | "public-data"
   | "scenario-intro"
   | "scenario-conclusion"
 
@@ -115,7 +114,6 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   distribution: BASINS_AND_RIVERS,
   calsim: BASINS_AND_RIVERS,
   coeqwal: BASINS_AND_RIVERS,
-  "public-data": BASINS_AND_RIVERS,
   "scenario-intro": BASINS_AND_RIVERS,
   "scenario-conclusion": BASINS_AND_RIVERS,
 }

@@ -86,12 +86,13 @@ function StaggeredCircle({
   const canHover = useMediaQuery("(hover: hover) and (pointer: fine)")
   const interactive = !showScenarios
 
-  const hoverHandlers = canHover && interactive
-    ? {
-        onMouseEnter: () => onSelect(category.id),
-        onMouseLeave: () => onSelect(null),
-      }
-    : {}
+  const hoverHandlers =
+    canHover && interactive
+      ? {
+          onMouseEnter: () => onSelect(category.id),
+          onMouseLeave: () => onSelect(null),
+        }
+      : {}
   const clickHandler =
     !canHover && interactive
       ? { onClick: () => onSelect(isSelected ? null : category.id) }
@@ -152,9 +153,7 @@ function StaggeredCircle({
             borderRadius: "50%",
             border: `${theme.strokeWidth.rule}px ${isSelected && !showScenarios ? "solid" : "dashed"} ${strokeColor}`,
             backgroundColor:
-              isSelected && !showScenarios
-                ? strokeColor
-                : "transparent",
+              isSelected && !showScenarios ? strokeColor : "transparent",
             transition: "all 0.3s ease",
             display: "flex",
             alignItems: "center",

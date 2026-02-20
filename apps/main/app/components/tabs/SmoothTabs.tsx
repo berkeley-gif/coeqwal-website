@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme, alpha } from "@repo/ui/mui"
 import { TwoColumnInterstitial } from "@repo/ui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
@@ -29,8 +29,18 @@ function TabDescription({ tab }: { tab: TabKey }) {
           body="Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making"
           linkListLabel="Learn more about"
           links={[
-            { label: "How water moves through California" },
-            { label: "How climate change affects California water" },
+            {
+              label: "How water moves through California",
+              href: "https://flow.coeqwal.org",
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+            {
+              label: "How climate change affects California water",
+              href: "https://climate.coeqwal.org",
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
             { label: "How water is managed in California" },
             { label: "How equity shapes California water" },
           ]}
@@ -128,6 +138,11 @@ export default function SmoothTabs() {
         top: theme.layout.collapsedHeaderHeight,
         zIndex: theme.zIndex.appBar,
         marginTop: "-80px", // Pull tabs up to appear at bottom of ActionPanel
+        backgroundColor: isInTabsArea
+          ? alpha(theme.palette.text.primary, 0.75)
+          : "transparent",
+        transition: "background-color 0.4s ease",
+        pointerEvents: "auto",
       }}
     >
       <div
@@ -161,10 +176,11 @@ export default function SmoothTabs() {
                 flex: 1,
                 position: "relative",
                 border: "none",
-                background: panelColor,
+                backgroundColor: panelColor,
                 cursor: "pointer",
                 color: theme.palette.common.white,
-                transition: "padding 0.3s ease",
+                transition:
+                  "padding 0.4s ease, clip-path 0.4s ease, gap 0.4s ease, font-size 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
                 gap: isInTabsArea ? 0 : 12,
@@ -174,11 +190,15 @@ export default function SmoothTabs() {
                 padding: isInTabsArea
                   ? "8px 20px"
                   : `24px ${theme.space.panel.padding}`,
-                borderTop: isInTabsArea
-                  ? "none"
-                  : `${theme.strokeWidth.rule}px solid ${theme.palette.blue.darkest}22`,
-                // File-tab shape: triangle cut from upper-right corner with equal legs (80px × 80px).
-                clipPath: "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
+                borderTop: "none",
+                borderBottom: isInTabsArea
+                  ? `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}80`
+                  : "none",
+                // File-tab shape: triangle cut from upper-right corner (80px).
+                // Smaller when docked (20px).
+                clipPath: isInTabsArea
+                  ? "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)"
+                  : "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
               }}
             >
               {/* Active tab indicator - only show when expanded, hide when docked */}
@@ -200,13 +220,13 @@ export default function SmoothTabs() {
                 component="span"
                 variant={isInTabsArea ? "tabLabelDocked" : "h4"}
                 sx={{
-                  transition: theme.transition.quick,
+                  transition: "font-size 0.4s ease, color 0.4s ease",
                   fontWeight: 600,
                 }}
               >
                 {label.charAt(0).toUpperCase() + label.slice(1)}
               </Typography>
-              {/* Description - only when expanded, matches Panel 4 column style */}
+              {/* Description - only when expanded */}
               {!isInTabsArea && (
                 <Typography
                   component="span"
@@ -234,7 +254,7 @@ export default function SmoothTabs() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
+            transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
             style={{
               overflow: "hidden",
               width: "100%",

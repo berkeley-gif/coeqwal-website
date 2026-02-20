@@ -19,7 +19,10 @@ export function useLearnScrollama() {
    * Updates the active section in the store.
    */
   const onStepEnter = useCallback(({ data }: StepEvent<SectionId>) => {
-    mapActions.setActiveSection(data)
+    // The california step has no visible content; entering it immediately triggers
+    // the central-valley map state so the zoom animation starts right away.
+    const effectiveSection = data === "california" ? "central-valley" : data
+    mapActions.setActiveSection(effectiveSection)
 
     // Clear outcome visualization when entering any section other than scenario-intro
     // This handles cases where user scrolls quickly past the exit trigger

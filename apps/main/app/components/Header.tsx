@@ -4,6 +4,7 @@ import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme, Box } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
+import { WATER_THEMES } from "@repo/data/coeqwal"
 
 /**
  * Main application header
@@ -20,6 +21,9 @@ export function Header() {
   const router = useRouter()
   const theme = useTheme()
   const { isInTabsArea, isHeaderDark } = useTabs()
+  // Once docked in the tabs area the background is solid blue, so always use
+  // white text/logo regardless of what IntroSection's scroll listener set.
+  const effectiveHeaderDark = isHeaderDark && !isInTabsArea
 
   // Smooth scroll to top using requestAnimationFrame
   // Native smooth scroll gets interrupted by React state changes during the tabs
@@ -58,11 +62,18 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
+  const waterThemesOptions = WATER_THEMES.map((theme) => ({
+    key: theme.id,
+    // Replace newlines with spaces for the single-line dropdown label
+    label: theme.label.replace(/\n/g, " "),
+    onClick: () => {},
+  }))
+
   return (
     <Box
       sx={{
         // Remove text shadow when header is in dark/flat mode
-        ...(isHeaderDark && {
+        ...(effectiveHeaderDark && {
           "& .MuiButton-root, & .MuiToolbar-root": {
             textShadow: "none !important",
           },
@@ -71,22 +82,25 @@ export function Header() {
     >
       <BaseHeader
         onLogoClick={handleLogoClick}
-        onAboutClick={() => router.push("about")}
-        onGetDataClick={() => router.push("data")}
+        onAboutClick={() => router.push("/about")}
+        onGetDataClick={() => router.push("/data")}
+        waterThemesOptions={waterThemesOptions}
         // Dynamic background: solid when in tabs area, transparent otherwise
-        backgroundColor={isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"}
+        backgroundColor={
+          isInTabsArea ? "rgba(42, 82, 135, 0.75)" : "transparent"
+        }
         // Text color and logo controlled by IntroSection via context
         textColor={
-          isHeaderDark
+          effectiveHeaderDark
             ? theme.palette.text.primary
             : theme.palette.common.white
         }
         borderBottom={
-          isHeaderDark
+          effectiveHeaderDark
             ? `${theme.strokeWidth.rule}px solid ${theme.palette.text.primary}CC`
             : `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}CC`
         }
-        logoVariant={isHeaderDark ? "color" : "light"}
+        logoVariant={effectiveHeaderDark ? "color" : "light"}
       />
     </Box>
   )

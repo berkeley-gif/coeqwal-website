@@ -710,6 +710,7 @@ export function getScenarioIconDefs(scenarioId: string): IconDef[] {
   if (!iconIds) return []
 
   return iconIds
+    .filter((id) => !id.startsWith("theme_"))
     .map((id) => ICON_REGISTRY[id])
     .filter((def): def is IconDef => def != null)
 }

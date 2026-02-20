@@ -29,7 +29,6 @@ interface ScenarioListProps {
   highlightedId?: string | null
 }
 
-
 export default function ScenarioList({
   scenarioIds,
   color = "inherit",

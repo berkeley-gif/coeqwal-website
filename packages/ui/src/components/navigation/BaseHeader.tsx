@@ -74,6 +74,7 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
+import type { NavDropdownOption } from "./NavDropdown"
 import {
   motion,
   useScroll,
@@ -99,6 +100,7 @@ type ActiveWaterStory = "flow" | "climate" | null
 type HeaderTranslations = {
   buttons: {
     waterStories: string
+    waterThemes: string
     getData: string
     about: string
   }
@@ -158,12 +160,16 @@ export interface BaseHeaderProps {
   onLogoClick?: () => void
   onGetDataClick?: () => void
   onAboutClick?: () => void
+
+  /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
+  waterThemesOptions?: NavDropdownOption[]
 }
 
 const translations: TranslationsMap = {
   en: {
     buttons: {
       waterStories: "Water stories",
+      waterThemes: "Water themes",
       getData: "Get data",
       about: "About COEQWAL",
     },
@@ -175,6 +181,7 @@ const translations: TranslationsMap = {
   es: {
     buttons: {
       waterStories: "Historias del agua",
+      waterThemes: "Temas del agua",
       getData: "Descargar datos",
       about: "Sobre COEQWAL",
     },
@@ -191,16 +198,13 @@ const translations: TranslationsMap = {
 const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
-  data: "https://dev.coeqwal.org/data",
-  about: "http://dev.coeqwal.org/about",
-  // TODO: Add about URL when available
-  // about: "https://coeqwal.org/about",
 }
 
 export function BaseHeader({
   onLogoClick,
   onGetDataClick,
   onAboutClick,
+  waterThemesOptions,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
   zIndex,
@@ -414,7 +418,8 @@ export function BaseHeader({
             px: isWideDesktop ? theme.space.panel.padding : 2,
             minHeight: "var(--header-h) !important",
             display: isWideDesktop ? "grid" : "flex",
-            gridTemplateColumns: isWideDesktop ? "3fr 2fr" : undefined,
+            gridTemplateColumns: isWideDesktop ? "auto 1fr" : undefined,
+            columnGap: isWideDesktop ? theme.spacing(4) : undefined,
             alignItems: "center",
             justifyContent: isWideDesktop ? undefined : "space-between",
           }}
@@ -471,8 +476,7 @@ export function BaseHeader({
               component="nav"
               aria-label="Main navigation"
               sx={{
-                justifySelf: isWideDesktop ? "start" : undefined,
-                ml: isWideDesktop ? "-30px" : 0,
+                justifySelf: isWideDesktop ? "end" : undefined,
               }}
             >
               <Stack direction="row" spacing={2} alignItems="center">
@@ -498,7 +502,18 @@ export function BaseHeader({
                   sx={buttonStyle}
                 />
 
-                {/* 2. Get data */}
+                {/* 2. Water themes dropdown (rendered when options are provided) */}
+                {waterThemesOptions && waterThemesOptions.length > 0 && (
+                  <NavDropdown
+                    label={t.buttons.waterThemes}
+                    disableRipple
+                    options={waterThemesOptions}
+                    variant="text"
+                    sx={buttonStyle}
+                  />
+                )}
+
+                {/* 3. Get data */}
                 <Button
                   variant="text"
                   disableRipple
@@ -508,20 +523,12 @@ export function BaseHeader({
                   {t.buttons.getData}
                 </Button>
 
-                {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
+                {/* 4. About COEQWAL */}
                 <Button
                   variant="text"
                   disableRipple
-                  // TODO: Remove disabled when URLS.about is available
                   onClick={onAboutClick ? onAboutClick : undefined}
-                  sx={{
-                    ...buttonStyle,
-                    // Override disabled styles to maintain visual consistency
-                    "&.Mui-disabled": {
-                      color: resolvedTextColor,
-                      opacity: 0.6,
-                    },
-                  }}
+                  sx={buttonStyle}
                 >
                   {t.buttons.about}
                 </Button>
@@ -757,6 +764,63 @@ export function BaseHeader({
               </List>
             </ListItem>
 
+            {/* Water themes section (mobile) */}
+            {waterThemesOptions && waterThemesOptions.length > 0 && (
+              <>
+                <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+                <ListItem
+                  disablePadding
+                  component="div"
+                  role="group"
+                  aria-labelledby="water-themes-label"
+                  sx={{ flexDirection: "column", alignItems: "stretch" }}
+                >
+                  <Box
+                    id="water-themes-label"
+                    component="span"
+                    sx={{
+                      ...theme.typography.nav,
+                      display: "block",
+                      px: 2,
+                      py: 1,
+                    }}
+                  >
+                    {t.buttons.waterThemes}
+                  </Box>
+                  <List disablePadding>
+                    {waterThemesOptions.map((option) => (
+                      <ListItem key={option.key} disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            option.onClick()
+                            handleMobileMenuClose()
+                          }}
+                          sx={{
+                            pl: 4,
+                            pr: 2,
+                            minHeight: MIN_TOUCH_TARGET,
+                            "&:focus-visible": {
+                              outline: `2px solid ${theme.palette.text.primary}`,
+                              outlineOffset: -2,
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={option.label}
+                            slotProps={{
+                              primary: {
+                                sx: { ...theme.typography.caption },
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </ListItem>
+              </>
+            )}
+
             {/* Spacing between sections */}
             <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
 
@@ -764,7 +828,7 @@ export function BaseHeader({
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  window.location.href = URLS.data
+                  onGetDataClick?.()
                   handleMobileMenuClose()
                 }}
                 sx={{
@@ -785,18 +849,17 @@ export function BaseHeader({
               </ListItemButton>
             </ListItem>
 
-            {/* About COEQWAL - TODO: Enable when URLS.about is available */}
+            {/* About COEQWAL */}
             <ListItem disablePadding>
               <ListItemButton
-                disabled
+                onClick={() => {
+                  onAboutClick?.()
+                  handleMobileMenuClose()
+                }}
                 sx={{
                   px: 2,
                   // WCAG 2.5.5: Minimum 44px touch target
                   minHeight: MIN_TOUCH_TARGET,
-                  // Disabled state styling
-                  "&.Mui-disabled": {
-                    opacity: 0.6,
-                  },
                   // WCAG 2.4.7: Focus visible indicator
                   "&:focus-visible": {
                     outline: `2px solid ${theme.palette.text.primary}`,

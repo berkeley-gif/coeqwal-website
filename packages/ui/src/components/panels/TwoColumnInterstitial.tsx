@@ -18,6 +18,10 @@ export interface InterstitialLink {
   onClick?: () => void
   /** Optional href (renders as anchor-like behavior) */
   href?: string
+  /** Link target, e.g. "_blank" for external links */
+  target?: string
+  /** Rel attribute, e.g. "noopener noreferrer" for external links */
+  rel?: string
 }
 
 export interface TwoColumnInterstitialProps {
@@ -41,6 +45,8 @@ function LinkRow({ link, color }: { link: InterstitialLink; color: string }) {
     <Box
       component={link.href ? "a" : "div"}
       {...(link.href ? { href: link.href } : {})}
+      {...(link.target ? { target: link.target } : {})}
+      {...(link.rel ? { rel: link.rel } : {})}
       onClick={link.onClick}
       sx={{
         display: "flex",

@@ -20,7 +20,6 @@ import VideoHero from "../components/VideoHero"
 import MorphingHeadline from "../components/MorphingHeadline"
 import CategoryCircles from "../components/CategoryCircles"
 import type { VideoSource } from "../components/VideoHero"
-import { ScrollToButton } from "@repo/ui"
 import { mapActions, useMapStore } from "../features/map/store"
 import { useTabs } from "../context/Tabs"
 
@@ -64,13 +63,23 @@ function Panel1Paragraph() {
   // Approach (0-25%): easeOut
   // Stick (25-75%): ~110vh of scroll runway
   // Leave (75-100%): easeIn
-  const yNum = useScrollValue(progress, [0, PARA_APPEAR, PARA_LEAVE, 1], [30, 0, 0, -30], {
-    ease: easeOut,
-  })
+  const yNum = useScrollValue(
+    progress,
+    [0, PARA_APPEAR, PARA_LEAVE, 1],
+    [30, 0, 0, -30],
+    {
+      ease: easeOut,
+    },
+  )
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, PARA_APPEAR, PARA_LEAVE, 1], [0, 1, 1, 0], {
-    ease: easeOut,
-  })
+  const opacity = useScrollValue(
+    progress,
+    [0, PARA_APPEAR, PARA_LEAVE, 1],
+    [0, 1, 1, 0],
+    {
+      ease: easeOut,
+    },
+  )
 
   return (
     <motion.div
@@ -88,9 +97,10 @@ function Panel1Paragraph() {
         }}
       >
         <Typography variant="displayBody" component="div">
-          COEQWAL &mdash; the Collaboratory for Equity in Water Allocation &mdash; is a
-          publicly-funded project that works with communities to model
-          alternative water management scenarios for California&apos;s Central Valley.
+          COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
+          &mdash; is a publicly-funded project that works with communities to
+          model alternative water management scenarios for California&apos;s
+          Central Valley.
           <br />
           <br />
           To learn more, see{" "}
@@ -163,7 +173,11 @@ function Panel2Headline() {
   const theme = useTheme()
   const progress = useScrollProgress()
   // Hold, shift up ~100px for circles, hold with circles, then exit
-  const yNum = useScrollValue(progress, [0, 0.5, 0.6, 0.85, 1], [0, 0, -12, -12, -30])
+  const yNum = useScrollValue(
+    progress,
+    [0, 0.5, 0.6, 0.85, 1],
+    [0, 0, -12, -12, -30],
+  )
   const y = useTransform(yNum, (v) => `${v}vh`)
   const opacity = useScrollValue(progress, [0, 0.85, 1], [1, 1, 0])
 
@@ -246,9 +260,7 @@ function Panel3Text({
   )
 
   return (
-    <motion.div
-      style={{ opacity, gridColumn: 2, alignSelf: "start" }}
-    >
+    <motion.div style={{ opacity, gridColumn: 2, alignSelf: "start" }}>
       <Box
         sx={{
           maxWidth: { xs: "540px", lg: "none" },
@@ -257,8 +269,8 @@ function Panel3Text({
         }}
       >
         <Typography variant="displayBody" component="p">
-          COEQWAL uses a computational model called CalSim to run a broad
-          range of alternative water management scenarios for California&rsquo;s
+          COEQWAL uses a computational model called CalSim to run a broad range
+          of alternative water management scenarios for California&rsquo;s
           Central Valley water. These scenarios are represented here, clustered
           according to the issues they address.
         </Typography>
@@ -352,8 +364,15 @@ function FloatingCategoryCircles({
   // sticky releases → slow float to 20vh → slow drift upward (extended runway) → off screen.
   const yNum = useTransform(
     scrollYProgress,
-    [appearStart, p2 ? p2.mid : 0.62, p3HoldStart, p3StickyRelease, p3ListsUp, p4YEnd],
-    [60,          45,                  50,           50,              20,         -100  ],
+    [
+      appearStart,
+      p2 ? p2.mid : 0.62,
+      p3HoldStart,
+      p3StickyRelease,
+      p3ListsUp,
+      p4YEnd,
+    ],
+    [60, 45, 50, 50, 20, -100],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
@@ -458,7 +477,10 @@ const IntroSection = () => {
     ? p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.42
     : 0.93
   const p4ExitEnd = p4Boundaries
-    ? Math.min(p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.62, 0.99)
+    ? Math.min(
+        p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.62,
+        0.99,
+      )
     : 0.95
   const panel5HeadlineOpacity = useTransform(
     introProgress,
@@ -552,11 +574,9 @@ const IntroSection = () => {
             ? [
                 // Shift up at 50-60% of Panel 2 (make room for circles)
                 boundaries.panels[2].start +
-                  (boundaries.panels[2].end - boundaries.panels[2].start) *
-                    0.50,
+                  (boundaries.panels[2].end - boundaries.panels[2].start) * 0.5,
                 boundaries.panels[2].start +
-                  (boundaries.panels[2].end - boundaries.panels[2].start) *
-                    0.60,
+                  (boundaries.panels[2].end - boundaries.panels[2].start) * 0.6,
               ]
             : undefined
         }
@@ -596,8 +616,13 @@ const IntroSection = () => {
         setSelectedTheme={setSelectedTheme}
       />
 
-      {/* position: relative required for Framer Motion useScroll offset calculations */}
-      <Box ref={introPanelsRef} sx={{ position: "relative" }}>
+      {/* position: relative required for Framer Motion useScroll offset calculations.
+          pointerEvents: "auto" re-enables event capture for all scroll panels so that
+          users cannot accidentally pan the map through the IntroSection content. */}
+      <Box
+        ref={introPanelsRef}
+        sx={{ position: "relative", pointerEvents: "auto" }}
+      >
         {/* Video Hero */}
         <div ref={panel1Ref}>
           <VideoHero
@@ -758,8 +783,7 @@ const IntroSection = () => {
                 transform: "translateX(-50%)",
                 zIndex: 2,
               }}
-            >
-            </Box>
+            ></Box>
           </Box>
         </Box>
 
@@ -769,57 +793,58 @@ const IntroSection = () => {
             section is sticky so the "On this site, you can" content stays pinned while
             the circles are still visible overhead. */}
         <Box ref={panel5Ref} sx={{ position: "relative", height: "350vh" }}>
-        <Box
-          component="section"
-          id="site-actions"
-          aria-label="What you can do on this site"
-          sx={{
-            position: "sticky",
-            top: 0,
-            minHeight: "100vh",
-            backgroundColor: theme.palette.brand.panelDark,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            paddingTop: theme.space.panel.topOffset,
-            paddingBottom: "clamp(96px, 18vh, 180px)",
-            paddingLeft: theme.space.panel.padding,
-            paddingRight: theme.space.panel.padding,
-            color: theme.palette.text.secondary,
-          }}
-        >
-          {/* Headline — fades in once category circles have fully exited */}
-          <motion.div style={{ opacity: panel5HeadlineOpacity }}>
-            <Box
-              sx={{
-                textAlign: { xs: "center", lg: "left" },
-              }}
-            >
+          <Box
+            component="section"
+            id="site-actions"
+            aria-label="What you can do on this site"
+            sx={{
+              position: "sticky",
+              top: 0,
+              minHeight: "100vh",
+              backgroundColor: theme.palette.brand.panelDark,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              paddingTop: theme.space.panel.topOffset,
+              paddingBottom: "clamp(96px, 18vh, 180px)",
+              paddingLeft: theme.space.panel.padding,
+              paddingRight: theme.space.panel.padding,
+              color: theme.palette.text.secondary,
+            }}
+          >
+            {/* Headline — fades in once category circles have fully exited */}
+            <motion.div style={{ opacity: panel5HeadlineOpacity }}>
               <Box
                 sx={{
-                  fontSize: theme.typography.h1.fontSize,
-                  maxWidth: "16ch",
+                  textAlign: { xs: "center", lg: "left" },
                 }}
               >
-                <Typography
-                  variant="h2Main"
-                  component="h2"
-                  sx={{ display: "block", color: "inherit" }}
+                <Box
+                  sx={{
+                    fontSize: theme.typography.h1.fontSize,
+                    maxWidth: "16ch",
+                  }}
                 >
-                  On this site,
-                </Typography>
-                <Typography
-                  variant="h1"
-                  component="span"
-                  sx={{ display: "block", color: "inherit" }}
-                >
-                  you can
-                </Typography>
+                  <Typography
+                    variant="h2Main"
+                    component="h2"
+                    sx={{ display: "block", color: "inherit" }}
+                  >
+                    On this site,
+                  </Typography>
+                  <Typography
+                    variant="h1"
+                    component="span"
+                    sx={{ display: "block", color: "inherit" }}
+                  >
+                    you can
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          </motion.div>
+            </motion.div>
+          </Box>
         </Box>
-        </Box>{/* end panel5Ref scroll runway wrapper */}
+        {/* end panel5Ref scroll runway wrapper */}
       </Box>
     </Box>
   )

@@ -12,7 +12,7 @@ export interface CameraView {
 }
 
 export const CALIFORNIA_VIEW: CameraView = {
-  longitude: -120.2,
+  longitude: -124.4,
   latitude: 37.5,
   zoom: 5,
   bearing: 0,
@@ -20,7 +20,7 @@ export const CALIFORNIA_VIEW: CameraView = {
 }
 
 export const CENTRAL_VALLEY_VIEW: CameraView = {
-  longitude: -120.8,
+  longitude: -125.0,
   latitude: 38.5,
   zoom: 5.82,
   bearing: 0,
@@ -28,7 +28,7 @@ export const CENTRAL_VALLEY_VIEW: CameraView = {
 }
 
 export const DELTA_VIEW: CameraView = {
-  longitude: -121.4,
+  longitude: -122.1,
   latitude: 38.2,
   zoom: 8.8,
   bearing: 0,

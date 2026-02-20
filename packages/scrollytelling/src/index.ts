@@ -14,7 +14,10 @@ export { usePanelBoundaries } from "./hooks/usePanelBoundaries"
 export type { PanelBoundary, PanelBoundaries } from "./hooks/usePanelBoundaries"
 export { useScrollSideEffect } from "./hooks/useScrollSideEffect"
 export { useMeetingProgress } from "./hooks/useMeetingProgress"
-export type { MeetingProgressOptions, ElementEdge } from "./hooks/useMeetingProgress"
+export type {
+  MeetingProgressOptions,
+  ElementEdge,
+} from "./hooks/useMeetingProgress"
 
 // Types
 export type {
