@@ -10,13 +10,15 @@ import {
   useScrollProgress,
   useScrollValue,
   usePanelBoundaries,
+  useMeetingProgress,
+  easeOut,
 } from "@repo/scrollytelling"
 import type { PanelBoundaries } from "@repo/scrollytelling"
 
+import { WATER_THEMES, THEME_SCENARIOS } from "@repo/data/coeqwal"
 import VideoHero from "../components/VideoHero"
 import MorphingHeadline from "../components/MorphingHeadline"
 import CategoryCircles from "../components/CategoryCircles"
-import type { Category } from "../components/CategoryCircles"
 import type { VideoSource } from "../components/VideoHero"
 import { ScrollToButton } from "@repo/ui"
 import { mapActions, useMapStore } from "../features/map/store"
@@ -29,67 +31,16 @@ const VIDEO_SRCS: VideoSource[] = [
   },
 ]
 
-const WATER_CATEGORIES: Category[] = [
-  {
-    id: "communities",
-    label: "Community\nwater systems",
-    description:
-      "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
-  },
-  {
-    id: "farms",
-    label: "Farms, groundwater\n& food systems",
-    description:
-      "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
-  },
-  {
-    id: "rivers",
-    label: "Rivers, salmon\n& ecosystems",
-    description:
-      "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
-  },
-  {
-    id: "delta",
-    label: "The Delta as\na living place",
-    description:
-      "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
-  },
-  {
-    id: "climate",
-    label: "Climate risk,\nreliability & resilience",
-    description:
-      "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
-  },
-  {
-    id: "governance",
-    label: "Water governance\n& decision-making",
-    description:
-      "How evidence, trade-offs, and equity considerations inform water-management decisions.",
-  },
-]
-
-/** Maps each category to its scenario IDs (deduplicated) */
-const CATEGORY_SCENARIOS: Record<string, string[]> = {
-  communities: ["s0035", "s0036", "s0037"],
-  farms: ["s0011", "s0025", "s0026", "s0027", "s0028"],
-  rivers: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
-  delta: [
-    "s0040",
-    "s0041",
-    "s0042",
-    "s0039",
-    "s0044",
-    "s0045",
-    "s0028",
-    "s0065",
-    "s0030",
-  ],
-  climate: [],
-  governance: ["s0020", "s0021", "s0023", "s0024"],
-}
-
 const INTRO_TEXT =
   "Water is important to all of us \u2013 from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the water issues that people care about."
+
+/** Fraction of a panel's scroll range where the paragraph reaches full opacity / Y=0. */
+const PARA_APPEAR = 0.2
+/** Fraction of a panel's scroll range where the paragraph begins to leave. */
+const PARA_LEAVE = 0.8
+/** Pixels the MorphingHeadline shifts upward (shiftAmount) to make room for circles.
+ *  Panel 4's sticky viewport subtracts this so its paragraph stays aligned with the headline. */
+const HEADLINE_SHIFT_PX = 100
 
 /**
  * Panel1Paragraph - Scroll-linked paragraph for frontmatter panel 1.
@@ -99,10 +50,16 @@ const INTRO_TEXT =
 function Panel1Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  // Scroll in from below, hold aligned with headline, then scroll out
-  const yNum = useScrollValue(progress, [0, 0.6, 0.8, 1], [30, 0, 0, -30])
+  // Approach (0-25%): easeOut
+  // Stick (25-75%): ~110vh of scroll runway
+  // Leave (75-100%): easeIn
+  const yNum = useScrollValue(progress, [0, PARA_APPEAR, PARA_LEAVE, 1], [30, 0, 0, -30], {
+    ease: easeOut,
+  })
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
+  const opacity = useScrollValue(progress, [0, PARA_APPEAR, PARA_LEAVE, 1], [0, 1, 1, 0], {
+    ease: easeOut,
+  })
 
   return (
     <motion.div
@@ -120,9 +77,9 @@ function Panel1Paragraph() {
         }}
       >
         <Typography variant="displayBody" component="div">
-          COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+          COEQWAL &mdash; the Collaboratory for Equity in Water Allocation &mdash; is a
           publicly-funded project that works with communities to model
-          alternative water management scenarios.
+          alternative water management scenarios for California&apos;s Central Valley.
           <br />
           <br />
           To learn more, see{" "}
@@ -149,10 +106,21 @@ function Panel1Paragraph() {
 function Panel2Paragraph() {
   const theme = useTheme()
   const progress = useScrollProgress()
-  // Scroll in gently, hold, shift up ~100px for circles, hold with circles, then exit
-  const yNum = useScrollValue(progress, [0, 0.35, 0.5, 0.6, 0.85, 1], [30, 0, 0, -12, -12, -30])
+  // Approach (0-25%): eased entry over ~95vh.
+  // Stick (25-50%): fully visible ~95vh before circles appear.
+  // Shift (50-60%): paragraph shifts up slightly as circles glide in (~38vh).
+  // Hold with circles (60-82%): ~84vh of co-visibility.
+  // Leave (82-100%): eased exit (~68vh).
+  const yNum = useScrollValue(
+    progress,
+    [0, 0.25, 0.5, 0.6, 0.82, 1],
+    [30, 0, 0, -12, -12, -30],
+    { ease: easeOut },
+  )
   const y = useTransform(yNum, (v) => `${v}vh`)
-  const opacity = useScrollValue(progress, [0, 0.15, 0.85, 1], [0, 1, 1, 0])
+  const opacity = useScrollValue(progress, [0, 0.15, 0.82, 1], [0, 1, 1, 0], {
+    ease: easeOut,
+  })
 
   return (
     <motion.div
@@ -249,79 +217,33 @@ function Panel3Text({
   })
 
   const p3 = boundaries.panels[3]
-  const p3Span = p3 ? p3.end - p3.start : 0.15
-  // Fade in well before Panel 3 top reaches viewport top
-  const fadeStart = (p3 ? p3.start : 0.848) - p3Span * 0.3
-  const fadeEnd = fadeStart + 0.02
+  const p3Start = p3 ? p3.start : 0.848
+  const p3End = p3 ? p3.end : 1.0
 
-  const opacity = useTransform(scrollYProgress, [fadeStart, fadeEnd], [0, 1])
+  // Remap global scroll progress to a 0→1 local progress for Panel 4
+  const localProgress = useTransform(scrollYProgress, [p3Start, p3End], [0, 1])
+
+  const opacity = useScrollValue(localProgress, [0, PARA_APPEAR, PARA_LEAVE, 1], [0, 1, 1, 0], {
+    ease: easeOut,
+  })
 
   return (
-    <motion.div style={{ opacity }}>
+    <motion.div
+      style={{ opacity, gridColumn: 2, alignSelf: "start" }}
+    >
       <Box
         sx={{
-          display: { xs: "flex", lg: "grid" },
-          gridTemplateColumns: { lg: "3fr 2fr" },
-          flexDirection: { xs: "column" },
-          gap: { xs: 3, lg: 0 },
-          alignItems: { xs: "center", lg: "start" },
+          maxWidth: { xs: "540px", lg: "none" },
+          textAlign: { xs: "center", lg: "left" },
           color: theme.palette.text.secondary,
         }}
       >
-        {/* Headline block - column 1 */}
-        <Box
-          sx={{
-            gridColumn: { lg: 1 },
-            alignSelf: { lg: "start" },
-            textAlign: { xs: "center", lg: "left" },
-          }}
-        >
-          <Box
-            component="h2"
-            sx={{
-              ...theme.typography.h5,
-              display: "block",
-              m: 0,
-              color: "inherit",
-              fontWeight: 500,
-              fontSize: "1.76rem",
-            }}
-          >
-            COEQWAL library of Central Valley
-          </Box>
-          <Box
-            component="span"
-            sx={{
-              ...theme.typography.h4,
-              display: "block",
-              m: 0,
-              color: "inherit",
-              fontWeight: 600,
-            }}
-          >
-            water management scenarios
-          </Box>
-        </Box>
-
-        {/* Paragraph block - column 2 */}
-        <Box
-          sx={{
-            gridColumn: { lg: 2 },
-            alignSelf: { lg: "start" },
-            maxWidth: { xs: "540px", lg: "none" },
-            textAlign: { xs: "center", lg: "left" },
-          }}
-        >
-          <Typography
-            variant="body2"
-            component="p"
-            sx={{ m: 0, color: "inherit" }}
-          >
-            COEQWAL has used a computational model called CalSim to run a broad
-            range of alternative water management scenarios. These scenarios are
-            represented here, clustered according to the issues they address.
-          </Typography>
-        </Box>
+        <Typography variant="displayBody" component="p">
+          COEQWAL uses a computational model called CalSim to run a broad
+          range of alternative water management scenarios for California&rsquo;s
+          Central Valley water. These scenarios are represented here, clustered
+          according to the issues they address.
+        </Typography>
       </Box>
     </motion.div>
   )
@@ -342,13 +264,13 @@ function Panel3Text({
 function FloatingCategoryCircles({
   containerRef,
   boundaries,
-  selectedCategory,
-  setSelectedCategory,
+  selectedTheme,
+  setSelectedTheme,
 }: {
   containerRef: React.RefObject<HTMLElement | null>
   boundaries: PanelBoundaries
-  selectedCategory: string | null
-  setSelectedCategory: (id: string | null) => void
+  selectedTheme: string | null
+  setSelectedTheme: (id: string | null) => void
 }) {
   const theme = useTheme()
 
@@ -383,15 +305,16 @@ function FloatingCategoryCircles({
     [0, 0, 1],
   )
 
-  // Y position: start at bottom (60vh), glide to below text blocks (~33vh) by p3.start,
-  // hold at 33vh while lists fade in, then scroll with Panel 3
+  // Y position: start at bottom (60vh), glide to mid-screen (~50vh) by mid Panel 4,
+  // hold at 50vh while scenario lists are visible, then exit upward
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
-  const p3HoldEnd = p3Start + (p3End - p3Start) * 0.4
+  const p3Mid = p3Start + (p3End - p3Start) * 0.5   // arrival = scenarioThreshold
+  const p3HoldEnd = p3Start + (p3End - p3Start) * 0.8
   const yNum = useTransform(
     scrollYProgress,
-    [appearStart, p2 ? p2.mid : 0.62, p3Start, p3HoldEnd, p3End],
-    [60, 45, 33, 33, -167],
+    [appearStart, p2 ? p2.mid : 0.62, p3Mid, p3HoldEnd, p3End],
+    [60, 45, 50, 50, -150],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
@@ -413,7 +336,7 @@ function FloatingCategoryCircles({
   const [circleColor, setCircleColor] = useState(darkColor)
 
   // Show scenario lists after circles hold for a moment (10% into hold period)
-  const scenarioThreshold = p3Start + (p3End - p3Start) * 0.1
+  const scenarioThreshold = p3Start + (p3End - p3Start) * 0.5
   const [showScenarios, setShowScenarios] = useState(false)
 
   useEffect(() => {
@@ -435,24 +358,19 @@ function FloatingCategoryCircles({
         opacity,
         pointerEvents,
         zIndex: theme.zIndex.heroContent + 5,
-        paddingLeft: showScenarios
-          ? theme.spacing(theme.space.section.md)
-          : theme.space.panel.padding,
-        paddingRight: showScenarios
-          ? theme.spacing(theme.space.section.md)
-          : theme.space.panel.padding,
-        transition: "padding 0.6s ease",
+        paddingLeft: theme.space.panel.padding,
+        paddingRight: theme.space.panel.padding,
       }}
     >
       <CategoryCircles
-        categories={WATER_CATEGORIES}
-        selectedId={selectedCategory}
-        onSelect={setSelectedCategory}
+        categories={WATER_THEMES}
+        selectedId={selectedTheme}
+        onSelect={setSelectedTheme}
         progress={circleProgress}
         revealStart={0}
         revealEnd={0.8}
         strokeColor={circleColor}
-        scenarioMap={CATEGORY_SCENARIOS}
+        scenarioMap={THEME_SCENARIOS}
         showScenarios={showScenarios}
       />
     </motion.div>
@@ -464,7 +382,7 @@ const IntroSection = () => {
   const { t } = useTranslation()
   const introPanelsRef = useRef<HTMLElement>(null)
   const waterIssuesRef = useRef<HTMLDivElement>(null)
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
 
   // Panel refs for DOM-measured scroll boundaries
   const panel1Ref = useRef<HTMLDivElement>(null) // VideoHero
@@ -473,12 +391,25 @@ const IntroSection = () => {
   const panel4Ref = useRef<HTMLDivElement>(null) // Panel 3 (Scenarios)
   const panel5Ref = useRef<HTMLDivElement>(null) // Panel 4 (Actions)
 
+  // Ref attached to the MorphingHeadline wrapper so useMeetingProgress can
+  // measure when VideoHero's bottom edge reaches the headline's top edge.
+  const headlineRef = useRef<HTMLDivElement>(null)
+
   // Memoize to avoid recreating the array on every render
   const panelRefs = useMemo(
     () => [panel1Ref, panel2Ref, panel3Ref, panel4Ref, panel5Ref],
     [],
   )
   const boundaries = usePanelBoundaries(introPanelsRef, panelRefs)
+
+  // Geometry-driven crossfade: scroll progress when VideoHero's bottom
+  // meets the MorphingHeadline's top edge.
+  const crossfadeAt = useMeetingProgress(
+    introPanelsRef,
+    panel1Ref,
+    headlineRef,
+    { edgeA: "bottom", edgeB: "top" },
+  )
 
   // Switch header text from white to dark when Panel 1 top nears viewport top
   const { setIsHeaderDark } = useTabs()
@@ -534,15 +465,17 @@ const IntroSection = () => {
     <Box>
       {/* Floating morphing headline - outside container for proper tracking */}
       <MorphingHeadline
+        ref={headlineRef}
         containerRef={introPanelsRef}
         weights={[1, 1.6, 3, 2, 1]}
         panelBoundaries={boundaries}
+        crossfadeAt={crossfadeAt > 0 ? crossfadeAt : undefined}
         exitRange={
           boundaries.ready && boundaries.panels[4]
             ? [
-                // panels[4].start ≈ 1.0 and panels[4].end > 1.0 (the last panel
-                // always overflows the scroll range). Cap both values to [0, 1]
-                // so the fade-out is actually reachable by scrollYProgress.
+                // panels[4].end overflows scroll range (last panel's bottom is past
+                // the scroll container end). Cap both values so the fade-out is
+                // reachable by scrollYProgress.
                 Math.min(
                   boundaries.panels[4].start +
                     (boundaries.panels[4].end - boundaries.panels[4].start) *
@@ -566,7 +499,7 @@ const IntroSection = () => {
               ]
             : undefined
         }
-        shiftAmount={100}
+        shiftAmount={HEADLINE_SHIFT_PX}
         headlines={[
           {
             line1: t("homePanel.titleLine1"),
@@ -586,6 +519,12 @@ const IntroSection = () => {
             textColor: theme.palette.text.primary,
           },
           {
+            line1: "Water management",
+            line2: "scenarios",
+            textShadow: false,
+            textColor: theme.palette.text.secondary,
+          },
+          {
             line1: "On this site,",
             line2: "you can",
             textShadow: false,
@@ -598,8 +537,8 @@ const IntroSection = () => {
       <FloatingCategoryCircles
         containerRef={introPanelsRef}
         boundaries={boundaries}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
+        selectedTheme={selectedTheme}
+        setSelectedTheme={setSelectedTheme}
       />
 
       {/* position: relative required for Framer Motion useScroll offset calculations */}
@@ -616,7 +555,7 @@ const IntroSection = () => {
         {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
         <div ref={panel2Ref}>
           <ScrollSection
-            height="160vh"
+            height="220vh"
             id="intro"
             ariaLabel="What is COEQWAL"
             style={{
@@ -683,7 +622,7 @@ const IntroSection = () => {
         <div ref={panel3Ref}>
           <div ref={waterIssuesRef}>
             <ScrollSection
-              height="300vh"
+              height="380vh"
               id="water-issues"
               ariaLabel="What water issues matter to you"
               style={{
@@ -726,59 +665,69 @@ const IntroSection = () => {
           </div>
         </div>
 
-        {/* Panel 3 - Dark background for floating category circles overlay */}
+        {/* Panel 3 - Dark background. Outer box is the scroll runway; inner box
+            is the sticky viewport that pins content while the user scrolls through. */}
         <Box
           ref={panel4Ref}
           id="scenarios"
           aria-label="COEQWAL library of Central Valley water management scenarios"
-          sx={{
-            minHeight: "200vh",
-            backgroundColor: theme.palette.brand.panelDark,
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            paddingTop: "clamp(90px, 12vh, 140px)",
-            paddingBottom: "clamp(80px, calc(16vh - 18px), 160px)",
-            paddingLeft: {
-              xs: theme.space.panel.padding,
-              lg: `${theme.spacing(theme.space.section.md)}`,
-            },
-            paddingRight: {
-              xs: theme.space.panel.padding,
-              lg: `${theme.spacing(theme.space.section.md)}`,
-            },
-          }}
+          sx={{ minHeight: "200vh", position: "relative" }}
         >
-          {/* Headline and paragraph - fade in when panel top reaches viewport top */}
-          <Panel3Text containerRef={introPanelsRef} boundaries={boundaries} />
-
-          {/* Scroll-down arrow to Panel 4 */}
           <Box
             sx={{
-              position: "absolute",
-              bottom: "clamp(16px, 4vh, 40px)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 2,
+              position: "sticky",
+              top: 0,
+              height: "100vh",
+              overflow: "hidden",
+              backgroundColor: theme.palette.brand.panelDark,
+              display: { xs: "flex", lg: "grid" },
+              gridTemplateColumns: { lg: "3fr 2fr" },
+              flexDirection: { xs: "column" },
+              justifyContent: { xs: "space-between" },
+              // Subtract HEADLINE_SHIFT_PX because the MorphingHeadline is already
+              // shifted up by that amount when this panel is reached.
+              paddingTop: `calc(${theme.space.panel.topOffset} - ${HEADLINE_SHIFT_PX}px)`,
+              paddingBottom: theme.space.panel.bottomOffset,
+              paddingLeft: theme.space.panel.padding,
+              paddingRight: theme.space.panel.padding,
             }}
           >
-            <ScrollToButton
-              scrollToId="site-actions"
-              ariaLabel="Scroll to continue"
-              color={theme.palette.text.secondary}
-              size={52}
-            />
+            <Panel3Text containerRef={introPanelsRef} boundaries={boundaries} />
+
+            {/* Scroll-down arrow */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: "clamp(16px, 4vh, 40px)",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 2,
+              }}
+            >
+              <ScrollToButton
+                scrollToId="site-actions"
+                ariaLabel="Scroll to continue"
+                color={theme.palette.text.secondary}
+                size={52}
+              />
+            </Box>
           </Box>
         </Box>
 
-        {/* Panel 4 - Learn / Explore / Share — three-column layout */}
+        {/* Panel 4 - Learn / Explore / Share
+            Outer div gives panel5Ref 200vh of total height so usePanelBoundaries
+            measures panels[4].start well below 1.0, giving the MorphingHeadline
+            ("On this site, you can") a scroll runway to appear before the container
+            ends. The inner section is sticky so the content stays pinned while the
+            user scrolls through that extra runway. */}
+        <Box ref={panel5Ref} sx={{ position: "relative", height: "200vh" }}>
         <Box
           component="section"
-          ref={panel5Ref}
           id="site-actions"
           aria-label="What you can do on this site"
           sx={{
+            position: "sticky",
+            top: 0,
             minHeight: "100vh",
             backgroundColor: theme.palette.brand.panelDark,
             display: "flex",
@@ -822,10 +771,9 @@ const IntroSection = () => {
             </Box>
           </Box>
 
-          {/* Three action columns — hidden but space preserved */}
+          {/* Three action columns */}
           <Box
             sx={{
-              visibility: "hidden",
               display: "grid",
               gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
               gap: { xs: 4, md: 6 },
@@ -890,6 +838,7 @@ const IntroSection = () => {
             ))}
           </Box>
         </Box>
+        </Box>{/* end panel5Ref scroll runway wrapper */}
       </Box>
     </Box>
   )

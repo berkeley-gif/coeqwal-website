@@ -13,21 +13,19 @@
  */
 
 import React, { useState } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
+import { type Theme } from "@repo/data/coeqwal"
 import ScenarioDots from "./ScenarioDots"
 import ScenarioList from "./ScenarioList"
 import HydroclimateIcons from "./HydroclimateIcons"
 import HydroclimateList from "./HydroclimateList"
 
-export interface Category {
-  id: string
-  label: string
-  description: string
-}
+/** @deprecated Use Theme from @repo/data/coeqwal */
+export type Category = Theme
 
 interface CategoryCirclesProps {
-  categories: Category[]
+  categories: Theme[]
   selectedId: string | null
   onSelect: (id: string | null) => void
   /** Optional scroll progress (0-1) for staggered reveal. If not provided, all circles are visible. */
@@ -58,7 +56,7 @@ function StaggeredCircle({
   scenarioIds,
   showScenarios,
 }: {
-  category: Category
+  category: Theme
   isSelected: boolean
   onSelect: (id: string | null) => void
   progress?: MotionValue<number>
@@ -84,28 +82,42 @@ function StaggeredCircle({
     null,
   )
 
+  // (hover: hover) and (pointer: fine) = true for mouse; false for touch/stylus
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)")
+  const interactive = !showScenarios
+
+  const hoverHandlers = canHover && interactive
+    ? {
+        onMouseEnter: () => onSelect(category.id),
+        onMouseLeave: () => onSelect(null),
+      }
+    : {}
+  const clickHandler =
+    !canHover && interactive
+      ? { onClick: () => onSelect(isSelected ? null : category.id) }
+      : {}
+
   return (
     <motion.div
       style={{
         opacity,
       }}
     >
+      {/* Desktop: hover selects/deselects. Touch: click toggles. */}
       <Box
+        {...hoverHandlers}
+        {...clickHandler}
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 1.5,
           transition: "all 0.3s ease",
+          cursor: interactive ? "pointer" : "default",
         }}
       >
-        {/* Label banner - clickable for selection when not showing scenarios */}
+        {/* Label banner */}
         <Box
-          onClick={
-            !showScenarios
-              ? () => onSelect(isSelected ? null : category.id)
-              : undefined
-          }
           sx={{
             backgroundColor: theme.palette.text.primary,
             color: theme.palette.common.white,
@@ -113,12 +125,8 @@ function StaggeredCircle({
             py: "3px",
             borderRadius: "4px",
             lineHeight: 1.1,
-            cursor: !showScenarios ? "pointer" : "default",
-            ...(!showScenarios && {
-              "&:hover": {
-                opacity: 0.85,
-              },
-            }),
+            transition: "opacity 0.2s ease",
+            opacity: isSelected && !showScenarios ? 0.85 : 1,
           }}
         >
           <Typography
@@ -135,36 +143,24 @@ function StaggeredCircle({
           </Typography>
         </Box>
 
-        {/* Circle - clickable when not showing scenarios */}
+        {/* Circle */}
         <Box
           className="category-circle"
-          onClick={
-            !showScenarios
-              ? () => onSelect(isSelected ? null : category.id)
-              : undefined
-          }
           sx={{
             width: circleSize,
             height: circleSize,
             borderRadius: "50%",
             border: `${theme.strokeWidth.rule}px ${isSelected && !showScenarios ? "solid" : "dashed"} ${strokeColor}`,
             backgroundColor:
-              isSelected && !showScenarios ? strokeColor : "transparent",
+              isSelected && !showScenarios
+                ? strokeColor
+                : "transparent",
             transition: "all 0.3s ease",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
             overflow: "hidden",
-            cursor: !showScenarios ? "pointer" : "default",
-            ...(!showScenarios && {
-              "&:hover": {
-                borderColor: strokeColor,
-                backgroundColor: isSelected
-                  ? strokeColor
-                  : "rgba(255, 255, 255, 0.1)",
-              },
-            }),
           }}
         >
           {/* Scenario dots or hydroclimate icons - shown when showScenarios is true */}
@@ -183,7 +179,7 @@ function StaggeredCircle({
         {isSelected && !showScenarios && (
           <Box
             sx={{
-              textAlign: "center",
+              textAlign: "left",
               color: strokeColor,
               mt: 1,
               maxWidth: "180px",

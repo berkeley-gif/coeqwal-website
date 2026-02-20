@@ -9,9 +9,12 @@ export { ScrollReveal } from "./components/ScrollReveal"
 export { useScrollProgress } from "./hooks/useScrollProgress"
 export { useScrollPhase } from "./hooks/useScrollPhase"
 export { useScrollValue, useScrollString } from "./hooks/useScrollValue"
+export type { ScrollValueOptions } from "./hooks/useScrollValue"
 export { usePanelBoundaries } from "./hooks/usePanelBoundaries"
 export type { PanelBoundary, PanelBoundaries } from "./hooks/usePanelBoundaries"
 export { useScrollSideEffect } from "./hooks/useScrollSideEffect"
+export { useMeetingProgress } from "./hooks/useMeetingProgress"
+export type { MeetingProgressOptions, ElementEdge } from "./hooks/useMeetingProgress"
 
 // Types
 export type {
@@ -29,3 +32,16 @@ export { getPhase, getSubProgress } from "./utils"
 
 // Re-export commonly used Framer Motion primitives for convenience
 export { useScroll, useTransform, useMotionValue } from "@repo/motion"
+
+// Easing functions for use with useScrollValue
+export {
+  easeIn,
+  easeOut,
+  easeInOut,
+  circIn,
+  circOut,
+  backIn,
+  backOut,
+  anticipate,
+  cubicBezier,
+} from "@repo/motion"
