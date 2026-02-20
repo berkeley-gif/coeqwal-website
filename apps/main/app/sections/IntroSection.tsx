@@ -447,9 +447,7 @@ const IntroSection = () => {
   })
 
   // Mirror the same p4ExitStart/p4ExitEnd fractions used in FloatingCategoryCircles.
-  // The headline cross-fades WITH the circles' opacity exit (starts at p4ExitStart,
-  // fully visible by p4ExitEnd) so there is no gap between circles disappearing
-  // and the headline appearing — without touching any circle timing.
+  // The headline cross-fades WITH the circles' opacity exit (starts at p4ExitStart)
   const p4Boundaries = boundaries.panels[4]
   const p4ExitStart = p4Boundaries
     ? p4Boundaries.start + (p4Boundaries.end - p4Boundaries.start) * 0.42
@@ -777,9 +775,9 @@ const IntroSection = () => {
             backgroundColor: theme.palette.brand.panelDark,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: "flex-end",
             paddingTop: theme.space.panel.topOffset,
-            paddingBottom: "clamp(80px, 12vh, 160px)",
+            paddingBottom: "clamp(96px, 18vh, 180px)",
             paddingLeft: theme.space.panel.padding,
             paddingRight: theme.space.panel.padding,
             color: theme.palette.text.secondary,
