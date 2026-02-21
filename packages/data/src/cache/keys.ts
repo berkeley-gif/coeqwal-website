@@ -34,6 +34,14 @@ export const CACHE_KEYS = {
     `/api/tiers/scenarios/${scenarioId}/tiers`,
 
   /**
+   * Tier data for a single outcome within a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param tierCode - Tier short code (e.g., "ENV_FLOWS")
+   */
+  scenarioTierByCode: (scenarioId: string, tierCode: string) =>
+    `/api/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
+
+  /**
    * Batch key for fetching multiple scenario tiers
    * Uses array format for SWR to track changes in the ID list
    * @param scenarioIds - Array of scenario IDs

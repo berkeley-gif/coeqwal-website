@@ -65,8 +65,7 @@ export function CallResponsePanel({
         alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        // Wide horizontal padding matching IntroSection / SmoothTabs panels
-        paddingLeft: (theme: Theme) => theme.space.panel.padding,
+        paddingLeft: (theme: Theme) => theme.space.panel.paddingXl,
         paddingRight: (theme: Theme) => theme.space.panel.padding,
       }}
     >

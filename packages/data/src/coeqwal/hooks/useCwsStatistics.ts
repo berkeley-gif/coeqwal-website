@@ -69,6 +69,8 @@ export function useCwsAggregatesList() {
     fetchCwsAggregatesList,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -120,10 +122,7 @@ export function useCwsAggregatesMonthly(
     isLoading,
   } = useSWR<CwsAggregateMonthlyResponse>(
     scenarioId ? CACHE_KEYS.cwsAggregatesMonthly(scenarioId, aggregate) : null,
-    () =>
-      scenarioId
-        ? fetchCwsAggregatesMonthly(scenarioId, aggregate)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchCwsAggregatesMonthly(scenarioId!, aggregate),
     {
       revalidateOnFocus: false,
     },
@@ -179,10 +178,7 @@ export function useCwsAggregatesPeriod(
     isLoading,
   } = useSWR<CwsAggregatePeriodResponse>(
     scenarioId ? CACHE_KEYS.cwsAggregatesPeriod(scenarioId, aggregate) : null,
-    () =>
-      scenarioId
-        ? fetchCwsAggregatesPeriod(scenarioId, aggregate)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchCwsAggregatesPeriod(scenarioId!, aggregate),
     {
       revalidateOnFocus: false,
     },
@@ -239,6 +235,8 @@ export function useMiContractorsList(group?: string) {
     () => fetchMiContractorsList(group),
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -290,10 +288,7 @@ export function useMiContractorsMonthly(
     isLoading,
   } = useSWR<MiContractorMonthlyResponse>(
     scenarioId ? CACHE_KEYS.miContractorsMonthly(scenarioId, contractor) : null,
-    () =>
-      scenarioId
-        ? fetchMiContractorsMonthly(scenarioId, contractor)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchMiContractorsMonthly(scenarioId!, contractor),
     {
       revalidateOnFocus: false,
     },
@@ -349,10 +344,7 @@ export function useMiContractorsPeriod(
     isLoading,
   } = useSWR<MiContractorPeriodResponse>(
     scenarioId ? CACHE_KEYS.miContractorsPeriod(scenarioId, contractor) : null,
-    () =>
-      scenarioId
-        ? fetchMiContractorsPeriod(scenarioId, contractor)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchMiContractorsPeriod(scenarioId!, contractor),
     {
       revalidateOnFocus: false,
     },
@@ -423,6 +415,8 @@ export function useDemandUnitsList(group?: string) {
     () => fetchDemandUnitsList(group),
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -510,6 +504,8 @@ export function useDemandUnitsGroups() {
     fetchDemandUnitsGroups,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -584,10 +580,7 @@ export function useDemandUnitsMonthly(
     isLoading,
   } = useSWR<DemandUnitMonthlyResponse>(
     scenarioId ? CACHE_KEYS.demandUnitsMonthly(scenarioId, duId, group) : null,
-    () =>
-      scenarioId
-        ? fetchDemandUnitsMonthly(scenarioId, duId, group)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchDemandUnitsMonthly(scenarioId!, duId, group),
     {
       revalidateOnFocus: false,
     },
@@ -645,10 +638,7 @@ export function useDemandUnitsPeriod(
     isLoading,
   } = useSWR<DemandUnitPeriodResponse>(
     scenarioId ? CACHE_KEYS.demandUnitsPeriod(scenarioId, duId, group) : null,
-    () =>
-      scenarioId
-        ? fetchDemandUnitsPeriod(scenarioId, duId, group)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchDemandUnitsPeriod(scenarioId!, duId, group),
     {
       revalidateOnFocus: false,
     },
@@ -701,10 +691,7 @@ export function useDemandUnitStatistics(
     scenarioId && duId
       ? CACHE_KEYS.demandUnitStatistics(scenarioId, duId)
       : null,
-    () =>
-      scenarioId && duId
-        ? fetchDemandUnitStatistics(scenarioId, duId)
-        : Promise.reject(new Error("Missing scenario or demand unit ID")),
+    () => fetchDemandUnitStatistics(scenarioId!, duId!),
     {
       revalidateOnFocus: false,
     },

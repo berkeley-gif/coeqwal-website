@@ -66,10 +66,9 @@ interface HydroclimateChooserProps {
   showLabels?: boolean
   /** Whether to show the section title */
   showTitle?: boolean
+  /** Override icon circle size (width & height). Defaults to "44px". */
+  iconSize?: string
 }
-
-// WCAG 2.5.5: 44px minimum touch target
-const ICON_SIZE = "44px"
 
 export function HydroclimateChooser({
   value = "historical",
@@ -77,6 +76,7 @@ export function HydroclimateChooser({
   layout = "horizontal",
   showLabels = false,
   showTitle = true,
+  iconSize = "44px",
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -115,7 +115,7 @@ export function HydroclimateChooser({
         sx={{
           display: "flex",
           flexDirection: isVertical ? "column" : "row",
-          gap: 1,
+          gap: theme.space.gap.xs,
           alignItems: isVertical ? "flex-start" : "center",
         }}
       >
@@ -170,10 +170,10 @@ export function HydroclimateChooser({
                   >
                     <Box
                       sx={{
-                        width: ICON_SIZE,
-                        height: ICON_SIZE,
-                        minWidth: ICON_SIZE,
-                        minHeight: ICON_SIZE,
+                        width: iconSize,
+                        height: iconSize,
+                        minWidth: iconSize,
+                        minHeight: iconSize,
                         flexShrink: 0,
                         display: "flex",
                         alignItems: "center",

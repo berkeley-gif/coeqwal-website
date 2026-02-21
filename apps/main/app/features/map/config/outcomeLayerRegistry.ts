@@ -358,7 +358,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     layerType: "marker",
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "ENV_FLOWS",
-    requiresIdMatching: false,
+    requiresIdMatching: true, // 17 per-station tier levels — must use multi-value /locations path
     tooltipFields: [
       {
         key: "locationName",
@@ -376,7 +376,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     layerType: "marker",
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "FW_DELTA_USES",
-    requiresIdMatching: false,
+    requiresIdMatching: true, // 2 per-station tier levels (EM, JP) — use /locations path
     tooltipFields: [
       {
         key: "locationName",

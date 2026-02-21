@@ -108,6 +108,7 @@ export { DEFAULT_API_BASE, ENDPOINTS } from "./api"
 export {
   fetchTierList,
   fetchScenarioTiers,
+  fetchScenarioTierByCode,
   fetchScenarioList,
   fetchAllScenarioTiers,
   fetchTierLocationData,

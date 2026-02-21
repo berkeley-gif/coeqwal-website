@@ -62,9 +62,9 @@ export function useReservoirList() {
     CACHE_KEYS.STATISTICS_RESERVOIRS,
     fetchReservoirList,
     {
-      // Static data - don't revalidate frequently
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -111,9 +111,9 @@ export function useAllReservoirsList() {
     CACHE_KEYS.STATISTICS_RESERVOIRS_ALL,
     fetchAllReservoirsList,
     {
-      // Static data - don't revalidate frequently
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -166,6 +166,7 @@ export function useScenariosWithPercentiles() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
     },
   )
 
@@ -210,10 +211,7 @@ export function useReservoirPercentiles(
     scenarioId && reservoirId
       ? CACHE_KEYS.reservoirPercentiles(scenarioId, reservoirId)
       : null,
-    () =>
-      scenarioId && reservoirId
-        ? fetchReservoirPercentiles(scenarioId, reservoirId)
-        : Promise.reject(new Error("Missing parameters")),
+    () => fetchReservoirPercentiles(scenarioId!, reservoirId!),
     {
       revalidateOnFocus: false,
     },
@@ -259,10 +257,7 @@ export function useAllReservoirPercentiles(scenarioId: string | null) {
     isLoading,
   } = useSWR<AllReservoirPercentilesResponse>(
     scenarioId ? CACHE_KEYS.allReservoirPercentiles(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAllReservoirPercentiles(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAllReservoirPercentiles(scenarioId!),
     {
       revalidateOnFocus: false,
     },
@@ -316,10 +311,7 @@ export function useGroupedReservoirPercentiles(
     scenarioId && group
       ? CACHE_KEYS.groupedReservoirPercentiles(scenarioId, group)
       : null,
-    () =>
-      scenarioId && group
-        ? fetchGroupedReservoirPercentiles(scenarioId, group)
-        : Promise.reject(new Error("Missing parameters")),
+    () => fetchGroupedReservoirPercentiles(scenarioId!, group!),
     {
       revalidateOnFocus: false,
     },
@@ -376,10 +368,7 @@ export function useStorageMonthly(
     isLoading,
   } = useSWR<StorageMonthlyResponse>(
     scenarioId && group ? CACHE_KEYS.storageMonthly(scenarioId, group) : null,
-    () =>
-      scenarioId && group
-        ? fetchStorageMonthly(scenarioId, group)
-        : Promise.reject(new Error("Missing parameters")),
+    () => fetchStorageMonthly(scenarioId!, group!),
     {
       revalidateOnFocus: false,
     },
@@ -437,10 +426,7 @@ export function useSpillMonthly(
     isLoading,
   } = useSWR<SpillMonthlyResponse>(
     scenarioId && group ? CACHE_KEYS.spillMonthly(scenarioId, group) : null,
-    () =>
-      scenarioId && group
-        ? fetchSpillMonthly(scenarioId, group)
-        : Promise.reject(new Error("Missing parameters")),
+    () => fetchSpillMonthly(scenarioId!, group!),
     {
       revalidateOnFocus: false,
     },
@@ -568,10 +554,7 @@ export function useReservoirPeriodSummary(scenarioId: string | null) {
     isLoading,
   } = useSWR<ReservoirPeriodSummaryResponse>(
     scenarioId ? CACHE_KEYS.reservoirPeriodSummary(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchReservoirPeriodSummary(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchReservoirPeriodSummary(scenarioId!),
     {
       revalidateOnFocus: false,
     },

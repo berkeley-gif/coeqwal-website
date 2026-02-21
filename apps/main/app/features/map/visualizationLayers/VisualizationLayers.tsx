@@ -39,6 +39,7 @@ import {
   fetchTierLocationData,
   type TierLocationResponse,
 } from "@repo/data/coeqwal"
+import { FetchError } from "@repo/data/fetching"
 
 // Store
 import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
@@ -197,7 +198,17 @@ export default function VisualizationLayers() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch tier location data:", err)
+        if (err instanceof FetchError && (err.status === 404 || err.status >= 500)) {
+          // 404: geometry table not yet populated for this tier type.
+          // 5xx: transient backend error.
+          // Both are known limitations — log as warning so the Next.js dev
+          // overlay is not triggered for expected backend gaps.
+          console.warn(
+            `Tier data unavailable for ${tierCode} (HTTP ${err.status})`,
+          )
+        } else {
+          console.error("Failed to fetch tier location data:", err)
+        }
         if (!cancelled) {
           setTierData(null)
         }
@@ -267,7 +278,14 @@ export default function VisualizationLayers() {
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
       {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
-        tierData && <TierLocationLabels data={tierData} />}
+        (tierData != null || Object.keys(locationData).length > 0) && (
+          <TierLocationLabels
+            data={tierData ?? undefined}
+            locationItems={
+              tierData == null ? Object.values(locationData) : undefined
+            }
+          />
+        )}
 
       {/* Hotspot markers for tier 4 locations */}
       <HotspotMarkers

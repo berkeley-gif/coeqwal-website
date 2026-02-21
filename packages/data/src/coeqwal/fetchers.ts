@@ -102,30 +102,73 @@ export async function fetchScenarioList(): Promise<ScenarioListItem[]> {
 }
 
 /**
+ * Fetch tier data for a single outcome within a scenario
+ *
+ * Returns weighted_score, normalized_score, gini, and tier distribution data
+ * for multi_value outcomes (e.g. ENV_FLOWS, AG_REV), or single_tier_level for
+ * single_value outcomes (e.g. DELTA_ECO).
+ *
+ * Use when you need one outcome's data without fetching the full scenario.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param tierCode - Tier short code (e.g., "ENV_FLOWS")
+ * @returns Tier info including distribution data and scores
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchScenarioTierByCode("s0020", "ENV_FLOWS")
+ * // { scenario: "s0020", tier_code: "ENV_FLOWS", tier_type: "multi_value",
+ * //   weighted_score: 2.4, data: [...], total_value: 17 }
+ * ```
+ */
+export async function fetchScenarioTierByCode(
+  scenarioId: string,
+  tierCode: string,
+): Promise<ScenarioTiersResponse["tiers"][string] & { scenario: string; tier_code: string }> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!tierCode) {
+    throw new Error("Tier code is required")
+  }
+
+  return apiFetcher(ENDPOINTS.scenarioTierByCode(scenarioId, tierCode), {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
  * Fetch tier data for multiple scenarios in parallel
+ *
+ * Uses Promise.allSettled so a single failing scenario does not abort the
+ * entire batch. Rejected entries are silently omitted from the result, so
+ * callers should check whether a given scenario ID is present in the map.
  *
  * Note: This fires parallel requests. For large numbers of scenarios,
  * consider using lazy loading (useScenarioTiersLazy) instead.
  *
  * @param scenarioIds - Array of scenario IDs
- * @returns Map of scenarioId -> ScenarioTiersResponse
+ * @returns Map of scenarioId -> ScenarioTiersResponse (only fulfilled entries)
  *
  * @example
  * ```typescript
  * const allData = await fetchAllScenarioTiers(["s0020", "s0021", "s0022"])
- * const s0020Data = allData["s0020"]
+ * const s0020Data = allData["s0020"] // undefined if that scenario failed
  * ```
  */
 export async function fetchAllScenarioTiers(
   scenarioIds: string[],
 ): Promise<Record<string, ScenarioTiersResponse>> {
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     scenarioIds.map((id) => fetchScenarioTiers(id)),
   )
 
   const record: Record<string, ScenarioTiersResponse> = {}
   scenarioIds.forEach((id, i) => {
-    record[id] = results[i]!
+    const result = results[i]
+    if (result?.status === "fulfilled") {
+      record[id] = result.value
+    }
   })
 
   return record
