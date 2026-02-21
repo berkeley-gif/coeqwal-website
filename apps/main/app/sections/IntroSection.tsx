@@ -337,9 +337,11 @@ function FloatingCategoryCircles({
   const p3HoldStart = p3Start + (p3End - p3Start) * 0.584
   // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE ≈ 0.667).
   const p3StickyRelease = p3Start + (p3End - p3Start) * PANEL4_STICKY_RELEASE
-  // Float finishes at 0.85: circles glide 30vh over ~55vh of scroll (≈ 0.55× natural
-  // scroll speed), which eliminates the abrupt "pop" a short range causes.
-  const p3ListsUp = p3Start + (p3End - p3Start) * 0.85
+  // Float finishes at 0.73: lists appear shortly after sticky release (0.667),
+  // freeing most of the remaining p3 runway for the hold-with-lists phase below.
+  const p3ListsUp = p3Start + (p3End - p3Start) * 0.73
+  // Hold at 20vh with lists visible from p3ListsUp → p3ListsHold before exiting.
+  const p3ListsHold = p3Start + (p3End - p3Start) * 0.93
 
   // Circles drift slowly upward through Panel 5.  Borrowing Panel 5's scroll runway
   // keeps the post-sticky-release runway constraint (always 100vh) from rushing the exit.
@@ -360,8 +362,8 @@ function FloatingCategoryCircles({
     [0, 0, 1, 1, 0],
   )
 
-  // Y: glide in → arrive at midscreen → hold (halved) while headline visible →
-  // sticky releases → slow float to 20vh → slow drift upward (extended runway) → off screen.
+  // Y: glide in → arrive at midscreen → hold while headline visible →
+  // sticky releases → float to 20vh → hold with lists visible → drift off screen.
   const yNum = useTransform(
     scrollYProgress,
     [
@@ -370,9 +372,10 @@ function FloatingCategoryCircles({
       p3HoldStart,
       p3StickyRelease,
       p3ListsUp,
+      p3ListsHold,
       p4YEnd,
     ],
-    [60, 45, 50, 50, 20, -100],
+    [60, 45, 50, 50, 20, 20, -100],
   )
   const y = useTransform(yNum, (v: number) => `${v}vh`)
 
