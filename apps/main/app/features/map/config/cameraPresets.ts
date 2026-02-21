@@ -19,6 +19,16 @@ export const CALIFORNIA_VIEW: CameraView = {
   pitch: 0,
 }
 
+// Full-state overview used when the scenario-intro section appears.
+// Centers California in the viewport (original pre-offset longitude).
+export const CALIFORNIA_CENTERED_VIEW: CameraView = {
+  longitude: -120.2,
+  latitude: 38.5,
+  zoom: 5.82,
+  bearing: 0,
+  pitch: 0,
+}
+
 export const CENTRAL_VALLEY_VIEW: CameraView = {
   longitude: -125.0,
   latitude: 38.5,
@@ -28,7 +38,7 @@ export const CENTRAL_VALLEY_VIEW: CameraView = {
 }
 
 export const DELTA_VIEW: CameraView = {
-  longitude: -122.1,
+  longitude: -121.4,
   latitude: 38.2,
   zoom: 8.8,
   bearing: 0,

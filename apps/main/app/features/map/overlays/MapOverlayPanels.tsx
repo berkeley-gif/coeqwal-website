@@ -21,6 +21,9 @@ import { useTheme } from "@repo/ui/mui"
 import { Scrollama, Step } from "react-scrollama"
 
 // Animation thresholds for scenario-intro section panels (progress 0-1)
+// Panels fade in BEFORE their tooltips so the user sees the panel first,
+// then the tooltip appears to explain it. Each panel's fadeEnd aligns with
+// its tooltip's fadeIn start: strategy 0.18, keyOps 0.34, keyOutcomes 0.55.
 const PANEL_ANIMATION_THRESHOLDS = {
   strategyInfo: { fadeStart: 0.12, fadeEnd: 0.18 },
   keyOperations: { fadeStart: 0.28, fadeEnd: 0.34 },
@@ -131,6 +134,8 @@ export default function MapOverlayPanels() {
   // State for manually closed tooltips
   const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
   const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
+  const [viewByClimateTooltipClosed, setViewByClimateTooltipClosed] =
+    useState(false)
   const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] =
     useState(false)
 
@@ -142,6 +147,7 @@ export default function MapOverlayPanels() {
       // Close all panel tooltips when showing outcome data on map
       setStrategyTooltipClosed(true)
       setKeyOpsTooltipClosed(true)
+      setViewByClimateTooltipClosed(true)
       setKeyOutcomesTooltipClosed(true)
     }
   }, [isOutcomeActive])
@@ -291,19 +297,30 @@ export default function MapOverlayPanels() {
     setSummaryPE(latest as "none" | "auto")
   })
 
-  // Tooltip opacity - fade in and out (adjusted for compressed timing)
+  // Tooltip opacity - fade in and out
+  // Sequence (no overlaps): strategy → key ops → view by climate → key outcomes
+  // Panel fadeEnd values: strategy 0.18, keyOps 0.34, keyOutcomes 0.54
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.18, 0.22, 0.26, 0.3],
+    [0.18, 0.22, 0.26, 0.30],
     [0, 1, 1, 0],
   )
 
+  // Starts at keyOps panel fadeEnd (0.34), ends at 0.44
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.36, 0.4, 0.46, 0.5],
+    [0.34, 0.37, 0.41, 0.44],
     [0, 1, 1, 0],
   )
 
+  // Picks up immediately after key ops ends (0.44), finishes as key outcomes panel appears (0.54)
+  const viewByClimateTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.44, 0.47, 0.51, 0.54],
+    [0, 1, 1, 0],
+  )
+
+  // Starts just after view by climate ends (0.54), key outcomes panel is now fully visible
   const keyOutcomesTooltipOpacity = useTransform(
     scenarioIntroProgress,
     [0.55, 0.58, 0.65, 0.68],
@@ -317,6 +334,9 @@ export default function MapOverlayPanels() {
   })
   useMotionValueEvent(keyOperationsTooltipOpacity, "change", (latest) => {
     if (latest === 0) setKeyOpsTooltipClosed(false)
+  })
+  useMotionValueEvent(viewByClimateTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setViewByClimateTooltipClosed(false)
   })
   useMotionValueEvent(keyOutcomesTooltipOpacity, "change", (latest) => {
     if (latest === 0) setKeyOutcomesTooltipClosed(false)
@@ -703,7 +723,7 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
-        {/* ==================== SECTION 12: Scenario Intro with Strategy Row ==================== */}
+        {/* ==================== SECTION 12: Scenario intro ==================== */}
         {/* 
           This section uses Framer Motion for the complex multi-step choreography.
           Scrollama just detects when we enter this section.
@@ -781,7 +801,7 @@ export default function MapOverlayPanels() {
                   gap: theme.space.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: theme.space.panel.padding, // Match left panel padding
+                  pr: theme.space.panel.padding,
                   pointerEvents: "none",
                 }}
               >
@@ -850,14 +870,32 @@ export default function MapOverlayPanels() {
                               </Typography>
                               This describes the water management strategy being
                               modeled.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
                               <Box
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
                                 }}
-                              ></Box>
+                              >
+                                Click{" "}
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    color: theme.palette.blue.medium,
+                                  }}
+                                >
+                                  more
+                                </Box>{" "}
+                                to see the whole strategy description. Underlined words appear in a glossary when clicked.
+                              </Box>
                             </>
                           }
                           position="left"
@@ -935,15 +973,22 @@ export default function MapOverlayPanels() {
                               These icons represent the key operational
                               decisions that define this water management
                               strategy.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
                               <Box
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
                                 }}
                               >
-                                Click the icons to see what key operations they
+                                Hover over the icons to see what key operations they
                                 represent.
                               </Box>
                             </>
@@ -953,6 +998,47 @@ export default function MapOverlayPanels() {
                           opacity={keyOperationsTooltipOpacity}
                           isClosed={keyOpsTooltipClosed}
                           onClose={() => setKeyOpsTooltipClosed(true)}
+                        />
+
+                        <ScrollTooltip
+                          targetRef={keyOperationsRef}
+                          containerRef={keyOperationsContainerRef}
+                          content={
+                            <>
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.space.component.xs }}
+                              >
+                                3. View by climate
+                              </Typography>
+                              Choosing one of these climate icons will show
+                              you how the scenario allocates water under
+                              different potential future climates.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
+                              <Box
+                                component="span"
+                                sx={{
+                                  display: "block",
+                                }}
+                              >
+                                Hover over the icons to see the hydroclimates
+                                they represent.
+                              </Box>
+                            </>
+                          }
+                          position="left"
+                          offsetY={20}
+                          opacity={viewByClimateTooltipOpacity}
+                          isClosed={viewByClimateTooltipClosed}
+                          onClose={() => setViewByClimateTooltipClosed(true)}
                         />
                       </Box>
                     </Box>
@@ -1020,11 +1106,9 @@ export default function MapOverlayPanels() {
                                 variant="tooltipHeader"
                                 sx={{ mb: theme.space.component.xs }}
                               >
-                                Key outcomes
+                                4. Key outcomes
                               </Typography>
-                              These outcomes show how this strategy affects
-                              water supply, ecosystems, agriculture, and
-                              communities.
+                              While the strategy description, key operations, and climate describe the key inputs into the CalSim model, the outcomes listed here summarize the outputs. They show how well the allocations meet needs in each category.
                               <Box
                                 component="span"
                                 sx={{
@@ -1032,18 +1116,21 @@ export default function MapOverlayPanels() {
                                   mt: theme.space.component.sm,
                                 }}
                               >
-                                Some outcomes record values from multiple
-                                locations in a bar chart that shows the number
-                                of locations in each tier. Other outcomes are
-                                recorded at a single location such as the Delta
-                                or Sacramento River.
+                                Outcomes represented by a bar chart show the percentage of locations in each tier. For other outcomes, there is only one location of interest.
                               </Box>
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
                               <Box
                                 component="span"
                                 sx={{
                                   display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
                                 }}
                               >
                                 Click on the{" "}

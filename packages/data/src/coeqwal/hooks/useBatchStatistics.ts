@@ -95,12 +95,10 @@ export function useBatchStatistics(
     cacheKey,
     () => fetchBatchStatistics(scenarios, types),
     {
-      // Don't refetch on window focus for performance
       revalidateOnFocus: false,
-      // Keep data fresh when reconnecting
+      // When scenarios change the cache key changes, so fresh data is fetched
+      // automatically — no need to suppress deduplication.
       revalidateOnReconnect: true,
-      // Don't dedupe requests (we want fresh data when scenarios change)
-      dedupingInterval: 0,
     },
   )
 

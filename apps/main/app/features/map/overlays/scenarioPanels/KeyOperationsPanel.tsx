@@ -91,10 +91,20 @@ export function KeyOperationsPanel({
 
         {/* Hydroclimate section */}
         <Box>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              ...theme.scenarios.panelTitle,
+              mb: theme.space.component.sm,
+            }}
+          >
+            View by climate
+          </Typography>
           <HydroclimateChooser
             layout="horizontal"
-            showTitle={true}
+            showTitle={false}
             showLabels={false}
+            iconSize={theme.spacing(5)}
           />
         </Box>
       </Box>

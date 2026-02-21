@@ -36,10 +36,7 @@ export function useAgAggregatesMonthly(scenarioId: string | null) {
     isLoading,
   } = useSWR<AgAggregateMonthlyResponse>(
     scenarioId ? CACHE_KEYS.agAggregatesMonthly(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAgAggregatesMonthly(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAgAggregatesMonthly(scenarioId!),
     {
       revalidateOnFocus: false,
     },
@@ -70,10 +67,7 @@ export function useAgAggregatesPeriod(scenarioId: string | null) {
     isLoading,
   } = useSWR<AgAggregatePeriodResponse>(
     scenarioId ? CACHE_KEYS.agAggregatesPeriod(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAgAggregatesPeriod(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAgAggregatesPeriod(scenarioId!),
     {
       revalidateOnFocus: false,
     },
@@ -104,10 +98,7 @@ export function useAgDemandUnitsDeliveryMonthly(scenarioId: string | null) {
     isLoading,
   } = useSWR<AgDemandUnitDeliveryMonthlyResponse>(
     scenarioId ? CACHE_KEYS.agDemandUnitsDeliveryMonthly(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAgDemandUnitsDeliveryMonthly(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAgDemandUnitsDeliveryMonthly(scenarioId!),
     {
       revalidateOnFocus: false,
     },
@@ -138,10 +129,7 @@ export function useAgDemandUnitsShortageMonthly(scenarioId: string | null) {
     isLoading,
   } = useSWR<AgDemandUnitShortageMonthlyResponse>(
     scenarioId ? CACHE_KEYS.agDemandUnitsShortageMonthly(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAgDemandUnitsShortageMonthly(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAgDemandUnitsShortageMonthly(scenarioId!),
     {
       revalidateOnFocus: false,
     },
@@ -172,10 +160,7 @@ export function useAgDemandUnitsPeriod(scenarioId: string | null) {
     isLoading,
   } = useSWR<AgDemandUnitPeriodResponse>(
     scenarioId ? CACHE_KEYS.agDemandUnitsPeriod(scenarioId) : null,
-    () =>
-      scenarioId
-        ? fetchAgDemandUnitsPeriod(scenarioId)
-        : Promise.reject(new Error("Missing scenario ID")),
+    () => fetchAgDemandUnitsPeriod(scenarioId!),
     {
       revalidateOnFocus: false,
     },

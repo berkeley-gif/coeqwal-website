@@ -27,6 +27,14 @@ export const ENDPOINTS = {
   scenarioTiers: (scenarioId: string) => `/tiers/scenarios/${scenarioId}/tiers`,
 
   /**
+   * Tier data for a single outcome within a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param tierCode - Tier short code (e.g., "ENV_FLOWS", "AG_REV")
+   */
+  scenarioTierByCode: (scenarioId: string, tierCode: string) =>
+    `/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
+
+  /**
    * Tier location data for map visualization
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param tierCode - Tier short code (e.g., "AG_REV")

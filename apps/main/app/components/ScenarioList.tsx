@@ -4,8 +4,7 @@
  * ScenarioList - Formatted list of scenarios
  *
  * Displays scenario ID, name, and a truncated description (2 lines with
- * "show more") for each scenario in a category. See the example in the scenarios
- * panel (Main stem panel 4) where it appears below each category circle.
+ * "show more") for each scenario in a category.
  *
  * Uses TruncatedText from @repo/ui for consistent show more/less behavior.
  * Descriptions are indented to align with scenario names, not the ID column.

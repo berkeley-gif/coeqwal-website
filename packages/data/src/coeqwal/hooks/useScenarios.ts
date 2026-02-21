@@ -45,8 +45,9 @@ export function useScenarios() {
     error: swrError,
     isLoading,
   } = useSWR<ScenarioListItem[]>(CACHE_KEYS.SCENARIOS, fetchScenarioList, {
-    // Scenario list is relatively static - don't revalidate on focus
+    // Scenario list is relatively static - don't revalidate on focus or reconnect
     revalidateOnFocus: false,
+    revalidateOnReconnect: false,
     revalidateIfStale: false,
   })
 

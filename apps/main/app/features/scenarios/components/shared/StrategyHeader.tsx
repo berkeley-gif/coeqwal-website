@@ -221,7 +221,7 @@ function DescriptionWithGlossaryLinks({
         aria-label="Show more description text"
         sx={toggleButtonStyles}
       >
-        show more
+        more
       </Box>
     </Box>
   )
@@ -267,7 +267,7 @@ function DescriptionWithGlossaryLinks({
           aria-label="Show less description text"
           sx={toggleButtonStyles}
         >
-          show less
+          less
         </Box>
       </motion.div>
 

@@ -505,7 +505,8 @@ export const themeValues = {
     // Full-panel spacing - CSS padding values applied by <Panel> component
     // Uses clamp() for responsive scaling: clamp(min, preferred, max)
     panel: {
-      padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight: edge gutters
+      padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight
+      paddingXl: "clamp(48px, 8vw, 120px)", // wider padding (used in panels for map overlay scrollytelling)
       topOffset: "clamp(140px, 22vh, 240px)", // paddingTop: clears header (70px) + headline breathing room
       bottomOffset: "clamp(100px, 16vh, 180px)", // paddingBottom: visual breathing room
     },
