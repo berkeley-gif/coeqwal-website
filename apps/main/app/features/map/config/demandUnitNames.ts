@@ -31,6 +31,18 @@ export const DEMAND_UNIT_NAMES: Record<string, DemandUnitNameInfo> = {
     urbName: "Small Communities",
     modName: "Non-Urban",
   },
+  "02_PU": {
+    subName: "Keswick",
+    urbName: "Shasta Co S.A. #25 - Keswick C.S.D.",
+  },
+  "02_SU": {
+    subName: "Redding",
+    urbName: "City of Redding",
+  },
+  "03_PU2": {
+    subName: "Bella Vista and Palo Cedro",
+    urbName: "Bella Vista W.D.",
+  },
   "Musco Family Olive Company": {
     urbName: "Musco Family Olive Company",
   },
