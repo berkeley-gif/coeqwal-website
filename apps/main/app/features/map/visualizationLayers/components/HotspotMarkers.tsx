@@ -47,6 +47,11 @@ const HOTSPOT_CONFIGS: Record<
     imageAlt: "Environmental flow marker showing flow at risk",
     labelPrefix: "Flow at risk",
   },
+  GW_STOR: {
+    image: "/images/map_markers/groundwater.png",
+    imageAlt: "Groundwater marker showing groundwater at risk",
+    labelPrefix: "Groundwater at risk",
+  },
 }
 
 interface HotspotMarkersProps {
@@ -118,18 +123,24 @@ export function HotspotMarkers({
   // Get config for this outcome code
   const config = outcomeCode ? HOTSPOT_CONFIGS[outcomeCode] : null
 
-  // Fetch tier 4 locations when outcome code changes
+  // Fetch tier 4 locations, then refine with Mapbox tile data before displaying.
+  // Waits for tiles so names and coordinates are resolved in a single update.
   useEffect(() => {
     if (!config || !outcomeCode || !visible) {
       setHotspots([])
       return
     }
 
+    let cancelled = false
+
     const loadHotspots = async () => {
       try {
         const response = await fetchTierLocationData(scenarioId, outcomeCode)
+        if (cancelled) return
 
-        // Filter for tier 4 features and convert to hotspot data
+        const MAX_HOTSPOT_MARKERS = 5
+
+        // Build initial hotspot data from API + static name mapping
         const hotspotsData: HotspotData[] = response.features
           .filter((f) => f.properties.tier_level === 4)
           .map((feature) => {
@@ -137,121 +148,109 @@ export function HotspotMarkers({
             const coords = getPolygonCenter(feature)
             if (!coords) return null
 
-            // Use static name mapping, fall back to API location_name
-            let enhancedName = feature.properties.location_name
+            let name = feature.properties.location_name
             const staticInfo = getDemandUnitNameInfo(locationId)
             if (staticInfo) {
-              enhancedName =
+              name =
                 staticInfo.subName ||
                 staticInfo.urbName ||
                 staticInfo.modName ||
-                enhancedName
+                name
             }
 
             return {
               id: locationId,
-              name: enhancedName,
+              name,
               longitude: coords[0],
               latitude: coords[1],
               tier: feature.properties.tier_level,
             }
           })
           .filter((h): h is HotspotData => h !== null)
+          .slice(0, MAX_HOTSPOT_MARKERS)
 
-        // Limit to 5 markers to avoid overwhelming the map
-        const MAX_HOTSPOT_MARKERS = 5
-        setHotspots(hotspotsData.slice(0, MAX_HOTSPOT_MARKERS))
+        if (cancelled || hotspotsData.length === 0) {
+          if (!cancelled) setHotspots(hotspotsData)
+          return
+        }
+
+        // Refine coordinates and names from Mapbox tile polygons, then set state.
+        // Done inside a single withMap call so we have map access for all hotspots.
+        mapAPI.withMap((mapRef) => {
+          const map = mapRef.getMap()
+
+          const refineAndSet = () => {
+            if (cancelled) return
+
+            const refined = hotspotsData.map((hotspot) => {
+              try {
+                const features = map.querySourceFeatures("composite", {
+                  sourceLayer: "demand_units",
+                  filter: ["==", "DU_ID", hotspot.id],
+                })
+
+                let { longitude: lng, latitude: lat, name } = hotspot
+
+                // Refine coordinates from polygon
+                const poly = features.find(
+                  (f) =>
+                    f.geometry.type === "Polygon" ||
+                    f.geometry.type === "MultiPolygon",
+                )
+                if (poly) {
+                  const pt = pointOnFeature(
+                    poly as unknown as Feature<Polygon | MultiPolygon>,
+                  )
+                  ;[lng, lat] = pt.geometry.coordinates as [number, number]
+                }
+
+                // Refine name from tile properties
+                const nameFeature = features[0]
+                const tileName =
+                  nameFeature?.properties?.Sub_Name?.trim() ||
+                  nameFeature?.properties?.Urb_Name?.trim() ||
+                  nameFeature?.properties?.Mod_Name?.trim()
+                if (tileName) {
+                  name = tileName
+                }
+
+                return { ...hotspot, longitude: lng, latitude: lat, name }
+              } catch {
+                return hotspot
+              }
+            })
+
+            setHotspots(refined)
+          }
+
+          if (map.isSourceLoaded("composite")) {
+            refineAndSet()
+          } else {
+            const onSourceData = (e: mapboxgl.MapSourceDataEvent) => {
+              if (e.sourceId === "composite" && e.isSourceLoaded) {
+                map.off("sourcedata", onSourceData)
+                refineAndSet()
+              }
+            }
+            map.on("sourcedata", onSourceData)
+            // Fallback: set with best available data after timeout
+            setTimeout(() => {
+              map.off("sourcedata", onSourceData)
+              refineAndSet()
+            }, 3000)
+          }
+        })
       } catch {
-        setHotspots([])
+        if (!cancelled) setHotspots([])
       }
     }
 
     loadHotspots()
-  }, [config, outcomeCode, scenarioId, visible])
 
-  // Refine hotspot coordinates and names using Mapbox tile data.
-  // The API returns Point centroids (may not match rendered polygon) and CalSim IDs
-  // (not human-readable). This queries tiles for each hotspot's DU_ID to get
-  // accurate polygon placement via pointOnFeature and real names (Sub_Name, etc.).
-  useEffect(() => {
-    if (hotspots.length === 0) return
-
-    mapAPI.withMap((mapRef) => {
-      const map = mapRef.getMap()
-
-      const refineCoords = () => {
-        let updated = false
-        const refined = hotspots.map((hotspot) => {
-          try {
-            const features = map.querySourceFeatures("composite", {
-              sourceLayer: "demand_units",
-              filter: ["==", "DU_ID", hotspot.id],
-            })
-
-            const poly = features.find(
-              (f) =>
-                f.geometry.type === "Polygon" ||
-                f.geometry.type === "MultiPolygon",
-            )
-
-            // Extract name from any matching feature
-            const nameFeature = features[0]
-            const subName = nameFeature?.properties?.Sub_Name?.trim()
-            const urbName = nameFeature?.properties?.Urb_Name?.trim()
-            const modName = nameFeature?.properties?.Mod_Name?.trim()
-            const tileName = subName || urbName || modName
-
-            let newLng = hotspot.longitude
-            let newLat = hotspot.latitude
-            let newName = hotspot.name
-
-            if (poly) {
-              const pt = pointOnFeature(
-                poly as unknown as Feature<Polygon | MultiPolygon>,
-              )
-              ;[newLng, newLat] = pt.geometry.coordinates as [number, number]
-            }
-
-            if (tileName) {
-              newName = tileName
-            }
-
-            if (
-              newLng !== hotspot.longitude ||
-              newLat !== hotspot.latitude ||
-              newName !== hotspot.name
-            ) {
-              updated = true
-              return { ...hotspot, longitude: newLng, latitude: newLat, name: newName }
-            }
-          } catch {
-            // Keep existing values if query fails
-          }
-          return hotspot
-        })
-
-        if (updated) {
-          setHotspots(refined)
-        }
-      }
-
-      if (map.isSourceLoaded("composite")) {
-        refineCoords()
-      } else {
-        const onSourceData = (e: mapboxgl.MapSourceDataEvent) => {
-          if (e.sourceId === "composite" && e.isSourceLoaded) {
-            map.off("sourcedata", onSourceData)
-            refineCoords()
-          }
-        }
-        map.on("sourcedata", onSourceData)
-        setTimeout(() => {
-          map.off("sourcedata", onSourceData)
-          refineCoords()
-        }, 3000)
-      }
-    })
-  }, [hotspots.length > 0, mapAPI]) // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true
+    }
+  }, [config, outcomeCode, scenarioId, visible, mapAPI])
 
   // Don't render if no config or not visible
   if (!config || !visible || hotspots.length === 0) {
