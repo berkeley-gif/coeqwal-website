@@ -15,39 +15,6 @@ The repository is managed with **Turborepo + pnpm workspaces** and split into tw
 - `apps/` -- standalone Next.js applications
 - `packages/` -- shared libraries consumed by the apps
 
-```mermaid
-graph TD
-    subgraph apps [apps]
-        Main["main"]
-        Flow["storyline-flow"]
-        Climate["storyline-climate"]
-    end
-
-    subgraph packages [packages]
-        UI["@repo/ui"]
-        Data["@repo/data"]
-        Viz["@repo/viz"]
-        MapPkg["@repo/map"]
-        State["@repo/state"]
-        Motion["@repo/motion"]
-        I18n["@repo/i18n"]
-        Utils["@repo/utils"]
-    end
-
-    Main --> UI
-    Main --> Data
-    Main --> Viz
-    Main --> MapPkg
-    Main --> State
-    Main --> Motion
-    Main --> I18n
-    Main --> Utils
-    Flow --> UI
-    Flow --> Data
-    Climate --> UI
-    Climate --> Data
-```
-
 ### Applications
 
 - **`apps/main`** -- The primary COEQWAL website. A Next.js 15 (App Router) application with an interactive Mapbox map, a scenario explorer, data visualizations, and a three-tab system (Learn / Explore / Share). All pages are statically exported.
