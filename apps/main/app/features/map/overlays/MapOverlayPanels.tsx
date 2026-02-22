@@ -18,6 +18,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 import { Scrollama, Step } from "react-scrollama"
 
 // Animation thresholds for scenario-intro section panels (progress 0-1)
@@ -35,6 +36,13 @@ const PANEL_POSITIONS = {
   paragraphTop: "15vh",
 } as const
 
+const ACCENT_TEXT_SX = {
+  fontFamily: themeValues.fontFamily.accent,
+  fontStyle: "italic",
+  fontWeight: 500,
+  fontSize: "1.4rem",
+} as const
+
 const RIGHT_PANEL_MAX_WIDTH = {
   xs: "100%",
   sm: "360px",
@@ -48,6 +56,7 @@ import { CallResponsePanel } from "@repo/ui"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
+import { PanelEyebrow } from "./PanelEyebrow"
 import {
   StrategyInfoPanel,
   KeyOperationsPanel,
@@ -408,20 +417,25 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1">
-                The{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  Central Valley
-                </Box>{" "}
-                is a long, low valley that collects much of California&apos;s
-                water from surrounding mountains. This water is stored, divided
-                up, and used to irrigate the most productive farmland in the
-                world, to supply drinking water to millions of people, and to
-                protect sensitive species and ecosystems.
-              </Typography>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <PanelEyebrow>Central Valley Water</PanelEyebrow>
+                <Typography variant="body1">
+                  The{" "}
+                  <Box
+                    component="span"
+                    sx={ACCENT_TEXT_SX}
+                  >
+                    Central Valley
+                  </Box>{" "}
+                  is a long, low valley that collects much of California&apos;s
+                  water from surrounding mountains. This water is stored,
+                  divided up, and used to irrigate the most productive farmland
+                  in the world, to supply drinking water to millions of people,
+                  and to protect sensitive species and ecosystems.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>
@@ -446,7 +460,7 @@ export default function MapOverlayPanels() {
                 The Central Valley lies across three water{" "}
                 <Box
                   component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                  sx={ACCENT_TEXT_SX}
                 >
                   basins
                 </Box>
@@ -558,21 +572,21 @@ export default function MapOverlayPanels() {
                   These waters flow to the Valley floor, where the{" "}
                   <Box
                     component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                    sx={ACCENT_TEXT_SX}
                   >
                     Sacramento River
                   </Box>{" "}
                   flows from the north and the{" "}
                   <Box
                     component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                    sx={ACCENT_TEXT_SX}
                   >
                     San Joaquin River
                   </Box>{" "}
                   flows from the south. The rivers meet and mix in the low-lying{" "}
                   <Box
                     component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                    sx={ACCENT_TEXT_SX}
                   >
                     Delta
                   </Box>
@@ -582,7 +596,7 @@ export default function MapOverlayPanels() {
                   During{" "}
                   <Box
                     component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+                    sx={ACCENT_TEXT_SX}
                   >
                     wet years
                   </Box>{" "}
@@ -656,35 +670,42 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
-                To do this water planning and accounting, the federal{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  U.S. Bureau of Reclamation
-                </Box>{" "}
-                and the state{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  Department of Water Resources
-                </Box>{" "}
-                use a computer model called{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  CalSim
-                </Box>
-                .
-              </Typography>
-              <Typography variant="body1">
-                CalSim simulates how much water flows into reservoirs based on
-                climate, how much is stored or released, and where it gets
-                delivered.
-              </Typography>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <PanelEyebrow>
+                  Central Valley Water Modeling
+                </PanelEyebrow>
+                <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
+                  To do this water planning and accounting, the federal{" "}
+                  <Box
+                    component="span"
+                    sx={ACCENT_TEXT_SX}
+                  >
+                    U.S. Bureau of Reclamation
+                  </Box>{" "}
+                  and the state{" "}
+                  <Box
+                    component="span"
+                    sx={ACCENT_TEXT_SX}
+                  >
+                    Department of Water Resources
+                  </Box>{" "}
+                  use a computer model called{" "}
+                  <Box
+                    component="span"
+                    sx={ACCENT_TEXT_SX}
+                  >
+                    CalSim
+                  </Box>
+                  .
+                </Typography>
+                <Typography variant="body1">
+                  CalSim simulates how much water flows into reservoirs based on
+                  climate, how much is stored or released, and where it gets
+                  delivered.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>
@@ -705,20 +726,22 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1">
-                Until now, this tool has been inaccessible to many communities,
-                creating barriers to participation in water decision-making. The{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  COEQWAL
-                </Box>{" "}
-                project uses CalSim to explore a wide range of different water
-                management strategies and climate futures. We are making these
-                scenarios available to the public so that communities can
-                envision alternative water futures for California.
-              </Typography>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <PanelEyebrow>
+                  COEQWAL Water Allocation Scenarios
+                </PanelEyebrow>
+                <Typography variant="body1">
+                  Until now, this tool has been inaccessible to many
+                  communities, creating barriers to participation in water
+                  decision-making. The COEQWAL 
+                  project uses CalSim to explore a wide range of different water
+                  management strategies and climate futures. We are making these
+                  scenarios available to the public so that communities can
+                  envision alternative water futures for California.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>

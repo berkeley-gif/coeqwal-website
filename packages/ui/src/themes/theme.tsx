@@ -174,8 +174,82 @@ const FONT_PRESETS = {
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
+// GT-Alpina accent typeface: local .otf files in apps/main/public/fonts/
+const accentFontFaces = `
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Thin-Trial.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Thin-Italic-Trial.otf") format("opentype");
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Light-Trial.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Light-Italic-Trial.otf") format("opentype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Regular-Trial.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Regular-Italic-Trial.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Medium-Trial.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Medium-Italic-Trial.otf") format("opentype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Bold-Trial.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Bold-Italic-Trial.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+`
+
 // Export font CSS import for ThemeRegistry (must load before other styles)
-export const fontCssImport = activeFont.cssImport
+export const fontCssImport = activeFont.cssImport + accentFontFaces
 
 /* ========================================================
  * 2. Design tokens
@@ -416,6 +490,7 @@ export const themeValues = {
   fontFamily: {
     text: activeFont.text,
     display: activeFont.display,
+    accent: '"GT Alpina", Georgia, "Times New Roman", serif',
   },
 
   /**
@@ -758,7 +833,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
-      fontWeight: 500,
+      fontWeight: 300,
       lineHeight: 1.05,
       letterSpacing: "-0.01em",
       margin: 0,
