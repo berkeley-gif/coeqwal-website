@@ -295,7 +295,8 @@ export default function VisualizationLayers() {
           !!outcomeCode &&
           (outcomeCode === "CWS_DEL" ||
             outcomeCode === "WRC_SALMON_AB" ||
-            outcomeCode === "AG_REV")
+            outcomeCode === "AG_REV" ||
+            outcomeCode === "ENV_FLOWS")
         }
       />
 
