@@ -152,50 +152,8 @@ export default function VisualizationLayers() {
           )
           setTierData(data)
 
-          // Zoom to show all markers
-          // In explore mode: camera is handled by useOutcomeVisualization
-          // In learn mode: skip if outcome has a cameraPreset (handled by useOutcomeVisualization)
-          const hasCameraPreset = config?.cameraPreset != null
-          const isLearnMode = mapMode === "learn"
-          const shouldFitBounds = isLearnMode && !hasCameraPreset
-          if (
-            shouldFitBounds &&
-            data.features.length > 0 &&
-            map.mapRef?.current
-          ) {
-            let minLng = Infinity,
-              minLat = Infinity,
-              maxLng = -Infinity,
-              maxLat = -Infinity
-
-            data.features.forEach((feature) => {
-              if (feature.geometry.type === "Point") {
-                const [lng, lat] = feature.geometry.coordinates as [
-                  number,
-                  number,
-                ]
-                minLng = Math.min(minLng, lng)
-                minLat = Math.min(minLat, lat)
-                maxLng = Math.max(maxLng, lng)
-                maxLat = Math.max(maxLat, lat)
-              }
-            })
-
-            if (minLng !== Infinity) {
-              // This only runs in learn mode (explore mode handled by useOutcomeVisualization)
-              map.mapRef.current.fitBounds(
-                [
-                  [minLng, minLat],
-                  [maxLng, maxLat],
-                ],
-                {
-                  padding: 100,
-                  maxZoom: 9,
-                  duration: 1000,
-                },
-              )
-            }
-          }
+          // Camera zoom is handled by useOutcomeVisualization for outcomes
+          // with a cameraPreset (Delta views). Other outcomes keep the current position.
         }
       } catch (err) {
         if (err instanceof FetchError && (err.status === 404 || err.status >= 500)) {
@@ -296,7 +254,8 @@ export default function VisualizationLayers() {
           (outcomeCode === "CWS_DEL" ||
             outcomeCode === "WRC_SALMON_AB" ||
             outcomeCode === "AG_REV" ||
-            outcomeCode === "ENV_FLOWS")
+            outcomeCode === "ENV_FLOWS" ||
+            outcomeCode === "GW_STOR")
         }
       />
 

@@ -310,7 +310,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Reservoir ID",
-    cameraPreset: RESERVOIR_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -346,7 +345,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "River",
-    cameraPreset: SACRAMENTO_RIVER_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════

@@ -28,6 +28,7 @@ import { useMap } from "@repo/map"
 import { useMapMode, useActiveOutcomeVisualization } from "../../store"
 import { useTierData, type UseTierDataResult } from "./useTierData"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
+import { CALIFORNIA_CENTERED_VIEW } from "../../config/cameraPresets"
 import { getOutcomeName } from "../../../../content/outcomes"
 import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 
@@ -102,52 +103,29 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // Fetch tier data (using outcomeCode)
   const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)
 
-  // Camera control - zoom to outcome when active
+  // Camera control - zoom to camera preset (e.g., Delta views) or return to
+  // overview when switching to an outcome without a preset.
   useEffect(() => {
     if (!isActive || !config) return
     if (!tierDataResult.featureIds.length && config.requiresIdMatching) return
 
+    const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
+
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
 
-      const targetZoom = config.cameraPreset?.zoom ?? 6.5
-      const targetLng = config.cameraPreset?.longitude ?? map.getCenter().lng
-      const targetLat = config.cameraPreset?.latitude ?? map.getCenter().lat
-
-      // In Explore mode, shift center to account for left panel (50% of viewport)
-      const isExplore = mapMode === "explore"
-
-      if (isExplore) {
-        // In explore mode: use same camera presets as Learn mode, but zoomed out
-        // and with left padding to account for scenario panel
-        const exploreZoomOffset = -1 // Zoom out by 1 level for explore view
-        const defaultZoom = 5.5
-        const defaultCenter = { lng: -120.5, lat: 38.0 } // Central Valley fallback
-
-        // Use camera preset if available, otherwise use defaults
-        const zoom = config.cameraPreset
-          ? config.cameraPreset.zoom + exploreZoomOffset
-          : defaultZoom
-        const center = config.cameraPreset
-          ? {
-              lng: config.cameraPreset.longitude,
-              lat: config.cameraPreset.latitude,
-            }
-          : defaultCenter
-
-        // Use padding to account for left panel (same approach as MapInstance.tsx)
+      if (mapMode === "explore") {
         const leftPadding = window.innerWidth / 2
         map.easeTo({
-          zoom,
-          center,
+          zoom: target.zoom - 1,
+          center: { lng: target.longitude, lat: target.latitude },
           padding: { left: leftPadding, top: 100, right: 0, bottom: 20 },
           duration: 1000,
         })
       } else {
-        // Learn mode - use preset zoom and center
         map.easeTo({
-          zoom: targetZoom,
-          center: { lng: targetLng, lat: targetLat },
+          zoom: target.zoom,
+          center: { lng: target.longitude, lat: target.latitude },
           duration: 1000,
         })
       }
