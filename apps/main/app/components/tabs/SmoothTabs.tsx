@@ -97,7 +97,8 @@ export default function SmoothTabs() {
   const [forceHideDescriptions, setForceHideDescriptions] = useState(false)
 
   // Show descriptions when expanded or opened by click, unless force-hidden.
-  const showDescriptions = !forceHideDescriptions && (!isInTabsArea || clickOpened)
+  const showDescriptions =
+    !forceHideDescriptions && (!isInTabsArea || clickOpened)
 
   // Once the tabs have docked (isInTabsArea = true), the interstitial is gone
   // from the flow and the force-hide flag is no longer needed.

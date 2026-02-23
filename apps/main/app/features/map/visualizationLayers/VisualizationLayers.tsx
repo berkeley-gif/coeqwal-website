@@ -156,7 +156,10 @@ export default function VisualizationLayers() {
           // with a cameraPreset (Delta views). Other outcomes keep the current position.
         }
       } catch (err) {
-        if (err instanceof FetchError && (err.status === 404 || err.status >= 500)) {
+        if (
+          err instanceof FetchError &&
+          (err.status === 404 || err.status >= 500)
+        ) {
           // 404: geometry table not yet populated for this tier type.
           // 5xx: transient backend error.
           // Both are known limitations — log as warning so the Next.js dev

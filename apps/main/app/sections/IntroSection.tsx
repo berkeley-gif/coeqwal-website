@@ -335,7 +335,7 @@ function FloatingCategoryCircles({
   // Hold start: circles are stationary at 50vh from p3HoldStart → p3StickyRelease.
   // 0.40 leaves ~0.10 × span of hold before PANEL4_STICKY_RELEASE = 0.5
   // (PANEL4_HEIGHT_VH was halved from 300 → 200, so sticky release moved from 0.667 → 0.5).
-  const p3HoldStart = p3Start + (p3End - p3Start) * 0.40
+  const p3HoldStart = p3Start + (p3End - p3Start) * 0.4
   // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE = 0.5).
   const p3StickyRelease = p3Start + (p3End - p3Start) * PANEL4_STICKY_RELEASE
   // Float finishes at 0.73: lists appear shortly after sticky release (0.667),

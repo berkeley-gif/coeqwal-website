@@ -32,7 +32,7 @@ const PANEL_ANIMATION_THRESHOLDS = {
   // Summary appears just after key outcomes (0.64–0.68), while the sticky
   // container is still pinned. The container releases at ~0.74–0.76, so 0.82+
   // thresholds are unreachable — the content has already scrolled away.
-  summary: { fadeStart: 0.70, fadeEnd: 0.74 },
+  summary: { fadeStart: 0.7, fadeEnd: 0.74 },
 } as const
 
 const PANEL_POSITIONS = {
@@ -293,7 +293,10 @@ export default function MapOverlayPanels() {
   // Each listener is gated: while the panel is latched (maxProgressRef >= fadeEnd)
   // we skip the update so the PE state stays "auto" while the user scrolls back up.
   useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
-    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd) return
+    if (
+      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
+    )
+      return
     const newPE = latest as "none" | "auto"
     setStrategyInfoPE(newPE)
 
@@ -310,15 +313,22 @@ export default function MapOverlayPanels() {
     }
   })
   useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
-    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd) return
+    if (
+      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
+    )
+      return
     setKeyOperationsPE(latest as "none" | "auto")
   })
   useMotionValueEvent(keyOutcomesPointerEvents, "change", (latest) => {
-    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd) return
+    if (
+      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
+    )
+      return
     setKeyOutcomesPE(latest as "none" | "auto")
   })
   useMotionValueEvent(summaryPointerEvents, "change", (latest) => {
-    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd) return
+    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd)
+      return
     setSummaryPE(latest as "none" | "auto")
   })
 
@@ -328,10 +338,14 @@ export default function MapOverlayPanels() {
 
   // Derived latch booleans — no new useState needed, computed from maxProgress.
   // A panel is "latched" (frozen visible) once the user has scrolled past its fadeEnd.
-  const strategyInfoLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
-  const keyOperationsLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
-  const keyOutcomesLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
-  const summaryLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd
+  const strategyInfoLatched =
+    maxProgress >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
+  const keyOperationsLatched =
+    maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
+  const keyOutcomesLatched =
+    maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
+  const summaryLatched =
+    maxProgress >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd
 
   // Unified scenarioIntroProgress listener:
   // - Drives the padding transition
@@ -376,7 +390,7 @@ export default function MapOverlayPanels() {
 
   const viewByClimateTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.50, 0.53, 0.61, 0.64],
+    [0.5, 0.53, 0.61, 0.64],
     [0, 1, 1, 0],
   )
 
@@ -464,10 +478,7 @@ export default function MapOverlayPanels() {
                 <PanelEyebrow>Central Valley Water</PanelEyebrow>
                 <Typography variant="body1">
                   The{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Central Valley
                   </Box>{" "}
                   is a long, low valley that collects much of California&apos;s
@@ -499,10 +510,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The Central Valley lies across three water{" "}
-                <Box
-                  component="span"
-                  sx={ACCENT_TEXT_SX}
-                >
+                <Box component="span" sx={ACCENT_TEXT_SX}>
                   basins
                 </Box>
                 .
@@ -611,34 +619,22 @@ export default function MapOverlayPanels() {
                   sx={{ mb: theme.space.component.lg }}
                 >
                   These waters flow to the Valley floor, where the{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Sacramento River
                   </Box>{" "}
                   flows from the north and the{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     San Joaquin River
                   </Box>{" "}
                   flows from the south. The rivers meet and mix in the low-lying{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Delta
                   </Box>
                   .
                 </Typography>
                 <Typography variant="body1">
                   During{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     wet years
                   </Box>{" "}
                   water flows from the Tulare Basin into the San Joaquin River.
@@ -714,29 +710,21 @@ export default function MapOverlayPanels() {
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
               >
-                <PanelEyebrow>
-                  Central Valley Water Modeling
-                </PanelEyebrow>
-                <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
+                <PanelEyebrow>Central Valley Water Modeling</PanelEyebrow>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: theme.space.component.lg }}
+                >
                   To do this water planning and accounting, the federal{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     U.S. Bureau of Reclamation
                   </Box>{" "}
                   and the state{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Department of Water Resources
                   </Box>{" "}
                   use a computer model called{" "}
-                  <Box
-                    component="span"
-                    sx={ACCENT_TEXT_SX}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     CalSim
                   </Box>
                   .
@@ -773,11 +761,11 @@ export default function MapOverlayPanels() {
                 <Typography variant="body1">
                   Until now, this tool has been inaccessible to many
                   communities, creating barriers to participation in water
-                  decision-making. The COEQWAL 
-                  project uses CalSim to explore and report a wide range of different water
-                  management strategies and climate futures. We are making these
-                  scenarios available to the public so that communities can
-                  envision alternative water futures for California.
+                  decision-making. The COEQWAL project uses CalSim to explore
+                  and report a wide range of different water management
+                  strategies and climate futures. We are making these scenarios
+                  available to the public so that communities can envision
+                  alternative water futures for California.
                 </Typography>
               </Box>
             </CallResponsePanel>
@@ -816,7 +804,8 @@ export default function MapOverlayPanels() {
                   pointerEvents: "none",
                   // Animate padding from default (paddingXl/padding) to narrow as user scrolls in
                   "& > #scenario-intro-call": {
-                    transition: "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                    transition:
+                      "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
                     ...(scenarioIntroPaddingReduced && {
                       paddingLeft: "16px",
                       paddingRight: "16px",
@@ -832,30 +821,34 @@ export default function MapOverlayPanels() {
                   minHeight="auto"
                   alignItems="flex-start"
                 >
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
-                >
-                  <PanelEyebrow>
-                    Library of Water Allocation Scenarios
-                  </PanelEyebrow>
-                  <Typography
-                    variant="body1"
+                  <Box
                     sx={{
-                      maxWidth: {
-                        xs: "100%",
-                        sm: "340px",
-                        md: "380px",
-                        lg: "420px",
-                        xl: "460px",
-                      },
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "14px",
                     }}
                   >
-                    Each water management scenario on this site can be read as
-                    having five explanatory elements. Let&apos;s look at the water
-                    management scenario for the way we currently manage Central
-                    Valley water.
-                  </Typography>
-                </Box>
+                    <PanelEyebrow>
+                      Library of Water Allocation Scenarios
+                    </PanelEyebrow>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        maxWidth: {
+                          xs: "100%",
+                          sm: "340px",
+                          md: "380px",
+                          lg: "420px",
+                          xl: "460px",
+                        },
+                      }}
+                    >
+                      Each water management scenario on this site can be read as
+                      having five explanatory elements. Let&apos;s look at the
+                      water management scenario for the way we currently manage
+                      Central Valley water.
+                    </Typography>
+                  </Box>
                 </CallResponsePanel>
               </Box>
             </motion.div>
@@ -877,8 +870,11 @@ export default function MapOverlayPanels() {
                   gap: theme.space.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: scenarioIntroPaddingReduced ? "16px" : theme.space.panel.padding,
-                  transition: "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                  pr: scenarioIntroPaddingReduced
+                    ? "16px"
+                    : theme.space.panel.padding,
+                  transition:
+                    "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
                   pointerEvents: "none",
                 }}
               >
@@ -971,7 +967,9 @@ export default function MapOverlayPanels() {
                                 >
                                   more
                                 </Box>{" "}
-                                to see the whole strategy description. Underlined words appear in a glossary when clicked.
+                                to see the whole strategy description.
+                                Underlined words appear in a glossary when
+                                clicked.
                               </Box>
                             </>
                           }
@@ -989,7 +987,9 @@ export default function MapOverlayPanels() {
                 {/* Key operations panel */}
                 <motion.div
                   style={{
-                    opacity: keyOperationsLatched ? 1 : keyOperationsPanelOpacity,
+                    opacity: keyOperationsLatched
+                      ? 1
+                      : keyOperationsPanelOpacity,
                     pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
@@ -1065,8 +1065,8 @@ export default function MapOverlayPanels() {
                                   display: "block",
                                 }}
                               >
-                                Hover over the icons to see what key operations they
-                                represent.
+                                Hover over the icons to see what key operations
+                                they represent.
                               </Box>
                             </>
                           }
@@ -1088,9 +1088,9 @@ export default function MapOverlayPanels() {
                               >
                                 3. View by climate
                               </Typography>
-                              Choosing one of these climate icons will show
-                              you how the scenario allocates water under
-                              different potential future climates.
+                              Choosing one of these climate icons will show you
+                              how the scenario allocates water under different
+                              potential future climates.
                               <Typography
                                 variant="tooltipHeader"
                                 sx={{
@@ -1185,7 +1185,11 @@ export default function MapOverlayPanels() {
                               >
                                 4. Key outcomes
                               </Typography>
-                              While the strategy description, key operations, and climate describe the key inputs into the CalSim model, the outcomes listed here summarize the outputs. They show how well the allocations meet needs in each category.
+                              While the strategy description, key operations,
+                              and climate describe the key inputs into the
+                              CalSim model, the outcomes listed here summarize
+                              the outputs. They show how well the allocations
+                              meet needs in each category.
                               <Box
                                 component="span"
                                 sx={{
@@ -1193,7 +1197,10 @@ export default function MapOverlayPanels() {
                                   mt: theme.space.component.sm,
                                 }}
                               >
-                                Outcomes represented by a bar chart show the percentage of locations in each tier. For other outcomes, there is only one location of interest.
+                                Outcomes represented by a bar chart show the
+                                percentage of locations in each tier. For other
+                                outcomes, there is only one location of
+                                interest.
                               </Box>
                               <Typography
                                 variant="tooltipHeader"
@@ -1294,8 +1301,8 @@ export default function MapOverlayPanels() {
                                 5. Scenario summary
                               </Typography>
                               This panel synthesizes everything above into a
-                              summary of the scenario&apos;s priorities
-                              and trade-offs.
+                              summary of the scenario&apos;s priorities and
+                              trade-offs.
                               <Typography
                                 variant="tooltipHeader"
                                 sx={{
@@ -1311,9 +1318,10 @@ export default function MapOverlayPanels() {
                                   display: "block",
                                 }}
                               >
-                                Click any outcome chart above to get a summary specific to that outcome, including the locations most affected.
-                                Click a location chip to zoom
-                                the map directly to that location.
+                                Click any outcome chart above to get a summary
+                                specific to that outcome, including the
+                                locations most affected. Click a location chip
+                                to zoom the map directly to that location.
                               </Box>
                             </>
                           }

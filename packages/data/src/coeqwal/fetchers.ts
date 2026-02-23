@@ -124,7 +124,12 @@ export async function fetchScenarioList(): Promise<ScenarioListItem[]> {
 export async function fetchScenarioTierByCode(
   scenarioId: string,
   tierCode: string,
-): Promise<ScenarioTiersResponse["tiers"][string] & { scenario: string; tier_code: string }> {
+): Promise<
+  ScenarioTiersResponse["tiers"][string] & {
+    scenario: string
+    tier_code: string
+  }
+> {
   if (!scenarioId) {
     throw new Error("Scenario ID is required")
   }
