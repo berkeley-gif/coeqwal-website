@@ -19,25 +19,28 @@ export function useLearnScrollama() {
    * Called when a step enters the viewport.
    * Updates the active section in the store.
    */
-  const onStepEnter = useCallback(({ data, direction }: StepEvent<SectionId>) => {
-    // The california step has no visible content; entering it immediately triggers
-    // the central-valley map state so the zoom animation starts right away.
-    const effectiveSection = data === "california" ? "central-valley" : data
-    mapActions.setActiveSection(effectiveSection)
+  const onStepEnter = useCallback(
+    ({ data, direction }: StepEvent<SectionId>) => {
+      // The california step has no visible content; entering it immediately triggers
+      // the central-valley map state so the zoom animation starts right away.
+      const effectiveSection = data === "california" ? "central-valley" : data
+      mapActions.setActiveSection(effectiveSection)
 
-    // Clear outcome visualization when entering any section other than scenario-intro
-    // This handles cases where user scrolls quickly past the exit trigger
-    if (data !== "scenario-intro") {
-      mapActions.clearOutcomeVisualization()
-    }
+      // Clear outcome visualization when entering any section other than scenario-intro
+      // This handles cases where user scrolls quickly past the exit trigger
+      if (data !== "scenario-intro") {
+        mapActions.clearOutcomeVisualization()
+      }
 
-    // When naturally scrolling into the central-valley step, ease the content
-    // to the viewport center using the same animation as the "Scroll to Explore"
-    // button. Only fires on downward entry — not when scrolling back up.
-    if (data === "central-valley" && direction === "down") {
-      smoothScrollToCenter("central-valley-content")
-    }
-  }, [])
+      // When naturally scrolling into the central-valley step, ease the content
+      // to the viewport center using the same animation as the "Scroll to Explore"
+      // button. Only fires on downward entry — not when scrolling back up.
+      if (data === "central-valley" && direction === "down") {
+        smoothScrollToCenter("central-valley-content")
+      }
+    },
+    [],
+  )
 
   /**
    * Called when a step exits the viewport.
