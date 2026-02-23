@@ -52,7 +52,7 @@ export function CallResponsePanel({
   delay = 0,
   sx = {},
   disableHighlight = true,
-  minHeight = "100vh",
+  minHeight = "80vh",
   alignItems = "center",
 }: CallResponsePanelProps) {
   return (
@@ -70,14 +70,12 @@ export function CallResponsePanel({
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 120 }}
+        initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.15 }}
         transition={{
-          type: "spring",
-          stiffness: 80,
-          damping: 18,
-          mass: 0.8,
+          duration: 0.6,
+          ease: [0.25, 0.1, 0.25, 1],
           ...(delay ? { delay } : {}),
         }}
         style={{

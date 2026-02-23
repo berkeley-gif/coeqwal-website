@@ -24,12 +24,15 @@ import { Scrollama, Step } from "react-scrollama"
 // Animation thresholds for scenario-intro section panels (progress 0-1)
 // Panels fade in BEFORE their tooltips so the user sees the panel first,
 // then the tooltip appears to explain it. Each panel's fadeEnd aligns with
-// its tooltip's fadeIn start: strategy 0.18, keyOps 0.34, keyOutcomes 0.55.
+// its tooltip's fadeIn start.
 const PANEL_ANIMATION_THRESHOLDS = {
-  strategyInfo: { fadeStart: 0.12, fadeEnd: 0.18 },
-  keyOperations: { fadeStart: 0.28, fadeEnd: 0.34 },
-  keyOutcomes: { fadeStart: 0.48, fadeEnd: 0.54 },
-  summary: { fadeStart: 0.48, fadeEnd: 0.54 },
+  strategyInfo: { fadeStart: 0.08, fadeEnd: 0.14 },
+  keyOperations: { fadeStart: 0.22, fadeEnd: 0.28 },
+  keyOutcomes: { fadeStart: 0.64, fadeEnd: 0.68 },
+  // Summary appears just after key outcomes (0.64–0.68), while the sticky
+  // container is still pinned. The container releases at ~0.74–0.76, so 0.82+
+  // thresholds are unreachable — the content has already scrolled away.
+  summary: { fadeStart: 0.70, fadeEnd: 0.74 },
 } as const
 
 const PANEL_POSITIONS = {
@@ -43,13 +46,7 @@ const ACCENT_TEXT_SX = {
   fontSize: "1.4rem",
 } as const
 
-const RIGHT_PANEL_MAX_WIDTH = {
-  xs: "100%",
-  sm: "360px",
-  md: "420px",
-  lg: "460px",
-  xl: "500px",
-} as const
+const RIGHT_PANEL_MAX_WIDTH = "540px"
 
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
@@ -141,6 +138,10 @@ export default function MapOverlayPanels() {
   const keyOutcomesRef = useRef<HTMLDivElement>(null)
   const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
 
+  // Refs for summary tooltip
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const summaryContainerRef = useRef<HTMLDivElement>(null)
+
   // State for manually closed tooltips
   const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
   const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
@@ -148,6 +149,7 @@ export default function MapOverlayPanels() {
     useState(false)
   const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] =
     useState(false)
+  const [summaryTooltipClosed, setSummaryTooltipClosed] = useState(false)
 
   // Close tooltips when outcome visualization is activated
   const isOutcomeActive = useIsOutcomeVisualizationActive()
@@ -159,6 +161,7 @@ export default function MapOverlayPanels() {
       setKeyOpsTooltipClosed(true)
       setViewByClimateTooltipClosed(true)
       setKeyOutcomesTooltipClosed(true)
+      setSummaryTooltipClosed(true)
     }
   }, [isOutcomeActive])
 
@@ -276,12 +279,21 @@ export default function MapOverlayPanels() {
   const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
   const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
 
+  // Shared max-progress tracker: drives all panel visibility latches.
+  // Each panel is frozen at opacity 1 once maxProgress exceeds its fadeEnd.
+  // Everything resets together when the user scrolls back above the section.
+  const maxProgressRef = useRef(0)
+  const [maxProgress, setMaxProgress] = useState(0)
+
   // Track if StrategyInfoPanel was ever visible (to avoid clearing on initial render)
   // Using first panel because it's visible the longest
   const strategyInfoWasVisible = useRef(false)
 
-  // Sync motion values to state for use in MUI sx prop
+  // Sync motion values to state for use in MUI sx prop.
+  // Each listener is gated: while the panel is latched (maxProgressRef >= fadeEnd)
+  // we skip the update so the PE state stays "auto" while the user scrolls back up.
   useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
+    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd) return
     const newPE = latest as "none" | "auto"
     setStrategyInfoPE(newPE)
 
@@ -298,42 +310,87 @@ export default function MapOverlayPanels() {
     }
   })
   useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
+    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd) return
     setKeyOperationsPE(latest as "none" | "auto")
   })
   useMotionValueEvent(keyOutcomesPointerEvents, "change", (latest) => {
+    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd) return
     setKeyOutcomesPE(latest as "none" | "auto")
   })
   useMotionValueEvent(summaryPointerEvents, "change", (latest) => {
+    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd) return
     setSummaryPE(latest as "none" | "auto")
+  })
+
+  // Track when scenario-intro has been scrolled into, to reduce left/right padding
+  const [scenarioIntroPaddingReduced, setScenarioIntroPaddingReduced] =
+    useState(false)
+
+  // Derived latch booleans — no new useState needed, computed from maxProgress.
+  // A panel is "latched" (frozen visible) once the user has scrolled past its fadeEnd.
+  const strategyInfoLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
+  const keyOperationsLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
+  const keyOutcomesLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
+  const summaryLatched = maxProgress >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd
+
+  // Unified scenarioIntroProgress listener:
+  // - Drives the padding transition
+  // - Records the highest progress reached (for visibility latches)
+  // - Resets all latches when the user scrolls back above the section
+  useMotionValueEvent(scenarioIntroProgress, "change", (latest) => {
+    setScenarioIntroPaddingReduced(latest > 0.01)
+
+    if (latest > maxProgressRef.current) {
+      maxProgressRef.current = latest
+      setMaxProgress(latest)
+    }
+
+    if (latest < 0.05 && maxProgressRef.current >= 0.05) {
+      maxProgressRef.current = 0
+      setMaxProgress(0)
+      // Reset PE so invisible panels don't intercept pointer events
+      setStrategyInfoPE("none")
+      setKeyOperationsPE("none")
+      setKeyOutcomesPE("none")
+      setSummaryPE("none")
+      // Clear any active outcome visualization
+      mapActions.clearOutcomeVisualization()
+      strategyInfoWasVisible.current = false
+    }
   })
 
   // Tooltip opacity - fade in and out
   // Sequence (no overlaps): strategy → key ops → view by climate → key outcomes
-  // Panel fadeEnd values: strategy 0.18, keyOps 0.34, keyOutcomes 0.54
+  // Each tooltip: 0.03 fade in, 0.08 visible, 0.03 fade out (0.14 total), 0.04 gap between
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.18, 0.22, 0.26, 0.30],
+    [0.14, 0.17, 0.25, 0.28],
     [0, 1, 1, 0],
   )
 
-  // Starts at keyOps panel fadeEnd (0.34), ends at 0.44
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.34, 0.37, 0.41, 0.44],
+    [0.32, 0.35, 0.43, 0.46],
     [0, 1, 1, 0],
   )
 
-  // Picks up immediately after key ops ends (0.44), finishes as key outcomes panel appears (0.54)
   const viewByClimateTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.44, 0.47, 0.51, 0.54],
+    [0.50, 0.53, 0.61, 0.64],
     [0, 1, 1, 0],
   )
 
-  // Starts just after view by climate ends (0.54), key outcomes panel is now fully visible
   const keyOutcomesTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.55, 0.58, 0.65, 0.68],
+    [0.68, 0.71, 0.79, 0.82],
+    [0, 1, 1, 0],
+  )
+
+  // Summary tooltip: fades in after the panel is fully visible, fades out near
+  // the end of the section. Follows the same 0.03/0.07/0.03 rhythm as others.
+  const summaryTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.74, 0.77, 0.81, 0.84],
     [0, 1, 1, 0],
   )
 
@@ -350,6 +407,9 @@ export default function MapOverlayPanels() {
   })
   useMotionValueEvent(keyOutcomesTooltipOpacity, "change", (latest) => {
     if (latest === 0) setKeyOutcomesTooltipClosed(false)
+  })
+  useMotionValueEvent(summaryTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setSummaryTooltipClosed(false)
   })
 
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
@@ -385,7 +445,7 @@ export default function MapOverlayPanels() {
         <Step data={"central-valley" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -398,6 +458,7 @@ export default function MapOverlayPanels() {
               isVisible={isFirstPanelVisible}
             >
               <Box
+                id="central-valley-content"
                 sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
               >
                 <PanelEyebrow>Central Valley Water</PanelEyebrow>
@@ -424,7 +485,7 @@ export default function MapOverlayPanels() {
         <Step data={"basins" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -454,7 +515,7 @@ export default function MapOverlayPanels() {
         <Step data={"watersheds" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -479,7 +540,7 @@ export default function MapOverlayPanels() {
         <Step data={"arrows" as SectionId}>
           <Box
             sx={{
-              minHeight: "50vh",
+              minHeight: "30vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -493,7 +554,7 @@ export default function MapOverlayPanels() {
         <Step data={"find-basin" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -523,7 +584,7 @@ export default function MapOverlayPanels() {
         <Step data={"rivers" as SectionId} progress>
           <Box
             sx={{
-              minHeight: "200vh",
+              minHeight: "150vh",
               position: "relative",
               pointerEvents: "none",
             }}
@@ -591,7 +652,7 @@ export default function MapOverlayPanels() {
         <Step data={"delta" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -613,7 +674,7 @@ export default function MapOverlayPanels() {
         <Step data={"distribution" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -638,7 +699,7 @@ export default function MapOverlayPanels() {
         <Step data={"calsim" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -694,7 +755,7 @@ export default function MapOverlayPanels() {
         <Step data={"coeqwal" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -733,7 +794,7 @@ export default function MapOverlayPanels() {
           <Box
             id="scenario-intro-wrapper"
             sx={{
-              minHeight: "900vh",
+              minHeight: "550vh",
               position: "relative",
               pointerEvents: "none",
             }}
@@ -753,6 +814,14 @@ export default function MapOverlayPanels() {
                   display: "flex",
                   alignItems: "flex-start",
                   pointerEvents: "none",
+                  // Animate padding from default (paddingXl/padding) to narrow as user scrolls in
+                  "& > #scenario-intro-call": {
+                    transition: "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                    ...(scenarioIntroPaddingReduced && {
+                      paddingLeft: "16px",
+                      paddingRight: "16px",
+                    }),
+                  },
                 }}
               >
                 <CallResponsePanel
@@ -763,9 +832,12 @@ export default function MapOverlayPanels() {
                   minHeight="auto"
                   alignItems="flex-start"
                 >
-                <PanelEyebrow>
-                  Library of Water Allocation Scenarios
-                </PanelEyebrow>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                >
+                  <PanelEyebrow>
+                    Library of Water Allocation Scenarios
+                  </PanelEyebrow>
                   <Typography
                     variant="body1"
                     sx={{
@@ -779,10 +851,11 @@ export default function MapOverlayPanels() {
                     }}
                   >
                     Each water management scenario on this site can be read as
-                    having three main elements. Let&apos;s look at the water
+                    having five explanatory elements. Let&apos;s look at the water
                     management scenario for the way we currently manage Central
                     Valley water.
                   </Typography>
+                </Box>
                 </CallResponsePanel>
               </Box>
             </motion.div>
@@ -793,7 +866,7 @@ export default function MapOverlayPanels() {
                 position: "sticky",
                 top: "15vh",
                 zIndex: 1,
-                mt: "100vh",
+                mt: "80vh",
                 pointerEvents: "none",
               }}
             >
@@ -804,14 +877,15 @@ export default function MapOverlayPanels() {
                   gap: theme.space.gap.sm,
                   justifyContent: "flex-end",
                   width: "100%",
-                  pr: theme.space.panel.padding,
+                  pr: scenarioIntroPaddingReduced ? "16px" : theme.space.panel.padding,
+                  transition: "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
                   pointerEvents: "none",
                 }}
               >
                 {/* Strategy info panel */}
                 <motion.div
                   style={{
-                    opacity: strategyInfoPanelOpacity,
+                    opacity: strategyInfoLatched ? 1 : strategyInfoPanelOpacity,
                     pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
@@ -915,7 +989,7 @@ export default function MapOverlayPanels() {
                 {/* Key operations panel */}
                 <motion.div
                   style={{
-                    opacity: keyOperationsPanelOpacity,
+                    opacity: keyOperationsLatched ? 1 : keyOperationsPanelOpacity,
                     pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
@@ -1051,7 +1125,7 @@ export default function MapOverlayPanels() {
                 {/* Key outcomes panel */}
                 <motion.div
                   style={{
-                    opacity: keyOutcomesPanelOpacity,
+                    opacity: keyOutcomesLatched ? 1 : keyOutcomesPanelOpacity,
                     pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
@@ -1164,7 +1238,7 @@ export default function MapOverlayPanels() {
                 {/* Summary panel */}
                 <motion.div
                   style={{
-                    opacity: summaryPanelOpacity,
+                    opacity: summaryLatched ? 1 : summaryPanelOpacity,
                     pointerEvents: "none", // Allow map panning through panel backgrounds
                   }}
                 >
@@ -1185,13 +1259,16 @@ export default function MapOverlayPanels() {
                       }}
                     >
                       <Box
+                        ref={summaryContainerRef}
                         sx={{
+                          position: "relative",
                           width: "100%",
                           maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: "none",
+                          pointerEvents: summaryPE,
                         }}
                       >
                         <motion.div
+                          ref={summaryRef}
                           style={{
                             pointerEvents: summaryPointerEvents, // "none" when hidden, "auto" when visible
                           }}
@@ -1204,6 +1281,48 @@ export default function MapOverlayPanels() {
                             <SummaryPanel scenarioId="s0020" />
                           </Box>
                         </motion.div>
+
+                        <ScrollTooltip
+                          targetRef={summaryRef}
+                          containerRef={summaryContainerRef}
+                          content={
+                            <>
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.space.component.xs }}
+                              >
+                                5. Scenario summary
+                              </Typography>
+                              This panel synthesizes everything above into a
+                              summary of the scenario&apos;s priorities
+                              and trade-offs.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
+                              <Box
+                                component="span"
+                                sx={{
+                                  display: "block",
+                                }}
+                              >
+                                Click any outcome chart above to get a summary specific to that outcome, including the locations most affected.
+                                Click a location chip to zoom
+                                the map directly to that location.
+                              </Box>
+                            </>
+                          }
+                          position="left"
+                          offsetY={20}
+                          opacity={summaryTooltipOpacity}
+                          isClosed={summaryTooltipClosed}
+                          onClose={() => setSummaryTooltipClosed(true)}
+                        />
                       </Box>
                     </Box>
                   </Box>
@@ -1211,7 +1330,8 @@ export default function MapOverlayPanels() {
               </Box>
             </Box>
 
-            {/* Scroll spacer */}
+            {/* Scroll spacer — gives the summary tooltip (progress 0.74–0.84)
+                enough runway before the wrapper exits the viewport. */}
             <Box sx={{ height: "100vh" }} aria-hidden="true" />
           </Box>
         </Step>
@@ -1220,7 +1340,7 @@ export default function MapOverlayPanels() {
         <Step data={"scenario-conclusion" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -1245,7 +1365,7 @@ export default function MapOverlayPanels() {
       {/* Buffer spacer */}
       <Box
         sx={{
-          height: "50vh",
+          height: "30vh",
           width: "100%",
           opacity: 0,
           pointerEvents: "none",

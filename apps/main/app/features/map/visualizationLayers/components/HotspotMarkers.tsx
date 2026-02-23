@@ -22,34 +22,28 @@ import { getDemandUnitNameInfo } from "../../config/demandUnitNames"
 const HOTSPOT_CONFIGS: Record<
   string,
   {
-    image: string
-    imageAlt: string
+    ariaLabel: string
     labelPrefix: string
   }
 > = {
   CWS_DEL: {
-    image: "/images/map_markers/drinking_water.png",
-    imageAlt: "Community water system marker showing water system at risk",
+    ariaLabel: "Community water system at risk",
     labelPrefix: "Water system at risk",
   },
   WRC_SALMON_AB: {
-    image: "/images/map_markers/salmon.png",
-    imageAlt: "Salmon habitat marker showing habitat at risk",
+    ariaLabel: "Salmon habitat at risk",
     labelPrefix: "Salmon habitat at risk",
   },
   AG_REV: {
-    image: "/images/map_markers/2008_03_24_PH_0262_Victoria_Island.png",
-    imageAlt: "Agricultural area marker showing farm at risk",
+    ariaLabel: "Agricultural area at risk",
     labelPrefix: "Farm at risk",
   },
   ENV_FLOWS: {
-    image: "/images/map_markers/flow.png",
-    imageAlt: "Environmental flow marker showing flow at risk",
+    ariaLabel: "Environmental flow at risk",
     labelPrefix: "Flow at risk",
   },
   GW_STOR: {
-    image: "/images/map_markers/groundwater.png",
-    imageAlt: "Groundwater marker showing groundwater at risk",
+    ariaLabel: "Groundwater location at risk",
     labelPrefix: "Groundwater at risk",
   },
 }
@@ -266,10 +260,11 @@ export function HotspotMarkers({
           key={hotspot.id}
           longitude={hotspot.longitude}
           latitude={hotspot.latitude}
-          anchor="bottom"
+          anchor="center"
         >
           <Box
             onClick={() => handleMarkerClick(hotspot)}
+            aria-label={config.ariaLabel}
             sx={{
               position: "relative",
               cursor: "pointer",
@@ -279,17 +274,18 @@ export function HotspotMarkers({
               },
             }}
           >
-            {/* Marker image */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={config.image}
-              alt={config.imageAlt}
-              style={{
-                width: "60px",
-                height: "auto",
-                filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.3))",
-              }}
-            />
+            {/* Pin marker — omitted for ENV_FLOWS, which uses TierMarkers diamonds */}
+            {outcomeCode !== "ENV_FLOWS" && (
+              <Box
+                sx={{
+                  fontSize: "28px",
+                  lineHeight: 1,
+                  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.35))",
+                }}
+              >
+                📍
+              </Box>
+            )}
 
             {/* Co-marker label */}
             <Box

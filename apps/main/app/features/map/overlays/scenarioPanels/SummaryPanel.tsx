@@ -333,15 +333,7 @@ export function SummaryPanel({
         padding: isInline ? theme.space.card.xs : theme.space.card.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
-        maxWidth: isInline
-          ? "100%"
-          : {
-              xs: "100%",
-              sm: "360px",
-              md: "420px",
-              lg: "460px",
-              xl: "500px",
-            },
+        maxWidth: isInline ? "100%" : theme.scenarios.learnPanel.maxWidth,
         pointerEvents: "auto",
       }}
     >
