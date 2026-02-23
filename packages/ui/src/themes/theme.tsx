@@ -853,7 +853,7 @@ const theme = createTheme({
     h4: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h4,
-      fontWeight: 600,
+      fontWeight: 400,
       lineHeight: 1.1,
     },
     h5: {
@@ -891,7 +891,7 @@ const theme = createTheme({
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.125rem", // 18px
-      fontWeight: 500,
+      fontWeight: 400,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
@@ -921,7 +921,7 @@ const theme = createTheme({
     overline: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem", // 14px
-      fontWeight: 600,
+      fontWeight: 500,
       lineHeight: 1.4,
       letterSpacing: "normal",
       textTransform: "uppercase",
@@ -937,9 +937,10 @@ const theme = createTheme({
     // Tab labels - expanded state (prominent, before docking)
     tabLabel: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.6rem",
-      fontWeight: 600,
+      fontSize: "2rem",
+      fontWeight: 500,
       lineHeight: 1.1,
+      letterSpacing: "0.01rem",
       textTransform: "capitalize" as const,
     },
     // Tab labels - docked state (with header)
@@ -948,7 +949,7 @@ const theme = createTheme({
     tabLabelDocked: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: "1.3rem",
-      fontWeight: 600,
+      fontWeight: 500,
       lineHeight: 1.1,
       textTransform: "capitalize" as const,
     },

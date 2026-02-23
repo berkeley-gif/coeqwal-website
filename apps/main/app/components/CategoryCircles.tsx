@@ -9,20 +9,19 @@
  * When `showScenarios` is true, circles display packed scenario dots
  * (via ScenarioDots) and the circle click-to-select behavior is disabled.
  *
- * Supports optional scroll-linked staggered reveal via a progress MotionValue.
+ * Supports optional scroll-linked one-by-one fade-in via a progress MotionValue.
  */
 
 import React, { useState } from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { motion, useTransform, MotionValue } from "@repo/motion"
 import { type Theme } from "@repo/data/coeqwal"
+import { DashedCircle } from "./DashedCircle"
 import ScenarioDots from "./ScenarioDots"
 import ScenarioList from "./ScenarioList"
 import HydroclimateIcons from "./HydroclimateIcons"
 import HydroclimateList from "./HydroclimateList"
 
-/** @deprecated Use Theme from @repo/data/coeqwal */
-export type Category = Theme
 
 interface CategoryCirclesProps {
   categories: Theme[]
@@ -66,7 +65,6 @@ function StaggeredCircle({
   scenarioIds?: string[]
   showScenarios?: boolean
 }) {
-  const theme = useTheme()
   // Always call useTransform (hooks can't be conditional), use fallback range when no progress
   const fallbackProgress = progress || ({ get: () => 1 } as MotionValue<number>)
   const opacity = useTransform(
@@ -104,7 +102,7 @@ function StaggeredCircle({
         opacity,
       }}
     >
-      {/* Desktop: hover selects/deselects. Touch: click toggles. */}
+      {/* Outer Box keeps hover handlers so description text stays in the hover zone */}
       <Box
         {...hoverHandlers}
         {...clickHandler}
@@ -117,50 +115,11 @@ function StaggeredCircle({
           cursor: interactive ? "pointer" : "default",
         }}
       >
-        {/* Label banner */}
-        <Box
-          sx={{
-            backgroundColor: theme.palette.text.primary,
-            color: theme.palette.common.white,
-            px: 1.5,
-            py: "3px",
-            borderRadius: "4px",
-            lineHeight: 1.1,
-            transition: "opacity 0.2s ease",
-            opacity: isSelected && !showScenarios ? 0.85 : 1,
-          }}
-        >
-          <Typography
-            variant="compactTitle"
-            component="div"
-            sx={{
-              textAlign: "center",
-              color: "inherit",
-              lineHeight: "inherit",
-              whiteSpace: "pre-line",
-            }}
-          >
-            {category.label}
-          </Typography>
-        </Box>
-
-        {/* Circle */}
-        <Box
-          className="category-circle"
-          sx={{
-            width: circleSize,
-            height: circleSize,
-            borderRadius: "50%",
-            border: `${theme.strokeWidth.rule}px ${isSelected && !showScenarios ? "solid" : "dashed"} ${strokeColor}`,
-            backgroundColor:
-              isSelected && !showScenarios ? strokeColor : "transparent",
-            transition: "all 0.3s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
+        <DashedCircle
+          label={category.label}
+          isSelected={isSelected && !showScenarios}
+          strokeColor={strokeColor}
+          size={circleSize}
         >
           {/* Scenario dots or hydroclimate icons - shown when showScenarios is true */}
           {hasScenarios && (
@@ -172,7 +131,7 @@ function StaggeredCircle({
             />
           )}
           {showScenarios && isClimate && <HydroclimateIcons size={80} />}
-        </Box>
+        </DashedCircle>
 
         {/* Description text - appears below circle when selected, hidden in scenario mode */}
         {isSelected && !showScenarios && (

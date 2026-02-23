@@ -9,7 +9,7 @@
  * override applied by CallResponsePanel to its children.
  */
 
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, useTheme, alpha } from "@repo/ui/mui"
 import type { ReactNode } from "react"
 
 interface PanelEyebrowProps {
@@ -29,7 +29,7 @@ export function PanelEyebrow({ children }: PanelEyebrowProps) {
         lineHeight: 1,
         letterSpacing: "0.12em",
         textTransform: "uppercase",
-        color: theme.palette.blue.pale,
+        color: alpha(theme.palette.common.white, 0.6),
         display: "block",
       }}
     >

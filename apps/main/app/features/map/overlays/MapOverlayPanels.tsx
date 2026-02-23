@@ -743,7 +743,7 @@ export default function MapOverlayPanels() {
         <Step data={"coeqwal" as SectionId}>
           <Box
             sx={{
-              minHeight: "80vh",
+              minHeight: "160vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
