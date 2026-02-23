@@ -8,6 +8,7 @@ import { TwoColumnInterstitial } from "@repo/ui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 
 /** Action descriptions shown in expanded tab buttons (matches Panel 4 columns) */
 const TAB_DESCRIPTIONS: Record<TabKey, string> = {
@@ -20,17 +21,20 @@ const TAB_DESCRIPTIONS: Record<TabKey, string> = {
 }
 
 /** Renders the active tab's description panel content */
-function TabDescription({ tab }: { tab: TabKey }) {
+function TabDescription({
+  tab,
+  onScrollPromptClick,
+}: {
+  tab: TabKey
+  onScrollPromptClick: () => void
+}) {
   switch (tab) {
     case "learn":
       return (
         <TwoColumnInterstitial
           headline="Did you know that California has one of the most complex water systems in the world?"
           body="Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making"
-          onScrollPromptClick={() => {
-            const el = document.getElementById("central-valley-call")
-            el?.scrollIntoView({ behavior: "smooth", block: "start" })
-          }}
+          onScrollPromptClick={onScrollPromptClick}
           linkListLabel="Learn more about"
           links={[
             {
@@ -88,8 +92,18 @@ export default function SmoothTabs() {
   // Track whether descriptions were opened by a tab click while docked
   const [clickOpened, setClickOpened] = useState(false)
 
-  // Show descriptions when expanded or opened by click
-  const showDescriptions = !isInTabsArea || clickOpened
+  // Force-hide the interstitial before a programmatic scroll so that its
+  // collapsing height animation doesn't shift document positions mid-scroll.
+  const [forceHideDescriptions, setForceHideDescriptions] = useState(false)
+
+  // Show descriptions when expanded or opened by click, unless force-hidden.
+  const showDescriptions = !forceHideDescriptions && (!isInTabsArea || clickOpened)
+
+  // Once the tabs have docked (isInTabsArea = true), the interstitial is gone
+  // from the flow and the force-hide flag is no longer needed.
+  useEffect(() => {
+    if (isInTabsArea) setForceHideDescriptions(false)
+  }, [isInTabsArea])
 
   // When user scrolls after a click-open, retract the descriptions
   useEffect(() => {
@@ -105,6 +119,18 @@ export default function SmoothTabs() {
     })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [clickOpened])
+
+  // "Scroll to Explore" handler for the Learn interstitial.
+  // Closes the interstitial FIRST so its height animation doesn't shift
+  // document positions during the scroll, then scrolls after the animation.
+  const handleScrollPromptClick = useCallback(() => {
+    setForceHideDescriptions(true)
+    // 0.45s matches the AnimatePresence exit transition duration.
+    // Waiting for it to complete means the layout is stable when we scroll.
+    setTimeout(() => {
+      smoothScrollToCenter("central-valley-content")
+    }, 460)
+  }, [])
 
   const onSelect = useCallback(
     (tab: TabKey | undefined) => {
@@ -277,7 +303,10 @@ export default function SmoothTabs() {
                   background: activeTabColor,
                 }}
               >
-                <TabDescription tab={activeTab} />
+                <TabDescription
+                  tab={activeTab}
+                  onScrollPromptClick={handleScrollPromptClick}
+                />
               </motion.div>
             </AnimatePresence>
           </motion.div>

@@ -686,13 +686,7 @@ export const themeValues = {
         pointerEvents: "auto" as const,
         padding: { xs: 2, sm: 2.5, md: 3 }, // matches space.card.xs
       },
-      maxWidth: {
-        xs: "100%",
-        sm: "360px",
-        md: "420px",
-        lg: "460px",
-        xl: "500px",
-      },
+      maxWidth: "540px",
     },
 
     // Panel title typography (for section headers like "Key operations", "Key outcomes")

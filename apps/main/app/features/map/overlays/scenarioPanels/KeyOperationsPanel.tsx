@@ -45,8 +45,8 @@ export function KeyOperationsPanel({
       sx={{
         ...theme.scenarios.learnPanel.base,
         boxShadow: theme.shadow.sm,
-        width: "fit-content",
-        maxWidth: "100%",
+        width: "100%",
+        maxWidth: theme.scenarios.learnPanel.maxWidth,
       }}
     >
       {/* Row with Key Operations and Hydroclimate */}
