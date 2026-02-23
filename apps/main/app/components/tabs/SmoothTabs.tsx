@@ -27,6 +27,10 @@ function TabDescription({ tab }: { tab: TabKey }) {
         <TwoColumnInterstitial
           headline="Did you know that California has one of the most complex water systems in the world?"
           body="Learn how water flows through California's Central Valley and the tools we use for water planning and decision-making"
+          onScrollPromptClick={() => {
+            const el = document.getElementById("central-valley-call")
+            el?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }}
           linkListLabel="Learn more about"
           links={[
             {
@@ -183,7 +187,7 @@ export default function SmoothTabs() {
                   "padding 0.4s ease, clip-path 0.4s ease, gap 0.4s ease, font-size 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
-                gap: isInTabsArea ? 0 : 12,
+                gap: isInTabsArea ? 0 : 6,
                 alignItems: isInTabsArea ? "center" : "flex-start",
                 justifyContent: "flex-start",
                 textAlign: isInTabsArea ? "center" : "left",

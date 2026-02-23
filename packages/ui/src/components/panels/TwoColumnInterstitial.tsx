@@ -35,6 +35,8 @@ export interface TwoColumnInterstitialProps {
   links: InterstitialLink[]
   /** Optional scroll prompt text (left column, bottom). Set to null to hide. */
   scrollPrompt?: string | null
+  /** Optional click handler for the scroll prompt */
+  onScrollPromptClick?: () => void
   /** Text color override (defaults to theme.palette.blue.darkest) */
   color?: string
 }
@@ -82,6 +84,7 @@ export function TwoColumnInterstitial({
   linkListLabel,
   links,
   scrollPrompt = "Scroll to explore",
+  onScrollPromptClick,
   color: colorProp,
 }: TwoColumnInterstitialProps) {
   const theme = useTheme()
@@ -121,6 +124,19 @@ export function TwoColumnInterstitial({
         </Box>
         {scrollPrompt !== null && (
           <Box
+            role={onScrollPromptClick ? "button" : undefined}
+            tabIndex={onScrollPromptClick ? 0 : undefined}
+            onClick={onScrollPromptClick}
+            onKeyDown={
+              onScrollPromptClick
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      onScrollPromptClick()
+                    }
+                  }
+                : undefined
+            }
             sx={{
               display: "flex",
               alignItems: "center",

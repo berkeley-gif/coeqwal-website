@@ -92,8 +92,9 @@ export default function MapOverlayPanels() {
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
 
-  // UI state
-  const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+  // Panels always "visible" for pointer-events; entrance animation is
+  // viewport-driven via CallResponsePanel's whileInView.
+  const isFirstPanelVisible = true
 
   // Ref for multi-step sticky animation (Framer Motion)
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
@@ -353,27 +354,6 @@ export default function MapOverlayPanels() {
 
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
   // visibility tracking in useMotionValueEvent above
-
-  // First panel entrance animation — triggered when the central-valley panel enters view.
-  // Threshold 0.01: fire as soon as a single pixel of the element is visible so the
-  // slide-in animation starts the moment the element arrives in the viewport, whether
-  // from the auto-scroll in Learn.tsx or from the user's own manual scroll.
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setIsFirstPanelVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.01 },
-    )
-
-    const mapPanel = document.getElementById("central-valley-call")
-    if (mapPanel) observer.observe(mapPanel)
-
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <Box
@@ -729,14 +709,11 @@ export default function MapOverlayPanels() {
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
               >
-                <PanelEyebrow>
-                  COEQWAL Water Allocation Scenarios
-                </PanelEyebrow>
                 <Typography variant="body1">
                   Until now, this tool has been inaccessible to many
                   communities, creating barriers to participation in water
                   decision-making. The COEQWAL 
-                  project uses CalSim to explore a wide range of different water
+                  project uses CalSim to explore and report a wide range of different water
                   management strategies and climate futures. We are making these
                   scenarios available to the public so that communities can
                   envision alternative water futures for California.
@@ -786,6 +763,9 @@ export default function MapOverlayPanels() {
                   minHeight="auto"
                   alignItems="flex-start"
                 >
+                <PanelEyebrow>
+                  Library of Water Allocation Scenarios
+                </PanelEyebrow>
                   <Typography
                     variant="body1"
                     sx={{

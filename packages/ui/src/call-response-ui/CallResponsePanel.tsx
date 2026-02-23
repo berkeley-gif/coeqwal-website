@@ -70,13 +70,14 @@ export function CallResponsePanel({
       }}
     >
       <motion.div
-        initial={{ marginTop: "100vh" }}
-        animate={{ marginTop: isVisible ? 0 : "100vh" }}
+        initial={{ opacity: 0, y: 120 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
         transition={{
           type: "spring",
-          stiffness: 40,
-          damping: 30,
-          duration: 1.8,
+          stiffness: 80,
+          damping: 18,
+          mass: 0.8,
           ...(delay ? { delay } : {}),
         }}
         style={{
