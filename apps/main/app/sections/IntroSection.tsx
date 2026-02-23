@@ -42,12 +42,12 @@ const PARA_LEAVE = 0.8
 const HEADLINE_SHIFT_PX = 100
 
 /** Panel 4 outer container height (scroll runway). */
-const PANEL4_HEIGHT_VH = 300
+const PANEL4_HEIGHT_VH = 200
 /** Sticky viewport height (always 100vh). */
 const PANEL4_STICKY_VH = 100
 /**
  * Local-progress fraction at which Panel 4's sticky viewport releases.
- * = 1 − sticky_height / container_height = 1 − 100/300 ≈ 0.667.
+ * = 1 − sticky_height / container_height = 1 − 100/200 = 0.5.
  * The MorphingHeadline and the paragraph both start their upward exit at this moment.
  */
 const PANEL4_STICKY_RELEASE = 1 - PANEL4_STICKY_VH / PANEL4_HEIGHT_VH
@@ -333,9 +333,10 @@ function FloatingCategoryCircles({
   const p3Start = p3 ? p3.start : 0.848
   const p3End = p3 ? p3.end : 1.0
   // Hold start: circles are stationary at 50vh from p3HoldStart → p3StickyRelease.
-  // Old value was 0.50 (hold = 0.167 × span). New value 0.584 halves it to 0.083 × span.
-  const p3HoldStart = p3Start + (p3End - p3Start) * 0.584
-  // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE ≈ 0.667).
+  // 0.40 leaves ~0.10 × span of hold before PANEL4_STICKY_RELEASE = 0.5
+  // (PANEL4_HEIGHT_VH was halved from 300 → 200, so sticky release moved from 0.667 → 0.5).
+  const p3HoldStart = p3Start + (p3End - p3Start) * 0.40
+  // Hold at 50vh until sticky releases and headline/paragraph scroll off (PANEL4_STICKY_RELEASE = 0.5).
   const p3StickyRelease = p3Start + (p3End - p3Start) * PANEL4_STICKY_RELEASE
   // Float finishes at 0.73: lists appear shortly after sticky release (0.667),
   // freeing most of the remaining p3 runway for the hold-with-lists phase below.
