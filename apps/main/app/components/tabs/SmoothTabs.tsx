@@ -249,10 +249,10 @@ export default function SmoothTabs() {
               )}
               <Typography
                 component="span"
-                variant={isInTabsArea ? "tabLabelDocked" : "h3"}
+                variant={isInTabsArea ? "nav" : "h3"}
                 sx={{
                   transition: "font-size 0.4s ease, color 0.4s ease",
-                  ...(!isInTabsArea && { fontSize: "2.8rem" }),
+                  ...(!isInTabsArea && { fontSize: "2.4rem" }),
                 }}
               >
                 {label.charAt(0).toUpperCase() + label.slice(1)}
