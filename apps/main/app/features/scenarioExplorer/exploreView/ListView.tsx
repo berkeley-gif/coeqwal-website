@@ -17,6 +17,15 @@ import {
   useScenarioList,
   type Scenario,
 } from "../../scenarios/hooks/useScenarioList"
+import type { ScenarioTheme } from "../../../content/scenarios"
+
+const THEME_ORDER: Record<ScenarioTheme, number> = {
+  baseline: 0,
+  ag_gw: 1,
+  eco: 2,
+  delta: 3,
+  cws: 4,
+}
 
 interface ListViewProps {
   compact?: boolean
@@ -84,6 +93,7 @@ export default function ListView({
     hasSearchResults,
     themeMatchingScenarioIds,
     showThemeDivider,
+    showAllThemeDividers,
   } =
     useMemo(() => {
       const baseScenarios = [...scenarios]
@@ -105,6 +115,13 @@ export default function ListView({
           } else {
             return bScore - aScore
           }
+        })
+      } else {
+        // Default: group scenarios by theme
+        baseScenarios.sort((a, b) => {
+          const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
+          const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
+          return aOrder - bOrder
         })
       }
 
@@ -138,6 +155,7 @@ export default function ListView({
           hasSearchResults: false,
           themeMatchingScenarioIds: themeIds,
           showThemeDivider: selectedTheme !== null && !showOnlyTheme,
+          showAllThemeDividers: !sortBy,
         }
       }
 
@@ -173,6 +191,7 @@ export default function ListView({
         hasSearchResults: matches.length > 0,
         themeMatchingScenarioIds: themeIds,
         showThemeDivider: selectedTheme !== null && !showOnlyTheme,
+        showAllThemeDividers: !sortBy,
       }
     }, [
       searchQuery,
@@ -245,6 +264,7 @@ export default function ListView({
     showSearchDivider: hasSearchResults,
     themeMatchingScenarioIds,
     showThemeDivider,
+    showAllThemeDividers,
     onOutcomeSelect: handleOutcomeSelect,
     onTierClick,
     onToggleScenario: handleToggleScenario,

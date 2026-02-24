@@ -23,6 +23,8 @@ export interface StrategyGridProps {
   showSearchDivider?: boolean
   themeMatchingScenarioIds?: Set<string>
   showThemeDivider?: boolean
+  /** When true, shows a divider between every pair of adjacent scenarios that belong to different themes */
+  showAllThemeDividers?: boolean
 
   // Events
   onOutcomeSelect: (scenarioId: string, outcome: string) => void

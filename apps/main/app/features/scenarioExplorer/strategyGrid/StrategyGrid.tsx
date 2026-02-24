@@ -42,6 +42,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showSearchDivider = false,
   themeMatchingScenarioIds,
   showThemeDivider = false,
+  showAllThemeDividers = false,
   onToggleScenario,
   onTierClick,
   selectedScenarios,
@@ -196,6 +197,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             showSearchDivider={showSearchDivider}
             themeMatchingScenarioIds={themeMatchingScenarioIds}
             showThemeDivider={showThemeDivider}
+            showAllThemeDividers={showAllThemeDividers}
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
             showDefinitions={showDefinitions}

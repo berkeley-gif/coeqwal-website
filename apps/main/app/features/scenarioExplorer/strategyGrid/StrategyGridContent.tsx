@@ -35,6 +35,8 @@ export interface StrategyGridContentProps {
   themeMatchingScenarioIds?: Set<string>
   /** Whether to show a divider after the theme-matching group */
   showThemeDivider?: boolean
+  /** Whether to show dividers between all adjacent scenarios with different themes */
+  showAllThemeDividers?: boolean
   /** Selected/chosen scenario IDs */
   selectedScenarios: string[]
   /** Show only chosen scenarios */
@@ -91,6 +93,7 @@ export function StrategyGridContent({
   showSearchDivider,
   themeMatchingScenarioIds,
   showThemeDivider = false,
+  showAllThemeDividers = false,
   selectedScenarios,
   showOnlyChosen,
   showDefinitions,
@@ -165,13 +168,19 @@ export function StrategyGridContent({
         const shouldShowDivider =
           showSearchDivider && isHighlighted && !isNextHighlighted
 
-        // Show divider after the last theme-matching scenario
+        // Show divider after the last theme-matching scenario (filtered view)
         const isThemeMatch = themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
         const isNextThemeMatch = nextScenario
           ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
           : false
         const shouldShowThemeDivider =
           showThemeDivider && isThemeMatch && !isNextThemeMatch
+
+        // Show divider whenever adjacent scenarios belong to different theme groups
+        const shouldShowThemeGroupDivider =
+          showAllThemeDividers &&
+          nextScenario !== undefined &&
+          scenario.theme !== nextScenario.theme
 
         const rows: React.ReactNode[] = []
 
@@ -223,6 +232,21 @@ export function StrategyGridContent({
           rows.push(
             <Box
               key={`theme-divider-${scenario.scenarioId}`}
+              sx={{
+                gridColumn: "1 / -1",
+                my: theme.space.section.sm,
+                height: "1px",
+                backgroundColor: theme.palette.grey[300],
+              }}
+            />,
+          )
+        }
+
+        // Theme group boundary divider — between every theme group in the default sort
+        if (shouldShowThemeGroupDivider) {
+          rows.push(
+            <Box
+              key={`theme-group-divider-${scenario.scenarioId}`}
               sx={{
                 gridColumn: "1 / -1",
                 my: theme.space.section.sm,

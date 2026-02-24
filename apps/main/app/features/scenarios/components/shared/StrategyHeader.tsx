@@ -20,7 +20,6 @@ import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
 import type { ScenarioForDisplay } from "./types"
-import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 
 export interface StrategyHeaderProps {
@@ -301,11 +300,7 @@ export function StrategyHeader({
   onTitleClick,
 }: StrategyHeaderProps) {
   const theme = useTheme()
-  const { selectedTheme, showThemeBadges } = useScenarioExplorerStore()
-
-  // When a theme filter is active and badges are toggled on, show all themes.
-  // Otherwise fall back to showing only the baseline badge (existing behaviour).
-  const showAllThemeBadges = selectedTheme !== null && showThemeBadges
+  const showAllThemeBadges = true
   const themeLabel = strategy.theme ? THEME_LABEL_CONFIG[strategy.theme]?.label : undefined
   const themeColors = strategy.theme ? theme.palette.waterThemes[strategy.theme] : undefined
 
