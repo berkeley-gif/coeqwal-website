@@ -47,6 +47,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
+  onShowOnlyChosenChange,
+  onShowDefinitionsChange,
   compact = false,
   renderMode = "all",
   sortBy,
@@ -175,6 +177,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}
             sortEnabled={sortEnabled}
+            showOnlyChosen={showOnlyChosen}
+            showDefinitions={showDefinitions}
+            onShowOnlyChosenChange={onShowOnlyChosenChange}
+            onShowDefinitionsChange={onShowDefinitionsChange}
             onTooltipToggle={handleToggleWithAnchor}
             onSortChange={onSortChange}
           />

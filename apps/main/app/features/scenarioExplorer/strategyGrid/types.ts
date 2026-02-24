@@ -33,6 +33,8 @@ export interface StrategyGridProps {
   showMapView: boolean
   showOnlyChosen: boolean
   showDefinitions: boolean
+  onShowOnlyChosenChange?: (value: boolean) => void
+  onShowDefinitionsChange?: (value: boolean) => void
 
   // Layout
   compact?: boolean
