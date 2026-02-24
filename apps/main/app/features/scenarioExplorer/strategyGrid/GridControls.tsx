@@ -13,6 +13,7 @@ import {
   DocumentListIcon,
   DocumentCheckedIcon,
   CurrentOpsIcon,
+  CurrentOpsMultipleIcon,
 } from "@repo/ui"
 import TogglePair from "../components/TogglePair"
 
@@ -77,11 +78,11 @@ export function GridControls({
               <CurrentOpsIcon active={!showDefinitions} size={Math.round(iconSize * 0.78)} />
             }
             rightIcon={
-              <CurrentOpsIcon active={showDefinitions} size={Math.round(iconSize * 0.78)} />
+              <CurrentOpsMultipleIcon active={showDefinitions} size={Math.round(iconSize * 0.78)} />
             }
             onLeftClick={() => onShowDefinitionsChange(false)}
             onRightClick={() => onShowDefinitionsChange(true)}
-            gap={"4px"}
+            gap={0.5}
           />
         </Box>
       </InfoTooltip>

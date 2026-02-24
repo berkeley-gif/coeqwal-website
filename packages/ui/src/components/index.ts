@@ -74,6 +74,7 @@ export {
   DocumentExpandedIcon,
   DocumentCollapsedIcon,
   CurrentOpsIcon,
+  CurrentOpsMultipleIcon,
 } from "./icons/DocumentIcons"
 
 // Call-response UI components
