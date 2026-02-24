@@ -12,8 +12,7 @@ import {
   InfoTooltip,
   DocumentListIcon,
   DocumentCheckedIcon,
-  DocumentExpandedIcon,
-  DocumentCollapsedIcon,
+  CurrentOpsIcon,
 } from "@repo/ui"
 import TogglePair from "../components/TogglePair"
 
@@ -71,21 +70,18 @@ export function GridControls({
         }}
       />
 
-      <InfoTooltip description="Show or hide strategy details">
+      <InfoTooltip description="Show current baseline or show all baseline variations">
         <Box>
           <TogglePair
             leftIcon={
-              <DocumentExpandedIcon active={showDefinitions} size={iconSize} />
+              <CurrentOpsIcon active={!showDefinitions} size={Math.round(iconSize * 0.78)} />
             }
             rightIcon={
-              <DocumentCollapsedIcon
-                active={!showDefinitions}
-                size={iconSize}
-              />
+              <CurrentOpsIcon active={showDefinitions} size={Math.round(iconSize * 0.78)} />
             }
-            onLeftClick={() => onShowDefinitionsChange(true)}
-            onRightClick={() => onShowDefinitionsChange(false)}
-            gap={0}
+            onLeftClick={() => onShowDefinitionsChange(false)}
+            onRightClick={() => onShowDefinitionsChange(true)}
+            gap={"4px"}
           />
         </Box>
       </InfoTooltip>

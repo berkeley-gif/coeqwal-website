@@ -73,6 +73,7 @@ export {
   DocumentCheckedIcon,
   DocumentExpandedIcon,
   DocumentCollapsedIcon,
+  CurrentOpsIcon,
 } from "./icons/DocumentIcons"
 
 // Call-response UI components
