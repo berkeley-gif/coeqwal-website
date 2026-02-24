@@ -253,21 +253,21 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     description:
       "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
   },
-  theme_groundwater: {
-    id: "theme_groundwater",
+  "theme_ag_gw": {
+    id: "theme_ag_gw",
     type: "circle",
-    lines: ["Ground-", "water"],
+    lines: ["Farms"],
     color: THEME_COLOR,
-    label: "Groundwater theme",
+    label: "Farms, groundwater & food systems",
     description:
       "Scenario exploring groundwater management changes, such as SGMA pumping limits.",
   },
-  theme_flows: {
-    id: "theme_flows",
+  theme_eco: {
+    id: "theme_eco",
     type: "circle",
-    lines: ["Flows"],
+    lines: ["Rivers"],
     color: THEME_COLOR,
-    label: "Flows theme",
+    label: "Rivers, salmon & ecosystems",
     description:
       "Scenario exploring changes to environmental or functional flow requirements.",
   },
@@ -276,7 +276,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["CWS"],
     color: THEME_COLOR,
-    label: "Community water systems theme",
+    label: "Community water systems",
     description:
       "Scenario exploring changes to community water system deliveries and allocations.",
   },
@@ -285,7 +285,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     type: "circle",
     lines: ["Delta"],
     color: THEME_COLOR,
-    label: "Delta theme",
+    label: "The Delta as a living place",
     description:
       "Scenario exploring changes to Delta operations, conveyance, or export rules.",
   },
@@ -572,49 +572,49 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "biops_2024_pa",
   ],
   s0025: [
-    "theme_groundwater",
+    "theme_ag_gw",
     "limit_sj_pumping",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0027: [
-    "theme_groundwater",
+    "theme_ag_gw",
     "limit_cv_pumping",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0029: [
-    "theme_flows",
+    "theme_eco",
     "functional_flows",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0026: [
-    "theme_groundwater",
+    "theme_ag_gw",
     "reduced_sj_ag",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0028: [
-    "theme_groundwater",
+    "theme_ag_gw",
     "reduced_cv_ag",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0031: [
-    "theme_flows",
+    "theme_eco",
     "functional_flows_salmon",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
   s0032: [
-    "theme_flows",
+    "theme_eco",
     "functional_flows",
     "limit_cv_pumping",
     "tucp",
@@ -622,7 +622,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "biops_2019",
   ],
   s0033: [
-    "theme_flows",
+    "theme_eco",
     "functional_flows_salmon",
     "limit_cv_pumping",
     "tucp",
@@ -630,7 +630,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "biops_2019",
   ],
   s0046: [
-    "theme_flows",
+    "theme_eco",
     "no_delta_flow",
     "tucp",
     "land_use_2020",
@@ -644,7 +644,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "land_use_2020",
     "biops_2019",
   ],
-  s0030: ["theme_flows", "no_flow_req", "tucp", "land_use_2020", "biops_2019"],
+  s0030: ["theme_rivers", "no_flow_req", "tucp", "land_use_2020", "biops_2019"],
   s0039: [
     "theme_delta",
     "usbr_alt3",

@@ -31,6 +31,10 @@ export interface StrategyGridContentProps {
   highlightedScenarios: Set<string>
   /** Whether to show search divider between highlighted and non-highlighted */
   showSearchDivider: boolean
+  /** Set of scenario IDs matching the active theme filter */
+  themeMatchingScenarioIds?: Set<string>
+  /** Whether to show a divider after the theme-matching group */
+  showThemeDivider?: boolean
   /** Selected/chosen scenario IDs */
   selectedScenarios: string[]
   /** Show only chosen scenarios */
@@ -85,6 +89,8 @@ export function StrategyGridContent({
   scenarios,
   highlightedScenarios,
   showSearchDivider,
+  themeMatchingScenarioIds,
+  showThemeDivider = false,
   selectedScenarios,
   showOnlyChosen,
   showDefinitions,
@@ -159,6 +165,14 @@ export function StrategyGridContent({
         const shouldShowDivider =
           showSearchDivider && isHighlighted && !isNextHighlighted
 
+        // Show divider after the last theme-matching scenario
+        const isThemeMatch = themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+        const isNextThemeMatch = nextScenario
+          ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
+          : false
+        const shouldShowThemeDivider =
+          showThemeDivider && isThemeMatch && !isNextThemeMatch
+
         const rows: React.ReactNode[] = []
 
         // Main scenario row
@@ -194,6 +208,21 @@ export function StrategyGridContent({
           rows.push(
             <Box
               key={`divider-${scenario.scenarioId}`}
+              sx={{
+                gridColumn: "1 / -1",
+                my: theme.space.section.sm,
+                height: "1px",
+                backgroundColor: theme.palette.grey[300],
+              }}
+            />,
+          )
+        }
+
+        // Theme group divider — separates theme-matching scenarios from the rest
+        if (shouldShowThemeDivider) {
+          rows.push(
+            <Box
+              key={`theme-divider-${scenario.scenarioId}`}
               sx={{
                 gridColumn: "1 / -1",
                 my: theme.space.section.sm,

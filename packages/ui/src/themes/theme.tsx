@@ -359,6 +359,16 @@ const palette = {
     share: "#2A6289", // Lighter dark blue - share
   },
 
+  // Water theme colors — background + text for each scenario theme
+  // Keys match ScenarioTheme / WATER_THEMES ids (packages/data/src/coeqwal/themes.ts)
+  waterThemes: {
+    baseline:  { background: "#ffd87e", text: "#7a5200" },
+    ag_gw:     { background: "#d4edda", text: "#2d6a4f" },
+    eco:       { background: "#cef1f5", text: "#186b88" },
+    delta:     { background: "#d0e8f7", text: "#193D6B" },
+    cws:       { background: "#ffe5cc", text: "#7a3000" },
+  },
+
   // Data visualization colors for outcome categories
   get outcomes() {
     return {
@@ -1719,6 +1729,7 @@ declare module "@mui/material/styles" {
     tiers: typeof themeValues.palette.tiers
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
+    waterThemes: typeof themeValues.palette.waterThemes
   }
 
   interface PaletteOptions {
@@ -1735,6 +1746,7 @@ declare module "@mui/material/styles" {
     tiers?: Partial<typeof themeValues.palette.tiers>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
+    waterThemes?: Partial<typeof themeValues.palette.waterThemes>
   }
 
   // zIndex - derived from themeValues.zIndex

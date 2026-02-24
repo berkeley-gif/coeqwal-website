@@ -124,6 +124,9 @@ export function CompactSelect<T extends string = string>({
             ? theme.palette.text.primary
             : theme.palette.grey[500],
         },
+        "& .MuiSelect-icon": {
+          pointerEvents: "none",
+        },
         "& .MuiOutlinedInput-notchedOutline": {
           borderColor: theme.palette.grey[300],
         },

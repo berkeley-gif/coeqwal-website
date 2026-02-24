@@ -7,6 +7,7 @@
  */
 
 import { create, immer } from "@repo/state/zustand"
+import type { ScenarioTheme } from "../../content/scenarios"
 
 // ============================================================================
 // Types
@@ -46,6 +47,11 @@ interface ScenarioExplorerState {
   searchQuery: string
   showOnlyChosen: boolean
 
+  // Theme filtering
+  selectedTheme: ScenarioTheme | null
+  showOnlyTheme: boolean
+  showThemeBadges: boolean
+
   // Display options
   showDefinitions: boolean
 
@@ -73,6 +79,11 @@ interface ScenarioExplorerActions {
   setSearchQuery: (query: string) => void
   setShowOnlyChosen: (show: boolean) => void
 
+  // Theme filtering
+  setSelectedTheme: (theme: ScenarioTheme | null) => void
+  setShowOnlyTheme: (show: boolean) => void
+  setShowThemeBadges: (show: boolean) => void
+
   // Display options
   setShowDefinitions: (show: boolean) => void
 
@@ -99,6 +110,9 @@ const initialState: ScenarioExplorerState = {
   pinnedScenarioId: null,
   searchQuery: "",
   showOnlyChosen: false,
+  selectedTheme: null,
+  showOnlyTheme: false,
+  showThemeBadges: false,
   showDefinitions: false,
   selectedTier: null,
 }
@@ -164,6 +178,25 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.showOnlyChosen = show
       }),
 
+    // Theme filtering
+    setSelectedTheme: (theme) =>
+      set((state) => {
+        state.selectedTheme = theme
+        if (theme === null) {
+          state.showOnlyTheme = false
+        }
+      }),
+
+    setShowOnlyTheme: (show) =>
+      set((state) => {
+        state.showOnlyTheme = show
+      }),
+
+    setShowThemeBadges: (show) =>
+      set((state) => {
+        state.showThemeBadges = show
+      }),
+
     // Display options
     setShowDefinitions: (show) =>
       set((state) => {
@@ -180,6 +213,8 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     resetFilters: () =>
       set((state) => {
         state.searchQuery = ""
+        state.selectedTheme = null
+        state.showOnlyTheme = false
       }),
 
     resetSelections: () =>

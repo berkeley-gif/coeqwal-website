@@ -11,6 +11,8 @@ export interface Theme {
   id: string
   /** Display label — may contain \n for line-breaks in circle layouts */
   label: string
+  /** Short label for compact UI contexts (tabs, chips, dropdowns) */
+  shortLabel: string
   /** One-sentence description of what this theme covers */
   description: string
 }
@@ -21,38 +23,44 @@ export interface Theme {
 
 export const WATER_THEMES: Theme[] = [
   {
-    id: "communities",
+    id: "cws",
     label: "Community\nwater systems",
+    shortLabel: "Community water systems",
     description:
       "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
   },
   {
-    id: "farms",
+    id: "ag_gw",
     label: "Farms, groundwater\n& food systems",
+    shortLabel: "Farms & groundwater",
     description:
       "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
   },
   {
-    id: "rivers",
+    id: "eco",
     label: "Rivers, salmon\n& ecosystems",
+    shortLabel: "Rivers & ecosystems",
     description:
       "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
   },
   {
     id: "delta",
     label: "The Delta as\na living place",
+    shortLabel: "The Delta",
     description:
       "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
   },
   {
     id: "climate",
     label: "Climate risk,\nreliability & resilience",
+    shortLabel: "Climate resilience",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
   },
   {
     id: "governance",
     label: "Water governance\n& decision-making",
+    shortLabel: "Governance",
     description:
       "How evidence, trade-offs, and equity considerations inform water-management decisions.",
   },
@@ -65,11 +73,12 @@ export const WATER_THEMES: Theme[] = [
 /**
  * Maps each water theme ID to the scenario IDs that address it.
  * Scenario IDs match the keys in scenarioMetadata (e.g. "s0035").
- */
+ * Note: THESE ARE PROVISIONAL (Feb 24, 2026) 
+ * */
 export const THEME_SCENARIOS: Record<string, string[]> = {
-  communities: ["s0035", "s0036", "s0037"],
-  farms: ["s0011", "s0025", "s0026", "s0027", "s0028"],
-  rivers: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
+  cws: ["s0035", "s0036", "s0037"],
+  "ag_gw": ["s0011", "s0025", "s0026", "s0027", "s0028"],
+  eco: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
   delta: [
     "s0040",
     "s0041",

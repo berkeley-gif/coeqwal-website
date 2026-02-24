@@ -42,6 +42,7 @@ export {
 
   // Form components
   Checkbox,
+  Switch,
   Radio,
   RadioGroup,
   FormControlLabel,

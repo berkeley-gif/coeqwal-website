@@ -14,14 +14,16 @@
 // Types
 // =============================================================================
 
-/** Scenario theme for visual categorization */
+/**
+ * Scenario theme for visual categorization.
+ * Keys align with WATER_THEMES ids in packages/data/src/coeqwal/themes.ts.
+ */
 export type ScenarioTheme =
   | "baseline"
-  | "groundwater"
-  | "flows"
+  | "ag_gw"
+  | "eco"
   | "cws"
   | "delta"
-  | "environmental" // deprecated ? use "flows" for new scenarios if it makes sense
 
 /** UI metadata for a scenario (not available from API) */
 export interface ScenarioMetadata {
@@ -126,10 +128,10 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   },
 
   // ---------------------------------------------------------------------------
-  // GROUNDWATER SCENARIOS - SGMA implementation scenarios
+  // FARMS SCENARIOS - SGMA and groundwater management scenarios
   // ---------------------------------------------------------------------------
   s0025: {
-    theme: "groundwater",
+    theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: San Joaquin Valley pumping limits",
     description:
@@ -137,7 +139,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "SGMA: SJ pumping",
   },
   s0026: {
-    theme: "groundwater",
+    theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: San Joaquin Valley reduced acreage",
     description:
@@ -145,7 +147,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "SGMA: SJ reduced ag",
   },
   s0027: {
-    theme: "groundwater",
+    theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: Central Valley pumping limits",
     description:
@@ -153,7 +155,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "SGMA: CV pumping",
   },
   s0028: {
-    theme: "groundwater",
+    theme: "ag_gw",
     iconPath: "/images/icons/groundwater.svg",
     label: "SGMA: Central Valley reduced acreage",
     description:
@@ -162,10 +164,10 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   },
 
   // ---------------------------------------------------------------------------
-  // FLOW SCENARIOS - Environmental and ecosystem-focused flow changes
+  // RIVERS SCENARIOS - Environmental and ecosystem-focused flow changes
   // ---------------------------------------------------------------------------
   s0029: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "Functional flows",
     description:
@@ -173,7 +175,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "Functional flows",
   },
   s0030: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "No flow requirements",
     description:
@@ -181,7 +183,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "No flow req.",
   },
   s0031: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "Salmon-friendly flows",
     description:
@@ -189,7 +191,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "Salmon flows",
   },
   s0032: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "Functional flows with reduced ag acreage",
     description:
@@ -197,7 +199,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "Func. flows + reduced ag",
   },
   s0033: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "Salmon-friendly flows with reduced ag acreage",
     description:
@@ -205,7 +207,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     shortLabel: "Salmon flows + reduced ag",
   },
   s0046: {
-    theme: "flows",
+    theme: "eco",
     iconPath: "/images/icons/environmental.svg",
     label: "Functional flows (variant)",
     description:
