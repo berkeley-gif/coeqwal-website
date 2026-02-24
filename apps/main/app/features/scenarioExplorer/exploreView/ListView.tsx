@@ -74,9 +74,17 @@ export default function ListView({
     setShowDefinitions,
     searchQuery,
     pinnedScenarioId,
+    selectedTheme,
+    showOnlyTheme,
   } = useScenarioExplorerStore()
 
-  const { sortedScenarios, matchingScenarioIds, hasSearchResults } =
+  const {
+    sortedScenarios,
+    matchingScenarioIds,
+    hasSearchResults,
+    themeMatchingScenarioIds,
+    showThemeDivider,
+  } =
     useMemo(() => {
       const baseScenarios = [...scenarios]
 
@@ -111,11 +119,25 @@ export default function ListView({
         return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
       }
 
+      // Helper to apply theme grouping: theme-matching scenarios float to top
+      const applyThemeGrouping = (scenarioList: typeof baseScenarios) => {
+        if (!selectedTheme) return { list: scenarioList, themeIds: new Set<string>() }
+        const themeMatches = scenarioList.filter((s) => s.theme === selectedTheme)
+        const rest = scenarioList.filter((s) => s.theme !== selectedTheme)
+        const themeIds = new Set(themeMatches.map((s) => s.scenarioId))
+        const list = showOnlyTheme ? themeMatches : [...themeMatches, ...rest]
+        return { list, themeIds }
+      }
+
       if (!searchQuery.trim()) {
+        const pinned = applyPinning(baseScenarios)
+        const { list, themeIds } = applyThemeGrouping(pinned)
         return {
-          sortedScenarios: applyPinning(baseScenarios),
+          sortedScenarios: list,
           matchingScenarioIds: new Set<string>(),
           hasSearchResults: false,
+          themeMatchingScenarioIds: themeIds,
+          showThemeDivider: selectedTheme !== null && !showOnlyTheme,
         }
       }
 
@@ -143,10 +165,14 @@ export default function ListView({
         }
       })
 
+      const pinned = applyPinning([...matches, ...nonMatches])
+      const { list, themeIds } = applyThemeGrouping(pinned)
       return {
-        sortedScenarios: applyPinning([...matches, ...nonMatches]),
+        sortedScenarios: list,
         matchingScenarioIds: matchingIds,
         hasSearchResults: matches.length > 0,
+        themeMatchingScenarioIds: themeIds,
+        showThemeDivider: selectedTheme !== null && !showOnlyTheme,
       }
     }, [
       searchQuery,
@@ -155,6 +181,8 @@ export default function ListView({
       allScoreData,
       scenarios,
       pinnedScenarioId,
+      selectedTheme,
+      showOnlyTheme,
     ])
 
   const handleToggleScenario = (scenarioId: string) => {
@@ -215,6 +243,8 @@ export default function ListView({
     scenarios: sortedScenarios,
     highlightedScenarios: matchingScenarioIds,
     showSearchDivider: hasSearchResults,
+    themeMatchingScenarioIds,
+    showThemeDivider,
     onOutcomeSelect: handleOutcomeSelect,
     onTierClick,
     onToggleScenario: handleToggleScenario,

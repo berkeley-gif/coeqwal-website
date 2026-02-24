@@ -9,6 +9,7 @@
 
 import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
+import { ThemeFilter } from "./ThemeFilter"
 
 function Divider() {
   const theme = useTheme()
@@ -45,6 +46,21 @@ export function ViewModeControls() {
         showTitle={true}
         showLabels={false}
       />
+
+      {/* Divider before theme filter - hidden under 700px */}
+      <Box
+        sx={{
+          display: "none",
+          "@media (min-width: 700px)": {
+            display: "contents",
+          },
+        }}
+      >
+        <Divider />
+      </Box>
+
+      {/* Theme filter */}
+      <ThemeFilter />
     </>
   )
 }

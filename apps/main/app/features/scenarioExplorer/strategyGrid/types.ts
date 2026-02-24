@@ -21,6 +21,8 @@ export interface StrategyGridProps {
   scenarios: ScenarioForDisplay[]
   highlightedScenarios?: Set<string>
   showSearchDivider?: boolean
+  themeMatchingScenarioIds?: Set<string>
+  showThemeDivider?: boolean
 
   // Events
   onOutcomeSelect: (scenarioId: string, outcome: string) => void

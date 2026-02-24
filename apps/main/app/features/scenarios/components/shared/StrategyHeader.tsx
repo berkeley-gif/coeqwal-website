@@ -20,6 +20,8 @@ import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
 import type { ScenarioForDisplay } from "./types"
+import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
+import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 
 export interface StrategyHeaderProps {
   /** Scenario data */
@@ -299,6 +301,13 @@ export function StrategyHeader({
   onTitleClick,
 }: StrategyHeaderProps) {
   const theme = useTheme()
+  const { selectedTheme, showThemeBadges } = useScenarioExplorerStore()
+
+  // When a theme filter is active and badges are toggled on, show all themes.
+  // Otherwise fall back to showing only the baseline badge (existing behaviour).
+  const showAllThemeBadges = selectedTheme !== null && showThemeBadges
+  const themeLabel = strategy.theme ? THEME_LABEL_CONFIG[strategy.theme]?.label : undefined
+  const themeColors = strategy.theme ? theme.palette.waterThemes[strategy.theme] : undefined
 
   // Format label for historical-ag scenario (s0011)
   const displayLabel =
@@ -330,8 +339,14 @@ export function StrategyHeader({
           {strategy.scenarioId.toUpperCase()}
         </Typography>
 
-        {strategy.theme === "baseline" && (
-          <ScenarioBadge label="Baseline" />
+        {showAllThemeBadges && themeLabel && themeColors ? (
+          <ScenarioBadge
+            label={themeLabel}
+            backgroundColor={themeColors.background}
+            color={themeColors.text}
+          />
+        ) : (
+          strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
         )}
       </Box>
       <Typography
