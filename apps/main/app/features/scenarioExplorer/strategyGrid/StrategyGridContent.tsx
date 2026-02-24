@@ -107,10 +107,23 @@ export function StrategyGridContent({
 }: StrategyGridContentProps) {
   const theme = useTheme()
 
-  // Filter scenarios if showOnlyChosen is enabled
-  const displayScenarios = showOnlyChosen
-    ? scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
-    : scenarios
+  // The primary baseline scenario, shown by default, others hidden until expanded
+  const PRIMARY_BASELINE_ID = "s0020"
+
+  // Filter scenarios: chosen-only takes precedence, then baseline visibility
+  const displayScenarios = (() => {
+    // When showing only chosen scenarios, respect that fully — no baseline filtering
+    if (showOnlyChosen) {
+      return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
+    }
+    // When showing all: hide non-primary baseline variations unless expanded
+    if (!showDefinitions) {
+      return scenarios.filter(
+        (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
+      )
+    }
+    return scenarios
+  })()
 
   // Create context-aware tooltip handler for a specific scenario
   // Includes chart data for accurate tier display in tooltips

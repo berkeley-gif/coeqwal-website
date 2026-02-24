@@ -15,6 +15,7 @@
 
 import React, { useState, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { ScenarioBadge } from "@repo/ui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
@@ -307,6 +308,32 @@ export function StrategyHeader({
 
   return (
     <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          mb: "4px",
+        }}
+      >
+        <Typography
+          component="span"
+          variant="overline"
+          sx={{
+            color: theme.palette.grey[600],
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontSize: "0.7rem",
+            lineHeight: 1,
+          }}
+        >
+          {strategy.scenarioId.toUpperCase()}
+        </Typography>
+
+        {strategy.theme === "baseline" && (
+          <ScenarioBadge label="Baseline" />
+        )}
+      </Box>
       <Typography
         variant="scenarioTitle"
         onClick={onTitleClick}

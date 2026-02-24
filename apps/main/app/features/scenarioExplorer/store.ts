@@ -99,7 +99,7 @@ const initialState: ScenarioExplorerState = {
   pinnedScenarioId: null,
   searchQuery: "",
   showOnlyChosen: false,
-  showDefinitions: true,
+  showDefinitions: false,
   selectedTier: null,
 }
 
