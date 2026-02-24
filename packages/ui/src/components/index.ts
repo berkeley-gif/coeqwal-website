@@ -81,8 +81,13 @@ export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
 
 // Chip components
-export { ToggleChip, TierChip, LocationChip } from "./Chip"
-export type { ToggleChipProps, TierChipProps, LocationChipProps } from "./Chip"
+export { ToggleChip, TierChip, LocationChip, ScenarioBadge } from "./Chip"
+export type {
+  ToggleChipProps,
+  TierChipProps,
+  LocationChipProps,
+  ScenarioBadgeProps,
+} from "./Chip"
 
 // Error handling
 export { ErrorFallback } from "./common/ErrorFallback"

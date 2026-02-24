@@ -200,9 +200,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           justifyContent: "flex-end", // Align checkbox closer to scenario title
           alignItems: "flex-start",
           alignSelf: "start",
-          // Non-compact: vertical padding matches scenario title alignment
+          // Non-compact: offset by eyebrow height (0.7rem + 4px mb) so checkbox
+          // aligns with the scenario title rather than the eyebrow above it
           ...(!compact && {
-            pt: theme.scenarios.grid.row.padding,
+            pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 0.7rem + 4px)`,
             pb: theme.scenarios.grid.row.padding,
           }),
           // Compact: checkbox spans all rows
@@ -229,7 +230,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       {compact ? (
         <CompactRowContent
           scenario={scenario}
-          showDefinitions={showDefinitions}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
         />
@@ -237,7 +237,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <NonCompactRowContent
           scenario={scenario}
           layoutMode={layoutMode}
-          showDefinitions={showDefinitions}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
         />
@@ -251,14 +250,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
  */
 interface CompactRowContentProps {
   scenario: ScenarioForDisplay
-  showDefinitions: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
 }
 
 function CompactRowContent({
   scenario,
-  showDefinitions,
   outcomeNames,
   renderOutcomeItem,
 }: CompactRowContentProps) {
@@ -284,7 +281,6 @@ function CompactRowContent({
       >
         <StrategyHeader
           strategy={scenario}
-          showDescription={showDefinitions}
           titleVariant="body2"
         />
         <Box
@@ -369,7 +365,6 @@ function CompactRowContent({
 interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay
   layoutMode: LayoutMode
-  showDefinitions: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
 }
@@ -377,7 +372,6 @@ interface NonCompactRowContentProps {
 function NonCompactRowContent({
   scenario,
   layoutMode,
-  showDefinitions,
   outcomeNames,
   renderOutcomeItem,
 }: NonCompactRowContentProps) {
@@ -405,7 +399,6 @@ function NonCompactRowContent({
       >
         <StrategyHeader
           strategy={scenario}
-          showDescription={showDefinitions}
           titleVariant="body2"
           descriptionMaxWidth="none"
         />
