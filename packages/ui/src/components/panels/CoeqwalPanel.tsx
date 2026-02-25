@@ -97,12 +97,12 @@ export function CoeqwalPanel({
             <Typography
               variant="overline"
               component="p"
-              sx={{ color: theme.palette.ink.subtle, mb: 2 }}
+              sx={{ color: theme.palette.text.primary, opacity: 0.6, mb: 2 }}
             >
               {eyebrow}
             </Typography>
           )}
-          <Typography variant="h5" component="h2" sx={{ color: theme.palette.ink.heading }}>
+          <Typography variant="h5" component="h2" sx={{ color: theme.palette.text.primary }}>
             {headline}
           </Typography>
         </Box>
@@ -120,7 +120,7 @@ export function CoeqwalPanel({
               <Typography
                 variant="body1"
                 component="div"
-                sx={{ color: theme.palette.ink.body, mb: cta ? 4 : 0 }}
+                sx={{ color: theme.palette.text.primary, mb: cta ? 4 : 0 }}
               >
                 {description}
               </Typography>

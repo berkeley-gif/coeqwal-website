@@ -283,7 +283,7 @@ const IntroSection = () => {
         >
           <Typography
             variant="body1"
-            sx={{ color: theme.palette.ink.body, mb: 7, lineHeight: 1.75 }}
+            sx={{ color: theme.palette.text.primary, mb: 7, lineHeight: 1.75 }}
           >
             Water is limited and every choice has trade-offs. COEQWAL allows
             you to explore different water scenarios and understand how
@@ -294,7 +294,7 @@ const IntroSection = () => {
           <Typography
             variant="h5"
             component="h2"
-            sx={{ color: theme.palette.ink.heading, mb: 5 }}
+            sx={{ color: theme.palette.text.primary, mb: 5 }}
           >
             On this site, you can
           </Typography>
@@ -331,11 +331,11 @@ const IntroSection = () => {
               >
                 <Typography
                   variant="body1"
-                  sx={{ color: theme.palette.ink.body, lineHeight: 1.75 }}
+                  sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
                 >
                   <Box
                     component="span"
-                    sx={{ color: theme.palette.ink.heading, fontWeight: 600 }}
+                    sx={{ color: theme.palette.text.primary, fontWeight: 600 }}
                   >
                     {verb}
                   </Box>{" "}
