@@ -163,7 +163,6 @@ export interface BaseHeaderProps {
 
   /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
   waterThemesOptions?: NavDropdownOption[]
-
 }
 
 const translations: TranslationsMap = {
@@ -549,7 +548,6 @@ export function BaseHeader({
                   {t.buttons.about}
                 </Button>
 
-
                 {/* Language switcher (OPTIONAL) */}
                 {showLanguageSwitcher && <LanguageSwitcher />}
               </Stack>
@@ -888,7 +886,6 @@ export function BaseHeader({
                 />
               </ListItemButton>
             </ListItem>
-
           </List>
         </Box>
       </Drawer>

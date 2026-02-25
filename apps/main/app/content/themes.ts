@@ -14,10 +14,10 @@ export interface ThemeLabelConfig {
 
 export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   baseline: { label: "Baseline" },
-  ag_gw:    { label: "Farms, groundwater & food systems" },
-  eco:      { label: "Rivers, salmon & ecosystems" },
-  delta:    { label: "The Delta as a living place" },
-  cws:      { label: "Community water systems" },
+  ag_gw: { label: "Farms, groundwater & food systems" },
+  eco: { label: "Rivers, salmon & ecosystems" },
+  delta: { label: "The Delta as a living place" },
+  cws: { label: "Community water systems" },
 }
 
 /** Active themes available for filtering */

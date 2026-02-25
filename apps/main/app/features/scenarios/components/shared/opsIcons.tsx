@@ -253,7 +253,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     description:
       "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
   },
-  "theme_ag_gw": {
+  theme_ag_gw: {
     id: "theme_ag_gw",
     type: "circle",
     lines: ["Farms"],
@@ -629,13 +629,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
     "land_use_2020",
     "biops_2019",
   ],
-  s0046: [
-    "theme_eco",
-    "no_delta_flow",
-    "tucp",
-    "land_use_2020",
-    "biops_2019",
-  ],
+  s0046: ["theme_eco", "no_delta_flow", "tucp", "land_use_2020", "biops_2019"],
   s0065: [
     "theme_delta",
     "dwr_adapt_2025",

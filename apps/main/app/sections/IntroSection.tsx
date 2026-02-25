@@ -31,11 +31,7 @@ import { useTabs } from "../context/Tabs"
 
 const MotionBox = motion.create(Box)
 
-function SectionLabel({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <Typography
       variant="overline"
@@ -171,7 +167,7 @@ function Panel1Paragraph() {
         <Typography variant="displayBody" component="div">
           COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
           &mdash; is a publicly-funded project that works with communities to
-          model alternative water management scenarios for California&apos;s
+          model alternative water management scenarios for California&rsquo;s
           Central Valley.
           <br />
           <br />
@@ -815,37 +811,45 @@ const IntroSection = () => {
             py: { xs: 7, md: 9 },
           }}
         >
-          <Box sx={{ maxWidth: "680px" }}>
-            <SectionLabel>About COEQWAL</SectionLabel>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <Typography
-                variant="h5"
-                component="h2"
-                sx={{ color: "#333", mb: 3 }}
-              >
-                A publicly-funded tool<br />for California&apos;s water future
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              rowGap: { xs: 3, md: 4 },
+              columnGap: { md: 6 },
+            }}
+          >
+            {/* Row 1: eyebrow + heading — spans full width */}
+            <Box sx={{ gridColumn: { md: "1 / -1" } }}>
+              <SectionLabel>About COEQWAL</SectionLabel>
+              <Typography variant="h5" component="h2" sx={{ color: "#333" }}>
+                A publicly-funded tool
+                <br />
+                for California&rsquo;s water future
               </Typography>
-              <Typography
-                variant="body1"
-                sx={{ color: "#555", mb: 4, maxWidth: "560px" }}
-              >
+            </Box>
+
+            {/* Row 2: paragraph + CTA — right column only */}
+            <Box sx={{ gridColumn: { xs: "1", md: "2" } }}>
+              <Typography variant="body1" sx={{ color: "#555", mb: 4 }}>
                 COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
                 &mdash; works with communities to model alternative water
-                management scenarios for California&apos;s Central Valley. Our
+                management scenarios for California&rsquo;s Central Valley. Our
                 goal is to help communities, policymakers, and researchers
                 understand how water decisions affect people and ecosystems.
               </Typography>
-              <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
-            </MotionBox>
-          </Box>
+              <AboutCtaLink href="/about">
+                Learn more about COEQWAL
+              </AboutCtaLink>
+            </Box>
+          </MotionBox>
         </Box>
 
-        {/* ── Water themes ───────────────────────────────────────── */}
+        {/* Water themes */}
         <Box
           component="section"
           aria-label="Water management themes"
@@ -872,7 +876,10 @@ const IntroSection = () => {
             >
               What water issues matter to you?
             </Typography>
-            <Typography variant="body1" sx={{ color: "#555", maxWidth: "560px" }}>
+            <Typography
+              variant="body1"
+              sx={{ color: "#555", maxWidth: "560px" }}
+            >
               Water is important to all of us &mdash; from farmers in the
               Central Valley to communities in the Delta, from salmon in the
               Sacramento River to urban water users in Los Angeles. We can
@@ -940,6 +947,141 @@ const IntroSection = () => {
                 />
               )
             })}
+          </Box>
+        </Box>
+
+        {/* On this site, you can */}
+        <Box
+          component="section"
+          aria-label="On this site, you can"
+          sx={{
+            backgroundColor: theme.palette.common.white,
+            px: theme.space.panel.padding,
+            pt: { xs: 9, md: 12 },
+            pb: 0,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Text content */}
+          <MotionBox
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            sx={{ maxWidth: "640px" }}
+          >
+            <SectionLabel>What you can do</SectionLabel>
+
+            <Typography
+              variant="body1"
+              sx={{ color: "#555", mb: 7, lineHeight: 1.75 }}
+            >
+              Water is limited and every choice has trade-offs. COEQWAL allows
+              you to explore different water scenarios and understand how
+              decisions shape potential futures for communities, farms, rivers,
+              and the Delta.
+            </Typography>
+
+            <Typography
+              variant="h5"
+              component="h2"
+              sx={{ color: "#333", mb: 5 }}
+            >
+              On this site, you can
+            </Typography>
+
+            <Box
+              component="ul"
+              sx={{
+                m: 0,
+                p: 0,
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+              }}
+            >
+              {[
+                {
+                  verb: "Learn",
+                  rest: "how water in California\u2019s Central Valley is managed,",
+                },
+                {
+                  verb: "Explore",
+                  rest: "how water outcomes shift under different scenarios, and",
+                },
+                {
+                  verb: "Share",
+                  rest: "your insights about California\u2019s water future",
+                },
+              ].map(({ verb, rest }) => (
+                <Box
+                  component="li"
+                  key={verb}
+                  sx={{ display: "flex", gap: 1.5 }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "#555", lineHeight: 1.75 }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{ color: "#333", fontWeight: 600 }}
+                    >
+                      {verb}
+                    </Box>{" "}
+                    {rest}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </MotionBox>
+
+          {/* Mock tab row — pinned to bottom */}
+          <Box
+            sx={{
+              mt: 8,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              borderTop: RULE,
+            }}
+          >
+            {["Learn", "Explore", "Share"].map((label, i) => (
+              <Box
+                key={label}
+                sx={{
+                  py: { xs: 4, md: 5 },
+                  px: { xs: 2, md: 3 },
+                  borderLeft: i > 0 ? RULE : "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  cursor: "default",
+                  "&:hover .tab-arrow": { transform: "translateX(4px)" },
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  component="span"
+                  sx={{ color: "#333" }}
+                >
+                  {label}
+                </Typography>
+                <ArrowForwardIcon
+                  className="tab-arrow"
+                  sx={{
+                    color: "#333",
+                    fontSize: "1.4rem",
+                    flexShrink: 0,
+                    transition: "transform 0.15s ease",
+                  }}
+                />
+              </Box>
+            ))}
           </Box>
         </Box>
 

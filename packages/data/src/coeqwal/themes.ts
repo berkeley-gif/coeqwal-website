@@ -73,11 +73,11 @@ export const WATER_THEMES: Theme[] = [
 /**
  * Maps each water theme ID to the scenario IDs that address it.
  * Scenario IDs match the keys in scenarioMetadata (e.g. "s0035").
- * Note: THESE ARE PROVISIONAL (Feb 24, 2026) 
+ * Note: THESE ARE PROVISIONAL (Feb 24, 2026)
  * */
 export const THEME_SCENARIOS: Record<string, string[]> = {
   cws: ["s0035", "s0036", "s0037"],
-  "ag_gw": ["s0011", "s0025", "s0026", "s0027", "s0028"],
+  ag_gw: ["s0011", "s0025", "s0026", "s0027", "s0028"],
   eco: ["s0030", "s0029", "s0032", "s0031", "s0033", "s0046"],
   delta: [
     "s0040",

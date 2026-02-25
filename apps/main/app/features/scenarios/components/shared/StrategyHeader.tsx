@@ -301,8 +301,12 @@ export function StrategyHeader({
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = true
-  const themeLabel = strategy.theme ? THEME_LABEL_CONFIG[strategy.theme]?.label : undefined
-  const themeColors = strategy.theme ? theme.palette.waterThemes[strategy.theme] : undefined
+  const themeLabel = strategy.theme
+    ? THEME_LABEL_CONFIG[strategy.theme]?.label
+    : undefined
+  const themeColors = strategy.theme
+    ? theme.palette.waterThemes[strategy.theme]
+    : undefined
 
   // Format label for historical-ag scenario (s0011)
   const displayLabel =

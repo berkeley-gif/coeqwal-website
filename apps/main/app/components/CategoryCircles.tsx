@@ -22,7 +22,6 @@ import ScenarioList from "./ScenarioList"
 import HydroclimateIcons from "./HydroclimateIcons"
 import HydroclimateList from "./HydroclimateList"
 
-
 interface CategoryCirclesProps {
   categories: Theme[]
   selectedId: string | null

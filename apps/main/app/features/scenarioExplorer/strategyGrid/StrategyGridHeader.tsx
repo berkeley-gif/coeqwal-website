@@ -114,7 +114,10 @@ export function StrategyGridHeader({
 
       {/* Controls in cols 1-2, same row as DividerContinuation / OutcomeCategoryLabels */}
       {controls && (
-        <ControlsRow controls={controls} showOutcomeLabels={showOutcomeLabels} />
+        <ControlsRow
+          controls={controls}
+          showOutcomeLabels={showOutcomeLabels}
+        />
       )}
 
       {/* Divider continuation for Column 3 - only in full mode */}

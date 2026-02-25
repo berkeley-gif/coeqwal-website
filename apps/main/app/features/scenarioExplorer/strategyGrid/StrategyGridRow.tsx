@@ -279,10 +279,7 @@ function CompactRowContent({
           gap: theme.space.gap.lg,
         }}
       >
-        <StrategyHeader
-          strategy={scenario}
-          titleVariant="body2"
-        />
+        <StrategyHeader strategy={scenario} titleVariant="body2" />
         <Box
           sx={{
             display: "flex",

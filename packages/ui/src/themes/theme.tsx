@@ -362,11 +362,11 @@ const palette = {
   // Water theme colors — background + text for each scenario theme
   // Keys match ScenarioTheme / WATER_THEMES ids (packages/data/src/coeqwal/themes.ts)
   waterThemes: {
-    baseline:  { background: "#ffd87e", text: "#7a5200" },
-    ag_gw:     { background: "#d4edda", text: "#2d6a4f" },
-    eco:       { background: "#cef1f5", text: "#186b88" },
-    delta:     { background: "#d0e8f7", text: "#193D6B" },
-    cws:       { background: "#ffe5cc", text: "#7a3000" },
+    baseline: { background: "#ffd87e", text: "#7a5200" },
+    ag_gw: { background: "#d4edda", text: "#2d6a4f" },
+    eco: { background: "#cef1f5", text: "#186b88" },
+    delta: { background: "#d0e8f7", text: "#193D6B" },
+    cws: { background: "#ffe5cc", text: "#7a3000" },
   },
 
   // Data visualization colors for outcome categories
@@ -870,7 +870,8 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       // Responsive section heading: mobile (1.7rem/27.2px) → desktop (2.1rem/33.6px)
       fontSize: "clamp(1.7rem, 1.1rem + 1.5vw, 2.1rem)",
-      fontWeight: 700,
+      fontWeight: 500,
+      letterSpacing: "0.01rem",
       lineHeight: 1.2,
     },
     h6: {
