@@ -291,7 +291,8 @@ const IntroSection = () => {
         />
       </div>
 
-      {/* About COEQWAL — headline handled by MorphingHeadline overlay */}
+      {/* About COEQWAL — headline handled by MorphingHeadline overlay on lg+;
+          responsiveHeadline fills in on smaller screens */}
       <div ref={aboutPanelRef}>
       <CoeqwalPanel
         id="about-coeqwal"
@@ -299,6 +300,24 @@ const IntroSection = () => {
         textColor={theme.palette.common.white}
         minHeight="80vh"
         contentMotionStyle={{ opacity: aboutOpacity }}
+        responsiveHeadline={
+          <>
+            <Typography
+              variant="h2Main"
+              component="span"
+              sx={{ display: "block", color: theme.palette.common.white }}
+            >
+              What is
+            </Typography>
+            <Typography
+              variant="h1"
+              component="span"
+              sx={{ display: "block", color: theme.palette.common.white }}
+            >
+              COEQWAL?
+            </Typography>
+          </>
+        }
         description={
           <>
             COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
@@ -313,17 +332,39 @@ const IntroSection = () => {
       />
       </div>
 
-      {/* Water themes — headline handled by MorphingHeadline overlay */}
+      {/* Water themes — headline handled by MorphingHeadline overlay on lg+;
+          responsiveHeadline fills in on smaller screens */}
       <div ref={waterThemesPanelRef}>
       <CoeqwalPanel
         description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
         borderBottom={RULE}
         layout="split"
         contentMotionStyle={{ opacity: waterThemesOpacity }}
+        responsiveHeadline={
+          <>
+            <Typography
+              variant="h2Main"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              What water issues
+            </Typography>
+            <Typography
+              variant="h1"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              matter to you?
+            </Typography>
+          </>
+        }
         descriptionSx={{
-          mt: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
+          mt: {
+            xs: 0,
+            lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
+          },
         }}
-        childrenMt={`calc(${theme.space.panel.padding} + 40px)`}
+        childrenMt={{ xs: 5, lg: `calc(${theme.space.panel.padding} + 40px)` }}
       >
         {/* Four main theme cards */}
         <Box

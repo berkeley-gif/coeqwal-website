@@ -255,7 +255,7 @@ export default function VideoHero({
         {/* Headline — marginTop offsets exactly the fixed header height */}
         <Box
           sx={{
-            display: hideHeadline ? "none" : "block",
+            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
             alignSelf: "flex-start",
             marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
             maxWidth: { xs: "100%", sm: "720px" },

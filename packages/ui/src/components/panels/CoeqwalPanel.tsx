@@ -60,8 +60,12 @@ export interface CoeqwalPanelProps {
    *  adjusting alignment when the headline is an external overlay. */
   descriptionSx?: SxProps<Theme>
   /** Top margin above the children slot (default: 5 = 40px).
-   *  Accepts any MUI spacing value or CSS string. */
-  childrenMt?: string | number
+   *  Accepts any MUI spacing value, CSS string, or responsive object. */
+  childrenMt?: string | number | Record<string, string | number>
+  /** Headline rendered only on small screens (hidden at lg+) where the
+   *  MorphingHeadline overlay is not active. Renders directly without a
+   *  Typography wrapper so callers can supply the correct variant pair. */
+  responsiveHeadline?: React.ReactNode
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -81,6 +85,7 @@ export function CoeqwalPanel({
   contentMotionStyle,
   descriptionSx,
   childrenMt = 5,
+  responsiveHeadline,
 }: CoeqwalPanelProps) {
   const theme = useTheme()
   const bg = background ?? theme.palette.common.white
@@ -125,6 +130,19 @@ export function CoeqwalPanel({
             : { maxWidth: "680px" }
         }
       >
+        {/* Responsive headline — visible on xs–md only; lg+ uses MorphingHeadline overlay */}
+        {responsiveHeadline && (
+          <Box
+            sx={{
+              display: { xs: "block", lg: "none" },
+              ...(layout === "split" && { gridColumn: { md: "1 / -1" } }),
+              mb: 2,
+            }}
+          >
+            {responsiveHeadline}
+          </Box>
+        )}
+
         {/* Headline block — full width in both layouts */}
         {(eyebrow || headline) && (
           <Box sx={layout === "split" ? { gridColumn: { md: "1 / -1" } } : undefined}>
