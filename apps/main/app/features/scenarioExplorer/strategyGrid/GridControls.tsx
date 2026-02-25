@@ -75,10 +75,16 @@ export function GridControls({
         <Box>
           <TogglePair
             leftIcon={
-              <CurrentOpsIcon active={!showDefinitions} size={Math.round(iconSize * 0.78)} />
+              <CurrentOpsIcon
+                active={!showDefinitions}
+                size={Math.round(iconSize * 0.78)}
+              />
             }
             rightIcon={
-              <CurrentOpsMultipleIcon active={showDefinitions} size={Math.round(iconSize * 0.78)} />
+              <CurrentOpsMultipleIcon
+                active={showDefinitions}
+                size={Math.round(iconSize * 0.78)}
+              />
             }
             onLeftClick={() => onShowDefinitionsChange(false)}
             onRightClick={() => onShowDefinitionsChange(true)}

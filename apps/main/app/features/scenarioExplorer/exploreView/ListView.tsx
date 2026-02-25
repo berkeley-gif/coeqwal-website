@@ -94,115 +94,115 @@ export default function ListView({
     themeMatchingScenarioIds,
     showThemeDivider,
     showAllThemeDividers,
-  } =
-    useMemo(() => {
-      const baseScenarios = [...scenarios]
+  } = useMemo(() => {
+    const baseScenarios = [...scenarios]
 
-      if (sortBy && allScoreData && Object.keys(allScoreData).length > 0) {
-        baseScenarios.sort((a, b) => {
-          const aScores = allScoreData[a.scenarioId]
-          const bScores = allScoreData[b.scenarioId]
+    if (sortBy && allScoreData && Object.keys(allScoreData).length > 0) {
+      baseScenarios.sort((a, b) => {
+        const aScores = allScoreData[a.scenarioId]
+        const bScores = allScoreData[b.scenarioId]
 
-          if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
-          if (!aScores?.[sortBy]) return 1
-          if (!bScores?.[sortBy]) return -1
+        if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
+        if (!aScores?.[sortBy]) return 1
+        if (!bScores?.[sortBy]) return -1
 
-          const aScore = aScores[sortBy].weighted_score
-          const bScore = bScores[sortBy].weighted_score
+        const aScore = aScores[sortBy].weighted_score
+        const bScore = bScores[sortBy].weighted_score
 
-          if (sortDirection === "asc") {
-            return aScore - bScore
-          } else {
-            return bScore - aScore
-          }
-        })
-      } else {
-        // Default: group scenarios by theme
-        baseScenarios.sort((a, b) => {
-          const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
-          const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
-          return aOrder - bOrder
-        })
-      }
-
-      // Helper to move pinned scenario to top
-      const applyPinning = (scenarioList: typeof baseScenarios) => {
-        if (!pinnedScenarioId) return scenarioList
-        const pinnedIndex = scenarioList.findIndex(
-          (s) => s.scenarioId === pinnedScenarioId,
-        )
-        if (pinnedIndex <= 0) return scenarioList // Already at top or not found
-        const pinned = scenarioList[pinnedIndex]!
-        return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
-      }
-
-      // Helper to apply theme grouping: theme-matching scenarios float to top
-      const applyThemeGrouping = (scenarioList: typeof baseScenarios) => {
-        if (!selectedTheme) return { list: scenarioList, themeIds: new Set<string>() }
-        const themeMatches = scenarioList.filter((s) => s.theme === selectedTheme)
-        const rest = scenarioList.filter((s) => s.theme !== selectedTheme)
-        const themeIds = new Set(themeMatches.map((s) => s.scenarioId))
-        const list = showOnlyTheme ? themeMatches : [...themeMatches, ...rest]
-        return { list, themeIds }
-      }
-
-      if (!searchQuery.trim()) {
-        const pinned = applyPinning(baseScenarios)
-        const { list, themeIds } = applyThemeGrouping(pinned)
-        return {
-          sortedScenarios: list,
-          matchingScenarioIds: new Set<string>(),
-          hasSearchResults: false,
-          themeMatchingScenarioIds: themeIds,
-          showThemeDivider: selectedTheme !== null && !showOnlyTheme,
-          showAllThemeDividers: !sortBy,
-        }
-      }
-
-      const searchLower = searchQuery.toLowerCase()
-      const matches: Scenario[] = []
-      const nonMatches: Scenario[] = []
-      const matchingIds = new Set<string>()
-
-      baseScenarios.forEach((scenario) => {
-        let isMatch = false
-
-        if (scenario.label.toLowerCase().includes(searchLower)) isMatch = true
-        if (scenario.description.toLowerCase().includes(searchLower))
-          isMatch = true
-        if (scenario.scenarioId.toLowerCase().includes(searchLower))
-          isMatch = true
-        if (scenario.shortLabel?.toLowerCase().includes(searchLower))
-          isMatch = true
-
-        if (isMatch) {
-          matches.push(scenario)
-          matchingIds.add(scenario.scenarioId)
+        if (sortDirection === "asc") {
+          return aScore - bScore
         } else {
-          nonMatches.push(scenario)
+          return bScore - aScore
         }
       })
+    } else {
+      // Default: group scenarios by theme
+      baseScenarios.sort((a, b) => {
+        const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
+        const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
+        return aOrder - bOrder
+      })
+    }
 
-      const pinned = applyPinning([...matches, ...nonMatches])
+    // Helper to move pinned scenario to top
+    const applyPinning = (scenarioList: typeof baseScenarios) => {
+      if (!pinnedScenarioId) return scenarioList
+      const pinnedIndex = scenarioList.findIndex(
+        (s) => s.scenarioId === pinnedScenarioId,
+      )
+      if (pinnedIndex <= 0) return scenarioList // Already at top or not found
+      const pinned = scenarioList[pinnedIndex]!
+      return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
+    }
+
+    // Helper to apply theme grouping: theme-matching scenarios float to top
+    const applyThemeGrouping = (scenarioList: typeof baseScenarios) => {
+      if (!selectedTheme)
+        return { list: scenarioList, themeIds: new Set<string>() }
+      const themeMatches = scenarioList.filter((s) => s.theme === selectedTheme)
+      const rest = scenarioList.filter((s) => s.theme !== selectedTheme)
+      const themeIds = new Set(themeMatches.map((s) => s.scenarioId))
+      const list = showOnlyTheme ? themeMatches : [...themeMatches, ...rest]
+      return { list, themeIds }
+    }
+
+    if (!searchQuery.trim()) {
+      const pinned = applyPinning(baseScenarios)
       const { list, themeIds } = applyThemeGrouping(pinned)
       return {
         sortedScenarios: list,
-        matchingScenarioIds: matchingIds,
-        hasSearchResults: matches.length > 0,
+        matchingScenarioIds: new Set<string>(),
+        hasSearchResults: false,
         themeMatchingScenarioIds: themeIds,
         showThemeDivider: selectedTheme !== null && !showOnlyTheme,
         showAllThemeDividers: !sortBy,
       }
-    }, [
-      searchQuery,
-      sortBy,
-      sortDirection,
-      allScoreData,
-      scenarios,
-      pinnedScenarioId,
-      selectedTheme,
-      showOnlyTheme,
-    ])
+    }
+
+    const searchLower = searchQuery.toLowerCase()
+    const matches: Scenario[] = []
+    const nonMatches: Scenario[] = []
+    const matchingIds = new Set<string>()
+
+    baseScenarios.forEach((scenario) => {
+      let isMatch = false
+
+      if (scenario.label.toLowerCase().includes(searchLower)) isMatch = true
+      if (scenario.description.toLowerCase().includes(searchLower))
+        isMatch = true
+      if (scenario.scenarioId.toLowerCase().includes(searchLower))
+        isMatch = true
+      if (scenario.shortLabel?.toLowerCase().includes(searchLower))
+        isMatch = true
+
+      if (isMatch) {
+        matches.push(scenario)
+        matchingIds.add(scenario.scenarioId)
+      } else {
+        nonMatches.push(scenario)
+      }
+    })
+
+    const pinned = applyPinning([...matches, ...nonMatches])
+    const { list, themeIds } = applyThemeGrouping(pinned)
+    return {
+      sortedScenarios: list,
+      matchingScenarioIds: matchingIds,
+      hasSearchResults: matches.length > 0,
+      themeMatchingScenarioIds: themeIds,
+      showThemeDivider: selectedTheme !== null && !showOnlyTheme,
+      showAllThemeDividers: !sortBy,
+    }
+  }, [
+    searchQuery,
+    sortBy,
+    sortDirection,
+    allScoreData,
+    scenarios,
+    pinnedScenarioId,
+    selectedTheme,
+    showOnlyTheme,
+  ])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)

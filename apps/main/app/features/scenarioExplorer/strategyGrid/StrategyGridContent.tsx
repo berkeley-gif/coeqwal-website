@@ -169,7 +169,8 @@ export function StrategyGridContent({
           showSearchDivider && isHighlighted && !isNextHighlighted
 
         // Show divider after the last theme-matching scenario (filtered view)
-        const isThemeMatch = themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+        const isThemeMatch =
+          themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
         const isNextThemeMatch = nextScenario
           ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
           : false

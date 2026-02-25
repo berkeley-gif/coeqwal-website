@@ -45,7 +45,6 @@ export function ViewModeControls() {
         showTitle={true}
         showLabels={false}
       />
-
     </>
   )
 }

@@ -27,7 +27,13 @@ import React, {
   useCallback,
   forwardRef,
 } from "react"
-import { useScroll, motion, useReducedMotion, useTransform, MotionValue } from "@repo/motion"
+import {
+  useScroll,
+  motion,
+  useReducedMotion,
+  useTransform,
+  MotionValue,
+} from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 /**

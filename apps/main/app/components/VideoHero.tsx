@@ -259,15 +259,24 @@ export default function VideoHero({
           sx={{
             display: hideHeadline ? "none" : "flex",
             flexDirection: "column",
-            gap: "20px", // standard spacing ... ? 
+            gap: "20px", // standard spacing ... ?
             maxWidth: { xs: "100%", sm: "760px" },
             textAlign: { xs: "center", lg: "left" },
             pointerEvents: "auto",
           }}
         >
           {/* Headline */}
-          <Box sx={{ color: "text.secondary", textShadow: theme.textShadow.display }}>
-            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
+          <Box
+            sx={{
+              color: "text.secondary",
+              textShadow: theme.textShadow.display,
+            }}
+          >
+            <Typography
+              variant="h2Main"
+              component="h2"
+              sx={{ display: "block", mb: 0.5 }}
+            >
               {t("homePanel.titleLine1")}
             </Typography>
             <Typography variant="h1" component="h1" sx={{ display: "block" }}>

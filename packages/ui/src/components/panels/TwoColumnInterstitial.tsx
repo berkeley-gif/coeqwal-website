@@ -111,7 +111,10 @@ export function TwoColumnInterstitial({
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-          <Typography variant="tabLabel" sx={{ maxWidth: "22ch", lineHeight: 1.25, textTransform: "none" }}>
+          <Typography
+            variant="tabLabel"
+            sx={{ maxWidth: "22ch", lineHeight: 1.25, textTransform: "none" }}
+          >
             {headline}
           </Typography>
           <Typography
@@ -150,9 +153,7 @@ export function TwoColumnInterstitial({
               },
             }}
           >
-            <Typography variant="overline">
-              {scrollPrompt}
-            </Typography>
+            <Typography variant="overline">{scrollPrompt}</Typography>
             <ArrowForwardIcon
               className="scroll-arrow"
               sx={{
