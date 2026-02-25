@@ -10,15 +10,6 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 
-/** Action descriptions shown in expanded tab buttons (matches Panel 4 columns) */
-const TAB_DESCRIPTIONS: Record<TabKey, string> = {
-  learn:
-    "the basics of Central Valley water management and how to read our scenario data",
-  explore:
-    "the scenarios. Use tools to understand and compare them. Look at the data through the lenses of tradeoffs, equity, and resilience.",
-  share:
-    "your findings by capturing data and charts as you explore and exporting them as files.",
-}
 
 /** Renders the active tab's description panel content */
 function TabDescription({
@@ -59,15 +50,8 @@ function TabDescription({
         <TwoColumnInterstitial
           headline="What if we managed water differently?"
           body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California's water future."
-          linkListLabel="Explore how critical water issues are addressed"
-          links={[
-            { label: "Community water systems" },
-            { label: "Farms, groundwater, and food systems" },
-            { label: "Rivers, salmon, and ecosystems" },
-            { label: "The Delta as a living place" },
-            { label: "Climate risk, reliability, and resilience" },
-            { label: "Water governance and decision-making" },
-          ]}
+          linkListLabel=""
+          links={[]}
         />
       )
     case "share":
@@ -214,17 +198,15 @@ export default function SmoothTabs() {
                   "padding 0.4s ease, clip-path 0.4s ease, gap 0.4s ease, font-size 0.4s ease",
                 display: "flex",
                 flexDirection: "column",
-                gap: isInTabsArea ? 0 : 6,
+                gap: 0,
                 alignItems: isInTabsArea ? "center" : "flex-start",
-                justifyContent: "flex-start",
+                justifyContent: "center",
                 textAlign: isInTabsArea ? "center" : "left",
                 padding: isInTabsArea
                   ? "8px 20px"
-                  : `24px ${theme.space.panel.padding}`,
+                  : `14px ${theme.space.panel.padding}`,
                 borderTop: "none",
-                borderBottom: isInTabsArea
-                  ? `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}80`
-                  : "none",
+                borderBottom: "none",
                 // File-tab shape: triangle cut from upper-right corner (80px).
                 // Smaller when docked (20px).
                 clipPath: isInTabsArea
@@ -249,29 +231,13 @@ export default function SmoothTabs() {
               )}
               <Typography
                 component="span"
-                variant={isInTabsArea ? "nav" : "h3"}
+                variant={isInTabsArea ? "nav" : "h5"}
                 sx={{
                   transition: "font-size 0.4s ease, color 0.4s ease",
-                  ...(!isInTabsArea && { fontSize: "2.4rem" }),
                 }}
               >
                 {label.charAt(0).toUpperCase() + label.slice(1)}
               </Typography>
-              {/* Description - only when expanded */}
-              {!isInTabsArea && (
-                <Typography
-                  component="span"
-                  variant="body2"
-                  sx={{
-                    fontWeight: 400,
-                    opacity: 0.85,
-                    textTransform: "none",
-                    m: 0,
-                  }}
-                >
-                  {TAB_DESCRIPTIONS[key]}
-                </Typography>
-              )}
             </button>
           )
         })}
@@ -289,6 +255,7 @@ export default function SmoothTabs() {
             style={{
               overflow: "hidden",
               width: "100%",
+              marginTop: -1,
               background: activeTabColor,
             }}
           >

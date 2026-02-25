@@ -313,7 +313,7 @@ export default function VideoHero({
         <ScrollToButton
           color={`${theme.palette.text.secondary}D9`}
           size={52}
-          scrollToId="intro"
+          scrollToId="about-coeqwal"
           ariaLabel="Scroll down to learn more"
         />
       </Box>

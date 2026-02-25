@@ -277,6 +277,7 @@ const palette = {
   brand: {
     sky: "#92C1D5", // Top of gradient - sky blue
     water: "#64A4D6", // Bottom of gradient - water blue
+    panelLight: "#EDE9E4", // Frontmatter panel background — undertone.stone
     panelMedium: "#3D7DB5", // Panel 1 background
     panelDark: "#193D6B", // Panel 3 background
   },
@@ -330,6 +331,7 @@ const palette = {
   undertone: {
     cool: "#f7fafc", // Cool blue-grey undertone (same as grey[50])
     warm: "#faf8f5", // Warm cream undertone
+    stone: "#EDE9E4", // Warm stone — panel backgrounds on light pages
   },
 
   // Ambient/mood elements
@@ -354,9 +356,16 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#1E4A7A", // Dark blue - learn
-    explore: "#24567E", // Medium dark blue - explore
-    share: "#2A6289", // Lighter dark blue - share
+    learn: "#64A4D6",  // brand.water
+    explore: "#3D7DB5", // brand.panelMedium
+    share: "#193D6B",  // brand.panelDark
+  },
+
+  // Ink colors for light-background content panels (About, Water themes, etc.)
+  ink: {
+    heading: "#333333", // Strong dark — section headings (h5)
+    body: "#555555",    // Mid dark — body paragraphs
+    subtle: "rgba(85, 85, 85, 0.55)", // Muted — overline eyebrows
   },
 
   // Water theme colors — background + text for each scenario theme
@@ -364,8 +373,8 @@ const palette = {
   waterThemes: {
     baseline: { background: "#ffd87e", text: "#7a5200" },
     ag_gw: { background: "#d4edda", text: "#2d6a4f" },
-    eco: { background: "#cef1f5", text: "#186b88" },
-    delta: { background: "#d0e8f7", text: "#193D6B" },
+    eco: { background: "#CCE8EE", text: "#186b88" },
+    delta: { background: "#C8DDF4", text: "#193D6B" },
     cws: { background: "#ffe5cc", text: "#7a3000" },
   },
 
@@ -870,7 +879,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       // Responsive section heading: mobile (1.7rem/27.2px) → desktop (2.1rem/33.6px)
       fontSize: "clamp(1.7rem, 1.1rem + 1.5vw, 2.1rem)",
-      fontWeight: 500,
+      fontWeight: 600,
       letterSpacing: "0.01rem",
       lineHeight: 1.2,
     },
@@ -1731,6 +1740,7 @@ declare module "@mui/material/styles" {
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
     waterThemes: typeof themeValues.palette.waterThemes
+    ink: typeof themeValues.palette.ink
   }
 
   interface PaletteOptions {
@@ -1748,6 +1758,7 @@ declare module "@mui/material/styles" {
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
     waterThemes?: Partial<typeof themeValues.palette.waterThemes>
+    ink?: Partial<typeof themeValues.palette.ink>
   }
 
   // zIndex - derived from themeValues.zIndex

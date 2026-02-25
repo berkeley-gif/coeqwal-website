@@ -8,7 +8,7 @@ export const fadeIn = {
   },
 }
 
-// Fade in from right (like AOS fade-left)
+// Fade in from right
 export const fadeInRight = {
   hidden: { opacity: 0, x: 50 },
   show: {
