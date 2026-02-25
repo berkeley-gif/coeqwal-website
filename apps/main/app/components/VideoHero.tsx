@@ -238,66 +238,61 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content */}
+      {/* Content — diagonal: headline upper-left, paragraph lower-right */}
       <Box
         sx={{
           gridArea: "stack",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "flex-end",
-          alignItems: { xs: "center", lg: "flex-start" },
-          paddingTop: `calc(${theme.layout.headerHeight}px + 24px)`,
-          paddingBottom: "clamp(80px, 12vh, 140px)",
+          justifyContent: "space-between",
+          paddingBottom: theme.space.panel.topOffset,
           paddingLeft: theme.space.panel.padding,
           paddingRight: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent,
           pointerEvents: "none",
         }}
       >
-        {/* Headline + paragraph stacked vertically */}
+        {/* Headline — marginTop offsets exactly the fixed header height */}
         <Box
           sx={{
-            display: hideHeadline ? "none" : "flex",
-            flexDirection: "column",
-            gap: "20px", // standard spacing ... ?
-            maxWidth: { xs: "100%", sm: "760px" },
-            textAlign: { xs: "center", lg: "left" },
+            display: hideHeadline ? "none" : "block",
+            alignSelf: "flex-start",
+            marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
+            maxWidth: { xs: "100%", sm: "720px" },
+            color: "text.secondary",
+            textShadow: theme.textShadow.display,
             pointerEvents: "auto",
           }}
         >
-          {/* Headline */}
-          <Box
-            sx={{
-              color: "text.secondary",
-              textShadow: theme.textShadow.display,
-            }}
-          >
-            <Typography
-              variant="h2Main"
-              component="h2"
-              sx={{ display: "block", mb: 0.5 }}
-            >
-              {t("homePanel.titleLine1")}
-            </Typography>
-            <Typography variant="h1" component="h1" sx={{ display: "block" }}>
-              {t("homePanel.titleLine2")}
-            </Typography>
-          </Box>
-
-          {/* Paragraph — directly below headline, no background box */}
           <Typography
-            variant="displayBody"
-            component="p"
-            sx={{
-              color: "text.secondary",
-              textShadow: theme.textShadow.nav,
-              lineHeight: 1.6,
-              maxWidth: "520px",
-            }}
+            variant="h2Main"
+            component="h2"
+            sx={{ display: "block", mb: 0.5 }}
           >
-            {t("homePanel.content")}
+            {t("homePanel.titleLine1")}
+          </Typography>
+          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
+            {t("homePanel.titleLine2")}
           </Typography>
         </Box>
+
+        {/* Paragraph — lower left */}
+        <Typography
+          variant="displayBody"
+          component="p"
+          sx={{
+            alignSelf: "flex-end",
+            marginTop: "auto",
+            textAlign: "left",
+            maxWidth: "480px",
+            color: "text.secondary",
+            textShadow: theme.textShadow.nav,
+            lineHeight: 1.6,
+            pointerEvents: "auto",
+          }}
+        >
+          {t("homePanel.content")}
+        </Typography>
       </Box>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}

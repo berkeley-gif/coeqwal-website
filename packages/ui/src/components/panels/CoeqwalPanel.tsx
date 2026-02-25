@@ -17,7 +17,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, Typography, useTheme, type SxProps, type Theme } from "@mui/material"
 import { motion } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
@@ -29,8 +29,9 @@ export interface CoeqwalPanelProps {
   id?: string
   /** Overline label rendered above the headline */
   eyebrow?: string
-  /** Primary heading — accepts JSX so callers can embed <br /> etc. */
-  headline: React.ReactNode
+  /** Primary heading — accepts JSX so callers can embed <br /> etc. Optional
+   *  when the headline is handled externally (e.g. MorphingHeadline overlay). */
+  headline?: React.ReactNode
   /** Body description rendered below the headline */
   description?: React.ReactNode
   /** CTA slot — rendered below description (e.g. an arrow link) */
@@ -42,10 +43,25 @@ export interface CoeqwalPanelProps {
   layout?: "single" | "split"
   /** Section background colour (default: theme.palette.common.white) */
   background?: string
+  /** Minimum height of the section — useful for scroll-driven panels that need
+   *  extra scroll runway for animations to play out */
+  minHeight?: string | number
+  /** Override text colour for all typography within the panel
+   *  (default: theme.palette.text.primary) */
+  textColor?: string
   /** Bottom border (e.g. RULE constant). Omit for no border. */
   borderBottom?: string
   /** Content rendered below the text block — card grids, etc. */
   children?: React.ReactNode
+  /** When provided, replaces the default whileInView entrance with a
+   *  scroll-driven style (e.g. pass a MotionValue<number> for opacity). */
+  contentMotionStyle?: object
+  /** Extra sx merged into the description/CTA wrapper box — useful for
+   *  adjusting alignment when the headline is an external overlay. */
+  descriptionSx?: SxProps<Theme>
+  /** Top margin above the children slot (default: 5 = 40px).
+   *  Accepts any MUI spacing value or CSS string. */
+  childrenMt?: string | number
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -58,11 +74,26 @@ export function CoeqwalPanel({
   cta,
   layout = "single",
   background,
+  textColor,
+  minHeight,
   borderBottom,
   children,
+  contentMotionStyle,
+  descriptionSx,
+  childrenMt = 5,
 }: CoeqwalPanelProps) {
   const theme = useTheme()
   const bg = background ?? theme.palette.common.white
+  const fg = textColor ?? theme.palette.text.primary
+
+  const motionProps = contentMotionStyle
+    ? { style: contentMotionStyle }
+    : {
+        initial: { opacity: 0, y: 20 },
+        whileInView: { opacity: 1, y: 0 },
+        viewport: { once: true, amount: 0.3 },
+        transition: { duration: 0.5, ease: "easeOut" },
+      }
 
   return (
     <Box
@@ -73,13 +104,16 @@ export function CoeqwalPanel({
         borderBottom: borderBottom ?? "none",
         px: theme.space.panel.padding,
         py: theme.space.panel.padding,
+        ...(minHeight !== undefined && {
+          minHeight,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }),
       }}
     >
       <MotionBox
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        {...motionProps}
         sx={
           layout === "split"
             ? {
@@ -92,35 +126,40 @@ export function CoeqwalPanel({
         }
       >
         {/* Headline block — full width in both layouts */}
-        <Box sx={layout === "split" ? { gridColumn: { md: "1 / -1" } } : undefined}>
-          {eyebrow && (
-            <Typography
-              variant="overline"
-              component="p"
-              sx={{ color: theme.palette.text.primary, opacity: 0.6, mb: 2 }}
+        {(eyebrow || headline) && (
+          <Box sx={layout === "split" ? { gridColumn: { md: "1 / -1" } } : undefined}>
+            {eyebrow && (
+              <Typography
+                variant="overline"
+                component="p"
+              sx={{ color: fg, opacity: 0.6, mb: 2 }}
             >
               {eyebrow}
             </Typography>
           )}
-          <Typography variant="h5" component="h2" sx={{ color: theme.palette.text.primary }}>
-            {headline}
-          </Typography>
-        </Box>
+          {headline && (
+            <Typography variant="h5" component="h2" sx={{ color: fg }}>
+                {headline}
+              </Typography>
+            )}
+          </Box>
+        )}
 
         {/* Description + CTA block */}
         {(description || cta) && (
           <Box
-            sx={
-              layout === "split"
-                ? { gridColumn: { xs: "1", md: "2" } }
-                : { mt: 3 }
-            }
+            sx={{
+              ...(layout === "split"
+                ? { gridColumn: { xs: "1", md: "2" }, color: fg }
+                : { mt: 3, color: fg }),
+              ...(descriptionSx as object),
+            }}
           >
             {description && (
               <Typography
                 variant="body1"
                 component="div"
-                sx={{ color: theme.palette.text.primary, mb: cta ? 4 : 0 }}
+                sx={{ color: fg, mb: cta ? 4 : 0 }}
               >
                 {description}
               </Typography>
@@ -131,7 +170,7 @@ export function CoeqwalPanel({
       </MotionBox>
 
       {/* Below-the-fold slot — card grids, etc. */}
-      {children && <Box sx={{ mt: 5 }}>{children}</Box>}
+      {children && <Box sx={{ mt: childrenMt }}>{children}</Box>}
     </Box>
   )
 }

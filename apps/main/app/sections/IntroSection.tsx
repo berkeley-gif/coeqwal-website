@@ -1,15 +1,23 @@
 "use client"
 
+import { useRef, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useTranslation } from "@repo/i18n"
 import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
 import { CoeqwalPanel } from "@repo/ui"
 import { motion } from "@repo/motion"
+import {
+  useScrollProgress,
+  useMotionValue,
+  useMeetingProgress,
+} from "@repo/scrollytelling"
 
 import { WATER_THEMES } from "@repo/data/coeqwal"
 import { THEME_LABEL_CONFIG } from "../content/themes"
 import VideoHero from "../components/VideoHero"
 import type { VideoSource } from "../components/VideoHero"
+import MorphingHeadline from "../components/MorphingHeadline"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* SUB-COMPONENTS                                                               */
@@ -37,7 +45,7 @@ function AboutCtaLink({
           "&:hover .about-arrow": { transform: "translateX(4px)" },
         }}
       >
-        <Typography variant="subtitle1">{children}</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{children}</Typography>
         <ArrowForwardIcon
           className="about-arrow"
           sx={{
@@ -45,6 +53,11 @@ function AboutCtaLink({
             flexShrink: 0,
             transition: "transform 0.15s ease",
             color: "inherit",
+            "& path": {
+              stroke: "currentColor",
+              strokeWidth: "0.5px",
+              paintOrder: "stroke fill",
+            },
           }}
         />
       </Box>
@@ -173,24 +186,119 @@ function ThemeCard({
 
 const IntroSection = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const morphHeadlineRef = useRef<HTMLDivElement>(null)
+  const videoHeroRef = useRef<HTMLDivElement>(null)
+  const aboutPanelRef = useRef<HTMLDivElement>(null)
+  const waterThemesPanelRef = useRef<HTMLDivElement>(null)
+
+  // Scroll progress across the entire IntroSection
+  const scrollProgress = useScrollProgress(containerRef)
+
+  // Geometry-driven crossfade timing:
+  // each value is the scroll progress when the panel border reaches the headline's top.
+  // useMeetingProgress accounts for the headline being position:fixed (scroll rate = 0).
+  const crossfadeAt1 = useMeetingProgress(
+    containerRef, videoHeroRef, morphHeadlineRef,
+    { edgeA: "bottom", edgeB: "top" },
+  )
+  const crossfadeAt2 = useMeetingProgress(
+    containerRef, aboutPanelRef, morphHeadlineRef,
+    { edgeA: "bottom", edgeB: "top" },
+  )
+
+  // Build panel boundaries for MorphingHeadline from the meeting points
+  const panelBoundaries = useMemo(() => ({
+    panels: [
+      { start: 0,           mid: crossfadeAt1 / 2,                         end: crossfadeAt1 },
+      { start: crossfadeAt1, mid: (crossfadeAt1 + crossfadeAt2) / 2,        end: crossfadeAt2 },
+      { start: crossfadeAt2, mid: (crossfadeAt2 + 1) / 2,                   end: 1 },
+    ],
+    ready: crossfadeAt1 > 0 && crossfadeAt2 > 0,
+  }), [crossfadeAt1, crossfadeAt2])
+
+  // Content opacity driven by the same meeting points.
+  // Seeded from the current scroll position so HMR / remount doesn't
+  // leave content invisible when the user is already scrolled past a panel.
+  const aboutOpacity = useMotionValue(
+    scrollProgress.get() >= crossfadeAt1 ? 1 : 0
+  )
+  const waterThemesOpacity = useMotionValue(
+    scrollProgress.get() >= crossfadeAt2 ? 1 : 0
+  )
+
+  useEffect(() => {
+    // Re-sync immediately in case crossfadeAt values were measured after mount
+    const p = scrollProgress.get()
+    aboutOpacity.set(p >= crossfadeAt1 ? 1 : 0)
+    waterThemesOpacity.set(p >= crossfadeAt2 ? 1 : 0)
+
+    return scrollProgress.on("change", (p) => {
+      aboutOpacity.set(p >= crossfadeAt1 ? 1 : 0)
+      waterThemesOpacity.set(p >= crossfadeAt2 ? 1 : 0)
+    })
+  }, [scrollProgress, crossfadeAt1, crossfadeAt2, aboutOpacity, waterThemesOpacity])
+
   const waterThemePalette = theme.palette.waterThemes as Record<
     string,
     { background: string; text: string }
   >
 
+  const headlines = [
+    {
+      line1: t("homePanel.titleLine1"),
+      line2: t("homePanel.titleLine2"),
+      textShadow: true as const,
+    },
+    {
+      line1: "What is",
+      line2: "COEQWAL?",
+      textShadow: false,
+      textColor: "text.secondary",
+    },
+    {
+      line1: "What water issues",
+      line2: "matter to you?",
+      textShadow: false,
+      textColor: "text.primary",
+    },
+  ]
+
   return (
-    <Box sx={{ pointerEvents: "auto" }}>
-      {/* Video Hero */}
-      <VideoHero
-        sources={VIDEO_SRCS}
-        fallbackImage="/images/home_hero_fallback.png"
+    <Box ref={containerRef} sx={{ pointerEvents: "auto" }}>
+      {/* Morphing headline — fixed overlay, upper-left.
+          panelBoundaries is geometry-driven via useMeetingProgress.
+          crossfadeAt synchronises the 0→1 fade precisely at the panel border.
+          No exitRange: the final headline ("What water issues") stays fixed —
+          it is the terminal state of the morph sequence. */}
+      <MorphingHeadline
+        ref={morphHeadlineRef}
+        headlines={headlines}
+        containerRef={containerRef}
+        weights={[1, 1, 2]}
+        panelBoundaries={panelBoundaries}
+        crossfadeAt={crossfadeAt1 > 0 ? crossfadeAt1 : undefined}
+        dockRef={waterThemesPanelRef}
       />
 
-      {/* About COEQWAL */}
+      {/* Video Hero */}
+      <div ref={videoHeroRef}>
+        <VideoHero
+          sources={VIDEO_SRCS}
+          fallbackImage="/images/home_hero_fallback.png"
+          hideHeadline
+        />
+      </div>
+
+      {/* About COEQWAL — headline handled by MorphingHeadline overlay */}
+      <div ref={aboutPanelRef}>
       <CoeqwalPanel
         id="about-coeqwal"
-        background={theme.palette.brand.panelLight}
-        headline={<>What is COEQWAL?</>}
+        background={theme.palette.brand.water}
+        textColor={theme.palette.common.white}
+        minHeight="80vh"
+        contentMotionStyle={{ opacity: aboutOpacity }}
         description={
           <>
             COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
@@ -203,12 +311,19 @@ const IntroSection = () => {
         cta={<AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>}
         layout="split"
       />
+      </div>
 
-      {/* Water themes */}
+      {/* Water themes — headline handled by MorphingHeadline overlay */}
+      <div ref={waterThemesPanelRef}>
       <CoeqwalPanel
-        headline="What water issues matter to you?"
         description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
         borderBottom={RULE}
+        layout="split"
+        contentMotionStyle={{ opacity: waterThemesOpacity }}
+        descriptionSx={{
+          mt: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
+        }}
+        childrenMt={`calc(${theme.space.panel.padding} + 40px)`}
       >
         {/* Four main theme cards */}
         <Box
@@ -261,6 +376,7 @@ const IntroSection = () => {
           })}
         </Box>
       </CoeqwalPanel>
+      </div>
 
       {/* On this site, you can */}
       <Box
@@ -273,32 +389,44 @@ const IntroSection = () => {
           pb: `calc(${theme.space.panel.padding} + 80px)`,
         }}
       >
-        {/* Text content */}
+        {/* Headline — matches MorphingHeadline typography */}
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          sx={{ maxWidth: "640px" }}
         >
           <Typography
-            variant="body1"
-            sx={{ color: theme.palette.text.primary, mb: 7, lineHeight: 1.75 }}
-          >
-            Water is limited and every choice has trade-offs. COEQWAL allows
-            you to explore different water scenarios and understand how
-            decisions shape potential futures for communities, farms, rivers,
-            and the Delta.
-          </Typography>
-
-          <Typography
-            variant="h5"
+            variant="h2Main"
             component="h2"
-            sx={{ color: theme.palette.text.primary, mb: 5 }}
+            sx={{ display: "block", color: "text.primary" }}
           >
-            On this site, you can
+            On this site
           </Typography>
+          <Typography
+            variant="h1"
+            component="h1"
+            sx={{ display: "block", color: "text.primary" }}
+          >
+            you can
+          </Typography>
+        </MotionBox>
 
+        {/* Two-column content */}
+        <MotionBox
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
+          sx={{
+            mt: 6,
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            columnGap: { md: 6 },
+            rowGap: { xs: 5 },
+          }}
+        >
+          {/* Left column — list */}
           <Box
             component="ul"
             sx={{
@@ -324,19 +452,12 @@ const IntroSection = () => {
                 rest: "your insights about California\u2019s water future",
               },
             ].map(({ verb, rest }) => (
-              <Box
-                component="li"
-                key={verb}
-                sx={{ display: "flex", gap: 1.5 }}
-              >
+              <Box component="li" key={verb}>
                 <Typography
                   variant="body1"
                   sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
                 >
-                  <Box
-                    component="span"
-                    sx={{ color: theme.palette.text.primary, fontWeight: 600 }}
-                  >
+                  <Box component="span" sx={{ fontWeight: 600 }}>
                     {verb}
                   </Box>{" "}
                   {rest}
@@ -344,6 +465,17 @@ const IntroSection = () => {
               </Box>
             ))}
           </Box>
+
+          {/* Right column — intro paragraph */}
+          <Typography
+            variant="body1"
+            sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
+          >
+            Water is limited and every choice has trade-offs. COEQWAL allows
+            you to explore different water scenarios and understand how
+            decisions shape potential futures for communities, farms, rivers,
+            and the Delta.
+          </Typography>
         </MotionBox>
       </Box>
     </Box>
