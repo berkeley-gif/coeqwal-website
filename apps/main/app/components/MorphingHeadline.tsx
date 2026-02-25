@@ -157,24 +157,32 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
 
     // Exit opacity: easeOut mirrors Panel3Text's paragraph fade — fast at first,
     // slowing near zero, so both elements visually exit at the same perceived rate.
+    // Fallback uses [0, 1] → [1, 1] (non-degenerate constant 1) instead of [1, 1]
+    // which would cause 0/0 = NaN in Framer Motion's interpolator.
     const exitOpacity = useTransform(
       scrollYProgress,
-      exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
+      exitRange ? [exitRange[0], exitRange[1]] : [0, 1],
       exitRange ? [1, 0] : [1, 1],
       { ease: (t: number) => 1 - (1 - t) * (1 - t) },
     )
 
     // Appear opacity: hidden before appearRange[0], fades in by appearRange[1].
+    // Fallback uses [0, 1] → [1, 1] (non-degenerate constant 1) instead of [0, 0].
     const appearOpacity = useTransform(
       scrollYProgress,
-      appearRange ? [0, appearRange[0], appearRange[1]] : [0, 0],
+      appearRange ? [0, appearRange[0], appearRange[1]] : [0, 1],
       appearRange ? [0, 0, 1] : [1, 1],
     )
 
     // Combined: invisible before appearRange, fades out during exitRange.
+    // Guard explicitly against NaN — ?? only catches null/undefined, not NaN.
     const combinedOpacity = useTransform(
       [appearOpacity, exitOpacity] as MotionValue<number>[],
-      ([a, e]: number[]) => (a ?? 1) * (e ?? 1),
+      ([a, e]: number[]) => {
+        const sa = Number.isFinite(a) ? (a as number) : 1
+        const se = Number.isFinite(e) ? (e as number) : 1
+        return sa * se
+      },
     )
 
     /**
