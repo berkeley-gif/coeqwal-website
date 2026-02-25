@@ -66,6 +66,8 @@ export type {
   TwoColumnInterstitialProps,
   InterstitialLink,
 } from "./panels/TwoColumnInterstitial"
+export { CoeqwalPanel } from "./panels/CoeqwalPanel"
+export type { CoeqwalPanelProps } from "./panels/CoeqwalPanel"
 
 // Custom icons
 export {

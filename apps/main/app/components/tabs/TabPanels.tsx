@@ -141,6 +141,7 @@ export default function TabPanels() {
           style={{
             position: "relative",
             borderRadius: 0,
+            marginTop: -1,
             pointerEvents: isMapTab ? "none" : "auto",
           }}
         >

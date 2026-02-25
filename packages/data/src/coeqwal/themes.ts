@@ -52,15 +52,15 @@ export const WATER_THEMES: Theme[] = [
   },
   {
     id: "climate",
-    label: "Climate risk,\nreliability & resilience",
+    label: "Drought, climate risk,\nand resilience",
     shortLabel: "Climate resilience",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
   },
   {
     id: "governance",
-    label: "Water governance\n& decision-making",
-    shortLabel: "Governance",
+    label: "Operations\nand impacts",
+    shortLabel: "Operations & impacts",
     description:
       "How evidence, trade-offs, and equity considerations inform water-management decisions.",
   },
