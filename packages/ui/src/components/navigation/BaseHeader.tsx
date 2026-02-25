@@ -7,7 +7,7 @@
  * and scroll-based shrinking animation.
  *
  * Header dimensions (from theme.layout):
- * - Expanded: 70px (theme.layout.headerHeight)
+ * - Expanded: 56px (theme.layout.headerHeight)
  * - Collapsed: 40px (theme.layout.collapsedHeaderHeight)
  * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
  * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
@@ -163,6 +163,7 @@ export interface BaseHeaderProps {
 
   /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
   waterThemesOptions?: NavDropdownOption[]
+
 }
 
 const translations: TranslationsMap = {
@@ -227,7 +228,7 @@ export function BaseHeader({
   const resolvedZIndex = zIndex ?? theme.zIndex.appBar
 
   // Header dimensions from theme
-  const expandedHeight = theme.layout.headerHeight // 70px
+  const expandedHeight = theme.layout.headerHeight // 56px
   const collapsedHeight = theme.layout.collapsedHeaderHeight // 40px
   const shrinkStart = theme.layout.headerShrinkStart // 120px
   const shrinkEnd = theme.layout.headerShrinkEnd // 240px
@@ -302,10 +303,6 @@ export function BaseHeader({
     textColorScrolled && isScrolled
       ? `${theme.strokeWidth.rule}px solid ${textColorScrolled}CC`
       : baseBorderBottom
-  const resolvedTextShadow =
-    textColorScrolled && isScrolled ? "none" : theme.textShadow.nav
-  const resolvedTextShadowHover =
-    textColorScrolled && isScrolled ? "none" : theme.textShadow.navHover
   const resolvedLogoVariant =
     textColorScrolled && isScrolled ? ("color" as const) : logoVariant
 
@@ -337,15 +334,34 @@ export function BaseHeader({
   const buttonStyle = {
     ...theme.typography.nav,
     color: resolvedTextColor,
-    padding: "4px 20px",
-    // WCAG 2.5.5: Adequate click target size
+    fontSize: "1.05rem",
+    fontWeight: 500,
+    textTransform: "none" as const,
+    padding: "0 10px",
+    height: "100%",
     minHeight: 28,
-    transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
-    textShadow: resolvedTextShadow,
+    borderRadius: 0,
+    textShadow: "none",
+    position: "relative" as const,
+    // Active-page underline
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: "4px",
+      backgroundColor: "transparent",
+      transition: `background-color ${theme.transition.fast} ease-out`,
+    },
     "&:hover": {
       backgroundColor: "transparent",
       color: resolvedTextColor,
-      textShadow: resolvedTextShadowHover,
+      opacity: 0.7,
+      textShadow: "none",
+    },
+    "&:hover::after": {
+      backgroundColor: theme.palette.brand.water,
     },
     "&:active": {
       backgroundColor: "transparent",
@@ -533,7 +549,8 @@ export function BaseHeader({
                   {t.buttons.about}
                 </Button>
 
-                {/* 4. Language switcher (OPTIONAL) */}
+
+                {/* Language switcher (OPTIONAL) */}
                 {showLanguageSwitcher && <LanguageSwitcher />}
               </Stack>
             </Box>
@@ -858,9 +875,7 @@ export function BaseHeader({
                 }}
                 sx={{
                   px: 2,
-                  // WCAG 2.5.5: Minimum 44px touch target
                   minHeight: MIN_TOUCH_TARGET,
-                  // WCAG 2.4.7: Focus visible indicator
                   "&:focus-visible": {
                     outline: `2px solid ${theme.palette.text.primary}`,
                     outlineOffset: -2,
@@ -873,6 +888,7 @@ export function BaseHeader({
                 />
               </ListItemButton>
             </ListItem>
+
           </List>
         </Box>
       </Drawer>

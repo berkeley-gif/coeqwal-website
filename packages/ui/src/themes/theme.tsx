@@ -512,7 +512,7 @@ export const themeValues = {
    * - controls: Form element sizes (MUI checkbox/radio overrides)
    */
   layout: {
-    headerHeight: 70, // px - expanded header height
+    headerHeight: 56, // px - expanded header height
     collapsedHeaderHeight: 40, // px - collapsed header height
     headerShrinkStart: 120, // px - scroll position where header starts shrinking
     headerShrinkEnd: 240, // px - scroll position where header is fully shrunk
@@ -868,10 +868,10 @@ const theme = createTheme({
     },
     h5: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: typeScale.h5,
-      fontWeight: 600,
-      letterSpacing: "0.02em",
-      lineHeight: 1.35,
+      // Responsive section heading: mobile (1.7rem/27.2px) → desktop (2.1rem/33.6px)
+      fontSize: "clamp(1.7rem, 1.1rem + 1.5vw, 2.1rem)",
+      fontWeight: 700,
+      lineHeight: 1.2,
     },
     h6: {
       fontFamily: themeValues.fontFamily.display,
@@ -883,7 +883,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - primary body text (comfortable reading size)
       fontWeight: 400,
-      lineHeight: 1.6,
+      lineHeight: 1.75,
     },
     body1Medium: {
       fontFamily: themeValues.fontFamily.text,

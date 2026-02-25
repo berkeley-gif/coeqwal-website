@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
 import { motion, useTransform, useScroll } from "@repo/motion"
 import {
   ScrollSection,
@@ -22,6 +22,65 @@ import CategoryCircles from "../components/CategoryCircles"
 import type { VideoSource } from "../components/VideoHero"
 import { mapActions, useMapStore } from "../features/map/store"
 import { useTabs } from "../context/Tabs"
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* ABOUT SECTION SUB-COMPONENTS                                                 */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+const MotionBox = motion.create(Box)
+
+function SectionLabel({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <Typography
+      variant="overline"
+      component="p"
+      sx={{ color: "rgba(85,85,85,0.55)", mb: 2 }}
+    >
+      {children}
+    </Typography>
+  )
+}
+
+function AboutCtaLink({
+  children,
+  href,
+}: {
+  children: React.ReactNode
+  href: string
+}) {
+  const theme = useTheme()
+  return (
+    <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 1,
+          py: 1,
+          cursor: "pointer",
+          "&:hover .about-arrow": { transform: "translateX(4px)" },
+        }}
+      >
+        <Typography variant="subtitle1">{children}</Typography>
+        <ArrowForwardIcon
+          className="about-arrow"
+          sx={{
+            fontSize: "1.1rem",
+            flexShrink: 0,
+            transition: "transform 0.15s ease",
+            color: "inherit",
+          }}
+        />
+      </Box>
+    </Link>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
 
 const VIDEO_SRCS: VideoSource[] = [
   {
@@ -560,6 +619,11 @@ const IntroSection = () => {
         weights={[1, 1.6, 3, 2]}
         panelBoundaries={boundaries}
         crossfadeAt={crossfadeAt > 0 ? crossfadeAt : undefined}
+        appearRange={
+          boundaries.ready && boundaries.panels[1]
+            ? [boundaries.panels[1].start * 0.85, boundaries.panels[1].start]
+            : undefined
+        }
         exitRange={
           boundaries.ready && boundaries.panels[3]
             ? [
@@ -632,9 +696,49 @@ const IntroSection = () => {
           <VideoHero
             sources={VIDEO_SRCS}
             fallbackImage="/images/home_hero_fallback.png"
-            hideHeadline
           />
         </div>
+
+        {/* About COEQWAL */}
+        <Box
+          component="section"
+          aria-label="About COEQWAL"
+          sx={{
+            backgroundColor: theme.palette.common.white,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            px: theme.space.panel.padding,
+            py: { xs: 7, md: 9 },
+          }}
+        >
+          <Box sx={{ maxWidth: "680px" }}>
+            <SectionLabel>About COEQWAL</SectionLabel>
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              <Typography
+                variant="h5"
+                component="h2"
+                sx={{ color: "#333", mb: 3 }}
+              >
+                A publicly-funded tool<br />for California&apos;s water future
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: "#555", mb: 4, maxWidth: "560px" }}
+              >
+                COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
+                &mdash; works with communities to model alternative water
+                management scenarios for California&apos;s Central Valley. Our
+                goal is to help communities, policymakers, and researchers
+                understand how water decisions affect people and ecosystems.
+              </Typography>
+              <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
+            </MotionBox>
+          </Box>
+        </Box>
 
         {/* Frontmatter Panel 1 - scroll choreography with @repo/scrollytelling */}
         <div ref={panel2Ref}>

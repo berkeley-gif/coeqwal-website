@@ -16,7 +16,7 @@ import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
 import { useReducedMotion } from "@repo/motion"
-import { ScrollToButton, DisplayBlock } from "@repo/ui"
+import { ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 
 export type VideoSource = { src: string; type: string }
@@ -238,75 +238,56 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content layout - grid stacking + flex for diagonal positioning */}
+      {/* Content */}
       <Box
         sx={{
           gridArea: "stack",
-          color: "text.secondary",
-          // Grid on large desktop (3fr 2fr matches header), flex column below 1200px
-          display: { xs: "flex", lg: "grid" },
-          gridTemplateColumns: { lg: "3fr 2fr" },
-          flexDirection: { xs: "column" },
-          justifyContent: { xs: "space-between" },
-          paddingTop: theme.space.panel.topOffset,
-          paddingBottom: "clamp(146px, calc(26vh - 18px), 270px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          alignItems: { xs: "center", lg: "flex-start" },
+          paddingTop: `calc(${theme.layout.headerHeight}px + 24px)`,
+          paddingBottom: "clamp(80px, 12vh, 140px)",
           paddingLeft: theme.space.panel.padding,
           paddingRight: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent,
           pointerEvents: "none",
         }}
       >
-        {/* Headline - column 1, top-aligned */}
+        {/* Headline + paragraph stacked vertically */}
         <Box
           sx={{
-            gridColumn: { lg: 1 },
-            alignSelf: { xs: "stretch", lg: "start" },
-            display: hideHeadline
-              ? { xs: "flex", lg: "none" }
-              : { xs: "flex", lg: "block" },
-            justifyContent: { xs: "center", lg: "flex-start" },
+            display: hideHeadline ? "none" : "flex",
+            flexDirection: "column",
+            gap: "20px", // standard spacing ... ? 
+            maxWidth: { xs: "100%", sm: "760px" },
+            textAlign: { xs: "center", lg: "left" },
             pointerEvents: "auto",
           }}
         >
-          <Box
-            sx={{
-              color: "text.secondary",
-              textShadow: theme.textShadow.display,
-              fontSize: theme.typography.h1.fontSize,
-              maxWidth: "16ch",
-              textAlign: { xs: "center", lg: "left" },
-            }}
-          >
-            <Typography
-              variant="h2Main"
-              component="h2"
-              sx={{ display: "block" }}
-            >
+          {/* Headline */}
+          <Box sx={{ color: "text.secondary", textShadow: theme.textShadow.display }}>
+            <Typography variant="h2Main" component="h2" sx={{ display: "block" }}>
               {t("homePanel.titleLine1")}
             </Typography>
             <Typography variant="h1" component="h1" sx={{ display: "block" }}>
               {t("homePanel.titleLine2")}
             </Typography>
           </Box>
-        </Box>
 
-        {/* Body - centered below 1200px, column 2 bottom-aligned above */}
-        <Box
-          sx={{
-            gridColumn: { lg: 2 },
-            alignSelf: { xs: "center", lg: "end" },
-            pointerEvents: "auto",
-          }}
-        >
-          <DisplayBlock
+          {/* Paragraph — directly below headline, no background box */}
+          <Typography
+            variant="displayBody"
+            component="p"
             sx={{
-              background: "rgba(0, 0, 0, 0.2)",
-              padding: "20px 24px",
-              ml: "-24px",
+              color: "text.secondary",
+              textShadow: theme.textShadow.nav,
+              lineHeight: 1.6,
+              maxWidth: "520px",
             }}
           >
             {t("homePanel.content")}
-          </DisplayBlock>
+          </Typography>
         </Box>
       </Box>
 

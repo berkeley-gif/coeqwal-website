@@ -27,7 +27,7 @@ import React, {
   useCallback,
   forwardRef,
 } from "react"
-import { useScroll, motion, useReducedMotion, useTransform } from "@repo/motion"
+import { useScroll, motion, useReducedMotion, useTransform, MotionValue } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 /**
@@ -95,6 +95,8 @@ export interface MorphingHeadlineProps {
    * Falls back to weight/boundary-based timing when not provided.
    */
   crossfadeAt?: number
+  /** Scroll progress range [start, end] where headline fades in (hidden before start) */
+  appearRange?: [number, number]
   /** Overall scroll progress range [start, end] where headline translates upward and exits */
   exitRange?: [number, number]
   /** Scroll progress range [start, end] where headline shifts up to make room (e.g., for circles) */
@@ -111,6 +113,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       weights,
       panelBoundaries,
       crossfadeAt,
+      appearRange,
       exitRange,
       shiftRange,
       shiftAmount = 100,
@@ -152,6 +155,19 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       exitRange ? [exitRange[0], exitRange[1]] : [1, 1],
       exitRange ? [1, 0] : [1, 1],
       { ease: (t: number) => 1 - (1 - t) * (1 - t) },
+    )
+
+    // Appear opacity: hidden before appearRange[0], fades in by appearRange[1].
+    const appearOpacity = useTransform(
+      scrollYProgress,
+      appearRange ? [0, appearRange[0], appearRange[1]] : [0, 0],
+      appearRange ? [0, 0, 1] : [1, 1],
+    )
+
+    // Combined: invisible before appearRange, fades out during exitRange.
+    const combinedOpacity = useTransform(
+      [appearOpacity, exitOpacity] as MotionValue<number>[],
+      ([a, e]: number[]) => (a ?? 1) * (e ?? 1),
     )
 
     /**
@@ -456,7 +472,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
         ref={ref}
         style={{
           y: exitY,
-          opacity: exitOpacity,
+          opacity: combinedOpacity,
           position: "fixed",
           top: theme.space.panel.topOffset,
           left: theme.space.panel.padding,
