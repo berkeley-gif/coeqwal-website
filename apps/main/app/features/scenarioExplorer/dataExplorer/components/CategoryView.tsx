@@ -766,6 +766,7 @@ function useMultiScenarioSpillData(scenarios: string[]) {
  * SpillFrequencySection - Monthly spill frequency & magnitude charts
  * Rendered inside a CSS Grid (ChartGridProvider), spans all columns
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SpillFrequencySection({
   scenarios,
   scenarioNames,

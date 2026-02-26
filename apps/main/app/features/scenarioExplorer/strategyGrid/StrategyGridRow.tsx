@@ -81,7 +81,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   isChosen,
   compact,
   layoutMode,
-  showDefinitions,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcome,

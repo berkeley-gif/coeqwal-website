@@ -33,3 +33,9 @@ docs/
 # Archived code (unused files preserved outside version control)
 **/archive/
 **/_archive/
+
+# Developer scratch files (local-only, never committed)
+**/*.peak.tsx
+**/*.peak.ts
+**/*.peak.jsx
+**/*.peak.js

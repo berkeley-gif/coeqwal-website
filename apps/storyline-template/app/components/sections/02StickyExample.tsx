@@ -48,8 +48,8 @@ function Content() {
         <Typography variant="body1">
           The outer element is a tall scroll runway. The inner element is{" "}
           <code>position: sticky</code>. Children call{" "}
-          <code>useScrollProgress()</code> to read a 0→1 value — watch the
-          debug overlay (top right) as you scroll.
+          <code>useScrollProgress()</code> to read a 0→1 value — watch the debug
+          overlay (top right) as you scroll.
         </Typography>
       </motion.div>
 

@@ -159,7 +159,8 @@ export default function ListView({
       ? new Set(getScenariosWithIcon(selectedIconId))
       : new Set<string>()
     const applyIconGrouping = (scenarioList: typeof baseScenarios) => {
-      if (!selectedIconId) return { list: scenarioList, iconIds: new Set<string>() }
+      if (!selectedIconId)
+        return { list: scenarioList, iconIds: new Set<string>() }
       const iconMatches = scenarioList.filter((s) =>
         iconScenarioIdSet.has(s.scenarioId),
       )
@@ -266,7 +267,9 @@ export default function ListView({
   const handleIconClick = (iconId: string) => {
     if (selectedIconId === iconId) {
       const iconScenarioIds = new Set(getScenariosWithIcon(iconId))
-      selectScenarios(selectedScenarios.filter((id) => !iconScenarioIds.has(id)))
+      selectScenarios(
+        selectedScenarios.filter((id) => !iconScenarioIds.has(id)),
+      )
       setSelectedIconId(null)
     } else {
       const iconScenarioIds = getScenariosWithIcon(iconId)

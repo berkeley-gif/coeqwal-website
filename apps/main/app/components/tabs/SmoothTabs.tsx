@@ -10,7 +10,6 @@ import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 
-
 /** Renders the active tab's description panel content */
 function TabDescription({
   tab,
