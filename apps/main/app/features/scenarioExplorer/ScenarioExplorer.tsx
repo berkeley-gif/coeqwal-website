@@ -312,10 +312,13 @@ export default function ScenarioExplorerNew() {
                     isExpanded={isListExpanded}
                     onCloseExpand={() => setIsListExpanded(false)}
                     modalToolbar={
-                      <SearchBar
-                        placeholder="Search scenarios by name or description"
-                        rightContent={<ViewModeControls />}
-                      />
+                      <>
+                        <SelectionBanner />
+                        <SearchBar
+                          placeholder="Search scenarios by name or description"
+                          rightContent={<ViewModeControls />}
+                        />
+                      </>
                     }
                   />
                 )}

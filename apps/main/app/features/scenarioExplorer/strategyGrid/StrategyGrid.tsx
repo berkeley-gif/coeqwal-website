@@ -43,6 +43,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   themeMatchingScenarioIds,
   showThemeDivider = false,
   showAllThemeDividers = false,
+  iconMatchingScenarioIds,
+  showIconDivider = false,
   onToggleScenario,
   onTierClick,
   selectedScenarios,
@@ -57,6 +59,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   sortBy,
   sortDirection = "asc",
   onSortChange,
+  onThemeBadgeClick,
+  onIconClick,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -198,6 +202,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             themeMatchingScenarioIds={themeMatchingScenarioIds}
             showThemeDivider={showThemeDivider}
             showAllThemeDividers={showAllThemeDividers}
+            iconMatchingScenarioIds={iconMatchingScenarioIds}
+            showIconDivider={showIconDivider}
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
             showDefinitions={showDefinitions}
@@ -217,6 +223,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onTooltipToggle={handleToggleWithAnchor}
             onTooltipToggleWithContext={handleToggleWithContext}
             onSortChange={onSortChange}
+            onThemeBadgeClick={onThemeBadgeClick}
+            onIconClick={onIconClick}
           />
         )}
       </Box>

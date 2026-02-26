@@ -696,6 +696,16 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
 // ============================================================================
 
 /**
+ * Get all scenario IDs that include a given operation icon.
+ * Used to select all scenarios sharing an operation when an icon is clicked.
+ */
+export function getScenariosWithIcon(iconId: string): string[] {
+  return Object.entries(SCENARIO_ICONS)
+    .filter(([, icons]) => icons.includes(iconId))
+    .map(([scenarioId]) => scenarioId)
+}
+
+/**
  * Get the resolved icon definitions for a given scenario.
  * Returns an empty array if the scenario has no icon mapping.
  */

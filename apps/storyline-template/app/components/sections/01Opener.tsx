@@ -31,20 +31,21 @@ export default function Opener() {
     >
       <ScrollReveal animation="fadeUp">
         <Typography variant="h1" gutterBottom>
-          Your Storyline Title
+          @repo/scrollytelling
         </Typography>
       </ScrollReveal>
 
       <ScrollReveal animation="fadeUp" delay={0.2}>
         <Typography variant="body1" sx={{ maxWidth: 600 }}>
-          A brief description of what this storyline covers. Replace this with
-          your opening narrative.
+          A shared package for scroll-driven storytelling. Wraps Framer Motion
+          with reusable components and hooks — so every storyline app starts
+          from the same tested foundation.
         </Typography>
       </ScrollReveal>
 
       <ScrollReveal animation="stagger" staggerDelay={0.15} delay={0.4}>
         <Typography variant="body2" sx={{ mt: 4, opacity: 0.7 }}>
-          Scroll down to explore
+          Scroll down to see it in action
         </Typography>
       </ScrollReveal>
     </Box>

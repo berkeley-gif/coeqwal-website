@@ -54,28 +54,30 @@ function Content() {
     >
       <motion.div style={{ opacity: titleOpacity }}>
         <Typography variant="h3" gutterBottom>
-          Side Effect Section
+          useScrollSideEffect
         </Typography>
       </motion.div>
 
       <motion.div style={{ opacity: firstOpacity }}>
         <Typography variant="body1">
-          As you scroll through this section, map markers appear and disappear
-          at specific progress thresholds.
+          Not everything is a CSS animation. Map layer changes, store updates,
+          and D3 transitions need to be triggered imperatively — at a specific
+          scroll threshold, not interpolated continuously.
         </Typography>
       </motion.div>
 
       <motion.div style={{ opacity: secondOpacity }}>
         <Typography variant="body1">
-          This demonstrates the useScrollSideEffect hook for triggering
-          imperative actions from scroll progress. The markers appear at 30%
-          progress and disappear when you scroll back.
+          <code>useScrollSideEffect</code> fires <code>enter</code> when
+          progress crosses 0.3 forward, and <code>exit</code> when it crosses
+          back. Watch the map: two markers appear at that threshold, and
+          disappear when you scroll back up.
         </Typography>
       </motion.div>
 
       <motion.div style={{ opacity: exitOpacity }}>
         <Typography variant="body2" sx={{ opacity: 0.7 }}>
-          Scroll past this section to continue.
+          One hook. Bidirectional. No manual scroll direction tracking.
         </Typography>
       </motion.div>
     </Box>

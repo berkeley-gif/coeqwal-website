@@ -3,6 +3,9 @@
 /**
  * ScrollSection - Scroll-tracking container
  *
+ * Sets position: relative and minHeight for the scroll runway
+ * Runs useScroll with layoutEffect: false (SSR-safe)
+ * Publishes scrollYProgress to React context for all children
  * Provides a scroll progress context (0-1) to all children.
  * Children can access progress via useScrollProgress() or the
  * ScrollElement/StickyElement components.
