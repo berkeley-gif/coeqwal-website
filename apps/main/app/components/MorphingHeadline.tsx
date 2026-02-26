@@ -27,7 +27,14 @@ import React, {
   useCallback,
   forwardRef,
 } from "react"
-import { useScroll, motion, useReducedMotion, useTransform, useMotionValueEvent, MotionValue } from "@repo/motion"
+import {
+  useScroll,
+  motion,
+  useReducedMotion,
+  useTransform,
+  useMotionValueEvent,
+  MotionValue,
+} from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useDockOffset } from "@repo/scrollytelling"
 
@@ -370,7 +377,6 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       recalculate(scrollYProgress.get())
       return scrollYProgress.on("change", recalculate)
     }, [scrollYProgress, headlines, calculateOpacity])
-
 
     // Track which headline to show (for reduced motion and screen readers)
     const [activeIndex, setActiveIndex] = useState(0)

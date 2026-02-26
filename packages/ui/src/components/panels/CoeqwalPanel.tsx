@@ -17,7 +17,13 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme, type SxProps, type Theme } from "@mui/material"
+import {
+  Box,
+  Typography,
+  useTheme,
+  type SxProps,
+  type Theme,
+} from "@mui/material"
 import { motion } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
@@ -145,18 +151,22 @@ export function CoeqwalPanel({
 
         {/* Headline block — full width in both layouts */}
         {(eyebrow || headline) && (
-          <Box sx={layout === "split" ? { gridColumn: { md: "1 / -1" } } : undefined}>
+          <Box
+            sx={
+              layout === "split" ? { gridColumn: { md: "1 / -1" } } : undefined
+            }
+          >
             {eyebrow && (
               <Typography
                 variant="overline"
                 component="p"
-              sx={{ color: fg, opacity: 0.6, mb: 2 }}
-            >
-              {eyebrow}
-            </Typography>
-          )}
-          {headline && (
-            <Typography variant="h5" component="h2" sx={{ color: fg }}>
+                sx={{ color: fg, opacity: 0.6, mb: 2 }}
+              >
+                {eyebrow}
+              </Typography>
+            )}
+            {headline && (
+              <Typography variant="h5" component="h2" sx={{ color: fg }}>
                 {headline}
               </Typography>
             )}

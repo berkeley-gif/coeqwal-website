@@ -356,15 +356,15 @@ const palette = {
   },
 
   tabPanels: {
-    learn: "#64A4D6",  // brand.water
+    learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
-    share: "#193D6B",  // brand.panelDark
+    share: "#193D6B", // brand.panelDark
   },
 
   // Ink colors for light-background content panels (About, Water themes, etc.)
   ink: {
     heading: "#333333", // Strong dark — section headings (h5)
-    body: "#555555",    // Mid dark — body paragraphs
+    body: "#555555", // Mid dark — body paragraphs
     subtle: "rgba(85, 85, 85, 0.55)", // Muted — overline eyebrows
   },
 

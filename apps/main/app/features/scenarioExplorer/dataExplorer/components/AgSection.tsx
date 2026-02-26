@@ -63,7 +63,7 @@ type AgEntityLevel = "aggregates" | "demand-units"
 /** Region filter for demand units */
 type AgRegionFilter = "all" | "SAC" | "SJR" | "TULARE"
 
-const AG_ENTITY_LEVEL_OPTIONS = [
+const _AG_ENTITY_LEVEL_OPTIONS = [
   { value: "aggregates" as const, label: "Project totals" },
   { value: "demand-units" as const, label: "Demand units" },
 ]
@@ -73,7 +73,7 @@ const AG_SCALE_OPTIONS = [
   { value: "relative" as const, label: "Relative scale" },
 ]
 
-const AG_REGION_OPTIONS = [
+const _AG_REGION_OPTIONS = [
   { value: "all" as const, label: "All regions" },
   { value: "SAC" as const, label: "Sacramento" },
   { value: "SJR" as const, label: "San Joaquin" },
@@ -656,9 +656,9 @@ function MonthlyAgSection({
   isModal = false,
 }: MonthlyAgSectionProps) {
   const theme = useTheme()
-  const [entityLevel, setEntityLevel] = useState<AgEntityLevel>("aggregates")
+  const [entityLevel, _setEntityLevel] = useState<AgEntityLevel>("aggregates")
   const [scaleMode, setScaleMode] = useState<VolumeScaleMode>("absolute")
-  const [regionFilter, setRegionFilter] = useState<AgRegionFilter>("all")
+  const [regionFilter, _setRegionFilter] = useState<AgRegionFilter>("all")
 
   const { entities, matrixData, cellStats, error, loadingScenarios } =
     useMultiScenarioAgData(scenarios, entityLevel)

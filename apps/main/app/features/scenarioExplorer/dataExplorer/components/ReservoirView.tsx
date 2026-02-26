@@ -22,7 +22,7 @@ import {
 import { PercentileBandChart } from "@repo/viz"
 import type {
   MonthlyPercentiles,
-  ReservoirPercentiles,
+  ReservoirPercentiles as _ReservoirPercentiles,
 } from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
 import { useScenarioExplorerStore } from "../../store"

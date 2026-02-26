@@ -103,7 +103,6 @@ export function useScenarioSummary(
   // Fetch tier data using existing hook (leverages SWR caching)
   const {
     chartData,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     outcomeNames: _outcomeInfos, // Available for future use
     isLoading: tiersLoading,
     error: tiersError,

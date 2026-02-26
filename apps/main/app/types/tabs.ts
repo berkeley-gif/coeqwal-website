@@ -21,7 +21,7 @@ const getLabel = (k: TabKey) => {
   return k
 }
 
-export const TABS = TAB_ORDER.map((k, i) => ({
+export const TABS = TAB_ORDER.map((k) => ({
   key: k,
   label: getLabel(k),
   panelColor: themeValues.palette.tabPanels[k],

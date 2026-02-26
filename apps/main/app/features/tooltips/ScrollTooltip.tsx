@@ -121,7 +121,10 @@ export default function ScrollTooltip({
       const newTop = Math.round(top + offsetY)
       const newLeft = Math.round(left)
       setTooltipPosition((prev) => {
-        if (Math.round(prev.top) === newTop && Math.round(prev.left) === newLeft)
+        if (
+          Math.round(prev.top) === newTop &&
+          Math.round(prev.left) === newLeft
+        )
           return prev
         return { top: newTop, left: newLeft }
       })

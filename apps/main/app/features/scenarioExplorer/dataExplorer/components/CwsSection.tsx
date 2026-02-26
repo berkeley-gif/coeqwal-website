@@ -1412,7 +1412,7 @@ function MonthlyCwsSection({
     return data
   }, [matrixData, displayMode])
 
-  const bandColors =
+  const _bandColors =
     displayMode === "delivery" ? DELIVERY_BAND_COLORS : SHORTAGE_BAND_COLORS
 
   // Build grouped demand unit options for CompactSelect, excluding already-added ones
@@ -1686,8 +1686,9 @@ function MonthlyCwsSection({
             variant="compactCaption"
             sx={{ color: "#92400e" }} // amber-800
           >
-            Monthly shortage data is only available in the "Project totals"
-            view. Switch to Project totals to see shortage charts.
+            Monthly shortage data is only available in the &ldquo;Project
+            totals&rdquo; view. Switch to Project totals to see shortage
+            charts.
           </Typography>
         </Box>
       )}

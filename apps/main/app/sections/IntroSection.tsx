@@ -26,7 +26,6 @@ import MorphingHeadline from "../components/MorphingHeadline"
 
 const MotionBox = motion.create(Box)
 
-
 function AboutCtaLink({
   children,
   href,
@@ -46,7 +45,9 @@ function AboutCtaLink({
           "&:hover .about-arrow": { transform: "translateX(4px)" },
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{children}</Typography>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+          {children}
+        </Typography>
         <ArrowForwardIcon
           className="about-arrow"
           sx={{
@@ -201,32 +202,43 @@ const IntroSection = () => {
   // each value is the scroll progress when the panel border reaches the headline's top.
   // useMeetingProgress accounts for the headline being position:fixed (scroll rate = 0).
   const crossfadeAt1 = useMeetingProgress(
-    containerRef, videoHeroRef, morphHeadlineRef,
+    containerRef,
+    videoHeroRef,
+    morphHeadlineRef,
     { edgeA: "bottom", edgeB: "top" },
   )
   const crossfadeAt2 = useMeetingProgress(
-    containerRef, aboutPanelRef, morphHeadlineRef,
+    containerRef,
+    aboutPanelRef,
+    morphHeadlineRef,
     { edgeA: "bottom", edgeB: "top" },
   )
 
   // Build panel boundaries for MorphingHeadline from the meeting points
-  const panelBoundaries = useMemo(() => ({
-    panels: [
-      { start: 0,           mid: crossfadeAt1 / 2,                         end: crossfadeAt1 },
-      { start: crossfadeAt1, mid: (crossfadeAt1 + crossfadeAt2) / 2,        end: crossfadeAt2 },
-      { start: crossfadeAt2, mid: (crossfadeAt2 + 1) / 2,                   end: 1 },
-    ],
-    ready: crossfadeAt1 > 0 && crossfadeAt2 > 0,
-  }), [crossfadeAt1, crossfadeAt2])
+  const panelBoundaries = useMemo(
+    () => ({
+      panels: [
+        { start: 0, mid: crossfadeAt1 / 2, end: crossfadeAt1 },
+        {
+          start: crossfadeAt1,
+          mid: (crossfadeAt1 + crossfadeAt2) / 2,
+          end: crossfadeAt2,
+        },
+        { start: crossfadeAt2, mid: (crossfadeAt2 + 1) / 2, end: 1 },
+      ],
+      ready: crossfadeAt1 > 0 && crossfadeAt2 > 0,
+    }),
+    [crossfadeAt1, crossfadeAt2],
+  )
 
   // Content opacity driven by the same meeting points.
   // Seeded from the current scroll position so HMR / remount doesn't
   // leave content invisible when the user is already scrolled past a panel.
   const aboutOpacity = useMotionValue(
-    scrollProgress.get() >= crossfadeAt1 ? 1 : 0
+    scrollProgress.get() >= crossfadeAt1 ? 1 : 0,
   )
   const waterThemesOpacity = useMotionValue(
-    scrollProgress.get() >= crossfadeAt2 ? 1 : 0
+    scrollProgress.get() >= crossfadeAt2 ? 1 : 0,
   )
 
   useEffect(() => {
@@ -239,7 +251,13 @@ const IntroSection = () => {
       aboutOpacity.set(p >= crossfadeAt1 ? 1 : 0)
       waterThemesOpacity.set(p >= crossfadeAt2 ? 1 : 0)
     })
-  }, [scrollProgress, crossfadeAt1, crossfadeAt2, aboutOpacity, waterThemesOpacity])
+  }, [
+    scrollProgress,
+    crossfadeAt1,
+    crossfadeAt2,
+    aboutOpacity,
+    waterThemesOpacity,
+  ])
 
   const waterThemePalette = theme.palette.waterThemes as Record<
     string,
@@ -295,133 +313,155 @@ const IntroSection = () => {
       {/* About COEQWAL — headline handled by MorphingHeadline overlay on lg+;
           responsiveHeadline fills in on smaller screens */}
       <div ref={aboutPanelRef}>
-      <CoeqwalPanel
-        id="about-coeqwal"
-        background={theme.palette.brand.water}
-        textColor={theme.palette.common.white}
-        minHeight="80vh"
-        contentMotionStyle={{ opacity: aboutOpacity }}
-        responsiveHeadline={
-          <>
-            <Typography
-              variant="h2Main"
-              component="span"
-              sx={{ display: "block", color: theme.palette.common.white }}
-            >
-              What is
-            </Typography>
-            <Typography
-              variant="h1"
-              component="span"
-              sx={{ display: "block", color: theme.palette.common.white }}
-            >
-              COEQWAL?
-            </Typography>
-          </>
-        }
-        description={
-          <>
-            COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
-            &mdash; works with communities to model alternative water
-            management scenarios for California&rsquo;s Central Valley. Our
-            goal is to help communities, policymakers, and researchers
-            understand how water decisions affect people and ecosystems.
-          </>
-        }
-        cta={<AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>}
-        layout="split"
-      />
+        <CoeqwalPanel
+          id="about-coeqwal"
+          background={theme.palette.brand.water}
+          textColor={theme.palette.common.white}
+          minHeight="80vh"
+          contentMotionStyle={{ opacity: aboutOpacity }}
+          responsiveHeadline={
+            <>
+              <Typography
+                variant="h2Main"
+                component="span"
+                sx={{ display: "block", color: theme.palette.common.white }}
+              >
+                What is
+              </Typography>
+              <Typography
+                variant="h1"
+                component="span"
+                sx={{ display: "block", color: theme.palette.common.white }}
+              >
+                COEQWAL?
+              </Typography>
+            </>
+          }
+          description={
+            <>
+              COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
+              &mdash; works with communities to model alternative water
+              management scenarios for California&rsquo;s Central Valley. Our
+              goal is to help communities, policymakers, and researchers
+              understand how water decisions affect people and ecosystems.
+            </>
+          }
+          cta={
+            <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
+          }
+          layout="split"
+        />
       </div>
 
       {/* Water themes — headline handled by MorphingHeadline overlay on lg+;
           responsiveHeadline fills in on smaller screens */}
       <div ref={waterThemesPanelRef}>
-      <CoeqwalPanel
-        description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
-        borderBottom={RULE}
-        layout="split"
-        contentMotionStyle={{ opacity: waterThemesOpacity }}
-        responsiveHeadline={
-          <>
-            <Typography
-              variant="h2Main"
-              component="span"
-              sx={{ display: "block", color: "text.primary" }}
+        <CoeqwalPanel
+          description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
+          borderBottom={RULE}
+          layout="split"
+          contentMotionStyle={{ opacity: waterThemesOpacity }}
+          responsiveHeadline={
+            <>
+              <Typography
+                variant="h2Main"
+                component="span"
+                sx={{ display: "block", color: "text.primary" }}
+              >
+                What water issues
+              </Typography>
+              <Typography
+                variant="h1"
+                component="span"
+                sx={{ display: "block", color: "text.primary" }}
+              >
+                matter to you?
+              </Typography>
+            </>
+          }
+          descriptionSx={{
+            mt: {
+              xs: 0,
+              lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
+            },
+          }}
+          childrenMt={{
+            xs: 5,
+            lg: `calc(${theme.space.panel.padding} + 40px)`,
+          }}
+        >
+          {/* Four main theme cards — reveal the grid as it enters the viewport */}
+          <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  lg: "repeat(4, 1fr)",
+                },
+                gap: { xs: 2, md: 2 },
+              }}
             >
-              What water issues
-            </Typography>
-            <Typography
-              variant="h1"
-              component="span"
-              sx={{ display: "block", color: "text.primary" }}
-            >
-              matter to you?
-            </Typography>
-          </>
-        }
-        descriptionSx={{
-          mt: {
-            xs: 0,
-            lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
-          },
-        }}
-        childrenMt={{ xs: 5, lg: `calc(${theme.space.panel.padding} + 40px)` }}
-      >
-        {/* Four main theme cards — reveal the grid as it enters the viewport */}
-        <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
-              gap: { xs: 2, md: 2 },
-            }}
-          >
-            {WATER_THEME_IDS.map((id, i) => {
-              const colors = waterThemePalette[id] ?? { background: "#eee", text: "#333" }
-              const description = WATER_THEMES.find((t) => t.id === id)?.description ?? ""
-              return (
-                <ThemeCard
-                  key={id}
-                  label={THEME_LABEL_CONFIG[id]?.label ?? id}
-                  description={description}
-                  photo={WATER_THEME_PHOTOS[id]}
-                  bg={colors.background}
-                  textColor={colors.text}
-                  index={i}
-                />
-              )
-            })}
-          </Box>
-        </ScrollReveal>
+              {WATER_THEME_IDS.map((id, i) => {
+                const colors = waterThemePalette[id] ?? {
+                  background: "#eee",
+                  text: "#333",
+                }
+                const description =
+                  WATER_THEMES.find((t) => t.id === id)?.description ?? ""
+                return (
+                  <ThemeCard
+                    key={id}
+                    label={THEME_LABEL_CONFIG[id]?.label ?? id}
+                    description={description}
+                    photo={WATER_THEME_PHOTOS[id]}
+                    bg={colors.background}
+                    textColor={colors.text}
+                    index={i}
+                  />
+                )
+              })}
+            </Box>
+          </ScrollReveal>
 
-        {/* ── Provisional themes (pending decision) ── */}
-        <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5} delay={0.1}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
-              gap: { xs: 2, md: 2 },
-              mt: 2,
-            }}
+          {/* ── Provisional themes (pending decision) ── */}
+          <ScrollReveal
+            animation="fadeUp"
+            amount={0.1}
+            duration={0.5}
+            delay={0.1}
           >
-            {(["climate", "governance"] as const).map((id, i) => {
-              const themeEntry = WATER_THEMES.find((t) => t.id === id)
-              const description = themeEntry?.description ?? ""
-              const label = (themeEntry?.label ?? id).replace(/\n/g, " ")
-              return (
-                <ThemeCard
-                  key={id}
-                  label={label}
-                  description={description}
-                  bg="#efefef"
-                  textColor="#444"
-                  index={i}
-                />
-              )
-            })}
-          </Box>
-        </ScrollReveal>
-      </CoeqwalPanel>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  lg: "repeat(4, 1fr)",
+                },
+                gap: { xs: 2, md: 2 },
+                mt: 2,
+              }}
+            >
+              {(["climate", "governance"] as const).map((id, i) => {
+                const themeEntry = WATER_THEMES.find((t) => t.id === id)
+                const description = themeEntry?.description ?? ""
+                const label = (themeEntry?.label ?? id).replace(/\n/g, " ")
+                return (
+                  <ThemeCard
+                    key={id}
+                    label={label}
+                    description={description}
+                    bg="#efefef"
+                    textColor="#444"
+                    index={i}
+                  />
+                )
+              })}
+            </Box>
+          </ScrollReveal>
+        </CoeqwalPanel>
       </div>
 
       {/* On this site, you can */}
@@ -517,10 +557,10 @@ const IntroSection = () => {
             variant="body1"
             sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
           >
-            Water is limited and every choice has trade-offs. COEQWAL allows
-            you to explore different water scenarios and understand how
-            decisions shape potential futures for communities, farms, rivers,
-            and the Delta.
+            Water is limited and every choice has trade-offs. COEQWAL allows you
+            to explore different water scenarios and understand how decisions
+            shape potential futures for communities, farms, rivers, and the
+            Delta.
           </Typography>
         </MotionBox>
       </Box>

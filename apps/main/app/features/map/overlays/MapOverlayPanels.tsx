@@ -67,7 +67,7 @@ const KEY_OUTCOMES_PHASE_THRESHOLDS = {
   hold: [0.68, 1.0] as ProgressRange,
 }
 const SUMMARY_PHASE_THRESHOLDS = {
-  enter: [0.70, 0.74] as ProgressRange,
+  enter: [0.7, 0.74] as ProgressRange,
   hold: [0.74, 1.0] as ProgressRange,
 }
 
@@ -636,541 +636,543 @@ export default function MapOverlayPanels() {
               sectionRef: scenarioIntroRef as any,
             }}
           >
-          <Box
-            ref={scenarioIntroRef}
-            id="scenario-intro-wrapper"
-            sx={{
-              minHeight: "550vh",
-              position: "relative",
-              pointerEvents: "none",
-            }}
-          >
-            {/* Sticky intro text at top */}
-            <StickyElement
-              top={paragraphTop}
-              zIndex={2}
-              style={{ pointerEvents: "none" }}
-            >
-              <Box
-                sx={{
-                  minHeight: "auto",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  pointerEvents: "none",
-                  // Animate padding from default (paddingXl/padding) to narrow as user scrolls in
-                  "& > #scenario-intro-call": {
-                    transition:
-                      "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
-                    ...(scenarioIntroPaddingReduced && {
-                      paddingLeft: "16px",
-                      paddingRight: "16px",
-                    }),
-                  },
-                }}
-              >
-                <CallResponsePanel
-                  id="scenario-intro-call"
-                  side="left"
-                  variant="call"
-                  isVisible={isFirstPanelVisible}
-                  minHeight="auto"
-                  alignItems="flex-start"
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "14px",
-                    }}
-                  >
-                    <PanelEyebrow>
-                      Library of Water Allocation Scenarios
-                    </PanelEyebrow>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        maxWidth: {
-                          xs: "100%",
-                          sm: "340px",
-                          md: "380px",
-                          lg: "420px",
-                          xl: "460px",
-                        },
-                      }}
-                    >
-                      Each water management scenario on this site can be read as
-                      having five explanatory elements. Let&apos;s look at the
-                      water management scenario for the way we currently manage
-                      Central Valley water.
-                    </Typography>
-                  </Box>
-                </CallResponsePanel>
-              </Box>
-            </StickyElement>
-
-            {/* All right-side panels in a single sticky container */}
             <Box
+              ref={scenarioIntroRef}
+              id="scenario-intro-wrapper"
               sx={{
-                position: "sticky",
-                top: "15vh",
-                zIndex: 1,
-                mt: "80vh",
+                minHeight: "550vh",
+                position: "relative",
                 pointerEvents: "none",
               }}
             >
+              {/* Sticky intro text at top */}
+              <StickyElement
+                top={paragraphTop}
+                zIndex={2}
+                style={{ pointerEvents: "none" }}
+              >
+                <Box
+                  sx={{
+                    minHeight: "auto",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    pointerEvents: "none",
+                    // Animate padding from default (paddingXl/padding) to narrow as user scrolls in
+                    "& > #scenario-intro-call": {
+                      transition:
+                        "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                      ...(scenarioIntroPaddingReduced && {
+                        paddingLeft: "16px",
+                        paddingRight: "16px",
+                      }),
+                    },
+                  }}
+                >
+                  <CallResponsePanel
+                    id="scenario-intro-call"
+                    side="left"
+                    variant="call"
+                    isVisible={isFirstPanelVisible}
+                    minHeight="auto"
+                    alignItems="flex-start"
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "14px",
+                      }}
+                    >
+                      <PanelEyebrow>
+                        Library of Water Allocation Scenarios
+                      </PanelEyebrow>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "340px",
+                            md: "380px",
+                            lg: "420px",
+                            xl: "460px",
+                          },
+                        }}
+                      >
+                        Each water management scenario on this site can be read
+                        as having five explanatory elements. Let&apos;s look at
+                        the water management scenario for the way we currently
+                        manage Central Valley water.
+                      </Typography>
+                    </Box>
+                  </CallResponsePanel>
+                </Box>
+              </StickyElement>
+
+              {/* All right-side panels in a single sticky container */}
               <Box
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: theme.space.gap.sm,
-                  justifyContent: "flex-end",
-                  width: "100%",
-                  pr: scenarioIntroPaddingReduced
-                    ? "16px"
-                    : theme.space.panel.padding,
-                  transition:
-                    "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                  position: "sticky",
+                  top: "15vh",
+                  zIndex: 1,
+                  mt: "80vh",
                   pointerEvents: "none",
                 }}
               >
-                {/* Strategy info panel */}
-                <ScrollElement
-                  enter={[0.08, 0.14]}
-                  hold={[0.14, 1.0]}
-                  style={{ pointerEvents: "none" }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: theme.space.gap.sm,
+                    justifyContent: "flex-end",
+                    width: "100%",
+                    pr: scenarioIntroPaddingReduced
+                      ? "16px"
+                      : theme.space.panel.padding,
+                    transition:
+                      "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                    pointerEvents: "none",
+                  }}
                 >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
+                  {/* Strategy info panel */}
+                  <ScrollElement
+                    enter={[0.08, 0.14]}
+                    hold={[0.14, 1.0]}
+                    style={{ pointerEvents: "none" }}
                   >
                     <Box
                       sx={{
+                        minHeight: "auto",
                         display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
+                        alignItems: "flex-start",
                         pointerEvents: "none",
                       }}
                     >
                       <Box
-                        ref={strategyInfoContainerRef}
                         sx={{
-                          position: "relative",
+                          display: "flex",
+                          justifyContent: "flex-end",
                           width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: strategyPE,
+                          pointerEvents: "none",
                         }}
                       >
-                        <div ref={strategyInfoRef}>
-                          <Box
-                            sx={{
-                              pointerEvents: strategyPE,
-                            }}
-                          >
-                            <StrategyInfoPanel
-                              scenarioId="s0020"
-                              onTitleClick={() =>
-                                setStrategyTooltipClosed(false)
-                              }
-                            />
-                          </Box>
-                        </div>
+                        <Box
+                          ref={strategyInfoContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: strategyPE,
+                          }}
+                        >
+                          <div ref={strategyInfoRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: strategyPE,
+                              }}
+                            >
+                              <StrategyInfoPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setStrategyTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
 
-                        <ScrollTooltip
-                          targetRef={strategyInfoRef}
-                          containerRef={strategyInfoContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                1. Strategy
-                              </Typography>
-                              This describes the water management strategy being
-                              modeled.
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{
-                                  mt: theme.space.component.sm,
-                                  mb: theme.space.component.xs,
-                                }}
-                              >
-                                Try this:
-                              </Typography>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                }}
-                              >
-                                Click{" "}
+                          <ScrollTooltip
+                            targetRef={strategyInfoRef}
+                            containerRef={strategyInfoContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  1. Strategy
+                                </Typography>
+                                This describes the water management strategy
+                                being modeled.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
                                 <Box
                                   component="span"
                                   sx={{
-                                    color: theme.palette.blue.medium,
+                                    display: "block",
                                   }}
                                 >
-                                  more
-                                </Box>{" "}
-                                to see the whole strategy description.
-                                Underlined words appear in a glossary when
-                                clicked.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={30}
-                          opacity={strategyInfoTooltipOpacity}
-                          isClosed={strategyTooltipClosed}
-                          onClose={() => setStrategyTooltipClosed(true)}
-                        />
+                                  Click{" "}
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      color: theme.palette.blue.medium,
+                                    }}
+                                  >
+                                    more
+                                  </Box>{" "}
+                                  to see the whole strategy description.
+                                  Underlined words appear in a glossary when
+                                  clicked.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={30}
+                            opacity={strategyInfoTooltipOpacity}
+                            isClosed={strategyTooltipClosed}
+                            onClose={() => setStrategyTooltipClosed(true)}
+                          />
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </ScrollElement>
+                  </ScrollElement>
 
-                {/* Key operations panel */}
-                <ScrollElement
-                  enter={[0.22, 0.28]}
-                  hold={[0.28, 1.0]}
-                  style={{ pointerEvents: "none" }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
+                  {/* Key operations panel */}
+                  <ScrollElement
+                    enter={[0.22, 0.28]}
+                    hold={[0.28, 1.0]}
+                    style={{ pointerEvents: "none" }}
                   >
                     <Box
                       sx={{
+                        minHeight: "auto",
                         display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
+                        alignItems: "flex-start",
                         pointerEvents: "none",
                       }}
                     >
                       <Box
-                        ref={keyOperationsContainerRef}
                         sx={{
-                          position: "relative",
+                          display: "flex",
+                          justifyContent: "flex-end",
                           width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOperationsPE,
+                          pointerEvents: "none",
                         }}
                       >
-                        <div ref={keyOperationsRef}>
-                          <Box
-                            sx={{
-                              pointerEvents: keyOperationsPE,
-                            }}
-                          >
-                            <KeyOperationsPanel
-                              scenarioId="s0020"
-                              onTitleClick={() => setKeyOpsTooltipClosed(false)}
-                            />
-                          </Box>
-                        </div>
+                        <Box
+                          ref={keyOperationsContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: keyOperationsPE,
+                          }}
+                        >
+                          <div ref={keyOperationsRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: keyOperationsPE,
+                              }}
+                            >
+                              <KeyOperationsPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setKeyOpsTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
 
-                        <ScrollTooltip
-                          targetRef={keyOperationsRef}
-                          containerRef={keyOperationsContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                2. Key operations
-                              </Typography>
-                              These icons represent the key operational
-                              decisions that define this water management
-                              strategy.
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{
-                                  mt: theme.space.component.sm,
-                                  mb: theme.space.component.xs,
-                                }}
-                              >
-                                Try this:
-                              </Typography>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                }}
-                              >
-                                Hover over the icons to see what key operations
-                                they represent.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={keyOperationsTooltipOpacity}
-                          isClosed={keyOpsTooltipClosed}
-                          onClose={() => setKeyOpsTooltipClosed(true)}
-                        />
-
-                        <ScrollTooltip
-                          targetRef={keyOperationsRef}
-                          containerRef={keyOperationsContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                3. View by climate
-                              </Typography>
-                              Choosing one of these climate icons will show you
-                              how the scenario allocates water under different
-                              potential future climates.
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{
-                                  mt: theme.space.component.sm,
-                                  mb: theme.space.component.xs,
-                                }}
-                              >
-                                Try this:
-                              </Typography>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                }}
-                              >
-                                Hover over the icons to see the hydroclimates
-                                they represent.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={viewByClimateTooltipOpacity}
-                          isClosed={viewByClimateTooltipClosed}
-                          onClose={() => setViewByClimateTooltipClosed(true)}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                </ScrollElement>
-
-                {/* Key outcomes panel */}
-                <ScrollElement
-                  enter={[0.64, 0.68]}
-                  hold={[0.68, 1.0]}
-                  style={{ pointerEvents: "none" }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        ref={keyOutcomesContainerRef}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOutcomesPE,
-                        }}
-                      >
-                        <div ref={keyOutcomesRef}>
-                          <Box
-                            sx={{
-                              pointerEvents: keyOutcomesPE,
-                            }}
-                          >
-                            <KeyOutcomesPanel
-                              scenarioId="s0020"
-                              onTitleClick={() =>
-                                setKeyOutcomesTooltipClosed(false)
-                              }
-                            />
-                          </Box>
-                        </div>
-
-                        <ScrollTooltip
-                          targetRef={keyOutcomesRef}
-                          containerRef={keyOutcomesContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                4. Key outcomes
-                              </Typography>
-                              While the strategy description, key operations,
-                              and climate describe the key inputs into the
-                              CalSim model, the outcomes listed here summarize
-                              the outputs. They show how well the allocations
-                              meet needs in each category.
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                  mt: theme.space.component.sm,
-                                }}
-                              >
-                                Outcomes represented by a bar chart show the
-                                percentage of locations in each tier. For other
-                                outcomes, there is only one location of
-                                interest.
-                              </Box>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{
-                                  mt: theme.space.component.sm,
-                                  mb: theme.space.component.xs,
-                                }}
-                              >
-                                Try this:
-                              </Typography>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                }}
-                              >
-                                Click on the{" "}
-                                <InfoIcon
+                          <ScrollTooltip
+                            targetRef={keyOperationsRef}
+                            containerRef={keyOperationsContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  2. Key operations
+                                </Typography>
+                                These icons represent the key operational
+                                decisions that define this water management
+                                strategy.
+                                <Typography
+                                  variant="tooltipHeader"
                                   sx={{
-                                    fontSize: "1rem",
-                                    verticalAlign: "text-top",
-                                    mx: 0.25,
-                                    color: "blue.bright",
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
                                   }}
-                                />{" "}
-                                icons to learn more about each outcome. Click on
-                                the chart to see the outcome on a map.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={keyOutcomesTooltipOpacity}
-                          isClosed={keyOutcomesTooltipClosed}
-                          onClose={() => setKeyOutcomesTooltipClosed(true)}
-                        />
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Hover over the icons to see what key
+                                  operations they represent.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={keyOperationsTooltipOpacity}
+                            isClosed={keyOpsTooltipClosed}
+                            onClose={() => setKeyOpsTooltipClosed(true)}
+                          />
+
+                          <ScrollTooltip
+                            targetRef={keyOperationsRef}
+                            containerRef={keyOperationsContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  3. View by climate
+                                </Typography>
+                                Choosing one of these climate icons will show
+                                you how the scenario allocates water under
+                                different potential future climates.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Hover over the icons to see the hydroclimates
+                                  they represent.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={viewByClimateTooltipOpacity}
+                            isClosed={viewByClimateTooltipClosed}
+                            onClose={() => setViewByClimateTooltipClosed(true)}
+                          />
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </ScrollElement>
+                  </ScrollElement>
 
-                {/* Summary panel */}
-                <ScrollElement
-                  enter={[0.70, 0.74]}
-                  hold={[0.74, 1.0]}
-                  style={{ pointerEvents: "none" }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
+                  {/* Key outcomes panel */}
+                  <ScrollElement
+                    enter={[0.64, 0.68]}
+                    hold={[0.68, 1.0]}
+                    style={{ pointerEvents: "none" }}
                   >
                     <Box
                       sx={{
+                        minHeight: "auto",
                         display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
+                        alignItems: "flex-start",
                         pointerEvents: "none",
                       }}
                     >
                       <Box
-                        ref={summaryContainerRef}
                         sx={{
-                          position: "relative",
+                          display: "flex",
+                          justifyContent: "flex-end",
                           width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: summaryPE,
+                          pointerEvents: "none",
                         }}
                       >
-                        <div ref={summaryRef}>
-                          <Box
-                            sx={{
-                              pointerEvents: summaryPE,
-                            }}
-                          >
-                            <SummaryPanel scenarioId="s0020" />
-                          </Box>
-                        </div>
+                        <Box
+                          ref={keyOutcomesContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: keyOutcomesPE,
+                          }}
+                        >
+                          <div ref={keyOutcomesRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: keyOutcomesPE,
+                              }}
+                            >
+                              <KeyOutcomesPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setKeyOutcomesTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
 
-                        <ScrollTooltip
-                          targetRef={summaryRef}
-                          containerRef={summaryContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                5. Scenario summary
-                              </Typography>
-                              This panel synthesizes everything above into a
-                              summary of the scenario&apos;s priorities and
-                              trade-offs.
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{
-                                  mt: theme.space.component.sm,
-                                  mb: theme.space.component.xs,
-                                }}
-                              >
-                                Try this:
-                              </Typography>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                }}
-                              >
-                                Click any outcome chart above to get a summary
-                                specific to that outcome, including the
-                                locations most affected. Click a location chip
-                                to zoom the map directly to that location.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={summaryTooltipOpacity}
-                          isClosed={summaryTooltipClosed}
-                          onClose={() => setSummaryTooltipClosed(true)}
-                        />
+                          <ScrollTooltip
+                            targetRef={keyOutcomesRef}
+                            containerRef={keyOutcomesContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  4. Key outcomes
+                                </Typography>
+                                While the strategy description, key operations,
+                                and climate describe the key inputs into the
+                                CalSim model, the outcomes listed here summarize
+                                the outputs. They show how well the allocations
+                                meet needs in each category.
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                    mt: theme.space.component.sm,
+                                  }}
+                                >
+                                  Outcomes represented by a bar chart show the
+                                  percentage of locations in each tier. For
+                                  other outcomes, there is only one location of
+                                  interest.
+                                </Box>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Click on the{" "}
+                                  <InfoIcon
+                                    sx={{
+                                      fontSize: "1rem",
+                                      verticalAlign: "text-top",
+                                      mx: 0.25,
+                                      color: "blue.bright",
+                                    }}
+                                  />{" "}
+                                  icons to learn more about each outcome. Click
+                                  on the chart to see the outcome on a map.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={keyOutcomesTooltipOpacity}
+                            isClosed={keyOutcomesTooltipClosed}
+                            onClose={() => setKeyOutcomesTooltipClosed(true)}
+                          />
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </ScrollElement>
-              </Box>
-            </Box>
+                  </ScrollElement>
 
-            {/* Scroll spacer — gives the summary tooltip (progress 0.74–0.84)
+                  {/* Summary panel */}
+                  <ScrollElement
+                    enter={[0.7, 0.74]}
+                    hold={[0.74, 1.0]}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <Box
+                      sx={{
+                        minHeight: "auto",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          width: "100%",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Box
+                          ref={summaryContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: summaryPE,
+                          }}
+                        >
+                          <div ref={summaryRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: summaryPE,
+                              }}
+                            >
+                              <SummaryPanel scenarioId="s0020" />
+                            </Box>
+                          </div>
+
+                          <ScrollTooltip
+                            targetRef={summaryRef}
+                            containerRef={summaryContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  5. Scenario summary
+                                </Typography>
+                                This panel synthesizes everything above into a
+                                summary of the scenario&apos;s priorities and
+                                trade-offs.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Click any outcome chart above to get a summary
+                                  specific to that outcome, including the
+                                  locations most affected. Click a location chip
+                                  to zoom the map directly to that location.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={summaryTooltipOpacity}
+                            isClosed={summaryTooltipClosed}
+                            onClose={() => setSummaryTooltipClosed(true)}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  </ScrollElement>
+                </Box>
+              </Box>
+
+              {/* Scroll spacer — gives the summary tooltip (progress 0.74–0.84)
                 enough runway before the wrapper exits the viewport. */}
-            <Box sx={{ height: "100vh" }} aria-hidden="true" />
-          </Box>
+              <Box sx={{ height: "100vh" }} aria-hidden="true" />
+            </Box>
           </ScrollSectionContext.Provider>
         </Step>
 
