@@ -18,6 +18,7 @@ export type {
   MeetingProgressOptions,
   ElementEdge,
 } from "./hooks/useMeetingProgress"
+export { useDockOffset } from "./hooks/useDockOffset"
 
 // Types
 export type {

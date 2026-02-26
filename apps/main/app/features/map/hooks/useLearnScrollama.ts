@@ -71,8 +71,6 @@ export function useLearnScrollama() {
         const riverProgress = Math.min(1, progress * 1.5)
         mapActions.setRiversProgress(riverProgress)
       }
-      // Note: Visualization clearing for scenario-intro is handled in MapOverlayPanels
-      // based on strategy panel visibility, not scroll progress
     },
     [],
   )
