@@ -17,9 +17,33 @@
  */
 
 import { useState, useEffect, useRef } from "react"
+import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { useTheme } from "@repo/ui/mui"
+import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
+import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
+import { useTransform, motion, useMotionValueEvent } from "@repo/motion"
+import { useMap } from "@repo/map"
+import { centralValleyBasins } from "@repo/data"
+import { useScrollProgress } from "@repo/scrollytelling"
+import ScrollTooltip from "../../tooltips/ScrollTooltip"
+import { GeocodingPanel } from "./GeocodingPanel"
+import { DeltaInfoPanel } from "./DeltaInfoPanel"
+import { PanelEyebrow } from "./PanelEyebrow"
+import {
+  StrategyInfoPanel,
+  KeyOperationsPanel,
+  KeyOutcomesPanel,
+  SummaryPanel,
+} from "./scenarioPanels"
+import {
+  mapActions,
+  useGeocodingResetCounter,
+  useIsOutcomeVisualizationActive,
+} from "../store"
+import type { SectionId } from "../config/sectionLayers"
+import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 // Animation thresholds for scenario-intro section panels (progress 0-1)
 // Panels fade in BEFORE their tooltips so the user sees the panel first,
@@ -48,35 +72,6 @@ const ACCENT_TEXT_SX = {
 
 const RIGHT_PANEL_MAX_WIDTH = "540px"
 
-import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
-import { CallResponsePanel } from "@repo/ui"
-import ScrollTooltip from "../../tooltips/ScrollTooltip"
-import { GeocodingPanel } from "./GeocodingPanel"
-import { DeltaInfoPanel } from "./DeltaInfoPanel"
-import { PanelEyebrow } from "./PanelEyebrow"
-import {
-  StrategyInfoPanel,
-  KeyOperationsPanel,
-  KeyOutcomesPanel,
-} from "./scenarioPanels"
-import { SummaryPanel } from "./scenarioPanels"
-import { Box, Typography, InfoIcon } from "@repo/ui/mui"
-import { useMap } from "@repo/map"
-import { centralValleyBasins } from "@repo/data"
-import {
-  mapActions,
-  useGeocodingResetCounter,
-  useIsOutcomeVisualizationActive,
-} from "../store"
-import type { SectionId } from "../config/sectionLayers"
-import {
-  useTransform,
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-} from "@repo/motion"
-import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -94,37 +89,9 @@ export default function MapOverlayPanels() {
   const isFirstPanelVisible = true
 
   // Ref for multi-step sticky animation (Framer Motion)
+  // Attached directly to the JSX element via ref={scenarioIntroRef} below,
+  // so no MutationObserver needed.
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
-
-  // Use MutationObserver to detect when the element is added to DOM
-  const [isScenarioIntroMounted, setIsScenarioIntroMounted] = useState(false)
-
-  useEffect(() => {
-    // Check if element already exists
-    const checkElement = () => {
-      const element = document.getElementById("scenario-intro-wrapper")
-      if (element) {
-        // Store the element in the ref for scroll tracking
-        scenarioIntroRef.current = element as HTMLDivElement
-        setIsScenarioIntroMounted(true)
-        return true
-      }
-      return false
-    }
-
-    if (checkElement()) return
-
-    // Otherwise observe DOM for the element
-    const observer = new MutationObserver(() => {
-      if (checkElement()) {
-        observer.disconnect()
-      }
-    })
-
-    observer.observe(document.body, { childList: true, subtree: true })
-
-    return () => observer.disconnect()
-  }, [])
 
   // Refs for strategy info tooltip
   const strategyInfoRef = useRef<HTMLDivElement>(null)
@@ -170,46 +137,15 @@ export default function MapOverlayPanels() {
   // ============================================================================
 
   // Multi-step sticky choreography:
-  // Tracks scroll through the scenario-intro-wrapper section
-  // Uses manual scroll tracking because useScroll doesn't work reliably
-  // when the ref isn't available at mount time
-  const scenarioIntroProgress = useMotionValue(0)
-
-  useEffect(() => {
-    if (!isScenarioIntroMounted || !scenarioIntroRef.current) return
-
-    const updateProgress = () => {
-      const element = scenarioIntroRef.current
-      if (!element) return
-
-      const rect = element.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const elementHeight = element.offsetHeight
-
-      // Progress calculation matching Framer Motion's ["start end", "end start"] offset:
-      // 0 when element top hits viewport bottom
-      // 1 when element bottom hits viewport top
-      const scrollStart = -viewportHeight // element top at viewport bottom
-      const scrollEnd = elementHeight // element bottom at viewport top
-      const totalRange = scrollEnd - scrollStart
-      const currentPosition = -rect.top // How far past scrollStart we are
-
-      const progress = Math.max(0, Math.min(1, currentPosition / totalRange))
-      scenarioIntroProgress.set(progress)
-    }
-
-    // Initial update
-    updateProgress()
-
-    // Update on scroll
-    window.addEventListener("scroll", updateProgress, { passive: true })
-    window.addEventListener("resize", updateProgress, { passive: true })
-
-    return () => {
-      window.removeEventListener("scroll", updateProgress)
-      window.removeEventListener("resize", updateProgress)
-    }
-  }, [isScenarioIntroMounted, scenarioIntroProgress])
+  // Tracks scroll through the scenario-intro-wrapper section.
+  // useScrollProgress wraps Framer Motion's useScroll with layoutEffect: false
+  // so it works correctly even though the ref is attached to a child element
+  // rendered later in the same component.
+  // offset ["start end", "end start"] = 0 when element top hits viewport bottom,
+  // 1 when element bottom hits viewport top — matches the previous manual calculation.
+  const scenarioIntroProgress = useScrollProgress(scenarioIntroRef, {
+    offset: ["start end", "end start"],
+  })
 
   // Paragraph position: fixed at top (no animation, just scrolls naturally)
   const paragraphTop = PANEL_POSITIONS.paragraphTop
@@ -588,7 +524,7 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
-        {/* ==================== SECTION 6: Rivers (Sticky with Progress) ==================== */}
+        {/* ==================== SECTION 6: Rivers (sticky with progress) ==================== */}
         <Step data={"rivers" as SectionId} progress>
           <Box
             sx={{
@@ -780,6 +716,7 @@ export default function MapOverlayPanels() {
         */}
         <Step data={"scenario-intro" as SectionId} progress>
           <Box
+            ref={scenarioIntroRef}
             id="scenario-intro-wrapper"
             sx={{
               minHeight: "550vh",

@@ -27,8 +27,9 @@ import React, {
   useCallback,
   forwardRef,
 } from "react"
-import { useScroll, motion, useReducedMotion, useTransform, useMotionValue, MotionValue } from "@repo/motion"
+import { useScroll, motion, useReducedMotion, useTransform, useMotionValueEvent, MotionValue } from "@repo/motion"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useDockOffset } from "@repo/scrollytelling"
 
 /**
  * Interpolates a value within keyframe ranges
@@ -292,10 +293,15 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       headlines.map((_, i) => (i === 0 ? 1 : 0)),
     )
 
-    // Track dock offset (when scrolled past the dockRef / container, headline moves up with it)
+    // Dock offset — rAF-safe, no forced layout flush on scroll.
+    // Returns a MotionValue that drives both the animated branch (direct DOM write)
+    // and the reduced-motion branch (via useMotionValueEvent below).
+    const dockOffsetMV = useDockOffset(dockRef, containerRef)
+
+    // Reduced-motion branch: sync dockOffset state from the MotionValue so the
+    // static CSS transform can be updated without a scroll listener.
     const [dockOffset, setDockOffset] = useState(0)
-    // MotionValue version — drives the animated branch without re-renders
-    const dockOffsetMV = useMotionValue(0)
+    useMotionValueEvent(dockOffsetMV, "change", setDockOffset)
 
     // Y transform: combines mid-panel shift (for circles) and exit scroll-away.
     // The exit segment uses easeIn (quadratic) so the headline starts slowly —
@@ -365,42 +371,6 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       return scrollYProgress.on("change", recalculate)
     }, [scrollYProgress, headlines, calculateOpacity])
 
-    // Separate scroll listener for docking.
-    // When dockRef is provided: the headline docks to that element's bottom — once
-    // the element's bottom scrolls above the headline's top, the headline moves up
-    // at the same rate, appearing to scroll with the page ("stopped in place").
-    // Without dockRef: original behaviour — docks to the container's bottom when
-    // the entire container has scrolled past the viewport.
-    useEffect(() => {
-      const handleScroll = () => {
-        let offset = 0
-
-        if (dockRef?.current) {
-          // Dock when the panel's TOP reaches the viewport top.
-          // offset = panel.top (negative once panel top has scrolled above y=0),
-          // so the headline moves up in exact lockstep with the panel's top edge.
-          const rect = dockRef.current.getBoundingClientRect()
-          if (rect.top < 0) {
-            offset = rect.top
-          }
-        } else if (containerRef.current) {
-          // Fallback: dock to the container's bottom (original behaviour).
-          const rect = containerRef.current.getBoundingClientRect()
-          const viewportHeight = window.innerHeight
-          if (rect.bottom < viewportHeight) {
-            offset = rect.bottom - viewportHeight
-          }
-        }
-
-        setDockOffset(offset)   // reduced-motion branch
-        dockOffsetMV.set(offset) // animated branch (no re-render)
-      }
-
-      window.addEventListener("scroll", handleScroll, { passive: true })
-      handleScroll()
-
-      return () => window.removeEventListener("scroll", handleScroll)
-    }, [containerRef, dockRef, dockOffsetMV])
 
     // Track which headline to show (for reduced motion and screen readers)
     const [activeIndex, setActiveIndex] = useState(0)
