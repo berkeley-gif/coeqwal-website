@@ -25,11 +25,14 @@ export interface OperationsIconGroupProps {
   size?: "sm" | "md" | "lg"
   /** Layout direction */
   layout?: "horizontal" | "vertical"
+  /** Called when an icon is clicked — receives the icon ID for cross-scenario selection */
+  onIconClick?: (iconId: string) => void
 }
 
 export function OperationsIconGroup({
   scenarioId,
   size = "md",
+  onIconClick,
 }: OperationsIconGroupProps) {
   const theme = useTheme()
   const iconSize = getIconSize(size)
@@ -64,6 +67,14 @@ export function OperationsIconGroup({
             tabIndex={0}
             role="button"
             aria-label={`${def.label} - focus or click for details`}
+            onClick={
+              onIconClick
+                ? (e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    onIconClick(def.id)
+                  }
+                : undefined
+            }
             sx={{
               width: fixedIconSize,
               height: fixedIconSize,

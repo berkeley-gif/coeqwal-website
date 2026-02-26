@@ -480,7 +480,7 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
-        {/* ==================== SECTION 4.5: Arrows (trigger) ==================== */}
+        {/* ==================== SECTION 4.5: Arrows ==================== */}
         <Step data={"arrows" as SectionId}>
           <Box
             sx={{

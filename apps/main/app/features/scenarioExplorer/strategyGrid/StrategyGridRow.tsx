@@ -20,6 +20,7 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import type { LayoutMode } from "./StrategyGridHeader"
+import type { ScenarioTheme } from "../../../content/scenarios"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -64,6 +65,10 @@ export interface StrategyGridRowProps {
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  /** Select all scenarios sharing a theme when badge is clicked */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Select all scenarios sharing an operation icon when clicked */
+  onIconClick?: (iconId: string) => void
 }
 
 /**
@@ -90,6 +95,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onTierClick,
   onTooltipToggle,
   onSortChange,
+  onThemeBadgeClick,
+  onIconClick,
 }: StrategyGridRowProps) {
   const theme = useTheme()
 
@@ -200,10 +207,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           justifyContent: "flex-end", // Align checkbox closer to scenario title
           alignItems: "flex-start",
           alignSelf: "start",
-          // Non-compact: offset by eyebrow height (0.7rem + 4px mb) so checkbox
-          // aligns with the scenario title rather than the eyebrow above it
+          // Non-compact: offset by eyebrow height + margin so checkbox center
+          // aligns with the scenario title's first text line.
+          // Eyebrow row = badge height (0.6rem × 1.4 lineHeight + 3px py×2 ≈ 16.4px)
+          // + mb 4px. Add half of title line-height, subtract half of checkbox height.
           ...(!compact && {
-            pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 0.7rem + 4px)`,
+            pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
             pb: theme.scenarios.grid.row.padding,
           }),
           // Compact: checkbox spans all rows
@@ -232,6 +241,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           scenario={scenario}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
+          onThemeBadgeClick={onThemeBadgeClick}
+          onIconClick={onIconClick}
         />
       ) : (
         <NonCompactRowContent
@@ -239,6 +250,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           layoutMode={layoutMode}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
+          onThemeBadgeClick={onThemeBadgeClick}
+          onIconClick={onIconClick}
         />
       )}
     </Box>
@@ -252,12 +265,16 @@ interface CompactRowContentProps {
   scenario: ScenarioForDisplay
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  onIconClick?: (iconId: string) => void
 }
 
 function CompactRowContent({
   scenario,
   outcomeNames,
   renderOutcomeItem,
+  onThemeBadgeClick,
+  onIconClick,
 }: CompactRowContentProps) {
   const theme = useTheme()
 
@@ -279,7 +296,11 @@ function CompactRowContent({
           gap: theme.space.gap.lg,
         }}
       >
-        <StrategyHeader strategy={scenario} titleVariant="body2" />
+        <StrategyHeader
+          strategy={scenario}
+          titleVariant="body2"
+          onThemeBadgeClick={onThemeBadgeClick}
+        />
         <Box
           sx={{
             display: "flex",
@@ -293,6 +314,7 @@ function CompactRowContent({
             scenarioId={scenario.scenarioId}
             theme={scenario.theme}
             size="md"
+            onIconClick={onIconClick}
           />
         </Box>
       </Box>
@@ -364,6 +386,8 @@ interface NonCompactRowContentProps {
   layoutMode: LayoutMode
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  onIconClick?: (iconId: string) => void
 }
 
 function NonCompactRowContent({
@@ -371,6 +395,8 @@ function NonCompactRowContent({
   layoutMode,
   outcomeNames,
   renderOutcomeItem,
+  onThemeBadgeClick,
+  onIconClick,
 }: NonCompactRowContentProps) {
   const theme = useTheme()
 
@@ -398,6 +424,7 @@ function NonCompactRowContent({
           strategy={scenario}
           titleVariant="body2"
           descriptionMaxWidth="none"
+          onThemeBadgeClick={onThemeBadgeClick}
         />
       </Box>
 
@@ -437,6 +464,7 @@ function NonCompactRowContent({
           scenarioId={scenario.scenarioId}
           theme={scenario.theme}
           size="md"
+          onIconClick={onIconClick}
         />
       </Box>
 

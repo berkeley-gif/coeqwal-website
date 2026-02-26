@@ -7,7 +7,7 @@
  * Uses useScenarioList hook to get enriched scenario data from API + local metadata.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
@@ -18,6 +18,7 @@ import {
   type Scenario,
 } from "../../scenarios/hooks/useScenarioList"
 import type { ScenarioTheme } from "../../../content/scenarios"
+import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
 
 const THEME_ORDER: Record<ScenarioTheme, number> = {
   baseline: 0,
@@ -65,6 +66,7 @@ export default function ListView({
 
   const [sortBy, setSortBy] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const listScrollRef = useRef<HTMLDivElement>(null)
 
   const handleSortChange = (
     outcome: string | null,
@@ -77,6 +79,7 @@ export default function ListView({
   const {
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
     showOnlyChosen,
     showDefinitions,
     setShowOnlyChosen,
@@ -85,6 +88,9 @@ export default function ListView({
     pinnedScenarioId,
     selectedTheme,
     showOnlyTheme,
+    setSelectedTheme,
+    selectedIconId,
+    setSelectedIconId,
   } = useScenarioExplorerStore()
 
   const {
@@ -94,6 +100,8 @@ export default function ListView({
     themeMatchingScenarioIds,
     showThemeDivider,
     showAllThemeDividers,
+    iconMatchingScenarioIds,
+    showIconDivider,
   } = useMemo(() => {
     const baseScenarios = [...scenarios]
 
@@ -146,9 +154,25 @@ export default function ListView({
       return { list, themeIds }
     }
 
+    // Helper to apply icon grouping: icon-matching scenarios float to top
+    const iconScenarioIdSet = selectedIconId
+      ? new Set(getScenariosWithIcon(selectedIconId))
+      : new Set<string>()
+    const applyIconGrouping = (scenarioList: typeof baseScenarios) => {
+      if (!selectedIconId) return { list: scenarioList, iconIds: new Set<string>() }
+      const iconMatches = scenarioList.filter((s) =>
+        iconScenarioIdSet.has(s.scenarioId),
+      )
+      const rest = scenarioList.filter(
+        (s) => !iconScenarioIdSet.has(s.scenarioId),
+      )
+      return { list: [...iconMatches, ...rest], iconIds: iconScenarioIdSet }
+    }
+
     if (!searchQuery.trim()) {
       const pinned = applyPinning(baseScenarios)
-      const { list, themeIds } = applyThemeGrouping(pinned)
+      const { list: themeList, themeIds } = applyThemeGrouping(pinned)
+      const { list, iconIds } = applyIconGrouping(themeList)
       return {
         sortedScenarios: list,
         matchingScenarioIds: new Set<string>(),
@@ -156,6 +180,8 @@ export default function ListView({
         themeMatchingScenarioIds: themeIds,
         showThemeDivider: selectedTheme !== null && !showOnlyTheme,
         showAllThemeDividers: !sortBy,
+        iconMatchingScenarioIds: iconIds,
+        showIconDivider: selectedIconId !== null,
       }
     }
 
@@ -184,7 +210,8 @@ export default function ListView({
     })
 
     const pinned = applyPinning([...matches, ...nonMatches])
-    const { list, themeIds } = applyThemeGrouping(pinned)
+    const { list: themeList, themeIds } = applyThemeGrouping(pinned)
+    const { list, iconIds } = applyIconGrouping(themeList)
     return {
       sortedScenarios: list,
       matchingScenarioIds: matchingIds,
@@ -192,6 +219,8 @@ export default function ListView({
       themeMatchingScenarioIds: themeIds,
       showThemeDivider: selectedTheme !== null && !showOnlyTheme,
       showAllThemeDividers: !sortBy,
+      iconMatchingScenarioIds: iconIds,
+      showIconDivider: selectedIconId !== null,
     }
   }, [
     searchQuery,
@@ -202,10 +231,52 @@ export default function ListView({
     pinnedScenarioId,
     selectedTheme,
     showOnlyTheme,
+    selectedIconId,
   ])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
+  }
+
+  const scrollListToTop = () =>
+    listScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+
+  // Click a theme badge → select all scenarios of that theme and float them to top.
+  // Clicking the active theme again deselects those scenarios and clears the filter.
+  const handleThemeBadgeClick = (theme: ScenarioTheme) => {
+    if (selectedTheme === theme) {
+      const themeIds = new Set(
+        scenarios.filter((s) => s.theme === theme).map((s) => s.scenarioId),
+      )
+      selectScenarios(selectedScenarios.filter((id) => !themeIds.has(id)))
+      setSelectedTheme(null)
+    } else {
+      const themeIds = scenarios
+        .filter((s) => s.theme === theme)
+        .map((s) => s.scenarioId)
+      const merged = Array.from(new Set([...selectedScenarios, ...themeIds]))
+      selectScenarios(merged)
+      setSelectedTheme(theme)
+    }
+    scrollListToTop()
+  }
+
+  // Click an operation icon → float matching scenarios to top and select them.
+  // Clicking the active icon again deselects those scenarios and clears the filter.
+  const handleIconClick = (iconId: string) => {
+    if (selectedIconId === iconId) {
+      const iconScenarioIds = new Set(getScenariosWithIcon(iconId))
+      selectScenarios(selectedScenarios.filter((id) => !iconScenarioIds.has(id)))
+      setSelectedIconId(null)
+    } else {
+      const iconScenarioIds = getScenariosWithIcon(iconId)
+      const merged = Array.from(
+        new Set([...selectedScenarios, ...iconScenarioIds]),
+      )
+      selectScenarios(merged)
+      setSelectedIconId(iconId)
+    }
+    scrollListToTop()
   }
 
   const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
@@ -265,6 +336,8 @@ export default function ListView({
     themeMatchingScenarioIds,
     showThemeDivider,
     showAllThemeDividers,
+    iconMatchingScenarioIds,
+    showIconDivider,
     onOutcomeSelect: handleOutcomeSelect,
     onTierClick,
     onToggleScenario: handleToggleScenario,
@@ -280,6 +353,8 @@ export default function ListView({
     sortBy,
     sortDirection,
     onSortChange: handleSortChange,
+    onThemeBadgeClick: handleThemeBadgeClick,
+    onIconClick: handleIconClick,
   }
 
   if (!compact) {
@@ -309,6 +384,7 @@ export default function ListView({
 
           {/* Scrollable content */}
           <Box
+            ref={listScrollRef}
             sx={{
               flex: 1,
               minHeight: 0,
@@ -418,6 +494,7 @@ export default function ListView({
         }}
       >
         <Box
+          ref={listScrollRef}
           sx={{
             flex: 1,
             overflowY: "auto",

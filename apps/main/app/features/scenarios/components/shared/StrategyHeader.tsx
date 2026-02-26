@@ -21,6 +21,7 @@ import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
 import type { ScenarioForDisplay } from "./types"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
+import type { ScenarioTheme } from "../../../../content/scenarios"
 
 export interface StrategyHeaderProps {
   /** Scenario data */
@@ -33,6 +34,8 @@ export interface StrategyHeaderProps {
   descriptionMaxWidth?: string | number | object
   /** Called when title is clicked */
   onTitleClick?: () => void
+  /** Called when the theme badge is clicked — selects all scenarios of that theme */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
 }
 
 /**
@@ -298,6 +301,7 @@ export function StrategyHeader({
   titleVariant = "body2",
   descriptionMaxWidth,
   onTitleClick,
+  onThemeBadgeClick,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = true
@@ -339,11 +343,41 @@ export function StrategyHeader({
         </Typography>
 
         {showAllThemeBadges && themeLabel && themeColors ? (
-          <ScenarioBadge
-            label={themeLabel}
-            backgroundColor={themeColors.background}
-            color={themeColors.text}
-          />
+          <Box
+            component={onThemeBadgeClick ? "button" : "span"}
+            type={onThemeBadgeClick ? "button" : undefined}
+            onClick={
+              onThemeBadgeClick && strategy.theme
+                ? (e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
+                : undefined
+            }
+            sx={
+              onThemeBadgeClick
+                ? {
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    "&:hover > span": { opacity: 0.8 },
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "2px",
+                      borderRadius: "2px",
+                    },
+                  }
+                : { display: "inline-flex" }
+            }
+          >
+            <ScenarioBadge
+              label={themeLabel}
+              backgroundColor={themeColors.background}
+              color={themeColors.text}
+            />
+          </Box>
         ) : (
           strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
         )}

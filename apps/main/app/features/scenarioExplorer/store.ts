@@ -52,6 +52,9 @@ interface ScenarioExplorerState {
   showOnlyTheme: boolean
   showThemeBadges: boolean
 
+  // Icon filtering
+  selectedIconId: string | null
+
   // Display options
   showDefinitions: boolean
 
@@ -84,6 +87,9 @@ interface ScenarioExplorerActions {
   setShowOnlyTheme: (show: boolean) => void
   setShowThemeBadges: (show: boolean) => void
 
+  // Icon filtering
+  setSelectedIconId: (iconId: string | null) => void
+
   // Display options
   setShowDefinitions: (show: boolean) => void
 
@@ -113,6 +119,7 @@ const initialState: ScenarioExplorerState = {
   selectedTheme: null,
   showOnlyTheme: false,
   showThemeBadges: false,
+  selectedIconId: null,
   showDefinitions: false,
   selectedTier: null,
 }
@@ -197,6 +204,12 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.showThemeBadges = show
       }),
 
+    // Icon filtering
+    setSelectedIconId: (iconId) =>
+      set((state) => {
+        state.selectedIconId = iconId
+      }),
+
     // Display options
     setShowDefinitions: (show) =>
       set((state) => {
@@ -215,6 +228,7 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.searchQuery = ""
         state.selectedTheme = null
         state.showOnlyTheme = false
+        state.selectedIconId = null
       }),
 
     resetSelections: () =>
