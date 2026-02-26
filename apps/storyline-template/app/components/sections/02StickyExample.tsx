@@ -41,6 +41,26 @@ function Content() {
         gap: 4,
       }}
     >
+      {/* Label so the sticky container boundary is visible in the browser */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 8,
+          left: 8,
+          px: 1,
+          py: 0.25,
+          background: "rgba(255,200,0,0.15)",
+          border: "1px solid rgba(255,200,0,0.6)",
+          borderRadius: 1,
+          fontFamily: "monospace",
+          fontSize: 11,
+          color: "rgba(255,200,0,0.9)",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        sticky inner (100vh)
+      </Box>
       <motion.div style={{ opacity: firstOpacity, y: firstY }}>
         <Typography variant="h3" gutterBottom>
           StickyScrollSection
@@ -79,6 +99,7 @@ export default function StickyExample() {
       height="250vh"
       offset={["start end", "end start"]}
       overlap="20vh"
+      stickyStyle={{ outline: "2px dashed rgba(255,200,0,0.4)" }}
       debug
     >
       <Content />
