@@ -131,6 +131,13 @@ function translateReservoirIds(
 }
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/** Duration (ms) for the fill/outline fade-in when tier data first becomes available */
+const FADE_IN_DURATION = 350
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
@@ -146,6 +153,8 @@ export function OutcomePolygonLayer({
   const theme = useTheme()
   const { mapRef } = useMap()
   const outlineCreatedRef = useRef(false)
+  /** RAF handle for the deferred fade-in; cancelled if the effect re-runs first */
+  const fadeRafRef = useRef<number | null>(null)
 
   // Get layer IDs based on type
   const { fillId, outlineId } = useMemo(
@@ -211,12 +220,28 @@ export function OutcomePolygonLayer({
     const map = mapRef.current.getMap()
     if (!map.getLayer(fillId)) return
 
-    // Apply visibility
-    map.setLayoutProperty(fillId, "visibility", visible ? "visible" : "none")
+    // Cancel any pending deferred fade-in from a previous run
+    if (fadeRafRef.current !== null) {
+      cancelAnimationFrame(fadeRafRef.current)
+      fadeRafRef.current = null
+    }
 
     if (!visible) {
-      // Hide outline too
+      // Reset opacity to 0 instantly (no transition) so the next show always
+      // starts from transparent and can fade in cleanly.
+      map.setPaintProperty(fillId, "fill-opacity-transition", {
+        duration: 0,
+        delay: 0,
+      })
+      map.setPaintProperty(fillId, "fill-opacity", 0)
+      map.setLayoutProperty(fillId, "visibility", "none")
+
       if (map.getLayer(outlineId)) {
+        map.setPaintProperty(outlineId, "line-opacity-transition", {
+          duration: 0,
+          delay: 0,
+        })
+        map.setPaintProperty(outlineId, "line-opacity", 0)
         map.setLayoutProperty(outlineId, "visibility", "none")
       }
       return
@@ -231,39 +256,37 @@ export function OutcomePolygonLayer({
 
     // Special handling for reservoir: keep natural fill color
     if (layerType === "reservoir") {
-      // Reservoir layer just shows/hides, labels are handled separately
+      map.setLayoutProperty(fillId, "visibility", "visible")
       return
     }
 
-    // Loading state: transparent fill (outline will be white)
+    // Loading state: keep fill invisible and suppress the outline entirely.
     if (!hasTierData) {
       map.setPaintProperty(fillId, "fill-color", "transparent")
+      map.setPaintProperty(fillId, "fill-opacity-transition", {
+        duration: 0,
+        delay: 0,
+      })
       map.setPaintProperty(fillId, "fill-opacity", 0)
-    }
-    // Special handling for Delta: single-feature, apply tier color directly
-    else if (layerType === "delta") {
-      map.setPaintProperty(fillId, "fill-color", colorExpression)
-      map.setPaintProperty(fillId, "fill-opacity", 0.9)
-    } else {
-      // Apply fill color and opacity for demand-units, WBA, etc.
-      map.setPaintProperty(fillId, "fill-color", colorExpression)
-      map.setPaintProperty(fillId, "fill-opacity", [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        5,
-        0.75,
-        8,
-        0.55,
-        10,
-        0.35,
-      ])
+      map.setLayoutProperty(fillId, "visibility", "visible")
+      if (map.getLayer(outlineId)) {
+        map.setLayoutProperty(outlineId, "visibility", "none")
+      }
+      return
     }
 
-    // Determine outline color: white for loading state, tier color otherwise
-    const outlineColor = hasTierData ? colorExpression : "#ffffff"
+    // Data is ready.
+    // Step 1 (this frame): apply colors, arm the transition spec, set opacity to 0,
+    // and make the layer visible at opacity 0. Mapbox renders one frame at opacity 0.
+    map.setPaintProperty(fillId, "fill-color", colorExpression)
+    map.setPaintProperty(fillId, "fill-opacity-transition", {
+      duration: FADE_IN_DURATION,
+      delay: 0,
+    })
+    map.setPaintProperty(fillId, "fill-opacity", 0)
+    map.setLayoutProperty(fillId, "visibility", "visible")
 
-    // Create outline layer if it doesn't exist
+    // Create outline layer if it doesn't exist, starting at opacity 0
     if (!map.getLayer(outlineId) && !outlineCreatedRef.current) {
       const fillLayer = map.getLayer(fillId)
       if (fillLayer) {
@@ -279,9 +302,9 @@ export function OutcomePolygonLayer({
             source: sourceId,
             "source-layer": sourceLayer,
             paint: {
-              "line-color": outlineColor,
-              "line-width": hasTierData ? 0.5 : 1,
-              "line-opacity": hasTierData ? 1 : 0.3,
+              "line-color": colorExpression,
+              "line-width": 0.5,
+              "line-opacity": 0,
               "line-offset": -0.25,
             },
             layout: { visibility: "none" },
@@ -293,24 +316,22 @@ export function OutcomePolygonLayer({
       }
     }
 
-    // Style outline layer
+    // Style outline (still at opacity 0, visibility none for now)
     if (map.getLayer(outlineId)) {
       if (filterExpression) {
         map.setFilter(outlineId, filterExpression)
       }
-      map.setPaintProperty(outlineId, "line-color", outlineColor)
+      map.setPaintProperty(outlineId, "line-color", colorExpression)
+      map.setPaintProperty(outlineId, "line-opacity-transition", {
+        duration: FADE_IN_DURATION,
+        delay: 0,
+      })
+      map.setPaintProperty(outlineId, "line-opacity", 0)
 
-      // Loading state: thin white outline
-      if (!hasTierData) {
-        map.setPaintProperty(outlineId, "line-width", 1)
-        map.setPaintProperty(outlineId, "line-opacity", 0.3)
-        map.setPaintProperty(outlineId, "line-offset", 0)
-      } else if (layerType === "delta") {
+      if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)
-        map.setPaintProperty(outlineId, "line-opacity", 1)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else {
-        map.setPaintProperty(outlineId, "line-opacity", 1)
         map.setPaintProperty(outlineId, "line-width", [
           "interpolate",
           ["linear"],
@@ -338,7 +359,43 @@ export function OutcomePolygonLayer({
           -1.5,
         ])
       }
-      map.setLayoutProperty(outlineId, "visibility", "visible")
+    }
+
+    // Step 2 (next frame): now that Mapbox has rendered one frame at opacity 0
+    // with the transition spec already armed, changing the opacity triggers the
+    // smooth fade-in. Without this RAF split, Mapbox batches the "set to 0" and
+    // "set to target" in the same frame and skips the transition.
+    fadeRafRef.current = requestAnimationFrame(() => {
+      fadeRafRef.current = null
+      if (!map.getLayer(fillId)) return
+
+      if (layerType === "delta") {
+        map.setPaintProperty(fillId, "fill-opacity", 0.9)
+      } else {
+        map.setPaintProperty(fillId, "fill-opacity", [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          5,
+          0.75,
+          8,
+          0.55,
+          10,
+          0.35,
+        ])
+      }
+
+      if (map.getLayer(outlineId)) {
+        map.setPaintProperty(outlineId, "line-opacity", 1)
+        map.setLayoutProperty(outlineId, "visibility", "visible")
+      }
+    })
+
+    return () => {
+      if (fadeRafRef.current !== null) {
+        cancelAnimationFrame(fadeRafRef.current)
+        fadeRafRef.current = null
+      }
     }
   }, [
     mapRef,
