@@ -23,10 +23,17 @@ import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
-import { useTransform, motion, useMotionValueEvent } from "@repo/motion"
+import { useTransform, useMotionValueEvent } from "@repo/motion"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
-import { useScrollProgress } from "@repo/scrollytelling"
+import {
+  useScrollProgress,
+  ScrollSectionContext,
+  ScrollElement,
+  StickyElement,
+  useScrollPhase,
+  type ProgressRange,
+} from "@repo/scrollytelling"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
@@ -45,19 +52,24 @@ import {
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
-// Animation thresholds for scenario-intro section panels (progress 0-1)
-// Panels fade in BEFORE their tooltips so the user sees the panel first,
-// then the tooltip appears to explain it. Each panel's fadeEnd aligns with
-// its tooltip's fadeIn start.
-const PANEL_ANIMATION_THRESHOLDS = {
-  strategyInfo: { fadeStart: 0.08, fadeEnd: 0.14 },
-  keyOperations: { fadeStart: 0.22, fadeEnd: 0.28 },
-  keyOutcomes: { fadeStart: 0.64, fadeEnd: 0.68 },
-  // Summary appears just after key outcomes (0.64–0.68), while the sticky
-  // container is still pinned. The container releases at ~0.74–0.76, so 0.82+
-  // thresholds are unreachable — the content has already scrolled away.
-  summary: { fadeStart: 0.7, fadeEnd: 0.74 },
-} as const
+// Phase thresholds for useScrollPhase — stable module-level constants so
+// the hook's internal useEffect dep array never triggers unnecessary re-runs.
+const STRATEGY_PHASE_THRESHOLDS = {
+  enter: [0.08, 0.14] as ProgressRange,
+  hold: [0.14, 1.0] as ProgressRange,
+}
+const KEY_OPERATIONS_PHASE_THRESHOLDS = {
+  enter: [0.22, 0.28] as ProgressRange,
+  hold: [0.28, 1.0] as ProgressRange,
+}
+const KEY_OUTCOMES_PHASE_THRESHOLDS = {
+  enter: [0.64, 0.68] as ProgressRange,
+  hold: [0.68, 1.0] as ProgressRange,
+}
+const SUMMARY_PHASE_THRESHOLDS = {
+  enter: [0.70, 0.74] as ProgressRange,
+  hold: [0.74, 1.0] as ProgressRange,
+}
 
 const PANEL_POSITIONS = {
   paragraphTop: "15vh",
@@ -133,16 +145,17 @@ export default function MapOverlayPanels() {
   }, [isOutcomeActive])
 
   // ============================================================================
-  // Framer Motion: Scenario-intro choreography
+  // Scenario-intro choreography
   // ============================================================================
 
-  // Multi-step sticky choreography:
   // Tracks scroll through the scenario-intro-wrapper section.
   // useScrollProgress wraps Framer Motion's useScroll with layoutEffect: false
   // so it works correctly even though the ref is attached to a child element
   // rendered later in the same component.
   // offset ["start end", "end start"] = 0 when element top hits viewport bottom,
-  // 1 when element bottom hits viewport top — matches the previous manual calculation.
+  // 1 when element bottom hits viewport top.
+  // This value is also provided to ScrollSectionContext so ScrollElement children
+  // can read the same progress and animate their opacity automatically.
   const scenarioIntroProgress = useScrollProgress(scenarioIntroRef, {
     offset: ["start end", "end start"],
   })
@@ -150,164 +163,57 @@ export default function MapOverlayPanels() {
   // Paragraph position: fixed at top (no animation, just scrolls naturally)
   const paragraphTop = PANEL_POSITIONS.paragraphTop
 
-  // Panel opacity - fade in and stay visible
-  const strategyInfoPanelOpacity = useTransform(
+  // Panel phases — useScrollPhase replaces the manual useTransform + latch +
+  // useState + useMotionValueEvent chains that previously managed each panel's
+  // opacity and pointer events.
+  //
+  // ScrollElement handles opacity using the same context progress; useScrollPhase
+  // gives us a React state value for pointer-events (which can't be a MotionValue).
+  const { phase: strategyPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd,
-    ],
-    [0, 1],
+    STRATEGY_PHASE_THRESHOLDS,
   )
-
-  const keyOperationsPanelOpacity = useTransform(
+  const { phase: keyOperationsPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd,
-    ],
-    [0, 1],
+    KEY_OPERATIONS_PHASE_THRESHOLDS,
   )
-
-  const keyOutcomesPanelOpacity = useTransform(
+  const { phase: keyOutcomesPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd,
-    ],
-    [0, 1],
+    KEY_OUTCOMES_PHASE_THRESHOLDS,
   )
-
-  const summaryPanelOpacity = useTransform(
+  const { phase: summaryPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.summary.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd,
-    ],
-    [0, 1],
+    SUMMARY_PHASE_THRESHOLDS,
   )
 
-  // TODO: Find better approach for allowing map panning while disabling hidden panel interactions
-  // Panel pointer events - derived from opacity to prevent invisible panels from receiving events
-  // When opacity < 0.1, pointer events are disabled (prevents clicking hidden panels)
-  // Using lower threshold to ensure panels are truly invisible before allowing map panning
-  // Applied to inner motion.div so map panning still works through backgrounds
-  const strategyInfoPointerEvents = useTransform(
-    strategyInfoPanelOpacity,
-    (v) => (v < 0.1 ? "none" : "auto"),
-  )
-  const keyOperationsPointerEvents = useTransform(
-    keyOperationsPanelOpacity,
-    (v) => (v < 0.1 ? "none" : "auto"),
-  )
-  const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
-  )
-  const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
-  )
-
-  // Convert motion values to state to override panel's hardcoded pointerEvents: "auto"
-  const [strategyInfoPE, setStrategyInfoPE] = useState<"none" | "auto">("none")
-  const [keyOperationsPE, setKeyOperationsPE] = useState<"none" | "auto">(
-    "none",
-  )
-  const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
-  const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
-
-  // Shared max-progress tracker: drives all panel visibility latches.
-  // Each panel is frozen at opacity 1 once maxProgress exceeds its fadeEnd.
-  // Everything resets together when the user scrolls back above the section.
-  const maxProgressRef = useRef(0)
-  const [maxProgress, setMaxProgress] = useState(0)
-
-  // Track if StrategyInfoPanel was ever visible (to avoid clearing on initial render)
-  // Using first panel because it's visible the longest
-  const strategyInfoWasVisible = useRef(false)
-
-  // Sync motion values to state for use in MUI sx prop.
-  // Each listener is gated: while the panel is latched (maxProgressRef >= fadeEnd)
-  // we skip the update so the PE state stays "auto" while the user scrolls back up.
-  useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
-    if (
-      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
-    )
-      return
-    const newPE = latest as "none" | "auto"
-    setStrategyInfoPE(newPE)
-
-    // Track when panel becomes visible
-    if (newPE === "auto") {
-      strategyInfoWasVisible.current = true
-    }
-
-    // Clear outcome visualization only when transitioning from visible to invisible
-    // (not on initial render when panel starts invisible)
-    if (newPE === "none" && strategyInfoWasVisible.current) {
-      mapActions.clearOutcomeVisualization()
-      strategyInfoWasVisible.current = false // Reset for next cycle
-    }
-  })
-  useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
-    if (
-      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
-    )
-      return
-    setKeyOperationsPE(latest as "none" | "auto")
-  })
-  useMotionValueEvent(keyOutcomesPointerEvents, "change", (latest) => {
-    if (
-      maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
-    )
-      return
-    setKeyOutcomesPE(latest as "none" | "auto")
-  })
-  useMotionValueEvent(summaryPointerEvents, "change", (latest) => {
-    if (maxProgressRef.current >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd)
-      return
-    setSummaryPE(latest as "none" | "auto")
-  })
+  // Derive pointer-events from phase: "none" only before the panel has entered.
+  const strategyPE = strategyPhase === "before" ? "none" : "auto"
+  const keyOperationsPE = keyOperationsPhase === "before" ? "none" : "auto"
+  const keyOutcomesPE = keyOutcomesPhase === "before" ? "none" : "auto"
+  const summaryPE = summaryPhase === "before" ? "none" : "auto"
 
   // Track when scenario-intro has been scrolled into, to reduce left/right padding
   const [scenarioIntroPaddingReduced, setScenarioIntroPaddingReduced] =
     useState(false)
 
-  // Derived latch booleans — no new useState needed, computed from maxProgress.
-  // A panel is "latched" (frozen visible) once the user has scrolled past its fadeEnd.
-  const strategyInfoLatched =
-    maxProgress >= PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd
-  const keyOperationsLatched =
-    maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd
-  const keyOutcomesLatched =
-    maxProgress >= PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd
-  const summaryLatched =
-    maxProgress >= PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd
-
-  // Unified scenarioIntroProgress listener:
-  // - Drives the padding transition
-  // - Records the highest progress reached (for visibility latches)
-  // - Resets all latches when the user scrolls back above the section
+  // Simplified progress listener: drives the padding transition only.
+  // Pointer-events reset is now handled by useScrollPhase above.
   useMotionValueEvent(scenarioIntroProgress, "change", (latest) => {
     setScenarioIntroPaddingReduced(latest > 0.01)
-
-    if (latest > maxProgressRef.current) {
-      maxProgressRef.current = latest
-      setMaxProgress(latest)
-    }
-
-    if (latest < 0.05 && maxProgressRef.current >= 0.05) {
-      maxProgressRef.current = 0
-      setMaxProgress(0)
-      // Reset PE so invisible panels don't intercept pointer events
-      setStrategyInfoPE("none")
-      setKeyOperationsPE("none")
-      setKeyOutcomesPE("none")
-      setSummaryPE("none")
-      // Clear any active outcome visualization
-      mapActions.clearOutcomeVisualization()
-      strategyInfoWasVisible.current = false
-    }
   })
+
+  // Clear the active outcome visualization when the strategy panel goes invisible
+  // (user scrolled back above the section). Replaces the old strategyInfoWasVisible
+  // ref + useMotionValueEvent pattern.
+  const strategyWasVisibleRef = useRef(false)
+  useEffect(() => {
+    if (strategyPhase !== "before") {
+      strategyWasVisibleRef.current = true
+    } else if (strategyWasVisibleRef.current) {
+      mapActions.clearOutcomeVisualization()
+      strategyWasVisibleRef.current = false
+    }
+  }, [strategyPhase])
 
   // Tooltip opacity - fade in and out
   // Sequence (no overlaps): strategy → key ops → view by climate → key outcomes
@@ -709,12 +615,27 @@ export default function MapOverlayPanels() {
         </Step>
 
         {/* ==================== SECTION 12: Scenario intro ==================== */}
-        {/* 
-          This section uses Framer Motion for the complex multi-step choreography.
-          Scrollama just detects when we enter this section.
-          Internal animations are driven by useScroll/useTransform.
+        {/*
+          Scrollama detects entry. Internal animations use @repo/scrollytelling:
+          - ScrollSectionContext.Provider shares scenarioIntroProgress with children
+          - StickyElement pins the left call panel
+          - ScrollElement handles opacity for each right-side panel (enter + hold)
+          - useScrollPhase (above) derives pointer-events state per panel
         */}
         <Step data={"scenario-intro" as SectionId} progress>
+          {/*
+            ScrollSectionContext.Provider manually shares the same scroll progress
+            that drives the tooltip animations with the ScrollElement children below.
+            Both use the same scenarioIntroProgress MotionValue so all animations
+            stay in sync without any extra useScroll calls.
+          */}
+          <ScrollSectionContext.Provider
+            value={{
+              progress: scenarioIntroProgress,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              sectionRef: scenarioIntroRef as any,
+            }}
+          >
           <Box
             ref={scenarioIntroRef}
             id="scenario-intro-wrapper"
@@ -725,13 +646,10 @@ export default function MapOverlayPanels() {
             }}
           >
             {/* Sticky intro text at top */}
-            <motion.div
-              style={{
-                position: "sticky",
-                top: paragraphTop,
-                zIndex: 2,
-                pointerEvents: "none",
-              }}
+            <StickyElement
+              top={paragraphTop}
+              zIndex={2}
+              style={{ pointerEvents: "none" }}
             >
               <Box
                 sx={{
@@ -788,7 +706,7 @@ export default function MapOverlayPanels() {
                   </Box>
                 </CallResponsePanel>
               </Box>
-            </motion.div>
+            </StickyElement>
 
             {/* All right-side panels in a single sticky container */}
             <Box
@@ -816,11 +734,10 @@ export default function MapOverlayPanels() {
                 }}
               >
                 {/* Strategy info panel */}
-                <motion.div
-                  style={{
-                    opacity: strategyInfoLatched ? 1 : strategyInfoPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
+                <ScrollElement
+                  enter={[0.08, 0.14]}
+                  hold={[0.14, 1.0]}
+                  style={{ pointerEvents: "none" }}
                 >
                   <Box
                     sx={{
@@ -844,18 +761,13 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: strategyInfoPE, // Block panel AND tooltip when hidden
+                          pointerEvents: strategyPE,
                         }}
                       >
-                        <motion.div
-                          ref={strategyInfoRef}
-                          style={{
-                            pointerEvents: strategyInfoPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
+                        <div ref={strategyInfoRef}>
                           <Box
                             sx={{
-                              pointerEvents: strategyInfoPE, // Override panel's hardcoded "auto"
+                              pointerEvents: strategyPE,
                             }}
                           >
                             <StrategyInfoPanel
@@ -865,7 +777,7 @@ export default function MapOverlayPanels() {
                               }
                             />
                           </Box>
-                        </motion.div>
+                        </div>
 
                         <ScrollTooltip
                           targetRef={strategyInfoRef}
@@ -919,16 +831,13 @@ export default function MapOverlayPanels() {
                       </Box>
                     </Box>
                   </Box>
-                </motion.div>
+                </ScrollElement>
 
                 {/* Key operations panel */}
-                <motion.div
-                  style={{
-                    opacity: keyOperationsLatched
-                      ? 1
-                      : keyOperationsPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
+                <ScrollElement
+                  enter={[0.22, 0.28]}
+                  hold={[0.28, 1.0]}
+                  style={{ pointerEvents: "none" }}
                 >
                   <Box
                     sx={{
@@ -952,18 +861,13 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOperationsPE, // Block panel AND tooltip when hidden
+                          pointerEvents: keyOperationsPE,
                         }}
                       >
-                        <motion.div
-                          ref={keyOperationsRef}
-                          style={{
-                            pointerEvents: keyOperationsPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
+                        <div ref={keyOperationsRef}>
                           <Box
                             sx={{
-                              pointerEvents: keyOperationsPE, // Override panel's hardcoded "auto"
+                              pointerEvents: keyOperationsPE,
                             }}
                           >
                             <KeyOperationsPanel
@@ -971,7 +875,7 @@ export default function MapOverlayPanels() {
                               onTitleClick={() => setKeyOpsTooltipClosed(false)}
                             />
                           </Box>
-                        </motion.div>
+                        </div>
 
                         <ScrollTooltip
                           targetRef={keyOperationsRef}
@@ -1057,14 +961,13 @@ export default function MapOverlayPanels() {
                       </Box>
                     </Box>
                   </Box>
-                </motion.div>
+                </ScrollElement>
 
                 {/* Key outcomes panel */}
-                <motion.div
-                  style={{
-                    opacity: keyOutcomesLatched ? 1 : keyOutcomesPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
+                <ScrollElement
+                  enter={[0.64, 0.68]}
+                  hold={[0.68, 1.0]}
+                  style={{ pointerEvents: "none" }}
                 >
                   <Box
                     sx={{
@@ -1088,18 +991,13 @@ export default function MapOverlayPanels() {
                           position: "relative",
                           width: "100%",
                           maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOutcomesPE, // Block panel AND tooltip when hidden
+                          pointerEvents: keyOutcomesPE,
                         }}
                       >
-                        <motion.div
-                          ref={keyOutcomesRef}
-                          style={{
-                            pointerEvents: keyOutcomesPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
+                        <div ref={keyOutcomesRef}>
                           <Box
                             sx={{
-                              pointerEvents: keyOutcomesPE, // Override panel's hardcoded "auto"
+                              pointerEvents: keyOutcomesPE,
                             }}
                           >
                             <KeyOutcomesPanel
@@ -1109,7 +1007,7 @@ export default function MapOverlayPanels() {
                               }
                             />
                           </Box>
-                        </motion.div>
+                        </div>
 
                         <ScrollTooltip
                           targetRef={keyOutcomesRef}
@@ -1177,14 +1075,13 @@ export default function MapOverlayPanels() {
                       </Box>
                     </Box>
                   </Box>
-                </motion.div>
+                </ScrollElement>
 
                 {/* Summary panel */}
-                <motion.div
-                  style={{
-                    opacity: summaryLatched ? 1 : summaryPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
+                <ScrollElement
+                  enter={[0.70, 0.74]}
+                  hold={[0.74, 1.0]}
+                  style={{ pointerEvents: "none" }}
                 >
                   <Box
                     sx={{
@@ -1211,20 +1108,15 @@ export default function MapOverlayPanels() {
                           pointerEvents: summaryPE,
                         }}
                       >
-                        <motion.div
-                          ref={summaryRef}
-                          style={{
-                            pointerEvents: summaryPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
+                        <div ref={summaryRef}>
                           <Box
                             sx={{
-                              pointerEvents: summaryPE, // Override panel's hardcoded "auto"
+                              pointerEvents: summaryPE,
                             }}
                           >
                             <SummaryPanel scenarioId="s0020" />
                           </Box>
-                        </motion.div>
+                        </div>
 
                         <ScrollTooltip
                           targetRef={summaryRef}
@@ -1271,7 +1163,7 @@ export default function MapOverlayPanels() {
                       </Box>
                     </Box>
                   </Box>
-                </motion.div>
+                </ScrollElement>
               </Box>
             </Box>
 
@@ -1279,6 +1171,7 @@ export default function MapOverlayPanels() {
                 enough runway before the wrapper exits the viewport. */}
             <Box sx={{ height: "100vh" }} aria-hidden="true" />
           </Box>
+          </ScrollSectionContext.Provider>
         </Step>
 
         {/* ==================== SECTION 13: Scenario Conclusion ==================== */}
