@@ -11,6 +11,7 @@ import {
   useScrollProgress,
   useMotionValue,
   useMeetingProgress,
+  ScrollReveal,
 } from "@repo/scrollytelling"
 
 import { WATER_THEMES } from "@repo/data/coeqwal"
@@ -366,56 +367,60 @@ const IntroSection = () => {
         }}
         childrenMt={{ xs: 5, lg: `calc(${theme.space.panel.padding} + 40px)` }}
       >
-        {/* Four main theme cards */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
-            gap: { xs: 2, md: 2 },
-          }}
-        >
-          {WATER_THEME_IDS.map((id, i) => {
-            const colors = waterThemePalette[id] ?? { background: "#eee", text: "#333" }
-            const description = WATER_THEMES.find((t) => t.id === id)?.description ?? ""
-            return (
-              <ThemeCard
-                key={id}
-                label={THEME_LABEL_CONFIG[id]?.label ?? id}
-                description={description}
-                photo={WATER_THEME_PHOTOS[id]}
-                bg={colors.background}
-                textColor={colors.text}
-                index={i}
-              />
-            )
-          })}
-        </Box>
+        {/* Four main theme cards — reveal the grid as it enters the viewport */}
+        <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
+              gap: { xs: 2, md: 2 },
+            }}
+          >
+            {WATER_THEME_IDS.map((id, i) => {
+              const colors = waterThemePalette[id] ?? { background: "#eee", text: "#333" }
+              const description = WATER_THEMES.find((t) => t.id === id)?.description ?? ""
+              return (
+                <ThemeCard
+                  key={id}
+                  label={THEME_LABEL_CONFIG[id]?.label ?? id}
+                  description={description}
+                  photo={WATER_THEME_PHOTOS[id]}
+                  bg={colors.background}
+                  textColor={colors.text}
+                  index={i}
+                />
+              )
+            })}
+          </Box>
+        </ScrollReveal>
 
         {/* ── Provisional themes (pending decision) ── */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
-            gap: { xs: 2, md: 2 },
-            mt: 2,
-          }}
-        >
-          {(["climate", "governance"] as const).map((id, i) => {
-            const themeEntry = WATER_THEMES.find((t) => t.id === id)
-            const description = themeEntry?.description ?? ""
-            const label = (themeEntry?.label ?? id).replace(/\n/g, " ")
-            return (
-              <ThemeCard
-                key={id}
-                label={label}
-                description={description}
-                bg="#efefef"
-                textColor="#444"
-                index={i}
-              />
-            )
-          })}
-        </Box>
+        <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5} delay={0.1}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" },
+              gap: { xs: 2, md: 2 },
+              mt: 2,
+            }}
+          >
+            {(["climate", "governance"] as const).map((id, i) => {
+              const themeEntry = WATER_THEMES.find((t) => t.id === id)
+              const description = themeEntry?.description ?? ""
+              const label = (themeEntry?.label ?? id).replace(/\n/g, " ")
+              return (
+                <ThemeCard
+                  key={id}
+                  label={label}
+                  description={description}
+                  bg="#efefef"
+                  textColor="#444"
+                  index={i}
+                />
+              )
+            })}
+          </Box>
+        </ScrollReveal>
       </CoeqwalPanel>
       </div>
 
