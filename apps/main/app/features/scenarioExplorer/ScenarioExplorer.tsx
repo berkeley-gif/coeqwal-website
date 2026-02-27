@@ -183,10 +183,9 @@ export default function ScenarioExplorerNew() {
                     {icon}
                     <Typography
                       component="span"
-                      variant="nav"
+                      variant="subtitle2"
                       sx={{
                         fontWeight: active ? 600 : 400,
-                        fontSize: "0.75rem",
                         lineHeight: 1,
                         whiteSpace: "nowrap",
                       }}
