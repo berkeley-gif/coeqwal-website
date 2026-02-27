@@ -16,6 +16,7 @@ import {
   Box,
   Typography,
   useTheme,
+  useMediaQuery,
   CircularProgress,
   Checkbox,
   FormControlLabel,
@@ -31,6 +32,10 @@ import { HydroclimateChooser } from "../../scenarios/components"
 
 export default function ComparisonPanel() {
   const theme = useTheme()
+  // At md (900px+) there is more horizontal than vertical space, so use the
+  // standard horizontal parallel coordinates layout. Below md (tablet/phone)
+  // use the vertical layout which works better in portrait orientation.
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"))
 
   const {
     highlightedScenario,
@@ -189,6 +194,7 @@ export default function ComparisonPanel() {
       <VerticalParallelLinePlotPeak
         data={chartData}
         axes={axes}
+        orientation={isDesktop ? "horizontal" : "vertical"}
         responsive={true}
         showBaseline={highlightBaseline}
         baselineData={baselineDataForChart}
