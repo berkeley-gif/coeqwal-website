@@ -30,6 +30,7 @@ import {
 } from "@dnd-kit/sortable"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
+import { getScenarioTheme } from "../../../content/scenarios"
 
 // Transform utility - only use translate, ignore scale to prevent chip resizing
 function transformToCSS(
@@ -49,10 +50,14 @@ function SortableChip({
   id,
   label,
   onDelete,
+  backgroundColor,
+  color,
 }: {
   id: string
   label: string
   onDelete: () => void
+  backgroundColor?: string
+  color?: string
 }) {
   const theme = useTheme()
   const {
@@ -80,14 +85,14 @@ function SortableChip({
         onDelete={onDelete}
         size="small"
         sx={{
-          backgroundColor: theme.palette.grey[100],
-          color: theme.palette.blue.darkest,
+          backgroundColor: backgroundColor ?? theme.palette.grey[100],
+          color: color ?? theme.palette.blue.darkest,
           fontWeight: theme.typography.fontWeightMedium,
           "& .MuiChip-deleteIcon": {
-            color: theme.palette.grey[400],
+            color: color ? `${color}99` : theme.palette.grey[400],
             fontSize: "1rem",
             "&:hover": {
-              color: theme.palette.grey[600],
+              color: color ?? theme.palette.grey[600],
             },
           },
         }}
@@ -185,37 +190,65 @@ export default function SelectionBanner() {
               backgroundColor: theme.palette.background.paper,
               borderBottom: theme.border.light,
               px: theme.space.page.x,
-              py: theme.space.component.md,
+              py: theme.space.component.sm,
             }}
           >
-            {/* Top row: count + Clear button */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: theme.space.gap.md,
-                mb: selectedScenarios.length > 0 ? theme.space.gap.sm : 0,
-              }}
-            >
-              <Typography
-                variant="overline"
-                sx={{ color: theme.palette.grey[500], flexShrink: 0 }}
+            {/* Outer row: [count + wrapping chips] pinned to left, [Clear] pinned to right */}
+            <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={pointerWithin}
+                onDragEnd={handleDragEnd}
               >
-                {selectedScenarios.length} scenario
-                {selectedScenarios.length !== 1 ? "s" : ""} selected
-              </Typography>
+                <SortableContext items={selectedScenarios}>
+                  <Box
+                    sx={{
+                      flex: 1,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      columnGap: 1,
+                      rowGap: 0,
+                    }}
+                  >
+                    <Typography
+                      variant="overline"
+                      sx={{ color: theme.palette.grey[500], flexShrink: 0, lineHeight: 1 }}
+                    >
+                      {selectedScenarios.length} scenario
+                      {selectedScenarios.length !== 1 ? "s" : ""}:
+                    </Typography>
+
+                    {selectedScenarios.map((scenarioId) => {
+                      const themeKey = getScenarioTheme(scenarioId)
+                      const themeColors = theme.palette.waterThemes[themeKey]
+                      return (
+                        <SortableChip
+                          key={scenarioId}
+                          id={scenarioId}
+                          label={getDisplayName(scenarioId)}
+                          onDelete={() => toggleScenario(scenarioId)}
+                          backgroundColor={themeColors?.background}
+                          color={themeColors?.text}
+                        />
+                      )
+                    })}
+                    <EndDropZone />
+                  </Box>
+                </SortableContext>
+              </DndContext>
 
               <Button
                 variant="text"
                 size="small"
                 onClick={clearScenarios}
-                startIcon={<icons.Close sx={{ fontSize: 16 }} />}
+                startIcon={<icons.Close sx={{ fontSize: 14 }} />}
                 sx={{
                   color: theme.palette.grey[400],
                   minWidth: "auto",
                   flexShrink: 0,
-                  px: theme.space.component.sm,
+                  px: theme.space.component.xs,
+                  py: 0,
                   "&:hover": {
                     color: theme.palette.grey[600],
                     backgroundColor: theme.palette.grey[100],
@@ -225,34 +258,6 @@ export default function SelectionBanner() {
                 Clear
               </Button>
             </Box>
-
-            {/* Chips with dnd-kit sorting */}
-            <DndContext
-              sensors={sensors}
-              collisionDetection={pointerWithin}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={selectedScenarios}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: 1,
-                    alignItems: "center",
-                  }}
-                >
-                  {selectedScenarios.map((scenarioId) => (
-                    <SortableChip
-                      key={scenarioId}
-                      id={scenarioId}
-                      label={getDisplayName(scenarioId)}
-                      onDelete={() => toggleScenario(scenarioId)}
-                    />
-                  ))}
-                  <EndDropZone />
-                </Box>
-              </SortableContext>
-            </DndContext>
           </Box>
         </motion.div>
       )}

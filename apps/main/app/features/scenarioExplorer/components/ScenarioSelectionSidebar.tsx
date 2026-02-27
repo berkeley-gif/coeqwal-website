@@ -64,11 +64,25 @@ export default function ScenarioSelectionSidebar({
   const {
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
     showOnlyChosen,
     showDefinitions,
     setShowOnlyChosen,
     setShowDefinitions,
   } = useScenarioExplorerStore()
+
+  // Toggle all scenarios in a theme group on/off
+  const toggleTheme = (itemIds: string[]) => {
+    const allChosen = itemIds.every((id) => selectedScenarios.includes(id))
+    if (allChosen) {
+      // Deselect all in this theme
+      selectScenarios(selectedScenarios.filter((id) => !itemIds.includes(id)))
+    } else {
+      // Select all in this theme (add any missing ones, preserving order)
+      const toAdd = itemIds.filter((id) => !selectedScenarios.includes(id))
+      selectScenarios([...selectedScenarios, ...toAdd])
+    }
+  }
 
   const { scenarios, isLoading } = useScenarioList()
 
@@ -159,15 +173,33 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {scenariosByTheme.map(({ theme: themeKey, items }) => (
+        {scenariosByTheme.map(({ theme: themeKey, items }) => {
+          const themeIds = items.map(({ id }) => id)
+          const allChosen = themeIds.length > 0 && themeIds.every((id) => selectedScenarios.includes(id))
+
+          return (
           <Box key={themeKey} sx={{ mb: 1.5 }}>
-            {/* Theme badge heading */}
-            <Box sx={{ px: 1.5, py: 0.5 }}>
+            {/* Theme badge heading — click to select/deselect all in theme */}
+            <Box
+              sx={{
+                px: 1.5,
+                py: 0.5,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                cursor: "pointer",
+                borderRadius: theme.borderRadius.xs,
+                "&:hover": {
+                  backgroundColor: theme.palette.interaction.selectedBackground,
+                },
+              }}
+              onClick={() => toggleTheme(themeIds)}
+              role="button"
+              aria-label={`${allChosen ? "Deselect" : "Select"} all ${THEME_LABEL_CONFIG[themeKey].label} scenarios`}
+            >
               <ScenarioBadge
                 label={THEME_LABEL_CONFIG[themeKey].label}
-                backgroundColor={
-                  theme.palette.waterThemes[themeKey].background
-                }
+                backgroundColor={theme.palette.waterThemes[themeKey].background}
                 color={theme.palette.waterThemes[themeKey].text}
                 sx={{ display: "block" }}
               />
@@ -263,7 +295,8 @@ export default function ScenarioSelectionSidebar({
               )
             })}
           </Box>
-        ))}
+          )
+        })}
       </Box>
     </Box>
   )
