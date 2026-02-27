@@ -203,6 +203,7 @@ export default function ScenarioSelectionSidebar({
             {items.map(({ id, shortLabel }) => {
               const isChosen = selectedScenarios.includes(id)
               const color = scenarioColors?.[id]
+              const accentColor = color || theme.palette.blue.bright
 
               return (
                 <Box
@@ -211,14 +212,17 @@ export default function ScenarioSelectionSidebar({
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 0.5,
-                    px: 1,
-                    py: 0.25,
+                    gap: 0.75,
+                    pl: 1.25,
+                    pr: 1,
+                    py: 0.5,
                     cursor: "pointer",
-                    borderRadius: theme.borderRadius.xs,
+                    borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
+                    transition: "background-color 0.1s",
                     "&:hover": {
                       backgroundColor:
                         theme.palette.interaction.selectedBackground,
+                      borderLeftColor: accentColor,
                     },
                   }}
                 >
@@ -230,7 +234,7 @@ export default function ScenarioSelectionSidebar({
                     sx={{
                       padding: 0,
                       flexShrink: 0,
-                      transform: "scale(0.8)",
+                      transform: "scale(0.75)",
                     }}
                   />
 
@@ -239,7 +243,7 @@ export default function ScenarioSelectionSidebar({
                     <Box
                       aria-hidden="true"
                       sx={{
-                        width: 16,
+                        width: 14,
                         height: 3,
                         borderRadius: "2px",
                         backgroundColor: color,
@@ -249,11 +253,15 @@ export default function ScenarioSelectionSidebar({
                   )}
 
                   <Typography
-                    variant="caption"
                     sx={{
-                      lineHeight: 1.3,
-                      fontWeight: isChosen ? 600 : 400,
-                      color: theme.palette.text.primary,
+                      fontSize: "0.8125rem",
+                      lineHeight: 1.35,
+                      fontWeight: isChosen ? 500 : 400,
+                      color: isChosen
+                        ? theme.palette.text.primary
+                        : theme.palette.grey[600],
+                      transition: "color 0.1s",
+                      letterSpacing: "0.01em",
                     }}
                   >
                     {shortLabel}
