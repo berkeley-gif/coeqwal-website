@@ -43,17 +43,17 @@ const VIEW_MODES: {
   {
     mode: "comparison",
     icon: <CompareArrowsIcon sx={{ fontSize: "1rem" }} />,
-    label: "Tradeoffs view",
+    label: "Tradeoffs tool",
   },
   {
     mode: "equity",
     icon: <AppsIcon sx={{ fontSize: "1rem" }} />,
-    label: "Equity view",
+    label: "Equity tool",
   },
   {
     mode: "resilience",
     icon: <TimelineIcon sx={{ fontSize: "1rem" }} />,
-    label: "Resilience view",
+    label: "Resilience tool",
   },
 ]
 
@@ -319,6 +319,7 @@ export default function ScenarioExplorerNew() {
               ? "Equity view"
               : "Resilience view"
         }
+        subHeader={<SelectionBanner />}
         maxWidth="90vw"
         maxHeight="90vh"
       >

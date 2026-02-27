@@ -9,6 +9,7 @@
 
 import { Box, useTheme } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
+import { useScenarioExplorerStore } from "../store"
 
 function Divider() {
   const theme = useTheme()
@@ -25,6 +26,9 @@ function Divider() {
 }
 
 export function ViewModeControls() {
+  const { hydroclimatePeriod, setHydroclimatePeriod } =
+    useScenarioExplorerStore()
+
   return (
     <>
       {/* Divider - hidden under 700px when layout is stacked */}
@@ -44,6 +48,8 @@ export function ViewModeControls() {
         layout="horizontal"
         showTitle={true}
         showLabels={false}
+        value={hydroclimatePeriod}
+        onChange={setHydroclimatePeriod}
       />
     </>
   )

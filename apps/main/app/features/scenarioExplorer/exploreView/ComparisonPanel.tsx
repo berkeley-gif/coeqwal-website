@@ -1,10 +1,14 @@
 "use client"
 
 /**
- * ComparisonPanel - Tradeoffs view with scenario legend and parallel coordinates chart
+ * ComparisonPanel - Tradeoffs view with shared selection sidebar and parallel coordinates chart
  *
- * Layout: scrollable theme-grouped legend on the left, toggle controls +
- * chart on the right. Clicking a legend row highlights that scenario.
+ * Layout:
+ *   [ScenarioSelectionSidebar 240px] | [HydroclimateChooser + toggle controls + chart]
+ *
+ * The sidebar carries all scenario selection tools (checkboxes, GridControls,
+ * SelectionBanner) wired to the shared store. The right panel renders chart
+ * controls and the parallel coordinates visualization.
  */
 
 import React, { useMemo, useState } from "react"
@@ -20,40 +24,28 @@ import {
   VerticalParallelLinePlotPeak,
   type VerticalParallelLineData,
 } from "@repo/viz"
-import { ScenarioBadge, CurrentOpsIcon, CurrentOpsMultipleIcon, InfoTooltip } from "@repo/ui"
-import TogglePair from "../components/TogglePair"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
-import {
-  getScenarioTheme,
-  getScenarioShortLabel,
-  type ScenarioTheme,
-} from "../../../content/scenarios"
-import { THEME_LABEL_CONFIG } from "../../../content/themes"
-
-// ─── Theme display config ─────────────────────────────────────────────────────
-
-const THEME_ORDER: ScenarioTheme[] = ["baseline", "cws", "ag_gw", "eco", "delta"]
+import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
+import { HydroclimateChooser } from "../../scenarios/components"
 
 export default function ComparisonPanel() {
   const theme = useTheme()
 
-  // Get state and actions from store
   const {
     highlightedScenario,
     setHighlightedScenario,
     setPinnedScenarioId,
-    showDefinitions,
-    setShowDefinitions,
+    hydroclimatePeriod,
+    setHydroclimatePeriod,
   } = useScenarioExplorerStore()
 
-  // Toggle states (local UI state)
+  // Chart toggle states (local UI state — not shared across views)
   const [overlayTiers, setOverlayTiers] = useState(false)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [relativeToBaseline, setRelativeToBaseline] = useState(true)
   const [defineOutcome, setDefineOutcome] = useState(false)
 
-  // Hover state for tooltip
   const [hoveredScenario, setHoveredScenario] =
     useState<VerticalParallelLineData | null>(null)
 
@@ -67,30 +59,20 @@ export default function ComparisonPanel() {
     hasData,
   } = useComparisonData()
 
-  // Group scenarios by theme, preserving THEME_ORDER
-  const scenariosByTheme = useMemo(() => {
-    const groups = new Map<ScenarioTheme, { id: string; shortLabel: string; color: string }[]>()
-    THEME_ORDER.forEach((theme) => groups.set(theme, []))
+  // Build scenarioId → color map for the sidebar's chart legend swatches
+  const scenarioColors = useMemo(
+    () => Object.fromEntries(scenarios.map(({ id, color }) => [id, color])),
+    [scenarios],
+  )
 
-    scenarios.forEach(({ id, color }) => {
-      const theme = getScenarioTheme(id)
-      const shortLabel = getScenarioShortLabel(id)
-      const bucket = groups.get(theme)
-      if (bucket) bucket.push({ id, shortLabel, color })
-    })
-
-    // Only return themes that have at least one scenario present
-    return THEME_ORDER
-      .map((theme) => ({ theme, items: groups.get(theme) ?? [] }))
-      .filter(({ items }) => items.length > 0)
-  }, [scenarios])
-
-  const highlightedData = useMemo(() => {
-    return comparisonData.map((scenario) => ({
-      ...scenario,
-      highlighted: scenario.id === highlightedScenario,
-    }))
-  }, [comparisonData, highlightedScenario])
+  const highlightedData = useMemo(
+    () =>
+      comparisonData.map((scenario) => ({
+        ...scenario,
+        highlighted: scenario.id === highlightedScenario,
+      })),
+    [comparisonData, highlightedScenario],
+  )
 
   // Transform data to be relative to baseline when toggle is on
   const chartData = useMemo(() => {
@@ -100,14 +82,12 @@ export default function ComparisonPanel() {
       values: Object.fromEntries(
         Object.entries(scenario.values).map(([axis, value]) => [
           axis,
-          // Keep null values as null (missing data stays missing)
           value === null ? null : value - (baselineScenario.values[axis] || 0),
         ]),
       ),
     }))
   }, [highlightedData, relativeToBaseline, baselineScenario])
 
-  // Baseline data for the chart - zeroed when in relative mode
   const baselineDataForChart = useMemo(() => {
     if (!baselineScenario) return undefined
     if (relativeToBaseline) {
@@ -121,30 +101,17 @@ export default function ComparisonPanel() {
     return baselineScenario
   }, [baselineScenario, relativeToBaseline])
 
-  // Handle scenario click in chart
   const handleScenarioClick = (scenarioId: string) => {
-    // Toggle highlight
     setHighlightedScenario(
       highlightedScenario === scenarioId ? null : scenarioId,
     )
-    // Bring clicked scenario to top of list
     setPinnedScenarioId(scenarioId)
   }
 
-  const checkboxSx = {
-    padding: 0,
-    margin: 0,
-    transform: "scale(0.85)",
-  }
+  const checkboxSx = { padding: 0, margin: 0, transform: "scale(0.85)" }
 
   const toggleControls = (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 0.5,
-      }}
-    >
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
       <FormControlLabel
         control={
           <Checkbox
@@ -232,7 +199,6 @@ export default function ComparisonPanel() {
         onLineHover={setHoveredScenario}
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
       />
-      {/* Hover tooltip showing scenario name */}
       {hoveredScenario && (
         <Box
           sx={{
@@ -273,10 +239,7 @@ export default function ComparisonPanel() {
         <CircularProgress size={32} />
         <Typography
           variant="body2"
-          sx={{
-            mt: theme.space.component.lg,
-            color: theme.palette.grey[600],
-          }}
+          sx={{ mt: theme.space.component.lg, color: theme.palette.grey[600] }}
         >
           Loading comparison...
         </Typography>
@@ -310,110 +273,10 @@ export default function ComparisonPanel() {
         overflow: "hidden",
       }}
     >
-      {/* ── Left: theme-grouped scenario legend ────────────────────────────── */}
-      <Box
-        sx={{
-          width: 220,
-          flexShrink: 0,
-          overflowY: "auto",
-          borderRight: `1px solid ${theme.palette.divider}`,
-          py: theme.space.component.sm,
-        }}
-      >
-        {scenariosByTheme.map(({ theme: themeKey, items }) => (
-          <Box key={themeKey} sx={{ mb: 1.5 }}>
-            {/* Theme badge heading */}
-            <Box sx={{ px: 1.5, py: 0.5 }}>
-              <ScenarioBadge
-                label={THEME_LABEL_CONFIG[themeKey].label}
-                backgroundColor={theme.palette.waterThemes[themeKey].background}
-                color={theme.palette.waterThemes[themeKey].text}
-                sx={{ display: "block" }}
-              />
-            </Box>
+      {/* ── Left: shared scenario selection sidebar ─────────────────────────── */}
+      <ScenarioSelectionSidebar scenarioColors={scenarioColors} />
 
-            {/* Baseline-only toggle: show current ops only vs all baseline variants */}
-            {themeKey === "baseline" && (
-              <Box sx={{ px: 1.5, pb: 0.5 }}>
-                <InfoTooltip description="Show only current operations, or show all baseline variations">
-                  <Box>
-                    <TogglePair
-                      leftIcon={
-                        <CurrentOpsIcon
-                          active={!showDefinitions}
-                          size={24}
-                        />
-                      }
-                      rightIcon={
-                        <CurrentOpsMultipleIcon
-                          active={showDefinitions}
-                          size={24}
-                        />
-                      }
-                      onLeftClick={() => setShowDefinitions(false)}
-                      onRightClick={() => setShowDefinitions(true)}
-                      gap={0.5}
-                    />
-                  </Box>
-                </InfoTooltip>
-              </Box>
-            )}
-
-            {/* Scenario rows */}
-            {items.map(({ id, shortLabel, color }) => {
-              const isHighlighted = highlightedScenario === id
-              return (
-                <Box
-                  key={id}
-                  onClick={() => handleScenarioClick(id)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    px: 1.5,
-                    py: 0.5,
-                    cursor: "pointer",
-                    borderRadius: theme.borderRadius.xs,
-                    backgroundColor: isHighlighted
-                      ? theme.palette.interaction.selectedBackground
-                      : "transparent",
-                    opacity: highlightedScenario && !isHighlighted ? 0.45 : 1,
-                    transition: "background-color 0.12s, opacity 0.12s",
-                    "&:hover": {
-                      backgroundColor: theme.palette.interaction.selectedBackground,
-                      opacity: 1,
-                    },
-                  }}
-                >
-                  {/* Color swatch — short horizontal line */}
-                  <Box
-                    aria-hidden="true"
-                    sx={{
-                      width: 16,
-                      height: 3,
-                      borderRadius: "2px",
-                      backgroundColor: color,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      lineHeight: 1.3,
-                      fontWeight: isHighlighted ? 600 : 400,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
-                    {shortLabel}
-                  </Typography>
-                </Box>
-              )
-            })}
-          </Box>
-        ))}
-      </Box>
-
-      {/* ── Right: toggle controls + chart ─────────────────────────────────── */}
+      {/* ── Right: hydroclimate chooser + chart controls + chart ─────────────── */}
       <Box
         sx={{
           flex: 1,
@@ -422,7 +285,26 @@ export default function ComparisonPanel() {
           overflow: "hidden",
         }}
       >
-        {/* Toggle controls */}
+        {/* Hydroclimate chooser */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            px: theme.space.component.lg,
+            pt: theme.space.component.sm,
+            pb: theme.space.component.xs,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <HydroclimateChooser
+            layout="horizontal"
+            showTitle={true}
+            showLabels={false}
+            value={hydroclimatePeriod}
+            onChange={setHydroclimatePeriod}
+          />
+        </Box>
+
+        {/* Chart toggle controls */}
         <Box
           sx={{
             flexShrink: 0,
