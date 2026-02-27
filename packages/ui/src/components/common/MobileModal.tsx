@@ -73,6 +73,19 @@ export interface MobileModalProps {
   denseTitle?: boolean
   /** When true, removes padding from the scrollable content area. */
   noPadding?: boolean
+  /**
+   * Fixed height for the dialog (e.g. "90vh"). When provided the dialog is
+   * always exactly this tall so that children using `height: "100%"` can
+   * resolve to a definite pixel value. Without this the dialog shrinks to its
+   * content and percentage heights on children become circular/undefined.
+   */
+  height?: string | number
+  /**
+   * When true the content area uses `overflow: hidden` instead of
+   * `overflow: auto`. Use when the child panel manages its own scrolling /
+   * overflow (e.g. a full-height chart panel).
+   */
+  noContentScroll?: boolean
 }
 
 /**
@@ -86,6 +99,7 @@ export function MobileModal({
   titleId: providedTitleId,
   maxWidth = 500,
   maxHeight = "80vh",
+  height,
   showCloseButton = true,
   closeOnBackdropClick = true,
   closeOnEscape = true,
@@ -95,6 +109,7 @@ export function MobileModal({
   subHeader,
   denseTitle = false,
   noPadding = false,
+  noContentScroll = false,
 }: MobileModalProps) {
   const theme = useTheme()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -167,6 +182,7 @@ export function MobileModal({
             width: "calc(100vw - 32px)",
             maxWidth,
             maxHeight,
+            ...(height !== undefined && { height }),
             backgroundColor: theme.palette.background.paper,
             borderRadius: theme.borderRadius.md,
             boxShadow: theme.shadow.lg,
@@ -254,7 +270,8 @@ export function MobileModal({
             aria-label={contentAriaLabel}
             sx={{
               flex: 1,
-              overflowY: "auto",
+              overflowY: noContentScroll ? "hidden" : "auto",
+              overflow: noContentScroll ? "hidden" : undefined,
               p: noPadding ? 0 : theme.space.section.sm,
               // WCAG 2.4.7: Focus visible styles for scrollable region
               ...(contentAriaLabel && {

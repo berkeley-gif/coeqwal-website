@@ -323,9 +323,11 @@ export default function ScenarioExplorerNew() {
         }
         denseTitle
         noPadding
+        noContentScroll
         subHeader={<SelectionBanner />}
         maxWidth="90vw"
         maxHeight="90vh"
+        height="90vh"
       >
         {exploreMode === "comparison" && <ComparisonPanel />}
         {exploreMode === "equity" && <EquityPanel />}
