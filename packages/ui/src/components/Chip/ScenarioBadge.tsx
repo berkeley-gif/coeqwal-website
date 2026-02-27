@@ -42,8 +42,10 @@ export function ScenarioBadge({
         px: "5px",
         py: "1.5px",
         borderRadius: "2px",
-        lineHeight: 1.4,
+        lineHeight: 1.2,
         flexShrink: 0,
+        boxDecorationBreak: "clone",
+        WebkitBoxDecorationBreak: "clone",
         ...sx,
       }}
     >
