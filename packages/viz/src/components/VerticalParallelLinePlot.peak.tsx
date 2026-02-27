@@ -74,10 +74,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Centralized filtering function - separate opacity for lines vs circles
   const getScenarioOpacity = useCallback(
     (scenario: VerticalParallelLineData, elementType: "line" | "circle") => {
-      // Check if scenario passes all active filters
+      // Check if scenario passes all active filters.
+      // A filter at its default [-1, 1] is treated as "no filter applied" —
+      // this prevents false-dimming when values exceed ±1 in relative mode.
       const passesAllFilters = axes.every((axis) => {
         const filter = filterRanges.current[axis]
         if (!filter) return true
+        if (filter[0] === -1 && filter[1] === 1) return true // default = no filter
 
         const value = scenario.values[axis]
         if (value == null) return true // Null/undefined values pass filters
@@ -101,6 +104,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       return axes.every((axis) => {
         const filter = filterRanges.current[axis]
         if (!filter) return true
+        if (filter[0] === -1 && filter[1] === 1) return true // default = no filter
 
         const value = scenario.values[axis]
         if (value == null) return true // Null/undefined values pass filters

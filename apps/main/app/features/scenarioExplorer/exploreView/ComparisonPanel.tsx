@@ -74,7 +74,11 @@ export default function ComparisonPanel() {
     [comparisonData, highlightedScenario],
   )
 
-  // Transform data to be relative to baseline when toggle is on
+  // Transform data to be relative to baseline when toggle is on.
+  // Both values are in [-1, 1] (mapped from normalized_score in [0,1] via ns*2-1),
+  // so their raw difference spans [-2, 2]. Dividing by 2 keeps the result in [-1, 1],
+  // which is equivalent to (scenario_ns - baseline_ns) — the direct difference in
+  // normalized scores. Zero = same as baseline; ±1 = maximum possible divergence.
   const chartData = useMemo(() => {
     if (!relativeToBaseline || !baselineScenario) return highlightedData
     return highlightedData.map((scenario) => ({
@@ -82,7 +86,7 @@ export default function ComparisonPanel() {
       values: Object.fromEntries(
         Object.entries(scenario.values).map(([axis, value]) => [
           axis,
-          value === null ? null : value - (baselineScenario.values[axis] || 0),
+          value === null ? null : (value - (baselineScenario.values[axis] ?? 0)) / 2,
         ]),
       ),
     }))
