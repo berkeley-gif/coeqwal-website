@@ -65,6 +65,14 @@ export interface MobileModalProps {
    * Use this for full-bleed bars like SelectionBanner.
    */
   subHeader?: React.ReactNode
+  /**
+   * When true, reduces the title row to eyebrow-scale vertical padding.
+   * Use when the title is a small label (e.g. overline variant) rather than
+   * a full heading.
+   */
+  denseTitle?: boolean
+  /** When true, removes padding from the scrollable content area. */
+  noPadding?: boolean
 }
 
 /**
@@ -85,6 +93,8 @@ export function MobileModal({
   contentAriaLabel,
   stickyHeader,
   subHeader,
+  denseTitle = false,
+  noPadding = false,
 }: MobileModalProps) {
   const theme = useTheme()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -167,15 +177,19 @@ export function MobileModal({
             outline: "none",
           }}
         >
-          {/* Header (only if title or close button) */}
+          {/* Header — full strip when title present, close-only slim strip otherwise */}
           {(title || showCloseButton) && (
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: title ? "space-between" : "flex-end",
-                // No title: zero padding since close button is absolutely positioned
-                p: title ? theme.space.section.sm : 0,
+                px: theme.space.section.sm,
+                py: !title
+                  ? theme.space.component.xs
+                  : denseTitle
+                    ? theme.space.component.xs
+                    : theme.space.section.sm,
                 borderBottom: title
                   ? `1px solid ${theme.palette.divider}`
                   : "none",
@@ -200,15 +214,6 @@ export function MobileModal({
                   onClick={onClose}
                   size="small"
                   aria-label="Close"
-                  sx={
-                    !title
-                      ? {
-                          position: "absolute",
-                          top: theme.space.component.sm,
-                          right: theme.space.component.sm,
-                        }
-                      : undefined
-                  }
                 >
                   <CloseIcon />
                 </IconButton>
@@ -250,7 +255,7 @@ export function MobileModal({
             sx={{
               flex: 1,
               overflowY: "auto",
-              p: theme.space.section.sm,
+              p: noPadding ? 0 : theme.space.section.sm,
               // WCAG 2.4.7: Focus visible styles for scrollable region
               ...(contentAriaLabel && {
                 "&:focus-visible": {

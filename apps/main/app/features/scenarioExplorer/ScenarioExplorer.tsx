@@ -313,12 +313,16 @@ export default function ScenarioExplorerNew() {
         open={isAnalysisMode}
         onClose={closeAnalysisModal}
         title={
-          exploreMode === "comparison"
-            ? "Tradeoffs view"
-            : exploreMode === "equity"
-              ? "Equity view"
-              : "Resilience view"
+          <Typography variant="overline" sx={{ color: theme.palette.text.primary }}>
+            {exploreMode === "comparison"
+              ? "Tradeoffs view"
+              : exploreMode === "equity"
+                ? "Equity view"
+                : "Resilience view"}
+          </Typography>
         }
+        denseTitle
+        noPadding
         subHeader={<SelectionBanner />}
         maxWidth="90vw"
         maxHeight="90vh"
