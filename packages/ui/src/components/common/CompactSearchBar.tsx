@@ -91,16 +91,15 @@ export function CompactSearchBar({
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
-          gap: theme.space.gap.md,
+          gap: theme.space.gap.sm,
         }}
       >
         {showLabel && (
           <Typography
-            variant="caption"
+            variant="subtitle2"
             component="label"
             htmlFor={inputId}
             sx={{
-              fontWeight: theme.typography.fontWeightMedium,
               color: theme.palette.grey[900],
             }}
           >

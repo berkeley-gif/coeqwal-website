@@ -76,7 +76,7 @@ export function HydroclimateChooser({
   layout = "horizontal",
   showLabels = false,
   showTitle = true,
-  iconSize = "44px",
+  iconSize = "40px",
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -95,7 +95,7 @@ export function HydroclimateChooser({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: theme.space.gap.md,
+        gap: theme.space.gap.sm,
         flexShrink: 0,
       }}
     >

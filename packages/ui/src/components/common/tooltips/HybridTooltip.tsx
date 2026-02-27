@@ -102,7 +102,9 @@ const getTooltipSlotProps = (
 ) => ({
   popper: {
     sx: {
-      zIndex: theme.zIndex.tooltip,
+      // Use tooltipAboveModal so tooltips inside modals (modal z-index: 110)
+      // still appear above them. tooltipAboveModal (120) > modal (110) > tooltip (100).
+      zIndex: theme.zIndex.tooltipAboveModal,
     },
   },
   tooltip: {
@@ -166,7 +168,7 @@ export function HybridTooltip({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            zIndex: theme.zIndex.tooltip,
+            zIndex: theme.zIndex.tooltipAboveModal,
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             boxShadow: theme.shadow.lg,
@@ -254,23 +256,23 @@ export function HybridTooltip({
         {children}
         {open && (
           <Box
-            sx={{
-              position: "fixed",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: theme.zIndex.tooltip,
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              boxShadow: theme.shadow.lg,
-              borderRadius: theme.borderRadius.md,
-              width,
-              maxWidth,
-              py: theme.space.component.md,
-              px: theme.space.component.lg,
-              ...theme.typography.compactSubtitle,
-              pointerEvents: "auto",
-            }}
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: theme.zIndex.tooltipAboveModal,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            boxShadow: theme.shadow.lg,
+            borderRadius: theme.borderRadius.md,
+            width,
+            maxWidth,
+            py: theme.space.component.md,
+            px: theme.space.component.lg,
+            ...theme.typography.compactSubtitle,
+            pointerEvents: "auto",
+          }}
             onMouseEnter={() => setOpen(true)}
             onMouseLeave={() => setOpen(false)}
           >

@@ -315,10 +315,10 @@ export default function ScenarioExplorerNew() {
         title={
           <Typography variant="overline" sx={{ color: theme.palette.text.primary }}>
             {exploreMode === "comparison"
-              ? "Tradeoffs view"
+              ? "Tradeoffs tool"
               : exploreMode === "equity"
-                ? "Equity view"
-                : "Resilience view"}
+                ? "Equity tool"
+                : "Resilience tool"}
           </Typography>
         }
         denseTitle
