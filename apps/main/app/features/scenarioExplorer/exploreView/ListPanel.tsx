@@ -81,7 +81,7 @@ export default function ListPanel({
       }}
     >
       <ListView
-        compact={exploreMode !== "list"}
+        compact={exploreMode === "map"}
         onTierClick={exploreMode === "map" ? handleTierClick : undefined}
         isExpanded={isExpanded}
         onCloseExpand={onCloseExpand}

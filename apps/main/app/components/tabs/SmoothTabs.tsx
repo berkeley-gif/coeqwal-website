@@ -49,8 +49,15 @@ function TabDescription({
         <TwoColumnInterstitial
           headline="What if we managed water differently?"
           body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California's water future."
-          linkListLabel=""
-          links={[]}
+          linkListLabel="Explore how critical water issues are addressed"
+          links={[
+            { label: "Community water systems" },
+            { label: "Farms, groundwater, and food systems" },
+            { label: "Rivers, salmon, and ecosystems" },
+            { label: "The Delta as a living place" },
+            { label: "Climate risk, reliability, and resilience" },
+            { label: "Water governance and decision-making" },
+          ]}
         />
       )
     case "share":
