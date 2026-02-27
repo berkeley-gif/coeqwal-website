@@ -11,6 +11,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioList } from "../../../scenarios/hooks/useScenarioList"
 import { HydroclimateChooser } from "../../../scenarios/components"
 import { OperationsIconGroup } from "../../../scenarios/components/shared"
+import { useScenarioExplorerStore } from "../../../scenarioExplorer/store"
 
 interface KeyOperationsPanelProps {
   scenarioId?: string
@@ -24,6 +25,7 @@ export function KeyOperationsPanel({
   const theme = useTheme()
   const { getScenario, isLoading } = useScenarioList()
   const scenario = getScenario(scenarioId)
+  const { hydroclimatePeriod, setHydroclimatePeriod } = useScenarioExplorerStore()
 
   if (isLoading) {
     return (
@@ -65,7 +67,7 @@ export function KeyOperationsPanel({
             onClick={onTitleClick}
             sx={{
               ...theme.scenarios.panelTitle,
-              mb: theme.space.component.sm,
+              mb: theme.space.component.xs,
             }}
           >
             Key operations
@@ -90,23 +92,13 @@ export function KeyOperationsPanel({
         />
 
         {/* Hydroclimate section */}
-        <Box>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              ...theme.scenarios.panelTitle,
-              mb: theme.space.component.sm,
-            }}
-          >
-            View by climate
-          </Typography>
-          <HydroclimateChooser
-            layout="horizontal"
-            showTitle={false}
-            showLabels={false}
-            iconSize={theme.spacing(5)}
-          />
-        </Box>
+        <HydroclimateChooser
+          layout="horizontal"
+          showTitle={true}
+          showLabels={false}
+          value={hydroclimatePeriod}
+          onChange={setHydroclimatePeriod}
+        />
       </Box>
     </Box>
   )

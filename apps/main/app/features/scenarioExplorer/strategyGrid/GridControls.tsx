@@ -71,7 +71,7 @@ export function GridControls({
         }}
       />
 
-      <InfoTooltip description="Show current baseline or show all baseline variations">
+      <InfoTooltip description="Show current operations or show all baseline variations">
         <Box>
           <TogglePair
             leftIcon={

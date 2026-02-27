@@ -21,12 +21,7 @@
 
 import React, { useMemo } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
-import {
-  ScenarioBadge,
-  CurrentOpsIcon,
-  CurrentOpsMultipleIcon,
-  InfoTooltip,
-} from "@repo/ui"
+import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import {
@@ -36,7 +31,6 @@ import {
 } from "../../../content/scenarios"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import GridControls from "../strategyGrid/GridControls"
-import TogglePair from "./TogglePair"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -204,33 +198,6 @@ export default function ScenarioSelectionSidebar({
                 sx={{ display: "block" }}
               />
             </Box>
-
-            {/* Baseline-only toggle: current ops / all baselines */}
-            {themeKey === "baseline" && (
-              <Box sx={{ px: 1.5, pb: 0.5 }}>
-                <InfoTooltip description="Show only current operations, or show all baseline variations">
-                  <Box>
-                    <TogglePair
-                      leftIcon={
-                        <CurrentOpsIcon
-                          active={!showDefinitions}
-                          size={22}
-                        />
-                      }
-                      rightIcon={
-                        <CurrentOpsMultipleIcon
-                          active={showDefinitions}
-                          size={22}
-                        />
-                      }
-                      onLeftClick={() => setShowDefinitions(false)}
-                      onRightClick={() => setShowDefinitions(true)}
-                      gap={0.5}
-                    />
-                  </Box>
-                </InfoTooltip>
-              </Box>
-            )}
 
             {/* Scenario rows */}
             {items.map(({ id, shortLabel }) => {

@@ -155,7 +155,7 @@ export function KeyOutcomesPanel({
         onClick={onTitleClick}
         sx={{
           ...theme.scenarios.panelTitle,
-          mb: theme.space.component.sm,
+          mb: theme.space.component.md,
         }}
       >
         Key outcomes
@@ -164,7 +164,7 @@ export function KeyOutcomesPanel({
       {/* Multiple location outcomes - first 5 */}
       <Typography
         variant="smallSectionLabel"
-        sx={{ mb: theme.space.component.sm }}
+        sx={{ mb: theme.space.component.md }}
       >
         Multiple location outcomes
       </Typography>
@@ -183,7 +183,7 @@ export function KeyOutcomesPanel({
       {/* Single location outcomes - last 4 */}
       <Typography
         variant="smallSectionLabel"
-        sx={{ mb: theme.space.component.sm }}
+        sx={{ mb: theme.space.component.md }}
       >
         Single location outcomes
       </Typography>

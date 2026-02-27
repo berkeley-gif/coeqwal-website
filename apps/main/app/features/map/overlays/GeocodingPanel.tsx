@@ -173,7 +173,7 @@ export function GeocodingPanel({
     >
       <Typography
         variant="body1"
-        sx={{ mb: theme.space.component.lg, color: theme.palette.grey[900] }}
+        sx={{ mb: theme.space.component.xs, color: theme.palette.grey[900] }}
       >
         Find my basin
       </Typography>

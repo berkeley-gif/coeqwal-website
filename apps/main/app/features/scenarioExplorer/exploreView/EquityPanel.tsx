@@ -62,7 +62,7 @@ export default function EquityPanel() {
             flexShrink: 0,
             px: theme.space.component.lg,
             pt: theme.space.component.sm,
-            pb: theme.space.component.xs,
+            pb: theme.space.component.lg,
             borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >

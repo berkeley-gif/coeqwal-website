@@ -59,7 +59,7 @@ export default function ComparisonPanel() {
     hasData,
   } = useComparisonData()
 
-  // Build scenarioId → color map for the sidebar's chart legend swatches
+  // Build scenarioId, gives color map for the sidebar's chart legend swatches
   const scenarioColors = useMemo(
     () => Object.fromEntries(scenarios.map(({ id, color }) => [id, color])),
     [scenarios],
@@ -291,7 +291,7 @@ export default function ComparisonPanel() {
             flexShrink: 0,
             px: theme.space.component.lg,
             pt: theme.space.component.sm,
-            pb: theme.space.component.xs,
+            pb: theme.space.component.lg,
             borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >

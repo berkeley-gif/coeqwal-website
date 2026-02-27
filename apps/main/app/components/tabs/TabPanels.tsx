@@ -55,14 +55,14 @@ export default function TabPanels() {
     const params = new URLSearchParams(searchParams.toString())
 
     if (isInTabsArea) {
-      // We are in the tabs area → ensure ?tab=<activeTab>
+      // We are in the tabs area  to  ensure ?tab=<activeTab>
       if (urlTab !== activeTab) {
         params.set("tab", activeTab)
         const query = params.toString()
         router.replace(query ? `?${query}` : "?", { scroll: false })
       }
     } else if (!isInTabsArea && urlTab) {
-      // We are outside the tabs area → remove ?tab if it exists
+      // We are outside the tabs area  to  remove ?tab if it exists
       params.delete("tab")
       const query = params.toString()
       router.replace(query ? `?${query}` : "?", { scroll: false })

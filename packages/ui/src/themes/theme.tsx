@@ -834,7 +834,7 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // Mobile (3.5rem / 56px) → Desktop (5rem / 80px)
+      // Mobile (3.5rem / 56px)  to  Desktop (5rem / 80px)
       fontSize: "clamp(3.6rem, 1.5rem + 4vw, 5rem)",
       fontWeight: 600,
       lineHeight: 1,
@@ -855,7 +855,7 @@ const theme = createTheme({
     // h2Main - Main site specific h2 variant with larger mobile size
     h2Main: {
       fontFamily: themeValues.fontFamily.display,
-      // Mobile (2.6rem / 41.6px) → Desktop (3.6rem / 57.6px)
+      // Mobile (2.6rem / 41.6px)  to  Desktop (3.6rem / 57.6px)
       fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)",
       fontWeight: 500,
       lineHeight: 1.05,
@@ -877,7 +877,7 @@ const theme = createTheme({
     },
     h5: {
       fontFamily: themeValues.fontFamily.display,
-      // Responsive section heading: mobile (1.7rem/27.2px) → desktop (2.1rem/33.6px)
+      // Responsive section heading: mobile (1.7rem/27.2px)  to  desktop (2.1rem/33.6px)
       fontSize: "clamp(1.7rem, 1.1rem + 1.5vw, 2.1rem)",
       fontWeight: 600,
       letterSpacing: "0.01rem",

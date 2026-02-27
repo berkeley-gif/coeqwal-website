@@ -288,7 +288,7 @@ const IntroSection = () => {
     <Box ref={containerRef} sx={{ pointerEvents: "auto" }}>
       {/* Morphing headline — fixed overlay, upper-left.
           panelBoundaries is geometry-driven via useMeetingProgress.
-          crossfadeAt synchronises the 0→1 fade precisely at the panel border.
+          crossfadeAt synchronises the 0 to 1 fade precisely at the panel border.
           No exitRange: the final headline ("What water issues") stays fixed —
           it is the terminal state of the morph sequence. */}
       <MorphingHeadline
