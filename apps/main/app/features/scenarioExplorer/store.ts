@@ -58,6 +58,9 @@ interface ScenarioExplorerState {
   // Display options
   showDefinitions: boolean
 
+  // Hydroclimate period selection (shared across all views)
+  hydroclimatePeriod: string
+
   // Tier selection (for map visualization)
   selectedTier: { strategy: string; outcome: string } | null
 }
@@ -93,6 +96,9 @@ interface ScenarioExplorerActions {
   // Display options
   setShowDefinitions: (show: boolean) => void
 
+  // Hydroclimate period
+  setHydroclimatePeriod: (period: string) => void
+
   // Tier selection
   setSelectedTier: (tier: { strategy: string; outcome: string } | null) => void
 
@@ -121,6 +127,7 @@ const initialState: ScenarioExplorerState = {
   showThemeBadges: false,
   selectedIconId: null,
   showDefinitions: false,
+  hydroclimatePeriod: "historical",
   selectedTier: null,
 }
 
@@ -214,6 +221,12 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowDefinitions: (show) =>
       set((state) => {
         state.showDefinitions = show
+      }),
+
+    // Hydroclimate period
+    setHydroclimatePeriod: (period) =>
+      set((state) => {
+        state.hydroclimatePeriod = period
       }),
 
     // Tier selection

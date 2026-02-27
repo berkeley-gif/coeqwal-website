@@ -59,6 +59,12 @@ export interface MobileModalProps {
   contentAriaLabel?: string
   /** Content to render in a fixed (non-scrolling) area below the title */
   stickyHeader?: React.ReactNode
+  /**
+   * Content to render between the title row and the content area with zero
+   * container padding. The child controls all its own spacing and borders.
+   * Use this for full-bleed bars like SelectionBanner.
+   */
+  subHeader?: React.ReactNode
 }
 
 /**
@@ -78,6 +84,7 @@ export function MobileModal({
   zIndex: providedZIndex,
   contentAriaLabel,
   stickyHeader,
+  subHeader,
 }: MobileModalProps) {
   const theme = useTheme()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -207,6 +214,11 @@ export function MobileModal({
                 </IconButton>
               )}
             </Box>
+          )}
+
+          {/* Zero-padding sub-header. Child controls all spacing/borders */}
+          {subHeader && (
+            <Box sx={{ flexShrink: 0 }}>{subHeader}</Box>
           )}
 
           {/* Sticky header area (non-scrolling) */}

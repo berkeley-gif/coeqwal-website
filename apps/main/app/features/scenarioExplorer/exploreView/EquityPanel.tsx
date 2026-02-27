@@ -1,43 +1,29 @@
 "use client"
 
 /**
- * EquityPanel - Left panel for equity tool
+ * EquityPanel - Equity analysis view
  *
- * This panel provides:
- * - Search bar
- * - Hydroclimate chooser
- * - Expandable modal view
- * - Selection banner, for already selected scenarios
+ * Layout:
+ *   [ScenarioSelectionSidebar 240px] | [HydroclimateChooser + equity tool content]
  *
- * But you can use whatever you like. It's like moving into a new apartment,
- * with some take it or leave it furniture left behind by the previous tenant.
- *
- * The map is displayed on the right side (handled by ScenarioExplorer layout).
+ * The map is displayed behind/alongside via the map store (activated on mount).
+ * All scenario selection tools are in the shared sidebar, wired to the store.
  */
 
-import React, { useState, useEffect } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  IconButton,
-  Tooltip,
-  icons,
-} from "@repo/ui/mui"
-import { MobileModal, CompactSearchBar } from "@repo/ui"
-import SelectionBanner from "../components/SelectionBanner"
-import { ViewModeControls } from "../components/ViewModeControls"
+import React, { useEffect } from "react"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { HydroclimateChooser } from "../../scenarios/components"
+import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
+import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
 
 export default function EquityPanel() {
   const theme = useTheme()
 
-  // Local UI state
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
+  const { hydroclimatePeriod, setHydroclimatePeriod } =
+    useScenarioExplorerStore()
 
   // Activate map when this panel is mounted
-  // Set panel width to 66.67% (2/3) so map centers in remaining 1/3
   useEffect(() => {
     mapActions.setExplorePanelWidth(66.67)
     mapActions.setMapMode("explore")
@@ -45,81 +31,63 @@ export default function EquityPanel() {
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
-      mapActions.setExplorePanelWidth(50) // Reset to default
+      mapActions.setExplorePanelWidth(50)
     }
   }, [])
 
-  // Toolbar with search + hydroclimate chooser
-  const toolbar = (
-    <CompactSearchBar
-      value={searchQuery}
-      onChange={setSearchQuery}
-      placeholder="Search..."
-      inputMaxWidth="165px"
-      leftContent={
-        !isExpanded && (
-          <Tooltip title="Expand" arrow>
-            <IconButton
-              size="small"
-              onClick={() => setIsExpanded(true)}
-              sx={{
-                color: theme.palette.grey[500],
-                "&:hover": {
-                  color: theme.palette.grey[700],
-                  backgroundColor: "rgba(0,0,0,0.04)",
-                },
-              }}
-            >
-              <icons.OpenInFull sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
-        )
-      }
-      rightContent={<ViewModeControls />}
-    />
-  )
-
-  // Panel content (shared between viewport and expanded views)
-  const panelContent = (
+  return (
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "row",
         height: "100%",
         overflow: "hidden",
       }}
     >
-      {/* Selection banner */}
-      <SelectionBanner />
+      {/* ── Left: shared scenario selection sidebar ─────────────────────────── */}
+      <ScenarioSelectionSidebar />
 
-      {/* Search toolbar */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
-        {toolbar}
-      </Box>
-
-      {/* Main content area */}
+      {/* ── Right: hydroclimate chooser + equity tool ───────────────────────── */}
       <Box
         sx={{
           flex: 1,
-          overflow: "auto",
-          px: "20px",
-          py: theme.space.component.lg,
-          backgroundColor: theme.palette.grey[100],
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         }}
       >
-        {/* Placeholder for equity tool content */}
-        <Box>
+        {/* Hydroclimate chooser */}
+        <Box
+          sx={{
+            flexShrink: 0,
+            px: theme.space.component.lg,
+            pt: theme.space.component.sm,
+            pb: theme.space.component.xs,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <HydroclimateChooser
+            layout="horizontal"
+            showTitle={true}
+            showLabels={false}
+            value={hydroclimatePeriod}
+            onChange={setHydroclimatePeriod}
+          />
+        </Box>
+
+        {/* Equity tool content */}
+        <Box
+          sx={{
+            flex: 1,
+            overflow: "auto",
+            px: theme.space.component.lg,
+            py: theme.space.component.lg,
+            backgroundColor: theme.palette.grey[100],
+          }}
+        >
           <Typography
             variant="h6"
-            sx={{
-              color: theme.palette.grey[500],
-              mb: theme.space.component.md,
-            }}
+            sx={{ color: theme.palette.grey[500], mb: theme.space.component.md }}
           >
             Equity tool
           </Typography>
@@ -131,51 +99,5 @@ export default function EquityPanel() {
         </Box>
       </Box>
     </Box>
-  )
-
-  return (
-    <>
-      {/* Viewport view */}
-      <Box
-        sx={{
-          display: isExpanded ? "none" : "flex",
-          flexDirection: "column",
-          height: "100%",
-          overflow: "hidden",
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
-        {panelContent}
-      </Box>
-
-      {/* Expanded modal view */}
-      <MobileModal
-        open={isExpanded}
-        onClose={() => setIsExpanded(false)}
-        title={
-          <Box
-            component="span"
-            sx={{
-              ...theme.typography.subtitle2,
-              color: theme.palette.text.primary,
-            }}
-          >
-            Equity tool
-          </Box>
-        }
-        maxWidth="90vw"
-        maxHeight="90vh"
-        contentAriaLabel="Equity tool expanded view"
-      >
-        <Box
-          sx={{
-            height: "80vh",
-            overflow: "hidden",
-          }}
-        >
-          {panelContent}
-        </Box>
-      </MobileModal>
-    </>
   )
 }
