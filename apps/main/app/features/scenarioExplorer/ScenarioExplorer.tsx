@@ -8,6 +8,7 @@
 import React, { useState } from "react"
 import {
   Box,
+  Divider,
   IconButton,
   Tooltip,
   Typography,
@@ -16,7 +17,8 @@ import {
   ViewListIcon,
   CompareArrowsIcon,
   AppsIcon,
-  TimelineIcon,
+  AutorenewIcon,
+  InsightsIcon,
 } from "@repo/ui/mui"
 import { MobileModal } from "@repo/ui"
 import ListPanel from "./exploreView"
@@ -27,33 +29,44 @@ import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import { useScenarioExplorerStore, type ExploreMode } from "./store"
+import { SIDEBAR_WIDTH } from "./components/ScenarioSelectionSidebar"
+
+// px value of theme.space.section.sm (= 3 * 8px = 24px) used in the modal
+// title row. The divider must be placed at SIDEBAR_WIDTH - TITLE_ROW_PX so it
+// lands directly above the sidebar/chart border in the content area below.
+const TITLE_ROW_PX = 24
 
 // ─── View mode button definitions ────────────────────────────────────────────
 
 const VIEW_MODES: {
-  mode: ExploreMode
+  mode: ExploreMode | "data"
   icon: React.ReactNode
   label: string
 }[] = [
   {
     mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1rem" }} />,
+    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Scenario list",
   },
   {
     mode: "comparison",
-    icon: <CompareArrowsIcon sx={{ fontSize: "1rem" }} />,
+    icon: <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Tradeoffs tool",
   },
   {
     mode: "equity",
-    icon: <AppsIcon sx={{ fontSize: "1rem" }} />,
+    icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Equity tool",
   },
   {
     mode: "resilience",
-    icon: <TimelineIcon sx={{ fontSize: "1rem" }} />,
+    icon: <AutorenewIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Resilience tool",
+  },
+  {
+    mode: "data",
+    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Explore data in depth",
   },
 ]
 
@@ -105,128 +118,72 @@ export default function ScenarioExplorerNew() {
           flexShrink: 0,
           pointerEvents: "auto",
           display: "flex",
+          alignItems: "center",
+          justifyContent: "space-evenly",
           width: "100%",
+          height: theme.layout.collapsedTabHeight,
+          background: theme.palette.tabPanels.explore,
+          ...theme.typography.nav,
+          lineHeight: 1,
+          color: theme.palette.common.white,
         }}
       >
-        {/* "Filter scenarios" tab — contains view mode buttons inline */}
-        {/* Uses div (not button) because it contains clickable children */}
-        <Box
-          role="tab"
-          aria-selected={mainView === "explorer"}
-          tabIndex={mainView === "explorer" ? 0 : -1}
-          onClick={() => setMainView("explorer")}
-          sx={{
-            flex: 1,
-            position: "relative",
-            padding: "8px 20px",
-            border: "none",
-            background: theme.palette.explore.background,
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            fontFamily: theme.typography.h1.fontFamily,
-            fontWeight: 600,
-            fontSize: "1.3rem",
-            lineHeight: 1.1,
-            textTransform: "capitalize",
-            color: theme.palette.blue.darkest,
-            transition: "opacity 0.15s ease",
-            opacity: mainView === "explorer" ? 1 : 0.7,
-            "&:hover": { opacity: 1 },
-          }}
-        >
-          Filter scenarios
-          {/* View mode icon+text buttons */}
-          {mainView === "explorer" && (
+        {VIEW_MODES.map(({ mode, icon, label }) => {
+          const active =
+            mode === "data"
+              ? mainView === "data"
+              : exploreMode === mode && mainView === "explorer"
+          return (
             <Box
+              key={mode}
+              component="button"
+              onClick={() => {
+                if (mode === "data") {
+                  setMainView("data")
+                } else {
+                  setMainView("explorer")
+                  setExploreMode(mode as ExploreMode)
+                }
+              }}
+              aria-pressed={active}
+              aria-label={label}
               sx={{
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
                 gap: 0.5,
+                px: 1.25,
+                py: 0.5,
+                border: "none",
+                borderRadius: theme.borderRadius.sm ?? "4px",
+                cursor: "pointer",
+                background: active
+                  ? "rgba(255,255,255,0.2)"
+                  : "transparent",
+                color: theme.palette.common.white,
+                textShadow: "none",
+                transition: "background-color 0.15s",
+                "&:hover": {
+                  background: "rgba(255,255,255,0.15)",
+                },
               }}
-              onClick={(e) => e.stopPropagation()}
             >
-              {VIEW_MODES.map(({ mode, icon, label }) => {
-                const active = exploreMode === mode
-                return (
-                  <Box
-                    key={mode}
-                    component="button"
-                    onClick={() => setExploreMode(mode)}
-                    aria-pressed={active}
-                    aria-label={label}
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      px: 1.25,
-                      py: 0.5,
-                      border: "none",
-                      borderRadius: theme.borderRadius.sm ?? "4px",
-                      cursor: "pointer",
-                      background: active
-                        ? theme.palette.interaction.selectedBackground
-                        : "transparent",
-                      color: active
-                        ? theme.palette.blue.bright
-                        : theme.palette.blue.darkest,
-                      opacity: active ? 1 : 0.55,
-                      transition: "opacity 0.15s, background-color 0.15s",
-                      "&:hover": {
-                        opacity: 1,
-                        background:
-                          theme.palette.interaction.selectedBackground,
-                      },
-                    }}
-                  >
-                    {icon}
-                    <Typography
-                      component="span"
-                      variant="subtitle2"
-                      sx={{
-                        fontWeight: active ? 600 : 400,
-                        lineHeight: 1,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {label}
-                    </Typography>
-                  </Box>
-                )
-              })}
+              {icon}
+              <Typography
+                component="span"
+                variant="subtitle2"
+                sx={{
+                  fontWeight: active ? 600 : 400,
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  color: "inherit",
+                  textShadow: "none",
+                }}
+              >
+                {label}
+              </Typography>
             </Box>
-          )}
-        </Box>
-
-        {/* "Explore data in depth" tab */}
-        <Box
-          component="button"
-          role="tab"
-          aria-selected={mainView === "data"}
-          tabIndex={mainView === "data" ? 0 : -1}
-          onClick={() => setMainView("data")}
-          sx={{
-            flex: 1,
-            position: "relative",
-            padding: "8px 20px",
-            border: "none",
-            background: theme.palette.share.background,
-            cursor: "pointer",
-            textAlign: "left",
-            fontFamily: theme.typography.h1.fontFamily,
-            fontWeight: 600,
-            fontSize: "1.3rem",
-            lineHeight: 1.1,
-            textTransform: "capitalize",
-            color: theme.palette.blue.darkest,
-            transition: "opacity 0.15s ease",
-            opacity: mainView === "data" ? 1 : 0.7,
-            "&:hover": { opacity: 1 },
-          }}
-        >
-          Explore data in depth
-        </Box>
+          )
+        })}
       </Box>
 
       {/* ── Content area (always full-width list + map behind) ─────────────── */}
@@ -313,16 +270,94 @@ export default function ScenarioExplorerNew() {
         open={isAnalysisMode}
         onClose={closeAnalysisModal}
         title={
-          <Typography
-            variant="overline"
-            sx={{ color: theme.palette.text.primary }}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              mr: -1,
+            }}
           >
-            {exploreMode === "comparison"
-              ? "Tradeoffs tool"
-              : exploreMode === "equity"
-                ? "Equity tool"
-                : "Resilience tool"}
-          </Typography>
+            {/* Tool name — fixed width aligns the divider with the sidebar border */}
+            <Box sx={{ width: SIDEBAR_WIDTH - TITLE_ROW_PX, flexShrink: 0 }}>
+              <Typography
+                variant="overline"
+                sx={{ color: theme.palette.text.primary }}
+              >
+                {exploreMode === "comparison"
+                  ? "Tradeoffs tool"
+                  : exploreMode === "equity"
+                    ? "Equity tool"
+                    : "Resilience tool"}
+              </Typography>
+            </Box>
+
+            {/* Vertical divider — lands above the sidebar/chart border */}
+            <Divider orientation="vertical" flexItem sx={{ mr: 1 }} />
+
+            {/* View mode buttons — same style as the "Filter scenarios" nav */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                flex: 1,
+                overflow: "hidden",
+              }}
+            >
+              {VIEW_MODES.filter((v) => v.mode !== "data").map(
+                ({ mode, icon, label }) => {
+                const active = exploreMode === mode
+                return (
+                  <Box
+                    key={mode}
+                    component="button"
+                    onClick={() => setExploreMode(mode as ExploreMode)}
+                    aria-pressed={active}
+                    aria-label={label}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      px: 1.25,
+                      py: 0.5,
+                      border: "none",
+                      borderRadius: theme.borderRadius.sm ?? "4px",
+                      cursor: "pointer",
+                      background: active
+                        ? theme.palette.interaction.selectedBackground
+                        : "transparent",
+                      color: active
+                        ? theme.palette.blue.bright
+                        : theme.palette.blue.darkest,
+                      opacity: active ? 1 : 0.55,
+                      textShadow: "none",
+                      transition: "opacity 0.15s, background-color 0.15s",
+                      "&:hover": {
+                        opacity: 1,
+                        background:
+                          theme.palette.interaction.selectedBackground,
+                      },
+                    }}
+                  >
+                    {icon}
+                    <Typography
+                      component="span"
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: active ? 600 : 400,
+                        lineHeight: 1,
+                        whiteSpace: "nowrap",
+                        textShadow: "none",
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
+          </Box>
         }
         denseTitle
         noPadding

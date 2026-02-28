@@ -13,7 +13,7 @@
  *   baseline   interpolateYlOrBr   warm oranges and browns
  *   ag_gw      interpolateYlGn     medium to dark greens
  *   eco        interpolateGnBu     teal through blue
- *   delta      interpolatePuBu     slate through navy
+ *   delta      interpolateBuPu     mid blue through deep violet
  *   cws        interpolateYlOrRd   orange through red
  *
  * Special case: s0020 (Current Operations) uses the golden yellow baseline badge
@@ -47,7 +47,7 @@ export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
   baseline: makeThemePalette(d3.interpolateYlOrBr),
   ag_gw: makeThemePalette(d3.interpolateYlGn),
   eco: makeThemePalette(d3.interpolateGnBu),
-  delta: makeThemePalette(d3.interpolatePuBu),
+  delta: makeThemePalette(d3.interpolateBuPu),
   cws: makeThemePalette(d3.interpolateYlOrRd),
 }
 

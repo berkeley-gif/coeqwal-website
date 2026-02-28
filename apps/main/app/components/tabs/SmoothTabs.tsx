@@ -209,14 +209,17 @@ export default function SmoothTabs() {
                 justifyContent: "center",
                 textAlign: isInTabsArea ? "center" : "left",
                 padding: isInTabsArea
-                  ? "8px 20px"
+                  ? "0 20px"
                   : `14px ${theme.space.panel.padding}`,
+                height: isInTabsArea
+                  ? theme.layout.collapsedTabHeight
+                  : undefined,
                 borderTop: "none",
                 borderBottom: "none",
                 // File-tab shape: triangle cut from upper-right corner (80px).
-                // Smaller when docked (20px).
+                // No cutout when docked for a clean layered look.
                 clipPath: isInTabsArea
-                  ? "polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%)"
+                  ? "none"
                   : "polygon(0 0, calc(100% - 80px) 0, 100% 80px, 100% 100%, 0 100%)",
               }}
             >

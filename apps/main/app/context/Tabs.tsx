@@ -63,6 +63,8 @@ type TabsContextShape = {
   setIsInTabsArea: React.Dispatch<React.SetStateAction<boolean>>
   isHeaderDark: boolean
   setIsHeaderDark: React.Dispatch<React.SetStateAction<boolean>>
+  isPastHero: boolean
+  setIsPastHero: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
@@ -85,6 +87,9 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // tracks whether header should use dark (blue) text instead of white
   const [isHeaderDark, setIsHeaderDark] = React.useState(false)
 
+  // tracks whether user has scrolled past 50% of the hero section
+  const [isPastHero, setIsPastHero] = React.useState(false)
+
   const value = useMemo(
     () => ({
       state,
@@ -98,8 +103,10 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       setIsInTabsArea,
       isHeaderDark,
       setIsHeaderDark,
+      isPastHero,
+      setIsPastHero,
     }),
-    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark],
+    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark, isPastHero],
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
@@ -130,6 +137,8 @@ export function useTabs() {
       setIsInTabsArea: () => {},
       isHeaderDark: false,
       setIsHeaderDark: () => {},
+      isPastHero: false,
+      setIsPastHero: () => {},
     }
   }
 

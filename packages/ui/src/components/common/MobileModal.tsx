@@ -219,6 +219,8 @@ export function MobileModal({
                   sx={{
                     m: 0,
                     typography: "h6",
+                    flex: 1,
+                    minWidth: 0,
                   }}
                 >
                   {title}

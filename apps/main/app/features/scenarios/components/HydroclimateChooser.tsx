@@ -107,7 +107,7 @@ export function HydroclimateChooser({
             whiteSpace: "nowrap",
           }}
         >
-          View by climate
+          View outcomes by climate
         </Typography>
       )}
 

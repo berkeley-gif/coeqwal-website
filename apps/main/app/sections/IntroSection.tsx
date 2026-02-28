@@ -16,6 +16,7 @@ import {
 
 import { WATER_THEMES } from "@repo/data/coeqwal"
 import { THEME_LABEL_CONFIG } from "../content/themes"
+import { useTabs } from "../context/Tabs"
 import VideoHero from "../components/VideoHero"
 import type { VideoSource } from "../components/VideoHero"
 import MorphingHeadline from "../components/MorphingHeadline"
@@ -197,6 +198,25 @@ const IntroSection = () => {
 
   // Scroll progress across the entire IntroSection
   const scrollProgress = useScrollProgress(containerRef)
+
+  // Track hero scroll progress for header transparency transition
+  const { setIsPastHero } = useTabs()
+  const heroScrollProgress = useScrollProgress(videoHeroRef, {
+    offset: ["start start", "end start"],
+  })
+
+  useEffect(() => {
+    let wasPastHero = heroScrollProgress.get() > 0.5
+    setIsPastHero(wasPastHero)
+
+    return heroScrollProgress.on("change", (p) => {
+      const isPast = p > 0.5
+      if (isPast !== wasPastHero) {
+        wasPastHero = isPast
+        setIsPastHero(isPast)
+      }
+    })
+  }, [heroScrollProgress, setIsPastHero])
 
   // Geometry-driven crossfade timing:
   // each value is the scroll progress when the panel border reaches the headline's top.

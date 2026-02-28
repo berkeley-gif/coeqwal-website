@@ -19,8 +19,17 @@
  * scenario row to serve as a chart legend.
  */
 
-import React, { useMemo } from "react"
-import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import React, { useMemo, useState } from "react"
+import {
+  Box,
+  Typography,
+  useTheme,
+  Checkbox,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  ExpandMoreIcon,
+} from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -33,6 +42,10 @@ import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import GridControls from "../strategyGrid/GridControls"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
+
+/** Width of the sidebar in pixels. Exported so sibling components (e.g. the
+ *  modal title row) can align a vertical divider to the sidebar border. */
+export const SIDEBAR_WIDTH = 270
 
 const THEME_ORDER: ScenarioTheme[] = [
   "baseline",
@@ -86,6 +99,18 @@ export default function ScenarioSelectionSidebar({
 
   const { scenarios, isLoading } = useScenarioList()
 
+  // All themes expanded by default
+  const [expandedThemes, setExpandedThemes] = useState<Set<ScenarioTheme>>(
+    new Set(THEME_ORDER),
+  )
+  const toggleExpanded = (themeKey: ScenarioTheme) => {
+    setExpandedThemes((prev) => {
+      const next = new Set(prev)
+      if (next.has(themeKey)) { next.delete(themeKey) } else { next.add(themeKey) }
+      return next
+    })
+  }
+
   // Group active scenarios by theme, respecting showOnlyChosen + showDefinitions filters
   const scenariosByTheme = useMemo(() => {
     const activeScenarios = scenarios.filter((s) => s.isActive)
@@ -121,7 +146,7 @@ export default function ScenarioSelectionSidebar({
     return THEME_ORDER.map((t) => ({
       theme: t,
       items: groups.get(t) ?? [],
-    })).filter(({ items }) => items.length > 0)
+    }))
   }, [scenarios, showOnlyChosen, showDefinitions, selectedScenarios])
 
   return (
@@ -180,26 +205,52 @@ export default function ScenarioSelectionSidebar({
           const allChosen =
             themeIds.length > 0 &&
             themeIds.every((id) => selectedScenarios.includes(id))
+          const isExpanded = expandedThemes.has(themeKey)
 
           return (
-            <Box key={themeKey} sx={{ mb: 1 }}>
-              {/* Theme badge heading — click to select/deselect all in theme */}
-              <Box
+            <Accordion
+              key={themeKey}
+              expanded={isExpanded}
+              onChange={() => toggleExpanded(themeKey)}
+              disableGutters
+              elevation={0}
+              sx={{
+                backgroundColor: "transparent",
+                "&:before": { display: "none" },
+                mb: 1,
+              }}
+            >
+              <AccordionSummary
+                expandIcon={
+                  <ExpandMoreIcon
+                    sx={{ fontSize: 16, color: theme.palette.grey[500] }}
+                  />
+                }
                 sx={{
+                  minHeight: 0,
                   px: 1.5,
                   py: 0.25,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  cursor: "pointer",
+                  flexDirection: "row-reverse",
+                  gap: 0.5,
+                  "&.Mui-expanded": { minHeight: 0 },
+                  "& .MuiAccordionSummary-content": { my: 0 },
+                  "& .MuiAccordionSummary-expandIconWrapper": {
+                    flexShrink: 0,
+                  },
                   borderRadius: theme.borderRadius.xs,
                   "&:hover": {
-                    backgroundColor:
-                      theme.palette.interaction.selectedBackground,
+                    backgroundColor: theme.palette.interaction.selectedBackground,
                   },
                 }}
-                onClick={() => toggleTheme(themeIds)}
-                role="button"
+                onClick={(e) => {
+                  // Only toggle theme selection when clicking the badge itself,
+                  // not the expand/collapse affordance
+                  const target = e.target as HTMLElement
+                  if (!target.closest(".MuiAccordionSummary-expandIconWrapper")) {
+                    e.stopPropagation()
+                    toggleTheme(themeIds)
+                  }
+                }}
                 aria-label={`${allChosen ? "Deselect" : "Select"} all ${THEME_LABEL_CONFIG[themeKey].label} scenarios`}
               >
                 <ScenarioBadge
@@ -210,79 +261,93 @@ export default function ScenarioSelectionSidebar({
                   color={theme.palette.waterThemes[themeKey].text}
                   sx={{ display: "block" }}
                 />
-              </Box>
+              </AccordionSummary>
 
-              {/* Scenario rows */}
-              {items.map(({ id, shortLabel }) => {
-                const isChosen = selectedScenarios.includes(id)
-                const color = scenarioColors?.[id]
-                const accentColor = color || theme.palette.blue.bright
-
-                return (
-                  <Box
-                    key={id}
-                    onClick={() => toggleScenario(id)}
+              <AccordionDetails sx={{ p: 0 }}>
+                {items.length === 0 && (
+                  <Typography
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.75,
-                      pl: 1.25,
-                      pr: 1,
-                      py: 0.25,
-                      cursor: "pointer",
-                      borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
-                      transition: "background-color 0.1s",
-                      "&:hover": {
-                        backgroundColor:
-                          theme.palette.interaction.selectedBackground,
-                        borderLeftColor: accentColor,
-                      },
+                      px: 2,
+                      py: 0.5,
+                      fontSize: "0.75rem",
+                      color: theme.palette.grey[400],
+                      fontStyle: "italic",
                     }}
                   >
-                    <Checkbox
-                      size="small"
-                      checked={isChosen}
-                      onChange={() => toggleScenario(id)}
-                      onClick={(e) => e.stopPropagation()}
-                      sx={{
-                        padding: 0,
-                        flexShrink: 0,
-                        transform: "scale(0.75)",
-                      }}
-                    />
+                    Coming soon
+                  </Typography>
+                )}
+                {items.map(({ id, shortLabel }) => {
+                  const isChosen = selectedScenarios.includes(id)
+                  const color = scenarioColors?.[id]
+                  const accentColor = color || theme.palette.blue.bright
 
-                    {/* Color swatch (ComparisonPanel chart legend) */}
-                    {color && (
-                      <Box
-                        aria-hidden="true"
-                        sx={{
-                          width: 14,
-                          height: 3,
-                          borderRadius: "2px",
-                          backgroundColor: color,
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
-
-                    <Typography
+                  return (
+                    <Box
+                      key={id}
+                      onClick={() => toggleScenario(id)}
                       sx={{
-                        fontSize: "0.8125rem",
-                        lineHeight: 1.35,
-                        fontWeight: isChosen ? 500 : 400,
-                        color: isChosen
-                          ? theme.palette.text.primary
-                          : theme.palette.grey[600],
-                        transition: "color 0.1s",
-                        letterSpacing: "0.01em",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        pl: 1.25,
+                        pr: 1,
+                        py: 0.25,
+                        cursor: "pointer",
+                        borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
+                        transition: "background-color 0.1s",
+                        "&:hover": {
+                          backgroundColor:
+                            theme.palette.interaction.selectedBackground,
+                          borderLeftColor: accentColor,
+                        },
                       }}
                     >
-                      {shortLabel}
-                    </Typography>
-                  </Box>
-                )
-              })}
-            </Box>
+                      <Checkbox
+                        size="small"
+                        checked={isChosen}
+                        onChange={() => toggleScenario(id)}
+                        onClick={(e) => e.stopPropagation()}
+                        sx={{
+                          padding: 0,
+                          flexShrink: 0,
+                          transform: "scale(0.75)",
+                        }}
+                      />
+
+                      {/* Color swatch (ComparisonPanel chart legend) */}
+                      {color && (
+                        <Box
+                          aria-hidden="true"
+                          sx={{
+                            width: 14,
+                            height: 3,
+                            borderRadius: "2px",
+                            backgroundColor: color,
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+
+                      <Typography
+                        sx={{
+                          fontSize: "0.8125rem",
+                          lineHeight: 1.35,
+                          fontWeight: isChosen ? 500 : 400,
+                          color: isChosen
+                            ? theme.palette.text.primary
+                            : theme.palette.grey[600],
+                          transition: "color 0.1s",
+                          letterSpacing: "0.01em",
+                        }}
+                      >
+                        {shortLabel}
+                      </Typography>
+                    </Box>
+                  )
+                })}
+              </AccordionDetails>
+            </Accordion>
           )
         })}
       </Box>

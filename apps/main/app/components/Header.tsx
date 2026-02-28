@@ -17,7 +17,7 @@ import { WATER_THEMES } from "@repo/data/coeqwal"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
-  const { isInTabsArea } = useTabs()
+  const { isPastHero } = useTabs()
 
   const handleLogoClick = () => {
     const start = window.scrollY
@@ -58,15 +58,16 @@ export function Header() {
       onGetDataClick={() => router.push("/data")}
       waterThemesOptions={waterThemesOptions}
       backgroundColor={
-        isInTabsArea ? "rgba(42, 82, 135, 0.75)" : theme.palette.common.white
+        isPastHero ? theme.palette.common.white : "transparent"
       }
-      textColor={isInTabsArea ? theme.palette.common.white : "#555555"}
+      textColor={isPastHero ? "#555555" : theme.palette.common.white}
       borderBottom={
-        isInTabsArea
-          ? `${theme.strokeWidth.rule}px solid rgba(255,255,255,0.2)`
-          : "1px solid #e5e5df"
+        isPastHero
+          ? "none"
+          : `${theme.strokeWidth.rule}px solid ${theme.palette.common.white}`
       }
-      logoVariant={isInTabsArea ? "light" : "color"}
+      navTextShadow={isPastHero ? "none" : theme.textShadow.nav}
+      logoVariant={isPastHero ? "color" : "light"}
       shrinkOnScroll
     />
   )
