@@ -127,7 +127,7 @@ export default function ScenarioSelectionSidebar({
   return (
     <Box
       sx={{
-        width: 240,
+        width: 270,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -162,7 +162,8 @@ export default function ScenarioSelectionSidebar({
           flex: 1,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          py: theme.space.component.sm,
+          pt: theme.space.component.md,
+          pb: theme.space.component.xs,
         }}
       >
         {isLoading && (
@@ -181,12 +182,12 @@ export default function ScenarioSelectionSidebar({
             themeIds.every((id) => selectedScenarios.includes(id))
 
           return (
-            <Box key={themeKey} sx={{ mb: 1.5 }}>
+            <Box key={themeKey} sx={{ mb: 1 }}>
               {/* Theme badge heading — click to select/deselect all in theme */}
               <Box
                 sx={{
                   px: 1.5,
-                  py: 0.5,
+                  py: 0.25,
                   display: "flex",
                   alignItems: "center",
                   gap: 0.75,
@@ -227,7 +228,7 @@ export default function ScenarioSelectionSidebar({
                       gap: 0.75,
                       pl: 1.25,
                       pr: 1,
-                      py: 0.5,
+                      py: 0.25,
                       cursor: "pointer",
                       borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
                       transition: "background-color 0.1s",
