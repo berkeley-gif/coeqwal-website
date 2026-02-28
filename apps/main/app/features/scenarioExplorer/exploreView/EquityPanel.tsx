@@ -87,7 +87,10 @@ export default function EquityPanel() {
         >
           <Typography
             variant="h6"
-            sx={{ color: theme.palette.grey[500], mb: theme.space.component.md }}
+            sx={{
+              color: theme.palette.grey[500],
+              mb: theme.space.component.md,
+            }}
           >
             Equity tool
           </Typography>

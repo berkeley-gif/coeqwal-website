@@ -81,8 +81,5 @@ export {
   getNestedValue,
 } from "./utils/d3-utils"
 
-export {
-  THEME_LINE_PALETTES,
-  getThemeLineColor,
-} from "./utils/themeLineColors"
+export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
 export type { ThemeKey } from "./utils/themeLineColors"

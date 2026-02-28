@@ -1687,8 +1687,7 @@ function MonthlyCwsSection({
             sx={{ color: "#92400e" }} // amber-800
           >
             Monthly shortage data is only available in the &ldquo;Project
-            totals&rdquo; view. Switch to Project totals to see shortage
-            charts.
+            totals&rdquo; view. Switch to Project totals to see shortage charts.
           </Typography>
         </Box>
       )}

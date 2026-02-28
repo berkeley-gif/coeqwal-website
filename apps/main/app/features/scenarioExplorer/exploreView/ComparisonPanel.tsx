@@ -91,7 +91,9 @@ export default function ComparisonPanel() {
       values: Object.fromEntries(
         Object.entries(scenario.values).map(([axis, value]) => [
           axis,
-          value === null ? null : (value - (baselineScenario.values[axis] ?? 0)) / 2,
+          value === null
+            ? null
+            : (value - (baselineScenario.values[axis] ?? 0)) / 2,
         ]),
       ),
     }))

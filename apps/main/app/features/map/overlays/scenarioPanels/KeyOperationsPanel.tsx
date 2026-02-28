@@ -25,7 +25,8 @@ export function KeyOperationsPanel({
   const theme = useTheme()
   const { getScenario, isLoading } = useScenarioList()
   const scenario = getScenario(scenarioId)
-  const { hydroclimatePeriod, setHydroclimatePeriod } = useScenarioExplorerStore()
+  const { hydroclimatePeriod, setHydroclimatePeriod } =
+    useScenarioExplorerStore()
 
   if (isLoading) {
     return (

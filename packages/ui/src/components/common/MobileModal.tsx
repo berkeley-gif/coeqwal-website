@@ -238,9 +238,7 @@ export function MobileModal({
           )}
 
           {/* Zero-padding sub-header. Child controls all spacing/borders */}
-          {subHeader && (
-            <Box sx={{ flexShrink: 0 }}>{subHeader}</Box>
-          )}
+          {subHeader && <Box sx={{ flexShrink: 0 }}>{subHeader}</Box>}
 
           {/* Sticky header area (non-scrolling) */}
           {stickyHeader && (

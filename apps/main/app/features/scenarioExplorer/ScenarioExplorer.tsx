@@ -137,7 +137,6 @@ export default function ScenarioExplorerNew() {
           }}
         >
           Filter scenarios
-
           {/* View mode icon+text buttons */}
           {mainView === "explorer" && (
             <Box
@@ -176,7 +175,8 @@ export default function ScenarioExplorerNew() {
                       transition: "opacity 0.15s, background-color 0.15s",
                       "&:hover": {
                         opacity: 1,
-                        background: theme.palette.interaction.selectedBackground,
+                        background:
+                          theme.palette.interaction.selectedBackground,
                       },
                     }}
                   >
@@ -313,7 +313,10 @@ export default function ScenarioExplorerNew() {
         open={isAnalysisMode}
         onClose={closeAnalysisModal}
         title={
-          <Typography variant="overline" sx={{ color: theme.palette.text.primary }}>
+          <Typography
+            variant="overline"
+            sx={{ color: theme.palette.text.primary }}
+          >
             {exploreMode === "comparison"
               ? "Tradeoffs tool"
               : exploreMode === "equity"

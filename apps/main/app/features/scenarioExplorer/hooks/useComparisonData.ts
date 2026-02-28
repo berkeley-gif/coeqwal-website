@@ -37,7 +37,8 @@ export function useComparisonData() {
     const filtered = showDefinitions
       ? allScenarioIds
       : allScenarioIds.filter(
-          (id) => getScenarioTheme(id) !== "baseline" || id === PRIMARY_BASELINE_ID,
+          (id) =>
+            getScenarioTheme(id) !== "baseline" || id === PRIMARY_BASELINE_ID,
         )
     return [...filtered].sort((a, b) => {
       if (a === PRIMARY_BASELINE_ID) return -1
