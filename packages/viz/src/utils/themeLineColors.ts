@@ -34,7 +34,9 @@ const PALETTE_STEPS = 7
 
 const makeThemePalette = (interpolator: (t: number) => string): string[] =>
   Array.from({ length: PALETTE_STEPS }, (_, i) =>
-    interpolator(PALETTE_START + (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START)),
+    interpolator(
+      PALETTE_START + (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
+    ),
   )
 
 /**
@@ -43,10 +45,10 @@ const makeThemePalette = (interpolator: (t: number) => string): string[] =>
  */
 export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
   baseline: makeThemePalette(d3.interpolateYlOrBr),
-  ag_gw:    makeThemePalette(d3.interpolateYlGn),
-  eco:      makeThemePalette(d3.interpolateGnBu),
-  delta:    makeThemePalette(d3.interpolatePuBu),
-  cws:      makeThemePalette(d3.interpolateYlOrRd),
+  ag_gw: makeThemePalette(d3.interpolateYlGn),
+  eco: makeThemePalette(d3.interpolateGnBu),
+  delta: makeThemePalette(d3.interpolatePuBu),
+  cws: makeThemePalette(d3.interpolateYlOrRd),
 }
 
 /**

@@ -20,7 +20,12 @@ import type { ScenarioTheme } from "../../content/scenarios"
  * - comparison: Parallel coordinates chart comparison
  * - equity: Equity analysis tool with map on right
  */
-export type ExploreMode = "list" | "map" | "comparison" | "equity" | "resilience"
+export type ExploreMode =
+  | "list"
+  | "map"
+  | "comparison"
+  | "equity"
+  | "resilience"
 
 /**
  * The main view within the Explore section.

@@ -213,7 +213,11 @@ export default function SelectionBanner() {
                   >
                     <Typography
                       variant="overline"
-                      sx={{ color: theme.palette.grey[500], flexShrink: 0, lineHeight: 1 }}
+                      sx={{
+                        color: theme.palette.grey[500],
+                        flexShrink: 0,
+                        lineHeight: 1,
+                      }}
                     >
                       {selectedScenarios.length} scenario
                       {selectedScenarios.length !== 1 ? "s" : ""}:

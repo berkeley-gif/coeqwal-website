@@ -34,7 +34,13 @@ import GridControls from "../strategyGrid/GridControls"
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const THEME_ORDER: ScenarioTheme[] = ["baseline", "cws", "ag_gw", "eco", "delta"]
+const THEME_ORDER: ScenarioTheme[] = [
+  "baseline",
+  "cws",
+  "ag_gw",
+  "eco",
+  "delta",
+]
 const PRIMARY_BASELINE_ID = "s0020"
 
 // ── Props ─────────────────────────────────────────────────────────────────────
@@ -112,9 +118,10 @@ export default function ScenarioSelectionSidebar({
       if (bucket) bucket.push({ id: s.scenarioId, shortLabel })
     })
 
-    return THEME_ORDER.map((t) => ({ theme: t, items: groups.get(t) ?? [] })).filter(
-      ({ items }) => items.length > 0,
-    )
+    return THEME_ORDER.map((t) => ({
+      theme: t,
+      items: groups.get(t) ?? [],
+    })).filter(({ items }) => items.length > 0)
   }, [scenarios, showOnlyChosen, showDefinitions, selectedScenarios])
 
   return (
@@ -169,107 +176,112 @@ export default function ScenarioSelectionSidebar({
 
         {scenariosByTheme.map(({ theme: themeKey, items }) => {
           const themeIds = items.map(({ id }) => id)
-          const allChosen = themeIds.length > 0 && themeIds.every((id) => selectedScenarios.includes(id))
+          const allChosen =
+            themeIds.length > 0 &&
+            themeIds.every((id) => selectedScenarios.includes(id))
 
           return (
-          <Box key={themeKey} sx={{ mb: 1.5 }}>
-            {/* Theme badge heading — click to select/deselect all in theme */}
-            <Box
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.75,
-                cursor: "pointer",
-                borderRadius: theme.borderRadius.xs,
-                "&:hover": {
-                  backgroundColor: theme.palette.interaction.selectedBackground,
-                },
-              }}
-              onClick={() => toggleTheme(themeIds)}
-              role="button"
-              aria-label={`${allChosen ? "Deselect" : "Select"} all ${THEME_LABEL_CONFIG[themeKey].label} scenarios`}
-            >
-              <ScenarioBadge
-                label={THEME_LABEL_CONFIG[themeKey].label}
-                backgroundColor={theme.palette.waterThemes[themeKey].background}
-                color={theme.palette.waterThemes[themeKey].text}
-                sx={{ display: "block" }}
-              />
-            </Box>
+            <Box key={themeKey} sx={{ mb: 1.5 }}>
+              {/* Theme badge heading — click to select/deselect all in theme */}
+              <Box
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  cursor: "pointer",
+                  borderRadius: theme.borderRadius.xs,
+                  "&:hover": {
+                    backgroundColor:
+                      theme.palette.interaction.selectedBackground,
+                  },
+                }}
+                onClick={() => toggleTheme(themeIds)}
+                role="button"
+                aria-label={`${allChosen ? "Deselect" : "Select"} all ${THEME_LABEL_CONFIG[themeKey].label} scenarios`}
+              >
+                <ScenarioBadge
+                  label={THEME_LABEL_CONFIG[themeKey].label}
+                  backgroundColor={
+                    theme.palette.waterThemes[themeKey].background
+                  }
+                  color={theme.palette.waterThemes[themeKey].text}
+                  sx={{ display: "block" }}
+                />
+              </Box>
 
-            {/* Scenario rows */}
-            {items.map(({ id, shortLabel }) => {
-              const isChosen = selectedScenarios.includes(id)
-              const color = scenarioColors?.[id]
-              const accentColor = color || theme.palette.blue.bright
+              {/* Scenario rows */}
+              {items.map(({ id, shortLabel }) => {
+                const isChosen = selectedScenarios.includes(id)
+                const color = scenarioColors?.[id]
+                const accentColor = color || theme.palette.blue.bright
 
-              return (
-                <Box
-                  key={id}
-                  onClick={() => toggleScenario(id)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    pl: 1.25,
-                    pr: 1,
-                    py: 0.5,
-                    cursor: "pointer",
-                    borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
-                    transition: "background-color 0.1s",
-                    "&:hover": {
-                      backgroundColor:
-                        theme.palette.interaction.selectedBackground,
-                      borderLeftColor: accentColor,
-                    },
-                  }}
-                >
-                  <Checkbox
-                    size="small"
-                    checked={isChosen}
-                    onChange={() => toggleScenario(id)}
-                    onClick={(e) => e.stopPropagation()}
+                return (
+                  <Box
+                    key={id}
+                    onClick={() => toggleScenario(id)}
                     sx={{
-                      padding: 0,
-                      flexShrink: 0,
-                      transform: "scale(0.75)",
-                    }}
-                  />
-
-                  {/* Color swatch (ComparisonPanel chart legend) */}
-                  {color && (
-                    <Box
-                      aria-hidden="true"
-                      sx={{
-                        width: 14,
-                        height: 3,
-                        borderRadius: "2px",
-                        backgroundColor: color,
-                        flexShrink: 0,
-                      }}
-                    />
-                  )}
-
-                  <Typography
-                    sx={{
-                      fontSize: "0.8125rem",
-                      lineHeight: 1.35,
-                      fontWeight: isChosen ? 500 : 400,
-                      color: isChosen
-                        ? theme.palette.text.primary
-                        : theme.palette.grey[600],
-                      transition: "color 0.1s",
-                      letterSpacing: "0.01em",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.75,
+                      pl: 1.25,
+                      pr: 1,
+                      py: 0.5,
+                      cursor: "pointer",
+                      borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
+                      transition: "background-color 0.1s",
+                      "&:hover": {
+                        backgroundColor:
+                          theme.palette.interaction.selectedBackground,
+                        borderLeftColor: accentColor,
+                      },
                     }}
                   >
-                    {shortLabel}
-                  </Typography>
-                </Box>
-              )
-            })}
-          </Box>
+                    <Checkbox
+                      size="small"
+                      checked={isChosen}
+                      onChange={() => toggleScenario(id)}
+                      onClick={(e) => e.stopPropagation()}
+                      sx={{
+                        padding: 0,
+                        flexShrink: 0,
+                        transform: "scale(0.75)",
+                      }}
+                    />
+
+                    {/* Color swatch (ComparisonPanel chart legend) */}
+                    {color && (
+                      <Box
+                        aria-hidden="true"
+                        sx={{
+                          width: 14,
+                          height: 3,
+                          borderRadius: "2px",
+                          backgroundColor: color,
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+
+                    <Typography
+                      sx={{
+                        fontSize: "0.8125rem",
+                        lineHeight: 1.35,
+                        fontWeight: isChosen ? 500 : 400,
+                        color: isChosen
+                          ? theme.palette.text.primary
+                          : theme.palette.grey[600],
+                        transition: "color 0.1s",
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {shortLabel}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
           )
         })}
       </Box>

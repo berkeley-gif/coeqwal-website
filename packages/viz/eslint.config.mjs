@@ -4,5 +4,7 @@ import { config } from "@repo/eslint-config/react-internal"
 export default [
   ...config,
   // Ignore *.peak.* scratch files — local-only dev helpers, never committed
-  { ignores: ["**/*.peak.tsx", "**/*.peak.ts", "**/*.peak.jsx", "**/*.peak.js"] },
+  {
+    ignores: ["**/*.peak.tsx", "**/*.peak.ts", "**/*.peak.jsx", "**/*.peak.js"],
+  },
 ]
