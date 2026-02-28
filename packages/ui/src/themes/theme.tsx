@@ -374,7 +374,7 @@ const palette = {
     baseline: { background: "#ffd87e", text: "#7a5200" },
     ag_gw: { background: "#d4edda", text: "#2d6a4f" },
     eco: { background: "#CCE8EE", text: "#186b88" },
-    delta: { background: "#C8DDF4", text: "#193D6B" },
+    delta: { background: "#D4CAED", text: "#3A2888" },
     cws: { background: "#ffe5cc", text: "#7a3000" },
   },
 
@@ -468,7 +468,7 @@ const zIndex = {
 
 // Stroke width - design system line weight
 const strokeWidth = {
-  rule: 2, // Primary line weight (px) used for borders, outlines, and SVG strokes
+  rule: 0.5, // Primary line weight (px) used for borders, outlines, and SVG strokes
 }
 
 // Border styles
@@ -522,7 +522,8 @@ export const themeValues = {
    */
   layout: {
     headerHeight: 56, // px - expanded header height
-    collapsedHeaderHeight: 40, // px - collapsed header height
+    collapsedHeaderHeight: 42, // px - collapsed header height
+    collapsedTabHeight: 44, // px - collapsed tab row height (slightly taller than header to balance visual weight)
     headerShrinkStart: 120, // px - scroll position where header starts shrinking
     headerShrinkEnd: 240, // px - scroll position where header is fully shrunk
     drawer: {
@@ -948,11 +949,11 @@ const theme = createTheme({
     },
     nav: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.25rem",
+      fontSize: "1.2rem",
       fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: "0.01em",
-      textTransform: "capitalize" as const,
+      textTransform: "none" as const,
     },
     // Tab labels - expanded state (prominent, before docking)
     tabLabel: {
@@ -1430,13 +1431,11 @@ const theme = createTheme({
     },
     MuiToolbar: {
       styleOverrides: {
-        root: ({ theme }) => ({
-          height: theme.layout.headerHeight,
-          minHeight: theme.layout.headerHeight,
-          [theme.breakpoints.up("sm")]: {
-            minHeight: theme.layout.headerHeight,
-          },
-        }),
+        root: {
+          // Reset MUI defaults (56px / 64px at sm breakpoint) so that
+          // BaseHeader controls height via CSS custom property --header-h
+          minHeight: "unset",
+        },
       },
     },
     MuiTypography: {
@@ -1740,6 +1739,7 @@ declare module "@mui/material/styles" {
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
     waterThemes: typeof themeValues.palette.waterThemes
+    tabPanels: typeof themeValues.palette.tabPanels
     ink: typeof themeValues.palette.ink
   }
 
@@ -1758,6 +1758,7 @@ declare module "@mui/material/styles" {
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
     waterThemes?: Partial<typeof themeValues.palette.waterThemes>
+    tabPanels?: Partial<typeof themeValues.palette.tabPanels>
     ink?: Partial<typeof themeValues.palette.ink>
   }
 

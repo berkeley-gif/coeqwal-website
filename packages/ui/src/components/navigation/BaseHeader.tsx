@@ -139,6 +139,7 @@ export interface BaseHeaderProps {
   backgroundColor?: string
   textColor?: string
   borderBottom?: string
+  navTextShadow?: string
   zIndex?: number
   logoVariant?: "color" | "light"
 
@@ -207,6 +208,7 @@ export function BaseHeader({
   waterThemesOptions,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
+  navTextShadow = "none",
   zIndex,
   backgroundColorScrolled,
   backgroundScrollThreshold = 200,
@@ -333,34 +335,16 @@ export function BaseHeader({
   const buttonStyle = {
     ...theme.typography.nav,
     color: resolvedTextColor,
-    fontSize: "1.05rem",
-    fontWeight: 500,
-    textTransform: "none" as const,
     padding: "0 10px",
     height: "100%",
     minHeight: 28,
     borderRadius: 0,
-    textShadow: "none",
+    textShadow: navTextShadow,
     position: "relative" as const,
-    // Active-page underline
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: "4px",
-      backgroundColor: "transparent",
-      transition: `background-color ${theme.transition.fast} ease-out`,
-    },
     "&:hover": {
       backgroundColor: "transparent",
       color: resolvedTextColor,
       opacity: 0.7,
-      textShadow: "none",
-    },
-    "&:hover::after": {
-      backgroundColor: theme.palette.brand.water,
     },
     "&:active": {
       backgroundColor: "transparent",
@@ -407,16 +391,14 @@ export function BaseHeader({
           zIndex: resolvedZIndex,
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
-          // Smooth color transitions when scrolling past threshold
-          transition:
-            backgroundColorScrolled || textColorScrolled
-              ? `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`
-              : undefined,
+          // Smooth color transitions when background/text change
+          transition: `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
           inset: "0 0 auto 0",
           height: "var(--header-h)",
+          overflow: "hidden",
         }}
         style={
           {
@@ -431,14 +413,15 @@ export function BaseHeader({
           sx={{
             py: "var(--pad-y) !important",
             px: isWideDesktop ? theme.space.panel.padding : 2,
-            minHeight: "var(--header-h) !important",
+            height: "var(--header-h) !important",
+            minHeight: "unset !important",
             display: isWideDesktop ? "grid" : "flex",
             gridTemplateColumns: isWideDesktop ? "auto 1fr" : undefined,
             columnGap: isWideDesktop ? theme.spacing(4) : undefined,
             alignItems: "center",
             justifyContent: isWideDesktop ? undefined : "space-between",
           }}
-          style={{ minHeight: "var(--header-h)" }}
+          style={{ height: "var(--header-h)", minHeight: "unset" }}
         >
           {/* ----------------------------------------
            * LOGO

@@ -22,8 +22,9 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const padding = isMapTab ? "0" : `2rem ${theme.space.panel.padding}`
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll
-    // Offset = collapsed header (40px) + docked SmoothTabs height (~40px)
-    const headerAndTabsOffset = theme.layout.collapsedHeaderHeight + 40
+    // Offset = collapsed header + docked SmoothTabs height
+    const headerAndTabsOffset =
+      theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
     const exploreStyles: React.CSSProperties = isExploreTab
       ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
       : {}
