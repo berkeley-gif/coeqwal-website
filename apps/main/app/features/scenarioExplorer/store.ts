@@ -1,74 +1,113 @@
 /**
  * Scenario Explorer store - state management for multi-view scenario exploration
+ *
+ * This store manages state that is shared across multiple components in the
+ * Scenario Explorer feature. Local UI state (like modal open/close, hover states)
+ * should remain in individual components.
  */
 
 import { create, immer } from "@repo/state/zustand"
+import type { ScenarioTheme } from "../../content/scenarios"
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type ExplorerView = "list" | "map" | "comparison" | "needs" | "data"
+/**
+ * The current tool mode within the "Choose scenarios" view.
+ * - list: Default grid view of all scenarios
+ * - map: Spatial visualization with map overlay
+ * - comparison: Parallel coordinates chart comparison
+ * - equity: Equity analysis tool with map on right
+ */
+export type ExploreMode =
+  | "list"
+  | "map"
+  | "comparison"
+  | "equity"
+  | "resilience"
 
-export type HydroclimateScenario =
-  | "historical"
-  | "warmer-wetter"
-  | "warmer-drier-i"
-  | "warmer-drier-ii"
-  | "warmer-drier-iii"
-  | "warmer-drier-iv"
+/**
+ * The main view within the Explore section.
+ * - explorer: "Choose scenarios" view with tool modes (list/map/comparison)
+ * - data: "Explore data in depth" view
+ */
+export type MainView = "explorer" | "data"
 
-export type SortOption =
-  | "name-asc"
-  | "name-desc"
-  | "outcome-best-first"
-  | "outcome-worst-first"
-  | "eflow-best"
-  | "exports-best"
-  | "x2-best"
-  | "storage-best"
-  | "shortage-best"
-  | "delta-ecology-best"
-  | "deliveries-best"
-
-export interface OutcomeCriteria {
-  outcome: string
-  min: number | null
-  max: number | null
-  weight?: number
-}
+// ============================================================================
+// State Interface
+// ============================================================================
 
 interface ScenarioExplorerState {
-  activeView: ExplorerView
+  // Navigation
+  mainView: MainView
+  exploreMode: ExploreMode
+
+  // Scenario selection (shared across all views)
   selectedScenarios: string[]
-  selectedOutcomes: string[]
+  highlightedScenario: string | null
+  pinnedScenarioId: string | null
+
+  // Filtering
   searchQuery: string
-  sortBy: SortOption
-  hydroclimateScenario: HydroclimateScenario
   showOnlyChosen: boolean
+
+  // Theme filtering
+  selectedTheme: ScenarioTheme | null
+  showOnlyTheme: boolean
+  showThemeBadges: boolean
+
+  // Icon filtering
+  selectedIconId: string | null
+
+  // Display options
   showDefinitions: boolean
-  outcomeCriteria: OutcomeCriteria[]
+
+  // Hydroclimate period selection (shared across all views)
+  hydroclimatePeriod: string
+
+  // Tier selection (for map visualization)
   selectedTier: { strategy: string; outcome: string } | null
 }
 
+// ============================================================================
+// Actions Interface
+// ============================================================================
+
 interface ScenarioExplorerActions {
-  setActiveView: (view: ExplorerView) => void
+  // Navigation
+  setMainView: (view: MainView) => void
+  setExploreMode: (mode: ExploreMode) => void
+
+  // Scenario selection
   toggleScenario: (scenarioId: string) => void
   selectScenarios: (scenarioIds: string[]) => void
   clearScenarios: () => void
-  toggleOutcome: (outcome: string) => void
-  selectOutcomes: (outcomes: string[]) => void
-  clearOutcomes: () => void
+  setHighlightedScenario: (scenarioId: string | null) => void
+  setPinnedScenarioId: (scenarioId: string | null) => void
+
+  // Filtering
   setSearchQuery: (query: string) => void
-  setSortBy: (sort: SortOption) => void
-  setHydroclimateScenario: (scenario: HydroclimateScenario) => void
   setShowOnlyChosen: (show: boolean) => void
+
+  // Theme filtering
+  setSelectedTheme: (theme: ScenarioTheme | null) => void
+  setShowOnlyTheme: (show: boolean) => void
+  setShowThemeBadges: (show: boolean) => void
+
+  // Icon filtering
+  setSelectedIconId: (iconId: string | null) => void
+
+  // Display options
   setShowDefinitions: (show: boolean) => void
-  addOutcomeCriteria: (criteria: OutcomeCriteria) => void
-  updateOutcomeCriteria: (index: number, criteria: OutcomeCriteria) => void
-  removeOutcomeCriteria: (index: number) => void
-  clearOutcomeCriteria: () => void
+
+  // Hydroclimate period
+  setHydroclimatePeriod: (period: string) => void
+
+  // Tier selection
   setSelectedTier: (tier: { strategy: string; outcome: string } | null) => void
+
+  // Reset functions
   resetFilters: () => void
   resetSelections: () => void
   resetAll: () => void
@@ -77,31 +116,46 @@ interface ScenarioExplorerActions {
 type ScenarioExplorerStore = ScenarioExplorerState & ScenarioExplorerActions
 
 // ============================================================================
-// Store
+// Initial State
 // ============================================================================
 
 const initialState: ScenarioExplorerState = {
-  activeView: "list",
+  mainView: "explorer",
+  exploreMode: "list",
   selectedScenarios: [],
-  selectedOutcomes: [],
+  highlightedScenario: null,
+  pinnedScenarioId: null,
   searchQuery: "",
-  sortBy: "name-asc",
-  hydroclimateScenario: "historical",
   showOnlyChosen: false,
-  showDefinitions: true,
-  outcomeCriteria: [],
+  selectedTheme: null,
+  showOnlyTheme: false,
+  showThemeBadges: false,
+  selectedIconId: null,
+  showDefinitions: false,
+  hydroclimatePeriod: "historical",
   selectedTier: null,
 }
+
+// ============================================================================
+// Store
+// ============================================================================
 
 export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
   immer<ScenarioExplorerStore>((set) => ({
     ...initialState,
 
-    setActiveView: (view) =>
+    // Navigation
+    setMainView: (view) =>
       set((state) => {
-        state.activeView = view
+        state.mainView = view
       }),
 
+    setExploreMode: (mode) =>
+      set((state) => {
+        state.exploreMode = mode
+      }),
+
+    // Scenario selection
     toggleScenario: (scenarioId) =>
       set((state) => {
         const index = state.selectedScenarios.indexOf(scenarioId)
@@ -116,87 +170,90 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.selectedScenarios = scenarioIds
       }),
+
     clearScenarios: () =>
       set((state) => {
         state.selectedScenarios = []
       }),
 
-    toggleOutcome: (outcome) =>
+    setHighlightedScenario: (scenarioId) =>
       set((state) => {
-        const index = state.selectedOutcomes.indexOf(outcome)
-        if (index > -1) {
-          state.selectedOutcomes.splice(index, 1)
-        } else {
-          state.selectedOutcomes.push(outcome)
-        }
+        state.highlightedScenario = scenarioId
       }),
 
-    selectOutcomes: (outcomes) =>
+    setPinnedScenarioId: (scenarioId) =>
       set((state) => {
-        state.selectedOutcomes = outcomes
-      }),
-    clearOutcomes: () =>
-      set((state) => {
-        state.selectedOutcomes = []
+        state.pinnedScenarioId = scenarioId
       }),
 
+    // Filtering
     setSearchQuery: (query) =>
       set((state) => {
         state.searchQuery = query
       }),
-    setSortBy: (sort) =>
-      set((state) => {
-        state.sortBy = sort
-      }),
-    setHydroclimateScenario: (scenario) =>
-      set((state) => {
-        state.hydroclimateScenario = scenario
-      }),
+
     setShowOnlyChosen: (show) =>
       set((state) => {
         state.showOnlyChosen = show
       }),
+
+    // Theme filtering
+    setSelectedTheme: (theme) =>
+      set((state) => {
+        state.selectedTheme = theme
+        if (theme === null) {
+          state.showOnlyTheme = false
+        }
+      }),
+
+    setShowOnlyTheme: (show) =>
+      set((state) => {
+        state.showOnlyTheme = show
+      }),
+
+    setShowThemeBadges: (show) =>
+      set((state) => {
+        state.showThemeBadges = show
+      }),
+
+    // Icon filtering
+    setSelectedIconId: (iconId) =>
+      set((state) => {
+        state.selectedIconId = iconId
+      }),
+
+    // Display options
     setShowDefinitions: (show) =>
       set((state) => {
         state.showDefinitions = show
       }),
 
-    addOutcomeCriteria: (criteria) =>
+    // Hydroclimate period
+    setHydroclimatePeriod: (period) =>
       set((state) => {
-        state.outcomeCriteria.push(criteria)
-      }),
-    updateOutcomeCriteria: (index, criteria) =>
-      set((state) => {
-        if (index >= 0 && index < state.outcomeCriteria.length) {
-          state.outcomeCriteria[index] = criteria
-        }
-      }),
-    removeOutcomeCriteria: (index) =>
-      set((state) => {
-        if (index >= 0 && index < state.outcomeCriteria.length) {
-          state.outcomeCriteria.splice(index, 1)
-        }
-      }),
-    clearOutcomeCriteria: () =>
-      set((state) => {
-        state.outcomeCriteria = []
+        state.hydroclimatePeriod = period
       }),
 
+    // Tier selection
     setSelectedTier: (tier) =>
       set((state) => {
         state.selectedTier = tier
       }),
 
+    // Reset functions
     resetFilters: () =>
       set((state) => {
         state.searchQuery = ""
-        state.sortBy = "name-asc"
+        state.selectedTheme = null
+        state.showOnlyTheme = false
+        state.selectedIconId = null
       }),
 
     resetSelections: () =>
       set((state) => {
         state.selectedScenarios = []
-        state.selectedOutcomes = []
+        state.highlightedScenario = null
+        state.pinnedScenarioId = null
         state.selectedTier = null
       }),
 

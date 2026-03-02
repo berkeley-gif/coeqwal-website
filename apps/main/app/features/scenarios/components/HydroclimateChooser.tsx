@@ -22,7 +22,7 @@ import { hydroclimateOptions } from "../../../content/scenarios"
 
 // Icon and background color configuration for each hydroclimate
 // Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
-const HYDROCLIMATE_CONFIG: Record<
+export const HYDROCLIMATE_CONFIG: Record<
   string,
   {
     icon: React.ElementType
@@ -49,6 +49,10 @@ const HYDROCLIMATE_CONFIG: Record<
     icon: LocalFireDepartmentIcon,
     bgColor: "#bf360c", // Red-orange - severe dry
   },
+  "warmer-drier-iv": {
+    icon: LocalFireDepartmentIcon,
+    bgColor: "#8b0000", // Dark red - extreme dry
+  },
 }
 
 interface HydroclimateChooserProps {
@@ -62,10 +66,9 @@ interface HydroclimateChooserProps {
   showLabels?: boolean
   /** Whether to show the section title */
   showTitle?: boolean
+  /** Override icon circle size (width & height). Defaults to "44px". */
+  iconSize?: string
 }
-
-// WCAG 2.5.5: 44px minimum touch target
-const ICON_SIZE = "44px"
 
 export function HydroclimateChooser({
   value = "historical",
@@ -73,6 +76,7 @@ export function HydroclimateChooser({
   layout = "horizontal",
   showLabels = false,
   showTitle = true,
+  iconSize = "40px",
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -91,7 +95,7 @@ export function HydroclimateChooser({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: theme.space.gap.md,
+        gap: theme.space.gap.sm,
         flexShrink: 0,
       }}
     >
@@ -103,7 +107,7 @@ export function HydroclimateChooser({
             whiteSpace: "nowrap",
           }}
         >
-          View scenario data under different climates
+          View outcomes by climate
         </Typography>
       )}
 
@@ -111,7 +115,7 @@ export function HydroclimateChooser({
         sx={{
           display: "flex",
           flexDirection: isVertical ? "column" : "row",
-          gap: 1,
+          gap: theme.space.gap.xs,
           alignItems: isVertical ? "flex-start" : "center",
         }}
       >
@@ -166,10 +170,10 @@ export function HydroclimateChooser({
                   >
                     <Box
                       sx={{
-                        width: ICON_SIZE,
-                        height: ICON_SIZE,
-                        minWidth: ICON_SIZE,
-                        minHeight: ICON_SIZE,
+                        width: iconSize,
+                        height: iconSize,
+                        minWidth: iconSize,
+                        minHeight: iconSize,
                         flexShrink: 0,
                         display: "flex",
                         alignItems: "center",

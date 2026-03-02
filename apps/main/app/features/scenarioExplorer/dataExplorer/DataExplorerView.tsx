@@ -1,11 +1,12 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme, Button, Tabs, Tab } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Button } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import CategoryView from "./components/CategoryView"
-import MapView from "./components/MapView"
-import TableView from "./components/TableView"
+// Hidden for now
+// import MapView from "./components/MapView"
+// import TableView from "./components/TableView"
 
 interface DataExplorerViewProps {
   /** Callback to navigate back to explorer view */
@@ -15,16 +16,13 @@ interface DataExplorerViewProps {
 /**
  * DataExplorerView
  *
- * Three sub-views: category, map, table
+ * Displays outcome data by category. Map and table views are hidden for now.
  */
 export default function DataExplorerView({
   onNavigateToExplorer,
 }: DataExplorerViewProps) {
   const theme = useTheme()
   const { selectedScenarios } = useScenarioExplorerStore()
-  const [subView, setSubView] = React.useState<"category" | "map" | "table">(
-    "category",
-  )
 
   const hasData = selectedScenarios.length > 0
 
@@ -48,7 +46,7 @@ export default function DataExplorerView({
           }}
         >
           <Typography
-            variant="h5"
+            variant="subtitle2"
             sx={{
               color: theme.palette.text.primary,
             }}
@@ -58,7 +56,7 @@ export default function DataExplorerView({
         </Box>
       )}
 
-      {/* Sub-navigation tabs */}
+      {/* Sub-navigation tabs 
       {hasData && (
         <Box
           sx={{
@@ -74,25 +72,25 @@ export default function DataExplorerView({
               indicator: {
                 style: {
                   height: 2,
-                  backgroundColor: theme.palette.blue.darkest,
+                  backgroundColor: theme.palette.text.primary,
                 },
               },
             }}
             sx={{
-              minHeight: 48,
+              minHeight: 44,
               "& .MuiTab-root": {
-                ...theme.typography.nav,
-                minHeight: 48,
+                minHeight: 44,
                 textTransform: "none",
-                fontWeight: theme.typography.fontWeightMedium,
-                color: theme.palette.grey[600],
+                ...theme.typography.dashboard,
+                fontWeight: 500,
+                color: theme.palette.grey[500],
                 px: 0,
-                mr: theme.space.section.md,
+                mr: theme.space.section.sm,
                 "&.Mui-selected": {
-                  color: theme.palette.blue.darkest,
+                  color: theme.palette.text.primary,
                 },
                 "&:hover": {
-                  color: theme.palette.blue.darkest,
+                  color: theme.palette.text.primary,
                 },
               },
             }}
@@ -103,6 +101,7 @@ export default function DataExplorerView({
           </Tabs>
         </Box>
       )}
+        */}
 
       {/* Main Content */}
       <Box
@@ -154,11 +153,11 @@ export default function DataExplorerView({
             </Box>
           </Box>
         ) : (
-          // Data view content based on active sub-tab
-          <Box sx={{ height: "100%", p: { xs: 2, md: 4 } }}>
-            {subView === "category" && <CategoryView />}
-            {subView === "map" && <MapView />}
-            {subView === "table" && <TableView />}
+          // Category view content
+          <Box
+            sx={{ height: "100%", py: { xs: 1, md: 2 }, px: { xs: 2, md: 4 } }}
+          >
+            <CategoryView />
           </Box>
         )}
       </Box>

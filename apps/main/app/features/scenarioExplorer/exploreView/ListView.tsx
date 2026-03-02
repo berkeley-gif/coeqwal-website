@@ -7,8 +7,9 @@
  * Uses useScenarioList hook to get enriched scenario data from API + local metadata.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
@@ -16,15 +17,34 @@ import {
   useScenarioList,
   type Scenario,
 } from "../../scenarios/hooks/useScenarioList"
+import type { ScenarioTheme } from "../../../content/scenarios"
+import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
+
+const THEME_ORDER: Record<ScenarioTheme, number> = {
+  baseline: 0,
+  ag_gw: 1,
+  eco: 2,
+  delta: 3,
+  cws: 4,
+}
 
 interface ListViewProps {
   compact?: boolean
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
+  /** When provided, controls the expanded modal externally */
+  isExpanded?: boolean
+  /** Callback to close the expanded modal */
+  onCloseExpand?: () => void
+  /** Toolbar content to render inside the expanded modal (e.g. search bar, controls) */
+  modalToolbar?: React.ReactNode
 }
 
 export default function ListView({
   compact = false,
   onTierClick,
+  isExpanded: isExpandedProp,
+  onCloseExpand,
+  modalToolbar,
 }: ListViewProps) {
   const theme = useTheme()
   const {
@@ -46,6 +66,7 @@ export default function ListView({
 
   const [sortBy, setSortBy] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const listScrollRef = useRef<HTMLDivElement>(null)
 
   const handleSortChange = (
     outcome: string | null,
@@ -58,83 +79,219 @@ export default function ListView({
   const {
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
     showOnlyChosen,
     showDefinitions,
     setShowOnlyChosen,
     setShowDefinitions,
     searchQuery,
+    pinnedScenarioId,
+    selectedTheme,
+    showOnlyTheme,
+    setSelectedTheme,
+    selectedIconId,
+    setSelectedIconId,
   } = useScenarioExplorerStore()
 
-  const { sortedScenarios, matchingScenarioIds, hasSearchResults } =
-    useMemo(() => {
-      const baseScenarios = [...scenarios]
+  const {
+    sortedScenarios,
+    matchingScenarioIds,
+    hasSearchResults,
+    themeMatchingScenarioIds,
+    showThemeDivider,
+    showAllThemeDividers,
+    iconMatchingScenarioIds,
+    showIconDivider,
+  } = useMemo(() => {
+    const baseScenarios = [...scenarios]
 
-      if (sortBy && allScoreData && Object.keys(allScoreData).length > 0) {
-        baseScenarios.sort((a, b) => {
-          const aScores = allScoreData[a.scenarioId]
-          const bScores = allScoreData[b.scenarioId]
+    if (sortBy && allScoreData && Object.keys(allScoreData).length > 0) {
+      baseScenarios.sort((a, b) => {
+        const aScores = allScoreData[a.scenarioId]
+        const bScores = allScoreData[b.scenarioId]
 
-          if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
-          if (!aScores?.[sortBy]) return 1
-          if (!bScores?.[sortBy]) return -1
+        if (!aScores?.[sortBy] && !bScores?.[sortBy]) return 0
+        if (!aScores?.[sortBy]) return 1
+        if (!bScores?.[sortBy]) return -1
 
-          const aScore = aScores[sortBy].weighted_score
-          const bScore = bScores[sortBy].weighted_score
+        const aScore = aScores[sortBy].weighted_score
+        const bScore = bScores[sortBy].weighted_score
 
-          if (sortDirection === "asc") {
-            return aScore - bScore
-          } else {
-            return bScore - aScore
-          }
-        })
-      }
-
-      if (!searchQuery.trim()) {
-        return {
-          sortedScenarios: baseScenarios,
-          matchingScenarioIds: new Set<string>(),
-          hasSearchResults: false,
-        }
-      }
-
-      const searchLower = searchQuery.toLowerCase()
-      const matches: Scenario[] = []
-      const nonMatches: Scenario[] = []
-      const matchingIds = new Set<string>()
-
-      baseScenarios.forEach((scenario) => {
-        let isMatch = false
-
-        if (scenario.label.toLowerCase().includes(searchLower)) isMatch = true
-        if (scenario.description.toLowerCase().includes(searchLower))
-          isMatch = true
-        if (scenario.scenarioId.toLowerCase().includes(searchLower))
-          isMatch = true
-        if (scenario.shortLabel?.toLowerCase().includes(searchLower))
-          isMatch = true
-
-        if (isMatch) {
-          matches.push(scenario)
-          matchingIds.add(scenario.scenarioId)
+        if (sortDirection === "asc") {
+          return aScore - bScore
         } else {
-          nonMatches.push(scenario)
+          return bScore - aScore
         }
       })
+    } else {
+      // Default: group scenarios by theme
+      baseScenarios.sort((a, b) => {
+        const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
+        const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
+        return aOrder - bOrder
+      })
+    }
 
+    // Helper to move pinned scenario to top
+    const applyPinning = (scenarioList: typeof baseScenarios) => {
+      if (!pinnedScenarioId) return scenarioList
+      const pinnedIndex = scenarioList.findIndex(
+        (s) => s.scenarioId === pinnedScenarioId,
+      )
+      if (pinnedIndex <= 0) return scenarioList // Already at top or not found
+      const pinned = scenarioList[pinnedIndex]!
+      return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
+    }
+
+    // Helper to apply theme grouping: theme-matching scenarios float to top
+    const applyThemeGrouping = (scenarioList: typeof baseScenarios) => {
+      if (!selectedTheme)
+        return { list: scenarioList, themeIds: new Set<string>() }
+      const themeMatches = scenarioList.filter((s) => s.theme === selectedTheme)
+      const rest = scenarioList.filter((s) => s.theme !== selectedTheme)
+      const themeIds = new Set(themeMatches.map((s) => s.scenarioId))
+      const list = showOnlyTheme ? themeMatches : [...themeMatches, ...rest]
+      return { list, themeIds }
+    }
+
+    // Helper to apply icon grouping: icon-matching scenarios float to top
+    const iconScenarioIdSet = selectedIconId
+      ? new Set(getScenariosWithIcon(selectedIconId))
+      : new Set<string>()
+    const applyIconGrouping = (scenarioList: typeof baseScenarios) => {
+      if (!selectedIconId)
+        return { list: scenarioList, iconIds: new Set<string>() }
+      const iconMatches = scenarioList.filter((s) =>
+        iconScenarioIdSet.has(s.scenarioId),
+      )
+      const rest = scenarioList.filter(
+        (s) => !iconScenarioIdSet.has(s.scenarioId),
+      )
+      return { list: [...iconMatches, ...rest], iconIds: iconScenarioIdSet }
+    }
+
+    if (!searchQuery.trim()) {
+      const pinned = applyPinning(baseScenarios)
+      const { list: themeList, themeIds } = applyThemeGrouping(pinned)
+      const { list, iconIds } = applyIconGrouping(themeList)
       return {
-        sortedScenarios: [...matches, ...nonMatches],
-        matchingScenarioIds: matchingIds,
-        hasSearchResults: matches.length > 0,
+        sortedScenarios: list,
+        matchingScenarioIds: new Set<string>(),
+        hasSearchResults: false,
+        themeMatchingScenarioIds: themeIds,
+        showThemeDivider: selectedTheme !== null && !showOnlyTheme,
+        showAllThemeDividers: !sortBy,
+        iconMatchingScenarioIds: iconIds,
+        showIconDivider: selectedIconId !== null,
       }
-    }, [searchQuery, sortBy, sortDirection, allScoreData, scenarios])
+    }
+
+    const searchLower = searchQuery.toLowerCase()
+    const matches: Scenario[] = []
+    const nonMatches: Scenario[] = []
+    const matchingIds = new Set<string>()
+
+    baseScenarios.forEach((scenario) => {
+      let isMatch = false
+
+      if (scenario.label.toLowerCase().includes(searchLower)) isMatch = true
+      if (scenario.description.toLowerCase().includes(searchLower))
+        isMatch = true
+      if (scenario.scenarioId.toLowerCase().includes(searchLower))
+        isMatch = true
+      if (scenario.shortLabel?.toLowerCase().includes(searchLower))
+        isMatch = true
+
+      if (isMatch) {
+        matches.push(scenario)
+        matchingIds.add(scenario.scenarioId)
+      } else {
+        nonMatches.push(scenario)
+      }
+    })
+
+    const pinned = applyPinning([...matches, ...nonMatches])
+    const { list: themeList, themeIds } = applyThemeGrouping(pinned)
+    const { list, iconIds } = applyIconGrouping(themeList)
+    return {
+      sortedScenarios: list,
+      matchingScenarioIds: matchingIds,
+      hasSearchResults: matches.length > 0,
+      themeMatchingScenarioIds: themeIds,
+      showThemeDivider: selectedTheme !== null && !showOnlyTheme,
+      showAllThemeDividers: !sortBy,
+      iconMatchingScenarioIds: iconIds,
+      showIconDivider: selectedIconId !== null,
+    }
+  }, [
+    searchQuery,
+    sortBy,
+    sortDirection,
+    allScoreData,
+    scenarios,
+    pinnedScenarioId,
+    selectedTheme,
+    showOnlyTheme,
+    selectedIconId,
+  ])
 
   const handleToggleScenario = (scenarioId: string) => {
     toggleScenario(scenarioId)
   }
 
+  const scrollListToTop = () =>
+    listScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+
+  // Click a theme badge → select all scenarios of that theme and float them to top.
+  // Clicking the active theme again deselects those scenarios and clears the filter.
+  const handleThemeBadgeClick = (theme: ScenarioTheme) => {
+    if (selectedTheme === theme) {
+      const themeIds = new Set(
+        scenarios.filter((s) => s.theme === theme).map((s) => s.scenarioId),
+      )
+      selectScenarios(selectedScenarios.filter((id) => !themeIds.has(id)))
+      setSelectedTheme(null)
+    } else {
+      const themeIds = scenarios
+        .filter((s) => s.theme === theme)
+        .map((s) => s.scenarioId)
+      const merged = Array.from(new Set([...selectedScenarios, ...themeIds]))
+      selectScenarios(merged)
+      setSelectedTheme(theme)
+    }
+    scrollListToTop()
+  }
+
+  // Click an operation icon → float matching scenarios to top and select them.
+  // Clicking the active icon again deselects those scenarios and clears the filter.
+  const handleIconClick = (iconId: string) => {
+    if (selectedIconId === iconId) {
+      const iconScenarioIds = new Set(getScenariosWithIcon(iconId))
+      selectScenarios(
+        selectedScenarios.filter((id) => !iconScenarioIds.has(id)),
+      )
+      setSelectedIconId(null)
+    } else {
+      const iconScenarioIds = getScenariosWithIcon(iconId)
+      const merged = Array.from(
+        new Set([...selectedScenarios, ...iconScenarioIds]),
+      )
+      selectScenarios(merged)
+      setSelectedIconId(iconId)
+    }
+    scrollListToTop()
+  }
+
   const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
     Record<string, string>
   >({})
+  // Use external expand control when provided, otherwise internal state
+  const [isExpandedInternal, setIsExpandedInternal] = useState(false)
+  const externallyControlled = isExpandedProp !== undefined
+  const isExpanded = externallyControlled ? isExpandedProp : isExpandedInternal
+  const closeExpand = externallyControlled
+    ? () => onCloseExpand?.()
+    : () => setIsExpandedInternal(false)
 
   const handleOutcomeSelect = (scenarioId: string, outcome: string) => {
     setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
@@ -179,6 +336,11 @@ export default function ListView({
     scenarios: sortedScenarios,
     highlightedScenarios: matchingScenarioIds,
     showSearchDivider: hasSearchResults,
+    themeMatchingScenarioIds,
+    showThemeDivider,
+    showAllThemeDividers,
+    iconMatchingScenarioIds,
+    showIconDivider,
     onOutcomeSelect: handleOutcomeSelect,
     onTierClick,
     onToggleScenario: handleToggleScenario,
@@ -194,41 +356,154 @@ export default function ListView({
     sortBy,
     sortDirection,
     onSortChange: handleSortChange,
+    onThemeBadgeClick: handleThemeBadgeClick,
+    onIconClick: handleIconClick,
   }
 
   if (!compact) {
     return (
+      <>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "calc(100vh - 220px)",
+            overflow: "hidden",
+            backgroundColor: theme.palette.grey[100],
+          }}
+        >
+          {/* Fixed header area */}
+          <Box
+            sx={{
+              flexShrink: 0,
+              px: theme.space.section.md,
+              // Match SearchBar's py: component.lg so dividers start at same distance from top
+              pt: theme.space.component.lg,
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+          </Box>
+
+          {/* Scrollable content */}
+          <Box
+            ref={listScrollRef}
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              px: theme.space.section.md,
+              pt: "10px",
+              pb: theme.space.section.xl,
+              // Top border to indicate scrollable area
+              borderTop: theme.border.medium,
+            }}
+          >
+            {showNoResultsMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontStyle: "italic",
+                  mb: 2,
+                  mt: 1,
+                }}
+              >
+                No scenarios match &ldquo;{searchQuery}&rdquo;
+              </Typography>
+            )}
+            <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+          </Box>
+        </Box>
+
+        {/* Expanded modal view */}
+        <MobileModal
+          open={isExpanded}
+          onClose={closeExpand}
+          maxWidth="95vw"
+          maxHeight="95vh"
+          contentAriaLabel="Scenario list expanded view"
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              height: "85vh",
+              overflow: "hidden",
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            {/* Toolbar (search, controls) */}
+            {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
+
+            {/* Fixed header area */}
+            <Box
+              sx={{
+                flexShrink: 0,
+                px: theme.space.section.md,
+                pt: theme.space.component.lg,
+                backgroundColor: theme.palette.grey[100],
+              }}
+            >
+              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+            </Box>
+
+            {/* Scrollable content */}
+            <Box
+              sx={{
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
+                overscrollBehavior: "contain",
+                px: theme.space.section.md,
+                pt: "10px",
+                pb: theme.space.section.xl,
+                borderTop: theme.border.medium,
+              }}
+            >
+              {showNoResultsMessage && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    fontStyle: "italic",
+                    mb: 2,
+                    mt: 1,
+                  }}
+                >
+                  No scenarios match &ldquo;{searchQuery}&rdquo;
+                </Typography>
+              )}
+              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+            </Box>
+          </Box>
+        </MobileModal>
+      </>
+    )
+  }
+
+  // Compact mode
+  const isMapMode = !!onTierClick
+
+  return (
+    <>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          height: "calc(100vh - 220px)",
-          overflow: "hidden",
+          height: "100%",
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        {/* Fixed header area */}
         <Box
-          sx={{
-            flexShrink: 0,
-            px: theme.space.section.md,
-            // Match SearchBar's py: component.lg so dividers start at same distance from top
-            pt: theme.space.component.lg,
-            backgroundColor: theme.palette.grey[100],
-          }}
-        >
-          <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
-        </Box>
-
-        {/* Scrollable content */}
-        <Box
+          ref={listScrollRef}
           sx={{
             flex: 1,
-            minHeight: 0,
             overflowY: "auto",
             overscrollBehavior: "contain",
-            px: theme.space.section.md,
-            pt: "10px",
+            px: theme.space.section.sm,
+            pt: theme.space.component.md,
             pb: theme.space.section.xl,
             // Top border to indicate scrollable area
             borderTop: theme.border.medium,
@@ -241,54 +516,103 @@ export default function ListView({
                 color: theme.palette.grey[600],
                 fontStyle: "italic",
                 mb: 2,
-                mt: 1,
               }}
             >
               No scenarios match &ldquo;{searchQuery}&rdquo;
             </Typography>
           )}
-          <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+          {isMapMode ? (
+            <>
+              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+              {/* Map mode instructions — below "Choose scenarios" header */}
+              <Box sx={{ mb: 1 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[500], display: "block" }}
+                >
+                  Click on an outcome to see on the map
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{ color: theme.palette.grey[500], display: "block" }}
+                >
+                  Add a location to view its outcome under different scenarios
+                </Typography>
+              </Box>
+              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+            </>
+          ) : (
+            <StrategyGrid {...strategyGridProps} renderMode="all" />
+          )}
         </Box>
       </Box>
-    )
-  }
 
-  // Compact mode
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        backgroundColor: theme.palette.grey[100],
-      }}
-    >
-      <Box
-        sx={{
-          flex: 1,
-          overflowY: "auto",
-          overscrollBehavior: "contain",
-          px: theme.space.section.sm,
-          pt: theme.space.component.md,
-          pb: theme.space.section.xl,
-          // Top border to indicate scrollable area
-          borderTop: theme.border.medium,
-        }}
+      {/* Expanded modal view */}
+      <MobileModal
+        open={isExpanded}
+        onClose={closeExpand}
+        maxWidth="95vw"
+        maxHeight="95vh"
+        contentAriaLabel="Scenario list expanded view"
       >
-        {showNoResultsMessage && (
-          <Typography
-            variant="body2"
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "85vh",
+            overflow: "hidden",
+          }}
+        >
+          {/* Toolbar (search, controls) */}
+          {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
+
+          {/* Fixed header area */}
+          <Box
             sx={{
-              color: theme.palette.grey[600],
-              fontStyle: "italic",
-              mb: 2,
+              flexShrink: 0,
+              px: theme.space.section.md,
+              pt: theme.space.component.lg,
+              backgroundColor: theme.palette.grey[100],
             }}
           >
-            No scenarios match &ldquo;{searchQuery}&rdquo;
-          </Typography>
-        )}
-        <StrategyGrid {...strategyGridProps} renderMode="all" />
-      </Box>
-    </Box>
+            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+          </Box>
+
+          {/* Scrollable content */}
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              overflowY: "auto",
+              overscrollBehavior: "contain",
+              px: theme.space.section.md,
+              pt: "10px",
+              pb: theme.space.section.xl,
+              borderTop: theme.border.medium,
+              backgroundColor: theme.palette.grey[100],
+            }}
+          >
+            {showNoResultsMessage && (
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontStyle: "italic",
+                  mb: 2,
+                  mt: 1,
+                }}
+              >
+                No scenarios match &ldquo;{searchQuery}&rdquo;
+              </Typography>
+            )}
+            <StrategyGrid
+              {...strategyGridProps}
+              compact={false}
+              renderMode="contentOnly"
+            />
+          </Box>
+        </Box>
+      </MobileModal>
+    </>
   )
 }

@@ -23,6 +23,7 @@ import type {
 import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
+import type { ScenarioTheme } from "../../../content/scenarios"
 
 export interface StrategyGridContentProps {
   /** Scenarios to display */
@@ -31,6 +32,16 @@ export interface StrategyGridContentProps {
   highlightedScenarios: Set<string>
   /** Whether to show search divider between highlighted and non-highlighted */
   showSearchDivider: boolean
+  /** Set of scenario IDs matching the active theme filter */
+  themeMatchingScenarioIds?: Set<string>
+  /** Whether to show a divider after the theme-matching group */
+  showThemeDivider?: boolean
+  /** Whether to show dividers between all adjacent scenarios with different themes */
+  showAllThemeDividers?: boolean
+  /** Set of scenario IDs matching the active icon filter */
+  iconMatchingScenarioIds?: Set<string>
+  /** Whether to show a divider after the icon-matching group */
+  showIconDivider?: boolean
   /** Selected/chosen scenario IDs */
   selectedScenarios: string[]
   /** Show only chosen scenarios */
@@ -75,6 +86,10 @@ export interface StrategyGridContentProps {
   ) => void
   /** Sort change handler */
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  /** Select all scenarios sharing a theme when badge is clicked */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Select all scenarios sharing an operation icon when clicked */
+  onIconClick?: (iconId: string) => void
 }
 
 /**
@@ -85,6 +100,11 @@ export function StrategyGridContent({
   scenarios,
   highlightedScenarios,
   showSearchDivider,
+  themeMatchingScenarioIds,
+  showThemeDivider = false,
+  showAllThemeDividers = false,
+  iconMatchingScenarioIds,
+  showIconDivider = false,
   selectedScenarios,
   showOnlyChosen,
   showDefinitions,
@@ -104,13 +124,28 @@ export function StrategyGridContent({
   onTooltipToggle,
   onTooltipToggleWithContext,
   onSortChange,
+  onThemeBadgeClick,
+  onIconClick,
 }: StrategyGridContentProps) {
   const theme = useTheme()
 
-  // Filter scenarios if showOnlyChosen is enabled
-  const displayScenarios = showOnlyChosen
-    ? scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
-    : scenarios
+  // The primary baseline scenario, shown by default, others hidden until expanded
+  const PRIMARY_BASELINE_ID = "s0020"
+
+  // Filter scenarios: chosen-only takes precedence, then baseline visibility
+  const displayScenarios = (() => {
+    // When showing only chosen scenarios, respect that fully — no baseline filtering
+    if (showOnlyChosen) {
+      return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
+    }
+    // When showing all: hide non-primary baseline variations unless expanded
+    if (!showDefinitions) {
+      return scenarios.filter(
+        (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
+      )
+    }
+    return scenarios
+  })()
 
   // Create context-aware tooltip handler for a specific scenario
   // Includes chart data for accurate tier display in tooltips
@@ -146,6 +181,30 @@ export function StrategyGridContent({
         const shouldShowDivider =
           showSearchDivider && isHighlighted && !isNextHighlighted
 
+        // Show divider after the last theme-matching scenario (filtered view)
+        const isThemeMatch =
+          themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+        const isNextThemeMatch = nextScenario
+          ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
+          : false
+        const shouldShowThemeDivider =
+          showThemeDivider && isThemeMatch && !isNextThemeMatch
+
+        // Show divider after the last icon-matching scenario
+        const isIconMatch =
+          iconMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+        const isNextIconMatch = nextScenario
+          ? (iconMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
+          : false
+        const shouldShowIconDivider =
+          showIconDivider && isIconMatch && !isNextIconMatch
+
+        // Show divider whenever adjacent scenarios belong to different theme groups
+        const shouldShowThemeGroupDivider =
+          showAllThemeDividers &&
+          nextScenario !== undefined &&
+          scenario.theme !== nextScenario.theme
+
         const rows: React.ReactNode[] = []
 
         // Main scenario row
@@ -173,6 +232,8 @@ export function StrategyGridContent({
             onTierClick={onTierClick}
             onTooltipToggle={createTooltipHandler(scenario)}
             onSortChange={onSortChange}
+            onThemeBadgeClick={onThemeBadgeClick}
+            onIconClick={onIconClick}
           />,
         )
 
@@ -181,6 +242,51 @@ export function StrategyGridContent({
           rows.push(
             <Box
               key={`divider-${scenario.scenarioId}`}
+              sx={{
+                gridColumn: "1 / -1",
+                my: theme.space.section.sm,
+                height: "1px",
+                backgroundColor: theme.palette.grey[300],
+              }}
+            />,
+          )
+        }
+
+        // Theme group divider — separates theme-matching scenarios from the rest
+        if (shouldShowThemeDivider) {
+          rows.push(
+            <Box
+              key={`theme-divider-${scenario.scenarioId}`}
+              sx={{
+                gridColumn: "1 / -1",
+                my: theme.space.section.sm,
+                height: "1px",
+                backgroundColor: theme.palette.grey[300],
+              }}
+            />,
+          )
+        }
+
+        // Icon group divider — separates icon-matching scenarios from the rest
+        if (shouldShowIconDivider) {
+          rows.push(
+            <Box
+              key={`icon-divider-${scenario.scenarioId}`}
+              sx={{
+                gridColumn: "1 / -1",
+                my: theme.space.section.sm,
+                height: "1px",
+                backgroundColor: theme.palette.grey[300],
+              }}
+            />,
+          )
+        }
+
+        // Theme group boundary divider — between every theme group in the default sort
+        if (shouldShowThemeGroupDivider) {
+          rows.push(
+            <Box
+              key={`theme-group-divider-${scenario.scenarioId}`}
               sx={{
                 gridColumn: "1 / -1",
                 my: theme.space.section.sm,

@@ -52,7 +52,7 @@ export function CallResponsePanel({
   delay = 0,
   sx = {},
   disableHighlight = true,
-  minHeight = "100vh",
+  minHeight = "80vh",
   alignItems = "center",
 }: CallResponsePanelProps) {
   return (
@@ -65,18 +65,17 @@ export function CallResponsePanel({
         alignItems,
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        // Responsive horizontal padding using page.x tokens (24px / 48px)
-        px: (theme: Theme) => theme.space.page.x,
+        paddingLeft: (theme: Theme) => theme.space.panel.paddingXl,
+        paddingRight: (theme: Theme) => theme.space.panel.padding,
       }}
     >
       <motion.div
-        initial={{ marginTop: "100vh" }}
-        animate={{ marginTop: isVisible ? 0 : "100vh" }}
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
         transition={{
-          type: "spring",
-          stiffness: 40,
-          damping: 30,
-          duration: 1.8,
+          duration: 0.6,
+          ease: [0.25, 0.1, 0.25, 1],
           ...(delay ? { delay } : {}),
         }}
         style={{

@@ -1,5 +1,5 @@
 /**
- * Root Layout - Application root with providers
+ * Root layout - Application root with providers
  *
  * Sets up theme, translations, and font loading for the entire app.
  */

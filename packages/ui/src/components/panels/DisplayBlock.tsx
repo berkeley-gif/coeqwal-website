@@ -13,7 +13,10 @@ export interface DisplayBlockProps {
 }
 
 /**
- * DisplayBlock - Bordered text block using the text font for comfortable reading.
+ * DisplayBlock - Clean body text for hero and frontmatter panels.
+ *
+ * No container, no border. Standard readable paragraphs with
+ * optional <strong> for emphasis within the text.
  */
 export function DisplayBlock({
   children,
@@ -25,29 +28,25 @@ export function DisplayBlock({
   return (
     <Box
       sx={{
-        // Responsive width: fixed max on larger screens, full-width on mobile
-        // 520px optimizes line length for content sentence wrapping
-        maxWidth: { xs: "100%", sm: "520px" },
+        maxWidth: { xs: "100%", sm: "540px" },
         width: { xs: "100%", sm: "auto" },
-        // Responsive padding: tighter on mobile
-        padding: {
-          xs: "clamp(24px, 5vw, 36px)",
-          sm: theme.space.displayBlock.padding,
-        },
-        background: "transparent",
-        border: theme.border.rule,
-        boxSizing: "border-box",
         ...sx,
       }}
     >
       <Typography
-        variant="body1"
+        variant="displayBody"
+        component="div"
         sx={{
-          color: "rgba(255, 255, 255, 0.95)",
+          color: "inherit",
           textShadow: textShadow ? theme.textShadow.displayBody : "none",
+          textRendering: "optimizeLegibility",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
           margin: 0,
           textAlign: "left",
-          // Uses body1 (1.25rem) consistently
+          "& strong, & b": {
+            fontWeight: 700,
+          },
         }}
       >
         {children}

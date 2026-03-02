@@ -24,6 +24,7 @@ export type {
   VerticalParallelLineData,
   VerticalParallelLinePlotProps,
 } from "./components/VerticalParallelLinePlot"
+export { default as VerticalParallelLinePlotPeak } from "./components/VerticalParallelLinePlot.peak"
 export { default as OutcomeGlyph } from "./components/OutcomeGlyph"
 export type { OutcomeGlyphProps } from "./components/OutcomeGlyph"
 export { default as OutcomeDotsGlyph } from "./components/OutcomeDotsGlyph"
@@ -42,6 +43,30 @@ export type {
   PercentileValues,
   MonthlyPercentiles,
 } from "./components/PercentileBandChart"
+export { default as PercentileMatrix } from "./components/PercentileMatrix"
+export { default as SpillChart } from "./components/SpillChart"
+export type {
+  SpillChartProps,
+  SpillMonthlyStats,
+  MonthlySpillData,
+} from "./components/SpillChart"
+export { default as SpillMatrix } from "./components/SpillMatrix"
+export type { SpillMatrixProps } from "./components/SpillMatrix"
+export type {
+  PercentileMatrixProps,
+  ReservoirData,
+  MatrixCell,
+  MatrixDisplayMode,
+  VolumeScaleMode,
+  CellStats,
+  CellStatsMap,
+  BreakdownComponent,
+  BreakdownDataMap,
+  BreakdownComponentsMap,
+} from "./components/PercentileMatrix"
+
+export { default as PackedDots } from "./components/PackedDots"
+export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
@@ -55,3 +80,6 @@ export {
   calculateChartDimensions,
   getNestedValue,
 } from "./utils/d3-utils"
+
+export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
+export type { ThemeKey } from "./utils/themeLineColors"

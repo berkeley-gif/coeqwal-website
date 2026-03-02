@@ -44,6 +44,16 @@ export { CompactSearchBar } from "./common/CompactSearchBar"
 export type { CompactSearchBarProps } from "./common/CompactSearchBar"
 export { InfoOverlay } from "./common/InfoOverlay"
 export type { InfoOverlayProps } from "./common/InfoOverlay"
+export { CompactSelect } from "./common/CompactSelect"
+export type {
+  CompactSelectProps,
+  CompactSelectOption,
+  CompactSelectGroup,
+} from "./common/CompactSelect"
+
+// Text utilities
+export { TruncatedText } from "./common/TruncatedText"
+export type { TruncatedTextProps } from "./common/TruncatedText"
 
 // Panel components
 export { Panel } from "./panels/Panel"
@@ -51,6 +61,13 @@ export type { PanelProps } from "./panels/Panel"
 export { OneColumnPanel } from "./panels/OneColumnPanel"
 export { DisplayBlock } from "./panels/DisplayBlock"
 export type { DisplayBlockProps } from "./panels/DisplayBlock"
+export { TwoColumnInterstitial } from "./panels/TwoColumnInterstitial"
+export type {
+  TwoColumnInterstitialProps,
+  InterstitialLink,
+} from "./panels/TwoColumnInterstitial"
+export { CoeqwalPanel } from "./panels/CoeqwalPanel"
+export type { CoeqwalPanelProps } from "./panels/CoeqwalPanel"
 
 // Custom icons
 export {
@@ -58,6 +75,8 @@ export {
   DocumentCheckedIcon,
   DocumentExpandedIcon,
   DocumentCollapsedIcon,
+  CurrentOpsIcon,
+  CurrentOpsMultipleIcon,
 } from "./icons/DocumentIcons"
 
 // Call-response UI components
@@ -65,8 +84,13 @@ export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
 
 // Chip components
-export { ToggleChip, TierChip, LocationChip } from "./Chip"
-export type { ToggleChipProps, TierChipProps, LocationChipProps } from "./Chip"
+export { ToggleChip, TierChip, LocationChip, ScenarioBadge } from "./Chip"
+export type {
+  ToggleChipProps,
+  TierChipProps,
+  LocationChipProps,
+  ScenarioBadgeProps,
+} from "./Chip"
 
 // Error handling
 export { ErrorFallback } from "./common/ErrorFallback"

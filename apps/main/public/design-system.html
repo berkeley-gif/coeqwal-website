@@ -141,31 +141,34 @@
       /* Display font samples */
       .sample-h1 {
         font-family: var(--font-display);
-        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
-        font-weight: 500;
-        line-height: 1.1;
-        color: var(--blue-darkest);
-      }
-
-      .sample-h1-bold {
-        font-family: var(--font-display);
-        font-size: clamp(1.75rem, 2rem + 2vw, 3.5rem);
-        font-weight: 700;
-        line-height: 1.05;
+        font-size: clamp(3.6rem, 1.5rem + 4vw, 5rem);
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.015em;
         color: var(--blue-darkest);
       }
 
       .sample-h2 {
         font-family: var(--font-display);
-        font-size: clamp(1.4rem, 1.6rem + 1.6vw, 2.8rem);
+        font-size: clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem);
         font-weight: 500;
-        line-height: 1.05;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        color: var(--blue-darkest);
+      }
+
+      .sample-h2-main {
+        font-family: var(--font-display);
+        font-size: clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem);
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: -0.01em;
         color: var(--blue-darkest);
       }
 
       .sample-h3 {
         font-family: var(--font-display);
-        font-size: 2rem;
+        font-size: 3.26rem;
         font-weight: 500;
         line-height: 1.1;
         color: var(--blue-darkest);
@@ -243,8 +246,9 @@
 
       .sample-nav {
         font-family: var(--font-display);
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 600;
+        letter-spacing: 0.01em;
         text-transform: capitalize;
       }
 
@@ -620,8 +624,7 @@
             <div class="type-label">
               <span class="type-name">H1</span>
               <span class="type-specs"
-                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 500 / 1.05 /
-                -0.016em</span
+                >clamp(3.6rem, 1.5rem + 4vw, 5rem) / 600 / 1 / -0.015em</span
               >
             </div>
             <div class="sample-h1">Water</div>
@@ -640,35 +643,9 @@
 
           <div class="type-sample">
             <div class="type-label">
-              <span class="type-name">H1 Bold</span>
-              <span class="type-specs"
-                >clamp(1.75rem, 2rem + 4vw, 5.5rem) / 700 / 1.05 /
-                -0.016em</span
-              >
-            </div>
-            <div class="sample-h1-bold">Water</div>
-            <code
-              style="
-                font-size: 0.75rem;
-                background: #f0f0f0;
-                padding: 2px 6px;
-                border-radius: 3px;
-                color: #666;
-              "
-              >variant="h1Bold"</code
-            >
-            <div class="type-usage">
-              Hero emphasis line (e.g., "California's Water" in "What is the
-              future of / California's water")
-            </div>
-          </div>
-
-          <div class="type-sample">
-            <div class="type-label">
               <span class="type-name">H2</span>
               <span class="type-specs"
-                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1.05 /
-                -0.016em</span
+                >clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem) / 500 / 1 / -0.01em</span
               >
             </div>
             <div class="sample-h2">California's</div>
@@ -683,7 +660,30 @@
               >variant="h2"</code
             >
             <div class="type-usage">
-              Hero intro line (0.8× of h1, responsive)
+              Hero intro line (0.8× of h1, responsive) - Used by storylines
+            </div>
+          </div>
+
+          <div class="type-sample">
+            <div class="type-label">
+              <span class="type-name">H2 Main</span>
+              <span class="type-specs"
+                >clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem) / 500 / 1 / -0.01em</span
+              >
+            </div>
+            <div class="sample-h2-main">California's</div>
+            <code
+              style="
+                font-size: 0.75rem;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 3px;
+                color: #666;
+              "
+              >variant="h2Main"</code
+            >
+            <div class="type-usage">
+              Main site hero intro line (larger mobile size)
             </div>
           </div>
 
@@ -708,7 +708,7 @@
             </div>
           </div>
 
-          <div class="type-sample" style="opacity: 0.5">
+          <div class="type-sample">
             <div class="type-label">
               <span class="type-name">H4</span>
               <span class="type-specs">2.45rem (39.2px) / 600 / 1.1</span>
@@ -716,12 +716,13 @@
             <div
               style="
                 font-family: var(--font-display);
-                font-size: 1.5rem;
+                font-size: 2.45rem;
                 font-weight: 600;
+                line-height: 1.1;
                 color: var(--blue-darkest);
               "
             >
-              -
+              Learn
             </div>
             <code
               style="
@@ -733,7 +734,10 @@
               "
               >variant="h4"</code
             >
-            <div class="type-usage" style="font-style: italic">Unused</div>
+            <div class="type-usage">
+              Section headers (ContactSection, LogoGrid, ScrollImageTextBlocks,
+              TwoColumnInterstitial)
+            </div>
           </div>
 
           <div class="type-sample">
@@ -870,7 +874,7 @@
             <div class="type-label">
               <span class="type-name">Header Nav</span>
               <span class="type-specs"
-                >1.1rem (17.6px) / 600 / 1.4 / 0.01em</span
+                >1.25rem (20px) / 600 / 1.4 / 0.01em</span
               >
             </div>
             <div class="sample-nav">About COEQWAL</div>
@@ -1037,18 +1041,18 @@
           <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H1</strong></td>
-              <td>clamp(1.75rem, 2rem + 4vw, 5.5rem)</td>
-              <td style="color: #888;">Hero base (500)</td>
-            </tr>
-            <tr style="border-bottom: 1px solid #eee;">
-              <td style="padding: 8px 0;"><strong>H1 Bold</strong></td>
-              <td>clamp(1.75rem, 2rem + 4vw, 5.5rem)</td>
-              <td style="color: #888;">Hero emphasis (700)</td>
+              <td>clamp(3.6rem, 1.5rem + 4vw, 5rem)</td>
+              <td style="color: #888;">Hero headline (600, lineHeight: 1)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H2</strong></td>
               <td>clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)</td>
-              <td style="color: #888;">Hero intro (0.8×)</td>
+              <td style="color: #888;">Hero intro (storylines)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 8px 0;"><strong>H2 Main</strong></td>
+              <td>clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)</td>
+              <td style="color: #888;">Hero intro (main site, 500)</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 0;"><strong>H3</strong></td>
@@ -1574,6 +1578,69 @@
       <h2 class="section-title">Color Palette</h2>
 
       <div class="color-grid">
+        <!-- Common Colors -->
+        <div class="color-card">
+          <h3>Common colors</h3>
+          <p
+            style="
+              font-size: 0.8rem;
+              color: #666;
+              margin-bottom: 16px;
+              line-height: 1.4;
+            "
+          >
+            Core color tokens. Access via <code>theme.palette.common</code>
+          </p>
+
+          <div
+            class="swatch"
+            style="background: #f2f0ef; border: 1px solid #ddd"
+          >
+            <span class="swatch-label" style="color: #333">common.white</span>
+            <span style="color: #333">#f2f0ef</span>
+          </div>
+
+          <div class="swatch dark" style="background: #000000">
+            <span class="swatch-label">common.black</span>
+            <span>#000000</span>
+          </div>
+        </div>
+
+        <!-- Text colors -->
+        <div class="color-card">
+          <h3>Text colors</h3>
+          <p
+            style="
+              font-size: 0.8rem;
+              color: #666;
+              margin-bottom: 16px;
+              line-height: 1.4;
+            "
+          >
+            Access via <code>theme.palette.text</code>
+          </p>
+
+          <div class="swatch dark" style="background: #193d6b">
+            <span class="swatch-label">text.primary (brand.panelDark)</span>
+            <span>#193D6B</span>
+          </div>
+
+          <div
+            class="swatch"
+            style="background: #f2f0ef; border: 1px solid #ddd"
+          >
+            <span class="swatch-label" style="color: #333"
+              >text.secondary (common.white)</span
+            >
+            <span style="color: #333">#f2f0ef</span>
+          </div>
+
+          <div class="swatch dark" style="background: #77a2d9">
+            <span class="swatch-label">text.disabled</span>
+            <span>#77a2d9</span>
+          </div>
+        </div>
+
         <!-- Panel Backgrounds -->
         <div class="color-card">
           <h3>Panel Backgrounds</h3>
@@ -1585,8 +1652,15 @@
               line-height: 1.4;
             "
           >
-            Hero gradient colors. Access via <code>theme.palette.brand</code>
+            Brand panel surfaces. Access via
+            <code>theme.palette.brand</code> and
+            <code>theme.palette.undertone</code>
           </p>
+
+          <div class="swatch light" style="background: #ede9e4">
+            <span class="swatch-label">brand.panelLight / undertone.stone</span>
+            <span>#EDE9E4</span>
+          </div>
 
           <div class="swatch dark" style="background: #64a4d6">
             <span class="swatch-label">brand.water</span>
@@ -1616,21 +1690,21 @@
             "
           >
             Tab panel backgrounds. Access via
-            <code>theme.palette.tabPanels</code>
+            <code>theme.palette.learn.background</code>, etc.
           </p>
 
           <div class="swatch light" style="background: #d5eaf5">
-            <span class="swatch-label">tabPanels.learn</span>
+            <span class="swatch-label">learn.background</span>
             <span>#D5EAF5</span>
           </div>
 
           <div class="swatch light" style="background: #c2d8eb">
-            <span class="swatch-label">tabPanels.explore</span>
+            <span class="swatch-label">explore.background</span>
             <span>#C2D8EB</span>
           </div>
 
           <div class="swatch light" style="background: #94b8da">
-            <span class="swatch-label">tabPanels.empower</span>
+            <span class="swatch-label">share.background</span>
             <span>#94B8DA</span>
           </div>
         </div>
@@ -1699,6 +1773,388 @@
           <div class="swatch dark" style="background: #cd5c5c">
             <span class="swatch-label">tiers.tier4</span>
             <span>#CD5C5C</span>
+          </div>
+        </div>
+
+        <!-- Water Theme Colors -->
+        <div style="grid-column: 1 / -1">
+          <div class="color-card">
+            <h3>Water Themes</h3>
+            <p
+              style="
+                font-size: 0.8rem;
+                color: #666;
+                margin-bottom: 20px;
+                line-height: 1.4;
+              "
+            >
+              Access via
+              <code>theme.palette.waterThemes</code>
+            </p>
+
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 16px;
+              "
+            >
+              <!-- baseline -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #ffd87e; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.1);
+                        color: #7a5200;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >baseline</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #7a5200;
+                    "
+                  >
+                    Baseline
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      font-size: 0.75rem;
+                      color: #666;
+                    "
+                  >
+                    <div>
+                      bg <code style="font-size: 0.75rem">#ffd87e</code>
+                    </div>
+                    <div style="color: #ccc">·</div>
+                    <div>
+                      text <code style="font-size: 0.75rem">#7a5200</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ag_gw -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #d4edda; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.1);
+                        color: #2d6a4f;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >ag_gw</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #2d6a4f;
+                    "
+                  >
+                    Farms, groundwater &amp; food systems
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      font-size: 0.75rem;
+                      color: #666;
+                    "
+                  >
+                    <div>
+                      bg <code style="font-size: 0.75rem">#d4edda</code>
+                    </div>
+                    <div style="color: #ccc">·</div>
+                    <div>
+                      text <code style="font-size: 0.75rem">#2d6a4f</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- eco -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #cce8ee; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.1);
+                        color: #186b88;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >eco</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #186b88;
+                    "
+                  >
+                    Rivers, salmon &amp; ecosystems
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      font-size: 0.75rem;
+                      color: #666;
+                    "
+                  >
+                    <div>
+                      bg <code style="font-size: 0.75rem">#CCE8EE</code>
+                    </div>
+                    <div style="color: #ccc">·</div>
+                    <div>
+                      text <code style="font-size: 0.75rem">#186b88</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- delta -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #c8ddf4; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.1);
+                        color: #193d6b;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >delta</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #193d6b;
+                    "
+                  >
+                    The Delta as a living place
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      font-size: 0.75rem;
+                      color: #666;
+                    "
+                  >
+                    <div>
+                      bg <code style="font-size: 0.75rem">#C8DDF4</code>
+                    </div>
+                    <div style="color: #ccc">·</div>
+                    <div>
+                      text <code style="font-size: 0.75rem">#193D6B</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- cws -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #ffe5cc; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.1);
+                        color: #7a3000;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >cws</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #7a3000;
+                    "
+                  >
+                    Community water systems
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      font-size: 0.75rem;
+                      color: #666;
+                    "
+                  >
+                    <div>
+                      bg <code style="font-size: 0.75rem">#ffe5cc</code>
+                    </div>
+                    <div style="color: #ccc">·</div>
+                    <div>
+                      text <code style="font-size: 0.75rem">#7a3000</code>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- climate -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #f0f0f0; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.08);
+                        color: #555;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >climate</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #555;
+                    "
+                  >
+                    Climate risk, reliability &amp; resilience
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="font-size: 0.75rem; color: #aaa; font-style: italic"
+                  >
+                    Colors not yet defined
+                  </div>
+                </div>
+              </div>
+
+              <!-- governance -->
+              <div
+                style="
+                  background: white;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+                "
+              >
+                <div style="background: #f0f0f0; padding: 20px 24px 16px">
+                  <div style="margin-bottom: 8px">
+                    <code
+                      style="
+                        background: rgba(0, 0, 0, 0.08);
+                        color: #555;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                      "
+                      >governance</code
+                    >
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-size: 0.95rem;
+                      font-weight: 600;
+                      color: #555;
+                    "
+                  >
+                    Water governance &amp; decision-making
+                  </div>
+                </div>
+                <div style="padding: 12px 24px 16px">
+                  <div
+                    style="font-size: 0.75rem; color: #aaa; font-style: italic"
+                  >
+                    Colors not yet defined
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2265,6 +2721,53 @@ sx={{
             <span style="color: #666">Storyline apps map background</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- =====================
+       STROKE WIDTH SECTION
+       ===================== -->
+    <div class="section">
+      <h2 class="section-title">Stroke width</h2>
+      <p style="margin-bottom: 24px; color: #666">
+        Primary line weight for borders, outlines, and SVG strokes. Access via
+        <code>theme.strokeWidth.rule</code> (numeric) or use pre-composed
+        borders via <code>theme.border.*</code>
+      </p>
+      <div
+        style="
+          background: white;
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        "
+      >
+        <table
+          style="width: 100%; font-size: 0.9rem; border-collapse: collapse"
+        >
+          <tr>
+            <td style="padding: 12px 0; font-weight: 500; width: 120px">
+              rule
+            </td>
+            <td style="padding: 12px 0"><code>2</code> px</td>
+            <td style="padding: 12px 0">
+              <div
+                style="
+                  width: 80px;
+                  height: 0;
+                  border-top: 2px solid #0a1929;
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 12px;
+                "
+              ></div>
+            </td>
+            <td style="padding: 12px 0; color: #888; font-size: 0.85rem">
+              Used in border.rule, border.onDark, border.active, scroll button
+              circle
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
 
@@ -3373,7 +3876,7 @@ sx={{
                 color: #666;
               "
             >
-              <strong>Visual:</strong> Header shrinks from 70px → 40px as user
+              <strong>Visual:</strong> Header shrinks from 70px to 40px as user
               scrolls from 120px to 240px down the page.
             </div>
           </div>
@@ -5257,7 +5760,7 @@ sx={{
     <!-- end hidden sections -->
 
     <footer>
-      <strong>COEQWAL Website Design System</strong> • Last updated January 15,
+      <strong>COEQWAL Website Design System</strong> • Last updated February 16,
       2026<br />
       Source: <code>packages/ui/src/themes/theme.tsx</code> •
       <!-- Fonts: Neue Haas Grotesk Display &amp; Text via Adobe Typekit -->

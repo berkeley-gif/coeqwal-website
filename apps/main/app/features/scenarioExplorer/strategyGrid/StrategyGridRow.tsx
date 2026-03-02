@@ -20,6 +20,7 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import type { LayoutMode } from "./StrategyGridHeader"
+import type { ScenarioTheme } from "../../../content/scenarios"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -64,6 +65,10 @@ export interface StrategyGridRowProps {
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  /** Select all scenarios sharing a theme when badge is clicked */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Select all scenarios sharing an operation icon when clicked */
+  onIconClick?: (iconId: string) => void
 }
 
 /**
@@ -76,7 +81,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   isChosen,
   compact,
   layoutMode,
-  showDefinitions,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcome,
@@ -90,6 +94,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onTierClick,
   onTooltipToggle,
   onSortChange,
+  onThemeBadgeClick,
+  onIconClick,
 }: StrategyGridRowProps) {
   const theme = useTheme()
 
@@ -200,9 +206,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           justifyContent: "flex-end", // Align checkbox closer to scenario title
           alignItems: "flex-start",
           alignSelf: "start",
-          // Non-compact: vertical padding matches scenario title alignment
+          // Non-compact: offset by eyebrow height + margin so checkbox center
+          // aligns with the scenario title's first text line.
+          // Eyebrow row = badge height (0.6rem × 1.4 lineHeight + 3px py×2 ≈ 16.4px)
+          // + mb 4px. Add half of title line-height, subtract half of checkbox height.
           ...(!compact && {
-            pt: theme.scenarios.grid.row.padding,
+            pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
             pb: theme.scenarios.grid.row.padding,
           }),
           // Compact: checkbox spans all rows
@@ -229,17 +238,19 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       {compact ? (
         <CompactRowContent
           scenario={scenario}
-          showDefinitions={showDefinitions}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
+          onThemeBadgeClick={onThemeBadgeClick}
+          onIconClick={onIconClick}
         />
       ) : (
         <NonCompactRowContent
           scenario={scenario}
           layoutMode={layoutMode}
-          showDefinitions={showDefinitions}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
+          onThemeBadgeClick={onThemeBadgeClick}
+          onIconClick={onIconClick}
         />
       )}
     </Box>
@@ -251,16 +262,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
  */
 interface CompactRowContentProps {
   scenario: ScenarioForDisplay
-  showDefinitions: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  onIconClick?: (iconId: string) => void
 }
 
 function CompactRowContent({
   scenario,
-  showDefinitions,
   outcomeNames,
   renderOutcomeItem,
+  onThemeBadgeClick,
+  onIconClick,
 }: CompactRowContentProps) {
   const theme = useTheme()
 
@@ -270,6 +283,7 @@ function CompactRowContent({
         display: "flex",
         flexDirection: "column",
         gap: theme.space.gap.md,
+        pl: 0.5,
       }}
     >
       {/* First row: Title/description + Key operations */}
@@ -283,8 +297,8 @@ function CompactRowContent({
       >
         <StrategyHeader
           strategy={scenario}
-          showDescription={showDefinitions}
           titleVariant="body2"
+          onThemeBadgeClick={onThemeBadgeClick}
         />
         <Box
           sx={{
@@ -294,11 +308,12 @@ function CompactRowContent({
             flexShrink: 0,
           }}
         >
-          <Typography variant="smallSectionLabel">Key operations</Typography>
+          <Typography variant="subtitle2">Key operations</Typography>
           <OperationsIconGroup
             scenarioId={scenario.scenarioId}
             theme={scenario.theme}
             size="md"
+            onIconClick={onIconClick}
           />
         </Box>
       </Box>
@@ -311,7 +326,7 @@ function CompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        <Typography variant="smallSectionLabel">Key outcomes</Typography>
+        <Typography variant="subtitle2">Key outcomes</Typography>
         <Box
           sx={{
             display: "flex",
@@ -368,17 +383,19 @@ function CompactRowContent({
 interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay
   layoutMode: LayoutMode
-  showDefinitions: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  onIconClick?: (iconId: string) => void
 }
 
 function NonCompactRowContent({
   scenario,
   layoutMode,
-  showDefinitions,
   outcomeNames,
   renderOutcomeItem,
+  onThemeBadgeClick,
+  onIconClick,
 }: NonCompactRowContentProps) {
   const theme = useTheme()
 
@@ -404,9 +421,9 @@ function NonCompactRowContent({
       >
         <StrategyHeader
           strategy={scenario}
-          showDescription={showDefinitions}
           titleVariant="body2"
           descriptionMaxWidth="none"
+          onThemeBadgeClick={onThemeBadgeClick}
         />
       </Box>
 
@@ -446,6 +463,7 @@ function NonCompactRowContent({
           scenarioId={scenario.scenarioId}
           theme={scenario.theme}
           size="md"
+          onIconClick={onIconClick}
         />
       </Box>
 

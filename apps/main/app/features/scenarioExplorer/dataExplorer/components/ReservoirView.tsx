@@ -20,7 +20,10 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { PercentileBandChart } from "@repo/viz"
-import type { MonthlyPercentiles, ReservoirPercentiles } from "@repo/data/coeqwal"
+import type {
+  MonthlyPercentiles,
+  ReservoirPercentiles as _ReservoirPercentiles,
+} from "@repo/data/coeqwal"
 import { useAllReservoirPercentiles } from "@repo/data/coeqwal/hooks"
 import { useScenarioExplorerStore } from "../../store"
 
@@ -281,7 +284,8 @@ function useMultiScenarioReservoirData(scenarioIds: string[]) {
  */
 export default function ReservoirView() {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
 
   // Fetch data for all selected scenarios
   const { dataByReservoir, isLoading, error } =
@@ -326,7 +330,10 @@ export default function ReservoirView() {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setActiveView("list")}
+          onClick={() => {
+            setMainView("explorer")
+            setExploreMode("list")
+          }}
           sx={{
             backgroundColor: theme.palette.blue.darkest,
             "&:hover": { backgroundColor: theme.palette.blue.bright },

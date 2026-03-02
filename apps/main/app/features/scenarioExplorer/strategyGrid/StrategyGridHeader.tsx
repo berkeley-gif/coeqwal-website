@@ -25,6 +25,7 @@ import {
   formatOutcomeLabel,
   type OutcomeName,
 } from "../../scenarios/components/shared"
+import { GridControls } from "./GridControls"
 
 /**
  * Layout mode for responsive grid behavior
@@ -49,6 +50,14 @@ export interface StrategyGridHeaderProps {
   sortDirection: "asc" | "desc"
   /** Whether sort is enabled */
   sortEnabled: boolean
+  /** Whether to show only chosen scenarios */
+  showOnlyChosen?: boolean
+  /** Whether to show strategy definitions */
+  showDefinitions?: boolean
+  /** Called when showOnlyChosen changes */
+  onShowOnlyChosenChange?: (value: boolean) => void
+  /** Called when showDefinitions changes */
+  onShowDefinitionsChange?: (value: boolean) => void
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
@@ -72,12 +81,26 @@ export function StrategyGridHeader({
   sortBy,
   sortDirection,
   sortEnabled,
+  showOnlyChosen = false,
+  showDefinitions = false,
+  onShowOnlyChosenChange,
+  onShowDefinitionsChange,
   onTooltipToggle,
   onSortChange,
 }: StrategyGridHeaderProps) {
+  const controls =
+    onShowOnlyChosenChange && onShowDefinitionsChange ? (
+      <GridControls
+        showOnlyChosen={showOnlyChosen}
+        showDefinitions={showDefinitions}
+        onShowOnlyChosenChange={onShowOnlyChosenChange}
+        onShowDefinitionsChange={onShowDefinitionsChange}
+      />
+    ) : null
+
   // Compact mode uses simplified header
   if (compact) {
-    return <CompactHeader />
+    return <CompactHeader controls={controls} />
   }
 
   // Full mode: 4 columns with outcome labels in header
@@ -88,6 +111,14 @@ export function StrategyGridHeader({
     <>
       {/* Column headers row */}
       <ColumnHeaders layoutMode={layoutMode} />
+
+      {/* Controls in cols 1-2, same row as DividerContinuation / OutcomeCategoryLabels */}
+      {controls && (
+        <ControlsRow
+          controls={controls}
+          showOutcomeLabels={showOutcomeLabels}
+        />
+      )}
 
       {/* Divider continuation for Column 3 - only in full mode */}
       {showOutcomeLabels && <DividerContinuation column={3} />}
@@ -111,7 +142,7 @@ export function StrategyGridHeader({
 /**
  * Compact header - simplified single-row header for mobile/condensed view
  */
-function CompactHeader() {
+function CompactHeader({ controls }: { controls: React.ReactNode }) {
   const theme = useTheme()
 
   return (
@@ -133,6 +164,38 @@ function CompactHeader() {
       >
         Choose scenarios
       </Typography>
+      {controls}
+    </Box>
+  )
+}
+
+/**
+ * ControlsRow - GridControls placed in cols 1-2, below the "Choose scenarios" header.
+ * Aligns with DividerContinuation and OutcomeCategoryLabels in the same grid row.
+ */
+function ControlsRow({
+  controls,
+  showOutcomeLabels,
+}: {
+  controls: React.ReactNode
+  showOutcomeLabels: boolean
+}) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      sx={{
+        gridColumn: "1 / 3",
+        display: { xs: "none", sm: "flex" },
+        alignItems: "center",
+        pr: theme.scenarios.grid.divider.gap,
+        pb: showOutcomeLabels
+          ? theme.scenarios.grid.header.categoryLabels
+          : theme.space.component.sm,
+        mt: showOutcomeLabels ? theme.scenarios.grid.divider.pullUp : 0,
+      }}
+    >
+      {controls}
     </Box>
   )
 }
@@ -159,7 +222,6 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
           display: { xs: "none", sm: "flex" },
           alignItems: "flex-start",
           alignSelf: "stretch",
-          // No pl - align with left edge of checkbox
           pr: theme.scenarios.grid.divider.gap,
           pb: theme.scenarios.grid.header.standard,
         }}

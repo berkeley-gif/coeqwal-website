@@ -20,10 +20,10 @@ import TabPanels from "./components/tabs/TabPanels"
 export default function Home() {
   return (
     <ClientProviders>
-      {/* WCAG 2.4.1: Skip link MUST be first focusable element in DOM */}
+      {/* WCAG 2.4.1: Skip link must be first focusable element in DOM */}
       <SkipLink />
 
-      {/* WCAG 2.4.3: Header MUST come before map in DOM for correct tab order
+      {/* WCAG 2.4.3: Header must come before map in DOM for correct tab order
           Tab order: Skip Link > Header nav > Map controls > Main content */}
       <Header />
 

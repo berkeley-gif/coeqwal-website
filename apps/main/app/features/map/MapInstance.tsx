@@ -12,6 +12,7 @@ import {
   useLearnMapScrollOffset,
   useActiveSection,
   useCameraView,
+  useExplorePanelWidth,
   mapActions,
   type MapMode,
 } from "./store"
@@ -105,6 +106,7 @@ export default function MapInstance({
   const learnMapScrollOffset = useLearnMapScrollOffset()
   const activeSection = useActiveSection()
   const cameraView = useCameraView()
+  const explorePanelWidth = useExplorePanelWidth()
 
   const isLearnMode = mapMode === "learn"
   const isExploreMode = mapMode === "explore"
@@ -140,13 +142,15 @@ export default function MapInstance({
   useEffect(() => {
     if (mapMode !== "explore" || !map.mapRef?.current) return
 
-    const leftPadding = window.innerWidth / 2
+    const leftPadding = window.innerWidth * (explorePanelWidth / 100)
+    // Less top padding when panel is wider (equity tool) to center map better vertically
+    const topPadding = explorePanelWidth > 50 ? 80 : 300
     map.mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
-      padding: { left: leftPadding, top: 300, right: 0, bottom: 20 },
+      padding: { left: leftPadding, top: topPadding, right: 0, bottom: 20 },
       maxZoom: 6,
       duration: 1000,
     })
-  }, [mapMode, map])
+  }, [mapMode, map, explorePanelWidth])
 
   /** Explore mode: hide base layers */
   useEffect(() => {
@@ -169,9 +173,10 @@ export default function MapInstance({
     if (mapMode !== "explore" || !map.mapRef?.current) return
 
     const handleResize = () => {
-      const leftPadding = window.innerWidth / 2
+      const leftPadding = window.innerWidth * (explorePanelWidth / 100)
+      const topPadding = explorePanelWidth > 50 ? 80 : 300
       map.mapRef.current?.fitBounds(CALIFORNIA_BOUNDS, {
-        padding: { left: leftPadding, top: 300, right: 0, bottom: 20 },
+        padding: { left: leftPadding, top: topPadding, right: 0, bottom: 20 },
         maxZoom: 6,
         duration: 300,
       })
@@ -179,7 +184,7 @@ export default function MapInstance({
 
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [mapMode, map])
+  }, [mapMode, map, explorePanelWidth])
 
   /** Learn mode: camera transitions when section changes */
   useEffect(() => {
@@ -237,7 +242,7 @@ export default function MapInstance({
           ...containerStyles,
           "& .mapboxgl-ctrl-bottom-left": {
             transition: "left 0.3s ease, bottom 0.3s ease",
-            left: isExploreMode ? "calc(50% + 16px)" : "10px",
+            left: isExploreMode ? `calc(${explorePanelWidth}% + 16px)` : "10px",
             bottom: "16px",
           },
         }}

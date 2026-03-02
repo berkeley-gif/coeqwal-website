@@ -289,7 +289,7 @@ export default function TierMarkers({
                 backgroundColor: getTierColor(feature.properties.tier_level),
                 // Diamond: white outline to match rivers; Circle: standard onDark border
                 border: isDiamond
-                  ? "2px solid rgba(255, 255, 255, 0.9)"
+                  ? `2px solid ${theme.palette.common.white}E6`
                   : theme.border.onDark,
                 boxShadow: theme.shadow.sm,
                 cursor: "pointer",

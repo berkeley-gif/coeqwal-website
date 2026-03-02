@@ -21,6 +21,8 @@ export interface CompactSearchBarProps {
   onChange: (value: string) => void
   /** Placeholder text */
   placeholder?: string
+  /** Content to render to the left of the search input (e.g., expand button) */
+  leftContent?: React.ReactNode
   /** Content to render on the right side (e.g., filters, toggles) */
   rightContent?: React.ReactNode
   /** Whether to show a label above the search input */
@@ -31,6 +33,8 @@ export interface CompactSearchBarProps {
   inputId?: string
   /** aria-label for the input when label is hidden */
   ariaLabel?: string
+  /** Max width for the search input container (defaults to 330px) */
+  inputMaxWidth?: string | number
 }
 
 /**
@@ -40,11 +44,13 @@ export function CompactSearchBar({
   value,
   onChange,
   placeholder = "Search...",
+  leftContent,
   rightContent,
   showLabel = true,
   label = "Search",
   inputId = "compact-search-input",
   ariaLabel,
+  inputMaxWidth = "330px",
 }: CompactSearchBarProps) {
   const theme = useTheme()
 
@@ -66,24 +72,34 @@ export function CompactSearchBar({
         borderBottom: theme.border.medium,
       }}
     >
+      {leftContent && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexShrink: 0,
+          }}
+        >
+          {leftContent}
+        </Box>
+      )}
       {/* Search section */}
       <Box
         sx={{
           width: "100%",
-          maxWidth: "330px",
+          maxWidth: inputMaxWidth,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
-          gap: theme.space.gap.md,
+          gap: theme.space.gap.sm,
         }}
       >
         {showLabel && (
           <Typography
-            variant="caption"
+            variant="subtitle2"
             component="label"
             htmlFor={inputId}
             sx={{
-              fontWeight: theme.typography.fontWeightMedium,
               color: theme.palette.grey[900],
             }}
           >

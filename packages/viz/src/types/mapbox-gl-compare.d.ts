@@ -1,4 +1,3 @@
-// Ambient declarations (no top-level export)
 declare module "mapbox-gl-compare" {
   import type mapboxgl from "mapbox-gl"
 

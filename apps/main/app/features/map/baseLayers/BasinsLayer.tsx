@@ -12,6 +12,7 @@
 
 import { Source, Layer } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
+import { themeValues } from "@repo/ui/themes/theme"
 import { useIsOutcomeVisualizationActive } from "../store"
 
 interface BasinsLayerProps {
@@ -64,7 +65,7 @@ export default function BasinsLayer({
         type="line"
         layout={{ visibility }}
         paint={{
-          "line-color": "white",
+          "line-color": themeValues.palette.common.white,
           "line-width": 2,
           "line-opacity": outlineOpacity,
         }}
@@ -89,7 +90,7 @@ export default function BasinsLayer({
           ],
         }}
         paint={{
-          "text-color": "#ffffff",
+          "text-color": themeValues.palette.common.white,
           "text-halo-color": "rgb(61, 41, 41)",
           "text-halo-width": 2,
           // Only fade Sacramento and San Joaquin labels; Tulare stays visible
