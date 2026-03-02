@@ -39,7 +39,7 @@ const WATER_THEME_PHOTOS: Record<string, string | undefined> = {
   cws: "/images/themes/FL_Porterville-9320.jpg",
   ag_gw: "/images/themes/PJH_Sprinklers_10911-2_07_15_2004.jpg",
   eco: "/images/themes/CC_salmon_underH20-5_10_15_2012.jpg",
-  delta: "/images/themes/Screenshot 2026-02-25 at 11.21.jpg",
+  delta: "/images/themes/2025_03_11_NS_0036_Oroville_Lake_Levels.jpg",
 } as const
 
 interface ThemeCircle {
@@ -51,6 +51,8 @@ interface ThemeCircle {
   /** Radius in image-space pixels */
   r: number
   photo: string
+  /** Scale factor for the photo within the circle (default 1). Values > 1 zoom out. */
+  photoScale?: number
   label: string
   description: string
 }
@@ -170,16 +172,40 @@ function WaterThemesPanelContent({
     [0.20, 0.35],
     prefersReducedMotion ? [1, 1] : [0, 1],
   )
-  const photoOpacity = useScrollValue(
-    progress,
-    [0.50, 0.70],
-    prefersReducedMotion ? [1, 1] : [0, 1],
-  )
-  const labelOpacity = useScrollValue(
-    progress,
-    [0.55, 0.75],
-    prefersReducedMotion ? [1, 1] : [0, 1],
-  )
+  // Per-circle staggered opacities — left-to-right reveal.
+  // Sort circles by cx to determine reveal order, then assign
+  // evenly spaced progress windows across the reveal range.
+  const sortedIndices = CIRCLE_CONFIG
+    .map((c, i) => ({ cx: c.cx, i }))
+    .sort((a, b) => a.cx - b.cx)
+    .map((entry) => entry.i)
+
+  const PHOTO_START = 0.40
+  const PHOTO_END = 0.75
+  const LABEL_START = 0.42
+  const LABEL_END = 0.77
+  const FADE_DUR = 0.06 // each circle's individual fade duration
+  const count = CIRCLE_CONFIG.length
+
+  const photoOpacities = CIRCLE_CONFIG.map((_, i) => {
+    const order = sortedIndices.indexOf(i)
+    const start = PHOTO_START + (order / (count - 1)) * (PHOTO_END - PHOTO_START - FADE_DUR)
+    return useScrollValue(
+      progress,
+      [start, start + FADE_DUR],
+      prefersReducedMotion ? [1, 1] : [0, 1],
+    )
+  })
+
+  const labelOpacities = CIRCLE_CONFIG.map((_, i) => {
+    const order = sortedIndices.indexOf(i)
+    const start = LABEL_START + (order / (count - 1)) * (LABEL_END - LABEL_START - FADE_DUR)
+    return useScrollValue(
+      progress,
+      [start, start + FADE_DUR],
+      prefersReducedMotion ? [1, 1] : [0, 1],
+    )
+  })
 
   return (
     <Box
@@ -238,7 +264,33 @@ function WaterThemesPanelContent({
           ))}
         </defs>
 
-        {/* Dashed circle outlines */}
+        {/* Photo fills (clipped to circles) */}
+        {CIRCLE_CONFIG.map((c, i) => {
+          if (!c.photo) return null
+          // photoScale > 1 zooms out: the image element shrinks relative to the
+          // clip circle, so more of the source is visible (with letterboxing).
+          // Default (no photoScale) uses "slice" to fill the circle (cover).
+          const zoomOut = c.photoScale ?? 1
+          const imgR = c.r / zoomOut
+          const fit = c.photoScale
+            ? "xMidYMid meet"
+            : "xMidYMid slice"
+          return (
+            <motion.image
+              key={`photo-${c.id}`}
+              href={c.photo}
+              x={c.cx - imgR}
+              y={c.cy - imgR}
+              width={imgR * 2}
+              height={imgR * 2}
+              clipPath={`url(#clip-${c.id})`}
+              preserveAspectRatio={fit}
+              style={{ opacity: photoOpacities[i] }}
+            />
+          )
+        })}
+
+        {/* Dashed circle outlines (on top of photos) */}
         {CIRCLE_CONFIG.map((c) => (
           <motion.circle
             key={`outline-${c.id}`}
@@ -253,23 +305,8 @@ function WaterThemesPanelContent({
           />
         ))}
 
-        {/* Photo fills (clipped to circles) */}
-        {CIRCLE_CONFIG.filter((c) => c.photo).map((c) => (
-          <motion.image
-            key={`photo-${c.id}`}
-            href={c.photo}
-            x={c.cx - c.r}
-            y={c.cy - c.r}
-            width={c.r * 2}
-            height={c.r * 2}
-            clipPath={`url(#clip-${c.id})`}
-            preserveAspectRatio="xMidYMid slice"
-            style={{ opacity: photoOpacity }}
-          />
-        ))}
-
         {/* Labels via foreignObject */}
-        {CIRCLE_CONFIG.map((c) => {
+        {CIRCLE_CONFIG.map((c, i) => {
           const labelW = 340
           const gap = 20
           // 9:00 position (direct left): right edge of label near circle's left,
@@ -290,7 +327,7 @@ function WaterThemesPanelContent({
               y={labelY}
               width={labelW}
               height={260}
-              style={{ opacity: labelOpacity, overflow: "visible" }}
+              style={{ opacity: labelOpacities[i], overflow: "visible" }}
             >
               <div
                 style={{
