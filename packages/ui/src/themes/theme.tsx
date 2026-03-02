@@ -372,9 +372,9 @@ const palette = {
   // Keys match ScenarioTheme / WATER_THEMES ids (packages/data/src/coeqwal/themes.ts)
   waterThemes: {
     baseline: { background: "#ffd87e", text: "#7a5200" },
-    ag_gw: { background: "#d4edda", text: "#2d6a4f" },
-    eco: { background: "#B8D0E8", text: "#1E4F6E" },
-    delta: { background: "#D4CAED", text: "#3A2888" },
+    ag_gw: { background: "#d0ebd7", text: "#2d6a4f" },
+    eco: { background: "#CDDFF1", text: "#1E4F6E" },
+    delta: { background: "#DED6F0", text: "#3A2888" },
     cws: { background: "#ffe5cc", text: "#7a3000" },
   },
 

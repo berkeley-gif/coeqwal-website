@@ -1173,7 +1173,8 @@ function useIndividualDemandUnitsData(
         }
         const ps = stats.period_summary
         const psDemand = ps
-          ? (ps.annual_delivery_avg_taf ?? 0) + (ps.annual_shortage_avg_taf ?? 0)
+          ? (ps.annual_delivery_avg_taf ?? 0) +
+            (ps.annual_shortage_avg_taf ?? 0)
           : 0
         const psP95 = ps?.delivery_exceedance?.["p95"]
         const psP95Fulfillment =
@@ -1589,7 +1590,11 @@ function MonthlyCwsSection({
                 </Box>
                 <Box
                   component="span"
-                  sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}
+                  sx={{
+                    color: "grey.400",
+                    fontSize: "0.8rem",
+                    fontStyle: "italic",
+                  }}
                 >
                   {displayMode === "delivery"
                     ? "Upper chart region = wetter-year delivery · Lower chart region = drier-year delivery"

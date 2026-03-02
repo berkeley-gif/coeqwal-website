@@ -69,37 +69,31 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       THEME_LABEL_CONFIG.cws?.label ??
       WATER_THEMES.find((t) => t.id === "cws")?.shortLabel ??
       "Community water systems",
-    description:
-      WATER_THEMES.find((t) => t.id === "cws")?.description ?? "",
-
+    description: WATER_THEMES.find((t) => t.id === "cws")?.description ?? "",
   },
   {
     id: "ag_gw",
     cx: 628,
-    cy: 833,
+    cy: 873,
     r: 130,
     photo: WATER_THEME_PHOTOS.ag_gw!,
     label:
       THEME_LABEL_CONFIG.ag_gw?.label ??
       WATER_THEMES.find((t) => t.id === "ag_gw")?.shortLabel ??
       "Farms & groundwater",
-    description:
-      WATER_THEMES.find((t) => t.id === "ag_gw")?.description ?? "",
-
+    description: WATER_THEMES.find((t) => t.id === "ag_gw")?.description ?? "",
   },
   {
     id: "eco",
     cx: 1420,
-    cy: 831,
+    cy: 871,
     r: 130,
     photo: WATER_THEME_PHOTOS.eco!,
     label:
       THEME_LABEL_CONFIG.eco?.label ??
       WATER_THEMES.find((t) => t.id === "eco")?.shortLabel ??
       "Rivers & ecosystems",
-    description:
-      WATER_THEMES.find((t) => t.id === "eco")?.description ?? "",
-
+    description: WATER_THEMES.find((t) => t.id === "eco")?.description ?? "",
   },
   {
     id: "delta",
@@ -111,14 +105,12 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       THEME_LABEL_CONFIG.delta?.label ??
       WATER_THEMES.find((t) => t.id === "delta")?.shortLabel ??
       "The Delta",
-    description:
-      WATER_THEMES.find((t) => t.id === "delta")?.description ?? "",
-
+    description: WATER_THEMES.find((t) => t.id === "delta")?.description ?? "",
   },
   {
     id: "governance",
     cx: 2200,
-    cy: 831,
+    cy: 871,
     r: 130,
     photo: WATER_THEME_PHOTOS.governance ?? "",
     label:
@@ -126,7 +118,6 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "Operations & impacts",
     description:
       WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
-
   },
   {
     id: "climate",
@@ -139,9 +130,144 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "Climate resilience",
     description:
       WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
-
   },
 ]
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* STAGGER TIMING                                                              */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/** Left-to-right reveal order — sorted by cx position */
+const SORTED_INDICES = CIRCLE_CONFIG.map((c, i) => ({ cx: c.cx, i }))
+  .sort((a, b) => a.cx - b.cx)
+  .map((entry) => entry.i)
+
+const PHOTO_START = 0.3
+const PHOTO_END = 0.7
+const LABEL_START = 0.32
+const LABEL_END = 0.72
+const FADE_DUR = 0.08
+const CIRCLE_COUNT = CIRCLE_CONFIG.length
+
+function getStaggerStart(index: number, rangeStart: number, rangeEnd: number) {
+  const order = SORTED_INDICES.indexOf(index)
+  return (
+    rangeStart +
+    (order / (CIRCLE_COUNT - 1)) * (rangeEnd - rangeStart - FADE_DUR)
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* PER-CIRCLE SUB-COMPONENTS (each calls its own hooks — lint-safe)            */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/** Photo fill clipped to a circle — owns its staggered opacity hook */
+function ThemeCirclePhoto({
+  circle,
+  index,
+  progress,
+  prefersReducedMotion,
+}: {
+  circle: ThemeCircle
+  index: number
+  progress: MotionValue<number>
+  prefersReducedMotion: boolean | null
+}) {
+  const start = getStaggerStart(index, PHOTO_START, PHOTO_END)
+  const opacity = useScrollValue(
+    progress,
+    [start, start + FADE_DUR],
+    prefersReducedMotion ? [1, 1] : [0, 1],
+  )
+
+  if (!circle.photo) return null
+
+  const zoomOut = circle.photoScale ?? 1
+  const imgR = circle.r / zoomOut
+  const fit = circle.photoScale ? "xMidYMid meet" : "xMidYMid slice"
+
+  return (
+    <motion.image
+      href={circle.photo}
+      x={circle.cx - imgR}
+      y={circle.cy - imgR}
+      width={imgR * 2}
+      height={imgR * 2}
+      clipPath={`url(#clip-${circle.id})`}
+      preserveAspectRatio={fit}
+      style={{ opacity }}
+    />
+  )
+}
+
+/** Label card positioned at 9:00 — owns its staggered opacity hook */
+function ThemeCircleLabel({
+  circle,
+  index,
+  progress,
+  prefersReducedMotion,
+}: {
+  circle: ThemeCircle
+  index: number
+  progress: MotionValue<number>
+  prefersReducedMotion: boolean | null
+}) {
+  const theme = useTheme()
+  const start = getStaggerStart(index, LABEL_START, LABEL_END)
+  const opacity = useScrollValue(
+    progress,
+    [start, start + FADE_DUR],
+    prefersReducedMotion ? [1, 1] : [0, 1],
+  )
+
+  const labelW = 340
+  const gap = 20
+  const labelX = circle.cx - circle.r - gap - labelW
+  const labelY = circle.cy - 120
+
+  const themeColors = theme.palette.waterThemes[
+    circle.id as keyof typeof theme.palette.waterThemes
+  ] ?? { background: "#eee", text: "#333" }
+
+  return (
+    <motion.foreignObject
+      x={labelX}
+      y={labelY}
+      width={labelW}
+      height={260}
+      style={{ opacity, overflow: "visible" }}
+    >
+      <div
+        style={{
+          backgroundColor: themeColors.background,
+          color: theme.palette.text.primary,
+          fontFamily: "inherit",
+          borderRadius: "8px",
+          padding: "14px 18px",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: "24px",
+            lineHeight: 1.3,
+            marginBottom: "6px",
+          }}
+        >
+          {circle.label}
+        </div>
+        <div
+          style={{
+            fontSize: "18px",
+            lineHeight: 1.5,
+          }}
+        >
+          {circle.description}
+        </div>
+      </div>
+    </motion.foreignObject>
+  )
+}
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* INNER CONTENT (reads scroll progress from StickyScrollSection context)      */
@@ -161,51 +287,17 @@ function WaterThemesPanelContent({
   const progress = useScrollProgress()
 
   // Phase opacities — when reduced motion, show final state
-  // TODO: background fade temporarily disabled for experimentation
+  // Image fades out after the last theme circle/label has appeared
   const imageOpacity = useScrollValue(
     progress,
-    [0.30, 0.50],
-    prefersReducedMotion ? [1, 1] : [1, 1],
+    [0.75, 0.88],
+    prefersReducedMotion ? [0, 0] : [1, 0],
   )
   const circleOutlineOpacity = useScrollValue(
     progress,
-    [0.20, 0.35],
+    [0.15, 0.3],
     prefersReducedMotion ? [1, 1] : [0, 1],
   )
-  // Per-circle staggered opacities — left-to-right reveal.
-  // Sort circles by cx to determine reveal order, then assign
-  // evenly spaced progress windows across the reveal range.
-  const sortedIndices = CIRCLE_CONFIG
-    .map((c, i) => ({ cx: c.cx, i }))
-    .sort((a, b) => a.cx - b.cx)
-    .map((entry) => entry.i)
-
-  const PHOTO_START = 0.40
-  const PHOTO_END = 0.75
-  const LABEL_START = 0.42
-  const LABEL_END = 0.77
-  const FADE_DUR = 0.06 // each circle's individual fade duration
-  const count = CIRCLE_CONFIG.length
-
-  const photoOpacities = CIRCLE_CONFIG.map((_, i) => {
-    const order = sortedIndices.indexOf(i)
-    const start = PHOTO_START + (order / (count - 1)) * (PHOTO_END - PHOTO_START - FADE_DUR)
-    return useScrollValue(
-      progress,
-      [start, start + FADE_DUR],
-      prefersReducedMotion ? [1, 1] : [0, 1],
-    )
-  })
-
-  const labelOpacities = CIRCLE_CONFIG.map((_, i) => {
-    const order = sortedIndices.indexOf(i)
-    const start = LABEL_START + (order / (count - 1)) * (LABEL_END - LABEL_START - FADE_DUR)
-    return useScrollValue(
-      progress,
-      [start, start + FADE_DUR],
-      prefersReducedMotion ? [1, 1] : [0, 1],
-    )
-  })
 
   return (
     <Box
@@ -265,30 +357,15 @@ function WaterThemesPanelContent({
         </defs>
 
         {/* Photo fills (clipped to circles) */}
-        {CIRCLE_CONFIG.map((c, i) => {
-          if (!c.photo) return null
-          // photoScale > 1 zooms out: the image element shrinks relative to the
-          // clip circle, so more of the source is visible (with letterboxing).
-          // Default (no photoScale) uses "slice" to fill the circle (cover).
-          const zoomOut = c.photoScale ?? 1
-          const imgR = c.r / zoomOut
-          const fit = c.photoScale
-            ? "xMidYMid meet"
-            : "xMidYMid slice"
-          return (
-            <motion.image
-              key={`photo-${c.id}`}
-              href={c.photo}
-              x={c.cx - imgR}
-              y={c.cy - imgR}
-              width={imgR * 2}
-              height={imgR * 2}
-              clipPath={`url(#clip-${c.id})`}
-              preserveAspectRatio={fit}
-              style={{ opacity: photoOpacities[i] }}
-            />
-          )
-        })}
+        {CIRCLE_CONFIG.map((c, i) => (
+          <ThemeCirclePhoto
+            key={`photo-${c.id}`}
+            circle={c}
+            index={i}
+            progress={progress}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ))}
 
         {/* Dashed circle outlines (on top of photos) */}
         {CIRCLE_CONFIG.map((c) => (
@@ -306,60 +383,15 @@ function WaterThemesPanelContent({
         ))}
 
         {/* Labels via foreignObject */}
-        {CIRCLE_CONFIG.map((c, i) => {
-          const labelW = 340
-          const gap = 20
-          // 9:00 position (direct left): right edge of label near circle's left,
-          // vertically centered on the circle
-          const labelX = c.cx - c.r - gap - labelW
-          const labelY = c.cy - 120
-
-          // Per-theme colors from the design system
-          const themeColors =
-            theme.palette.waterThemes[
-              c.id as keyof typeof theme.palette.waterThemes
-            ] ?? { background: "#eee", text: "#333" }
-
-          return (
-            <motion.foreignObject
-              key={`label-${c.id}`}
-              x={labelX}
-              y={labelY}
-              width={labelW}
-              height={260}
-              style={{ opacity: labelOpacities[i], overflow: "visible" }}
-            >
-              <div
-                style={{
-                  backgroundColor: themeColors.background,
-                  color: theme.palette.text.primary,
-                  fontFamily: "inherit",
-                  borderRadius: "8px",
-                  padding: "14px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: "24px",
-                    lineHeight: 1.3,
-                    marginBottom: "6px",
-                  }}
-                >
-                  {c.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: "18px",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {c.description}
-                </div>
-              </div>
-            </motion.foreignObject>
-          )
-        })}
+        {CIRCLE_CONFIG.map((c, i) => (
+          <ThemeCircleLabel
+            key={`label-${c.id}`}
+            circle={c}
+            index={i}
+            progress={progress}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ))}
       </svg>
 
       {/* Layer 4: Text content — headline + description */}
