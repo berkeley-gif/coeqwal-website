@@ -35,7 +35,7 @@ const IMG_H = 1066
 
 const DELTA_AERIALS_SRC = "/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png"
 
-const WATER_THEME_PHOTOS: Record<string, string> = {
+const WATER_THEME_PHOTOS: Record<string, string | undefined> = {
   cws: "/images/themes/FL_Porterville-9320.jpg",
   ag_gw: "/images/themes/PJH_Sprinklers_10911-2_07_15_2004.jpg",
   eco: "/images/themes/CC_salmon_underH20-5_10_15_2012.jpg",
@@ -59,8 +59,8 @@ interface ThemeCircle {
 const CIRCLE_CONFIG: ThemeCircle[] = [
   {
     id: "cws",
-    cx: 750,
-    cy: 450,
+    cx: 1028,
+    cy: 560,
     r: 130,
     photo: WATER_THEME_PHOTOS.cws!,
     label:
@@ -73,8 +73,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
   },
   {
     id: "ag_gw",
-    cx: 350,
-    cy: 780,
+    cx: 628,
+    cy: 833,
     r: 130,
     photo: WATER_THEME_PHOTOS.ag_gw!,
     label:
@@ -87,8 +87,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
   },
   {
     id: "eco",
-    cx: 1900,
-    cy: 700,
+    cx: 1420,
+    cy: 831,
     r: 130,
     photo: WATER_THEME_PHOTOS.eco!,
     label:
@@ -101,8 +101,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
   },
   {
     id: "delta",
-    cx: 2350,
-    cy: 480,
+    cx: 1810,
+    cy: 558,
     r: 130,
     photo: WATER_THEME_PHOTOS.delta!,
     label:
@@ -111,6 +111,32 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "The Delta",
     description:
       WATER_THEMES.find((t) => t.id === "delta")?.description ?? "",
+
+  },
+  {
+    id: "governance",
+    cx: 2200,
+    cy: 831,
+    r: 130,
+    photo: WATER_THEME_PHOTOS.governance ?? "",
+    label:
+      WATER_THEMES.find((t) => t.id === "governance")?.shortLabel ??
+      "Operations & impacts",
+    description:
+      WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
+
+  },
+  {
+    id: "climate",
+    cx: 2589,
+    cy: 558,
+    r: 130,
+    photo: WATER_THEME_PHOTOS.climate ?? "",
+    label:
+      WATER_THEMES.find((t) => t.id === "climate")?.shortLabel ??
+      "Climate resilience",
+    description:
+      WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
 
   },
 ]
@@ -228,7 +254,7 @@ function WaterThemesPanelContent({
         ))}
 
         {/* Photo fills (clipped to circles) */}
-        {CIRCLE_CONFIG.map((c) => (
+        {CIRCLE_CONFIG.filter((c) => c.photo).map((c) => (
           <motion.image
             key={`photo-${c.id}`}
             href={c.photo}
@@ -246,10 +272,10 @@ function WaterThemesPanelContent({
         {CIRCLE_CONFIG.map((c) => {
           const labelW = 340
           const gap = 20
-          // 10:00 position (upper-left): right edge of label near circle's left,
-          // bottom of content near the circle's upper quadrant
+          // 9:00 position (direct left): right edge of label near circle's left,
+          // vertically centered on the circle
           const labelX = c.cx - c.r - gap - labelW
-          const labelY = c.cy - c.r - 100
+          const labelY = c.cy - 120
 
           // Per-theme colors from the design system
           const themeColors =
