@@ -53,8 +53,6 @@ interface ThemeCircle {
   photo: string
   label: string
   description: string
-  /** Which side the label sits on relative to the circle */
-  labelSide: "left" | "right"
 }
 
 /** Placeholder circle positions — tune visually against the aerial image */
@@ -71,7 +69,7 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "Community water systems",
     description:
       WATER_THEMES.find((t) => t.id === "cws")?.description ?? "",
-    labelSide: "left",
+
   },
   {
     id: "ag_gw",
@@ -85,7 +83,7 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "Farms & groundwater",
     description:
       WATER_THEMES.find((t) => t.id === "ag_gw")?.description ?? "",
-    labelSide: "right",
+
   },
   {
     id: "eco",
@@ -99,7 +97,7 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "Rivers & ecosystems",
     description:
       WATER_THEMES.find((t) => t.id === "eco")?.description ?? "",
-    labelSide: "left",
+
   },
   {
     id: "delta",
@@ -113,7 +111,7 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
       "The Delta",
     description:
       WATER_THEMES.find((t) => t.id === "delta")?.description ?? "",
-    labelSide: "left",
+
   },
 ]
 
@@ -135,14 +133,15 @@ function WaterThemesPanelContent({
   const progress = useScrollProgress()
 
   // Phase opacities — when reduced motion, show final state
+  // TODO: background fade temporarily disabled for experimentation
   const imageOpacity = useScrollValue(
     progress,
     [0.30, 0.50],
-    prefersReducedMotion ? [0, 0] : [1, 0],
+    prefersReducedMotion ? [1, 1] : [1, 1],
   )
   const circleOutlineOpacity = useScrollValue(
     progress,
-    [0.05, 0.15],
+    [0.20, 0.35],
     prefersReducedMotion ? [1, 1] : [0, 1],
   )
   const photoOpacity = useScrollValue(
@@ -222,8 +221,8 @@ function WaterThemesPanelContent({
             r={c.r}
             fill="none"
             stroke="white"
-            strokeWidth={2}
-            strokeDasharray="10 8"
+            strokeWidth={8}
+            strokeDasharray="18 20"
             style={{ opacity: circleOutlineOpacity }}
           />
         ))}
@@ -245,10 +244,18 @@ function WaterThemesPanelContent({
 
         {/* Labels via foreignObject */}
         {CIRCLE_CONFIG.map((c) => {
-          const labelW = 280
-          const labelX =
-            c.labelSide === "right" ? c.cx + c.r + 20 : c.cx - c.r - labelW - 20
-          const labelY = c.cy - 40
+          const labelW = 340
+          const gap = 20
+          // 10:00 position (upper-left): right edge of label near circle's left,
+          // bottom of content near the circle's upper quadrant
+          const labelX = c.cx - c.r - gap - labelW
+          const labelY = c.cy - c.r - 100
+
+          // Per-theme colors from the design system
+          const themeColors =
+            theme.palette.waterThemes[
+              c.id as keyof typeof theme.palette.waterThemes
+            ] ?? { background: "#eee", text: "#333" }
 
           return (
             <motion.foreignObject
@@ -256,30 +263,32 @@ function WaterThemesPanelContent({
               x={labelX}
               y={labelY}
               width={labelW}
-              height={200}
+              height={260}
               style={{ opacity: labelOpacity, overflow: "visible" }}
             >
               <div
                 style={{
-                  color: "#fff",
+                  backgroundColor: themeColors.background,
+                  color: theme.palette.text.primary,
                   fontFamily: "inherit",
+                  borderRadius: "8px",
+                  padding: "14px 18px",
                 }}
               >
                 <div
                   style={{
                     fontWeight: 700,
-                    fontSize: "18px",
+                    fontSize: "24px",
                     lineHeight: 1.3,
-                    marginBottom: "4px",
+                    marginBottom: "6px",
                   }}
                 >
                   {c.label}
                 </div>
                 <div
                   style={{
-                    fontSize: "14px",
+                    fontSize: "18px",
                     lineHeight: 1.5,
-                    opacity: 0.85,
                   }}
                 >
                   {c.description}
