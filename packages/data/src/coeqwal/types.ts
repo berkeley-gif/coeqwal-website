@@ -1012,3 +1012,168 @@ export interface BatchStatisticsResponse {
   cws?: Record<string, BatchCwsData>
   ag?: Record<string, BatchAgData>
 }
+
+// ============================================================================
+// Wildlife Refuge Delivery Types
+// ============================================================================
+
+/**
+ * Refuge demand unit metadata
+ * from /api/statistics/refuge-demand-units
+ */
+export interface RefugeDemandUnitData {
+  /** Demand unit ID (e.g., "08N_PR1") — references du_refuge_entity.du_id */
+  du_id: string
+  /** Water balance area ID */
+  wba_id: string
+  /** Hydrologic region ("SAC", "SJR", "TULARE") */
+  hydrologic_region: string
+  /** CS3 contractor type ("PR" = Priority Refuge, "NR" = Non-priority Refuge) */
+  cs3_type: string
+  /** Refuge or wildlife area name */
+  refuge_or_wildlife_area: string | null
+  /** Managing agency (e.g., "USFWS") */
+  managed_by: string | null
+  /** Water provider description */
+  provider: string | null
+  /** Whether the DU receives surface water */
+  sw: boolean
+}
+
+/**
+ * Response from /api/statistics/refuge-demand-units
+ */
+export interface RefugeDemandUnitsListResponse {
+  demand_units: RefugeDemandUnitData[]
+  total: number
+}
+
+/**
+ * Monthly delivery statistics for one (du_id × water_month) combination
+ */
+export interface RefugeDeliveryMonthlyStats {
+  /** Demand unit ID */
+  du_id: string
+  /** Water month (1=Oct, 12=Sep) */
+  water_month: number
+  /** Mean delivery for this water month across all simulated years (TAF) */
+  delivery_avg_taf: number | null
+  /** Coefficient of variation of monthly delivery */
+  delivery_cv: number | null
+  /** 0th percentile delivery (TAF) */
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  /** Exceedance percentiles — exc_pX = value exceeded X% of time */
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+  sample_count: number | null
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/delivery-monthly
+ */
+export interface RefugeDeliveryMonthlyResponse {
+  scenario_id: string
+  data: RefugeDeliveryMonthlyStats[]
+  count: number
+}
+
+/**
+ * Monthly shortage statistics for one (du_id × water_month) combination.
+ * Shortage = max(demand - delivery, 0). No native CalSim shortage variable exists.
+ */
+export interface RefugeShortageMonthlyStats {
+  /** Demand unit ID */
+  du_id: string
+  /** Water month (1=Oct, 12=Sep) */
+  water_month: number
+  /** Mean shortage for this water month (TAF) */
+  shortage_avg_taf: number | null
+  /** CV of monthly shortage (TAF) */
+  shortage_cv: number | null
+  /** Mean shortage as % of demand */
+  shortage_pct_avg: number | null
+  /** CV of monthly shortage % */
+  shortage_pct_cv: number | null
+  /** Fraction of months with shortage > 0.1 TAF threshold */
+  shortage_frequency_pct: number | null
+  /** Percentile bands of monthly shortage TAF */
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  /** Exceedance percentiles of monthly shortage TAF */
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+  sample_count: number | null
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/shortage-monthly
+ */
+export interface RefugeShortageMonthlyResponse {
+  scenario_id: string
+  data: RefugeShortageMonthlyStats[]
+  count: number
+}
+
+/**
+ * Period-of-record summary for one (scenario × du_id) pair
+ */
+export interface RefugePeriodSummary {
+  /** Demand unit ID */
+  du_id: string
+  simulation_start_year: number | null
+  simulation_end_year: number | null
+  total_years: number | null
+  /** Mean of annual delivery totals (TAF) */
+  annual_delivery_avg_taf: number | null
+  annual_delivery_cv: number | null
+  /** Annual delivery exceedance curve */
+  delivery_exc_p5: number | null
+  delivery_exc_p10: number | null
+  delivery_exc_p25: number | null
+  delivery_exc_p50: number | null
+  delivery_exc_p75: number | null
+  delivery_exc_p90: number | null
+  delivery_exc_p95: number | null
+  /** Mean of annual shortage totals (TAF) */
+  annual_shortage_avg_taf: number | null
+  annual_shortage_cv: number | null
+  /** Mean annual shortage as % of demand */
+  annual_shortage_pct_avg: number | null
+  annual_shortage_pct_cv: number | null
+  /**
+   * 95th percentile of annual shortage %.
+   * "In 95 of 100 years, annual shortage ≤ this value."
+   * 0 = perfectly reliable in 95% of years.
+   */
+  reliability_pct_95: number | null
+}
+
+/**
+ * Response from /api/statistics/scenarios/:scenarioId/refuge-demand-units/period-summary
+ */
+export interface RefugePeriodResponse {
+  scenario_id: string
+  data: RefugePeriodSummary[]
+  count: number
+}

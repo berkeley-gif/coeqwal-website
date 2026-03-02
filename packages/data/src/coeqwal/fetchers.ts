@@ -42,6 +42,10 @@ import type {
   AgDemandUnitPeriodResponse,
   ReservoirPeriodSummaryResponse,
   BatchStatisticsResponse,
+  RefugeDemandUnitsListResponse,
+  RefugeDeliveryMonthlyResponse,
+  RefugeShortageMonthlyResponse,
+  RefugePeriodResponse,
 } from "./types"
 
 /**
@@ -905,5 +909,75 @@ export async function fetchBatchStatistics(
       baseUrl: DEFAULT_API_BASE,
       timeout: 60000, // Larger timeout for batch requests
     },
+  )
+}
+
+// ============================================================================
+// Wildlife Refuge Demand Unit fetchers
+// ============================================================================
+
+/**
+ * Fetch list of wildlife refuge demand units
+ *
+ * @returns All 18 refuge demand unit entities
+ */
+export async function fetchRefugeDemandUnitsList(): Promise<RefugeDemandUnitsListResponse> {
+  return apiFetcher<RefugeDemandUnitsListResponse>(
+    ENDPOINTS.refugeDemandUnitsList(),
+    { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+/**
+ * Fetch monthly delivery statistics for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly delivery for 18 refuge demand units × 12 water months
+ */
+export async function fetchRefugeDusDeliveryMonthly(
+  scenarioId: string,
+): Promise<RefugeDeliveryMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugeDeliveryMonthlyResponse>(
+    ENDPOINTS.refugeDusDeliveryMonthly(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+/**
+ * Fetch monthly shortage statistics for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly shortage for 18 refuge demand units × 12 water months
+ */
+export async function fetchRefugeDusShortageMonthly(
+  scenarioId: string,
+): Promise<RefugeShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugeShortageMonthlyResponse>(
+    ENDPOINTS.refugeDusShortageMonthly(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Annual averages, CVs, and reliability_pct_95 for 18 refuge DUs
+ */
+export async function fetchRefugeDusPeriod(
+  scenarioId: string,
+): Promise<RefugePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugePeriodResponse>(
+    ENDPOINTS.refugeDusPeriod(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
   )
 }

@@ -246,6 +246,32 @@ export const ENDPOINTS = {
   reservoirPeriodSummary: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/period-summary`,
 
+  // Wildlife Refuge demand unit endpoints
+
+  /** List of wildlife refuge demand units */
+  refugeDemandUnitsList: () => `/statistics/refuge-demand-units`,
+
+  /**
+   * Monthly delivery statistics for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusDeliveryMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/delivery-monthly`,
+
+  /**
+   * Monthly shortage statistics for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusShortageMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/shortage-monthly`,
+
+  /**
+   * Period-of-record summary for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/period-summary`,
+
   // Batch statistics endpoint (for Data Explorer performance)
 
   /**

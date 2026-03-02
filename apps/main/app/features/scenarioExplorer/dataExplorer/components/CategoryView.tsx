@@ -46,6 +46,7 @@ import { useSpillMonthly, useBatchStatistics } from "@repo/data/coeqwal/hooks"
 import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
 import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
+import RefugeSection from "./RefugeSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
@@ -1265,6 +1266,12 @@ export default function CategoryView() {
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
                   batchData={USE_BATCH_API ? batchData : undefined}
+                />
+              ) : category.id === "environmental-water" &&
+                selectedScenarios.length > 0 ? (
+                <RefugeSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
                 />
               ) : (
                 <>

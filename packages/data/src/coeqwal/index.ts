@@ -99,6 +99,15 @@ export type {
   BatchCwsData,
   BatchAgData,
   BatchStatisticsResponse,
+  // Wildlife Refuge types
+  RefugeDemandUnitData,
+  RefugeDemandUnitsListResponse,
+  RefugeDeliveryMonthlyStats,
+  RefugeDeliveryMonthlyResponse,
+  RefugeShortageMonthlyStats,
+  RefugeShortageMonthlyResponse,
+  RefugePeriodSummary,
+  RefugePeriodResponse,
 } from "./types"
 
 // API constants

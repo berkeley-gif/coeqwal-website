@@ -251,6 +251,35 @@ export const CACHE_KEYS = {
   agDemandUnitsPeriod: (scenarioId: string) =>
     `/api/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
 
+  // Wildlife Refuge Demand Units cache keys (18 refuge demand units)
+
+  /** List of wildlife refuge demand units */
+  REFUGE_DUS_LIST: "/api/statistics/refuge-demand-units",
+
+  /**
+   * Monthly delivery statistics for refuge demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   */
+  refugeDusDeliveryMonthly: (scenarioId: string, duId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/refuge-demand-units/delivery-monthly${duId ? `?du_id=${duId}` : ""}`,
+
+  /**
+   * Monthly shortage statistics for refuge demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   */
+  refugeDusShortageMonthly: (scenarioId: string, duId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/refuge-demand-units/shortage-monthly${duId ? `?du_id=${duId}` : ""}`,
+
+  /**
+   * Period-of-record summary for refuge demand units
+   * @param scenarioId - Scenario ID
+   * @param duId - Optional demand unit ID filter
+   */
+  refugeDusPeriod: (scenarioId: string, duId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/refuge-demand-units/period-summary${duId ? `?du_id=${duId}` : ""}`,
+
   // Reservoir period summary cache key
 
   /**
