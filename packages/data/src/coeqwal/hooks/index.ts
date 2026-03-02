@@ -58,3 +58,9 @@ export {
   getCwsForScenario,
   getAgForScenario,
 } from "./useBatchStatistics"
+export {
+  useRefugeDemandUnitsList,
+  useRefugeDusDeliveryMonthly,
+  useRefugeDusShortageMonthly,
+  useRefugeDusPeriod,
+} from "./useRefugeStatistics"
