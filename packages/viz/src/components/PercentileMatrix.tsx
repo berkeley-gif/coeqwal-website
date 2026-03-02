@@ -562,7 +562,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.text)
             .attr("text-transform", "uppercase")
             .attr("letter-spacing", "0.05em")
-              .text("P95 delivery")
+              .text("P95 reliability")
           g.append("text")
             .attr("x", labelX)
             .attr("y", currentY + 14)
@@ -1403,7 +1403,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-size", labelFontSize)
               .attr("font-family", "'Inter', -apple-system, sans-serif")
               .attr("fill", COLORS.text)
-              .text("P95 delivery")
+              .text("P95 reliability")
             statsG
               .append("text")
               .attr("x", valueX)
@@ -1540,7 +1540,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const shortagePct = (100 - reliability).toFixed(2)
             cwsContextNote = `CVP South of Delta has frequent but tiny shortages. ${shortageYears} out of 100 years have some shortage (>0.1 TAF). But avg shortage is only ${avgShortage.toFixed(2)} TAF/yr out of ${Math.round(avgDelivery).toLocaleString()} TAF delivered. That's only ${shortagePct}% of delivery! To see shortage amounts toggle the controls above.`
           } else {
-            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>P95 delivery</strong> = in 95 of 100 simulated years, at least this % of annual demand was delivered. Computed as (delivery at exceedance p95) ÷ annual demand × 100. Higher is better; 95–100 % = fully reliable.</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with any shortage (&gt;0.1 TAF threshold). This filters CalSim solver noise.</p>`
+            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>P95 reliability</strong> = in 95 of 100 simulated years, at least this % of annual demand was delivered. Computed as (delivery at exceedance p95) ÷ annual demand × 100. Higher is better; 95–100 % = fully reliable.</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with any shortage (&gt;0.1 TAF threshold). This filters CalSim solver noise.</p>`
           }
 
           const contextText = statsG

@@ -1587,6 +1587,14 @@ function MonthlyCwsSection({
                     <ShortageBandsLegend />
                   )}
                 </Box>
+                <Box
+                  component="span"
+                  sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}
+                >
+                  {displayMode === "delivery"
+                    ? "Upper chart region = wetter-year delivery · Lower chart region = drier-year delivery"
+                    : "Upper chart region = drier-year shortage · Lower chart region = wetter-year shortage (near zero)"}
+                </Box>
               </Box>
             </>
           }
