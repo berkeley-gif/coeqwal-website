@@ -259,6 +259,7 @@ const IntroSection = () => {
             <AboutCtaLink href="/about">Learn more about COEQWAL</AboutCtaLink>
           }
           layout="split"
+          descriptionSx={{ maxWidth: "calc(100% - 40px)" }}
         />
       </div>
 
@@ -270,6 +271,7 @@ const IntroSection = () => {
           background={`url('/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png') bottom center / 100% auto no-repeat, linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`}
           borderBottom={RULE}
           minHeight="100vh"
+          contentAlign="top"
           layout="split"
           contentMotionStyle={{ opacity: waterThemesOpacity }}
           responsiveHeadline={
@@ -295,6 +297,7 @@ const IntroSection = () => {
               xs: 0,
               lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
             },
+            maxWidth: "calc(100% - 40px)",
           }}
         />
       </div>

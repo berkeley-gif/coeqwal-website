@@ -537,9 +537,17 @@ function useMultiScenarioCwsAggregates(scenarios: string[]) {
         if (!cellStats[shortCode]) {
           cellStats[shortCode] = {}
         }
+        // P95 delivery fulfillment = delivery exceeded in 95% of years / annual demand × 100.
+        const cwsDemand =
+          summary.annual_delivery_avg_taf + summary.annual_shortage_avg_taf
+        const cwsP95 = summary.delivery_exceedance?.["p95"]
+        const cwsP95Fulfillment =
+          cwsP95 !== undefined && cwsDemand > 0
+            ? Math.min(100, (cwsP95 / cwsDemand) * 100)
+            : undefined
         cellStats[shortCode][scenarioId] = {
           annualAvgTaf: summary.annual_delivery_avg_taf,
-          reliabilityPct: summary.reliability_pct,
+          reliabilityPct: cwsP95Fulfillment,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
@@ -819,9 +827,16 @@ function useMultiScenarioMiContractors(scenarios: string[]) {
         if (!cellStats[shortCode]) {
           cellStats[shortCode] = {}
         }
+        const miDemand =
+          summary.annual_delivery_avg_taf + summary.annual_shortage_avg_taf
+        const miP95 = summary.delivery_exceedance?.["p95"]
+        const miP95Fulfillment =
+          miP95 !== undefined && miDemand > 0
+            ? Math.min(100, (miP95 / miDemand) * 100)
+            : undefined
         cellStats[shortCode][scenarioId] = {
           annualAvgTaf: summary.annual_delivery_avg_taf,
-          reliabilityPct: summary.reliability_pct,
+          reliabilityPct: miP95Fulfillment,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
@@ -965,9 +980,16 @@ function useMultiScenarioDemandUnits(scenarios: string[]) {
         if (!cellStats[duId]) {
           cellStats[duId] = {}
         }
+        const duDemand =
+          summary.annual_delivery_avg_taf + summary.annual_shortage_avg_taf
+        const duP95 = summary.delivery_exceedance?.["p95"]
+        const duP95Fulfillment =
+          duP95 !== undefined && duDemand > 0
+            ? Math.min(100, (duP95 / duDemand) * 100)
+            : undefined
         cellStats[duId][scenarioId] = {
           annualAvgTaf: summary.annual_delivery_avg_taf,
-          reliabilityPct: summary.reliability_pct,
+          reliabilityPct: duP95Fulfillment,
           shortageFrequencyPct: summary.shortage_frequency_pct,
         }
       },
@@ -1149,10 +1171,19 @@ function useIndividualDemandUnitsData(
         if (!cellStats[duId]) {
           cellStats[duId] = {}
         }
+        const ps = stats.period_summary
+        const psDemand = ps
+          ? (ps.annual_delivery_avg_taf ?? 0) + (ps.annual_shortage_avg_taf ?? 0)
+          : 0
+        const psP95 = ps?.delivery_exceedance?.["p95"]
+        const psP95Fulfillment =
+          psP95 !== undefined && psDemand > 0
+            ? Math.min(100, (psP95 / psDemand) * 100)
+            : undefined
         cellStats[duId][scenarioId] = {
-          annualAvgTaf: stats.period_summary?.annual_delivery_avg_taf,
-          reliabilityPct: stats.period_summary?.reliability_pct,
-          shortageFrequencyPct: stats.period_summary?.shortage_frequency_pct,
+          annualAvgTaf: ps?.annual_delivery_avg_taf,
+          reliabilityPct: psP95Fulfillment,
+          shortageFrequencyPct: ps?.shortage_frequency_pct,
         }
 
         // Build matrix data
