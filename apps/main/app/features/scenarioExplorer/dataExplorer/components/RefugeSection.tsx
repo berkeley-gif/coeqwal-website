@@ -68,6 +68,55 @@ const REGION_OPTIONS = [
   { value: "TULARE" as const, label: "Tulare" },
 ]
 
+/** Delivery band colors — blue, matching COLORS in PercentileMatrix */
+const DELIVERY_BAND_COLORS = {
+  range: "#d9eafb", // q0-q100 (lightest)
+  outer: "#c5dbf3", // q10-q90
+  inner: "#a2bee1", // q30-q70
+  median: "#2c5aa0", // q50 (darkest)
+}
+
+/** Shortage band colors — orange/amber, matching COLORS_SHORTAGE in PercentileMatrix */
+const SHORTAGE_BAND_COLORS = {
+  range: "#fef3e2",
+  outer: "#fdd49e",
+  inner: "#fdae6b",
+  median: "#e6550d",
+}
+
+// ============================================================================
+// Legend Components
+// ============================================================================
+
+function DeliveryBandsLegend() {
+  return (
+    <>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.range, borderRadius: "2px" }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Min–max range</Box>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.outer, borderRadius: "2px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>10–90th percentile</Box>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.inner, borderRadius: "2px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>30–70th percentile</Box>
+      <Box component="span" sx={{ width: 14, height: 3, backgroundColor: DELIVERY_BAND_COLORS.median, borderRadius: "1px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Median</Box>
+    </>
+  )
+}
+
+function ShortageBandsLegend() {
+  return (
+    <>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.range, borderRadius: "2px" }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Min–max range</Box>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.outer, borderRadius: "2px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>10–90th percentile</Box>
+      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.inner, borderRadius: "2px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>30–70th percentile</Box>
+      <Box component="span" sx={{ width: 14, height: 3, backgroundColor: SHORTAGE_BAND_COLORS.median, borderRadius: "1px", ml: 0.75 }} />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Median</Box>
+    </>
+  )
+}
 
 // ============================================================================
 // Helpers
@@ -269,9 +318,7 @@ export default function RefugeSection({
 }: RefugeSectionProps) {
   const theme = useTheme()
 
-  // "relative" is the default because many refuges receive very small volumes
-  // that appear flat on an absolute scale shared with high-delivery DUs.
-  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">("relative")
+  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">("absolute")
   const [regionFilter, setRegionFilter] = useState<RegionFilter>("all")
   const [chartMode, setChartMode] = useState<ChartMode>("delivery")
 
@@ -414,13 +461,25 @@ export default function RefugeSection({
                     Percentile distribution of monthly deliveries across all simulated
                     years (TAF). Each band shows a range of outcomes. The center line is
                     the median; outer bands are the extremes. Per-scenario annual averages
-                    and worst-case shortage % are shown below each chart.{" "}
+                    and P95 reliability are shown below each chart.{" "}
+                    Relative scale normalizes each row to its own maximum — useful when
+                    refuges receive very different volumes.
                     <Box
                       component="span"
-                      sx={{ color: theme.palette.text.secondary }}
+                      sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1.5 }}
                     >
-                      Relative scale normalizes each row to its own maximum. This is
-                      useful when refuges receive very different volumes.
+                      <Box
+                        component="span"
+                        sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+                      >
+                        <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>
+                          Overlapping percentile bands:
+                        </Box>
+                        <DeliveryBandsLegend />
+                      </Box>
+                      <Box component="span" sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}>
+                        Upper chart region = wetter-year delivery · Lower chart region = drier-year delivery
+                      </Box>
                     </Box>
                   </>
                 ) : (
@@ -429,6 +488,23 @@ export default function RefugeSection({
                     simulated years (TAF). A flat chart near zero means the refuge
                     consistently received its full allocation. Spikes indicate dry-year
                     cutbacks.
+                    <Box
+                      component="span"
+                      sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1.5 }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+                      >
+                        <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>
+                          Overlapping percentile bands:
+                        </Box>
+                        <ShortageBandsLegend />
+                      </Box>
+                      <Box component="span" sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}>
+                        Upper chart region = drier-year shortage · Lower chart region = wetter-year shortage (near zero)
+                      </Box>
+                    </Box>
                   </>
                 )
               }

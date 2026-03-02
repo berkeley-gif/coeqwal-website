@@ -780,6 +780,12 @@ function MonthlyAgSection({
                   </Box>
                   <DeliveryBandsLegend />
                 </Box>
+                <Box
+                  component="span"
+                  sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}
+                >
+                  Upper chart region = wetter-year delivery · Lower chart region = drier-year delivery
+                </Box>
               </Box>
             </>
           }

@@ -16,6 +16,7 @@ import { useTabs } from "../context/Tabs"
 import VideoHero from "../components/VideoHero"
 import type { VideoSource } from "../components/VideoHero"
 import MorphingHeadline from "../components/MorphingHeadline"
+import { WaterThemesPanel } from "./WaterThemesPanel"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* SUB-COMPONENTS                                                               */
@@ -89,6 +90,9 @@ const IntroSection = () => {
   const videoHeroRef = useRef<HTMLDivElement>(null)
   const aboutPanelRef = useRef<HTMLDivElement>(null)
   const waterThemesPanelRef = useRef<HTMLDivElement>(null)
+  // Dock marker at the END of the 300vh sticky section — MorphingHeadline
+  // docks here so it only scrolls away once the full section is done.
+  const waterThemesDockRef = useRef<HTMLDivElement>(null)
 
   // Scroll progress across the entire IntroSection
   const scrollProgress = useScrollProgress(containerRef)
@@ -207,7 +211,7 @@ const IntroSection = () => {
         weights={[1, 1, 2]}
         panelBoundaries={panelBoundaries}
         crossfadeAt={crossfadeAt1 > 0 ? crossfadeAt1 : undefined}
-        dockRef={waterThemesPanelRef}
+        dockRef={waterThemesDockRef}
       />
 
       {/* Video Hero */}
@@ -263,44 +267,13 @@ const IntroSection = () => {
         />
       </div>
 
-      {/* Water themes — headline handled by MorphingHeadline overlay on lg+;
-          responsiveHeadline fills in on smaller screens */}
-      <div ref={waterThemesPanelRef}>
-        <CoeqwalPanel
-          description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
-          background={`url('/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png') bottom center / 100% auto no-repeat, linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`}
-          borderBottom={RULE}
-          minHeight="100vh"
-          contentAlign="top"
-          layout="split"
-          contentMotionStyle={{ opacity: waterThemesOpacity }}
-          responsiveHeadline={
-            <>
-              <Typography
-                variant="h2Main"
-                component="span"
-                sx={{ display: "block", color: "text.primary" }}
-              >
-                What water issues
-              </Typography>
-              <Typography
-                variant="h1"
-                component="span"
-                sx={{ display: "block", color: "text.primary" }}
-              >
-                matter to you?
-              </Typography>
-            </>
-          }
-          descriptionSx={{
-            mt: {
-              xs: 0,
-              lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
-            },
-            maxWidth: "calc(100% - 40px)",
-          }}
-        />
-      </div>
+      {/* Water themes — sticky scrollytelling with circle overlays */}
+      <WaterThemesPanel
+        panelRef={waterThemesPanelRef}
+        dockRef={waterThemesDockRef}
+        contentOpacity={waterThemesOpacity}
+        borderBottom={RULE}
+      />
 
       {/* On this site, you can */}
       <Box
