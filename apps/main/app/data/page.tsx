@@ -40,7 +40,13 @@ import {
 import { THEME_LABEL_CONFIG } from "../content/themes"
 
 // Theme order matches ScenarioSelectionSidebar
-const THEME_ORDER: ScenarioTheme[] = ["baseline", "cws", "ag_gw", "eco", "delta"]
+const THEME_ORDER: ScenarioTheme[] = [
+  "baseline",
+  "cws",
+  "ag_gw",
+  "eco",
+  "delta",
+]
 
 /** Group a scenario list by theme, preserving THEME_ORDER, dropping empty groups. */
 function groupByTheme<T extends { scenario_id: string }>(
@@ -52,9 +58,10 @@ function groupByTheme<T extends { scenario_id: string }>(
     const t = getScenarioTheme(s.scenario_id)
     buckets.get(t)?.push(s)
   })
-  return THEME_ORDER.map((t) => ({ theme: t, scenarios: buckets.get(t) ?? [] })).filter(
-    ({ scenarios }) => scenarios.length > 0,
-  )
+  return THEME_ORDER.map((t) => ({
+    theme: t,
+    scenarios: buckets.get(t) ?? [],
+  })).filter(({ scenarios }) => scenarios.length > 0)
 }
 
 // ── Shared dropdown option components ────────────────────────────────────────
@@ -179,13 +186,21 @@ function ScenarioSelect({
         sx={SELECT_SX}
         MenuProps={menuProps}
         renderValue={(v) =>
-          v ? <SelectedScenarioValue scenarioId={v as string} /> : "Choose a scenario"
+          v ? (
+            <SelectedScenarioValue scenarioId={v as string} />
+          ) : (
+            "Choose a scenario"
+          )
         }
       >
         {groups.flatMap(({ theme: themeKey, scenarios: group }) => [
           <ThemeSubheader key={`hdr-${themeKey}`} themeKey={themeKey} />,
           ...group.map((scenario) => (
-            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id} sx={{ py: 1 }}>
+            <MenuItem
+              key={scenario.scenario_id}
+              value={scenario.scenario_id}
+              sx={{ py: 1 }}
+            >
               <ScenarioOption scenarioId={scenario.scenario_id} />
             </MenuItem>
           )),

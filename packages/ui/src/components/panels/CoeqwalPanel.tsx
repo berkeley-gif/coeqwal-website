@@ -111,7 +111,7 @@ export function CoeqwalPanel({
       component="section"
       id={id}
       sx={{
-        backgroundColor: bg,
+        background: bg,
         borderBottom: borderBottom ?? "none",
         px: theme.space.panel.padding,
         py: theme.space.panel.padding,
