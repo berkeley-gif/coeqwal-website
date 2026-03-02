@@ -246,7 +246,8 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
     if (!scenarioId || !result.summaries.length) return
     for (const summary of result.summaries) {
       if (!cellStats[summary.du_id]) cellStats[summary.du_id] = {}
-      cellStats[summary.du_id][scenarioId] = {
+      const duStats = cellStats[summary.du_id]!
+      duStats[scenarioId] = {
         annualAvgTaf: summary.annual_delivery_avg_taf ?? undefined,
         // Convert shortage_pct_95 → fulfillment (higher = better, matches AG/CWS convention)
         reliabilityPct:
