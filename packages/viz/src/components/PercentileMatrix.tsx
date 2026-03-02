@@ -29,6 +29,19 @@ export interface ReservoirData {
   reliabilityPct?: number
   /** CWS-specific: Shortage frequency percentage (shown when annualAvgTaf is set) */
   shortageFrequencyPct?: number
+  /**
+   * Optional single-line subtitle rendered below the entity name in the label column.
+   * Styled like the "CVP / SWP" system line in reservoir charts (medium weight, secondary color).
+   * Used for secondary identifiers (e.g. demand unit ID or hydrologic region).
+   */
+  labelSubtitle?: string
+  /**
+   * Optional key→value attribute pairs rendered below the subtitle.
+   * Each pair is displayed as a small uppercase key label + bold value,
+   * matching the "Capacity / Dead pool" styling in reservoir charts.
+   * Requires capacityTaf === 0 (no reservoir mode) to activate.
+   */
+  labelAttributes?: { key: string; value: string }[]
 }
 
 // Mapping of reservoir IDs to water systems (for major California reservoirs)
@@ -365,7 +378,11 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             : maxValue > 1 ? 1
             : maxValue > 0.1 ? 0.1
             : 0.01
-          const maxY = Math.ceil((maxValue * 1.05) / increment) * increment
+          const rawMaxY = Math.ceil((maxValue * 1.05) / increment) * increment
+          // Guard against degenerate [0,0] domain (all data = 0 and minYMaxTaf = 0).
+          // A flat domain causes D3 to place every value at 50% height.
+          // Use a tiny non-zero ceiling so the zero line sits correctly at the bottom.
+          const maxY = rawMaxY > 0 ? rawMaxY : 0.001
           perReservoirYDomains[reservoir.reservoirId] = [0, maxY]
         })
       } else {
@@ -485,13 +502,19 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
       // Check data type:
       // - CWS with stats: has annualAvgTaf > 0 (show delivery/reliability/shortage)
-      // - CWS without stats: capacityTaf === 0 and no annualAvgTaf (show name only)
+      // - Entity with attributes: capacityTaf === 0, labelAttributes present (reservoir-style key→value rows)
+      // - CWS without stats: capacityTaf === 0 and no annualAvgTaf, no labelAttributes (show name only)
       // - Reservoir: has capacityTaf > 0 (show system/capacity/dead pool)
       const isCwsWithStats =
         reservoir.annualAvgTaf !== undefined && reservoir.annualAvgTaf > 0
+      const hasLabelAttributes =
+        reservoir.capacityTaf === 0 &&
+        !isCwsWithStats &&
+        (reservoir.labelAttributes?.length ?? 0) > 0
       const isCwsWithoutStats =
         reservoir.capacityTaf === 0 &&
-        (reservoir.annualAvgTaf === undefined || reservoir.annualAvgTaf === 0)
+        !isCwsWithStats &&
+        !hasLabelAttributes
 
       if (isCwsWithStats) {
         // CWS-specific labels: Annual average, Reliability, Shortage frequency
@@ -539,7 +562,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.text)
             .attr("text-transform", "uppercase")
             .attr("letter-spacing", "0.05em")
-            .text("Reliability")
+              .text("P95 delivery")
           g.append("text")
             .attr("x", labelX)
             .attr("y", currentY + 14)
@@ -583,6 +606,53 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.deadPool) // Orange/red for concerning metric
             .text(`${Math.round(reservoir.shortageFrequencyPct)}%`)
         }
+      } else if (hasLabelAttributes) {
+        // Entity with custom label attributes (e.g. refuge demand units).
+        // Renders a subtitle line + key→value pairs in reservoir-label style.
+        let attrY = rowTop + 68
+
+        if (reservoir.labelSubtitle) {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", rowTop + 68)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.75rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "500")
+            .attr("fill", COLORS.text)
+            .attr("letter-spacing", "0.02em")
+            .text(reservoir.labelSubtitle)
+          attrY = rowTop + 68 + 20
+        }
+
+        reservoir.labelAttributes!.forEach(({ key, value }) => {
+          // Key — small uppercase label
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", attrY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.6875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "400")
+            .attr("fill", COLORS.text)
+            .attr("letter-spacing", "0.05em")
+            .text(key)
+          // Value — bold, tabular figures
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", attrY + 14)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "600")
+            .attr("font-feature-settings", "'tnum' 1")
+            .attr("fill", COLORS.header)
+            .text(value)
+          attrY += 32
+        })
       } else if (isCwsWithoutStats) {
         // CWS entity without per-scenario stats - just show name (already rendered above)
         // No additional labels needed since stats vary by scenario
@@ -1333,7 +1403,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-size", labelFontSize)
               .attr("font-family", "'Inter', -apple-system, sans-serif")
               .attr("fill", COLORS.text)
-              .text("Reliability")
+              .text("P95 delivery")
             statsG
               .append("text")
               .attr("x", valueX)
@@ -1470,7 +1540,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const shortagePct = (100 - reliability).toFixed(2)
             cwsContextNote = `CVP South of Delta has frequent but tiny shortages. ${shortageYears} out of 100 years have some shortage (>0.1 TAF). But avg shortage is only ${avgShortage.toFixed(2)} TAF/yr out of ${Math.round(avgDelivery).toLocaleString()} TAF delivered. That's only ${shortagePct}% of delivery! To see shortage amounts toggle the controls above.`
           } else {
-            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>Reliability</strong> = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %).</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages.</p>`
+            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>P95 delivery</strong> = in 95 of 100 simulated years, at least this % of annual demand was delivered. Computed as (delivery at exceedance p95) ÷ annual demand × 100. Higher is better; 95–100 % = fully reliable.</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with any shortage (&gt;0.1 TAF threshold). This filters CalSim solver noise.</p>`
           }
 
           const contextText = statsG
