@@ -125,6 +125,13 @@ export interface PercentileMatrixProps {
   breakdownComponents?: BreakdownComponentsMap
   /** Scenario IDs that are still loading data (shows spinner in empty cells) */
   loadingScenarios?: string[]
+  /**
+   * Minimum value allowed for the y-axis maximum (TAF).
+   * Default 100, which works well for reservoirs and CWS contractors.
+   * Set to 0 for small-volume entities (e.g. wildlife refuges) so the axis
+   * scales to the actual data range instead of being locked at ≥100 TAF.
+   */
+  minYMaxTaf?: number
 }
 
 // Water month labels (short - for axis)
@@ -210,6 +217,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   breakdownData,
   breakdownComponents,
   loadingScenarios,
+  minYMaxTaf = 100,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -345,11 +353,18 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           if (reservoir.capacityTaf > 0) {
             maxValue = Math.max(maxValue, reservoir.capacityTaf)
           }
-          // Minimum max of 100 TAF, then round up to a nice number with 5% headroom
-          const minMax = 100
-          maxValue = Math.max(maxValue, minMax)
-          // Round to nice increments based on magnitude
-          const increment = maxValue > 1000 ? 500 : maxValue > 100 ? 50 : 10
+          // Apply caller-supplied minimum (default 100 TAF for reservoirs/CWS;
+          // pass 0 for small-volume entities like wildlife refuges).
+          maxValue = Math.max(maxValue, minYMaxTaf)
+          // Round up to a nice increment with 5% headroom.
+          // Handles sub-1 TAF ranges (e.g. refuge deliveries in tenths of TAF).
+          const increment =
+            maxValue > 1000 ? 500
+            : maxValue > 100 ? 50
+            : maxValue > 10 ? 10
+            : maxValue > 1 ? 1
+            : maxValue > 0.1 ? 0.1
+            : 0.01
           const maxY = Math.ceil((maxValue * 1.05) / increment) * increment
           perReservoirYDomains[reservoir.reservoirId] = [0, maxY]
         })
@@ -387,9 +402,19 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           // Also consider capacity as a reference
           maxValue = Math.max(maxValue, reservoir.capacityTaf)
         })
-        // Minimum max of 100 TAF, round up to a nice number with 10% headroom
-        maxValue = Math.max(maxValue, 100)
-        sharedYDomain = [0, Math.ceil((maxValue * 1.1) / 500) * 500]
+        // Apply caller-supplied minimum, then round up with 10% headroom.
+        maxValue = Math.max(maxValue, minYMaxTaf)
+        const absIncrement =
+          maxValue > 1000 ? 500
+          : maxValue > 100 ? 50
+          : maxValue > 10 ? 10
+          : maxValue > 1 ? 1
+          : maxValue > 0.1 ? 0.1
+          : 0.01
+        sharedYDomain = [
+          0,
+          Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement,
+        ]
       }
     }
 
@@ -750,9 +775,18 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           .attr("stroke", val === 50 ? COLORS.gridStrong : COLORS.grid)
           .attr("stroke-width", val === 50 ? 1 : 0.5)
 
-        // Y-axis label
+        // Y-axis label — use enough decimal places for the domain range
+        const domainMax = reservoirYDomain[1]
         const labelText =
-          displayMode === "percentage" ? `${val}%` : `${val.toLocaleString()}`
+          displayMode === "percentage"
+            ? `${val}%`
+            : domainMax < 0.1
+              ? val.toFixed(3)
+              : domainMax < 1
+                ? val.toFixed(2)
+                : domainMax < 10
+                  ? val.toFixed(1)
+                  : `${Math.round(val).toLocaleString()}`
         g.append("text")
           .attr("x", gridStartX - 4)
           .attr("y", y)
@@ -1279,7 +1313,12 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-weight", "600")
               .attr("font-feature-settings", "'tnum' 1")
               .attr("fill", COLORS.header)
-              .text(`${Math.round(stats.annualAvgTaf).toLocaleString()} TAF/yr`)
+              .text((() => {
+                const taf = stats.annualAvgTaf!
+                if (taf < 0.1) return `${Math.round(taf * 1000)} AF/yr`
+                if (taf < 10) return `${taf.toFixed(1)} TAF/yr`
+                return `${Math.round(taf).toLocaleString()} TAF/yr`
+              })())
             currentY += lineHeight
           }
 
@@ -1624,9 +1663,16 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
             if (monthIndex >= 0 && monthIndex < 12) {
               const unit = displayMode === "volume" ? " TAF" : "%"
+              const _yMax = getYDomain(reservoir.reservoirId)[1]
               const formatValue = (v: number) =>
                 displayMode === "volume"
-                  ? v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                  ? _yMax < 0.1
+                    ? v.toFixed(3)
+                    : _yMax < 1
+                      ? v.toFixed(2)
+                      : _yMax < 10
+                        ? v.toFixed(1)
+                        : v.toLocaleString(undefined, { maximumFractionDigits: 0 })
                   : v.toFixed(0)
 
               // Update playhead position (snapped to month)

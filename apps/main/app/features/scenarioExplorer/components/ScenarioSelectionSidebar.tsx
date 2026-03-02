@@ -106,7 +106,11 @@ export default function ScenarioSelectionSidebar({
   const toggleExpanded = (themeKey: ScenarioTheme) => {
     setExpandedThemes((prev) => {
       const next = new Set(prev)
-      if (next.has(themeKey)) { next.delete(themeKey) } else { next.add(themeKey) }
+      if (next.has(themeKey)) {
+        next.delete(themeKey)
+      } else {
+        next.add(themeKey)
+      }
       return next
     })
   }
@@ -239,14 +243,17 @@ export default function ScenarioSelectionSidebar({
                   },
                   borderRadius: theme.borderRadius.xs,
                   "&:hover": {
-                    backgroundColor: theme.palette.interaction.selectedBackground,
+                    backgroundColor:
+                      theme.palette.interaction.selectedBackground,
                   },
                 }}
                 onClick={(e) => {
                   // Only toggle theme selection when clicking the badge itself,
                   // not the expand/collapse affordance
                   const target = e.target as HTMLElement
-                  if (!target.closest(".MuiAccordionSummary-expandIconWrapper")) {
+                  if (
+                    !target.closest(".MuiAccordionSummary-expandIconWrapper")
+                  ) {
                     e.stopPropagation()
                     toggleTheme(themeIds)
                   }

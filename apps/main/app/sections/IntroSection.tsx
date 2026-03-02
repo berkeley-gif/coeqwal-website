@@ -1,7 +1,6 @@
 "use client"
 
 import { useRef, useEffect, useMemo } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
 import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
@@ -11,11 +10,8 @@ import {
   useScrollProgress,
   useMotionValue,
   useMeetingProgress,
-  ScrollReveal,
 } from "@repo/scrollytelling"
 
-import { WATER_THEMES } from "@repo/data/coeqwal"
-import { THEME_LABEL_CONFIG } from "../content/themes"
 import { useTabs } from "../context/Tabs"
 import VideoHero from "../components/VideoHero"
 import type { VideoSource } from "../components/VideoHero"
@@ -80,108 +76,6 @@ const VIDEO_SRCS: VideoSource[] = [
 ]
 
 const RULE = "1px solid #e5e5df"
-
-const WATER_THEME_IDS = ["cws", "ag_gw", "eco", "delta"] as const
-
-const WATER_THEME_PHOTOS: Partial<Record<string, string>> = {
-  cws: "/images/themes/FL_Porterville-9320.jpg",
-  ag_gw: "/images/themes/PJH_Sprinklers_10911-2_07_15_2004.jpg",
-  eco: "/images/themes/CC_salmon_underH20-5_10_15_2012.jpg",
-  delta: "/images/themes/Screenshot 2026-02-25 at 11.21.jpg",
-}
-
-/* ─────────────────────────────────────────────────────────────────────────── */
-/* THEME CARD                                                                   */
-/* ─────────────────────────────────────────────────────────────────────────── */
-
-/** Water-theme card — coloured header, photo, description */
-function ThemeCard({
-  label,
-  description,
-  photo,
-  bg,
-  textColor,
-  index,
-}: {
-  label: string
-  description: string
-  photo?: string
-  bg: string
-  textColor: string
-  index: number
-}) {
-  const theme = useTheme()
-  return (
-    <MotionBox
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.45, ease: "easeOut", delay: index * 0.07 }}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        border: RULE,
-        borderRadius: theme.borderRadius.md,
-        overflow: "hidden",
-      }}
-    >
-      {/* Coloured header */}
-      <Box
-        sx={{
-          backgroundColor: bg,
-          px: { xs: 3, md: 3.5 },
-          py: { xs: 2.5, md: 3 },
-        }}
-      >
-        <Typography
-          sx={{
-            fontWeight: 700,
-            fontSize: { xs: "1rem", md: "1.05rem" },
-            lineHeight: 1.3,
-            color: textColor,
-          }}
-        >
-          {label}
-        </Typography>
-      </Box>
-
-      {/* Photo */}
-      <Box
-        aria-hidden="true"
-        sx={{
-          width: "100%",
-          aspectRatio: "4 / 3",
-          position: "relative",
-          backgroundColor: "#d8d8d8",
-        }}
-      >
-        {photo && (
-          <Image
-            src={photo}
-            alt=""
-            fill
-            style={{ objectFit: "cover" }}
-            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          />
-        )}
-      </Box>
-
-      {/* Description */}
-      <Box
-        sx={{
-          backgroundColor: "#fff",
-          px: { xs: 3, md: 3.5 },
-          py: { xs: 2.5, md: 3 },
-          flex: 1,
-        }}
-      >
-        <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.7 }}>
-          {description}
-        </Typography>
-      </Box>
-    </MotionBox>
-  )
-}
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* INTRO SECTION                                                                */
@@ -279,11 +173,6 @@ const IntroSection = () => {
     waterThemesOpacity,
   ])
 
-  const waterThemePalette = theme.palette.waterThemes as Record<
-    string,
-    { background: string; text: string }
-  >
-
   const headlines = [
     {
       line1: t("homePanel.titleLine1"),
@@ -378,7 +267,9 @@ const IntroSection = () => {
       <div ref={waterThemesPanelRef}>
         <CoeqwalPanel
           description="Water is important to all of us — from farmers in the Central Valley to communities in the Delta, from salmon in the Sacramento River to urban water users in Los Angeles. We can consider how decisions affect the issues people care about."
+          background={`url('/images/themes/2025_08_28_KJ_3517_Delta_Aerials.png') bottom center / 100% auto no-repeat, linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`}
           borderBottom={RULE}
+          minHeight="100vh"
           layout="split"
           contentMotionStyle={{ opacity: waterThemesOpacity }}
           responsiveHeadline={
@@ -405,83 +296,7 @@ const IntroSection = () => {
               lg: `calc(${theme.space.panel.topOffset} - ${theme.space.panel.padding})`,
             },
           }}
-          childrenMt={{
-            xs: 5,
-            lg: `calc(${theme.space.panel.padding} + 40px)`,
-          }}
-        >
-          {/* Four main theme cards — reveal the grid as it enters the viewport */}
-          <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  lg: "repeat(4, 1fr)",
-                },
-                gap: { xs: 2, md: 2 },
-              }}
-            >
-              {WATER_THEME_IDS.map((id, i) => {
-                const colors = waterThemePalette[id] ?? {
-                  background: "#eee",
-                  text: "#333",
-                }
-                const description =
-                  WATER_THEMES.find((t) => t.id === id)?.description ?? ""
-                return (
-                  <ThemeCard
-                    key={id}
-                    label={THEME_LABEL_CONFIG[id]?.label ?? id}
-                    description={description}
-                    photo={WATER_THEME_PHOTOS[id]}
-                    bg={colors.background}
-                    textColor={colors.text}
-                    index={i}
-                  />
-                )
-              })}
-            </Box>
-          </ScrollReveal>
-
-          {/* ── Provisional themes (pending decision) ── */}
-          <ScrollReveal
-            animation="fadeUp"
-            amount={0.1}
-            duration={0.5}
-            delay={0.1}
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  lg: "repeat(4, 1fr)",
-                },
-                gap: { xs: 2, md: 2 },
-                mt: 2,
-              }}
-            >
-              {(["climate", "governance"] as const).map((id, i) => {
-                const themeEntry = WATER_THEMES.find((t) => t.id === id)
-                const description = themeEntry?.description ?? ""
-                const label = (themeEntry?.label ?? id).replace(/\n/g, " ")
-                return (
-                  <ThemeCard
-                    key={id}
-                    label={label}
-                    description={description}
-                    bg="#efefef"
-                    textColor="#444"
-                    index={i}
-                  />
-                )
-              })}
-            </Box>
-          </ScrollReveal>
-        </CoeqwalPanel>
+        />
       </div>
 
       {/* On this site, you can */}
