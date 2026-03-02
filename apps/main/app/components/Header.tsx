@@ -4,6 +4,7 @@ import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
+import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "@repo/data/coeqwal"
 
 /**
@@ -17,6 +18,10 @@ import { WATER_THEMES } from "@repo/data/coeqwal"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
+
+  // -- Context for the theme panels
+  const { activeThemeKey, openThemePanel } = usePanelRoute()
+
   const { isPastHero } = useTabs()
 
   const handleLogoClick = () => {
@@ -48,8 +53,9 @@ export function Header() {
   const waterThemesOptions = WATER_THEMES.map((wt) => ({
     key: wt.id,
     label: wt.label.replace(/\n/g, " "),
-    onClick: () => {},
-  }))
+    onClick: () => openThemePanel(wt.id),
+    active: activeThemeKey === wt.id,
+  })) ?? []
 
   return (
     <BaseHeader
