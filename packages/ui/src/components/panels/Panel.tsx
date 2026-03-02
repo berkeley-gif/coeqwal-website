@@ -98,7 +98,7 @@ export function Panel({
     )
   }
 
-  // Grid stacking mode: background color → background image → content
+  // Grid stacking mode: background color and background image and content
   return (
     <Box
       component="section"

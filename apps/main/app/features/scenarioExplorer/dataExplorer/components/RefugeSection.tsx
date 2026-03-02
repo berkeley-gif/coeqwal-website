@@ -33,17 +33,18 @@ import {
   useRefugeDusPeriod,
 } from "@repo/data/coeqwal/hooks"
 import type {
-  RefugeDemandUnitData,
   RefugeDeliveryMonthlyStats,
   RefugeShortageMonthlyStats,
-  RefugePeriodSummary,
 } from "@repo/data/coeqwal"
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type MatrixDataType = Record<string, Record<string, MonthlyPercentiles | undefined>>
+type MatrixDataType = Record<
+  string,
+  Record<string, MonthlyPercentiles | undefined>
+>
 type RegionFilter = "all" | "SAC" | "SJR" | "TULARE"
 type ChartMode = "delivery" | "shortage"
 
@@ -91,14 +92,57 @@ const SHORTAGE_BAND_COLORS = {
 function DeliveryBandsLegend() {
   return (
     <>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.range, borderRadius: "2px" }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Min–max range</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.outer, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>10–90th percentile</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.inner, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>30–70th percentile</Box>
-      <Box component="span" sx={{ width: 14, height: 3, backgroundColor: DELIVERY_BAND_COLORS.median, borderRadius: "1px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Median</Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Min–max range
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: DELIVERY_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
     </>
   )
 }
@@ -106,14 +150,57 @@ function DeliveryBandsLegend() {
 function ShortageBandsLegend() {
   return (
     <>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.range, borderRadius: "2px" }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Min–max range</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.outer, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>10–90th percentile</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: SHORTAGE_BAND_COLORS.inner, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>30–70th percentile</Box>
-      <Box component="span" sx={{ width: 14, height: 3, backgroundColor: SHORTAGE_BAND_COLORS.median, borderRadius: "1px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Median</Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Min–max range
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: SHORTAGE_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
     </>
   )
 }
@@ -178,7 +265,9 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
   })
 
   const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter((_, i) => results[i]?.isLoading ?? false)
+  const loadingScenarios = scenarios.filter(
+    (_, i) => results[i]?.isLoading ?? false,
+  )
 
   const matrixData: MatrixDataType = {}
   results.forEach((result, index) => {
@@ -206,7 +295,9 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
   })
 
   const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter((_, i) => results[i]?.isLoading ?? false)
+  const loadingScenarios = scenarios.filter(
+    (_, i) => results[i]?.isLoading ?? false,
+  )
 
   const matrixData: MatrixDataType = {}
   results.forEach((result, index) => {
@@ -261,7 +352,6 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
   return { cellStats, isLoading }
 }
 
-
 // ============================================================================
 // Section header
 // ============================================================================
@@ -272,11 +362,17 @@ interface SectionHeaderProps {
   description?: React.ReactNode
 }
 
-function SectionHeader({ title, titleAdornment, description }: SectionHeaderProps) {
+function SectionHeader({
+  title,
+  titleAdornment,
+  description,
+}: SectionHeaderProps) {
   const theme = useTheme()
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
+      >
         <Typography
           variant="overline"
           sx={{
@@ -319,7 +415,9 @@ export default function RefugeSection({
 }: RefugeSectionProps) {
   const theme = useTheme()
 
-  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">("absolute")
+  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">(
+    "absolute",
+  )
   const [regionFilter, setRegionFilter] = useState<RegionFilter>("all")
   const [chartMode, setChartMode] = useState<ChartMode>("delivery")
 
@@ -370,9 +468,14 @@ export default function RefugeSection({
 
   const primaryScenario = scenarios[0] ?? null
 
-  const isActiveLoading = chartMode === "delivery" ? isLoadingDelivery : isLoadingShortage
-  const activeMatrix = chartMode === "delivery" ? deliveryMatrix : shortageMatrix
-  const activeLoadingScenarios = chartMode === "delivery" ? deliveryLoadingScenarios : shortageLoadingScenarios
+  const isActiveLoading =
+    chartMode === "delivery" ? isLoadingDelivery : isLoadingShortage
+  const activeMatrix =
+    chartMode === "delivery" ? deliveryMatrix : shortageMatrix
+  const activeLoadingScenarios =
+    chartMode === "delivery"
+      ? deliveryLoadingScenarios
+      : shortageLoadingScenarios
   const hasActiveData = !isActiveLoading && Object.keys(activeMatrix).length > 0
 
   if (!primaryScenario) {
@@ -459,51 +562,102 @@ export default function RefugeSection({
               description={
                 chartMode === "delivery" ? (
                   <>
-                    Percentile distribution of monthly deliveries across all simulated
-                    years (TAF). Each band shows a range of outcomes. The center line is
-                    the median; outer bands are the extremes. Per-scenario annual averages
-                    and P95 reliability are shown below each chart.{" "}
-                    Relative scale normalizes each row to its own maximum — useful when
-                    refuges receive very different volumes.
+                    Percentile distribution of monthly deliveries across all
+                    simulated years (TAF). Each band shows a range of outcomes.
+                    The center line is the median; outer bands are the extremes.
+                    Per-scenario annual averages and P95 reliability are shown
+                    below each chart. Relative scale normalizes each row to its
+                    own maximum — useful when refuges receive very different
+                    volumes.
                     <Box
                       component="span"
-                      sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1.5 }}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        mt: 1.5,
+                      }}
                     >
                       <Box
                         component="span"
-                        sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
                       >
-                        <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>
+                        <Box
+                          component="span"
+                          sx={{
+                            color: "grey.500",
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                          }}
+                        >
                           Overlapping percentile bands:
                         </Box>
                         <DeliveryBandsLegend />
                       </Box>
-                      <Box component="span" sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}>
-                        Upper chart region = wetter-year delivery · Lower chart region = drier-year delivery
+                      <Box
+                        component="span"
+                        sx={{
+                          color: "grey.400",
+                          fontSize: "0.8rem",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Upper chart region = wetter-year delivery · Lower chart
+                        region = drier-year delivery
                       </Box>
                     </Box>
                   </>
                 ) : (
                   <>
                     Shortage = max(demand − delivery, 0), distributed across all
-                    simulated years (TAF). A flat chart near zero means the refuge
-                    consistently received its full allocation. Spikes indicate dry-year
-                    cutbacks.
+                    simulated years (TAF). A flat chart near zero means the
+                    refuge consistently received its full allocation. Spikes
+                    indicate dry-year cutbacks.
                     <Box
                       component="span"
-                      sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1.5 }}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        mt: 1.5,
+                      }}
                     >
                       <Box
                         component="span"
-                        sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
                       >
-                        <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>
+                        <Box
+                          component="span"
+                          sx={{
+                            color: "grey.500",
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                          }}
+                        >
                           Overlapping percentile bands:
                         </Box>
                         <ShortageBandsLegend />
                       </Box>
-                      <Box component="span" sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}>
-                        Upper chart region = drier-year shortage · Lower chart region = wetter-year shortage (near zero)
+                      <Box
+                        component="span"
+                        sx={{
+                          color: "grey.400",
+                          fontSize: "0.8rem",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Upper chart region = drier-year shortage · Lower chart
+                        region = wetter-year shortage (near zero)
                       </Box>
                     </Box>
                   </>
@@ -522,7 +676,7 @@ export default function RefugeSection({
                   No {chartMode} data available for this scenario and region.
                 </Typography>
               ) : (
-                  <PercentileMatrix
+                <PercentileMatrix
                   reservoirs={reservoirData}
                   scenarios={scenarios}
                   scenarioNames={scenarioNames}
@@ -532,7 +686,9 @@ export default function RefugeSection({
                   showScenarioHeaders={false}
                   displayMode="volume"
                   volumeScaleMode={scaleMode as VolumeScaleMode}
-                  colorScheme={chartMode === "delivery" ? "delivery" : "shortage"}
+                  colorScheme={
+                    chartMode === "delivery" ? "delivery" : "shortage"
+                  }
                   loadingScenarios={activeLoadingScenarios}
                   cellStats={cellStats}
                   minYMaxTaf={0}
@@ -540,7 +696,6 @@ export default function RefugeSection({
               )}
             </Box>
           </Box>
-
         </>
       )}
     </>

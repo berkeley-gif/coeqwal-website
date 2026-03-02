@@ -372,12 +372,17 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           // Round up to a nice increment with 5% headroom.
           // Handles sub-1 TAF ranges (e.g. refuge deliveries in tenths of TAF).
           const increment =
-            maxValue > 1000 ? 500
-            : maxValue > 100 ? 50
-            : maxValue > 10 ? 10
-            : maxValue > 1 ? 1
-            : maxValue > 0.1 ? 0.1
-            : 0.01
+            maxValue > 1000
+              ? 500
+              : maxValue > 100
+                ? 50
+                : maxValue > 10
+                  ? 10
+                  : maxValue > 1
+                    ? 1
+                    : maxValue > 0.1
+                      ? 0.1
+                      : 0.01
           const rawMaxY = Math.ceil((maxValue * 1.05) / increment) * increment
           // Guard against degenerate [0,0] domain (all data = 0 and minYMaxTaf = 0).
           // A flat domain causes D3 to place every value at 50% height.
@@ -422,12 +427,17 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         // Apply caller-supplied minimum, then round up with 10% headroom.
         maxValue = Math.max(maxValue, minYMaxTaf)
         const absIncrement =
-          maxValue > 1000 ? 500
-          : maxValue > 100 ? 50
-          : maxValue > 10 ? 10
-          : maxValue > 1 ? 1
-          : maxValue > 0.1 ? 0.1
-          : 0.01
+          maxValue > 1000
+            ? 500
+            : maxValue > 100
+              ? 50
+              : maxValue > 10
+                ? 10
+                : maxValue > 1
+                  ? 1
+                  : maxValue > 0.1
+                    ? 0.1
+                    : 0.01
         sharedYDomain = [
           0,
           Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement,
@@ -512,9 +522,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
         !isCwsWithStats &&
         (reservoir.labelAttributes?.length ?? 0) > 0
       const isCwsWithoutStats =
-        reservoir.capacityTaf === 0 &&
-        !isCwsWithStats &&
-        !hasLabelAttributes
+        reservoir.capacityTaf === 0 && !isCwsWithStats && !hasLabelAttributes
 
       if (isCwsWithStats) {
         // CWS-specific labels: Annual average, Reliability, Shortage frequency
@@ -562,7 +570,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.text)
             .attr("text-transform", "uppercase")
             .attr("letter-spacing", "0.05em")
-              .text("P95 reliability")
+            .text("P95 reliability")
           g.append("text")
             .attr("x", labelX)
             .attr("y", currentY + 14)
@@ -1383,12 +1391,14 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-weight", "600")
               .attr("font-feature-settings", "'tnum' 1")
               .attr("fill", COLORS.header)
-              .text((() => {
-                const taf = stats.annualAvgTaf!
-                if (taf < 0.1) return `${Math.round(taf * 1000)} AF/yr`
-                if (taf < 10) return `${taf.toFixed(1)} TAF/yr`
-                return `${Math.round(taf).toLocaleString()} TAF/yr`
-              })())
+              .text(
+                (() => {
+                  const taf = stats.annualAvgTaf!
+                  if (taf < 0.1) return `${Math.round(taf * 1000)} AF/yr`
+                  if (taf < 10) return `${taf.toFixed(1)} TAF/yr`
+                  return `${Math.round(taf).toLocaleString()} TAF/yr`
+                })(),
+              )
             currentY += lineHeight
           }
 
@@ -1742,7 +1752,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                       ? v.toFixed(2)
                       : _yMax < 10
                         ? v.toFixed(1)
-                        : v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                        : v.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })
                   : v.toFixed(0)
 
               // Update playhead position (snapped to month)
@@ -1865,6 +1877,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     breakdownData,
     breakdownComponents,
     loadingScenarios,
+    minYMaxTaf,
   ])
 
   return (
