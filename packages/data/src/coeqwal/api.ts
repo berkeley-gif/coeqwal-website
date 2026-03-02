@@ -27,6 +27,14 @@ export const ENDPOINTS = {
   scenarioTiers: (scenarioId: string) => `/tiers/scenarios/${scenarioId}/tiers`,
 
   /**
+   * Tier data for a single outcome within a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param tierCode - Tier short code (e.g., "ENV_FLOWS", "AG_REV")
+   */
+  scenarioTierByCode: (scenarioId: string, tierCode: string) =>
+    `/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
+
+  /**
    * Tier location data for map visualization
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param tierCode - Tier short code (e.g., "AG_REV")
@@ -36,8 +44,11 @@ export const ENDPOINTS = {
 
   // Statistics endpoints (reservoir percentiles)
 
-  /** List of reservoirs with percentile data */
+  /** List of reservoirs with percentile data (grouped) */
   STATISTICS_RESERVOIRS: "/statistics/reservoirs",
+
+  /** List of all reservoirs with statistics data */
+  STATISTICS_RESERVOIRS_ALL: "/statistics/reservoirs/all",
 
   /** List of scenarios with percentile data */
   STATISTICS_SCENARIOS: "/statistics/scenarios",
@@ -56,4 +67,221 @@ export const ENDPOINTS = {
    */
   allReservoirPercentiles: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/reservoir-percentiles`,
+
+  /**
+   * Percentile data for a group of reservoirs in a scenario
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param group - Reservoir group (e.g., "major")
+   */
+  groupedReservoirPercentiles: (scenarioId: string, group: string) =>
+    `/statistics/scenarios/${scenarioId}/reservoir-percentiles?group=${group}`,
+
+  /**
+   * Monthly storage data with both percentage and TAF values
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param group - Reservoir group (e.g., "major")
+   */
+  storageMonthly: (scenarioId: string, group: string) =>
+    `/statistics/scenarios/${scenarioId}/storage-monthly?group=${group}`,
+
+  /**
+   * Monthly spill statistics for reservoirs
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param group - Reservoir group (e.g., "major")
+   */
+  spillMonthly: (scenarioId: string, group: string) =>
+    `/statistics/scenarios/${scenarioId}/spill-monthly?group=${group}`,
+
+  // CWS Aggregate endpoints (M&I delivery/shortage statistics)
+
+  /** List of CWS aggregate entities */
+  CWS_AGGREGATES_LIST: "/statistics/cws-aggregates",
+
+  /**
+   * Monthly delivery and shortage statistics for CWS aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param aggregate - Optional filter by aggregate short_code (e.g., "swp_total")
+   */
+  cwsAggregatesMonthly: (scenarioId: string, aggregate?: string) =>
+    `/statistics/scenarios/${scenarioId}/cws-aggregates/monthly${aggregate ? `?aggregate=${aggregate}` : ""}`,
+
+  /**
+   * Period-of-record summary for CWS aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param aggregate - Optional filter by aggregate short_code
+   */
+  cwsAggregatesPeriod: (scenarioId: string, aggregate?: string) =>
+    `/statistics/scenarios/${scenarioId}/cws-aggregates/period-summary${aggregate ? `?aggregate=${aggregate}` : ""}`,
+
+  // M&I Contractors endpoints (30 SWP water agency contractors)
+
+  /**
+   * List of M&I contractors
+   * @param group - Optional filter by group (e.g., "swp")
+   */
+  MI_CONTRACTORS_LIST: "/statistics/mi-contractors",
+
+  /**
+   * List of M&I contractors with optional group filter
+   * @param group - Optional group filter (e.g., "swp")
+   */
+  miContractorsList: (group?: string) =>
+    `/statistics/mi-contractors${group ? `?group=${group}` : ""}`,
+
+  /**
+   * Monthly delivery statistics for M&I contractors
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param contractor - Optional filter by contractor short_code
+   */
+  miContractorsMonthly: (scenarioId: string, contractor?: string) =>
+    `/statistics/scenarios/${scenarioId}/mi-contractors/delivery-monthly${contractor ? `?contractor=${contractor}` : ""}`,
+
+  /**
+   * Period-of-record summary for M&I contractors
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param contractor - Optional filter by contractor short_code
+   */
+  miContractorsPeriod: (scenarioId: string, contractor?: string) =>
+    `/statistics/scenarios/${scenarioId}/mi-contractors/period-summary${contractor ? `?contractor=${contractor}` : ""}`,
+
+  // Urban Demand Units endpoints (46 demand units)
+
+  /**
+   * List of urban demand units
+   */
+  DEMAND_UNITS_LIST: "/statistics/demand-units",
+
+  /**
+   * List of urban demand units organized by group
+   * Returns units grouped by "swp", "cvp", etc.
+   */
+  DEMAND_UNITS_GROUPS: "/statistics/demand-units/groups",
+
+  /**
+   * List of urban demand units with optional group filter
+   * @param group - Optional group filter (e.g., "swp", "cvp")
+   */
+  demandUnitsList: (group?: string) =>
+    `/statistics/demand-units${group ? `?group=${group}` : ""}`,
+
+  /**
+   * Statistics for a single demand unit (includes both monthly and period data)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
+   */
+  demandUnitStatistics: (scenarioId: string, duId: string) =>
+    `/statistics/scenarios/${scenarioId}/demand-units/${duId}/statistics`,
+
+  /**
+   * Monthly delivery statistics for urban demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duId - Optional filter by demand unit ID (e.g., "UD_ACWD")
+   * @param group - Optional group filter (e.g., "swp")
+   */
+  demandUnitsMonthly: (scenarioId: string, duId?: string, group?: string) => {
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
+      .filter(Boolean)
+      .join("&")
+    return `/statistics/scenarios/${scenarioId}/demand-units/delivery-monthly${params ? `?${params}` : ""}`
+  },
+
+  /**
+   * Period-of-record summary for urban demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param duId - Optional filter by demand unit ID
+   * @param group - Optional group filter
+   */
+  demandUnitsPeriod: (scenarioId: string, duId?: string, group?: string) => {
+    const params = [duId && `du_id=${duId}`, group && `group=${group}`]
+      .filter(Boolean)
+      .join("&")
+    return `/statistics/scenarios/${scenarioId}/demand-units/period-summary${params ? `?${params}` : ""}`
+  },
+
+  // AG Aggregate endpoints (Agricultural delivery statistics)
+
+  /**
+   * Monthly delivery statistics for AG aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agAggregatesMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-aggregates/monthly`,
+
+  /**
+   * Period-of-record summary for AG aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agAggregatesPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-aggregates/period-summary`,
+
+  // AG Demand Units endpoints (150 agricultural demand units)
+
+  /**
+   * Monthly delivery statistics for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsDeliveryMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/delivery-monthly`,
+
+  /**
+   * Monthly shortage statistics for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsShortageMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/shortage-monthly`,
+
+  /**
+   * Period-of-record summary for AG demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  agDemandUnitsPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/ag-demand-units/period-summary`,
+
+  // Reservoir period summary endpoint
+
+  /**
+   * Period-of-record summary for all reservoirs (storage exceedance + spill stats)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  reservoirPeriodSummary: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/period-summary`,
+
+  // Wildlife Refuge demand unit endpoints
+
+  /** List of wildlife refuge demand units */
+  refugeDemandUnitsList: () => `/statistics/refuge-demand-units`,
+
+  /**
+   * Monthly delivery statistics for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusDeliveryMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/delivery-monthly`,
+
+  /**
+   * Monthly shortage statistics for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusShortageMonthly: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/shortage-monthly`,
+
+  /**
+   * Period-of-record summary for refuge demand units
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   */
+  refugeDusPeriod: (scenarioId: string) =>
+    `/statistics/scenarios/${scenarioId}/refuge-demand-units/period-summary`,
+
+  // Batch statistics endpoint (for Data Explorer performance)
+
+  /**
+   * Batch fetch statistics for multiple scenarios
+   * @param scenarios - Comma-separated scenario IDs (e.g., "s0020,s0021,s0022")
+   * @param types - Comma-separated data types (e.g., "storage,cws,ag")
+   */
+  batchStatistics: (
+    scenarios: string[],
+    types: string[] = ["storage", "cws", "ag"],
+  ) =>
+    `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
 } as const

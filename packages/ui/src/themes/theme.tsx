@@ -18,7 +18,7 @@ import { createTheme, Theme } from "@mui/material/styles"
  *
  * 4. createTheme()    - MUI theme configuration
  *                       palette, typography, components
- *                       Typography variants: h1, h1Bold, h2–h6, body1, body2,
+ *                       Typography variants: h1, h2–h6, body1, body2,
  *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
  *                       dashboard, panelTitle, subtitle1/2, caption, overline
  *
@@ -35,33 +35,26 @@ import { createTheme, Theme } from "@mui/material/styles"
  * To switch fonts, change ACTIVE_FONT_PRESET below.
  * Of course you can add fonts here as well. Follow the examples for how to load Google and Adobe fonts.
  *
- * Available: "neueHaas" | "realPro" | "roboto" | "inter" | "openSans" | "system" | "avenirNext"
- *
- * Note: we have decided to use Neue Haas Grotesk Display and Text for the site. I'm leaving this here
- * for a little while longer in case anyone want to test to be sure we made the right choice.
+ * Active: "neueHaas"
+ * Other presets are commented out below but preserved for comparison.
  */
 
-type FontPresetKey =
-  | "neueHaas"
-  | "roboto"
-  | "inter"
-  | "workSans"
-  | "openSans"
-  | "firaSans"
-  | "system"
-  | "avenirNext"
-  | "lato"
+type FontPresetKey = "neueHaas"
+// | "neueHaasUnica"
+// | "ffDagny"
+// | "larsseit"
+// | "roboto"
+// | "inter"
+// | "workSans"
+// | "openSans"
+// | "firaSans"
+// | "system"
+// | "avenirNext"
+// | "lato"
 
-const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas" // <- CHANGE THIS TO SWITCH FONTS SITEWIDE
+const ACTIVE_FONT_PRESET: FontPresetKey = "neueHaas"
 
 const FONT_PRESETS = {
-  // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
-  lato: {
-    text: '"Lato", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Lato", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");',
-  },
   // Adobe TypeKit fonts - weights depend on TypeKit project configuration
   neueHaas: {
     text: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
@@ -69,66 +62,194 @@ const FONT_PRESETS = {
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
     cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
   },
-  realPro: {
-    text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
-  // Roboto: Available weights 100, 300, 400, 500, 700, 900 (no 600)
-  roboto: {
-    text: '"Roboto", Helvetica, Arial, sans-serif',
-    display: '"Roboto", Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
-  },
-  // Inter: Variable font with all weights 100-900
-  inter: {
-    text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
-  },
-  // Work Sans: Variable font with all weights 100-900
-  workSans: {
-    text: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // Open Sans: Available weights 300-800
-  openSans: {
-    text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // Fira Sans: Available weights 100-900
-  firaSans: {
-    text: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
-    display: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
-    cssImport:
-      '@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap");',
-  },
-  // System fonts - no import needed
-  system: {
-    text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    display:
-      "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
-    cssImport: "",
-  },
-  // Adobe TypeKit
-  avenirNext: {
-    text: '"avenir-next-lt-pro", sans-serif',
-    display: '"avenir-next-lt-pro", sans-serif',
-    cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
-  },
+  // // Neue Haas Unica: single-family font (no display/text split)
+  // neueHaasUnica: {
+  //   text: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"neue-haas-unica", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // FF Dagny Web Pro: single-family font
+  // ffDagny: {
+  //   text: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"ff-dagny-web-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Larsseit: local .woff files in apps/main/public/fonts/
+  // larsseit: {
+  //   text: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Larsseit", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: `
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Light.woff") format("woff");
+  //       font-weight: 300;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit.woff") format("woff");
+  //       font-weight: 400;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Medium.woff") format("woff");
+  //       font-weight: 500;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //     @font-face {
+  //       font-family: "Larsseit";
+  //       src: url("/fonts/Larsseit-Bold.woff") format("woff");
+  //       font-weight: 700;
+  //       font-style: normal;
+  //       font-display: swap;
+  //     }
+  //   `,
+  // },
+  // realPro: {
+  //   text: '"ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   display:
+  //     '"ff-real-headline-pro", "ff-real-text-pro", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Roboto: Available weights 100, 300, 400, 500, 700, 900 (no 600)
+  // roboto: {
+  //   text: '"Roboto", Helvetica, Arial, sans-serif',
+  //   display: '"Roboto", Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap");',
+  // },
+  // // Inter: Variable font with all weights 100-900
+  // inter: {
+  //   text: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Inter", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Work Sans: Variable font with all weights 100-900
+  // workSans: {
+  //   text: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Work Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Open Sans: Available weights 300-800
+  // openSans: {
+  //   text: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Open Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // Fira Sans: Available weights 100-900
+  // firaSans: {
+  //   text: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Fira Sans", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@300;400;500;600;700&display=swap");',
+  // },
+  // // System fonts - no import needed
+  // system: {
+  //   text: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  //   display:
+  //     "-apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
+  //   cssImport: "",
+  // },
+  // // Adobe TypeKit
+  // avenirNext: {
+  //   text: '"avenir-next-lt-pro", sans-serif',
+  //   display: '"avenir-next-lt-pro", sans-serif',
+  //   cssImport: '@import url("https://use.typekit.net/rxm7kha.css");',
+  // },
+  // // Lato: Available weights 100, 300, 400, 700, 900 (no 500/600)
+  // lato: {
+  //   text: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+  //   display: '"Lato", Roboto, Helvetica, Arial, sans-serif',
+  //   cssImport:
+  //     '@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");',
+  // },
 } as const
 
 const activeFont = FONT_PRESETS[ACTIVE_FONT_PRESET]
 
+// GT-Alpina accent typeface: local .otf files in apps/main/public/fonts/
+const accentFontFaces = `
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Thin-Trial.otf") format("opentype");
+    font-weight: 100;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Thin-Italic-Trial.otf") format("opentype");
+    font-weight: 100;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Light-Trial.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Light-Italic-Trial.otf") format("opentype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Regular-Trial.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Regular-Italic-Trial.otf") format("opentype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Medium-Trial.otf") format("opentype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Medium-Italic-Trial.otf") format("opentype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Bold-Trial.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "GT Alpina";
+    src: url("/fonts/GT-Alpina-Standard-Bold-Italic-Trial.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+`
+
 // Export font CSS import for ThemeRegistry (must load before other styles)
-export const fontCssImport = activeFont.cssImport
+export const fontCssImport = activeFont.cssImport + accentFontFaces
 
 /* ========================================================
  * 2. Design tokens
@@ -156,6 +277,7 @@ const palette = {
   brand: {
     sky: "#92C1D5", // Top of gradient - sky blue
     water: "#64A4D6", // Bottom of gradient - water blue
+    panelLight: "#EDE9E4", // Frontmatter panel background — undertone.stone
     panelMedium: "#3D7DB5", // Panel 1 background
     panelDark: "#193D6B", // Panel 3 background
   },
@@ -187,7 +309,7 @@ const palette = {
 
   // Common colors (mirrored in MUI palette.common for consistency)
   common: {
-    white: "#FFFFFF",
+    white: "#f2f0ef", // Off-white
     black: "#000000",
   },
 
@@ -209,6 +331,7 @@ const palette = {
   undertone: {
     cool: "#f7fafc", // Cool blue-grey undertone (same as grey[50])
     warm: "#faf8f5", // Warm cream undertone
+    stone: "#EDE9E4", // Warm stone — panel backgrounds on light pages
   },
 
   // Ambient/mood elements
@@ -226,16 +349,33 @@ const palette = {
 
   // Outcome tier colors
   tiers: {
-    tier1: "#7b9d3f", // Green, tier 1
-    tier2: "#60aacb", // Blue, tier 2
-    tier3: "#FFB347", // Orange, tier 3
-    tier4: "#CD5C5C", // Red, tier 4
+    tier1: "#1ca367", // Green, tier 1
+    tier2: "#31b2c5", // Blue, tier 2
+    tier3: "#f2944f", // Orange, tier 3
+    tier4: "#ee5d32", // Red, tier 4
   },
 
   tabPanels: {
-    learn: "#D5EAF5", // More saturated light blue
-    explore: "#C2D8EB", // Shifted toward true blue
-    empower: "#94B8DA", // Shifted toward true blue
+    learn: "#64A4D6", // brand.water
+    explore: "#3D7DB5", // brand.panelMedium
+    share: "#193D6B", // brand.panelDark
+  },
+
+  // Ink colors for light-background content panels (About, Water themes, etc.)
+  ink: {
+    heading: "#333333", // Strong dark — section headings (h5)
+    body: "#555555", // Mid dark — body paragraphs
+    subtle: "rgba(85, 85, 85, 0.55)", // Muted — overline eyebrows
+  },
+
+  // Water theme colors — background + text for each scenario theme
+  // Keys match ScenarioTheme / WATER_THEMES ids (packages/data/src/coeqwal/themes.ts)
+  waterThemes: {
+    baseline: { background: "#ffd87e", text: "#7a5200" },
+    ag_gw: { background: "#d4edda", text: "#2d6a4f" },
+    eco: { background: "#CCE8EE", text: "#186b88" },
+    delta: { background: "#D4CAED", text: "#3A2888" },
+    cws: { background: "#ffe5cc", text: "#7a3000" },
   },
 
   // Data visualization colors for outcome categories
@@ -323,6 +463,12 @@ const zIndex = {
   dropdown: 90, // Dropdown menus (above header)
   tooltip: 100, // Tooltips and help text
   modal: 110, // Modal dialogs (reserved)
+  tooltipAboveModal: 120, // Tooltips that need to appear above modals
+}
+
+// Stroke width - design system line weight
+const strokeWidth = {
+  rule: 0.5, // Primary line weight (px) used for borders, outlines, and SVG strokes
 }
 
 // Border styles
@@ -330,12 +476,12 @@ const border = {
   none: "none",
   light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
   medium: `1px solid ${palette.grey[300]}`, // Standard borders
-  active: `2px solid ${palette.blue.bright}`, // Selected/active states
+  active: `${strokeWidth.rule}px solid ${palette.blue.bright}`, // Selected/active states
   activeLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
-  onDark: "2px solid #FFFFFF", // On dark backgrounds
-  subtleOutline: "1px solid rgba(255, 255, 255, 0.3)", // Semi-transparent white outline
-  rule: "1px solid rgba(255, 255, 255, 0.8)", // Primary design system rule (header, display blocks)
+  onDark: `${strokeWidth.rule}px solid ${palette.common.white}`, // On dark backgrounds
+  subtleOutline: `1px solid ${palette.common.white}4D`, // Semi-transparent white outline (30% opacity)
+  rule: `${strokeWidth.rule}px solid ${palette.common.white}CC`, // Primary design system rule (header, display blocks, 80% opacity)
 }
 
 // Background styles
@@ -363,6 +509,7 @@ export const themeValues = {
   fontFamily: {
     text: activeFont.text,
     display: activeFont.display,
+    accent: '"GT Alpina", Georgia, "Times New Roman", serif',
   },
 
   /**
@@ -374,8 +521,9 @@ export const themeValues = {
    * - controls: Form element sizes (MUI checkbox/radio overrides)
    */
   layout: {
-    headerHeight: 70, // px - expanded header height
-    collapsedHeaderHeight: 40, // px - collapsed header height
+    headerHeight: 56, // px - expanded header height
+    collapsedHeaderHeight: 42, // px - collapsed header height
+    collapsedTabHeight: 44, // px - collapsed tab row height (slightly taller than header to balance visual weight)
     headerShrinkStart: 120, // px - scroll position where header starts shrinking
     headerShrinkEnd: 240, // px - scroll position where header is fully shrunk
     drawer: {
@@ -396,6 +544,7 @@ export const themeValues = {
 
   // Design tokens (from above)
   palette,
+  strokeWidth,
   borderRadius,
   shadow,
   textShadow,
@@ -451,7 +600,8 @@ export const themeValues = {
     // Full-panel spacing - CSS padding values applied by <Panel> component
     // Uses clamp() for responsive scaling: clamp(min, preferred, max)
     panel: {
-      padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight: edge gutters
+      padding: "clamp(32px, 6vw, 80px)", // paddingLeft & paddingRight
+      paddingXl: "clamp(48px, 8vw, 120px)", // wider padding (used in panels for map overlay scrollytelling)
       topOffset: "clamp(140px, 22vh, 240px)", // paddingTop: clears header (70px) + headline breathing room
       bottomOffset: "clamp(100px, 16vh, 180px)", // paddingBottom: visual breathing room
     },
@@ -556,13 +706,7 @@ export const themeValues = {
         pointerEvents: "auto" as const,
         padding: { xs: 2, sm: 2.5, md: 3 }, // matches space.card.xs
       },
-      maxWidth: {
-        xs: "100%",
-        sm: "360px",
-        md: "420px",
-        lg: "460px",
-        xl: "500px",
-      },
+      maxWidth: "540px",
     },
 
     // Panel title typography (for section headers like "Key operations", "Key outcomes")
@@ -643,17 +787,17 @@ const theme = createTheme({
       light: themeValues.palette.brand.sky,
       dark: themeValues.palette.blue.medium,
     },
-    // Tab panel colors
+    // Section colors (used for frontmatter panel backgrounds)
     learn: {
-      background: themeValues.palette.tabPanels.learn,
+      background: "#D5EAF5",
       text: themeValues.palette.blue.darkest,
     },
     explore: {
-      background: themeValues.palette.tabPanels.explore,
+      background: "#C2D8EB",
       text: themeValues.palette.blue.darkest,
     },
-    empower: {
-      background: themeValues.palette.tabPanels.empower,
+    share: {
+      background: "#94B8DA",
       text: themeValues.palette.blue.darkest,
     },
     // MUI standard colors
@@ -662,8 +806,8 @@ const theme = createTheme({
       paper: "#FFFFFF", // Solid white for UI backgrounds
     },
     text: {
-      primary: themeValues.palette.blue.darkest,
-      secondary: "#FFFFFF",
+      primary: themeValues.palette.brand.panelDark,
+      secondary: themeValues.palette.common.white,
       disabled: themeValues.palette.blue.light,
     },
     action: {
@@ -691,21 +835,11 @@ const theme = createTheme({
     h1: {
       fontFamily: themeValues.fontFamily.display,
       // Responsive hero headline
-      // At 1024px: ~4.7rem, at 500px: ~3rem, min: 1.75rem
-      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
-      fontWeight: 500,
-      lineHeight: 1.05,
-      letterSpacing: "-0.016em",
-      margin: 0, // Reset default margins
-      padding: 0, // Reset default padding
-    },
-    // h1Bold - Bold emphasis variant for hero headlines (e.g., "Water" in "California's Water")
-    h1Bold: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "clamp(1.75rem, 2rem + 4vw, 5.5rem)",
-      fontWeight: 700,
-      lineHeight: 1.05,
-      letterSpacing: "-0.016em",
+      // Mobile (3.5rem / 56px)  to  Desktop (5rem / 80px)
+      fontSize: "clamp(3.6rem, 1.5rem + 4vw, 5rem)",
+      fontWeight: 600,
+      lineHeight: 1,
+      letterSpacing: "-0.015em",
       margin: 0,
       padding: 0,
     },
@@ -713,9 +847,20 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.display,
       // Responsive intro line - 0.8× of h1 (e.g., "California's" in "California's Water")
       fontSize: "clamp(1.4rem, 1.6rem + 3.2vw, 4.4rem)",
+      fontWeight: 300,
+      lineHeight: 1.05,
+      letterSpacing: "-0.01em",
+      margin: 0,
+      padding: 0,
+    },
+    // h2Main - Main site specific h2 variant with larger mobile size
+    h2Main: {
+      fontFamily: themeValues.fontFamily.display,
+      // Mobile (2.6rem / 41.6px)  to  Desktop (3.6rem / 57.6px)
+      fontSize: "clamp(2.6rem, 0.8rem + 3.5vw, 3.6rem)",
       fontWeight: 500,
-      lineHeight: 1.05, // Match h1/h1Bold for tight headline pairing
-      letterSpacing: "-0.016em",
+      lineHeight: 1.05,
+      letterSpacing: "-0.01em",
       margin: 0,
       padding: 0,
     },
@@ -728,15 +873,16 @@ const theme = createTheme({
     h4: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h4,
-      fontWeight: 600,
+      fontWeight: 400,
       lineHeight: 1.1,
     },
     h5: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: typeScale.h5,
+      // Responsive section heading: mobile (1.7rem/27.2px)  to  desktop (2.1rem/33.6px)
+      fontSize: "clamp(1.7rem, 1.1rem + 1.5vw, 2.1rem)",
       fontWeight: 600,
-      letterSpacing: "0.02em",
-      lineHeight: 1.35,
+      letterSpacing: "0.01rem",
+      lineHeight: 1.2,
     },
     h6: {
       fontFamily: themeValues.fontFamily.display,
@@ -748,7 +894,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.25rem", // 20px - primary body text (comfortable reading size)
       fontWeight: 400,
-      lineHeight: 1.6,
+      lineHeight: 1.75,
     },
     body1Medium: {
       fontFamily: themeValues.fontFamily.text,
@@ -766,7 +912,7 @@ const theme = createTheme({
     subtitle1: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "1.125rem", // 18px
-      fontWeight: 500,
+      fontWeight: 400,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
@@ -796,25 +942,26 @@ const theme = createTheme({
     overline: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: "0.875rem", // 14px
-      fontWeight: 600,
+      fontWeight: 500,
       lineHeight: 1.4,
       letterSpacing: "normal",
       textTransform: "uppercase",
     },
     nav: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.1rem", // matches body2 size
+      fontSize: "1.2rem",
       fontWeight: 600,
       lineHeight: 1.4,
       letterSpacing: "0.01em",
-      textTransform: "capitalize" as const,
+      textTransform: "none" as const,
     },
     // Tab labels - expanded state (prominent, before docking)
     tabLabel: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.6rem",
-      fontWeight: 600,
+      fontSize: "2rem",
+      fontWeight: 500,
       lineHeight: 1.1,
+      letterSpacing: "0.01rem",
       textTransform: "capitalize" as const,
     },
     // Tab labels - docked state (with header)
@@ -823,7 +970,7 @@ const theme = createTheme({
     tabLabelDocked: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: "1.3rem",
-      fontWeight: 600,
+      fontWeight: 500,
       lineHeight: 1.1,
       textTransform: "capitalize" as const,
     },
@@ -908,13 +1055,12 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.8,
     },
-    // Display body - for hero/panel body text using display font
+    // Display body - for hero/panel body text (frontmatter, video hero)
     displayBody: {
-      fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.4rem", // 22.4px - matches body1 size
-      fontWeight: 500,
-      lineHeight: 1.6,
-      letterSpacing: "0.01em",
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "1.4rem", // 22.4px
+      fontWeight: 400,
+      lineHeight: 1.5,
     },
   },
   shape: {
@@ -1285,13 +1431,11 @@ const theme = createTheme({
     },
     MuiToolbar: {
       styleOverrides: {
-        root: ({ theme }) => ({
-          height: theme.layout.headerHeight,
-          minHeight: theme.layout.headerHeight,
-          [theme.breakpoints.up("sm")]: {
-            minHeight: theme.layout.headerHeight,
-          },
-        }),
+        root: {
+          // Reset MUI defaults (56px / 64px at sm breakpoint) so that
+          // BaseHeader controls height via CSS custom property --header-h
+          minHeight: "unset",
+        },
       },
     },
     MuiTypography: {
@@ -1554,6 +1698,7 @@ const theme = createTheme({
  * ======================================================== */
 
 // Attach all design tokens from themeValues
+theme.strokeWidth = themeValues.strokeWidth
 theme.border = themeValues.border
 theme.background = themeValues.background
 theme.borderRadius = themeValues.borderRadius
@@ -1587,12 +1732,15 @@ declare module "@mui/material/styles" {
     nature: typeof themeValues.palette.nature
     learn: { background: string; text: string }
     explore: { background: string; text: string }
-    empower: { background: string; text: string }
+    share: { background: string; text: string }
     ambient: typeof themeValues.palette.ambient
     overlay: typeof themeValues.palette.overlay
     tiers: typeof themeValues.palette.tiers
     outcomes: typeof themeValues.palette.outcomes
     undertone: typeof themeValues.palette.undertone
+    waterThemes: typeof themeValues.palette.waterThemes
+    tabPanels: typeof themeValues.palette.tabPanels
+    ink: typeof themeValues.palette.ink
   }
 
   interface PaletteOptions {
@@ -1603,12 +1751,15 @@ declare module "@mui/material/styles" {
     nature?: Partial<typeof themeValues.palette.nature>
     learn?: { background?: string; text?: string }
     explore?: { background?: string; text?: string }
-    empower?: { background?: string; text?: string }
+    share?: { background?: string; text?: string }
     ambient?: Partial<typeof themeValues.palette.ambient>
     overlay?: Partial<typeof themeValues.palette.overlay>
     tiers?: Partial<typeof themeValues.palette.tiers>
     outcomes?: Partial<typeof themeValues.palette.outcomes>
     undertone?: Partial<typeof themeValues.palette.undertone>
+    waterThemes?: Partial<typeof themeValues.palette.waterThemes>
+    tabPanels?: Partial<typeof themeValues.palette.tabPanels>
+    ink?: Partial<typeof themeValues.palette.ink>
   }
 
   // zIndex - derived from themeValues.zIndex
@@ -1627,11 +1778,13 @@ declare module "@mui/material/styles" {
     dropdown: number
     tooltip: number
     modal: number
+    tooltipAboveModal: number
   }
 
   // Theme interface - types derived from themeValues
   interface Theme {
     layout: typeof themeValues.layout
+    strokeWidth: typeof themeValues.strokeWidth
     border: typeof themeValues.border
     background: typeof themeValues.background
     borderRadius: typeof themeValues.borderRadius
@@ -1663,7 +1816,7 @@ declare module "@mui/material/styles" {
   // Add custom typography variant
   interface TypographyVariants {
     fontWeightSemiBold: number
-    h1Bold: React.CSSProperties
+    h2Main: React.CSSProperties
     body1Medium: React.CSSProperties
     nav: React.CSSProperties
     tabLabel: React.CSSProperties
@@ -1683,7 +1836,7 @@ declare module "@mui/material/styles" {
   }
   interface TypographyVariantsOptions {
     fontWeightSemiBold?: number
-    h1Bold?: React.CSSProperties
+    h2Main?: React.CSSProperties
     body1Medium?: React.CSSProperties
     nav?: React.CSSProperties
     tabLabel?: React.CSSProperties
@@ -1714,7 +1867,7 @@ declare module "@mui/material/Button" {
 
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
-    h1Bold: true
+    h2Main: true
     body1Medium: true
     nav: true
     tabLabel: true

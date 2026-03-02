@@ -15,10 +15,13 @@
 
 import React, { useState, useCallback, useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { ScenarioBadge } from "@repo/ui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
 import { Truncate } from "@re-dev/react-truncate"
 import type { ScenarioForDisplay } from "./types"
+import { THEME_LABEL_CONFIG } from "../../../../content/themes"
+import type { ScenarioTheme } from "../../../../content/scenarios"
 
 export interface StrategyHeaderProps {
   /** Scenario data */
@@ -31,6 +34,8 @@ export interface StrategyHeaderProps {
   descriptionMaxWidth?: string | number | object
   /** Called when title is clicked */
   onTitleClick?: () => void
+  /** Called when the theme badge is clicked — selects all scenarios of that theme */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
 }
 
 /**
@@ -221,7 +226,7 @@ function DescriptionWithGlossaryLinks({
         aria-label="Show more description text"
         sx={toggleButtonStyles}
       >
-        show more
+        more
       </Box>
     </Box>
   )
@@ -232,7 +237,7 @@ function DescriptionWithGlossaryLinks({
       variant="dashboard"
       sx={{
         color: theme.palette.grey[600],
-        maxWidth: maxWidth ?? theme.layout.maxWidth.md,
+        ...(maxWidth && { maxWidth }),
         lineHeight: 1.6,
         position: "relative",
       }}
@@ -267,7 +272,7 @@ function DescriptionWithGlossaryLinks({
           aria-label="Show less description text"
           sx={toggleButtonStyles}
         >
-          show less
+          less
         </Box>
       </motion.div>
 
@@ -296,8 +301,16 @@ export function StrategyHeader({
   titleVariant = "body2",
   descriptionMaxWidth,
   onTitleClick,
+  onThemeBadgeClick,
 }: StrategyHeaderProps) {
   const theme = useTheme()
+  const showAllThemeBadges = true
+  const themeLabel = strategy.theme
+    ? THEME_LABEL_CONFIG[strategy.theme]?.label
+    : undefined
+  const themeColors = strategy.theme
+    ? theme.palette.waterThemes[strategy.theme]
+    : undefined
 
   // Format label for historical-ag scenario (s0011)
   const displayLabel =
@@ -307,11 +320,72 @@ export function StrategyHeader({
 
   return (
     <Box>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          mb: "4px",
+        }}
+      >
+        <Typography
+          component="span"
+          variant="overline"
+          sx={{
+            color: theme.palette.grey[600],
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            fontSize: "0.7rem",
+            lineHeight: 1,
+          }}
+        >
+          {strategy.scenarioId.toUpperCase()}
+        </Typography>
+
+        {showAllThemeBadges && themeLabel && themeColors ? (
+          <Box
+            component={onThemeBadgeClick ? "button" : "span"}
+            type={onThemeBadgeClick ? "button" : undefined}
+            onClick={
+              onThemeBadgeClick && strategy.theme
+                ? (e: React.MouseEvent) => {
+                    e.stopPropagation()
+                    onThemeBadgeClick(strategy.theme as ScenarioTheme)
+                  }
+                : undefined
+            }
+            sx={
+              onThemeBadgeClick
+                ? {
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    "&:hover > span": { opacity: 0.8 },
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "2px",
+                      borderRadius: "2px",
+                    },
+                  }
+                : { display: "inline-flex" }
+            }
+          >
+            <ScenarioBadge
+              label={themeLabel}
+              backgroundColor={themeColors.background}
+              color={themeColors.text}
+            />
+          </Box>
+        ) : (
+          strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
+        )}
+      </Box>
       <Typography
         variant="scenarioTitle"
         onClick={onTitleClick}
         sx={{
-          maxWidth: theme.layout.maxWidth.sm,
           mb: showDescription ? theme.space.component.xs : 0,
           color: theme.palette.grey[900],
           cursor: onTitleClick ? "pointer" : "default",

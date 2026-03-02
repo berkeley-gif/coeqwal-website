@@ -1,0 +1,81 @@
+:root {
+  --primary-color: #1a4472;
+  --primary-color-transparent: #1a447280;
+  --dark-color: #021224;
+  --light-color: #1a3a5c;
+  --text-color: #f2f0ef;
+}
+
+header {
+  pointer-events: auto;
+}
+
+html {
+  position: relative;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 5rem;
+  padding-right: 5rem;
+  width: max-content;
+  pointer-events: auto;
+  margin-bottom: 20vh;
+}
+
+.filled-container {
+  background-color: var(--primary-color);
+}
+
+.sticky-container {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  width: 100%;
+}
+
+.container-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.text-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+
+.paragraph {
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 1536px) {
+  .paragraph {
+    margin-bottom: 3rem;
+  }
+}

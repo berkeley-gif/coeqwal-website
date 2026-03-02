@@ -17,9 +17,35 @@ import type {
   ScenarioListItem,
   TierLocationResponse,
   ReservoirListResponse,
+  AllReservoirsListResponse,
   StatisticsScenariosResponse,
   ReservoirPercentiles,
   AllReservoirPercentilesResponse,
+  GroupedReservoirPercentilesResponse,
+  StorageMonthlyResponse,
+  SpillMonthlyResponse,
+  CwsAggregatesListResponse,
+  CwsAggregateMonthlyResponse,
+  CwsAggregatePeriodResponse,
+  MiContractorsListResponse,
+  MiContractorMonthlyResponse,
+  MiContractorPeriodResponse,
+  DemandUnitsListResponse,
+  DemandUnitsGroupedResponse,
+  DemandUnitStatisticsResponse,
+  DemandUnitMonthlyResponse,
+  DemandUnitPeriodResponse,
+  AgAggregateMonthlyResponse,
+  AgAggregatePeriodResponse,
+  AgDemandUnitDeliveryMonthlyResponse,
+  AgDemandUnitShortageMonthlyResponse,
+  AgDemandUnitPeriodResponse,
+  ReservoirPeriodSummaryResponse,
+  BatchStatisticsResponse,
+  RefugeDemandUnitsListResponse,
+  RefugeDeliveryMonthlyResponse,
+  RefugeShortageMonthlyResponse,
+  RefugePeriodResponse,
 } from "./types"
 
 /**
@@ -80,30 +106,78 @@ export async function fetchScenarioList(): Promise<ScenarioListItem[]> {
 }
 
 /**
+ * Fetch tier data for a single outcome within a scenario
+ *
+ * Returns weighted_score, normalized_score, gini, and tier distribution data
+ * for multi_value outcomes (e.g. ENV_FLOWS, AG_REV), or single_tier_level for
+ * single_value outcomes (e.g. DELTA_ECO).
+ *
+ * Use when you need one outcome's data without fetching the full scenario.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param tierCode - Tier short code (e.g., "ENV_FLOWS")
+ * @returns Tier info including distribution data and scores
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchScenarioTierByCode("s0020", "ENV_FLOWS")
+ * // { scenario: "s0020", tier_code: "ENV_FLOWS", tier_type: "multi_value",
+ * //   weighted_score: 2.4, data: [...], total_value: 17 }
+ * ```
+ */
+export async function fetchScenarioTierByCode(
+  scenarioId: string,
+  tierCode: string,
+): Promise<
+  ScenarioTiersResponse["tiers"][string] & {
+    scenario: string
+    tier_code: string
+  }
+> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!tierCode) {
+    throw new Error("Tier code is required")
+  }
+
+  return apiFetcher(ENDPOINTS.scenarioTierByCode(scenarioId, tierCode), {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
  * Fetch tier data for multiple scenarios in parallel
+ *
+ * Uses Promise.allSettled so a single failing scenario does not abort the
+ * entire batch. Rejected entries are silently omitted from the result, so
+ * callers should check whether a given scenario ID is present in the map.
  *
  * Note: This fires parallel requests. For large numbers of scenarios,
  * consider using lazy loading (useScenarioTiersLazy) instead.
  *
  * @param scenarioIds - Array of scenario IDs
- * @returns Map of scenarioId -> ScenarioTiersResponse
+ * @returns Map of scenarioId -> ScenarioTiersResponse (only fulfilled entries)
  *
  * @example
  * ```typescript
  * const allData = await fetchAllScenarioTiers(["s0020", "s0021", "s0022"])
- * const s0020Data = allData["s0020"]
+ * const s0020Data = allData["s0020"] // undefined if that scenario failed
  * ```
  */
 export async function fetchAllScenarioTiers(
   scenarioIds: string[],
 ): Promise<Record<string, ScenarioTiersResponse>> {
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     scenarioIds.map((id) => fetchScenarioTiers(id)),
   )
 
   const record: Record<string, ScenarioTiersResponse> = {}
   scenarioIds.forEach((id, i) => {
-    record[id] = results[i]!
+    const result = results[i]
+    if (result?.status === "fulfilled") {
+      record[id] = result.value
+    }
   })
 
   return record
@@ -163,6 +237,27 @@ export async function fetchReservoirList(): Promise<ReservoirListResponse> {
   return apiFetcher<ReservoirListResponse>(ENDPOINTS.STATISTICS_RESERVOIRS, {
     baseUrl: DEFAULT_API_BASE,
   })
+}
+
+/**
+ * Fetch list of all reservoirs with statistics data
+ * Returns all available reservoirs including capacity information
+ *
+ * @returns Array of reservoir info with capacity
+ *
+ * @example
+ * ```typescript
+ * const { reservoirs } = await fetchAllReservoirsList()
+ * // [{ reservoir_id: "SHSTA", reservoir_name: "Shasta", capacity_taf: 4552 }, ...]
+ * ```
+ */
+export async function fetchAllReservoirsList(): Promise<AllReservoirsListResponse> {
+  return apiFetcher<AllReservoirsListResponse>(
+    ENDPOINTS.STATISTICS_RESERVOIRS_ALL,
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
 }
 
 /**
@@ -241,5 +336,648 @@ export async function fetchAllReservoirPercentiles(
     {
       baseUrl: DEFAULT_API_BASE,
     },
+  )
+}
+
+/**
+ * Fetch percentile data for a group of reservoirs in a scenario
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Grouped reservoir percentile data for the scenario
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchGroupedReservoirPercentiles("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "FOLSM": { ... }, "SHSTA": { ... } } }
+ * ```
+ */
+export async function fetchGroupedReservoirPercentiles(
+  scenarioId: string,
+  group: string,
+): Promise<GroupedReservoirPercentilesResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<GroupedReservoirPercentilesResponse>(
+    ENDPOINTS.groupedReservoirPercentiles(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly storage data with both percentage and TAF values
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Storage data with both monthly_percent and monthly_taf
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchStorageMonthly("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "SHSTA": { monthly_percent: {...}, monthly_taf: {...} } } }
+ * ```
+ */
+export async function fetchStorageMonthly(
+  scenarioId: string,
+  group: string,
+): Promise<StorageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<StorageMonthlyResponse>(
+    ENDPOINTS.storageMonthly(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly spill statistics for reservoirs
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param group - Reservoir group (e.g., "major")
+ * @returns Spill data with monthly percentiles and frequency
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchSpillMonthly("s0020", "major")
+ * // { scenario_id: "s0020", group: "major", reservoirs: { "SHSTA": { spill_frequency: 45.2, ... } } }
+ * ```
+ */
+export async function fetchSpillMonthly(
+  scenarioId: string,
+  group: string,
+): Promise<SpillMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!group) {
+    throw new Error("Group is required")
+  }
+
+  return apiFetcher<SpillMonthlyResponse>(
+    ENDPOINTS.spillMonthly(scenarioId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// CWS Aggregate API fetchers (M&I delivery/shortage statistics)
+// ============================================================================
+
+/**
+ * Fetch list of CWS aggregate entities
+ *
+ * @returns Array of CWS aggregates (SWP Total, CVP North, CVP South, MWD)
+ *
+ * @example
+ * ```typescript
+ * const { aggregates } = await fetchCwsAggregatesList()
+ * // [{ short_code: "swp_total", label: "SWP Total M&I" }, ...]
+ * ```
+ */
+export async function fetchCwsAggregatesList(): Promise<CwsAggregatesListResponse> {
+  return apiFetcher<CwsAggregatesListResponse>(ENDPOINTS.CWS_AGGREGATES_LIST, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for CWS aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param aggregate - Optional filter by aggregate short_code (e.g., "swp_total")
+ * @returns Monthly statistics for CWS aggregates
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchCwsAggregatesMonthly("s0020")
+ * // { scenario_id: "s0020", aggregates: { "swp_total": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchCwsAggregatesMonthly(
+  scenarioId: string,
+  aggregate?: string,
+): Promise<CwsAggregateMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<CwsAggregateMonthlyResponse>(
+    ENDPOINTS.cwsAggregatesMonthly(scenarioId, aggregate),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for CWS aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param aggregate - Optional filter by aggregate short_code
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchCwsAggregatesPeriod("s0020")
+ * // { scenario_id: "s0020", aggregates: { "swp_total": { annual_delivery_avg_taf: 1506, reliability_pct: 90, ... } } }
+ * ```
+ */
+export async function fetchCwsAggregatesPeriod(
+  scenarioId: string,
+  aggregate?: string,
+): Promise<CwsAggregatePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<CwsAggregatePeriodResponse>(
+    ENDPOINTS.cwsAggregatesPeriod(scenarioId, aggregate),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// M&I Contractors API fetchers (30 SWP water agency contractors)
+// ============================================================================
+
+/**
+ * Fetch list of M&I contractors
+ *
+ * @param group - Optional filter by group (e.g., "swp")
+ * @returns Array of M&I contractors
+ *
+ * @example
+ * ```typescript
+ * const { contractors } = await fetchMiContractorsList()
+ * // [{ short_code: "mwd_mi", label: "Metropolitan Water District" }, ...]
+ * ```
+ */
+export async function fetchMiContractorsList(
+  group?: string,
+): Promise<MiContractorsListResponse> {
+  return apiFetcher<MiContractorsListResponse>(
+    ENDPOINTS.miContractorsList(group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for M&I contractors
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param contractor - Optional filter by contractor short_code
+ * @returns Monthly statistics for M&I contractors
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchMiContractorsMonthly("s0020")
+ * // { scenario_id: "s0020", contractors: { "mwd_mi": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchMiContractorsMonthly(
+  scenarioId: string,
+  contractor?: string,
+): Promise<MiContractorMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<MiContractorMonthlyResponse>(
+    ENDPOINTS.miContractorsMonthly(scenarioId, contractor),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for M&I contractors
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param contractor - Optional filter by contractor short_code
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchMiContractorsPeriod("s0020")
+ * // { scenario_id: "s0020", contractors: { "mwd_mi": { annual_delivery_avg_taf: 1506, reliability_pct: 90, ... } } }
+ * ```
+ */
+export async function fetchMiContractorsPeriod(
+  scenarioId: string,
+  contractor?: string,
+): Promise<MiContractorPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<MiContractorPeriodResponse>(
+    ENDPOINTS.miContractorsPeriod(scenarioId, contractor),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// Urban Demand Units API fetchers (46 demand units)
+// ============================================================================
+
+/**
+ * Fetch list of urban demand units
+ *
+ * @param group - Optional filter by group (e.g., "swp", "cvp")
+ * @returns Array of urban demand units
+ *
+ * @example
+ * ```typescript
+ * const { demand_units } = await fetchDemandUnitsList()
+ * // [{ du_id: "UD_ACWD", label: "Alameda County Water District" }, ...]
+ * ```
+ */
+export async function fetchDemandUnitsList(
+  group?: string,
+): Promise<DemandUnitsListResponse> {
+  return apiFetcher<DemandUnitsListResponse>(ENDPOINTS.demandUnitsList(group), {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch list of urban demand units organized by group
+ *
+ * @returns Demand units grouped by category (e.g., "swp", "cvp")
+ *
+ * @example
+ * ```typescript
+ * const { groups } = await fetchDemandUnitsGroups()
+ * // { swp: [{ du_id: "UD_MWD", label: "Metropolitan Water District" }, ...], cvp: [...] }
+ * ```
+ */
+export async function fetchDemandUnitsGroups(): Promise<DemandUnitsGroupedResponse> {
+  return apiFetcher<DemandUnitsGroupedResponse>(ENDPOINTS.DEMAND_UNITS_GROUPS, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch complete statistics for a single demand unit
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Demand unit ID (e.g., "MWD", "SBA029")
+ * @returns Complete statistics including monthly delivery/shortage and period summary
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitStatistics("s0020", "MWD")
+ * // { scenario_id: "s0020", du_id: "MWD", monthly_delivery: {...}, period_summary: {...} }
+ * ```
+ */
+export async function fetchDemandUnitStatistics(
+  scenarioId: string,
+  duId: string,
+): Promise<DemandUnitStatisticsResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!duId) {
+    throw new Error("Demand unit ID is required")
+  }
+
+  return apiFetcher<DemandUnitStatisticsResponse>(
+    ENDPOINTS.demandUnitStatistics(scenarioId, duId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch monthly delivery and shortage statistics for urban demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID (e.g., "UD_ACWD")
+ * @param group - Optional group filter (e.g., "swp")
+ * @returns Monthly statistics for urban demand units
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitsMonthly("s0020")
+ * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { monthly_delivery: {...}, monthly_shortage: {...} } } }
+ * ```
+ */
+export async function fetchDemandUnitsMonthly(
+  scenarioId: string,
+  duId?: string,
+  group?: string,
+): Promise<DemandUnitMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<DemandUnitMonthlyResponse>(
+    ENDPOINTS.demandUnitsMonthly(scenarioId, duId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for urban demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param duId - Optional filter by demand unit ID
+ * @param group - Optional group filter
+ * @returns Period summary with annual averages, reliability, and exceedance values
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchDemandUnitsPeriod("s0020")
+ * // { scenario_id: "s0020", demand_units: { "UD_ACWD": { annual_delivery_avg_taf: 50, reliability_pct: 85, ... } } }
+ * ```
+ */
+export async function fetchDemandUnitsPeriod(
+  scenarioId: string,
+  duId?: string,
+  group?: string,
+): Promise<DemandUnitPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<DemandUnitPeriodResponse>(
+    ENDPOINTS.demandUnitsPeriod(scenarioId, duId, group),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// AG Aggregate API fetchers (Agricultural delivery statistics)
+// ============================================================================
+
+/**
+ * Fetch monthly delivery statistics for AG aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly statistics for AG aggregates (5 project totals)
+ */
+export async function fetchAgAggregatesMonthly(
+  scenarioId: string,
+): Promise<AgAggregateMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgAggregateMonthlyResponse>(
+    ENDPOINTS.agAggregatesMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for AG aggregates
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Period summary with annual averages and delivery exceedance
+ */
+export async function fetchAgAggregatesPeriod(
+  scenarioId: string,
+): Promise<AgAggregatePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgAggregatePeriodResponse>(
+    ENDPOINTS.agAggregatesPeriod(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// AG Demand Units API fetchers (150 agricultural demand units)
+// ============================================================================
+
+/**
+ * Fetch monthly delivery statistics for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly delivery statistics for 150 AG demand units
+ */
+export async function fetchAgDemandUnitsDeliveryMonthly(
+  scenarioId: string,
+): Promise<AgDemandUnitDeliveryMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitDeliveryMonthlyResponse>(
+    ENDPOINTS.agDemandUnitsDeliveryMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // 150 DUs × 12 months = large payload
+    },
+  )
+}
+
+/**
+ * Fetch monthly shortage statistics for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly shortage statistics for AG demand units
+ */
+export async function fetchAgDemandUnitsShortageMonthly(
+  scenarioId: string,
+): Promise<AgDemandUnitShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitShortageMonthlyResponse>(
+    ENDPOINTS.agDemandUnitsShortageMonthly(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // large payload
+    },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for AG demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Period summary with delivery exceedance for 150 AG demand units
+ */
+export async function fetchAgDemandUnitsPeriod(
+  scenarioId: string,
+): Promise<AgDemandUnitPeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<AgDemandUnitPeriodResponse>(
+    ENDPOINTS.agDemandUnitsPeriod(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 30000, // 150 DUs = large payload
+    },
+  )
+}
+
+// ============================================================================
+// Reservoir Period Summary API fetcher
+// ============================================================================
+
+/**
+ * Fetch period-of-record summary for all reservoirs
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Storage exceedance and annual spill stats for all reservoirs
+ */
+export async function fetchReservoirPeriodSummary(
+  scenarioId: string,
+): Promise<ReservoirPeriodSummaryResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+
+  return apiFetcher<ReservoirPeriodSummaryResponse>(
+    ENDPOINTS.reservoirPeriodSummary(scenarioId),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+// ============================================================================
+// Batch Statistics API fetcher
+// ============================================================================
+
+/**
+ * Fetch batch statistics for multiple scenarios
+ *
+ * This dramatically improves Data Explorer load time by fetching all data
+ * in a single request instead of N×M individual requests.
+ *
+ * @param scenarios - Array of scenario IDs (e.g., ["s0020", "s0021"])
+ * @param types - Data types to fetch (default: ["storage", "cws", "ag"])
+ * @returns Combined statistics for all scenarios
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchBatchStatistics(["s0020", "s0021"])
+ * // { scenarios: ["s0020", "s0021"], storage: {...}, cws: {...}, ag: {...} }
+ * ```
+ */
+export async function fetchBatchStatistics(
+  scenarios: string[],
+  types: string[] = ["storage", "cws", "ag"],
+): Promise<BatchStatisticsResponse> {
+  if (!scenarios || scenarios.length === 0) {
+    throw new Error("At least one scenario is required")
+  }
+
+  return apiFetcher<BatchStatisticsResponse>(
+    ENDPOINTS.batchStatistics(scenarios, types),
+    {
+      baseUrl: DEFAULT_API_BASE,
+      timeout: 60000, // Larger timeout for batch requests
+    },
+  )
+}
+
+// ============================================================================
+// Wildlife Refuge Demand Unit fetchers
+// ============================================================================
+
+/**
+ * Fetch list of wildlife refuge demand units
+ *
+ * @returns All 18 refuge demand unit entities
+ */
+export async function fetchRefugeDemandUnitsList(): Promise<RefugeDemandUnitsListResponse> {
+  return apiFetcher<RefugeDemandUnitsListResponse>(
+    ENDPOINTS.refugeDemandUnitsList(),
+    { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+/**
+ * Fetch monthly delivery statistics for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly delivery for 18 refuge demand units × 12 water months
+ */
+export async function fetchRefugeDusDeliveryMonthly(
+  scenarioId: string,
+): Promise<RefugeDeliveryMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugeDeliveryMonthlyResponse>(
+    ENDPOINTS.refugeDusDeliveryMonthly(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+/**
+ * Fetch monthly shortage statistics for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Monthly shortage for 18 refuge demand units × 12 water months
+ */
+export async function fetchRefugeDusShortageMonthly(
+  scenarioId: string,
+): Promise<RefugeShortageMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugeShortageMonthlyResponse>(
+    ENDPOINTS.refugeDusShortageMonthly(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+/**
+ * Fetch period-of-record summary for refuge demand units
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @returns Annual averages, CVs, and reliability_pct_95 for 18 refuge DUs
+ */
+export async function fetchRefugeDusPeriod(
+  scenarioId: string,
+): Promise<RefugePeriodResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<RefugePeriodResponse>(
+    ENDPOINTS.refugeDusPeriod(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
   )
 }

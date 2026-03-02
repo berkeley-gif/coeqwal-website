@@ -16,10 +16,19 @@ export default function GlobalError({
   reset: () => void
 }) {
   return (
-    <ErrorFallback
-      title="Something went wrong"
-      message="We've encountered an unexpected error. Please try again."
-      onRetry={reset}
-    />
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <ErrorFallback
+        title="Something went wrong"
+        message="We've encountered an unexpected error. Please try again."
+        onRetry={reset}
+      />
+    </div>
   )
 }

@@ -26,8 +26,10 @@ function delay(ms: number): Promise<void> {
  * Determines if an error is retryable based on status code
  */
 function isRetryableStatus(status: number): boolean {
-  // Retry on server errors (5xx) and rate limiting (429)
-  return status >= 500 || status === 429
+  // Retry only on transient errors: rate limiting (429) and gateway/availability
+  // errors (502, 503, 504). A 500 Internal Server Error is a definitive failure
+  // on the backend and should not be retried.
+  return status === 429 || status === 502 || status === 503 || status === 504
 }
 
 /**

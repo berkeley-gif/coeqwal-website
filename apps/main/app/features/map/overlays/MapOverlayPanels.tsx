@@ -17,56 +17,72 @@
  */
 
 import { useState, useEffect, useRef } from "react"
-import { useTheme } from "@repo/ui/mui"
-import { Scrollama, Step } from "react-scrollama"
-
-// Animation thresholds for scenario-intro section panels (progress 0-1)
-const PANEL_ANIMATION_THRESHOLDS = {
-  strategyInfo: { fadeStart: 0.12, fadeEnd: 0.18 },
-  keyOperations: { fadeStart: 0.28, fadeEnd: 0.34 },
-  keyOutcomes: { fadeStart: 0.48, fadeEnd: 0.54 },
-  summary: { fadeStart: 0.48, fadeEnd: 0.54 },
-} as const
-
-const PANEL_POSITIONS = {
-  paragraphTop: "15vh",
-} as const
-
-const RIGHT_PANEL_MAX_WIDTH = {
-  xs: "100%",
-  sm: "360px",
-  md: "420px",
-  lg: "460px",
-  xl: "500px",
-} as const
-
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
+import { useTheme } from "@repo/ui/mui"
+import { Box, Typography, InfoIcon } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 import { CallResponsePanel } from "@repo/ui"
+import { Scrollama, Step } from "react-scrollama"
+import { useTransform, useMotionValueEvent } from "@repo/motion"
+import { useMap } from "@repo/map"
+import { centralValleyBasins } from "@repo/data"
+import {
+  useScrollProgress,
+  ScrollSectionContext,
+  ScrollElement,
+  StickyElement,
+  useScrollPhase,
+  type ProgressRange,
+} from "@repo/scrollytelling"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
 import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
+import { PanelEyebrow } from "./PanelEyebrow"
 import {
   StrategyInfoPanel,
   KeyOperationsPanel,
   KeyOutcomesPanel,
+  SummaryPanel,
 } from "./scenarioPanels"
-import { SummaryPanel } from "./scenarioPanels"
-import { Box, Typography, InfoIcon } from "@repo/ui/mui"
-import { useMap } from "@repo/map"
-import { centralValleyBasins } from "@repo/data"
 import {
   mapActions,
   useGeocodingResetCounter,
   useIsOutcomeVisualizationActive,
 } from "../store"
 import type { SectionId } from "../config/sectionLayers"
-import {
-  useTransform,
-  motion,
-  useMotionValue,
-  useMotionValueEvent,
-} from "@repo/motion"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
+
+// Phase thresholds for useScrollPhase — stable module-level constants so
+// the hook's internal useEffect dep array never triggers unnecessary re-runs.
+const STRATEGY_PHASE_THRESHOLDS = {
+  enter: [0.08, 0.14] as ProgressRange,
+  hold: [0.14, 1.0] as ProgressRange,
+}
+const KEY_OPERATIONS_PHASE_THRESHOLDS = {
+  enter: [0.22, 0.28] as ProgressRange,
+  hold: [0.28, 1.0] as ProgressRange,
+}
+const KEY_OUTCOMES_PHASE_THRESHOLDS = {
+  enter: [0.64, 0.68] as ProgressRange,
+  hold: [0.68, 1.0] as ProgressRange,
+}
+const SUMMARY_PHASE_THRESHOLDS = {
+  enter: [0.7, 0.74] as ProgressRange,
+  hold: [0.74, 1.0] as ProgressRange,
+}
+
+const PANEL_POSITIONS = {
+  paragraphTop: "15vh",
+} as const
+
+const ACCENT_TEXT_SX = {
+  fontFamily: themeValues.fontFamily.accent,
+  fontStyle: "italic",
+  fontWeight: 500,
+  fontSize: "1.4rem",
+} as const
+
+const RIGHT_PANEL_MAX_WIDTH = "540px"
 
 // ============================================================================
 // MAIN COMPONENT
@@ -80,41 +96,14 @@ export default function MapOverlayPanels() {
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
 
-  // UI state
-  const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+  // Panels always "visible" for pointer-events; entrance animation is
+  // viewport-driven via CallResponsePanel's whileInView.
+  const isFirstPanelVisible = true
 
   // Ref for multi-step sticky animation (Framer Motion)
+  // Attached directly to the JSX element via ref={scenarioIntroRef} below,
+  // so no MutationObserver needed.
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
-
-  // Use MutationObserver to detect when the element is added to DOM
-  const [isScenarioIntroMounted, setIsScenarioIntroMounted] = useState(false)
-
-  useEffect(() => {
-    // Check if element already exists
-    const checkElement = () => {
-      const element = document.getElementById("scenario-intro-wrapper")
-      if (element) {
-        // Store the element in the ref for scroll tracking
-        scenarioIntroRef.current = element as HTMLDivElement
-        setIsScenarioIntroMounted(true)
-        return true
-      }
-      return false
-    }
-
-    if (checkElement()) return
-
-    // Otherwise observe DOM for the element
-    const observer = new MutationObserver(() => {
-      if (checkElement()) {
-        observer.disconnect()
-      }
-    })
-
-    observer.observe(document.body, { childList: true, subtree: true })
-
-    return () => observer.disconnect()
-  }, [])
 
   // Refs for strategy info tooltip
   const strategyInfoRef = useRef<HTMLDivElement>(null)
@@ -128,11 +117,18 @@ export default function MapOverlayPanels() {
   const keyOutcomesRef = useRef<HTMLDivElement>(null)
   const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
 
+  // Refs for summary tooltip
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const summaryContainerRef = useRef<HTMLDivElement>(null)
+
   // State for manually closed tooltips
   const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
   const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
+  const [viewByClimateTooltipClosed, setViewByClimateTooltipClosed] =
+    useState(false)
   const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] =
     useState(false)
+  const [summaryTooltipClosed, setSummaryTooltipClosed] = useState(false)
 
   // Close tooltips when outcome visualization is activated
   const isOutcomeActive = useIsOutcomeVisualizationActive()
@@ -142,171 +138,115 @@ export default function MapOverlayPanels() {
       // Close all panel tooltips when showing outcome data on map
       setStrategyTooltipClosed(true)
       setKeyOpsTooltipClosed(true)
+      setViewByClimateTooltipClosed(true)
       setKeyOutcomesTooltipClosed(true)
+      setSummaryTooltipClosed(true)
     }
   }, [isOutcomeActive])
 
   // ============================================================================
-  // Framer Motion: Scenario-intro choreography
+  // Scenario-intro choreography
   // ============================================================================
 
-  // Multi-step sticky choreography:
-  // Tracks scroll through the scenario-intro-wrapper section
-  // Uses manual scroll tracking because useScroll doesn't work reliably
-  // when the ref isn't available at mount time
-  const scenarioIntroProgress = useMotionValue(0)
-
-  useEffect(() => {
-    if (!isScenarioIntroMounted || !scenarioIntroRef.current) return
-
-    const updateProgress = () => {
-      const element = scenarioIntroRef.current
-      if (!element) return
-
-      const rect = element.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const elementHeight = element.offsetHeight
-
-      // Progress calculation matching Framer Motion's ["start end", "end start"] offset:
-      // 0 when element top hits viewport bottom
-      // 1 when element bottom hits viewport top
-      const scrollStart = -viewportHeight // element top at viewport bottom
-      const scrollEnd = elementHeight // element bottom at viewport top
-      const totalRange = scrollEnd - scrollStart
-      const currentPosition = -rect.top // How far past scrollStart we are
-
-      const progress = Math.max(0, Math.min(1, currentPosition / totalRange))
-      scenarioIntroProgress.set(progress)
-    }
-
-    // Initial update
-    updateProgress()
-
-    // Update on scroll
-    window.addEventListener("scroll", updateProgress, { passive: true })
-    window.addEventListener("resize", updateProgress, { passive: true })
-
-    return () => {
-      window.removeEventListener("scroll", updateProgress)
-      window.removeEventListener("resize", updateProgress)
-    }
-  }, [isScenarioIntroMounted, scenarioIntroProgress])
+  // Tracks scroll through the scenario-intro-wrapper section.
+  // useScrollProgress wraps Framer Motion's useScroll with layoutEffect: false
+  // so it works correctly even though the ref is attached to a child element
+  // rendered later in the same component.
+  // offset ["start end", "end start"] = 0 when element top hits viewport bottom,
+  // 1 when element bottom hits viewport top.
+  // This value is also provided to ScrollSectionContext so ScrollElement children
+  // can read the same progress and animate their opacity automatically.
+  const scenarioIntroProgress = useScrollProgress(scenarioIntroRef, {
+    offset: ["start end", "end start"],
+  })
 
   // Paragraph position: fixed at top (no animation, just scrolls naturally)
   const paragraphTop = PANEL_POSITIONS.paragraphTop
 
-  // Panel opacity - fade in and stay visible
-  const strategyInfoPanelOpacity = useTransform(
+  // Panel phases — useScrollPhase replaces the manual useTransform + latch +
+  // useState + useMotionValueEvent chains that previously managed each panel's
+  // opacity and pointer events.
+  //
+  // ScrollElement handles opacity using the same context progress; useScrollPhase
+  // gives us a React state value for pointer-events (which can't be a MotionValue).
+  const { phase: strategyPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.strategyInfo.fadeEnd,
-    ],
-    [0, 1],
+    STRATEGY_PHASE_THRESHOLDS,
   )
-
-  const keyOperationsPanelOpacity = useTransform(
+  const { phase: keyOperationsPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.keyOperations.fadeEnd,
-    ],
-    [0, 1],
+    KEY_OPERATIONS_PHASE_THRESHOLDS,
   )
-
-  const keyOutcomesPanelOpacity = useTransform(
+  const { phase: keyOutcomesPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.keyOutcomes.fadeEnd,
-    ],
-    [0, 1],
+    KEY_OUTCOMES_PHASE_THRESHOLDS,
   )
-
-  const summaryPanelOpacity = useTransform(
+  const { phase: summaryPhase } = useScrollPhase(
     scenarioIntroProgress,
-    [
-      PANEL_ANIMATION_THRESHOLDS.summary.fadeStart,
-      PANEL_ANIMATION_THRESHOLDS.summary.fadeEnd,
-    ],
-    [0, 1],
+    SUMMARY_PHASE_THRESHOLDS,
   )
 
-  // TODO: Find better approach for allowing map panning while disabling hidden panel interactions
-  // Panel pointer events - derived from opacity to prevent invisible panels from receiving events
-  // When opacity < 0.1, pointer events are disabled (prevents clicking hidden panels)
-  // Using lower threshold to ensure panels are truly invisible before allowing map panning
-  // Applied to inner motion.div so map panning still works through backgrounds
-  const strategyInfoPointerEvents = useTransform(
-    strategyInfoPanelOpacity,
-    (v) => (v < 0.1 ? "none" : "auto"),
-  )
-  const keyOperationsPointerEvents = useTransform(
-    keyOperationsPanelOpacity,
-    (v) => (v < 0.1 ? "none" : "auto"),
-  )
-  const keyOutcomesPointerEvents = useTransform(keyOutcomesPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
-  )
-  const summaryPointerEvents = useTransform(summaryPanelOpacity, (v) =>
-    v < 0.1 ? "none" : "auto",
-  )
+  // Derive pointer-events from phase: "none" only before the panel has entered.
+  const strategyPE = strategyPhase === "before" ? "none" : "auto"
+  const keyOperationsPE = keyOperationsPhase === "before" ? "none" : "auto"
+  const keyOutcomesPE = keyOutcomesPhase === "before" ? "none" : "auto"
+  const summaryPE = summaryPhase === "before" ? "none" : "auto"
 
-  // Convert motion values to state to override panel's hardcoded pointerEvents: "auto"
-  const [strategyInfoPE, setStrategyInfoPE] = useState<"none" | "auto">("none")
-  const [keyOperationsPE, setKeyOperationsPE] = useState<"none" | "auto">(
-    "none",
-  )
-  const [keyOutcomesPE, setKeyOutcomesPE] = useState<"none" | "auto">("none")
-  const [summaryPE, setSummaryPE] = useState<"none" | "auto">("none")
+  // Track when scenario-intro has been scrolled into, to reduce left/right padding
+  const [scenarioIntroPaddingReduced, setScenarioIntroPaddingReduced] =
+    useState(false)
 
-  // Track if StrategyInfoPanel was ever visible (to avoid clearing on initial render)
-  // Using first panel because it's visible the longest
-  const strategyInfoWasVisible = useRef(false)
+  // Simplified progress listener: drives the padding transition only.
+  // Pointer-events reset is now handled by useScrollPhase above.
+  useMotionValueEvent(scenarioIntroProgress, "change", (latest) => {
+    setScenarioIntroPaddingReduced(latest > 0.01)
+  })
 
-  // Sync motion values to state for use in MUI sx prop
-  useMotionValueEvent(strategyInfoPointerEvents, "change", (latest) => {
-    const newPE = latest as "none" | "auto"
-    setStrategyInfoPE(newPE)
-
-    // Track when panel becomes visible
-    if (newPE === "auto") {
-      strategyInfoWasVisible.current = true
-    }
-
-    // Clear outcome visualization only when transitioning from visible to invisible
-    // (not on initial render when panel starts invisible)
-    if (newPE === "none" && strategyInfoWasVisible.current) {
+  // Clear the active outcome visualization when the strategy panel goes invisible
+  // (user scrolled back above the section). Replaces the old strategyInfoWasVisible
+  // ref + useMotionValueEvent pattern.
+  const strategyWasVisibleRef = useRef(false)
+  useEffect(() => {
+    if (strategyPhase !== "before") {
+      strategyWasVisibleRef.current = true
+    } else if (strategyWasVisibleRef.current) {
       mapActions.clearOutcomeVisualization()
-      strategyInfoWasVisible.current = false // Reset for next cycle
+      strategyWasVisibleRef.current = false
     }
-  })
-  useMotionValueEvent(keyOperationsPointerEvents, "change", (latest) => {
-    setKeyOperationsPE(latest as "none" | "auto")
-  })
-  useMotionValueEvent(keyOutcomesPointerEvents, "change", (latest) => {
-    setKeyOutcomesPE(latest as "none" | "auto")
-  })
-  useMotionValueEvent(summaryPointerEvents, "change", (latest) => {
-    setSummaryPE(latest as "none" | "auto")
-  })
+  }, [strategyPhase])
 
-  // Tooltip opacity - fade in and out (adjusted for compressed timing)
+  // Tooltip opacity - fade in and out
+  // Sequence (no overlaps): strategy → key ops → view by climate → key outcomes
+  // Each tooltip: 0.03 fade in, 0.08 visible, 0.03 fade out (0.14 total), 0.04 gap between
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.18, 0.22, 0.26, 0.3],
+    [0.14, 0.17, 0.25, 0.28],
     [0, 1, 1, 0],
   )
 
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.36, 0.4, 0.46, 0.5],
+    [0.32, 0.35, 0.43, 0.46],
+    [0, 1, 1, 0],
+  )
+
+  const viewByClimateTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.5, 0.53, 0.61, 0.64],
     [0, 1, 1, 0],
   )
 
   const keyOutcomesTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.55, 0.58, 0.65, 0.68],
+    [0.68, 0.71, 0.79, 0.82],
+    [0, 1, 1, 0],
+  )
+
+  // Summary tooltip: fades in after the panel is fully visible, fades out near
+  // the end of the section. Follows the same 0.03/0.07/0.03 rhythm as others.
+  const summaryTooltipOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.74, 0.77, 0.81, 0.84],
     [0, 1, 1, 0],
   )
 
@@ -318,31 +258,18 @@ export default function MapOverlayPanels() {
   useMotionValueEvent(keyOperationsTooltipOpacity, "change", (latest) => {
     if (latest === 0) setKeyOpsTooltipClosed(false)
   })
+  useMotionValueEvent(viewByClimateTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setViewByClimateTooltipClosed(false)
+  })
   useMotionValueEvent(keyOutcomesTooltipOpacity, "change", (latest) => {
     if (latest === 0) setKeyOutcomesTooltipClosed(false)
+  })
+  useMotionValueEvent(summaryTooltipOpacity, "change", (latest) => {
+    if (latest === 0) setSummaryTooltipClosed(false)
   })
 
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
   // visibility tracking in useMotionValueEvent above
-
-  // First panel entrance animation
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target.id === "california-call" && entry.isIntersecting) {
-            setIsFirstPanelVisible(true)
-          }
-        })
-      },
-      { threshold: 0.5, rootMargin: "0px 0px -200px 0px" },
-    )
-
-    const mapPanel = document.getElementById("california-call")
-    if (mapPanel) observer.observe(mapPanel)
-
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <Box
@@ -360,58 +287,21 @@ export default function MapOverlayPanels() {
         offset={SCROLLAMA_CONFIG.offset}
         debug={SCROLLAMA_CONFIG.debug}
       >
-        {/* ==================== SECTION 1: California overview ==================== */}
+        {/* ==================== SECTION 1: California overview ====================
+            Short scroll runway — no visible content.
+            Fires the Scrollama "california" step as soon as the section enters
+            the viewport, triggering the Central Valley zoom via useLearnScrollama.
+            50vh gives the zoom animation time to play and the momentum of an
+            active scroll to settle before the central-valley paragraph slides in. */}
         <Step data={"california" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="california-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                Did you know that California has one of the most complex water
-                systems in the world?
-              </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  mt: theme.space.component.xl,
-                }}
-              >
-                <Box
-                  component="span"
-                  sx={{
-                    fontSize: "1.5rem",
-                    color: theme.palette.common.white,
-                    animation: "bounce 2s ease-in-out infinite",
-                    "@keyframes bounce": {
-                      "0%, 100%": { transform: "translateY(0)" },
-                      "50%": { transform: "translateY(-8px)" },
-                    },
-                  }}
-                >
-                  ↓
-                </Box>
-              </Box>
-            </CallResponsePanel>
-          </Box>
+          <Box sx={{ height: "50vh", pointerEvents: "none" }} />
         </Step>
 
         {/* ==================== SECTION 2: Central Valley ==================== */}
         <Step data={"central-valley" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -423,20 +313,23 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1">
-                The{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  Central Valley
-                </Box>{" "}
-                is a long, low valley that collects much of California&apos;s
-                water from surrounding mountains. This water is stored, divided
-                up, and used to irrigate the most productive farmland in the
-                world, to supply drinking water to millions of people, and to
-                protect sensitive species and ecosystems.
-              </Typography>
+              <Box
+                id="central-valley-content"
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <PanelEyebrow>Central Valley Water</PanelEyebrow>
+                <Typography variant="body1">
+                  The{" "}
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    Central Valley
+                  </Box>{" "}
+                  is a long, low valley that collects much of California&apos;s
+                  water from surrounding mountains. This water is stored,
+                  divided up, and used to irrigate the most productive farmland
+                  in the world, to supply drinking water to millions of people,
+                  and to protect sensitive species and ecosystems.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>
@@ -445,7 +338,7 @@ export default function MapOverlayPanels() {
         <Step data={"basins" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -459,10 +352,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 The Central Valley lies across three water{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
+                <Box component="span" sx={ACCENT_TEXT_SX}>
                   basins
                 </Box>
                 .
@@ -475,7 +365,7 @@ export default function MapOverlayPanels() {
         <Step data={"watersheds" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -496,11 +386,11 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
-        {/* ==================== SECTION 4.5: Arrows (trigger) ==================== */}
+        {/* ==================== SECTION 4.5: Arrows ==================== */}
         <Step data={"arrows" as SectionId}>
           <Box
             sx={{
-              minHeight: "50vh",
+              minHeight: "30vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -514,7 +404,7 @@ export default function MapOverlayPanels() {
         <Step data={"find-basin" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -540,11 +430,11 @@ export default function MapOverlayPanels() {
           </Box>
         </Step>
 
-        {/* ==================== SECTION 6: Rivers (Sticky with Progress) ==================== */}
+        {/* ==================== SECTION 6: Rivers (sticky with progress) ==================== */}
         <Step data={"rivers" as SectionId} progress>
           <Box
             sx={{
-              minHeight: "200vh",
+              minHeight: "150vh",
               position: "relative",
               pointerEvents: "none",
             }}
@@ -571,34 +461,22 @@ export default function MapOverlayPanels() {
                   sx={{ mb: theme.space.component.lg }}
                 >
                   These waters flow to the Valley floor, where the{" "}
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Sacramento River
                   </Box>{" "}
                   flows from the north and the{" "}
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     San Joaquin River
                   </Box>{" "}
                   flows from the south. The rivers meet and mix in the low-lying{" "}
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     Delta
                   </Box>
                   .
                 </Typography>
                 <Typography variant="body1">
                   During{" "}
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                  >
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
                     wet years
                   </Box>{" "}
                   water flows from the Tulare Basin into the San Joaquin River.
@@ -612,7 +490,7 @@ export default function MapOverlayPanels() {
         <Step data={"delta" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -634,7 +512,7 @@ export default function MapOverlayPanels() {
         <Step data={"distribution" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -659,7 +537,7 @@ export default function MapOverlayPanels() {
         <Step data={"calsim" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -671,35 +549,34 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1" sx={{ mb: theme.space.component.lg }}>
-                To do this water planning and accounting, the federal{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <PanelEyebrow>Central Valley Water Modeling</PanelEyebrow>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: theme.space.component.lg }}
                 >
-                  U.S. Bureau of Reclamation
-                </Box>{" "}
-                and the state{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  Department of Water Resources
-                </Box>{" "}
-                use a computer model called{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  CalSim
-                </Box>
-                .
-              </Typography>
-              <Typography variant="body1">
-                CalSim simulates how much water flows into reservoirs based on
-                climate, how much is stored or released, and where it gets
-                delivered.
-              </Typography>
+                  To do this water planning and accounting, the federal{" "}
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    U.S. Bureau of Reclamation
+                  </Box>{" "}
+                  and the state{" "}
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    Department of Water Resources
+                  </Box>{" "}
+                  use a computer model called{" "}
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    CalSim
+                  </Box>
+                  .
+                </Typography>
+                <Typography variant="body1">
+                  CalSim simulates how much water flows into reservoirs based on
+                  climate, how much is stored or released, and where it gets
+                  delivered.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>
@@ -708,7 +585,7 @@ export default function MapOverlayPanels() {
         <Step data={"coeqwal" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "160vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -720,495 +597,590 @@ export default function MapOverlayPanels() {
               variant="call"
               isVisible={isFirstPanelVisible}
             >
-              <Typography variant="body1">
-                Until now, this tool has been inaccessible to many communities,
-                creating barriers to participation in water decision-making. The{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  COEQWAL
-                </Box>{" "}
-                project uses CalSim to explore a wide range of different water
-                management strategies and climate futures. We are making these
-                scenarios available to the public.
-              </Typography>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+              >
+                <Typography variant="body1">
+                  Until now, this tool has been inaccessible to many
+                  communities, creating barriers to participation in water
+                  decision-making. The COEQWAL project uses CalSim to explore
+                  and report a wide range of different water management
+                  strategies and climate futures. We are making these scenarios
+                  available to the public so that communities can envision
+                  alternative water futures for California.
+                </Typography>
+              </Box>
             </CallResponsePanel>
           </Box>
         </Step>
 
-        {/* ==================== SECTION 11: Public Data ==================== */}
-        <Step data={"public-data" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="public-data-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                We are making these{" "}
-                <Box
-                  component="span"
-                  sx={{ fontWeight: theme.typography.fontWeightSemiBold }}
-                >
-                  alternative water management scenarios
-                </Box>{" "}
-                available to the public so that communities can envision
-                alternative water futures for California and understand the
-                consequences that different water management strategies can
-                bring.
-              </Typography>
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 12: Scenario Intro with Strategy Row ==================== */}
-        {/* 
-          This section uses Framer Motion for the complex multi-step choreography.
-          Scrollama just detects when we enter this section.
-          Internal animations are driven by useScroll/useTransform.
+        {/* ==================== SECTION 12: Scenario intro ==================== */}
+        {/*
+          Scrollama detects entry. Internal animations use @repo/scrollytelling:
+          - ScrollSectionContext.Provider shares scenarioIntroProgress with children
+          - StickyElement pins the left call panel
+          - ScrollElement handles opacity for each right-side panel (enter + hold)
+          - useScrollPhase (above) derives pointer-events state per panel
         */}
         <Step data={"scenario-intro" as SectionId} progress>
-          <Box
-            id="scenario-intro-wrapper"
-            sx={{
-              minHeight: "900vh",
-              position: "relative",
-              pointerEvents: "none",
+          {/*
+            ScrollSectionContext.Provider manually shares the same scroll progress
+            that drives the tooltip animations with the ScrollElement children below.
+            Both use the same scenarioIntroProgress MotionValue so all animations
+            stay in sync without any extra useScroll calls.
+          */}
+          <ScrollSectionContext.Provider
+            value={{
+              progress: scenarioIntroProgress,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              sectionRef: scenarioIntroRef as any,
             }}
           >
-            {/* Sticky intro text at top */}
-            <motion.div
-              style={{
-                position: "sticky",
-                top: paragraphTop,
-                zIndex: 2,
-                pointerEvents: "none",
-              }}
-            >
-              <Box
-                sx={{
-                  minHeight: "auto",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  pointerEvents: "none",
-                }}
-              >
-                <CallResponsePanel
-                  id="scenario-intro-call"
-                  side="left"
-                  variant="call"
-                  isVisible={isFirstPanelVisible}
-                  minHeight="auto"
-                  alignItems="flex-start"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      maxWidth: {
-                        xs: "100%",
-                        sm: "340px",
-                        md: "380px",
-                        lg: "420px",
-                        xl: "460px",
-                      },
-                    }}
-                  >
-                    Each water management scenario on this site can be read as
-                    having three main elements. Let&apos;s look at the water
-                    management scenario for the way we currently manage Central
-                    Valley water.
-                  </Typography>
-                </CallResponsePanel>
-              </Box>
-            </motion.div>
-
-            {/* All right-side panels in a single sticky container */}
             <Box
+              ref={scenarioIntroRef}
+              id="scenario-intro-wrapper"
               sx={{
-                position: "sticky",
-                top: "15vh",
-                zIndex: 1,
-                mt: "100vh",
+                minHeight: "550vh",
+                position: "relative",
                 pointerEvents: "none",
               }}
             >
+              {/* Sticky intro text at top */}
+              <StickyElement
+                top={paragraphTop}
+                zIndex={2}
+                style={{ pointerEvents: "none" }}
+              >
+                <Box
+                  sx={{
+                    minHeight: "auto",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    pointerEvents: "none",
+                    // Animate padding from default (paddingXl/padding) to narrow as user scrolls in
+                    "& > #scenario-intro-call": {
+                      transition:
+                        "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                      ...(scenarioIntroPaddingReduced && {
+                        paddingLeft: "16px",
+                        paddingRight: "16px",
+                      }),
+                    },
+                  }}
+                >
+                  <CallResponsePanel
+                    id="scenario-intro-call"
+                    side="left"
+                    variant="call"
+                    isVisible={isFirstPanelVisible}
+                    minHeight="auto"
+                    alignItems="flex-start"
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "14px",
+                      }}
+                    >
+                      <PanelEyebrow>
+                        Library of Water Allocation Scenarios
+                      </PanelEyebrow>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          maxWidth: {
+                            xs: "100%",
+                            sm: "340px",
+                            md: "380px",
+                            lg: "420px",
+                            xl: "460px",
+                          },
+                        }}
+                      >
+                        Each water management scenario on this site can be read
+                        as having five explanatory elements. Let&apos;s look at
+                        the water management scenario for the way we currently
+                        manage Central Valley water.
+                      </Typography>
+                    </Box>
+                  </CallResponsePanel>
+                </Box>
+              </StickyElement>
+
+              {/* All right-side panels in a single sticky container */}
               <Box
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: theme.space.gap.sm,
-                  justifyContent: "flex-end",
-                  width: "100%",
-                  pr: theme.space.page.x, // Match left panel padding
+                  position: "sticky",
+                  top: "15vh",
+                  zIndex: 1,
+                  mt: "80vh",
                   pointerEvents: "none",
                 }}
               >
-                {/* Strategy info panel */}
-                <motion.div
-                  style={{
-                    opacity: strategyInfoPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: theme.space.gap.sm,
+                    justifyContent: "flex-end",
+                    width: "100%",
+                    pr: scenarioIntroPaddingReduced
+                      ? "16px"
+                      : theme.space.panel.padding,
+                    transition:
+                      "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
+                    pointerEvents: "none",
                   }}
                 >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
+                  {/* Strategy info panel */}
+                  <ScrollElement
+                    enter={[0.08, 0.14]}
+                    hold={[0.14, 1.0]}
+                    style={{ pointerEvents: "none" }}
                   >
                     <Box
                       sx={{
+                        minHeight: "auto",
                         display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        ref={strategyInfoContainerRef}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: strategyInfoPE, // Block panel AND tooltip when hidden
-                        }}
-                      >
-                        <motion.div
-                          ref={strategyInfoRef}
-                          style={{
-                            pointerEvents: strategyInfoPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              pointerEvents: strategyInfoPE, // Override panel's hardcoded "auto"
-                            }}
-                          >
-                            <StrategyInfoPanel
-                              scenarioId="s0020"
-                              onTitleClick={() =>
-                                setStrategyTooltipClosed(false)
-                              }
-                            />
-                          </Box>
-                        </motion.div>
-
-                        <ScrollTooltip
-                          targetRef={strategyInfoRef}
-                          containerRef={strategyInfoContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                Strategy
-                              </Typography>
-                              This describes the water management strategy being
-                              modeled.
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                Click the{" "}
-                                <InfoIcon
-                                  sx={{
-                                    fontSize: "1rem",
-                                    verticalAlign: "text-top",
-                                    mx: 0.25,
-                                    color: "blue.bright",
-                                  }}
-                                />{" "}
-                                icon to see definitions of terms.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={30}
-                          opacity={strategyInfoTooltipOpacity}
-                          isClosed={strategyTooltipClosed}
-                          onClose={() => setStrategyTooltipClosed(true)}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                </motion.div>
-
-                {/* Key operations panel */}
-                <motion.div
-                  style={{
-                    opacity: keyOperationsPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        ref={keyOperationsContainerRef}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOperationsPE, // Block panel AND tooltip when hidden
-                        }}
-                      >
-                        <motion.div
-                          ref={keyOperationsRef}
-                          style={{
-                            pointerEvents: keyOperationsPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              pointerEvents: keyOperationsPE, // Override panel's hardcoded "auto"
-                            }}
-                          >
-                            <KeyOperationsPanel
-                              scenarioId="s0020"
-                              onTitleClick={() => setKeyOpsTooltipClosed(false)}
-                            />
-                          </Box>
-                        </motion.div>
-
-                        <ScrollTooltip
-                          targetRef={keyOperationsRef}
-                          containerRef={keyOperationsContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                Key operations
-                              </Typography>
-                              These icons represent the key operational
-                              decisions that define this water management
-                              strategy.
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                Click the icons to see what key operations they
-                                represent.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={keyOperationsTooltipOpacity}
-                          isClosed={keyOpsTooltipClosed}
-                          onClose={() => setKeyOpsTooltipClosed(true)}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                </motion.div>
-
-                {/* Key outcomes panel */}
-                <motion.div
-                  style={{
-                    opacity: keyOutcomesPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        ref={keyOutcomesContainerRef}
-                        sx={{
-                          position: "relative",
-                          width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                          pointerEvents: keyOutcomesPE, // Block panel AND tooltip when hidden
-                        }}
-                      >
-                        <motion.div
-                          ref={keyOutcomesRef}
-                          style={{
-                            pointerEvents: keyOutcomesPointerEvents, // "none" when hidden, "auto" when visible
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              pointerEvents: keyOutcomesPE, // Override panel's hardcoded "auto"
-                            }}
-                          >
-                            <KeyOutcomesPanel
-                              scenarioId="s0020"
-                              onTitleClick={() =>
-                                setKeyOutcomesTooltipClosed(false)
-                              }
-                            />
-                          </Box>
-                        </motion.div>
-
-                        <ScrollTooltip
-                          targetRef={keyOutcomesRef}
-                          containerRef={keyOutcomesContainerRef}
-                          content={
-                            <>
-                              <Typography
-                                variant="tooltipHeader"
-                                sx={{ mb: theme.space.component.xs }}
-                              >
-                                Key outcomes
-                              </Typography>
-                              These outcomes show how this strategy affects
-                              water supply, ecosystems, agriculture, and
-                              communities.
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                  mt: theme.space.component.sm,
-                                }}
-                              >
-                                Some outcomes record values from multiple
-                                locations in a bar chart that shows the number
-                                of locations in each tier. Other outcomes are
-                                recorded at a single location such as the Delta
-                                or Sacramento River.
-                              </Box>
-                              <Box
-                                component="span"
-                                sx={{
-                                  display: "block",
-                                  mt: theme.space.component.sm,
-                                  fontStyle: "italic",
-                                }}
-                              >
-                                Click on the{" "}
-                                <InfoIcon
-                                  sx={{
-                                    fontSize: "1rem",
-                                    verticalAlign: "text-top",
-                                    mx: 0.25,
-                                    color: "blue.bright",
-                                  }}
-                                />{" "}
-                                icons to learn more about each outcome. Click on
-                                the chart to see the outcome on a map.
-                              </Box>
-                            </>
-                          }
-                          position="left"
-                          offsetY={20}
-                          opacity={keyOutcomesTooltipOpacity}
-                          isClosed={keyOutcomesTooltipClosed}
-                          onClose={() => setKeyOutcomesTooltipClosed(true)}
-                        />
-                      </Box>
-                    </Box>
-                  </Box>
-                </motion.div>
-
-                {/* Summary panel */}
-                <motion.div
-                  style={{
-                    opacity: summaryPanelOpacity,
-                    pointerEvents: "none", // Allow map panning through panel backgrounds
-                  }}
-                >
-                  <Box
-                    sx={{
-                      minHeight: "auto",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        width: "100%",
+                        alignItems: "flex-start",
                         pointerEvents: "none",
                       }}
                     >
                       <Box
                         sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
                           width: "100%",
-                          maxWidth: RIGHT_PANEL_MAX_WIDTH,
                           pointerEvents: "none",
                         }}
                       >
-                        <motion.div
-                          style={{
-                            pointerEvents: summaryPointerEvents, // "none" when hidden, "auto" when visible
+                        <Box
+                          ref={strategyInfoContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: strategyPE,
                           }}
                         >
-                          <Box
-                            sx={{
-                              pointerEvents: summaryPE, // Override panel's hardcoded "auto"
-                            }}
-                          >
-                            <SummaryPanel scenarioId="s0020" />
-                          </Box>
-                        </motion.div>
+                          <div ref={strategyInfoRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: strategyPE,
+                              }}
+                            >
+                              <StrategyInfoPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setStrategyTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
+
+                          <ScrollTooltip
+                            targetRef={strategyInfoRef}
+                            containerRef={strategyInfoContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  1. Strategy
+                                </Typography>
+                                This describes the water management strategy
+                                being modeled.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Click{" "}
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      color: theme.palette.blue.medium,
+                                    }}
+                                  >
+                                    more
+                                  </Box>{" "}
+                                  to see the whole strategy description.
+                                  Underlined words appear in a glossary when
+                                  clicked.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={30}
+                            opacity={strategyInfoTooltipOpacity}
+                            isClosed={strategyTooltipClosed}
+                            onClose={() => setStrategyTooltipClosed(true)}
+                          />
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </motion.div>
-              </Box>
-            </Box>
+                  </ScrollElement>
 
-            {/* Scroll spacer */}
-            <Box sx={{ height: "100vh" }} aria-hidden="true" />
-          </Box>
+                  {/* Key operations panel */}
+                  <ScrollElement
+                    enter={[0.22, 0.28]}
+                    hold={[0.28, 1.0]}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <Box
+                      sx={{
+                        minHeight: "auto",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          width: "100%",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Box
+                          ref={keyOperationsContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: keyOperationsPE,
+                          }}
+                        >
+                          <div ref={keyOperationsRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: keyOperationsPE,
+                              }}
+                            >
+                              <KeyOperationsPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setKeyOpsTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
+
+                          <ScrollTooltip
+                            targetRef={keyOperationsRef}
+                            containerRef={keyOperationsContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  2. Key operations
+                                </Typography>
+                                These icons represent the key operational
+                                decisions that define this water management
+                                strategy.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Hover over the icons to see what key
+                                  operations they represent.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={keyOperationsTooltipOpacity}
+                            isClosed={keyOpsTooltipClosed}
+                            onClose={() => setKeyOpsTooltipClosed(true)}
+                          />
+
+                          <ScrollTooltip
+                            targetRef={keyOperationsRef}
+                            containerRef={keyOperationsContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  3. View by climate
+                                </Typography>
+                                Choosing one of these climate icons will show
+                                you how the scenario allocates water under
+                                different potential future climates.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Hover over the icons to see the hydroclimates
+                                  they represent.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={viewByClimateTooltipOpacity}
+                            isClosed={viewByClimateTooltipClosed}
+                            onClose={() => setViewByClimateTooltipClosed(true)}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  </ScrollElement>
+
+                  {/* Key outcomes panel */}
+                  <ScrollElement
+                    enter={[0.64, 0.68]}
+                    hold={[0.68, 1.0]}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <Box
+                      sx={{
+                        minHeight: "auto",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          width: "100%",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Box
+                          ref={keyOutcomesContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: keyOutcomesPE,
+                          }}
+                        >
+                          <div ref={keyOutcomesRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: keyOutcomesPE,
+                              }}
+                            >
+                              <KeyOutcomesPanel
+                                scenarioId="s0020"
+                                onTitleClick={() =>
+                                  setKeyOutcomesTooltipClosed(false)
+                                }
+                              />
+                            </Box>
+                          </div>
+
+                          <ScrollTooltip
+                            targetRef={keyOutcomesRef}
+                            containerRef={keyOutcomesContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  4. Key outcomes
+                                </Typography>
+                                While the strategy description, key operations,
+                                and climate describe the key inputs into the
+                                CalSim model, the outcomes listed here summarize
+                                the outputs. They show how well the allocations
+                                meet needs in each category.
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                    mt: theme.space.component.sm,
+                                  }}
+                                >
+                                  Outcomes represented by a bar chart show the
+                                  percentage of locations in each tier. For
+                                  other outcomes, there is only one location of
+                                  interest.
+                                </Box>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Click on the{" "}
+                                  <InfoIcon
+                                    sx={{
+                                      fontSize: "1rem",
+                                      verticalAlign: "text-top",
+                                      mx: 0.25,
+                                      color: "blue.bright",
+                                    }}
+                                  />{" "}
+                                  icons to learn more about each outcome. Click
+                                  on the chart to see the outcome on a map.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={keyOutcomesTooltipOpacity}
+                            isClosed={keyOutcomesTooltipClosed}
+                            onClose={() => setKeyOutcomesTooltipClosed(true)}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  </ScrollElement>
+
+                  {/* Summary panel */}
+                  <ScrollElement
+                    enter={[0.7, 0.74]}
+                    hold={[0.74, 1.0]}
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <Box
+                      sx={{
+                        minHeight: "auto",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          width: "100%",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Box
+                          ref={summaryContainerRef}
+                          sx={{
+                            position: "relative",
+                            width: "100%",
+                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
+                            pointerEvents: summaryPE,
+                          }}
+                        >
+                          <div ref={summaryRef}>
+                            <Box
+                              sx={{
+                                pointerEvents: summaryPE,
+                              }}
+                            >
+                              <SummaryPanel scenarioId="s0020" />
+                            </Box>
+                          </div>
+
+                          <ScrollTooltip
+                            targetRef={summaryRef}
+                            containerRef={summaryContainerRef}
+                            content={
+                              <>
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{ mb: theme.space.component.xs }}
+                                >
+                                  5. Scenario summary
+                                </Typography>
+                                This panel synthesizes everything above into a
+                                summary of the scenario&apos;s priorities and
+                                trade-offs.
+                                <Typography
+                                  variant="tooltipHeader"
+                                  sx={{
+                                    mt: theme.space.component.sm,
+                                    mb: theme.space.component.xs,
+                                  }}
+                                >
+                                  Try this:
+                                </Typography>
+                                <Box
+                                  component="span"
+                                  sx={{
+                                    display: "block",
+                                  }}
+                                >
+                                  Click any outcome chart above to get a summary
+                                  specific to that outcome, including the
+                                  locations most affected. Click a location chip
+                                  to zoom the map directly to that location.
+                                </Box>
+                              </>
+                            }
+                            position="left"
+                            offsetY={20}
+                            opacity={summaryTooltipOpacity}
+                            isClosed={summaryTooltipClosed}
+                            onClose={() => setSummaryTooltipClosed(true)}
+                          />
+                        </Box>
+                      </Box>
+                    </Box>
+                  </ScrollElement>
+                </Box>
+              </Box>
+
+              {/* Scroll spacer — gives the summary tooltip (progress 0.74–0.84)
+                enough runway before the wrapper exits the viewport. */}
+              <Box sx={{ height: "100vh" }} aria-hidden="true" />
+            </Box>
+          </ScrollSectionContext.Provider>
         </Step>
 
         {/* ==================== SECTION 13: Scenario Conclusion ==================== */}
         <Step data={"scenario-conclusion" as SectionId}>
           <Box
             sx={{
-              minHeight: "100vh",
+              minHeight: "80vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -1233,7 +1205,7 @@ export default function MapOverlayPanels() {
       {/* Buffer spacer */}
       <Box
         sx={{
-          height: "50vh",
+          height: "30vh",
           width: "100%",
           opacity: 0,
           pointerEvents: "none",

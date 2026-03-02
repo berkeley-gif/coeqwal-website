@@ -328,20 +328,12 @@ export function SummaryPanel({
         // Match the styling of other panels (StrategyRow, KeyOperationsPanel, KeyOutcomesPanel)
         backgroundColor: isInline
           ? theme.palette.grey[50]
-          : "rgba(255, 255, 255, 0.95)",
+          : `${theme.palette.common.white}F2`,
         borderRadius: isInline ? theme.borderRadius.md : 0,
         padding: isInline ? theme.space.card.xs : theme.space.card.sm,
         boxShadow: isInline ? theme.shadow.none : theme.shadow.sm,
         width: "100%",
-        maxWidth: isInline
-          ? "100%"
-          : {
-              xs: "100%",
-              sm: "360px",
-              md: "420px",
-              lg: "460px",
-              xl: "500px",
-            },
+        maxWidth: isInline ? "100%" : theme.scenarios.learnPanel.maxWidth,
         pointerEvents: "auto",
       }}
     >

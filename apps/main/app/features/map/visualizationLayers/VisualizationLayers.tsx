@@ -39,6 +39,7 @@ import {
   fetchTierLocationData,
   type TierLocationResponse,
 } from "@repo/data/coeqwal"
+import { FetchError } from "@repo/data/fetching"
 
 // Store
 import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
@@ -151,53 +152,24 @@ export default function VisualizationLayers() {
           )
           setTierData(data)
 
-          // Zoom to show all markers
-          // In explore mode: camera is handled by useOutcomeVisualization
-          // In learn mode: skip if outcome has a cameraPreset (handled by useOutcomeVisualization)
-          const hasCameraPreset = config?.cameraPreset != null
-          const isLearnMode = mapMode === "learn"
-          const shouldFitBounds = isLearnMode && !hasCameraPreset
-          if (
-            shouldFitBounds &&
-            data.features.length > 0 &&
-            map.mapRef?.current
-          ) {
-            let minLng = Infinity,
-              minLat = Infinity,
-              maxLng = -Infinity,
-              maxLat = -Infinity
-
-            data.features.forEach((feature) => {
-              if (feature.geometry.type === "Point") {
-                const [lng, lat] = feature.geometry.coordinates as [
-                  number,
-                  number,
-                ]
-                minLng = Math.min(minLng, lng)
-                minLat = Math.min(minLat, lat)
-                maxLng = Math.max(maxLng, lng)
-                maxLat = Math.max(maxLat, lat)
-              }
-            })
-
-            if (minLng !== Infinity) {
-              // This only runs in learn mode (explore mode handled by useOutcomeVisualization)
-              map.mapRef.current.fitBounds(
-                [
-                  [minLng, minLat],
-                  [maxLng, maxLat],
-                ],
-                {
-                  padding: 100,
-                  maxZoom: 9,
-                  duration: 1000,
-                },
-              )
-            }
-          }
+          // Camera zoom is handled by useOutcomeVisualization for outcomes
+          // with a cameraPreset (Delta views). Other outcomes keep the current position.
         }
       } catch (err) {
-        console.error("Failed to fetch tier location data:", err)
+        if (
+          err instanceof FetchError &&
+          (err.status === 404 || err.status >= 500)
+        ) {
+          // 404: geometry table not yet populated for this tier type.
+          // 5xx: transient backend error.
+          // Both are known limitations — log as warning so the Next.js dev
+          // overlay is not triggered for expected backend gaps.
+          console.warn(
+            `Tier data unavailable for ${tierCode} (HTTP ${err.status})`,
+          )
+        } else {
+          console.error("Failed to fetch tier location data:", err)
+        }
         if (!cancelled) {
           setTierData(null)
         }
@@ -267,7 +239,14 @@ export default function VisualizationLayers() {
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
       {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
-        tierData && <TierLocationLabels data={tierData} />}
+        (tierData != null || Object.keys(locationData).length > 0) && (
+          <TierLocationLabels
+            data={tierData ?? undefined}
+            locationItems={
+              tierData == null ? Object.values(locationData) : undefined
+            }
+          />
+        )}
 
       {/* Hotspot markers for tier 4 locations */}
       <HotspotMarkers
@@ -275,7 +254,11 @@ export default function VisualizationLayers() {
         scenarioId={scenarioId}
         visible={
           !!outcomeCode &&
-          (outcomeCode === "CWS_DEL" || outcomeCode === "WRC_SALMON_AB")
+          (outcomeCode === "CWS_DEL" ||
+            outcomeCode === "WRC_SALMON_AB" ||
+            outcomeCode === "AG_REV" ||
+            outcomeCode === "ENV_FLOWS" ||
+            outcomeCode === "GW_STOR")
         }
       />
 

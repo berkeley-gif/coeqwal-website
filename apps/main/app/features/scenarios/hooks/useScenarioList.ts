@@ -22,10 +22,12 @@ export function useScenarioList() {
   // Get raw scenario data from the data package
   const { scenarios: rawScenarios, isLoading, error } = useScenarios()
 
-  // Enrich API data with local metadata (user-friendly labels, descriptions, themes, icons)
+  // Enrich API data with local metadata (user-friendly labels, descriptions, themes, icons).
+  // s0020 (Current Operations) is sorted to the front of the list so it appears first
+  // in all views that consume this hook (list view, sidebar, etc.).
   const scenarios = useMemo<Scenario[]>(() => {
     if (!rawScenarios) return []
-    return rawScenarios.map((apiScenario) => {
+    const enriched = rawScenarios.map((apiScenario) => {
       const metadata = getScenarioMetadata(apiScenario.scenario_id)
       return {
         // Identity
@@ -43,6 +45,12 @@ export function useScenarioList() {
         apiShortTitle: apiScenario.short_title,
         apiDescription: apiScenario.description,
       }
+    })
+    // Current Operations (s0020) is the canonical reference scenario and always appears first.
+    return enriched.sort((a, b) => {
+      if (a.scenarioId === "s0020") return -1
+      if (b.scenarioId === "s0020") return 1
+      return 0
     })
   }, [rawScenarios])
 

@@ -22,6 +22,7 @@
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
+    "@repo/scrollytelling": "workspace:^",
     "@repo/state": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",

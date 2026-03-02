@@ -40,6 +40,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   scenarios: scenariosProp,
   highlightedScenarios,
   showSearchDivider = false,
+  themeMatchingScenarioIds,
+  showThemeDivider = false,
+  showAllThemeDividers = false,
+  iconMatchingScenarioIds,
+  showIconDivider = false,
   onToggleScenario,
   onTierClick,
   selectedScenarios,
@@ -47,11 +52,15 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
+  onShowOnlyChosenChange,
+  onShowDefinitionsChange,
   compact = false,
   renderMode = "all",
   sortBy,
   sortDirection = "asc",
   onSortChange,
+  onThemeBadgeClick,
+  onIconClick,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -175,6 +184,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}
             sortEnabled={sortEnabled}
+            showOnlyChosen={showOnlyChosen}
+            showDefinitions={showDefinitions}
+            onShowOnlyChosenChange={onShowOnlyChosenChange}
+            onShowDefinitionsChange={onShowDefinitionsChange}
             onTooltipToggle={handleToggleWithAnchor}
             onSortChange={onSortChange}
           />
@@ -186,6 +199,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             scenarios={displayScenarios}
             highlightedScenarios={highlighted}
             showSearchDivider={showSearchDivider}
+            themeMatchingScenarioIds={themeMatchingScenarioIds}
+            showThemeDivider={showThemeDivider}
+            showAllThemeDividers={showAllThemeDividers}
+            iconMatchingScenarioIds={iconMatchingScenarioIds}
+            showIconDivider={showIconDivider}
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
             showDefinitions={showDefinitions}
@@ -205,6 +223,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onTooltipToggle={handleToggleWithAnchor}
             onTooltipToggleWithContext={handleToggleWithContext}
             onSortChange={onSortChange}
+            onThemeBadgeClick={onThemeBadgeClick}
+            onIconClick={onIconClick}
           />
         )}
       </Box>

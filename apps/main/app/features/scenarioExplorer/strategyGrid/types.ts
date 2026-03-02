@@ -8,6 +8,7 @@ import type {
   ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import type { OutcomeScoreData } from "../../scenarios/hooks"
+import type { ScenarioTheme } from "../../../content/scenarios"
 
 export interface StrategyGridProps {
   // Data
@@ -21,6 +22,12 @@ export interface StrategyGridProps {
   scenarios: ScenarioForDisplay[]
   highlightedScenarios?: Set<string>
   showSearchDivider?: boolean
+  themeMatchingScenarioIds?: Set<string>
+  showThemeDivider?: boolean
+  /** When true, shows a divider between every pair of adjacent scenarios that belong to different themes */
+  showAllThemeDividers?: boolean
+  iconMatchingScenarioIds?: Set<string>
+  showIconDivider?: boolean
 
   // Events
   onOutcomeSelect: (scenarioId: string, outcome: string) => void
@@ -33,6 +40,8 @@ export interface StrategyGridProps {
   showMapView: boolean
   showOnlyChosen: boolean
   showDefinitions: boolean
+  onShowOnlyChosenChange?: (value: boolean) => void
+  onShowDefinitionsChange?: (value: boolean) => void
 
   // Layout
   compact?: boolean
@@ -42,4 +51,10 @@ export interface StrategyGridProps {
   sortBy?: string | null
   sortDirection?: "asc" | "desc"
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+
+  // Badge / icon click-to-select
+  /** Select all scenarios sharing a theme when badge is clicked */
+  onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Select all scenarios sharing an operation icon when clicked */
+  onIconClick?: (iconId: string) => void
 }

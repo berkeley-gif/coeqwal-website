@@ -55,14 +55,14 @@ export default function TabPanels() {
     const params = new URLSearchParams(searchParams.toString())
 
     if (isInTabsArea) {
-      // We are in the tabs area → ensure ?tab=<activeTab>
+      // We are in the tabs area  to  ensure ?tab=<activeTab>
       if (urlTab !== activeTab) {
         params.set("tab", activeTab)
         const query = params.toString()
         router.replace(query ? `?${query}` : "?", { scroll: false })
       }
     } else if (!isInTabsArea && urlTab) {
-      // We are outside the tabs area → remove ?tab if it exists
+      // We are outside the tabs area  to  remove ?tab if it exists
       params.delete("tab")
       const query = params.toString()
       router.replace(query ? `?${query}` : "?", { scroll: false })
@@ -89,6 +89,7 @@ export default function TabPanels() {
 
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Background color tied to active tab
@@ -120,10 +121,10 @@ export default function TabPanels() {
             <ExplorePanel />
           </TabPanel>
         )
-      case "empower":
+      case "share":
         return (
-          <TabPanel tabKey="empower" ref={panelRef}>
-            <h2>Empower</h2>
+          <TabPanel tabKey="share" ref={panelRef}>
+            <h2>Share</h2>
             <p style={{ height: "500px" }}>Coming soon...</p>
           </TabPanel>
         )
@@ -140,6 +141,7 @@ export default function TabPanels() {
           style={{
             position: "relative",
             borderRadius: 0,
+            marginTop: -1,
             pointerEvents: isMapTab ? "none" : "auto",
           }}
         >

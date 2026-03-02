@@ -12,6 +12,7 @@ import { Marker } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import type { TierLocationResponse } from "@repo/data/coeqwal"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
+import type { TierLocation } from "../types"
 
 // =============================================================================
 // LOCATION CONFIGS
@@ -78,8 +79,14 @@ interface LocationData {
 interface TierLocationLabelsProps {
   /** Tier lookup for reservoirs: CalSim ID -> tier level */
   tierLookup?: Record<string, number>
-  /** Tier location data from API for stations */
+  /** Tier location data from GeoJSON endpoint (includes geometry) */
   data?: TierLocationResponse
+  /**
+   * Fallback: plain location items from the /locations endpoint.
+   * Used when the GeoJSON endpoint is unavailable (e.g. geometry table not
+   * yet populated). Coordinates come from STATION_COORDINATES.
+   */
+  locationItems?: TierLocation[]
 }
 
 // =============================================================================
@@ -89,6 +96,7 @@ interface TierLocationLabelsProps {
 export function TierLocationLabels({
   tierLookup,
   data,
+  locationItems,
 }: TierLocationLabelsProps) {
   const theme = useTheme()
 
@@ -131,38 +139,35 @@ export function TierLocationLabels({
       }
     })
   } else if (data) {
-    // DEBUG: Log what the API returns
-    console.log(
-      "TierLocationLabels - API data:",
-      data.features.map((f) => ({
-        location_id: f.properties.location_id,
-        location_name: f.properties.location_name,
-        tier_level: f.properties.tier_level,
-      })),
-    )
-    console.log(
-      "TierLocationLabels - Available station IDs:",
-      Object.keys(STATION_COORDINATES),
-    )
-
-    // Station mode: use hardcoded coordinates, only tier from API
+    // Station mode: GeoJSON from tier-map endpoint. Uses hardcoded coordinates
+    // (geometry in the response is ignored; only tier_level is taken from it).
     locations = data.features
-      .filter((f) => f.geometry.type === "Point")
+      .filter((f) => f.geometry?.type === "Point")
       .map((f) => {
         const locationId = f.properties.location_id
         const coords = STATION_COORDINATES[locationId]
-
-        console.log(
-          `TierLocationLabels - Looking up ${locationId}: found=${!!coords}`,
-        )
-
-        // Skip if no hardcoded coordinates for this station
         if (!coords) return null
-
         return {
           id: locationId,
           name: STATION_NAMES[locationId] || locationId,
           tier: f.properties.tier_level,
+          longitude: coords[0],
+          latitude: coords[1],
+        }
+      })
+      .filter((loc): loc is LocationData => loc !== null)
+  } else if (locationItems) {
+    // Fallback station mode: plain /locations data when GeoJSON endpoint is
+    // unavailable (geometry table not yet populated). Coordinates come from
+    // the hardcoded STATION_COORDINATES lookup.
+    locations = locationItems
+      .map((loc) => {
+        const coords = STATION_COORDINATES[loc.location_id]
+        if (!coords) return null
+        return {
+          id: loc.location_id,
+          name: STATION_NAMES[loc.location_id] || loc.location_name,
+          tier: loc.tier_level,
           longitude: coords[0],
           latitude: coords[1],
         }
@@ -214,7 +219,7 @@ export function TierLocationLabels({
                   y1={10}
                   x2={0}
                   y2={10 + armDy}
-                  stroke="rgba(255, 255, 255, 0.8)"
+                  stroke={`${theme.palette.common.white}CC`}
                   strokeWidth="1.5"
                 />
               </svg>

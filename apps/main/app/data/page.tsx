@@ -7,29 +7,237 @@
  * for scenario outcomes and metrics.
  */
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import {
   Box,
   Typography,
   Container,
   Select,
   MenuItem,
+  ListSubheader,
   FormControl,
-  InputLabel,
   Grid,
   IconButton,
   CircularProgress,
   SelectChangeEvent,
   Alert,
+  useTheme,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-import { ArrowHead } from "@repo/ui"
+import { ArrowHead, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
+import { ContactSection } from "../components/ContactSection"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
   fetchScenariosForDownload,
 } from "../lib/api/fileDownloadApi"
+import {
+  getScenarioLabel,
+  getScenarioTheme,
+  type ScenarioTheme,
+} from "../content/scenarios"
+import { THEME_LABEL_CONFIG } from "../content/themes"
+
+// Theme order matches ScenarioSelectionSidebar
+const THEME_ORDER: ScenarioTheme[] = ["baseline", "cws", "ag_gw", "eco", "delta"]
+
+/** Group a scenario list by theme, preserving THEME_ORDER, dropping empty groups. */
+function groupByTheme<T extends { scenario_id: string }>(
+  items: T[],
+): { theme: ScenarioTheme; scenarios: T[] }[] {
+  const buckets = new Map<ScenarioTheme, T[]>()
+  THEME_ORDER.forEach((t) => buckets.set(t, []))
+  items.forEach((s) => {
+    const t = getScenarioTheme(s.scenario_id)
+    buckets.get(t)?.push(s)
+  })
+  return THEME_ORDER.map((t) => ({ theme: t, scenarios: buckets.get(t) ?? [] })).filter(
+    ({ scenarios }) => scenarios.length > 0,
+  )
+}
+
+// ── Shared dropdown option components ────────────────────────────────────────
+
+/**
+ * Two-row dropdown option matching the StrategyHeader eyebrow convention.
+ * Top row: SCENARIOID (overline). Bottom row: full scenario label.
+ * Theme is conveyed by the ListSubheader group above, so no badge here.
+ */
+function ScenarioOption({ scenarioId }: { scenarioId: string }) {
+  const theme = useTheme()
+  const label = getScenarioLabel(scenarioId)
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Typography
+        component="span"
+        variant="overline"
+        sx={{
+          color: theme.palette.grey[600],
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          fontSize: "0.7rem",
+          lineHeight: 1,
+        }}
+      >
+        {scenarioId}
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ lineHeight: 1.3, color: theme.palette.text.primary }}
+      >
+        {label}
+      </Typography>
+    </Box>
+  )
+}
+
+/**
+ * Compact single-line renderValue for the closed Select state.
+ * SCENARIOID (overline) + full label, matching the StrategyHeader eyebrow style.
+ */
+function SelectedScenarioValue({ scenarioId }: { scenarioId: string }) {
+  const theme = useTheme()
+  const label = getScenarioLabel(scenarioId)
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Typography
+        component="span"
+        variant="overline"
+        sx={{
+          color: theme.palette.grey[600],
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          fontSize: "0.7rem",
+          lineHeight: 1,
+          flexShrink: 0,
+        }}
+      >
+        {scenarioId}
+      </Typography>
+      <Typography component="span" variant="body2">
+        {label}
+      </Typography>
+    </Box>
+  )
+}
+
+/**
+ * Grouped scenario Select. Encapsulates all styling and rendering logic;
+ * callers supply id, value, onChange, the grouped data, and disabled state.
+ */
+function ScenarioSelect({
+  id,
+  value,
+  onChange,
+  groups,
+  disabled = false,
+}: {
+  id: string
+  value: string
+  onChange: (event: SelectChangeEvent<string>) => void
+  groups: { theme: ScenarioTheme; scenarios: Scenario[] }[]
+  disabled?: boolean
+}) {
+  const theme = useTheme()
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        mt: 0.5,
+        backgroundColor: "common.white",
+        boxShadow: theme.shadow.sm,
+        border: `1px solid ${theme.palette.grey[200]}`,
+        borderRadius: theme.borderRadius.md,
+        "& .MuiMenuItem-root": {
+          py: 1,
+          whiteSpace: "normal" as const,
+          wordBreak: "break-word" as const,
+          "&:hover": { backgroundColor: theme.palette.grey[50] },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.grey[100],
+            "&:hover": { backgroundColor: theme.palette.grey[100] },
+          },
+        },
+        "& .MuiListSubheader-root": {
+          lineHeight: 1,
+          backgroundColor: "common.white",
+        },
+      },
+    },
+  }
+
+  return (
+    <FormControl fullWidth sx={{ mb: (t) => t.space.section.sm }}>
+      <Select
+        id={id}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        displayEmpty
+        sx={SELECT_SX}
+        MenuProps={menuProps}
+        renderValue={(v) =>
+          v ? <SelectedScenarioValue scenarioId={v as string} /> : "Choose a scenario"
+        }
+      >
+        {groups.flatMap(({ theme: themeKey, scenarios: group }) => [
+          <ThemeSubheader key={`hdr-${themeKey}`} themeKey={themeKey} />,
+          ...group.map((scenario) => (
+            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id} sx={{ py: 1 }}>
+              <ScenarioOption scenarioId={scenario.scenario_id} />
+            </MenuItem>
+          )),
+        ])}
+      </Select>
+    </FormControl>
+  )
+}
+
+/**
+ * Non-selectable theme group header for the Select dropdown.
+ * Renders a ScenarioBadge, matching the sidebar accordion headers.
+ */
+function ThemeSubheader({ themeKey }: { themeKey: ScenarioTheme }) {
+  const theme = useTheme()
+  return (
+    <ListSubheader
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        pt: 1.5,
+        pb: 0.5,
+        px: 2,
+        lineHeight: 1,
+      }}
+    >
+      <ScenarioBadge
+        label={THEME_LABEL_CONFIG[themeKey].label}
+        backgroundColor={theme.palette.waterThemes[themeKey].background}
+        color={theme.palette.waterThemes[themeKey].text}
+      />
+    </ListSubheader>
+  )
+}
+
+// ── Shared Select styling (matches CompactSelect visual language) ─────────────
+
+const SELECT_SX = {
+  backgroundColor: "common.white",
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "grey.300",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "grey.400",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "grey.500",
+    borderWidth: "1px",
+  },
+}
+
+// ── Page component ────────────────────────────────────────────────────────────
 
 export default function DataPage() {
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
@@ -37,6 +245,8 @@ export default function DataPage() {
   const [scenarios, setScenarios] = useState<Scenario[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const theme = useTheme()
 
   useEffect(() => {
     let alive = true
@@ -49,9 +259,11 @@ export default function DataPage() {
         const data = await fetchScenariosForDownload()
         if (!alive) return
 
-        const sorted = [...(data.scenarios ?? [])].sort((a, b) =>
-          a.scenario_id.localeCompare(b.scenario_id),
-        )
+        const sorted = [...(data.scenarios ?? [])].sort((a, b) => {
+          if (a.scenario_id === "s0020") return -1
+          if (b.scenario_id === "s0020") return 1
+          return a.scenario_id.localeCompare(b.scenario_id)
+        })
         setScenarios(sorted)
       } catch (error) {
         if (alive && error instanceof Error) {
@@ -84,6 +296,9 @@ export default function DataPage() {
     (scenario) => scenario.files.output_csv || scenario.files.sv_csv,
   )
 
+  const zipGroups = useMemo(() => groupByTheme(zipScenarios), [zipScenarios])
+  const csvGroups = useMemo(() => groupByTheme(csvScenarios), [csvScenarios])
+
   // Get selected scenario data
   const selectedZipScenario = scenarios.find(
     (s) => s.scenario_id === selectedZipDataset,
@@ -107,6 +322,7 @@ export default function DataPage() {
           overflowX: "hidden",
           width: "100%",
           pointerEvents: "auto",
+          backgroundColor: theme.palette.brand.panelMedium,
         }}
       >
         <Box
@@ -120,8 +336,7 @@ export default function DataPage() {
             overflowX: "hidden",
             width: "100%",
             minHeight: "100vh",
-            backgroundColor: (theme) => theme.palette.background.paper,
-            color: (theme) => theme.palette.blue.darkest,
+            color: (theme) => theme.palette.common.white,
           }}
         >
           <Container
@@ -145,7 +360,7 @@ export default function DataPage() {
                   position: "absolute",
                   left: -56,
                   top: 4,
-                  color: (theme) => theme.palette.blue.darkest,
+                  color: (theme) => theme.palette.common.white,
                   width: 40,
                   height: 40,
                 }}
@@ -158,14 +373,7 @@ export default function DataPage() {
                   }}
                 />
               </IconButton>
-              <Typography
-                variant="h5"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                }}
-              >
-                Data & downloads
-              </Typography>
+              <Typography variant="h4">Data & downloads</Typography>
             </Box>
 
             {error && (
@@ -200,7 +408,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.section.sm,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Access complete CalSim3 model run files in zipped format,
@@ -218,36 +425,13 @@ export default function DataPage() {
                     </Alert>
                   ) : (
                     <>
-                      {/* Dropdown for dataset selection */}
-                      <FormControl
-                        fullWidth
-                        sx={{ mb: (theme) => theme.space.section.sm }}
-                      >
-                        <InputLabel id="zip-dataset-select-label">
-                          Select dataset
-                        </InputLabel>
-                        <Select
-                          labelId="zip-dataset-select-label"
-                          id="zip-dataset-select"
-                          value={selectedZipDataset}
-                          label="Select dataset"
-                          onChange={handleZipDatasetChange}
-                          disabled={zipScenarios.length === 0}
-                        >
-                          <MenuItem value="">
-                            <em>Choose scenario</em>
-                          </MenuItem>
-                          {zipScenarios.map((scenario) => (
-                            <MenuItem
-                              key={scenario.scenario_id}
-                              value={scenario.scenario_id}
-                            >
-                              {scenario.files.zip?.filename ||
-                                scenario.scenario_id}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <ScenarioSelect
+                        id="zip-dataset-select"
+                        value={selectedZipDataset}
+                        onChange={handleZipDatasetChange}
+                        groups={zipGroups}
+                        disabled={zipScenarios.length === 0}
+                      />
 
                       {/* Download buttons (only show when a file is selected) */}
                       {selectedZipDataset && selectedZipScenario?.files.zip && (
@@ -280,7 +464,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.section.sm,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Download CalSim3 scenario input and output data in csv
@@ -298,35 +481,13 @@ export default function DataPage() {
                     </Alert>
                   ) : (
                     <>
-                      {/* Dropdown for dataset selection */}
-                      <FormControl
-                        fullWidth
-                        sx={{ mb: (theme) => theme.space.section.sm }}
-                      >
-                        <InputLabel id="csv-dataset-select-label">
-                          Select dataset
-                        </InputLabel>
-                        <Select
-                          labelId="csv-dataset-select-label"
-                          id="csv-dataset-select"
-                          value={selectedCsvDataset}
-                          label="Select dataset"
-                          onChange={handleCsvDatasetChange}
-                          disabled={csvScenarios.length === 0}
-                        >
-                          <MenuItem value="">
-                            <em>Choose scenario</em>
-                          </MenuItem>
-                          {csvScenarios.map((scenario) => (
-                            <MenuItem
-                              key={scenario.scenario_id}
-                              value={scenario.scenario_id}
-                            >
-                              {scenario.scenario_id}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <ScenarioSelect
+                        id="csv-dataset-select"
+                        value={selectedCsvDataset}
+                        onChange={handleCsvDatasetChange}
+                        groups={csvGroups}
+                        disabled={csvScenarios.length === 0}
+                      />
 
                       {/* Download buttons - show when a scenario is selected and files exist */}
                       {selectedCsvDataset && selectedCsvScenario && (
@@ -391,7 +552,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
@@ -402,7 +562,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -423,7 +583,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Peer-reviewed publications and research papers related to
@@ -433,7 +592,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -454,7 +613,6 @@ export default function DataPage() {
                     variant="body1"
                     sx={{
                       mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     REST API endpoints for programmatic access to scenario data,
@@ -464,38 +622,7 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
-                    }}
-                  >
-                    Coming soon
-                  </Typography>
-                </Box>
-              </Grid>
-
-              {/* Support & contact section */}
-              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <Box>
-                  <Typography
-                    variant="h5"
-                    sx={{ mb: (theme) => theme.space.component.lg }}
-                  >
-                    Support & contact
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.space.component.lg,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Contact our team for technical support, questions about the
-                    data, or collaboration opportunities.
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontStyle: "italic",
-                      color: (theme) => theme.palette.grey[600],
+                      color: (theme) => theme.palette.grey[300],
                     }}
                   >
                     Coming soon
@@ -505,6 +632,14 @@ export default function DataPage() {
             </Grid>
           </Container>
         </Box>
+        <ContactSection
+          title="Get Involved"
+          id="getInvolved"
+          ariaLabel="get involved"
+          text="Do you have questions or feedback about our project? 
+                            Would you like to be involved in future phases of this work? Please email: "
+          email="coeqwal@berkeley.edu"
+        />
       </Box>
     </>
   )

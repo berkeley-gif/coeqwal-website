@@ -1,5 +1,7 @@
 "use client"
 
+// TODO: rename. Not just a mobile modal component
+
 /**
  * MobileModal - Reusable mobile modal component
  *
@@ -55,6 +57,35 @@ export interface MobileModalProps {
   zIndex?: number
   /** ARIA label for the content region (enables focusable scrolling) */
   contentAriaLabel?: string
+  /** Content to render in a fixed (non-scrolling) area below the title */
+  stickyHeader?: React.ReactNode
+  /**
+   * Content to render between the title row and the content area with zero
+   * container padding. The child controls all its own spacing and borders.
+   * Use this for full-bleed bars like SelectionBanner.
+   */
+  subHeader?: React.ReactNode
+  /**
+   * When true, reduces the title row to eyebrow-scale vertical padding.
+   * Use when the title is a small label (e.g. overline variant) rather than
+   * a full heading.
+   */
+  denseTitle?: boolean
+  /** When true, removes padding from the scrollable content area. */
+  noPadding?: boolean
+  /**
+   * Fixed height for the dialog (e.g. "90vh"). When provided the dialog is
+   * always exactly this tall so that children using `height: "100%"` can
+   * resolve to a definite pixel value. Without this the dialog shrinks to its
+   * content and percentage heights on children become circular/undefined.
+   */
+  height?: string | number
+  /**
+   * When true the content area uses `overflow: hidden` instead of
+   * `overflow: auto`. Use when the child panel manages its own scrolling /
+   * overflow (e.g. a full-height chart panel).
+   */
+  noContentScroll?: boolean
 }
 
 /**
@@ -68,11 +99,17 @@ export function MobileModal({
   titleId: providedTitleId,
   maxWidth = 500,
   maxHeight = "80vh",
+  height,
   showCloseButton = true,
   closeOnBackdropClick = true,
   closeOnEscape = true,
   zIndex: providedZIndex,
   contentAriaLabel,
+  stickyHeader,
+  subHeader,
+  denseTitle = false,
+  noPadding = false,
+  noContentScroll = false,
 }: MobileModalProps) {
   const theme = useTheme()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -145,6 +182,7 @@ export function MobileModal({
             width: "calc(100vw - 32px)",
             maxWidth,
             maxHeight,
+            ...(height !== undefined && { height }),
             backgroundColor: theme.palette.background.paper,
             borderRadius: theme.borderRadius.md,
             boxShadow: theme.shadow.lg,
@@ -155,14 +193,19 @@ export function MobileModal({
             outline: "none",
           }}
         >
-          {/* Header (only if title or close button) */}
+          {/* Header — full strip when title present, close-only slim strip otherwise */}
           {(title || showCloseButton) && (
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: title ? "space-between" : "flex-end",
-                p: theme.space.section.sm,
+                px: theme.space.section.sm,
+                py: !title
+                  ? theme.space.component.xs
+                  : denseTitle
+                    ? theme.space.component.xs
+                    : theme.space.section.sm,
                 borderBottom: title
                   ? `1px solid ${theme.palette.divider}`
                   : "none",
@@ -176,6 +219,8 @@ export function MobileModal({
                   sx={{
                     m: 0,
                     typography: "h6",
+                    flex: 1,
+                    minWidth: 0,
                   }}
                 >
                   {title}
@@ -187,19 +232,34 @@ export function MobileModal({
                   onClick={onClose}
                   size="small"
                   aria-label="Close"
-                  sx={
-                    !title
-                      ? {
-                          position: "absolute",
-                          top: theme.space.component.sm,
-                          right: theme.space.component.sm,
-                        }
-                      : undefined
-                  }
                 >
                   <CloseIcon />
                 </IconButton>
               )}
+            </Box>
+          )}
+
+          {/* Zero-padding sub-header. Child controls all spacing/borders */}
+          {subHeader && <Box sx={{ flexShrink: 0 }}>{subHeader}</Box>}
+
+          {/* Sticky header area (non-scrolling) */}
+          {stickyHeader && (
+            <Box
+              sx={{
+                flexShrink: 0,
+                px: theme.space.section.sm,
+                py: theme.space.component.sm,
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                // Reset child margins/borders since container handles them
+                "& > *": {
+                  mb: "0 !important",
+                  pb: "0 !important",
+                  borderBottom: "none !important",
+                },
+              }}
+            >
+              {stickyHeader}
             </Box>
           )}
 
@@ -210,8 +270,9 @@ export function MobileModal({
             aria-label={contentAriaLabel}
             sx={{
               flex: 1,
-              overflowY: "auto",
-              p: theme.space.section.sm,
+              overflowY: noContentScroll ? "hidden" : "auto",
+              overflow: noContentScroll ? "hidden" : undefined,
+              p: noPadding ? 0 : theme.space.section.sm,
               // WCAG 2.4.7: Focus visible styles for scrollable region
               ...(contentAriaLabel && {
                 "&:focus-visible": {

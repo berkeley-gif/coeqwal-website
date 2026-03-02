@@ -42,7 +42,8 @@ import {
  */
 function MapViewContent() {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
   const mapMetrics = getMapMetrics()
 
   const [selectedMetric, setSelectedMetric] = React.useState<string>(
@@ -183,7 +184,10 @@ function MapViewContent() {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setActiveView("list")}
+          onClick={() => {
+            setMainView("explorer")
+            setExploreMode("list")
+          }}
           sx={{
             backgroundColor: theme.palette.blue.darkest,
             color: theme.palette.common.white,
@@ -427,12 +431,11 @@ function MapViewContent() {
           touchZoom={true}
           doubleClickZoom={true}
           dragPan={true}
-          dragRotate={false}
+          dragRotate={true}
           touchRotate={false}
           keyboard={false}
           style={{ width: "100%", height: "100%" }}
-          projection={{ name: "mercator" }}
-          terrain={undefined}
+          projection={{ name: "globe" }}
         >
           <NavigationControl position="bottom-right" />
 
@@ -453,7 +456,7 @@ function MapViewContent() {
               left: theme.space.component.lg,
               right: theme.space.component.lg,
               p: theme.space.component.lg,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              backgroundColor: `${theme.palette.common.white}F2`,
               borderRadius: theme.borderRadius.md,
               boxShadow: theme.shadow.sm,
             }}

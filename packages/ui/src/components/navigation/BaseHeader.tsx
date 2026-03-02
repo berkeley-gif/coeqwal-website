@@ -7,7 +7,7 @@
  * and scroll-based shrinking animation.
  *
  * Header dimensions (from theme.layout):
- * - Expanded: 70px (theme.layout.headerHeight)
+ * - Expanded: 56px (theme.layout.headerHeight)
  * - Collapsed: 40px (theme.layout.collapsedHeaderHeight)
  * - Shrink starts: 120px scroll (theme.layout.headerShrinkStart)
  * - Shrink ends: 240px scroll (theme.layout.headerShrinkEnd)
@@ -27,7 +27,7 @@
  * Navigation links (left to right):
  * - Water stories dropdown: links to flow.coeqwal.org, climate.coeqwal.org
  * - Get data: links to dev.coeqwal.org/data
- * - About COEQWAL: placeholder (no link yet)
+ * - About COEQWAL
  * - Language switcher (optional)
  *
  * WCAG 2.0 AA Compliance:
@@ -37,7 +37,7 @@
  * - WCAG 2.1.1: All interactive elements keyboard accessible
  * - WCAG 2.1.2: No keyboard traps (MUI Drawer handles focus trap correctly)
  * - WCAG 2.3.3: Respects prefers-reduced-motion for animations
- * - WCAG 2.4.1: Skip link is now a separate <SkipLink /> component that must be
+ * - WCAG 2.4.1: Skip link is a separate <SkipLink /> component that must be
  *               placed FIRST in the page, before any other content including this header.
  *               See: packages/ui/src/components/navigation/SkipLink.tsx
  * - WCAG 2.4.3: Focus returns to trigger when drawer/dropdown closes
@@ -74,6 +74,7 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
+import type { NavDropdownOption } from "./NavDropdown"
 import {
   motion,
   useScroll,
@@ -88,13 +89,10 @@ const MotionAppBar = motion.create(AppBar)
 
 // Mobile breakpoint - below this width, show hamburger menu
 const MOBILE_BREAKPOINT = 750
-
 // WCAG: Minimum touch target size (44x44px)
 const MIN_TOUCH_TARGET = 44
-
 // ID for drawer (used by aria-controls)
 const MOBILE_DRAWER_ID = "mobile-nav-drawer"
-
 // Active water story - determined by current URL hostname
 type ActiveWaterStory = "flow" | "climate" | null
 
@@ -102,6 +100,7 @@ type ActiveWaterStory = "flow" | "climate" | null
 type HeaderTranslations = {
   buttons: {
     waterStories: string
+    waterThemes: string
     getData: string
     about: string
   }
@@ -140,15 +139,19 @@ export interface BaseHeaderProps {
   backgroundColor?: string
   textColor?: string
   borderBottom?: string
+  navTextShadow?: string
   zIndex?: number
   logoVariant?: "color" | "light"
 
   /* --- Scroll-based background color (optional) --- */
-  // If set, header auto-switches from backgroundColor → backgroundColorScrolled
+  // If set, header auto-switches from backgroundColor to backgroundColorScrolled
   // after user scrolls past backgroundScrollThreshold pixels.
   // Leave unset if you want to control background color yourself (like main app does).
   backgroundColorScrolled?: string
   backgroundScrollThreshold?: number // default: 200px
+
+  /** Text color to transition to when header shrinks (default: same as textColor) */
+  textColorScrolled?: string
 
   /* --- Optional features --- */
   shrinkOnScroll?: boolean // default: true
@@ -156,12 +159,18 @@ export interface BaseHeaderProps {
 
   /* --- Action handlers (optional overrides) --- */
   onLogoClick?: () => void
+  onGetDataClick?: () => void
+  onAboutClick?: () => void
+
+  /** Options for the Water Themes dropdown. When provided, a dropdown is rendered after Water Stories. */
+  waterThemesOptions?: NavDropdownOption[]
 }
 
 const translations: TranslationsMap = {
   en: {
     buttons: {
       waterStories: "Water stories",
+      waterThemes: "Water themes",
       getData: "Get data",
       about: "About COEQWAL",
     },
@@ -173,6 +182,7 @@ const translations: TranslationsMap = {
   es: {
     buttons: {
       waterStories: "Historias del agua",
+      waterThemes: "Temas del agua",
       getData: "Descargar datos",
       about: "Sobre COEQWAL",
     },
@@ -189,18 +199,20 @@ const translations: TranslationsMap = {
 const URLS = {
   flow: "https://flow.coeqwal.org",
   climate: "https://climate.coeqwal.org",
-  data: "https://dev.coeqwal.org/data",
-  // TODO: Add about URL when available
-  // about: "https://coeqwal.org/about",
 }
 
 export function BaseHeader({
   onLogoClick,
+  onGetDataClick,
+  onAboutClick,
+  waterThemesOptions,
   backgroundColor = "transparent",
   textColor, // Default set after theme is available
+  navTextShadow = "none",
   zIndex,
   backgroundColorScrolled,
   backgroundScrollThreshold = 200,
+  textColorScrolled,
   shrinkOnScroll = true,
   showLanguageSwitcher = false,
   borderBottom, // Default set after theme is available
@@ -211,13 +223,13 @@ export function BaseHeader({
    * ======================================== */
   const theme = useTheme()
 
-  // Use theme tokens for defaults
-  const resolvedTextColor = textColor ?? theme.palette.common.white
-  const resolvedBorderBottom = borderBottom ?? theme.border.rule
+  // Use theme tokens for defaults (resolvedTextColor set after isScrolled)
+  const baseTextColor = textColor ?? theme.palette.common.white
+  const baseBorderBottom = borderBottom ?? theme.border.rule
   const resolvedZIndex = zIndex ?? theme.zIndex.appBar
 
   // Header dimensions from theme
-  const expandedHeight = theme.layout.headerHeight // 70px
+  const expandedHeight = theme.layout.headerHeight // 56px
   const collapsedHeight = theme.layout.collapsedHeaderHeight // 40px
   const shrinkStart = theme.layout.headerShrinkStart // 120px
   const shrinkEnd = theme.layout.headerShrinkEnd // 240px
@@ -226,6 +238,7 @@ export function BaseHeader({
    * RESPONSIVE & MOTION PREFERENCES
    * ======================================== */
   const isMobile = useMediaQuery(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+  const isWideDesktop = useMediaQuery("(min-width: 1200px)")
   // WCAG 2.3.3: Respect user's motion preferences
   const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -273,7 +286,7 @@ export function BaseHeader({
   const [isScrolled, setIsScrolled] = useState(false)
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (backgroundColorScrolled) {
+    if (backgroundColorScrolled || textColorScrolled) {
       setIsScrolled(latest > backgroundScrollThreshold)
     }
   })
@@ -283,6 +296,16 @@ export function BaseHeader({
     backgroundColorScrolled && isScrolled
       ? backgroundColorScrolled
       : backgroundColor
+
+  // Resolve text color, border, text shadow, and logo (transitions when scrolled)
+  const resolvedTextColor =
+    textColorScrolled && isScrolled ? textColorScrolled : baseTextColor
+  const resolvedBorderBottom =
+    textColorScrolled && isScrolled
+      ? `${theme.strokeWidth.rule}px solid ${textColorScrolled}CC`
+      : baseBorderBottom
+  const resolvedLogoVariant =
+    textColorScrolled && isScrolled ? ("color" as const) : logoVariant
 
   // --- Shrink animation ---
   const shrinkProgress = useTransform(
@@ -312,15 +335,16 @@ export function BaseHeader({
   const buttonStyle = {
     ...theme.typography.nav,
     color: resolvedTextColor,
-    padding: "8px 20px",
-    // WCAG 2.5.5: Adequate click target size (36px minimum for desktop)
-    minHeight: 36,
-    transition: `color ${theme.transition.fast} ease-out, text-shadow ${theme.transition.fast} ease-out`,
-    textShadow: theme.textShadow.nav,
+    padding: "0 10px",
+    height: "100%",
+    minHeight: 28,
+    borderRadius: 0,
+    textShadow: navTextShadow,
+    position: "relative" as const,
     "&:hover": {
       backgroundColor: "transparent",
       color: resolvedTextColor,
-      textShadow: theme.textShadow.navHover,
+      opacity: 0.7,
     },
     "&:active": {
       backgroundColor: "transparent",
@@ -367,15 +391,14 @@ export function BaseHeader({
           zIndex: resolvedZIndex,
           backgroundColor: effectiveBackgroundColor,
           color: resolvedTextColor,
-          // Smooth background color transition when scrolling past threshold
-          transition: backgroundColorScrolled
-            ? `background-color ${theme.transition.standard} ease`
-            : undefined,
+          // Smooth color transitions when background/text change
+          transition: `background-color ${theme.transition.standard} ease, color ${theme.transition.standard} ease, border-bottom ${theme.transition.standard} ease`,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
           borderBottom: resolvedBorderBottom,
           inset: "0 0 auto 0",
           height: "var(--header-h)",
+          overflow: "hidden",
         }}
         style={
           {
@@ -389,13 +412,16 @@ export function BaseHeader({
         <Toolbar
           sx={{
             py: "var(--pad-y) !important",
-            px: 2,
-            minHeight: "var(--header-h) !important",
-            display: "flex",
+            px: isWideDesktop ? theme.space.panel.padding : 2,
+            height: "var(--header-h) !important",
+            minHeight: "unset !important",
+            display: isWideDesktop ? "grid" : "flex",
+            gridTemplateColumns: isWideDesktop ? "auto 1fr" : undefined,
+            columnGap: isWideDesktop ? theme.spacing(4) : undefined,
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: isWideDesktop ? undefined : "space-between",
           }}
-          style={{ minHeight: "var(--header-h)" }}
+          style={{ height: "var(--header-h)", minHeight: "unset" }}
         >
           {/* ----------------------------------------
            * LOGO
@@ -436,7 +462,7 @@ export function BaseHeader({
               onLogoClick ? "COEQWAL home" : "COEQWAL - Scroll to top"
             }
           >
-            <Logo variant={logoVariant} />
+            <Logo variant={resolvedLogoVariant} />
           </Box>
 
           {/* ----------------------------------------
@@ -444,13 +470,14 @@ export function BaseHeader({
            * WCAG 1.3.1: Semantic nav element - DO NOT REMOVE
            * ---------------------------------------- */}
           {!isMobile && (
-            <Box component="nav" aria-label="Main navigation">
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                sx={{ pr: 2 }}
-              >
+            <Box
+              component="nav"
+              aria-label="Main navigation"
+              sx={{
+                justifySelf: isWideDesktop ? "end" : undefined,
+              }}
+            >
+              <Stack direction="row" spacing={2} alignItems="center">
                 {/* 1. Water stories dropdown */}
                 <NavDropdown
                   label={t.buttons.waterStories}
@@ -473,35 +500,38 @@ export function BaseHeader({
                   sx={buttonStyle}
                 />
 
-                {/* 2. Get data */}
+                {/* 2. Water themes dropdown (rendered when options are provided) */}
+                {waterThemesOptions && waterThemesOptions.length > 0 && (
+                  <NavDropdown
+                    label={t.buttons.waterThemes}
+                    disableRipple
+                    options={waterThemesOptions}
+                    variant="text"
+                    sx={buttonStyle}
+                  />
+                )}
+
+                {/* 3. Get data */}
                 <Button
                   variant="text"
                   disableRipple
-                  onClick={() => (window.location.href = URLS.data)}
+                  onClick={onGetDataClick ? onGetDataClick : undefined}
                   sx={buttonStyle}
                 >
                   {t.buttons.getData}
                 </Button>
 
-                {/* 3. About COEQWAL - TODO: Add URLS.about when available */}
+                {/* 4. About COEQWAL */}
                 <Button
                   variant="text"
                   disableRipple
-                  // TODO: Remove disabled when URLS.about is available
-                  disabled
-                  sx={{
-                    ...buttonStyle,
-                    // Override disabled styles to maintain visual consistency
-                    "&.Mui-disabled": {
-                      color: resolvedTextColor,
-                      opacity: 0.6,
-                    },
-                  }}
+                  onClick={onAboutClick ? onAboutClick : undefined}
+                  sx={buttonStyle}
                 >
                   {t.buttons.about}
                 </Button>
 
-                {/* 4. Language switcher (OPTIONAL) */}
+                {/* Language switcher (OPTIONAL) */}
                 {showLanguageSwitcher && <LanguageSwitcher />}
               </Stack>
             </Box>
@@ -732,6 +762,63 @@ export function BaseHeader({
               </List>
             </ListItem>
 
+            {/* Water themes section (mobile) */}
+            {waterThemesOptions && waterThemesOptions.length > 0 && (
+              <>
+                <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
+                <ListItem
+                  disablePadding
+                  component="div"
+                  role="group"
+                  aria-labelledby="water-themes-label"
+                  sx={{ flexDirection: "column", alignItems: "stretch" }}
+                >
+                  <Box
+                    id="water-themes-label"
+                    component="span"
+                    sx={{
+                      ...theme.typography.nav,
+                      display: "block",
+                      px: 2,
+                      py: 1,
+                    }}
+                  >
+                    {t.buttons.waterThemes}
+                  </Box>
+                  <List disablePadding>
+                    {waterThemesOptions.map((option) => (
+                      <ListItem key={option.key} disablePadding>
+                        <ListItemButton
+                          onClick={() => {
+                            option.onClick()
+                            handleMobileMenuClose()
+                          }}
+                          sx={{
+                            pl: 4,
+                            pr: 2,
+                            minHeight: MIN_TOUCH_TARGET,
+                            "&:focus-visible": {
+                              outline: `2px solid ${theme.palette.text.primary}`,
+                              outlineOffset: -2,
+                            },
+                          }}
+                        >
+                          <ListItemText
+                            primary={option.label}
+                            slotProps={{
+                              primary: {
+                                sx: { ...theme.typography.caption },
+                              },
+                            }}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </ListItem>
+              </>
+            )}
+
             {/* Spacing between sections */}
             <Box sx={{ height: theme.spacing(2) }} aria-hidden="true" />
 
@@ -739,7 +826,7 @@ export function BaseHeader({
             <ListItem disablePadding>
               <ListItemButton
                 onClick={() => {
-                  window.location.href = URLS.data
+                  onGetDataClick?.()
                   handleMobileMenuClose()
                 }}
                 sx={{
@@ -760,19 +847,16 @@ export function BaseHeader({
               </ListItemButton>
             </ListItem>
 
-            {/* About COEQWAL - TODO: Enable when URLS.about is available */}
+            {/* About COEQWAL */}
             <ListItem disablePadding>
               <ListItemButton
-                disabled
+                onClick={() => {
+                  onAboutClick?.()
+                  handleMobileMenuClose()
+                }}
                 sx={{
                   px: 2,
-                  // WCAG 2.5.5: Minimum 44px touch target
                   minHeight: MIN_TOUCH_TARGET,
-                  // Disabled state styling
-                  "&.Mui-disabled": {
-                    opacity: 0.6,
-                  },
-                  // WCAG 2.4.7: Focus visible indicator
                   "&:focus-visible": {
                     outline: `2px solid ${theme.palette.text.primary}`,
                     outlineOffset: -2,

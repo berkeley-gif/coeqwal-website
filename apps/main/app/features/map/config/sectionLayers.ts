@@ -6,6 +6,7 @@ import {
   CameraView,
   CALIFORNIA_VIEW,
   CENTRAL_VALLEY_VIEW,
+  CALIFORNIA_CENTERED_VIEW,
 } from "./cameraPresets"
 
 /** Section IDs for Learn mode scrollytelling */
@@ -21,7 +22,6 @@ export type SectionId =
   | "distribution"
   | "calsim"
   | "coeqwal"
-  | "public-data"
   | "scenario-intro"
   | "scenario-conclusion"
 
@@ -115,7 +115,9 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
   distribution: BASINS_AND_RIVERS,
   calsim: BASINS_AND_RIVERS,
   coeqwal: BASINS_AND_RIVERS,
-  "public-data": BASINS_AND_RIVERS,
-  "scenario-intro": BASINS_AND_RIVERS,
-  "scenario-conclusion": BASINS_AND_RIVERS,
+  "scenario-intro": { ...BASINS_AND_RIVERS, camera: CALIFORNIA_CENTERED_VIEW },
+  "scenario-conclusion": {
+    ...BASINS_AND_RIVERS,
+    camera: CALIFORNIA_CENTERED_VIEW,
+  },
 }

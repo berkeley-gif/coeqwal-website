@@ -33,7 +33,8 @@ import {
  */
 export default function TableView() {
   const theme = useTheme()
-  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const { selectedScenarios, setMainView, setExploreMode } =
+    useScenarioExplorerStore()
 
   const [searchQuery, setSearchQuery] = React.useState("")
   const [categoryFilter, setCategoryFilter] = React.useState<string>("all")
@@ -117,7 +118,10 @@ export default function TableView() {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => setActiveView("list")}
+          onClick={() => {
+            setMainView("explorer")
+            setExploreMode("list")
+          }}
           sx={{
             backgroundColor: theme.palette.blue.darkest,
             "&:hover": { backgroundColor: theme.palette.blue.bright },

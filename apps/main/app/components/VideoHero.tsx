@@ -15,12 +15,9 @@
 import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
-import { motion, useReducedMotion } from "@repo/motion"
-import { ScrollToButton, DisplayBlock } from "@repo/ui"
+import { useReducedMotion } from "@repo/motion"
+import { ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
-
-// Motion-enabled MUI components
-const MotionBox = motion.create(Box)
 
 export type VideoSource = { src: string; type: string }
 export interface VideoHeroProps {
@@ -107,27 +104,6 @@ export default function VideoHero({
   }, [mounted, canPlay, failed, isPlaying, prefersReducedMotion])
 
   const showStaticImage = failed
-
-  // Animation variants - MotionConfig in ThemeRegistry handles reduced motion automatically
-  const heroIn = {
-    hidden: { opacity: 0, x: -24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut" },
-    },
-  }
-
-  const heroInRight = {
-    hidden: { opacity: 0, x: 24, filter: "blur(6px)" },
-    show: {
-      opacity: 1,
-      x: 0,
-      filter: "blur(0px)",
-      transition: { duration: 0.6, ease: "easeOut", delay: 0.12 },
-    },
-  }
 
   return (
     // WCAG 1.3.1: Semantic section element with accessible name
@@ -219,19 +195,19 @@ export default function VideoHero({
           aria-pressed={isPlaying}
           sx={{
             position: "absolute",
-            bottom: 16,
+            bottom: "clamp(24px, 4vh, 48px)",
             right: 16,
             zIndex: theme.zIndex.heroControls,
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            width: 44, // WCAG 2.5.5: Minimum 44x44px touch target
-            height: 44,
+            color: "text.secondary",
+            width: 52,
+            height: 52,
             "&:hover": {
               backgroundColor: "rgba(0, 0, 0, 0.7)",
             },
             // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
             "&:focus-visible": {
-              outline: "2px solid white",
+              outline: `2px solid ${theme.palette.text.secondary}`,
               outlineOffset: 2,
             },
           }}
@@ -262,83 +238,61 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content layout - grid stacking + flex for diagonal positioning */}
+      {/* Content — diagonal: headline upper-left, paragraph lower-right */}
       <Box
         sx={{
-          gridArea: "stack", // CSS Grid stacking: occupies same cell as video
+          gridArea: "stack",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          paddingTop: theme.space.panel.topOffset,
-          paddingBottom: theme.space.panel.bottomOffset,
+          paddingBottom: theme.space.panel.topOffset,
           paddingLeft: theme.space.panel.padding,
           paddingRight: theme.space.panel.padding,
           zIndex: theme.zIndex.heroContent,
-          pointerEvents: "none", // Let clicks pass through to pause button (WCAG 2.2.2)
+          pointerEvents: "none",
         }}
       >
-        {/* Headline - top-left on desktop, centered on mobile */}
-        {/* When hideHeadline: show on mobile only (MorphingHeadline handles desktop) */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroIn}
+        {/* Headline — marginTop offsets exactly the fixed header height */}
+        <Box
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
-            display: hideHeadline
-              ? { xs: "flex", md: "none" } // Mobile: show, Desktop: hidden (MorphingHeadline)
-              : { xs: "flex", md: "block" }, // Always show when not using MorphingHeadline
-            justifyContent: { xs: "center", md: "flex-start" },
-            pointerEvents: "auto", // Re-enable for text selection
+            display: hideHeadline ? { xs: "block", lg: "none" } : "block",
+            alignSelf: "flex-start",
+            marginTop: `calc(${theme.layout.headerHeight}px + 48px)`,
+            maxWidth: { xs: "100%", sm: "720px" },
+            color: "text.secondary",
+            textShadow: theme.textShadow.display,
+            pointerEvents: "auto",
           }}
         >
-          <Box
-            sx={{
-              color: "common.white",
-              textShadow: theme.textShadow.display,
-              // fontSize needed for maxWidth "ch" unit to calculate correctly
-              fontSize: theme.typography.h1Bold.fontSize,
-              // lineHeight controls spacing between the two headline lines
-              lineHeight: 1.05,
-              maxWidth: "16ch",
-              textAlign: { xs: "center", md: "left" },
-            }}
+          <Typography
+            variant="h2Main"
+            component="h2"
+            sx={{ display: "block", mb: 0.5 }}
           >
-            <Typography variant="h2" component="span">
-              {t("homePanel.titleLine1")}
-            </Typography>
-            <br />
-            <Typography variant="h1Bold" component="span">
-              {t("homePanel.titleLine2")}
-            </Typography>
-          </Box>
-        </MotionBox>
-        {/* Desktop spacer when headline hidden (maintains DisplayBlock position) */}
-        {hideHeadline && <Box sx={{ display: { xs: "none", md: "block" } }} />}
+            {t("homePanel.titleLine1")}
+          </Typography>
+          <Typography variant="h1" component="h1" sx={{ display: "block" }}>
+            {t("homePanel.titleLine2")}
+          </Typography>
+        </Box>
 
-        {/* Body - bottom-right on desktop, centered on mobile */}
-        <MotionBox
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.3 }}
-          variants={heroInRight}
+        {/* Paragraph — lower left */}
+        <Typography
+          variant="displayBody"
+          component="p"
           sx={{
-            alignSelf: { xs: "stretch", md: "flex-end" },
-            display: { xs: "flex", md: "block" },
-            justifyContent: { xs: "center", md: "flex-end" },
-            pointerEvents: "auto", // Re-enable for text selection
+            alignSelf: "flex-end",
+            marginTop: "auto",
+            textAlign: "left",
+            maxWidth: "480px",
+            color: "text.secondary",
+            textShadow: theme.textShadow.nav,
+            lineHeight: 1.6,
+            pointerEvents: "auto",
           }}
         >
-          <DisplayBlock
-            sx={{
-              // WCAG AA: Darkish transparent fill for text contrast against video
-              background: "rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            {t("homePanel.content")}
-          </DisplayBlock>
-        </MotionBox>
+          {t("homePanel.content")}
+        </Typography>
       </Box>
 
       {/* WCAG 2.4.4: Scroll indicator with descriptive aria-label */}
@@ -352,9 +306,9 @@ export default function VideoHero({
         }}
       >
         <ScrollToButton
-          color="rgba(255, 255, 255, 0.85)"
+          color={`${theme.palette.text.secondary}D9`}
           size={52}
-          scrollToId="intro"
+          scrollToId="about-coeqwal"
           ariaLabel="Scroll down to learn more"
         />
       </Box>
