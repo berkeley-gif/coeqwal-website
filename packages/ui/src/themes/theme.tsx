@@ -373,7 +373,7 @@ const palette = {
   waterThemes: {
     baseline: { background: "#ffd87e", text: "#7a5200" },
     ag_gw: { background: "#d4edda", text: "#2d6a4f" },
-    eco: { background: "#CCE8EE", text: "#186b88" },
+    eco: { background: "#B8D0E8", text: "#1E4F6E" },
     delta: { background: "#D4CAED", text: "#3A2888" },
     cws: { background: "#ffe5cc", text: "#7a3000" },
   },

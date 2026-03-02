@@ -230,7 +230,7 @@ const IntroSection = () => {
           id="about-coeqwal"
           background={theme.palette.brand.water}
           textColor={theme.palette.common.white}
-          minHeight="80vh"
+          minHeight="120vh"
           contentMotionStyle={{ opacity: aboutOpacity }}
           responsiveHeadline={
             <>
