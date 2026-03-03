@@ -438,10 +438,10 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                   : maxValue > 0.1
                     ? 0.1
                     : 0.01
-        sharedYDomain = [
-          0,
-          Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement,
-        ]
+        const absRawMax = Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement
+        // Guard against degenerate [0,0] domain — same as relative mode.
+        // A flat domain causes D3 to place every value at 50% height.
+        sharedYDomain = [0, absRawMax > 0 ? absRawMax : 0.001]
       }
     }
 
