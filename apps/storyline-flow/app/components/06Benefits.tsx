@@ -26,6 +26,7 @@ function SectionBenefits() {
   )
 }
 
+//TODO: fix the chart svg size 
 function CityPictogram() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact
@@ -73,6 +74,7 @@ function CityPictogram() {
   })
 
   const sentenceOpacity = useTransform(scrollYProgress, [0.1, 0.3], [0, 1])
+  const captionOpacity = useTransform(scrollYProgress, [0.1, 0.3], [0, 0.7])
 
   return (
     <Box
@@ -101,9 +103,12 @@ function CityPictogram() {
         />
         <motion.div
           className="paragraph"
-          style={{ opacity: sentenceOpacity, marginTop: "5rem" }}
+          style={{ marginTop: "5rem" }}
         >
-          <Typography>{content?.benefits.p1}</Typography>
+          <motion.div style={{ opacity: sentenceOpacity }}>
+            <Typography>{content?.benefits.p1}</Typography>
+          </motion.div>
+          <motion.div style={{ opacity: captionOpacity }}>
           <Typography variant="caption">
             Data source:{" "}
             <a
@@ -127,7 +132,8 @@ function CityPictogram() {
           </Typography>
           <Typography variant="caption">
             {" Each icon represents 1 million people."}
-          </Typography>
+            </Typography>
+          </motion.div>
         </motion.div>
         <Pictogram
           partialValue={9007878}
@@ -164,6 +170,7 @@ function Agriculture() {
   })
 
   const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
+  const captionOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 0.7])
 
   return (
     <Box
@@ -184,24 +191,28 @@ function Agriculture() {
       >
         <motion.div
           className="paragraph"
-          style={{ opacity: sentenceOpacity, marginBottom: "20%" }}
+          style={{marginBottom: "20%" }}
         >
-          <Typography> {content?.benefits.p2}</Typography>
-          <Typography variant="caption">
-            Data source: Cash receipts by state from{" "}
-            <a
-              href="https://data.ers.usda.gov/reports.aspx?ID=4052#Pf221faeb8bdd40be9b9db688e7036405_19_17iT0R0x5"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
-            >
-              United States Department of Agriculture
-            </a>{" "}
-            in current dollars.
-          </Typography>
-          <Typography variant="caption">
-            {" Each icon represents 1 billion dollars."}
-          </Typography>
+          <motion.div style={{ opacity: sentenceOpacity }}>
+            <Typography> {content?.benefits.p2}</Typography>
+          </motion.div>
+          <motion.div style={{ opacity: captionOpacity }}>
+            <Typography variant="caption">
+              Data source: Cash receipts by state from{" "}
+              <a
+                href="https://data.ers.usda.gov/reports.aspx?ID=4052#Pf221faeb8bdd40be9b9db688e7036405_19_17iT0R0x5"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", textDecoration: "underline" }}
+              >
+                United States Department of Agriculture
+              </a>{" "}
+              in current dollars.
+            </Typography>
+            <Typography variant="caption">
+              {" Each icon represents 1 billion dollars."}
+            </Typography>
+          </motion.div>
         </motion.div>
         <Pictogram
           partialValue={13987139000}
@@ -234,6 +245,7 @@ function Economy() {
   })
 
   const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
+  const captionOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 0.7])
 
   return (
     <Box
@@ -255,9 +267,12 @@ function Economy() {
       >
         <motion.div
           className="paragraph"
-          style={{ opacity: sentenceOpacity, marginBottom: "20%" }}
+          style={{ marginBottom: "20%" }}
         >
-          <Typography>{content?.p3}</Typography>
+          <motion.div style={{ opacity: sentenceOpacity }}>
+            <Typography>{content?.p3}</Typography>
+          </motion.div>
+          <motion.div style={{ opacity: captionOpacity }}>
           <Typography variant="caption">
             Data source: GDP by state from{" "}
             <a
@@ -272,7 +287,8 @@ function Economy() {
           </Typography>
           <Typography variant="caption">
             {" Each icon represents 100 billion dollars."}
-          </Typography>
+            </Typography>
+          </motion.div>
           <Pictogram
             partialValue={327958}
             totalValue={4103124}

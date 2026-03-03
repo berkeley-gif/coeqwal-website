@@ -4,20 +4,17 @@
 }
 
 .pictogram-title {
-  font-size: 1.3rem;
   text-anchor: start;
   dominant-baseline: middle;
 }
 
 .pictogram-label {
-  font-size: 1.5rem;
   font-weight: bold;
   text-anchor: end;
   dominant-baseline: middle;
 }
 
 .pictogram-city-label {
-  font-size: 1.2rem;
   text-anchor: end;
   dominant-baseline: middle;
 }

@@ -101,7 +101,7 @@ function Resolution() {
               className="paragraph"
               style={{ margin: "1rem 0", opacity: firstSentenceOpacity }}
             >
-              <Typography variant="h5">
+              <Typography variant="h4">
                 {content?.transition.subtitle}
               </Typography>
             </motion.div>
@@ -110,7 +110,7 @@ function Resolution() {
                 className="paragraph"
                 style={{ opacity: secondSentenceOpacity }}
               >
-                <Typography variant="h5">
+                <Typography variant="h4">
                   {content?.transition.p11} <br />
                   {content?.transition.p12}
                 </Typography>
@@ -119,10 +119,10 @@ function Resolution() {
                 className="paragraph"
                 style={{ opacity: thirdSentenceOpacity }}
               >
-                <Typography variant="h5" gutterBottom>
+                <Typography variant="h4" gutterBottom>
                   {content?.transition.p2}
                 </Typography>
-                <Typography variant="h5">
+                <Typography variant="h4">
                   <span style={{ fontWeight: "bold" }}>
                     <u>{content?.ending.p11}</u>
                   </span>{" "}
@@ -179,6 +179,7 @@ function Builder() {
     },
   }
 
+  //TODO: probably need to add more padding
   return (
     <>
       <Box height="auto" width="100%" style={{ position: "relative" }}>
@@ -203,10 +204,10 @@ function Builder() {
                 animate="animate"
                 exit="exit"
               >
-                <Typography variant="h3" gutterBottom>
+                <Typography variant="h2" gutterBottom>
                   {content?.subtitle}
                 </Typography>
-                <Typography variant="h3">{content?.caption}</Typography>
+                <Typography variant="h2">{content?.caption}</Typography>
               </motion.div>
             )}
             {currentParagraph == 1 && (
@@ -218,12 +219,12 @@ function Builder() {
                 animate="animate"
                 exit="exit"
               >
-                <Typography variant="h3" gutterBottom>
+                <Typography variant="h2" gutterBottom>
                   {content?.p11}{" "}
                   <span style={{ fontWeight: "bold" }}>{content?.p12}</span>{" "}
                   {content?.p13}
                 </Typography>
-                <Typography variant="h3">
+                <Typography variant="h2">
                   {content?.p14}{" "}
                   <span style={{ fontWeight: "bold" }}>{content?.p15}</span>{" "}
                   {content?.p16}
@@ -239,10 +240,10 @@ function Builder() {
                 animate="animate"
                 exit="exit"
               >
-                <Typography variant="h3" gutterBottom>
+                <Typography variant="h2" gutterBottom>
                   {content?.p2}
                 </Typography>
-                <Typography variant="h3">{content?.p3}</Typography>
+                <Typography variant="h2">{content?.p3}</Typography>
               </motion.div>
             )}
             {currentParagraph == 3 && (
@@ -254,10 +255,10 @@ function Builder() {
                 animate="animate"
                 exit="exit"
               >
-                <Typography variant="h3" gutterBottom>
+                <Typography variant="h2" gutterBottom>
                   {content?.p41}
                 </Typography>
-                <Typography variant="h3">{content?.p42}</Typography>
+                <Typography variant="h2">{content?.p42}</Typography>
               </motion.div>
             )}
           </AnimatePresence>

@@ -1,7 +1,7 @@
 import React, { useRef } from "react"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
-import { Typography } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 
 export interface UnderlineLegendProps {
   /** Colors for each segment of the underline */
@@ -108,7 +108,7 @@ const Legend: React.FC<UnderlineLegendProps> = ({
         {labels.map((label, idx) => {
           const percentage = idx * (100 / (labels.length - 1))
           return (
-            <div
+            <Box
               key={idx}
               style={{
                 position: "absolute",
@@ -117,8 +117,8 @@ const Legend: React.FC<UnderlineLegendProps> = ({
                 textAlign: "center",
               }}
             >
-              <Typography variant="caption">{label}</Typography>
-            </div>
+              <Typography variant="outcomeLabel">{label}</Typography>
+            </Box>
           )
         })}
       </motion.div>

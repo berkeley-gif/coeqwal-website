@@ -10,6 +10,7 @@ import {
 import "./pictogram.css"
 import { OffWhiteColor } from "../helpers/colorPalette"
 import { pictogramConfig } from "../helpers/breakpoints"
+import { useTheme } from "@repo/ui/mui"
 
 interface PictogramProps {
   partialValue: number
@@ -53,7 +54,8 @@ function Pictogram({
   const svgRef = useRef<SVGSVGElement>(null)
   const [displayStatus, setDisplayStatus] = React.useState<
     "visible" | "hidden"
-  >("hidden")
+    >("hidden")
+  const theme = useTheme()
 
   const setup = useMemo(() => {
     const totalOpacity = reversed ? 0.9 : 0.3
@@ -144,6 +146,7 @@ function Pictogram({
         top: config.shift.top,
         visibility: displayStatus,
         opacity: overallOpacity,
+        fontSize: theme.typography.caption.fontSize,
       }}
     >
       <svg ref={svgRef} width="100%" height="100%">
@@ -336,7 +339,6 @@ function IconContainer({
             strokeDasharray="2,2"
           />
           <motion.text
-            fontSize="1rem"
             x={x + (config.iconSize * percentage) / 100 + shift.x}
             y={y - config.iconSize * (rowIdx + 1)}
             dx="-0.5rem"
@@ -365,7 +367,6 @@ function IconContainer({
             strokeDasharray="2,2"
           />
           <motion.text
-            fontSize="1rem"
             x={x + (config.iconSize * percentage) / 100 + shift.x}
             y={y + config.iconSize + shift.y}
             dx={

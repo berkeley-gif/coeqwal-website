@@ -15,24 +15,18 @@
 .x-axis-ticks {
   text-anchor: end;
   dominant-baseline: middle;
-  font-size: 1.2rem;
 }
 
 .y-axis-ticks {
   text-anchor: end;
   dominant-baseline: middle;
-  font-size: 1rem;
 }
 
 .tooltip {
   position: absolute;
-  background: rgba(2, 18, 36, 0.9);
-  color: #f2f0ef;
   padding: 8px;
-  border-radius: 4px;
   pointer-events: none;
   white-space: nowrap;
-  font-size: 1rem;
   z-index: 1000;
 }
 

@@ -104,7 +104,7 @@ function Precipitation() {
           {content?.title3}
         </Typography>
       </motion.div>
-      <Stack spacing={12} direction="column" component="section" role="region">
+      <Stack spacing={12} direction="column" component="section" role="region" mt={2}>
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -213,7 +213,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
         </motion.div>
       </Stack>
       <Stack
-        spacing={1}
+        spacing={3}
         direction="column"
         component="section"
         role="region"
@@ -250,10 +250,10 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
           className="paragraph"
           style={{ opacity: exampleParagraphOpacity }}
         >
-          <Typography variant="body1">
+          <Typography variant="h6">
             Click on{" "}
             <VisibilityIcon
-              sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+              sx={{ verticalAlign: "middle" }}
             />{" "}
             and circles to explore how California is affected by droughts and
             floods.
@@ -315,6 +315,8 @@ function Snowpack() {
     [0, 1],
   )
   const titleOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 1])
+  const captionOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 0.7])
+
 
   return (
     <Box
@@ -362,10 +364,10 @@ function Snowpack() {
         className="paragraph"
         style={{ height: "fit-content", width: "100%" }}
       >
-        <MotionTypography variant="h4" style={{ opacity: titleOpacity }}>
+        <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
           {"From Snow to Snowmelt \u2014 an Illustration"}
         </MotionTypography>
-        <MotionTypography variant="caption">
+        <MotionTypography variant="caption" style={{ opacity: captionOpacity }}>
           GIS data source: Snowpack spatial accumulation from{" "}
           <a
             href="https://www.nohrsc.noaa.gov/snowfall/"
@@ -423,9 +425,20 @@ function Snowpack() {
               }),
             )}
             step={1}
+            sx={{
+              "& .MuiSlider-thumb": {
+                backgroundColor: "common.white",
+              },
+              "& .MuiSlider-markLabel": {
+                color: "common.white",
+              },
+              "& .MuiSlider-mark": {
+                backgroundColor: "common.white",
+              },
+            }}
           />
           <MotionTypography
-            variant="h6"
+            variant="caption"
             gutterBottom
             variants={springUpTextVariants}
             initial="hidden"
@@ -436,6 +449,17 @@ function Snowpack() {
             Months in a Water Year
           </MotionTypography>
         </div>
+        <MotionTypography
+            variant="h6"
+            gutterBottom
+            variants={springUpTextVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ amount: 0.1, once: true }}
+            custom={0}
+          >
+            Slide through the months to see how snow accumulates and melts throughout the year. 
+          </MotionTypography>
       </Box>
     </Box>
   )
