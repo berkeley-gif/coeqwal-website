@@ -13,6 +13,7 @@ import {
   SetMealIcon,
   ScienceIcon,
   WaterDropIcon,
+  WavesIcon,
   type Theme,
 } from "@repo/ui/mui"
 
@@ -62,6 +63,7 @@ export const getOutcomeCategoryColor = (
   const colorMap: Record<string, string> = {
     "community-water": theme.palette.outcomes.communityWater,
     "agricultural-water": theme.palette.outcomes.agriculturalWater,
+    "env-flow-statistics": theme.palette.outcomes.environmentalWater,
     "environmental-water": theme.palette.outcomes.environmentalWater,
     "delta-salinity": theme.palette.outcomes.deltaSalinity,
     "reservoir-storage": theme.palette.outcomes.reservoirStorage,
@@ -83,8 +85,13 @@ export const outcomeCategories = [
     icon: <AgricultureIcon fontSize="small" />,
   },
   {
+    id: "env-flow-statistics",
+    name: "Environmental river flows",
+    icon: <WavesIcon fontSize="small" />,
+  },
+  {
     id: "environmental-water",
-    name: "Environmental water",
+    name: "Environmental water — refuges",
     icon: <SetMealIcon fontSize="small" />,
   },
   {

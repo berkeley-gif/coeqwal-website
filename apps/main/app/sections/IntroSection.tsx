@@ -275,6 +275,14 @@ const IntroSection = () => {
         borderBottom={RULE}
       />
 
+      {/* Spacer between themes panel and site overview */}
+      <Box
+        sx={{
+          height: theme.space.panel.padding,
+          backgroundColor: theme.palette.brand.panelLight,
+        }}
+      />
+
       {/* On this site, you can */}
       <Box
         component="section"
