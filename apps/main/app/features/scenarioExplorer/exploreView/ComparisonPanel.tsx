@@ -24,11 +24,16 @@ import {
 import {
   VerticalParallelLinePlotPeak,
   type VerticalParallelLineData,
+  type AxisLayout,
 } from "@repo/viz"
+import { InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
+import { formatOutcomeLabel } from "../../scenarios/components/shared"
+import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
+import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
 export default function ComparisonPanel() {
   const theme = useTheme()
@@ -54,15 +59,34 @@ export default function ComparisonPanel() {
   const [hoveredScenario, setHoveredScenario] =
     useState<VerticalParallelLineData | null>(null)
 
+  // Axis layout positions reported by the chart for HTML label positioning
+  const [axisLayout, setAxisLayout] = useState<AxisLayout[]>([])
+
+  // Tooltip state for outcome info buttons
+  const {
+    openTooltip: activeInfoTooltip,
+    anchor: tooltipAnchor,
+    handleToggleWithAnchor,
+    handleClose: handleTooltipClose,
+    forceClose: handleTooltipForceClose,
+  } = useTierTooltipState()
+
   const {
     data: comparisonData,
     axes,
+    outcomeCodes,
     lineColors,
     scenarios,
     baselineScenario,
     isLoading,
     hasData,
   } = useComparisonData()
+
+  // Map display names → outcome codes for tooltip lookups
+  const axisCodeMap = useMemo(
+    () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
+    [axes, outcomeCodes],
+  )
 
   // Build scenarioId, gives color map for the sidebar's chart legend swatches
   const scenarioColors = useMemo(
@@ -193,11 +217,127 @@ export default function ComparisonPanel() {
 
   const chartElement = (
     <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+      {/* ── HTML axis labels above chart (desktop) ──────────────────── */}
+      {isDesktop && axisLayout.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: `${axisLayout[0]?.y ?? 0}px`,
+            pointerEvents: "auto",
+            zIndex: 2,
+          }}
+        >
+          {axisLayout.map((layout) => {
+            const outcomeCode = axisCodeMap.get(layout.axis)
+            return (
+              <Box
+                key={layout.axis}
+                sx={{
+                  position: "absolute",
+                  left: `${layout.x}px`,
+                  bottom: 4,
+                  transform: "translateX(-50%)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                <Typography
+                  variant="outcomeLabel"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    textAlign: "center",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {formatOutcomeLabel(layout.axis)}
+                </Typography>
+                {outcomeCode && (
+                  <InfoIconButton
+                    isActive={activeInfoTooltip === outcomeCode}
+                    onClick={(e) =>
+                      handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                    }
+                    title={`Details for ${layout.axis}`}
+                  />
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* ── HTML axis labels left of chart (mobile) ─────────────────── */}
+      {!isDesktop && axisLayout.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: `${axisLayout[0]?.x ?? 0}px`,
+            pointerEvents: "auto",
+            zIndex: 2,
+          }}
+        >
+          {axisLayout.map((layout) => {
+            const outcomeCode = axisCodeMap.get(layout.axis)
+            return (
+              <Box
+                key={layout.axis}
+                sx={{
+                  position: "absolute",
+                  top: `${layout.y}px`,
+                  right: 8,
+                  transform: "translateY(-50%)",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                {outcomeCode && (
+                  <InfoIconButton
+                    isActive={activeInfoTooltip === outcomeCode}
+                    onClick={(e) =>
+                      handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                    }
+                    title={`Details for ${layout.axis}`}
+                  />
+                )}
+                <Typography
+                  variant="outcomeLabel"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    textAlign: "right",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {formatOutcomeLabel(layout.axis)}
+                </Typography>
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* ── The SVG chart ───────────────────────────────────────────── */}
       <VerticalParallelLinePlotPeak
         data={chartData}
         axes={axes}
         orientation={isDesktop ? "horizontal" : "vertical"}
         responsive={true}
+        hideAxisLabels={true}
+        onAxesLayout={setAxisLayout}
+        margin={
+          isDesktop
+            ? { top: 80, right: 20, bottom: 20, left: 20 }
+            : undefined
+        }
         showBaseline={highlightBaseline}
         baselineData={baselineDataForChart}
         overlayTiers={overlayTiers}
@@ -211,6 +351,8 @@ export default function ComparisonPanel() {
         onLineHover={setHoveredScenario}
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
       />
+
+      {/* ── Hovered scenario name tooltip ────────────────────────────── */}
       {hoveredScenario && (
         <Box
           sx={{
@@ -348,6 +490,14 @@ export default function ComparisonPanel() {
           </Box>
         </Box>
       </Box>
+
+      {/* ── Outcome info tooltip portal ─────────────────────────────── */}
+      <TierTooltipPortal
+        outcomeCode={activeInfoTooltip}
+        anchorEl={tooltipAnchor}
+        onClose={handleTooltipClose}
+        onForceClose={handleTooltipForceClose}
+      />
     </Box>
   )
 }
