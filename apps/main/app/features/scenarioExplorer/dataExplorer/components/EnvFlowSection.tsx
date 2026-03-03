@@ -87,28 +87,51 @@ function FlowBandsLegend() {
     <>
       <Box
         component="span"
-        sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.range, borderRadius: "2px" }}
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
       />
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
         Min–max range
       </Box>
       <Box
         component="span"
-        sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.outer, borderRadius: "2px", ml: 0.75 }}
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
       />
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
         10–90th percentile
       </Box>
       <Box
         component="span"
-        sx={{ width: 14, height: 14, backgroundColor: DELIVERY_BAND_COLORS.inner, borderRadius: "2px", ml: 0.75 }}
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
       />
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
         30–70th percentile
       </Box>
       <Box
         component="span"
-        sx={{ width: 14, height: 3, backgroundColor: DELIVERY_BAND_COLORS.median, borderRadius: "1px", ml: 0.75 }}
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: DELIVERY_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
       />
       <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
         Median
@@ -144,27 +167,27 @@ function monthlyRowsToPercentiles(
       // Skip if median is null/undefined — columns absent (old API) or no data
       if (row.flow_q50_taf == null) continue
       monthly[String(row.water_month)] = {
-        q0:   row.flow_q0_taf   ?? 0,
-        q10:  row.flow_q10_taf  ?? 0,
-        q30:  row.flow_q30_taf  ?? 0,
-        q50:  row.flow_q50_taf,
-        q70:  row.flow_q70_taf  ?? 0,
-        q90:  row.flow_q90_taf  ?? 0,
+        q0: row.flow_q0_taf ?? 0,
+        q10: row.flow_q10_taf ?? 0,
+        q30: row.flow_q30_taf ?? 0,
+        q50: row.flow_q50_taf,
+        q70: row.flow_q70_taf ?? 0,
+        q90: row.flow_q90_taf ?? 0,
         q100: row.flow_q100_taf ?? 0,
-        mean: row.flow_avg_taf  ?? 0,
+        mean: row.flow_avg_taf ?? 0,
       }
     } else {
       // Skip if median is null/undefined — columns absent (old API) or no data
       if (row.flow_q50_cfs == null) continue
       monthly[String(row.water_month)] = {
-        q0:   row.flow_q0_cfs   ?? 0,
-        q10:  row.flow_q10_cfs  ?? 0,
-        q30:  row.flow_q30_cfs  ?? 0,
-        q50:  row.flow_q50_cfs,
-        q70:  row.flow_q70_cfs  ?? 0,
-        q90:  row.flow_q90_cfs  ?? 0,
+        q0: row.flow_q0_cfs ?? 0,
+        q10: row.flow_q10_cfs ?? 0,
+        q30: row.flow_q30_cfs ?? 0,
+        q50: row.flow_q50_cfs,
+        q70: row.flow_q70_cfs ?? 0,
+        q90: row.flow_q90_cfs ?? 0,
         q100: row.flow_q100_cfs ?? 0,
-        mean: row.flow_avg_cfs  ?? 0,
+        mean: row.flow_avg_cfs ?? 0,
       }
     }
   }
@@ -182,7 +205,9 @@ function useMultiScenarioChannelsMonthly(scenarios: string[], unit: FlowUnit) {
   })
 
   const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter((_, i) => results[i]?.isLoading ?? false)
+  const loadingScenarios = scenarios.filter(
+    (_, i) => results[i]?.isLoading ?? false,
+  )
 
   const matrixData: MatrixDataType = {}
   results.forEach((result, index) => {
@@ -191,7 +216,8 @@ function useMultiScenarioChannelsMonthly(scenarios: string[], unit: FlowUnit) {
 
     const byChannel = new Map<string, ChannelMonthlyStats[]>()
     for (const row of result.rows) {
-      if (!byChannel.has(row.network_arc_id)) byChannel.set(row.network_arc_id, [])
+      if (!byChannel.has(row.network_arc_id))
+        byChannel.set(row.network_arc_id, [])
       byChannel.get(row.network_arc_id)!.push(row)
     }
     for (const [arcId, arcRows] of byChannel.entries()) {
@@ -226,7 +252,8 @@ function useMultiScenarioChannelsPeriod(scenarios: string[]) {
     const scenarioId = scenarios[index]
     if (!scenarioId || !result.summaries.length) return
     for (const summary of result.summaries as ChannelPeriodSummary[]) {
-      if (!cellStats[summary.network_arc_id]) cellStats[summary.network_arc_id] = {}
+      if (!cellStats[summary.network_arc_id])
+        cellStats[summary.network_arc_id] = {}
       const stats = cellStats[summary.network_arc_id]!
       stats[scenarioId] = {
         annualAvgTaf: summary.avg_pct_unimpaired ?? undefined,
@@ -248,21 +275,37 @@ interface SectionHeaderProps {
   description?: React.ReactNode
 }
 
-function SectionHeader({ title, titleAdornment, description }: SectionHeaderProps) {
+function SectionHeader({
+  title,
+  titleAdornment,
+  description,
+}: SectionHeaderProps) {
   const theme = useTheme()
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
+      >
         <Typography
           variant="overline"
-          sx={{ textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}
+          sx={{
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            whiteSpace: "nowrap",
+          }}
         >
           {title}
         </Typography>
         {titleAdornment}
       </Box>
       {description && (
-        <Box sx={{ color: theme.palette.grey[600], mt: 0.5, ...theme.typography.dashboard }}>
+        <Box
+          sx={{
+            color: theme.palette.grey[600],
+            mt: 0.5,
+            ...theme.typography.dashboard,
+          }}
+        >
           {description}
         </Box>
       )}
@@ -279,11 +322,16 @@ interface EnvFlowSectionProps {
   scenarioNames: Record<string, string>
 }
 
-export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSectionProps) {
+export default function EnvFlowSection({
+  scenarios,
+  scenarioNames,
+}: EnvFlowSectionProps) {
   const theme = useTheme()
 
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("streams")
-  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">("absolute")
+  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">(
+    "absolute",
+  )
   const [flowUnit, setFlowUnit] = useState<FlowUnit>("taf")
 
   // Fetch all 59 channel entities (static, cached 24 h)
@@ -291,12 +339,16 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
 
   // Apply channel filter
   const filteredChannels = useMemo(() => {
-    if (channelFilter === "streams") return channels.filter((c) => c.channel_class === "stream")
+    if (channelFilter === "streams")
+      return channels.filter((c) => c.channel_class === "stream")
     if (channelFilter === "mif_only") return channels.filter((c) => c.has_mif)
     return channels
   }, [channels, channelFilter])
 
-  const filteredArcIds = new Set(filteredChannels.map((c) => c.network_arc_id))
+  const filteredArcIds = useMemo(
+    () => new Set(filteredChannels.map((c) => c.network_arc_id)),
+    [filteredChannels],
+  )
 
   // Build ReservoirData[] for PercentileMatrix rows
   const reservoirData: ReservoirData[] = useMemo(
@@ -311,7 +363,9 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
           .join(" · "),
         labelAttributes: [
           { key: "CLASS", value: channelClassLabel(ch.channel_class) },
-          ...(ch.watershed_name ? [{ key: "WATERSHED", value: ch.watershed_name }] : []),
+          ...(ch.watershed_name
+            ? [{ key: "WATERSHED", value: ch.watershed_name }]
+            : []),
         ],
       })),
     [filteredChannels],
@@ -416,12 +470,17 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
             title={`Monthly river flows — ${flowUnit === "taf" ? "TAF / month" : "CFS"}`}
             description={
               <>
-                Percentile distribution of monthly flow volume across all simulated
-                years, per CalSim channel reach.
-                Toggle between TAF/month and CFS using the control above.
+                Percentile distribution of monthly flow volume across all
+                simulated years, per CalSim channel reach. Toggle between
+                TAF/month and CFS using the control above.
                 <Box
                   component="span"
-                  sx={{ display: "flex", flexDirection: "column", gap: 0.5, mt: 1.5 }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 0.5,
+                    mt: 1.5,
+                  }}
                 >
                   <Box
                     component="span"
@@ -434,7 +493,11 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
                   >
                     <Box
                       component="span"
-                      sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}
+                      sx={{
+                        color: "grey.500",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      }}
                     >
                       Overlapping percentile bands:
                     </Box>
@@ -442,14 +505,19 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
                   </Box>
                   <Box
                     component="span"
-                    sx={{ color: "grey.400", fontSize: "0.8rem", fontStyle: "italic" }}
+                    sx={{
+                      color: "grey.400",
+                      fontSize: "0.8rem",
+                      fontStyle: "italic",
+                    }}
                   >
-                    Upper chart region = wetter years (higher flow) · Lower region =
-                    drier years (lower flow). Wet years = P10–P30; dry years = P70–P90.{" "}
-                    <strong>Avg %</strong> = mean % of natural unimpaired flow over the
-                    full simulation period.{" "}
-                    <strong>MIF met</strong> = % of months where flow met the binding
-                    minimum instream flow requirement (priority reaches only).
+                    Upper chart region = wetter years (higher flow) · Lower
+                    region = drier years (lower flow). Wet years = P10–P30; dry
+                    years = P70–P90. <strong>Avg %</strong> = mean % of natural
+                    unimpaired flow over the full simulation period.{" "}
+                    <strong>MIF met</strong> = % of months where flow met the
+                    binding minimum instream flow requirement (priority reaches
+                    only).
                   </Box>
                 </Box>
               </>

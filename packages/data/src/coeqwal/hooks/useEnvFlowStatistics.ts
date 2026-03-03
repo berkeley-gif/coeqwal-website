@@ -39,11 +39,16 @@ import type {
  * @param watershed - Optional filter by watershed short_code (e.g. 'SAC_LOWER')
  */
 export function useChannelsList(channelClass?: string, watershed?: string) {
-  const cacheKey = channelClass || watershed
-    ? `/api/statistics/channels?${[channelClass && `channel_class=${channelClass}`, watershed && `watershed=${watershed}`].filter(Boolean).join("&")}`
-    : CACHE_KEYS.CHANNELS_LIST
+  const cacheKey =
+    channelClass || watershed
+      ? `/api/statistics/channels?${[channelClass && `channel_class=${channelClass}`, watershed && `watershed=${watershed}`].filter(Boolean).join("&")}`
+      : CACHE_KEYS.CHANNELS_LIST
 
-  const { data, error: swrError, isLoading } = useSWR<ChannelsListResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<ChannelsListResponse>(
     cacheKey,
     () => fetchChannelsList(channelClass, watershed),
     { revalidateOnFocus: false },
@@ -68,7 +73,11 @@ export function useChannelsList(channelClass?: string, watershed?: string) {
  * Each season includes calendar_months and wy_months for display and grouping.
  */
 export function useEnvFlowSeasons() {
-  const { data, error: swrError, isLoading } = useSWR<EnvFlowSeasonsResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<EnvFlowSeasonsResponse>(
     CACHE_KEYS.ENV_FLOW_SEASONS,
     () => fetchEnvFlowSeasons(),
     { revalidateOnFocus: false },
@@ -100,7 +109,11 @@ export function useChannelsMonthly(
   scenarioId: string | null,
   channelId?: string,
 ) {
-  const { data, error: swrError, isLoading } = useSWR<ChannelsMonthlyResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<ChannelsMonthlyResponse>(
     scenarioId ? CACHE_KEYS.channelsMonthly(scenarioId, channelId) : null,
     () => fetchChannelsMonthly(scenarioId!, channelId),
     { revalidateOnFocus: false },
@@ -134,7 +147,11 @@ export function useChannelsSeasonal(
   scenarioId: string | null,
   channelId?: string,
 ) {
-  const { data, error: swrError, isLoading } = useSWR<ChannelsSeasonalResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<ChannelsSeasonalResponse>(
     scenarioId ? CACHE_KEYS.channelsSeasonal(scenarioId, channelId) : null,
     () => fetchChannelsSeasonal(scenarioId!, channelId),
     { revalidateOnFocus: false },
@@ -168,7 +185,11 @@ export function useChannelsPeriodSummary(
   scenarioId: string | null,
   channelId?: string,
 ) {
-  const { data, error: swrError, isLoading } = useSWR<ChannelsPeriodSummaryResponse>(
+  const {
+    data,
+    error: swrError,
+    isLoading,
+  } = useSWR<ChannelsPeriodSummaryResponse>(
     scenarioId ? CACHE_KEYS.channelsPeriodSummary(scenarioId, channelId) : null,
     () => fetchChannelsPeriodSummary(scenarioId!, channelId),
     { revalidateOnFocus: false },

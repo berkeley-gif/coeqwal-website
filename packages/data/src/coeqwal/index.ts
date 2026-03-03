@@ -108,6 +108,17 @@ export type {
   RefugeShortageMonthlyResponse,
   RefugePeriodSummary,
   RefugePeriodResponse,
+  // Environmental flow types
+  ChannelEntity,
+  ChannelsListResponse,
+  EnvFlowSeason,
+  EnvFlowSeasonsResponse,
+  ChannelMonthlyStats,
+  ChannelsMonthlyResponse,
+  ChannelSeasonalStats,
+  ChannelsSeasonalResponse,
+  ChannelPeriodSummary,
+  ChannelsPeriodSummaryResponse,
 } from "./types"
 
 // API constants
@@ -154,6 +165,12 @@ export {
   fetchReservoirPeriodSummary,
   // Batch statistics fetcher
   fetchBatchStatistics,
+  // Environmental flow fetchers
+  fetchChannelsList,
+  fetchEnvFlowSeasons,
+  fetchChannelsMonthly,
+  fetchChannelsSeasonal,
+  fetchChannelsPeriodSummary,
 } from "./fetchers"
 
 // Re-export hooks for convenience

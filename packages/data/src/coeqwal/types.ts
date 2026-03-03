@@ -1213,7 +1213,12 @@ export interface ChannelsListResponse {
  */
 export interface EnvFlowSeason {
   season_id: number
-  short_code: "wet_peak" | "wet_base" | "spring_recession" | "dry" | "fall_pulse"
+  short_code:
+    | "wet_peak"
+    | "wet_base"
+    | "spring_recession"
+    | "dry"
+    | "fall_pulse"
   name: string
   description: string
   calendar_months: string
@@ -1332,7 +1337,12 @@ export interface ChannelsMonthlyResponse {
 export interface ChannelSeasonalStats {
   network_arc_id: string
   season_id: number
-  season_short_code: "wet_peak" | "wet_base" | "spring_recession" | "dry" | "fall_pulse"
+  season_short_code:
+    | "wet_peak"
+    | "wet_base"
+    | "spring_recession"
+    | "dry"
+    | "fall_pulse"
   season_name: string
   season_sort_order: number
   // Raw flow volume (CFS)

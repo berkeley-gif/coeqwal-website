@@ -1012,10 +1012,9 @@ export async function fetchChannelsList(
  * @returns wet_peak, wet_base, spring_recession, dry, fall_pulse
  */
 export async function fetchEnvFlowSeasons(): Promise<EnvFlowSeasonsResponse> {
-  return apiFetcher<EnvFlowSeasonsResponse>(
-    ENDPOINTS.ENV_FLOW_SEASONS,
-    { baseUrl: DEFAULT_API_BASE },
-  )
+  return apiFetcher<EnvFlowSeasonsResponse>(ENDPOINTS.ENV_FLOW_SEASONS, {
+    baseUrl: DEFAULT_API_BASE,
+  })
 }
 
 /**
