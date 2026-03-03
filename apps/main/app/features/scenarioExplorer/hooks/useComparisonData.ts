@@ -119,6 +119,7 @@ export function useComparisonData() {
   return {
     data: parallelPlotData,
     axes,
+    outcomeCodes: OUTCOME_CODE_ORDER,
     lineColors,
     scenarios,
     baselineScenario,

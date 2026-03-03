@@ -145,6 +145,26 @@ export interface PercentileMatrixProps {
    * scales to the actual data range instead of being locked at ≥100 TAF.
    */
   minYMaxTaf?: number
+  /**
+   * Optional suffix appended to Y-axis tick labels in volume mode.
+   * E.g. "%" for % unimpaired charts so ticks read "50%" not "50".
+   * Has no effect when displayMode="percentage" (which always appends "%").
+   */
+  yAxisSuffix?: string
+  /**
+   * Y value to draw a bold reference gridline at (in addition to the default
+   * highlight at val===50 for percentage mode).  Pass e.g. 100 for the
+   * "= natural flow" reference on % unimpaired charts.
+   */
+  yAxisReferenceValue?: number
+  /**
+   * Hard ceiling for the Y-axis maximum in volume+absolute mode.
+   * When set, the computed domain is capped at this value regardless of how
+   * high the data goes.  Data above the cap is clipped by the chart boundary.
+   * Use e.g. 120 for % unimpaired charts so the axis stays at 0–120%
+   * even when a few regulated channels exceed 100%.
+   */
+  yAxisMax?: number
 }
 
 // Water month labels (short - for axis)
@@ -231,6 +251,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   breakdownComponents,
   loadingScenarios,
   minYMaxTaf = 100,
+  yAxisSuffix,
+  yAxisReferenceValue,
+  yAxisMax,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -442,7 +465,9 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement
         // Guard against degenerate [0,0] domain — same as relative mode.
         // A flat domain causes D3 to place every value at 50% height.
-        sharedYDomain = [0, absRawMax > 0 ? absRawMax : 0.001]
+        const absComputedMax = absRawMax > 0 ? absRawMax : 0.001
+        // If caller supplied a hard ceiling (e.g. 120 for % unimpaired), honour it.
+        sharedYDomain = [0, yAxisMax !== undefined ? yAxisMax : absComputedMax]
       }
     }
 
@@ -454,10 +479,13 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       return sharedYDomain
     }
 
-    // Helper to get Y scale for a reservoir
+    // Helper to get Y scale for a reservoir.
+    // .clamp(true) ensures values outside the domain map to the range boundary
+    // rather than overflowing the chart area (important when yAxisMax caps the
+    // domain below the actual data maximum, e.g. % unimpaired charts).
     const getYScale = (reservoirId: string) => {
       const domain = getYDomain(reservoirId)
-      return d3.scaleLinear().domain(domain).range([chartHeight, 0])
+      return d3.scaleLinear().domain(domain).range([chartHeight, 0]).clamp(true)
     }
 
     // X scale (shared across all cells)
@@ -846,17 +874,20 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           reservoirYScale(val)
 
         // Gridline (spans all scenario columns for this row)
+        const isRefLine =
+          (displayMode === "percentage" && val === 50) ||
+          (yAxisReferenceValue !== undefined && val === yAxisReferenceValue)
         g.append("line")
           .attr("x1", gridStartX)
           .attr("x2", gridEndX)
           .attr("y1", y)
           .attr("y2", y)
-          .attr("stroke", val === 50 ? COLORS.gridStrong : COLORS.grid)
-          .attr("stroke-width", val === 50 ? 1 : 0.5)
+          .attr("stroke", isRefLine ? COLORS.gridStrong : COLORS.grid)
+          .attr("stroke-width", isRefLine ? 1 : 0.5)
 
         // Y-axis label — use enough decimal places for the domain range
         const domainMax = reservoirYDomain[1]
-        const labelText =
+        const rawLabel =
           displayMode === "percentage"
             ? `${val}%`
             : domainMax < 0.1
@@ -866,6 +897,10 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
                 : domainMax < 10
                   ? val.toFixed(1)
                   : `${Math.round(val).toLocaleString()}`
+        const labelText =
+          yAxisSuffix && displayMode !== "percentage"
+            ? `${rawLabel}${yAxisSuffix}`
+            : rawLabel
         g.append("text")
           .attr("x", gridStartX - 4)
           .attr("y", y)
