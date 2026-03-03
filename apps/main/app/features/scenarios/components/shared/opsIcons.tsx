@@ -543,6 +543,36 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     description:
       "Increase Shasta Reservoir carryover storage target by 20%, with CVP Settlement Contractor allocations reduced as needed.",
   },
+
+  // ── New circle icons — CWS allocation priorities ─────────────────────────
+
+  cws_hhs: {
+    id: "cws_hhs",
+    type: "circle",
+    lines: ["M&I", "HHS"],
+    color: OPS_BLUE,
+    label: "M&I HHS priority",
+    description:
+      "CVP and SWP surface supplies prioritized for M&I contractors at health and human safety delivery levels.",
+  },
+  cws_func: {
+    id: "cws_func",
+    type: "circle",
+    lines: ["M&I", "Func."],
+    color: OPS_BLUE,
+    label: "M&I functional priority",
+    description:
+      "CVP and SWP surface supplies prioritized for M&I contractors at functional delivery levels (70% of contract).",
+  },
+  cws_full: {
+    id: "cws_full",
+    type: "circle",
+    lines: ["M&I", "Full"],
+    color: OPS_BLUE,
+    label: "M&I full contract priority",
+    description:
+      "CVP and SWP surface supplies prioritized for M&I contractors at full contract entitlement levels.",
+  },
 }
 
 // ============================================================================
@@ -616,7 +646,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
   s0032: [
     "theme_eco",
     "functional_flows",
-    "limit_cv_pumping",
+    "reduced_cv_ag",
     "tucp",
     "land_use_2020",
     "biops_2019",
@@ -624,21 +654,30 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
   s0033: [
     "theme_eco",
     "functional_flows_salmon",
-    "limit_cv_pumping",
+    "reduced_cv_ag",
     "tucp",
     "land_use_2020",
     "biops_2019",
   ],
-  s0046: ["theme_eco", "no_delta_flow", "tucp", "land_use_2020", "biops_2019"],
+  s0046: [
+    "theme_eco",
+    "no_delta_flow",
+    "tucp",
+    "land_use_2020",
+    "biops_2019_mod",
+  ],
   s0065: [
     "theme_delta",
     "dwr_adapt_2025",
     "tunnel",
     "tucp",
     "land_use_2020",
-    "biops_2019",
+    "biops_2019_mod",
   ],
-  s0030: ["theme_rivers", "no_flow_req", "tucp", "land_use_2020", "biops_2019"],
+  s0030: ["theme_eco", "no_flow_req", "tucp", "land_use_2020", "biops_2019"],
+  s0035: ["theme_cws", "cws_hhs", "tucp", "land_use_2020", "biops_2019"],
+  s0036: ["theme_cws", "cws_func", "tucp", "land_use_2020", "biops_2019"],
+  s0037: ["theme_cws", "cws_full", "tucp", "land_use_2020", "biops_2019"],
   s0039: [
     "theme_delta",
     "usbr_alt3",
