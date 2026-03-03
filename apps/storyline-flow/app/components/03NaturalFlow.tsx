@@ -319,6 +319,11 @@ function Wetland() {
     [0.4, 0.6],
     [0, 1],
   )
+  const captionOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 0.7],
+  )
 
   useEffect(() => {
     const unsubscribe = secondParagraphOpacity.on("change", (value) => {
@@ -367,23 +372,26 @@ function Wetland() {
           </Typography>
           <Typography variant="body1">{content?.transition.p14}</Typography>
         </motion.div>
-        <motion.div
+        <div
           className="paragraph"
-          style={{ opacity: thirdParagraphOpacity }}
         >
-          <Typography variant="body1">{content?.transition.p2}</Typography>
-          <Typography variant="caption">
-            GIS data source:{" "}
-            <a
-              href="https://www.sfei.org/projects/sacramento-san-joaquin-delta-historical-ecology-study#toc-associated-data"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
-            >
-              San Francisco Estuary Institute
-            </a>
-          </Typography>
-        </motion.div>
+          <motion.div style={{opacity: thirdParagraphOpacity}}>
+            <Typography variant="body1">{content?.transition.p2}</Typography>
+          </motion.div>
+          <motion.div style={{opacity: captionOpacity}}>
+            <Typography variant="caption">
+              GIS data source:{" "}
+              <a
+                href="https://www.sfei.org/projects/sacramento-san-joaquin-delta-historical-ecology-study#toc-associated-data"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", textDecoration: "underline" }}
+              >
+                San Francisco Estuary Institute
+              </a>
+            </Typography>
+          </motion.div>
+        </div>
       </Stack>
     </Box>
   )
@@ -509,6 +517,11 @@ function Delta() {
     [0.1, 0.3, 0.7, 0.99],
     [0, 1, 1, 0],
   )
+  const captionOpacity = useTransform(
+    scrollYProgress,
+    [0.1, 0.3, 0.7, 0.99],
+    [0, 0.7, 0.7, 0],
+  )
   const secondParagraphOpacity = useTransform(
     scrollYProgress,
     [0.25, 0.5, 0.7, 0.99],
@@ -604,7 +617,7 @@ function Delta() {
             </MotionTypography>
             <MotionTypography
               variant="caption"
-              style={{ opacity: firstParagraphOpacity }}
+              style={{ opacity: captionOpacity }}
             >
               GIS data source:{" "}
               <a

@@ -106,9 +106,9 @@ function Transformation() {
       height="130vh"
       sx={{ justifyContent: "space-around" }}
     >
-      <Stack spacing={12} direction="column" component="section" role="region">
+      <Stack spacing={6} direction="column" component="section" role="region">
         <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
-          <Typography variant="h3" gutterBottom>
+          <Typography variant="h1" gutterBottom>
             {content?.subtitle1}
             <br />
             {content?.subtitle2}

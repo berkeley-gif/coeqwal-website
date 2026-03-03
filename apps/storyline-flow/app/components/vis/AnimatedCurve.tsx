@@ -13,6 +13,7 @@ import {
   OffWhiteColor,
   SnowWaterColor,
 } from "../helpers/colorPalette"
+import { Box, useTheme } from "@repo/ui/mui"
 
 const startMonth = 9 // October
 const months = Array.from({ length: 12 }, (_, i) =>
@@ -193,12 +194,13 @@ export default function AnimatedCurve({
   const freshWaterControl = useTransform(scrollYProgress, [0.7, 0.75], [0, 1])
 
   return (
-    <div
+    <Box
       ref={containerRef}
-      style={{
+      sx={{
         width: "100%",
         height: `${responsiveHeight[breakpoint] || 350}px`,
         paddingTop: "15px",
+        typography: "caption",
       }}
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
@@ -215,7 +217,6 @@ export default function AnimatedCurve({
           y={yScale(0.8)}
           fill={SnowWaterColor}
           style={{ opacity: snowPathControl }}
-          fontSize="1rem"
           textAnchor="middle"
         >
           Snow-forming precipitation
@@ -226,7 +227,6 @@ export default function AnimatedCurve({
           y={yScale(0.8)}
           fill={FreshWaterColor}
           style={{ opacity: freshWaterControl }}
-          fontSize="1rem"
           textAnchor="middle"
         >
           Snowmelt
@@ -255,7 +255,7 @@ export default function AnimatedCurve({
           snowData={snowData}
         />
       </svg>
-    </div>
+    </Box>
   )
 }
 
@@ -278,7 +278,8 @@ function Annotation({
   monthIdx: number
   scrollYProgress: MotionValue<number>
   snowData: { x: number; y: number }[]
-}) {
+  }) {
+  const theme = useTheme()
   const width = xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)
   const pathRef = useRef<SVGPathElement | null>(null)
 
@@ -304,7 +305,12 @@ function Annotation({
   const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.5, 0.6], [0, 1])
 
   return (
-    <g id="annotation" transform={`translate(${0}, ${0})`}>
+    <g id="annotation"
+      transform={`translate(${0}, ${0})`}
+      style={{
+        fontSize: theme.typography.caption.fontSize,
+      }}
+    >
       <path ref={pathRef} d={lineGen(snowData)!} fill="none" stroke="none" />
       <motion.rect
         x={xScale(0)}
@@ -319,7 +325,6 @@ function Annotation({
         y={0}
         dy="1rem"
         fill={OffWhiteColor}
-        fontSize="1rem"
         fontWeight="bold"
         textAnchor="middle"
         style={{ opacity: textOpacity }}
@@ -388,7 +393,6 @@ function YAxis({
             fill={OffWhiteColor}
             dx="-1em"
             dy="0.25em"
-            fontSize="0.9rem"
             textAnchor="end"
           >
             {labels[i]}
@@ -412,8 +416,7 @@ function YAxis({
         x={0}
         y={size.height / 2}
         fill={OffWhiteColor}
-        dx={"-3rem"}
-        fontSize="1rem"
+        dx={"-2em"}
         textAnchor="end"
         style={{ opacity: axisPathLength }}
       >

@@ -28,7 +28,7 @@ function Opener() {
       role="region"
     >
       <Box className="paragraph" component="header" role="banner">
-        <Typography id="opener-heading" variant="h1Bold" gutterBottom>
+        <Typography id="opener-heading" variant="h1">
           {content?.title}
         </Typography>
         <Typography variant="h3" gutterBottom>
@@ -37,15 +37,15 @@ function Opener() {
       </Box>
       <Stack spacing={12} direction="column" component="section" role="region">
         <Box className="paragraph" component="article">
-          <Typography variant="storyBody">{content?.p1}</Typography>
-          <Typography variant="storyBody">{content?.p2}</Typography>
+          <Typography variant="body1">{content?.p1}</Typography>
+          <Typography variant="body1">{content?.p2}</Typography>
         </Box>
         <Box
           className="paragraph"
           component="article"
           aria-labelledby="opener-throughline"
         >
-          <Typography id="throughline-heading" variant="storyBody">
+          <Typography id="throughline-heading" variant="body1">
             {content?.throughline.p11}
             <Underline startAnimation={isMapReady}>
               {content?.throughline.p12}

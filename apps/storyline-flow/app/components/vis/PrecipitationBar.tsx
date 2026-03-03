@@ -7,12 +7,9 @@ import { debounce } from "lodash"
 import "./precipitation-bar.css"
 import { useFetchData } from "../../hooks/useFetchData"
 import { useBreakpoint } from "@repo/ui/hooks"
-import {
-  visibleIconTransform,
-  visibleIconTransformConfig,
-} from "../helpers/breakpoints"
 import { FreshWaterColor, OffWhiteColor } from "../helpers/colorPalette"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
+import { Box, Theme, useTheme } from "@repo/ui/mui"
 
 interface PrecipitationDatum {
   year: number
@@ -27,6 +24,7 @@ const responsiveHeight = {
   lg: 400,
   xl: 500,
 }
+
 
 const margin = { top: 20, right: 80, bottom: 35, left: 180 }
 const LABEL_HEIGHT = 50
@@ -137,19 +135,27 @@ function PrecipitationBar({
   }, [dimensions.height, yExtents])
 
   return (
-    <div ref={containerRef} style={{ height: selectedHeight, width: "100%" }}>
+    <div ref={containerRef} style={{ height: selectedHeight, width: "100%", position: "relative" }}>
       {tooltip.visible && tooltip.data && (
-        <div
+        //TODO: Make this into a proper tooltip component, and add accessibility features (aria-live, role="tooltip", etc.)
+        <Box
           className="tooltip"
-          style={{ transform: `translate(${tooltip.x}px, ${tooltip.y}px)` }}
+          sx={{
+            transform: `translate(${tooltip.x}px, ${tooltip.y}px)`,
+            typography: 'caption',
+            backgroundColor: "common.white",
+            color: "text.primary",
+            borderRadius: (theme: Theme) => theme.borderRadius.md,
+            border: (theme: Theme) => theme.border.medium,
+          }}
         >
-          <strong>Year:</strong> {tooltip.data.year} <br />
-          <strong>Annual Precipitation:</strong> {tooltip.data.value}
+          <strong>Year</strong>{" \u2013"} {tooltip.data.year} <br />
+          <strong>Annual Precipitation</strong>{" \u2013"}  {tooltip.data.value}
           {tooltip.data.anomaly >= 0
             ? ` (+${tooltip.data.anomaly})`
             : ` (${tooltip.data.anomaly})`}{" "}
           inch
-        </div>
+        </Box>
       )}
       <svg
         width={dimensions.width}
@@ -211,12 +217,7 @@ function BarChart({
   scrollYProgress: MotionValue<number>
   getSelectedYear: (year: string) => void
 }) {
-  const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
-  const breakpoint = useBreakpoint()
-  const transform = visibleIconTransform[
-    breakpoint
-  ] as visibleIconTransformConfig
   const [yearHovered, setYearHovered] = useState<number | null>(null)
   const [yearClicked, setYearClicked] = useState<number | null>(null)
 
@@ -245,9 +246,8 @@ function BarChart({
               idx={idx}
               hasPhoto={yearLabels.includes(d.year)}
               onAnimationComplete={() => {
-                if (idx === data.length - 1) setFinished(true)
+                //if (idx === data.length - 1) setFinished(true)
               }}
-              transform={transform}
               yearHovered={yearHovered}
               yearClicked={yearClicked}
             />
@@ -263,7 +263,8 @@ function BarChart({
               fill="transparent"
               style={{ cursor: cursorStyle }}
               onMouseMove={(e) => {
-                if (!finished) return
+                //TODO: this blocks the tooltip showing, because the setFinished is never triggered.
+                //if (!finished) return
                 if (containerRef.current) {
                   const rect = containerRef.current.getBoundingClientRect()
                   setTooltip({
@@ -308,7 +309,6 @@ function Bar({
   idx,
   hasPhoto = false,
   onAnimationComplete,
-  transform,
   yearHovered,
   yearClicked,
 }: {
@@ -322,11 +322,11 @@ function Bar({
   idx: number
   hasPhoto?: boolean
   onAnimationComplete?: () => void
-  transform: visibleIconTransformConfig
   yearHovered: number | null
   yearClicked: number | null
 }) {
   const [animationPlayed, setAnimationPlayed] = useState(false)
+  const theme = useTheme()
 
   const range = useMemo(
     (): [number, number] => [0.5 + idx * 0.01, 0.7 + idx * 0.01],
@@ -374,11 +374,13 @@ function Bar({
       />
       <g
         transform={`translate(${xPos + barWidth / 2}, ${d.anomaly < 0 ? yPosEnd + barHeight : yPosEnd})`}
+        style={{
+          fontSize: theme.typography.caption.fontSize,
+        }}
       >
         <motion.text
           className="axis-label"
           dy={d.anomaly < 0 ? "0.9em" : "-0.7em"}
-          fontSize="1rem"
           style={{ opacity }}
         >
           {d.year}
@@ -389,7 +391,7 @@ function Bar({
             yearClicked={yearClicked}
             isClicked={yearClicked === d.year}
             opacity={opacity}
-            transform={`translate(${transform.x}, ${d.anomaly < 0 ? transform.belowY : transform.aboveY})`}
+            transform={(d.anomaly < 0) ? "2em" : "-2em"}
             onAnimationComplete={onAnimationComplete}
           />
         )}
@@ -416,6 +418,7 @@ function VisibleIcon({
   const animatedScale = isHovered ? 1.1 : isClicked ? 1 : [0.8, 1, 0.8]
 
   return (
+    <g style={{ transform: `translateY(${transform})` }}>
     <motion.g
       initial={{ scale: 0 }}
       animate={{
@@ -432,7 +435,8 @@ function VisibleIcon({
           style={{
             opacity: opacity,
             fill: OffWhiteColor,
-            transform: transform,
+            transform: "translate(-12px, -12px)",
+            transformOrigin: "12px 12px",
           }}
           onAnimationComplete={onAnimationComplete}
           d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
@@ -442,13 +446,15 @@ function VisibleIcon({
           style={{
             opacity: opacity,
             fill: OffWhiteColor,
-            transform: transform,
+            transform: "translate(-12px, -12px)",
+            transformOrigin: "12px 12px",
           }}
           onAnimationComplete={onAnimationComplete}
           d="M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z"
         ></motion.path>
-      )}
-    </motion.g>
+        )}
+      </motion.g>
+    </g>
   )
 }
 
@@ -460,7 +466,8 @@ function XAxis({
   yOffset: number
   dimensions: { width: number; height: number }
   scrollYProgress: MotionValue<number>
-}) {
+  }) {
+  const theme = useTheme()
   const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.4, 0.7], [0, 1])
   const axisPathLength = usePlayAnimationOnce(
     scrollYProgress,
@@ -469,7 +476,9 @@ function XAxis({
   )
 
   return (
-    <g className="x-axis" transform={`translate(${margin.left}, ${yOffset})`}>
+    <g className="x-axis"
+      transform={`translate(${margin.left}, ${yOffset})`}
+      style={{ fontSize: theme.typography.caption.fontSize }}>
       <motion.path
         className="axis"
         d={`M0,0 L${dimensions.width - margin.right - margin.left},0`}
@@ -501,7 +510,8 @@ function YAxis({
   dimensions: { width: number; height: number }
   average: number
   scrollYProgress: MotionValue<number>
-}) {
+  }) {
+  const theme = useTheme()
   const aboveMidpoint = (margin.top + yScale(0)) / 2
   const belowMidpoint = (dimensions.height - margin.bottom + yScale(0)) / 2
 
@@ -514,7 +524,9 @@ function YAxis({
 
   return (
     <>
-      <g className="y-axis" transform={`translate(${margin.left}, 0)`}>
+      <g className="y-axis"
+        transform={`translate(${margin.left}, 0)`}
+        style={{ fontSize: theme.typography.caption.fontSize }}>
         <motion.path
           className="axis"
           d={`M0,${dimensions.height - margin.bottom} L0,${margin.top}`}
@@ -533,6 +545,7 @@ function YAxis({
       <g
         className="y-axis-label"
         transform={`translate(${margin.left / 2}, 0)`}
+        style={{ fontSize: theme.typography.caption.fontSize }}
       >
         <motion.g style={{ opacity: labelOpacity }}>
           <text
@@ -540,7 +553,6 @@ function YAxis({
             y={yScale(0)}
             dx="-0.5em"
             className="axis-label"
-            fontSize="1rem"
           >
             Historical average
           </text>
@@ -550,7 +562,7 @@ function YAxis({
             dx="-0.5em"
             dy="1.5em"
             className="axis-label"
-            fontSize="0.8rem"
+            style={{ fontSize: theme.typography.compactSubtitle.fontSize }}
           >
             {average} inch
           </text>
@@ -559,7 +571,6 @@ function YAxis({
           x={0}
           y={aboveMidpoint}
           className="axis-label"
-          fontSize="1rem"
           style={{ opacity: labelOpacity }}
         >
           Above average
@@ -568,7 +579,6 @@ function YAxis({
           x={0}
           y={belowMidpoint}
           className="axis-label"
-          fontSize="1rem"
           style={{ opacity: labelOpacity }}
         >
           Below average
