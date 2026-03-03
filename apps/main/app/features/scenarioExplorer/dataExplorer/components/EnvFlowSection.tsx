@@ -41,7 +41,10 @@ import type {
 // Types
 // ============================================================================
 
-type MatrixDataType = Record<string, Record<string, MonthlyPercentiles | undefined>>
+type MatrixDataType = Record<
+  string,
+  Record<string, MonthlyPercentiles | undefined>
+>
 type ChannelFilter = "all" | "streams" | "eflows_only" | "mif_only"
 type FlowUnit = "taf" | "cfs"
 type ChartMode = "volume" | "pct_unimpaired"
@@ -52,7 +55,11 @@ type ChartMode = "volume" | "pct_unimpaired"
 
 const CHART_MODE_OPTIONS = [
   { value: "volume" as const, label: "Monthly flow volume" },
-  { value: "pct_unimpaired" as const, label: "% Unimpaired (coming soon)", disabled: true },
+  {
+    value: "pct_unimpaired" as const,
+    label: "% Unimpaired (coming soon)",
+    disabled: true,
+  },
 ]
 
 /**
@@ -71,9 +78,7 @@ const CHANNEL_FILTER_GROUPS = [
   },
   {
     label: "All channels",
-    options: [
-      { value: "all" as const, label: "All channels" },
-    ],
+    options: [{ value: "all" as const, label: "All channels" }],
   },
 ]
 
@@ -84,8 +89,7 @@ const CHANNEL_FILTER_DESCRIPTIONS: Record<ChannelFilter, string> = {
     "17 streams with prescribed functional flow (EFLOWS) targets in the model SV input. These are the reaches used for tier results and the California Environmental Flows Framework analysis.",
   mif_only:
     "20 stream reaches with a binding minimum instream flow (MIF) companion variable (C_reach_MIF) in the model DV output. These are the primary environmental monitoring locations.",
-  all:
-    "All 59 CalSim channel reaches including stream reaches, reservoir releases (e.g. below dams), and conveyance canals (e.g. Delta Cross Channel, Clifton Court).",
+  all: "All 59 CalSim channel reaches including stream reaches, reservoir releases (e.g. below dams), and conveyance canals (e.g. Delta Cross Channel, Clifton Court).",
 }
 
 const SCALE_OPTIONS = [
@@ -119,14 +123,57 @@ const PCT_BAND_COLORS = {
 function BandLegend({ colors }: { colors: typeof DELIVERY_BAND_COLORS }) {
   return (
     <>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: colors.range, borderRadius: "2px" }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Min–max</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: colors.outer, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>10–90th pct</Box>
-      <Box component="span" sx={{ width: 14, height: 14, backgroundColor: colors.inner, borderRadius: "2px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>30–70th pct</Box>
-      <Box component="span" sx={{ width: 14, height: 3, backgroundColor: colors.median, borderRadius: "1px", ml: 0.75 }} />
-      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>Median</Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: colors.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Min–max
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: colors.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th pct
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: colors.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th pct
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: colors.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
     </>
   )
 }
@@ -146,32 +193,35 @@ function channelClassLabel(cls: string | null): string {
  * Flow volume percentile bands (CFS or TAF) from migration-28 columns.
  * Skips months where the median is null/undefined (missing or old API).
  */
-function rowsToVolumePercentiles(rows: ChannelMonthlyStats[], unit: FlowUnit): MonthlyPercentiles {
+function rowsToVolumePercentiles(
+  rows: ChannelMonthlyStats[],
+  unit: FlowUnit,
+): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
     if (unit === "taf") {
       if (row.flow_q50_taf == null) continue
       monthly[String(row.water_month)] = {
-        q0:   row.flow_q0_taf   ?? 0,
-        q10:  row.flow_q10_taf  ?? 0,
-        q30:  row.flow_q30_taf  ?? 0,
-        q50:  row.flow_q50_taf,
-        q70:  row.flow_q70_taf  ?? 0,
-        q90:  row.flow_q90_taf  ?? 0,
+        q0: row.flow_q0_taf ?? 0,
+        q10: row.flow_q10_taf ?? 0,
+        q30: row.flow_q30_taf ?? 0,
+        q50: row.flow_q50_taf,
+        q70: row.flow_q70_taf ?? 0,
+        q90: row.flow_q90_taf ?? 0,
         q100: row.flow_q100_taf ?? 0,
-        mean: row.flow_avg_taf  ?? 0,
+        mean: row.flow_avg_taf ?? 0,
       }
     } else {
       if (row.flow_q50_cfs == null) continue
       monthly[String(row.water_month)] = {
-        q0:   row.flow_q0_cfs   ?? 0,
-        q10:  row.flow_q10_cfs  ?? 0,
-        q30:  row.flow_q30_cfs  ?? 0,
-        q50:  row.flow_q50_cfs,
-        q70:  row.flow_q70_cfs  ?? 0,
-        q90:  row.flow_q90_cfs  ?? 0,
+        q0: row.flow_q0_cfs ?? 0,
+        q10: row.flow_q10_cfs ?? 0,
+        q30: row.flow_q30_cfs ?? 0,
+        q50: row.flow_q50_cfs,
+        q70: row.flow_q70_cfs ?? 0,
+        q90: row.flow_q90_cfs ?? 0,
         q100: row.flow_q100_cfs ?? 0,
-        mean: row.flow_avg_cfs  ?? 0,
+        mean: row.flow_avg_cfs ?? 0,
       }
     }
   }
@@ -183,17 +233,19 @@ function rowsToVolumePercentiles(rows: ChannelMonthlyStats[], unit: FlowUnit): M
  * NULL where no unimpaired reference exists (Mokelumne, some canals).
  * Values are percentages (0–∞); highly regulated reaches can exceed 100%.
  */
-function rowsToPctUnimpairedPercentiles(rows: ChannelMonthlyStats[]): MonthlyPercentiles {
+function rowsToPctUnimpairedPercentiles(
+  rows: ChannelMonthlyStats[],
+): MonthlyPercentiles {
   const monthly: MonthlyPercentiles = {}
   for (const row of rows) {
     if (row.q50 == null) continue
     monthly[String(row.water_month)] = {
-      q0:   row.q0   ?? 0,
-      q10:  row.q10  ?? 0,
-      q30:  row.q30  ?? 0,
-      q50:  row.q50,
-      q70:  row.q70  ?? 0,
-      q90:  row.q90  ?? 0,
+      q0: row.q0 ?? 0,
+      q10: row.q10 ?? 0,
+      q30: row.q30 ?? 0,
+      q50: row.q50,
+      q70: row.q70 ?? 0,
+      q90: row.q90 ?? 0,
       q100: row.q100 ?? 0,
       mean: row.pct_unimpaired_avg ?? 0,
     }
@@ -210,7 +262,10 @@ function computeAnnualAvgTaf(rows: ChannelMonthlyStats[]): number | null {
   let total = 0
   let count = 0
   for (const row of rows) {
-    if (row.flow_avg_taf != null) { total += row.flow_avg_taf; count++ }
+    if (row.flow_avg_taf != null) {
+      total += row.flow_avg_taf
+      count++
+    }
   }
   return count === 12 ? total : count > 0 ? total * (12 / count) : null
 }
@@ -219,7 +274,9 @@ function computeAnnualAvgTaf(rows: ChannelMonthlyStats[]): number | null {
  * Annual average flow in CFS = mean of 12 monthly flow_avg_cfs values.
  */
 function computeAnnualAvgCfs(rows: ChannelMonthlyStats[]): number | null {
-  const vals = rows.map((r) => r.flow_avg_cfs).filter((v): v is number => v != null)
+  const vals = rows
+    .map((r) => r.flow_avg_cfs)
+    .filter((v): v is number => v != null)
   return vals.length === 12 ? vals.reduce((a, b) => a + b, 0) / 12 : null
 }
 
@@ -242,7 +299,9 @@ function useMultiScenarioMonthly(scenarios: string[], unit: FlowUnit) {
   })
 
   const isLoading = results.some((r) => r.isLoading)
-  const loadingScenarios = scenarios.filter((_, i) => results[i]?.isLoading ?? false)
+  const loadingScenarios = scenarios.filter(
+    (_, i) => results[i]?.isLoading ?? false,
+  )
 
   const volumeMatrix: MatrixDataType = {}
   const pctMatrix: MatrixDataType = {}
@@ -254,7 +313,8 @@ function useMultiScenarioMonthly(scenarios: string[], unit: FlowUnit) {
 
     const byChannel = new Map<string, ChannelMonthlyStats[]>()
     for (const row of result.rows) {
-      if (!byChannel.has(row.network_arc_id)) byChannel.set(row.network_arc_id, [])
+      if (!byChannel.has(row.network_arc_id))
+        byChannel.set(row.network_arc_id, [])
       byChannel.get(row.network_arc_id)!.push(row)
     }
 
@@ -272,12 +332,19 @@ function useMultiScenarioMonthly(scenarios: string[], unit: FlowUnit) {
       annualCellStats[arcId]![scenarioId] = {
         // Show annual avg in TAF/yr (correct label), secondary shows CFS avg
         // PercentileMatrix only has two slots; we use TAF/yr + CFS avg
-        annualAvgTaf: unit === "taf" ? (annualTaf ?? undefined) : (annualCfs ?? undefined),
+        annualAvgTaf:
+          unit === "taf" ? (annualTaf ?? undefined) : (annualCfs ?? undefined),
       }
     }
   })
 
-  return { volumeMatrix, pctMatrix, annualCellStats, isLoading, loadingScenarios }
+  return {
+    volumeMatrix,
+    pctMatrix,
+    annualCellStats,
+    isLoading,
+    loadingScenarios,
+  }
 }
 
 /** MIF compliance % from period-of-record summaries. */
@@ -292,7 +359,8 @@ function useMultiScenarioMifStats(scenarios: string[]): CellStatsMap {
     const scenarioId = scenarios[index]
     if (!scenarioId || !result.summaries.length) return
     for (const summary of result.summaries as ChannelPeriodSummary[]) {
-      if (!mifStats[summary.network_arc_id]) mifStats[summary.network_arc_id] = {}
+      if (!mifStats[summary.network_arc_id])
+        mifStats[summary.network_arc_id] = {}
       mifStats[summary.network_arc_id]![scenarioId] = {
         reliabilityPct: summary.mif_met_pct ?? undefined,
       }
@@ -311,21 +379,37 @@ interface SectionHeaderProps {
   description?: React.ReactNode
 }
 
-function SectionHeader({ title, titleAdornment, description }: SectionHeaderProps) {
+function SectionHeader({
+  title,
+  titleAdornment,
+  description,
+}: SectionHeaderProps) {
   const theme = useTheme()
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
+      >
         <Typography
           variant="overline"
-          sx={{ textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}
+          sx={{
+            textTransform: "uppercase",
+            letterSpacing: "0.06em",
+            whiteSpace: "nowrap",
+          }}
         >
           {title}
         </Typography>
         {titleAdornment}
       </Box>
       {description && (
-        <Box sx={{ color: theme.palette.grey[600], mt: 0.5, ...theme.typography.dashboard }}>
+        <Box
+          sx={{
+            color: theme.palette.grey[600],
+            mt: 0.5,
+            ...theme.typography.dashboard,
+          }}
+        >
           {description}
         </Box>
       )}
@@ -342,17 +426,25 @@ interface EnvFlowSectionProps {
   scenarioNames: Record<string, string>
 }
 
-export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSectionProps) {
+export default function EnvFlowSection({
+  scenarios,
+  scenarioNames,
+}: EnvFlowSectionProps) {
   const theme = useTheme()
 
   const [chartMode, setChartMode] = useState<ChartMode>("volume")
-  const [channelFilter, setChannelFilter] = useState<ChannelFilter>("eflows_only")
+  const [channelFilter, setChannelFilter] =
+    useState<ChannelFilter>("eflows_only")
   // Each chart mode remembers its own scale preference independently.
   // % unimpaired defaults to relative because pct_unimpaired varies enormously
   // across channels (downstream routing nodes have values >> 100% while
   // headwater reaches may be < 100%), making a shared absolute axis impractical.
-  const [volumeScaleMode, setVolumeScaleMode] = useState<"absolute" | "relative">("absolute")
-  const [pctScaleMode, setPctScaleMode] = useState<"absolute" | "relative">("relative")
+  const [volumeScaleMode, setVolumeScaleMode] = useState<
+    "absolute" | "relative"
+  >("absolute")
+  const [pctScaleMode, setPctScaleMode] = useState<"absolute" | "relative">(
+    "relative",
+  )
   const [flowUnit, setFlowUnit] = useState<FlowUnit>("taf")
 
   const scaleMode = chartMode === "volume" ? volumeScaleMode : pctScaleMode
@@ -364,19 +456,24 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
   const { channels, isLoading: isLoadingChannels } = useChannelsList()
 
   const filteredChannels = useMemo(() => {
-    if (channelFilter === "streams") return channels.filter((c) => c.channel_class === "stream")
-    if (channelFilter === "eflows_only") return channels.filter((c) => c.has_eflows)
+    if (channelFilter === "streams")
+      return channels.filter((c) => c.channel_class === "stream")
+    if (channelFilter === "eflows_only")
+      return channels.filter((c) => c.has_eflows)
     if (channelFilter === "mif_only") return channels.filter((c) => c.has_mif)
     return channels
   }, [channels, channelFilter])
 
   // Dynamic counts for dropdown labels (updated once channels load)
-  const channelCounts = useMemo(() => ({
-    streams: channels.filter((c) => c.channel_class === "stream").length,
-    eflows_only: channels.filter((c) => c.has_eflows).length,
-    mif_only: channels.filter((c) => c.has_mif).length,
-    all: channels.length,
-  }), [channels])
+  const channelCounts = useMemo(
+    () => ({
+      streams: channels.filter((c) => c.channel_class === "stream").length,
+      eflows_only: channels.filter((c) => c.has_eflows).length,
+      mif_only: channels.filter((c) => c.has_mif).length,
+      all: channels.length,
+    }),
+    [channels],
+  )
 
   // Build groups with live counts appended to labels
   const channelFilterGroups = useMemo(() => {
@@ -402,10 +499,14 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
         reservoirName: ch.label ?? ch.network_arc_id,
         capacityTaf: 0,
         deadPoolTaf: 0,
-        labelSubtitle: [ch.network_arc_id, ch.watershed_short_code].filter(Boolean).join(" · "),
+        labelSubtitle: [ch.network_arc_id, ch.watershed_short_code]
+          .filter(Boolean)
+          .join(" · "),
         labelAttributes: [
           { key: "CLASS", value: channelClassLabel(ch.channel_class) },
-          ...(ch.watershed_name ? [{ key: "WATERSHED", value: ch.watershed_name }] : []),
+          ...(ch.watershed_name
+            ? [{ key: "WATERSHED", value: ch.watershed_name }]
+            : []),
         ],
       })),
     [filteredChannels],
@@ -424,7 +525,10 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
   // Merge annual avg flow + MIF compliance into one CellStatsMap
   const cellStats: CellStatsMap = useMemo(() => {
     const merged: CellStatsMap = {}
-    const arcIds = new Set([...Object.keys(annualCellStats), ...Object.keys(mifStats)])
+    const arcIds = new Set([
+      ...Object.keys(annualCellStats),
+      ...Object.keys(mifStats),
+    ])
     for (const arcId of arcIds) {
       merged[arcId] = {}
       for (const scenarioId of scenarios) {
@@ -457,7 +561,9 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
   if (!primaryScenario) {
     return (
       <Box sx={{ p: theme.space.section.sm }}>
-        <Typography color="text.secondary">Select a scenario to view river flow data.</Typography>
+        <Typography color="text.secondary">
+          Select a scenario to view river flow data.
+        </Typography>
       </Box>
     )
   }
@@ -477,7 +583,10 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
         }}
       >
         <ChartGridProvider scenarios={scenarios}>
-          <GridScenarioHeader scenarios={scenarios} scenarioNames={scenarioNames} />
+          <GridScenarioHeader
+            scenarios={scenarios}
+            scenarioNames={scenarioNames}
+          />
         </ChartGridProvider>
       </Box>
 
@@ -511,19 +620,27 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
               <Box sx={{ maxWidth: 300, fontSize: "0.8rem", lineHeight: 1.5 }}>
                 <Box sx={{ fontWeight: 600, mb: 0.5 }}>Channel subsets</Box>
                 <Box sx={{ mb: 0.75 }}>
-                  <Box component="span" sx={{ fontWeight: 600 }}>Stream reaches: </Box>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    Stream reaches:{" "}
+                  </Box>
                   {CHANNEL_FILTER_DESCRIPTIONS.streams}
                 </Box>
                 <Box sx={{ mb: 0.75 }}>
-                  <Box component="span" sx={{ fontWeight: 600 }}>EFLOWS streams: </Box>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    EFLOWS streams:{" "}
+                  </Box>
                   {CHANNEL_FILTER_DESCRIPTIONS.eflows_only}
                 </Box>
                 <Box sx={{ mb: 0.75 }}>
-                  <Box component="span" sx={{ fontWeight: 600 }}>MIF streams: </Box>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    MIF streams:{" "}
+                  </Box>
                   {CHANNEL_FILTER_DESCRIPTIONS.mif_only}
                 </Box>
                 <Box>
-                  <Box component="span" sx={{ fontWeight: 600 }}>All channels: </Box>
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    All channels:{" "}
+                  </Box>
                   {CHANNEL_FILTER_DESCRIPTIONS.all}
                 </Box>
               </Box>
@@ -590,35 +707,94 @@ export default function EnvFlowSection({ scenarios, scenarioNames }: EnvFlowSect
             description={
               isVolume ? (
                 <>
-                  Percentile distribution of monthly flow volume ({unitLabel}) across all simulated
-                  years, per CalSim channel reach.{" "}
+                  Percentile distribution of monthly flow volume ({unitLabel})
+                  across all simulated years, per CalSim channel reach.{" "}
                   <Box component="span" sx={{ color: "grey.500" }}>
                     {CHANNEL_FILTER_DESCRIPTIONS[channelFilter]}
                   </Box>
-                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap", mt: 1, ml: 0.5 }}>
-                    <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>Bands:</Box>
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                      mt: 1,
+                      ml: 0.5,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        color: "grey.500",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Bands:
+                    </Box>
                     <BandLegend colors={DELIVERY_BAND_COLORS} />
                   </Box>
-                  <Box component="span" sx={{ display: "block", color: "grey.400", fontSize: "0.8rem", mt: 0.75 }}>
-                    <strong>{annualStatLabel}</strong> = annual average flow (sum of 12 monthly means).{" "}
-                    <strong>MIF met</strong> = % of months at or above binding minimum instream flow (priority reaches only).
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "block",
+                      color: "grey.400",
+                      fontSize: "0.8rem",
+                      mt: 0.75,
+                    }}
+                  >
+                    <strong>{annualStatLabel}</strong> = annual average flow
+                    (sum of 12 monthly means). <strong>MIF met</strong> = % of
+                    months at or above binding minimum instream flow (priority
+                    reaches only).
                   </Box>
                 </>
               ) : (
                 <>
-                  Monthly flow as a percentage of the natural unimpaired reference
-                  (C_{"{reach}"} / UNIMP_{"{watershed}"} x 100). Percentile distribution across
-                  100 simulated years. Each chart is scaled independently (relative mode) because
-                  downstream routing nodes accumulate multiple watersheds and can far exceed 100%.
-                  A bold gridline marks 100% (= natural flow) where it falls within range.
-                  NULL where no unimpaired reference exists (Mokelumne, some canals).
-                  <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1, flexWrap: "wrap", mt: 1, ml: 0.5 }}>
-                    <Box component="span" sx={{ color: "grey.500", fontSize: "0.875rem", fontWeight: 600 }}>Bands:</Box>
+                  Monthly flow as a percentage of the natural unimpaired
+                  reference (C_{"{reach}"} / UNIMP_{"{watershed}"} x 100).
+                  Percentile distribution across 100 simulated years. Each chart
+                  is scaled independently (relative mode) because downstream
+                  routing nodes accumulate multiple watersheds and can far
+                  exceed 100%. A bold gridline marks 100% (= natural flow) where
+                  it falls within range. NULL where no unimpaired reference
+                  exists (Mokelumne, some canals).
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                      mt: 1,
+                      ml: 0.5,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        color: "grey.500",
+                        fontSize: "0.875rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Bands:
+                    </Box>
                     <BandLegend colors={PCT_BAND_COLORS} />
                   </Box>
-                  <Box component="span" sx={{ display: "block", color: "grey.400", fontSize: "0.8rem", mt: 0.75 }}>
-                    Y-axis unit is % per channel (not TAF). <strong>MIF met</strong> = % of months at or above
-                    binding minimum instream flow (priority reaches only).
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "block",
+                      color: "grey.400",
+                      fontSize: "0.8rem",
+                      mt: 0.75,
+                    }}
+                  >
+                    Y-axis unit is % per channel (not TAF).{" "}
+                    <strong>MIF met</strong> = % of months at or above binding
+                    minimum instream flow (priority reaches only).
                   </Box>
                 </>
               )

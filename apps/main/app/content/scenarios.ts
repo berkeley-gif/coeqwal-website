@@ -216,7 +216,8 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0035: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    label: "Priority deliveries to community water systems: health and human safety level",
+    label:
+      "Priority deliveries to community water systems: health and human safety level",
     description:
       "CVP and SWP surface supplies are reallocated to prioritize M&I contractors at health and human safety (HHS) delivery levels. CVP agricultural contracts are assigned lower priority to accommodate M&I deliveries. Based on current operations with 2020 LandIQ land use and TUCPs active.",
     shortLabel: "CWS priority: HHS level",
@@ -232,7 +233,8 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
   s0037: {
     theme: "cws",
     iconPath: "/images/icons/current_ops.svg",
-    label: "Priority deliveries to community water systems: full contract level",
+    label:
+      "Priority deliveries to community water systems: full contract level",
     description:
       "CVP and SWP surface supplies are reallocated to prioritize M&I contractors at full contract entitlement levels. CVP agricultural contracts are assigned lower priority. Based on current operations with 2020 LandIQ land use and TUCPs active.",
     shortLabel: "CWS priority: full contract",

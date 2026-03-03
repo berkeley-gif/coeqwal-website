@@ -334,9 +334,7 @@ export default function ComparisonPanel() {
         hideAxisLabels={true}
         onAxesLayout={setAxisLayout}
         margin={
-          isDesktop
-            ? { top: 80, right: 20, bottom: 20, left: 20 }
-            : undefined
+          isDesktop ? { top: 80, right: 20, bottom: 20, left: 20 } : undefined
         }
         showBaseline={highlightBaseline}
         baselineData={baselineDataForChart}

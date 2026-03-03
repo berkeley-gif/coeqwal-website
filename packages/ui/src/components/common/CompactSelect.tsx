@@ -92,7 +92,11 @@ export function CompactSelect<T extends string = string>({
           {group.label}
         </ListSubheader>,
         ...group.options.map((option) => (
-          <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
+          <MenuItem
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {option.label}
           </MenuItem>
         )),
@@ -100,7 +104,11 @@ export function CompactSelect<T extends string = string>({
     }
 
     return options.map((option) => (
-      <MenuItem key={option.value} value={option.value} disabled={option.disabled}>
+      <MenuItem
+        key={option.value}
+        value={option.value}
+        disabled={option.disabled}
+      >
         {option.label}
       </MenuItem>
     ))
