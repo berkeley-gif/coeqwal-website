@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
@@ -50,12 +51,16 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const waterThemesOptions = WATER_THEMES.map((wt) => ({
-    key: wt.id,
-    label: wt.label.replace(/\n/g, " "),
-    onClick: () => openThemePanel(wt.id),
-    active: activeThemeKey === wt.id,
-  })) ?? []
+  const waterThemesOptions = useMemo(
+    () =>
+      WATER_THEMES.map((wt) => ({
+        key: wt.id,
+        label: wt.label.replace(/\n/g, " "),
+        onClick: () => openThemePanel(wt.id),
+        active: activeThemeKey === wt.id,
+      })),
+    [activeThemeKey, openThemePanel],
+  )
 
   return (
     <BaseHeader
