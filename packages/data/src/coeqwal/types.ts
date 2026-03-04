@@ -1177,3 +1177,277 @@ export interface RefugePeriodResponse {
   data: RefugePeriodSummary[]
   count: number
 }
+
+// ============================================================================
+// Environmental River Flows types
+// ============================================================================
+
+/**
+ * A single CalSim channel reach from /api/statistics/channels
+ */
+export interface ChannelEntity {
+  network_arc_id: string
+  label: string
+  channel_class: "stream" | "canal" | "reservoir_release" | null
+  channel_class_label: string | null
+  watershed_short_code: string | null
+  watershed_name: string | null
+  hydrologic_region: string | null
+  /** SV variable name for natural unimpaired flow reference (e.g., "UNIMP_SHAS") */
+  unimp_sv_variable: string | null
+  /** true if this reach has a C_{reach}_MIF binding minimum instream flow in the DV */
+  has_mif: boolean
+  /** true if this reach has an EFLOWS_{reach} functional flow target in the SV */
+  has_eflows: boolean
+}
+
+/** Response from /api/statistics/channels */
+export interface ChannelsListResponse {
+  channels: ChannelEntity[]
+  total: number
+}
+
+/**
+ * One CEFF season definition from /api/statistics/env-flow-seasons.
+ * Water months: 1=October ... 12=September.
+ */
+export interface EnvFlowSeason {
+  season_id: number
+  short_code:
+    | "wet_peak"
+    | "wet_base"
+    | "spring_recession"
+    | "dry"
+    | "fall_pulse"
+  name: string
+  description: string
+  calendar_months: string
+  /** Water year month numbers in this season (e.g., [3,4,5] for Dec–Feb) */
+  wy_months: number[]
+  sort_order: number
+}
+
+/** Response from /api/statistics/env-flow-seasons */
+export interface EnvFlowSeasonsResponse {
+  seasons: EnvFlowSeason[]
+  total: number
+}
+
+/**
+ * One (channel × water_month) row from
+ * /api/statistics/scenarios/:scenarioId/channels/monthly
+ *
+ * Stores two parallel statistic families (migration 28 added the flow_q* columns):
+ *
+ *   Flow volume (all channels):
+ *     flow_avg_cfs/taf  — mean monthly flow
+ *     flow_q{p}_cfs/taf — percentile bands of per-year monthly flow in CFS and TAF/month
+ *     flow_exc_p{p}_cfs/taf — exceedance percentiles
+ *
+ *   % unimpaired (channels with a UNIMP reference only):
+ *     q* / exc_p* — percentile distribution of pct_unimpaired
+ *     NULL for Mokelumne reaches and any channel without unimp_sv_variable.
+ */
+export interface ChannelMonthlyStats {
+  network_arc_id: string
+  /** 1=October … 12=September */
+  water_month: number
+
+  // ── Flow volume ──────────────────────────────────────────────────────────
+  /** Mean monthly flow (CFS) across all simulated years */
+  flow_avg_cfs: number | null
+  flow_cv: number | null
+  /** Mean monthly flow volume (TAF/month) across all simulated years */
+  flow_avg_taf: number | null
+  /** Percentile bands of per-year monthly flow — CFS */
+  flow_q0_cfs: number | null
+  flow_q10_cfs: number | null
+  flow_q30_cfs: number | null
+  flow_q50_cfs: number | null
+  flow_q70_cfs: number | null
+  flow_q90_cfs: number | null
+  flow_q100_cfs: number | null
+  /** Exceedance percentiles — CFS (exc_p5 = value exceeded 5 % of years) */
+  flow_exc_p5_cfs: number | null
+  flow_exc_p10_cfs: number | null
+  flow_exc_p25_cfs: number | null
+  flow_exc_p50_cfs: number | null
+  flow_exc_p75_cfs: number | null
+  flow_exc_p90_cfs: number | null
+  flow_exc_p95_cfs: number | null
+  /** Percentile bands of per-year monthly flow — TAF/month */
+  flow_q0_taf: number | null
+  flow_q10_taf: number | null
+  flow_q30_taf: number | null
+  flow_q50_taf: number | null
+  flow_q70_taf: number | null
+  flow_q90_taf: number | null
+  flow_q100_taf: number | null
+  /** Exceedance percentiles — TAF/month */
+  flow_exc_p5_taf: number | null
+  flow_exc_p10_taf: number | null
+  flow_exc_p25_taf: number | null
+  flow_exc_p50_taf: number | null
+  flow_exc_p75_taf: number | null
+  flow_exc_p90_taf: number | null
+  flow_exc_p95_taf: number | null
+
+  // ── % unimpaired ─────────────────────────────────────────────────────────
+  /** Mean of unimpaired reference flow (CFS) for this month */
+  unimp_avg_cfs: number | null
+  /** Mean (C_{reach} / UNIMP) × 100 across years — NULL if no UNIMP reference */
+  pct_unimpaired_avg: number | null
+  pct_unimpaired_cv: number | null
+  /** Percentile distribution of pct_unimpaired across years */
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+
+  sample_count: number | null
+}
+
+/** Response from /api/statistics/scenarios/:scenarioId/channels/monthly */
+export interface ChannelsMonthlyResponse {
+  scenario_id: string
+  /** Flat array: 59 channels × 12 months = 708 rows */
+  data: ChannelMonthlyStats[]
+  count: number
+}
+
+/**
+ * One (channel × CEFF season) row from
+ * /api/statistics/scenarios/:scenarioId/channels/seasonal
+ *
+ * Contains three metric families (all may be partially NULL):
+ *   flow_*        — raw CFS volume distribution (all 59 channels)
+ *   unimp_* / pct_unimpaired_* — Metric 1 seasonal (57 channels; NULL for Mokelumne)
+ *   pct_ff_* / ff_* / deviation_avg — Metric 2 (17 EFLOWS channels; NULL otherwise)
+ */
+export interface ChannelSeasonalStats {
+  network_arc_id: string
+  season_id: number
+  season_short_code:
+    | "wet_peak"
+    | "wet_base"
+    | "spring_recession"
+    | "dry"
+    | "fall_pulse"
+  season_name: string
+  season_sort_order: number
+  // Raw flow volume (CFS)
+  flow_avg_cfs: number | null
+  flow_cv: number | null
+  flow_q0: number | null
+  flow_q10: number | null
+  flow_q30: number | null
+  flow_q50: number | null
+  flow_q70: number | null
+  flow_q90: number | null
+  flow_q100: number | null
+  flow_exc_p5: number | null
+  flow_exc_p10: number | null
+  flow_exc_p25: number | null
+  flow_exc_p50: number | null
+  flow_exc_p75: number | null
+  flow_exc_p90: number | null
+  flow_exc_p95: number | null
+  // % unimpaired (Metric 1 seasonal)
+  unimp_avg_cfs: number | null
+  pct_unimpaired_avg: number | null
+  pct_unimpaired_cv: number | null
+  unimp_q0: number | null
+  unimp_q10: number | null
+  unimp_q30: number | null
+  unimp_q50: number | null
+  unimp_q70: number | null
+  unimp_q90: number | null
+  unimp_q100: number | null
+  unimp_exc_p5: number | null
+  unimp_exc_p10: number | null
+  unimp_exc_p25: number | null
+  unimp_exc_p50: number | null
+  unimp_exc_p75: number | null
+  unimp_exc_p90: number | null
+  unimp_exc_p95: number | null
+  // % functional flows (Metric 2 — NULL unless has_eflows = true)
+  /** Mean (C_{reach} / EFLOWS_{reach}) × 100 across simulated years, by season */
+  pct_ff_avg: number | null
+  pct_ff_cv: number | null
+  /** pct_ff_avg − 100.0; negative = below functional flow target */
+  deviation_avg: number | null
+  /** Fraction of years where seasonal pct_ff >= 100% (target met) */
+  target_met_pct: number | null
+  ff_q0: number | null
+  ff_q10: number | null
+  ff_q30: number | null
+  ff_q50: number | null
+  ff_q70: number | null
+  ff_q90: number | null
+  ff_q100: number | null
+  ff_exc_p5: number | null
+  ff_exc_p10: number | null
+  ff_exc_p25: number | null
+  ff_exc_p50: number | null
+  ff_exc_p75: number | null
+  ff_exc_p90: number | null
+  ff_exc_p95: number | null
+  sample_count: number | null
+}
+
+/** Response from /api/statistics/scenarios/:scenarioId/channels/seasonal */
+export interface ChannelsSeasonalResponse {
+  scenario_id: string
+  /** Flat array: 59 channels × 5 seasons = 295 rows */
+  data: ChannelSeasonalStats[]
+  count: number
+}
+
+/**
+ * One channel's period-of-record summary from
+ * /api/statistics/scenarios/:scenarioId/channels/period-summary
+ *
+ * Metric 3 — Pearson r flow alteration index (monthly simulated vs. unimpaired).
+ * r ≈ +1: natural seasonal timing preserved.
+ * r ≈ 0: seasonal pattern substantially altered.
+ * NULL where no unimpaired reference variable exists.
+ */
+export interface ChannelPeriodSummary {
+  network_arc_id: string
+  simulation_start_year: number | null
+  simulation_end_year: number | null
+  total_months: number | null
+  /** Pearson r between monthly C_{reach} and UNIMP_{watershed} (full period of record) */
+  pearson_r: number | null
+  /** Two-tailed p-value for pearson_r (total_months = sample size) */
+  p_value: number | null
+  /** Mean of all monthly pct_unimpaired values over the full period */
+  avg_pct_unimpaired: number | null
+  annual_cv_pct_unimpaired: number | null
+  /** Mean of all monthly pct_ff values (NULL if no EFLOWS target) */
+  avg_pct_ff: number | null
+  annual_cv_pct_ff: number | null
+  /** % of months where C_{reach} >= binding MIF (NULL if has_mif = false) */
+  mif_met_pct: number | null
+  has_mif: boolean
+  has_eflows: boolean
+  unimp_sv_variable: string | null
+}
+
+/** Response from /api/statistics/scenarios/:scenarioId/channels/period-summary */
+export interface ChannelsPeriodSummaryResponse {
+  scenario_id: string
+  /** One row per channel reach (59 rows) */
+  data: ChannelPeriodSummary[]
+  count: number
+}

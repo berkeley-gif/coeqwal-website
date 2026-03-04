@@ -11,6 +11,16 @@ export interface VerticalParallelLineData {
   highlighted?: boolean
 }
 
+/** Position of a single axis in container-relative pixels */
+export interface AxisLayout {
+  /** Axis display name (matches the string in the `axes` prop) */
+  axis: string
+  /** X position in container-relative pixels */
+  x: number
+  /** Y position in container-relative pixels */
+  y: number
+}
+
 export interface VerticalParallelLinePlotProps {
   data: VerticalParallelLineData[]
   axes: string[]
@@ -31,6 +41,10 @@ export interface VerticalParallelLinePlotProps {
   baselineData?: VerticalParallelLineData
   defineOutcome?: boolean
   overlayTiers?: boolean
+  /** When true, SVG text labels on axes are not rendered. Use with onAxesLayout for external HTML labels. */
+  hideAxisLabels?: boolean
+  /** Called after layout with the position of each axis in container-relative pixels. */
+  onAxesLayout?: (layout: AxisLayout[]) => void
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
 }
@@ -60,11 +74,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   baselineData,
   defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
+  hideAxisLabels = false,
+  onAxesLayout,
   onLineHover,
   onLineClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const prevAxisLayoutRef = useRef<string>("")
   const dimensions = useResizeObserver(
     containerRef as React.RefObject<HTMLElement>,
   )
@@ -388,41 +405,46 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         // ── Labels ───────────────────────────────────────────────────────────
         axisGroup.selectAll(".axis-label").remove()
 
-        if (isHoriz) {
-          // Single rotated label below the axis bottom
-          axisGroup
-            .append("text")
-            .attr("class", "axis-label")
-            .attr("transform", `translate(0, ${innerHeight + 8}) rotate(-40)`)
-            .attr("text-anchor", "end")
-            .attr("font-size", "11px")
-            .attr("font-weight", "500")
-            .attr("fill", "#333")
-            .text(axis)
-        } else {
-          // Word-wrapped label to the left
-          const words = axis.split(/\s+/)
-          const lineHeight = 14
-          const maxWordsPerLine = 1
-          const lines = []
-          for (let i = 0; i < words.length; i += maxWordsPerLine) {
-            lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
-          }
-          lines.forEach((line, index) => {
+        if (!hideAxisLabels) {
+          if (isHoriz) {
+            // Single rotated label below the axis bottom
             axisGroup
               .append("text")
               .attr("class", "axis-label")
-              .attr("x", -10)
               .attr(
-                "y",
-                4 + (index - (lines.length - 1) / 2) * lineHeight,
+                "transform",
+                `translate(0, ${innerHeight + 8}) rotate(-40)`,
               )
               .attr("text-anchor", "end")
-              .attr("font-size", "12px")
+              .attr("font-size", "11px")
               .attr("font-weight", "500")
               .attr("fill", "#333")
-              .text(line)
-          })
+              .text(axis)
+          } else {
+            // Word-wrapped label to the left
+            const words = axis.split(/\s+/)
+            const lineHeight = 14
+            const maxWordsPerLine = 1
+            const lines: string[] = []
+            for (let i = 0; i < words.length; i += maxWordsPerLine) {
+              lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+            }
+            lines.forEach((line, index) => {
+              axisGroup
+                .append("text")
+                .attr("class", "axis-label")
+                .attr("x", -10)
+                .attr(
+                  "y",
+                  4 + (index - (lines.length - 1) / 2) * lineHeight,
+                )
+                .attr("text-anchor", "end")
+                .attr("font-size", "12px")
+                .attr("font-weight", "500")
+                .attr("fill", "#333")
+                .text(line)
+            })
+          }
         }
 
         // ── Tick marks ───────────────────────────────────────────────────────
@@ -686,6 +708,24 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       })
 
+      // ── Report axis positions to parent for external HTML labels ────────────
+      if (onAxesLayout) {
+        const layoutPositions: AxisLayout[] = axes.map((axis) => {
+          const axisPos = axisScale(axis)!
+          return isHoriz
+            ? { axis, x: margin.left + axisPos, y: margin.top }
+            : { axis, x: margin.left, y: margin.top + axisPos }
+        })
+        // Only fire callback when positions actually change to prevent re-render loops
+        const key = layoutPositions
+          .map((p) => `${p.axis}:${p.x}:${p.y}`)
+          .join("|")
+        if (key !== prevAxisLayoutRef.current) {
+          prevAxisLayoutRef.current = key
+          onAxesLayout(layoutPositions)
+        }
+      }
+
       // ── Line generators ──────────────────────────────────────────────────────
       const baselineLineGen = isHoriz
         ? d3
@@ -903,6 +943,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       getScenarioOpacity,
       isScenarioActive,
       overlayTiers,
+      hideAxisLabels,
+      onAxesLayout,
       updateScenarioVisibility,
       applyHoverDimming,
     ],

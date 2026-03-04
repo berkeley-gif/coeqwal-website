@@ -46,6 +46,11 @@ import type {
   RefugeDeliveryMonthlyResponse,
   RefugeShortageMonthlyResponse,
   RefugePeriodResponse,
+  ChannelsListResponse,
+  EnvFlowSeasonsResponse,
+  ChannelsMonthlyResponse,
+  ChannelsSeasonalResponse,
+  ChannelsPeriodSummaryResponse,
 } from "./types"
 
 /**
@@ -978,6 +983,98 @@ export async function fetchRefugeDusPeriod(
   }
   return apiFetcher<RefugePeriodResponse>(
     ENDPOINTS.refugeDusPeriod(scenarioId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+// ============================================================================
+// Environmental River Flows fetchers (59 CalSim channel reaches)
+// ============================================================================
+
+/**
+ * Fetch all 59 env-flow channel reach entities
+ *
+ * @returns Channel list with watershed, class, and capability attributes
+ */
+export async function fetchChannelsList(
+  channelClass?: string,
+  watershed?: string,
+): Promise<ChannelsListResponse> {
+  return apiFetcher<ChannelsListResponse>(
+    ENDPOINTS.channelsList(channelClass, watershed),
+    { baseUrl: DEFAULT_API_BASE },
+  )
+}
+
+/**
+ * Fetch the 5 CEFF seasonal definitions (static lookup)
+ *
+ * @returns wet_peak, wet_base, spring_recession, dry, fall_pulse
+ */
+export async function fetchEnvFlowSeasons(): Promise<EnvFlowSeasonsResponse> {
+  return apiFetcher<EnvFlowSeasonsResponse>(ENDPOINTS.ENV_FLOW_SEASONS, {
+    baseUrl: DEFAULT_API_BASE,
+  })
+}
+
+/**
+ * Fetch monthly % unimpaired flow statistics for all channels in a scenario (Metric 1)
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param channelId - Optional single channel filter (e.g., "C_SAC049")
+ * @returns 59 channels × 12 water months = 708 rows (flat array)
+ */
+export async function fetchChannelsMonthly(
+  scenarioId: string,
+  channelId?: string,
+): Promise<ChannelsMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<ChannelsMonthlyResponse>(
+    ENDPOINTS.channelsMonthly(scenarioId, channelId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 20000 },
+  )
+}
+
+/**
+ * Fetch seasonal flow volumes, % unimpaired, and % functional flow stats (Metrics 1+2)
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param channelId - Optional single channel filter
+ * @returns 59 channels × 5 CEFF seasons = 295 rows (flat array)
+ *          pct_ff_* columns are NULL for channels without EFLOWS targets
+ */
+export async function fetchChannelsSeasonal(
+  scenarioId: string,
+  channelId?: string,
+): Promise<ChannelsSeasonalResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<ChannelsSeasonalResponse>(
+    ENDPOINTS.channelsSeasonal(scenarioId, channelId),
+    { baseUrl: DEFAULT_API_BASE, timeout: 20000 },
+  )
+}
+
+/**
+ * Fetch period-of-record Pearson r flow alteration index and full-period aggregates (Metric 3)
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param channelId - Optional single channel filter
+ * @returns One row per channel reach (59 rows)
+ *          pearson_r ≈ +1: natural timing preserved; ≈ 0: substantially altered
+ */
+export async function fetchChannelsPeriodSummary(
+  scenarioId: string,
+  channelId?: string,
+): Promise<ChannelsPeriodSummaryResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<ChannelsPeriodSummaryResponse>(
+    ENDPOINTS.channelsPeriodSummary(scenarioId, channelId),
     { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
   )
 }
