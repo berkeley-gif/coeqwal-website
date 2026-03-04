@@ -15,12 +15,13 @@
 
 import { useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import type { Theme, ThemeSectionId, SectionContent } from "../../../../packages/data/src/coeqwal/themes"
 import { THEME_SECTION_IDS } from "../../../../packages/data/src/coeqwal/themes"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
+import { ScrollToButton } from "@repo/ui"
 
 interface ThemePanelProps {
     // All the theme content and information
@@ -94,7 +95,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ y: "100%" }}
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
-                        transition={{ type: "spring", stiffness: 300, damping: 35 }}
+                        transition={{ type: "spring", stiffness: 250, damping: 35 }}
                         onClick={closeThemePanel}
                         style={{
                             position: "fixed",
@@ -106,12 +107,99 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                             // dvh handles mobile browser chrome correctly —
                             // vh would be clipped by the browser address bar on mobile
                             height: "100dvh",
+
                         }}
                     >
-                        Something here
+                        {// Sticky header
+                            // position: sticky only works when parent is flex + flexDirection: column
+                        }
+                        <Box sx={{ position: "sticky", top: 0, zIndex: 1, flexShrink: 0, }}>
+                            {/* Hero */}
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    position: "relative",
+                                    flexDirection: "column",
+                                    alignItems: "flex-start",
+                                    gap: muiTheme.space.gap.md,
+                                    height: "auto",
+                                    overflow: "hidden",
+                                    backgroundColor: muiTheme.palette.grey[200],
+                                    padding: `${muiTheme.space.panel.padding} ${muiTheme.space.panel.padding}`
+                                }}
+                            >
+                                {theme.heroImage && (
+                                    <Box
+                                        component="img"
+                                        src={theme.heroImage}
+                                        // Decorative — title is rendered as text below
+                                        alt=""
+                                        aria-hidden="true"
+                                        sx={{
+                                            position: "absolute",
+                                            left: 0,
+                                            top: 0,
+                                            width: "100%",
+                                            height: "100%",
+                                            objectFit: "cover",
+                                            display: "block",
+                                            filter: "brightness(0.6)",
+                                            zIndex: muiTheme.zIndex.heroBackground,
+                                        }}
+                                    />
+                                )}
+                                {/* Close button — top left, arrow pointing left */}
+                                <Box
+                                    sx={{
+                                        zIndex: muiTheme.zIndex.pageContent,
+                                    }}
+                                >
+                                    <ScrollToButton
+                                        onClick={closeThemePanel}
+                                        // 180deg = arrow points left (back/close affordance)
+                                        rotation="90deg"
+                                        size={45}
+                                        axis="horizontal"
+                                        color={muiTheme.palette.common.white}
+                                        ariaLabel="Close theme panel"
+                                        animationComplete={true}
+                                        delay={0}
+                                    />
+                                </Box>
+
+                                {/* Theme title + inquiry overlaid on hero */}
+                                <Box
+                                    sx={{
+                                        color: muiTheme.palette.common.white,
+                                        zIndex: muiTheme.zIndex.pageContent,
+                                    }}
+                                >
+                                    <Typography
+                                        variant="h1"
+                                        sx={{
+                                            textTransform: "capitalize",
+
+                                        }}
+                                    >
+                                        {theme.label.replace(/\n/g, " ")}
+                                    </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            maxWidth: "80%"
+                                        }}
+                                    >
+                                        {theme.inquiry}
+                                    </Typography>
+                                </Box>
+
+
+                            </Box>
+                        </Box>
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     )
 }

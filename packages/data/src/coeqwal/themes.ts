@@ -131,8 +131,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "The Delta",
     description:
       "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
-    heroImage: '/images/themes/delta_hero.jpeg',
-    inquiry: '',
+    heroImage: '/images/themes/delta_hero.jpg',
+    inquiry: 'Can the Delta stay healthy for people, farms, fish, and wildlife – now and in the future?',
     sections: [
       {
         // ================== INTRO =======================
