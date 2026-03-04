@@ -4,24 +4,25 @@
 
 "use client"
 
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
 export function usePanelRoute() {
     const router = useRouter()
     const pathname = usePathname()
+    const searchParams = useSearchParams()
 
-    const activeThemeKey = pathname.startsWith("/themes/")
-        ? pathname.split("/themes/")[1]
-        : null
+    const activeThemeKey = searchParams.get("theme")
 
     const openThemePanel = useCallback((key: string) => {
-        router.push(`/themes/${key}`, { scroll: false })
-    }, [router])
+        // Add theme query param
+        router.push(`${pathname}?theme=${key}`, { scroll: false })
+    }, [router, pathname, searchParams])
 
-    const closeThemePanel = useCallback((key: string) => {
-        router.push("/", { scroll: false })
-    }, [router])
+    const closeThemePanel = useCallback(() => {
+        // Remove the theme param
+        router.push(pathname, { scroll: false })
+    }, [router, searchParams])
 
     return { activeThemeKey, openThemePanel, closeThemePanel }
 }

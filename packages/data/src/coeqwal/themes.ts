@@ -3,7 +3,73 @@
  */
 
 // =============================================================================
-// Types
+// Block types
+// Content blocks for the mixed theme section
+// =============================================================================
+export type ParagraphBlock = {
+  type: "paragraph",
+  text: string,
+}
+
+export type ListBlock = {
+  type: "list",
+  items: string[],
+}
+
+export type ImageBlock = {
+  type: "image"
+  src: string
+  alt: string
+  caption?: string
+}
+
+// Union of all possible block types
+export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
+
+// =============================================================================
+// Mixed Theme Section
+// The mixed theme section has any number of content blocks, in order
+// =============================================================================
+export interface MixedSection {
+  type: "mixed"
+  blocks: ContentBlock[]
+}
+
+// =============================================================================
+// Boxed Theme Section
+// The boxed theme section features any number of blocks with a title, and any 
+// number of paragraphs
+// =============================================================================
+export interface BoxItem {
+  title: string
+  paragraphs: string[]
+}
+
+export interface BoxSection {
+  type: "boxes"
+  items: BoxItem[]
+}
+
+export type SectionContent = MixedSection | BoxSection
+
+// =============================================================================
+// Themes Section Id's for the theme panels
+// =============================================================================
+
+export const THEME_SECTION_IDS = [
+  "intro",
+  "why-this-matters",
+  "what-this-theme-focuses-on",
+  "what-to-keep-in-mind",
+  "what-management-strategies-are-explored",
+  "what-the-models-show",
+  "how-to-explore-further"
+] as const
+
+export type ThemeSectionId = typeof THEME_SECTION_IDS[number]
+
+// =============================================================================
+// Themes Content and Info
 // =============================================================================
 
 export interface Theme {
@@ -15,11 +81,18 @@ export interface Theme {
   shortLabel: string
   /** One-sentence description of what this theme covers */
   description: string
+  /** Hero image for the theme panel */
+  heroImage: string
+  /** Intro question that encapsulates the theme */
+  inquiry: string
+  /** Sections for the theme panel */
+  sections: ThemeSection[]
 }
 
-// =============================================================================
-// Themes
-// =============================================================================
+export interface ThemeSection {
+  id: ThemeSectionId
+  content: SectionContent
+}
 
 export const WATER_THEMES: Theme[] = [
   {
@@ -28,6 +101,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Community water systems",
     description:
       "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
+    heroImage: '',
+    inquiry: '',
+    sections: [],
   },
   {
     id: "ag_gw",
@@ -35,6 +111,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Farms & groundwater",
     description:
       "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
+    heroImage: '',
+    inquiry: '',
+    sections: [],
   },
   {
     id: "eco",
@@ -42,6 +121,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Rivers & ecosystems",
     description:
       "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
+    heroImage: '',
+    inquiry: '',
+    sections: [],
   },
   {
     id: "delta",
@@ -49,6 +131,87 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "The Delta",
     description:
       "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
+    heroImage: '/images/themes/delta_hero.jpeg',
+    inquiry: '',
+    sections: [
+      {
+        // ================== INTRO =======================
+        id: "intro",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Millions of Californians rely on water pumped from the Sacramento-San Joaquin Delta. At the same time, the Delta is a living place – home to communities, farms that grow food, and fish and birds that depend on healthy rivers and wetlands.",
+
+            },
+            {
+              type: "image",
+              src: "/images/themes/delta-diagram.png",
+              alt: "Delta flow diagram",
+              caption: "Sea flows into the Delta"
+            },
+          ]
+        }
+      },
+      {
+        // ================== WHY THIS MATTERS =======================
+        id: "why-this-matters",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "The Sacramento–San Joaquin Delta sits at the heart of California’s water system. It sends water to cities and farms across the state. It is also an ecosystem of wetlands, rivers, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
+
+            },
+            {
+              type: "paragraph",
+              text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta. Controlled releases from dams maintain freshwater flows into the Delta throughout the year. Wetlands have been converted to farmland. Some islands have sunk below sea level. Invasive species have changed habitats. These physical changes affect the quality of water in the Delta and estuary.",
+
+            },
+            {
+              type: "paragraph",
+              text: "The Delta now faces new pressures. Droughts are lasting longer. Heat waves are more intense. Sea levels are rising, changing how freshwater from rivers mixes with saltwater from the Bay. These shifts increase stress on both ecosystems and water supplies.",
+
+            },
+            {
+              type: "paragraph",
+              text: "Understanding how the Delta functions – as both infrastructure and living ecosystem – helps inform decisions about its future.",
+
+            },
+          ]
+        }
+      },
+      // ================== WHAT THIS THEME FOCUSES ON =======================
+      {
+        id: "what-this-theme-focuses-on",
+        content: {
+          type: "boxes",
+          items: [
+            {
+              title: "Seasonal flow & salinity patterns",
+              paragraphs: [
+                "The Delta changes with the seasons. In spring, snowmelt fills rivers with fresh water, pushing salt toward the Bay. In summer and fall, river flows decline, temperatures rise, and salt moves farther inland. Reservoir releases help manage salinity during dry months. Farms, wetlands, fish, and communities depend on these seasonal patterns, and on whether conditions remain within healthy ranges.",
+              ],
+            },
+            {
+              title: "Water management & ecosystem health",
+              paragraphs: [
+                "Water management decisions shape what happens inside the Delta. Freshwater flows influence salinity levels and where they occur. Pumping shifts how water moves through the system. Reservoir storage affects both supply and temperature. These forces interact to influence habitat conditions and ecosystem resilience.",
+                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress."
+              ],
+            },
+            {
+              title: "System connections & ripple effects",
+              paragraphs: [
+                "The Delta is deeply connected to the rest of California’s water system. Storage north and south of the Delta, export operations, farming demand, environmental requirements, and sea-level rise all interact. A change in one place can affect many others. Seeing the Delta as a living place means recognizing how water movement, landscape, communities, and ecosystem health are linked, as well as how management decisions influence long-term resilience.",
+              ],
+            },
+          ],
+        }
+      },
+    ],
   },
   {
     id: "climate",
@@ -56,6 +219,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Climate resilience",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
+    heroImage: '',
+    inquiry: '',
+    sections: [],
   },
   {
     id: "governance",
@@ -63,6 +229,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Operations & impacts",
     description:
       "How evidence, trade-offs, and equity considerations inform water-management decisions.",
+    heroImage: '',
+    inquiry: '',
+    sections: [],
   },
 ]
 
