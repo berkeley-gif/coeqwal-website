@@ -147,7 +147,7 @@ export const WATER_THEMES: Theme[] = [
             },
             {
               type: "image",
-              src: "/images/themes/delta-diagram.png",
+              src: "/images/themes/delta_salinity_overview_graph.png",
               alt: "Delta flow diagram",
               caption: "Sea flows into the Delta"
             },
@@ -206,6 +206,25 @@ export const WATER_THEMES: Theme[] = [
               title: "System connections & ripple effects",
               paragraphs: [
                 "The Delta is deeply connected to the rest of California’s water system. Storage north and south of the Delta, export operations, farming demand, environmental requirements, and sea-level rise all interact. A change in one place can affect many others. Seeing the Delta as a living place means recognizing how water movement, landscape, communities, and ecosystem health are linked, as well as how management decisions influence long-term resilience.",
+              ],
+            },
+          ],
+        }
+      },
+      // ================== WHAT TO KEEP IN MIND =======================
+      {
+        id: "what-to-keep-in-mind",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "list",
+              items: [
+                "The Delta responds to seasons and extreme years, not just long-term averages. Short periods of stress can matter.",
+                "Changing river flows alone does not automatically restore ecosystem health. Landscape conditions, habitat changes, levees, and invasive species – not directly evaluated by COEQWAL – also influence outcomes.",
+                "Different regions experience impacts differently. A benefit in one area may create pressure in another.",
+                "Some water standards must legally be met. Certain outcomes may appear stable even when other parts of the system change.",
+                "Key outcomes (i.e. tier outcomes) provide a big-picture view, but local or seasonal variation can still be important."
               ],
             },
           ],

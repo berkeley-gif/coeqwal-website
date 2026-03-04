@@ -110,7 +110,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
                         }}
                     >
-                        {// Sticky header
+                        {// Sticky hero
                             // position: sticky only works when parent is flex + flexDirection: column
                         }
                         <Box sx={{ position: "sticky", top: 0, zIndex: 1, flexShrink: 0, }}>
@@ -119,13 +119,13 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                 sx={{
                                     display: "flex",
                                     position: "relative",
-                                    flexDirection: "column",
+                                    flexDirection: "row",
                                     alignItems: "flex-start",
                                     gap: muiTheme.space.gap.md,
                                     height: "auto",
                                     overflow: "hidden",
                                     backgroundColor: muiTheme.palette.grey[200],
-                                    padding: `${muiTheme.space.panel.padding} ${muiTheme.space.panel.padding}`
+                                    padding: `25px ${muiTheme.space.panel.padding}`
                                 }}
                             >
                                 {theme.heroImage && (
@@ -175,7 +175,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                     }}
                                 >
                                     <Typography
-                                        variant="h1"
+                                        variant="h2"
                                         sx={{
                                             textTransform: "capitalize",
 
@@ -186,7 +186,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                     <Typography
                                         variant="body1"
                                         sx={{
-                                            maxWidth: "80%"
+                                            maxWidth: "100%"
                                         }}
                                     >
                                         {theme.inquiry}
@@ -195,6 +195,45 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
 
                             </Box>
+                        </Box>
+
+                        {// Scrollable body
+                        }
+                        <Box
+                            ref={scrollContainerRef}
+                            sx={{
+                                flex: 1,
+                                overflowY: "auto",
+                                padding: { xs: 3, md: 6 },
+                                maxWidth: 900,
+                                width: "100%",
+                                mx: "auto",
+                            }}
+                        >
+                            {theme.sections.map((section) => (
+                                <Box
+                                    key={section.id}
+                                    component="section"
+                                    // id is the scrollspy anchor — must match what useScrollSpy observes
+                                    id={section.id}
+                                    sx={{ marginBottom: 8 }}
+                                >
+                                    {/* Skip heading for intro — it has no label */}
+                                    {SECTION_LABELS[section.id] && (
+                                        <Typography
+                                            variant="h3"
+                                            sx={{
+                                                textTransform: "capitalize",
+
+                                            }}
+                                        >
+                                            {SECTION_LABELS[section.id]}
+                                        </Typography>
+
+                                    )}
+                                    <SectionContentRenderer content={section.content} />
+                                </Box>
+                            ))}
                         </Box>
                     </motion.div>
                 </>
