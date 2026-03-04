@@ -561,9 +561,17 @@ function useMultiScenarioAgDemandUnits(scenarios: string[]) {
         if (!cellStats[duId]) {
           cellStats[duId] = {}
         }
+        // P95 delivery fulfillment = delivery exceeded in 95% of years / annual demand × 100.
+        // Matches the environmental-water convention (100 − shortage_pct_95). Higher = better.
+        const p95Demand = summary.annual_demand_avg_taf
+        const p95Delivery = summary.delivery_exceedance?.["p95"]
+        const p95Fulfillment =
+          p95Delivery !== undefined && p95Demand != null && p95Demand > 0
+            ? Math.min(100, (p95Delivery / p95Demand) * 100)
+            : undefined
         cellStats[duId][scenarioId] = {
           annualAvgTaf: summary.annual_delivery_avg_taf,
-          reliabilityPct: summary.reliability_pct ?? undefined,
+          reliabilityPct: p95Fulfillment,
         }
       },
     )
@@ -771,6 +779,17 @@ function MonthlyAgSection({
                     Overlapping percentile bands:
                   </Box>
                   <DeliveryBandsLegend />
+                </Box>
+                <Box
+                  component="span"
+                  sx={{
+                    color: "grey.400",
+                    fontSize: "0.8rem",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Upper chart region = wetter-year delivery · Lower chart region
+                  = drier-year delivery
                 </Box>
               </Box>
             </>
