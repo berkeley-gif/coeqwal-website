@@ -197,6 +197,7 @@ export default function ComparisonPanel() {
         }
         sx={{ mr: 1.5 }}
       />
+      {/* Temporarily disabled overlay tiers
       <FormControlLabel
         control={
           <Checkbox
@@ -212,6 +213,7 @@ export default function ComparisonPanel() {
           </Typography>
         }
       />
+      */}
     </Box>
   )
 
