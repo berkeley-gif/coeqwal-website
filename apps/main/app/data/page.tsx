@@ -26,7 +26,7 @@ import {
 import { Header } from "../components/Header"
 import { ArrowHead, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
-import { ContactSection } from "../components/ContactSection"
+import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
@@ -647,7 +647,7 @@ export default function DataPage() {
             </Grid>
           </Container>
         </Box>
-        <ContactSection
+        <CenteredTextSection
           title="Get Involved"
           id="getInvolved"
           ariaLabel="get involved"

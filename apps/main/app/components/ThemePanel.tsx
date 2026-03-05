@@ -16,13 +16,14 @@
 import { useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
-import { usePanelRoute } from "../hooks/usePanelRoute"
+import { ScrollToButton } from "@repo/ui"
+import { Panel } from "@repo/ui"
 import type { Theme, SectionContent } from "../../../../packages/data/src/coeqwal/themes"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
-import { ScrollToButton } from "@repo/ui"
-import { Panel } from "@repo/ui"
+import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
+import { usePanelRoute } from "../hooks/usePanelRoute"
 
 interface ThemePanelProps {
     // All the theme content and information
@@ -315,6 +316,13 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                     <SectionContentRenderer content={section.content} />
                                 </Panel>
                             ))}
+                            <CenteredTextSection
+                                id="conclusion"
+                                ariaLabel="Conclusion"
+                                text="Together, these views make trade-offs, equity, and resilience visible, providing a shared, data-grounded basis for comparison, discussion, and learning."
+                                bgColor={muiTheme.palette.brand.water}
+                                textColor={muiTheme.palette.text.secondary}
+                            />
                         </Box>
                     </motion.div>
                 </>

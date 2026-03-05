@@ -13,7 +13,7 @@ import { CenterImageText } from "../components/CenterImageText"
 import { TieredImageText } from "../components/TieredImageText"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
 import { LogoGrid } from "../components/LogoGrid"
-import { ContactSection } from "../components/ContactSection"
+import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { ImageTextBlock } from "../components/ScrollImageTextBlocks"
 import type { GridLogo } from "../components/LogoGrid"
 
@@ -149,7 +149,7 @@ export default function AboutPage() {
         id="ourPartners"
         ariaLabel="our partners"
       />
-      <ContactSection
+      <CenteredTextSection
         title="Get Involved"
         id="getInvolved"
         ariaLabel="get involved"
