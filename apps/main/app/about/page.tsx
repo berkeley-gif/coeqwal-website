@@ -93,14 +93,24 @@ export default function AboutPage() {
     // Force scroll to top immediately
     window.scrollTo({ top: 0, left: 0, behavior: "instant" })
 
-    // Double-check after a tick (after animations initialize)
-    setTimeout(() => {
-      if (window.scrollY > 0) {
-        console.log("Page shifted! Scroll position:", window.scrollY)
-        window.scrollTo(0, 0)
-      }
+  useEffect(() => {
+    // Guard required: this effect touches browser-only APIs (window.history, window.scrollTo).
+    if (typeof window === "undefined") return
+
+    window.history.scrollRestoration = "manual"
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" })
+
+    const timer = setTimeout(() => {
+        if (window.scrollY > 0) {
+            console.log("Page shifted! Scroll position:", window.scrollY)
+            window.scrollTo(0, 0)
+        }
     }, 100)
-  }, [])
+
+    // Clean up the timeout if the component unmounts before it fires.
+    // Without this, the callback could run against an unmounted component.
+    return () => clearTimeout(timer)
+}, [])
 
   return (
     <>
