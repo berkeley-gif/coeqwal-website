@@ -26,6 +26,11 @@ export function Header() {
   const { isPastHero } = useTabs()
 
   const handleLogoClick = () => {
+    // Guard: this handler references browser-only APIs.
+    // It will never be called on the server, but the function body
+    // is evaluated during prerendering, so we still need the guard.
+    if (typeof window === "undefined") return
+
     const start = window.scrollY
     if (start === 0) return
 

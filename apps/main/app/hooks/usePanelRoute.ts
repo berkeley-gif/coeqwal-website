@@ -8,21 +8,24 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 
 export function usePanelRoute() {
-    const router = useRouter()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-    const activeThemeKey = searchParams.get("theme")
+  const activeThemeKey = searchParams.get("theme")
 
-    const openThemePanel = useCallback((key: string) => {
-        // Add theme query param
-        router.push(`${pathname}?theme=${key}`, { scroll: false })
-    }, [router, pathname, searchParams])
+  const openThemePanel = useCallback(
+    (key: string) => {
+      // Add theme query param
+      router.push(`${pathname}?theme=${key}`, { scroll: false })
+    },
+    [router, pathname, searchParams],
+  )
 
-    const closeThemePanel = useCallback(() => {
-        // Remove the theme param
-        router.push(pathname, { scroll: false })
-    }, [router, searchParams])
+  const closeThemePanel = useCallback(() => {
+    // Remove the theme param
+    router.push(pathname, { scroll: false })
+  }, [router, searchParams])
 
-    return { activeThemeKey, openThemePanel, closeThemePanel }
+  return { activeThemeKey, openThemePanel, closeThemePanel }
 }

@@ -7,13 +7,13 @@
 // Content blocks for the mixed theme section
 // =============================================================================
 export type ParagraphBlock = {
-  type: "paragraph",
-  text: string,
+  type: "paragraph"
+  text: string
 }
 
 export type ListBlock = {
-  type: "list",
-  items: string[],
+  type: "list"
+  items: string[]
 }
 
 export type ImageBlock = {
@@ -32,14 +32,14 @@ export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
 // =============================================================================
 export interface MixedSection {
   type: "mixed"
-  blocks: ContentBlock[],
+  blocks: ContentBlock[]
   /** Optional gap between blocks — defaults to theme spacing if omitted */
   gap?: string | number
 }
 
 // =============================================================================
 // Boxed Theme Section
-// The boxed theme section features any number of blocks with a title, and any 
+// The boxed theme section features any number of blocks with a title, and any
 // number of paragraphs
 // =============================================================================
 export interface BoxItem {
@@ -65,10 +65,10 @@ export const THEME_SECTION_IDS = [
   "what-to-keep-in-mind",
   "what-management-strategies-are-explored",
   "what-the-models-show",
-  "how-to-explore-further"
+  "how-to-explore-further",
 ] as const
 
-export type ThemeSectionId = typeof THEME_SECTION_IDS[number]
+export type ThemeSectionId = (typeof THEME_SECTION_IDS)[number]
 
 // =============================================================================
 // Themes Content and Info
@@ -103,8 +103,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Community water systems",
     description:
       "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
-    heroImage: '',
-    inquiry: '',
+    heroImage: "",
+    inquiry: "",
     sections: [],
   },
   {
@@ -113,8 +113,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Farms & groundwater",
     description:
       "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
-    heroImage: '',
-    inquiry: '',
+    heroImage: "",
+    inquiry: "",
     sections: [],
   },
   {
@@ -123,8 +123,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Rivers & ecosystems",
     description:
       "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
-    heroImage: '',
-    inquiry: '',
+    heroImage: "",
+    inquiry: "",
     sections: [],
   },
   {
@@ -133,8 +133,9 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "The Delta",
     description:
       "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
-    heroImage: '/images/themes/delta_hero.jpg',
-    inquiry: 'Can the Delta stay healthy for people, farms, fish, and wildlife – now and in the future?',
+    heroImage: "/images/themes/delta_hero.jpg",
+    inquiry:
+      "Can the Delta stay healthy for people, farms, fish, and wildlife – now and in the future?",
     sections: [
       {
         // ================== INTRO =======================
@@ -145,16 +146,15 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "Millions of Californians rely on water pumped from the Sacramento-San Joaquin Delta. At the same time, the Delta is a living place – home to communities, farms that grow food, and fish and birds that depend on healthy rivers and wetlands.",
-
             },
             {
               type: "image",
               src: "/images/themes/delta_salinity_overview_graph.png",
               alt: "Delta flow diagram",
-              caption: "Rising tides and saline waters flowing into the Delta"
+              caption: "Rising tides and saline waters flowing into the Delta",
             },
-          ]
-        }
+          ],
+        },
       },
       {
         // ================== WHY THIS MATTERS =======================
@@ -166,25 +166,21 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "The Sacramento–San Joaquin Delta sits at the heart of California’s water system. It sends water to cities and farms across the state. It is also an ecosystem of wetlands, rivers, and important fish species. Families, farmers, fishing communities, and Tribal nations have deep ties to this landscape.",
-
             },
             {
               type: "paragraph",
               text: "Over time, dams, levees, reservoirs, and pumping plants have changed how water moves through the Delta. Controlled releases from dams maintain freshwater flows into the Delta throughout the year. Wetlands have been converted to farmland. Some islands have sunk below sea level. Invasive species have changed habitats. These physical changes affect the quality of water in the Delta and estuary.",
-
             },
             {
               type: "paragraph",
               text: "The Delta now faces new pressures. Droughts are lasting longer. Heat waves are more intense. Sea levels are rising, changing how freshwater from rivers mixes with saltwater from the Bay. These shifts increase stress on both ecosystems and water supplies.",
-
             },
             {
               type: "paragraph",
               text: "Understanding how the Delta functions – as both infrastructure and living ecosystem – helps inform decisions about its future.",
-
             },
-          ]
-        }
+          ],
+        },
       },
       // ================== WHAT THIS THEME FOCUSES ON =======================
       {
@@ -202,7 +198,7 @@ export const WATER_THEMES: Theme[] = [
               title: "Water management & ecosystem health",
               paragraphs: [
                 "Water management decisions shape what happens inside the Delta. Freshwater flows influence salinity levels and where they occur. Pumping shifts how water moves through the system. Reservoir storage affects both supply and temperature. These forces interact to influence habitat conditions and ecosystem resilience.",
-                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress."
+                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress.",
               ],
             },
             {
@@ -212,7 +208,7 @@ export const WATER_THEMES: Theme[] = [
               ],
             },
           ],
-        }
+        },
       },
       // ================== WHAT TO KEEP IN MIND =======================
       {
@@ -227,11 +223,11 @@ export const WATER_THEMES: Theme[] = [
                 "Changing river flows alone does not automatically restore ecosystem health. Landscape conditions, habitat changes, levees, and invasive species – not directly evaluated by COEQWAL – also influence outcomes.",
                 "Different regions experience impacts differently. A benefit in one area may create pressure in another.",
                 "Some water standards must legally be met. Certain outcomes may appear stable even when other parts of the system change.",
-                "Key outcomes (i.e. tier outcomes) provide a big-picture view, but local or seasonal variation can still be important."
+                "Key outcomes (i.e. tier outcomes) provide a big-picture view, but local or seasonal variation can still be important.",
               ],
             },
           ],
-        }
+        },
       },
       // ================== WHAT MANAGEMENT STRATEGIES ARE EXPLORED =======================
       {
@@ -257,7 +253,7 @@ export const WATER_THEMES: Theme[] = [
               text: "Looking at these factors together shows how the Delta responds under different conditions.",
             },
           ],
-        }
+        },
       },
       // ================== WHAT THE MODELS SHOW =======================
       {
@@ -279,7 +275,7 @@ export const WATER_THEMES: Theme[] = [
               text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health,water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
             },
           ],
-        }
+        },
       },
       // ================== WHAT THE MODELS SHOW =======================
       {
@@ -292,7 +288,7 @@ export const WATER_THEMES: Theme[] = [
               text: "Explore how water management choices influence salinity, reservoir storage, estuary health, and water deliveries – and how these changes affect communities and ecosystems across California.",
             },
           ],
-        }
+        },
       },
     ],
   },
@@ -302,8 +298,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Climate resilience",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
-    heroImage: '',
-    inquiry: '',
+    heroImage: "",
+    inquiry: "",
     sections: [],
   },
   {
@@ -312,8 +308,8 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Operations & impacts",
     description:
       "How evidence, trade-offs, and equity considerations inform water-management decisions.",
-    heroImage: '',
-    inquiry: '',
+    heroImage: "",
+    inquiry: "",
     sections: [],
   },
 ]
