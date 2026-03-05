@@ -63,7 +63,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                         )
                     case "image":
                         return (
-                            <figure key={i} style={{ margin: "70px", display: "flex", alignItems: "center", flexDirection: "column" }}>
+                            <figure key={i} style={{ margin: "30px", display: "flex", alignItems: "center", flexDirection: "column" }}>
                                 <Box
                                     component={motion.img}
                                     initial="hidden"
