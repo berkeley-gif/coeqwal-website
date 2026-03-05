@@ -572,7 +572,6 @@ export function BaseHeader({
           )}
         </Toolbar>
       </MotionAppBar>
-
       {/* ----------------------------------------
        * MOBILE DRAWER
        * Slides from right, rounded corners on top-left and bottom-right

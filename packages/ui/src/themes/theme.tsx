@@ -591,6 +591,15 @@ export const themeValues = {
       xl: 3, // 24px - spacious gap
     },
 
+    // Large gap spacing for paragraphs and lists
+    listGap: {
+      xs: 2.5, // 20px - minimum paragraph breathing room
+      sm: 3.5, // 28px - compact list spacing
+      md: 4.5, // 36px - default section gap
+      lg: 5.5, // 44px - comfortable narrative spacing
+      xl: 8, // 64px - maximum open spacing
+    },
+
     // Page margins
     page: {
       x: { xs: 4, sm: 6, md: 8 }, // 32px / 48px / 64px horizontal (clears map controls)
