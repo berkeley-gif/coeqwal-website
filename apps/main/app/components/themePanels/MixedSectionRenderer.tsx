@@ -1,5 +1,12 @@
 // apps/main/components/theme-panel/MixedSectionRenderer.tsx
+
+import { Typography, List, ListItem, ListItemText, ListItemIcon, Box } from "@repo/ui/mui"
+import OpacityIcon from '@mui/icons-material/Opacity';
+import { motion } from "@repo/motion";
+import { useTheme } from "@repo/ui/mui";
+import { fadeInRight } from "../../lib/constants/motionAnimations"
 import type { MixedSection } from "../../../../../packages/data/src/coeqwal/themes.ts"
+
 
 function parseBoldText(text: string): React.ReactNode {
     const parts = text.split(/\*\*(.*?)\*\*/g)
@@ -9,27 +16,66 @@ function parseBoldText(text: string): React.ReactNode {
 }
 
 export function MixedSectionRenderer({ content }: { content: MixedSection }) {
+    const muiTheme = useTheme()
+
     return (
-        <div>
+        <Box
+            component={motion.div}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: false, amount: 0.3 }}
+            variants={fadeInRight}
+        >
             {content.blocks.map((block, i) => {
                 switch (block.type) {
                     case "paragraph":
-                        return <p key={i}>{parseBoldText(block.text)}</p>
+                        return (
+                            <Typography
+                                variant="body1"
+                                key={i}
+                                sx={{
+                                    marginBottom: "40px"
+                                }}
+                            >
+                                {parseBoldText(block.text)}
+                            </Typography>
+                        )
                     case "list":
                         return (
-                            <ul key={i}>
+                            <List key={i}>
                                 {block.items.map((item, j) => (
-                                    <li key={j}>{parseBoldText(item)}</li>
+                                    <ListItem>
+                                        <ListItemIcon
+                                        sx={{
+                                            color: muiTheme.palette.blue.darkest
+                                        }}
+                                        >
+                                            <OpacityIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={parseBoldText(item)}
+                                        />
+                                    </ListItem>
                                 ))}
-                            </ul>
+                            </List>
                         )
                     case "image":
                         return (
-                            <figure key={i} style={{ margin: "24px 0" }}>
-                                <img
+                            <figure key={i} style={{ margin: "70px", display: "flex", alignItems: "center", flexDirection: "column" }}>
+                                <Box
+                                    component={motion.img}
+                                    initial="hidden"
+                                    whileInView="show"
+                                    viewport={{ once: false, amount: 0.3 }}
+                                    variants={fadeInRight}
                                     src={block.src}
                                     alt={block.alt}
-                                    style={{ width: "100%", maxWidth: "800px", borderRadius: 8 }}
+                                    sx={{
+                                        width: "100%",
+                                        maxWidth: "800px",
+                                        margin: "0 auto",
+                                        height: "auto",
+                                    }}
                                 />
                                 {block.caption && (
                                     <figcaption style={{ marginTop: 8, fontSize: "0.85em" }}>
@@ -44,6 +90,6 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                     }
                 }
             })}
-        </div>
+        </Box>
     )
 } 

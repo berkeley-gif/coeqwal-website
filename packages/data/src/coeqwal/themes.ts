@@ -149,7 +149,7 @@ export const WATER_THEMES: Theme[] = [
               type: "image",
               src: "/images/themes/delta_salinity_overview_graph.png",
               alt: "Delta flow diagram",
-              caption: "Sea flows into the Delta"
+              caption: "Rising tides and saline waters flowing into the Delta"
             },
           ]
         }
