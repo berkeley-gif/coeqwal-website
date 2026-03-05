@@ -31,14 +31,35 @@ interface ThemePanelProps {
 }
 
 // Order matches THEME_SECTION_IDS exactly.
-const SECTION_LABELS: Record<string, string> = {
-    "intro": "Intro",
-    "why-this-matters": "Why this matters",
-    "what-this-theme-focuses-on": "What this theme focuses on",
-    "what-to-keep-in-mind": "What to keep in mind",
-    "what-management-strategies-are-explored": "Management strategies",
-    "what-the-models-show": "What the models show",
-    "how-to-explore-further": "How to explore further",
+const SECTION_LABELS: Record<string, { long: string; short: string }> = {
+    "intro": {
+        long: "Intro",
+        short: "Intro",
+    },
+    "why-this-matters": {
+        long: "Why this matters",
+        short: "Importance",
+    },
+    "what-this-theme-focuses-on": {
+        long: "What this theme focuses on",
+        short: "Focus",
+    },
+    "what-to-keep-in-mind": {
+        long: "What to keep in mind",
+        short: "Keep in mind",
+    },
+    "what-management-strategies-are-explored": {
+        long: "What management strategies are explored",
+        short: "Management strategies",
+    },
+    "what-the-models-show": {
+        long: "What the models show",
+        short: "Model results",
+    },
+    "how-to-explore-further": {
+        long: "How to explore further",
+        short: "Explore further",
+    },
 }
 
 /* Section content dispatcher
@@ -234,7 +255,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                 }}
                             >
                                 {theme.sections
-                                    .filter((s) => SECTION_LABELS[s.id] !== "")
+                                    .filter((s) => SECTION_LABELS[s.id]?.short !== "")
                                     .map((section) => {
                                         const isActive = activeSection === section.id
                                         return (
@@ -243,7 +264,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                                 component="button"
                                                 onClick={() => scrollToSection(section.id)}
                                                 aria-pressed={isActive}
-                                                aria-label={SECTION_LABELS[section.id]}
+                                                aria-label={SECTION_LABELS[section.id]?.long}
                                                 sx={{
                                                     display: "inline-flex",
                                                     alignItems: "center",
@@ -271,7 +292,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                                         transition: "opacity 0.15s ease",
                                                     }}
                                                 >
-                                                    {SECTION_LABELS[section.id]}
+                                                    {SECTION_LABELS[section.id]?.short}
                                                 </Typography>
                                             </Box>
                                         )
@@ -309,7 +330,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                                 textTransform: "capitalize",
                                             }}
                                         >
-                                            {SECTION_LABELS[section.id]}
+                                            {SECTION_LABELS[section.id]?.long}
                                         </Typography>
 
                                     )}

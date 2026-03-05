@@ -25,6 +25,11 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             whileInView="show"
             viewport={{ once: false, amount: 0.3 }}
             variants={fadeInRight}
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: content.gap ?? "16px"
+            }}
         >
             {content.blocks.map((block, i) => {
                 switch (block.type) {
@@ -33,9 +38,6 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                             <Typography
                                 variant="body1"
                                 key={i}
-                                sx={{
-                                    marginBottom: "40px"
-                                }}
                             >
                                 {parseBoldText(block.text)}
                             </Typography>
@@ -46,9 +48,9 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                                 {block.items.map((item, j) => (
                                     <ListItem>
                                         <ListItemIcon
-                                        sx={{
-                                            color: muiTheme.palette.blue.darkest
-                                        }}
+                                            sx={{
+                                                color: muiTheme.palette.blue.darkest
+                                            }}
                                         >
                                             <OpacityIcon />
                                         </ListItemIcon>
