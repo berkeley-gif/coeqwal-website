@@ -5,8 +5,7 @@
  *
  * Provides background information on funding and methodology
  */
-export const dynamic = "force-dynamic"
-import React, { useEffect } from "react"
+import React, { useEffect, Suspense } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { CenterImageText } from "../components/CenterImageText"
@@ -105,7 +104,9 @@ export default function AboutPage() {
 
   return (
     <>
-      <Header />
+      <Suspense fallback={null}>
+        <Header />
+      </Suspense>
       <CenterImageText
         id="intro"
         ariaLabel="intro"
