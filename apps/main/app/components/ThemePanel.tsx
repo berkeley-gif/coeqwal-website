@@ -17,10 +17,11 @@ import { useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { usePanelRoute } from "../hooks/usePanelRoute"
-import type { Theme, ThemeSectionId, SectionContent } from "../../../../packages/data/src/coeqwal/themes"
+import type { Theme, SectionContent } from "../../../../packages/data/src/coeqwal/themes"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
 import { ScrollToButton } from "@repo/ui"
+import { Panel } from "@repo/ui"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 
 interface ThemePanelProps {
@@ -64,6 +65,8 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
     const isOpen = theme !== null
 
+    const themeId = theme?.id
+
     // Ref for the scrollable content container 
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -73,8 +76,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
         [theme?.id] // only recompute when the theme changes, not on every render
     )
     const activeSection = useWhichScrollSection(activeSectionIds, scrollContainerRef)
-    console.log("activeSection:", activeSection)
-    console.log("activeSectionIds:", activeSectionIds)
 
     // Lock scroll when open
     useEffect(() => {
@@ -188,7 +189,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                     }}
                                 >
                                     <Typography
-                                        variant="h2"
+                                        variant="h3"
                                         sx={{
                                             textTransform: "capitalize",
 
@@ -209,7 +210,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
                             </Box>
 
-                            {/* Horizontal Scroll Index */}
+                            {/* Horizontal Scroll Tab Index */}
                             <Box
                                 component="nav"
                                 role="tablist"
@@ -225,7 +226,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                     width: "100%",
                                     height: muiTheme.layout.collapsedTabHeight,
                                     ...muiTheme.typography.nav,
-                                    background: muiTheme.palette.waterThemes.delta.background,
+                                    background: muiTheme.palette.brand.panelMedium,
                                     lineHeight: 1,
                                     overflowX: "auto",
                                     scrollBarWIdth: "none",
@@ -251,23 +252,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                                     borderRadius: muiTheme.borderRadius.sm ?? "4px",
                                                     cursor: "pointer",
                                                     background: "transparent",
-                                                    color: muiTheme.palette.waterThemes.delta.text,
+                                                    color: muiTheme.palette.common.white,
                                                     textShadow: "none",
                                                     transition: "background-color 0.15s",
-                                                    // Use data attribute for active — more specific than :hover
-                                                    '&[data-active="true"]': {
-                                                        background: "rgba(255,255,255,0.2)",
-                                                    },
-                                                    "&:hover": {
-                                                        background: "rgba(255,255,255,0.1)",
-                                                    },
-                                                    '&[data-active="true"]:hover': {
-                                                        background: "rgba(255,255,255,0.25)",
-                                                    },
-                                                    "&:focus-visible": {
-                                                        outline: "2px solid rgba(255,255,255,0.8)",
-                                                        outlineOffset: -2,
-                                                    },
                                                 }}
                                             >
                                                 <Typography
@@ -279,7 +266,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                                         color: "inherit",
                                                         textShadow: "none",
                                                         fontWeight: 600,
-                                                        opacity: isActive ? 1 : 0.6,
+                                                        opacity: isActive ? 1 : 0.5,
                                                         transition: "opacity 0.15s ease",
                                                     }}
                                                 >
@@ -292,33 +279,33 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                             </Box>
                         </Box>
 
-                        {// Scrollable body
-                        }
+                        {/* Scrollable body */}
                         <Box
                             ref={scrollContainerRef}
                             sx={{
                                 flex: 1,
                                 overflowY: "auto",
-                                padding: { xs: 3, md: 6 },
                                 width: "100%",
-                                mx: "auto",
                             }}
                         >
                             {theme.sections.map((section) => (
-                                <Box
-                                    key={section.id}
-                                    component="section"
-                                    // id is the scrollspy anchor — must match what useScrollSpy observes
+                                <Panel
                                     id={section.id}
-                                    sx={{ marginBottom: 8 }}
+                                    key={section.id}
+                                    ariaLabel={section.id}
+                                    fullHeight={false}
+                                    includeNavbarPadding={false}
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: muiTheme.space.gap.xl,
+                                    }}
                                 >
-                                    {/* Skip heading for intro — it has no label */}
                                     {SECTION_LABELS[section.id] && (
                                         <Typography
-                                            variant="h3"
+                                            variant="h4"
                                             sx={{
                                                 textTransform: "capitalize",
-
                                             }}
                                         >
                                             {SECTION_LABELS[section.id]}
@@ -326,7 +313,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
                                     )}
                                     <SectionContentRenderer content={section.content} />
-                                </Box>
+                                </Panel>
                             ))}
                         </Box>
                     </motion.div>

@@ -18,7 +18,7 @@ export function useWhichScrollSection(
     sectionIds: string[],
     containerRef: React.RefObject<HTMLElement | null>
 ) {
-    const [activeId, setActiveId] = useState<string>("")
+    const [activeId, setActiveId] = useState<string>(sectionIds[0] as string)
     const activeIdRef = useRef(activeId)
     activeIdRef.current = activeId
 
@@ -69,7 +69,7 @@ export function useWhichScrollSection(
 
     // Reset to empty when theme changes
     useEffect(() => {
-        setActiveId("")
+        setActiveId(sectionIds[0] as string)
     }, [sectionIds])
 
     return activeId
