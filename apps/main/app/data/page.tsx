@@ -370,7 +370,9 @@ export default function DataPage() {
               }}
             >
               <IconButton
-                onClick={() => window.history.back()}
+                onClick={() => {
+                  if (typeof window !== "undefined") window.history.back()
+                }}
                 sx={{
                   position: "absolute",
                   left: -56,

@@ -7,8 +7,8 @@ import { WATER_THEMES } from "@repo/data/coeqwal"
 import { ThemePanel } from "./ThemePanel"
 
 export function ActiveThemePanel() {
-    const { activeThemeKey } = usePanelRoute()
-    const activeTheme = WATER_THEMES.find((t) => t.id === activeThemeKey) ?? null
+  const { activeThemeKey } = usePanelRoute()
+  const activeTheme = WATER_THEMES.find((t) => t.id === activeThemeKey) ?? null
 
-    return <ThemePanel theme={activeTheme} />
+  return <ThemePanel theme={activeTheme} />
 }

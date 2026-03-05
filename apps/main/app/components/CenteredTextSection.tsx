@@ -56,7 +56,7 @@ export function CenteredTextSection({
       }}
     >
       {/* Title */}
-      {title &&
+      {title && (
         <Box
           component={motion.div}
           initial="hidden"
@@ -69,9 +69,9 @@ export function CenteredTextSection({
         >
           <Typography variant="h4">{title}</Typography>
         </Box>
-      }
+      )}
       {/* Contact paragraph with email */}
-      {email ?
+      {email ? (
         <Box
           component={motion.div}
           initial="hidden"
@@ -88,7 +88,7 @@ export function CenteredTextSection({
             {text} <a href={`mailto:${email}`}>{email}</a>
           </Typography>
         </Box>
-        :
+      ) : (
         <Box
           component={motion.div}
           initial="hidden"
@@ -101,11 +101,9 @@ export function CenteredTextSection({
             textAlign: "center",
           }}
         >
-          <Typography variant="body1">
-            {text}
-          </Typography>
+          <Typography variant="body1">{text}</Typography>
         </Box>
-      }
+      )}
     </Box>
   )
 }
