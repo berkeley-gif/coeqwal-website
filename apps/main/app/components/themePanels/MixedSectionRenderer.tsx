@@ -29,7 +29,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                                 <img
                                     src={block.src}
                                     alt={block.alt}
-                                    style={{ width: "100%", borderRadius: 8 }}
+                                    style={{ width: "100%", maxWidth: "800px", borderRadius: 8 }}
                                 />
                                 {block.caption && (
                                     <figcaption style={{ marginTop: 8, fontSize: "0.85em" }}>
