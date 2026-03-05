@@ -7,7 +7,7 @@
  * for scenario outcomes and metrics.
  */
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import {
   Box,
   Typography,
@@ -324,7 +324,9 @@ export default function DataPage() {
 
   return (
     <>
-      <Header />
+      <Suspense fallback={null}>
+        <Header />
+      </Suspense>
 
       {/* Main content wrapper */}
       <Box
