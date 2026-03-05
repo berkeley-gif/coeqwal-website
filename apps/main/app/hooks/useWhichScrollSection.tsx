@@ -43,12 +43,12 @@ export function useWhichScrollSection(
             if (isNearBottom) {
                 // Force last section active when near bottom —
                 // handles short sections that never reach the top threshold
-                newId = sectionIds[sectionIds.length - 1] ?? sectionIds[0]
+                newId = sectionIds[sectionIds.length - 1] ?? sectionIds[0] ?? ""
             } else {
                 const active = sectionPositions
                     .filter((s) => s.top <= 80)
                     .at(-1)
-                newId = active?.id ?? sectionIds[0]
+               newId = active?.id ?? sectionIds[0] ?? ""
             }
 
             if (newId !== activeIdRef.current) {
@@ -65,7 +65,7 @@ export function useWhichScrollSection(
 
     // Reset to empty when theme changes
     useEffect(() => {
-        setActiveId(sectionIds[0] as string)
+        setActiveId(sectionIds[0] ?? "")
     }, [sectionIds])
 
     return activeId
