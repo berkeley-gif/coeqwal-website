@@ -29,8 +29,8 @@ export function BoxSectionRenderer({ content }: { content: BoxSection }) {
                         display: "flex",
                         flexDirection: "row",
                         boxShadow: muiTheme.shadow.lg,
-                        gap: muiTheme.space.gap.xl,
-                        padding: "70px",
+                        gap: muiTheme.space.listGap.lg,
+                        padding: muiTheme.space.listGap.xl,
                         maxWidth: "900px"
                     }}
                 >
@@ -48,7 +48,7 @@ export function BoxSectionRenderer({ content }: { content: BoxSection }) {
                         sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: "30px"
+                            gap: muiTheme.space.listGap.md,
                         }}
                     >
                         {item.paragraphs.map((p, j) => (

@@ -32,7 +32,9 @@ export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
 // =============================================================================
 export interface MixedSection {
   type: "mixed"
-  blocks: ContentBlock[]
+  blocks: ContentBlock[],
+  /** Optional gap between blocks — defaults to theme spacing if omitted */
+  gap?: string | number
 }
 
 // =============================================================================
@@ -159,6 +161,7 @@ export const WATER_THEMES: Theme[] = [
         id: "why-this-matters",
         content: {
           type: "mixed",
+          gap: "40px",
           blocks: [
             {
               type: "paragraph",
@@ -226,6 +229,67 @@ export const WATER_THEMES: Theme[] = [
                 "Some water standards must legally be met. Certain outcomes may appear stable even when other parts of the system change.",
                 "Key outcomes (i.e. tier outcomes) provide a big-picture view, but local or seasonal variation can still be important."
               ],
+            },
+          ],
+        }
+      },
+      // ================== WHAT MANAGEMENT STRATEGIES ARE EXPLORED =======================
+      {
+        id: "what-management-strategies-are-explored",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This theme allows you to explore how different water management choices affect:",
+            },
+            {
+              type: "list",
+              items: [
+                "Freshwater availability for in-Delta farms and communities",
+                "Delta outflows that support estuary health",
+                "Reservoir storage north and south of the Delta",
+                "Water deliveries to farms and cities",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: "Looking at these factors together shows how the Delta responds under different conditions.",
+            },
+          ],
+        }
+      },
+      // ================== WHAT THE MODELS SHOW =======================
+      {
+        id: "what-the-models-show",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "**Trade-offs** – Water is limited. When we support one goal, it can affect another. Increasing flows to improve ecosystem conditions may change storage or deliveries. Protecting storage may influence how much water moves downstream. Managing pumping can shift salinity patterns. The Delta makes these trade-offs visible. Understanding them helps people see the real choices involved.",
+            },
+            {
+              type: "paragraph",
+              text: "**Equity** – Not everyone is affected in the same way. Where you live, what water rights you hold, how close you are to rising saltwater, and how sensitive ecosystems are can shape how impacts are felt. Exploring multiple outcomes together helps show where benefits are stronger and where pressures may be greater. This supports more informed and fair conversations about the future.",
+            },
+            {
+              type: "paragraph",
+              text: "**Resilience** – Resilience means being able to handle stress and still function. For the Delta, this means handling droughts, floods, rising seas, heat, and changing water demand without losing ecosystem health,water reliability, or ways of life that depend on water. Flows, storage, temperature, salinity, and landscape shape all play a role. Understanding how they interact helps us think about what it takes to support the Delta over time, as both a working water system and a living estuary.",
+            },
+          ],
+        }
+      },
+      // ================== WHAT THE MODELS SHOW =======================
+      {
+        id: "how-to-explore-further",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Explore how water management choices influence salinity, reservoir storage, estuary health, and water deliveries – and how these changes affect communities and ecosystems across California.",
             },
           ],
         }
