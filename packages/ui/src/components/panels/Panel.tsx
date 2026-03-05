@@ -72,11 +72,15 @@ export function Panel({
   // Standard panel padding from theme
   const panelPadding = includePadding
     ? {
-      paddingTop: includeNavbarPadding ? theme.space.component.sm : theme.space.panel.padding ,
-      paddingBottom: includeNavbarPadding ? theme.space.component.sm : theme.space.panel.padding,
-      paddingLeft: theme.space.panel.padding,
-      paddingRight: theme.space.panel.padding,
-    }
+        paddingTop: includeNavbarPadding
+          ? theme.space.component.sm
+          : theme.space.panel.padding,
+        paddingBottom: includeNavbarPadding
+          ? theme.space.component.sm
+          : theme.space.panel.padding,
+        paddingLeft: theme.space.panel.padding,
+        paddingRight: theme.space.panel.padding,
+      }
     : {}
 
   // Simple mode: no background image, direct styling on container

@@ -597,7 +597,7 @@ export const themeValues = {
       sm: 3.5, // 28px - compact list spacing
       md: 4.5, // 36px - default section gap
       lg: 5.5, // 44px - comfortable narrative spacing
-      xl: 8,   // 64px - maximum open spacing
+      xl: 8, // 64px - maximum open spacing
     },
 
     // Page margins
