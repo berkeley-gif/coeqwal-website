@@ -1,9 +1,11 @@
 "use client"
 
+import { useMemo } from "react"
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
+import { usePanelRoute } from "../hooks/usePanelRoute"
 import { WATER_THEMES } from "@repo/data/coeqwal"
 
 /**
@@ -17,9 +19,18 @@ import { WATER_THEMES } from "@repo/data/coeqwal"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
+
+  // -- Context for the theme panels
+  const { activeThemeKey, openThemePanel } = usePanelRoute()
+
   const { isPastHero } = useTabs()
 
   const handleLogoClick = () => {
+    // Guard: this handler references browser-only APIs.
+    // It will never be called on the server, but the function body
+    // is evaluated during prerendering, so we still need the guard.
+    if (typeof window === "undefined") return
+
     const start = window.scrollY
     if (start === 0) return
 
@@ -45,11 +56,16 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const waterThemesOptions = WATER_THEMES.map((wt) => ({
-    key: wt.id,
-    label: wt.label.replace(/\n/g, " "),
-    onClick: () => {},
-  }))
+  const waterThemesOptions = useMemo(
+    () =>
+      WATER_THEMES.map((wt) => ({
+        key: wt.id,
+        label: wt.label.replace(/\n/g, " "),
+        onClick: () => openThemePanel(wt.id),
+        active: activeThemeKey === wt.id,
+      })),
+    [activeThemeKey, openThemePanel],
+  )
 
   return (
     <BaseHeader

@@ -7,7 +7,7 @@
  * for scenario outcomes and metrics.
  */
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import {
   Box,
   Typography,
@@ -26,7 +26,7 @@ import {
 import { Header } from "../components/Header"
 import { ArrowHead, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
-import { ContactSection } from "../components/ContactSection"
+import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
@@ -324,7 +324,9 @@ export default function DataPage() {
 
   return (
     <>
-      <Header />
+      <Suspense fallback={null}>
+        <Header />
+      </Suspense>
 
       {/* Main content wrapper */}
       <Box
@@ -370,7 +372,9 @@ export default function DataPage() {
               }}
             >
               <IconButton
-                onClick={() => window.history.back()}
+                onClick={() => {
+                  if (typeof window !== "undefined") window.history.back()
+                }}
                 sx={{
                   position: "absolute",
                   left: -56,
@@ -647,7 +651,7 @@ export default function DataPage() {
             </Grid>
           </Container>
         </Box>
-        <ContactSection
+        <CenteredTextSection
           title="Get Involved"
           id="getInvolved"
           ariaLabel="get involved"

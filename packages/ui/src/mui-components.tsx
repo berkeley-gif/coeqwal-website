@@ -58,6 +58,7 @@ export {
   ListItem,
   ListItemText,
   ListSubheader,
+  ListItemIcon,
 
   // Feedback components
   Snackbar,

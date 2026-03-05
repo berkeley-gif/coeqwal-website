@@ -5,15 +5,14 @@
  *
  * Provides background information on funding and methodology
  */
-
-import React, { useEffect } from "react"
+import React, { useEffect, Suspense } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { CenterImageText } from "../components/CenterImageText"
 import { TieredImageText } from "../components/TieredImageText"
 import { ScrollImageTextBlocks } from "../components/ScrollImageTextBlocks"
 import { LogoGrid } from "../components/LogoGrid"
-import { ContactSection } from "../components/ContactSection"
+import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { ImageTextBlock } from "../components/ScrollImageTextBlocks"
 import type { GridLogo } from "../components/LogoGrid"
 
@@ -84,27 +83,30 @@ export default function AboutPage() {
       width: 205,
     },
   ]
-
-  // This effect keeps motion from creating a margin with fadeIn of the first section
   useEffect(() => {
-    // Prevent scroll restoration
-    window.history.scrollRestoration = "manual"
+    // Guard required: this effect touches browser-only APIs (window.history, window.scrollTo).
+    if (typeof window === "undefined") return
 
-    // Force scroll to top immediately
+    window.history.scrollRestoration = "manual"
     window.scrollTo({ top: 0, left: 0, behavior: "instant" })
 
-    // Double-check after a tick (after animations initialize)
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (window.scrollY > 0) {
         console.log("Page shifted! Scroll position:", window.scrollY)
         window.scrollTo(0, 0)
       }
     }, 100)
+
+    // Clean up the timeout if the component unmounts before it fires.
+    // Without this, the callback could run against an unmounted component.
+    return () => clearTimeout(timer)
   }, [])
 
   return (
     <>
-      <Header />
+      <Suspense fallback={null}>
+        <Header />
+      </Suspense>
       <CenterImageText
         id="intro"
         ariaLabel="intro"
@@ -149,7 +151,7 @@ export default function AboutPage() {
         id="ourPartners"
         ariaLabel="our partners"
       />
-      <ContactSection
+      <CenteredTextSection
         title="Get Involved"
         id="getInvolved"
         ariaLabel="get involved"
