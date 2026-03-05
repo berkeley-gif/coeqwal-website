@@ -13,15 +13,15 @@
 */
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 import type { Theme, ThemeSectionId, SectionContent } from "../../../../packages/data/src/coeqwal/themes"
-import { THEME_SECTION_IDS } from "../../../../packages/data/src/coeqwal/themes"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
 import { ScrollToButton } from "@repo/ui"
+import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 
 interface ThemePanelProps {
     // All the theme content and information
@@ -30,7 +30,7 @@ interface ThemePanelProps {
 
 // Order matches THEME_SECTION_IDS exactly.
 const SECTION_LABELS: Record<string, string> = {
-    "intro": "",
+    "intro": "Intro",
     "why-this-matters": "Why this matters",
     "what-this-theme-focuses-on": "What this theme focuses on",
     "what-to-keep-in-mind": "What to keep in mind",
@@ -67,7 +67,15 @@ export function ThemePanel({ theme }: ThemePanelProps) {
     // Ref for the scrollable content container 
     const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-    const activeSectionIds = theme?.sections.map((s) => s.id as string) ?? []
+    // Look for the sections that are active
+    const activeSectionIds = useMemo(
+        () => theme?.sections.map((s) => s.id as string) ?? [],
+        [theme?.id] // only recompute when the theme changes, not on every render
+    )
+    const activeSection = useWhichScrollSection(activeSectionIds, scrollContainerRef)
+    console.log("activeSection:", activeSection)
+    console.log("activeSectionIds:", activeSectionIds)
+
     // Lock scroll when open
     useEffect(() => {
         document.body.style.overflow = isOpen ? "hidden" : ""
@@ -83,6 +91,12 @@ export function ThemePanel({ theme }: ThemePanelProps) {
         return () => window.removeEventListener("keydown", handleKeyDown)
     }, [isOpen, closeThemePanel])
 
+    // Scroll to section inside the panel container — not window
+    const scrollToSection = (sectionId: string) => {
+        const el = scrollContainerRef.current?.querySelector(`#${sectionId}`)
+        el?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+
     return (
         <AnimatePresence>
             {isOpen && theme && (
@@ -96,7 +110,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         animate={{ y: 0 }}
                         exit={{ y: "100%" }}
                         transition={{ type: "spring", stiffness: 250, damping: 35 }}
-                        onClick={closeThemePanel}
                         style={{
                             position: "fixed",
                             inset: 0,
@@ -195,6 +208,88 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
 
                             </Box>
+
+                            {/* Horizontal Scroll Index */}
+                            <Box
+                                component="nav"
+                                role="tablist"
+                                aria-label="Index for the theme sections"
+                                sx={{
+                                    position: "sticky",
+                                    top: 0,
+                                    zIndex: muiTheme.zIndex.appBar,
+                                    flexShrink: 0,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-evenly",
+                                    width: "100%",
+                                    height: muiTheme.layout.collapsedTabHeight,
+                                    ...muiTheme.typography.nav,
+                                    background: muiTheme.palette.waterThemes.delta.background,
+                                    lineHeight: 1,
+                                    overflowX: "auto",
+                                    scrollBarWIdth: "none",
+                                }}
+                            >
+                                {theme.sections
+                                    .filter((s) => SECTION_LABELS[s.id] !== "")
+                                    .map((section) => {
+                                        const isActive = activeSection === section.id
+                                        return (
+                                            <Box
+                                                key={section.id}
+                                                component="button"
+                                                onClick={() => scrollToSection(section.id)}
+                                                aria-pressed={isActive}
+                                                aria-label={SECTION_LABELS[section.id]}
+                                                sx={{
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    px: 1.25,
+                                                    py: 0.5,
+                                                    border: "none",
+                                                    borderRadius: muiTheme.borderRadius.sm ?? "4px",
+                                                    cursor: "pointer",
+                                                    background: "transparent",
+                                                    color: muiTheme.palette.waterThemes.delta.text,
+                                                    textShadow: "none",
+                                                    transition: "background-color 0.15s",
+                                                    // Use data attribute for active — more specific than :hover
+                                                    '&[data-active="true"]': {
+                                                        background: "rgba(255,255,255,0.2)",
+                                                    },
+                                                    "&:hover": {
+                                                        background: "rgba(255,255,255,0.1)",
+                                                    },
+                                                    '&[data-active="true"]:hover': {
+                                                        background: "rgba(255,255,255,0.25)",
+                                                    },
+                                                    "&:focus-visible": {
+                                                        outline: "2px solid rgba(255,255,255,0.8)",
+                                                        outlineOffset: -2,
+                                                    },
+                                                }}
+                                            >
+                                                <Typography
+                                                    component="span"
+                                                    variant="subtitle2"
+                                                    sx={{
+                                                        lineHeight: 1,
+                                                        whiteSpace: "nowrap",
+                                                        color: "inherit",
+                                                        textShadow: "none",
+                                                        fontWeight: 600,
+                                                        opacity: isActive ? 1 : 0.6,
+                                                        transition: "opacity 0.15s ease",
+                                                    }}
+                                                >
+                                                    {SECTION_LABELS[section.id]}
+                                                </Typography>
+                                            </Box>
+                                        )
+                                    })}
+
+                            </Box>
                         </Box>
 
                         {// Scrollable body
@@ -205,7 +300,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                                 flex: 1,
                                 overflowY: "auto",
                                 padding: { xs: 3, md: 6 },
-                                maxWidth: 900,
                                 width: "100%",
                                 mx: "auto",
                             }}
