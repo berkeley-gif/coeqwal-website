@@ -19,7 +19,7 @@ export function usePanelRoute() {
       // Add theme query param
       router.push(`${pathname}?theme=${key}`, { scroll: false })
     },
-    [router, pathname, searchParams],
+    [router, pathname],
   )
 
   const closeThemePanel = useCallback(() => {
