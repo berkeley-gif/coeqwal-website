@@ -2,10 +2,6 @@
  * useWhichScrollSection — Tracks which section is currently being read
  * within a scrollable container.
  *
- * Uses scroll position instead of IntersectionObserver because IO's
- * rootMargin approach causes the active section to snap back when
- * sections exit the observation window from the top.
- *
  * Strategy: on every scroll event, find the section whose top is
  * closest to (but not past) the top of the container.
  */
