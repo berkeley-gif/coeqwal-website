@@ -16,6 +16,7 @@ export function BoxSectionRenderer({ content }: { content: BoxSection }) {
                 gap: "70px",
             }}
         >
+            {/* Box for a single item */}
             {content.items.map((item, i) => (
                 <Box
                     initial="hidden"
