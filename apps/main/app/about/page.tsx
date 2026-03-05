@@ -84,15 +84,6 @@ export default function AboutPage() {
       width: 205,
     },
   ]
-
-  // This effect keeps motion from creating a margin with fadeIn of the first section
-  useEffect(() => {
-    // Prevent scroll restoration
-    window.history.scrollRestoration = "manual"
-
-    // Force scroll to top immediately
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" })
-
   useEffect(() => {
     // Guard required: this effect touches browser-only APIs (window.history, window.scrollTo).
     if (typeof window === "undefined") return
