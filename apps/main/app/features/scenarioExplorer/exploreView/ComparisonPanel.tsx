@@ -586,6 +586,7 @@ export default function ComparisonPanel() {
         anchorEl={tooltipAnchor}
         onClose={handleTooltipClose}
         onForceClose={handleTooltipForceClose}
+        zIndex={theme.zIndex.tooltipAboveModal}
       />
     </Box>
   )
