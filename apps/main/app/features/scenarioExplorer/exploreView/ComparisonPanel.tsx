@@ -56,7 +56,19 @@ export default function ComparisonPanel() {
     setOverlayTiers,
     defineOutcome,
     setDefineOutcome,
+    selectedScenarios,
   } = useScenarioExplorerStore()
+
+  const chosenIds = useMemo(
+    () => new Set(selectedScenarios),
+    [selectedScenarios],
+  )
+
+  // Sidebar hover → chart highlight
+  const [sidebarHoveredIds, setSidebarHoveredIdsRaw] = useState<Set<string> | null>(null)
+  const handleSidebarHover = useCallback((ids: string[] | null) => {
+    setSidebarHoveredIdsRaw(ids ? new Set(ids) : null)
+  }, [])
 
   const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
@@ -371,6 +383,8 @@ export default function ComparisonPanel() {
         lineColors={lineColors}
         onLineHover={setHoveredScenario}
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+        chosenIds={chosenIds}
+        sidebarHoveredIds={sidebarHoveredIds}
       />
 
     </Box>
@@ -428,6 +442,7 @@ export default function ComparisonPanel() {
       <ScenarioSelectionSidebar
         scenarioColors={scenarioColors}
         hoveredScenarioId={hoveredScenario?.id ?? null}
+        onRowHover={handleSidebarHover}
       />
 
       {/* ── Right: hydroclimate chooser + chart controls + chart ─────────────── */}
