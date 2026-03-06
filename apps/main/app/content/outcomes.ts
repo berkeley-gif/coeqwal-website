@@ -120,7 +120,7 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   ENV_FLOWS:
     "Tiers reflect the extent to which modeled flows sustain ecological function relative to natural or functional flow (FF) targets. The framework distinguishes between fully functional ecosystems, partially functional conditions, existing regulatory baselines, and degraded/no-function states.",
   RES_STOR:
-    "Tier reflects the degree to which a reservoir fills each spring in advance of the summer delivery season (Apr-Oct) during which reservoirs provide water to irrigators and communities. Tiers are designated for select key reservoirs based on how frequently those reservoirs have April 30 (end of month) storage above or below certain thresholds. These thresholds are different for each reservoir and are set here based on percentiles of recent historical data, but may be adjusted in the future. The scheme described here yields tier designations that will be '1' if storage conditions are more consistently higher than recent historical conditions; '2' if they are roughly equivalent to recent conditions; '3' if they are moderately lower than recent conditions; and '4' if they are consistently and substantially lower than recent conditions.",
+    "Tiers reflect how frequently key reservoirs reach April 30 storage thresholds relative to recent historical percentiles, ahead of the summer delivery season.",
   GW_STOR:
     "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
   DELTA_ECO:
@@ -182,8 +182,7 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
       "Sub-optimal: Partial functional flows in wet season and spring; full functional flows in summer in 75% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer. (Modified Functional Flows)",
     tier3:
       "At-risk: CalSim minimum flow constraints for Baseline Scenario in 50% of years. (Existing Flow Requirements)",
-    tier4:
-      "Critical: None of the above thresholds met. (No function)",
+    tier4: "Critical: None of the above thresholds met. (No function)",
   },
   RES_STOR: {
     tier1:

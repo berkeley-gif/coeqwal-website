@@ -5,7 +5,7 @@
  *
  * This panel wraps ListView and manages map mode effects. In the explore view:
  * - List mode: ListPanel fills the full width
- * - Map mode: ListPanel shows in compact mode on the right, map appears on the left
+ * - Map mode: ListPanel retracts to the left half, map appears on the right
  * - Comparison mode: ComparisonPanel shows on the left, ListPanel shows on the right
  *
  * The actual map visualization is rendered at a higher level in the app and
@@ -42,6 +42,7 @@ export default function ListPanel({
   useEffect(() => {
     if (exploreMode === "map") {
       mapActions.setMapMode("explore")
+      mapActions.setExplorePanelWidth(50)
     } else {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
@@ -50,6 +51,7 @@ export default function ListPanel({
     return () => {
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setExplorePanelWidth(50)
     }
   }, [exploreMode])
 

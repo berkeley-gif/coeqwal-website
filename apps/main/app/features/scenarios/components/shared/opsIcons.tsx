@@ -584,9 +584,18 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
  * The first icon is always the theme icon.
  */
 export const SCENARIO_ICONS: Record<string, string[]> = {
-  s0011: ["theme_baseline", "no_tucp", "land_use_2004", "biops_2019"],
+  s0002: ["theme_baseline", "no_tucp", "land_use_2004", "biops_2019"],
+  s0010: ["theme_delta", "tunnel", "no_tucp", "land_use_2004", "biops_2019"],
+  s0011: ["theme_baseline", "tucp", "land_use_2004", "biops_2019"],
   s0020: ["theme_baseline", "tucp", "land_use_2020", "biops_2019"],
   s0021: ["theme_baseline", "no_tucp", "land_use_2020", "biops_2019"],
+  s0022: [
+    "theme_baseline",
+    "usbr_alt2v1",
+    "no_tucp",
+    "land_use_2004",
+    "biops_2024_pa",
+  ],
   s0023: [
     "theme_baseline",
     "usbr_alt2v1",
@@ -661,6 +670,7 @@ export const SCENARIO_ICONS: Record<string, string[]> = {
   ],
   s0046: [
     "theme_eco",
+    "functional_flows",
     "no_delta_flow",
     "tucp",
     "land_use_2020",
