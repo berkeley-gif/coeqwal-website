@@ -64,15 +64,18 @@ export default function ComparisonPanel() {
     [selectedScenarios],
   )
 
-  // Sidebar hover → chart highlight
-  const [sidebarHoveredIds, setSidebarHoveredIdsRaw] = useState<Set<string> | null>(null)
-  const handleSidebarHover = useCallback((ids: string[] | null) => {
-    setSidebarHoveredIdsRaw(ids ? new Set(ids) : null)
-  }, [])
+  // ── Hover state ─────────────────────────────────────────────────────────
+  // Chart hover is handled internally by the D3 layer (hoveredScenarioRef +
+  // commitHoverIn / scheduleHoverClear). The `onLineHover` callback only
+  // propagates the hovered scenario to the sidebar for row highlighting.
+  //
+  // Sidebar hover (row or theme badge) feeds into `highlightedIds`, which
+  // the chart uses for external-source highlighting.
+  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const setHoveredScenario = useCallback(
     (scenario: VerticalParallelLineData | null) => {
@@ -91,6 +94,10 @@ export default function ComparisonPanel() {
     },
     [],
   )
+
+  const handleSidebarHover = useCallback((ids: string[] | null) => {
+    setHighlightedIds(ids ? new Set(ids) : null)
+  }, [])
 
   // Axis layout positions reported by the chart for HTML label positioning
   const [axisLayout, setAxisLayout] = useState<AxisLayout[]>([])
@@ -384,7 +391,7 @@ export default function ComparisonPanel() {
         onLineHover={setHoveredScenario}
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
         chosenIds={chosenIds}
-        sidebarHoveredIds={sidebarHoveredIds}
+        highlightedIds={highlightedIds}
       />
 
     </Box>

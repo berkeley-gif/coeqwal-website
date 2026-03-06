@@ -248,19 +248,6 @@ export default function ScenarioSelectionSidebar({
               </Box>
 
               {/* ── Scenario rows ───────────────────────────────────────── */}
-              {items.length === 0 && (
-                <Typography
-                  sx={{
-                    px: 2,
-                    py: 0.5,
-                    fontSize: "0.75rem",
-                    color: theme.palette.grey[400],
-                    fontStyle: "italic",
-                  }}
-                >
-                  Coming soon
-                </Typography>
-              )}
               {items.map(({ id, shortLabel }) => {
                 const isChosen = selectedScenarios.includes(id)
                 const color = scenarioColors?.[id]
