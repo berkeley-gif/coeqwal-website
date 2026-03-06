@@ -102,27 +102,27 @@ export const WATER_THEMES: Theme[] = [
     label: "Community\nwater systems",
     shortLabel: "Community water systems",
     description:
-      "Whether people and communities can reliably access safe, affordable water for daily life, health, and essential services.",
+      "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
     heroImage: "",
     inquiry: "",
     sections: [],
   },
   {
     id: "ag_gw",
-    label: "Farms, groundwater\n& food systems",
-    shortLabel: "Farms & groundwater",
+    label: "Farms and\ngroundwater",
+    shortLabel: "Farms and groundwater",
     description:
-      "How water availability supports food production today, while sustaining groundwater and agricultural viability over time.",
+      "Whether agricultural water deliveries can sustain food protection, while preventing over-draft of groundwater basins",
     heroImage: "",
     inquiry: "",
     sections: [],
   },
   {
     id: "eco",
-    label: "Rivers, salmon\n& ecosystems",
-    shortLabel: "Rivers & ecosystems",
+    label: "Rivers, salmon and\nthe Delta ecosystem",
+    shortLabel: "Rivers, salmon and the Delta ecosystem",
     description:
-      "Whether rivers, fish, and ecosystems receive the flows they need to remain functional and resilient.",
+      "Whether rivers, salmon, and the Delta estuary receive the flows they need to remain functional and resilient",
     heroImage: "",
     inquiry: "",
     sections: [],
@@ -132,7 +132,7 @@ export const WATER_THEMES: Theme[] = [
     label: "The Delta as\na living place",
     shortLabel: "The Delta",
     description:
-      "How water decisions affect the Delta as a place where communities, farms, and ecosystems coexist.",
+      "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive.",
     heroImage: "/images/themes/delta_hero.jpg",
     inquiry:
       "Can the Delta stay healthy for people, farms, fish, and wildlife – now and in the future?",

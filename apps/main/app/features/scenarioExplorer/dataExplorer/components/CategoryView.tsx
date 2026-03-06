@@ -58,7 +58,7 @@ import { useScenarioList } from "../../../scenarios/hooks"
  * Feature flag: Use batch API for fetching statistics
  * Set to true to test the batch endpoint, false for existing individual-request behavior
  */
-const USE_BATCH_API = false
+const USE_BATCH_API = true
 
 /**
  * SectionHeader - Reusable header for chart sections
@@ -1071,6 +1071,9 @@ export default function CategoryView() {
   const { selectedScenarios, setMainView, setExploreMode } =
     useScenarioExplorerStore()
   const [expanded, setExpanded] = React.useState<string[]>([])
+  const [hasBeenExpanded, setHasBeenExpanded] = React.useState<Set<string>>(
+    new Set(),
+  )
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
@@ -1098,6 +1101,12 @@ export default function CategoryView() {
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId],
     )
+    setHasBeenExpanded((prev) => {
+      if (prev.has(categoryId)) return prev
+      const next = new Set(prev)
+      next.add(categoryId)
+      return next
+    })
   }
 
   // Empty state when no scenarios selected
@@ -1247,8 +1256,7 @@ export default function CategoryView() {
                 pb: theme.space.component.xl,
               }}
             >
-              {/* Special aligned layout for reservoir-storage category */}
-              {category.id === "reservoir-storage" &&
+              {!hasBeenExpanded.has(category.id) ? null : category.id === "reservoir-storage" &&
               selectedScenarios.length > 0 ? (
                 <ReservoirStorageSection
                   scenarios={selectedScenarios}

@@ -13,12 +13,7 @@ import {
 export type SectionId =
   | "california"
   | "central-valley"
-  | "basins"
-  | "watersheds"
-  | "arrows"
-  | "find-basin"
   | "rivers"
-  | "delta"
   | "distribution"
   | "calsim"
   | "coeqwal"
@@ -81,37 +76,8 @@ export const SECTION_LAYERS: Record<SectionId, SectionLayerConfig> = {
     camera: CENTRAL_VALLEY_VIEW,
   },
 
-  // === Basins ===
-  basins: {
-    basins: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  // === Watersheds (basins + inflow fills) ===
-  watersheds: {
-    basins: true,
-    inflowWatersheds: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  // === Arrows (basins + inflow + arrows) ===
-  arrows: {
-    basins: true,
-    inflowWatersheds: true,
-    arrows: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
-  // === Find Basin (geocoding) ===
-  "find-basin": {
-    basins: true,
-    inflowWatersheds: true,
-    camera: CENTRAL_VALLEY_VIEW,
-  },
-
   // === Rivers onwards - basins + rivers stay visible ===
   rivers: BASINS_AND_RIVERS,
-  delta: BASINS_AND_RIVERS,
   distribution: BASINS_AND_RIVERS,
   calsim: BASINS_AND_RIVERS,
   coeqwal: BASINS_AND_RIVERS,

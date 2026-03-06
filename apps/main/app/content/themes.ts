@@ -14,8 +14,8 @@ export interface ThemeLabelConfig {
 
 export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   baseline: { label: "Baseline" },
-  ag_gw: { label: "Farms, groundwater & food systems" },
-  eco: { label: "Rivers, salmon & ecosystems" },
+  ag_gw: { label: "Farms and groundwater" },
+  eco: { label: "Rivers, salmon and the Delta ecosystem" },
   delta: { label: "The Delta as a living place" },
   cws: { label: "Community water systems" },
 }

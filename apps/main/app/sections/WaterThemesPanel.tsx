@@ -14,7 +14,7 @@
  */
 
 import React from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
   StickyScrollSection,
@@ -24,6 +24,7 @@ import {
 import type { MotionValue } from "@repo/motion"
 import { WATER_THEMES } from "@repo/data/coeqwal"
 import { THEME_LABEL_CONFIG } from "../content/themes"
+import { usePanelRoute } from "../hooks/usePanelRoute"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* IMAGE & CIRCLE CONFIG                                                       */
@@ -115,9 +116,10 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     photo: WATER_THEME_PHOTOS.governance ?? "",
     label:
       WATER_THEMES.find((t) => t.id === "governance")?.shortLabel ??
-      "Operations & impacts",
+      "Water operations and impacts",
     description:
-      WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
+      WATER_THEMES.find((t) => t.id === "governance")?.description ??
+      "How water management decisions affect trade-offs, equity and resilience",
   },
   {
     id: "climate",
@@ -127,9 +129,10 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     photo: WATER_THEME_PHOTOS.climate ?? "",
     label:
       WATER_THEMES.find((t) => t.id === "climate")?.shortLabel ??
-      "Climate resilience",
+      "Drought and climate risk",
     description:
-      WATER_THEMES.find((t) => t.id === "governance")?.description ?? "",
+      WATER_THEMES.find((t) => t.id === "climate")?.description ??
+      "How the water system performs under drought stress, climate variability, and extreme conditions",
   },
 ]
 
@@ -206,11 +209,13 @@ function ThemeCircleLabel({
   index,
   progress,
   prefersReducedMotion,
+  onLearnMore,
 }: {
   circle: ThemeCircle
   index: number
   progress: MotionValue<number>
   prefersReducedMotion: boolean | null
+  onLearnMore?: () => void
 }) {
   const theme = useTheme()
   const start = getStaggerStart(index, LABEL_START, LABEL_END)
@@ -264,6 +269,43 @@ function ThemeCircleLabel({
         >
           {circle.description}
         </div>
+        {onLearnMore && (
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={onLearnMore}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                onLearnMore()
+              }
+            }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              marginTop: "10px",
+              fontSize: "18px",
+              fontWeight: 600,
+              cursor: "pointer",
+              pointerEvents: "auto",
+            }}
+          >
+            Learn more
+            <ArrowForwardIcon
+              sx={{
+                fontSize: "1.1rem",
+                flexShrink: 0,
+                transition: "transform 0.15s ease",
+                "& path": {
+                  stroke: "currentColor",
+                  strokeWidth: "0.5px",
+                  paintOrder: "stroke fill",
+                },
+              }}
+            />
+          </div>
+        )}
       </div>
     </motion.foreignObject>
   )
@@ -282,6 +324,7 @@ function WaterThemesPanelContent({
 }) {
   const theme = useTheme()
   const prefersReducedMotion = useReducedMotion()
+  const { openThemePanel } = usePanelRoute()
 
   // Local scroll progress (0–1) within this StickyScrollSection
   const progress = useScrollProgress()
@@ -390,6 +433,11 @@ function WaterThemesPanelContent({
             index={i}
             progress={progress}
             prefersReducedMotion={prefersReducedMotion}
+            onLearnMore={
+              c.id === "delta"
+                ? () => openThemePanel("delta")
+                : undefined
+            }
           />
         ))}
       </svg>
