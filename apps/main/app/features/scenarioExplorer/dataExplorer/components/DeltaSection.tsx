@@ -1,13 +1,14 @@
 "use client"
 
 /**
- * DeltaSection — Delta salinity and X2 section for the Data Explorer
+ * DeltaSection — Delta salinity, X2, and outflow section for the Data Explorer
  *
  * Charts:
- *   1. April X2 position (km) — single-month percentile band (water month 7)
- *   2. September X2 position (km) — single-month percentile band (water month 12)
+ *   1. April X2 position (km) — text stat (water month 7)
+ *   2. September X2 position (km) — text stat (water month 12)
  *   3. Salinity at compliance points (EM, JP, RS, CO) — monthly percentile bands
  *   4. Salinity at pumping plants (Banks, Tracy/Jones) — monthly percentile bands
+ *   5. Delta outflow (NDO) — monthly percentile bands (TAF)
  *
  * Data comes from the delta_monthly table via /api/statistics/scenarios/{id}/delta/monthly.
  */
@@ -44,17 +45,18 @@ const VARIABLE_LABELS: Record<string, string> = {
 
 const VARIABLE_UNITS: Record<string, string> = {
   x2: "KM",
-  em_ec: "µmhos/cm",
-  jp_ec: "µmhos/cm",
-  rs_ec: "µmhos/cm",
-  co_ec: "µmhos/cm",
-  banks_ec: "µmhos/cm",
-  tracy_ec: "µmhos/cm",
+  em_ec: "EC (µmhos/cm)",
+  jp_ec: "EC (µmhos/cm)",
+  rs_ec: "EC (µmhos/cm)",
+  co_ec: "EC (µmhos/cm)",
+  banks_ec: "EC (µmhos/cm)",
+  tracy_ec: "EC (µmhos/cm)",
   ndo: "TAF",
 }
 
 const COMPLIANCE_VARS = ["em_ec", "jp_ec", "rs_ec", "co_ec"]
 const PUMPS_VARS = ["banks_ec", "tracy_ec"]
+const OUTFLOW_VARS = ["ndo"]
 
 /** Salinity band colors — teal/green, distinct from delivery blue and shortage orange */
 const SALINITY_BAND_COLORS = {
@@ -62,6 +64,14 @@ const SALINITY_BAND_COLORS = {
   outer: "#b2dfdb",
   inner: "#80cbc4",
   median: "#00695c",
+}
+
+/** Outflow band colors — blue, matching reservoir/flow conventions */
+const OUTFLOW_BAND_COLORS = {
+  range: "#e3f2fd",
+  outer: "#90caf9",
+  inner: "#42a5f5",
+  median: "#1565c0",
 }
 
 // ============================================================================
@@ -274,13 +284,7 @@ function SectionHeader({
 // X2 text stats cell (rendered per scenario inside GridRow)
 // ============================================================================
 
-function X2StatCell({
-  avg,
-  cv,
-}: {
-  avg: number | null
-  cv: number | null
-}) {
+function X2StatCell({ avg, cv }: { avg: number | null; cv: number | null }) {
   const theme = useTheme()
   return (
     <Box sx={{ textAlign: "center" }}>
@@ -351,7 +355,7 @@ export default function DeltaSection({
     return stats
   }, [allData])
 
-  // Build matrices for salinity chart groups
+  // Build matrices for salinity and outflow chart groups
   const complianceMatrix = useMemo(
     () => buildMatrixForVariables(allData, COMPLIANCE_VARS),
     [allData],
@@ -360,12 +364,17 @@ export default function DeltaSection({
     () => buildMatrixForVariables(allData, PUMPS_VARS),
     [allData],
   )
+  const outflowMatrix = useMemo(
+    () => buildMatrixForVariables(allData, OUTFLOW_VARS),
+    [allData],
+  )
 
   const complianceEntities = useMemo(
     () => buildReservoirData(COMPLIANCE_VARS),
     [],
   )
   const pumpsEntities = useMemo(() => buildReservoirData(PUMPS_VARS), [])
+  const outflowEntities = useMemo(() => buildReservoirData(OUTFLOW_VARS), [])
 
   const primaryScenario = scenarios[0] ?? null
 
@@ -433,12 +442,7 @@ export default function DeltaSection({
               >
                 {(scenarioId) => {
                   const s = aprilX2Stats[scenarioId]
-                  return (
-                    <X2StatCell
-                      avg={s?.avg ?? null}
-                      cv={s?.cv ?? null}
-                    />
-                  )
+                  return <X2StatCell avg={s?.avg ?? null} cv={s?.cv ?? null} />
                 }}
               </GridRow>
               <GridRow
@@ -448,12 +452,7 @@ export default function DeltaSection({
               >
                 {(scenarioId) => {
                   const s = septX2Stats[scenarioId]
-                  return (
-                    <X2StatCell
-                      avg={s?.avg ?? null}
-                      cv={s?.cv ?? null}
-                    />
-                  )
+                  return <X2StatCell avg={s?.avg ?? null} cv={s?.cv ?? null} />
                 }}
               </GridRow>
             </ChartGridProvider>
@@ -501,7 +500,7 @@ export default function DeltaSection({
               volumeScaleMode="relative"
               loadingScenarios={loadingScenarios}
               minYMaxTaf={0}
-              yAxisSuffix=" µS/cm"
+              tooltipUnit=" µmhos/cm"
             />
           )}
         </Box>
@@ -546,7 +545,52 @@ export default function DeltaSection({
               volumeScaleMode="relative"
               loadingScenarios={loadingScenarios}
               minYMaxTaf={0}
-              yAxisSuffix=" µS/cm"
+              tooltipUnit=" µmhos/cm"
+            />
+          )}
+        </Box>
+      </Box>
+
+      {/* ── Delta Outflow (NDO) ──────────────────────────────── */}
+      <Box sx={chartCardSx}>
+        <SectionHeader
+          title="Delta outflow"
+          description={
+            <>
+              Monthly net Delta outflow volume (TAF). This is the total flow
+              leaving the Delta toward San Francisco Bay, reflecting the
+              combined effect of upstream inflows, in-Delta diversions, and
+              export pumping.
+              <Box component="span" sx={{ display: "block", mt: 1.5 }}>
+                <BandsLegend colors={OUTFLOW_BAND_COLORS} />
+              </Box>
+            </>
+          }
+        />
+        <Box sx={{ mt: theme.space.component.lg }}>
+          {isLoading && !hasData ? (
+            <PercentileMatrixSkeleton
+              scenarios={scenarios}
+              rowCount={1}
+              labelColumnWidth={160}
+            />
+          ) : !hasData ? (
+            <Typography color="text.secondary" variant="body2">
+              No Delta outflow data available.
+            </Typography>
+          ) : (
+            <PercentileMatrix
+              reservoirs={outflowEntities}
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+              data={outflowMatrix}
+              responsive
+              labelColumnWidth={160}
+              showScenarioHeaders={false}
+              displayMode="volume"
+              volumeScaleMode="relative"
+              loadingScenarios={loadingScenarios}
+              minYMaxTaf={0}
             />
           )}
         </Box>
