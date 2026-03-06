@@ -63,6 +63,12 @@ interface ScenarioExplorerState {
   // Display options
   showDefinitions: boolean
 
+  // Chart toggles (comparison panel)
+  relativeToBaseline: boolean
+  highlightBaseline: boolean
+  overlayTiers: boolean
+  defineOutcome: boolean
+
   // Hydroclimate period selection (shared across all views)
   hydroclimatePeriod: string
 
@@ -101,6 +107,12 @@ interface ScenarioExplorerActions {
   // Display options
   setShowDefinitions: (show: boolean) => void
 
+  // Chart toggles
+  setRelativeToBaseline: (show: boolean) => void
+  setHighlightBaseline: (show: boolean) => void
+  setOverlayTiers: (show: boolean) => void
+  setDefineOutcome: (show: boolean) => void
+
   // Hydroclimate period
   setHydroclimatePeriod: (period: string) => void
 
@@ -132,6 +144,10 @@ const initialState: ScenarioExplorerState = {
   showThemeBadges: false,
   selectedIconId: null,
   showDefinitions: false,
+  relativeToBaseline: true,
+  highlightBaseline: false,
+  overlayTiers: false,
+  defineOutcome: false,
   hydroclimatePeriod: "historical",
   selectedTier: null,
 }
@@ -226,6 +242,27 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowDefinitions: (show) =>
       set((state) => {
         state.showDefinitions = show
+      }),
+
+    // Chart toggles
+    setRelativeToBaseline: (show) =>
+      set((state) => {
+        state.relativeToBaseline = show
+      }),
+
+    setHighlightBaseline: (show) =>
+      set((state) => {
+        state.highlightBaseline = show
+      }),
+
+    setOverlayTiers: (show) =>
+      set((state) => {
+        state.overlayTiers = show
+      }),
+
+    setDefineOutcome: (show) =>
+      set((state) => {
+        state.defineOutcome = show
       }),
 
     // Hydroclimate period

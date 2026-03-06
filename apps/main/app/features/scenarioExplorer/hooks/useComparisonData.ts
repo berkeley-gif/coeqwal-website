@@ -25,7 +25,8 @@ export function useComparisonData() {
   } = useMultipleScenarioTiers()
   const { getDisplayName } = useScenarioList()
 
-  const { showDefinitions } = useScenarioExplorerStore()
+  const { showDefinitions, showOnlyChosen, selectedScenarios } =
+    useScenarioExplorerStore()
 
   const isLoading = tiersLoading
   const error = tiersError
@@ -34,18 +35,22 @@ export function useComparisonData() {
   // When showDefinitions is false, only s0020 is shown from the baseline theme —
   // matching the filter logic in StrategyGridContent and ScenarioSelectionSidebar.
   const scenarioIds = useMemo(() => {
-    const filtered = showDefinitions
+    let filtered = showDefinitions
       ? allScenarioIds
       : allScenarioIds.filter(
           (id) =>
             getScenarioTheme(id) !== "baseline" || id === PRIMARY_BASELINE_ID,
         )
+    if (showOnlyChosen && selectedScenarios.length > 0) {
+      const chosen = new Set(selectedScenarios)
+      filtered = filtered.filter((id) => chosen.has(id))
+    }
     return [...filtered].sort((a, b) => {
       if (a === PRIMARY_BASELINE_ID) return -1
       if (b === PRIMARY_BASELINE_ID) return 1
       return 0
     })
-  }, [allScenarioIds, showDefinitions])
+  }, [allScenarioIds, showDefinitions, showOnlyChosen, selectedScenarios])
 
   // Build scenarios array with dynamic names and theme-aligned colors.
   // Per-theme counters ensure each scenario gets the next step in its theme's
@@ -111,10 +116,27 @@ export function useComparisonData() {
     return parallelPlotData.map((data) => colorMap.get(data.id) || "#666666")
   }, [parallelPlotData, scenarios])
 
-  const baselineScenario = useMemo(
-    () => parallelPlotData.find((d) => d.id === "s0020") || null,
-    [parallelPlotData],
-  )
+  // Always compute baseline from full score data so relative-to-baseline
+  // works even when the baseline is filtered out of the visible set.
+  const baselineScenario = useMemo<VerticalParallelLineData | null>(() => {
+    const inPlot = parallelPlotData.find((d) => d.id === PRIMARY_BASELINE_ID)
+    if (inPlot) return inPlot
+
+    if (!allScoreData?.[PRIMARY_BASELINE_ID]) return null
+    const scores = allScoreData[PRIMARY_BASELINE_ID]
+    const values: Record<string, number | null> = {}
+    OUTCOME_CODE_ORDER.forEach((code) => {
+      const s = scores[code]
+      const name = getOutcomeName(code)
+      values[name] = s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
+    })
+    return {
+      id: PRIMARY_BASELINE_ID,
+      name: getDisplayName(PRIMARY_BASELINE_ID),
+      values,
+      highlighted: false,
+    }
+  }, [parallelPlotData, allScoreData, getDisplayName])
 
   return {
     data: parallelPlotData,
