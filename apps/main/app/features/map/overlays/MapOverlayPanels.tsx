@@ -25,7 +25,6 @@ import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
 import { motion, useTransform, useMotionValueEvent } from "@repo/motion"
 
-
 import {
   useScrollProgress,
   ScrollSectionContext,
@@ -35,7 +34,6 @@ import {
 } from "@repo/scrollytelling"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
 
-
 import { PanelEyebrow } from "./PanelEyebrow"
 import {
   StrategyInfoPanel,
@@ -43,10 +41,7 @@ import {
   KeyOutcomesPanel,
   SummaryPanel,
 } from "./scenarioPanels"
-import {
-  mapActions,
-  useIsOutcomeVisualizationActive,
-} from "../store"
+import { mapActions, useIsOutcomeVisualizationActive } from "../store"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
@@ -753,8 +748,9 @@ export default function MapOverlayPanels() {
                                 >
                                   Water management strategy
                                 </Typography>
-                                This panel describes the decisions, priorities, and
-                                policies that determine how water is allocated.
+                                This panel describes the decisions, priorities,
+                                and policies that determine how water is
+                                allocated.
                               </>
                             }
                             position="left"
@@ -870,7 +866,8 @@ export default function MapOverlayPanels() {
                                 </Typography>
                                 This describes the temperature and patterns of
                                 rainfall and snow that determine how much water
-                                is available over time. Soon you will be able to see the scenario results for different climates.
+                                is available over time. Soon you will be able to
+                                see the scenario results for different climates.
                               </>
                             }
                             position="left"
@@ -943,7 +940,8 @@ export default function MapOverlayPanels() {
                                 >
                                   Key outcomes
                                 </Typography>
-Each scenario produces different outcomes for agriculture, communities, and the environment.
+                                Each scenario produces different outcomes for
+                                agriculture, communities, and the environment.
                                 <Box
                                   component="span"
                                   sx={{
@@ -1050,7 +1048,8 @@ Each scenario produces different outcomes for agriculture, communities, and the 
                                 >
                                   Scenario summary
                                 </Typography>
-                                Finally, a summary has been created for each scenario.
+                                Finally, a summary has been created for each
+                                scenario.
                                 <Typography
                                   variant="tooltipHeader"
                                   sx={{

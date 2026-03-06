@@ -38,8 +38,9 @@ export default function Home() {
 
       {/* WCAG 2.4.1: Skip link target - id required for header skip link */}
       <MainContent>
-        <IntroSection />
-        {/* Suspense is needed for useSearchParams() */}
+        <Suspense fallback={null}>
+          <IntroSection />
+        </Suspense>
         <Suspense fallback={null}>
           <SmoothTabs />
           <TabPanels />

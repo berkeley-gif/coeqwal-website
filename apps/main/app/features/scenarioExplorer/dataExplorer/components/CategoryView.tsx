@@ -1256,8 +1256,8 @@ export default function CategoryView() {
                 pb: theme.space.component.xl,
               }}
             >
-              {!hasBeenExpanded.has(category.id) ? null : category.id === "reservoir-storage" &&
-              selectedScenarios.length > 0 ? (
+              {!hasBeenExpanded.has(category.id) ? null : category.id ===
+                  "reservoir-storage" && selectedScenarios.length > 0 ? (
                 <ReservoirStorageSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}

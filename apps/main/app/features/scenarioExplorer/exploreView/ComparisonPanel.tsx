@@ -53,7 +53,7 @@ export default function ComparisonPanel() {
     highlightBaseline,
     setHighlightBaseline,
     overlayTiers,
-    setOverlayTiers,
+    setOverlayTiers: _setOverlayTiers,
     defineOutcome,
     setDefineOutcome,
     selectedScenarios,
@@ -270,7 +270,16 @@ export default function ComparisonPanel() {
   )
 
   const chartElement = (
-    <Box ref={chartWrapperRef} sx={{ position: "relative", width: "100%", height: "100%", userSelect: "none", WebkitUserSelect: "none" }}>
+    <Box
+      ref={chartWrapperRef}
+      sx={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+      }}
+    >
       {/* ── HTML axis labels above chart (desktop) ──────────────────── */}
       {isDesktop && axisLayout.length > 0 && (
         <Box
@@ -410,7 +419,6 @@ export default function ComparisonPanel() {
         highlightedIds={highlightedIds}
         baselineId="s0020"
       />
-
     </Box>
   )
 
@@ -500,17 +508,26 @@ export default function ComparisonPanel() {
           <InfoTooltip
             placement="bottom"
             description={
-              <Box sx={{ maxWidth: 340, fontSize: "0.82rem", lineHeight: 1.55 }}>
+              <Box
+                sx={{ maxWidth: 340, fontSize: "0.82rem", lineHeight: 1.55 }}
+              >
                 <p style={{ margin: "0 0 8px" }}>
                   Each line represents a scenario scored across nine outcome
                   categories. Each category contains indicators that experts
-                  have classified into four tiers (Tier 1 = best, Tier 4 = worst).
+                  have classified into four tiers (Tier 1 = best, Tier 4 =
+                  worst).
                 </p>
                 <p style={{ margin: "0 0 8px" }}>
                   The position on each axis is a normalized weighted average of
                   those tier assignments. The weighted score is:
                 </p>
-                <p style={{ margin: "0 0 4px", fontFamily: "monospace", fontSize: "0.78rem" }}>
+                <p
+                  style={{
+                    margin: "0 0 4px",
+                    fontFamily: "monospace",
+                    fontSize: "0.78rem",
+                  }}
+                >
                   W = (1p₁ + 2p₂ + 3p₃ + 4p₄) / (p₁ + p₂ + p₃ + p₄)
                 </p>
                 <p style={{ margin: "0 0 8px", fontSize: "0.78rem" }}>
@@ -519,7 +536,13 @@ export default function ComparisonPanel() {
                 <p style={{ margin: "0 0 4px" }}>
                   This is then normalized to a 0-1 scale:
                 </p>
-                <p style={{ margin: "0 0 8px", fontFamily: "monospace", fontSize: "0.78rem" }}>
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "monospace",
+                    fontSize: "0.78rem",
+                  }}
+                >
                   S = (4 - W) / 3
                 </p>
                 <p style={{ margin: 0 }}>

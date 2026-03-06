@@ -49,7 +49,12 @@ export function useComparisonData() {
       if (b === PRIMARY_BASELINE_ID) return 1
       return 0
     })
-  }, [allScenarioIds, showAlternativeBaselines, showOnlyChosen, selectedScenarios])
+  }, [
+    allScenarioIds,
+    showAlternativeBaselines,
+    showOnlyChosen,
+    selectedScenarios,
+  ])
 
   // Build scenarios array with dynamic names and theme-aligned colors.
   // Per-theme counters ensure each scenario gets the next step in its theme's
@@ -127,7 +132,8 @@ export function useComparisonData() {
     OUTCOME_CODE_ORDER.forEach((code) => {
       const s = scores[code]
       const name = getOutcomeName(code)
-      values[name] = s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
+      values[name] =
+        s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
     })
     return {
       id: PRIMARY_BASELINE_ID,
