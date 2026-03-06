@@ -199,13 +199,18 @@ export default function ScenarioExplorerNew() {
           pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Single full-width column — scenario list, search, banner */}
+        {/* Content column — full-width normally, retracts to left half in map mode */}
         <Box
           sx={{
-            width: "100%",
+            width: needsTransparentBg ? "50%" : "100%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            backgroundColor: needsTransparentBg
+              ? theme.palette.explore.background
+              : "transparent",
+            pointerEvents: "auto",
+            transition: "width 0.3s ease",
           }}
         >
           <SelectionBanner />

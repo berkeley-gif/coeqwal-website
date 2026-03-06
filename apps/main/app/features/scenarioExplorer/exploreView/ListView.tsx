@@ -537,6 +537,7 @@ export default function ListView({
                   sx={{ color: theme.palette.grey[500], display: "block" }}
                 >
                   Add a location to view its outcome under different scenarios
+                  (coming soon)
                 </Typography>
               </Box>
               <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
