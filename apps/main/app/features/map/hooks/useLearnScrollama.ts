@@ -44,15 +44,9 @@ export function useLearnScrollama() {
 
   /**
    * Called when a step exits the viewport.
-   * Used for cleanup like resetting geocoding when leaving find-basin,
-   * and clearing outcome visualization when leaving scenario-intro.
+   * Used for cleanup like clearing outcome visualization when leaving scenario-intro.
    */
   const onStepExit = useCallback(({ data }: StepEvent<SectionId>) => {
-    // Reset geocoding when leaving find-basin section
-    if (data === "find-basin") {
-      mapActions.resetGeocoding()
-    }
-
     // Clear outcome visualization when leaving scenario-intro section
     if (data === "scenario-intro") {
       mapActions.clearOutcomeVisualization()

@@ -63,6 +63,7 @@ export function Header() {
         label: wt.label.replace(/\n/g, " "),
         onClick: () => openThemePanel(wt.id),
         active: activeThemeKey === wt.id,
+        disabled: wt.id !== "delta",
       })),
     [activeThemeKey, openThemePanel],
   )

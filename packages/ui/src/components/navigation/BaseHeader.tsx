@@ -107,6 +107,8 @@ type HeaderTranslations = {
   waterStories: {
     flow: string
     climate: string
+    managed: string
+    equity: string
   }
 }
 
@@ -176,7 +178,9 @@ const translations: TranslationsMap = {
     },
     waterStories: {
       flow: "How water flows through California",
-      climate: "Climate change",
+      climate: "How climate affects California water",
+      managed: "How California water is managed",
+      equity: "How equity shapes California water",
     },
   },
   es: {
@@ -188,7 +192,9 @@ const translations: TranslationsMap = {
     },
     waterStories: {
       flow: "Cómo fluye el agua a través de California",
-      climate: "Cambio climático",
+      climate: "Cómo el clima afecta el agua de California",
+      managed: "Cómo se gestiona el agua en California",
+      equity: "Cómo la equidad moldea el agua de California",
     },
   },
 }
@@ -495,6 +501,18 @@ export function BaseHeader({
                       onClick: () => (window.location.href = URLS.climate),
                       active: activeWaterStory === "climate",
                     },
+                    {
+                      key: "managed",
+                      label: t.waterStories.managed,
+                      onClick: () => {},
+                      disabled: true,
+                    },
+                    {
+                      key: "equity",
+                      label: t.waterStories.equity,
+                      onClick: () => {},
+                      disabled: true,
+                    },
                   ]}
                   variant="text"
                   sx={buttonStyle}
@@ -722,16 +740,13 @@ export function BaseHeader({
                       handleMobileMenuClose()
                     }}
                     selected={activeWaterStory === "climate"}
-                    // WCAG 2.4.8: Current page indication
                     aria-current={
                       activeWaterStory === "climate" ? "page" : undefined
                     }
                     sx={{
                       pl: 4,
                       pr: 2,
-                      // WCAG 2.5.5: Minimum 44px touch target
                       minHeight: MIN_TOUCH_TARGET,
-                      // WCAG 2.4.7: Focus visible indicator
                       "&:focus-visible": {
                         outline: `2px solid ${theme.palette.text.primary}`,
                         outlineOffset: -2,
@@ -747,12 +762,49 @@ export function BaseHeader({
                         primary: {
                           sx: {
                             ...theme.typography.caption,
-                            // Bold when active (non-color indicator)
                             fontWeight:
                               activeWaterStory === "climate"
                                 ? theme.typography.fontWeightBold
                                 : theme.typography.fontWeightRegular,
                           },
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    disabled
+                    sx={{
+                      pl: 4,
+                      pr: 2,
+                      minHeight: MIN_TOUCH_TARGET,
+                    }}
+                  >
+                    <ListItemText
+                      primary={t.waterStories.managed}
+                      slotProps={{
+                        primary: {
+                          sx: { ...theme.typography.caption },
+                        },
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    disabled
+                    sx={{
+                      pl: 4,
+                      pr: 2,
+                      minHeight: MIN_TOUCH_TARGET,
+                    }}
+                  >
+                    <ListItemText
+                      primary={t.waterStories.equity}
+                      slotProps={{
+                        primary: {
+                          sx: { ...theme.typography.caption },
                         },
                       }}
                     />
@@ -788,6 +840,7 @@ export function BaseHeader({
                     {waterThemesOptions.map((option) => (
                       <ListItem key={option.key} disablePadding>
                         <ListItemButton
+                          disabled={option.disabled}
                           onClick={() => {
                             option.onClick()
                             handleMobileMenuClose()

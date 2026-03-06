@@ -105,8 +105,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Sacramento river color - use visualization color if active, otherwise default blue
   const sacBodyColor = sacramentoColor ?? DEFAULT_RIVER_BODY_COLOR
   const sacBodyWidth = 2
-  const sacOutlineWidth = 3
-  const sacTroughWidth = 6
+  const sacOutlineWidth = 4
+  const sacTroughWidth = 7
 
   // Update layer properties when visibility, progress, or color changes
   useEffect(() => {
@@ -274,7 +274,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           paint={{
             "line-color": RIVER_OUTLINE_COLOR,
             "line-width": sacOutlineWidth,
-            "line-opacity": 0.9,
+            "line-opacity": 1,
             "line-trim-offset": trimOffset,
           }}
           layout={{
@@ -311,7 +311,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": RIVER_TROUGH_COLOR,
-            "line-width": 6,
+            "line-width": 7,
             "line-opacity": 0.6,
             "line-trim-offset": trimOffset,
           }}
@@ -326,8 +326,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": RIVER_OUTLINE_COLOR,
-            "line-width": 3,
-            "line-opacity": 0.9,
+            "line-width": 4,
+            "line-opacity": 1,
             "line-trim-offset": trimOffset,
           }}
           layout={{

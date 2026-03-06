@@ -252,11 +252,14 @@ const IntroSection = () => {
           }
           description={
             <>
-              COEQWAL &mdash; the Collaboratory for Equity in Water Allocation
-              &mdash; works with communities to model alternative water
-              management scenarios for California&rsquo;s Central Valley. Our
-              goal is to help communities, policymakers, and researchers
-              understand how water decisions affect people and ecosystems.
+              COEQWAL – the Collaboratory for Equity in Water Allocation – is a
+              publicly-funded project that works with communities to better
+              understand how water is managed in California.
+              <br />
+              <br />
+              Using water planning models, COEQWAL sheds light on how
+              alternative decisions and climate change scenarios shape our water
+              future.
             </>
           }
           cta={
@@ -306,14 +309,14 @@ const IntroSection = () => {
             component="h2"
             sx={{ display: "block", color: "text.primary" }}
           >
-            On this site
+            Want to
           </Typography>
           <Typography
             variant="h1"
             component="h1"
             sx={{ display: "block", color: "text.primary" }}
           >
-            you can
+            know more?
           </Typography>
         </MotionBox>
 
