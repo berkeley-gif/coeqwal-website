@@ -51,6 +51,8 @@ export interface VerticalParallelLinePlotProps {
   chosenIds?: Set<string>
   /** IDs of scenarios currently highlighted (from any hover source). Full opacity, others dim. */
   highlightedIds?: Set<string> | null
+  /** Scenario ID to render with a gold halo (e.g. the baseline scenario). */
+  baselineId?: string
 }
 
 const ARROW_PATH =
@@ -58,6 +60,8 @@ const ARROW_PATH =
 
 const DEFAULT_MARGIN_VERTICAL = { top: 40, right: 60, bottom: 50, left: 100 }
 const DEFAULT_MARGIN_HORIZONTAL = { top: 30, right: 20, bottom: 90, left: 20 }
+const BASELINE_HALO_COLOR = "#C5A135"
+const BASELINE_HALO_WIDTH_EXTRA = 3
 
 const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   data,
@@ -84,6 +88,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   onLineClick,
   chosenIds,
   highlightedIds,
+  baselineId,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -215,6 +220,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           ? (line.transition().duration(300).ease(d3.easeQuadOut) as any)
           : line
         sel.attr("opacity", s.lineOpacity).attr("stroke-width", s.strokeWidth)
+
+        // Keep the gold halo in sync
+        const halo = g.select(`.line-halo-${i}`)
+        if (!halo.empty()) {
+          const hSel = animate
+            ? (halo.transition().duration(300).ease(d3.easeQuadOut) as any)
+            : halo
+          hSel
+            .attr("opacity", s.lineOpacity)
+            .attr("stroke-width", s.strokeWidth + BASELINE_HALO_WIDTH_EXTRA)
+        }
 
         axes.forEach((axisName) => {
           const circle = g.select(
@@ -871,10 +887,25 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               : colors.default
 
         const style = getLineStyle(d, dataIndex, null)
+        const isBaseline = baselineId != null && d.id === baselineId
 
         const pathData = axes.map(
           (axis) => [axis, d.values[axis]] as [string, number | null],
         )
+
+        // Gold halo rendered behind the normal line for the baseline scenario
+        if (isBaseline) {
+          g.append("path")
+            .attr("class", `line-halo-${dataIndex}`)
+            .attr("fill", "none")
+            .attr("stroke", BASELINE_HALO_COLOR)
+            .attr("stroke-width", style.strokeWidth + BASELINE_HALO_WIDTH_EXTRA)
+            .attr("opacity", style.lineOpacity)
+            .attr("d", lineGenerator(pathData))
+            .attr("stroke-linecap", "round")
+            .attr("stroke-linejoin", "round")
+            .style("pointer-events", "none")
+        }
 
         g.append("path")
           .attr("class", `line-${dataIndex}`)
@@ -953,6 +984,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       title,
       onLineClick,
       passesFilters,
+      baselineId,
       overlayTiers,
       hideAxisLabels,
       onAxesLayout,

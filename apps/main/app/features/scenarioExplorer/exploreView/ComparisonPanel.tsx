@@ -392,6 +392,7 @@ export default function ComparisonPanel() {
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
         chosenIds={chosenIds}
         highlightedIds={highlightedIds}
+        baselineId="s0020"
       />
 
     </Box>
