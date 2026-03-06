@@ -19,8 +19,8 @@ import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { ScrollToButton } from "@repo/ui"
 import { Panel } from "@repo/ui"
 import type {
-    Theme,
-    SectionContent,
+  Theme,
+  SectionContent,
 } from "../../../../packages/data/src/coeqwal/themes"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
@@ -29,40 +29,40 @@ import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 
 interface ThemePanelProps {
-    // All the theme content and information
-    theme: Theme | null
+  // All the theme content and information
+  theme: Theme | null
 }
 
 // Order matches THEME_SECTION_IDS exactly.
 const SECTION_LABELS: Record<string, { long: string; short: string }> = {
-    intro: {
-        long: "Intro",
-        short: "Intro",
-    },
-    "why-this-matters": {
-        long: "Why this matters",
-        short: "Importance",
-    },
-    "what-this-theme-focuses-on": {
-        long: "What this theme focuses on",
-        short: "Focus",
-    },
-    "what-to-keep-in-mind": {
-        long: "What to keep in mind",
-        short: "Keep in mind",
-    },
-    "what-management-strategies-are-explored": {
-        long: "What management strategies are explored",
-        short: "Management strategies",
-    },
-    "what-the-models-show": {
-        long: "What the models show",
-        short: "Model results",
-    },
-    "how-to-explore-further": {
-        long: "How to explore further",
-        short: "Explore further",
-    },
+  intro: {
+    long: "Intro",
+    short: "Intro",
+  },
+  "why-this-matters": {
+    long: "Why this matters",
+    short: "Importance",
+  },
+  "what-this-theme-focuses-on": {
+    long: "What this theme focuses on",
+    short: "Focus",
+  },
+  "what-to-keep-in-mind": {
+    long: "What to keep in mind",
+    short: "Keep in mind",
+  },
+  "what-management-strategies-are-explored": {
+    long: "What management strategies are explored",
+    short: "Management strategies",
+  },
+  "what-the-models-show": {
+    long: "What the models show",
+    short: "Model results",
+  },
+  "how-to-explore-further": {
+    long: "How to explore further",
+    short: "Explore further",
+  },
 }
 
 /* Section content dispatcher
@@ -70,283 +70,283 @@ const SECTION_LABELS: Record<string, { long: string; short: string }> = {
  * Adding a new section type = adding one case here + a new renderer
  */
 function SectionContentRenderer({ content }: { content: SectionContent }) {
-    switch (content.type) {
-        case "mixed":
-            return <MixedSectionRenderer content={content} />
-        case "boxes":
-            return <BoxSectionRenderer content={content} />
-        default: {
-            // Exhaustive check — TypeScript will error here if a new
-            // SectionContent type is added but not handled
-            const _exhaustive: never = content
-            return null
-        }
+  switch (content.type) {
+    case "mixed":
+      return <MixedSectionRenderer content={content} />
+    case "boxes":
+      return <BoxSectionRenderer content={content} />
+    default: {
+      // Exhaustive check — TypeScript will error here if a new
+      // SectionContent type is added but not handled
+      const _exhaustive: never = content
+      return null
     }
+  }
 }
 
 export function ThemePanel({ theme }: ThemePanelProps) {
-    const { closeThemePanel } = usePanelRoute()
-    const muiTheme = useTheme()
+  const { closeThemePanel } = usePanelRoute()
+  const muiTheme = useTheme()
 
-    const isOpen = theme !== null
+  const isOpen = theme !== null
 
-    // Ref for the scrollable content container
-    const scrollContainerRef = useRef<HTMLDivElement>(null)
+  // Ref for the scrollable content container
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-    // Look for the sections that are active
-    const activeSectionIds = useMemo(
-        () => theme?.sections.map((s) => s.id as string) ?? [],
-        [theme?.sections]
-    )
-    const activeSection = useWhichScrollSection(
-        activeSectionIds,
-        scrollContainerRef,
-    )
+  // Look for the sections that are active
+  const activeSectionIds = useMemo(
+    () => theme?.sections.map((s) => s.id as string) ?? [],
+    [theme?.sections],
+  )
+  const activeSection = useWhichScrollSection(
+    activeSectionIds,
+    scrollContainerRef,
+  )
 
-    // Lock scroll when open
-    useEffect(() => {
-        document.body.style.overflow = isOpen ? "hidden" : ""
-        return () => {
-            document.body.style.overflow = ""
-        }
-    }, [isOpen])
-
-    // WCAG 2.1.1: Close on Escape key
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isOpen) closeThemePanel()
-        }
-        window.addEventListener("keydown", handleKeyDown)
-        return () => window.removeEventListener("keydown", handleKeyDown)
-    }, [isOpen, closeThemePanel])
-
-    // Scroll to section inside the panel container — not window
-    const scrollToSection = (sectionId: string) => {
-        const el = scrollContainerRef.current?.querySelector(`#${sectionId}`)
-        el?.scrollIntoView({ behavior: "smooth", block: "start" })
+  // Lock scroll when open
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : ""
+    return () => {
+      document.body.style.overflow = ""
     }
+  }, [isOpen])
 
-    return (
-        <AnimatePresence>
-            {isOpen && theme && (
-                <>
-                    <motion.div
-                        key={theme.id}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label={`${theme.shortLabel} theme`}
-                        initial={{ y: "100%" }}
-                        animate={{ y: 0 }}
-                        exit={{ y: "100%" }}
-                        transition={{ type: "spring", stiffness: 250, damping: 35 }}
-                        style={{
-                            position: "fixed",
-                            inset: 0,
-                            zIndex: muiTheme.zIndex.modal,
-                            display: "flex",
-                            flexDirection: "column",
-                            backgroundColor: muiTheme.palette.background.default,
-                            height: "100dvh",
+  // WCAG 2.1.1: Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) closeThemePanel()
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isOpen, closeThemePanel])
+
+  // Scroll to section inside the panel container — not window
+  const scrollToSection = (sectionId: string) => {
+    const el = scrollContainerRef.current?.querySelector(`#${sectionId}`)
+    el?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  return (
+    <AnimatePresence>
+      {isOpen && theme && (
+        <>
+          <motion.div
+            key={theme.id}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${theme.shortLabel} theme`}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 250, damping: 35 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: muiTheme.zIndex.modal,
+              display: "flex",
+              flexDirection: "column",
+              backgroundColor: muiTheme.palette.background.default,
+              height: "100dvh",
+            }}
+          >
+            {
+              // Sticky hero
+              // position: sticky only works when parent is flex + flexDirection: column
+            }
+            <Box sx={{ position: "sticky", top: 0, zIndex: 1, flexShrink: 0 }}>
+              {/* Hero */}
+              <Box
+                sx={{
+                  display: "flex",
+                  position: "relative",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: muiTheme.space.gap.md,
+                  height: "auto",
+                  overflow: "hidden",
+                  backgroundColor: muiTheme.palette.grey[200],
+                  padding: `25px ${muiTheme.space.panel.padding}`,
+                }}
+              >
+                {theme.heroImage && (
+                  <Box
+                    component="img"
+                    src={theme.heroImage}
+                    // Decorative — title is rendered as text below
+                    alt=""
+                    aria-hidden="true"
+                    sx={{
+                      position: "absolute",
+                      left: 0,
+                      top: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                      filter: "brightness(0.6)",
+                      zIndex: muiTheme.zIndex.heroBackground,
+                    }}
+                  />
+                )}
+                {/* Close button — top left, arrow pointing left */}
+                <Box
+                  sx={{
+                    zIndex: muiTheme.zIndex.pageContent,
+                  }}
+                >
+                  <ScrollToButton
+                    onClick={closeThemePanel}
+                    // 180deg = arrow points left (back/close affordance)
+                    rotation="90deg"
+                    size={45}
+                    axis="horizontal"
+                    color={muiTheme.palette.common.white}
+                    ariaLabel="Close theme panel"
+                    animationComplete={true}
+                    delay={0}
+                  />
+                </Box>
+
+                {/* Theme title + inquiry overlaid on hero */}
+                <Box
+                  sx={{
+                    color: muiTheme.palette.common.white,
+                    zIndex: muiTheme.zIndex.pageContent,
+                  }}
+                >
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {theme.label.replace(/\n/g, " ")}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      maxWidth: "100%",
+                    }}
+                  >
+                    {theme.inquiry}
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Horizontal Scroll Tab Index */}
+              <Box
+                component="nav"
+                role="tablist"
+                aria-label="Index for the theme sections"
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: muiTheme.zIndex.appBar,
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-evenly",
+                  width: "100%",
+                  height: muiTheme.layout.collapsedTabHeight,
+                  ...muiTheme.typography.nav,
+                  background: muiTheme.palette.brand.panelMedium,
+                  lineHeight: 1,
+                  overflowX: "auto",
+                  scrollBarWIdth: "none",
+                }}
+              >
+                {theme.sections
+                  .filter((s) => SECTION_LABELS[s.id]?.short !== "")
+                  .map((section) => {
+                    const isActive = activeSection === section.id
+                    return (
+                      <Box
+                        key={section.id}
+                        component="button"
+                        onClick={() => scrollToSection(section.id)}
+                        aria-pressed={isActive}
+                        aria-label={SECTION_LABELS[section.id]?.long}
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          px: 1.25,
+                          py: 0.5,
+                          border: "none",
+                          borderRadius: muiTheme.borderRadius.sm ?? "4px",
+                          cursor: "pointer",
+                          background: "transparent",
+                          color: muiTheme.palette.common.white,
+                          textShadow: "none",
+                          transition: "background-color 0.15s",
                         }}
-                    >
-                        {
-                            // Sticky hero
-                            // position: sticky only works when parent is flex + flexDirection: column
-                        }
-                        <Box sx={{ position: "sticky", top: 0, zIndex: 1, flexShrink: 0 }}>
-                            {/* Hero */}
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    position: "relative",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    gap: muiTheme.space.gap.md,
-                                    height: "auto",
-                                    overflow: "hidden",
-                                    backgroundColor: muiTheme.palette.grey[200],
-                                    padding: `25px ${muiTheme.space.panel.padding}`,
-                                }}
-                            >
-                                {theme.heroImage && (
-                                    <Box
-                                        component="img"
-                                        src={theme.heroImage}
-                                        // Decorative — title is rendered as text below
-                                        alt=""
-                                        aria-hidden="true"
-                                        sx={{
-                                            position: "absolute",
-                                            left: 0,
-                                            top: 0,
-                                            width: "100%",
-                                            height: "100%",
-                                            objectFit: "cover",
-                                            display: "block",
-                                            filter: "brightness(0.6)",
-                                            zIndex: muiTheme.zIndex.heroBackground,
-                                        }}
-                                    />
-                                )}
-                                {/* Close button — top left, arrow pointing left */}
-                                <Box
-                                    sx={{
-                                        zIndex: muiTheme.zIndex.pageContent,
-                                    }}
-                                >
-                                    <ScrollToButton
-                                        onClick={closeThemePanel}
-                                        // 180deg = arrow points left (back/close affordance)
-                                        rotation="90deg"
-                                        size={45}
-                                        axis="horizontal"
-                                        color={muiTheme.palette.common.white}
-                                        ariaLabel="Close theme panel"
-                                        animationComplete={true}
-                                        delay={0}
-                                    />
-                                </Box>
-
-                                {/* Theme title + inquiry overlaid on hero */}
-                                <Box
-                                    sx={{
-                                        color: muiTheme.palette.common.white,
-                                        zIndex: muiTheme.zIndex.pageContent,
-                                    }}
-                                >
-                                    <Typography
-                                        variant="h3"
-                                        sx={{
-                                            textTransform: "capitalize",
-                                        }}
-                                    >
-                                        {theme.label.replace(/\n/g, " ")}
-                                    </Typography>
-                                    <Typography
-                                        variant="body1"
-                                        sx={{
-                                            maxWidth: "100%",
-                                        }}
-                                    >
-                                        {theme.inquiry}
-                                    </Typography>
-                                </Box>
-                            </Box>
-
-                            {/* Horizontal Scroll Tab Index */}
-                            <Box
-                                component="nav"
-                                role="tablist"
-                                aria-label="Index for the theme sections"
-                                sx={{
-                                    position: "sticky",
-                                    top: 0,
-                                    zIndex: muiTheme.zIndex.appBar,
-                                    flexShrink: 0,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-evenly",
-                                    width: "100%",
-                                    height: muiTheme.layout.collapsedTabHeight,
-                                    ...muiTheme.typography.nav,
-                                    background: muiTheme.palette.brand.panelMedium,
-                                    lineHeight: 1,
-                                    overflowX: "auto",
-                                    scrollBarWIdth: "none",
-                                }}
-                            >
-                                {theme.sections
-                                    .filter((s) => SECTION_LABELS[s.id]?.short !== "")
-                                    .map((section) => {
-                                        const isActive = activeSection === section.id
-                                        return (
-                                            <Box
-                                                key={section.id}
-                                                component="button"
-                                                onClick={() => scrollToSection(section.id)}
-                                                aria-pressed={isActive}
-                                                aria-label={SECTION_LABELS[section.id]?.long}
-                                                sx={{
-                                                    display: "inline-flex",
-                                                    alignItems: "center",
-                                                    px: 1.25,
-                                                    py: 0.5,
-                                                    border: "none",
-                                                    borderRadius: muiTheme.borderRadius.sm ?? "4px",
-                                                    cursor: "pointer",
-                                                    background: "transparent",
-                                                    color: muiTheme.palette.common.white,
-                                                    textShadow: "none",
-                                                    transition: "background-color 0.15s",
-                                                }}
-                                            >
-                                                <Typography
-                                                    component="span"
-                                                    variant="subtitle2"
-                                                    sx={{
-                                                        lineHeight: 1,
-                                                        whiteSpace: "nowrap",
-                                                        color: "inherit",
-                                                        textShadow: "none",
-                                                        fontWeight: 600,
-                                                        opacity: isActive ? 1 : 0.5,
-                                                        transition: "opacity 0.15s ease",
-                                                    }}
-                                                >
-                                                    {SECTION_LABELS[section.id]?.short}
-                                                </Typography>
-                                            </Box>
-                                        )
-                                    })}
-                            </Box>
-                        </Box>
-
-                        {/* Scrollable body */}
-                        <Box
-                            ref={scrollContainerRef}
-                            sx={{
-                                flex: 1,
-                                overflowY: "auto",
-                                width: "100%",
-                            }}
+                      >
+                        <Typography
+                          component="span"
+                          variant="subtitle2"
+                          sx={{
+                            lineHeight: 1,
+                            whiteSpace: "nowrap",
+                            color: "inherit",
+                            textShadow: "none",
+                            fontWeight: 600,
+                            opacity: isActive ? 1 : 0.5,
+                            transition: "opacity 0.15s ease",
+                          }}
                         >
-                            {theme.sections.map((section) => (
-                                <Panel
-                                    id={section.id}
-                                    key={section.id}
-                                    ariaLabel={section.id}
-                                    fullHeight={false}
-                                    includeNavbarPadding={false}
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: muiTheme.space.gap.xl,
-                                    }}
-                                >
-                                    {SECTION_LABELS[section.id] && (
-                                        <Typography
-                                            variant="h4"
-                                            sx={{
-                                                textTransform: "capitalize",
-                                            }}
-                                        >
-                                            {SECTION_LABELS[section.id]?.long}
-                                        </Typography>
-                                    )}
-                                    <SectionContentRenderer content={section.content} />
-                                </Panel>
-                            ))}
-                            <CenteredTextSection
-                                id="conclusion"
-                                ariaLabel="Conclusion"
-                                text="Together, these views make trade-offs, equity, and resilience visible, providing a shared, data-grounded basis for comparison, discussion, and learning."
-                                bgColor={muiTheme.palette.brand.water}
-                                textColor={muiTheme.palette.text.secondary}
-                            />
-                        </Box>
-                    </motion.div>
-                </>
-            )}
-        </AnimatePresence>
-    )
+                          {SECTION_LABELS[section.id]?.short}
+                        </Typography>
+                      </Box>
+                    )
+                  })}
+              </Box>
+            </Box>
+
+            {/* Scrollable body */}
+            <Box
+              ref={scrollContainerRef}
+              sx={{
+                flex: 1,
+                overflowY: "auto",
+                width: "100%",
+              }}
+            >
+              {theme.sections.map((section) => (
+                <Panel
+                  id={section.id}
+                  key={section.id}
+                  ariaLabel={section.id}
+                  fullHeight={false}
+                  includeNavbarPadding={false}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: muiTheme.space.gap.xl,
+                  }}
+                >
+                  {SECTION_LABELS[section.id] && (
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {SECTION_LABELS[section.id]?.long}
+                    </Typography>
+                  )}
+                  <SectionContentRenderer content={section.content} />
+                </Panel>
+              ))}
+              <CenteredTextSection
+                id="conclusion"
+                ariaLabel="Conclusion"
+                text="Together, these views make trade-offs, equity, and resilience visible, providing a shared, data-grounded basis for comparison, discussion, and learning."
+                bgColor={muiTheme.palette.brand.water}
+                textColor={muiTheme.palette.text.secondary}
+              />
+            </Box>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
 }

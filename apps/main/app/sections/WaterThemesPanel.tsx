@@ -434,9 +434,7 @@ function WaterThemesPanelContent({
             progress={progress}
             prefersReducedMotion={prefersReducedMotion}
             onLearnMore={
-              c.id === "delta"
-                ? () => openThemePanel("delta")
-                : undefined
+              c.id === "delta" ? () => openThemePanel("delta") : undefined
             }
           />
         ))}

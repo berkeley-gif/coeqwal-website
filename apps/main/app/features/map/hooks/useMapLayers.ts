@@ -313,7 +313,7 @@ export function useMapLayers() {
   useEffect(() => {
     if (!mapReady) return
     if (mapMode !== "learn") return // Only manage in Learn mode
-    if (activeSection === "delta") return // Still in delta, don't hide
+    if ((activeSection as string) === "delta") return // Still in delta, don't hide
 
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return

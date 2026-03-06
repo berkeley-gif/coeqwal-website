@@ -216,7 +216,9 @@ export default function ScenarioSelectionSidebar({
             <Box key={themeKey} sx={{ mb: 1 }}>
               {/* ── Theme header: checkbox + clickable badge ────────────── */}
               <Box
-                onMouseEnter={() => visibleIds.length > 0 && onRowHover?.(visibleIds)}
+                onMouseEnter={() =>
+                  visibleIds.length > 0 && onRowHover?.(visibleIds)
+                }
                 onMouseLeave={() => onRowHover?.(null)}
                 sx={{
                   display: "flex",
@@ -309,9 +311,7 @@ export default function ScenarioSelectionSidebar({
                         padding: 0,
                         flexShrink: 0,
                         transform: "scale(0.75)",
-                        color: isActive
-                          ? "rgba(255,255,255,0.5)"
-                          : undefined,
+                        color: isActive ? "rgba(255,255,255,0.5)" : undefined,
                         "&.Mui-checked": isActive
                           ? { color: "rgba(255,255,255,0.85)" }
                           : {},

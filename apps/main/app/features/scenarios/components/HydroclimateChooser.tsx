@@ -240,9 +240,7 @@ export function HydroclimateChooser({
             }
 
             return (
-              <React.Fragment key={option.value}>
-                {iconButton}
-              </React.Fragment>
+              <React.Fragment key={option.value}>{iconButton}</React.Fragment>
             )
           },
         )}
