@@ -46,8 +46,8 @@ export interface StrategyGridContentProps {
   selectedScenarios: string[]
   /** Show only chosen scenarios */
   showOnlyChosen: boolean
-  /** Show scenario descriptions */
-  showDefinitions: boolean
+  /** Show alternative baseline scenarios */
+  showAlternativeBaselines: boolean
   /** Compact layout mode */
   compact: boolean
   /** Layout mode for responsive behavior */
@@ -107,7 +107,7 @@ export function StrategyGridContent({
   showIconDivider = false,
   selectedScenarios,
   showOnlyChosen,
-  showDefinitions,
+  showAlternativeBaselines,
   compact,
   layoutMode,
   outcomeNames,
@@ -138,8 +138,8 @@ export function StrategyGridContent({
     if (showOnlyChosen) {
       return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
     }
-    // When showing all: hide non-primary baseline variations unless expanded
-    if (!showDefinitions) {
+    // When showing all: hide alternative baselines unless toggled on
+    if (!showAlternativeBaselines) {
       return scenarios.filter(
         (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
       )
@@ -218,7 +218,7 @@ export function StrategyGridContent({
             isChosen={selectedScenarios.includes(scenario.scenarioId)}
             compact={compact}
             layoutMode={layoutMode}
-            showDefinitions={showDefinitions}
+            showAlternativeBaselines={showAlternativeBaselines}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
             selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}

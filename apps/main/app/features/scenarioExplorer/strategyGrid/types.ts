@@ -39,9 +39,9 @@ export interface StrategyGridProps {
   selectedOutcomes: Record<string, string | null>
   showMapView: boolean
   showOnlyChosen: boolean
-  showDefinitions: boolean
+  showAlternativeBaselines: boolean
   onShowOnlyChosenChange?: (value: boolean) => void
-  onShowDefinitionsChange?: (value: boolean) => void
+  onShowAlternativeBaselinesChange?: (value: boolean) => void
 
   // Layout
   compact?: boolean

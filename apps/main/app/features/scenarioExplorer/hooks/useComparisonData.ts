@@ -25,17 +25,16 @@ export function useComparisonData() {
   } = useMultipleScenarioTiers()
   const { getDisplayName } = useScenarioList()
 
-  const { showDefinitions, showOnlyChosen, selectedScenarios } =
+  const { showAlternativeBaselines, showOnlyChosen, selectedScenarios } =
     useScenarioExplorerStore()
 
   const isLoading = tiersLoading
   const error = tiersError
 
   // Apply baseline filter and ensure s0020 is always listed first.
-  // When showDefinitions is false, only s0020 is shown from the baseline theme —
-  // matching the filter logic in StrategyGridContent and ScenarioSelectionSidebar.
+  // When showAlternativeBaselines is false, only s0020 is shown from the baseline theme.
   const scenarioIds = useMemo(() => {
-    let filtered = showDefinitions
+    let filtered = showAlternativeBaselines
       ? allScenarioIds
       : allScenarioIds.filter(
           (id) =>
@@ -50,7 +49,7 @@ export function useComparisonData() {
       if (b === PRIMARY_BASELINE_ID) return 1
       return 0
     })
-  }, [allScenarioIds, showDefinitions, showOnlyChosen, selectedScenarios])
+  }, [allScenarioIds, showAlternativeBaselines, showOnlyChosen, selectedScenarios])
 
   // Build scenarios array with dynamic names and theme-aligned colors.
   // Per-theme counters ensure each scenario gets the next step in its theme's

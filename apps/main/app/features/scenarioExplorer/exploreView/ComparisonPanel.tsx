@@ -11,7 +11,7 @@
  * controls and the parallel coordinates visualization.
  */
 
-import React, { useMemo, useState, useRef, useCallback } from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -26,7 +26,7 @@ import {
   type VerticalParallelLineData,
   type AxisLayout,
 } from "@repo/viz"
-import { InfoIconButton } from "@repo/ui"
+import { InfoIconButton, InfoTooltip } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
@@ -110,6 +110,18 @@ export default function ComparisonPanel() {
     handleClose: handleTooltipClose,
     forceClose: handleTooltipForceClose,
   } = useTierTooltipState()
+
+  // Prevent browser text-selection anywhere inside the chart area.
+  // Native mousedown.preventDefault is the standards-compliant way to do this
+  // and is fully compatible with D3 drag (see d3/d3-drag#9).
+  const chartWrapperRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = chartWrapperRef.current
+    if (!el) return
+    const prevent = (e: MouseEvent) => e.preventDefault()
+    el.addEventListener("mousedown", prevent)
+    return () => el.removeEventListener("mousedown", prevent)
+  }, [])
 
   const {
     data: comparisonData,
@@ -258,7 +270,7 @@ export default function ComparisonPanel() {
   )
 
   const chartElement = (
-    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+    <Box ref={chartWrapperRef} sx={{ position: "relative", width: "100%", height: "100%", userSelect: "none", WebkitUserSelect: "none" }}>
       {/* ── HTML axis labels above chart (desktop) ──────────────────── */}
       {isDesktop && axisLayout.length > 0 && (
         <Box
@@ -268,7 +280,7 @@ export default function ComparisonPanel() {
             left: 0,
             right: 0,
             height: `${axisLayout[0]?.y ?? 0}px`,
-            pointerEvents: "auto",
+            pointerEvents: "none",
             zIndex: 2,
           }}
         >
@@ -299,13 +311,15 @@ export default function ComparisonPanel() {
                   {formatOutcomeLabel(layout.axis)}
                 </Typography>
                 {outcomeCode && (
-                  <InfoIconButton
-                    isActive={activeInfoTooltip === outcomeCode}
-                    onClick={(e) =>
-                      handleToggleWithAnchor(outcomeCode, e.currentTarget)
-                    }
-                    title={`Details for ${layout.axis}`}
-                  />
+                  <Box sx={{ pointerEvents: "auto" }}>
+                    <InfoIconButton
+                      isActive={activeInfoTooltip === outcomeCode}
+                      onClick={(e) =>
+                        handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                      }
+                      title={`Details for ${layout.axis}`}
+                    />
+                  </Box>
                 )}
               </Box>
             )
@@ -322,7 +336,7 @@ export default function ComparisonPanel() {
             left: 0,
             bottom: 0,
             width: `${axisLayout[0]?.x ?? 0}px`,
-            pointerEvents: "auto",
+            pointerEvents: "none",
             zIndex: 2,
           }}
         >
@@ -343,13 +357,15 @@ export default function ComparisonPanel() {
                 }}
               >
                 {outcomeCode && (
-                  <InfoIconButton
-                    isActive={activeInfoTooltip === outcomeCode}
-                    onClick={(e) =>
-                      handleToggleWithAnchor(outcomeCode, e.currentTarget)
-                    }
-                    title={`Details for ${layout.axis}`}
-                  />
+                  <Box sx={{ pointerEvents: "auto" }}>
+                    <InfoIconButton
+                      isActive={activeInfoTooltip === outcomeCode}
+                      onClick={(e) =>
+                        handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                      }
+                      title={`Details for ${layout.axis}`}
+                    />
+                  </Box>
                 )}
                 <Typography
                   variant="outcomeLabel"
@@ -462,10 +478,12 @@ export default function ComparisonPanel() {
           overflow: "hidden",
         }}
       >
-        {/* Hydroclimate chooser */}
+        {/* Hydroclimate chooser + methodology link */}
         <Box
           sx={{
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
             px: theme.space.component.lg,
             pt: theme.space.component.sm,
             pb: theme.space.component.lg,
@@ -479,6 +497,54 @@ export default function ComparisonPanel() {
             value={hydroclimatePeriod}
             onChange={setHydroclimatePeriod}
           />
+          <InfoTooltip
+            placement="bottom"
+            description={
+              <Box sx={{ maxWidth: 340, fontSize: "0.82rem", lineHeight: 1.55 }}>
+                <p style={{ margin: "0 0 8px" }}>
+                  Each line represents a scenario scored across nine outcome
+                  categories. Each category contains indicators that experts
+                  have classified into four tiers (Tier 1 = best, Tier 4 = worst).
+                </p>
+                <p style={{ margin: "0 0 8px" }}>
+                  The position on each axis is a normalized weighted average of
+                  those tier assignments. The weighted score is:
+                </p>
+                <p style={{ margin: "0 0 4px", fontFamily: "monospace", fontSize: "0.78rem" }}>
+                  W = (1p₁ + 2p₂ + 3p₃ + 4p₄) / (p₁ + p₂ + p₃ + p₄)
+                </p>
+                <p style={{ margin: "0 0 8px", fontSize: "0.78rem" }}>
+                  where p<sub>i</sub> is the proportion of indicators in Tier i.
+                </p>
+                <p style={{ margin: "0 0 4px" }}>
+                  This is then normalized to a 0-1 scale:
+                </p>
+                <p style={{ margin: "0 0 8px", fontFamily: "monospace", fontSize: "0.78rem" }}>
+                  S = (4 - W) / 3
+                </p>
+                <p style={{ margin: 0 }}>
+                  S = 1 means all indicators are in Tier 1. S = 0 means all
+                  indicators are in Tier 4. Higher is better.
+                </p>
+              </Box>
+            }
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                ml: "auto",
+                flexShrink: 0,
+                cursor: "pointer",
+                color: theme.palette.grey[500],
+                textDecoration: "underline",
+                textDecorationStyle: "dotted",
+                textUnderlineOffset: 3,
+                "&:hover": { color: theme.palette.grey[800] },
+              }}
+            >
+              Methodology
+            </Typography>
+          </InfoTooltip>
         </Box>
 
         {/* Chart toggle controls */}

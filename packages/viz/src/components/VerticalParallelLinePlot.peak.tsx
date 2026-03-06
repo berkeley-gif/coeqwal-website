@@ -181,7 +181,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       } else {
         // Resting state: three tiers
         if (!active) {
-          lineOpacity = 0.42; circleOpacity = 0.48
+          lineOpacity = 0.22; circleOpacity = 0.28
         } else if (chosen) {
           lineOpacity = 1.0; circleOpacity = 1.0
         } else {
@@ -1010,6 +1010,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     if (g.empty()) return
     applyStyles(g, hoveredScenarioRef.current)
   }, [highlightedIds, applyStyles])
+
 
   return (
     <div

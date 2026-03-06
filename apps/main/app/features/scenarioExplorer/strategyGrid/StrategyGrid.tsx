@@ -51,9 +51,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   selectedOutcomes,
   showMapView,
   showOnlyChosen,
-  showDefinitions,
+  showAlternativeBaselines,
   onShowOnlyChosenChange,
-  onShowDefinitionsChange,
+  onShowAlternativeBaselinesChange,
   compact = false,
   renderMode = "all",
   sortBy,
@@ -185,9 +185,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             sortDirection={sortDirection}
             sortEnabled={sortEnabled}
             showOnlyChosen={showOnlyChosen}
-            showDefinitions={showDefinitions}
+            showAlternativeBaselines={showAlternativeBaselines}
             onShowOnlyChosenChange={onShowOnlyChosenChange}
-            onShowDefinitionsChange={onShowDefinitionsChange}
+            onShowAlternativeBaselinesChange={onShowAlternativeBaselinesChange}
             onTooltipToggle={handleToggleWithAnchor}
             onSortChange={onSortChange}
           />
@@ -206,7 +206,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             showIconDivider={showIconDivider}
             selectedScenarios={selectedScenarios}
             showOnlyChosen={showOnlyChosen}
-            showDefinitions={showDefinitions}
+            showAlternativeBaselines={showAlternativeBaselines}
             compact={compact}
             layoutMode={layoutMode}
             outcomeNames={outcomeNames}

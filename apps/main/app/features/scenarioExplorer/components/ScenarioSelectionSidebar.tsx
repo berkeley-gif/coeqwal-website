@@ -4,7 +4,7 @@
  * ScenarioSelectionSidebar - Shared scenario selection panel for analysis modals
  *
  * Renders a narrow vertical sidebar containing:
- * - GridControls (show only chosen / baseline toggle) — from store
+ * - GridControls (show only chosen / alternative baselines toggle) — from store
  * - Flat theme-grouped scenario list with checkboxes
  *
  * Theme headers have a select-all checkbox and a clickable badge that
@@ -74,9 +74,9 @@ export default function ScenarioSelectionSidebar({
     selectScenarios,
     highlightedScenario,
     showOnlyChosen,
-    showDefinitions,
+    showAlternativeBaselines,
     setShowOnlyChosen,
-    setShowDefinitions,
+    setShowAlternativeBaselines,
   } = useScenarioExplorerStore()
 
   // ── Scroll-to-highlight plumbing ──────────────────────────────────────────
@@ -124,7 +124,7 @@ export default function ScenarioSelectionSidebar({
           selectedScenarios.includes(s.scenarioId),
         )
       }
-      if (!showDefinitions) {
+      if (!showAlternativeBaselines) {
         return activeScenarios.filter(
           (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
         )
@@ -150,7 +150,7 @@ export default function ScenarioSelectionSidebar({
       items: displayGroups.get(t) ?? [],
       allIds: allGroups.get(t) ?? [],
     }))
-  }, [scenarios, showOnlyChosen, showDefinitions, selectedScenarios])
+  }, [scenarios, showOnlyChosen, showAlternativeBaselines, selectedScenarios])
 
   return (
     <Box
@@ -165,7 +165,7 @@ export default function ScenarioSelectionSidebar({
         backgroundColor: theme.palette.grey[50],
       }}
     >
-      {/* ── Grid controls (show only chosen / baseline toggle) ─────────────── */}
+      {/* ── Grid controls (show only chosen / alternative baselines toggle) ── */}
       <Box
         sx={{
           flexShrink: 0,
@@ -177,9 +177,9 @@ export default function ScenarioSelectionSidebar({
       >
         <GridControls
           showOnlyChosen={showOnlyChosen}
-          showDefinitions={showDefinitions}
+          showAlternativeBaselines={showAlternativeBaselines}
           onShowOnlyChosenChange={setShowOnlyChosen}
-          onShowDefinitionsChange={setShowDefinitions}
+          onShowAlternativeBaselinesChange={setShowAlternativeBaselines}
           iconSize={28}
         />
       </Box>
