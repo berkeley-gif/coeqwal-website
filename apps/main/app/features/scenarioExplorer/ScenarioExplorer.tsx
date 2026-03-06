@@ -15,6 +15,7 @@ import {
   useTheme,
   icons,
   ViewListIcon,
+  MapIcon,
   CompareArrowsIcon,
   AppsIcon,
   AutorenewIcon,
@@ -47,6 +48,11 @@ const VIEW_MODES: {
     mode: "list",
     icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Scenario list",
+  },
+  {
+    mode: "map",
+    icon: <MapIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Map tool",
   },
   {
     mode: "comparison",
