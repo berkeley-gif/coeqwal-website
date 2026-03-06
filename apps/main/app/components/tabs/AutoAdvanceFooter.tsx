@@ -28,18 +28,22 @@ export default function AutoAdvanceFooter() {
       data-auto-advance-sentinel
       style={{
         position: "relative",
-        paddingTop: "1rem",
-        paddingBottom: "2.1rem",
+        padding: `${theme.spacing(theme.space.section.lg)} ${theme.spacing(theme.space.section.md)}`,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 12,
-        backgroundColor: theme.palette.blue.darkest,
+        gap: theme.spacing(theme.space.component.lg),
+        backgroundColor: tab?.panelColor ?? theme.palette.blue.darkest,
         color: theme.palette.common.white,
-        pointerEvents: "auto", // Ensure footer is clickable even when parent has pointerEvents: none
+        pointerEvents: "auto",
       }}
     >
-      <Typography variant="caption">{tab?.footerText ?? ""}</Typography>
+      <Typography
+        variant="tabLabel"
+        sx={{ color: "common.white", textTransform: "none" }}
+      >
+        {tab?.footerText ?? ""}
+      </Typography>
       <ScrollToButton
         onClick={onAdvance}
         animationComplete

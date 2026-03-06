@@ -18,15 +18,7 @@
  */
 
 import { useEffect, useRef, useCallback } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  MuiCard as Card,
-  MuiCardContent as CardContent,
-  MuiCardActionArea as CardActionArea,
-} from "@repo/ui/mui"
-import { LeadingMarkerText } from "@repo/ui"
+import { Box, useTheme } from "@repo/ui/mui"
 import MapOverlayPanels from "../../features/map/overlays/MapOverlayPanels"
 import { useMapReady, useMapError, mapActions } from "../../features/map/store"
 
@@ -35,7 +27,6 @@ export default function LearnPanel() {
   const mapError = useMapError()
   const theme = useTheme()
   const scrollytellingRef = useRef<HTMLDivElement>(null)
-  const cardColor = theme.palette.blue.pale
 
   // Set map mode to 'learn' on mount, reset to 'hidden' on unmount
   useEffect(() => {
@@ -159,103 +150,6 @@ export default function LearnPanel() {
               Loading map...
             </Box>
           )}
-        </Box>
-      </Box>
-      <Box
-        sx={{
-          backgroundColor: theme.palette.learn.background,
-          p: (theme) => theme.space.section.lg,
-          paddingBottom: "100px", // Extended bottom padding for visual balance
-          position: "relative",
-          zIndex: theme.zIndex.appBar,
-          pointerEvents: "auto",
-        }}
-      >
-        <Box
-          id="learnMoreContainer"
-          sx={{
-            display: "flex",
-            alignItems: { sm: "flex-start", md: "center" },
-            flexDirection: { sm: "column-reverse", lg: "row" },
-            justifyContent: "center",
-            gap: (theme) => theme.space.gap.lg,
-            width: "100%",
-            maxWidth: theme.layout.maxWidth.xl,
-            margin: "0 auto",
-          }}
-        >
-          {/* Image column */}
-          <Box
-            sx={{
-              minWidth: 0,
-              display: "flex",
-              justifyContent: "center",
-              width: "30%",
-            }}
-          >
-            <Box
-              component="img"
-              src="/images/content/learn.png"
-              alt="Learn"
-              sx={{ width: "100%", maxWidth: 520, height: "auto" }}
-            />
-          </Box>
-          {/* Text column */}
-          <Box id="textColumn" sx={{ width: "44%" }}>
-            <LeadingMarkerText title="Learn More" circleColor="#66b479">
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: (theme) => theme.space.gap.md,
-                  mt: (theme) => theme.space.section.xs,
-                }}
-              >
-                <Card
-                  sx={{
-                    backgroundColor: cardColor,
-                  }}
-                  component="a"
-                  href="https://flow.coeqwal.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <CardActionArea
-                    sx={{
-                      p: (theme) => theme.space.component.lg,
-                    }}
-                  >
-                    <CardContent sx={{ height: "100%" }}>
-                      <Typography variant="body1">
-                        How water moves through California →
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-                <Card
-                  component="a"
-                  href="https://climate.coeqwal.org/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    backgroundColor: cardColor,
-                  }}
-                >
-                  <CardActionArea
-                    sx={{
-                      p: (theme) => theme.space.component.lg,
-                    }}
-                  >
-                    <CardContent sx={{ height: "100%" }}>
-                      <Typography variant="body1">
-                        Climate change and California water →
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Box>
-            </LeadingMarkerText>
-          </Box>
         </Box>
       </Box>
     </div>

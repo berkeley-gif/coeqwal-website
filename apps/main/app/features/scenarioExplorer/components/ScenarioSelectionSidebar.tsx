@@ -19,7 +19,7 @@
  * scenario row to serve as a chart legend.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect, useRef } from "react"
 import {
   Box,
   Typography,
@@ -65,12 +65,18 @@ interface ScenarioSelectionSidebarProps {
    * Used by ComparisonPanel to make the sidebar double as a chart legend.
    */
   scenarioColors?: Record<string, string>
+  /**
+   * Scenario currently hovered on the chart (transient). Receives a subtle
+   * visual treatment in the sidebar but does not trigger scroll.
+   */
+  hoveredScenarioId?: string | null
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
+  hoveredScenarioId,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
 
@@ -78,11 +84,39 @@ export default function ScenarioSelectionSidebar({
     selectedScenarios,
     toggleScenario,
     selectScenarios,
+    highlightedScenario,
     showOnlyChosen,
     showDefinitions,
     setShowOnlyChosen,
     setShowDefinitions,
   } = useScenarioExplorerStore()
+
+  // ── Scroll-to-highlight plumbing ────────────────────────────────────────────
+  const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  // Auto-expand the highlighted scenario's theme accordion so the row is visible
+  useEffect(() => {
+    if (!highlightedScenario) return
+    const themeKey = getScenarioTheme(highlightedScenario) as ScenarioTheme
+    setExpandedThemes((prev) => {
+      if (prev.has(themeKey)) return prev
+      const next = new Set(prev)
+      next.add(themeKey)
+      return next
+    })
+  }, [highlightedScenario])
+
+  // Smooth-scroll to the highlighted row after a brief delay
+  // (allows accordion expansion to settle first)
+  useEffect(() => {
+    if (!highlightedScenario) return
+    const timer = setTimeout(() => {
+      scenarioRowRefs.current
+        .get(highlightedScenario)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }, 120)
+    return () => clearTimeout(timer)
+  }, [highlightedScenario])
 
   // Toggle all scenarios in a theme group on/off
   const toggleTheme = (itemIds: string[]) => {
