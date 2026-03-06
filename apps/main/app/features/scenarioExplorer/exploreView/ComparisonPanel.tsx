@@ -11,7 +11,7 @@
  * controls and the parallel coordinates visualization.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -56,8 +56,27 @@ export default function ComparisonPanel() {
   const [relativeToBaseline, setRelativeToBaseline] = useState(true)
   const [defineOutcome, setDefineOutcome] = useState(false)
 
-  const [hoveredScenario, setHoveredScenario] =
+  const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const setHoveredScenario = useCallback(
+    (scenario: VerticalParallelLineData | null) => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current)
+        hoverTimerRef.current = null
+      }
+      if (scenario) {
+        setHoveredScenarioRaw(scenario)
+      } else {
+        hoverTimerRef.current = setTimeout(
+          () => setHoveredScenarioRaw(null),
+          200,
+        )
+      }
+    },
+    [],
+  )
 
   // Axis layout positions reported by the chart for HTML label positioning
   const [axisLayout, setAxisLayout] = useState<AxisLayout[]>([])
@@ -352,30 +371,6 @@ export default function ComparisonPanel() {
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
       />
 
-      {/* ── Hovered scenario name tooltip ────────────────────────────── */}
-      {hoveredScenario && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: -12,
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 1,
-            boxShadow: theme.shadows[2],
-            pointerEvents: "none",
-            zIndex: 10,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Typography variant="caption" sx={{ fontWeight: 400 }}>
-            {hoveredScenario.name}
-          </Typography>
-        </Box>
-      )}
     </Box>
   )
 
@@ -428,7 +423,10 @@ export default function ComparisonPanel() {
       }}
     >
       {/* ── Left: shared scenario selection sidebar ─────────────────────────── */}
-      <ScenarioSelectionSidebar scenarioColors={scenarioColors} />
+      <ScenarioSelectionSidebar
+        scenarioColors={scenarioColors}
+        hoveredScenarioId={hoveredScenario?.id ?? null}
+      />
 
       {/* ── Right: hydroclimate chooser + chart controls + chart ─────────────── */}
       <Box

@@ -111,7 +111,7 @@ export const outcomeCategories = [
   },
   {
     id: "salmon-abundance",
-    name: "Salmon abundance",
+    name: "Winter-run salmon",
     icon: <SetMealIcon fontSize="small" />,
   },
 ]
