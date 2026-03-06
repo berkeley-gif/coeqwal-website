@@ -318,6 +318,16 @@ export const ENDPOINTS = {
   channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
     `/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
 
+  // Delta statistics endpoints (X2, salinity, outflow)
+
+  /**
+   * Monthly Delta statistics (X2, salinity, outflow)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
+   */
+  deltaMonthly: (scenarioId: string, category?: string) =>
+    `/statistics/scenarios/${scenarioId}/delta/monthly${category ? `?category=${category}` : ""}`,
+
   // Batch statistics endpoint (for Data Explorer performance)
 
   /**

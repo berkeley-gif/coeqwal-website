@@ -71,3 +71,4 @@ export {
   useChannelsSeasonal,
   useChannelsPeriodSummary,
 } from "./useEnvFlowStatistics"
+export { useDeltaMonthly } from "./useDeltaStatistics"

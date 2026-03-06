@@ -321,6 +321,16 @@ export const CACHE_KEYS = {
   channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
     `/api/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
 
+  // Delta statistics cache keys (X2, salinity, outflow)
+
+  /**
+   * Monthly Delta statistics (X2, salinity, outflow)
+   * @param scenarioId - Scenario ID
+   * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
+   */
+  deltaMonthly: (scenarioId: string, category?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/delta/monthly${category ? `?category=${category}` : ""}`,
+
   // Batch statistics cache key (for Data Explorer performance)
 
   /**
