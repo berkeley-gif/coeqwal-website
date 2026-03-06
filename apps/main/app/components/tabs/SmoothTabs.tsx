@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Typography, useTheme, alpha } from "@repo/ui/mui"
 import { TwoColumnInterstitial } from "@repo/ui"
@@ -102,19 +102,43 @@ export default function SmoothTabs() {
     if (isInTabsArea) setForceHideDescriptions(false)
   }, [isInTabsArea])
 
-  // When user scrolls after a click-open, retract the descriptions
+  // Expand interstitial when activeTab changes while docked (covers both
+  // tab clicks and AutoAdvanceFooter navigation).
+  const prevTabRef = useRef(activeTab)
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab && isInTabsArea) {
+      setClickOpened(true)
+    }
+    prevTabRef.current = activeTab
+  }, [activeTab, isInTabsArea])
+
+  // When user scrolls after a click-open, retract the descriptions.
+  // Delayed so the programmatic smooth-scroll from tab navigation
+  // doesn't immediately close the interstitial.
+  const scrollHandlerRef = useRef<(() => void) | null>(null)
   useEffect(() => {
     if (!clickOpened) return
 
-    const handleScroll = () => {
-      setClickOpened(false)
-    }
+    const timer = setTimeout(() => {
+      const handleScroll = () => {
+        scrollHandlerRef.current = null
+        setClickOpened(false)
+      }
+      scrollHandlerRef.current = handleScroll
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-      once: true,
-    })
-    return () => window.removeEventListener("scroll", handleScroll)
+      window.addEventListener("scroll", handleScroll, {
+        passive: true,
+        once: true,
+      })
+    }, 800)
+
+    return () => {
+      clearTimeout(timer)
+      if (scrollHandlerRef.current) {
+        window.removeEventListener("scroll", scrollHandlerRef.current)
+        scrollHandlerRef.current = null
+      }
+    }
   }, [clickOpened])
 
   // "Scroll to Explore" handler for the Learn interstitial.

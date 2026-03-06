@@ -22,7 +22,7 @@ export const OUTCOME_NAMES = {
   DELTA_ECO: "Delta estuary ecology",
   FW_EXP: "Freshwater for Delta exports",
   FW_DELTA_USES: "Freshwater for in-Delta uses",
-  WRC_SALMON_AB: "Salmon abundance",
+  WRC_SALMON_AB: "Winter-run salmon",
 } as const
 
 /** Valid outcome codes */

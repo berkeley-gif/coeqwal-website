@@ -109,6 +109,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Track currently hovered scenario for dimming other lines
   const hoveredScenarioRef = useRef<number | null>(null)
 
+  // Debounce mouseout so micro-movements between a line and its circles
+  // (or between adjacent path segments) don't cause rapid dim/undim flicker.
+  const hoverOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Centralized filtering function - separate opacity for lines vs circles
   const getScenarioOpacity = useCallback(
     (scenario: VerticalParallelLineData, elementType: "line" | "circle") => {
@@ -225,6 +229,35 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
     },
     [data, axes, getScenarioOpacity, isScenarioActive],
+  )
+
+  const scheduleHoverClear = useCallback(
+    (g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
+      if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
+      hoverOutTimer.current = setTimeout(() => {
+        if (hoveredScenarioRef.current !== null) return
+        onLineHover?.(null)
+        applyHoverDimming(g, null)
+      }, 180)
+    },
+    [onLineHover, applyHoverDimming],
+  )
+
+  const commitHoverIn = useCallback(
+    (
+      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      d: VerticalParallelLineData,
+      dataIndex: number,
+    ) => {
+      if (hoverOutTimer.current) {
+        clearTimeout(hoverOutTimer.current)
+        hoverOutTimer.current = null
+      }
+      hoveredScenarioRef.current = dataIndex
+      onLineHover?.(d)
+      applyHoverDimming(g, dataIndex)
+    },
+    [onLineHover, applyHoverDimming],
   )
 
   // Handle responsive sizing
@@ -867,14 +900,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .style("cursor", "pointer")
           .on("mouseover", function () {
             if (!isScenarioActive(d)) return
-            hoveredScenarioRef.current = dataIndex
-            onLineHover?.(d)
-            applyHoverDimming(g, dataIndex)
+            commitHoverIn(g, d, dataIndex)
           })
           .on("mouseout", function () {
             hoveredScenarioRef.current = null
-            onLineHover?.(null)
-            applyHoverDimming(g, null)
+            scheduleHoverClear(g)
           })
           .on("click", function () {
             onLineClick?.(d)
@@ -897,14 +927,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .style("cursor", "pointer")
             .on("mouseover", function () {
               if (!isScenarioActive(d)) return
-              hoveredScenarioRef.current = dataIndex
-              onLineHover?.(d)
-              applyHoverDimming(g, dataIndex)
+              commitHoverIn(g, d, dataIndex)
             })
             .on("mouseout", function () {
               hoveredScenarioRef.current = null
-              onLineHover?.(null)
-              applyHoverDimming(g, null)
+              scheduleHoverClear(g)
             })
             .on("click", function () {
               onLineClick?.(d)
@@ -938,7 +965,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       showBaseline,
       baselineData,
       title,
-      onLineHover,
       onLineClick,
       getScenarioOpacity,
       isScenarioActive,
@@ -946,7 +972,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       hideAxisLabels,
       onAxesLayout,
       updateScenarioVisibility,
-      applyHoverDimming,
+      commitHoverIn,
+      scheduleHoverClear,
     ],
   )
 

@@ -94,29 +94,32 @@ export default function ScenarioSelectionSidebar({
   // ── Scroll-to-highlight plumbing ────────────────────────────────────────────
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
-  // Auto-expand the highlighted scenario's theme accordion so the row is visible
+  // The active scenario is whichever is highlighted (click) or hovered from chart
+  const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+
+  // Auto-expand the active scenario's theme accordion so the row is visible
   useEffect(() => {
-    if (!highlightedScenario) return
-    const themeKey = getScenarioTheme(highlightedScenario) as ScenarioTheme
+    if (!activeScenarioId) return
+    const themeKey = getScenarioTheme(activeScenarioId) as ScenarioTheme
     setExpandedThemes((prev) => {
       if (prev.has(themeKey)) return prev
       const next = new Set(prev)
       next.add(themeKey)
       return next
     })
-  }, [highlightedScenario])
+  }, [activeScenarioId])
 
-  // Smooth-scroll to the highlighted row after a brief delay
+  // Smooth-scroll to the active row after a brief delay
   // (allows accordion expansion to settle first)
   useEffect(() => {
-    if (!highlightedScenario) return
+    if (!activeScenarioId) return
     const timer = setTimeout(() => {
       scenarioRowRefs.current
-        .get(highlightedScenario)
+        .get(activeScenarioId)
         ?.scrollIntoView({ behavior: "smooth", block: "nearest" })
     }, 120)
     return () => clearTimeout(timer)
-  }, [highlightedScenario])
+  }, [activeScenarioId])
 
   // Toggle all scenarios in a theme group on/off
   const toggleTheme = (itemIds: string[]) => {
@@ -322,12 +325,20 @@ export default function ScenarioSelectionSidebar({
                   const isChosen = selectedScenarios.includes(id)
                   const color = scenarioColors?.[id]
                   const accentColor = color || theme.palette.blue.bright
+                  const isActive =
+                    id === highlightedScenario ||
+                    id === hoveredScenarioId
 
                   return (
                     <Box
                       key={id}
+                      ref={(el: HTMLDivElement | null) => {
+                        if (el) scenarioRowRefs.current.set(id, el)
+                        else scenarioRowRefs.current.delete(id)
+                      }}
                       onClick={() => toggleScenario(id)}
                       sx={{
+                        position: "relative",
                         display: "flex",
                         alignItems: "center",
                         gap: 0.75,
@@ -335,11 +346,21 @@ export default function ScenarioSelectionSidebar({
                         pr: 1,
                         py: 0.25,
                         cursor: "pointer",
-                        borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
-                        transition: "background-color 0.1s",
+                        borderLeft: `3px solid ${
+                          isActive || isChosen
+                            ? accentColor
+                            : "transparent"
+                        }`,
+                        backgroundColor: isActive
+                          ? theme.palette.grey[900]
+                          : "transparent",
+                        transition:
+                          "background-color 200ms ease, border-color 200ms ease, color 200ms ease",
                         "&:hover": {
-                          backgroundColor:
-                            theme.palette.interaction.selectedBackground,
+                          backgroundColor: isActive
+                            ? theme.palette.grey[900]
+                            : theme.palette.interaction
+                                .selectedBackground,
                           borderLeftColor: accentColor,
                         },
                       }}
@@ -353,6 +374,12 @@ export default function ScenarioSelectionSidebar({
                           padding: 0,
                           flexShrink: 0,
                           transform: "scale(0.75)",
+                          color: isActive
+                            ? "rgba(255,255,255,0.5)"
+                            : undefined,
+                          "&.Mui-checked": isActive
+                            ? { color: "rgba(255,255,255,0.85)" }
+                            : {},
                         }}
                       />
 
@@ -361,11 +388,12 @@ export default function ScenarioSelectionSidebar({
                         <Box
                           aria-hidden="true"
                           sx={{
-                            width: 14,
+                            width: isActive ? 20 : 14,
                             height: 3,
-                            borderRadius: "2px",
+                            borderRadius: "1.5px",
                             backgroundColor: color,
                             flexShrink: 0,
+                            transition: "width 200ms ease",
                           }}
                         />
                       )}
@@ -374,11 +402,18 @@ export default function ScenarioSelectionSidebar({
                         sx={{
                           fontSize: "0.8125rem",
                           lineHeight: 1.35,
-                          fontWeight: isChosen ? 500 : 400,
-                          color: isChosen
-                            ? theme.palette.text.primary
-                            : theme.palette.grey[600],
-                          transition: "color 0.1s",
+                          fontWeight: isActive
+                            ? 600
+                            : isChosen
+                              ? 500
+                              : 400,
+                          color: isActive
+                            ? "#fff"
+                            : isChosen
+                              ? theme.palette.text.primary
+                              : theme.palette.grey[600],
+                          transition:
+                            "color 200ms ease",
                           letterSpacing: "0.01em",
                         }}
                       >
