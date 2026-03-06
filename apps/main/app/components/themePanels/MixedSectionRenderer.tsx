@@ -1,6 +1,5 @@
 // apps/main/components/theme-panel/MixedSectionRenderer.tsx
 
-<<<<<<< HEAD
 import {
   Typography,
   List,
@@ -12,17 +11,6 @@ import {
 } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import { useTheme } from "@repo/ui/mui"
-||||||| parent of 4f3eaf49 (fix/icon import in theme component)
-import { Typography, List, ListItem, ListItemText, ListItemIcon, Box } from "@repo/ui/mui"
-import OpacityIcon from '@mui/icons-material/Opacity';
-import { motion } from "@repo/motion";
-import { useTheme } from "@repo/ui/mui";
-=======
-import { Typography, List, ListItem, ListItemText, ListItemIcon, Box } from "@repo/ui/mui"
-import { OpacityIcon } from '@repo/ui/mui';
-import { motion } from "@repo/motion";
-import { useTheme } from "@repo/ui/mui";
->>>>>>> 4f3eaf49 (fix/icon import in theme component)
 import { fadeInRight } from "../../lib/constants/motionAnimations"
 import type { MixedSection } from "../../../../../packages/data/src/coeqwal/themes.ts"
 

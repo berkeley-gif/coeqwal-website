@@ -330,4 +330,11 @@ export const ENDPOINTS = {
     types: string[] = ["storage", "cws", "ag"],
   ) =>
     `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
+
+  // Verification status endpoints
+
+  VERIFICATION_STATUS: "/verification/status",
+
+  verificationScenario: (scenarioId: string) =>
+    `/verification/status/${scenarioId}`,
 } as const

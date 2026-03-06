@@ -169,7 +169,7 @@ export interface BaseHeaderProps {
 const translations: TranslationsMap = {
   en: {
     buttons: {
-      waterStories: "Water stories",
+      waterStories: "Guides",
       waterThemes: "Water themes",
       getData: "Get data",
       about: "About COEQWAL",
