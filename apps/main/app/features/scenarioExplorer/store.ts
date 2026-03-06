@@ -61,7 +61,7 @@ interface ScenarioExplorerState {
   selectedIconId: string | null
 
   // Display options
-  showDefinitions: boolean
+  showAlternativeBaselines: boolean
 
   // Chart toggles (comparison panel)
   relativeToBaseline: boolean
@@ -105,7 +105,7 @@ interface ScenarioExplorerActions {
   setSelectedIconId: (iconId: string | null) => void
 
   // Display options
-  setShowDefinitions: (show: boolean) => void
+  setShowAlternativeBaselines: (show: boolean) => void
 
   // Chart toggles
   setRelativeToBaseline: (show: boolean) => void
@@ -143,7 +143,7 @@ const initialState: ScenarioExplorerState = {
   showOnlyTheme: false,
   showThemeBadges: false,
   selectedIconId: null,
-  showDefinitions: false,
+  showAlternativeBaselines: false,
   relativeToBaseline: true,
   highlightBaseline: false,
   overlayTiers: false,
@@ -239,9 +239,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
 
     // Display options
-    setShowDefinitions: (show) =>
+    setShowAlternativeBaselines: (show) =>
       set((state) => {
-        state.showDefinitions = show
+        state.showAlternativeBaselines = show
       }),
 
     // Chart toggles

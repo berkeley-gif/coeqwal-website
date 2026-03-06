@@ -35,8 +35,8 @@ export interface StrategyGridRowProps {
   compact: boolean
   /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
-  /** Show scenario descriptions */
-  showDefinitions: boolean
+  /** Show alternative baseline scenarios */
+  showAlternativeBaselines: boolean
   /** Outcome names with display info */
   outcomeNames: OutcomeName[]
   /** Get chart data for this scenario */
