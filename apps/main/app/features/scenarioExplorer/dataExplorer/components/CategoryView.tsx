@@ -48,6 +48,7 @@ import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
 import EnvFlowSection from "./EnvFlowSection"
 import RefugeSection from "./RefugeSection"
+import DeltaSection from "./DeltaSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
@@ -1285,6 +1286,12 @@ export default function CategoryView() {
               ) : category.id === "environmental-water" &&
                 selectedScenarios.length > 0 ? (
                 <RefugeSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
+              ) : category.id === "delta-salinity" &&
+                selectedScenarios.length > 0 ? (
+                <DeltaSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
                 />

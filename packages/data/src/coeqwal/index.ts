@@ -119,6 +119,9 @@ export type {
   ChannelsSeasonalResponse,
   ChannelPeriodSummary,
   ChannelsPeriodSummaryResponse,
+  // Delta statistics types
+  DeltaMonthlyStats,
+  DeltaMonthlyResponse,
 } from "./types"
 
 // API constants
@@ -171,6 +174,8 @@ export {
   fetchChannelsMonthly,
   fetchChannelsSeasonal,
   fetchChannelsPeriodSummary,
+  // Delta fetchers
+  fetchDeltaMonthly,
 } from "./fetchers"
 
 // Re-export hooks for convenience

@@ -1451,3 +1451,44 @@ export interface ChannelsPeriodSummaryResponse {
   data: ChannelPeriodSummary[]
   count: number
 }
+
+// ============================================================================
+// DELTA STATISTICS
+// ============================================================================
+
+/**
+ * Monthly statistics for one (variable_code × water_month) from delta_monthly.
+ *
+ * Variables: x2 (KM), em_ec/jp_ec/rs_ec/co_ec (UMHOS/CM),
+ *            banks_ec/tracy_ec (UMHOS/CM), ndo (TAF).
+ */
+export interface DeltaMonthlyStats {
+  variable_code: string
+  water_month: number
+  avg: number | null
+  cv: number | null
+  unit: string
+  avg_cfs: number | null
+  q0: number | null
+  q10: number | null
+  q30: number | null
+  q50: number | null
+  q70: number | null
+  q90: number | null
+  q100: number | null
+  exc_p5: number | null
+  exc_p10: number | null
+  exc_p25: number | null
+  exc_p50: number | null
+  exc_p75: number | null
+  exc_p90: number | null
+  exc_p95: number | null
+  sample_count: number | null
+}
+
+/** Response from /api/statistics/scenarios/:scenarioId/delta/monthly */
+export interface DeltaMonthlyResponse {
+  scenario_id: string
+  data: DeltaMonthlyStats[]
+  count: number
+}

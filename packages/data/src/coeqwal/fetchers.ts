@@ -51,6 +51,7 @@ import type {
   ChannelsMonthlyResponse,
   ChannelsSeasonalResponse,
   ChannelsPeriodSummaryResponse,
+  DeltaMonthlyResponse,
 } from "./types"
 
 /**
@@ -1076,5 +1077,29 @@ export async function fetchChannelsPeriodSummary(
   return apiFetcher<ChannelsPeriodSummaryResponse>(
     ENDPOINTS.channelsPeriodSummary(scenarioId, channelId),
     { baseUrl: DEFAULT_API_BASE, timeout: 15000 },
+  )
+}
+
+// ============================================================================
+// Delta Statistics
+// ============================================================================
+
+/**
+ * Fetch monthly Delta statistics (X2, salinity, outflow)
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
+ * @returns 8 variables × 12 water months = 96 rows (or subset if filtered)
+ */
+export async function fetchDeltaMonthly(
+  scenarioId: string,
+  category?: string,
+): Promise<DeltaMonthlyResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  return apiFetcher<DeltaMonthlyResponse>(
+    ENDPOINTS.deltaMonthly(scenarioId, category),
+    { baseUrl: DEFAULT_API_BASE },
   )
 }
