@@ -48,13 +48,15 @@ export default function ComparisonPanel() {
     setPinnedScenarioId,
     hydroclimatePeriod,
     setHydroclimatePeriod,
+    relativeToBaseline,
+    setRelativeToBaseline,
+    highlightBaseline,
+    setHighlightBaseline,
+    overlayTiers,
+    setOverlayTiers,
+    defineOutcome,
+    setDefineOutcome,
   } = useScenarioExplorerStore()
-
-  // Chart toggle states (local UI state — not shared across views)
-  const [overlayTiers, setOverlayTiers] = useState(false)
-  const [highlightBaseline, setHighlightBaseline] = useState(false)
-  const [relativeToBaseline, setRelativeToBaseline] = useState(true)
-  const [defineOutcome, setDefineOutcome] = useState(false)
 
   const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
