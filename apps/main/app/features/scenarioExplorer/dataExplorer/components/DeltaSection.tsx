@@ -94,9 +94,7 @@ function rowsToMonthlyPercentiles(
   return monthly
 }
 
-function buildReservoirData(
-  variableCodes: string[],
-): ReservoirData[] {
+function buildReservoirData(variableCodes: string[]): ReservoirData[] {
   return variableCodes.map((code) => ({
     reservoirId: code,
     reservoirName: VARIABLE_LABELS[code] ?? code,
@@ -433,9 +431,9 @@ export default function DeltaSection({
           title="April X2"
           description={
             <>
-              Distribution of April X2 position across simulated years.
-              X2 is the distance (km) from Golden Gate where salinity = 2 ppt.
-              Lower values indicate saltwater intrusion further into the Delta.
+              Distribution of April X2 position across simulated years. X2 is
+              the distance (km) from Golden Gate where salinity = 2 ppt. Lower
+              values indicate saltwater intrusion further into the Delta.
               <Box component="span" sx={{ display: "block", mt: 1.5 }}>
                 <BandsLegend colors={X2_BAND_COLORS} />
               </Box>
@@ -478,9 +476,9 @@ export default function DeltaSection({
           title="September X2"
           description={
             <>
-              Distribution of September X2 position across simulated years.
-              Fall X2 reflects conditions at the end of the dry season,
-              when salinity intrusion is typically most pronounced.
+              Distribution of September X2 position across simulated years. Fall
+              X2 reflects conditions at the end of the dry season, when salinity
+              intrusion is typically most pronounced.
               <Box component="span" sx={{ display: "block", mt: 1.5 }}>
                 <BandsLegend colors={X2_BAND_COLORS} />
               </Box>
