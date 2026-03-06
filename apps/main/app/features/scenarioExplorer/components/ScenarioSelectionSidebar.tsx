@@ -55,6 +55,8 @@ const PRIMARY_BASELINE_ID = "s0020"
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
+  /** Called when the user hovers scenario rows or a theme header in the sidebar. */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -62,6 +64,7 @@ interface ScenarioSelectionSidebarProps {
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredScenarioId,
+  onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
 
@@ -203,6 +206,8 @@ export default function ScenarioSelectionSidebar({
             <Box key={themeKey} sx={{ mb: 1 }}>
               {/* ── Theme header: checkbox + clickable badge ────────────── */}
               <Box
+                onMouseEnter={() => themeIds.length > 0 && onRowHover?.(themeIds)}
+                onMouseLeave={() => onRowHover?.(null)}
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -271,6 +276,8 @@ export default function ScenarioSelectionSidebar({
                       else scenarioRowRefs.current.delete(id)
                     }}
                     onClick={() => toggleScenario(id)}
+                    onMouseEnter={() => onRowHover?.([id])}
+                    onMouseLeave={() => onRowHover?.(null)}
                     sx={{
                       position: "relative",
                       display: "flex",
