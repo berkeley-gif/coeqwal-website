@@ -292,7 +292,7 @@ export default function ComparisonPanel() {
                 sx={{
                   position: "absolute",
                   left: `${layout.x}px`,
-                  bottom: 4,
+                  bottom: 16,
                   transform: "translateX(-50%)",
                   display: "flex",
                   flexDirection: "column",
