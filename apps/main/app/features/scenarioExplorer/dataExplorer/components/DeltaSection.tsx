@@ -16,7 +16,7 @@ import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { PercentileMatrix } from "@repo/viz"
 import type { ReservoirData, MonthlyPercentiles } from "@repo/viz"
-import { GridScenarioHeader } from "./AlignedScenarioGrid"
+import { GridScenarioHeader, GridRow } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
 import { useDeltaMonthly } from "@repo/data/coeqwal/hooks"
@@ -62,13 +62,6 @@ const SALINITY_BAND_COLORS = {
   outer: "#b2dfdb",
   inner: "#80cbc4",
   median: "#00695c",
-}
-
-const X2_BAND_COLORS = {
-  range: "#e8eaf6",
-  outer: "#c5cae9",
-  inner: "#9fa8da",
-  median: "#283593",
 }
 
 // ============================================================================
@@ -148,41 +141,6 @@ function buildMatrixForVariables(
     for (const [varCode, varRows] of byVar.entries()) {
       if (!matrix[varCode]) matrix[varCode] = {}
       matrix[varCode][scenarioId] = rowsToMonthlyPercentiles(varRows)
-    }
-  }
-
-  return matrix
-}
-
-/**
- * Build a matrix for X2 showing only April (water month 7) or September (water month 12).
- * We filter down to just that one month but still pass it as month "1" so
- * PercentileMatrix renders a single column.
- */
-function buildSingleMonthMatrix(
-  allData: Record<string, DeltaMonthlyStats[]>,
-  variableCode: string,
-  waterMonth: number,
-): MatrixDataType {
-  const matrix: MatrixDataType = { [variableCode]: {} }
-
-  for (const [scenarioId, rows] of Object.entries(allData)) {
-    const matchingRow = rows.find(
-      (r) => r.variable_code === variableCode && r.water_month === waterMonth,
-    )
-    if (matchingRow) {
-      matrix[variableCode]![scenarioId] = {
-        "1": {
-          q0: matchingRow.q0 ?? 0,
-          q10: matchingRow.q10 ?? 0,
-          q30: matchingRow.q30 ?? 0,
-          q50: matchingRow.q50 ?? 0,
-          q70: matchingRow.q70 ?? 0,
-          q90: matchingRow.q90 ?? 0,
-          q100: matchingRow.q100 ?? 0,
-          mean: matchingRow.avg ?? 0,
-        },
-      }
     }
   }
 
@@ -313,6 +271,40 @@ function SectionHeader({
 }
 
 // ============================================================================
+// X2 text stats cell (rendered per scenario inside GridRow)
+// ============================================================================
+
+function X2StatCell({
+  avg,
+  cv,
+}: {
+  avg: number | null
+  cv: number | null
+}) {
+  const theme = useTheme()
+  return (
+    <Box sx={{ textAlign: "center" }}>
+      <Typography
+        sx={{
+          fontWeight: 600,
+          fontSize: "0.95rem",
+          color: theme.palette.text.primary,
+          fontFeatureSettings: "'tnum' 1",
+        }}
+      >
+        {avg != null ? `${avg.toFixed(1)} km` : "—"}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{ color: theme.palette.grey[500], display: "block" }}
+      >
+        {cv != null ? `CV ${(cv * 100).toFixed(1)}%` : ""}
+      </Typography>
+    </Box>
+  )
+}
+
+// ============================================================================
 // Main component
 // ============================================================================
 
@@ -332,15 +324,34 @@ export default function DeltaSection({
 
   const hasData = !isLoading && Object.keys(allData).length > 0
 
-  // Build matrices for each chart group
-  const aprilX2Matrix = useMemo(
-    () => buildSingleMonthMatrix(allData, "x2", 7),
-    [allData],
-  )
-  const septX2Matrix = useMemo(
-    () => buildSingleMonthMatrix(allData, "x2", 12),
-    [allData],
-  )
+  // Extract X2 single-month stats (avg + cv) per scenario
+  const aprilX2Stats = useMemo(() => {
+    const stats: Record<string, { avg: number | null; cv: number | null }> = {}
+    for (const [scenarioId, rows] of Object.entries(allData)) {
+      const row = rows.find(
+        (r) => r.variable_code === "x2" && r.water_month === 7,
+      )
+      stats[scenarioId] = row
+        ? { avg: row.avg, cv: row.cv }
+        : { avg: null, cv: null }
+    }
+    return stats
+  }, [allData])
+
+  const septX2Stats = useMemo(() => {
+    const stats: Record<string, { avg: number | null; cv: number | null }> = {}
+    for (const [scenarioId, rows] of Object.entries(allData)) {
+      const row = rows.find(
+        (r) => r.variable_code === "x2" && r.water_month === 12,
+      )
+      stats[scenarioId] = row
+        ? { avg: row.avg, cv: row.cv }
+        : { avg: null, cv: null }
+    }
+    return stats
+  }, [allData])
+
+  // Build matrices for salinity chart groups
   const complianceMatrix = useMemo(
     () => buildMatrixForVariables(allData, COMPLIANCE_VARS),
     [allData],
@@ -348,33 +359,6 @@ export default function DeltaSection({
   const pumpsMatrix = useMemo(
     () => buildMatrixForVariables(allData, PUMPS_VARS),
     [allData],
-  )
-
-  // ReservoirData entries for each group
-  const aprilX2Entities: ReservoirData[] = useMemo(
-    () => [
-      {
-        reservoirId: "x2",
-        reservoirName: "April X2",
-        capacityTaf: 0,
-        deadPoolTaf: 0,
-        labelSubtitle: "Distance (KM) from Golden Gate",
-      },
-    ],
-    [],
-  )
-
-  const septX2Entities: ReservoirData[] = useMemo(
-    () => [
-      {
-        reservoirId: "x2",
-        reservoirName: "September X2",
-        capacityTaf: 0,
-        deadPoolTaf: 0,
-        labelSubtitle: "Distance (KM) from Golden Gate",
-      },
-    ],
-    [],
   )
 
   const complianceEntities = useMemo(
@@ -425,92 +409,54 @@ export default function DeltaSection({
         </ChartGridProvider>
       </Box>
 
-      {/* ── April X2 ──────────────────────────────────────────── */}
+      {/* ── X2 Position (April & September) ─────────────────── */}
       <Box sx={chartCardSx}>
         <SectionHeader
-          title="April X2"
-          description={
-            <>
-              Distribution of April X2 position across simulated years. X2 is
-              the distance (km) from Golden Gate where salinity = 2 ppt. Lower
-              values indicate saltwater intrusion further into the Delta.
-              <Box component="span" sx={{ display: "block", mt: 1.5 }}>
-                <BandsLegend colors={X2_BAND_COLORS} />
-              </Box>
-            </>
-          }
+          title="X2 Position"
+          description="X2 is the distance (km) from Golden Gate where salinity reaches 2 ppt. Lower values indicate saltwater intrusion further into the Delta."
         />
         <Box sx={{ mt: theme.space.component.lg }}>
           {isLoading && !hasData ? (
-            <PercentileMatrixSkeleton
-              scenarios={scenarios}
-              rowCount={1}
-              labelColumnWidth={160}
-            />
+            <Typography color="text.secondary" variant="body2">
+              Loading X2 data…
+            </Typography>
           ) : !hasData ? (
             <Typography color="text.secondary" variant="body2">
-              No April X2 data available.
+              No X2 data available.
             </Typography>
           ) : (
-            <PercentileMatrix
-              reservoirs={aprilX2Entities}
-              scenarios={scenarios}
-              scenarioNames={scenarioNames}
-              data={aprilX2Matrix}
-              responsive
-              labelColumnWidth={160}
-              showScenarioHeaders={false}
-              displayMode="volume"
-              volumeScaleMode="absolute"
-              loadingScenarios={loadingScenarios}
-              minYMaxTaf={0}
-              yAxisSuffix=" km"
-            />
-          )}
-        </Box>
-      </Box>
-
-      {/* ── September X2 ──────────────────────────────────────── */}
-      <Box sx={chartCardSx}>
-        <SectionHeader
-          title="September X2"
-          description={
-            <>
-              Distribution of September X2 position across simulated years. Fall
-              X2 reflects conditions at the end of the dry season, when salinity
-              intrusion is typically most pronounced.
-              <Box component="span" sx={{ display: "block", mt: 1.5 }}>
-                <BandsLegend colors={X2_BAND_COLORS} />
-              </Box>
-            </>
-          }
-        />
-        <Box sx={{ mt: theme.space.component.lg }}>
-          {isLoading && !hasData ? (
-            <PercentileMatrixSkeleton
-              scenarios={scenarios}
-              rowCount={1}
-              labelColumnWidth={160}
-            />
-          ) : !hasData ? (
-            <Typography color="text.secondary" variant="body2">
-              No September X2 data available.
-            </Typography>
-          ) : (
-            <PercentileMatrix
-              reservoirs={septX2Entities}
-              scenarios={scenarios}
-              scenarioNames={scenarioNames}
-              data={septX2Matrix}
-              responsive
-              labelColumnWidth={160}
-              showScenarioHeaders={false}
-              displayMode="volume"
-              volumeScaleMode="absolute"
-              loadingScenarios={loadingScenarios}
-              minYMaxTaf={0}
-              yAxisSuffix=" km"
-            />
+            <ChartGridProvider scenarios={scenarios}>
+              <GridRow
+                label="April X2"
+                sublabel="distance (km)"
+                scenarios={scenarios}
+              >
+                {(scenarioId) => {
+                  const s = aprilX2Stats[scenarioId]
+                  return (
+                    <X2StatCell
+                      avg={s?.avg ?? null}
+                      cv={s?.cv ?? null}
+                    />
+                  )
+                }}
+              </GridRow>
+              <GridRow
+                label="September X2"
+                sublabel="distance (km)"
+                scenarios={scenarios}
+              >
+                {(scenarioId) => {
+                  const s = septX2Stats[scenarioId]
+                  return (
+                    <X2StatCell
+                      avg={s?.avg ?? null}
+                      cv={s?.cv ?? null}
+                    />
+                  )
+                }}
+              </GridRow>
+            </ChartGridProvider>
           )}
         </Box>
       </Box>
