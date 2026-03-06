@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
@@ -23,7 +23,14 @@ export function Header() {
   // -- Context for the theme panels
   const { activeThemeKey, openThemePanel } = usePanelRoute()
 
-  const { isPastHero } = useTabs()
+  const { isPastHero: rawIsPastHero } = useTabs()
+
+  // Defer isPastHero until after hydration so server and client render
+  // the same initial markup (variant="light"). Once mounted, the real
+  // scroll-based value takes over.
+  const [hasMounted, setHasMounted] = useState(false)
+  useEffect(() => setHasMounted(true), [])
+  const isPastHero = hasMounted && rawIsPastHero
 
   const handleLogoClick = () => {
     // Guard: this handler references browser-only APIs.
