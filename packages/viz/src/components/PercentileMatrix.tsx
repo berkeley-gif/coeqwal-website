@@ -165,6 +165,11 @@ export interface PercentileMatrixProps {
    * even when a few regulated channels exceed 100%.
    */
   yAxisMax?: number
+  /**
+   * Unit string shown in hover tooltips. Defaults to " TAF" for volume mode
+   * and "%" for percentage mode. Override for non-TAF data (e.g. " µmhos/cm").
+   */
+  tooltipUnit?: string
 }
 
 // Water month labels (short - for axis)
@@ -254,6 +259,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   yAxisSuffix,
   yAxisReferenceValue,
   yAxisMax,
+  tooltipUnit,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -1778,7 +1784,8 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const monthIndex = Math.round(xScale.invert(relativeX))
 
             if (monthIndex >= 0 && monthIndex < 12) {
-              const unit = displayMode === "volume" ? " TAF" : "%"
+              const unit =
+                tooltipUnit ?? (displayMode === "volume" ? " TAF" : "%")
               const _yMax = getYDomain(reservoir.reservoirId)[1]
               const formatValue = (v: number) =>
                 displayMode === "volume"

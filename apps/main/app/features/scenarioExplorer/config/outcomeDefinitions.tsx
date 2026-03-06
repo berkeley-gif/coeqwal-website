@@ -604,6 +604,19 @@ export const outcomeMetrics: OutcomeMetric[] = [
     isTier: false,
     showOnMap: true,
   },
+  {
+    id: "delta-outflow",
+    name: "Delta outflow volumes",
+    category: "delta-salinity",
+    unit: "acre-feet",
+    temporal: ["monthly", "annual"],
+    aggregations: ["annual-average", "annual-cv"],
+    spatialType: "delta-node",
+    description:
+      "Net Delta outflow — total flow leaving the Delta toward San Francisco Bay",
+    isTier: false,
+    showOnMap: true,
+  },
 
   // RESERVOIR STORAGE
   {
