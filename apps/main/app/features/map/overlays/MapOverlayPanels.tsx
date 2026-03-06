@@ -646,10 +646,23 @@ export default function MapOverlayPanels() {
                           },
                         }}
                       >
-                        Each water management scenario on this site can be read
-                        as having five explanatory elements. Let&apos;s look at
-                        the water management scenario for the way we currently
-                        manage Central Valley water.
+                        Every{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          scenario
+                        </Box>{" "}
+                        has three main elements: water management{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          strategy
+                        </Box>
+                        ,{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          hydroclimate
+                        </Box>{" "}
+                        and{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          outcomes
+                        </Box>
+                        .
                       </Typography>
                     </Box>
                   </CallResponsePanel>
@@ -738,38 +751,10 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  1. Strategy
+                                  Water management strategy
                                 </Typography>
-                                This describes the water management strategy
-                                being modeled.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Click{" "}
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      color: theme.palette.blue.medium,
-                                    }}
-                                  >
-                                    more
-                                  </Box>{" "}
-                                  to see the whole strategy description.
-                                  Underlined words appear in a glossary when
-                                  clicked.
-                                </Box>
+                                This panel describes the decisions, priorities, and
+                                policies that determine how water is allocated.
                               </>
                             }
                             position="left"
@@ -840,7 +825,7 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  2. Key operations
+                                  Key operations
                                 </Typography>
                                 These icons represent the key operational
                                 decisions that define this water management
@@ -881,29 +866,11 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  3. View by climate
+                                  Hydroclimate
                                 </Typography>
-                                Choosing one of these climate icons will show
-                                you how the scenario allocates water under
-                                different potential future climates.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Hover over the icons to see the hydroclimates
-                                  they represent.
-                                </Box>
+                                This describes the temperature and patterns of
+                                rainfall and snow that determine how much water
+                                is available over time. Soon you will be able to see the scenario results for different climates.
                               </>
                             }
                             position="left"
@@ -974,13 +941,9 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  4. Key outcomes
+                                  Key outcomes
                                 </Typography>
-                                While the strategy description, key operations,
-                                and climate describe the key inputs into the
-                                CalSim model, the outcomes listed here summarize
-                                the outputs. They show how well the allocations
-                                meet needs in each category.
+Each scenario produces different outcomes for agriculture, communities, and the environment.
                                 <Box
                                   component="span"
                                   sx={{
@@ -1085,11 +1048,9 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  5. Scenario summary
+                                  Scenario summary
                                 </Typography>
-                                This panel synthesizes everything above into a
-                                summary of the scenario&apos;s priorities and
-                                trade-offs.
+                                Finally, a summary has been created for each scenario.
                                 <Typography
                                   variant="tooltipHeader"
                                   sx={{
