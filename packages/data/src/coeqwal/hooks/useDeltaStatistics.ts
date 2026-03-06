@@ -17,10 +17,7 @@ import type { DeltaMonthlyResponse } from "../types"
  * @param scenarioId - Scenario ID (e.g., "s0020") or null to suspend
  * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
  */
-export function useDeltaMonthly(
-  scenarioId: string | null,
-  category?: string,
-) {
+export function useDeltaMonthly(scenarioId: string | null, category?: string) {
   const {
     data,
     error: swrError,

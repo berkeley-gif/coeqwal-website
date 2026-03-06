@@ -587,8 +587,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
     aggregations: [],
     spatialType: "delta-node",
     spatialLocation: "EM, JP, RS, CO",
-    description:
-      "Electrical conductivity at four Delta compliance stations",
+    description: "Electrical conductivity at four Delta compliance stations",
     isTier: false,
     showOnMap: true,
   },
