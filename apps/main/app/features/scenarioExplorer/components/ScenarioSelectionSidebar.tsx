@@ -109,6 +109,15 @@ export default function ScenarioSelectionSidebar({
   const scenariosByTheme = useMemo(() => {
     const activeScenarios = scenarios.filter((s) => s.isActive)
 
+    // Full (unfiltered) theme membership — used by theme checkboxes so they
+    // can select/deselect an entire theme even when "show only selected" hides rows.
+    const allGroups = new Map<ScenarioTheme, string[]>()
+    THEME_ORDER.forEach((t) => allGroups.set(t, []))
+    activeScenarios.forEach((s) => {
+      const t = getScenarioTheme(s.scenarioId)
+      allGroups.get(t)?.push(s.scenarioId)
+    })
+
     const filtered = (() => {
       if (showOnlyChosen) {
         return activeScenarios.filter((s) =>
@@ -123,22 +132,23 @@ export default function ScenarioSelectionSidebar({
       return activeScenarios
     })()
 
-    const groups = new Map<
+    const displayGroups = new Map<
       ScenarioTheme,
       { id: string; shortLabel: string }[]
     >()
-    THEME_ORDER.forEach((t) => groups.set(t, []))
+    THEME_ORDER.forEach((t) => displayGroups.set(t, []))
 
     filtered.forEach((s) => {
       const t = getScenarioTheme(s.scenarioId)
       const shortLabel = getScenarioShortLabel(s.scenarioId)
-      const bucket = groups.get(t)
+      const bucket = displayGroups.get(t)
       if (bucket) bucket.push({ id: s.scenarioId, shortLabel })
     })
 
     return THEME_ORDER.map((t) => ({
       theme: t,
-      items: groups.get(t) ?? [],
+      items: displayGroups.get(t) ?? [],
+      allIds: allGroups.get(t) ?? [],
     }))
   }, [scenarios, showOnlyChosen, showDefinitions, selectedScenarios])
 
@@ -193,20 +203,20 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {scenariosByTheme.map(({ theme: themeKey, items }) => {
-          const themeIds = items.map(({ id }) => id)
+        {scenariosByTheme.map(({ theme: themeKey, items, allIds }) => {
+          const visibleIds = items.map(({ id }) => id)
           const allChosen =
-            themeIds.length > 0 &&
-            themeIds.every((id) => selectedScenarios.includes(id))
+            allIds.length > 0 &&
+            allIds.every((id) => selectedScenarios.includes(id))
           const someChosen =
-            themeIds.length > 0 &&
-            themeIds.some((id) => selectedScenarios.includes(id))
+            allIds.length > 0 &&
+            allIds.some((id) => selectedScenarios.includes(id))
 
           return (
             <Box key={themeKey} sx={{ mb: 1 }}>
               {/* ── Theme header: checkbox + clickable badge ────────────── */}
               <Box
-                onMouseEnter={() => themeIds.length > 0 && onRowHover?.(themeIds)}
+                onMouseEnter={() => visibleIds.length > 0 && onRowHover?.(visibleIds)}
                 onMouseLeave={() => onRowHover?.(null)}
                 sx={{
                   display: "flex",
@@ -225,7 +235,7 @@ export default function ScenarioSelectionSidebar({
                   size="small"
                   checked={allChosen}
                   indeterminate={someChosen && !allChosen}
-                  onChange={() => toggleTheme(themeIds)}
+                  onChange={() => toggleTheme(allIds)}
                   sx={{
                     padding: 0,
                     flexShrink: 0,
@@ -233,7 +243,7 @@ export default function ScenarioSelectionSidebar({
                   }}
                 />
                 <Box
-                  onClick={() => toggleTheme(themeIds)}
+                  onClick={() => toggleTheme(allIds)}
                   sx={{ cursor: "pointer", display: "flex" }}
                 >
                   <ScenarioBadge
