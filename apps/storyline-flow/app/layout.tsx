@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { FontLoader } from "./components/helpers/FontLoader"
-import ClientDynamicMapProvider from "./components/ClientDynamicMapProvider"
+import { ClientProvider } from "./components/ClientProvider"
 
 export const metadata: Metadata = {
   title: "How Water Moves through California",
@@ -23,7 +23,7 @@ export default function RootLayout({
           <FontLoader kitId="rxm7kha" />
           <TranslationProvider initialLocale="en">
             <ThemeRegistry>
-              <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
+              <ClientProvider>{children}</ClientProvider>
             </ThemeRegistry>
           </TranslationProvider>
         </StrictMode>

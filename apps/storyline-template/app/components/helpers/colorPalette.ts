@@ -1,7 +1,0 @@
-export const PrimaryColor = "#1a4472"
-export const DarkColor = "#021224"
-export const LightColor = "#1a3a5c"
-export const TextColor = "#f2f0ef"
-export const OffWhiteColor = "#f2f0ef"
-export const RiverWaterColor = "#5BA4CF"
-export const OceanWaterColor = "#3A7CA5"

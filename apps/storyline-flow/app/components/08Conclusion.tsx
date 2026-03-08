@@ -1,10 +1,9 @@
 "use client"
 
 import { Box, Stack, Typography } from "@repo/ui/mui"
-import useStoryStore from "../store"
+import { useStoryline } from "../store"
 import AnimatedWaves from "./helpers/AnimatedWave"
 import { useEffect, useRef, useState } from "react"
-import useActiveSection from "../hooks/useActiveSection"
 import {
   AnimatePresence,
   motion,
@@ -13,21 +12,10 @@ import {
   useTransform,
 } from "@repo/motion"
 
-function Conclusion() {
-  return (
-    <>
-      <Builder />
-      <Resolution />
-    </>
-  )
-}
-
-function Resolution() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Resolution() {
+  const storyline = useStoryline()
   const content = storyline?.conclusion
-  const { sectionRef } = useActiveSection("resolution", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
   const viewportRef = useRef<HTMLDivElement>(null)
 
@@ -137,23 +125,31 @@ function Resolution() {
   )
 }
 
-function Builder() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Builder() {
+  const storyline = useStoryline()
   const content = storyline?.conclusion
-  const { sectionRef } = useActiveSection("tension", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start center", "end end"],
+    offset: ["start center", "end start"],
   })
-  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
+  const sectionOpacity = useTransform(scrollYProgress, [0.05, 0.2], [0, 1])
   const [currentParagraph, setCurrentParagraph] = useState<number>(0)
 
-  //TODO: double check this so that the first paragraph stays longer
+  // Finish all 4 frames by 80% scroll progress, then hold on the final frame.
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const paragraphIndex = Math.min(3, Math.floor(latest * 4))
-    setCurrentParagraph(paragraphIndex)
+    const completionPoint = 0.8
+    const normalizedProgress = Math.min(latest / completionPoint, 1)
+    const paragraphIndex = Math.min(3, Math.floor(normalizedProgress * 4))
+    console.log(
+      normalizedProgress,
+      paragraphIndex,
+      Math.floor(normalizedProgress * 4),
+    )
+
+    setCurrentParagraph((prev) =>
+      prev === paragraphIndex ? prev : paragraphIndex,
+    )
   })
 
   const paragraphVariants = {
@@ -182,17 +178,25 @@ function Builder() {
   //TODO: probably need to add more padding
   return (
     <>
-      <Box height="auto" width="100%" style={{ position: "relative" }}>
+      <Box
+        ref={sectionRef}
+        height="auto"
+        width="100%"
+        style={{ position: "relative" }}
+      >
         <Box
-          ref={sectionRef}
-          height="200vh" // Control this to determine how long the section is visible
+          height="100vh" // 100vh spacer + 100vh sticky = total 200vh section
           width="100%"
           sx={{ position: "relative" }}
         ></Box>
 
         <motion.div
           className="container-center filled-container sticky-container"
-          style={{ opacity: sectionOpacity, height: "100vh", width: "100%" }}
+          style={{
+            position: "sticky",
+            top: 0,
+            opacity: sectionOpacity,
+          }}
         >
           <AnimatePresence mode="wait">
             {currentParagraph == 0 && (
@@ -267,5 +271,3 @@ function Builder() {
     </>
   )
 }
-
-export default Conclusion

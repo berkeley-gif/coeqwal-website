@@ -1,10 +1,11 @@
 {
-  "2014": [
+  "data": [
     {
       "id": "2",
       "name": "Trucking hatchery salmon",
       "latitude": 40.3987,
       "longitude": -122.1454,
+      "year": "2014",
       "images": [
         "/variability/2014trucking01.jpg",
         "/variability/2014trucking02.jpg",
@@ -17,42 +18,39 @@
       ],
       "source": "US Fish and Wildlife Service, Pacific Southwest Region, 2014",
       "anchor": "top"
-    }
-  ],
-  "2017": [
+    },
     {
       "id": "4",
       "name": "Oroville Dam emergency",
-      "latitude": 39.5427,
+      "latitude": 39.4427,
       "longitude": -121.4921,
+      "year": "2017",
       "images": ["/variability/2017oroville01.jpg"],
       "captions": [
         "Oroville Dam's spillway eroded during February floods of 2017. After heavy rainfall (almost 13 inches over 4 days), floodwaters threatened to overtop the dam, forcing engineers to release massive amounts of water. As the main and emergency spillway failed, over 180,000 residents evacuated and hatchery fish were urgently relocated. Photo by California Department of Water Resources, 2017."
       ],
       "source": "California Department of Water Resources, 2017",
       "anchor": "top"
-    }
-  ],
-  "2021": [
+    },
     {
       "id": "8",
       "name": "Lake Oroville breaks records",
+      "year": "2021",
       "captions": [
         "The Bidwell Bar Bridge and nearby marina on Lake Oroville at record-breaking low water. In September 2021, water storage in the reservoir was 25 percent of the total capacity. By this time, the spillway of the Oroville Dam had been reconstructed after hazardous failures during floods of 2017."
       ],
-      "latitude": 39.5497,
+      "latitude": 39.6497,
       "longitude": -121.4322,
       "images": ["/variability/2021oroville01.jpg"],
       "source": "California Department of Water Resources, 2021",
       "anchor": "top"
-    }
-  ],
-  "2023": [
+    },
     {
       "id": "10",
       "name": "Tulare Lake returns",
       "latitude": 36.025,
       "longitude": -119.726526,
+      "year": "2023",
       "images": ["/variability/2023tulare01.jpg"],
       "captions": [
         "Storms in March 2023 filled much of Tulare Lake, which had been dry for over 100 years. Once the largest freshwater lake west of the Mississippi River, Tulare Lake vanished by the late 1800's due to diversions for water supply. The lake, known as 'Pa-ashi' or 'big water' has been inhabited by the Tachi Yakuts people, who were forcibly removed during the Gold Rush. In 2023, the Tachi Yakuts honored the lake's return."

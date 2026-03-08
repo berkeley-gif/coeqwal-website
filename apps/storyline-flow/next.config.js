@@ -1,8 +1,11 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  output: "export", // Enable static export
+import path from "path"
 
-  // Transpile workspace packages for optimal dev experience
+const geojsonLoaderPath = path.resolve(process.cwd(), "./geojson-loader.cjs")
+
+/** @type {import("next").NextConfig} */
+const nextConfig = {
+  output: "export",
+
   transpilePackages: [
     "@repo/map",
     "@repo/state",
@@ -10,10 +13,34 @@ const nextConfig = {
     "@repo/ui",
     "@repo/motion",
     "@repo/i18n",
+    "@repo/data",
   ],
 
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true,
+  },
+
+  // Turbopack loader rules (Next 15.3+)
+  turbopack: {
+    rules: {
+      "*.geojson": {
+        loaders: [geojsonLoaderPath],
+        as: "*.js",
+      },
+    },
+  },
+
+  experimental: {
+    optimizePackageImports: ["@mui/icons-material", "@mui/material"],
+  },
+
+  // Webpack rule (used when you run with --webpack, and for non-turbo tooling paths)
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.geojson$/,
+      type: "json",
+    })
+    return config
   },
 }
 

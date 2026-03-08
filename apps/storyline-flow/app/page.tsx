@@ -1,20 +1,27 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import MapContainer from "./components/MapContainer"
 import { Box, CircularProgress, Typography } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import SectionWaterSource from "./components/02WaterSource"
+import {
+  Precipitation,
+  Snowpack,
+  Variability,
+} from "./components/02WaterSource"
 import {
   AnimatePresence,
   motion,
   useMotionValueEvent,
   useScroll,
 } from "@repo/motion"
-import { DIVISION } from "./components/helpers/sectionDivision"
-import useStoryStore from "./store"
+import {
+  appActions,
+  useActiveSectionStore,
+  useMapReady,
+  useTooltip,
+} from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
 import { BaseHeader } from "@repo/ui"
 //import { HeaderStory } from "@repo/motion/components"
@@ -22,13 +29,35 @@ import {
   OffWhiteColor,
   FreshWaterColor,
 } from "./components/helpers/colorPalette"
-import SectionDelta from "./components/03NaturalFlow"
-import SectionHuman from "./components/04Human"
-import SectionTransformation from "./components/05Transformation"
-import SectionBenefits from "./components/06Benefits"
-import SectionImpact from "./components/07Impact"
-import Conclusion from "./components/08Conclusion"
+import {
+  CentralValley,
+  DeltaWetland,
+  HistoricalDelta,
+  TransitionFromDeltaToGoldRush,
+  MajorRiver,
+} from "./components/03NaturalFlow"
+import { GoldRush, Drinking } from "./components/04Human"
 import { FloatImageTooltip } from "./components/helpers/Tooltip"
+import { DynamicMap } from "./components/map/DynamicMap"
+import { Scrollama, Step } from "react-scrollama"
+import {
+  SECTION_DIVISION,
+  SectionId,
+} from "./components/map/config/sectionConfig"
+import Transformation from "./components/05Transformation"
+import CityPictogram, { Agriculture, Economy } from "./components/06Benefits"
+import {
+  Climate,
+  Delta,
+  DrinkingWater,
+  Salmon,
+  TransitionToImpact,
+} from "./components/07Impact"
+import { Builder, Resolution } from "./components/08Conclusion"
+import {
+  SCROLLAMA_CONFIG,
+  useScrollamaSection,
+} from "./hooks/useScrollamaSection"
 
 const MotionBox = motion.create(Box)
 
@@ -39,18 +68,18 @@ const MotionBox = motion.create(Box)
 //IMPORTANT!: "overflowX: hidden" breaks the sticky behavior of delta section
 
 export default function StoryContainer() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
-  const setMapReady = useStoryStore((state) => state.setMapReady)
-  const tooltipContent = useStoryStore((state) => state.tooltipContent)
-  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
+  const isMapReady = useMapReady()
+  const tooltipContent = useTooltip()
 
   useEffect(() => {
-    fetchStoryline()
-  }, [fetchStoryline])
+    appActions.fetchStoryline()
+  }, [])
 
-  const closeTooltip = () => setTooltipContent(null)
+  useEffect(() => {
+    console.log(tooltipContent)
+  }, [tooltipContent])
+
+  const closeTooltip = () => appActions.setTooltipContent(null)
 
   return (
     <>
@@ -63,57 +92,175 @@ export default function StoryContainer() {
           <FloatImageTooltip marker={tooltipContent} />
         </>
       )}
-      <Box
-        sx={{
-          // This chunk has to be here, so that the scroll bar works as expected ?!?!?!
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: (theme) => theme.zIndex.basement,
-        }}
-      >
-        <MapContainer
-          onLoad={() => {
-            setMapReady(true)
-            console.log("🗺️ Map loaded")
-          }}
-        />
-      </Box>
-      <Box
-        component="main"
-        ref={containerRef}
-        sx={{
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          margin: 0,
-          padding: 0,
-          width: "100%",
-          "& > *": {
-            margin: 0,
-          },
-          pointerEvents: "none",
-          color: "common.white",
-        }}
-      >
-        <Opener />
-        <SectionWaterSource />
-        <SectionDelta />
-        <SectionHuman />
-        <SectionTransformation />
-        <SectionBenefits />
-        <SectionImpact />
-        <Conclusion />
-      </Box>
-      {/*<SourceAnnouncer />*/}
+      <DynamicMap />
+      <ContentContainer />
     </>
   )
 }
 
+//TODO: update the sticky container implementation to be scrollama version
+function ContentContainer() {
+  // react-scrollama callbacks
+  const { onStepEnter, onStepProgress } = useScrollamaSection()
+
+  return (
+    <Box
+      component="main"
+      sx={{
+        position: "relative",
+        pointerEvents: "none",
+        color: "common.white",
+      }}
+    >
+      <Scrollama
+        onStepEnter={onStepEnter}
+        onStepProgress={onStepProgress}
+        offset={SCROLLAMA_CONFIG.offset}
+        debug={SCROLLAMA_CONFIG.debug}
+      >
+        <Step data={"opener" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Opener />
+          </Box>
+        </Step>
+
+        {/* Section 2 - California's water*/}
+        <Step data={"precipitation" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Precipitation />
+          </Box>
+        </Step>
+        <Step data={"variability" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Variability />
+          </Box>
+        </Step>
+        <Step data={"snowpack" as SectionId}>
+          <Box height="120vh" width="100%" className="story-step-container">
+            <Snowpack />
+          </Box>
+        </Step>
+
+        {/* Section 3 - Natural Flow */}
+        <Step data={"major-river" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <MajorRiver />
+          </Box>
+        </Step>
+        <Step data={"central-valley" as SectionId}>
+          <Box height="80vh" width="100%" className="story-step-container">
+            <CentralValley />
+          </Box>
+        </Step>
+        <Step data={"delta-wetland" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <DeltaWetland />
+          </Box>
+        </Step>
+        {/* (1) this one doesn't need story-step-container */}
+        <Step data={"historical-delta" as SectionId}>
+          <Box height="150vh" width="100%">
+            <HistoricalDelta />
+          </Box>
+        </Step>
+        <Step data={"transition" as SectionId}>
+          <Box height="150vh" width="100%">
+            <TransitionFromDeltaToGoldRush />
+          </Box>
+        </Step>
+
+        {/* Section 4 - Human Impact */}
+        <Step data={"goldrush" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <GoldRush />
+          </Box>
+        </Step>
+        <Step data={"drinking" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Drinking />
+          </Box>
+        </Step>
+
+        {/* Section 5 - Water Transformation */}
+        <Step data={"transformation" as SectionId}>
+          <Box height="130vh" width="100%" className="story-step-container">
+            <Transformation />
+          </Box>
+        </Step>
+        {/* Section 6 - Benefits */}
+        <Step data={"city" as SectionId}>
+          <Box
+            height="150vh"
+            width="100%"
+            className="story-step-sticky-container"
+          >
+            <CityPictogram />
+          </Box>
+        </Step>
+        <Step data={"agriculture" as SectionId}>
+          <Box
+            height="150vh"
+            width="100%"
+            className="story-step-sticky-container"
+          >
+            <Agriculture />
+          </Box>
+        </Step>
+        <Step data={"economy" as SectionId}>
+          <Box
+            height="150vh"
+            width="100%"
+            className="story-step-sticky-container"
+          >
+            <Economy />
+          </Box>
+        </Step>
+
+        {/* Section 7 - Impact */}
+        <Step data={"turning" as SectionId}>
+          <Box height="50vh" width="100%" className="story-step-container">
+            <TransitionToImpact />
+          </Box>
+        </Step>
+        <Step data={"impact-salmon" as SectionId}>
+          <Box height="80vh" width="100%" className="story-step-container">
+            <Salmon />
+          </Box>
+        </Step>
+        <Step data={"impact-delta" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Delta />
+          </Box>
+        </Step>
+        <Step data={"impact-water" as SectionId}>
+          <Box height="70vh" width="100%" className="story-step-container">
+            <DrinkingWater />
+          </Box>
+        </Step>
+        <Step data={"impact-climate" as SectionId}>
+          <Box height="100vh" width="100%" className="story-step-container">
+            <Climate />
+          </Box>
+        </Step>
+
+        {/* Section 8 - Resolution */}
+        <Step data={"builder" as SectionId}>
+          <Box height="200vh" width="100%">
+            <Builder />
+          </Box>
+        </Step>
+        <Step data={"resolution" as SectionId}>
+          <Box height="200vh" width="100%">
+            <Resolution />
+          </Box>
+        </Step>
+      </Scrollama>
+    </Box>
+  )
+}
+
 function SectionIndicator() {
-  const activeSection = useStoryStore((state) => state.activeSection)
+  const activeSection = useActiveSectionStore()
   const { scrollY } = useScroll()
   const lastYRef = useRef(0)
   const [isHidden, setIsHidden] = useState(false)
@@ -125,6 +272,10 @@ function SectionIndicator() {
     }
     lastYRef.current = latest
   })
+
+  useEffect(() => {
+    console.log("Active section changed:", activeSection)
+  }, [activeSection])
 
   return (
     <MotionBox
@@ -144,10 +295,10 @@ function SectionIndicator() {
         flexDirection: "column",
         gap: 1,
         color: "common.white",
-        backgroundColor: "overlay.waterDark"
+        backgroundColor: "overlay.waterDark",
       }}
     >
-      {DIVISION.map((division, index) => {
+      {SECTION_DIVISION.map((division, index) => {
         const isActive = division.sections.includes(activeSection)
         return (
           <motion.div
@@ -176,7 +327,7 @@ function SectionIndicator() {
 function Loader() {
   return (
     <motion.div id="loader" exit={{ opacity: 0 }} className="filled-container">
-      <CircularProgress color="inherit" />
+      <CircularProgress sx={{ color: "common.white" }} />
     </motion.div>
   )
 }

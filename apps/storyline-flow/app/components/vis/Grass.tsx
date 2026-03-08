@@ -6,6 +6,8 @@ import { motion, MotionValue } from "@repo/motion"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { grassConfig } from "../helpers/breakpoints"
 
+//TODO: make this motion based not CSS based
+
 function createStars() {
   const starsContainer = document.getElementById("stars")
   if (starsContainer) {
@@ -83,8 +85,10 @@ function Grass({ opacity }: { opacity: MotionValue<number> }) {
     createStars()
 
     // Adjust the grass density (if needed, you may change the divisor).
-    const sideDensityQuarter = Math.floor(window.innerWidth / 20)
-    const densityQuarter = Math.floor(window.innerWidth / 10)
+    const sideDensityQuarter = 50
+    const densityQuarter = 100
+
+    //console.log(sideDensityQuarter, densityQuarter)
 
     // Create grass for the left and right containers.
     // Here, the baseSwaySpeed is set to 4 seconds, and each blade's duration will vary more randomly.

@@ -1,85 +1,32 @@
 "use client"
 
 import { Box, Stack, Typography } from "@repo/ui/mui"
-import { useMap } from "@repo/map"
 import {
   motion,
-  MotionValue,
   useMotionValueEvent,
   useScroll,
   useTransform,
 } from "@repo/motion"
 import Bird from "./vis/Bird"
 import Grass from "./vis/Grass"
-import useActiveSection from "../hooks/useActiveSection"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import useStoryStore from "../store"
+import { useRef, useState } from "react"
+import { useStoryline } from "../store"
 import { Sentence } from "@repo/motion/components"
-import {
-  DeltaTextLabels,
-  FlowTextLabels,
-  ValleyTextLabels,
-} from "./helpers/mapAnnotations"
 import Underline from "./helpers/Underline"
-import {
-  ValleyBoundary,
-  Coordinate,
-  DeltaBoundary,
-} from "./helpers/data/boundaries"
-import * as turf from "@turf/turf"
 import { FreshWaterColor } from "./helpers/colorPalette"
-import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 
 const MotionBox = motion.create(Box)
 const MotionTypography = motion.create(Typography)
 
-function SectionDelta() {
-  return (
-    <>
-      <WaterFlow />
-      <Valley />
-      <Wetland />
-      <Delta />
-      <Transition />
-    </>
-  )
-}
-
-function WaterFlow() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function MajorRiver() {
+  const storyline = useStoryline()
   const content = storyline?.flow
-  const { sectionRef, isSectionActive } = useActiveSection("flow", {
-    amount: 0.5,
-  })
-  const { setPaintProperty } = useMap() // from our context
-  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-
-  useMotionValueEvent(scrollYProgress, "change", (value) => {
-    if (value > 0.3 && value < 0.9) {
-      setPaintProperty("snowpack-layer", "fill-opacity", 0)
-      setPaintProperty("river-sac-layer", "line-opacity", 1)
-      setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-    } else {
-      setPaintProperty("river-sac-layer", "line-opacity", 0)
-      setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-    }
-  })
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {
-      setMarkers(FlowTextLabels, "text")
-    },
-    () => {
-      setMarkers([], "text")
-    },
-  )
 
   const titleOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 1])
   const firstParagraphOpacity = useTransform(
@@ -94,26 +41,15 @@ function WaterFlow() {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="100vh"
-      tabIndex={-1}
-      sx={{ justifyContent: "center" }}
-      role="region"
-    >
+    <Box ref={sectionRef} className="container">
+      {/* Title */}
       <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
         <Typography variant="h3" gutterBottom>
           {content?.title}
         </Typography>
       </motion.div>
-      <Stack
-        spacing={10}
-        direction="column"
-        component="section"
-        role="region"
-        sx={{ width: "100%" }}
-      >
+      {/* Paragraph */}
+      <Stack spacing={6} direction="column">
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -138,127 +74,25 @@ function WaterFlow() {
   )
 }
 
-function Valley() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function CentralValley() {
+  const storyline = useStoryline()
   const content = storyline?.flow
-  const { sectionRef, isSectionActive } = useActiveSection("valley", {
-    amount: 0.5,
-  })
-  const { setPaintProperty, mapRef } = useMap() // from our context
+  const sectionRef = useRef(null)
   const [startAnimation, setStartAnimation] = useState(false)
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [boundaryAnimationComplete, setBoundaryAnimationComplete] =
-    useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end center"],
+    offset: ["start end", "end start"],
   })
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.1 && latest < 0.9) {
+    if (latest > 0.5) {
       setStartAnimation(true)
-      setPaintProperty("valley-boundary-layer", "line-opacity", 1)
-      return
     }
-    setPaintProperty("valley-boundary-layer", "line-opacity", 0)
   })
 
-  const boundaryData = useMemo(() => {
-    const line = turf.lineString(ValleyBoundary)
-    const length = turf.length(line, { units: "kilometers" })
-    const frames = 100
-    const segment = length / frames
-    const smoothCoords: Coordinate[] = []
-    for (let dist = 0; dist <= length; dist += segment) {
-      const pt = turf.along(line, dist, { units: "kilometers" })
-      smoothCoords.push(pt.geometry.coordinates as Coordinate)
-    }
-    smoothCoords.push(ValleyBoundary[ValleyBoundary.length - 1] ?? [0, 0])
-    return smoothCoords
-  }, [])
-
-  const setUpBoundary = useCallback(
-    (scrollYProgress: MotionValue<number>) => {
-      if (!mapRef.current || !boundaryData.length) return
-
-      function updateBoundaryBasedOnScroll(scrollProgress: number) {
-        if (!mapRef.current) return
-        const startScroll = 0.35
-        const endScroll = 0.8
-
-        const clampedScroll = Math.max(
-          startScroll,
-          Math.min(endScroll, scrollProgress),
-        )
-        const animationProgress =
-          (clampedScroll - startScroll) / (endScroll - startScroll)
-
-        // Calculate how many boundary points to show based on scroll progress
-        const total = boundaryData.length
-        const currentIdx = Math.floor(animationProgress * (total - 1))
-
-        const geoJsonSource = mapRef.current.getSource(
-          "valley-boundary",
-        ) as mapboxgl.GeoJSONSource
-        geoJsonSource.setData({
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: boundaryData.slice(0, currentIdx + 1),
-          },
-          properties: {},
-        })
-
-        if (animationProgress >= 1) {
-          setBoundaryAnimationComplete(true)
-        }
-      }
-
-      updateBoundaryBasedOnScroll(scrollYProgress.get())
-
-      const unsubscribe = scrollYProgress.on(
-        "change",
-        updateBoundaryBasedOnScroll,
-      )
-
-      return unsubscribe
-    },
-    [mapRef, boundaryData, setBoundaryAnimationComplete],
-  )
-
-  const load = useCallback(() => {
-    setMarkers(ValleyTextLabels, "text")
-    if (boundaryAnimationComplete) return
-    setUpBoundary(scrollYProgress)
-  }, [setMarkers, boundaryAnimationComplete, setUpBoundary, scrollYProgress])
-
-  const unload = useCallback(() => {
-    setBoundaryAnimationComplete(false)
-    if (!mapRef.current) return
-    ;(
-      mapRef.current.getSource("valley-boundary") as mapboxgl.GeoJSONSource
-    ).setData({
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: boundaryData.slice(0, 1),
-      },
-      properties: {},
-    })
-  }, [mapRef, boundaryData])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
-
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="80vh"
-      tabIndex={-1}
-      sx={{ justifyContent: "center" }}
-      role="region"
-    >
+    <Box ref={sectionRef} className="container">
       <Box className="paragraph">
         <Sentence custom={0} options={{ amount: 1 }}>
           {content?.valley.p11}
@@ -272,14 +106,10 @@ function Valley() {
   )
 }
 
-function Wetland() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function DeltaWetland() {
+  const storyline = useStoryline()
   const content = storyline?.flow
-  const { sectionRef, isSectionActive } = useActiveSection("wetland", {
-    amount: 0.5,
-  })
-  const { setPaintProperty } = useMap() // from our context
-  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const sectionRef = useRef(null)
   const [startDeltaAnimation, setStartDeltaAnimation] = useState(false)
 
   const { scrollYProgress } = useScroll({
@@ -288,25 +118,8 @@ function Wetland() {
   })
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.3 && latest < 0.8) {
-      setPaintProperty("delta-water-layer", "fill-opacity", 1)
-      setPaintProperty("delta-wetland-layer", "fill-opacity", 1)
-      return
-    }
-    setPaintProperty("delta-water-layer", "fill-opacity", 0)
-    setPaintProperty("delta-wetland-layer", "fill-opacity", 0)
+    if (latest > 0.4) setStartDeltaAnimation(true)
   })
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {
-      setMarkers(DeltaTextLabels, "text")
-    },
-    () => {
-      setMarkers([], "text")
-    },
-  )
 
   const firstParagraphOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
   const secondParagraphOpacity = useTransform(
@@ -319,33 +132,12 @@ function Wetland() {
     [0.4, 0.6],
     [0, 1],
   )
-  const captionOpacity = useTransform(
-    scrollYProgress,
-    [0.4, 0.6],
-    [0, 0.7],
-  )
-
-  useEffect(() => {
-    const unsubscribe = secondParagraphOpacity.on("change", (value) => {
-      if (value === 1) setStartDeltaAnimation(true)
-    })
-
-    return () => {
-      unsubscribe()
-    }
-  }, [secondParagraphOpacity])
+  const captionOpacity = useTransform(scrollYProgress, [0.4, 0.6], [0, 0.7])
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
-      tabIndex={-1}
-      role="region"
-    >
+    <Box ref={sectionRef} className="container">
       <Stack
-        spacing={8}
+        spacing={6}
         direction="column"
         component="section"
         role="region"
@@ -372,13 +164,11 @@ function Wetland() {
           </Typography>
           <Typography variant="body1">{content?.transition.p14}</Typography>
         </motion.div>
-        <div
-          className="paragraph"
-        >
-          <motion.div style={{opacity: thirdParagraphOpacity}}>
+        <div className="paragraph">
+          <motion.div style={{ opacity: thirdParagraphOpacity }}>
             <Typography variant="body1">{content?.transition.p2}</Typography>
           </motion.div>
-          <motion.div style={{opacity: captionOpacity}}>
+          <motion.div style={{ opacity: captionOpacity }}>
             <Typography variant="caption">
               GIS data source:{" "}
               <a
@@ -397,20 +187,14 @@ function Wetland() {
   )
 }
 
-function Delta() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function HistoricalDelta() {
+  const storyline = useStoryline()
   const content = storyline?.delta
-  const { sectionRef, isSectionActive } = useActiveSection("delta", {
-    amount: 0.1,
-  })
-  const { setPaintProperty, mapRef } = useMap() // from our context
-  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   })
-  const [boundaryAnimationComplete, setBoundaryAnimationComplete] =
-    useState(false)
 
   const sectionOpacity = useTransform(
     scrollYProgress,
@@ -418,135 +202,40 @@ function Delta() {
     [0, 1, 1, 0],
   )
 
-  const boundaryData = useMemo(() => {
-    const line = turf.lineString(DeltaBoundary)
-    const length = turf.length(line, { units: "kilometers" })
-    const frames = 100
-    const segment = length / frames
-    const smoothCoords: Coordinate[] = []
-    for (let dist = 0; dist <= length; dist += segment) {
-      const pt = turf.along(line, dist, { units: "kilometers" })
-      smoothCoords.push(pt.geometry.coordinates as Coordinate)
-    }
-    smoothCoords.push(DeltaBoundary[DeltaBoundary.length - 1] ?? [0, 0])
-    return smoothCoords
-  }, [])
-
-  const setUpBoundary = useCallback(
-    (scrollYProgress: MotionValue<number>) => {
-      if (!mapRef.current || !boundaryData.length) return
-
-      function updateBoundaryBasedOnScroll(scrollProgress: number) {
-        if (!mapRef.current) return
-        const startScroll = 0.2
-        const endScroll = 0.5
-
-        const clampedScroll = Math.max(
-          startScroll,
-          Math.min(endScroll, scrollProgress),
-        )
-        const animationProgress =
-          (clampedScroll - startScroll) / (endScroll - startScroll)
-
-        const total = boundaryData.length
-        const currentIdx = Math.floor(animationProgress * (total - 1))
-
-        const geoJsonSource = mapRef.current.getSource(
-          "delta-boundary",
-        ) as mapboxgl.GeoJSONSource
-        geoJsonSource.setData({
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: boundaryData.slice(0, currentIdx + 1),
-          },
-          properties: {},
-        })
-
-        if (animationProgress >= 1) {
-          //setBoundaryAnimationComplete(true)
-        }
-      }
-
-      updateBoundaryBasedOnScroll(scrollYProgress.get())
-
-      const unsubscribe = scrollYProgress.on(
-        "change",
-        updateBoundaryBasedOnScroll,
-      )
-
-      return unsubscribe
-    },
-    [mapRef, boundaryData],
-  )
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.1 && latest < 0.8) {
-      setPaintProperty("delta-boundary-layer", "line-opacity", 1)
-      return
-    }
-    setPaintProperty("delta-boundary-layer", "line-opacity", 0)
-  })
-
-  const unload = useCallback(() => {
-    //setPaintProperty("delta-boundary-layer", "line-opacity", 0)
-    setBoundaryAnimationComplete(false)
-    if (!mapRef.current) return
-    ;(
-      mapRef.current.getSource("delta-boundary") as mapboxgl.GeoJSONSource
-    ).setData({
-      type: "Feature",
-      geometry: {
-        type: "LineString",
-        coordinates: boundaryData.slice(0, 1),
-      },
-      properties: {},
-    })
-  }, [mapRef, boundaryData])
-
-  const load = useCallback(() => {
-    setMarkers([], "text")
-    if (boundaryAnimationComplete) return
-    setUpBoundary(scrollYProgress)
-  }, [setMarkers, setUpBoundary, scrollYProgress, boundaryAnimationComplete])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
-
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
-    [0.1, 0.3, 0.7, 0.99],
+    [0.1, 0.3, 0.7, 0.95],
     [0, 1, 1, 0],
   )
   const captionOpacity = useTransform(
     scrollYProgress,
-    [0.1, 0.3, 0.7, 0.99],
+    [0.1, 0.3, 0.7, 0.95],
     [0, 0.7, 0.7, 0],
   )
   const secondParagraphOpacity = useTransform(
     scrollYProgress,
-    [0.25, 0.5, 0.7, 0.99],
+    [0.25, 0.5, 0.7, 0.95],
     [0, 1, 1, 0],
   )
   const firstSentenceOpacity = useTransform(
     scrollYProgress,
-    [0.4, 0.6, 0.7, 0.99],
+    [0.4, 0.6, 0.7, 0.95],
     [0, 1, 1, 0],
   )
   const secondSentenceOpacity = useTransform(
     scrollYProgress,
-    [0.45, 0.65, 0.7, 0.99],
+    [0.45, 0.65, 0.7, 0.95],
     [0, 1, 1, 0],
   )
   const thirdSentenceOpacity = useTransform(
     scrollYProgress,
-    [0.5, 0.7, 0.7, 0.99],
+    [0.5, 0.7, 0.7, 0.95],
     [0, 1, 1, 0],
   )
 
   return (
     <Box
       height="auto"
-      width="100%"
       sx={{
         position: "relative",
       }}
@@ -555,12 +244,17 @@ function Delta() {
     >
       <Box
         ref={sectionRef}
-        height="250vh" // Control this to determine how long the section is visible
+        height="100vh" // Control this to determine how long the section is visible
         width="100%"
         sx={{ position: "relative" }}
       ></Box>
 
-      <Box className="sticky-container">
+      <Box
+        className="sticky-container"
+        sx={{
+          position: "sticky",
+        }}
+      >
         <motion.div
           id="sticky-delta"
           className="filled-container"
@@ -637,38 +331,31 @@ function Delta() {
 }
 
 //TODO: sometimes see a 1px gap between this and Delta (found out the delta section is not high enough??)
-function Transition() {
-  const storyline = useStoryStore((state) => state.storyline)
-  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+export function TransitionFromDeltaToGoldRush() {
+  const storyline = useStoryline()
   const content = storyline?.delta
-  const { sectionRef, isSectionActive } = useActiveSection("transition", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"],
   })
 
-  const opacity = useTransform(scrollYProgress, [0.6, 0.9], [1, 0])
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {
-      setTextMarkers([], "text")
-    },
-    () => {},
-  )
+  const opacity = useTransform(scrollYProgress, [0.6, 1], [1, 0])
 
   return (
     <MotionBox
-      style={{ width: "100%", height: "100%", zIndex: 1, opacity: opacity }}
+      style={{
+        width: "100%",
+        height: "100%",
+        zIndex: 1,
+        opacity: opacity,
+      }}
     >
       <Box
         sx={{
           position: "absolute",
           width: "100%",
-          height: "100vh",
+          height: "150vh",
           zIndex: 2,
           overflowY: "hidden",
         }}
@@ -712,7 +399,7 @@ function Transition() {
       <Box
         ref={sectionRef}
         className="container-center filled-container"
-        height="100vh"
+        height="100%"
         width="100%"
       >
         <Box className="paragraph" sx={{ p: 1 }}>
@@ -723,4 +410,4 @@ function Transition() {
   )
 }
 
-export default SectionDelta
+export default MajorRiver

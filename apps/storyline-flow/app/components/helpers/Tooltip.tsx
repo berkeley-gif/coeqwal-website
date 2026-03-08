@@ -11,9 +11,11 @@ import {
 } from "@repo/ui/mui"
 import { MarkerType } from "./mapMarkers"
 import { useMap } from "@repo/map"
-import useStoryStore from "../../store"
+import { appActions } from "../../store"
+import { TooltipType } from "../map/setup/LayerOrchestrator"
 
-export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
+//TODO: Update the tooltip style
+export function FloatImageTooltip({ marker }: { marker: TooltipType }) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
   const images = marker.images || [] // Fallback to single image if no array
   const { project } = useMap()
@@ -22,7 +24,6 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
     y: 0,
   }
   const transformClass = `popup-${marker.anchor || "top"}`
-  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
 
   const nextImage = () => {
     setCurrentImgIndex((prev) => (prev + 1) % images.length)
@@ -32,7 +33,7 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
     setCurrentImgIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
-  const closeTooltip = () => setTooltipContent(null)
+  const closeTooltip = () => appActions.setTooltipContent(null)
 
   return (
     <motion.div
@@ -47,7 +48,14 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
         ×
       </button>
 
-      <Box sx={{ position: "relative", overflow: "hidden", width: "100%", color: 'common.white' }}>
+      <Box
+        sx={{
+          position: "relative",
+          overflow: "hidden",
+          width: "100%",
+          color: "common.white",
+        }}
+      >
         <ImageContainer
           images={images as string[]}
           currentImgIndex={currentImgIndex}
@@ -65,9 +73,10 @@ export function FloatImageTooltip({ marker }: { marker: MarkerType }) {
         )}
       </Box>
 
-      <Box sx={{color: 'common.white', mt: 1, mb: 1 }}>
-        <Typography variant="h5">{marker.name}</Typography>
-        <Typography variant="body2" sx={{ marginTop: 1 }}>
+      <Box sx={{ color: "text.primary", mt: 1, mb: 1 }}>
+        <Typography variant="h6">{marker.name}</Typography>
+        <Typography variant="caption">{marker.year}</Typography>
+        <Typography variant="body1" sx={{ marginTop: 2 }}>
           {marker.captions ? marker.captions[currentImgIndex] || "" : ""}
         </Typography>
       </Box>
