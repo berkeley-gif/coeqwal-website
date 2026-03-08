@@ -54,7 +54,7 @@ function Pictogram({
   const svgRef = useRef<SVGSVGElement>(null)
   const [displayStatus, setDisplayStatus] = React.useState<
     "visible" | "hidden"
-    >("hidden")
+  >("hidden")
   const theme = useTheme()
 
   const setup = useMemo(() => {

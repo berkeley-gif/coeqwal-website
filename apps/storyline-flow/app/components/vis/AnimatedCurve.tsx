@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import * as d3 from "d3"
+import { d3 } from "@repo/viz"
 import rough from "roughjs"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { FlubberInterpolate } from "@repo/motion"
@@ -278,7 +278,7 @@ function Annotation({
   monthIdx: number
   scrollYProgress: MotionValue<number>
   snowData: { x: number; y: number }[]
-  }) {
+}) {
   const theme = useTheme()
   const width = xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)
   const pathRef = useRef<SVGPathElement | null>(null)
@@ -305,7 +305,8 @@ function Annotation({
   const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.5, 0.6], [0, 1])
 
   return (
-    <g id="annotation"
+    <g
+      id="annotation"
       transform={`translate(${0}, ${0})`}
       style={{
         fontSize: theme.typography.caption.fontSize,

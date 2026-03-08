@@ -1,5 +1,5 @@
 {
-  "mining": [
+  "data": [
     {
       "id": "2",
       "name": "High-powered gold mining (1867)",
@@ -14,10 +14,8 @@
         "Miners at their “monitors”, an iron nozzle attached to a hose, used in hydraulic mining during the Gold Rush. The high-powered jets allowed miners to remove massive amounts of gravel from ancient riverbeds. The debris washed into sluices where miners searched for gold. The debris was often discharged into the nearest river."
       ],
       "source": "Houseworth at French Corral Mine, ca. 1867",
-      "anchor": "right"
-    }
-  ],
-  "irrigation": [
+      "anchor": "top"
+    },
     {
       "id": "5",
       "name": "Reclamation District 900 (1910)",
@@ -32,7 +30,7 @@
         "By 1910, an innovative steam-powered dredger with clamshell bucket reduced the labor needed to deepen rivers, build canals and levees, and develop land. This dredger cut a straight channel through wetlands in Reclamation District 900, immediately west of Sacramento. Within the District, an internal system of canals drains land ringed by levees. Reclamation Districts manage the infrastructure that keeps water out of “reclaimed” former wetlands. By 1930, nearly all of the Delta’s wetlands were drained for agriculture or settlement. Today, over 90% of the state’s wetlands have been drained or filled"
       ],
       "source": "McMurry Foto Co., ca. 1910",
-      "anchor": "top"
+      "anchor": "left"
     }
   ]
 }

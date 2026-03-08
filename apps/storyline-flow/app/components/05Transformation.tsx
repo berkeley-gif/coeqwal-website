@@ -1,12 +1,9 @@
 "use client"
 
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
-import useActiveSection from "../hooks/useActiveSection"
-import useStoryStore from "../store"
-import { useEffect, useState } from "react"
-import { useMap } from "@repo/map"
+import { useStoryline } from "../store"
+import { useRef, useState } from "react"
 import Underline from "./helpers/Underline"
-import { DAMS } from "./helpers/data/dams"
 import {
   motion,
   useMotionValueEvent,
@@ -17,52 +14,15 @@ import { InfrastructureColor } from "./helpers/colorPalette"
 
 const MotionTypography = motion.create(Typography)
 
-function SectionTransformation() {
-  return (
-    <>
-      <Transformation />
-    </>
-  )
-}
-
-function Transformation() {
-  const storyline = useStoryStore((state) => state.storyline)
+export default function Transformation() {
+  const storyline = useStoryline()
   const content = storyline?.transformation
-  const { sectionRef } = useActiveSection("transformation", {
-    amount: 0.5,
-  })
-  const { setPaintProperty } = useMap()
+  const sectionRef = useRef(null)
   const [startAnimation, setStartAnimation] = useState(false)
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
-  })
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.4 && latest < 0.9) {
-      setPaintProperty("canal-layer", "line-opacity", 1)
-      setPaintProperty("delta-canal-layer", "line-opacity", 1)
-      setPaintProperty("nhd-rivers-layer", "line-opacity", 1)
-      //setPaintProperty("river-sac-layer", "line-opacity", 1)
-      //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-      if (!hasSetMarkers) {
-        setHasSetMarkers(true)
-        setMarkers(DAMS, "dam")
-      }
-    } else if (latest < 0.35 || latest > 0.95) {
-      setMarkers([], "dam")
-      setHasSetMarkers(false)
-      setPaintProperty("delta-canal-layer", "line-opacity", 0)
-      setPaintProperty("nhd-rivers-layer", "line-opacity", 0)
-      //setPaintProperty("river-sac-layer", "line-opacity", 0)
-      //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-      if (latest > 0.9) {
-        setPaintProperty("canal-layer", "line-opacity", 0)
-      }
-    }
   })
 
   const titleOpacity = useTransform(scrollYProgress, [0, 0.4], [0, 1])
@@ -92,28 +52,21 @@ function Transformation() {
     [0, 1],
   )
 
-  useEffect(() => {
-    const unsubscribe = fifthParagraphOpacity.on("change", (value) => {
-      if (value > 0.8) setStartAnimation(true)
-    })
-    return unsubscribe
-  }, [fifthParagraphOpacity])
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.5) setStartAnimation(true)
+  })
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="130vh"
-      sx={{ justifyContent: "space-around" }}
-    >
-      <Stack spacing={6} direction="column" component="section" role="region">
-        <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
-          <Typography variant="h1" gutterBottom>
-            {content?.subtitle1}
-            <br />
-            {content?.subtitle2}
-          </Typography>
-        </motion.div>
+    <Box ref={sectionRef} className="container">
+      <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
+        <Typography variant="h1" gutterBottom>
+          {content?.subtitle1}
+          <br />
+          {content?.subtitle2}
+        </Typography>
+      </motion.div>
+
+      <Stack spacing={4} direction="column" component="section" role="region">
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -164,13 +117,8 @@ function Transformation() {
         </Box>
         <motion.div
           className="paragraph"
-          // width is necessary for the auto line break
           style={{ opacity: fifthParagraphOpacity, width: "80vw" }}
         >
-          {/*<Typography>
-            Over the past 175 years, the timing and pathways of
-            California&apos;s water flows
-          </Typography>*/}
           <Typography className="overflow-text">
             {content?.transition.p11}{" "}
             <Underline startAnimation={startAnimation}>
@@ -183,5 +131,3 @@ function Transformation() {
     </Box>
   )
 }
-
-export default SectionTransformation

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useMemo } from "react"
-import * as d3 from "d3"
+import { d3 } from "@repo/viz"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { debounce } from "lodash"
 import "./precipitation-bar.css"
@@ -24,7 +24,6 @@ const responsiveHeight = {
   lg: 400,
   xl: 500,
 }
-
 
 const margin = { top: 20, right: 80, bottom: 35, left: 180 }
 const LABEL_HEIGHT = 50
@@ -135,22 +134,27 @@ function PrecipitationBar({
   }, [dimensions.height, yExtents])
 
   return (
-    <div ref={containerRef} style={{ height: selectedHeight, width: "100%", position: "relative" }}>
+    <div
+      ref={containerRef}
+      style={{ height: selectedHeight, width: "100%", position: "relative" }}
+    >
       {tooltip.visible && tooltip.data && (
         //TODO: Make this into a proper tooltip component, and add accessibility features (aria-live, role="tooltip", etc.)
         <Box
           className="tooltip"
           sx={{
             transform: `translate(${tooltip.x}px, ${tooltip.y}px)`,
-            typography: 'caption',
+            typography: "caption",
             backgroundColor: "common.white",
             color: "text.primary",
             borderRadius: (theme: Theme) => theme.borderRadius.md,
             border: (theme: Theme) => theme.border.medium,
           }}
         >
-          <strong>Year</strong>{" \u2013"} {tooltip.data.year} <br />
-          <strong>Annual Precipitation</strong>{" \u2013"}  {tooltip.data.value}
+          <strong>Year</strong>
+          {" \u2013"} {tooltip.data.year} <br />
+          <strong>Annual Precipitation</strong>
+          {" \u2013"} {tooltip.data.value}
           {tooltip.data.anomaly >= 0
             ? ` (+${tooltip.data.anomaly})`
             : ` (${tooltip.data.anomaly})`}{" "}
@@ -220,10 +224,6 @@ function BarChart({
   const barWidth = xScale.bandwidth() * 0.6
   const [yearHovered, setYearHovered] = useState<number | null>(null)
   const [yearClicked, setYearClicked] = useState<number | null>(null)
-
-  useEffect(() => {
-    console.log("Year clicked:", yearClicked)
-  }, [yearClicked])
 
   return (
     <>
@@ -391,7 +391,7 @@ function Bar({
             yearClicked={yearClicked}
             isClicked={yearClicked === d.year}
             opacity={opacity}
-            transform={(d.anomaly < 0) ? "2em" : "-2em"}
+            transform={d.anomaly < 0 ? "2em" : "-2em"}
             onAnimationComplete={onAnimationComplete}
           />
         )}
@@ -419,39 +419,39 @@ function VisibleIcon({
 
   return (
     <g style={{ transform: `translateY(${transform})` }}>
-    <motion.g
-      initial={{ scale: 0 }}
-      animate={{
-        scale: animatedScale, // Oscillate between 1 and 1.2
-      }}
-      transition={{
-        duration: isHovered || isClicked ? 0.2 : 1.5, // Duration of one cycle
-        repeat: isHovered || isClicked ? 0 : Infinity, // Infinite animation
-        repeatType: "reverse", // Reverse direction after each cycle
-      }}
-    >
-      {yearClicked === null || isClicked ? (
-        <motion.path
-          style={{
-            opacity: opacity,
-            fill: OffWhiteColor,
-            transform: "translate(-12px, -12px)",
-            transformOrigin: "12px 12px",
-          }}
-          onAnimationComplete={onAnimationComplete}
-          d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
-        ></motion.path>
-      ) : (
-        <motion.path
-          style={{
-            opacity: opacity,
-            fill: OffWhiteColor,
-            transform: "translate(-12px, -12px)",
-            transformOrigin: "12px 12px",
-          }}
-          onAnimationComplete={onAnimationComplete}
-          d="M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z"
-        ></motion.path>
+      <motion.g
+        initial={{ scale: 0 }}
+        animate={{
+          scale: animatedScale, // Oscillate between 1 and 1.2
+        }}
+        transition={{
+          duration: isHovered || isClicked ? 0.2 : 1.5, // Duration of one cycle
+          repeat: isHovered || isClicked ? 0 : Infinity, // Infinite animation
+          repeatType: "reverse", // Reverse direction after each cycle
+        }}
+      >
+        {yearClicked === null || isClicked ? (
+          <motion.path
+            style={{
+              opacity: opacity,
+              fill: OffWhiteColor,
+              transform: "translate(-12px, -12px)",
+              transformOrigin: "12px 12px",
+            }}
+            onAnimationComplete={onAnimationComplete}
+            d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+          ></motion.path>
+        ) : (
+          <motion.path
+            style={{
+              opacity: opacity,
+              fill: OffWhiteColor,
+              transform: "translate(-12px, -12px)",
+              transformOrigin: "12px 12px",
+            }}
+            onAnimationComplete={onAnimationComplete}
+            d="M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z"
+          ></motion.path>
         )}
       </motion.g>
     </g>
@@ -466,7 +466,7 @@ function XAxis({
   yOffset: number
   dimensions: { width: number; height: number }
   scrollYProgress: MotionValue<number>
-  }) {
+}) {
   const theme = useTheme()
   const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.4, 0.7], [0, 1])
   const axisPathLength = usePlayAnimationOnce(
@@ -476,9 +476,11 @@ function XAxis({
   )
 
   return (
-    <g className="x-axis"
+    <g
+      className="x-axis"
       transform={`translate(${margin.left}, ${yOffset})`}
-      style={{ fontSize: theme.typography.caption.fontSize }}>
+      style={{ fontSize: theme.typography.caption.fontSize }}
+    >
       <motion.path
         className="axis"
         d={`M0,0 L${dimensions.width - margin.right - margin.left},0`}
@@ -510,7 +512,7 @@ function YAxis({
   dimensions: { width: number; height: number }
   average: number
   scrollYProgress: MotionValue<number>
-  }) {
+}) {
   const theme = useTheme()
   const aboveMidpoint = (margin.top + yScale(0)) / 2
   const belowMidpoint = (dimensions.height - margin.bottom + yScale(0)) / 2
@@ -524,9 +526,11 @@ function YAxis({
 
   return (
     <>
-      <g className="y-axis"
+      <g
+        className="y-axis"
         transform={`translate(${margin.left}, 0)`}
-        style={{ fontSize: theme.typography.caption.fontSize }}>
+        style={{ fontSize: theme.typography.caption.fontSize }}
+      >
         <motion.path
           className="axis"
           d={`M0,${dimensions.height - margin.bottom} L0,${margin.top}`}
@@ -548,12 +552,7 @@ function YAxis({
         style={{ fontSize: theme.typography.caption.fontSize }}
       >
         <motion.g style={{ opacity: labelOpacity }}>
-          <text
-            x={0}
-            y={yScale(0)}
-            dx="-0.5em"
-            className="axis-label"
-          >
+          <text x={0} y={yScale(0)} dx="-0.5em" className="axis-label">
             Historical average
           </text>
           <text

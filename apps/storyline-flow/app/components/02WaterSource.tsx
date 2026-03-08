@@ -1,22 +1,13 @@
 "use client"
 
 import { Box, Slider, Stack, Typography, VisibilityIcon } from "@repo/ui/mui"
-import { useState } from "react"
-import { useMap } from "@repo/map/client"
-import { useFetchData } from "../hooks/useFetchData"
+import { useRef, useState } from "react"
 import PrecipitationBar from "./vis/PrecipitationBar"
-import useActiveSection from "../hooks/useActiveSection"
-import { MarkerType } from "./helpers/mapMarkers"
-import useStoryStore from "../store"
+import { appActions, useStoryline, useStoryStore } from "../store"
 
 import AnimatedCurve from "./vis/AnimatedCurve"
 import { MONTHIDS, MONTHS, selectedMonths } from "./helpers/constants"
-import {
-  motion,
-  useMotionValueEvent,
-  useScroll,
-  useTransform,
-} from "@repo/motion"
+import { motion, useScroll, useTransform } from "@repo/motion"
 import { springUpTextVariants } from "@repo/motion/variants"
 import Legend from "./helpers/Legend"
 import {
@@ -24,38 +15,14 @@ import {
   SnowWaterColorScale,
 } from "./helpers/colorPalette"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
-import { SierraNevadaMountains } from "./helpers/mapAnnotations"
-import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 
 const MotionSlider = motion.create(Slider)
 const MotionTypography = motion.create(Typography)
 
-function SectionWaterSource() {
-  const [markers, setMarkers] = useState<Record<string, MarkerType[]>>({}) // Initialize markers as an empty array
-
-  useFetchData<Record<string, MarkerType[]>>(
-    "/data/variability_marker.json",
-    (data) => {
-      setMarkers(data)
-    },
-  )
-
-  return (
-    <>
-      <Precipitation />
-      <Variability markers={markers} />
-      <Snowpack />
-    </>
-  )
-}
-
-function Precipitation() {
-  const { setPaintProperty } = useMap()
-  const storyline = useStoryStore((state) => state.storyline)
+export function Precipitation() {
+  const storyline = useStoryline()
   const content = storyline?.precipitation
-  const { sectionRef } = useActiveSection("precipitation", {
-    amount: 0.2,
-  })
+  const sectionRef = useRef(null)
 
   const colors = FreshWaterColorScale
   const labels = ["10", "20", "30", "40", "50 in."]
@@ -63,14 +30,6 @@ function Precipitation() {
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
-  })
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.1 && latest < 0.9) {
-      setPaintProperty("precipitation-vector-layer", "fill-opacity", 1)
-      return
-    }
-    setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
   })
 
   const titleOpacity = useTransform(scrollYProgress, [0.2, 0.5], [0, 1])
@@ -86,15 +45,8 @@ function Precipitation() {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      id="precipitation"
-      className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
-      tabIndex={-1} // Ensure focusable for screen readers
-      role="region"
-    >
+    <Box ref={sectionRef} className="container">
+      {/* Title */}
       <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
         <Typography variant="h3" gutterBottom>
           {content?.title1}{" "}
@@ -104,7 +56,8 @@ function Precipitation() {
           {content?.title3}
         </Typography>
       </motion.div>
-      <Stack spacing={12} direction="column" component="section" role="region" mt={2}>
+      {/* Paragraph */}
+      <Stack spacing={6} direction="column">
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -136,37 +89,18 @@ function Precipitation() {
   )
 }
 
-function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Variability() {
+  const storyline = useStoryline()
   const content = storyline?.variability
-  const { sectionRef, isSectionActive } = useActiveSection("variability", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [currentPoints, setCurrentPoints] = useState<MarkerType[]>([])
-  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
 
   const getSelectedYear = (year: string) => {
-    const points = markers[year] || []
-    setMarkers(points, "rough-circle")
-    setCurrentPoints(points)
-    setTooltipContent(points[0] || null) // Set the first point as tooltip content
+    appActions.setSelectYearVariability(year)
   }
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {
-      setMarkers(currentPoints, "rough-circle")
-    },
-    () => {
-      setMarkers([], "rough-circle")
-    },
-  )
 
   const firstParagraphOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
   const secondParagraphOpacity = useTransform(
@@ -188,15 +122,8 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   ) //TODO: make this 0.7 a constant for caption
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="110vh"
-      sx={{ justifyContent: "space-around" }}
-      tabIndex={-1}
-      role="region"
-    >
-      <Stack spacing={3} direction="column" component="section" role="region">
+    <Box ref={sectionRef} className="container">
+      <Stack spacing={2} direction="column">
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -204,6 +131,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
           <Typography>{content?.p1}</Typography>
           <Typography gutterBottom>{content?.p2}</Typography>
         </motion.div>
+
         <motion.div
           className="paragraph"
           style={{ opacity: secondParagraphOpacity }}
@@ -212,36 +140,30 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
           <Typography>{content?.p4}</Typography>
         </motion.div>
       </Stack>
-      <Stack
-        spacing={3}
-        direction="column"
-        component="section"
-        role="region"
-        sx={{ width: "100%" }}
-      >
+
+      <Stack spacing={1} direction="column" sx={{ width: "100%", mt: 6 }}>
+        <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
+          California Rainfall Deviation from Average
+        </MotionTypography>
+        <MotionTypography variant="caption" style={{ opacity: captionOpacity }}>
+          Data source:{" "}
+          <a
+            href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            NOAA
+          </a>
+        </MotionTypography>
         <Box
           className="paragraph"
           style={{ height: "fit-content", width: "100%" }}
         >
-          <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
-            California Rainfall Deviation from Average
-          </MotionTypography>
-          <MotionTypography
-            variant="caption"
-            style={{ opacity: captionOpacity }}
-          >
-            Data source:{" "}
-            <a
-              href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "inherit", textDecoration: "underline" }}
-            >
-              NOAA
-            </a>
-          </MotionTypography>
           <PrecipitationBar
-            yearLabels={Object.keys(markers).map((key) => parseInt(key))}
+            yearLabels={["2014", "2017", "2021", "2023"].map((key) =>
+              parseInt(key),
+            )}
             scrollYProgress={scrollYProgress}
             getSelectedYear={getSelectedYear}
           />
@@ -251,11 +173,8 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
           style={{ opacity: exampleParagraphOpacity }}
         >
           <Typography variant="h6">
-            Click on{" "}
-            <VisibilityIcon
-              sx={{ verticalAlign: "middle" }}
-            />{" "}
-            and circles to explore how California is affected by droughts and
+            Click on <VisibilityIcon sx={{ verticalAlign: "middle" }} /> and
+            circles to explore how California is affected by droughts and
             floods.
           </Typography>
         </motion.div>
@@ -264,45 +183,18 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   )
 }
 
-function Snowpack() {
+export function Snowpack() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.snowpack
-  const { sectionRef, isSectionActive } = useActiveSection("snowpack", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const [monthIdx, setMonthIdx] = useState(0)
-  const { setPaintProperty, setFilter } = useMap()
-  const setMarkers = useStoryStore((state) => state.setMarkers)
   const colors = SnowWaterColorScale
   const labels = ["1", "6.5", "13", "20 ft."]
-  const setSelectedMonthSnowpack = useStoryStore(
-    (state) => state.setSelectedMonthSnowpack,
-  )
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.5 && latest < 0.9) {
-      setPaintProperty("snowpack-layer", "fill-opacity", 1)
-      return
-    }
-    setPaintProperty("snowpack-layer", "fill-opacity", 0)
-  })
-
-  //NOTE: It seems I have to implement text markers using load and unload
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {
-      setMarkers([SierraNevadaMountains], "text")
-    },
-    () => {
-      setMarkers([], "text")
-    },
-  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -317,32 +209,25 @@ function Snowpack() {
   const titleOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 1])
   const captionOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 0.7])
 
-
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="120vh"
-      sx={{ justifyContent: "space-around" }}
-      tabIndex={-1}
-      role="region"
-    >
+    <Box ref={sectionRef} className="container">
+      <Box className="paragraph">
+        <Typography variant="h3" gutterBottom>
+          {content?.title1}
+          <Legend colors={colors} labels={labels}>
+            {content?.title2}
+          </Legend>{" "}
+          {content?.title3}
+        </Typography>
+      </Box>
+
       <Stack
-        spacing={6}
+        spacing={2}
         direction="column"
         component="section"
         role="region"
         sx={{ width: "100%" }}
       >
-        <Box className="paragraph">
-          <Typography variant="h3" gutterBottom>
-            {content?.title1}
-            <Legend colors={colors} labels={labels}>
-              {content?.title2}
-            </Legend>{" "}
-            {content?.title3}
-          </Typography>
-        </Box>
         <motion.div
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
@@ -360,30 +245,35 @@ function Snowpack() {
           </Typography>
         </motion.div>
       </Stack>
-      <Box
-        className="paragraph"
-        style={{ height: "fit-content", width: "100%" }}
-      >
-        <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
-          {"From Snow to Snowmelt \u2014 an Illustration"}
-        </MotionTypography>
-        <MotionTypography variant="caption" style={{ opacity: captionOpacity }}>
-          GIS data source: Snowpack spatial accumulation from{" "}
-          <a
-            href="https://www.nohrsc.noaa.gov/snowfall/"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "inherit", textDecoration: "underline" }}
+
+      <Stack spacing={1} direction="column" sx={{ width: "100%", mt: 6 }}>
+        <Box
+          className="paragraph"
+          style={{ height: "fit-content", width: "100%" }}
+        >
+          <MotionTypography variant="h5" style={{ opacity: titleOpacity }}>
+            {"From Snow to Snowmelt \u2014 an Illustration"}
+          </MotionTypography>
+          <MotionTypography
+            variant="caption"
+            style={{ opacity: captionOpacity }}
           >
-            NOAA
-          </a>
-          .
-        </MotionTypography>
-        <AnimatedCurve
-          selectedMonth={monthIdx}
-          scrollYProgress={scrollYProgress}
-        />
-        {/* <PathMorphing />*/}
+            GIS data source: Snowpack spatial accumulation from{" "}
+            <a
+              href="https://www.nohrsc.noaa.gov/snowfall/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              NOAA
+            </a>
+            .
+          </MotionTypography>
+          <AnimatedCurve
+            selectedMonth={monthIdx}
+            scrollYProgress={scrollYProgress}
+          />
+        </Box>
         <div id="month-slider">
           <MotionSlider
             variants={springUpTextVariants}
@@ -397,15 +287,9 @@ function Snowpack() {
             track={false}
             onChange={(e, newValue) => {
               setMonthIdx(newValue as number)
-              setSelectedMonthSnowpack(MONTHIDS[newValue as number] as string)
-              setFilter("snowpack-layer", [
-                "all",
-                [
-                  "==",
-                  ["get", "month-adjusted"],
-                  MONTHIDS[newValue as number] as string,
-                ],
-              ] as unknown as string)
+              appActions.setSelectedMonthSnowpack(
+                MONTHIDS[newValue as number] as string,
+              )
             }}
             valueLabelDisplay="auto"
             valueLabelFormat={(value) => MONTHS[value]}
@@ -450,19 +334,20 @@ function Snowpack() {
           </MotionTypography>
         </div>
         <MotionTypography
-            variant="h6"
-            gutterBottom
-            variants={springUpTextVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ amount: 0.1, once: true }}
-            custom={0}
-          >
-            Slide through the months to see how snow accumulates and melts throughout the year. 
-          </MotionTypography>
-      </Box>
+          variant="h6"
+          gutterBottom
+          variants={springUpTextVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ amount: 0.1, once: true }}
+          custom={0}
+        >
+          Slide through the months to see how snow accumulates and melts
+          throughout the year.
+        </MotionTypography>
+      </Stack>
     </Box>
   )
 }
 
-export default SectionWaterSource
+export default Precipitation

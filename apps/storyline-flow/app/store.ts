@@ -1,75 +1,136 @@
-import { create } from "zustand"
-import { MarkerType } from "./components/helpers/mapMarkers"
+import { create, immer } from "@repo/state/zustand"
 import { Storyline } from "./story"
+import {
+  getSectionLayerConfig,
+  SectionId,
+  SectionLayerConfig,
+} from "./components/map/config/sectionConfig"
+import { TooltipType } from "./components/map/setup/LayerOrchestrator"
 
-interface StoryState {
+// ============================================================================
+// COMBINED STATE
+// ============================================================================
+
+interface AppState {
+  // Story
   storyline: Storyline | null
-  activeSection: string
-  isMapReady: boolean
-  loadedSections: Set<string>
-  markerLayer: {
-    points: MarkerType[]
-    style: string
-  }
-  textMarkerLayer: {
-    points: MarkerType[]
-    style: string
-  }
-  breakpoint: string
+  activeSection: SectionId
   selectedMonthSnowpack: string
-  tooltipContent: MarkerType | null
-  setActiveSection: (section: string) => void
-  setMapReady: (isReady: boolean) => void
-  fetchStoryline: () => Promise<void>
-  markSectionAsLoaded: (section: string) => void
-  setMarkers: (markers: MarkerType[], style: string) => void
-  setTextMarkers: (markers: MarkerType[], style: string) => void
-  setBreakpoint: (breakpoint: string) => void
-  setSelectedMonthSnowpack: (month: string) => void
-  setTooltipContent: (content: MarkerType | null) => void
+  selectedYearVariability: string
+
+  // Map
+  isMapReady: boolean
+  riverProgress: number
+  valleyBoundaryProgress: number
+  deltaBoundaryProgress: number
+
+  tooltipContent: TooltipType | null
 }
 
-const useStoryStore = create<StoryState>((set) => {
-  return {
-    storyline: null,
-    activeSection: "opener",
-    isMapReady: false,
-    loadedSections: new Set(["opener", "precipitation"]), // Initialize with the first section loaded
-    markerLayer: { points: [], style: "rough-circle" },
-    textMarkerLayer: { points: [], style: "text" },
-    breakpoint: "xl",
-    selectedMonthSnowpack: "10",
-    tooltipContent: null,
-    setActiveSection: (section: string) => set({ activeSection: section }),
-    setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
-    markSectionAsLoaded: (section: string) =>
-      set((state) => {
-        const updatedLoadedSections = new Set(state.loadedSections)
-        updatedLoadedSections.add(section)
-        return { loadedSections: updatedLoadedSections }
-      }),
-    fetchStoryline: async () => {
-      try {
-        const response = await fetch("/locales/english.json")
-        if (!response.ok) {
-          throw new Error("Failed to fetch story data")
-        }
-        const data = await response.json()
-        set({ storyline: data })
-      } catch (err) {
-        console.error("Error loading story data:", err)
-      }
-    },
-    setMarkers: (markers: MarkerType[], style: string) =>
-      set({ markerLayer: { points: markers, style: style } }),
-    setTextMarkers: (markers: MarkerType[], style: string) =>
-      set({ textMarkerLayer: { points: markers, style: style } }),
-    setBreakpoint: (breakpoint: string) => set({ breakpoint: breakpoint }),
-    setSelectedMonthSnowpack: (month: string) =>
-      set({ selectedMonthSnowpack: month }),
-    setTooltipContent: (content: MarkerType | null) =>
-      set({ tooltipContent: content }),
-  }
-})
+const initialState: AppState = {
+  storyline: null,
+  activeSection: "opener",
+  selectedMonthSnowpack: "10",
+  selectedYearVariability: "",
 
-export default useStoryStore
+  isMapReady: false,
+  riverProgress: 0,
+  valleyBoundaryProgress: 0,
+  deltaBoundaryProgress: 0,
+
+  tooltipContent: null,
+}
+
+// ============================================================================
+// Store
+// ============================================================================
+
+export const useStoryStore = create<AppState>()(immer(() => initialState))
+
+// ============================================================================
+// Actions
+// ============================================================================
+
+export const appActions = {
+  // Story
+  setActiveSection: (section: SectionId) =>
+    useStoryStore.setState({ activeSection: section }),
+
+  fetchStoryline: async () => {
+    try {
+      const response = await fetch("/locales/english.json")
+      if (!response.ok) {
+        throw new Error("Failed to fetch story data")
+      }
+      const data = await response.json()
+      useStoryStore.setState({ storyline: data })
+    } catch (err) {
+      console.error("Error loading story data:", err)
+    }
+  },
+
+  setSelectedMonthSnowpack: (month: string) =>
+    useStoryStore.setState({ selectedMonthSnowpack: month }),
+
+  setSelectYearVariability: (year: string) =>
+    useStoryStore.setState({ selectedYearVariability: year }),
+
+  // Map
+  setMapReady: (ready: boolean) =>
+    useStoryStore.setState({ isMapReady: ready }),
+
+  setTooltipContent: (content: TooltipType | null) =>
+    useStoryStore.setState({ tooltipContent: content }),
+
+  setRiverProgress: (progress: number) =>
+    useStoryStore.setState({ riverProgress: progress }),
+
+  setValleyProgress: (progress: number) =>
+    useStoryStore.setState({ valleyBoundaryProgress: progress }),
+
+  setDeltaBoundaryProgress: (progress: number) =>
+    useStoryStore.setState({ deltaBoundaryProgress: progress }),
+}
+
+// ============================================================================
+// Selectors (subscribing)
+// ============================================================================
+
+// Core
+export const useMapReady = () => useStoryStore((state) => state.isMapReady)
+export const useStoryline = () => useStoryStore((state) => state.storyline)
+export const useTooltip = () => useStoryStore((state) => state.tooltipContent)
+
+export const useActiveSectionStore = () =>
+  useStoryStore((state) => state.activeSection)
+
+const createLayerSelector = (key: keyof SectionLayerConfig) => () =>
+  useStoryStore((s) => !!getSectionLayerConfig(s.activeSection)[key])
+
+export const useShowPrecipitation = createLayerSelector("precipitation")
+export const useShowSnowpack = createLayerSelector("snowpack")
+export const useShowVariability = createLayerSelector("variability")
+export const useShowRivers = createLayerSelector("majorRivers")
+export const useShowValleyBoundary = createLayerSelector(
+  "centralValleyBoundary",
+)
+export const useShowWetland = createLayerSelector("wetland")
+export const useShowDeltaBoundary = createLayerSelector("deltaBoundary")
+export const useShowGoldRush = createLayerSelector("goldrush")
+export const useShowDrinking = createLayerSelector("drinking")
+export const useShowTransformation = createLayerSelector("transformation")
+export const useShowCity = createLayerSelector("city")
+export const useShowImpact = createLayerSelector("impact")
+
+export const useCameraView = () =>
+  useStoryStore((s) => getSectionLayerConfig(s.activeSection).camera)
+export const useRiversProgress = () => useStoryStore((s) => s.riverProgress)
+export const useValleyBoundaryProgress = () =>
+  useStoryStore((s) => s.valleyBoundaryProgress)
+export const useDeltaBoundaryProgress = () =>
+  useStoryStore((s) => s.deltaBoundaryProgress)
+
+export const useSelectedMonthSnowpack = () =>
+  useStoryStore((s) => s.selectedMonthSnowpack)
+export const useSelectedYearVariability = () =>
+  useStoryStore((s) => s.selectedYearVariability)

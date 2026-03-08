@@ -51,7 +51,11 @@ function Opener() {
         className="paragraph text-center-holder"
         component="header"
         role="banner"
-        sx={{ top: "50%", pointerEvents: "none", textShadow: theme.textShadow.display }}
+        sx={{
+          top: "50%",
+          pointerEvents: "none",
+          textShadow: theme.textShadow.display,
+        }}
       >
         <Typography id="opener-heading" variant="h1Bold" gutterBottom>
           {"How Climate Change Affects California's Water"}

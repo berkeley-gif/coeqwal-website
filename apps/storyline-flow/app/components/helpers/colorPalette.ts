@@ -29,7 +29,7 @@ const InfrastructureCandidates = {
   1: "#F8A42D",
   2: "#F27322",
   3: "#FCB321",
-  4: '#FFA200',
+  4: "#FFA200",
   5: "#E54545",
 }
 

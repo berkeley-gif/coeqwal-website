@@ -16,7 +16,11 @@ export {
 // Export types from react-map-gl and mapbox-gl
 export type { LayerProps } from "react-map-gl/mapbox"
 export type { MapRef } from "react-map-gl/mapbox"
-export type { LngLatLike, FitBoundsOptions } from "mapbox-gl"
+export type {
+  LngLatLike,
+  FitBoundsOptions,
+  DataDrivenPropertyValueSpecification,
+} from "mapbox-gl"
 
 // Export core types from our types file
 export type {

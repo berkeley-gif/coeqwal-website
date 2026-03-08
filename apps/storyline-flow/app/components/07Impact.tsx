@@ -1,40 +1,14 @@
 "use client"
 
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
-import { useCallback, useState } from "react"
-import useActiveSection from "../hooks/useActiveSection"
-import useStoryStore from "../store"
-import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
+import { useRef } from "react"
+import { useStoryline } from "../store"
 import { motion, useScroll, useTransform } from "@repo/motion"
-import { SacramentoDelta, ShastaDam } from "./helpers/mapAnnotations"
-import { MarkerType } from "./helpers/mapMarkers"
-import { useFetchData } from "../hooks/useFetchData"
 
-function SectionImpact() {
-  const [markers, setMarkers] = useState<Record<string, MarkerType[]>>({}) // Initialize markers as an empty array
-
-  useFetchData<Record<string, MarkerType[]>>(
-    "/data/impact_marker.json",
-    (data) => {
-      setMarkers(data)
-    },
-  )
-
-  return (
-    <>
-      <Transition />
-      <Salmon markers={markers.salmon ?? []} />
-      <Delta markers={markers.delta ?? []} />
-      <Drinking markers={markers.drinkingwater ?? []} />
-      <Climate markers={markers.climate ?? []} />
-    </>
-  )
-}
-
-function Transition() {
-  const storyline = useStoryStore((state) => state.storyline)
+export function TransitionToImpact() {
+  const storyline = useStoryline()
   const content = storyline?.impact.benefits
-  const { sectionRef } = useActiveSection("turning", { amount: 0.5 })
+  const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -50,12 +24,7 @@ function Transition() {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="50vh"
-      sx={{ justifyContent: "center" }}
-    >
+    <Box ref={sectionRef} className="container">
       <motion.div
         className="paragraph"
         style={{ opacity: firstSentenceOpacity }}
@@ -76,36 +45,15 @@ function Transition() {
   )
 }
 
-function Salmon({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Salmon() {
+  const storyline = useStoryline()
   const content = storyline?.impact.salmon
-  const { sectionRef, isSectionActive } = useActiveSection("impact-salmon", {
-    amount: 0.5,
-  })
-  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
+  const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-
-  const load = useCallback(() => {
-    if (hasSetMarkers) return // Prevent setting markers again if already set
-    setMarkers(markers, "rough-circle")
-    setTextMarkers([ShastaDam], "text")
-    setHasSetMarkers(true)
-    return
-  }, [hasSetMarkers, setMarkers, markers, setTextMarkers])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-    setHasSetMarkers(false)
-  }, [setTextMarkers, setMarkers])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -119,12 +67,7 @@ function Salmon({ markers }: { markers: MarkerType[] }) {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="80vh"
-      sx={{ justifyContent: "center" }}
-    >
+    <Box ref={sectionRef} className="container">
       <motion.div
         className="paragraph"
         style={{ opacity: firstParagraphOpacity }}
@@ -146,35 +89,14 @@ function Salmon({ markers }: { markers: MarkerType[] }) {
   )
 }
 
-function Delta({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Delta() {
+  const storyline = useStoryline()
   const content = storyline?.impact.delta
-  const { sectionRef, isSectionActive } = useActiveSection("impact-delta", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
-
-  const load = useCallback(() => {
-    if (hasSetMarkers) return // Prevent setting markers again if already set
-    setMarkers(markers, "rough-circle")
-    setTextMarkers([SacramentoDelta], "text")
-    setHasSetMarkers(true)
-    return
-  }, [hasSetMarkers, setMarkers, markers, setTextMarkers])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-    setHasSetMarkers(false)
-  }, [setMarkers, setTextMarkers])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -193,12 +115,7 @@ function Delta({ markers }: { markers: MarkerType[] }) {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
-    >
+    <Box ref={sectionRef} className="container">
       <motion.div
         className="paragraph"
         style={{ opacity: firstParagraphOpacity }}
@@ -232,29 +149,10 @@ function Delta({ markers }: { markers: MarkerType[] }) {
   )
 }
 
-function Drinking({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
+export function DrinkingWater() {
+  const storyline = useStoryline()
   const content = storyline?.impact
-  const { sectionRef, isSectionActive } = useActiveSection("impact-water", {
-    amount: 0.5,
-  })
-
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
-
-  const load = useCallback(() => {
-    if (hasSetMarkers) return // Prevent setting markers again if already set
-    setMarkers(markers, "rough-circle")
-    setHasSetMarkers(true)
-    return
-  }, [hasSetMarkers, setMarkers, markers])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setHasSetMarkers(false)
-  }, [setMarkers])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
+  const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -278,12 +176,7 @@ function Drinking({ markers }: { markers: MarkerType[] }) {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="70vh"
-      sx={{ justifyContent: "space-around" }}
-    >
+    <Box ref={sectionRef} className="container">
       <Stack direction="column" spacing={6}>
         <motion.div
           className="paragraph"
@@ -322,33 +215,15 @@ function Drinking({ markers }: { markers: MarkerType[] }) {
   )
 }
 
-function Climate({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
+export function Climate() {
+  const storyline = useStoryline()
   const content = storyline?.impact.climate
-  const { sectionRef, isSectionActive } = useActiveSection("impact-climate", {
-    amount: 0.5,
-  })
+  const sectionRef = useRef(null)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
-
-  const load = useCallback(() => {
-    if (hasSetMarkers) return // Prevent setting markers again if already set
-    setMarkers(markers, "rough-circle")
-    setHasSetMarkers(true)
-    return
-  }, [hasSetMarkers, setMarkers, markers])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setHasSetMarkers(false)
-  }, [setMarkers])
-
-  useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -362,12 +237,7 @@ function Climate({ markers }: { markers: MarkerType[] }) {
   )
 
   return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
-    >
+    <Box ref={sectionRef} className="container">
       <Stack direction="column" spacing={12}>
         <motion.div
           className="paragraph"
@@ -401,5 +271,3 @@ function Climate({ markers }: { markers: MarkerType[] }) {
     </Box>
   )
 }
-
-export default SectionImpact

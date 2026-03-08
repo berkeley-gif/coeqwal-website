@@ -9,6 +9,9 @@ export type {
   ScenarioComparisonChartProps,
 } from "./types"
 
+// Export d3
+export * as d3 from "d3"
+
 // Export components
 export { default as BarChart } from "./components/BarChart"
 export type { BarChartProps } from "./components/BarChart"
