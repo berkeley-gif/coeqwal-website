@@ -9,7 +9,6 @@ import {
   Typography,
   FiberManualRecordIcon,
 } from "@repo/ui/mui"
-import { MarkerType } from "./mapMarkers"
 import { useMap } from "@repo/map"
 import { appActions } from "../../store"
 import { TooltipType } from "../map/setup/LayerOrchestrator"
@@ -84,7 +83,7 @@ export function FloatImageTooltip({ marker }: { marker: TooltipType }) {
   )
 }
 
-export function ImageTooltip({ marker }: { marker: MarkerType }) {
+export function ImageTooltip({ marker }: { marker: TooltipType }) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
   const images = marker.images || [] // Fallback to single image if no array
 
