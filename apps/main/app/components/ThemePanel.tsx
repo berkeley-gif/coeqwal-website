@@ -249,7 +249,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   background: muiTheme.palette.brand.panelMedium,
                   lineHeight: 1,
                   overflowX: "auto",
-                  scrollBarWIdth: "none",
+                  scrollbarWidth: "none",
                 }}
               >
                 {theme.sections

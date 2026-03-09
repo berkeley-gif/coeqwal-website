@@ -1,5 +1,8 @@
 /**
- * usePanelRoute is a hook for when you need to pull up a panel and change the URL
+ * usePanelRoute — manages the ?theme= URL parameter for theme panels.
+ *
+ * Uses router.push (not replace) so the browser back button closes/reopens
+ * the panel, giving users a familiar "back to dismiss" interaction.
  */
 
 "use client"
@@ -16,16 +19,14 @@ export function usePanelRoute() {
 
   const openThemePanel = useCallback(
     (key: string) => {
-      // Add theme query param
       router.push(`${pathname}?theme=${key}`, { scroll: false })
     },
     [router, pathname],
   )
 
   const closeThemePanel = useCallback(() => {
-    // Remove the theme param
     router.push(pathname, { scroll: false })
-  }, [router, searchParams])
+  }, [router, pathname])
 
   return { activeThemeKey, openThemePanel, closeThemePanel }
 }

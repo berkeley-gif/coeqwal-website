@@ -11,6 +11,7 @@ export { ScrollToButton } from "./navigation/ScrollToButton"
 export { SkipLink } from "./navigation/SkipLink"
 
 // Common components
+export { default as AutoHeight } from "./common/AutoHeight"
 export { Logo, LogoColor, LogoLight } from "./common/Logo"
 export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { LeadingMarkerText } from "./common/LeadingMarkerText"
