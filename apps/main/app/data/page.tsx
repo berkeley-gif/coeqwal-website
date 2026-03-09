@@ -7,7 +7,7 @@
  * for scenario outcomes and metrics.
  */
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import {
   Box,
   Typography,
@@ -17,16 +17,15 @@ import {
   ListSubheader,
   FormControl,
   Grid,
-  IconButton,
   CircularProgress,
   SelectChangeEvent,
   Alert,
   useTheme,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-import { ArrowHead, ScenarioBadge } from "@repo/ui"
+import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
-import { ContactSection } from "../components/ContactSection"
+import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
   getFileDownloadUrl,
@@ -40,7 +39,13 @@ import {
 import { THEME_LABEL_CONFIG } from "../content/themes"
 
 // Theme order matches ScenarioSelectionSidebar
-const THEME_ORDER: ScenarioTheme[] = ["baseline", "cws", "ag_gw", "eco", "delta"]
+const THEME_ORDER: ScenarioTheme[] = [
+  "baseline",
+  "cws",
+  "ag_gw",
+  "eco",
+  "delta",
+]
 
 /** Group a scenario list by theme, preserving THEME_ORDER, dropping empty groups. */
 function groupByTheme<T extends { scenario_id: string }>(
@@ -52,9 +57,10 @@ function groupByTheme<T extends { scenario_id: string }>(
     const t = getScenarioTheme(s.scenario_id)
     buckets.get(t)?.push(s)
   })
-  return THEME_ORDER.map((t) => ({ theme: t, scenarios: buckets.get(t) ?? [] })).filter(
-    ({ scenarios }) => scenarios.length > 0,
-  )
+  return THEME_ORDER.map((t) => ({
+    theme: t,
+    scenarios: buckets.get(t) ?? [],
+  })).filter(({ scenarios }) => scenarios.length > 0)
 }
 
 // ── Shared dropdown option components ────────────────────────────────────────
@@ -179,13 +185,21 @@ function ScenarioSelect({
         sx={SELECT_SX}
         MenuProps={menuProps}
         renderValue={(v) =>
-          v ? <SelectedScenarioValue scenarioId={v as string} /> : "Choose a scenario"
+          v ? (
+            <SelectedScenarioValue scenarioId={v as string} />
+          ) : (
+            "Choose a scenario"
+          )
         }
       >
         {groups.flatMap(({ theme: themeKey, scenarios: group }) => [
           <ThemeSubheader key={`hdr-${themeKey}`} themeKey={themeKey} />,
           ...group.map((scenario) => (
-            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id} sx={{ py: 1 }}>
+            <MenuItem
+              key={scenario.scenario_id}
+              value={scenario.scenario_id}
+              sx={{ py: 1 }}
+            >
               <ScenarioOption scenarioId={scenario.scenario_id} />
             </MenuItem>
           )),
@@ -309,7 +323,9 @@ export default function DataPage() {
 
   return (
     <>
-      <Header />
+      <Suspense fallback={null}>
+        <Header />
+      </Suspense>
 
       {/* Main content wrapper */}
       <Box
@@ -354,25 +370,20 @@ export default function DataPage() {
                 mb: (theme) => theme.space.section.lg,
               }}
             >
-              <IconButton
-                onClick={() => window.history.back()}
+              <CircularArrowButton
+                onClick={() => {
+                  if (typeof window !== "undefined") window.history.back()
+                }}
+                size={40}
+                rotation="90deg"
+                color={theme.palette.common.white}
+                ariaLabel="Go back"
                 sx={{
                   position: "absolute",
                   left: -56,
                   top: 4,
-                  color: (theme) => theme.palette.common.white,
-                  width: 40,
-                  height: 40,
                 }}
-              >
-                <ArrowHead
-                  style={{
-                    width: 24,
-                    height: 24,
-                    transform: "rotate(180deg)",
-                  }}
-                />
-              </IconButton>
+              />
               <Typography variant="h4">Data & downloads</Typography>
             </Box>
 
@@ -632,7 +643,7 @@ export default function DataPage() {
             </Grid>
           </Container>
         </Box>
-        <ContactSection
+        <CenteredTextSection
           title="Get Involved"
           id="getInvolved"
           ariaLabel="get involved"

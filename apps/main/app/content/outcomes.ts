@@ -22,7 +22,7 @@ export const OUTCOME_NAMES = {
   DELTA_ECO: "Delta estuary ecology",
   FW_EXP: "Freshwater for Delta exports",
   FW_DELTA_USES: "Freshwater for in-Delta uses",
-  WRC_SALMON_AB: "Salmon abundance",
+  WRC_SALMON_AB: "Winter-run salmon",
 } as const
 
 /** Valid outcome codes */
@@ -114,23 +114,23 @@ export const OUTCOME_CODE_ORDER: OutcomeCode[] = [
  */
 export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
   CWS_DEL:
-    "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for **140 community water systems**.",
+    "Tiers reflect the degree of Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
   AG_REV:
-    "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at **134 agricultural water districts** and evaluated relative to historical values.",
+    "Tiers correspond to the impact of water shortages on agricultural production",
   ENV_FLOWS:
-    "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at **17 locations** on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "Tiers reflect the extent to which modeled flows sustain ecological function relative to natural or functional flow (FF) targets. The framework distinguishes between fully functional ecosystems, partially functional conditions, existing regulatory baselines, and degraded/no-function states.",
   RES_STOR:
-    "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in **8 large reservoirs**.",
+    "Tiers reflect how frequently key reservoirs reach April 30 storage thresholds relative to recent historical percentiles, ahead of the summer delivery season.",
   GW_STOR:
-    "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
+    "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
   DELTA_ECO:
-    "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
+    "Tiers reflect ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability). Indicators are assigned a given score based on average winter/spring flows, and scores are scaled accordingly to accommodate threshold effects and additive impacts from multiple years of wet/dry conditions.",
   FW_EXP:
-    "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the **Banks and Jones pumping plants**.",
+    "Tier reflects the amount of fresh water exported from the Delta pumps (Banks, Jones) over the 100-year simulation period. For this tier calculation, the volume of water pumped at either pumping location is reduced proportionally by the amount the salinity of that water exceeds 900 uS/cm. Water pumped with salinity greater than 2500 uS/cm is assigned a 0 value. Tiers are defined based on the combined total volume pumped at each pumping location for the 100-year period.",
   FW_DELTA_USES:
     "How often water in the Delta is fresh enough for in-Delta uses, assessed at **two compliance locations** in the western Delta.",
   WRC_SALMON_AB:
-    "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
+    "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
 }
 
 /**
@@ -156,64 +156,73 @@ export interface TierValueDefinitions {
  */
 export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   CWS_DEL: {
-    tier1: "Optimal: Water deliveries reduced by less than 10% of planned",
-    tier2: "Sub-optimal: Water deliveries reduced by less than 20% of planned",
-    tier3: "At-risk: Water deliveries reduced by less than 30% of planned",
-    tier4: "Critical: Water deliveries reduced by more than 30% of planned",
+    tier1:
+      "Near full deliveries in most years, no years with large shortfalls (Definition: ≥ 90% of target met in ≥ 90% of years, no year with ≤ 70% of target delivered)",
+    tier2:
+      "Near full deliveries in at least half of years, no years with critical shortfalls (Definition: ≥ 90% of target met in ≥ 50% of years, no years with ≤ 50% of target delivered)",
+    tier3:
+      "Near full deliveries in at least half of years, no more than 20 years with critical shortfalls (Definition: ≥ 90% of target met in ≥ 50% of years, no more than 20% of years with < 50% of target delivered)",
+    tier4:
+      "None of the above criteria met (Either ≥ 90% of target met in < 50% of years and/or ≥ 20% years with < 50% of target delivered)",
   },
   AG_REV: {
-    tier1: "Optimal: Agricultural revenue remains stable or increase",
-    tier2: "Sub-optimal: Agricultural revenue declines less than 5%",
-    tier3: "At-risk: Agricultural revenue declines between 5% and 20%",
-    tier4: "Critical: Agricultural revenue decreases more than 20%",
+    tier1:
+      "Optimal: Agricultural production increases with respect to today's outcomes",
+    tier2:
+      "Sub-optimal: Agricultural production declines less than 5% with respect to today's outcomes",
+    tier3:
+      "At-risk: Agricultural production declines 5%-20% with respect to today's outcomes",
+    tier4:
+      "Critical: Agricultural production declines more than 20% with respect to today's outcomes",
   },
   ENV_FLOWS: {
     tier1:
-      "Optimal: Flows exhibit sufficient magnitude and variation in 90% of years",
+      "Optimal: Functional flows to sustain native freshwater species in 90% of years; must have higher mean daily flows (volume/# days) in spring and winter than summer. (Functional Ecosystem)",
     tier2:
-      "Sub-optimal: Flows in the wet season and spring are below target ranges, but flows in the dry season are sufficient in 90% of years.",
+      "Sub-optimal: Partial functional flows in wet season and spring; full functional flows in summer in 75% of years. Must have higher mean daily flows (volume/# days) in spring and winter than summer. (Modified Functional Flows)",
     tier3:
-      "At-risk: Seasonal flow targets are not achieved in wet season, spring, or dry season, but existing regulatory minimum flows are met in 90% of years.",
-    tier4:
-      "Critical: Minimum flow requirements are met in fewer than 90% of years.",
+      "At-risk: CalSim minimum flow constraints for Baseline Scenario in 50% of years. (Existing Flow Requirements)",
+    tier4: "Critical: None of the above thresholds met. (No function)",
   },
   RES_STOR: {
     tier1:
-      "Optimal: Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the long-term median value",
+      "Optimal: Reservoir storage is greater than or equal to the top threshold for each reservoir for at least 90% of years (as represented by April values) in the dataset. As of July 2025, this threshold is set at the 50th percentile of recent historical data as available through CDEC.",
     tier2:
-      "Sub-optimal: Reservoir storage is lower, but similar to recent history. In two out of three years (66%), end-of-April storage exceeds the **33rd percentile** of long-term values",
+      "Sub-optimal: Reservoir storage is greater than or equal to the middle threshold for each reservoir for at least 67% of years (as represented by April values) in the dataset. As of July 2025, this threshold is set at the 33rd percentile of recent historical data as available through CDEC.",
     tier3:
-      "At-risk: Reservoir storage is slightly lower than recent history. In three out of ten years (30%), end-of-April storage exceeds the **33rd percentile** of long-term values",
+      "At-risk: Reservoir storage is greater than or equal to the middle threshold for each reservoir for at least 30% of years (as represented by April values) in the dataset. As of July 2025, this threshold is set at the 33rd percentile of recent historical data as available through CDEC.",
     tier4:
-      "Critical: Reservoir storage is much lower than recent history. In fewer than three out of ten years (30%), end-of-April storage exceeds the **33rd percentile** of long-term values",
+      "Critical: Reservoir storage is not high enough to meet the conditions of Tiers 1-3. Reservoir storage is below the middle threshold (at or below the lower threshold) for more than 70% of years (as represented by April values). As of July 2025, the lower threshold is set as the 20th percentile of recent historical values.",
   },
   GW_STOR: {
     tier1:
-      "Optimal: Groundwater trend is **stable or increasing** and average total storage is **greater than historical**.",
+      "Optimal: Under Tier 1 conditions, the groundwater trend in a WBA is stable or increasing from 1960-2021 and average total storage is greater than in the reference scenario.",
     tier2:
-      "At-risk: Groundwater trend is **stable or increasing** and average total storage is **less than historical**.",
+      "Sub-optimal: Under Tier 2 conditions, the groundwater trend in a WBA is stable or increasing but total storage is less than in the reference.",
     tier3:
-      "Compromised: Groundwater trend is **declining at a moderate rate**.",
-    tier4: "Critical: Groundwater trend is **declining at a rapid rate**.",
+      "At-risk: Under Tier 3, the groundwater trend is declining (not stable or increasing as in Tiers 1 or 2) but at a moderate rate (fitted linear trend is less negative than -0.015 ft/yr).",
+    tier4:
+      "Critical: In Tier 4, groundwater trends in a WBA are declining more severely, at a rate greater than 0.015 ft/year (slope <= -0.015 ft/yr).",
   },
   DELTA_ECO: {
     tier1:
-      "Optimal: Scores in top 25% of healthy flows compared to historical record",
+      "Optimal: Scenario scores in the top 25% based on yearly evaluation of ecosystem indicators: low SAV, high turbidity, fresh conditions, expanded microhabitats in most years",
     tier2:
-      "Sub-optimal: Scores in top 50% of healthy flows compared to historical record",
+      "Sub-optimal: Scenario scores in the top 50% based on yearly evaluation of ecosystem indicators: unchanged SAV, high turbidity, fresh conditions, some microhabitats available in most years",
     tier3:
-      "At-risk: Scores in top 75% of healthy flows compared to historical record",
-    tier4: "Critical: Doesn't meet any of the above thresholds",
+      "At-risk: Scenario scores in the top 75% based on yearly evaluation of ecosystem indicators: unchanged SAV, standard turbidity, moderate salinity, few microhabitats available in most years",
+    tier4:
+      "Critical: None of the above thresholds met: unchanged SAV, low turbidity, moderate to high salinity, few microhabitats available in most years",
   },
   FW_EXP: {
     tier1:
-      "Optimal: Average salinity at pumping plants meets water quality standards for drinking and irrigation year round in 95% of years",
+      "Optimal: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is greater than 505 million acre-feet",
     tier2:
-      "Sub-optimal: Average salinity at pumping plants remains suitable for drinking and irrigation (but with potential need for extra treatment) for at least 10 months per year in 95% of years",
+      "Sub-optimal: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is greater than 465 million acre-feet but less than 505 million acre-feet",
     tier3:
-      "At-risk: Average salinity at pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
+      "At-risk: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is greater than 400 million acre-feet but less than 465 million acre-feet",
     tier4:
-      "Critical: Average salinity at pumping plants is unsuitable for irrigation or drinking water for **more than two months in any year**",
+      "Critical: Total combined salinity-penalized export volume pumped at Banks and Jones pumping plants is less than 400 million acre-feet",
   },
   FW_DELTA_USES: {
     tier1:
@@ -227,12 +236,12 @@ export const OUTCOME_TIER_VALUES: Record<OutcomeCode, TierValueDefinitions> = {
   },
   WRC_SALMON_AB: {
     tier1:
-      "Optimal: There is at least an 80% chance that the population grows to 8 times its current size",
+      "Optimal: Tier 1 is met if there's at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 10-year average.",
     tier2:
-      "Sub-optimal: There is at least an 80% chance that the population grows to 2 to 8 times its current size",
+      "Sub-optimal: Tier 2 is met if there's at least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 10-year average.",
     tier3:
-      "At-risk: There is at least an 80% chance that the population grows from its current size, but does not exceed 2 times its current size",
+      "At-risk: Tier 3 is met if there's at least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 10-year average.",
     tier4:
-      "Critical: The population **does not grow** from its current size, **remains stable** at current levels, or the population **declines**.",
+      "Critical: Tier 4 is assigned if the change in population size does not satisfy Tier 1, 2, or 3.",
   },
 }

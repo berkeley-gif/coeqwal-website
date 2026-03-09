@@ -81,9 +81,9 @@ export default function ListView({
     toggleScenario,
     selectScenarios,
     showOnlyChosen,
-    showDefinitions,
+    showAlternativeBaselines,
     setShowOnlyChosen,
-    setShowDefinitions,
+    setShowAlternativeBaselines,
     searchQuery,
     pinnedScenarioId,
     selectedTheme,
@@ -348,11 +348,11 @@ export default function ListView({
     selectedOutcomes: localSelectedOutcomes,
     showMapView: false,
     showOnlyChosen,
-    showDefinitions,
+    showAlternativeBaselines,
     compact,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
-    onShowDefinitionsChange: setShowDefinitions,
+    onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
     sortBy,
     sortDirection,
     onSortChange: handleSortChange,
@@ -537,6 +537,7 @@ export default function ListView({
                   sx={{ color: theme.palette.grey[500], display: "block" }}
                 >
                   Add a location to view its outcome under different scenarios
+                  (coming soon)
                 </Typography>
               </Box>
               <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />

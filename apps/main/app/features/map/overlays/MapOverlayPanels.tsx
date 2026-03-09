@@ -17,26 +17,23 @@
  */
 
 import { useState, useEffect, useRef } from "react"
-import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
+
 import { useTheme } from "@repo/ui/mui"
 import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
-import { useTransform, useMotionValueEvent } from "@repo/motion"
-import { useMap } from "@repo/map"
-import { centralValleyBasins } from "@repo/data"
+import { motion, useTransform, useMotionValueEvent } from "@repo/motion"
+
 import {
   useScrollProgress,
   ScrollSectionContext,
-  ScrollElement,
   StickyElement,
   useScrollPhase,
   type ProgressRange,
 } from "@repo/scrollytelling"
 import ScrollTooltip from "../../tooltips/ScrollTooltip"
-import { GeocodingPanel } from "./GeocodingPanel"
-import { DeltaInfoPanel } from "./DeltaInfoPanel"
+
 import { PanelEyebrow } from "./PanelEyebrow"
 import {
   StrategyInfoPanel,
@@ -44,32 +41,32 @@ import {
   KeyOutcomesPanel,
   SummaryPanel,
 } from "./scenarioPanels"
-import {
-  mapActions,
-  useGeocodingResetCounter,
-  useIsOutcomeVisualizationActive,
-} from "../store"
+import { mapActions, useIsOutcomeVisualizationActive } from "../store"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
 // Phase thresholds for useScrollPhase — stable module-level constants so
 // the hook's internal useEffect dep array never triggers unnecessary re-runs.
+// Phase 1: Panels enter one at a time (0.03–0.55), each sliding up with easing
 const STRATEGY_PHASE_THRESHOLDS = {
-  enter: [0.08, 0.14] as ProgressRange,
+  enter: [0.03, 0.14] as ProgressRange,
   hold: [0.14, 1.0] as ProgressRange,
 }
 const KEY_OPERATIONS_PHASE_THRESHOLDS = {
-  enter: [0.22, 0.28] as ProgressRange,
-  hold: [0.28, 1.0] as ProgressRange,
+  enter: [0.18, 0.29] as ProgressRange,
+  hold: [0.29, 1.0] as ProgressRange,
 }
 const KEY_OUTCOMES_PHASE_THRESHOLDS = {
-  enter: [0.64, 0.68] as ProgressRange,
-  hold: [0.68, 1.0] as ProgressRange,
+  enter: [0.33, 0.44] as ProgressRange,
+  hold: [0.44, 1.0] as ProgressRange,
 }
 const SUMMARY_PHASE_THRESHOLDS = {
-  enter: [0.7, 0.74] as ProgressRange,
-  hold: [0.74, 1.0] as ProgressRange,
+  enter: [0.48, 0.59] as ProgressRange,
+  hold: [0.59, 1.0] as ProgressRange,
 }
+
+// Ease-out cubic — fast start, gentle deceleration into final position
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
 const PANEL_POSITIONS = {
   paragraphTop: "15vh",
@@ -90,8 +87,6 @@ const RIGHT_PANEL_MAX_WIDTH = "540px"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
-  const map = useMap()
-  const geocodingResetCounter = useGeocodingResetCounter()
 
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
@@ -196,10 +191,17 @@ export default function MapOverlayPanels() {
   const [scenarioIntroPaddingReduced, setScenarioIntroPaddingReduced] =
     useState(false)
 
-  // Simplified progress listener: drives the padding transition only.
-  // Pointer-events reset is now handled by useScrollPhase above.
+  // Simplified progress listener: drives the padding transition and early
+  // camera shift. When the scroll section first enters the viewport bottom
+  // (progress > 0.01), we immediately set the active section so the map
+  // camera pans left in sync with the paragraph padding reduction — rather
+  // than waiting for Scrollama's step-enter (which fires at offset 0.5).
   useMotionValueEvent(scenarioIntroProgress, "change", (latest) => {
-    setScenarioIntroPaddingReduced(latest > 0.01)
+    const entering = latest > 0.01
+    setScenarioIntroPaddingReduced(entering)
+    if (entering) {
+      mapActions.setActiveSection("scenario-intro")
+    }
   })
 
   // Clear the active outcome visualization when the strategy panel goes invisible
@@ -215,38 +217,94 @@ export default function MapOverlayPanels() {
     }
   }, [strategyPhase])
 
-  // Tooltip opacity - fade in and out
-  // Sequence (no overlaps): strategy → key ops → view by climate → key outcomes
-  // Each tooltip: 0.03 fade in, 0.08 visible, 0.03 fade out (0.14 total), 0.04 gap between
+  // Phase 1: Panel entrance — each slides up from below the viewport
+  // and fades in with ease-out cubic (fast start → gentle settle).
+  // Only one panel animates at a time; each waits for the previous to land.
+  const SLIDE_DISTANCE = 500 // px — roughly half the viewport
+
+  const strategyOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.03, 0.14],
+    [0, 1],
+    { ease: easeOutCubic },
+  )
+  const strategyY = useTransform(
+    scenarioIntroProgress,
+    [0.03, 0.14],
+    [SLIDE_DISTANCE, 0],
+    { ease: easeOutCubic },
+  )
+
+  const keyOperationsOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.18, 0.29],
+    [0, 1],
+    { ease: easeOutCubic },
+  )
+  const keyOperationsY = useTransform(
+    scenarioIntroProgress,
+    [0.18, 0.29],
+    [SLIDE_DISTANCE, 0],
+    { ease: easeOutCubic },
+  )
+
+  const keyOutcomesOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.33, 0.44],
+    [0, 1],
+    { ease: easeOutCubic },
+  )
+  const keyOutcomesY = useTransform(
+    scenarioIntroProgress,
+    [0.33, 0.44],
+    [SLIDE_DISTANCE, 0],
+    { ease: easeOutCubic },
+  )
+
+  const summaryOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.48, 0.59],
+    [0, 1],
+    { ease: easeOutCubic },
+  )
+  const summaryY = useTransform(
+    scenarioIntroProgress,
+    [0.48, 0.59],
+    [SLIDE_DISTANCE, 0],
+    { ease: easeOutCubic },
+  )
+
+  // Phase 2: Tooltip opacity — sequenced AFTER all panels are in position.
+  // Panels finish entering at ~0.59, tooltips run 0.62–0.90.
+  // Each: 0.02 fade in, 0.03 hold, 0.02 fade out = 0.07 per tooltip,
+  // with ~0.005 gap between. Longer hold gives readers time to absorb.
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.14, 0.17, 0.25, 0.28],
+    [0.62, 0.64, 0.67, 0.69],
     [0, 1, 1, 0],
   )
 
   const keyOperationsTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.32, 0.35, 0.43, 0.46],
+    [0.695, 0.715, 0.745, 0.765],
     [0, 1, 1, 0],
   )
 
   const viewByClimateTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.5, 0.53, 0.61, 0.64],
+    [0.77, 0.79, 0.82, 0.84],
     [0, 1, 1, 0],
   )
 
   const keyOutcomesTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.68, 0.71, 0.79, 0.82],
+    [0.845, 0.865, 0.895, 0.915],
     [0, 1, 1, 0],
   )
 
-  // Summary tooltip: fades in after the panel is fully visible, fades out near
-  // the end of the section. Follows the same 0.03/0.07/0.03 rhythm as others.
   const summaryTooltipOpacity = useTransform(
     scenarioIntroProgress,
-    [0.74, 0.77, 0.81, 0.84],
+    [0.92, 0.935, 0.965, 0.98],
     [0, 1, 1, 0],
   )
 
@@ -326,111 +384,15 @@ export default function MapOverlayPanels() {
                   is a long, low valley that collects much of California&apos;s
                   water from surrounding mountains. This water is stored,
                   divided up, and used to irrigate the most productive farmland
-                  in the world, to supply drinking water to millions of people,
-                  and to protect sensitive species and ecosystems.
+                  in the world, supplies drinking water to millions of people,
+                  and protects sensitive species and health of ecosystems.
                 </Typography>
               </Box>
             </CallResponsePanel>
           </Box>
         </Step>
 
-        {/* ==================== SECTION 3: Basins ==================== */}
-        <Step data={"basins" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="basins-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                The Central Valley lies across three water{" "}
-                <Box component="span" sx={ACCENT_TEXT_SX}>
-                  basins
-                </Box>
-                .
-              </Typography>
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 4: Watersheds ==================== */}
-        <Step data={"watersheds" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="watersheds-call"
-              side="left"
-              variant="call"
-              isVisible={isFirstPanelVisible}
-            >
-              <Typography variant="body1">
-                Each basin collects the rain and snowmelt that flows down from
-                surrounding mountains into its network of streams, rivers,
-                reservoirs, and wetlands.
-              </Typography>
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 4.5: Arrows ==================== */}
-        <Step data={"arrows" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "30vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            {/* Hidden trigger section - arrows appear */}
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 5: Find My Basin ==================== */}
-        <Step data={"find-basin" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="find-basin-call"
-              side="right"
-              variant="response"
-              isVisible={isFirstPanelVisible}
-              disableHighlight
-            >
-              <GeocodingPanel
-                basinsData={
-                  centralValleyBasins as FeatureCollection<
-                    Polygon | MultiPolygon
-                  >
-                }
-                onMarkerChange={mapActions.setGeocoderMarker}
-                resetTrigger={geocodingResetCounter}
-              />
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 6: Rivers (sticky with progress) ==================== */}
+        {/* ==================== SECTION 3: Rivers (sticky with progress) ==================== */}
         <Step data={"rivers" as SectionId} progress>
           <Box
             sx={{
@@ -456,59 +418,30 @@ export default function MapOverlayPanels() {
                 isVisible={isFirstPanelVisible}
                 sx={{ minHeight: "auto", mb: 0 }}
               >
-                <Typography
-                  variant="body1"
-                  sx={{ mb: theme.space.component.lg }}
-                >
-                  These waters flow to the Valley floor, where the{" "}
+                <Typography variant="body1">
+                  The{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     Sacramento River
                   </Box>{" "}
-                  flows from the north and the{" "}
+                  flows through the Valley from the north and the{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     San Joaquin River
                   </Box>{" "}
-                  flows from the south. The rivers meet and mix in the low-lying{" "}
+                  flows from the south. These rivers meet in the{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     Delta
                   </Box>
-                  .
-                </Typography>
-                <Typography variant="body1">
-                  During{" "}
-                  <Box component="span" sx={ACCENT_TEXT_SX}>
-                    wet years
-                  </Box>{" "}
-                  water flows from the Tulare Basin into the San Joaquin River.
+                  , a unique ecosystem of low-lying islands, farms, and
+                  wetlands. Here river water mixes with salty tides from San
+                  Francisco Bay. Pumps and canals move water from the Delta to
+                  cities and farms to the south.
                 </Typography>
               </CallResponsePanel>
             </Box>
           </Box>
         </Step>
 
-        {/* ==================== SECTION 7: Delta Info ==================== */}
-        <Step data={"delta" as SectionId}>
-          <Box
-            sx={{
-              minHeight: "80vh",
-              display: "flex",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}
-          >
-            <CallResponsePanel
-              id="delta-call"
-              side="right"
-              variant="response"
-              isVisible={isFirstPanelVisible}
-              disableHighlight
-            >
-              <DeltaInfoPanel map={map} />
-            </CallResponsePanel>
-          </Box>
-        </Step>
-
-        {/* ==================== SECTION 8: Water Distribution ==================== */}
+        {/* ==================== SECTION 7: Water Distribution ==================== */}
         <Step data={"distribution" as SectionId}>
           <Box
             sx={{
@@ -557,7 +490,7 @@ export default function MapOverlayPanels() {
                   variant="body1"
                   sx={{ mb: theme.space.component.lg }}
                 >
-                  To do this water planning and accounting, the federal{" "}
+                  The federal{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     U.S. Bureau of Reclamation
                   </Box>{" "}
@@ -568,13 +501,16 @@ export default function MapOverlayPanels() {
                   use a computer model called{" "}
                   <Box component="span" sx={ACCENT_TEXT_SX}>
                     CalSim
-                  </Box>
-                  .
+                  </Box>{" "}
+                  to do this accounting.
                 </Typography>
                 <Typography variant="body1">
-                  CalSim simulates how much water flows into reservoirs based on
-                  climate, how much is stored or released, and where it gets
-                  delivered.
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    CalSim
+                  </Box>{" "}
+                  represents the water management system as a network and
+                  simulates how much water flows into reservoirs, how much is
+                  stored or released, and where it gets delivered.
                 </Typography>
               </Box>
             </CallResponsePanel>
@@ -585,7 +521,7 @@ export default function MapOverlayPanels() {
         <Step data={"coeqwal" as SectionId}>
           <Box
             sx={{
-              minHeight: "160vh",
+              minHeight: "120vh",
               display: "flex",
               alignItems: "center",
               pointerEvents: "none",
@@ -600,14 +536,21 @@ export default function MapOverlayPanels() {
               <Box
                 sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
               >
-                <Typography variant="body1">
-                  Until now, this tool has been inaccessible to many
-                  communities, creating barriers to participation in water
-                  decision-making. The COEQWAL project uses CalSim to explore
-                  and report a wide range of different water management
-                  strategies and climate futures. We are making these scenarios
-                  available to the public so that communities can envision
-                  alternative water futures for California.
+                <Typography
+                  variant="body1"
+                  sx={{ mb: theme.space.component.lg }}
+                >
+                  The COEQWAL project uses{" "}
+                  <Box component="span" sx={ACCENT_TEXT_SX}>
+                    CalSim
+                  </Box>{" "}
+                  to explore a wide range of different water management
+                  strategies and climate futures – and makes these scenarios
+                  available to the public.
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                  Let&apos;s look at a scenario that represents how we currently
+                  manage water.
                 </Typography>
               </Box>
             </CallResponsePanel>
@@ -640,7 +583,7 @@ export default function MapOverlayPanels() {
               ref={scenarioIntroRef}
               id="scenario-intro-wrapper"
               sx={{
-                minHeight: "550vh",
+                minHeight: "1100vh",
                 position: "relative",
                 pointerEvents: "none",
               }}
@@ -698,10 +641,23 @@ export default function MapOverlayPanels() {
                           },
                         }}
                       >
-                        Each water management scenario on this site can be read
-                        as having five explanatory elements. Let&apos;s look at
-                        the water management scenario for the way we currently
-                        manage Central Valley water.
+                        Every{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          scenario
+                        </Box>{" "}
+                        has three main elements: water management{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          strategy
+                        </Box>
+                        ,{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          hydroclimate
+                        </Box>{" "}
+                        and{" "}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
+                          outcomes
+                        </Box>
+                        .
                       </Typography>
                     </Box>
                   </CallResponsePanel>
@@ -734,10 +690,12 @@ export default function MapOverlayPanels() {
                   }}
                 >
                   {/* Strategy info panel */}
-                  <ScrollElement
-                    enter={[0.08, 0.14]}
-                    hold={[0.14, 1.0]}
-                    style={{ pointerEvents: "none" }}
+                  <motion.div
+                    style={{
+                      opacity: strategyOpacity,
+                      y: strategyY,
+                      pointerEvents: "none",
+                    }}
                   >
                     <Box
                       sx={{
@@ -788,38 +746,11 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  1. Strategy
+                                  Water management strategy
                                 </Typography>
-                                This describes the water management strategy
-                                being modeled.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Click{" "}
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      color: theme.palette.blue.medium,
-                                    }}
-                                  >
-                                    more
-                                  </Box>{" "}
-                                  to see the whole strategy description.
-                                  Underlined words appear in a glossary when
-                                  clicked.
-                                </Box>
+                                This panel describes the decisions, priorities,
+                                and policies that determine how water is
+                                allocated.
                               </>
                             }
                             position="left"
@@ -831,13 +762,15 @@ export default function MapOverlayPanels() {
                         </Box>
                       </Box>
                     </Box>
-                  </ScrollElement>
+                  </motion.div>
 
                   {/* Key operations panel */}
-                  <ScrollElement
-                    enter={[0.22, 0.28]}
-                    hold={[0.28, 1.0]}
-                    style={{ pointerEvents: "none" }}
+                  <motion.div
+                    style={{
+                      opacity: keyOperationsOpacity,
+                      y: keyOperationsY,
+                      pointerEvents: "none",
+                    }}
                   >
                     <Box
                       sx={{
@@ -888,7 +821,7 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  2. Key operations
+                                  Key operations
                                 </Typography>
                                 These icons represent the key operational
                                 decisions that define this water management
@@ -929,29 +862,12 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  3. View by climate
+                                  Hydroclimate
                                 </Typography>
-                                Choosing one of these climate icons will show
-                                you how the scenario allocates water under
-                                different potential future climates.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Hover over the icons to see the hydroclimates
-                                  they represent.
-                                </Box>
+                                This describes the temperature and patterns of
+                                rainfall and snow that determine how much water
+                                is available over time. Soon you will be able to
+                                see the scenario results for different climates.
                               </>
                             }
                             position="left"
@@ -963,13 +879,15 @@ export default function MapOverlayPanels() {
                         </Box>
                       </Box>
                     </Box>
-                  </ScrollElement>
+                  </motion.div>
 
                   {/* Key outcomes panel */}
-                  <ScrollElement
-                    enter={[0.64, 0.68]}
-                    hold={[0.68, 1.0]}
-                    style={{ pointerEvents: "none" }}
+                  <motion.div
+                    style={{
+                      opacity: keyOutcomesOpacity,
+                      y: keyOutcomesY,
+                      pointerEvents: "none",
+                    }}
                   >
                     <Box
                       sx={{
@@ -1020,13 +938,10 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  4. Key outcomes
+                                  Key outcomes
                                 </Typography>
-                                While the strategy description, key operations,
-                                and climate describe the key inputs into the
-                                CalSim model, the outcomes listed here summarize
-                                the outputs. They show how well the allocations
-                                meet needs in each category.
+                                Each scenario produces different outcomes for
+                                agriculture, communities, and the environment.
                                 <Box
                                   component="span"
                                   sx={{
@@ -1077,13 +992,15 @@ export default function MapOverlayPanels() {
                         </Box>
                       </Box>
                     </Box>
-                  </ScrollElement>
+                  </motion.div>
 
                   {/* Summary panel */}
-                  <ScrollElement
-                    enter={[0.7, 0.74]}
-                    hold={[0.74, 1.0]}
-                    style={{ pointerEvents: "none" }}
+                  <motion.div
+                    style={{
+                      opacity: summaryOpacity,
+                      y: summaryY,
+                      pointerEvents: "none",
+                    }}
                   >
                     <Box
                       sx={{
@@ -1129,11 +1046,10 @@ export default function MapOverlayPanels() {
                                   variant="tooltipHeader"
                                   sx={{ mb: theme.space.component.xs }}
                                 >
-                                  5. Scenario summary
+                                  Scenario summary
                                 </Typography>
-                                This panel synthesizes everything above into a
-                                summary of the scenario&apos;s priorities and
-                                trade-offs.
+                                Finally, a summary has been created for each
+                                scenario.
                                 <Typography
                                   variant="tooltipHeader"
                                   sx={{
@@ -1165,7 +1081,7 @@ export default function MapOverlayPanels() {
                         </Box>
                       </Box>
                     </Box>
-                  </ScrollElement>
+                  </motion.div>
                 </Box>
               </Box>
 

@@ -1,10 +1,12 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
 import { BaseHeader } from "@repo/ui"
 import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
-import { WATER_THEMES } from "@repo/data/coeqwal"
+import { usePanelRoute } from "../hooks/usePanelRoute"
+import { WATER_THEMES } from "../content/themes"
 
 /**
  * Main application header
@@ -17,9 +19,25 @@ import { WATER_THEMES } from "@repo/data/coeqwal"
 export function Header() {
   const router = useRouter()
   const theme = useTheme()
-  const { isPastHero } = useTabs()
+
+  // -- Context for the theme panels
+  const { activeThemeKey, openThemePanel } = usePanelRoute()
+
+  const { isPastHero: rawIsPastHero } = useTabs()
+
+  // Defer isPastHero until after hydration so server and client render
+  // the same initial markup (variant="light"). Once mounted, the real
+  // scroll-based value takes over.
+  const [hasMounted, setHasMounted] = useState(false)
+  useEffect(() => setHasMounted(true), [])
+  const isPastHero = hasMounted && rawIsPastHero
 
   const handleLogoClick = () => {
+    // Guard: this handler references browser-only APIs.
+    // It will never be called on the server, but the function body
+    // is evaluated during prerendering, so we still need the guard.
+    if (typeof window === "undefined") return
+
     const start = window.scrollY
     if (start === 0) return
 
@@ -45,11 +63,17 @@ export function Header() {
     requestAnimationFrame(animateScroll)
   }
 
-  const waterThemesOptions = WATER_THEMES.map((wt) => ({
-    key: wt.id,
-    label: wt.label.replace(/\n/g, " "),
-    onClick: () => {},
-  }))
+  const waterThemesOptions = useMemo(
+    () =>
+      WATER_THEMES.map((wt) => ({
+        key: wt.id,
+        label: wt.label.replace(/\n/g, " "),
+        onClick: () => openThemePanel(wt.id),
+        active: activeThemeKey === wt.id,
+        disabled: wt.id !== "delta",
+      })),
+    [activeThemeKey, openThemePanel],
+  )
 
   return (
     <BaseHeader
@@ -57,9 +81,7 @@ export function Header() {
       onAboutClick={() => router.push("/about")}
       onGetDataClick={() => router.push("/data")}
       waterThemesOptions={waterThemesOptions}
-      backgroundColor={
-        isPastHero ? theme.palette.common.white : "transparent"
-      }
+      backgroundColor={isPastHero ? theme.palette.common.white : "transparent"}
       textColor={isPastHero ? "#555555" : theme.palette.common.white}
       borderBottom={
         isPastHero

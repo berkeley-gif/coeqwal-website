@@ -11,7 +11,7 @@
  * controls and the parallel coordinates visualization.
  */
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -24,11 +24,16 @@ import {
 import {
   VerticalParallelLinePlotPeak,
   type VerticalParallelLineData,
+  type AxisLayout,
 } from "@repo/viz"
+import { InfoIconButton, InfoTooltip } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
+import { formatOutcomeLabel } from "../../scenarios/components/shared"
+import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
+import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
 export default function ComparisonPanel() {
   const theme = useTheme()
@@ -43,26 +48,97 @@ export default function ComparisonPanel() {
     setPinnedScenarioId,
     hydroclimatePeriod,
     setHydroclimatePeriod,
+    relativeToBaseline,
+    setRelativeToBaseline,
+    highlightBaseline,
+    setHighlightBaseline,
+    overlayTiers,
+    setOverlayTiers: _setOverlayTiers,
+    defineOutcome,
+    setDefineOutcome,
+    selectedScenarios,
   } = useScenarioExplorerStore()
 
-  // Chart toggle states (local UI state — not shared across views)
-  const [overlayTiers, setOverlayTiers] = useState(false)
-  const [highlightBaseline, setHighlightBaseline] = useState(false)
-  const [relativeToBaseline, setRelativeToBaseline] = useState(true)
-  const [defineOutcome, setDefineOutcome] = useState(false)
+  const chosenIds = useMemo(
+    () => new Set(selectedScenarios),
+    [selectedScenarios],
+  )
 
-  const [hoveredScenario, setHoveredScenario] =
+  // ── Hover state ─────────────────────────────────────────────────────────
+  // Chart hover is handled internally by the D3 layer (hoveredScenarioRef +
+  // commitHoverIn / scheduleHoverClear). The `onLineHover` callback only
+  // propagates the hovered scenario to the sidebar for row highlighting.
+  //
+  // Sidebar hover (row or theme badge) feeds into `highlightedIds`, which
+  // the chart uses for external-source highlighting.
+  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
+
+  const setHoveredScenario = useCallback(
+    (scenario: VerticalParallelLineData | null) => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current)
+        hoverTimerRef.current = null
+      }
+      if (scenario) {
+        setHoveredScenarioRaw(scenario)
+      } else {
+        hoverTimerRef.current = setTimeout(
+          () => setHoveredScenarioRaw(null),
+          200,
+        )
+      }
+    },
+    [],
+  )
+
+  const handleSidebarHover = useCallback((ids: string[] | null) => {
+    setHighlightedIds(ids ? new Set(ids) : null)
+  }, [])
+
+  // Axis layout positions reported by the chart for HTML label positioning
+  const [axisLayout, setAxisLayout] = useState<AxisLayout[]>([])
+
+  // Tooltip state for outcome info buttons
+  const {
+    openTooltip: activeInfoTooltip,
+    anchor: tooltipAnchor,
+    handleToggleWithAnchor,
+    handleClose: handleTooltipClose,
+    forceClose: handleTooltipForceClose,
+  } = useTierTooltipState()
+
+  // Prevent browser text-selection anywhere inside the chart area.
+  // Native mousedown.preventDefault is the standards-compliant way to do this
+  // and is fully compatible with D3 drag (see d3/d3-drag#9).
+  const chartWrapperRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = chartWrapperRef.current
+    if (!el) return
+    const prevent = (e: MouseEvent) => e.preventDefault()
+    el.addEventListener("mousedown", prevent)
+    return () => el.removeEventListener("mousedown", prevent)
+  }, [])
 
   const {
     data: comparisonData,
     axes,
+    outcomeCodes,
     lineColors,
     scenarios,
     baselineScenario,
     isLoading,
     hasData,
   } = useComparisonData()
+
+  // Map display names → outcome codes for tooltip lookups
+  const axisCodeMap = useMemo(
+    () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
+    [axes, outcomeCodes],
+  )
 
   // Build scenarioId, gives color map for the sidebar's chart legend swatches
   const scenarioColors = useMemo(
@@ -173,6 +249,7 @@ export default function ComparisonPanel() {
         }
         sx={{ mr: 1.5 }}
       />
+      {/* Temporarily disabled overlay tiers
       <FormControlLabel
         control={
           <Checkbox
@@ -188,16 +265,144 @@ export default function ComparisonPanel() {
           </Typography>
         }
       />
+      */}
     </Box>
   )
 
   const chartElement = (
-    <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+    <Box
+      ref={chartWrapperRef}
+      sx={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+      }}
+    >
+      {/* ── HTML axis labels above chart (desktop) ──────────────────── */}
+      {isDesktop && axisLayout.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: `${axisLayout[0]?.y ?? 0}px`,
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        >
+          {axisLayout.map((layout) => {
+            const outcomeCode = axisCodeMap.get(layout.axis)
+            return (
+              <Box
+                key={layout.axis}
+                sx={{
+                  position: "absolute",
+                  left: `${layout.x}px`,
+                  bottom: 16,
+                  transform: "translateX(-50%)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                <Typography
+                  variant="outcomeLabel"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    textAlign: "center",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {formatOutcomeLabel(layout.axis)}
+                </Typography>
+                {outcomeCode && (
+                  <Box sx={{ pointerEvents: "auto" }}>
+                    <InfoIconButton
+                      isActive={activeInfoTooltip === outcomeCode}
+                      onClick={(e) =>
+                        handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                      }
+                      title={`Details for ${layout.axis}`}
+                    />
+                  </Box>
+                )}
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* ── HTML axis labels left of chart (mobile) ─────────────────── */}
+      {!isDesktop && axisLayout.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            bottom: 0,
+            width: `${axisLayout[0]?.x ?? 0}px`,
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        >
+          {axisLayout.map((layout) => {
+            const outcomeCode = axisCodeMap.get(layout.axis)
+            return (
+              <Box
+                key={layout.axis}
+                sx={{
+                  position: "absolute",
+                  top: `${layout.y}px`,
+                  right: 8,
+                  transform: "translateY(-50%)",
+                  display: "flex",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: "2px",
+                }}
+              >
+                {outcomeCode && (
+                  <Box sx={{ pointerEvents: "auto" }}>
+                    <InfoIconButton
+                      isActive={activeInfoTooltip === outcomeCode}
+                      onClick={(e) =>
+                        handleToggleWithAnchor(outcomeCode, e.currentTarget)
+                      }
+                      title={`Details for ${layout.axis}`}
+                    />
+                  </Box>
+                )}
+                <Typography
+                  variant="outcomeLabel"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    textAlign: "right",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {formatOutcomeLabel(layout.axis)}
+                </Typography>
+              </Box>
+            )
+          })}
+        </Box>
+      )}
+
+      {/* ── The SVG chart ───────────────────────────────────────────── */}
       <VerticalParallelLinePlotPeak
         data={chartData}
         axes={axes}
         orientation={isDesktop ? "horizontal" : "vertical"}
         responsive={true}
+        hideAxisLabels={true}
+        onAxesLayout={setAxisLayout}
+        margin={
+          isDesktop ? { top: 80, right: 20, bottom: 20, left: 20 } : undefined
+        }
         showBaseline={highlightBaseline}
         baselineData={baselineDataForChart}
         overlayTiers={overlayTiers}
@@ -210,30 +415,10 @@ export default function ComparisonPanel() {
         lineColors={lineColors}
         onLineHover={setHoveredScenario}
         onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+        chosenIds={chosenIds}
+        highlightedIds={highlightedIds}
+        baselineId="s0020"
       />
-      {hoveredScenario && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: -12,
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 1,
-            boxShadow: theme.shadows[2],
-            pointerEvents: "none",
-            zIndex: 10,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Typography variant="caption" sx={{ fontWeight: 400 }}>
-            {hoveredScenario.name}
-          </Typography>
-        </Box>
-      )}
     </Box>
   )
 
@@ -286,7 +471,11 @@ export default function ComparisonPanel() {
       }}
     >
       {/* ── Left: shared scenario selection sidebar ─────────────────────────── */}
-      <ScenarioSelectionSidebar scenarioColors={scenarioColors} />
+      <ScenarioSelectionSidebar
+        scenarioColors={scenarioColors}
+        hoveredScenarioId={hoveredScenario?.id ?? null}
+        onRowHover={handleSidebarHover}
+      />
 
       {/* ── Right: hydroclimate chooser + chart controls + chart ─────────────── */}
       <Box
@@ -297,10 +486,12 @@ export default function ComparisonPanel() {
           overflow: "hidden",
         }}
       >
-        {/* Hydroclimate chooser */}
+        {/* Hydroclimate chooser + methodology link */}
         <Box
           sx={{
             flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
             px: theme.space.component.lg,
             pt: theme.space.component.sm,
             pb: theme.space.component.lg,
@@ -314,6 +505,69 @@ export default function ComparisonPanel() {
             value={hydroclimatePeriod}
             onChange={setHydroclimatePeriod}
           />
+          <InfoTooltip
+            placement="bottom"
+            description={
+              <Box
+                sx={{ maxWidth: 340, fontSize: "0.82rem", lineHeight: 1.55 }}
+              >
+                <p style={{ margin: "0 0 8px" }}>
+                  Each line represents a scenario scored across nine outcome
+                  categories. Each category contains indicators that experts
+                  have classified into four tiers (Tier 1 = best, Tier 4 =
+                  worst).
+                </p>
+                <p style={{ margin: "0 0 8px" }}>
+                  The position on each axis is a normalized weighted average of
+                  those tier assignments. The weighted score is:
+                </p>
+                <p
+                  style={{
+                    margin: "0 0 4px",
+                    fontFamily: "monospace",
+                    fontSize: "0.78rem",
+                  }}
+                >
+                  W = (1p₁ + 2p₂ + 3p₃ + 4p₄) / (p₁ + p₂ + p₃ + p₄)
+                </p>
+                <p style={{ margin: "0 0 8px", fontSize: "0.78rem" }}>
+                  where p<sub>i</sub> is the proportion of indicators in Tier i.
+                </p>
+                <p style={{ margin: "0 0 4px" }}>
+                  This is then normalized to a 0-1 scale:
+                </p>
+                <p
+                  style={{
+                    margin: "0 0 8px",
+                    fontFamily: "monospace",
+                    fontSize: "0.78rem",
+                  }}
+                >
+                  S = (4 - W) / 3
+                </p>
+                <p style={{ margin: 0 }}>
+                  S = 1 means all indicators are in Tier 1. S = 0 means all
+                  indicators are in Tier 4. Higher is better.
+                </p>
+              </Box>
+            }
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                ml: "auto",
+                flexShrink: 0,
+                cursor: "pointer",
+                color: theme.palette.grey[500],
+                textDecoration: "underline",
+                textDecorationStyle: "dotted",
+                textUnderlineOffset: 3,
+                "&:hover": { color: theme.palette.grey[800] },
+              }}
+            >
+              Methodology
+            </Typography>
+          </InfoTooltip>
         </Box>
 
         {/* Chart toggle controls */}
@@ -348,6 +602,15 @@ export default function ComparisonPanel() {
           </Box>
         </Box>
       </Box>
+
+      {/* ── Outcome info tooltip portal ─────────────────────────────── */}
+      <TierTooltipPortal
+        outcomeCode={activeInfoTooltip}
+        anchorEl={tooltipAnchor}
+        onClose={handleTooltipClose}
+        onForceClose={handleTooltipForceClose}
+        zIndex={theme.zIndex.tooltipAboveModal}
+      />
     </Box>
   )
 }

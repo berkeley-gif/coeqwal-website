@@ -52,12 +52,12 @@ export interface StrategyGridHeaderProps {
   sortEnabled: boolean
   /** Whether to show only chosen scenarios */
   showOnlyChosen?: boolean
-  /** Whether to show strategy definitions */
-  showDefinitions?: boolean
+  /** Whether to show alternative baseline scenarios */
+  showAlternativeBaselines?: boolean
   /** Called when showOnlyChosen changes */
   onShowOnlyChosenChange?: (value: boolean) => void
-  /** Called when showDefinitions changes */
-  onShowDefinitionsChange?: (value: boolean) => void
+  /** Called when showAlternativeBaselines changes */
+  onShowAlternativeBaselinesChange?: (value: boolean) => void
   /** Toggle tooltip with anchor */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
@@ -82,19 +82,19 @@ export function StrategyGridHeader({
   sortDirection,
   sortEnabled,
   showOnlyChosen = false,
-  showDefinitions = false,
+  showAlternativeBaselines = false,
   onShowOnlyChosenChange,
-  onShowDefinitionsChange,
+  onShowAlternativeBaselinesChange,
   onTooltipToggle,
   onSortChange,
 }: StrategyGridHeaderProps) {
   const controls =
-    onShowOnlyChosenChange && onShowDefinitionsChange ? (
+    onShowOnlyChosenChange && onShowAlternativeBaselinesChange ? (
       <GridControls
         showOnlyChosen={showOnlyChosen}
-        showDefinitions={showDefinitions}
+        showAlternativeBaselines={showAlternativeBaselines}
         onShowOnlyChosenChange={onShowOnlyChosenChange}
-        onShowDefinitionsChange={onShowDefinitionsChange}
+        onShowAlternativeBaselinesChange={onShowAlternativeBaselinesChange}
       />
     ) : null
 

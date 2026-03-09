@@ -19,6 +19,7 @@ import type { SelectChangeEvent } from "@mui/material/Select"
 export interface CompactSelectOption<T extends string = string> {
   value: T
   label: string
+  disabled?: boolean
 }
 
 export interface CompactSelectGroup<T extends string = string> {
@@ -91,7 +92,11 @@ export function CompactSelect<T extends string = string>({
           {group.label}
         </ListSubheader>,
         ...group.options.map((option) => (
-          <MenuItem key={option.value} value={option.value}>
+          <MenuItem
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {option.label}
           </MenuItem>
         )),
@@ -99,7 +104,11 @@ export function CompactSelect<T extends string = string>({
     }
 
     return options.map((option) => (
-      <MenuItem key={option.value} value={option.value}>
+      <MenuItem
+        key={option.value}
+        value={option.value}
+        disabled={option.disabled}
+      >
         {option.label}
       </MenuItem>
     ))

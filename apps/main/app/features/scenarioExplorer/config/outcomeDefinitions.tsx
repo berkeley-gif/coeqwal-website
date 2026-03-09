@@ -13,6 +13,7 @@ import {
   SetMealIcon,
   ScienceIcon,
   WaterDropIcon,
+  WavesIcon,
   type Theme,
 } from "@repo/ui/mui"
 
@@ -62,6 +63,7 @@ export const getOutcomeCategoryColor = (
   const colorMap: Record<string, string> = {
     "community-water": theme.palette.outcomes.communityWater,
     "agricultural-water": theme.palette.outcomes.agriculturalWater,
+    "env-flow-statistics": theme.palette.outcomes.environmentalWater,
     "environmental-water": theme.palette.outcomes.environmentalWater,
     "delta-salinity": theme.palette.outcomes.deltaSalinity,
     "reservoir-storage": theme.palette.outcomes.reservoirStorage,
@@ -83,8 +85,13 @@ export const outcomeCategories = [
     icon: <AgricultureIcon fontSize="small" />,
   },
   {
+    id: "env-flow-statistics",
+    name: "Environmental river flows",
+    icon: <WavesIcon fontSize="small" />,
+  },
+  {
     id: "environmental-water",
-    name: "Environmental water",
+    name: "Environmental water — refuges",
     icon: <SetMealIcon fontSize="small" />,
   },
   {
@@ -104,7 +111,7 @@ export const outcomeCategories = [
   },
   {
     id: "salmon-abundance",
-    name: "Salmon abundance",
+    name: "Winter-run salmon",
     icon: <SetMealIcon fontSize="small" />,
   },
 ]
@@ -572,15 +579,15 @@ export const outcomeMetrics: OutcomeMetric[] = [
     showOnMap: true,
   },
   {
-    id: "salinity-compliance-em-jp",
-    name: "Salinity at compliance points (Emmaton & Jersey Point)",
+    id: "salinity-compliance",
+    name: "Salinity at compliance points (Emmaton, Jersey Point, Rock Slough, Collinsville)",
     category: "delta-salinity",
     unit: "salinity",
     temporal: ["monthly"],
     aggregations: [],
     spatialType: "delta-node",
-    spatialLocation: "EM, JP",
-    description: "Salinity at Emmaton and Jersey Point",
+    spatialLocation: "EM, JP, RS, CO",
+    description: "Electrical conductivity at four Delta compliance stations",
     isTier: false,
     showOnMap: true,
   },
@@ -594,6 +601,19 @@ export const outcomeMetrics: OutcomeMetric[] = [
     spatialType: "delta-node",
     spatialLocation: "Banks, Jones",
     description: "Salinity at Banks and Jones pumping plants",
+    isTier: false,
+    showOnMap: true,
+  },
+  {
+    id: "delta-outflow",
+    name: "Delta outflow volumes",
+    category: "delta-salinity",
+    unit: "acre-feet",
+    temporal: ["monthly", "annual"],
+    aggregations: ["annual-average", "annual-cv"],
+    spatialType: "delta-node",
+    description:
+      "Net Delta outflow — total flow leaving the Delta toward San Francisco Bay",
     isTier: false,
     showOnMap: true,
   },

@@ -7,21 +7,21 @@
  * wetland demand units in the Sacramento and San Joaquin hydrologic regions.
  *
  * Charts:
- *   - Monthly delivery percentile bands (PercentileMatrix, TAF)
- *   - Monthly shortage percentile bands (PercentileMatrix, TAF)
+ *   - Monthly delivery OR shortage percentile bands (toggled by dropdown)
  *   - Period-of-record reliability display (reliability_pct_95)
  *
  * Layout follows the same CSS Grid patterns as AgSection and CwsSection.
  */
 
 import React, { useState, useMemo } from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { CompactSelect } from "@repo/ui"
 import { PercentileMatrix } from "@repo/viz"
 import type {
   ReservoirData,
   MonthlyPercentiles,
   VolumeScaleMode,
+  CellStatsMap,
 } from "@repo/viz"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
@@ -35,19 +35,31 @@ import {
 import type {
   RefugeDeliveryMonthlyStats,
   RefugeShortageMonthlyStats,
-  RefugePeriodSummary,
 } from "@repo/data/coeqwal"
 
 // ============================================================================
 // Types
 // ============================================================================
 
-type MatrixDataType = Record<string, Record<string, MonthlyPercentiles | undefined>>
+type MatrixDataType = Record<
+  string,
+  Record<string, MonthlyPercentiles | undefined>
+>
 type RegionFilter = "all" | "SAC" | "SJR" | "TULARE"
+type ChartMode = "delivery" | "shortage"
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const CHART_MODE_OPTIONS = [
+  { value: "delivery" as const, label: "Delivery" },
+  { value: "shortage" as const, label: "Shortage" },
+]
 
 const SCALE_OPTIONS = [
-  { value: "absolute" as const, label: "Absolute scale" },
   { value: "relative" as const, label: "Relative scale" },
+  { value: "absolute" as const, label: "Absolute scale" },
 ]
 
 const REGION_OPTIONS = [
@@ -57,9 +69,152 @@ const REGION_OPTIONS = [
   { value: "TULARE" as const, label: "Tulare" },
 ]
 
+/** Delivery band colors — blue, matching COLORS in PercentileMatrix */
+const DELIVERY_BAND_COLORS = {
+  range: "#d9eafb", // q0-q100 (lightest)
+  outer: "#c5dbf3", // q10-q90
+  inner: "#a2bee1", // q30-q70
+  median: "#2c5aa0", // q50 (darkest)
+}
+
+/** Shortage band colors — orange/amber, matching COLORS_SHORTAGE in PercentileMatrix */
+const SHORTAGE_BAND_COLORS = {
+  range: "#fef3e2",
+  outer: "#fdd49e",
+  inner: "#fdae6b",
+  median: "#e6550d",
+}
+
+// ============================================================================
+// Legend Components
+// ============================================================================
+
+function DeliveryBandsLegend() {
+  return (
+    <>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Min–max range
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: DELIVERY_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: DELIVERY_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
+    </>
+  )
+}
+
+function ShortageBandsLegend() {
+  return (
+    <>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.range,
+          borderRadius: "2px",
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Min–max range
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.outer,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        10–90th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 14,
+          backgroundColor: SHORTAGE_BAND_COLORS.inner,
+          borderRadius: "2px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        30–70th percentile
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          width: 14,
+          height: 3,
+          backgroundColor: SHORTAGE_BAND_COLORS.median,
+          borderRadius: "1px",
+          ml: 0.75,
+        }}
+      />
+      <Box component="span" sx={{ fontSize: "0.875rem", color: "grey.500" }}>
+        Median
+      </Box>
+    </>
+  )
+}
+
 // ============================================================================
 // Helpers
 // ============================================================================
+
+/** Map cs3_type code to a human-readable label */
+function cs3TypeLabel(cs3_type: string): string {
+  if (cs3_type === "PR") return "Project"
+  if (cs3_type === "NR") return "Non-project"
+  return cs3_type
+}
 
 function deliveryRowsToMonthlyPercentiles(
   rows: RefugeDeliveryMonthlyStats[],
@@ -100,13 +255,9 @@ function shortageRowsToMonthlyPercentiles(
 }
 
 // ============================================================================
-// Multi-scenario hooks
+// Multi-scenario data hooks
 // ============================================================================
 
-/**
- * Fetch monthly delivery data for all selected scenarios and build a
- * duId → scenarioId → MonthlyPercentiles matrix.
- */
 function useMultiScenarioRefugeDelivery(scenarios: string[]) {
   const results = scenarios.map((scenarioId) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -137,10 +288,6 @@ function useMultiScenarioRefugeDelivery(scenarios: string[]) {
   return { matrixData, isLoading, loadingScenarios }
 }
 
-/**
- * Fetch monthly shortage data for all selected scenarios and build a
- * duId → scenarioId → MonthlyPercentiles matrix.
- */
 function useMultiScenarioRefugeShortage(scenarios: string[]) {
   const results = scenarios.map((scenarioId) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -171,85 +318,38 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
   return { matrixData, isLoading, loadingScenarios }
 }
 
-// ============================================================================
-// Reliability mini-display
-// ============================================================================
+/**
+ * Fetch period-of-record summaries for all selected scenarios.
+ * Builds a CellStatsMap (duId → scenarioId → {annualAvgTaf, reliabilityPct})
+ * so PercentileMatrix can render per-cell stats below each chart.
+ */
+function useMultiScenarioRefugePeriod(scenarios: string[]) {
+  const results = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useRefugeDusPeriod(scenarioId)
+  })
 
-interface ReliabilityDisplayProps {
-  summaries: RefugePeriodSummary[]
-  duIds: string[]
-  duLabels: Record<string, string>
-}
+  const isLoading = results.some((r) => r.isLoading)
+  const cellStats: CellStatsMap = {}
 
-function ReliabilityDisplay({
-  summaries,
-  duIds,
-  duLabels,
-}: ReliabilityDisplayProps) {
-  const theme = useTheme()
-  const byDu = new Map(summaries.map((s) => [s.du_id, s]))
+  results.forEach((result, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !result.summaries.length) return
+    for (const summary of result.summaries) {
+      if (!cellStats[summary.du_id]) cellStats[summary.du_id] = {}
+      const duStats = cellStats[summary.du_id]!
+      duStats[scenarioId] = {
+        annualAvgTaf: summary.annual_delivery_avg_taf ?? undefined,
+        // Convert shortage_pct_95 → fulfillment (higher = better, matches AG/CWS convention)
+        reliabilityPct:
+          summary.reliability_pct_95 != null
+            ? 100 - summary.reliability_pct_95
+            : undefined,
+      }
+    }
+  })
 
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: theme.space.component.sm,
-      }}
-    >
-      {duIds.map((duId) => {
-        const summary = byDu.get(duId)
-        const reliability = summary?.reliability_pct_95 ?? null
-        const isReliable = reliability !== null && reliability <= 5
-
-        return (
-          <Box
-            key={duId}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              minWidth: 80,
-              p: theme.space.component.sm,
-              borderRadius: 1,
-              border: `1px solid ${theme.palette.divider}`,
-              backgroundColor: theme.palette.background.paper,
-            }}
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: "0.65rem",
-                color: theme.palette.text.secondary,
-                textAlign: "center",
-                lineHeight: 1.2,
-                mb: 0.5,
-              }}
-            >
-              {duLabels[duId] ?? duId}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 600,
-                fontSize: "0.9rem",
-                color:
-                  reliability === null
-                    ? theme.palette.text.disabled
-                    : isReliable
-                      ? theme.palette.success.main
-                      : reliability <= 20
-                        ? theme.palette.warning.main
-                        : theme.palette.error.main,
-              }}
-            >
-              {reliability === null ? "—" : `${reliability.toFixed(1)}%`}
-            </Typography>
-          </Box>
-        )
-      })}
-    </Box>
-  )
+  return { cellStats, isLoading }
 }
 
 // ============================================================================
@@ -262,11 +362,17 @@ interface SectionHeaderProps {
   description?: React.ReactNode
 }
 
-function SectionHeader({ title, titleAdornment, description }: SectionHeaderProps) {
+function SectionHeader({
+  title,
+  titleAdornment,
+  description,
+}: SectionHeaderProps) {
   const theme = useTheme()
   return (
     <Box sx={{ display: "flex", flexDirection: "column" }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: theme.space.gap.sm }}
+      >
         <Typography
           variant="overline"
           sx={{
@@ -309,8 +415,11 @@ export default function RefugeSection({
 }: RefugeSectionProps) {
   const theme = useTheme()
 
-  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">("absolute")
+  const [scaleMode, setScaleMode] = useState<"absolute" | "relative">(
+    "absolute",
+  )
   const [regionFilter, setRegionFilter] = useState<RegionFilter>("all")
+  const [chartMode, setChartMode] = useState<ChartMode>("delivery")
 
   const { demandUnits, isLoading: isLoadingDUs } = useRefugeDemandUnitsList()
 
@@ -324,32 +433,23 @@ export default function RefugeSection({
 
   const filteredDuIds = filteredDUs.map((du) => du.du_id)
 
-  // Build ReservoirData[] for PercentileMatrix (using du_id as reservoirId)
+  // Build ReservoirData[] for PercentileMatrix.
+  // Use labelSubtitle for the du_id + region identifier line,
+  // and labelAttributes for managed_by / cs3_type — styled like reservoir chart labels.
   const reservoirData: ReservoirData[] = useMemo(
     () =>
       filteredDUs.map((du) => ({
         reservoirId: du.du_id,
-        reservoirName: du.refuge_or_wildlife_area
-          ? `${du.du_id} — ${du.refuge_or_wildlife_area}`
-          : du.du_id,
+        reservoirName: du.refuge_or_wildlife_area ?? du.du_id,
         capacityTaf: 0,
         deadPoolTaf: 0,
+        labelSubtitle: `${du.du_id} · ${du.hydrologic_region}`,
+        labelAttributes: [
+          ...(du.managed_by ? [{ key: "AGENCY", value: du.managed_by }] : []),
+          { key: "TYPE", value: cs3TypeLabel(du.cs3_type) },
+        ],
       })),
     [filteredDUs],
-  )
-
-  // Labels for reliability badge display
-  const duLabels = useMemo(
-    () =>
-      Object.fromEntries(
-        demandUnits.map((du) => [
-          du.du_id,
-          du.refuge_or_wildlife_area
-            ? `${du.du_id}\n${du.refuge_or_wildlife_area.substring(0, 18)}`
-            : du.du_id,
-        ]),
-      ),
-    [demandUnits],
   )
 
   const {
@@ -364,15 +464,19 @@ export default function RefugeSection({
     loadingScenarios: shortageLoadingScenarios,
   } = useMultiScenarioRefugeShortage(scenarios)
 
-  // Reliability uses the first selected scenario
-  const primaryScenario = scenarios[0] ?? null
-  const { summaries: periodSummaries, isLoading: isLoadingPeriod } =
-    useRefugeDusPeriod(primaryScenario)
+  const { cellStats } = useMultiScenarioRefugePeriod(scenarios)
 
-  const hasDeliveryData =
-    !isLoadingDelivery && Object.keys(deliveryMatrix).length > 0
-  const hasShortageData =
-    !isLoadingShortage && Object.keys(shortageMatrix).length > 0
+  const primaryScenario = scenarios[0] ?? null
+
+  const isActiveLoading =
+    chartMode === "delivery" ? isLoadingDelivery : isLoadingShortage
+  const activeMatrix =
+    chartMode === "delivery" ? deliveryMatrix : shortageMatrix
+  const activeLoadingScenarios =
+    chartMode === "delivery"
+      ? deliveryLoadingScenarios
+      : shortageLoadingScenarios
+  const hasActiveData = !isActiveLoading && Object.keys(activeMatrix).length > 0
 
   if (!primaryScenario) {
     return (
@@ -418,6 +522,12 @@ export default function RefugeSection({
         }}
       >
         <CompactSelect
+          aria-label="Chart content"
+          value={chartMode}
+          options={CHART_MODE_OPTIONS}
+          onChange={(v) => setChartMode(v as ChartMode)}
+        />
+        <CompactSelect
           aria-label="Region filter"
           value={regionFilter}
           options={REGION_OPTIONS}
@@ -431,107 +541,157 @@ export default function RefugeSection({
         />
       </Box>
 
-      {isLoadingDUs ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress size={32} />
-        </Box>
-      ) : (
+      {isLoadingDUs ? null : (
         <>
-          {/* ── Monthly Delivery ─────────────────────────────────────── */}
-          <Box sx={{ mb: theme.space.section.sm }}>
+          {/* ── Monthly Chart (delivery OR shortage) ─────────────────── */}
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: theme.borderRadius.md,
+              border: theme.border.light,
+              p: theme.space.component.lg,
+              mb: theme.space.component.lg,
+            }}
+          >
             <SectionHeader
-              title="Monthly surface water delivery"
-              description="Percentile distribution of monthly deliveries across all simulated years (TAF)"
-            />
-            <Box sx={{ mt: theme.space.component.lg }}>
-              {isLoadingDelivery && !hasDeliveryData ? (
-                <PercentileMatrixSkeleton
-                  scenarios={scenarios}
-                  rowCount={Math.min(filteredDuIds.length, 4)}
-                />
-              ) : !hasDeliveryData ? (
-                <Typography color="text.secondary" variant="body2">
-                  No delivery data available for this scenario and region.
-                </Typography>
-              ) : (
-                <PercentileMatrix
-                  reservoirs={reservoirData}
-                  scenarios={scenarios}
-                  scenarioNames={scenarioNames}
-                  data={deliveryMatrix}
-                  responsive
-                  labelColumnWidth={140}
-                  displayMode="volume"
-                  volumeScaleMode={scaleMode as VolumeScaleMode}
-                  colorScheme="delivery"
-                  loadingScenarios={deliveryLoadingScenarios}
-                />
-              )}
-            </Box>
-          </Box>
-
-          {/* ── Monthly Shortage ─────────────────────────────────────── */}
-          <Box sx={{ mb: theme.space.section.sm }}>
-            <SectionHeader
-              title="Monthly delivery shortage"
-              description="Shortage = max(demand − delivery, 0). Distribution across all simulated years (TAF)"
-            />
-            <Box sx={{ mt: theme.space.component.lg }}>
-              {isLoadingShortage && !hasShortageData ? (
-                <PercentileMatrixSkeleton
-                  scenarios={scenarios}
-                  rowCount={Math.min(filteredDuIds.length, 4)}
-                />
-              ) : !hasShortageData ? (
-                <Typography color="text.secondary" variant="body2">
-                  No shortage data available for this scenario and region.
-                </Typography>
-              ) : (
-                <PercentileMatrix
-                  reservoirs={reservoirData}
-                  scenarios={scenarios}
-                  scenarioNames={scenarioNames}
-                  data={shortageMatrix}
-                  responsive
-                  labelColumnWidth={140}
-                  displayMode="volume"
-                  volumeScaleMode={scaleMode as VolumeScaleMode}
-                  colorScheme="shortage"
-                  loadingScenarios={shortageLoadingScenarios}
-                />
-              )}
-            </Box>
-          </Box>
-
-          {/* ── Reliability ──────────────────────────────────────────── */}
-          <Box sx={{ mb: theme.space.section.sm }}>
-            <SectionHeader
-              title="Delivery reliability"
+              title={
+                chartMode === "delivery"
+                  ? "Monthly surface water delivery"
+                  : "Monthly delivery shortage"
+              }
               description={
-                <>
-                  95th percentile of annual shortage %.{" "}
-                  <Box component="span" sx={{ color: theme.palette.text.primary }}>
-                    In 95 of 100 years, annual shortage ≤ this value.
-                  </Box>{" "}
-                  Green = ≤5%, yellow = 5–20%, red = &gt;20%.{" "}
-                  <Box component="span" sx={{ color: theme.palette.grey[400] }}>
-                    Showing {scenarioNames[primaryScenario] ?? primaryScenario}.
-                  </Box>
-                </>
+                chartMode === "delivery" ? (
+                  <>
+                    Percentile distribution of monthly deliveries across all
+                    simulated years (TAF). Each band shows a range of outcomes.
+                    The center line is the median; outer bands are the extremes.
+                    Per-scenario annual averages and P95 reliability are shown
+                    below each chart. Relative scale normalizes each row to its
+                    own maximum — useful when refuges receive very different
+                    volumes.
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        mt: 1.5,
+                      }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Box
+                          component="span"
+                          sx={{
+                            color: "grey.500",
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Overlapping percentile bands:
+                        </Box>
+                        <DeliveryBandsLegend />
+                      </Box>
+                      <Box
+                        component="span"
+                        sx={{
+                          color: "grey.400",
+                          fontSize: "0.8rem",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Upper chart region = wetter-year delivery · Lower chart
+                        region = drier-year delivery
+                      </Box>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    Shortage = max(demand − delivery, 0), distributed across all
+                    simulated years (TAF). A flat chart near zero means the
+                    refuge consistently received its full allocation. Spikes
+                    indicate dry-year cutbacks.
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                        mt: 1.5,
+                      }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 1,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Box
+                          component="span"
+                          sx={{
+                            color: "grey.500",
+                            fontSize: "0.875rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Overlapping percentile bands:
+                        </Box>
+                        <ShortageBandsLegend />
+                      </Box>
+                      <Box
+                        component="span"
+                        sx={{
+                          color: "grey.400",
+                          fontSize: "0.8rem",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Upper chart region = drier-year shortage · Lower chart
+                        region = wetter-year shortage (near zero)
+                      </Box>
+                    </Box>
+                  </>
+                )
               }
             />
             <Box sx={{ mt: theme.space.component.lg }}>
-              {isLoadingPeriod ? (
-                <CircularProgress size={24} />
-              ) : periodSummaries.length === 0 ? (
+              {isActiveLoading && !hasActiveData ? (
+                <PercentileMatrixSkeleton
+                  scenarios={scenarios}
+                  rowCount={Math.min(filteredDuIds.length, 4)}
+                  labelColumnWidth={160}
+                />
+              ) : !hasActiveData ? (
                 <Typography color="text.secondary" variant="body2">
-                  No reliability data available for this scenario.
+                  No {chartMode} data available for this scenario and region.
                 </Typography>
               ) : (
-                <ReliabilityDisplay
-                  summaries={periodSummaries}
-                  duIds={filteredDuIds}
-                  duLabels={duLabels}
+                <PercentileMatrix
+                  reservoirs={reservoirData}
+                  scenarios={scenarios}
+                  scenarioNames={scenarioNames}
+                  data={activeMatrix}
+                  responsive
+                  labelColumnWidth={160}
+                  showScenarioHeaders={false}
+                  displayMode="volume"
+                  volumeScaleMode={scaleMode as VolumeScaleMode}
+                  colorScheme={
+                    chartMode === "delivery" ? "delivery" : "shortage"
+                  }
+                  loadingScenarios={activeLoadingScenarios}
+                  cellStats={cellStats}
+                  minYMaxTaf={0}
                 />
               )}
             </Box>

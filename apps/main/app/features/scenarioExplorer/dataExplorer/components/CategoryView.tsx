@@ -46,7 +46,9 @@ import { useSpillMonthly, useBatchStatistics } from "@repo/data/coeqwal/hooks"
 import type { SpillMonthlyReservoirData } from "@repo/data/coeqwal"
 import CwsSection from "./CwsSection"
 import AgSection from "./AgSection"
+import EnvFlowSection from "./EnvFlowSection"
 import RefugeSection from "./RefugeSection"
+import DeltaSection from "./DeltaSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { fetchTierLocationData } from "@repo/data/coeqwal"
@@ -57,7 +59,7 @@ import { useScenarioList } from "../../../scenarios/hooks"
  * Feature flag: Use batch API for fetching statistics
  * Set to true to test the batch endpoint, false for existing individual-request behavior
  */
-const USE_BATCH_API = false
+const USE_BATCH_API = true
 
 /**
  * SectionHeader - Reusable header for chart sections
@@ -1070,6 +1072,9 @@ export default function CategoryView() {
   const { selectedScenarios, setMainView, setExploreMode } =
     useScenarioExplorerStore()
   const [expanded, setExpanded] = React.useState<string[]>([])
+  const [hasBeenExpanded, setHasBeenExpanded] = React.useState<Set<string>>(
+    new Set(),
+  )
   // Use the same hook as SelectionBanner for consistent scenario names
   const { getDisplayName } = useScenarioList()
 
@@ -1097,6 +1102,12 @@ export default function CategoryView() {
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId],
     )
+    setHasBeenExpanded((prev) => {
+      if (prev.has(categoryId)) return prev
+      const next = new Set(prev)
+      next.add(categoryId)
+      return next
+    })
   }
 
   // Empty state when no scenarios selected
@@ -1246,9 +1257,8 @@ export default function CategoryView() {
                 pb: theme.space.component.xl,
               }}
             >
-              {/* Special aligned layout for reservoir-storage category */}
-              {category.id === "reservoir-storage" &&
-              selectedScenarios.length > 0 ? (
+              {!hasBeenExpanded.has(category.id) ? null : category.id ===
+                  "reservoir-storage" && selectedScenarios.length > 0 ? (
                 <ReservoirStorageSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
@@ -1267,9 +1277,21 @@ export default function CategoryView() {
                   scenarioNames={scenarioNames}
                   batchData={USE_BATCH_API ? batchData : undefined}
                 />
+              ) : category.id === "env-flow-statistics" &&
+                selectedScenarios.length > 0 ? (
+                <EnvFlowSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
               ) : category.id === "environmental-water" &&
                 selectedScenarios.length > 0 ? (
                 <RefugeSection
+                  scenarios={selectedScenarios}
+                  scenarioNames={scenarioNames}
+                />
+              ) : category.id === "delta-salinity" &&
+                selectedScenarios.length > 0 ? (
+                <DeltaSection
                   scenarios={selectedScenarios}
                   scenarioNames={scenarioNames}
                 />
@@ -1306,6 +1328,7 @@ export default function CategoryView() {
                 category.id !== "reservoir-storage" &&
                 category.id !== "community-water" &&
                 category.id !== "agricultural-water" &&
+                category.id !== "env-flow-statistics" &&
                 category.id !== "environmental-water" &&
                 category.id !== "delta-salinity" &&
                 category.id !== "groundwater-storage" &&

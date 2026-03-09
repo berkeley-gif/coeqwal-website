@@ -108,6 +108,20 @@ export type {
   RefugeShortageMonthlyResponse,
   RefugePeriodSummary,
   RefugePeriodResponse,
+  // Environmental flow types
+  ChannelEntity,
+  ChannelsListResponse,
+  EnvFlowSeason,
+  EnvFlowSeasonsResponse,
+  ChannelMonthlyStats,
+  ChannelsMonthlyResponse,
+  ChannelSeasonalStats,
+  ChannelsSeasonalResponse,
+  ChannelPeriodSummary,
+  ChannelsPeriodSummaryResponse,
+  // Delta statistics types
+  DeltaMonthlyStats,
+  DeltaMonthlyResponse,
 } from "./types"
 
 // API constants
@@ -154,11 +168,15 @@ export {
   fetchReservoirPeriodSummary,
   // Batch statistics fetcher
   fetchBatchStatistics,
+  // Environmental flow fetchers
+  fetchChannelsList,
+  fetchEnvFlowSeasons,
+  fetchChannelsMonthly,
+  fetchChannelsSeasonal,
+  fetchChannelsPeriodSummary,
+  // Delta fetchers
+  fetchDeltaMonthly,
 } from "./fetchers"
 
 // Re-export hooks for convenience
 export * from "./hooks"
-
-// Water themes and scenario mappings
-export type { Theme } from "./themes"
-export { WATER_THEMES, THEME_SCENARIOS } from "./themes"

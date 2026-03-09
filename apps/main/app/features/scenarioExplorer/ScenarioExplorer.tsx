@@ -15,6 +15,7 @@ import {
   useTheme,
   icons,
   ViewListIcon,
+  MapIcon,
   CompareArrowsIcon,
   AppsIcon,
   AutorenewIcon,
@@ -47,6 +48,11 @@ const VIEW_MODES: {
     mode: "list",
     icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Scenario list",
+  },
+  {
+    mode: "map",
+    icon: <MapIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Map tool",
   },
   {
     mode: "comparison",
@@ -156,9 +162,7 @@ export default function ScenarioExplorerNew() {
                 border: "none",
                 borderRadius: theme.borderRadius.sm ?? "4px",
                 cursor: "pointer",
-                background: active
-                  ? "rgba(255,255,255,0.2)"
-                  : "transparent",
+                background: active ? "rgba(255,255,255,0.2)" : "transparent",
                 color: theme.palette.common.white,
                 textShadow: "none",
                 transition: "background-color 0.15s",
@@ -195,13 +199,18 @@ export default function ScenarioExplorerNew() {
           pointerEvents: needsTransparentBg ? "none" : "auto",
         }}
       >
-        {/* Single full-width column — scenario list, search, banner */}
+        {/* Content column — full-width normally, retracts to left half in map mode */}
         <Box
           sx={{
-            width: "100%",
+            width: needsTransparentBg ? "50%" : "100%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            backgroundColor: needsTransparentBg
+              ? theme.palette.explore.background
+              : "transparent",
+            pointerEvents: "auto",
+            transition: "width 0.3s ease",
           }}
         >
           <SelectionBanner />
@@ -307,55 +316,56 @@ export default function ScenarioExplorerNew() {
             >
               {VIEW_MODES.filter((v) => v.mode !== "data").map(
                 ({ mode, icon, label }) => {
-                const active = exploreMode === mode
-                return (
-                  <Box
-                    key={mode}
-                    component="button"
-                    onClick={() => setExploreMode(mode as ExploreMode)}
-                    aria-pressed={active}
-                    aria-label={label}
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      px: 1.25,
-                      py: 0.5,
-                      border: "none",
-                      borderRadius: theme.borderRadius.sm ?? "4px",
-                      cursor: "pointer",
-                      background: active
-                        ? theme.palette.interaction.selectedBackground
-                        : "transparent",
-                      color: active
-                        ? theme.palette.blue.bright
-                        : theme.palette.blue.darkest,
-                      opacity: active ? 1 : 0.55,
-                      textShadow: "none",
-                      transition: "opacity 0.15s, background-color 0.15s",
-                      "&:hover": {
-                        opacity: 1,
-                        background:
-                          theme.palette.interaction.selectedBackground,
-                      },
-                    }}
-                  >
-                    {icon}
-                    <Typography
-                      component="span"
-                      variant="subtitle2"
+                  const active = exploreMode === mode
+                  return (
+                    <Box
+                      key={mode}
+                      component="button"
+                      onClick={() => setExploreMode(mode as ExploreMode)}
+                      aria-pressed={active}
+                      aria-label={label}
                       sx={{
-                        fontWeight: active ? 600 : 400,
-                        lineHeight: 1,
-                        whiteSpace: "nowrap",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        px: 1.25,
+                        py: 0.5,
+                        border: "none",
+                        borderRadius: theme.borderRadius.sm ?? "4px",
+                        cursor: "pointer",
+                        background: active
+                          ? theme.palette.interaction.selectedBackground
+                          : "transparent",
+                        color: active
+                          ? theme.palette.blue.bright
+                          : theme.palette.blue.darkest,
+                        opacity: active ? 1 : 0.55,
                         textShadow: "none",
+                        transition: "opacity 0.15s, background-color 0.15s",
+                        "&:hover": {
+                          opacity: 1,
+                          background:
+                            theme.palette.interaction.selectedBackground,
+                        },
                       }}
                     >
-                      {label}
-                    </Typography>
-                  </Box>
-                )
-              })}
+                      {icon}
+                      <Typography
+                        component="span"
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: active ? 600 : 400,
+                          lineHeight: 1,
+                          whiteSpace: "nowrap",
+                          textShadow: "none",
+                        }}
+                      >
+                        {label}
+                      </Typography>
+                    </Box>
+                  )
+                },
+              )}
             </Box>
           </Box>
         }

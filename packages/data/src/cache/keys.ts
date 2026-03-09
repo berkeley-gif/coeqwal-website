@@ -289,6 +289,48 @@ export const CACHE_KEYS = {
   reservoirPeriodSummary: (scenarioId: string) =>
     `/api/statistics/scenarios/${scenarioId}/period-summary`,
 
+  // Environmental River Flows cache keys (59 CalSim channel reaches)
+
+  /** List of all 59 channel reaches with watershed attributes (static) */
+  CHANNELS_LIST: "/api/statistics/channels",
+
+  /** List of all 5 CEFF seasonal definitions (static lookup) */
+  ENV_FLOW_SEASONS: "/api/statistics/env-flow-seasons",
+
+  /**
+   * Monthly % unimpaired flow statistics (Metric 1) — all channels in scenario
+   * @param scenarioId - Scenario ID
+   * @param channelId - Optional single channel filter
+   */
+  channelsMonthly: (scenarioId: string, channelId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/channels/monthly${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  /**
+   * Seasonal flow volumes + % unimpaired + % functional flow (Metrics 1+2)
+   * @param scenarioId - Scenario ID
+   * @param channelId - Optional single channel filter
+   */
+  channelsSeasonal: (scenarioId: string, channelId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/channels/seasonal${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  /**
+   * Period-of-record Pearson r alteration index (Metric 3) + full-period aggregates
+   * @param scenarioId - Scenario ID
+   * @param channelId - Optional single channel filter
+   */
+  channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  // Delta statistics cache keys (X2, salinity, outflow)
+
+  /**
+   * Monthly Delta statistics (X2, salinity, outflow)
+   * @param scenarioId - Scenario ID
+   * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
+   */
+  deltaMonthly: (scenarioId: string, category?: string) =>
+    `/api/statistics/scenarios/${scenarioId}/delta/monthly${category ? `?category=${category}` : ""}`,
+
   // Batch statistics cache key (for Data Explorer performance)
 
   /**

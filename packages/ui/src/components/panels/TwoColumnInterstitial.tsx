@@ -8,7 +8,7 @@
  */
 
 import { Box, Typography, useTheme } from "@mui/material"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { NavArrow } from "../common/NavArrow"
 
 /** A single link row with label and forward arrow */
 export interface InterstitialLink {
@@ -22,6 +22,8 @@ export interface InterstitialLink {
   target?: string
   /** Rel attribute, e.g. "noopener noreferrer" for external links */
   rel?: string
+  /** Optional opacity override (0–1) for inactive links */
+  opacity?: number
 }
 
 export interface TwoColumnInterstitialProps {
@@ -57,23 +59,16 @@ function LinkRow({ link, color }: { link: InterstitialLink; color: string }) {
         gap: 1,
         py: 2,
         borderBottom: `1px solid ${color}20`,
-        cursor: "pointer",
+        cursor: link.onClick || link.href ? "pointer" : "default",
         textDecoration: "none",
         color: "inherit",
+        opacity: link.opacity ?? 1,
         "&:last-child": { borderBottom: "none" },
         "&:hover .interstitial-arrow": { transform: "translateX(4px)" },
       }}
     >
       <Typography variant="subtitle1">{link.label}</Typography>
-      <ArrowForwardIcon
-        className="interstitial-arrow"
-        sx={{
-          fontSize: "1.1rem",
-          opacity: 0.6,
-          flexShrink: 0,
-          transition: "transform 0.15s ease",
-        }}
-      />
+      <NavArrow className="interstitial-arrow" opacity={0.6} bold={false} />
     </Box>
   )
 }
@@ -107,20 +102,20 @@ export function TwoColumnInterstitial({
           flex: 1,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between",
+          justifyContent: "center",
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Typography
             variant="tabLabel"
-            sx={{ maxWidth: "22ch", lineHeight: 1.25, textTransform: "none" }}
+            sx={{ maxWidth: "30ch", lineHeight: 1.25, textTransform: "none" }}
           >
             {headline}
           </Typography>
           <Typography
             variant="body2"
             component="p"
-            sx={{ maxWidth: "40ch", opacity: 0.85, lineHeight: 1.5 }}
+            sx={{ maxWidth: "50ch", opacity: 0.85, lineHeight: 1.5 }}
           >
             {body}
           </Typography>
@@ -146,22 +141,15 @@ export function TwoColumnInterstitial({
               gap: 1,
               pt: 3,
               cursor: "pointer",
-              opacity: 0.5,
-              "&:hover": { opacity: 0.8 },
+              opacity: 0.75,
+              "&:hover": { opacity: 1 },
               "&:hover .scroll-arrow": {
-                transform: "rotate(90deg) translateX(4px)",
+                transform: "translateX(4px)",
               },
             }}
           >
             <Typography variant="overline">{scrollPrompt}</Typography>
-            <ArrowForwardIcon
-              className="scroll-arrow"
-              sx={{
-                fontSize: "1.1rem",
-                transform: "rotate(90deg)",
-                transition: "transform 0.15s ease",
-              }}
-            />
+            <NavArrow direction="down" className="scroll-arrow" bold={false} />
           </Box>
         )}
       </Box>
