@@ -20,18 +20,18 @@ interface LogoProps {
  *   Example: <button aria-label="COEQWAL home"><Logo /></button>
  */
 export function Logo({ width = 150, variant = "color", className }: LogoProps) {
-  // Drop shadow style for light variant to improve visibility
-  const lightStyle: React.CSSProperties = {
-    filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))",
-  }
+  const isLight = variant === "light"
+  const SvgComponent = isLight ? LogoLight : LogoColor
 
-  if (variant === "light") {
-    return (
-      <span style={lightStyle}>
-        <LogoLight width={width} className={className} />
-      </span>
-    )
-  }
-
-  return <LogoColor width={width} className={className} />
+  return (
+    <span
+      style={
+        isLight
+          ? { filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))" }
+          : undefined
+      }
+    >
+      <SvgComponent width={width} className={className} />
+    </span>
+  )
 }

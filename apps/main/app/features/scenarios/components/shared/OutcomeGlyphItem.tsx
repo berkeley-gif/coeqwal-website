@@ -60,7 +60,7 @@ export function formatOutcomeLabel(displayName: string): React.ReactNode {
     "Delta estuary ecology": ["Delta estuary", "ecology"],
     "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
     "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
-    "Salmon abundance": ["Salmon", "abundance"],
+    "Winter-run salmon": ["Winter-run", "salmon"],
   }
 
   const parts = breakPoints[displayName]

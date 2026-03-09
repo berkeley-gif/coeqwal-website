@@ -143,11 +143,10 @@ export default function MapInstance({
     if (mapMode !== "explore" || !map.mapRef?.current) return
 
     const leftPadding = window.innerWidth * (explorePanelWidth / 100)
-    // Less top padding when panel is wider (equity tool) to center map better vertically
-    const topPadding = explorePanelWidth > 50 ? 80 : 300
+    const topPadding = explorePanelWidth > 50 ? 80 : 200
     map.mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
-      padding: { left: leftPadding, top: topPadding, right: 0, bottom: 20 },
-      maxZoom: 6,
+      padding: { left: leftPadding, top: topPadding, right: 0, bottom: 0 },
+      maxZoom: 7.5,
       duration: 1000,
     })
   }, [mapMode, map, explorePanelWidth])
@@ -174,10 +173,10 @@ export default function MapInstance({
 
     const handleResize = () => {
       const leftPadding = window.innerWidth * (explorePanelWidth / 100)
-      const topPadding = explorePanelWidth > 50 ? 80 : 300
+      const topPadding = explorePanelWidth > 50 ? 80 : 200
       map.mapRef.current?.fitBounds(CALIFORNIA_BOUNDS, {
-        padding: { left: leftPadding, top: topPadding, right: 0, bottom: 20 },
-        maxZoom: 6,
+        padding: { left: leftPadding, top: topPadding, right: 0, bottom: 0 },
+        maxZoom: 7.5,
         duration: 300,
       })
     }

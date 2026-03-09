@@ -38,6 +38,8 @@ export interface PanelProps {
   height?: string | number
   /** Include standard panel padding (default: true) */
   includePadding?: boolean
+  /** Padding for navbar (default: true) */
+  includeNavbarPadding?: boolean
   /** Additional sx props for the container */
   sx?: SxProps<Theme>
   /** Additional sx props for the content wrapper (only used with backgroundImage) */
@@ -57,6 +59,7 @@ export function Panel({
   fullHeight = true,
   height,
   includePadding = true,
+  includeNavbarPadding = true,
   sx,
   contentSx,
   children,
@@ -69,8 +72,12 @@ export function Panel({
   // Standard panel padding from theme
   const panelPadding = includePadding
     ? {
-        paddingTop: theme.space.panel.topOffset,
-        paddingBottom: theme.space.panel.bottomOffset,
+        paddingTop: includeNavbarPadding
+          ? theme.space.component.sm
+          : theme.space.panel.padding,
+        paddingBottom: includeNavbarPadding
+          ? theme.space.component.sm
+          : theme.space.panel.padding,
         paddingLeft: theme.space.panel.padding,
         paddingRight: theme.space.panel.padding,
       }
@@ -85,9 +92,9 @@ export function Panel({
         aria-label={ariaLabel}
         sx={{
           position: "relative", // For absolute children (scroll indicators, etc.)
-          height: fullHeight ? "100vh" : height,
+          height: fullHeight ? "100vh" : "auto",
           width: "100%",
-          overflow: "hidden",
+          overflow: fullHeight ? "hidden" : "visible",
           backgroundColor,
           ...panelPadding,
           ...sx,
@@ -98,7 +105,7 @@ export function Panel({
     )
   }
 
-  // Grid stacking mode: background color → background image → content
+  // Grid stacking mode: background color and background image and content
   return (
     <Box
       component="section"

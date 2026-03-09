@@ -16,7 +16,7 @@
 
 /**
  * Scenario theme for visual categorization.
- * Keys align with WATER_THEMES ids in packages/data/src/coeqwal/themes.ts.
+ * Keys align with WATER_THEMES ids in content/themes.ts.
  */
 export type ScenarioTheme = "baseline" | "ag_gw" | "eco" | "cws" | "delta"
 
@@ -198,7 +198,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     iconPath: "/images/icons/environmental.svg",
     label: "Salmon-friendly flows with reduced ag acreage",
     description:
-      "Combines salmon-friendly flow requirements with reduced Central Valley agricultural acreage, exploring how both changes interact to support salmon and water supply.",
+      "Combines salmon-friendly flow requirements on the Sacramento River with reduced Central Valley agricultural acreage (from s0028), exploring how both changes interact to support salmon and offset reservoir drawdown.",
     shortLabel: "Salmon flows + reduced ag",
   },
   s0046: {
@@ -206,8 +206,38 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     iconPath: "/images/icons/environmental.svg",
     label: "Functional flows (variant)",
     description:
-      "Variant of the functional flows scenario implementing flow requirements at 17 tributary and Delta outflow points. Uses 2020 LandIQ land use.",
+      "Variation of functional flows that removes the downstream Sac, SJR, and Delta flow requirements.",
     shortLabel: "Func. flows (v2)",
+  },
+
+  // ---------------------------------------------------------------------------
+  // CWS SCENARIOS - Prioritizing municipal and industrial water deliveries
+  // ---------------------------------------------------------------------------
+  s0035: {
+    theme: "cws",
+    iconPath: "/images/icons/current_ops.svg",
+    label:
+      "Priority deliveries to community water systems: health and human safety level",
+    description:
+      "CVP and SWP surface supplies are reallocated to prioritize M&I contractors at health and human safety (HHS) delivery levels. CVP agricultural contracts are assigned lower priority to accommodate M&I deliveries. Based on current operations with 2020 LandIQ land use and TUCPs active.",
+    shortLabel: "CWS priority: HHS level",
+  },
+  s0036: {
+    theme: "cws",
+    iconPath: "/images/icons/current_ops.svg",
+    label: "Priority deliveries to community water systems: functional level",
+    description:
+      "CVP and SWP surface supplies are reallocated to prioritize M&I contractors at a functional delivery level (70% of maximum contract entitlement). CVP agricultural contracts are assigned lower priority. Based on current operations with 2020 LandIQ land use and TUCPs active.",
+    shortLabel: "CWS priority: functional level",
+  },
+  s0037: {
+    theme: "cws",
+    iconPath: "/images/icons/current_ops.svg",
+    label:
+      "Priority deliveries to community water systems: full contract level",
+    description:
+      "CVP and SWP surface supplies are reallocated to prioritize M&I contractors at full contract entitlement levels. CVP agricultural contracts are assigned lower priority. Based on current operations with 2020 LandIQ land use and TUCPs active.",
+    shortLabel: "CWS priority: full contract",
   },
 
   // ---------------------------------------------------------------------------
@@ -266,7 +296,7 @@ export const scenarioMetadata: Record<string, ScenarioMetadata> = {
     iconPath: "/images/icons/current_ops.svg",
     label: "DWR 2025 Delta Conveyance Project",
     description:
-      "DWR's 2025 Delta Conveyance Project scenario with 2020 LandIQ land use and voluntary agreements, exploring how new Delta infrastructure affects water supply and ecosystem outcomes.",
+      "DWR's 2025 Delta Conveyance Project scenario with 2020 LandIQ land use and voluntary agreements (Healthy Rivers and Landscapes), exploring how new Delta infrastructure affects water supply and ecosystem outcomes.",
     shortLabel: "DWR 2025 DCP",
   },
 }

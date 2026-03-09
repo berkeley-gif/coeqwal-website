@@ -20,21 +20,21 @@ import TogglePair from "../components/TogglePair"
 interface GridControlsProps {
   /** Whether to show only chosen strategies */
   showOnlyChosen: boolean
-  /** Whether to show strategy definitions */
-  showDefinitions: boolean
+  /** Whether to show alternative baseline scenarios */
+  showAlternativeBaselines: boolean
   /** Called when showOnlyChosen changes */
   onShowOnlyChosenChange: (value: boolean) => void
-  /** Called when showDefinitions changes */
-  onShowDefinitionsChange: (value: boolean) => void
+  /** Called when showAlternativeBaselines changes */
+  onShowAlternativeBaselinesChange: (value: boolean) => void
   /** Icon size (default 40) */
   iconSize?: number
 }
 
 export function GridControls({
   showOnlyChosen,
-  showDefinitions,
+  showAlternativeBaselines,
   onShowOnlyChosenChange,
-  onShowDefinitionsChange,
+  onShowAlternativeBaselinesChange,
   iconSize = 36, // trying slightly smaller
 }: GridControlsProps) {
   const theme = useTheme()
@@ -71,23 +71,23 @@ export function GridControls({
         }}
       />
 
-      <InfoTooltip description="Show current operations or show all baseline variations">
+      <InfoTooltip description="Show or hide alternative baseline scenarios">
         <Box>
           <TogglePair
             leftIcon={
               <CurrentOpsIcon
-                active={!showDefinitions}
+                active={!showAlternativeBaselines}
                 size={Math.round(iconSize * 0.78)}
               />
             }
             rightIcon={
               <CurrentOpsMultipleIcon
-                active={showDefinitions}
+                active={showAlternativeBaselines}
                 size={Math.round(iconSize * 0.78)}
               />
             }
-            onLeftClick={() => onShowDefinitionsChange(false)}
-            onRightClick={() => onShowDefinitionsChange(true)}
+            onLeftClick={() => onShowAlternativeBaselinesChange(false)}
+            onRightClick={() => onShowAlternativeBaselinesChange(true)}
             gap={0.5}
           />
         </Box>

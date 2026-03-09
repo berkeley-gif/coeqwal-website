@@ -29,6 +29,19 @@ export interface ReservoirData {
   reliabilityPct?: number
   /** CWS-specific: Shortage frequency percentage (shown when annualAvgTaf is set) */
   shortageFrequencyPct?: number
+  /**
+   * Optional single-line subtitle rendered below the entity name in the label column.
+   * Styled like the "CVP / SWP" system line in reservoir charts (medium weight, secondary color).
+   * Used for secondary identifiers (e.g. demand unit ID or hydrologic region).
+   */
+  labelSubtitle?: string
+  /**
+   * Optional key→value attribute pairs rendered below the subtitle.
+   * Each pair is displayed as a small uppercase key label + bold value,
+   * matching the "Capacity / Dead pool" styling in reservoir charts.
+   * Requires capacityTaf === 0 (no reservoir mode) to activate.
+   */
+  labelAttributes?: { key: string; value: string }[]
 }
 
 // Mapping of reservoir IDs to water systems (for major California reservoirs)
@@ -125,6 +138,38 @@ export interface PercentileMatrixProps {
   breakdownComponents?: BreakdownComponentsMap
   /** Scenario IDs that are still loading data (shows spinner in empty cells) */
   loadingScenarios?: string[]
+  /**
+   * Minimum value allowed for the y-axis maximum (TAF).
+   * Default 100, which works well for reservoirs and CWS contractors.
+   * Set to 0 for small-volume entities (e.g. wildlife refuges) so the axis
+   * scales to the actual data range instead of being locked at ≥100 TAF.
+   */
+  minYMaxTaf?: number
+  /**
+   * Optional suffix appended to Y-axis tick labels in volume mode.
+   * E.g. "%" for % unimpaired charts so ticks read "50%" not "50".
+   * Has no effect when displayMode="percentage" (which always appends "%").
+   */
+  yAxisSuffix?: string
+  /**
+   * Y value to draw a bold reference gridline at (in addition to the default
+   * highlight at val===50 for percentage mode).  Pass e.g. 100 for the
+   * "= natural flow" reference on % unimpaired charts.
+   */
+  yAxisReferenceValue?: number
+  /**
+   * Hard ceiling for the Y-axis maximum in volume+absolute mode.
+   * When set, the computed domain is capped at this value regardless of how
+   * high the data goes.  Data above the cap is clipped by the chart boundary.
+   * Use e.g. 120 for % unimpaired charts so the axis stays at 0–120%
+   * even when a few regulated channels exceed 100%.
+   */
+  yAxisMax?: number
+  /**
+   * Unit string shown in hover tooltips. Defaults to " TAF" for volume mode
+   * and "%" for percentage mode. Override for non-TAF data (e.g. " µmhos/cm").
+   */
+  tooltipUnit?: string
 }
 
 // Water month labels (short - for axis)
@@ -210,6 +255,11 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
   breakdownData,
   breakdownComponents,
   loadingScenarios,
+  minYMaxTaf = 100,
+  yAxisSuffix,
+  yAxisReferenceValue,
+  yAxisMax,
+  tooltipUnit,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -345,12 +395,28 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           if (reservoir.capacityTaf > 0) {
             maxValue = Math.max(maxValue, reservoir.capacityTaf)
           }
-          // Minimum max of 100 TAF, then round up to a nice number with 5% headroom
-          const minMax = 100
-          maxValue = Math.max(maxValue, minMax)
-          // Round to nice increments based on magnitude
-          const increment = maxValue > 1000 ? 500 : maxValue > 100 ? 50 : 10
-          const maxY = Math.ceil((maxValue * 1.05) / increment) * increment
+          // Apply caller-supplied minimum (default 100 TAF for reservoirs/CWS;
+          // pass 0 for small-volume entities like wildlife refuges).
+          maxValue = Math.max(maxValue, minYMaxTaf)
+          // Round up to a nice increment with 5% headroom.
+          // Handles sub-1 TAF ranges (e.g. refuge deliveries in tenths of TAF).
+          const increment =
+            maxValue > 1000
+              ? 500
+              : maxValue > 100
+                ? 50
+                : maxValue > 10
+                  ? 10
+                  : maxValue > 1
+                    ? 1
+                    : maxValue > 0.1
+                      ? 0.1
+                      : 0.01
+          const rawMaxY = Math.ceil((maxValue * 1.05) / increment) * increment
+          // Guard against degenerate [0,0] domain (all data = 0 and minYMaxTaf = 0).
+          // A flat domain causes D3 to place every value at 50% height.
+          // Use a tiny non-zero ceiling so the zero line sits correctly at the bottom.
+          const maxY = rawMaxY > 0 ? rawMaxY : 0.001
           perReservoirYDomains[reservoir.reservoirId] = [0, maxY]
         })
       } else {
@@ -387,9 +453,27 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           // Also consider capacity as a reference
           maxValue = Math.max(maxValue, reservoir.capacityTaf)
         })
-        // Minimum max of 100 TAF, round up to a nice number with 10% headroom
-        maxValue = Math.max(maxValue, 100)
-        sharedYDomain = [0, Math.ceil((maxValue * 1.1) / 500) * 500]
+        // Apply caller-supplied minimum, then round up with 10% headroom.
+        maxValue = Math.max(maxValue, minYMaxTaf)
+        const absIncrement =
+          maxValue > 1000
+            ? 500
+            : maxValue > 100
+              ? 50
+              : maxValue > 10
+                ? 10
+                : maxValue > 1
+                  ? 1
+                  : maxValue > 0.1
+                    ? 0.1
+                    : 0.01
+        const absRawMax =
+          Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement
+        // Guard against degenerate [0,0] domain — same as relative mode.
+        // A flat domain causes D3 to place every value at 50% height.
+        const absComputedMax = absRawMax > 0 ? absRawMax : 0.001
+        // If caller supplied a hard ceiling (e.g. 120 for % unimpaired), honour it.
+        sharedYDomain = [0, yAxisMax !== undefined ? yAxisMax : absComputedMax]
       }
     }
 
@@ -401,10 +485,13 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
       return sharedYDomain
     }
 
-    // Helper to get Y scale for a reservoir
+    // Helper to get Y scale for a reservoir.
+    // .clamp(true) ensures values outside the domain map to the range boundary
+    // rather than overflowing the chart area (important when yAxisMax caps the
+    // domain below the actual data maximum, e.g. % unimpaired charts).
     const getYScale = (reservoirId: string) => {
       const domain = getYDomain(reservoirId)
-      return d3.scaleLinear().domain(domain).range([chartHeight, 0])
+      return d3.scaleLinear().domain(domain).range([chartHeight, 0]).clamp(true)
     }
 
     // X scale (shared across all cells)
@@ -460,13 +547,17 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
 
       // Check data type:
       // - CWS with stats: has annualAvgTaf > 0 (show delivery/reliability/shortage)
-      // - CWS without stats: capacityTaf === 0 and no annualAvgTaf (show name only)
+      // - Entity with attributes: capacityTaf === 0, labelAttributes present (reservoir-style key→value rows)
+      // - CWS without stats: capacityTaf === 0 and no annualAvgTaf, no labelAttributes (show name only)
       // - Reservoir: has capacityTaf > 0 (show system/capacity/dead pool)
       const isCwsWithStats =
         reservoir.annualAvgTaf !== undefined && reservoir.annualAvgTaf > 0
-      const isCwsWithoutStats =
+      const hasLabelAttributes =
         reservoir.capacityTaf === 0 &&
-        (reservoir.annualAvgTaf === undefined || reservoir.annualAvgTaf === 0)
+        !isCwsWithStats &&
+        (reservoir.labelAttributes?.length ?? 0) > 0
+      const isCwsWithoutStats =
+        reservoir.capacityTaf === 0 && !isCwsWithStats && !hasLabelAttributes
 
       if (isCwsWithStats) {
         // CWS-specific labels: Annual average, Reliability, Shortage frequency
@@ -514,7 +605,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.text)
             .attr("text-transform", "uppercase")
             .attr("letter-spacing", "0.05em")
-            .text("Reliability")
+            .text("P95 reliability")
           g.append("text")
             .attr("x", labelX)
             .attr("y", currentY + 14)
@@ -558,6 +649,53 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             .attr("fill", COLORS.deadPool) // Orange/red for concerning metric
             .text(`${Math.round(reservoir.shortageFrequencyPct)}%`)
         }
+      } else if (hasLabelAttributes) {
+        // Entity with custom label attributes (e.g. refuge demand units).
+        // Renders a subtitle line + key→value pairs in reservoir-label style.
+        let attrY = rowTop + 68
+
+        if (reservoir.labelSubtitle) {
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", rowTop + 68)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.75rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "500")
+            .attr("fill", COLORS.text)
+            .attr("letter-spacing", "0.02em")
+            .text(reservoir.labelSubtitle)
+          attrY = rowTop + 68 + 20
+        }
+
+        reservoir.labelAttributes!.forEach(({ key, value }) => {
+          // Key — small uppercase label
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", attrY)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.6875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "400")
+            .attr("fill", COLORS.text)
+            .attr("letter-spacing", "0.05em")
+            .text(key)
+          // Value — bold, tabular figures
+          g.append("text")
+            .attr("x", labelX)
+            .attr("y", attrY + 14)
+            .attr("text-anchor", "start")
+            .attr("dominant-baseline", "hanging")
+            .attr("font-size", "0.875rem")
+            .attr("font-family", "'Inter', -apple-system, sans-serif")
+            .attr("font-weight", "600")
+            .attr("font-feature-settings", "'tnum' 1")
+            .attr("fill", COLORS.header)
+            .text(value)
+          attrY += 32
+        })
       } else if (isCwsWithoutStats) {
         // CWS entity without per-scenario stats - just show name (already rendered above)
         // No additional labels needed since stats vary by scenario
@@ -742,17 +880,33 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
           reservoirYScale(val)
 
         // Gridline (spans all scenario columns for this row)
+        const isRefLine =
+          (displayMode === "percentage" && val === 50) ||
+          (yAxisReferenceValue !== undefined && val === yAxisReferenceValue)
         g.append("line")
           .attr("x1", gridStartX)
           .attr("x2", gridEndX)
           .attr("y1", y)
           .attr("y2", y)
-          .attr("stroke", val === 50 ? COLORS.gridStrong : COLORS.grid)
-          .attr("stroke-width", val === 50 ? 1 : 0.5)
+          .attr("stroke", isRefLine ? COLORS.gridStrong : COLORS.grid)
+          .attr("stroke-width", isRefLine ? 1 : 0.5)
 
-        // Y-axis label
+        // Y-axis label — use enough decimal places for the domain range
+        const domainMax = reservoirYDomain[1]
+        const rawLabel =
+          displayMode === "percentage"
+            ? `${val}%`
+            : domainMax < 0.1
+              ? val.toFixed(3)
+              : domainMax < 1
+                ? val.toFixed(2)
+                : domainMax < 10
+                  ? val.toFixed(1)
+                  : `${Math.round(val).toLocaleString()}`
         const labelText =
-          displayMode === "percentage" ? `${val}%` : `${val.toLocaleString()}`
+          yAxisSuffix && displayMode !== "percentage"
+            ? `${rawLabel}${yAxisSuffix}`
+            : rawLabel
         g.append("text")
           .attr("x", gridStartX - 4)
           .attr("y", y)
@@ -1279,7 +1433,14 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-weight", "600")
               .attr("font-feature-settings", "'tnum' 1")
               .attr("fill", COLORS.header)
-              .text(`${Math.round(stats.annualAvgTaf).toLocaleString()} TAF/yr`)
+              .text(
+                (() => {
+                  const taf = stats.annualAvgTaf!
+                  if (taf < 0.1) return `${Math.round(taf * 1000)} AF/yr`
+                  if (taf < 10) return `${taf.toFixed(1)} TAF/yr`
+                  return `${Math.round(taf).toLocaleString()} TAF/yr`
+                })(),
+              )
             currentY += lineHeight
           }
 
@@ -1294,7 +1455,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
               .attr("font-size", labelFontSize)
               .attr("font-family", "'Inter', -apple-system, sans-serif")
               .attr("fill", COLORS.text)
-              .text("Reliability")
+              .text("P95 reliability")
             statsG
               .append("text")
               .attr("x", valueX)
@@ -1431,7 +1592,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const shortagePct = (100 - reliability).toFixed(2)
             cwsContextNote = `CVP South of Delta has frequent but tiny shortages. ${shortageYears} out of 100 years have some shortage (>0.1 TAF). But avg shortage is only ${avgShortage.toFixed(2)} TAF/yr out of ${Math.round(avgDelivery).toLocaleString()} TAF delivered. That's only ${shortagePct}% of delivery! To see shortage amounts toggle the controls above.`
           } else {
-            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>Reliability</strong> = (1 − Avg Shortage / Avg Delivery) × 100, where shortage is the unmet portion of each year's delivery target (target = demand × allocation %).</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with shortage > 0.1 TAF. This 0.1 threshold filters CalSim solver noise while capturing real shortages.</p>`
+            cwsContextNote = `<p style="margin: 0 0 10px 0;"><strong>P95 reliability</strong> = in 95 of 100 simulated years, at least this % of annual demand was delivered. Computed as (delivery at exceedance p95) ÷ annual demand × 100. Higher is better; 95–100 % = fully reliable.</p><p style="margin: 0;"><strong>Shortage frequency</strong> = percentage of years with any shortage (&gt;0.1 TAF threshold). This filters CalSim solver noise.</p>`
           }
 
           const contextText = statsG
@@ -1623,10 +1784,20 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
             const monthIndex = Math.round(xScale.invert(relativeX))
 
             if (monthIndex >= 0 && monthIndex < 12) {
-              const unit = displayMode === "volume" ? " TAF" : "%"
+              const unit =
+                tooltipUnit ?? (displayMode === "volume" ? " TAF" : "%")
+              const _yMax = getYDomain(reservoir.reservoirId)[1]
               const formatValue = (v: number) =>
                 displayMode === "volume"
-                  ? v.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                  ? _yMax < 0.1
+                    ? v.toFixed(3)
+                    : _yMax < 1
+                      ? v.toFixed(2)
+                      : _yMax < 10
+                        ? v.toFixed(1)
+                        : v.toLocaleString(undefined, {
+                            maximumFractionDigits: 0,
+                          })
                   : v.toFixed(0)
 
               // Update playhead position (snapped to month)
@@ -1749,6 +1920,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     breakdownData,
     breakdownComponents,
     loadingScenarios,
+    minYMaxTaf,
   ])
 
   return (

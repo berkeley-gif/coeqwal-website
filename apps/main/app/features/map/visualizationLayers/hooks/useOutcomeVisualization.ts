@@ -111,24 +111,15 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
     const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
 
+    if (mapMode === "explore") return
+
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
-
-      if (mapMode === "explore") {
-        const leftPadding = window.innerWidth / 2
-        map.easeTo({
-          zoom: target.zoom - 1,
-          center: { lng: target.longitude, lat: target.latitude },
-          padding: { left: leftPadding, top: 100, right: 0, bottom: 20 },
-          duration: 1000,
-        })
-      } else {
-        map.easeTo({
-          zoom: target.zoom,
-          center: { lng: target.longitude, lat: target.latitude },
-          duration: 1000,
-        })
-      }
+      map.easeTo({
+        zoom: target.zoom,
+        center: { lng: target.longitude, lat: target.latitude },
+        duration: 1000,
+      })
     })
   }, [
     isActive,

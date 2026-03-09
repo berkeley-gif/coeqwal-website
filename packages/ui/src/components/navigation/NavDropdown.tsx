@@ -25,6 +25,8 @@ export interface NavDropdownOption {
   onClick: () => void
   /** Whether this option represents the current page/site */
   active?: boolean
+  /** Whether this option is disabled (non-interactive) */
+  disabled?: boolean
 }
 
 export interface NavDropdownProps {
@@ -108,6 +110,7 @@ export function NavDropdown({
           <MenuItem
             key={option.key}
             onClick={() => handleOptionClick(option)}
+            disabled={option.disabled}
             aria-current={option.active ? "page" : undefined}
             sx={(theme) => ({
               ...theme.typography.button,

@@ -28,6 +28,7 @@ export type {
   VerticalParallelLinePlotProps,
 } from "./components/VerticalParallelLinePlot"
 export { default as VerticalParallelLinePlotPeak } from "./components/VerticalParallelLinePlot.peak"
+export type { AxisLayout } from "./components/VerticalParallelLinePlot.peak"
 export { default as OutcomeGlyph } from "./components/OutcomeGlyph"
 export type { OutcomeGlyphProps } from "./components/OutcomeGlyph"
 export { default as OutcomeDotsGlyph } from "./components/OutcomeDotsGlyph"

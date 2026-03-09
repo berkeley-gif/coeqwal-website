@@ -107,7 +107,7 @@ export function HydroclimateChooser({
             whiteSpace: "nowrap",
           }}
         >
-          View outcomes by climate
+          View outcomes by climate (coming soon)
         </Typography>
       )}
 
@@ -126,112 +126,121 @@ export function HydroclimateChooser({
             const isSelected = value === option.value
             const isDisabled = option.value !== "historical"
 
-            return (
-              <HybridTooltip
-                key={option.value}
-                content={
-                  <>
-                    <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
-                      {option.label}
-                      {isDisabled && " (Coming soon)"}
-                    </Typography>
-                    {option.description}
-                  </>
-                }
-              >
-                {/* Span wrapper enables tooltip on disabled buttons (MUI requirement) */}
-                <span style={{ display: "inline-flex" }}>
+            const iconButton = (
+              <span style={{ display: "inline-flex" }}>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={() => handleSelect(option.value)}
+                  disabled={isDisabled}
+                  aria-label={`${option.label}${isDisabled ? " (Coming soon)" : ""}${isSelected ? " (selected)" : ""}`}
+                  aria-pressed={isSelected}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: theme.space.gap.xs,
+                    cursor: isDisabled ? "not-allowed" : "pointer",
+                    opacity: isDisabled ? 0.4 : 1,
+                    transition: theme.transition.default,
+                    // Remove default button styles
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    // WCAG 2.4.7: Focus visible styles
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "4px",
+                      borderRadius: theme.borderRadius.circle,
+                    },
+                  }}
+                >
                   <Box
-                    component="button"
-                    type="button"
-                    onClick={() => handleSelect(option.value)}
-                    disabled={isDisabled}
-                    aria-label={`${option.label}${isDisabled ? " (Coming soon)" : ""}${isSelected ? " (selected)" : ""}`}
-                    aria-pressed={isSelected}
                     sx={{
+                      width: iconSize,
+                      height: iconSize,
+                      minWidth: iconSize,
+                      minHeight: iconSize,
+                      flexShrink: 0,
                       display: "flex",
-                      flexDirection: "column",
                       alignItems: "center",
-                      gap: theme.space.gap.xs,
-                      cursor: isDisabled ? "not-allowed" : "pointer",
-                      opacity: isDisabled ? 0.4 : 1,
+                      justifyContent: "center",
+                      position: "relative",
+                      borderRadius: theme.borderRadius.circle,
+                      backgroundColor: isDisabled
+                        ? theme.palette.grey[400]
+                        : config?.bgColor || theme.palette.blue.bright,
+                      border: isSelected
+                        ? theme.border.highlight
+                        : "3px solid transparent",
+                      boxShadow: isSelected
+                        ? theme.shadow.sm
+                        : theme.shadow.none,
                       transition: theme.transition.default,
-                      // Remove default button styles
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      // WCAG 2.4.7: Focus visible styles
-                      "&:focus-visible": {
-                        outline: `2px solid ${theme.palette.blue.bright}`,
-                        outlineOffset: "4px",
-                        borderRadius: theme.borderRadius.circle,
+                      "&:hover": !isDisabled
+                        ? {
+                            transform: "scale(1.1)",
+                            boxShadow: theme.shadow.sm,
+                          }
+                        : {},
+                      // Invisible hit area
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        inset: -4,
                       },
                     }}
                   >
-                    <Box
+                    <IconComponent
                       sx={{
-                        width: iconSize,
-                        height: iconSize,
-                        minWidth: iconSize,
-                        minHeight: iconSize,
-                        flexShrink: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        position: "relative",
-                        borderRadius: theme.borderRadius.circle,
-                        backgroundColor: isDisabled
-                          ? theme.palette.grey[400]
-                          : config?.bgColor || theme.palette.blue.bright,
-                        border: isSelected
-                          ? theme.border.highlight
-                          : "3px solid transparent",
-                        boxShadow: isSelected
-                          ? theme.shadow.sm
-                          : theme.shadow.none,
-                        transition: theme.transition.default,
-                        "&:hover": !isDisabled
-                          ? {
-                              transform: "scale(1.1)",
-                              boxShadow: theme.shadow.sm,
-                            }
-                          : {},
-                        // Invisible hit area
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          inset: -4,
-                        },
+                        color: theme.palette.common.white,
+                        fontSize: "1.5rem",
+                      }}
+                    />
+                  </Box>
+                  {showLabels && (
+                    <Typography
+                      variant="compactMicro"
+                      sx={{
+                        color: isSelected
+                          ? theme.palette.blue.darkest
+                          : theme.palette.grey[600],
+                        fontWeight: isSelected
+                          ? theme.typography.fontWeightMedium
+                          : theme.typography.fontWeightRegular,
+                        textAlign: "center",
+                        lineHeight: 1.2, // Tighter than variant default for data viz
+                        maxWidth: 60,
                       }}
                     >
-                      <IconComponent
-                        sx={{
-                          color: theme.palette.common.white,
-                          fontSize: "1.5rem",
-                        }}
-                      />
-                    </Box>
-                    {showLabels && (
-                      <Typography
-                        variant="compactMicro"
-                        sx={{
-                          color: isSelected
-                            ? theme.palette.blue.darkest
-                            : theme.palette.grey[600],
-                          fontWeight: isSelected
-                            ? theme.typography.fontWeightMedium
-                            : theme.typography.fontWeightRegular,
-                          textAlign: "center",
-                          lineHeight: 1.2, // Tighter than variant default for data viz
-                          maxWidth: 60,
-                        }}
-                      >
+                      {option.label}
+                    </Typography>
+                  )}
+                </Box>
+              </span>
+            )
+
+            // Only show tooltip for the historical option
+            if (!isDisabled) {
+              return (
+                <HybridTooltip
+                  key={option.value}
+                  content={
+                    <>
+                      <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                         {option.label}
                       </Typography>
-                    )}
-                  </Box>
-                </span>
-              </HybridTooltip>
+                      {option.description}
+                    </>
+                  }
+                >
+                  {iconButton}
+                </HybridTooltip>
+              )
+            }
+
+            return (
+              <React.Fragment key={option.value}>{iconButton}</React.Fragment>
             )
           },
         )}

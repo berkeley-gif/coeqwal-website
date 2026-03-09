@@ -61,7 +61,13 @@ interface ScenarioExplorerState {
   selectedIconId: string | null
 
   // Display options
-  showDefinitions: boolean
+  showAlternativeBaselines: boolean
+
+  // Chart toggles (comparison panel)
+  relativeToBaseline: boolean
+  highlightBaseline: boolean
+  overlayTiers: boolean
+  defineOutcome: boolean
 
   // Hydroclimate period selection (shared across all views)
   hydroclimatePeriod: string
@@ -99,7 +105,13 @@ interface ScenarioExplorerActions {
   setSelectedIconId: (iconId: string | null) => void
 
   // Display options
-  setShowDefinitions: (show: boolean) => void
+  setShowAlternativeBaselines: (show: boolean) => void
+
+  // Chart toggles
+  setRelativeToBaseline: (show: boolean) => void
+  setHighlightBaseline: (show: boolean) => void
+  setOverlayTiers: (show: boolean) => void
+  setDefineOutcome: (show: boolean) => void
 
   // Hydroclimate period
   setHydroclimatePeriod: (period: string) => void
@@ -131,7 +143,11 @@ const initialState: ScenarioExplorerState = {
   showOnlyTheme: false,
   showThemeBadges: false,
   selectedIconId: null,
-  showDefinitions: false,
+  showAlternativeBaselines: false,
+  relativeToBaseline: true,
+  highlightBaseline: false,
+  overlayTiers: false,
+  defineOutcome: false,
   hydroclimatePeriod: "historical",
   selectedTier: null,
 }
@@ -223,9 +239,30 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
 
     // Display options
-    setShowDefinitions: (show) =>
+    setShowAlternativeBaselines: (show) =>
       set((state) => {
-        state.showDefinitions = show
+        state.showAlternativeBaselines = show
+      }),
+
+    // Chart toggles
+    setRelativeToBaseline: (show) =>
+      set((state) => {
+        state.relativeToBaseline = show
+      }),
+
+    setHighlightBaseline: (show) =>
+      set((state) => {
+        state.highlightBaseline = show
+      }),
+
+    setOverlayTiers: (show) =>
+      set((state) => {
+        state.overlayTiers = show
+      }),
+
+    setDefineOutcome: (show) =>
+      set((state) => {
+        state.defineOutcome = show
       }),
 
     // Hydroclimate period

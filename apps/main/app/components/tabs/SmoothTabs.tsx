@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Typography, useTheme, alpha } from "@repo/ui/mui"
 import { TwoColumnInterstitial } from "@repo/ui"
@@ -8,6 +8,7 @@ import { TwoColumnInterstitial } from "@repo/ui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 
 /** Renders the active tab's description panel content */
@@ -18,6 +19,8 @@ function TabDescription({
   tab: TabKey
   onScrollPromptClick: () => void
 }) {
+  const { openThemePanel } = usePanelRoute()
+
   switch (tab) {
     case "learn":
       return (
@@ -39,8 +42,8 @@ function TabDescription({
               target: "_blank",
               rel: "noopener noreferrer",
             },
-            { label: "How water is managed in California" },
-            { label: "How equity shapes California water" },
+            { label: "How water is managed in California", opacity: 0.65 },
+            { label: "How equity shapes California water", opacity: 0.65 },
           ]}
         />
       )
@@ -52,11 +55,14 @@ function TabDescription({
           linkListLabel="Explore how critical water issues are addressed"
           links={[
             { label: "Community water systems" },
-            { label: "Farms, groundwater, and food systems" },
-            { label: "Rivers, salmon, and ecosystems" },
-            { label: "The Delta as a living place" },
-            { label: "Climate risk, reliability, and resilience" },
-            { label: "Water governance and decision-making" },
+            { label: "Farms and groundwater" },
+            { label: "Rivers, salmon and the Delta ecosystem" },
+            {
+              label: "The Delta as a living place",
+              onClick: () => openThemePanel("delta"),
+            },
+            { label: "Drought and climate risk" },
+            { label: "Water operations and impacts" },
           ]}
         />
       )
@@ -96,19 +102,43 @@ export default function SmoothTabs() {
     if (isInTabsArea) setForceHideDescriptions(false)
   }, [isInTabsArea])
 
-  // When user scrolls after a click-open, retract the descriptions
+  // Expand interstitial when activeTab changes while docked (covers both
+  // tab clicks and AutoAdvanceFooter navigation).
+  const prevTabRef = useRef(activeTab)
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab && isInTabsArea) {
+      setClickOpened(true)
+    }
+    prevTabRef.current = activeTab
+  }, [activeTab, isInTabsArea])
+
+  // When user scrolls after a click-open, retract the descriptions.
+  // Delayed so the programmatic smooth-scroll from tab navigation
+  // doesn't immediately close the interstitial.
+  const scrollHandlerRef = useRef<(() => void) | null>(null)
   useEffect(() => {
     if (!clickOpened) return
 
-    const handleScroll = () => {
-      setClickOpened(false)
-    }
+    const timer = setTimeout(() => {
+      const handleScroll = () => {
+        scrollHandlerRef.current = null
+        setClickOpened(false)
+      }
+      scrollHandlerRef.current = handleScroll
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-      once: true,
-    })
-    return () => window.removeEventListener("scroll", handleScroll)
+      window.addEventListener("scroll", handleScroll, {
+        passive: true,
+        once: true,
+      })
+    }, 800)
+
+    return () => {
+      clearTimeout(timer)
+      if (scrollHandlerRef.current) {
+        window.removeEventListener("scroll", scrollHandlerRef.current)
+        scrollHandlerRef.current = null
+      }
+    }
   }, [clickOpened])
 
   // "Scroll to Explore" handler for the Learn interstitial.

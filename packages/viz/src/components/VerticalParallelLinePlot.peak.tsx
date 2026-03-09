@@ -11,6 +11,16 @@ export interface VerticalParallelLineData {
   highlighted?: boolean
 }
 
+/** Position of a single axis in container-relative pixels */
+export interface AxisLayout {
+  /** Axis display name (matches the string in the `axes` prop) */
+  axis: string
+  /** X position in container-relative pixels */
+  x: number
+  /** Y position in container-relative pixels */
+  y: number
+}
+
 export interface VerticalParallelLinePlotProps {
   data: VerticalParallelLineData[]
   axes: string[]
@@ -31,8 +41,18 @@ export interface VerticalParallelLinePlotProps {
   baselineData?: VerticalParallelLineData
   defineOutcome?: boolean
   overlayTiers?: boolean
+  /** When true, SVG text labels on axes are not rendered. Use with onAxesLayout for external HTML labels. */
+  hideAxisLabels?: boolean
+  /** Called after layout with the position of each axis in container-relative pixels. */
+  onAxesLayout?: (layout: AxisLayout[]) => void
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
+  /** IDs of scenarios the user has selected/chosen. Renders at full opacity in resting state. */
+  chosenIds?: Set<string>
+  /** IDs of scenarios currently highlighted (from any hover source). Full opacity, others dim. */
+  highlightedIds?: Set<string> | null
+  /** Scenario ID to render with a gold halo (e.g. the baseline scenario). */
+  baselineId?: string
 }
 
 const ARROW_PATH =
@@ -40,6 +60,8 @@ const ARROW_PATH =
 
 const DEFAULT_MARGIN_VERTICAL = { top: 40, right: 60, bottom: 50, left: 100 }
 const DEFAULT_MARGIN_HORIZONTAL = { top: 30, right: 20, bottom: 90, left: 20 }
+const BASELINE_HALO_COLOR = "#C5A135"
+const BASELINE_HALO_WIDTH_EXTRA = 3
 
 const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   data,
@@ -60,11 +82,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   baselineData,
   defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
+  hideAxisLabels = false,
+  onAxesLayout,
   onLineHover,
   onLineClick,
+  chosenIds,
+  highlightedIds,
+  baselineId,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const prevAxisLayoutRef = useRef<string>("")
   const dimensions = useResizeObserver(
     containerRef as React.RefObject<HTMLElement>,
   )
@@ -92,122 +120,159 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Track currently hovered scenario for dimming other lines
   const hoveredScenarioRef = useRef<number | null>(null)
 
-  // Centralized filtering function - separate opacity for lines vs circles
-  const getScenarioOpacity = useCallback(
-    (scenario: VerticalParallelLineData, elementType: "line" | "circle") => {
-      // Check if scenario passes all active filters.
-      // A filter at its default [-1, 1] is treated as "no filter applied" —
-      // this prevents false-dimming when values exceed ±1 in relative mode.
-      const passesAllFilters = axes.every((axis) => {
-        const filter = filterRanges.current[axis]
-        if (!filter) return true
-        if (filter[0] === -1 && filter[1] === 1) return true // default = no filter
+  // Debounce mouseout so micro-movements between a line and its circles
+  // (or between adjacent path segments) don't cause rapid dim/undim flicker.
+  const hoverOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-        const value = scenario.values[axis]
-        if (value == null) return true // Null/undefined values pass filters
-        return value >= filter[0] && value <= filter[1]
-      })
+  // ── Unified style resolver ──────────────────────────────────────────────────
+  // Single source of truth for every visual property of a scenario line/circle.
+  // `hoveredIndex` is the D3-level chart hover (by array index); `highlightedIds`
+  // covers sidebar hover, theme hover, or any external source (by scenario ID).
 
-      if (elementType === "circle") {
-        return passesAllFilters ? 1.0 : 0.15
-      } else {
-        return passesAllFilters ? 1.0 : 0.2
-      }
-    },
-    [axes],
-  )
-
-  // Check if scenario is active (passes all filters) - for hover eligibility
-  const isScenarioActive = useCallback(
+  const passesFilters = useCallback(
     (scenario: VerticalParallelLineData) => {
       return axes.every((axis) => {
         const filter = filterRanges.current[axis]
         if (!filter) return true
-        if (filter[0] === -1 && filter[1] === 1) return true // default = no filter
-
+        if (filter[0] === -1 && filter[1] === 1) return true
         const value = scenario.values[axis]
-        if (value == null) return true // Null/undefined values pass filters
+        if (value == null) return true
         return value >= filter[0] && value <= filter[1]
       })
     },
     [axes],
   )
 
-  const updateScenarioVisibility = useCallback(
-    (g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
-      data.forEach((scenario, scenarioIndex) => {
-        const lineOpacity = getScenarioOpacity(scenario, "line")
-        const circleOpacity = getScenarioOpacity(scenario, "circle")
+  interface LineStyle {
+    lineOpacity: number
+    circleOpacity: number
+    strokeWidth: number
+    circleRadius: number
+  }
 
-        g.select(`.line-${scenarioIndex}`)
-          .transition()
-          .duration(300)
-          .ease(d3.easeQuadOut)
-          .attr("opacity", lineOpacity)
+  const getLineStyle = useCallback(
+    (
+      scenario: VerticalParallelLineData,
+      scenarioIndex: number,
+      hoveredIndex: number | null,
+    ): LineStyle => {
+      const active = passesFilters(scenario)
+      const chosen = chosenIds ? chosenIds.has(scenario.id) : false
+      const hasHighlight =
+        hoveredIndex !== null ||
+        (highlightedIds != null && highlightedIds.size > 0)
+      const isHovered =
+        hoveredIndex === scenarioIndex ||
+        (highlightedIds != null && highlightedIds.has(scenario.id))
 
-        axes.forEach((axisName) => {
-          g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, "-")}`)
-            .transition()
-            .duration(300)
-            .ease(d3.easeQuadOut)
-            .attr("opacity", circleOpacity)
-        })
-      })
+      // ── Opacity ──────────────────────────────────────────────
+      let lineOpacity: number
+      let circleOpacity: number
+
+      if (hasHighlight) {
+        if (isHovered) {
+          lineOpacity = 1.0; circleOpacity = 1.0
+        } else if (chosen && active) {
+          lineOpacity = 0.35; circleOpacity = 0.4
+        } else {
+          lineOpacity = active ? 0.1 : 0.04
+          circleOpacity = active ? 0.12 : 0.06
+        }
+      } else {
+        // Resting state: three tiers
+        if (!active) {
+          lineOpacity = 0.22; circleOpacity = 0.28
+        } else if (chosen) {
+          lineOpacity = 1.0; circleOpacity = 1.0
+        } else {
+          lineOpacity = 0.55; circleOpacity = 0.7
+        }
+      }
+
+      // ── Stroke width ─────────────────────────────────────────
+      const strokeWidth = isHovered
+        ? 3.5
+        : chosen
+          ? (scenario.highlighted ? 3 : 2.2)
+          : active ? 1.8 : 0.8
+
+      // ── Circle radius ────────────────────────────────────────
+      const circleRadius = isHovered
+        ? (scenario.highlighted ? 6 : 5)
+        : (scenario.highlighted ? 5 : 4)
+
+      return { lineOpacity, circleOpacity, strokeWidth, circleRadius }
     },
-    [data, axes, getScenarioOpacity],
+    [passesFilters, chosenIds, highlightedIds],
   )
 
-  const applyHoverDimming = useCallback(
+  // Apply styles to all scenarios in the SVG group (used after brush, hover, and sidebar changes)
+  const applyStyles = useCallback(
     (
       g: d3.Selection<SVGGElement, unknown, null, undefined>,
       hoveredIndex: number | null,
+      animate = false,
     ) => {
-      data.forEach((scenario, scenarioIndex) => {
-        const isHovered = hoveredIndex === scenarioIndex
-        const isActive = isScenarioActive(scenario)
+      data.forEach((scenario, i) => {
+        const s = getLineStyle(scenario, i, hoveredIndex)
+        const line = g.select(`.line-${i}`)
+        const sel = animate
+          ? (line.transition().duration(300).ease(d3.easeQuadOut) as any)
+          : line
+        sel.attr("opacity", s.lineOpacity).attr("stroke-width", s.strokeWidth)
 
-        let lineOpacity: number
-        let circleOpacity: number
-
-        if (hoveredIndex === null) {
-          lineOpacity = getScenarioOpacity(scenario, "line")
-          circleOpacity = getScenarioOpacity(scenario, "circle")
-        } else if (isHovered) {
-          lineOpacity = 1.0
-          circleOpacity = 1.0
-        } else {
-          lineOpacity = isActive ? 0.15 : 0.05
-          circleOpacity = isActive ? 0.2 : 0.1
+        // Keep the gold halo in sync
+        const halo = g.select(`.line-halo-${i}`)
+        if (!halo.empty()) {
+          const hSel = animate
+            ? (halo.transition().duration(300).ease(d3.easeQuadOut) as any)
+            : halo
+          hSel
+            .attr("opacity", s.lineOpacity)
+            .attr("stroke-width", s.strokeWidth + BASELINE_HALO_WIDTH_EXTRA)
         }
 
-        const strokeWidth = isHovered
-          ? 3.5
-          : isActive
-            ? scenario.highlighted
-              ? 3
-              : 2.5
-            : 1.5
-
-        g.select(`.line-${scenarioIndex}`)
-          .attr("opacity", lineOpacity)
-          .attr("stroke-width", strokeWidth)
-
-        const circleRadius = isHovered
-          ? scenario.highlighted
-            ? 6
-            : 5
-          : scenario.highlighted
-            ? 5
-            : 4
-
         axes.forEach((axisName) => {
-          g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, "-")}`)
-            .attr("opacity", circleOpacity)
-            .attr("r", circleRadius)
+          const circle = g.select(
+            `.circle-${i}-${axisName.replace(/\s+/g, "-")}`,
+          )
+          const cSel = animate
+            ? (circle.transition().duration(300).ease(d3.easeQuadOut) as any)
+            : circle
+          cSel.attr("opacity", s.circleOpacity).attr("r", s.circleRadius)
         })
       })
     },
-    [data, axes, getScenarioOpacity, isScenarioActive],
+    [data, axes, getLineStyle],
+  )
+
+  const scheduleHoverClear = useCallback(
+    (g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
+      if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
+      hoverOutTimer.current = setTimeout(() => {
+        if (hoveredScenarioRef.current !== null) return
+        onLineHover?.(null)
+        applyStyles(g, null)
+      }, 180)
+    },
+    [onLineHover, applyStyles],
+  )
+
+  const commitHoverIn = useCallback(
+    (
+      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      d: VerticalParallelLineData,
+      dataIndex: number,
+    ) => {
+      if (hoverOutTimer.current) {
+        clearTimeout(hoverOutTimer.current)
+        hoverOutTimer.current = null
+      }
+      hoveredScenarioRef.current = dataIndex
+      onLineHover?.(d)
+      applyStyles(g, dataIndex)
+    },
+    [onLineHover, applyStyles],
   )
 
   // Handle responsive sizing
@@ -388,41 +453,46 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         // ── Labels ───────────────────────────────────────────────────────────
         axisGroup.selectAll(".axis-label").remove()
 
-        if (isHoriz) {
-          // Single rotated label below the axis bottom
-          axisGroup
-            .append("text")
-            .attr("class", "axis-label")
-            .attr("transform", `translate(0, ${innerHeight + 8}) rotate(-40)`)
-            .attr("text-anchor", "end")
-            .attr("font-size", "11px")
-            .attr("font-weight", "500")
-            .attr("fill", "#333")
-            .text(axis)
-        } else {
-          // Word-wrapped label to the left
-          const words = axis.split(/\s+/)
-          const lineHeight = 14
-          const maxWordsPerLine = 1
-          const lines = []
-          for (let i = 0; i < words.length; i += maxWordsPerLine) {
-            lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
-          }
-          lines.forEach((line, index) => {
+        if (!hideAxisLabels) {
+          if (isHoriz) {
+            // Single rotated label below the axis bottom
             axisGroup
               .append("text")
               .attr("class", "axis-label")
-              .attr("x", -10)
               .attr(
-                "y",
-                4 + (index - (lines.length - 1) / 2) * lineHeight,
+                "transform",
+                `translate(0, ${innerHeight + 8}) rotate(-40)`,
               )
               .attr("text-anchor", "end")
-              .attr("font-size", "12px")
+              .attr("font-size", "11px")
               .attr("font-weight", "500")
               .attr("fill", "#333")
-              .text(line)
-          })
+              .text(axis)
+          } else {
+            // Word-wrapped label to the left
+            const words = axis.split(/\s+/)
+            const lineHeight = 14
+            const maxWordsPerLine = 1
+            const lines: string[] = []
+            for (let i = 0; i < words.length; i += maxWordsPerLine) {
+              lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+            }
+            lines.forEach((line, index) => {
+              axisGroup
+                .append("text")
+                .attr("class", "axis-label")
+                .attr("x", -10)
+                .attr(
+                  "y",
+                  4 + (index - (lines.length - 1) / 2) * lineHeight,
+                )
+                .attr("text-anchor", "end")
+                .attr("font-size", "12px")
+                .attr("font-weight", "500")
+                .attr("fill", "#333")
+                .text(line)
+            })
+          }
         }
 
         // ── Tick marks ───────────────────────────────────────────────────────
@@ -576,7 +646,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 d3.select(this).attr("transform", groupTransform(clampedValue))
                 filterRanges.current[axis] = [clampedValue, currentRange[1]]
                 updateRangeIndicator(clampedValue, currentRange[1])
-                updateScenarioVisibility(g)
+                applyStyles(g, hoveredScenarioRef.current, true)
               })
               .on("end", function () {
                 isDragging.current = false
@@ -643,7 +713,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 d3.select(this).attr("transform", groupTransform(clampedValue))
                 filterRanges.current[axis] = [currentRange[0], clampedValue]
                 updateRangeIndicator(currentRange[0], clampedValue)
-                updateScenarioVisibility(g)
+                applyStyles(g, hoveredScenarioRef.current, true)
               })
               .on("end", function () {
                 isDragging.current = false
@@ -685,6 +755,24 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         }
 
       })
+
+      // ── Report axis positions to parent for external HTML labels ────────────
+      if (onAxesLayout) {
+        const layoutPositions: AxisLayout[] = axes.map((axis) => {
+          const axisPos = axisScale(axis)!
+          return isHoriz
+            ? { axis, x: margin.left + axisPos, y: margin.top }
+            : { axis, x: margin.left, y: margin.top + axisPos }
+        })
+        // Only fire callback when positions actually change to prevent re-render loops
+        const key = layoutPositions
+          .map((p) => `${p.axis}:${p.x}:${p.y}`)
+          .join("|")
+        if (key !== prevAxisLayoutRef.current) {
+          prevAxisLayoutRef.current = key
+          onAxesLayout(layoutPositions)
+        }
+      }
 
       // ── Line generators ──────────────────────────────────────────────────────
       const baselineLineGen = isHoriz
@@ -798,43 +886,42 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               ? colors.highlighted
               : colors.default
 
-        const passesAllFilters = axes.every((axis) => {
-          const filter = filterRanges.current[axis]
-          if (!filter) return true
-
-          const value = d.values[axis]
-          if (value == null) return true
-          return value >= filter[0] && value <= filter[1]
-        })
-
-        const lineOpacity = getScenarioOpacity(d, "line")
-        const circleOpacity = getScenarioOpacity(d, "circle")
+        const style = getLineStyle(d, dataIndex, null)
+        const isBaseline = baselineId != null && d.id === baselineId
 
         const pathData = axes.map(
           (axis) => [axis, d.values[axis]] as [string, number | null],
         )
 
+        // Gold halo rendered behind the normal line for the baseline scenario
+        if (isBaseline) {
+          g.append("path")
+            .attr("class", `line-halo-${dataIndex}`)
+            .attr("fill", "none")
+            .attr("stroke", BASELINE_HALO_COLOR)
+            .attr("stroke-width", style.strokeWidth + BASELINE_HALO_WIDTH_EXTRA)
+            .attr("opacity", style.lineOpacity)
+            .attr("d", lineGenerator(pathData))
+            .attr("stroke-linecap", "round")
+            .attr("stroke-linejoin", "round")
+            .style("pointer-events", "none")
+        }
+
         g.append("path")
           .attr("class", `line-${dataIndex}`)
           .attr("fill", "none")
           .attr("stroke", lineColor)
-          .attr(
-            "stroke-width",
-            passesAllFilters ? (d.highlighted ? 3 : 2.5) : 1.5,
-          )
-          .attr("opacity", lineOpacity)
+          .attr("stroke-width", style.strokeWidth)
+          .attr("opacity", style.lineOpacity)
           .attr("d", lineGenerator(pathData))
           .style("cursor", "pointer")
           .on("mouseover", function () {
-            if (!isScenarioActive(d)) return
-            hoveredScenarioRef.current = dataIndex
-            onLineHover?.(d)
-            applyHoverDimming(g, dataIndex)
+            if (!passesFilters(d)) return
+            commitHoverIn(g, d, dataIndex)
           })
           .on("mouseout", function () {
             hoveredScenarioRef.current = null
-            onLineHover?.(null)
-            applyHoverDimming(g, null)
+            scheduleHoverClear(g)
           })
           .on("click", function () {
             onLineClick?.(d)
@@ -850,21 +937,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("fill", lineColor)
             .attr("stroke", "white")
             .attr("stroke-width", 1.5)
-            .attr("r", d.highlighted ? 5 : 4)
-            .attr("opacity", circleOpacity)
+            .attr("r", style.circleRadius)
+            .attr("opacity", style.circleOpacity)
             .attr("cx", isHoriz ? axisScale(axis)! : scales[axis]!(value))
             .attr("cy", isHoriz ? scales[axis]!(value) : axisScale(axis)!)
             .style("cursor", "pointer")
             .on("mouseover", function () {
-              if (!isScenarioActive(d)) return
-              hoveredScenarioRef.current = dataIndex
-              onLineHover?.(d)
-              applyHoverDimming(g, dataIndex)
+              if (!passesFilters(d)) return
+              commitHoverIn(g, d, dataIndex)
             })
             .on("mouseout", function () {
               hoveredScenarioRef.current = null
-              onLineHover?.(null)
-              applyHoverDimming(g, null)
+              scheduleHoverClear(g)
             })
             .on("click", function () {
               onLineClick?.(d)
@@ -898,13 +982,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       showBaseline,
       baselineData,
       title,
-      onLineHover,
       onLineClick,
-      getScenarioOpacity,
-      isScenarioActive,
+      passesFilters,
+      baselineId,
       overlayTiers,
-      updateScenarioVisibility,
-      applyHoverDimming,
+      hideAxisLabels,
+      onAxesLayout,
+      getLineStyle,
+      applyStyles,
+      commitHoverIn,
+      scheduleHoverClear,
     ],
   )
 
@@ -915,6 +1002,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   useEffect(() => {
     updateChart(currentWidth, currentHeight, true)
   }, [currentWidth, currentHeight, updateChart])
+
+  // Re-apply styles when external highlight changes (sidebar hover / selection)
+  useEffect(() => {
+    const svg = d3.select(svgRef.current)
+    const g = svg.select<SVGGElement>("g")
+    if (g.empty()) return
+    applyStyles(g, hoveredScenarioRef.current)
+  }, [highlightedIds, applyStyles])
+
 
   return (
     <div

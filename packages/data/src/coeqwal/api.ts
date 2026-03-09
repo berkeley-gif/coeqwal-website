@@ -272,6 +272,62 @@ export const ENDPOINTS = {
   refugeDusPeriod: (scenarioId: string) =>
     `/statistics/scenarios/${scenarioId}/refuge-demand-units/period-summary`,
 
+  // Environmental River Flows endpoints (59 CalSim channel reaches)
+
+  /** List of all 59 env-flow channel reaches with watershed attributes */
+  CHANNELS_LIST: "/statistics/channels",
+
+  /**
+   * Filtered list of channel reaches
+   * @param channelClass - 'stream', 'canal', or 'reservoir_release'
+   */
+  channelsList: (channelClass?: string, watershed?: string) => {
+    const params = [
+      channelClass && `channel_class=${channelClass}`,
+      watershed && `watershed=${watershed}`,
+    ]
+      .filter(Boolean)
+      .join("&")
+    return `/statistics/channels${params ? `?${params}` : ""}`
+  },
+
+  /** List of all 5 CEFF seasonal definitions (static lookup) */
+  ENV_FLOW_SEASONS: "/statistics/env-flow-seasons",
+
+  /**
+   * Monthly % unimpaired flow statistics (Metric 1)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param channelId - Optional single channel filter (e.g., "C_SAC049")
+   */
+  channelsMonthly: (scenarioId: string, channelId?: string) =>
+    `/statistics/scenarios/${scenarioId}/channels/monthly${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  /**
+   * Seasonal flow volumes + % unimpaired + % functional flow (Metrics 1+2)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param channelId - Optional single channel filter
+   */
+  channelsSeasonal: (scenarioId: string, channelId?: string) =>
+    `/statistics/scenarios/${scenarioId}/channels/seasonal${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  /**
+   * Period-of-record flow alteration index (Metric 3) + full-period aggregates
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param channelId - Optional single channel filter
+   */
+  channelsPeriodSummary: (scenarioId: string, channelId?: string) =>
+    `/statistics/scenarios/${scenarioId}/channels/period-summary${channelId ? `?channel_id=${channelId}` : ""}`,
+
+  // Delta statistics endpoints (X2, salinity, outflow)
+
+  /**
+   * Monthly Delta statistics (X2, salinity, outflow)
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param category - Optional: 'x2', 'salinity_compliance', 'salinity_pumps', 'outflow'
+   */
+  deltaMonthly: (scenarioId: string, category?: string) =>
+    `/statistics/scenarios/${scenarioId}/delta/monthly${category ? `?category=${category}` : ""}`,
+
   // Batch statistics endpoint (for Data Explorer performance)
 
   /**
@@ -284,4 +340,11 @@ export const ENDPOINTS = {
     types: string[] = ["storage", "cws", "ag"],
   ) =>
     `/statistics/batch?scenarios=${scenarios.join(",")}&types=${types.join(",")}`,
+
+  // Verification status endpoints
+
+  VERIFICATION_STATUS: "/verification/status",
+
+  verificationScenario: (scenarioId: string) =>
+    `/verification/status/${scenarioId}`,
 } as const

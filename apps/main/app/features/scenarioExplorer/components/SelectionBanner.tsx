@@ -76,6 +76,7 @@ function SortableChip({
     cursor: isDragging ? "grabbing" : "grab",
     touchAction: "none",
     zIndex: isDragging ? 100 : "auto",
+    flexShrink: 0,
   }
 
   return (
@@ -193,7 +194,6 @@ export default function SelectionBanner() {
               py: theme.space.component.sm,
             }}
           >
-            {/* Outer row: [count + wrapping chips] pinned to left, [Clear] pinned to right */}
             <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
               <DndContext
                 sensors={sensors}

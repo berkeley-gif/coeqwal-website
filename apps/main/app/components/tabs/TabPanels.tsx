@@ -14,7 +14,7 @@ import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../../context/Tabs"
 import { TABS, TabKey } from "../../types/tabs"
 import TabPanel from "../../components/tabs/TabPanel"
-import AutoHeight from "../../../../../packages/ui/src/components/common/AutoHeight"
+import { AutoHeight } from "@repo/ui"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
 import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
@@ -23,7 +23,7 @@ import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 
 const panelVariants = {
-  enter: { opacity: 0, x: 30 },
+  enter: { opacity: 0, x: 30 }, // is this used?
   center: { opacity: 1, x: 0 },
   exit: { opacity: 0, x: -30 },
 }
@@ -49,13 +49,15 @@ export default function TabPanels() {
     offsetPx: collapsedHeaderHeight,
   })
 
+  // Sole owner of the ?tab= URL parameter.
+  // Adds ?tab= when user scrolls into the tabs area, removes it when they leave.
+  // Also updates ?tab= when activeTab changes (click, auto-advance, URL init).
+  // useTabNavigation only dispatches context state — it does not touch the URL.
   useEffect(() => {
-    // Read the *current* URL query from the browser
     const urlTab = searchParams.get("tab") as TabKey | null
     const params = new URLSearchParams(searchParams.toString())
 
     if (isInTabsArea) {
-      // We are in the tabs area  to  ensure ?tab=<activeTab>
       if (urlTab !== activeTab) {
         params.set("tab", activeTab)
         const query = params.toString()

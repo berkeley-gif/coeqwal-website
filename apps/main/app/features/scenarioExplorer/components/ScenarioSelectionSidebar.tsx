@@ -4,8 +4,11 @@
  * ScenarioSelectionSidebar - Shared scenario selection panel for analysis modals
  *
  * Renders a narrow vertical sidebar containing:
- * - GridControls (show only chosen / baseline toggle) — from store
- * - Scrollable theme-grouped scenario list with checkboxes
+ * - GridControls (show only chosen / alternative baselines toggle) — from store
+ * - Flat theme-grouped scenario list with checkboxes
+ *
+ * Theme headers have a select-all checkbox and a clickable badge that
+ * toggles all scenarios in that theme — matching the list view behavior.
  *
  * Note: SelectionBanner is NOT rendered here — it lives in the modal title
  * row so it has full horizontal width and is never clipped.
@@ -19,17 +22,8 @@
  * scenario row to serve as a chart legend.
  */
 
-import React, { useMemo, useState } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  Checkbox,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  ExpandMoreIcon,
-} from "@repo/ui/mui"
+import React, { useMemo, useEffect, useRef } from "react"
+import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -59,18 +53,18 @@ const PRIMARY_BASELINE_ID = "s0020"
 // ── Props ─────────────────────────────────────────────────────────────────────
 
 interface ScenarioSelectionSidebarProps {
-  /**
-   * Optional map of scenarioId → line color.
-   * When provided, renders a small colored swatch next to each scenario row.
-   * Used by ComparisonPanel to make the sidebar double as a chart legend.
-   */
   scenarioColors?: Record<string, string>
+  hoveredScenarioId?: string | null
+  /** Called when the user hovers scenario rows or a theme header in the sidebar. */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
+  hoveredScenarioId,
+  onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
 
@@ -78,20 +72,33 @@ export default function ScenarioSelectionSidebar({
     selectedScenarios,
     toggleScenario,
     selectScenarios,
+    highlightedScenario,
     showOnlyChosen,
-    showDefinitions,
+    showAlternativeBaselines,
     setShowOnlyChosen,
-    setShowDefinitions,
+    setShowAlternativeBaselines,
   } = useScenarioExplorerStore()
+
+  // ── Scroll-to-highlight plumbing ──────────────────────────────────────────
+  const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+
+  useEffect(() => {
+    if (!activeScenarioId) return
+    const timer = setTimeout(() => {
+      scenarioRowRefs.current
+        .get(activeScenarioId)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }, 80)
+    return () => clearTimeout(timer)
+  }, [activeScenarioId])
 
   // Toggle all scenarios in a theme group on/off
   const toggleTheme = (itemIds: string[]) => {
     const allChosen = itemIds.every((id) => selectedScenarios.includes(id))
     if (allChosen) {
-      // Deselect all in this theme
       selectScenarios(selectedScenarios.filter((id) => !itemIds.includes(id)))
     } else {
-      // Select all in this theme (add any missing ones, preserving order)
       const toAdd = itemIds.filter((id) => !selectedScenarios.includes(id))
       selectScenarios([...selectedScenarios, ...toAdd])
     }
@@ -99,30 +106,25 @@ export default function ScenarioSelectionSidebar({
 
   const { scenarios, isLoading } = useScenarioList()
 
-  // All themes expanded by default
-  const [expandedThemes, setExpandedThemes] = useState<Set<ScenarioTheme>>(
-    new Set(THEME_ORDER),
-  )
-  const toggleExpanded = (themeKey: ScenarioTheme) => {
-    setExpandedThemes((prev) => {
-      const next = new Set(prev)
-      if (next.has(themeKey)) { next.delete(themeKey) } else { next.add(themeKey) }
-      return next
-    })
-  }
-
-  // Group active scenarios by theme, respecting showOnlyChosen + showDefinitions filters
   const scenariosByTheme = useMemo(() => {
     const activeScenarios = scenarios.filter((s) => s.isActive)
 
-    // Apply the same filtering logic as StrategyGridContent
+    // Full (unfiltered) theme membership — used by theme checkboxes so they
+    // can select/deselect an entire theme even when "show only selected" hides rows.
+    const allGroups = new Map<ScenarioTheme, string[]>()
+    THEME_ORDER.forEach((t) => allGroups.set(t, []))
+    activeScenarios.forEach((s) => {
+      const t = getScenarioTheme(s.scenarioId)
+      allGroups.get(t)?.push(s.scenarioId)
+    })
+
     const filtered = (() => {
       if (showOnlyChosen) {
         return activeScenarios.filter((s) =>
           selectedScenarios.includes(s.scenarioId),
         )
       }
-      if (!showDefinitions) {
+      if (!showAlternativeBaselines) {
         return activeScenarios.filter(
           (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
         )
@@ -130,24 +132,25 @@ export default function ScenarioSelectionSidebar({
       return activeScenarios
     })()
 
-    const groups = new Map<
+    const displayGroups = new Map<
       ScenarioTheme,
       { id: string; shortLabel: string }[]
     >()
-    THEME_ORDER.forEach((t) => groups.set(t, []))
+    THEME_ORDER.forEach((t) => displayGroups.set(t, []))
 
     filtered.forEach((s) => {
       const t = getScenarioTheme(s.scenarioId)
       const shortLabel = getScenarioShortLabel(s.scenarioId)
-      const bucket = groups.get(t)
+      const bucket = displayGroups.get(t)
       if (bucket) bucket.push({ id: s.scenarioId, shortLabel })
     })
 
     return THEME_ORDER.map((t) => ({
       theme: t,
-      items: groups.get(t) ?? [],
+      items: displayGroups.get(t) ?? [],
+      allIds: allGroups.get(t) ?? [],
     }))
-  }, [scenarios, showOnlyChosen, showDefinitions, selectedScenarios])
+  }, [scenarios, showOnlyChosen, showAlternativeBaselines, selectedScenarios])
 
   return (
     <Box
@@ -162,7 +165,7 @@ export default function ScenarioSelectionSidebar({
         backgroundColor: theme.palette.grey[50],
       }}
     >
-      {/* ── Grid controls (show only chosen / baseline toggle) ─────────────── */}
+      {/* ── Grid controls (show only chosen / alternative baselines toggle) ── */}
       <Box
         sx={{
           flexShrink: 0,
@@ -174,9 +177,9 @@ export default function ScenarioSelectionSidebar({
       >
         <GridControls
           showOnlyChosen={showOnlyChosen}
-          showDefinitions={showDefinitions}
+          showAlternativeBaselines={showAlternativeBaselines}
           onShowOnlyChosenChange={setShowOnlyChosen}
-          onShowDefinitionsChange={setShowDefinitions}
+          onShowAlternativeBaselinesChange={setShowAlternativeBaselines}
           iconSize={28}
         />
       </Box>
@@ -200,154 +203,155 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {scenariosByTheme.map(({ theme: themeKey, items }) => {
-          const themeIds = items.map(({ id }) => id)
+        {scenariosByTheme.map(({ theme: themeKey, items, allIds }) => {
+          const visibleIds = items.map(({ id }) => id)
           const allChosen =
-            themeIds.length > 0 &&
-            themeIds.every((id) => selectedScenarios.includes(id))
-          const isExpanded = expandedThemes.has(themeKey)
+            allIds.length > 0 &&
+            allIds.every((id) => selectedScenarios.includes(id))
+          const someChosen =
+            allIds.length > 0 &&
+            allIds.some((id) => selectedScenarios.includes(id))
 
           return (
-            <Accordion
-              key={themeKey}
-              expanded={isExpanded}
-              onChange={() => toggleExpanded(themeKey)}
-              disableGutters
-              elevation={0}
-              sx={{
-                backgroundColor: "transparent",
-                "&:before": { display: "none" },
-                mb: 1,
-              }}
-            >
-              <AccordionSummary
-                expandIcon={
-                  <ExpandMoreIcon
-                    sx={{ fontSize: 16, color: theme.palette.grey[500] }}
-                  />
+            <Box key={themeKey} sx={{ mb: 1 }}>
+              {/* ── Theme header: checkbox + clickable badge ────────────── */}
+              <Box
+                onMouseEnter={() =>
+                  visibleIds.length > 0 && onRowHover?.(visibleIds)
                 }
+                onMouseLeave={() => onRowHover?.(null)}
                 sx={{
-                  minHeight: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
                   px: 1.5,
                   py: 0.25,
-                  flexDirection: "row-reverse",
-                  gap: 0.5,
-                  "&.Mui-expanded": { minHeight: 0 },
-                  "& .MuiAccordionSummary-content": { my: 0 },
-                  "& .MuiAccordionSummary-expandIconWrapper": {
-                    flexShrink: 0,
-                  },
                   borderRadius: theme.borderRadius.xs,
                   "&:hover": {
-                    backgroundColor: theme.palette.interaction.selectedBackground,
+                    backgroundColor:
+                      theme.palette.interaction.selectedBackground,
                   },
                 }}
-                onClick={(e) => {
-                  // Only toggle theme selection when clicking the badge itself,
-                  // not the expand/collapse affordance
-                  const target = e.target as HTMLElement
-                  if (!target.closest(".MuiAccordionSummary-expandIconWrapper")) {
-                    e.stopPropagation()
-                    toggleTheme(themeIds)
-                  }
-                }}
-                aria-label={`${allChosen ? "Deselect" : "Select"} all ${THEME_LABEL_CONFIG[themeKey].label} scenarios`}
               >
-                <ScenarioBadge
-                  label={THEME_LABEL_CONFIG[themeKey].label}
-                  backgroundColor={
-                    theme.palette.waterThemes[themeKey].background
-                  }
-                  color={theme.palette.waterThemes[themeKey].text}
-                  sx={{ display: "block" }}
+                <Checkbox
+                  size="small"
+                  checked={allChosen}
+                  indeterminate={someChosen && !allChosen}
+                  onChange={() => toggleTheme(allIds)}
+                  sx={{
+                    padding: 0,
+                    flexShrink: 0,
+                    transform: "scale(0.8)",
+                  }}
                 />
-              </AccordionSummary>
+                <Box
+                  onClick={() => toggleTheme(allIds)}
+                  sx={{ cursor: "pointer", display: "flex" }}
+                >
+                  <ScenarioBadge
+                    label={THEME_LABEL_CONFIG[themeKey].label}
+                    backgroundColor={
+                      theme.palette.waterThemes[themeKey].background
+                    }
+                    color={theme.palette.waterThemes[themeKey].text}
+                    sx={{ display: "block" }}
+                  />
+                </Box>
+              </Box>
 
-              <AccordionDetails sx={{ p: 0 }}>
-                {items.length === 0 && (
-                  <Typography
+              {/* ── Scenario rows ───────────────────────────────────────── */}
+              {items.map(({ id, shortLabel }) => {
+                const isChosen = selectedScenarios.includes(id)
+                const color = scenarioColors?.[id]
+                const accentColor = color || theme.palette.blue.bright
+                const isActive =
+                  id === highlightedScenario || id === hoveredScenarioId
+
+                return (
+                  <Box
+                    key={id}
+                    ref={(el: HTMLDivElement | null) => {
+                      if (el) scenarioRowRefs.current.set(id, el)
+                      else scenarioRowRefs.current.delete(id)
+                    }}
+                    onClick={() => toggleScenario(id)}
+                    onMouseEnter={() => onRowHover?.([id])}
+                    onMouseLeave={() => onRowHover?.(null)}
                     sx={{
-                      px: 2,
-                      py: 0.5,
-                      fontSize: "0.75rem",
-                      color: theme.palette.grey[400],
-                      fontStyle: "italic",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.75,
+                      pl: 1.25,
+                      pr: 1,
+                      py: 0.25,
+                      cursor: "pointer",
+                      borderLeft: `3px solid ${
+                        isActive || isChosen ? accentColor : "transparent"
+                      }`,
+                      backgroundColor: isActive
+                        ? theme.palette.grey[900]
+                        : "transparent",
+                      transition:
+                        "background-color 200ms ease, border-color 200ms ease, color 200ms ease",
+                      "&:hover": {
+                        backgroundColor: isActive
+                          ? theme.palette.grey[900]
+                          : theme.palette.interaction.selectedBackground,
+                        borderLeftColor: accentColor,
+                      },
                     }}
                   >
-                    Coming soon
-                  </Typography>
-                )}
-                {items.map(({ id, shortLabel }) => {
-                  const isChosen = selectedScenarios.includes(id)
-                  const color = scenarioColors?.[id]
-                  const accentColor = color || theme.palette.blue.bright
-
-                  return (
-                    <Box
-                      key={id}
-                      onClick={() => toggleScenario(id)}
+                    <Checkbox
+                      size="small"
+                      checked={isChosen}
+                      onChange={() => toggleScenario(id)}
+                      onClick={(e) => e.stopPropagation()}
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.75,
-                        pl: 1.25,
-                        pr: 1,
-                        py: 0.25,
-                        cursor: "pointer",
-                        borderLeft: `2px solid ${isChosen ? accentColor : "transparent"}`,
-                        transition: "background-color 0.1s",
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.interaction.selectedBackground,
-                          borderLeftColor: accentColor,
-                        },
+                        padding: 0,
+                        flexShrink: 0,
+                        transform: "scale(0.75)",
+                        color: isActive ? "rgba(255,255,255,0.5)" : undefined,
+                        "&.Mui-checked": isActive
+                          ? { color: "rgba(255,255,255,0.85)" }
+                          : {},
                       }}
-                    >
-                      <Checkbox
-                        size="small"
-                        checked={isChosen}
-                        onChange={() => toggleScenario(id)}
-                        onClick={(e) => e.stopPropagation()}
+                    />
+
+                    {color && (
+                      <Box
+                        aria-hidden="true"
                         sx={{
-                          padding: 0,
+                          width: isActive ? 20 : 14,
+                          height: 3,
+                          borderRadius: "1.5px",
+                          backgroundColor: color,
                           flexShrink: 0,
-                          transform: "scale(0.75)",
+                          transition: "width 200ms ease",
                         }}
                       />
+                    )}
 
-                      {/* Color swatch (ComparisonPanel chart legend) */}
-                      {color && (
-                        <Box
-                          aria-hidden="true"
-                          sx={{
-                            width: 14,
-                            height: 3,
-                            borderRadius: "2px",
-                            backgroundColor: color,
-                            flexShrink: 0,
-                          }}
-                        />
-                      )}
-
-                      <Typography
-                        sx={{
-                          fontSize: "0.8125rem",
-                          lineHeight: 1.35,
-                          fontWeight: isChosen ? 500 : 400,
-                          color: isChosen
+                    <Typography
+                      sx={{
+                        fontSize: "0.8125rem",
+                        lineHeight: 1.35,
+                        fontWeight: isActive ? 600 : 400,
+                        color: isActive
+                          ? "#fff"
+                          : isChosen
                             ? theme.palette.text.primary
                             : theme.palette.grey[600],
-                          transition: "color 0.1s",
-                          letterSpacing: "0.01em",
-                        }}
-                      >
-                        {shortLabel}
-                      </Typography>
-                    </Box>
-                  )
-                })}
-              </AccordionDetails>
-            </Accordion>
+                        transition: "color 200ms ease",
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {shortLabel}
+                    </Typography>
+                  </Box>
+                )
+              })}
+            </Box>
           )
         })}
       </Box>

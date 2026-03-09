@@ -72,6 +72,10 @@ export interface CoeqwalPanelProps {
    *  MorphingHeadline overlay is not active. Renders directly without a
    *  Typography wrapper so callers can supply the correct variant pair. */
   responsiveHeadline?: React.ReactNode
+  /** Vertical content alignment when minHeight is set.
+   *  "center" (default) — vertically centres content.
+   *  "top" — content starts at the top (useful when descriptionSx handles positioning). */
+  contentAlign?: "center" | "top"
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -92,6 +96,7 @@ export function CoeqwalPanel({
   descriptionSx,
   childrenMt = 5,
   responsiveHeadline,
+  contentAlign = "center",
 }: CoeqwalPanelProps) {
   const theme = useTheme()
   const bg = background ?? theme.palette.common.white
@@ -111,7 +116,7 @@ export function CoeqwalPanel({
       component="section"
       id={id}
       sx={{
-        backgroundColor: bg,
+        background: bg,
         borderBottom: borderBottom ?? "none",
         px: theme.space.panel.padding,
         py: theme.space.panel.padding,
@@ -119,7 +124,7 @@ export function CoeqwalPanel({
           minHeight,
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: contentAlign === "top" ? "flex-start" : "center",
         }),
       }}
     >
