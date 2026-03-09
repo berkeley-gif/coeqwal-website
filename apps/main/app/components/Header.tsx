@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
-import { WATER_THEMES } from "@repo/data/coeqwal"
+import { WATER_THEMES } from "../content/themes"
 
 /**
  * Main application header

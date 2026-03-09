@@ -16,7 +16,7 @@
 
 /**
  * Scenario theme for visual categorization.
- * Keys align with WATER_THEMES ids in packages/data/src/coeqwal/themes.ts.
+ * Keys align with WATER_THEMES ids in content/themes.ts.
  */
 export type ScenarioTheme = "baseline" | "ag_gw" | "eco" | "cws" | "delta"
 
