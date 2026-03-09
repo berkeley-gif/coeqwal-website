@@ -12,7 +12,7 @@ import {
 import { motion } from "@repo/motion"
 import { useTheme } from "@repo/ui/mui"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
-import type { MixedSection } from "../../../../../packages/data/src/coeqwal/themes.ts"
+import type { MixedSection } from "@repo/data/coeqwal"
 
 function parseBoldText(text: string): React.ReactNode {
   const parts = text.split(/\*\*(.*?)\*\*/g)

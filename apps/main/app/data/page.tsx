@@ -17,14 +17,13 @@ import {
   ListSubheader,
   FormControl,
   Grid,
-  IconButton,
   CircularProgress,
   SelectChangeEvent,
   Alert,
   useTheme,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-import { ArrowHead, ScenarioBadge } from "@repo/ui"
+import { CircularArrowButton, ScenarioBadge } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import { CenteredTextSection } from "../components/CenteredTextSection"
 import type { Scenario } from "../types/scenarioDownloads"
@@ -371,27 +370,20 @@ export default function DataPage() {
                 mb: (theme) => theme.space.section.lg,
               }}
             >
-              <IconButton
+              <CircularArrowButton
                 onClick={() => {
                   if (typeof window !== "undefined") window.history.back()
                 }}
+                size={40}
+                rotation="90deg"
+                color={theme.palette.common.white}
+                ariaLabel="Go back"
                 sx={{
                   position: "absolute",
                   left: -56,
                   top: 4,
-                  color: (theme) => theme.palette.common.white,
-                  width: 40,
-                  height: 40,
                 }}
-              >
-                <ArrowHead
-                  style={{
-                    width: 24,
-                    height: 24,
-                    transform: "rotate(180deg)",
-                  }}
-                />
-              </IconButton>
+              />
               <Typography variant="h4">Data & downloads</Typography>
             </Box>
 

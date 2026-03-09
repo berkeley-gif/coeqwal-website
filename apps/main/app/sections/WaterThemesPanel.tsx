@@ -14,7 +14,8 @@
  */
 
 import React from "react"
-import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { NavArrow } from "@repo/ui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
   StickyScrollSection,
@@ -292,18 +293,7 @@ function ThemeCircleLabel({
             }}
           >
             Learn more
-            <ArrowForwardIcon
-              sx={{
-                fontSize: "1.1rem",
-                flexShrink: 0,
-                transition: "transform 0.15s ease",
-                "& path": {
-                  stroke: "currentColor",
-                  strokeWidth: "0.5px",
-                  paintOrder: "stroke fill",
-                },
-              }}
-            />
+            <NavArrow />
           </div>
         )}
       </div>

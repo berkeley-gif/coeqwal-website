@@ -18,10 +18,7 @@ import { motion, AnimatePresence } from "@repo/motion"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { ScrollToButton } from "@repo/ui"
 import { Panel } from "@repo/ui"
-import type {
-  Theme,
-  SectionContent,
-} from "../../../../packages/data/src/coeqwal/themes"
+import type { Theme, SectionContent } from "@repo/data/coeqwal"
 import { MixedSectionRenderer } from "./themePanels/MixedSectionRenderer"
 import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
 import { CenteredTextSection } from "./CenteredTextSection"

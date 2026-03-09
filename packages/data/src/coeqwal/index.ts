@@ -182,5 +182,5 @@ export {
 export * from "./hooks"
 
 // Water themes and scenario mappings
-export type { Theme } from "./themes"
+export type { Theme, MixedSection, BoxSection, SectionContent } from "./themes"
 export { WATER_THEMES, THEME_SCENARIOS } from "./themes"

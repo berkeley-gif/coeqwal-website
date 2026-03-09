@@ -3,8 +3,8 @@
 import { useRef, useEffect, useMemo } from "react"
 import Link from "next/link"
 import { useTranslation } from "@repo/i18n"
-import { Box, Typography, ArrowForwardIcon, useTheme } from "@repo/ui/mui"
-import { CoeqwalPanel } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { CoeqwalPanel, NavArrow } from "@repo/ui"
 import { motion } from "@repo/motion"
 import {
   useScrollProgress,
@@ -45,19 +45,7 @@ function AboutCtaLink({
         <Typography variant="subtitle1" sx={{ fontWeight: "fontWeightSemiBold" }}>
           {children}
         </Typography>
-        <ArrowForwardIcon
-          className="about-arrow"
-          sx={{
-            fontSize: "1.1rem",
-            flexShrink: 0,
-            transition: "transform 0.15s ease",
-            "& path": {
-              stroke: "currentColor",
-              strokeWidth: "0.5px",
-              paintOrder: "stroke fill",
-            },
-          }}
-        />
+        <NavArrow className="about-arrow" />
       </Box>
     </Link>
   )

@@ -2,7 +2,7 @@
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
-import type { BoxSection } from "../../../../../packages/data/src/coeqwal/themes.ts"
+import type { BoxSection } from "@repo/data/coeqwal"
 
 export function BoxSectionRenderer({ content }: { content: BoxSection }) {
   const muiTheme = useTheme()
