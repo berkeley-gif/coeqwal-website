@@ -8,7 +8,7 @@
  */
 
 import { Box, Typography, useTheme } from "@mui/material"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { NavArrow } from "../common/NavArrow"
 
 /** A single link row with label and forward arrow */
 export interface InterstitialLink {
@@ -68,15 +68,7 @@ function LinkRow({ link, color }: { link: InterstitialLink; color: string }) {
       }}
     >
       <Typography variant="subtitle1">{link.label}</Typography>
-      <ArrowForwardIcon
-        className="interstitial-arrow"
-        sx={{
-          fontSize: "1.1rem",
-          opacity: 0.6,
-          flexShrink: 0,
-          transition: "transform 0.15s ease",
-        }}
-      />
+      <NavArrow className="interstitial-arrow" opacity={0.6} bold={false} />
     </Box>
   )
 }
@@ -152,19 +144,12 @@ export function TwoColumnInterstitial({
               opacity: 0.75,
               "&:hover": { opacity: 1 },
               "&:hover .scroll-arrow": {
-                transform: "rotate(90deg) translateX(4px)",
+                transform: "translateX(4px)",
               },
             }}
           >
             <Typography variant="overline">{scrollPrompt}</Typography>
-            <ArrowForwardIcon
-              className="scroll-arrow"
-              sx={{
-                fontSize: "1.1rem",
-                transform: "rotate(90deg)",
-                transition: "transform 0.15s ease",
-              }}
-            />
+            <NavArrow direction="down" className="scroll-arrow" bold={false} />
           </Box>
         )}
       </Box>
