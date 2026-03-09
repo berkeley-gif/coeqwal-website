@@ -39,11 +39,10 @@ function AboutCtaLink({
           alignItems: "center",
           gap: 1,
           py: 1,
-          cursor: "pointer",
           "&:hover .about-arrow": { transform: "translateX(4px)" },
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: "fontWeightSemiBold" }}>
           {children}
         </Typography>
         <ArrowForwardIcon
@@ -52,7 +51,6 @@ function AboutCtaLink({
             fontSize: "1.1rem",
             flexShrink: 0,
             transition: "transform 0.15s ease",
-            color: "inherit",
             "& path": {
               stroke: "currentColor",
               strokeWidth: "0.5px",
@@ -75,8 +73,6 @@ const VIDEO_SRCS: VideoSource[] = [
     type: "video/mp4",
   },
 ]
-
-const RULE = "1px solid #e5e5df"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /* INTRO SECTION                                                                */
@@ -181,7 +177,7 @@ const IntroSection = () => {
     {
       line1: t("homePanel.titleLine1"),
       line2: t("homePanel.titleLine2"),
-      textShadow: true as const,
+      textShadow: true,
     },
     {
       line1: "What is",
@@ -229,7 +225,7 @@ const IntroSection = () => {
         <CoeqwalPanel
           id="about-coeqwal"
           background={theme.palette.brand.water}
-          textColor={theme.palette.common.white}
+          textColor={theme.palette.text.secondary}
           minHeight="120vh"
           contentMotionStyle={{ opacity: aboutOpacity }}
           responsiveHeadline={
@@ -237,14 +233,14 @@ const IntroSection = () => {
               <Typography
                 variant="h2Main"
                 component="span"
-                sx={{ display: "block", color: theme.palette.common.white }}
+                sx={{ display: "block", color: "text.secondary" }}
               >
                 What is
               </Typography>
               <Typography
                 variant="h1"
                 component="span"
-                sx={{ display: "block", color: theme.palette.common.white }}
+                sx={{ display: "block", color: "text.secondary" }}
               >
                 COEQWAL?
               </Typography>
@@ -275,14 +271,14 @@ const IntroSection = () => {
         panelRef={waterThemesPanelRef}
         dockRef={waterThemesDockRef}
         contentOpacity={waterThemesOpacity}
-        borderBottom={RULE}
+        borderBottom={theme.border.light}
       />
 
       {/* Spacer between themes panel and site overview */}
       <Box
         sx={{
           height: theme.space.panel.padding,
-          backgroundColor: theme.palette.brand.panelLight,
+          backgroundColor: "brand.panelLight",
         }}
       />
 
@@ -291,59 +287,46 @@ const IntroSection = () => {
         component="section"
         aria-label="On this site, you can"
         sx={{
-          backgroundColor: theme.palette.brand.panelLight,
+          backgroundColor: "brand.panelLight",
           px: theme.space.panel.padding,
           pt: theme.space.panel.padding,
           pb: `calc(${theme.space.panel.padding} + 80px)`,
         }}
       >
-        {/* Headline — matches MorphingHeadline typography */}
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <Typography
-            variant="h2Main"
-            component="h2"
-            sx={{ display: "block", color: "text.primary" }}
-          >
+          <Typography variant="h2Main" component="h2">
             Want to
           </Typography>
-          <Typography
-            variant="h1"
-            component="h1"
-            sx={{ display: "block", color: "text.primary" }}
-          >
+          <Typography variant="h1" component="h1">
             know more?
           </Typography>
         </MotionBox>
 
-        {/* Two-column content */}
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
           sx={{
-            mt: 6,
+            mt: theme.space.section.lg,
             display: "grid",
             gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            columnGap: { md: 6 },
-            rowGap: { xs: 5 },
+            columnGap: { md: theme.space.section.lg },
+            rowGap: { xs: theme.space.section.md },
           }}
         >
-          {/* Left column — list */}
           <Box
             component="ul"
             sx={{
-              m: 0,
-              p: 0,
               listStyle: "none",
               display: "flex",
               flexDirection: "column",
-              gap: 3,
+              gap: theme.space.gap.xl,
             }}
           >
             {[
@@ -361,11 +344,11 @@ const IntroSection = () => {
               },
             ].map(({ verb, rest }) => (
               <Box component="li" key={verb}>
-                <Typography
-                  variant="body1"
-                  sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
-                >
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                <Typography variant="body1">
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: "fontWeightSemiBold" }}
+                  >
                     {verb}
                   </Box>{" "}
                   {rest}
@@ -374,11 +357,7 @@ const IntroSection = () => {
             ))}
           </Box>
 
-          {/* Right column — intro paragraph */}
-          <Typography
-            variant="body1"
-            sx={{ color: theme.palette.text.primary, lineHeight: 1.75 }}
-          >
+          <Typography variant="body1">
             Water is limited and every choice has trade-offs. COEQWAL allows you
             to explore different water scenarios and understand how decisions
             shape potential futures for communities, farms, rivers, and the
