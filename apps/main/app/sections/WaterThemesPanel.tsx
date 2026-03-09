@@ -23,8 +23,7 @@ import {
   useScrollValue,
 } from "@repo/scrollytelling"
 import type { MotionValue } from "@repo/motion"
-import { WATER_THEMES } from "@repo/data/coeqwal"
-import { THEME_LABEL_CONFIG } from "../content/themes"
+import { WATER_THEMES, THEME_LABEL_CONFIG } from "../content/themes"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 
 /* ─────────────────────────────────────────────────────────────────────────── */

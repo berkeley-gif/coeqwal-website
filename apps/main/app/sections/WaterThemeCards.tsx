@@ -13,8 +13,7 @@ import Image from "next/image"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import { ScrollReveal } from "@repo/scrollytelling"
-import { WATER_THEMES } from "@repo/data/coeqwal"
-import { THEME_LABEL_CONFIG } from "../content/themes"
+import { WATER_THEMES, THEME_LABEL_CONFIG } from "../content/themes"
 
 const RULE = "1px solid #e5e5df"
 

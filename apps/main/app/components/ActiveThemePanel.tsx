@@ -3,7 +3,7 @@
 "use client"
 
 import { usePanelRoute } from "../hooks/usePanelRoute"
-import { WATER_THEMES } from "@repo/data/coeqwal"
+import { WATER_THEMES } from "../content/themes"
 import { ThemePanel } from "./ThemePanel"
 
 export function ActiveThemePanel() {
