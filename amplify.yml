@@ -1,4 +1,4 @@
-version: 2
+version: 1
 applications:
   - frontend:
       phases:
@@ -8,14 +8,17 @@ applications:
             - nvm use 22
             - node -v
             - npm install -g pnpm@10.0.0
-            - pnpm -v
-            - pnpm install --frozen-lockfile
+            - pnpm install
         build:
           commands:
-            - pnpm turbo run build --filter=main
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-flow
       artifacts:
-        baseDirectory: apps/main/out
+        baseDirectory: apps/storyline-flow/out
         files:
           - "**/*"
       buildPath: /
-    appRoot: apps/main
+    appRoot: apps/storyline-flow
+    environment:
+      variables:
+        NODE_VERSION: 22
