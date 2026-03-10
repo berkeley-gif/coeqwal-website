@@ -476,6 +476,7 @@ const border = {
   none: "none",
   light: `1px solid ${palette.grey[200]}`, // Subtle/light borders
   medium: `1px solid ${palette.grey[300]}`, // Standard borders
+  heavy: `10px solid ${palette.blue.softSky}`, // Prominent panel borders
   active: `${strokeWidth.rule}px solid ${palette.blue.bright}`, // Selected/active states
   activeLight: `1px solid ${palette.blue.light}`, // Lighter blue accent
   highlight: `3px solid ${palette.blue.bright}`, // Strong highlight (selected items)
