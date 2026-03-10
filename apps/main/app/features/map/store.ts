@@ -15,8 +15,8 @@ import {
 // Types
 // ============================================================================
 
-/** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel) */
-export type MapMode = "hidden" | "learn" | "explore"
+/** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel), get-started (visible background, non-interactive) */
+export type MapMode = "hidden" | "learn" | "explore" | "get-started"
 
 /** Outcome visualization state used by both Learn and Explore modes */
 export interface OutcomeVisualization {

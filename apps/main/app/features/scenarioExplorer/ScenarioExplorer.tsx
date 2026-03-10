@@ -32,6 +32,7 @@ import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import { useScenarioExplorerStore, type ExploreMode } from "./store"
+import { useMapMode } from "../map/store"
 import { SIDEBAR_WIDTH } from "./components/ScenarioSelectionSidebar"
 
 // px value of theme.space.section.sm (= 3 * 8px = 24px) used in the modal
@@ -90,11 +91,17 @@ export default function ScenarioExplorerNew() {
 
   const { mainView, setMainView, exploreMode, setExploreMode } =
     useScenarioExplorerStore()
+  const mapMode = useMapMode()
 
   const [isListExpanded, setIsListExpanded] = useState(false)
 
-  // Only map mode needs a transparent background (lets the map layer show through)
-  const needsTransparentBg = mainView === "explorer" && exploreMode === "map"
+  // Map explore mode: panel retracts to 50%, map fills right half
+  const isMapExploreMode = mainView === "explorer" && exploreMode === "map"
+  // Get-started map mode: full-width but transparent so persistent map shows through
+  const isGetStartedMapMode =
+    mainView === "get-started" && mapMode === "get-started"
+  // Either mode needs the outer container to be transparent
+  const needsTransparentBg = isMapExploreMode || isGetStartedMapMode
 
   // Analysis modal is open when an analysis mode is active
   const isAnalysisMode =
@@ -209,11 +216,11 @@ export default function ScenarioExplorerNew() {
         {/* Content column — full-width normally, retracts to left half in map mode */}
         <Box
           sx={{
-            width: needsTransparentBg ? "50%" : "100%",
+            width: isMapExploreMode ? "50%" : "100%",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            backgroundColor: needsTransparentBg
+            backgroundColor: isMapExploreMode
               ? theme.palette.explore.background
               : "transparent",
             pointerEvents: "auto",

@@ -3,6 +3,7 @@
 import { useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ContentPanel } from "@repo/ui"
+import { useMapMode } from "../../map/store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const SECTIONS: { title: string; body?: string }[] = [
@@ -15,6 +16,10 @@ const SECTIONS: { title: string; body?: string }[] = [
 export default function GetStartedView() {
   const theme = useTheme()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const mapMode = useMapMode()
+  const mapActive = mapMode === "get-started"
+
+  const blueBg = theme.palette.tabPanels.explore
 
   const panelSx = {
     display: "flex",
@@ -31,23 +36,32 @@ export default function GetStartedView() {
         position: "relative",
         height: "100%",
         overflow: "auto",
-        backgroundColor: theme.palette.tabPanels.explore,
+        backgroundColor: mapActive ? "transparent" : blueBg,
       }}
     >
-      {SECTIONS.map(({ title, body }) => (
-        <ContentPanel key={title} sx={panelSx}>
-          <Typography variant="h3" component="h2">
-            {title}
-          </Typography>
-          {body && (
-            <Typography variant="body1" sx={{ mt: theme.space.component.lg }}>
-              {body}
+      {/* Blue wrapper for all non-tier content panels */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: mapActive ? blueBg : "transparent",
+        }}
+      >
+        {SECTIONS.map(({ title, body }) => (
+          <ContentPanel key={title} sx={panelSx}>
+            <Typography variant="h3" component="h2">
+              {title}
             </Typography>
-          )}
-        </ContentPanel>
-      ))}
+            {body && (
+              <Typography variant="body1" sx={{ mt: theme.space.component.lg }}>
+                {body}
+              </Typography>
+            )}
+          </ContentPanel>
+        ))}
+      </Box>
 
-      {/* Tiers section with polygon-to-glyph animation */}
+      {/* Tier section — uses box-shadow for blue surround */}
       <TierAnimationSection scrollContainerRef={scrollContainerRef} />
     </Box>
   )

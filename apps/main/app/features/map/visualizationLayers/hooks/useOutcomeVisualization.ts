@@ -98,7 +98,9 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
   // Whether visualization should be active
   const isActive =
-    !!outcome && !!config && (mapMode === "learn" || mapMode === "explore")
+    !!outcome &&
+    !!config &&
+    (mapMode === "learn" || mapMode === "explore" || mapMode === "get-started")
 
   // Fetch tier data (using outcomeCode)
   const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)
@@ -111,7 +113,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
 
     const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
 
-    if (mapMode === "explore") return
+    if (mapMode === "explore" || mapMode === "get-started") return
 
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
