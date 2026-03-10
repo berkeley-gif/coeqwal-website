@@ -344,6 +344,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         selection.attr("transform", `translate(${margin.left},${margin.top})`)
       }
 
+      // Clear hover state before removing elements — the old DOM nodes won't
+      // fire mouseout once removed, so we must reset manually.
+      if (hoveredScenarioRef.current !== null) {
+        hoveredScenarioRef.current = null
+        onLineHover?.(null)
+      }
+      if (hoverOutTimer.current) {
+        clearTimeout(hoverOutTimer.current)
+        hoverOutTimer.current = null
+      }
+
       g.selectAll("[class^='line-']").remove()
       g.selectAll("[class^='circle-']").remove()
 
@@ -785,18 +796,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .x(([axisName, value]) => scales[axisName]!(value))
             .y(([axisName]) => axisScale(axisName)!)
 
-      const lineGenerator = isHoriz
-        ? d3
-            .line<[string, number | null]>()
-            .defined(([, value]) => value !== null)
-            .x(([axisName]) => axisScale(axisName)!)
-            .y(([axisName, value]) => scales[axisName]!(value as number))
-        : d3
-            .line<[string, number | null]>()
-            .defined(([, value]) => value !== null)
-            .x(([axisName, value]) => scales[axisName]!(value as number))
-            .y(([axisName]) => axisScale(axisName)!)
-
       // ── Baseline ─────────────────────────────────────────────────────────────
       if (showBaseline && baselineData) {
         const baselineColor = "#ff7f0e"
@@ -877,6 +876,19 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         })
       }
 
+      // ── Jitter for single-value axes ──────────────────────────────────────────
+      // The last 4 axes are single-value tier outcomes with limited discrete
+      // values, causing heavy line overlap. A small deterministic pixel offset
+      // per scenario fans overlapping lines apart so each remains hoverable.
+      const JITTER_AXIS_COUNT = 4
+      const JITTER_MAX_PX = 4
+      const jitterAxes = new Set(axes.slice(-JITTER_AXIS_COUNT))
+
+      const jitterPxForIndex = (i: number) => {
+        if (data.length <= 1) return 0
+        return ((i / (data.length - 1)) * 2 - 1) * JITTER_MAX_PX
+      }
+
       // ── Data lines and circles ────────────────────────────────────────────────
       data.forEach((d, dataIndex) => {
         const lineColor =
@@ -893,6 +905,28 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           (axis) => [axis, d.values[axis]] as [string, number | null],
         )
 
+        const jPx = jitterPxForIndex(dataIndex)
+        const jitterFor = (axisName: string) =>
+          jitterAxes.has(axisName) ? jPx : 0
+
+        const jitteredLineGen = isHoriz
+          ? d3
+              .line<[string, number | null]>()
+              .defined(([, v]) => v !== null)
+              .x(([axisName]) => axisScale(axisName)!)
+              .y(
+                ([axisName, value]) =>
+                  scales[axisName]!(value as number) + jitterFor(axisName),
+              )
+          : d3
+              .line<[string, number | null]>()
+              .defined(([, v]) => v !== null)
+              .x(
+                ([axisName, value]) =>
+                  scales[axisName]!(value as number) + jitterFor(axisName),
+              )
+              .y(([axisName]) => axisScale(axisName)!)
+
         // Gold halo rendered behind the normal line for the baseline scenario
         if (isBaseline) {
           g.append("path")
@@ -901,7 +935,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", BASELINE_HALO_COLOR)
             .attr("stroke-width", style.strokeWidth + BASELINE_HALO_WIDTH_EXTRA)
             .attr("opacity", style.lineOpacity)
-            .attr("d", lineGenerator(pathData))
+            .attr("d", jitteredLineGen(pathData))
             .attr("stroke-linecap", "round")
             .attr("stroke-linejoin", "round")
             .style("pointer-events", "none")
@@ -913,7 +947,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("stroke", lineColor)
           .attr("stroke-width", style.strokeWidth)
           .attr("opacity", style.lineOpacity)
-          .attr("d", lineGenerator(pathData))
+          .attr("d", jitteredLineGen(pathData))
           .style("cursor", "pointer")
           .on("mouseover", function () {
             if (!passesFilters(d)) return
@@ -931,6 +965,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           const value = d.values[axis]
           if (value == null) return
 
+          const j = jitterFor(axis)
+
           g.append("circle")
             .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
             .datum(d as any)
@@ -939,8 +975,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke-width", 1.5)
             .attr("r", style.circleRadius)
             .attr("opacity", style.circleOpacity)
-            .attr("cx", isHoriz ? axisScale(axis)! : scales[axis]!(value))
-            .attr("cy", isHoriz ? scales[axis]!(value) : axisScale(axis)!)
+            .attr(
+              "cx",
+              isHoriz ? axisScale(axis)! : scales[axis]!(value) + j,
+            )
+            .attr(
+              "cy",
+              isHoriz ? scales[axis]!(value) + j : axisScale(axis)!,
+            )
             .style("cursor", "pointer")
             .on("mouseover", function () {
               if (!passesFilters(d)) return
@@ -992,6 +1034,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       applyStyles,
       commitHoverIn,
       scheduleHoverClear,
+      onLineHover,
     ],
   )
 
@@ -1032,6 +1075,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           width: "100%",
           height: "100%",
           transition: "all 0.3s ease-out",
+        }}
+        onMouseLeave={() => {
+          if (hoveredScenarioRef.current === null && !hoverOutTimer.current) return
+          hoveredScenarioRef.current = null
+          if (hoverOutTimer.current) {
+            clearTimeout(hoverOutTimer.current)
+            hoverOutTimer.current = null
+          }
+          onLineHover?.(null)
+          const svg = d3.select(svgRef.current)
+          const g = svg.select<SVGGElement>("g")
+          if (!g.empty()) applyStyles(g, null)
         }}
       />
     </div>
