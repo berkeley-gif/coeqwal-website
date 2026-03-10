@@ -32,7 +32,7 @@ export type ExploreMode =
  * - explorer: "Choose scenarios" view with tool modes (list/map/comparison)
  * - data: "Explore data in depth" view
  */
-export type MainView = "explorer" | "data"
+export type MainView = "get-started" | "explorer" | "data"
 
 // ============================================================================
 // State Interface
@@ -132,7 +132,7 @@ type ScenarioExplorerStore = ScenarioExplorerState & ScenarioExplorerActions
 // ============================================================================
 
 const initialState: ScenarioExplorerState = {
-  mainView: "explorer",
+  mainView: "get-started",
   exploreMode: "list",
   selectedScenarios: [],
   highlightedScenario: null,

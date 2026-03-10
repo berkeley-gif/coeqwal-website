@@ -20,11 +20,13 @@ import {
   AppsIcon,
   AutorenewIcon,
   InsightsIcon,
+  PlayArrowIcon,
 } from "@repo/ui/mui"
 import { MobileModal } from "@repo/ui"
 import ListPanel from "./exploreView"
 import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
+import GetStartedView from "./getStarted/GetStartedView"
 import SelectionBanner from "./components/SelectionBanner"
 import SearchBar from "./components/SearchBar"
 import { ViewModeControls } from "./components/ViewModeControls"
@@ -40,10 +42,15 @@ const TITLE_ROW_PX = 24
 // ─── View mode button definitions ────────────────────────────────────────────
 
 const VIEW_MODES: {
-  mode: ExploreMode | "data"
+  mode: ExploreMode | "data" | "get-started"
   icon: React.ReactNode
   label: string
 }[] = [
+  {
+    mode: "get-started",
+    icon: <PlayArrowIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Get started",
+  },
   {
     mode: "list",
     icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
@@ -135,17 +142,17 @@ export default function ScenarioExplorerNew() {
         }}
       >
         {VIEW_MODES.map(({ mode, icon, label }) => {
-          const active =
-            mode === "data"
-              ? mainView === "data"
-              : exploreMode === mode && mainView === "explorer"
+          const isTopLevel = mode === "data" || mode === "get-started"
+          const active = isTopLevel
+            ? mainView === mode
+            : exploreMode === mode && mainView === "explorer"
           return (
             <Box
               key={mode}
               component="button"
               onClick={() => {
-                if (mode === "data") {
-                  setMainView("data")
+                if (isTopLevel) {
+                  setMainView(mode as "data" | "get-started")
                 } else {
                   setMainView("explorer")
                   setExploreMode(mode as ExploreMode)
@@ -213,7 +220,7 @@ export default function ScenarioExplorerNew() {
             transition: "width 0.3s ease",
           }}
         >
-          <SelectionBanner />
+          {mainView !== "get-started" && <SelectionBanner />}
 
           {/* Search toolbar (explorer view only) */}
           {mainView === "explorer" && (
@@ -265,6 +272,7 @@ export default function ScenarioExplorerNew() {
                 }
               />
             )}
+            {mainView === "get-started" && <GetStartedView />}
             {mainView === "data" && (
               <DataExplorerView
                 onNavigateToExplorer={() => setMainView("explorer")}
@@ -314,7 +322,7 @@ export default function ScenarioExplorerNew() {
                 overflow: "hidden",
               }}
             >
-              {VIEW_MODES.filter((v) => v.mode !== "data").map(
+              {VIEW_MODES.filter((v) => v.mode !== "data" && v.mode !== "get-started").map(
                 ({ mode, icon, label }) => {
                   const active = exploreMode === mode
                   return (
