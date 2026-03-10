@@ -115,6 +115,48 @@ export default function TierAnimationSection({
 
   const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7], [1, 1, 0])
 
+  // Fade out map polygons as squares appear (scroll-driven)
+  const FILL_LAYER_ID = "demand-units"
+  const OUTLINE_LAYER_ID = "demand-units-outline"
+
+  useEffect(() => {
+    const mapRef = mapAPI.mapRef?.current
+    if (!mapRef || isLoading) return
+
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      const map = mapRef.getMap?.()
+      if (!map || !map.isStyleLoaded?.()) return
+
+      // Polygons fade from full to 0 between 0.1 and 0.3
+      const polyOpacity = Math.max(0, Math.min(1, 1 - (v - 0.1) / 0.2))
+
+      try {
+        if (map.getLayer(FILL_LAYER_ID)) {
+          map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", polyOpacity)
+        }
+        if (map.getLayer(OUTLINE_LAYER_ID)) {
+          map.setPaintProperty(OUTLINE_LAYER_ID, "line-opacity", polyOpacity)
+        }
+      } catch { /* layer may not exist yet */ }
+    })
+
+    return () => {
+      unsubscribe()
+      // Restore full opacity on cleanup
+      const map = mapRef.getMap?.()
+      if (map?.isStyleLoaded?.()) {
+        try {
+          if (map.getLayer(FILL_LAYER_ID)) {
+            map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", 1)
+          }
+          if (map.getLayer(OUTLINE_LAYER_ID)) {
+            map.setPaintProperty(OUTLINE_LAYER_ID, "line-opacity", 1)
+          }
+        } catch { /* ok */ }
+      }
+    }
+  }, [scrollYProgress, mapAPI.mapRef, isLoading])
+
   // Measure panel size for particle end positions
   const measurePanel = useCallback(() => {
     if (!panelRef.current) return
