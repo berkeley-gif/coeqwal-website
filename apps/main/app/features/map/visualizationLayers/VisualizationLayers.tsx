@@ -183,11 +183,12 @@ export default function VisualizationLayers() {
   }, [outcome, scenarioId, usesMapboxLayers, map, mapMode, config])
 
   const isLearnMode = mapMode === "learn"
+  const isGetStartedMode = mapMode === "get-started"
 
-  // Memoize dim opacity to avoid unnecessary re-renders
+  // Memoize dim opacity (skip in get-started mode for clean background)
   const dimOpacity = useMemo(
-    () => (isVisualizationActive ? BASEMAP_DIM_OPACITY : 0),
-    [isVisualizationActive],
+    () => (isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0),
+    [isVisualizationActive, isGetStartedMode],
   )
 
   return (
@@ -248,11 +249,12 @@ export default function VisualizationLayers() {
           />
         )}
 
-      {/* Hotspot markers for tier 4 locations */}
+      {/* Hotspot markers for tier 4 locations (hidden in get-started mode) */}
       <HotspotMarkers
         outcomeCode={outcomeCode}
         scenarioId={scenarioId}
         visible={
+          !isGetStartedMode &&
           !!outcomeCode &&
           (outcomeCode === "CWS_DEL" ||
             outcomeCode === "WRC_SALMON_AB" ||

@@ -79,6 +79,8 @@ const getContainerStyles = (
       }
     case "explore":
       return { ...base, opacity: 1, pointerEvents: "auto" }
+    case "get-started":
+      return { ...base, opacity: 1, pointerEvents: "none" }
     default:
       return base
   }
@@ -151,9 +153,13 @@ export default function MapInstance({
     })
   }, [mapMode, map, explorePanelWidth])
 
-  /** Explore mode: hide base layers */
+  /** Explore / get-started mode: hide base layers */
   useEffect(() => {
-    if (mapMode !== "explore" || !map.mapRef?.current) return
+    if (
+      (mapMode !== "explore" && mapMode !== "get-started") ||
+      !map.mapRef?.current
+    )
+      return
 
     const mapInstance = map.mapRef.current.getMap()
     MAPBOX_LAYER_IDS.forEach((layerId) => {
