@@ -16,14 +16,19 @@
  * Even wrapping just the Box/CallResponsePanel in a helper component causes the IntersectionObserver to fail.
  */
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback, type RefObject } from "react"
 
 import { useTheme } from "@repo/ui/mui"
 import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { themeValues } from "@repo/ui/themes/theme"
 import { CallResponsePanel } from "@repo/ui"
 import { Scrollama, Step } from "react-scrollama"
-import { motion, useTransform, useMotionValueEvent } from "@repo/motion"
+import {
+  motion,
+  MotionValue,
+  useTransform,
+  useMotionValueEvent,
+} from "@repo/motion"
 
 import {
   useScrollProgress,
@@ -79,7 +84,69 @@ const ACCENT_TEXT_SX = {
   fontSize: "1.4rem",
 } as const
 
+const LEARN_SCENARIO_ID = "s0020" // for the Scenario Intro panels
 const RIGHT_PANEL_MAX_WIDTH = "540px"
+
+const SLIDE_DISTANCE = 500 // px, starting Y-offset for the Scenario Intro slide-up animation; used in useTransform so can't be css value
+
+/** Pairs opacity (0-1) and Y translation (SLIDE_DISTANCE->0) for a panel entrance. */
+function usePanelEntrance(
+  progress: MotionValue<number>,
+  range: ProgressRange,
+) {
+  const opacity = useTransform(progress, range, [0, 1], {
+    ease: easeOutCubic,
+  })
+  const y = useTransform(progress, range, [SLIDE_DISTANCE, 0], {
+    ease: easeOutCubic,
+  })
+  return { opacity, y }
+}
+
+/** Shared wrapper for the 4 right-side scenario intro panels (strategy, key ops, outcomes, summary). */
+function RightPanelSlot({
+  entrance,
+  pointerEvents,
+  containerRef,
+  targetRef,
+  children,
+  tooltip,
+}: {
+  entrance: { opacity: MotionValue<number>; y: MotionValue<number> }
+  pointerEvents: React.CSSProperties["pointerEvents"]
+  containerRef: RefObject<HTMLDivElement | null>
+  targetRef: RefObject<HTMLDivElement | null>
+  children: React.ReactNode
+  tooltip: React.ReactNode
+}) {
+  return (
+    <motion.div
+      style={{
+        opacity: entrance.opacity,
+        y: entrance.y,
+        pointerEvents: "none",
+        display: "flex",
+        justifyContent: "flex-end",
+        width: "100%",
+      }}
+    >
+      <Box
+        ref={containerRef}
+        sx={{
+          position: "relative",
+          width: "100%",
+          maxWidth: RIGHT_PANEL_MAX_WIDTH,
+          pointerEvents,
+        }}
+      >
+        <div ref={targetRef} style={{ pointerEvents }}>
+          {children}
+        </div>
+        {tooltip}
+      </Box>
+    </motion.div>
+  )
+}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -91,53 +158,64 @@ export default function MapOverlayPanels() {
   // react-scrollama callbacks
   const { onStepEnter, onStepExit, onStepProgress } = useLearnScrollama()
 
-  // Panels always "visible" for pointer-events; entrance animation is
-  // viewport-driven via CallResponsePanel's whileInView.
-  const isFirstPanelVisible = true
-
   // Ref for multi-step sticky animation (Framer Motion)
   // Attached directly to the JSX element via ref={scenarioIntroRef} below,
   // so no MutationObserver needed.
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
 
-  // Refs for strategy info tooltip
-  const strategyInfoRef = useRef<HTMLDivElement>(null)
-  const strategyInfoContainerRef = useRef<HTMLDivElement>(null)
+  // Tooltip target/container ref pairs — one per right-side panel
+  const panelRefs = {
+    strategy: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
+    keyOperations: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
+    keyOutcomes: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
+    summary: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
+  }
 
-  // Refs for key operations tooltip
-  const keyOperationsRef = useRef<HTMLDivElement>(null)
-  const keyOperationsContainerRef = useRef<HTMLDivElement>(null)
-
-  // Refs for key outcomes tooltip
-  const keyOutcomesRef = useRef<HTMLDivElement>(null)
-  const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
-
-  // Refs for summary tooltip
-  const summaryRef = useRef<HTMLDivElement>(null)
-  const summaryContainerRef = useRef<HTMLDivElement>(null)
-
-  // State for manually closed tooltips
-  const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
-  const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
-  const [viewByClimateTooltipClosed, setViewByClimateTooltipClosed] =
-    useState(false)
-  const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] =
-    useState(false)
-  const [summaryTooltipClosed, setSummaryTooltipClosed] = useState(false)
+  // Tracks which tooltips the user (or the system) has manually closed.
+  // A tooltip is "closed" when its key is in the set.
+  const [closedTooltips, setClosedTooltips] = useState<Set<string>>(
+    () => new Set(),
+  )
+  const closeTooltip = useCallback(
+    (key: string) =>
+      setClosedTooltips((prev) => {
+        if (prev.has(key)) return prev
+        const next = new Set(prev)
+        next.add(key)
+        return next
+      }),
+    [],
+  )
+  const reopenTooltip = useCallback(
+    (key: string) =>
+      setClosedTooltips((prev) => {
+        if (!prev.has(key)) return prev
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      }),
+    [],
+  )
+  const closeAllTooltips = useCallback(
+    () =>
+      setClosedTooltips(
+        new Set([
+          "strategy",
+          "keyOps",
+          "viewByClimate",
+          "keyOutcomes",
+          "summary",
+        ]),
+      ),
+    [],
+  )
 
   // Close tooltips when outcome visualization is activated
   const isOutcomeActive = useIsOutcomeVisualizationActive()
 
   useEffect(() => {
-    if (isOutcomeActive) {
-      // Close all panel tooltips when showing outcome data on map
-      setStrategyTooltipClosed(true)
-      setKeyOpsTooltipClosed(true)
-      setViewByClimateTooltipClosed(true)
-      setKeyOutcomesTooltipClosed(true)
-      setSummaryTooltipClosed(true)
-    }
-  }, [isOutcomeActive])
+    if (isOutcomeActive) closeAllTooltips()
+  }, [isOutcomeActive, closeAllTooltips])
 
   // ============================================================================
   // Scenario-intro choreography
@@ -220,59 +298,10 @@ export default function MapOverlayPanels() {
   // Phase 1: Panel entrance — each slides up from below the viewport
   // and fades in with ease-out cubic (fast start → gentle settle).
   // Only one panel animates at a time; each waits for the previous to land.
-  const SLIDE_DISTANCE = 500 // px — roughly half the viewport
-
-  const strategyOpacity = useTransform(
-    scenarioIntroProgress,
-    [0.03, 0.14],
-    [0, 1],
-    { ease: easeOutCubic },
-  )
-  const strategyY = useTransform(
-    scenarioIntroProgress,
-    [0.03, 0.14],
-    [SLIDE_DISTANCE, 0],
-    { ease: easeOutCubic },
-  )
-
-  const keyOperationsOpacity = useTransform(
-    scenarioIntroProgress,
-    [0.18, 0.29],
-    [0, 1],
-    { ease: easeOutCubic },
-  )
-  const keyOperationsY = useTransform(
-    scenarioIntroProgress,
-    [0.18, 0.29],
-    [SLIDE_DISTANCE, 0],
-    { ease: easeOutCubic },
-  )
-
-  const keyOutcomesOpacity = useTransform(
-    scenarioIntroProgress,
-    [0.33, 0.44],
-    [0, 1],
-    { ease: easeOutCubic },
-  )
-  const keyOutcomesY = useTransform(
-    scenarioIntroProgress,
-    [0.33, 0.44],
-    [SLIDE_DISTANCE, 0],
-    { ease: easeOutCubic },
-  )
-
-  const summaryOpacity = useTransform(
-    scenarioIntroProgress,
-    [0.48, 0.59],
-    [0, 1],
-    { ease: easeOutCubic },
-  )
-  const summaryY = useTransform(
-    scenarioIntroProgress,
-    [0.48, 0.59],
-    [SLIDE_DISTANCE, 0],
-    { ease: easeOutCubic },
-  )
+  const strategy = usePanelEntrance(scenarioIntroProgress, STRATEGY_PHASE_THRESHOLDS.enter)
+  const keyOperations = usePanelEntrance(scenarioIntroProgress, KEY_OPERATIONS_PHASE_THRESHOLDS.enter)
+  const keyOutcomes = usePanelEntrance(scenarioIntroProgress, KEY_OUTCOMES_PHASE_THRESHOLDS.enter)
+  const summary = usePanelEntrance(scenarioIntroProgress, SUMMARY_PHASE_THRESHOLDS.enter)
 
   // Phase 2: Tooltip opacity — sequenced AFTER all panels are in position.
   // Panels finish entering at ~0.59, tooltips run 0.62–0.90.
@@ -311,19 +340,19 @@ export default function MapOverlayPanels() {
   // Reset tooltip closed states when scrolling away (opacity goes to 0)
   // This allows tooltips to reappear when user scrolls back to that section
   useMotionValueEvent(strategyInfoTooltipOpacity, "change", (latest) => {
-    if (latest === 0) setStrategyTooltipClosed(false)
+    if (latest === 0) reopenTooltip("strategy")
   })
   useMotionValueEvent(keyOperationsTooltipOpacity, "change", (latest) => {
-    if (latest === 0) setKeyOpsTooltipClosed(false)
+    if (latest === 0) reopenTooltip("keyOps")
   })
   useMotionValueEvent(viewByClimateTooltipOpacity, "change", (latest) => {
-    if (latest === 0) setViewByClimateTooltipClosed(false)
+    if (latest === 0) reopenTooltip("viewByClimate")
   })
   useMotionValueEvent(keyOutcomesTooltipOpacity, "change", (latest) => {
-    if (latest === 0) setKeyOutcomesTooltipClosed(false)
+    if (latest === 0) reopenTooltip("keyOutcomes")
   })
   useMotionValueEvent(summaryTooltipOpacity, "change", (latest) => {
-    if (latest === 0) setSummaryTooltipClosed(false)
+    if (latest === 0) reopenTooltip("summary")
   })
 
   // Note: Outcome visualization clearing is handled by the StrategyInfoPanel
@@ -369,11 +398,11 @@ export default function MapOverlayPanels() {
               id="central-valley-call"
               side="left"
               variant="call"
-              isVisible={isFirstPanelVisible}
+              isVisible
             >
               <Box
                 id="central-valley-content"
-                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
               >
                 <PanelEyebrow>Central Valley Water</PanelEyebrow>
                 <Typography variant="body1">
@@ -415,7 +444,7 @@ export default function MapOverlayPanels() {
                 id="rivers-call"
                 side="left"
                 variant="call"
-                isVisible={isFirstPanelVisible}
+                isVisible
                 sx={{ minHeight: "auto", mb: 0 }}
               >
                 <Typography variant="body1">
@@ -455,7 +484,7 @@ export default function MapOverlayPanels() {
               id="distribution-call"
               side="left"
               variant="call"
-              isVisible={isFirstPanelVisible}
+              isVisible
             >
               <Typography variant="body1">
                 Water is stored, diverted and distributed to multiple points
@@ -480,10 +509,10 @@ export default function MapOverlayPanels() {
               id="calsim-call"
               side="left"
               variant="call"
-              isVisible={isFirstPanelVisible}
+              isVisible
             >
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
               >
                 <PanelEyebrow>Central Valley Water Modeling</PanelEyebrow>
                 <Typography
@@ -531,10 +560,10 @@ export default function MapOverlayPanels() {
               id="coeqwal-call"
               side="left"
               variant="call"
-              isVisible={isFirstPanelVisible}
+              isVisible
             >
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: "14px" }}
+                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
               >
                 <Typography
                   variant="body1"
@@ -575,8 +604,7 @@ export default function MapOverlayPanels() {
           <ScrollSectionContext.Provider
             value={{
               progress: scenarioIntroProgress,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              sectionRef: scenarioIntroRef as any,
+              sectionRef: scenarioIntroRef as RefObject<HTMLElement | null>,
             }}
           >
             <Box
@@ -605,8 +633,8 @@ export default function MapOverlayPanels() {
                       transition:
                         "padding-left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
                       ...(scenarioIntroPaddingReduced && {
-                        paddingLeft: "16px",
-                        paddingRight: "16px",
+                        paddingLeft: theme.space.component.lg,
+                        paddingRight: theme.space.component.lg,
                       }),
                     },
                   }}
@@ -615,7 +643,7 @@ export default function MapOverlayPanels() {
                     id="scenario-intro-call"
                     side="left"
                     variant="call"
-                    isVisible={isFirstPanelVisible}
+                    isVisible
                     minHeight="auto"
                     alignItems="flex-start"
                   >
@@ -623,7 +651,7 @@ export default function MapOverlayPanels() {
                       sx={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "14px",
+                        gap: theme.space.component.lg,
                       }}
                     >
                       <PanelEyebrow>
@@ -668,7 +696,7 @@ export default function MapOverlayPanels() {
               <Box
                 sx={{
                   position: "sticky",
-                  top: "15vh",
+                  top: PANEL_POSITIONS.paragraphTop,
                   zIndex: 1,
                   mt: "80vh",
                   pointerEvents: "none",
@@ -682,7 +710,7 @@ export default function MapOverlayPanels() {
                     justifyContent: "flex-end",
                     width: "100%",
                     pr: scenarioIntroPaddingReduced
-                      ? "16px"
+                      ? theme.space.component.lg
                       : theme.space.panel.padding,
                     transition:
                       "padding-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1)",
@@ -690,398 +718,241 @@ export default function MapOverlayPanels() {
                   }}
                 >
                   {/* Strategy info panel */}
-                  <motion.div
-                    style={{
-                      opacity: strategyOpacity,
-                      y: strategyY,
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        minHeight: "auto",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          width: "100%",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Box
-                          ref={strategyInfoContainerRef}
-                          sx={{
-                            position: "relative",
-                            width: "100%",
-                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                            pointerEvents: strategyPE,
-                          }}
-                        >
-                          <div ref={strategyInfoRef}>
-                            <Box
-                              sx={{
-                                pointerEvents: strategyPE,
-                              }}
+                  <RightPanelSlot
+                    entrance={strategy}
+                    pointerEvents={strategyPE}
+                    containerRef={panelRefs.strategy.container}
+                    targetRef={panelRefs.strategy.target}
+                    tooltip={
+                      <ScrollTooltip
+                        targetRef={panelRefs.strategy.target}
+                        containerRef={panelRefs.strategy.container}
+                        content={
+                          <>
+                            <Typography
+                              variant="tooltipHeader"
+                              sx={{ mb: theme.space.component.xs }}
                             >
-                              <StrategyInfoPanel
-                                scenarioId="s0020"
-                                onTitleClick={() =>
-                                  setStrategyTooltipClosed(false)
-                                }
-                              />
-                            </Box>
-                          </div>
-
-                          <ScrollTooltip
-                            targetRef={strategyInfoRef}
-                            containerRef={strategyInfoContainerRef}
-                            content={
-                              <>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{ mb: theme.space.component.xs }}
-                                >
-                                  Water management strategy
-                                </Typography>
-                                This panel describes the decisions, priorities,
-                                and policies that determine how water is
-                                allocated.
-                              </>
-                            }
-                            position="left"
-                            offsetY={30}
-                            opacity={strategyInfoTooltipOpacity}
-                            isClosed={strategyTooltipClosed}
-                            onClose={() => setStrategyTooltipClosed(true)}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                  </motion.div>
+                              Water management strategy
+                            </Typography>
+                            This panel describes the decisions, priorities, and
+                            policies that determine how water is allocated.
+                          </>
+                        }
+                        position="left"
+                        offsetY={30}
+                        opacity={strategyInfoTooltipOpacity}
+                        isClosed={closedTooltips.has("strategy")}
+                        onClose={() => closeTooltip("strategy")}
+                      />
+                    }
+                  >
+                    <StrategyInfoPanel
+                      scenarioId={LEARN_SCENARIO_ID}
+                      onTitleClick={() => reopenTooltip("strategy")}
+                    />
+                  </RightPanelSlot>
 
                   {/* Key operations panel */}
-                  <motion.div
-                    style={{
-                      opacity: keyOperationsOpacity,
-                      y: keyOperationsY,
-                      pointerEvents: "none",
-                    }}
+                  <RightPanelSlot
+                    entrance={keyOperations}
+                    pointerEvents={keyOperationsPE}
+                    containerRef={panelRefs.keyOperations.container}
+                    targetRef={panelRefs.keyOperations.target}
+                    tooltip={
+                      <>
+                        <ScrollTooltip
+                          targetRef={panelRefs.keyOperations.target}
+                          containerRef={panelRefs.keyOperations.container}
+                          content={
+                            <>
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.space.component.xs }}
+                              >
+                                Key operations
+                              </Typography>
+                              These icons represent the key operational decisions
+                              that define this water management strategy.
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{
+                                  mt: theme.space.component.sm,
+                                  mb: theme.space.component.xs,
+                                }}
+                              >
+                                Try this:
+                              </Typography>
+                              <Box
+                                component="span"
+                                sx={{ display: "block" }}
+                              >
+                                Hover over the icons to see what key operations
+                                they represent.
+                              </Box>
+                            </>
+                          }
+                          position="left"
+                          offsetY={20}
+                          opacity={keyOperationsTooltipOpacity}
+                          isClosed={closedTooltips.has("keyOps")}
+                          onClose={() => closeTooltip("keyOps")}
+                        />
+
+                        <ScrollTooltip
+                          targetRef={panelRefs.keyOperations.target}
+                          containerRef={panelRefs.keyOperations.container}
+                          content={
+                            <>
+                              <Typography
+                                variant="tooltipHeader"
+                                sx={{ mb: theme.space.component.xs }}
+                              >
+                                Hydroclimate
+                              </Typography>
+                              This describes the temperature and patterns of
+                              rainfall and snow that determine how much water is
+                              available over time. Soon you will be able to see
+                              the scenario results for different climates.
+                            </>
+                          }
+                          position="left"
+                          offsetY={20}
+                          opacity={viewByClimateTooltipOpacity}
+                          isClosed={closedTooltips.has("viewByClimate")}
+                          onClose={() => closeTooltip("viewByClimate")}
+                        />
+                      </>
+                    }
                   >
-                    <Box
-                      sx={{
-                        minHeight: "auto",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          width: "100%",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Box
-                          ref={keyOperationsContainerRef}
-                          sx={{
-                            position: "relative",
-                            width: "100%",
-                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                            pointerEvents: keyOperationsPE,
-                          }}
-                        >
-                          <div ref={keyOperationsRef}>
-                            <Box
-                              sx={{
-                                pointerEvents: keyOperationsPE,
-                              }}
-                            >
-                              <KeyOperationsPanel
-                                scenarioId="s0020"
-                                onTitleClick={() =>
-                                  setKeyOpsTooltipClosed(false)
-                                }
-                              />
-                            </Box>
-                          </div>
-
-                          <ScrollTooltip
-                            targetRef={keyOperationsRef}
-                            containerRef={keyOperationsContainerRef}
-                            content={
-                              <>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{ mb: theme.space.component.xs }}
-                                >
-                                  Key operations
-                                </Typography>
-                                These icons represent the key operational
-                                decisions that define this water management
-                                strategy.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Hover over the icons to see what key
-                                  operations they represent.
-                                </Box>
-                              </>
-                            }
-                            position="left"
-                            offsetY={20}
-                            opacity={keyOperationsTooltipOpacity}
-                            isClosed={keyOpsTooltipClosed}
-                            onClose={() => setKeyOpsTooltipClosed(true)}
-                          />
-
-                          <ScrollTooltip
-                            targetRef={keyOperationsRef}
-                            containerRef={keyOperationsContainerRef}
-                            content={
-                              <>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{ mb: theme.space.component.xs }}
-                                >
-                                  Hydroclimate
-                                </Typography>
-                                This describes the temperature and patterns of
-                                rainfall and snow that determine how much water
-                                is available over time. Soon you will be able to
-                                see the scenario results for different climates.
-                              </>
-                            }
-                            position="left"
-                            offsetY={20}
-                            opacity={viewByClimateTooltipOpacity}
-                            isClosed={viewByClimateTooltipClosed}
-                            onClose={() => setViewByClimateTooltipClosed(true)}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                  </motion.div>
+                    <KeyOperationsPanel
+                      scenarioId={LEARN_SCENARIO_ID}
+                      onTitleClick={() => reopenTooltip("keyOps")}
+                    />
+                  </RightPanelSlot>
 
                   {/* Key outcomes panel */}
-                  <motion.div
-                    style={{
-                      opacity: keyOutcomesOpacity,
-                      y: keyOutcomesY,
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        minHeight: "auto",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          width: "100%",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Box
-                          ref={keyOutcomesContainerRef}
-                          sx={{
-                            position: "relative",
-                            width: "100%",
-                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                            pointerEvents: keyOutcomesPE,
-                          }}
-                        >
-                          <div ref={keyOutcomesRef}>
+                  <RightPanelSlot
+                    entrance={keyOutcomes}
+                    pointerEvents={keyOutcomesPE}
+                    containerRef={panelRefs.keyOutcomes.container}
+                    targetRef={panelRefs.keyOutcomes.target}
+                    tooltip={
+                      <ScrollTooltip
+                        targetRef={panelRefs.keyOutcomes.target}
+                        containerRef={panelRefs.keyOutcomes.container}
+                        content={
+                          <>
+                            <Typography
+                              variant="tooltipHeader"
+                              sx={{ mb: theme.space.component.xs }}
+                            >
+                              Key outcomes
+                            </Typography>
+                            Each scenario produces different outcomes for
+                            agriculture, communities, and the environment.
                             <Box
+                              component="span"
                               sx={{
-                                pointerEvents: keyOutcomesPE,
+                                display: "block",
+                                mt: theme.space.component.sm,
                               }}
                             >
-                              <KeyOutcomesPanel
-                                scenarioId="s0020"
-                                onTitleClick={() =>
-                                  setKeyOutcomesTooltipClosed(false)
-                                }
-                              />
+                              Outcomes represented by a bar chart show the
+                              percentage of locations in each tier. For other
+                              outcomes, there is only one location of interest.
                             </Box>
-                          </div>
-
-                          <ScrollTooltip
-                            targetRef={keyOutcomesRef}
-                            containerRef={keyOutcomesContainerRef}
-                            content={
-                              <>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{ mb: theme.space.component.xs }}
-                                >
-                                  Key outcomes
-                                </Typography>
-                                Each scenario produces different outcomes for
-                                agriculture, communities, and the environment.
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                    mt: theme.space.component.sm,
-                                  }}
-                                >
-                                  Outcomes represented by a bar chart show the
-                                  percentage of locations in each tier. For
-                                  other outcomes, there is only one location of
-                                  interest.
-                                </Box>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Click on the{" "}
-                                  <InfoIcon
-                                    sx={{
-                                      fontSize: "1rem",
-                                      verticalAlign: "text-top",
-                                      mx: 0.25,
-                                      color: "blue.bright",
-                                    }}
-                                  />{" "}
-                                  icons to learn more about each outcome. Click
-                                  on the chart to see the outcome on a map.
-                                </Box>
-                              </>
-                            }
-                            position="left"
-                            offsetY={20}
-                            opacity={keyOutcomesTooltipOpacity}
-                            isClosed={keyOutcomesTooltipClosed}
-                            onClose={() => setKeyOutcomesTooltipClosed(true)}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                  </motion.div>
+                            <Typography
+                              variant="tooltipHeader"
+                              sx={{
+                                mt: theme.space.component.sm,
+                                mb: theme.space.component.xs,
+                              }}
+                            >
+                              Try this:
+                            </Typography>
+                            <Box
+                              component="span"
+                              sx={{ display: "block" }}
+                            >
+                              Click on the{" "}
+                              <InfoIcon
+                                sx={{
+                                  fontSize: "1rem",
+                                  verticalAlign: "text-top",
+                                  mx: 0.25,
+                                  color: "blue.bright",
+                                }}
+                              />{" "}
+                              icons to learn more about each outcome. Click on
+                              the chart to see the outcome on a map.
+                            </Box>
+                          </>
+                        }
+                        position="left"
+                        offsetY={20}
+                        opacity={keyOutcomesTooltipOpacity}
+                        isClosed={closedTooltips.has("keyOutcomes")}
+                        onClose={() => closeTooltip("keyOutcomes")}
+                      />
+                    }
+                  >
+                    <KeyOutcomesPanel
+                      scenarioId={LEARN_SCENARIO_ID}
+                      onTitleClick={() => reopenTooltip("keyOutcomes")}
+                    />
+                  </RightPanelSlot>
 
                   {/* Summary panel */}
-                  <motion.div
-                    style={{
-                      opacity: summaryOpacity,
-                      y: summaryY,
-                      pointerEvents: "none",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        minHeight: "auto",
-                        display: "flex",
-                        alignItems: "flex-start",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          width: "100%",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Box
-                          ref={summaryContainerRef}
-                          sx={{
-                            position: "relative",
-                            width: "100%",
-                            maxWidth: RIGHT_PANEL_MAX_WIDTH,
-                            pointerEvents: summaryPE,
-                          }}
-                        >
-                          <div ref={summaryRef}>
-                            <Box
+                  <RightPanelSlot
+                    entrance={summary}
+                    pointerEvents={summaryPE}
+                    containerRef={panelRefs.summary.container}
+                    targetRef={panelRefs.summary.target}
+                    tooltip={
+                      <ScrollTooltip
+                        targetRef={panelRefs.summary.target}
+                        containerRef={panelRefs.summary.container}
+                        content={
+                          <>
+                            <Typography
+                              variant="tooltipHeader"
+                              sx={{ mb: theme.space.component.xs }}
+                            >
+                              Scenario summary
+                            </Typography>
+                            Finally, a summary has been created for each
+                            scenario.
+                            <Typography
+                              variant="tooltipHeader"
                               sx={{
-                                pointerEvents: summaryPE,
+                                mt: theme.space.component.sm,
+                                mb: theme.space.component.xs,
                               }}
                             >
-                              <SummaryPanel scenarioId="s0020" />
+                              Try this:
+                            </Typography>
+                            <Box
+                              component="span"
+                              sx={{ display: "block" }}
+                            >
+                              Click any outcome chart above to get a summary
+                              specific to that outcome, including the locations
+                              most affected. Click a location chip to zoom the
+                              map directly to that location.
                             </Box>
-                          </div>
-
-                          <ScrollTooltip
-                            targetRef={summaryRef}
-                            containerRef={summaryContainerRef}
-                            content={
-                              <>
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{ mb: theme.space.component.xs }}
-                                >
-                                  Scenario summary
-                                </Typography>
-                                Finally, a summary has been created for each
-                                scenario.
-                                <Typography
-                                  variant="tooltipHeader"
-                                  sx={{
-                                    mt: theme.space.component.sm,
-                                    mb: theme.space.component.xs,
-                                  }}
-                                >
-                                  Try this:
-                                </Typography>
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    display: "block",
-                                  }}
-                                >
-                                  Click any outcome chart above to get a summary
-                                  specific to that outcome, including the
-                                  locations most affected. Click a location chip
-                                  to zoom the map directly to that location.
-                                </Box>
-                              </>
-                            }
-                            position="left"
-                            offsetY={20}
-                            opacity={summaryTooltipOpacity}
-                            isClosed={summaryTooltipClosed}
-                            onClose={() => setSummaryTooltipClosed(true)}
-                          />
-                        </Box>
-                      </Box>
-                    </Box>
-                  </motion.div>
+                          </>
+                        }
+                        position="left"
+                        offsetY={20}
+                        opacity={summaryTooltipOpacity}
+                        isClosed={closedTooltips.has("summary")}
+                        onClose={() => closeTooltip("summary")}
+                      />
+                    }
+                  >
+                    <SummaryPanel scenarioId={LEARN_SCENARIO_ID} />
+                  </RightPanelSlot>
                 </Box>
               </Box>
 
@@ -1106,7 +977,7 @@ export default function MapOverlayPanels() {
               id="scenario-conclusion-call"
               side="left"
               variant="call"
-              isVisible={isFirstPanelVisible}
+              isVisible
             >
               <Typography variant="body1">
                 Keeping these three things in mind can help you read a scenario
