@@ -1,18 +1,20 @@
 "use client"
 
+import { useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ContentPanel } from "@repo/ui"
+import TierAnimationSection from "./TierAnimationSection"
 
-const SECTIONS = [
+const SECTIONS: { title: string; body?: string }[] = [
   { title: "Welcome", body: "...use our tools..." },
   { title: "Scenarios" },
   { title: "Scenario scorecard" },
   { title: "Operations" },
-  { title: "Tiers" },
-] as const
+]
 
 export default function GetStartedView() {
   const theme = useTheme()
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const panelSx = {
     display: "flex",
@@ -24,7 +26,9 @@ export default function GetStartedView() {
 
   return (
     <Box
+      ref={scrollContainerRef}
       sx={{
+        position: "relative",
         height: "100%",
         overflow: "auto",
         backgroundColor: theme.palette.tabPanels.explore,
@@ -42,6 +46,9 @@ export default function GetStartedView() {
           )}
         </ContentPanel>
       ))}
+
+      {/* Tiers section with polygon-to-glyph animation */}
+      <TierAnimationSection scrollContainerRef={scrollContainerRef} />
     </Box>
   )
 }
