@@ -5,7 +5,7 @@ import { motion, useTransform } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 
 const MAX_PARTICLES = 120
-const PARTICLE_SIZE = 8
+const SQUARE_SIZE = 10
 const LINE_HEIGHT = 4
 const LINE_WIDTH = 28
 const BAR_GAP = 12
@@ -77,30 +77,31 @@ function Particle({
   scrollProgress: MotionValue<number>
   index: number
 }) {
-  const stagger = (index % 20) * 0.005
-  const enterStart = 0.3 + stagger
-  const enterEnd = 0.65 + stagger
+  const stagger = (index % 20) * 0.003
+  const appearStart = 0.12 + stagger
+  const moveStart = 0.25 + stagger
+  const moveEnd = 0.6 + stagger
 
-  const x = useTransform(scrollProgress, [enterStart, enterEnd], [startX, endX])
-  const y = useTransform(scrollProgress, [enterStart, enterEnd], [startY, endY])
+  const x = useTransform(scrollProgress, [moveStart, moveEnd], [startX, endX])
+  const y = useTransform(scrollProgress, [moveStart, moveEnd], [startY, endY])
   const width = useTransform(
     scrollProgress,
-    [enterStart, enterEnd],
-    [PARTICLE_SIZE, LINE_WIDTH],
+    [moveStart, moveEnd],
+    [SQUARE_SIZE, LINE_WIDTH],
   )
   const height = useTransform(
     scrollProgress,
-    [enterStart, enterEnd],
-    [PARTICLE_SIZE, LINE_HEIGHT],
+    [moveStart, moveEnd],
+    [SQUARE_SIZE, LINE_HEIGHT],
   )
   const borderRadius = useTransform(
     scrollProgress,
-    [enterStart, enterEnd],
-    [PARTICLE_SIZE / 2, 2],
+    [moveStart, moveEnd],
+    [1, 1],
   )
   const opacity = useTransform(
     scrollProgress,
-    [0.25, 0.32, 0.65, 0.72],
+    [appearStart, appearStart + 0.08, 0.65, 0.72],
     [0, 1, 1, 0.9],
   )
 
