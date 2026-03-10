@@ -9,10 +9,8 @@ import { useMap } from "@repo/map"
 import { mapActions } from "../../map/store"
 import { useTierAnimationData } from "./useTierAnimationData"
 import ParticleOverlay, { type ParticleStartPos } from "./ParticleOverlay"
-import { OutcomeGlyph } from "@repo/viz"
 
 const SCROLL_RUNWAY = "300vh"
-const GLYPH_SIZE = 280
 
 const CAM_CENTER: [number, number] = [-120.5, 37.2]
 const CAM_ZOOM = 6.2
@@ -26,17 +24,14 @@ export default function TierAnimationSection({
 }: TierAnimationSectionProps) {
   const theme = useTheme()
   const mapAPI = useMap()
-  const { centroids, tierDistribution, tierColors, isLoading, error } =
+  const { centroids, tierDistribution, isLoading, error } =
     useTierAnimationData()
 
   const runwayRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const glyphRef = useRef<HTMLDivElement>(null)
   const cameraSetRef = useRef(false)
 
-  const [glyphRect, setGlyphRect] = useState<{
-    x: number; y: number; width: number; height: number
-  } | null>(null)
+  const [panelSize, setPanelSize] = useState<{ width: number; height: number } | null>(null)
   const [startPositions, setStartPositions] = useState<ParticleStartPos[]>([])
   const [panelInView, setPanelInView] = useState(false)
 
@@ -119,33 +114,24 @@ export default function TierAnimationSection({
   })
 
   const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7], [1, 1, 0])
-  const glyphOpacity = useTransform(scrollYProgress, [0.4, 0.7], [0, 1])
 
-  // Measure glyph position relative to the panel container
-  const measureGlyph = useCallback(() => {
-    if (!glyphRef.current || !panelRef.current) return
-    const panelRect = panelRef.current.getBoundingClientRect()
-    const elRect = glyphRef.current.getBoundingClientRect()
-    if (elRect.width === 0) return
-    setGlyphRect({
-      x: elRect.left - panelRect.left,
-      y: elRect.top - panelRect.top,
-      width: elRect.width,
-      height: elRect.height,
-    })
+  // Measure panel size for particle end positions
+  const measurePanel = useCallback(() => {
+    if (!panelRef.current) return
+    const rect = panelRef.current.getBoundingClientRect()
+    if (rect.width === 0) return
+    setPanelSize({ width: rect.width, height: rect.height })
   }, [])
 
   useEffect(() => {
     if (isLoading) return
-    const raf = requestAnimationFrame(() => {
-      measureGlyph()
-    })
-    window.addEventListener("resize", measureGlyph)
+    const raf = requestAnimationFrame(measurePanel)
+    window.addEventListener("resize", measurePanel)
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener("resize", measureGlyph)
+      window.removeEventListener("resize", measurePanel)
     }
-  }, [isLoading, measureGlyph])
+  }, [isLoading, measurePanel])
 
   // Project centroids from lng/lat to panel-relative screen coords
   const computeStartPositions = useCallback(() => {
@@ -272,33 +258,16 @@ export default function TierAnimationSection({
               {/* White overlay that fades IN to cover the persistent map */}
               <MapFade opacity={mapOpacity} />
 
-              {/* Particle overlay — only render once glyph is measured */}
-              {startPositions.length > 0 && glyphRect && (
+              {/* Particles morph from map dots into tier lines */}
+              {startPositions.length > 0 && panelSize && (
                 <ParticleOverlay
                   startPositions={startPositions}
-                  glyphRect={glyphRect}
+                  panelWidth={panelSize.width}
+                  panelHeight={panelSize.height}
                   tierDistribution={tierDistribution}
                   scrollProgress={scrollYProgress}
                 />
               )}
-
-              {/* Glyph target */}
-              <motion.div
-                ref={glyphRef}
-                style={{
-                  position: "absolute",
-                  bottom: "10%",
-                  right: "10%",
-                  zIndex: 3,
-                  opacity: glyphOpacity,
-                }}
-              >
-                <OutcomeGlyph
-                  size={GLYPH_SIZE}
-                  values={tierDistribution}
-                  tierColors={tierColors}
-                />
-              </motion.div>
             </>
           )}
         </Box>
@@ -314,7 +283,10 @@ function MapFade({ opacity }: { opacity: MotionValue<number> }) {
     <motion.div
       style={{
         position: "absolute",
-        inset: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: "25%",
         backgroundColor: "white",
         opacity: inverseOpacity,
         pointerEvents: "none",

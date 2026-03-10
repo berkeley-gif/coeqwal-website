@@ -6,6 +6,9 @@ import type { MotionValue } from "@repo/motion"
 
 const MAX_PARTICLES = 120
 const PARTICLE_SIZE = 8
+const LINE_HEIGHT = 4
+const LINE_WIDTH = 28
+const BAR_GAP = 12
 
 export interface ParticleStartPos {
   x: number
@@ -16,20 +19,22 @@ export interface ParticleStartPos {
 
 interface ParticleOverlayProps {
   startPositions: ParticleStartPos[]
-  glyphRect: { x: number; y: number; width: number; height: number }
+  panelWidth: number
+  panelHeight: number
   tierDistribution: [number, number, number, number]
   scrollProgress: MotionValue<number>
 }
 
 function computeEndPositions(
   startPositions: ParticleStartPos[],
-  glyphRect: { x: number; y: number; width: number; height: number },
+  panelWidth: number,
+  panelHeight: number,
   tierDistribution: [number, number, number, number],
 ) {
-  const { x: gx, y: gy, width: gw, height: gh } = glyphRect
-  const barHeight = gh / 4
-  const maxBarWidth = gw * 0.7
-  const barX = gx + gw * 0.15
+  const barAreaX = panelWidth * 0.72
+  const barAreaWidth = panelWidth * 0.22
+  const totalBarsHeight = 4 * LINE_HEIGHT + 3 * BAR_GAP
+  const barAreaTop = (panelHeight - totalBarsHeight) / 2
 
   const tierBuckets: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
   const tierTotals: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
@@ -40,8 +45,8 @@ function computeEndPositions(
 
   return startPositions.map((p) => {
     const tierIdx = p.tier - 1
-    const barY = gy + tierIdx * barHeight
-    const barWidth = (tierDistribution[tierIdx] || 0.25) * maxBarWidth
+    const rowY = barAreaTop + tierIdx * (LINE_HEIGHT + BAR_GAP) + LINE_HEIGHT / 2
+    const barWidth = (tierDistribution[tierIdx] || 0.25) * barAreaWidth
     const posInTier = tierBuckets[p.tier] ?? 0
     tierBuckets[p.tier] = posInTier + 1
     const totalInTier = tierTotals[p.tier] ?? 1
@@ -49,8 +54,8 @@ function computeEndPositions(
     const fraction = totalInTier > 1 ? posInTier / (totalInTier - 1) : 0.5
 
     return {
-      x: barX + fraction * barWidth,
-      y: barY + barHeight * 0.5,
+      x: barAreaX + fraction * barWidth,
+      y: rowY,
     }
   })
 }
@@ -78,10 +83,20 @@ function Particle({
 
   const x = useTransform(scrollProgress, [enterStart, enterEnd], [startX, endX])
   const y = useTransform(scrollProgress, [enterStart, enterEnd], [startY, endY])
-  const scale = useTransform(
+  const width = useTransform(
     scrollProgress,
-    [enterStart, enterStart + 0.05, enterEnd - 0.05, enterEnd],
-    [1, 1.3, 1.3, 1],
+    [enterStart, enterEnd],
+    [PARTICLE_SIZE, LINE_WIDTH],
+  )
+  const height = useTransform(
+    scrollProgress,
+    [enterStart, enterEnd],
+    [PARTICLE_SIZE, LINE_HEIGHT],
+  )
+  const borderRadius = useTransform(
+    scrollProgress,
+    [enterStart, enterEnd],
+    [PARTICLE_SIZE / 2, 2],
   )
   const opacity = useTransform(
     scrollProgress,
@@ -95,13 +110,12 @@ function Particle({
         position: "absolute",
         left: 0,
         top: 0,
-        width: PARTICLE_SIZE,
-        height: PARTICLE_SIZE,
-        borderRadius: "50%",
+        width,
+        height,
+        borderRadius,
         backgroundColor: color,
         x,
         y,
-        scale,
         opacity,
         translateX: "-50%",
         translateY: "-50%",
@@ -113,7 +127,8 @@ function Particle({
 
 export default function ParticleOverlay({
   startPositions,
-  glyphRect,
+  panelWidth,
+  panelHeight,
   tierDistribution,
   scrollProgress,
 }: ParticleOverlayProps) {
@@ -126,8 +141,8 @@ export default function ParticleOverlay({
   }, [startPositions])
 
   const endPositions = useMemo(
-    () => computeEndPositions(sampled, glyphRect, tierDistribution),
-    [sampled, glyphRect, tierDistribution],
+    () => computeEndPositions(sampled, panelWidth, panelHeight, tierDistribution),
+    [sampled, panelWidth, panelHeight, tierDistribution],
   )
 
   return (
