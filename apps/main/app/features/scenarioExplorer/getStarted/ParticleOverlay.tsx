@@ -45,7 +45,8 @@ function computeEndPositions(
 
   return startPositions.map((p) => {
     const tierIdx = p.tier - 1
-    const rowY = barAreaTop + tierIdx * (LINE_HEIGHT + BAR_GAP) + LINE_HEIGHT / 2
+    const rowY =
+      barAreaTop + tierIdx * (LINE_HEIGHT + BAR_GAP) + LINE_HEIGHT / 2
     const barWidth = (tierDistribution[tierIdx] || 0.25) * barAreaWidth
     const posInTier = tierBuckets[p.tier] ?? 0
     tierBuckets[p.tier] = posInTier + 1
@@ -136,13 +137,15 @@ export default function ParticleOverlay({
   const sampled = useMemo(() => {
     if (startPositions.length <= MAX_PARTICLES) return startPositions
     const step = startPositions.length / MAX_PARTICLES
-    return Array.from({ length: MAX_PARTICLES }, (_, i) =>
-      startPositions[Math.floor(i * step)]!,
+    return Array.from(
+      { length: MAX_PARTICLES },
+      (_, i) => startPositions[Math.floor(i * step)]!,
     )
   }, [startPositions])
 
   const endPositions = useMemo(
-    () => computeEndPositions(sampled, panelWidth, panelHeight, tierDistribution),
+    () =>
+      computeEndPositions(sampled, panelWidth, panelHeight, tierDistribution),
     [sampled, panelWidth, panelHeight, tierDistribution],
   )
 

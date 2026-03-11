@@ -4,11 +4,11 @@
  * This is a Server Component that renders the main page structure.
  * Client components (map, tabs, etc.) are wrapped in ClientProviders
  * to establish the hydration boundary.
- * 
- * All three suspense boundaries exist because of useSearchParams() from next/navigation. 
+ *
+ * All three suspense boundaries exist because of useSearchParams() from next/navigation.
  * In Next.js App Router, any client component that calls useSearchParams() must have a
- * Suspense boundary above it to avoid hydration errors. With SSG, search params don't 
- * exist at build time. They're only available on the client. useSearchParams() suspends 
+ * Suspense boundary above it to avoid hydration errors. With SSG, search params don't
+ * exist at build time. They're only available on the client. useSearchParams() suspends
  * until the client hydrates and the actual URL params are readable.
  */
 

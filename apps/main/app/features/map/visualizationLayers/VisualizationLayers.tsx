@@ -187,7 +187,8 @@ export default function VisualizationLayers() {
 
   // Memoize dim opacity (skip in get-started mode for clean background)
   const dimOpacity = useMemo(
-    () => (isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0),
+    () =>
+      isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0,
     [isVisualizationActive, isGetStartedMode],
   )
 

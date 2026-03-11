@@ -57,7 +57,9 @@ interface GeoJSONResponse {
   features: GeoJSONFeature[]
 }
 
-function computeCentroid(geometry: GeoJSONFeature["geometry"]): [number, number] | null {
+function computeCentroid(
+  geometry: GeoJSONFeature["geometry"],
+): [number, number] | null {
   if (geometry.type === "Point") {
     const coords = geometry.coordinates as number[]
     if (coords[0] == null || coords[1] == null) return null
@@ -88,7 +90,10 @@ export function useTierAnimationData(): TierAnimationData {
   const theme = useTheme()
   const tierColors = getTierColorsFromTheme(theme)
   const colorTuple: [string, string, string, string] = [
-    tierColors[1], tierColors[2], tierColors[3], tierColors[4],
+    tierColors[1],
+    tierColors[2],
+    tierColors[3],
+    tierColors[4],
   ]
 
   const [locations, setLocations] = useState<TierLocationsResponse | null>(null)
@@ -102,12 +107,16 @@ export function useTierAnimationData(): TierAnimationData {
     async function fetchData() {
       try {
         const [locRes, geoRes] = await Promise.all([
-          fetch(`${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}/locations`),
+          fetch(
+            `${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}/locations`,
+          ),
           fetch(`${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}`),
         ])
 
         if (!locRes.ok || !geoRes.ok) {
-          throw new Error(`API error: locations=${locRes.status}, geojson=${geoRes.status}`)
+          throw new Error(
+            `API error: locations=${locRes.status}, geojson=${geoRes.status}`,
+          )
         }
 
         const locData: TierLocationsResponse = await locRes.json()
@@ -127,7 +136,9 @@ export function useTierAnimationData(): TierAnimationData {
     }
 
     fetchData()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const tierColorMap = useMemo(() => {

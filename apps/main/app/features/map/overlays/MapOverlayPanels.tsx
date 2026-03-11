@@ -90,10 +90,7 @@ const RIGHT_PANEL_MAX_WIDTH = "540px"
 const SLIDE_DISTANCE = 500 // px, starting Y-offset for the Scenario Intro slide-up animation; used in useTransform so can't be css value
 
 /** Pairs opacity (0-1) and Y translation (SLIDE_DISTANCE->0) for a panel entrance. */
-function usePanelEntrance(
-  progress: MotionValue<number>,
-  range: ProgressRange,
-) {
+function usePanelEntrance(progress: MotionValue<number>, range: ProgressRange) {
   const opacity = useTransform(progress, range, [0, 1], {
     ease: easeOutCubic,
   })
@@ -165,10 +162,22 @@ export default function MapOverlayPanels() {
 
   // Tooltip target/container ref pairs — one per right-side panel
   const panelRefs = {
-    strategy: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
-    keyOperations: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
-    keyOutcomes: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
-    summary: { target: useRef<HTMLDivElement>(null), container: useRef<HTMLDivElement>(null) },
+    strategy: {
+      target: useRef<HTMLDivElement>(null),
+      container: useRef<HTMLDivElement>(null),
+    },
+    keyOperations: {
+      target: useRef<HTMLDivElement>(null),
+      container: useRef<HTMLDivElement>(null),
+    },
+    keyOutcomes: {
+      target: useRef<HTMLDivElement>(null),
+      container: useRef<HTMLDivElement>(null),
+    },
+    summary: {
+      target: useRef<HTMLDivElement>(null),
+      container: useRef<HTMLDivElement>(null),
+    },
   }
 
   // Tracks which tooltips the user (or the system) has manually closed.
@@ -298,10 +307,22 @@ export default function MapOverlayPanels() {
   // Phase 1: Panel entrance — each slides up from below the viewport
   // and fades in with ease-out cubic (fast start → gentle settle).
   // Only one panel animates at a time; each waits for the previous to land.
-  const strategy = usePanelEntrance(scenarioIntroProgress, STRATEGY_PHASE_THRESHOLDS.enter)
-  const keyOperations = usePanelEntrance(scenarioIntroProgress, KEY_OPERATIONS_PHASE_THRESHOLDS.enter)
-  const keyOutcomes = usePanelEntrance(scenarioIntroProgress, KEY_OUTCOMES_PHASE_THRESHOLDS.enter)
-  const summary = usePanelEntrance(scenarioIntroProgress, SUMMARY_PHASE_THRESHOLDS.enter)
+  const strategy = usePanelEntrance(
+    scenarioIntroProgress,
+    STRATEGY_PHASE_THRESHOLDS.enter,
+  )
+  const keyOperations = usePanelEntrance(
+    scenarioIntroProgress,
+    KEY_OPERATIONS_PHASE_THRESHOLDS.enter,
+  )
+  const keyOutcomes = usePanelEntrance(
+    scenarioIntroProgress,
+    KEY_OUTCOMES_PHASE_THRESHOLDS.enter,
+  )
+  const summary = usePanelEntrance(
+    scenarioIntroProgress,
+    SUMMARY_PHASE_THRESHOLDS.enter,
+  )
 
   // Phase 2: Tooltip opacity — sequenced AFTER all panels are in position.
   // Panels finish entering at ~0.59, tooltips run 0.62–0.90.
@@ -402,7 +423,11 @@ export default function MapOverlayPanels() {
             >
               <Box
                 id="central-valley-content"
-                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: theme.space.component.lg,
+                }}
               >
                 <PanelEyebrow>Central Valley Water</PanelEyebrow>
                 <Typography variant="body1">
@@ -512,7 +537,11 @@ export default function MapOverlayPanels() {
               isVisible
             >
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: theme.space.component.lg,
+                }}
               >
                 <PanelEyebrow>Central Valley Water Modeling</PanelEyebrow>
                 <Typography
@@ -563,7 +592,11 @@ export default function MapOverlayPanels() {
               isVisible
             >
               <Box
-                sx={{ display: "flex", flexDirection: "column", gap: theme.space.component.lg }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: theme.space.component.lg,
+                }}
               >
                 <Typography
                   variant="body1"
@@ -772,8 +805,9 @@ export default function MapOverlayPanels() {
                               >
                                 Key operations
                               </Typography>
-                              These icons represent the key operational decisions
-                              that define this water management strategy.
+                              These icons represent the key operational
+                              decisions that define this water management
+                              strategy.
                               <Typography
                                 variant="tooltipHeader"
                                 sx={{
@@ -783,10 +817,7 @@ export default function MapOverlayPanels() {
                               >
                                 Try this:
                               </Typography>
-                              <Box
-                                component="span"
-                                sx={{ display: "block" }}
-                              >
+                              <Box component="span" sx={{ display: "block" }}>
                                 Hover over the icons to see what key operations
                                 they represent.
                               </Box>
@@ -871,10 +902,7 @@ export default function MapOverlayPanels() {
                             >
                               Try this:
                             </Typography>
-                            <Box
-                              component="span"
-                              sx={{ display: "block" }}
-                            >
+                            <Box component="span" sx={{ display: "block" }}>
                               Click on the{" "}
                               <InfoIcon
                                 sx={{
@@ -932,10 +960,7 @@ export default function MapOverlayPanels() {
                             >
                               Try this:
                             </Typography>
-                            <Box
-                              component="span"
-                              sx={{ display: "block" }}
-                            >
+                            <Box component="span" sx={{ display: "block" }}>
                               Click any outcome chart above to get a summary
                               specific to that outcome, including the locations
                               most affected. Click a location chip to zoom the
