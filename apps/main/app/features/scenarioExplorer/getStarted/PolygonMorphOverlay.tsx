@@ -291,6 +291,7 @@ export default function PolygonMorphOverlay({
   const cloneRefs = useRef<(SVGPathElement | null)[]>([])
   const dupeRefs = useRef<(SVGGElement | null)[]>([])
   const extraRowRefs = useRef<(SVGGElement | null)[]>([])
+  const extraRectRefs = useRef<(SVGRectElement | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const sampled = useMemo(() => {
@@ -424,6 +425,8 @@ export default function PolygonMorphOverlay({
         width: number
         height: number
         color: string
+        cx: number
+        cy: number
       }
 
       // Row 0: 3 duplicates to the right of the morphed original
@@ -438,18 +441,23 @@ export default function PolygonMorphOverlay({
             width: (tierCounts[t] || 0) * glyphThinW,
             height: glyphBarH,
             color: tierColors[t] || "#ccc",
+            cx: 0, cy: 0,
           })
         }
         row0.push(bars)
       }
 
-      // Row 1+: full rows below
+      // Row 1+: full rows below — each bar stores its parent glyph center
       const extraRows: BarRect[][][] = []
       for (let r = 1; r < NUM_ROWS; r++) {
         const rowGlyphs: BarRect[][] = []
         const yShift = r * (glyphRowH + ROW_SPACING)
         for (let c = 0; c < COLS; c++) {
           const offsetX = c * (GLYPH_BAR_WIDTH + spaceBetweenX)
+          const glyphCx = barLeft + offsetX + GLYPH_BAR_WIDTH / 2
+          const firstBarY = (tierGlyphY[1] || 0) - glyphBarH / 2 + yShift
+          const lastBarBottom = (tierGlyphY[4] || 0) - glyphBarH / 2 + yShift + glyphBarH
+          const glyphCy = (firstBarY + lastBarBottom) / 2
           const bars: BarRect[] = []
           for (let t = 1; t <= 4; t++) {
             bars.push({
@@ -458,6 +466,8 @@ export default function PolygonMorphOverlay({
               width: (tierCounts[t] || 0) * glyphThinW,
               height: glyphBarH,
               color: tierColors[t] || "#ccc",
+              cx: glyphCx,
+              cy: glyphCy,
             })
           }
           rowGlyphs.push(bars)
@@ -635,25 +645,46 @@ export default function PolygonMorphOverlay({
         g.style.opacity = String(t)
       }
 
-      // ── HOLD 0.95 → 0.98: pause before duplication ──
-      // ── Extra rows: appear on top of row 0, then slide straight down ──
+      // ── HOLD 0.95 → 0.96: pause before duplication ──
+      // ── Extra rows: slide down (0.96-0.975), hold, dot morph (0.985-0.995) ──
       for (let r = 0; r < extraRowRefs.current.length; r++) {
         const g = extraRowRefs.current[r]
         if (!g) continue
-        const moveStart = 0.98
-        const moveEnd = 0.995
-        const visible = v >= moveStart
+        const visible = v >= 0.96
         g.style.opacity = visible ? "1" : "0"
-        const t = Math.min(
-          1,
-          Math.max(0, (v - moveStart) / (moveEnd - moveStart)),
-        )
-        const yOffset = -rowYShift * (1 - t)
+        const slideT = Math.min(1, Math.max(0, (v - 0.96) / (0.975 - 0.96)))
+        const yOffset = -rowYShift * (1 - slideT)
         g.style.transform = `translateY(${yOffset}px)`
+      }
+
+      // ── Dot morph: each glyph's 4 bars converge to center dot (0.985-0.995) ──
+      {
+        const DOT_R = 4
+        const DOT_SIZE = DOT_R * 2
+        let ri = 0
+        for (let r = 0; r < extraRows.length; r++) {
+          for (let c = 0; c < extraRows[r]!.length; c++) {
+            const bars = extraRows[r]![c]!
+            for (let b = 0; b < bars.length; b++) {
+              const el = extraRectRefs.current[ri++]
+              if (!el) continue
+              const bar = bars[b]!
+              const dotT = Math.min(1, Math.max(0, (v - 0.985) / (0.995 - 0.985)))
+              const dotX = bar.cx - DOT_R
+              const dotY = bar.cy - DOT_R
+              el.setAttribute("x", String(bar.x + dotT * (dotX - bar.x)))
+              el.setAttribute("y", String(bar.y + dotT * (dotY - bar.y)))
+              el.setAttribute("width", String(Math.max(0, bar.width + dotT * (DOT_SIZE - bar.width))))
+              el.setAttribute("height", String(Math.max(0, bar.height + dotT * (DOT_SIZE - bar.height))))
+              el.setAttribute("rx", String(dotT * DOT_R))
+              el.setAttribute("ry", String(dotT * DOT_R))
+            }
+          }
+        }
       }
     })
     return unsub
-  }, [shapes, scrollProgress, rowYShift])
+  }, [shapes, scrollProgress, rowYShift, extraRows])
 
   const overlayLeft = panelWidth * 0.75
   const overlayWidth = panelWidth * 0.25
@@ -769,33 +800,40 @@ export default function PolygonMorphOverlay({
           </g>
         ))}
         {/* Extra rows of glyph bar charts */}
-        {extraRows.map((rowGlyphs, r) => (
-          <g
-            key={`row-${r}`}
-            ref={(el) => {
-              extraRowRefs.current[r] = el
-            }}
-            style={{ opacity: 0 }}
-          >
-            {rowGlyphs.map((bars, c) => (
-              <g key={`col-${c}`}>
-                {bars.map((bar, t) => (
-                  <rect
-                    key={t}
-                    x={bar.x}
-                    y={bar.y}
-                    width={bar.width}
-                    height={bar.height}
-                    fill={bar.color}
-                    fillOpacity={fillOpacity}
-                    stroke={bar.color}
-                    strokeWidth={strokeWidth}
-                  />
-                ))}
-              </g>
-            ))}
-          </g>
-        ))}
+        {(() => {
+          let ri = 0
+          return extraRows.map((rowGlyphs, r) => (
+            <g
+              key={`row-${r}`}
+              ref={(el) => {
+                extraRowRefs.current[r] = el
+              }}
+              style={{ opacity: 0 }}
+            >
+              {rowGlyphs.map((bars, c) => (
+                <g key={`col-${c}`}>
+                  {bars.map((bar, t) => {
+                    const idx = ri++
+                    return (
+                      <rect
+                        key={t}
+                        ref={(el) => { extraRectRefs.current[idx] = el }}
+                        x={bar.x}
+                        y={bar.y}
+                        width={bar.width}
+                        height={bar.height}
+                        fill={bar.color}
+                        fillOpacity={fillOpacity}
+                        stroke={bar.color}
+                        strokeWidth={strokeWidth}
+                      />
+                    )
+                  })}
+                </g>
+              ))}
+            </g>
+          ))
+        })()}
       </svg>
     </>
   )
