@@ -274,6 +274,7 @@ export default function PolygonMorphOverlay({
   const primaryRefs = useRef<(SVGPathElement | null)[]>([])
   const cloneRefs = useRef<(SVGPathElement | null)[]>([])
   const dupeRefs = useRef<(SVGGElement | null)[]>([])
+  const extraRowRefs = useRef<(SVGGElement | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const sampled = useMemo(() => {
@@ -284,7 +285,7 @@ export default function PolygonMorphOverlay({
     )
   }, [polygons])
 
-  const { shapes, layoutInfo, duplicateGlyphs } = useMemo(() => {
+  const { shapes, layoutInfo, duplicateGlyphs, extraRows, rowYShift } = useMemo(() => {
     const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
     const thinW = layoutResult.thinWidth
     const glyphThinW = layoutResult.glyphThinWidth
@@ -347,14 +348,21 @@ export default function PolygonMorphOverlay({
       if (!tierGlyphY[tier]) tierGlyphY[tier] = layoutResult.positions[i]!.glyphBarY
     }
 
-    const NUM_DUPLICATES = 3
-    const totalGlyphs = 1 + NUM_DUPLICATES
+    const COLS = 4
+    const NUM_ROWS = 2
     const availableW = overlayW - padX * 2
-    const spaceBetween = (availableW - totalGlyphs * GLYPH_BAR_WIDTH) / Math.max(totalGlyphs - 1, 1)
-    const dupes: Array<Array<{ x: number; y: number; width: number; height: number; color: string }>> = []
-    for (let d = 0; d < NUM_DUPLICATES; d++) {
-      const offsetX = (d + 1) * (GLYPH_BAR_WIDTH + spaceBetween)
-      const bars: Array<{ x: number; y: number; width: number; height: number; color: string }> = []
+    const spaceBetweenX = (availableW - COLS * GLYPH_BAR_WIDTH) / Math.max(COLS - 1, 1)
+
+    const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
+    const glyphRowH = 4 * glyphBarH + 5 * glyphBarSpacing
+    const ROW_SPACING = 16
+    type BarRect = { x: number; y: number; width: number; height: number; color: string }
+
+    // Row 0: 3 duplicates to the right of the morphed original
+    const row0: BarRect[][] = []
+    for (let d = 0; d < COLS - 1; d++) {
+      const offsetX = (d + 1) * (GLYPH_BAR_WIDTH + spaceBetweenX)
+      const bars: BarRect[] = []
       for (let t = 1; t <= 4; t++) {
         bars.push({
           x: barLeft + offsetX,
@@ -364,10 +372,33 @@ export default function PolygonMorphOverlay({
           color: tierColors[t] || "#ccc",
         })
       }
-      dupes.push(bars)
+      row0.push(bars)
     }
 
-    return { shapes: shapeData, layoutInfo: layoutResult.info, duplicateGlyphs: dupes }
+    // Row 1+: full rows below
+    const extraRows: BarRect[][][] = []
+    for (let r = 1; r < NUM_ROWS; r++) {
+      const rowGlyphs: BarRect[][] = []
+      const yShift = r * (glyphRowH + ROW_SPACING)
+      for (let c = 0; c < COLS; c++) {
+        const offsetX = c * (GLYPH_BAR_WIDTH + spaceBetweenX)
+        const bars: BarRect[] = []
+        for (let t = 1; t <= 4; t++) {
+          bars.push({
+            x: barLeft + offsetX,
+            y: (tierGlyphY[t] || 0) - glyphBarH / 2 + yShift,
+            width: (tierCounts[t] || 0) * glyphThinW,
+            height: glyphBarH,
+            color: tierColors[t] || "#ccc",
+          })
+        }
+        rowGlyphs.push(bars)
+      }
+      extraRows.push(rowGlyphs)
+    }
+
+    const rowYShift = glyphRowH + ROW_SPACING
+    return { shapes: shapeData, layoutInfo: layoutResult.info, duplicateGlyphs: row0, extraRows, rowYShift }
   }, [sampled, panelWidth, panelHeight])
 
   useEffect(() => {
@@ -507,14 +538,28 @@ export default function PolygonMorphOverlay({
         el.setAttribute("d", pointsToD(pts))
       }
 
-      // ── Duplicate glyphs: fade in left to right ──
+      // ── Row 0 duplicate glyphs: fade in left to right ──
       for (let d = 0; d < dupeRefs.current.length; d++) {
         const g = dupeRefs.current[d]
         if (!g) continue
-        const fadeStart = 0.92 + d * 0.025
-        const fadeEnd = fadeStart + 0.025
+        const fadeStart = 0.92 + d * 0.01
+        const fadeEnd = fadeStart + 0.01
         const t = Math.min(1, Math.max(0, (v - fadeStart) / (fadeEnd - fadeStart)))
         g.style.opacity = String(t)
+      }
+
+      // ── HOLD 0.95 → 0.98: pause before duplication ──
+      // ── Extra rows: appear on top of row 0, then slide straight down ──
+      for (let r = 0; r < extraRowRefs.current.length; r++) {
+        const g = extraRowRefs.current[r]
+        if (!g) continue
+        const moveStart = 0.98
+        const moveEnd = 0.995
+        const visible = v >= moveStart
+        g.style.opacity = visible ? "1" : "0"
+        const t = Math.min(1, Math.max(0, (v - moveStart) / (moveEnd - moveStart)))
+        const yOffset = -rowYShift * (1 - t)
+        g.style.transform = `translateY(${yOffset}px)`
       }
     })
     return unsub
@@ -599,7 +644,7 @@ export default function PolygonMorphOverlay({
             style={{ opacity: 0 }}
           />
         ))}
-        {/* Duplicate glyph bar charts: fade in left to right */}
+        {/* Row 0 duplicate glyph bar charts: fade in left to right */}
         {duplicateGlyphs.map((bars, d) => (
           <g key={`dup-${d}`} ref={(el) => { dupeRefs.current[d] = el }} style={{ opacity: 0 }}>
             {bars.map((bar, t) => (
@@ -614,6 +659,28 @@ export default function PolygonMorphOverlay({
                 stroke={bar.color}
                 strokeWidth={strokeWidth}
               />
+            ))}
+          </g>
+        ))}
+        {/* Extra rows of glyph bar charts */}
+        {extraRows.map((rowGlyphs, r) => (
+          <g key={`row-${r}`} ref={(el) => { extraRowRefs.current[r] = el }} style={{ opacity: 0 }}>
+            {rowGlyphs.map((bars, c) => (
+              <g key={`col-${c}`}>
+                {bars.map((bar, t) => (
+                  <rect
+                    key={t}
+                    x={bar.x}
+                    y={bar.y}
+                    width={bar.width}
+                    height={bar.height}
+                    fill={bar.color}
+                    fillOpacity={fillOpacity}
+                    stroke={bar.color}
+                    strokeWidth={strokeWidth}
+                  />
+                ))}
+              </g>
             ))}
           </g>
         ))}
