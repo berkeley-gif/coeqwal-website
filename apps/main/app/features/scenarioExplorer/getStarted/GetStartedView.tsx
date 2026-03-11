@@ -53,7 +53,7 @@ export default function GetStartedView() {
       >
         {SECTIONS_BEFORE.map(({ title, body }) => (
           <ContentPanel key={title} sx={panelSx}>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h4" component="h2" fontWeight={300}>
               {title}
             </Typography>
             {body && (
@@ -78,7 +78,7 @@ export default function GetStartedView() {
       >
         {SECTIONS_AFTER.map(({ title, body }) => (
           <ContentPanel key={title} sx={panelSx}>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h4" component="h2" fontWeight={300}>
               {title}
             </Typography>
             {body && (
