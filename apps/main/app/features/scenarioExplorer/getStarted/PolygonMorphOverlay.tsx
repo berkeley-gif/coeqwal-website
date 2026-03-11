@@ -10,7 +10,7 @@ const ROW_GAP = 6
 const BAR_HEIGHT = SQUARE_SIZE
 const BAR_GAP = 2
 const GLYPH_BAR_WIDTH = 60
-const LABEL_GAP = 30
+const LABEL_GAP = 36
 
 export interface PolygonMorphData {
   screenPoly: [number, number][]
@@ -161,10 +161,9 @@ function computeGridLayout(
     (tierRows[1] || 0) + (tierRows[2] || 0) + (tierRows[3] || 0) + (tierRows[4] || 0)
   const totalGridHeight = totalRows * cell + 3 * ROW_GAP
 
-  // Upper region: grid (Distribution view) — 15%–48% of panel height
+  // Upper region: grid (Distribution view) — top-aligned, starts just below label
   const gridRegionTop = panelHeight * 0.15 + LABEL_GAP
-  const gridRegionBottom = panelHeight * 0.48
-  const gridStartY = gridRegionTop + Math.max(0, (gridRegionBottom - gridRegionTop - totalGridHeight) / 2)
+  const gridStartY = gridRegionTop
 
   const tierGridStartY: Record<number, number> = {}
   let cumY = gridStartY
@@ -184,18 +183,21 @@ function computeGridLayout(
   const glyphBarH = (GLYPH_BAR_WIDTH * 0.8) / 4
   const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
 
-  // Lower region: bars (Bar chart) — 55%–88% of panel height
-  const barRegionTop = panelHeight * 0.55 + LABEL_GAP
-  const barTotalHeight = 4 * BAR_HEIGHT + 3 * BAR_GAP
-  const barRegionBottom = panelHeight * 0.88
-  const barStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - barTotalHeight) / 2)
+  // Bar chart label sits below the grid with a clean gap
+  const gridBottom = gridStartY + totalGridHeight
+  const barLabelTop = gridBottom + LABEL_GAP
+  const barContentTop = barLabelTop + LABEL_GAP
 
-  // Glyph final Y positions — centered in the bar region
+  // Lower region: bars — top-aligned below label
+  const barTotalHeight = 4 * BAR_HEIGHT + 3 * BAR_GAP
+  const barStartY = barContentTop
+
+  // Glyph final Y positions — top-aligned in the bar region
   const glyphTotalH = 4 * glyphBarH + 5 * glyphBarSpacing
-  const glyphTopY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - glyphTotalH) / 2)
+  const glyphTopY = barContentTop
 
   // Mirror the grid layout into the bar region so clones can travel down as squares
-  const barGridStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - totalGridHeight) / 2)
+  const barGridStartY = barContentTop
   const tierBarGridStartY: Record<number, number> = {}
   let barCumY = barGridStartY
   for (let tier = 1; tier <= 4; tier++) {
@@ -251,7 +253,7 @@ function computeGridLayout(
     glyphBarHeight: glyphBarH,
     info: {
       gridLabelY: panelHeight * 0.15,
-      barLabelY: panelHeight * 0.55,
+      barLabelY: barLabelTop,
     },
   }
 }
