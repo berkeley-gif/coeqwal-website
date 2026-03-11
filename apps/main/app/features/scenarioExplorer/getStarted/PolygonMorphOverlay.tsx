@@ -8,6 +8,7 @@ const SQUARE_SIZE = 10
 const SQUARE_GAP = 2
 const ROW_GAP = 6
 const BAR_GAP = 10
+const LABEL_GAP = 30
 
 export interface PolygonMorphData {
   screenPoly: [number, number][]
@@ -99,7 +100,11 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-/* ── grid & bar layout ──────────────────────────────── */
+function lerp(a: [number, number], b: [number, number], t: number): [number, number] {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
+}
+
+/* ── grid & bar layout (stacked regions) ─────────────── */
 
 interface GridLayout {
   gridX: number
@@ -110,9 +115,15 @@ interface GridLayout {
   barY: number
 }
 
+export interface LayoutInfo {
+  gridLabelY: number
+  barLabelY: number
+}
+
 interface LayoutResult {
   positions: GridLayout[]
   thinWidth: number
+  info: LayoutInfo
 }
 
 function computeGridLayout(
@@ -123,7 +134,6 @@ function computeGridLayout(
   const overlayLeft = panelWidth * 0.75
   const overlayWidth = panelWidth * 0.25
   const pad = overlayWidth * 0.08
-  const overlayCenter = overlayLeft + overlayWidth / 2
 
   const tierTotals: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
   for (const p of polygons) tierTotals[p.tier] = (tierTotals[p.tier] || 0) + 1
@@ -141,7 +151,11 @@ function computeGridLayout(
   const totalRows =
     (tierRows[1] || 0) + (tierRows[2] || 0) + (tierRows[3] || 0) + (tierRows[4] || 0)
   const totalGridHeight = totalRows * cell + 3 * ROW_GAP
-  const gridStartY = (panelHeight - totalGridHeight) / 2
+
+  // Upper region: grid (Distribution view) — 15%–48% of panel height
+  const gridRegionTop = panelHeight * 0.15 + LABEL_GAP
+  const gridRegionBottom = panelHeight * 0.48
+  const gridStartY = gridRegionTop + Math.max(0, (gridRegionBottom - gridRegionTop - totalGridHeight) / 2)
 
   const tierGridStartY: Record<number, number> = {}
   let cumY = gridStartY
@@ -153,13 +167,14 @@ function computeGridLayout(
   const gridWidth = Math.min(cols, maxPerTier) * cell - SQUARE_GAP
   const gridLeft = overlayLeft + pad + (overlayWidth - pad * 2 - gridWidth) / 2
 
-  // Thin width: fit all items in the widest tier within the overlay
   const maxBarArea = overlayWidth - pad * 2
   const thinW = Math.max(1, Math.min(3, Math.floor(maxBarArea / Math.max(maxPerTier, 1))))
 
-  // Final bar layout: 4 bars stacked vertically, centered
+  // Lower region: bars (Bar chart) — 55%–88% of panel height
+  const barRegionTop = panelHeight * 0.55 + LABEL_GAP
   const barTotalHeight = 4 * SQUARE_SIZE + 3 * BAR_GAP
-  const barStartY = (panelHeight - barTotalHeight) / 2
+  const barRegionBottom = panelHeight * 0.88
+  const barStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - barTotalHeight) / 2)
 
   const tierBuckets: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
 
@@ -181,17 +196,26 @@ function computeGridLayout(
       ? col * numRowsInTier + row
       : lastRowCount * numRowsInTier + (col - lastRowCount) * (numRowsInTier - 1) + row
 
+    const barTierIdx = p.tier - 1
+
     return {
       gridX,
       gridY,
       row,
       tierTopY,
       barX: barLeft + denseIdx * thinW + thinW / 2,
-      barY: tierTopY,
+      barY: barStartY + barTierIdx * (SQUARE_SIZE + BAR_GAP) + SQUARE_SIZE / 2,
     }
   })
 
-  return { positions, thinWidth: thinW }
+  return {
+    positions,
+    thinWidth: thinW,
+    info: {
+      gridLabelY: panelHeight * 0.15,
+      barLabelY: panelHeight * 0.55,
+    },
+  }
 }
 
 /* ── component ───────────────────────────────────────── */
@@ -207,7 +231,9 @@ export default function PolygonMorphOverlay({
   scrollProgress,
 }: PolygonMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const pathRefs = useRef<(SVGPathElement | null)[]>([])
+  const primaryRefs = useRef<(SVGPathElement | null)[]>([])
+  const cloneRefs = useRef<(SVGPathElement | null)[]>([])
+  const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const sampled = useMemo(() => {
     if (polygons.length <= MAX_POLYGONS) return polygons
@@ -217,12 +243,12 @@ export default function PolygonMorphOverlay({
     )
   }, [polygons])
 
-  const shapes = useMemo(() => {
-    const layout = computeGridLayout(sampled, panelWidth, panelHeight)
-    const thinW = layout.thinWidth
+  const { shapes, layoutInfo } = useMemo(() => {
+    const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
+    const thinW = layoutResult.thinWidth
 
-    return sampled.map((poly, i) => {
-      const l = layout.positions[i]!
+    const shapeData = sampled.map((poly, i) => {
+      const l = layoutResult.positions[i]!
       const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
       const squareAtCentroid = rectPoints(
         poly.centroidScreen[0],
@@ -245,125 +271,110 @@ export default function PolygonMorphOverlay({
         barSlice,
         color: poly.color,
         rawD: pointsToD(poly.screenPoly),
-        initialD: pointsToD(poly.screenPoly),
+        endSquareD: pointsToD(squareAtGrid),
       }
     })
+
+    return { shapes: shapeData, layoutInfo: layoutResult.info }
   }, [sampled, panelWidth, panelHeight])
 
   useEffect(() => {
     const CROSSFADE_THRESHOLD = 0.15
+    const CLONE_SPAWN = 0.44
+    const N = shapes.length
+
     const unsub = scrollProgress.on("change", (v) => {
+      // ── Labels (update regardless of SVG visibility) ──
+      const mapLabel = labelRefs.current[0]
+      const distLabel = labelRefs.current[1]
+      const barLabel = labelRefs.current[2]
+      if (mapLabel) {
+        const t = Math.min(1, Math.max(0, (v - 0.10) / 0.05))
+        mapLabel.style.opacity = String(t)
+      }
+      if (distLabel) {
+        const t = Math.min(1, Math.max(0, (v - 0.36) / 0.04))
+        distLabel.style.opacity = String(t)
+      }
+      if (barLabel) {
+        const t = Math.min(1, Math.max(0, (v - 0.64) / 0.04))
+        barLabel.style.opacity = String(t)
+      }
+
+      // ── SVG visibility ──
       if (svgRef.current) {
         svgRef.current.style.opacity = v >= CROSSFADE_THRESHOLD ? "1" : "0"
         if (v < CROSSFADE_THRESHOLD) return
       }
 
-      for (let i = 0; i < shapes.length; i++) {
-        const el = pathRefs.current[i]
+      // ── Primary paths: polygon → square → grid, then freeze ──
+      for (let i = 0; i < N; i++) {
+        const el = primaryRefs.current[i]
         if (!el) continue
         const shape = shapes[i]
         if (!shape) continue
-        const { polygon, square, endSquare, thinAtGrid, thinAtTop, barSlice, rawD } = shape
+        const { polygon, square, endSquare, rawD } = shape
         const stagger = (i % 20) * 0.002
 
-        // ── Forward: polygon → squares in grid ──
         const morphStart = 0.16 + stagger
         const morphEnd = 0.22 + stagger
         const moveStart = 0.24 + stagger
-        const moveEnd = 0.32 + stagger
-        // ── HOLD: squares in grid (0.32 → 0.42) ──
-        const shrinkStart = 0.42 + stagger
-        const shrinkEnd = 0.46 + stagger
-        const slideStart = 0.48 + stagger
-        const slideEnd = 0.52 + stagger
-        const condenseStart = 0.54 + stagger
-        const condenseEnd = 0.60 + stagger
-        // ── HOLD: bars (0.60 → 0.70) ──
-        const barHoldEnd = 0.70
-        const rExpandStart = 0.70 + stagger
-        const rExpandEnd = 0.74 + stagger
-        const rSlideStart = 0.74 + stagger
-        const rSlideEnd = 0.78 + stagger
-        const rGrowStart = 0.78 + stagger
-        const rGrowEnd = 0.82 + stagger
-        // ── HOLD: final squares (0.82+) ──
-        // 0.90+ : hold at endSquare (stays fixed as user scrolls away)
+        const moveEnd = 0.34 + stagger
 
         if (v <= morphStart) {
           el.setAttribute("d", rawD)
-          continue
-        }
-
-        let pts: [number, number][]
-
-        // ── Forward phases ──
-        if (v <= morphEnd) {
+        } else if (v <= morphEnd) {
           const t = easeInOut((v - morphStart) / (morphEnd - morphStart))
-          pts = polygon.map((p, j): [number, number] => [
-            p[0] + (square[j]![0] - p[0]) * t,
-            p[1] + (square[j]![1] - p[1]) * t,
-          ])
+          const pts = polygon.map((p, j) => lerp(p, square[j]!, t))
+          el.setAttribute("d", pointsToD(pts))
         } else if (v <= moveStart) {
-          pts = square
+          el.setAttribute("d", pointsToD(square))
         } else if (v <= moveEnd) {
           const t = easeInOut((v - moveStart) / (moveEnd - moveStart))
-          pts = square.map((p, j): [number, number] => [
-            p[0] + (endSquare[j]![0] - p[0]) * t,
-            p[1] + (endSquare[j]![1] - p[1]) * t,
-          ])
-        } else if (v <= shrinkStart) {
+          const pts = square.map((p, j) => lerp(p, endSquare[j]!, t))
+          el.setAttribute("d", pointsToD(pts))
+        } else {
+          el.setAttribute("d", pointsToD(endSquare))
+        }
+      }
+
+      // ── Clone paths: spawn from grid squares, shrink, merge rows, condense to bars ──
+      for (let i = 0; i < N; i++) {
+        const el = cloneRefs.current[i]
+        if (!el) continue
+        const shape = shapes[i]
+        if (!shape) continue
+
+        if (v < CLONE_SPAWN) {
+          el.style.opacity = "0"
+          continue
+        }
+        el.style.opacity = "1"
+
+        const { endSquare, thinAtGrid, thinAtTop, barSlice } = shape
+        const stagger = (i % 20) * 0.002
+
+        const shrinkStart = 0.44 + stagger
+        const shrinkEnd = 0.50 + stagger
+        const slideStart = 0.50 + stagger
+        const slideEnd = 0.56 + stagger
+        const condenseStart = 0.56 + stagger
+        const condenseEnd = 0.62 + stagger
+
+        let pts: [number, number][]
+        if (v <= shrinkStart) {
           pts = endSquare
         } else if (v <= shrinkEnd) {
           const t = easeInOut((v - shrinkStart) / (shrinkEnd - shrinkStart))
-          pts = endSquare.map((p, j): [number, number] => [
-            p[0] + (thinAtGrid[j]![0] - p[0]) * t,
-            p[1] + (thinAtGrid[j]![1] - p[1]) * t,
-          ])
-        } else if (v <= slideStart) {
-          pts = thinAtGrid
+          pts = endSquare.map((p, j) => lerp(p, thinAtGrid[j]!, t))
         } else if (v <= slideEnd) {
           const t = easeInOut((v - slideStart) / (slideEnd - slideStart))
-          pts = thinAtGrid.map((p, j): [number, number] => [
-            p[0] + (thinAtTop[j]![0] - p[0]) * t,
-            p[1] + (thinAtTop[j]![1] - p[1]) * t,
-          ])
-        } else if (v <= condenseStart) {
-          pts = thinAtTop
+          pts = thinAtGrid.map((p, j) => lerp(p, thinAtTop[j]!, t))
         } else if (v <= condenseEnd) {
           const t = easeInOut((v - condenseStart) / (condenseEnd - condenseStart))
-          pts = thinAtTop.map((p, j): [number, number] => [
-            p[0] + (barSlice[j]![0] - p[0]) * t,
-            p[1] + (barSlice[j]![1] - p[1]) * t,
-          ])
-
-        // ── Hold bars ──
-        } else if (v <= barHoldEnd) {
-          pts = barSlice
-
-        // ── Reverse: bars → thin at top (expand) ──
-        } else if (v <= rExpandEnd) {
-          const t = easeInOut((v - rExpandStart) / (rExpandEnd - rExpandStart))
-          pts = barSlice.map((p, j): [number, number] => [
-            p[0] + (thinAtTop[j]![0] - p[0]) * t,
-            p[1] + (thinAtTop[j]![1] - p[1]) * t,
-          ])
-        // ── Reverse: thin at top → thin at grid (slide down) ──
-        } else if (v <= rSlideEnd) {
-          const t = easeInOut((v - rSlideStart) / (rSlideEnd - rSlideStart))
-          pts = thinAtTop.map((p, j): [number, number] => [
-            p[0] + (thinAtGrid[j]![0] - p[0]) * t,
-            p[1] + (thinAtGrid[j]![1] - p[1]) * t,
-          ])
-        // ── Reverse: thin at grid → square at grid (grow) ──
-        } else if (v <= rGrowEnd) {
-          const t = easeInOut((v - rGrowStart) / (rGrowEnd - rGrowStart))
-          pts = thinAtGrid.map((p, j): [number, number] => [
-            p[0] + (endSquare[j]![0] - p[0]) * t,
-            p[1] + (endSquare[j]![1] - p[1]) * t,
-          ])
-        // ── Hold at squares (stays fixed as user scrolls away) ──
+          pts = thinAtTop.map((p, j) => lerp(p, barSlice[j]!, t))
         } else {
-          pts = endSquare
+          pts = barSlice
         }
 
         el.setAttribute("d", pointsToD(pts))
@@ -372,33 +383,86 @@ export default function PolygonMorphOverlay({
     return unsub
   }, [shapes, scrollProgress])
 
+  const overlayLeft = panelWidth * 0.75
+  const overlayWidth = panelWidth * 0.25
+
+  const labelStyle: React.CSSProperties = {
+    position: "absolute",
+    left: overlayLeft,
+    width: overlayWidth,
+    textAlign: "center",
+    opacity: 0,
+    zIndex: 4,
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    color: "rgba(0,0,0,0.45)",
+    pointerEvents: "none",
+  }
+
   return (
-    <svg
-      ref={svgRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 2,
-        opacity: 0,
-      }}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {shapes.map((s, i) => (
-        <path
-          key={i}
-          ref={(el) => {
-            pathRefs.current[i] = el
-          }}
-          fill={s.color}
-          fillOpacity={fillOpacity}
-          stroke={s.color}
-          strokeWidth={strokeWidth}
-          d={s.initialD}
-        />
-      ))}
-    </svg>
+    <>
+      {/* Labels */}
+      <div
+        ref={(el) => { labelRefs.current[0] = el }}
+        style={{ ...labelStyle, top: panelHeight * 0.08 }}
+      >
+        Map view
+      </div>
+      <div
+        ref={(el) => { labelRefs.current[1] = el }}
+        style={{ ...labelStyle, top: layoutInfo.gridLabelY }}
+      >
+        Distribution view
+      </div>
+      <div
+        ref={(el) => { labelRefs.current[2] = el }}
+        style={{ ...labelStyle, top: layoutInfo.barLabelY }}
+      >
+        Bar chart
+      </div>
+
+      {/* SVG overlay */}
+      <svg
+        ref={svgRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          zIndex: 2,
+          opacity: 0,
+        }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Primary paths: polygon → grid squares (freeze) */}
+        {shapes.map((s, i) => (
+          <path
+            key={`p-${i}`}
+            ref={(el) => { primaryRefs.current[i] = el }}
+            fill={s.color}
+            fillOpacity={fillOpacity}
+            stroke={s.color}
+            strokeWidth={strokeWidth}
+            d={s.rawD}
+          />
+        ))}
+        {/* Clone paths: grid squares → bars */}
+        {shapes.map((s, i) => (
+          <path
+            key={`c-${i}`}
+            ref={(el) => { cloneRefs.current[i] = el }}
+            fill={s.color}
+            fillOpacity={fillOpacity}
+            stroke={s.color}
+            strokeWidth={strokeWidth}
+            d={s.endSquareD}
+            style={{ opacity: 0 }}
+          />
+        ))}
+      </svg>
+    </>
   )
 }

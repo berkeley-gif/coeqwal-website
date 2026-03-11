@@ -196,7 +196,7 @@ export default function TierAnimationSection({
     layoutEffect: false,
   })
 
-  const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.55], [1, 1, 0])
+  const mapOpacity = useTransform(scrollYProgress, [0, 0.05, 0.18], [1, 1, 0])
 
   // At CROSSFADE_THRESHOLD, hide Mapbox polygons so the SVG overlay takes over.
   // Before the threshold, Mapbox renders AG polygons normally (no race conditions).
