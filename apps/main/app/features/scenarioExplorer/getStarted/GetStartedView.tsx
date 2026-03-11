@@ -6,11 +6,15 @@ import { ContentPanel } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import TierAnimationSection from "./TierAnimationSection"
 
-const SECTIONS: { title: string; body?: string }[] = [
+const SECTIONS_BEFORE: { title: string; body?: string }[] = [
   { title: "Welcome", body: "Use our tools to explore the COEQWAL library of scenarios..." },
   { title: "COEQWAL library of scenarios", body: "Not comprehensive. We have chosen these scenarios in order to... Models...Caveats...." },
-  { title: "Results", body: "...and how to view and compare them." },
-  { title: "Operations" },
+]
+
+const SECTIONS_AFTER: { title: string; body?: string }[] = [
+  { title: "Aggregates" },
+  { title: "Theme groups" },
+  { title: "Follow your own location" },
 ]
 
 export default function GetStartedView() {
@@ -39,7 +43,7 @@ export default function GetStartedView() {
         backgroundColor: mapActive ? "transparent" : blueBg,
       }}
     >
-      {/* Blue wrapper for all non-tier content panels */}
+      {/* Blue wrapper for pre-outcomes panels */}
       <Box
         sx={{
           display: "flex",
@@ -47,9 +51,9 @@ export default function GetStartedView() {
           backgroundColor: mapActive ? blueBg : "transparent",
         }}
       >
-        {SECTIONS.map(({ title, body }) => (
+        {SECTIONS_BEFORE.map(({ title, body }) => (
           <ContentPanel key={title} sx={panelSx}>
-            <Typography variant="h3" component="h2">
+            <Typography variant="h5" component="h2">
               {title}
             </Typography>
             {body && (
@@ -61,8 +65,30 @@ export default function GetStartedView() {
         ))}
       </Box>
 
-      {/* Tier section — uses box-shadow for blue surround */}
+      {/* Outcomes / Tier animation section */}
       <TierAnimationSection scrollContainerRef={scrollContainerRef} />
+
+      {/* Blue wrapper for post-outcomes panels */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: blueBg,
+        }}
+      >
+        {SECTIONS_AFTER.map(({ title, body }) => (
+          <ContentPanel key={title} sx={panelSx}>
+            <Typography variant="h5" component="h2">
+              {title}
+            </Typography>
+            {body && (
+              <Typography variant="body1" sx={{ mt: theme.space.component.lg }}>
+                {body}
+              </Typography>
+            )}
+          </ContentPanel>
+        ))}
+      </Box>
     </Box>
   )
 }
