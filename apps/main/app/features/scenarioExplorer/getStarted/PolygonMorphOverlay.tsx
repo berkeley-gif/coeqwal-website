@@ -7,7 +7,8 @@ const POINTS_PER_SHAPE = 96
 const SQUARE_SIZE = 10
 const SQUARE_GAP = 2
 const ROW_GAP = 6
-const BAR_GAP = 10
+const BAR_HEIGHT = SQUARE_SIZE
+const BAR_GAP = 2
 const LABEL_GAP = 30
 
 export interface PolygonMorphData {
@@ -175,7 +176,7 @@ function computeGridLayout(
 
   // Lower region: bars (Bar chart) — 55%–88% of panel height
   const barRegionTop = panelHeight * 0.55 + LABEL_GAP
-  const barTotalHeight = 4 * SQUARE_SIZE + 3 * BAR_GAP
+  const barTotalHeight = 4 * BAR_HEIGHT + 3 * BAR_GAP
   const barRegionBottom = panelHeight * 0.88
   const barStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - barTotalHeight) / 2)
 
@@ -223,7 +224,7 @@ function computeGridLayout(
       barGridY,
       barTierTopY,
       barX: barLeft + denseIdx * thinW + thinW / 2,
-      barY: barStartY + barTierIdx * (SQUARE_SIZE + BAR_GAP) + SQUARE_SIZE / 2,
+      barY: barStartY + barTierIdx * (BAR_HEIGHT + BAR_GAP) + BAR_HEIGHT / 2,
     }
   })
 
@@ -282,7 +283,7 @@ export default function PolygonMorphOverlay({
       const squareAtBarGrid = rectPoints(l.barGridX, l.barGridY, SQUARE_SIZE, SQUARE_SIZE, POINTS_PER_SHAPE)
       const thinAtBarGrid = rectPoints(l.barGridX, l.barGridY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
       const thinAtBarTop = rectPoints(l.barGridX, l.barTierTopY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
-      const barSlice = rectPoints(l.barX, l.barY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
+      const barSlice = rectPoints(l.barX, l.barY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
 
       return {
         polygon: resampled,
