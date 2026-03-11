@@ -17,6 +17,24 @@ const SCROLL_RUNWAY = "300vh"
 const CAM_CENTER: [number, number] = [-120.5, 37.2]
 const CAM_ZOOM = 6.2
 
+/** Linearly interpolate a value across zoom stops, matching Mapbox's interpolation. */
+function lerpZoom(
+  z: number,
+  ...stops: [number, number][]
+): number {
+  if (stops.length === 0) return 0
+  if (z <= stops[0]![0]) return stops[0]![1]
+  for (let i = 1; i < stops.length; i++) {
+    const [z0, v0] = stops[i - 1]!
+    const [z1, v1] = stops[i]!
+    if (z <= z1) {
+      const t = (z - z0) / (z1 - z0)
+      return v0 + t * (v1 - v0)
+    }
+  }
+  return stops[stops.length - 1]![1]
+}
+
 /** Extract the outer ring from a GeoJSON Polygon or MultiPolygon geometry. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractOuterRing(geometry: any): [number, number][] | null {
@@ -56,6 +74,7 @@ export default function TierAnimationSection({
     height: number
   } | null>(null)
   const [polygonData, setPolygonData] = useState<PolygonMorphData[]>([])
+  const [mapStyle, setMapStyle] = useState({ fillOpacity: 0.65, strokeWidth: 0.8 })
   const [panelInView, setPanelInView] = useState(false)
 
   // Activate persistent map with AG_REV visualization on mount
@@ -138,42 +157,58 @@ export default function TierAnimationSection({
 
   const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7], [1, 1, 0])
 
-  // Fade out map polygons as squares appear (scroll-driven)
-  const FILL_LAYER_ID = "demand-units"
-  const OUTLINE_LAYER_ID = "demand-units-outline"
+  // At CROSSFADE_THRESHOLD, hide Mapbox polygons so the SVG overlay takes over.
+  // Before the threshold, Mapbox renders AG polygons normally (no race conditions).
+  const CROSSFADE_THRESHOLD = 0.15
 
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
+    let currentlyVisible = true
+    const fillOpacityExpr = lerpZoom(
+      CAM_ZOOM,
+      [5, 0.75],
+      [8, 0.55],
+      [10, 0.35],
+    )
+
     const unsubscribe = scrollYProgress.on("change", (v) => {
       const map = mapRef.getMap?.()
-      if (!map || !map.isStyleLoaded?.()) return
+      if (!map?.isStyleLoaded?.()) return
 
-      // Polygons fade from full to 0 between 0.1 and 0.3
-      const polyOpacity = Math.max(0, Math.min(1, 1 - (v - 0.1) / 0.2))
+      const shouldBeVisible = v < CROSSFADE_THRESHOLD
+      if (shouldBeVisible === currentlyVisible) return
+      currentlyVisible = shouldBeVisible
 
       try {
-        if (map.getLayer(FILL_LAYER_ID)) {
-          map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", polyOpacity)
+        if (map.getLayer("demand-units")) {
+          map.setPaintProperty(
+            "demand-units",
+            "fill-opacity",
+            shouldBeVisible ? fillOpacityExpr : 0,
+          )
         }
-        if (map.getLayer(OUTLINE_LAYER_ID)) {
-          map.setPaintProperty(OUTLINE_LAYER_ID, "line-opacity", polyOpacity)
+        if (map.getLayer("demand-units-outline")) {
+          map.setPaintProperty(
+            "demand-units-outline",
+            "line-opacity",
+            shouldBeVisible ? 1 : 0,
+          )
         }
       } catch { /* layer may not exist yet */ }
     })
 
     return () => {
       unsubscribe()
-      // Restore full opacity on cleanup
       const map = mapRef.getMap?.()
       if (map?.isStyleLoaded?.()) {
         try {
-          if (map.getLayer(FILL_LAYER_ID)) {
-            map.setPaintProperty(FILL_LAYER_ID, "fill-opacity", 1)
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty("demand-units", "fill-opacity", fillOpacityExpr)
           }
-          if (map.getLayer(OUTLINE_LAYER_ID)) {
-            map.setPaintProperty(OUTLINE_LAYER_ID, "line-opacity", 1)
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty("demand-units-outline", "line-opacity", 1)
           }
         } catch { /* ok */ }
       }
@@ -200,7 +235,14 @@ export default function TierAnimationSection({
 
   // Query polygon geometries from the Mapbox demand-units layer and project
   // each vertex to panel-relative screen coordinates.
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const computePolygonData = useCallback(() => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
+
     if (!mapAPI.mapRef?.current || !panelRef.current || centroids.length === 0)
       return
 
@@ -209,7 +251,6 @@ export default function TierAnimationSection({
 
     const panelRect = panelRef.current.getBoundingClientRect()
 
-    // Build lookup from centroid data (AG demand units only)
     const centroidLookup = new Map(
       centroids.map((c) => [c.id, c]),
     )
@@ -218,6 +259,11 @@ export default function TierAnimationSection({
     const features: any[] = map.queryRenderedFeatures(undefined as any, {
       layers: ["demand-units"],
     })
+
+    if (features.length === 0) {
+      retryTimerRef.current = setTimeout(computePolygonData, 1000)
+      return
+    }
 
     const seen = new Set<string>()
     const result: PolygonMorphData[] = []
@@ -228,7 +274,7 @@ export default function TierAnimationSection({
       seen.add(duId)
 
       const cData = centroidLookup.get(duId)
-      if (!cData) continue // not an AG unit in our tier data
+      if (!cData) continue
 
       const ring = extractOuterRing(f.geometry)
       if (!ring || ring.length < 3) continue
@@ -258,6 +304,11 @@ export default function TierAnimationSection({
       })
     }
 
+    const zoom = map.getZoom()
+    const fo = lerpZoom(zoom, [5, 0.75], [8, 0.55], [10, 0.35])
+    const sw = lerpZoom(zoom, [5, 0.5], [7, 1], [9, 2])
+    setMapStyle({ fillOpacity: fo, strokeWidth: sw })
+
     setPolygonData(result)
   }, [centroids, mapAPI])
 
@@ -265,7 +316,13 @@ export default function TierAnimationSection({
   useEffect(() => {
     if (!panelInView || isLoading || centroids.length === 0) return
     const timer = setTimeout(computePolygonData, 2000)
-    return () => clearTimeout(timer)
+    return () => {
+      clearTimeout(timer)
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
+      }
+    }
   }, [panelInView, isLoading, centroids, computePolygonData])
 
   useEffect(() => {
@@ -343,8 +400,7 @@ export default function TierAnimationSection({
               variant="body1"
               sx={{ mt: 1, maxWidth: 420, color: "text.secondary" }}
             >
-              Each polygon on the map represents an agricultural demand unit.
-              Scroll to see how they assemble into the tier distribution glyph.
+              Each polygon on the map represents an agricultural district receiving surface water.
             </Typography>
           </Box>
 
@@ -370,7 +426,8 @@ export default function TierAnimationSection({
                   polygons={polygonData}
                   panelWidth={panelSize.width}
                   panelHeight={panelSize.height}
-                  tierDistribution={tierDistribution}
+                  fillOpacity={mapStyle.fillOpacity}
+                  strokeWidth={mapStyle.strokeWidth}
                   scrollProgress={scrollYProgress}
                 />
               )}
