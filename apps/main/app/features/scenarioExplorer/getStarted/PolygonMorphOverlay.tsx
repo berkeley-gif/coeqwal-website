@@ -281,8 +281,10 @@ export default function PolygonMorphOverlay({
 
       // Clone targets: move down as squares, then morph to bars in the lower region
       const squareAtBarGrid = rectPoints(l.barGridX, l.barGridY, SQUARE_SIZE, SQUARE_SIZE, POINTS_PER_SHAPE)
-      const thinAtBarGrid = rectPoints(l.barGridX, l.barGridY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
-      const thinAtBarTop = rectPoints(l.barGridX, l.barTierTopY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
+      const thinAtBarGrid = rectPoints(l.barGridX, l.barGridY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
+      const thinAtBarTop = rectPoints(l.barGridX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
+      // Packed horizontally at tier top Y (X-only move), then compact to final Y
+      const barPackedAtTop = rectPoints(l.barX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
       const barSlice = rectPoints(l.barX, l.barY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
 
       return {
@@ -292,6 +294,7 @@ export default function PolygonMorphOverlay({
         squareAtBarGrid,
         thinAtBarGrid,
         thinAtBarTop,
+        barPackedAtTop,
         barSlice,
         color: poly.color,
         rawD: pointsToD(poly.screenPoly),
@@ -321,7 +324,7 @@ export default function PolygonMorphOverlay({
         distLabel.style.opacity = String(t)
       }
       if (barLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.74) / 0.04))
+        const t = Math.min(1, Math.max(0, (v - 0.76) / 0.04))
         barLabel.style.opacity = String(t)
       }
 
@@ -362,7 +365,7 @@ export default function PolygonMorphOverlay({
         }
       }
 
-      // ── Clone paths: move down as squares, then shrink → slide → condense to bars ──
+      // ── Clone paths: orthogonal sequence — each phase moves one axis only ──
       for (let i = 0; i < N; i++) {
         const el = cloneRefs.current[i]
         if (!el) continue
@@ -375,22 +378,23 @@ export default function PolygonMorphOverlay({
         }
         el.style.opacity = "1"
 
-        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barSlice } = shape
+        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barPackedAtTop } = shape
         const stagger = (i % 20) * 0.002
 
-        // Phase 1: squares travel down to bar region
+        // 1. Drop: squares travel down (Y only)
         const dropStart = 0.44 + stagger
         const dropEnd = 0.50 + stagger
-        // ── HOLD: duplicated distribution view (0.50 → 0.58) ──
-        // Phase 2: shrink to thin rects in bar region
-        const shrinkStart = 0.58 + stagger
-        const shrinkEnd = 0.62 + stagger
-        // Phase 3: slide rows up within bar region
-        const slideStart = 0.62 + stagger
-        const slideEnd = 0.66 + stagger
-        // Phase 4: condense into bars
-        const condenseStart = 0.66 + stagger
-        const condenseEnd = 0.72 + stagger
+        // ── HOLD: duplicated distribution view (0.50 → 0.56) ──
+        // 2. Narrow: squares shrink width within rows (width only)
+        const narrowStart = 0.56 + stagger
+        const narrowEnd = 0.60 + stagger
+        // 3. Rows combine: thin rects slide up to single row per tier (Y only)
+        const combineStart = 0.60 + stagger
+        const combineEnd = 0.64 + stagger
+        // ── HOLD: combined rows pause (0.64 → 0.70) ──
+        // 4. Compress left: slide horizontally into bar chart rows (X only)
+        const compressStart = 0.70 + stagger
+        const compressEnd = 0.74 + stagger
 
         let pts: [number, number][]
         if (v <= dropStart) {
@@ -398,19 +402,23 @@ export default function PolygonMorphOverlay({
         } else if (v <= dropEnd) {
           const t = easeInOut((v - dropStart) / (dropEnd - dropStart))
           pts = endSquare.map((p, j) => lerp(p, squareAtBarGrid[j]!, t))
-        } else if (v <= shrinkStart) {
+        } else if (v <= narrowStart) {
           pts = squareAtBarGrid
-        } else if (v <= shrinkEnd) {
-          const t = easeInOut((v - shrinkStart) / (shrinkEnd - shrinkStart))
+        } else if (v <= narrowEnd) {
+          const t = easeInOut((v - narrowStart) / (narrowEnd - narrowStart))
           pts = squareAtBarGrid.map((p, j) => lerp(p, thinAtBarGrid[j]!, t))
-        } else if (v <= slideEnd) {
-          const t = easeInOut((v - slideStart) / (slideEnd - slideStart))
+        } else if (v <= combineStart) {
+          pts = thinAtBarGrid
+        } else if (v <= combineEnd) {
+          const t = easeInOut((v - combineStart) / (combineEnd - combineStart))
           pts = thinAtBarGrid.map((p, j) => lerp(p, thinAtBarTop[j]!, t))
-        } else if (v <= condenseEnd) {
-          const t = easeInOut((v - condenseStart) / (condenseEnd - condenseStart))
-          pts = thinAtBarTop.map((p, j) => lerp(p, barSlice[j]!, t))
+        } else if (v <= compressStart) {
+          pts = thinAtBarTop
+        } else if (v <= compressEnd) {
+          const t = easeInOut((v - compressStart) / (compressEnd - compressStart))
+          pts = thinAtBarTop.map((p, j) => lerp(p, barPackedAtTop[j]!, t))
         } else {
-          pts = barSlice
+          pts = barPackedAtTop
         }
 
         el.setAttribute("d", pointsToD(pts))
