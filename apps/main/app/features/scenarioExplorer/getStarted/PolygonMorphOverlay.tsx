@@ -273,6 +273,7 @@ export default function PolygonMorphOverlay({
   const svgRef = useRef<SVGSVGElement>(null)
   const primaryRefs = useRef<(SVGPathElement | null)[]>([])
   const cloneRefs = useRef<(SVGPathElement | null)[]>([])
+  const dupeRefs = useRef<(SVGGElement | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const sampled = useMemo(() => {
@@ -283,7 +284,7 @@ export default function PolygonMorphOverlay({
     )
   }, [polygons])
 
-  const { shapes, layoutInfo } = useMemo(() => {
+  const { shapes, layoutInfo, duplicateGlyphs } = useMemo(() => {
     const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
     const thinW = layoutResult.thinWidth
     const glyphThinW = layoutResult.glyphThinWidth
@@ -327,7 +328,46 @@ export default function PolygonMorphOverlay({
       }
     })
 
-    return { shapes: shapeData, layoutInfo: layoutResult.info }
+    // Compute duplicate glyph bars (static copies that fade in to the right)
+    const overlayLeft = panelWidth * 0.75
+    const overlayW = panelWidth * 0.25
+    const padX = overlayW * 0.08
+    const barLeft = overlayLeft + padX
+
+    const tierCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
+    const tierColors: Record<number, string> = {}
+    for (const p of sampled) {
+      tierCounts[p.tier] = (tierCounts[p.tier] || 0) + 1
+      if (!tierColors[p.tier]) tierColors[p.tier] = p.color
+    }
+
+    const tierGlyphY: Record<number, number> = {}
+    for (let i = 0; i < sampled.length; i++) {
+      const tier = sampled[i]!.tier
+      if (!tierGlyphY[tier]) tierGlyphY[tier] = layoutResult.positions[i]!.glyphBarY
+    }
+
+    const NUM_DUPLICATES = 3
+    const totalGlyphs = 1 + NUM_DUPLICATES
+    const availableW = overlayW - padX * 2
+    const spaceBetween = (availableW - totalGlyphs * GLYPH_BAR_WIDTH) / Math.max(totalGlyphs - 1, 1)
+    const dupes: Array<Array<{ x: number; y: number; width: number; height: number; color: string }>> = []
+    for (let d = 0; d < NUM_DUPLICATES; d++) {
+      const offsetX = (d + 1) * (GLYPH_BAR_WIDTH + spaceBetween)
+      const bars: Array<{ x: number; y: number; width: number; height: number; color: string }> = []
+      for (let t = 1; t <= 4; t++) {
+        bars.push({
+          x: barLeft + offsetX,
+          y: (tierGlyphY[t] || 0) - glyphBarH / 2,
+          width: (tierCounts[t] || 0) * glyphThinW,
+          height: glyphBarH,
+          color: tierColors[t] || "#ccc",
+        })
+      }
+      dupes.push(bars)
+    }
+
+    return { shapes: shapeData, layoutInfo: layoutResult.info, duplicateGlyphs: dupes }
   }, [sampled, panelWidth, panelHeight])
 
   useEffect(() => {
@@ -466,6 +506,16 @@ export default function PolygonMorphOverlay({
 
         el.setAttribute("d", pointsToD(pts))
       }
+
+      // ── Duplicate glyphs: fade in left to right ──
+      for (let d = 0; d < dupeRefs.current.length; d++) {
+        const g = dupeRefs.current[d]
+        if (!g) continue
+        const fadeStart = 0.92 + d * 0.025
+        const fadeEnd = fadeStart + 0.025
+        const t = Math.min(1, Math.max(0, (v - fadeStart) / (fadeEnd - fadeStart)))
+        g.style.opacity = String(t)
+      }
     })
     return unsub
   }, [shapes, scrollProgress])
@@ -548,6 +598,24 @@ export default function PolygonMorphOverlay({
             d={s.endSquareD}
             style={{ opacity: 0 }}
           />
+        ))}
+        {/* Duplicate glyph bar charts: fade in left to right */}
+        {duplicateGlyphs.map((bars, d) => (
+          <g key={`dup-${d}`} ref={(el) => { dupeRefs.current[d] = el }} style={{ opacity: 0 }}>
+            {bars.map((bar, t) => (
+              <rect
+                key={t}
+                x={bar.x}
+                y={bar.y}
+                width={bar.width}
+                height={bar.height}
+                fill={bar.color}
+                fillOpacity={fillOpacity}
+                stroke={bar.color}
+                strokeWidth={strokeWidth}
+              />
+            ))}
+          </g>
         ))}
       </svg>
     </>
