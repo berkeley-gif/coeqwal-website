@@ -14,8 +14,8 @@ import PolygonMorphOverlay, {
 
 const SCROLL_RUNWAY = "300vh"
 
-const CAM_CENTER: [number, number] = [-120.5, 37.2]
-const CAM_ZOOM = 6.2
+const CAM_CENTER: [number, number] = [-120.2, 38.5]
+const CAM_ZOOM = 5.82
 
 /** Linearly interpolate a value across zoom stops, matching Mapbox's interpolation. */
 function lerpZoom(
@@ -112,26 +112,15 @@ export default function TierAnimationSection({
     return () => observer.disconnect()
   }, [])
 
-  // Fly camera to Central Valley with padding matching the panel position.
-  // Deferred until the panel is in view (stuck position) so getBoundingClientRect is accurate.
+  // Fly camera to match the learn map's scenario-intro position (CALIFORNIA_CENTERED_VIEW).
+  // Zero padding — the camera coordinates already position California to the left.
   useEffect(() => {
-    if (!panelInView || isLoading || !mapAPI.mapRef?.current || !panelRef.current)
+    if (!panelInView || isLoading || !mapAPI.mapRef?.current)
       return
     if (cameraSetRef.current) return
 
     const timer = setTimeout(() => {
-      if (!panelRef.current || !mapAPI.mapRef?.current) return
-
-      const rect = panelRef.current.getBoundingClientRect()
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-
-      const padding = {
-        top: Math.max(0, Math.round(rect.top)),
-        bottom: Math.max(0, Math.round(vh - rect.bottom)),
-        left: Math.max(0, Math.round(rect.left)),
-        right: Math.max(0, Math.round(vw - rect.right)),
-      }
+      if (!mapAPI.mapRef?.current) return
 
       mapAPI.mapRef.current.easeTo({
         center: CAM_CENTER,
@@ -140,7 +129,7 @@ export default function TierAnimationSection({
         pitch: 0,
         duration: 1500,
         easing: (t: number) => t * (2 - t),
-        padding,
+        padding: { top: 0, bottom: 0, left: 0, right: 0 },
       })
       cameraSetRef.current = true
     }, 200)
