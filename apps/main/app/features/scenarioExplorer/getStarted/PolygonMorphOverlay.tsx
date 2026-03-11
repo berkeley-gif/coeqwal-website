@@ -3,7 +3,7 @@
 import { useRef, useEffect, useMemo } from "react"
 import type { MotionValue } from "@repo/motion"
 
-const POINTS_PER_SHAPE = 32
+const POINTS_PER_SHAPE = 96
 const SQUARE_SIZE = 10
 const SQUARE_GAP = 2
 const ROW_GAP = 6
@@ -202,7 +202,8 @@ export default function PolygonMorphOverlay({
         square: squareAtCentroid,
         endSquare: squareAtGrid,
         color: poly.color,
-        initialD: pointsToD(resampled),
+        rawD: pointsToD(poly.screenPoly),
+        initialD: pointsToD(poly.screenPoly),
       }
     })
   }, [sampled, panelWidth, panelHeight])
@@ -220,18 +221,22 @@ export default function PolygonMorphOverlay({
         if (!el) continue
         const shape = shapes[i]
         if (!shape) continue
-        const { polygon, square, endSquare } = shape
+        const { polygon, square, endSquare, rawD } = shape
         const stagger = (i % 20) * 0.003
 
-        const morphStart = 0.15 + stagger
-        const morphEnd = 0.35 + stagger
-        const moveStart = 0.4 + stagger
-        const moveEnd = 0.65 + stagger
+        const morphStart = 0.30 + stagger
+        const morphEnd = 0.45 + stagger
+        const moveStart = 0.50 + stagger
+        const moveEnd = 0.70 + stagger
+
+        if (v <= morphStart) {
+          // Use raw (unsampled) polygon vertices — exact match to Mapbox geometry
+          el.setAttribute("d", rawD)
+          continue
+        }
 
         let pts: [number, number][]
-        if (v <= morphStart) {
-          pts = polygon
-        } else if (v <= morphEnd) {
+        if (v <= morphEnd) {
           const t = easeInOut(
             Math.min(1, (v - morphStart) / (morphEnd - morphStart)),
           )
