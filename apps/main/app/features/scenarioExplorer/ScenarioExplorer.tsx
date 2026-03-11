@@ -329,58 +329,58 @@ export default function ScenarioExplorerNew() {
                 overflow: "hidden",
               }}
             >
-              {VIEW_MODES.filter((v) => v.mode !== "data" && v.mode !== "get-started").map(
-                ({ mode, icon, label }) => {
-                  const active = exploreMode === mode
-                  return (
-                    <Box
-                      key={mode}
-                      component="button"
-                      onClick={() => setExploreMode(mode as ExploreMode)}
-                      aria-pressed={active}
-                      aria-label={label}
+              {VIEW_MODES.filter(
+                (v) => v.mode !== "data" && v.mode !== "get-started",
+              ).map(({ mode, icon, label }) => {
+                const active = exploreMode === mode
+                return (
+                  <Box
+                    key={mode}
+                    component="button"
+                    onClick={() => setExploreMode(mode as ExploreMode)}
+                    aria-pressed={active}
+                    aria-label={label}
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      px: 1.25,
+                      py: 0.5,
+                      border: "none",
+                      borderRadius: theme.borderRadius.sm ?? "4px",
+                      cursor: "pointer",
+                      background: active
+                        ? theme.palette.interaction.selectedBackground
+                        : "transparent",
+                      color: active
+                        ? theme.palette.blue.bright
+                        : theme.palette.blue.darkest,
+                      opacity: active ? 1 : 0.55,
+                      textShadow: "none",
+                      transition: "opacity 0.15s, background-color 0.15s",
+                      "&:hover": {
+                        opacity: 1,
+                        background:
+                          theme.palette.interaction.selectedBackground,
+                      },
+                    }}
+                  >
+                    {icon}
+                    <Typography
+                      component="span"
+                      variant="subtitle2"
                       sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        px: 1.25,
-                        py: 0.5,
-                        border: "none",
-                        borderRadius: theme.borderRadius.sm ?? "4px",
-                        cursor: "pointer",
-                        background: active
-                          ? theme.palette.interaction.selectedBackground
-                          : "transparent",
-                        color: active
-                          ? theme.palette.blue.bright
-                          : theme.palette.blue.darkest,
-                        opacity: active ? 1 : 0.55,
+                        fontWeight: active ? 600 : 400,
+                        lineHeight: 1,
+                        whiteSpace: "nowrap",
                         textShadow: "none",
-                        transition: "opacity 0.15s, background-color 0.15s",
-                        "&:hover": {
-                          opacity: 1,
-                          background:
-                            theme.palette.interaction.selectedBackground,
-                        },
                       }}
                     >
-                      {icon}
-                      <Typography
-                        component="span"
-                        variant="subtitle2"
-                        sx={{
-                          fontWeight: active ? 600 : 400,
-                          lineHeight: 1,
-                          whiteSpace: "nowrap",
-                          textShadow: "none",
-                        }}
-                      >
-                        {label}
-                      </Typography>
-                    </Box>
-                  )
-                },
-              )}
+                      {label}
+                    </Typography>
+                  </Box>
+                )
+              })}
             </Box>
           </Box>
         }

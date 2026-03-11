@@ -7,14 +7,19 @@ import { useMapMode } from "../../map/store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const SECTIONS_BEFORE: { title: string; body?: string }[] = [
-  { title: "Welcome", body: "Use our tools to explore the COEQWAL library of scenarios..." },
-  { title: "COEQWAL library of scenarios", body: "Not comprehensive. We have chosen these scenarios in order to... Models...Caveats...." },
+  {
+    title: "Welcome",
+    body: "Use our tools to explore the COEQWAL library of scenarios...",
+  },
+  {
+    title: "COEQWAL library of scenarios",
+    body: "Not comprehensive. We have chosen these scenarios in order to... Models...Caveats....",
+  },
 ]
 
 const SECTIONS_AFTER: { title: string; body?: string }[] = [
-  { title: "Aggregates" },
-  { title: "Theme groups" },
-  { title: "Follow your own location" },
+  { title: "Hydroclimates", body: "What are hydroclimates?" },
+  { title: "Data in depth", body: "Wet years, dry years..." },
 ]
 
 export default function GetStartedView() {

@@ -42,7 +42,10 @@ function AboutCtaLink({
           "&:hover .about-arrow": { transform: "translateX(4px)" },
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: "fontWeightSemiBold" }}>
+        <Typography
+          variant="subtitle1"
+          sx={{ fontWeight: "fontWeightSemiBold" }}
+        >
           {children}
         </Typography>
         <NavArrow className="about-arrow" />

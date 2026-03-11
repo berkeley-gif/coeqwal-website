@@ -18,10 +18,7 @@ const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
 /** Linearly interpolate a value across zoom stops, matching Mapbox's interpolation. */
-function lerpZoom(
-  z: number,
-  ...stops: [number, number][]
-): number {
+function lerpZoom(z: number, ...stops: [number, number][]): number {
   if (stops.length === 0) return 0
   if (z <= stops[0]![0]) return stops[0]![1]
   for (let i = 1; i < stops.length; i++) {
@@ -62,7 +59,7 @@ export default function TierAnimationSection({
 }: TierAnimationSectionProps) {
   const theme = useTheme()
   const mapAPI = useMap()
-  const { centroids, tierDistribution, isLoading, error } =
+  const { centroids, tierDistribution: _tierDistribution, isLoading, error } =
     useTierAnimationData()
 
   const runwayRef = useRef<HTMLDivElement>(null)
@@ -74,7 +71,10 @@ export default function TierAnimationSection({
     height: number
   } | null>(null)
   const [polygonData, setPolygonData] = useState<PolygonMorphData[]>([])
-  const [mapStyle, setMapStyle] = useState({ fillOpacity: 0.65, strokeWidth: 0.8 })
+  const [mapStyle, setMapStyle] = useState({
+    fillOpacity: 0.65,
+    strokeWidth: 0.8,
+  })
   const [panelInView, setPanelInView] = useState(false)
 
   // Tracks whether the camera has settled and polygons should be allowed to show
@@ -100,7 +100,9 @@ export default function TierAnimationSection({
           map.setPaintProperty("demand-units", "fill-opacity", 0)
         if (map.getLayer("demand-units-outline"))
           map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-      } catch { /* ok */ }
+      } catch {
+        /* ok */
+      }
     }, 50)
 
     return () => {
@@ -114,7 +116,9 @@ export default function TierAnimationSection({
             padding: { top: 0, bottom: 0, left: 0, right: 0 },
             duration: 0,
           })
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -136,8 +140,7 @@ export default function TierAnimationSection({
   // Fly camera to match the learn map's scenario-intro position (CALIFORNIA_CENTERED_VIEW).
   // Hide demand-unit polygons during the ease, then fade them in once the camera settles.
   useEffect(() => {
-    if (!panelInView || isLoading || !mapAPI.mapRef?.current)
-      return
+    if (!panelInView || isLoading || !mapAPI.mapRef?.current) return
     if (cameraSetRef.current) return
 
     const timer = setTimeout(() => {
@@ -164,13 +167,19 @@ export default function TierAnimationSection({
             map.setPaintProperty("demand-units", "fill-opacity", fo)
           }
           if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
-              duration: 600,
-              delay: 0,
-            })
+            map.setPaintProperty(
+              "demand-units-outline",
+              "line-opacity-transition",
+              {
+                duration: 600,
+                delay: 0,
+              },
+            )
             map.setPaintProperty("demand-units-outline", "line-opacity", 1)
           }
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       }
       map?.once("moveend", onMoveEnd)
 
@@ -187,7 +196,7 @@ export default function TierAnimationSection({
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [panelInView, isLoading, mapAPI.mapRef]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [panelInView, isLoading, mapAPI.mapRef])
 
   const { scrollYProgress } = useScroll({
     target: runwayRef,
@@ -209,12 +218,7 @@ export default function TierAnimationSection({
     if (!mapRef || isLoading) return
 
     let currentlyVisible = true
-    const fillOpacityExpr = lerpZoom(
-      CAM_ZOOM,
-      [5, 0.75],
-      [8, 0.55],
-      [10, 0.35],
-    )
+    const fillOpacityExpr = lerpZoom(CAM_ZOOM, [5, 0.75], [8, 0.55], [10, 0.35])
 
     const unsubscribe = scrollYProgress.on("change", (v) => {
       const map = mapRef.getMap?.()
@@ -240,7 +244,9 @@ export default function TierAnimationSection({
             shouldBeVisible ? 1 : 0,
           )
         }
-      } catch { /* layer may not exist yet */ }
+      } catch {
+        /* layer may not exist yet */
+      }
     })
 
     return () => {
@@ -249,12 +255,18 @@ export default function TierAnimationSection({
       if (map?.isStyleLoaded?.()) {
         try {
           if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity", fillOpacityExpr)
+            map.setPaintProperty(
+              "demand-units",
+              "fill-opacity",
+              fillOpacityExpr,
+            )
           }
           if (map.getLayer("demand-units-outline")) {
             map.setPaintProperty("demand-units-outline", "line-opacity", 1)
           }
-        } catch { /* ok */ }
+        } catch {
+          /* ok */
+        }
       }
     }
   }, [scrollYProgress, mapAPI.mapRef, isLoading, svgReady])
@@ -300,9 +312,7 @@ export default function TierAnimationSection({
     const svgOriginX = panelRect.left + panelEl.clientLeft
     const svgOriginY = panelRect.top + panelEl.clientTop
 
-    const centroidLookup = new Map(
-      centroids.map((c) => [c.id, c]),
-    )
+    const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
 
     // querySourceFeatures returns all loaded tile data (including off-screen),
     // giving more complete coverage than queryRenderedFeatures.
@@ -312,11 +322,14 @@ export default function TierAnimationSection({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const layer = map.getLayer("demand-units") as any
       const sourceId: string | undefined = layer?.source
-      const sourceLayer: string | undefined = layer?.sourceLayer ?? layer?.["source-layer"]
+      const sourceLayer: string | undefined =
+        layer?.sourceLayer ?? layer?.["source-layer"]
       if (sourceId && sourceLayer) {
         features = map.querySourceFeatures(sourceId, { sourceLayer })
       }
-    } catch { /* fall through */ }
+    } catch {
+      /* fall through */
+    }
     if (features.length === 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       features = map.queryRenderedFeatures(undefined as any, {
@@ -330,7 +343,10 @@ export default function TierAnimationSection({
     }
 
     // Tile boundaries clip polygons into fragments — keep the largest per DU_ID
-    const bestRings = new Map<string, { ring: [number, number][]; cData: typeof centroids[0] }>()
+    const bestRings = new Map<
+      string,
+      { ring: [number, number][]; cData: (typeof centroids)[0] }
+    >()
     for (const f of features) {
       const duId: string | undefined = f.properties?.DU_ID
       if (!duId) continue
@@ -351,21 +367,22 @@ export default function TierAnimationSection({
         try {
           const pt = map.project([lng, lat])
           screenPoly.push([pt.x - svgOriginX, pt.y - svgOriginY])
-        } catch { /* vertex outside projection bounds */ }
+        } catch {
+          /* vertex outside projection bounds */
+        }
       }
       if (screenPoly.length < 3) continue
 
       let centroidPt: { x: number; y: number }
       try {
         centroidPt = map.project([cData.lng, cData.lat])
-      } catch { continue }
+      } catch {
+        continue
+      }
 
       result.push({
         screenPoly,
-        centroidScreen: [
-          centroidPt.x - svgOriginX,
-          centroidPt.y - svgOriginY,
-        ],
+        centroidScreen: [centroidPt.x - svgOriginX, centroidPt.y - svgOriginY],
         color: cData.color,
         tier: cData.tier,
       })
@@ -451,13 +468,14 @@ export default function TierAnimationSection({
             }}
           >
             <Typography variant="h3" component="h2" color="text.secondary">
-              Outcomes
+              Key outcomes
             </Typography>
             <Typography
               variant="body1"
               sx={{ mt: 1, maxWidth: 420, color: "text.secondary" }}
             >
-              Each polygon on the map represents an agricultural district receiving surface water.
+              Each polygon on the map represents an agricultural district
+              receiving surface water.
             </Typography>
           </Box>
 

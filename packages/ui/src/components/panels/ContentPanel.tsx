@@ -17,11 +17,7 @@ export interface ContentPanelProps {
   sx?: SxProps<Theme>
 }
 
-export function ContentPanel({
-  children,
-  minHeight,
-  sx,
-}: ContentPanelProps) {
+export function ContentPanel({ children, minHeight, sx }: ContentPanelProps) {
   const theme = useTheme()
 
   return (
