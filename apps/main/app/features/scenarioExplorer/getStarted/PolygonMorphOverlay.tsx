@@ -684,7 +684,8 @@ export default function PolygonMorphOverlay({
       }
     })
     return unsub
-  }, [shapes, scrollProgress, rowYShift, extraRows])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shapes, scrollProgress, rowYShift])
 
   const overlayLeft = panelWidth * 0.75
   const overlayWidth = panelWidth * 0.25
