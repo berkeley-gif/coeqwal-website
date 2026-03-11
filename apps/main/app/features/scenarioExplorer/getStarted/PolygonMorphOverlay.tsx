@@ -119,6 +119,7 @@ interface GridLayout {
   barX: number
   barY: number
   glyphBarX: number
+  glyphBarY: number
 }
 
 export interface LayoutInfo {
@@ -130,6 +131,7 @@ interface LayoutResult {
   positions: GridLayout[]
   thinWidth: number
   glyphThinWidth: number
+  glyphBarHeight: number
   info: LayoutInfo
 }
 
@@ -178,11 +180,19 @@ function computeGridLayout(
   const thinW = Math.max(1, Math.min(3, Math.floor(maxBarArea / Math.max(maxPerTier, 1))))
   const glyphThinW = Math.max(0.5, GLYPH_BAR_WIDTH / Math.max(maxPerTier, 1))
 
+  // Glyph proportions (matches BarChart component): 80% bars, 20% spacing
+  const glyphBarH = (GLYPH_BAR_WIDTH * 0.8) / 4
+  const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
+
   // Lower region: bars (Bar chart) — 55%–88% of panel height
   const barRegionTop = panelHeight * 0.55 + LABEL_GAP
   const barTotalHeight = 4 * BAR_HEIGHT + 3 * BAR_GAP
   const barRegionBottom = panelHeight * 0.88
   const barStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - barTotalHeight) / 2)
+
+  // Glyph final Y positions — centered in the bar region
+  const glyphTotalH = 4 * glyphBarH + 5 * glyphBarSpacing
+  const glyphTopY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - glyphTotalH) / 2)
 
   // Mirror the grid layout into the bar region so clones can travel down as squares
   const barGridStartY = barRegionTop + Math.max(0, (barRegionBottom - barRegionTop - totalGridHeight) / 2)
@@ -230,6 +240,7 @@ function computeGridLayout(
       barX: barLeft + denseIdx * thinW + thinW / 2,
       barY: barStartY + barTierIdx * (BAR_HEIGHT + BAR_GAP) + BAR_HEIGHT / 2,
       glyphBarX: barLeft + denseIdx * glyphThinW + glyphThinW / 2,
+      glyphBarY: glyphTopY + glyphBarSpacing + barTierIdx * (glyphBarH + glyphBarSpacing) + glyphBarH / 2,
     }
   })
 
@@ -237,6 +248,7 @@ function computeGridLayout(
     positions,
     thinWidth: thinW,
     glyphThinWidth: glyphThinW,
+    glyphBarHeight: glyphBarH,
     info: {
       gridLabelY: panelHeight * 0.15,
       barLabelY: panelHeight * 0.55,
@@ -273,6 +285,7 @@ export default function PolygonMorphOverlay({
     const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
     const thinW = layoutResult.thinWidth
     const glyphThinW = layoutResult.glyphThinWidth
+    const glyphBarH = layoutResult.glyphBarHeight
 
     const shapeData = sampled.map((poly, i) => {
       const l = layoutResult.positions[i]!
@@ -291,8 +304,10 @@ export default function PolygonMorphOverlay({
       const thinAtBarGrid = rectPoints(l.barGridX, l.barGridY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
       const thinAtBarTop = rectPoints(l.barGridX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
       const barPackedAtTop = rectPoints(l.barX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
-      // Final glyph-sized position: compressed to match list-view bar width
+      // Compressed to glyph width (X only)
       const barGlyph = rectPoints(l.glyphBarX, l.barTierTopY, glyphThinW, BAR_HEIGHT, POINTS_PER_SHAPE)
+      // Final glyph-sized position: compact to glyph height & spacing (Y only)
+      const barFinal = rectPoints(l.glyphBarX, l.glyphBarY, glyphThinW, glyphBarH, POINTS_PER_SHAPE)
 
       return {
         polygon: resampled,
@@ -303,6 +318,7 @@ export default function PolygonMorphOverlay({
         thinAtBarTop,
         barPackedAtTop,
         barGlyph,
+        barFinal,
         color: poly.color,
         rawD: pointsToD(poly.screenPoly),
         endSquareD: pointsToD(squareAtGrid),
@@ -331,7 +347,7 @@ export default function PolygonMorphOverlay({
         distLabel.style.opacity = String(t)
       }
       if (barLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.84) / 0.04))
+        const t = Math.min(1, Math.max(0, (v - 0.94) / 0.04))
         barLabel.style.opacity = String(t)
       }
 
@@ -385,7 +401,7 @@ export default function PolygonMorphOverlay({
         }
         el.style.opacity = "1"
 
-        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barPackedAtTop, barGlyph } = shape
+        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barPackedAtTop, barGlyph, barFinal } = shape
         const stagger = (i % 20) * 0.002
 
         // 1. Drop: squares travel down (Y only)
@@ -403,9 +419,13 @@ export default function PolygonMorphOverlay({
         const compressStart = 0.70 + stagger
         const compressEnd = 0.74 + stagger
         // ── HOLD: bar rows pause (0.74 → 0.78) ──
-        // 5. Shrink to glyph size: compress further left (X only)
-        const glyphStart = 0.78 + stagger
-        const glyphEnd = 0.82 + stagger
+        // 5. Shrink to glyph width (X only)
+        const glyphXStart = 0.78 + stagger
+        const glyphXEnd = 0.82 + stagger
+        // ── HOLD: glyph-width bars pause (0.82 → 0.88) ──
+        // 6. Compact to glyph height & spacing (Y only, no stagger — all rows move together)
+        const glyphYStart = 0.88
+        const glyphYEnd = 0.92
 
         let pts: [number, number][]
         if (v <= dropStart) {
@@ -428,13 +448,18 @@ export default function PolygonMorphOverlay({
         } else if (v <= compressEnd) {
           const t = easeInOut((v - compressStart) / (compressEnd - compressStart))
           pts = thinAtBarTop.map((p, j) => lerp(p, barPackedAtTop[j]!, t))
-        } else if (v <= glyphStart) {
+        } else if (v <= glyphXStart) {
           pts = barPackedAtTop
-        } else if (v <= glyphEnd) {
-          const t = easeInOut((v - glyphStart) / (glyphEnd - glyphStart))
+        } else if (v <= glyphXEnd) {
+          const t = easeInOut((v - glyphXStart) / (glyphXEnd - glyphXStart))
           pts = barPackedAtTop.map((p, j) => lerp(p, barGlyph[j]!, t))
-        } else {
+        } else if (v <= glyphYStart) {
           pts = barGlyph
+        } else if (v <= glyphYEnd) {
+          const t = easeInOut((v - glyphYStart) / (glyphYEnd - glyphYStart))
+          pts = barGlyph.map((p, j) => lerp(p, barFinal[j]!, t))
+        } else {
+          pts = barFinal
         }
 
         el.setAttribute("d", pointsToD(pts))
