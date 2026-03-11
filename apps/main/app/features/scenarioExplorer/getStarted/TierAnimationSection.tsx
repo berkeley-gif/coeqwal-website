@@ -77,16 +77,37 @@ export default function TierAnimationSection({
   const [mapStyle, setMapStyle] = useState({ fillOpacity: 0.65, strokeWidth: 0.8 })
   const [panelInView, setPanelInView] = useState(false)
 
-  // Activate persistent map with AG_REV visualization on mount
+  // Tracks whether the camera has settled and polygons should be allowed to show
+  const polygonsAllowedRef = useRef(false)
+
+  // Activate persistent map with AG_REV visualization on mount.
+  // Suppress demand-unit polygon visibility until the camera settles.
   useEffect(() => {
     mapActions.setMapMode("get-started")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
 
+    // Continuously suppress polygon opacity until polygonsAllowedRef is set.
+    // This overrides OutcomePolygonLayer's RAF-based fade-in.
+    const suppressInterval = setInterval(() => {
+      if (polygonsAllowedRef.current) {
+        clearInterval(suppressInterval)
+        return
+      }
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (!map?.isStyleLoaded?.()) return
+      try {
+        if (map.getLayer("demand-units"))
+          map.setPaintProperty("demand-units", "fill-opacity", 0)
+        if (map.getLayer("demand-units-outline"))
+          map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+      } catch { /* ok */ }
+    }, 50)
+
     return () => {
+      clearInterval(suppressInterval)
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
 
-      // Reset map padding on unmount
       if (mapAPI.mapRef?.current) {
         try {
           mapAPI.mapRef.current.easeTo({
@@ -113,7 +134,7 @@ export default function TierAnimationSection({
   }, [])
 
   // Fly camera to match the learn map's scenario-intro position (CALIFORNIA_CENTERED_VIEW).
-  // Zero padding — the camera coordinates already position California to the left.
+  // Hide demand-unit polygons during the ease, then fade them in once the camera settles.
   useEffect(() => {
     if (!panelInView || isLoading || !mapAPI.mapRef?.current)
       return
@@ -121,6 +142,37 @@ export default function TierAnimationSection({
 
     const timer = setTimeout(() => {
       if (!mapAPI.mapRef?.current) return
+      const map = mapAPI.mapRef.current.getMap?.()
+
+      // After camera settles: compute SVG polygon data, then fade Mapbox polygons in
+      const onMoveEnd = () => {
+        if (!map) return
+
+        // Compute SVG data now that the camera is stable
+        computePolygonDataRef.current()
+
+        // Allow polygons to show (stops the suppress interval)
+        polygonsAllowedRef.current = true
+
+        try {
+          const fo = lerpZoom(CAM_ZOOM, [5, 0.75], [8, 0.55], [10, 0.35])
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty("demand-units", "fill-opacity-transition", {
+              duration: 600,
+              delay: 0,
+            })
+            map.setPaintProperty("demand-units", "fill-opacity", fo)
+          }
+          if (map.getLayer("demand-units-outline")) {
+            map.setPaintProperty("demand-units-outline", "line-opacity-transition", {
+              duration: 600,
+              delay: 0,
+            })
+            map.setPaintProperty("demand-units-outline", "line-opacity", 1)
+          }
+        } catch { /* ok */ }
+      }
+      map?.once("moveend", onMoveEnd)
 
       mapAPI.mapRef.current.easeTo({
         center: CAM_CENTER,
@@ -135,7 +187,7 @@ export default function TierAnimationSection({
     }, 200)
 
     return () => clearTimeout(timer)
-  }, [panelInView, isLoading, mapAPI.mapRef])
+  }, [panelInView, isLoading, mapAPI.mapRef]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { scrollYProgress } = useScroll({
     target: runwayRef,
@@ -144,11 +196,13 @@ export default function TierAnimationSection({
     layoutEffect: false,
   })
 
-  const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7], [1, 1, 0])
+  const mapOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0])
 
   // At CROSSFADE_THRESHOLD, hide Mapbox polygons so the SVG overlay takes over.
   // Before the threshold, Mapbox renders AG polygons normally (no race conditions).
   const CROSSFADE_THRESHOLD = 0.15
+
+  const svgReady = polygonData.length > 0
 
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
@@ -166,7 +220,8 @@ export default function TierAnimationSection({
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
 
-      const shouldBeVisible = v < CROSSFADE_THRESHOLD
+      // Keep Mapbox visible until SVG polygon data is ready
+      const shouldBeVisible = !svgReady || v < CROSSFADE_THRESHOLD
       if (shouldBeVisible === currentlyVisible) return
       currentlyVisible = shouldBeVisible
 
@@ -202,7 +257,7 @@ export default function TierAnimationSection({
         } catch { /* ok */ }
       }
     }
-  }, [scrollYProgress, mapAPI.mapRef, isLoading])
+  }, [scrollYProgress, mapAPI.mapRef, isLoading, svgReady])
 
   // Measure panel size for particle end positions
   const measurePanel = useCallback(() => {
@@ -225,6 +280,7 @@ export default function TierAnimationSection({
   // Query polygon geometries from the Mapbox demand-units layer and project
   // each vertex to panel-relative screen coordinates.
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const computePolygonDataRef = useRef<() => void>(() => {})
 
   const computePolygonData = useCallback(() => {
     if (retryTimerRef.current) {
@@ -238,55 +294,77 @@ export default function TierAnimationSection({
     const map = mapAPI.mapRef.current.getMap?.()
     if (!map || !map.isStyleLoaded?.() || !map.getLayer("demand-units")) return
 
-    const panelRect = panelRef.current.getBoundingClientRect()
+    const panelEl = panelRef.current
+    const panelRect = panelEl.getBoundingClientRect()
+    // SVG uses position:absolute;inset:0 so its origin is inside the border
+    const svgOriginX = panelRect.left + panelEl.clientLeft
+    const svgOriginY = panelRect.top + panelEl.clientTop
 
     const centroidLookup = new Map(
       centroids.map((c) => [c.id, c]),
     )
 
+    // querySourceFeatures returns all loaded tile data (including off-screen),
+    // giving more complete coverage than queryRenderedFeatures.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const features: any[] = map.queryRenderedFeatures(undefined as any, {
-      layers: ["demand-units"],
-    })
+    let features: any[] = []
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const layer = map.getLayer("demand-units") as any
+      const sourceId: string | undefined = layer?.source
+      const sourceLayer: string | undefined = layer?.sourceLayer ?? layer?.["source-layer"]
+      if (sourceId && sourceLayer) {
+        features = map.querySourceFeatures(sourceId, { sourceLayer })
+      }
+    } catch { /* fall through */ }
+    if (features.length === 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      features = map.queryRenderedFeatures(undefined as any, {
+        layers: ["demand-units"],
+      })
+    }
 
     if (features.length === 0) {
       retryTimerRef.current = setTimeout(computePolygonData, 1000)
       return
     }
 
-    const seen = new Set<string>()
-    const result: PolygonMorphData[] = []
-
+    // Tile boundaries clip polygons into fragments — keep the largest per DU_ID
+    const bestRings = new Map<string, { ring: [number, number][]; cData: typeof centroids[0] }>()
     for (const f of features) {
       const duId: string | undefined = f.properties?.DU_ID
-      if (!duId || seen.has(duId)) continue
-      seen.add(duId)
-
+      if (!duId) continue
       const cData = centroidLookup.get(duId)
       if (!cData) continue
-
       const ring = extractOuterRing(f.geometry)
       if (!ring || ring.length < 3) continue
+      const existing = bestRings.get(duId)
+      if (!existing || ring.length > existing.ring.length) {
+        bestRings.set(duId, { ring, cData })
+      }
+    }
 
+    const result: PolygonMorphData[] = []
+    for (const [, { ring, cData }] of bestRings) {
       const screenPoly: [number, number][] = []
       for (const [lng, lat] of ring) {
         try {
           const pt = map.project([lng, lat])
-          screenPoly.push([pt.x - panelRect.left, pt.y - panelRect.top])
-        } catch {
-          /* vertex outside projection bounds */
-        }
+          screenPoly.push([pt.x - svgOriginX, pt.y - svgOriginY])
+        } catch { /* vertex outside projection bounds */ }
       }
       if (screenPoly.length < 3) continue
 
-      const centroidPt = mapAPI.project(cData.lng, cData.lat)
-      if (!centroidPt) continue
+      let centroidPt: { x: number; y: number }
+      try {
+        centroidPt = map.project([cData.lng, cData.lat])
+      } catch { continue }
 
       result.push({
         screenPoly,
         centroidScreen: [
-          centroidPt.x - panelRect.left,
-          centroidPt.y - panelRect.top,
+          centroidPt.x - svgOriginX,
+          centroidPt.y - svgOriginY,
         ],
         color: cData.color,
         tier: cData.tier,
@@ -301,18 +379,8 @@ export default function TierAnimationSection({
     setPolygonData(result)
   }, [centroids, mapAPI])
 
-  // Compute polygon data after camera has settled and panel is in view
-  useEffect(() => {
-    if (!panelInView || isLoading || centroids.length === 0) return
-    const timer = setTimeout(computePolygonData, 2000)
-    return () => {
-      clearTimeout(timer)
-      if (retryTimerRef.current) {
-        clearTimeout(retryTimerRef.current)
-        retryTimerRef.current = null
-      }
-    }
-  }, [panelInView, isLoading, centroids, computePolygonData])
+  // Keep ref in sync so the camera effect can call the latest version
+  computePolygonDataRef.current = computePolygonData
 
   useEffect(() => {
     window.addEventListener("resize", computePolygonData)

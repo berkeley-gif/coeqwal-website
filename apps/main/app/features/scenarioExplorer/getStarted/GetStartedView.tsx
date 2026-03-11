@@ -7,7 +7,7 @@ import { useMapMode } from "../../map/store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const SECTIONS: { title: string; body?: string }[] = [
-  { title: "Welcome", body: "...use our tools..." },
+  { title: "Welcome", body: "...use our tools to explore..." },
   { title: "Scenarios" },
   { title: "Scenario scorecard" },
   { title: "Operations" },
