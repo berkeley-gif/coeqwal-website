@@ -8,12 +8,32 @@ import { StickyElement } from "@repo/scrollytelling"
 import { useMap } from "@repo/map"
 import { mapActions } from "../../map/store"
 import { useTierAnimationData } from "./useTierAnimationData"
-import ParticleOverlay, { type ParticleStartPos } from "./ParticleOverlay"
+import PolygonMorphOverlay, {
+  type PolygonMorphData,
+} from "./PolygonMorphOverlay"
 
 const SCROLL_RUNWAY = "300vh"
 
 const CAM_CENTER: [number, number] = [-120.5, 37.2]
 const CAM_ZOOM = 6.2
+
+/** Extract the outer ring from a GeoJSON Polygon or MultiPolygon geometry. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractOuterRing(geometry: any): [number, number][] | null {
+  if (!geometry) return null
+  if (geometry.type === "Polygon") {
+    return geometry.coordinates?.[0] as [number, number][] | null
+  }
+  if (geometry.type === "MultiPolygon") {
+    let largest: [number, number][] = []
+    for (const polygon of geometry.coordinates ?? []) {
+      const ring = polygon?.[0] as [number, number][] | undefined
+      if (ring && ring.length > largest.length) largest = ring
+    }
+    return largest.length > 0 ? largest : null
+  }
+  return null
+}
 
 interface TierAnimationSectionProps {
   scrollContainerRef: React.RefObject<HTMLElement | null>
@@ -31,8 +51,11 @@ export default function TierAnimationSection({
   const panelRef = useRef<HTMLDivElement>(null)
   const cameraSetRef = useRef(false)
 
-  const [panelSize, setPanelSize] = useState<{ width: number; height: number } | null>(null)
-  const [startPositions, setStartPositions] = useState<ParticleStartPos[]>([])
+  const [panelSize, setPanelSize] = useState<{
+    width: number
+    height: number
+  } | null>(null)
+  const [polygonData, setPolygonData] = useState<PolygonMorphData[]>([])
   const [panelInView, setPanelInView] = useState(false)
 
   // Activate persistent map with AG_REV visualization on mount
@@ -175,39 +198,80 @@ export default function TierAnimationSection({
     }
   }, [isLoading, measurePanel])
 
-  // Project centroids from lng/lat to panel-relative screen coords
-  const computeStartPositions = useCallback(() => {
+  // Query polygon geometries from the Mapbox demand-units layer and project
+  // each vertex to panel-relative screen coordinates.
+  const computePolygonData = useCallback(() => {
     if (!mapAPI.mapRef?.current || !panelRef.current || centroids.length === 0)
       return
 
+    const map = mapAPI.mapRef.current.getMap?.()
+    if (!map || !map.isStyleLoaded?.() || !map.getLayer("demand-units")) return
+
     const panelRect = panelRef.current.getBoundingClientRect()
-    const positions: ParticleStartPos[] = []
-    for (const c of centroids) {
-      const pt = mapAPI.project(c.lng, c.lat)
-      if (pt) {
-        positions.push({
-          x: pt.x - panelRect.left,
-          y: pt.y - panelRect.top,
-          color: c.color,
-          tier: c.tier,
-        })
+
+    // Build lookup from centroid data (AG demand units only)
+    const centroidLookup = new Map(
+      centroids.map((c) => [c.id, c]),
+    )
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const features: any[] = map.queryRenderedFeatures(undefined as any, {
+      layers: ["demand-units"],
+    })
+
+    const seen = new Set<string>()
+    const result: PolygonMorphData[] = []
+
+    for (const f of features) {
+      const duId: string | undefined = f.properties?.DU_ID
+      if (!duId || seen.has(duId)) continue
+      seen.add(duId)
+
+      const cData = centroidLookup.get(duId)
+      if (!cData) continue // not an AG unit in our tier data
+
+      const ring = extractOuterRing(f.geometry)
+      if (!ring || ring.length < 3) continue
+
+      const screenPoly: [number, number][] = []
+      for (const [lng, lat] of ring) {
+        try {
+          const pt = map.project([lng, lat])
+          screenPoly.push([pt.x - panelRect.left, pt.y - panelRect.top])
+        } catch {
+          /* vertex outside projection bounds */
+        }
       }
+      if (screenPoly.length < 3) continue
+
+      const centroidPt = mapAPI.project(cData.lng, cData.lat)
+      if (!centroidPt) continue
+
+      result.push({
+        screenPoly,
+        centroidScreen: [
+          centroidPt.x - panelRect.left,
+          centroidPt.y - panelRect.top,
+        ],
+        color: cData.color,
+        tier: cData.tier,
+      })
     }
-    setStartPositions(positions)
+
+    setPolygonData(result)
   }, [centroids, mapAPI])
 
-  // Compute particle positions after camera has settled and panel is in view
+  // Compute polygon data after camera has settled and panel is in view
   useEffect(() => {
     if (!panelInView || isLoading || centroids.length === 0) return
-    // Wait for camera easeTo (1500ms) + buffer
-    const timer = setTimeout(computeStartPositions, 2000)
+    const timer = setTimeout(computePolygonData, 2000)
     return () => clearTimeout(timer)
-  }, [panelInView, isLoading, centroids, computeStartPositions])
+  }, [panelInView, isLoading, centroids, computePolygonData])
 
   useEffect(() => {
-    window.addEventListener("resize", computeStartPositions)
-    return () => window.removeEventListener("resize", computeStartPositions)
-  }, [computeStartPositions])
+    window.addEventListener("resize", computePolygonData)
+    return () => window.removeEventListener("resize", computePolygonData)
+  }, [computePolygonData])
 
   if (error) {
     return (
@@ -300,10 +364,10 @@ export default function TierAnimationSection({
               {/* White overlay that fades IN to cover the persistent map */}
               <MapFade opacity={mapOpacity} />
 
-              {/* Particles morph from map dots into tier lines */}
-              {startPositions.length > 0 && panelSize && (
-                <ParticleOverlay
-                  startPositions={startPositions}
+              {/* Polygon shapes morph into squares then into tier lines */}
+              {polygonData.length > 0 && panelSize && (
+                <PolygonMorphOverlay
+                  polygons={polygonData}
                   panelWidth={panelSize.width}
                   panelHeight={panelSize.height}
                   tierDistribution={tierDistribution}
