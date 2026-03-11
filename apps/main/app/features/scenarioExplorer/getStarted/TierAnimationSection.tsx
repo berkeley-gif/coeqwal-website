@@ -12,7 +12,7 @@ import PolygonMorphOverlay, {
   type PolygonMorphData,
 } from "./PolygonMorphOverlay"
 
-const SCROLL_RUNWAY = "900vh"
+const SCROLL_RUNWAY = "1600vh"
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
