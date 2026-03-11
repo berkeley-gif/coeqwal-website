@@ -9,6 +9,7 @@ const SQUARE_GAP = 2
 const ROW_GAP = 6
 const BAR_HEIGHT = SQUARE_SIZE
 const BAR_GAP = 2
+const GLYPH_BAR_WIDTH = 60
 const LABEL_GAP = 30
 
 export interface PolygonMorphData {
@@ -117,6 +118,7 @@ interface GridLayout {
   barTierTopY: number
   barX: number
   barY: number
+  glyphBarX: number
 }
 
 export interface LayoutInfo {
@@ -127,6 +129,7 @@ export interface LayoutInfo {
 interface LayoutResult {
   positions: GridLayout[]
   thinWidth: number
+  glyphThinWidth: number
   info: LayoutInfo
 }
 
@@ -173,6 +176,7 @@ function computeGridLayout(
 
   const maxBarArea = overlayWidth - pad * 2
   const thinW = Math.max(1, Math.min(3, Math.floor(maxBarArea / Math.max(maxPerTier, 1))))
+  const glyphThinW = Math.max(0.5, GLYPH_BAR_WIDTH / Math.max(maxPerTier, 1))
 
   // Lower region: bars (Bar chart) — 55%–88% of panel height
   const barRegionTop = panelHeight * 0.55 + LABEL_GAP
@@ -225,12 +229,14 @@ function computeGridLayout(
       barTierTopY,
       barX: barLeft + denseIdx * thinW + thinW / 2,
       barY: barStartY + barTierIdx * (BAR_HEIGHT + BAR_GAP) + BAR_HEIGHT / 2,
+      glyphBarX: barLeft + denseIdx * glyphThinW + glyphThinW / 2,
     }
   })
 
   return {
     positions,
     thinWidth: thinW,
+    glyphThinWidth: glyphThinW,
     info: {
       gridLabelY: panelHeight * 0.15,
       barLabelY: panelHeight * 0.55,
@@ -266,6 +272,7 @@ export default function PolygonMorphOverlay({
   const { shapes, layoutInfo } = useMemo(() => {
     const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
     const thinW = layoutResult.thinWidth
+    const glyphThinW = layoutResult.glyphThinWidth
 
     const shapeData = sampled.map((poly, i) => {
       const l = layoutResult.positions[i]!
@@ -283,9 +290,9 @@ export default function PolygonMorphOverlay({
       const squareAtBarGrid = rectPoints(l.barGridX, l.barGridY, SQUARE_SIZE, SQUARE_SIZE, POINTS_PER_SHAPE)
       const thinAtBarGrid = rectPoints(l.barGridX, l.barGridY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
       const thinAtBarTop = rectPoints(l.barGridX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
-      // Packed horizontally at tier top Y (X-only move), then compact to final Y
       const barPackedAtTop = rectPoints(l.barX, l.barTierTopY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
-      const barSlice = rectPoints(l.barX, l.barY, thinW, BAR_HEIGHT, POINTS_PER_SHAPE)
+      // Final glyph-sized position: compressed to match list-view bar width
+      const barGlyph = rectPoints(l.glyphBarX, l.barTierTopY, glyphThinW, BAR_HEIGHT, POINTS_PER_SHAPE)
 
       return {
         polygon: resampled,
@@ -295,7 +302,7 @@ export default function PolygonMorphOverlay({
         thinAtBarGrid,
         thinAtBarTop,
         barPackedAtTop,
-        barSlice,
+        barGlyph,
         color: poly.color,
         rawD: pointsToD(poly.screenPoly),
         endSquareD: pointsToD(squareAtGrid),
@@ -324,7 +331,7 @@ export default function PolygonMorphOverlay({
         distLabel.style.opacity = String(t)
       }
       if (barLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.76) / 0.04))
+        const t = Math.min(1, Math.max(0, (v - 0.84) / 0.04))
         barLabel.style.opacity = String(t)
       }
 
@@ -378,7 +385,7 @@ export default function PolygonMorphOverlay({
         }
         el.style.opacity = "1"
 
-        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barPackedAtTop } = shape
+        const { endSquare, squareAtBarGrid, thinAtBarGrid, thinAtBarTop, barPackedAtTop, barGlyph } = shape
         const stagger = (i % 20) * 0.002
 
         // 1. Drop: squares travel down (Y only)
@@ -395,6 +402,10 @@ export default function PolygonMorphOverlay({
         // 4. Compress left: slide horizontally into bar chart rows (X only)
         const compressStart = 0.70 + stagger
         const compressEnd = 0.74 + stagger
+        // ── HOLD: bar rows pause (0.74 → 0.78) ──
+        // 5. Shrink to glyph size: compress further left (X only)
+        const glyphStart = 0.78 + stagger
+        const glyphEnd = 0.82 + stagger
 
         let pts: [number, number][]
         if (v <= dropStart) {
@@ -417,8 +428,13 @@ export default function PolygonMorphOverlay({
         } else if (v <= compressEnd) {
           const t = easeInOut((v - compressStart) / (compressEnd - compressStart))
           pts = thinAtBarTop.map((p, j) => lerp(p, barPackedAtTop[j]!, t))
-        } else {
+        } else if (v <= glyphStart) {
           pts = barPackedAtTop
+        } else if (v <= glyphEnd) {
+          const t = easeInOut((v - glyphStart) / (glyphEnd - glyphStart))
+          pts = barPackedAtTop.map((p, j) => lerp(p, barGlyph[j]!, t))
+        } else {
+          pts = barGlyph
         }
 
         el.setAttribute("d", pointsToD(pts))
