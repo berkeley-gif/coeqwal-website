@@ -7,6 +7,7 @@ const POINTS_PER_SHAPE = 96
 const SQUARE_SIZE = 10
 const SQUARE_GAP = 2
 const ROW_GAP = 6
+const BAR_GAP = 10
 
 export interface PolygonMorphData {
   screenPoly: [number, number][]
@@ -98,16 +99,31 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-/* ── grid-position layout (squares in tier rows) ─────── */
+/* ── grid & bar layout ──────────────────────────────── */
 
-function computeGridPositions(
+interface GridLayout {
+  gridX: number
+  gridY: number
+  row: number
+  tierTopY: number
+  barX: number
+  barY: number
+}
+
+interface LayoutResult {
+  positions: GridLayout[]
+  thinWidth: number
+}
+
+function computeGridLayout(
   polygons: PolygonMorphData[],
   panelWidth: number,
   panelHeight: number,
-): { x: number; y: number }[] {
+): LayoutResult {
   const overlayLeft = panelWidth * 0.75
   const overlayWidth = panelWidth * 0.25
   const pad = overlayWidth * 0.08
+  const overlayCenter = overlayLeft + overlayWidth / 2
 
   const tierTotals: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
   for (const p of polygons) tierTotals[p.tier] = (tierTotals[p.tier] || 0) + 1
@@ -115,10 +131,7 @@ function computeGridPositions(
   const cell = SQUARE_SIZE + SQUARE_GAP
   const maxPerTier = Math.max(...Object.values(tierTotals))
   const cols = Math.ceil(
-    Math.min(
-      maxPerTier,
-      Math.floor((overlayWidth - pad * 2) / cell),
-    ),
+    Math.min(maxPerTier, Math.floor((overlayWidth - pad * 2) / cell)),
   )
 
   const tierRows: Record<number, number> = {}
@@ -127,30 +140,58 @@ function computeGridPositions(
   }
   const totalRows =
     (tierRows[1] || 0) + (tierRows[2] || 0) + (tierRows[3] || 0) + (tierRows[4] || 0)
-  const totalHeight = totalRows * cell + 3 * ROW_GAP
-  const startY = (panelHeight - totalHeight) / 2
+  const totalGridHeight = totalRows * cell + 3 * ROW_GAP
+  const gridStartY = (panelHeight - totalGridHeight) / 2
 
-  const tierBuckets: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
-  let tierStartY: Record<number, number> = {}
-  let cumY = startY
+  const tierGridStartY: Record<number, number> = {}
+  let cumY = gridStartY
   for (let tier = 1; tier <= 4; tier++) {
-    tierStartY[tier] = cumY
+    tierGridStartY[tier] = cumY
     cumY += (tierRows[tier] || 0) * cell + ROW_GAP
   }
 
   const gridWidth = Math.min(cols, maxPerTier) * cell - SQUARE_GAP
   const gridLeft = overlayLeft + pad + (overlayWidth - pad * 2 - gridWidth) / 2
 
-  return polygons.map((p) => {
+  // Thin width: fit all items in the widest tier within the overlay
+  const maxBarArea = overlayWidth - pad * 2
+  const thinW = Math.max(1, Math.min(3, Math.floor(maxBarArea / Math.max(maxPerTier, 1))))
+
+  // Final bar layout: 4 bars stacked vertically, centered
+  const barTotalHeight = 4 * SQUARE_SIZE + 3 * BAR_GAP
+  const barStartY = (panelHeight - barTotalHeight) / 2
+
+  const tierBuckets: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
+
+  const positions = polygons.map((p): GridLayout => {
     const idx = tierBuckets[p.tier] ?? 0
     tierBuckets[p.tier] = idx + 1
     const col = idx % cols
     const row = Math.floor(idx / cols)
+
+    const gridX = gridLeft + col * cell + SQUARE_SIZE / 2
+    const gridY = (tierGridStartY[p.tier] || 0) + row * cell + SQUARE_SIZE / 2
+    const tierTopY = (tierGridStartY[p.tier] || 0) + SQUARE_SIZE / 2
+
+    const barLeft = overlayLeft + pad
+    const tierCount = tierTotals[p.tier] || 1
+    const numRowsInTier = tierRows[p.tier] || 1
+    const lastRowCount = tierCount - (numRowsInTier - 1) * cols
+    const denseIdx = col < lastRowCount
+      ? col * numRowsInTier + row
+      : lastRowCount * numRowsInTier + (col - lastRowCount) * (numRowsInTier - 1) + row
+
     return {
-      x: gridLeft + col * cell + SQUARE_SIZE / 2,
-      y: (tierStartY[p.tier] || 0) + row * cell + SQUARE_SIZE / 2,
+      gridX,
+      gridY,
+      row,
+      tierTopY,
+      barX: barLeft + denseIdx * thinW + thinW / 2,
+      barY: tierTopY,
     }
   })
+
+  return { positions, thinWidth: thinW }
 }
 
 /* ── component ───────────────────────────────────────── */
@@ -177,9 +218,11 @@ export default function PolygonMorphOverlay({
   }, [polygons])
 
   const shapes = useMemo(() => {
-    const gridPositions = computeGridPositions(sampled, panelWidth, panelHeight)
+    const layout = computeGridLayout(sampled, panelWidth, panelHeight)
+    const thinW = layout.thinWidth
 
     return sampled.map((poly, i) => {
+      const l = layout.positions[i]!
       const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
       const squareAtCentroid = rectPoints(
         poly.centroidScreen[0],
@@ -188,19 +231,18 @@ export default function PolygonMorphOverlay({
         SQUARE_SIZE,
         POINTS_PER_SHAPE,
       )
-      const grid = gridPositions[i]!
-      const squareAtGrid = rectPoints(
-        grid.x,
-        grid.y,
-        SQUARE_SIZE,
-        SQUARE_SIZE,
-        POINTS_PER_SHAPE,
-      )
+      const squareAtGrid = rectPoints(l.gridX, l.gridY, SQUARE_SIZE, SQUARE_SIZE, POINTS_PER_SHAPE)
+      const thinAtGrid = rectPoints(l.gridX, l.gridY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
+      const thinAtTop = rectPoints(l.gridX, l.tierTopY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
+      const barSlice = rectPoints(l.barX, l.barY, thinW, SQUARE_SIZE, POINTS_PER_SHAPE)
 
       return {
         polygon: resampled,
         square: squareAtCentroid,
         endSquare: squareAtGrid,
+        thinAtGrid,
+        thinAtTop,
+        barSlice,
         color: poly.color,
         rawD: pointsToD(poly.screenPoly),
         initialD: pointsToD(poly.screenPoly),
@@ -212,8 +254,8 @@ export default function PolygonMorphOverlay({
     const CROSSFADE_THRESHOLD = 0.15
     const unsub = scrollProgress.on("change", (v) => {
       if (svgRef.current) {
-        svgRef.current.style.opacity = v >= CROSSFADE_THRESHOLD && v < 0.999 ? "1" : "0"
-        if (v < CROSSFADE_THRESHOLD || v >= 0.999) return
+        svgRef.current.style.opacity = v >= CROSSFADE_THRESHOLD ? "1" : "0"
+        if (v < CROSSFADE_THRESHOLD) return
       }
 
       for (let i = 0; i < shapes.length; i++) {
@@ -221,39 +263,104 @@ export default function PolygonMorphOverlay({
         if (!el) continue
         const shape = shapes[i]
         if (!shape) continue
-        const { polygon, square, endSquare, rawD } = shape
-        const stagger = (i % 20) * 0.003
+        const { polygon, square, endSquare, thinAtGrid, thinAtTop, barSlice, rawD } = shape
+        const stagger = (i % 20) * 0.002
 
-        const morphStart = 0.30 + stagger
-        const morphEnd = 0.45 + stagger
-        const moveStart = 0.50 + stagger
-        const moveEnd = 0.70 + stagger
+        // ── Forward: polygon → bars ──
+        const morphStart = 0.20 + stagger
+        const morphEnd = 0.28 + stagger
+        const moveStart = 0.30 + stagger
+        const moveEnd = 0.40 + stagger
+        const shrinkStart = 0.42 + stagger
+        const shrinkEnd = 0.48 + stagger
+        const slideStart = 0.50 + stagger
+        const slideEnd = 0.56 + stagger
+        const condenseStart = 0.58 + stagger
+        const condenseEnd = 0.66 + stagger
+        // ── Hold bars ──
+        const barHoldEnd = 0.72
+        // ── Reverse: bars → squares ──
+        const rExpandStart = 0.72 + stagger
+        const rExpandEnd = 0.78 + stagger
+        const rSlideStart = 0.78 + stagger
+        const rSlideEnd = 0.84 + stagger
+        const rGrowStart = 0.84 + stagger
+        const rGrowEnd = 0.90 + stagger
+        // 0.90+ : hold at endSquare (stays fixed as user scrolls away)
 
         if (v <= morphStart) {
-          // Use raw (unsampled) polygon vertices — exact match to Mapbox geometry
           el.setAttribute("d", rawD)
           continue
         }
 
         let pts: [number, number][]
+
+        // ── Forward phases ──
         if (v <= morphEnd) {
-          const t = easeInOut(
-            Math.min(1, (v - morphStart) / (morphEnd - morphStart)),
-          )
-          pts = polygon.map((p: [number, number], j: number): [number, number] => [
+          const t = easeInOut((v - morphStart) / (morphEnd - morphStart))
+          pts = polygon.map((p, j): [number, number] => [
             p[0] + (square[j]![0] - p[0]) * t,
             p[1] + (square[j]![1] - p[1]) * t,
           ])
         } else if (v <= moveStart) {
           pts = square
         } else if (v <= moveEnd) {
-          const t = easeInOut(
-            Math.min(1, (v - moveStart) / (moveEnd - moveStart)),
-          )
-          pts = square.map((p: [number, number], j: number): [number, number] => [
+          const t = easeInOut((v - moveStart) / (moveEnd - moveStart))
+          pts = square.map((p, j): [number, number] => [
             p[0] + (endSquare[j]![0] - p[0]) * t,
             p[1] + (endSquare[j]![1] - p[1]) * t,
           ])
+        } else if (v <= shrinkStart) {
+          pts = endSquare
+        } else if (v <= shrinkEnd) {
+          const t = easeInOut((v - shrinkStart) / (shrinkEnd - shrinkStart))
+          pts = endSquare.map((p, j): [number, number] => [
+            p[0] + (thinAtGrid[j]![0] - p[0]) * t,
+            p[1] + (thinAtGrid[j]![1] - p[1]) * t,
+          ])
+        } else if (v <= slideStart) {
+          pts = thinAtGrid
+        } else if (v <= slideEnd) {
+          const t = easeInOut((v - slideStart) / (slideEnd - slideStart))
+          pts = thinAtGrid.map((p, j): [number, number] => [
+            p[0] + (thinAtTop[j]![0] - p[0]) * t,
+            p[1] + (thinAtTop[j]![1] - p[1]) * t,
+          ])
+        } else if (v <= condenseStart) {
+          pts = thinAtTop
+        } else if (v <= condenseEnd) {
+          const t = easeInOut((v - condenseStart) / (condenseEnd - condenseStart))
+          pts = thinAtTop.map((p, j): [number, number] => [
+            p[0] + (barSlice[j]![0] - p[0]) * t,
+            p[1] + (barSlice[j]![1] - p[1]) * t,
+          ])
+
+        // ── Hold bars ──
+        } else if (v <= barHoldEnd) {
+          pts = barSlice
+
+        // ── Reverse: bars → thin at top (expand) ──
+        } else if (v <= rExpandEnd) {
+          const t = easeInOut((v - rExpandStart) / (rExpandEnd - rExpandStart))
+          pts = barSlice.map((p, j): [number, number] => [
+            p[0] + (thinAtTop[j]![0] - p[0]) * t,
+            p[1] + (thinAtTop[j]![1] - p[1]) * t,
+          ])
+        // ── Reverse: thin at top → thin at grid (slide down) ──
+        } else if (v <= rSlideEnd) {
+          const t = easeInOut((v - rSlideStart) / (rSlideEnd - rSlideStart))
+          pts = thinAtTop.map((p, j): [number, number] => [
+            p[0] + (thinAtGrid[j]![0] - p[0]) * t,
+            p[1] + (thinAtGrid[j]![1] - p[1]) * t,
+          ])
+        // ── Reverse: thin at grid → square at grid (grow) ──
+        } else if (v <= rGrowEnd) {
+          const t = easeInOut((v - rGrowStart) / (rGrowEnd - rGrowStart))
+          pts = thinAtGrid.map((p, j): [number, number] => [
+            p[0] + (endSquare[j]![0] - p[0]) * t,
+            p[1] + (endSquare[j]![1] - p[1]) * t,
+          ])
+        // ── Hold at squares (stays fixed as user scrolls away) ──
         } else {
           pts = endSquare
         }
