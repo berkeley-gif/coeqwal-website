@@ -12,7 +12,7 @@ import PolygonMorphOverlay, {
   type PolygonMorphData,
 } from "./PolygonMorphOverlay"
 
-const SCROLL_RUNWAY = "300vh"
+const SCROLL_RUNWAY = "600vh"
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
@@ -196,7 +196,7 @@ export default function TierAnimationSection({
     layoutEffect: false,
   })
 
-  const mapOpacity = useTransform(scrollYProgress, [0, 0.55, 0.85], [1, 1, 0])
+  const mapOpacity = useTransform(scrollYProgress, [0, 0.3, 0.55], [1, 1, 0])
 
   // At CROSSFADE_THRESHOLD, hide Mapbox polygons so the SVG overlay takes over.
   // Before the threshold, Mapbox renders AG polygons normally (no race conditions).
