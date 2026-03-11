@@ -266,26 +266,27 @@ export default function PolygonMorphOverlay({
         const { polygon, square, endSquare, thinAtGrid, thinAtTop, barSlice, rawD } = shape
         const stagger = (i % 20) * 0.002
 
-        // ── Forward: polygon → bars ──
-        const morphStart = 0.20 + stagger
-        const morphEnd = 0.28 + stagger
-        const moveStart = 0.30 + stagger
-        const moveEnd = 0.40 + stagger
+        // ── Forward: polygon → squares in grid ──
+        const morphStart = 0.16 + stagger
+        const morphEnd = 0.22 + stagger
+        const moveStart = 0.24 + stagger
+        const moveEnd = 0.32 + stagger
+        // ── HOLD: squares in grid (0.32 → 0.42) ──
         const shrinkStart = 0.42 + stagger
-        const shrinkEnd = 0.48 + stagger
-        const slideStart = 0.50 + stagger
-        const slideEnd = 0.56 + stagger
-        const condenseStart = 0.58 + stagger
-        const condenseEnd = 0.66 + stagger
-        // ── Hold bars ──
-        const barHoldEnd = 0.72
-        // ── Reverse: bars → squares ──
-        const rExpandStart = 0.72 + stagger
-        const rExpandEnd = 0.78 + stagger
-        const rSlideStart = 0.78 + stagger
-        const rSlideEnd = 0.84 + stagger
-        const rGrowStart = 0.84 + stagger
-        const rGrowEnd = 0.90 + stagger
+        const shrinkEnd = 0.46 + stagger
+        const slideStart = 0.48 + stagger
+        const slideEnd = 0.52 + stagger
+        const condenseStart = 0.54 + stagger
+        const condenseEnd = 0.60 + stagger
+        // ── HOLD: bars (0.60 → 0.70) ──
+        const barHoldEnd = 0.70
+        const rExpandStart = 0.70 + stagger
+        const rExpandEnd = 0.74 + stagger
+        const rSlideStart = 0.74 + stagger
+        const rSlideEnd = 0.78 + stagger
+        const rGrowStart = 0.78 + stagger
+        const rGrowEnd = 0.82 + stagger
+        // ── HOLD: final squares (0.82+) ──
         // 0.90+ : hold at endSquare (stays fixed as user scrolls away)
 
         if (v <= morphStart) {

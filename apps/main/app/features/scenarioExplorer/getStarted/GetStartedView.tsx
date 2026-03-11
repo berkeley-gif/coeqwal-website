@@ -7,9 +7,9 @@ import { useMapMode } from "../../map/store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const SECTIONS: { title: string; body?: string }[] = [
-  { title: "Welcome", body: "...use our tools to explore..." },
-  { title: "Scenarios" },
-  { title: "Scenario scorecard" },
+  { title: "Welcome", body: "Use our tools to explore the COEQWAL library of scenarios..." },
+  { title: "COEQWAL library of scenarios", body: "Not comprehensive. We have chosen these scenarios in order to... ." },
+  { title: "Results", body: "...and how to view and compare them." },
   { title: "Operations" },
 ]
 
