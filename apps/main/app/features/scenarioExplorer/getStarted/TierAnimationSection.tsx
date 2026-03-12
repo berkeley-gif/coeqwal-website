@@ -59,8 +59,12 @@ export default function TierAnimationSection({
 }: TierAnimationSectionProps) {
   const theme = useTheme()
   const mapAPI = useMap()
-  const { centroids, tierDistribution: _tierDistribution, isLoading, error } =
-    useTierAnimationData()
+  const {
+    centroids,
+    tierDistribution: _tierDistribution,
+    isLoading,
+    error,
+  } = useTierAnimationData()
 
   const runwayRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)

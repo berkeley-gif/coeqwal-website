@@ -305,197 +305,205 @@ export default function PolygonMorphOverlay({
     )
   }, [polygons])
 
-  const { shapes, layoutInfo, duplicateGlyphs, extraRows, rowYShift, radarLabelY } =
-    useMemo(() => {
-      const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
-      const thinW = layoutResult.thinWidth
-      const glyphThinW = layoutResult.glyphThinWidth
-      const glyphBarH = layoutResult.glyphBarHeight
+  const {
+    shapes,
+    layoutInfo,
+    duplicateGlyphs,
+    extraRows,
+    rowYShift,
+    radarLabelY,
+  } = useMemo(() => {
+    const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
+    const thinW = layoutResult.thinWidth
+    const glyphThinW = layoutResult.glyphThinWidth
+    const glyphBarH = layoutResult.glyphBarHeight
 
-      const shapeData = sampled.map((poly, i) => {
-        const l = layoutResult.positions[i]!
-        const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
-        const squareAtCentroid = rectPoints(
-          poly.centroidScreen[0],
-          poly.centroidScreen[1],
-          SQUARE_SIZE,
-          SQUARE_SIZE,
-          POINTS_PER_SHAPE,
-        )
-        const squareAtGrid = rectPoints(
-          l.gridX,
-          l.gridY,
-          SQUARE_SIZE,
-          SQUARE_SIZE,
-          POINTS_PER_SHAPE,
-        )
+    const shapeData = sampled.map((poly, i) => {
+      const l = layoutResult.positions[i]!
+      const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
+      const squareAtCentroid = rectPoints(
+        poly.centroidScreen[0],
+        poly.centroidScreen[1],
+        SQUARE_SIZE,
+        SQUARE_SIZE,
+        POINTS_PER_SHAPE,
+      )
+      const squareAtGrid = rectPoints(
+        l.gridX,
+        l.gridY,
+        SQUARE_SIZE,
+        SQUARE_SIZE,
+        POINTS_PER_SHAPE,
+      )
 
-        // Clone targets: move down as squares, then morph to bars in the lower region
-        const squareAtBarGrid = rectPoints(
-          l.barGridX,
-          l.barGridY,
-          SQUARE_SIZE,
-          SQUARE_SIZE,
-          POINTS_PER_SHAPE,
-        )
-        const thinAtBarGrid = rectPoints(
-          l.barGridX,
-          l.barGridY,
-          thinW,
-          BAR_HEIGHT,
-          POINTS_PER_SHAPE,
-        )
-        const thinAtBarTop = rectPoints(
-          l.barGridX,
-          l.barTierTopY,
-          thinW,
-          BAR_HEIGHT,
-          POINTS_PER_SHAPE,
-        )
-        const barPackedAtTop = rectPoints(
-          l.barX,
-          l.barTierTopY,
-          thinW,
-          BAR_HEIGHT,
-          POINTS_PER_SHAPE,
-        )
-        // Compressed to glyph width (X only)
-        const barGlyph = rectPoints(
-          l.glyphBarX,
-          l.barTierTopY,
-          glyphThinW,
-          BAR_HEIGHT,
-          POINTS_PER_SHAPE,
-        )
-        // Final glyph-sized position: compact to glyph height & spacing (Y only)
-        const barFinal = rectPoints(
-          l.glyphBarX,
-          l.glyphBarY,
-          glyphThinW,
-          glyphBarH,
-          POINTS_PER_SHAPE,
-        )
+      // Clone targets: move down as squares, then morph to bars in the lower region
+      const squareAtBarGrid = rectPoints(
+        l.barGridX,
+        l.barGridY,
+        SQUARE_SIZE,
+        SQUARE_SIZE,
+        POINTS_PER_SHAPE,
+      )
+      const thinAtBarGrid = rectPoints(
+        l.barGridX,
+        l.barGridY,
+        thinW,
+        BAR_HEIGHT,
+        POINTS_PER_SHAPE,
+      )
+      const thinAtBarTop = rectPoints(
+        l.barGridX,
+        l.barTierTopY,
+        thinW,
+        BAR_HEIGHT,
+        POINTS_PER_SHAPE,
+      )
+      const barPackedAtTop = rectPoints(
+        l.barX,
+        l.barTierTopY,
+        thinW,
+        BAR_HEIGHT,
+        POINTS_PER_SHAPE,
+      )
+      // Compressed to glyph width (X only)
+      const barGlyph = rectPoints(
+        l.glyphBarX,
+        l.barTierTopY,
+        glyphThinW,
+        BAR_HEIGHT,
+        POINTS_PER_SHAPE,
+      )
+      // Final glyph-sized position: compact to glyph height & spacing (Y only)
+      const barFinal = rectPoints(
+        l.glyphBarX,
+        l.glyphBarY,
+        glyphThinW,
+        glyphBarH,
+        POINTS_PER_SHAPE,
+      )
 
-        return {
-          polygon: resampled,
-          square: squareAtCentroid,
-          endSquare: squareAtGrid,
-          squareAtBarGrid,
-          thinAtBarGrid,
-          thinAtBarTop,
-          barPackedAtTop,
-          barGlyph,
-          barFinal,
-          color: poly.color,
-          rawD: pointsToD(poly.screenPoly),
-          endSquareD: pointsToD(squareAtGrid),
-        }
-      })
-
-      // Compute duplicate glyph bars (static copies that fade in to the right)
-      const overlayLeft = panelWidth * 0.75
-      const overlayW = panelWidth * 0.25
-      const padX = overlayW * 0.08
-      const barLeft = overlayLeft + padX
-
-      const tierCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
-      const tierColors: Record<number, string> = {}
-      for (const p of sampled) {
-        tierCounts[p.tier] = (tierCounts[p.tier] || 0) + 1
-        if (!tierColors[p.tier]) tierColors[p.tier] = p.color
+      return {
+        polygon: resampled,
+        square: squareAtCentroid,
+        endSquare: squareAtGrid,
+        squareAtBarGrid,
+        thinAtBarGrid,
+        thinAtBarTop,
+        barPackedAtTop,
+        barGlyph,
+        barFinal,
+        color: poly.color,
+        rawD: pointsToD(poly.screenPoly),
+        endSquareD: pointsToD(squareAtGrid),
       }
+    })
 
-      const tierGlyphY: Record<number, number> = {}
-      for (let i = 0; i < sampled.length; i++) {
-        const tier = sampled[i]!.tier
-        if (!tierGlyphY[tier])
-          tierGlyphY[tier] = layoutResult.positions[i]!.glyphBarY
+    // Compute duplicate glyph bars (static copies that fade in to the right)
+    const overlayLeft = panelWidth * 0.75
+    const overlayW = panelWidth * 0.25
+    const padX = overlayW * 0.08
+    const barLeft = overlayLeft + padX
+
+    const tierCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 }
+    const tierColors: Record<number, string> = {}
+    for (const p of sampled) {
+      tierCounts[p.tier] = (tierCounts[p.tier] || 0) + 1
+      if (!tierColors[p.tier]) tierColors[p.tier] = p.color
+    }
+
+    const tierGlyphY: Record<number, number> = {}
+    for (let i = 0; i < sampled.length; i++) {
+      const tier = sampled[i]!.tier
+      if (!tierGlyphY[tier])
+        tierGlyphY[tier] = layoutResult.positions[i]!.glyphBarY
+    }
+
+    const COLS = 4
+    const NUM_ROWS = 2
+    const availableW = overlayW - padX * 2
+    const spaceBetweenX =
+      (availableW - COLS * GLYPH_BAR_WIDTH) / Math.max(COLS - 1, 1)
+
+    const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
+    const glyphRowH = 4 * glyphBarH + 5 * glyphBarSpacing
+    const ROW_SPACING = 16
+    type BarRect = {
+      x: number
+      y: number
+      width: number
+      height: number
+      color: string
+      cx: number
+      cy: number
+    }
+
+    // Row 0: 3 duplicates to the right of the morphed original
+    const row0: BarRect[][] = []
+    for (let d = 0; d < COLS - 1; d++) {
+      const offsetX = (d + 1) * (GLYPH_BAR_WIDTH + spaceBetweenX)
+      const bars: BarRect[] = []
+      for (let t = 1; t <= 4; t++) {
+        bars.push({
+          x: barLeft + offsetX,
+          y: (tierGlyphY[t] || 0) - glyphBarH / 2,
+          width: (tierCounts[t] || 0) * glyphThinW,
+          height: glyphBarH,
+          color: tierColors[t] || "#ccc",
+          cx: 0,
+          cy: 0,
+        })
       }
+      row0.push(bars)
+    }
 
-      const COLS = 4
-      const NUM_ROWS = 2
-      const availableW = overlayW - padX * 2
-      const spaceBetweenX =
-        (availableW - COLS * GLYPH_BAR_WIDTH) / Math.max(COLS - 1, 1)
-
-      const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
-      const glyphRowH = 4 * glyphBarH + 5 * glyphBarSpacing
-      const ROW_SPACING = 16
-      type BarRect = {
-        x: number
-        y: number
-        width: number
-        height: number
-        color: string
-        cx: number
-        cy: number
-      }
-
-      // Row 0: 3 duplicates to the right of the morphed original
-      const row0: BarRect[][] = []
-      for (let d = 0; d < COLS - 1; d++) {
-        const offsetX = (d + 1) * (GLYPH_BAR_WIDTH + spaceBetweenX)
+    // Row 1+: full rows below — each bar stores its parent glyph center
+    const extraRows: BarRect[][][] = []
+    for (let r = 1; r < NUM_ROWS; r++) {
+      const rowGlyphs: BarRect[][] = []
+      const yShift = r * (glyphRowH + ROW_SPACING)
+      for (let c = 0; c < COLS; c++) {
+        const offsetX = c * (GLYPH_BAR_WIDTH + spaceBetweenX)
+        const glyphCx = barLeft + offsetX + GLYPH_BAR_WIDTH / 2
+        const firstBarY = (tierGlyphY[1] || 0) - glyphBarH / 2 + yShift
+        const lastBarBottom =
+          (tierGlyphY[4] || 0) - glyphBarH / 2 + yShift + glyphBarH
+        const glyphCy = (firstBarY + lastBarBottom) / 2
         const bars: BarRect[] = []
         for (let t = 1; t <= 4; t++) {
           bars.push({
             x: barLeft + offsetX,
-            y: (tierGlyphY[t] || 0) - glyphBarH / 2,
+            y: (tierGlyphY[t] || 0) - glyphBarH / 2 + yShift,
             width: (tierCounts[t] || 0) * glyphThinW,
             height: glyphBarH,
             color: tierColors[t] || "#ccc",
-            cx: 0, cy: 0,
+            cx: glyphCx,
+            cy: glyphCy,
           })
         }
-        row0.push(bars)
+        rowGlyphs.push(bars)
       }
+      extraRows.push(rowGlyphs)
+    }
 
-      // Row 1+: full rows below — each bar stores its parent glyph center
-      const extraRows: BarRect[][][] = []
-      for (let r = 1; r < NUM_ROWS; r++) {
-        const rowGlyphs: BarRect[][] = []
-        const yShift = r * (glyphRowH + ROW_SPACING)
-        for (let c = 0; c < COLS; c++) {
-          const offsetX = c * (GLYPH_BAR_WIDTH + spaceBetweenX)
-          const glyphCx = barLeft + offsetX + GLYPH_BAR_WIDTH / 2
-          const firstBarY = (tierGlyphY[1] || 0) - glyphBarH / 2 + yShift
-          const lastBarBottom = (tierGlyphY[4] || 0) - glyphBarH / 2 + yShift + glyphBarH
-          const glyphCy = (firstBarY + lastBarBottom) / 2
-          const bars: BarRect[] = []
-          for (let t = 1; t <= 4; t++) {
-            bars.push({
-              x: barLeft + offsetX,
-              y: (tierGlyphY[t] || 0) - glyphBarH / 2 + yShift,
-              width: (tierCounts[t] || 0) * glyphThinW,
-              height: glyphBarH,
-              color: tierColors[t] || "#ccc",
-              cx: glyphCx,
-              cy: glyphCy,
-            })
-          }
-          rowGlyphs.push(bars)
-        }
-        extraRows.push(rowGlyphs)
+    const rowYShift = glyphRowH + ROW_SPACING
+
+    let maxExtraDotCY = 0
+    if (extraRows.length > 0) {
+      for (const bars of extraRows[0]!) {
+        maxExtraDotCY = Math.max(maxExtraDotCY, bars[0]?.cy || 0)
       }
+    }
+    const radarLabelY = maxExtraDotCY + 100 - 50 - 40
 
-      const rowYShift = glyphRowH + ROW_SPACING
-
-      let maxExtraDotCY = 0
-      if (extraRows.length > 0) {
-        for (const bars of extraRows[0]!) {
-          maxExtraDotCY = Math.max(maxExtraDotCY, bars[0]?.cy || 0)
-        }
-      }
-      const radarLabelY = maxExtraDotCY + 100 - 50 - 40
-
-      return {
-        shapes: shapeData,
-        layoutInfo: layoutResult.info,
-        duplicateGlyphs: row0,
-        extraRows,
-        rowYShift,
-        radarLabelY,
-      }
-    }, [sampled, panelWidth, panelHeight])
+    return {
+      shapes: shapeData,
+      layoutInfo: layoutResult.info,
+      duplicateGlyphs: row0,
+      extraRows,
+      rowYShift,
+      radarLabelY,
+    }
+  }, [sampled, panelWidth, panelHeight])
 
   useEffect(() => {
     const CROSSFADE_THRESHOLD = 0.15
@@ -538,7 +546,7 @@ export default function PolygonMorphOverlay({
         barLabel.style.opacity = String(t)
       }
       if (radarLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.92) / 0.03))
+        const t = Math.min(1, Math.max(0, (v - 0.90) / 0.03))
         radarLabel.style.opacity = String(t)
       }
 
@@ -605,7 +613,7 @@ export default function PolygonMorphOverlay({
 
         // 1. Drop (Y)
         const dropStart = 0.44 + stagger
-        const dropEnd = 0.50 + stagger
+        const dropEnd = 0.5 + stagger
         // HOLD 0.50 → 0.53
         // 2. Narrow (width)
         const narrowStart = 0.53 + stagger
@@ -620,7 +628,7 @@ export default function PolygonMorphOverlay({
         // HOLD 0.65 → 0.67
         // 5. Glyph width (X)
         const glyphXStart = 0.67 + stagger
-        const glyphXEnd = 0.70 + stagger
+        const glyphXEnd = 0.7 + stagger
         // HOLD 0.70 → 0.72
         // 6. Glyph height (Y, no stagger)
         const glyphYStart = 0.72
@@ -693,7 +701,12 @@ export default function PolygonMorphOverlay({
       // ── Dot morph + arc to circle + spokes + radar (extraRectRefs) ──
       {
         const outerRingR = 0.9
-        const radarFractions = [outerRingR * 3 / 4, outerRingR * 3 / 4, outerRingR * 4 / 4, outerRingR * 2 / 4]
+        const radarFractions = [
+          (outerRingR * 3) / 4,
+          (outerRingR * 3) / 4,
+          (outerRingR * 4) / 4,
+          (outerRingR * 2) / 4,
+        ]
         let ri = 0
         for (let r = 0; r < extraRows.length; r++) {
           for (let c = 0; c < extraRows[r]!.length; c++) {
@@ -710,13 +723,13 @@ export default function PolygonMorphOverlay({
             )
             const finalAngle = startAngle + deltaAngle
 
-            // Spoke lines: grow from dot toward center (0.93-0.95)
+            // Spoke lines: grow from dot toward center (0.91-0.93)
             const spoke = spokeRefs.current[c]
             if (spoke) {
-              if (v >= 0.93) {
+              if (v >= 0.91) {
                 spoke.style.opacity = "1"
                 const spokeT = easeInOut(
-                  Math.min(1, Math.max(0, (v - 0.93) / 0.02)),
+                  Math.min(1, Math.max(0, (v - 0.91) / 0.02)),
                 )
                 const outerX = circleCX + Math.cos(finalAngle) * circleRadius
                 const outerY = circleCY + Math.sin(finalAngle) * circleRadius
@@ -726,7 +739,7 @@ export default function PolygonMorphOverlay({
                 spoke.setAttribute("y1", String(outerY))
                 spoke.setAttribute("x2", String(innerX))
                 spoke.setAttribute("y2", String(innerY))
-              } else {
+              } else if (v < 0.91) {
                 spoke.style.opacity = "0"
               }
             }
@@ -745,26 +758,33 @@ export default function PolygonMorphOverlay({
               let rr = dotT * DOT_R
 
               // Phase 2: HOLD dots (0.85-0.87)
-              // Phase 3: arc to circle (0.87-0.93)
-              // Phase 4: spokes grow (0.93-0.95)
-              // Phase 5: concentric rings fade in (0.95-0.97)
-              // Phase 6: move inward to radar positions (0.97-0.995)
+              // Phase 3: arc to circle (0.87-0.91)
+              // Phase 4: spokes grow (0.91-0.93)
+              // Phase 5: concentric rings fade in (0.93-0.95)
+              // Phase 6: move inward to radar positions (0.95-0.965)
+              // Phase 7: HOLD radar chart (0.965-1.0)
               if (v >= 0.87) {
                 const arcT = easeInOut(
-                  Math.min(1, Math.max(0, (v - 0.87) / 0.06)),
+                  Math.min(1, Math.max(0, (v - 0.87) / 0.04)),
                 )
                 const angle = startAngle + arcT * deltaAngle
                 const dist = startDist + arcT * (circleRadius - startDist)
                 let newCX = circleCX + Math.cos(angle) * dist
                 let newCY = circleCY + Math.sin(angle) * dist
 
-                if (v >= 0.97) {
+                if (v >= 0.95) {
                   const radarDist = circleRadius * (radarFractions[c] ?? 0.5)
                   const inT = easeInOut(
-                    Math.min(1, Math.max(0, (v - 0.97) / 0.025)),
+                    Math.min(1, Math.max(0, (v - 0.95) / 0.015)),
                   )
-                  newCX = circleCX + Math.cos(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
-                  newCY = circleCY + Math.sin(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
+                  newCX =
+                    circleCX +
+                    Math.cos(finalAngle) *
+                      (circleRadius + inT * (radarDist - circleRadius))
+                  newCY =
+                    circleCY +
+                    Math.sin(finalAngle) *
+                      (circleRadius + inT * (radarDist - circleRadius))
                 }
 
                 cx = newCX - DOT_R
@@ -794,7 +814,7 @@ export default function PolygonMorphOverlay({
         const outerRingR = circleRadius * 0.9
         ring.setAttribute("r", String(outerRingR * ((i + 1) / 4)))
         const stagger = i * 0.004
-        const fadeT = Math.min(1, Math.max(0, (v - (0.95 + stagger)) / 0.008))
+        const fadeT = Math.min(1, Math.max(0, (v - (0.93 + stagger)) / 0.008))
         ring.style.opacity = String(fadeT)
       }
     })
@@ -941,7 +961,9 @@ export default function PolygonMorphOverlay({
                     return (
                       <rect
                         key={t}
-                        ref={(el) => { extraRectRefs.current[idx] = el }}
+                        ref={(el) => {
+                          extraRectRefs.current[idx] = el
+                        }}
                         x={bar.x}
                         y={bar.y}
                         width={bar.width}
@@ -962,7 +984,9 @@ export default function PolygonMorphOverlay({
         {[1, 2, 3, 4].map((i) => (
           <circle
             key={`ring-${i}`}
-            ref={(el) => { ringRefs.current[i - 1] = el }}
+            ref={(el) => {
+              ringRefs.current[i - 1] = el
+            }}
             fill="none"
             stroke="rgba(0,0,0,0.15)"
             strokeWidth={0.75}
@@ -973,7 +997,9 @@ export default function PolygonMorphOverlay({
         {[0, 1, 2, 3].map((i) => (
           <line
             key={`spoke-${i}`}
-            ref={(el) => { spokeRefs.current[i] = el }}
+            ref={(el) => {
+              spokeRefs.current[i] = el
+            }}
             stroke="rgba(0,0,0,0.25)"
             strokeWidth={1}
             style={{ opacity: 0 }}
