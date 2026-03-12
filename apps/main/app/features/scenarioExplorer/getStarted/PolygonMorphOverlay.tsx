@@ -697,11 +697,11 @@ export default function PolygonMorphOverlay({
             const dotCX = bars[0]!.cx
             const dotCY = bars[0]!.cy
 
-            const targetAngle = (c / COLS) * Math.PI * 2 - Math.PI / 2
+            const targetAngle = Math.PI + (c / COLS) * Math.PI * 2
             const startAngle = Math.atan2(dotCY - circleCY, dotCX - circleCX)
             let deltaAngle = targetAngle - startAngle
-            if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI
-            if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI
+            // Force all dots to sweep clockwise (positive delta)
+            while (deltaAngle < 0) deltaAngle += 2 * Math.PI
             const startDist = Math.sqrt(
               (dotCX - circleCX) ** 2 + (dotCY - circleCY) ** 2,
             )
