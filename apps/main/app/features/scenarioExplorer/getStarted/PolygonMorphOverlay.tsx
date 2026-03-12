@@ -303,7 +303,7 @@ export default function PolygonMorphOverlay({
     )
   }, [polygons])
 
-  const { shapes, layoutInfo, duplicateGlyphs, extraRows, rowYShift } =
+  const { shapes, layoutInfo, duplicateGlyphs, extraRows, rowYShift, radarLabelY } =
     useMemo(() => {
       const layoutResult = computeGridLayout(sampled, panelWidth, panelHeight)
       const thinW = layoutResult.thinWidth
@@ -476,12 +476,22 @@ export default function PolygonMorphOverlay({
       }
 
       const rowYShift = glyphRowH + ROW_SPACING
+
+      let maxExtraDotCY = 0
+      if (extraRows.length > 0) {
+        for (const bars of extraRows[0]!) {
+          maxExtraDotCY = Math.max(maxExtraDotCY, bars[0]?.cy || 0)
+        }
+      }
+      const radarLabelY = maxExtraDotCY + 100 + 50 + 24
+
       return {
         shapes: shapeData,
         layoutInfo: layoutResult.info,
         duplicateGlyphs: row0,
         extraRows,
         rowYShift,
+        radarLabelY,
       }
     }, [sampled, panelWidth, panelHeight])
 
@@ -490,11 +500,29 @@ export default function PolygonMorphOverlay({
     const CLONE_SPAWN = 0.44
     const N = shapes.length
 
+    // Pre-compute circle parameters from extra-row dot centers
+    const COLS = 4
+    const DOT_R = 4
+    const DOT_SIZE = DOT_R * 2
+    let circleCX = 0
+    let maxDotCY = 0
+    if (extraRows.length > 0 && extraRows[0]!.length > 0) {
+      const first = extraRows[0]![0]!
+      const last = extraRows[0]![extraRows[0]!.length - 1]!
+      circleCX = (first[0]!.cx + last[0]!.cx) / 2
+      for (const bars of extraRows[0]!) {
+        maxDotCY = Math.max(maxDotCY, bars[0]?.cy || 0)
+      }
+    }
+    const circleCY = maxDotCY + 100
+    const circleRadius = 50
+
     const unsub = scrollProgress.on("change", (v) => {
-      // ── Labels (update regardless of SVG visibility) ──
+      // ── Labels ──
       const mapLabel = labelRefs.current[0]
       const distLabel = labelRefs.current[1]
       const barLabel = labelRefs.current[2]
+      const radarLabel = labelRefs.current[3]
       if (mapLabel) {
         const t = Math.min(1, Math.max(0, (v - 0.1) / 0.05))
         mapLabel.style.opacity = String(t)
@@ -504,8 +532,12 @@ export default function PolygonMorphOverlay({
         distLabel.style.opacity = String(t)
       }
       if (barLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.94) / 0.04))
+        const t = Math.min(1, Math.max(0, (v - 0.72) / 0.03))
         barLabel.style.opacity = String(t)
+      }
+      if (radarLabel) {
+        const t = Math.min(1, Math.max(0, (v - 0.92) / 0.03))
+        radarLabel.style.opacity = String(t)
       }
 
       // ── SVG visibility ──
@@ -545,7 +577,7 @@ export default function PolygonMorphOverlay({
         }
       }
 
-      // ── Clone paths: orthogonal sequence — each phase moves one axis only ──
+      // ── Clone paths: orthogonal sequence — trimmed holds ──
       for (let i = 0; i < N; i++) {
         const el = cloneRefs.current[i]
         if (!el) continue
@@ -569,28 +601,28 @@ export default function PolygonMorphOverlay({
         } = shape
         const stagger = (i % 20) * 0.002
 
-        // 1. Drop: squares travel down (Y only)
+        // 1. Drop (Y)
         const dropStart = 0.44 + stagger
-        const dropEnd = 0.5 + stagger
-        // ── HOLD: duplicated distribution view (0.50 → 0.56) ──
-        // 2. Narrow: squares shrink width within rows (width only)
-        const narrowStart = 0.56 + stagger
-        const narrowEnd = 0.6 + stagger
-        // 3. Rows combine: thin rects slide up to single row per tier (Y only)
-        const combineStart = 0.6 + stagger
-        const combineEnd = 0.64 + stagger
-        // ── HOLD: combined rows pause (0.64 → 0.70) ──
-        // 4. Compress left: slide horizontally into bar chart rows (X only)
-        const compressStart = 0.7 + stagger
-        const compressEnd = 0.74 + stagger
-        // ── HOLD: bar rows pause (0.74 → 0.78) ──
-        // 5. Shrink to glyph width (X only)
-        const glyphXStart = 0.78 + stagger
-        const glyphXEnd = 0.82 + stagger
-        // ── HOLD: glyph-width bars pause (0.82 → 0.88) ──
-        // 6. Compact to glyph height & spacing (Y only, no stagger — all rows move together)
-        const glyphYStart = 0.88
-        const glyphYEnd = 0.92
+        const dropEnd = 0.50 + stagger
+        // HOLD 0.50 → 0.53
+        // 2. Narrow (width)
+        const narrowStart = 0.53 + stagger
+        const narrowEnd = 0.56 + stagger
+        // 3. Combine rows (Y)
+        const combineStart = 0.56 + stagger
+        const combineEnd = 0.59 + stagger
+        // HOLD 0.59 → 0.62
+        // 4. Compress left (X)
+        const compressStart = 0.62 + stagger
+        const compressEnd = 0.65 + stagger
+        // HOLD 0.65 → 0.67
+        // 5. Glyph width (X)
+        const glyphXStart = 0.67 + stagger
+        const glyphXEnd = 0.70 + stagger
+        // HOLD 0.70 → 0.72
+        // 6. Glyph height (Y, no stagger)
+        const glyphYStart = 0.72
+        const glyphYEnd = 0.75
 
         let pts: [number, number][]
         if (v <= dropStart) {
@@ -636,8 +668,8 @@ export default function PolygonMorphOverlay({
       for (let d = 0; d < dupeRefs.current.length; d++) {
         const g = dupeRefs.current[d]
         if (!g) continue
-        const fadeStart = 0.92 + d * 0.01
-        const fadeEnd = fadeStart + 0.01
+        const fadeStart = 0.75 + d * 0.008
+        const fadeEnd = fadeStart + 0.008
         const t = Math.min(
           1,
           Math.max(0, (v - fadeStart) / (fadeEnd - fadeStart)),
@@ -645,39 +677,71 @@ export default function PolygonMorphOverlay({
         g.style.opacity = String(t)
       }
 
-      // ── HOLD 0.95 → 0.96: pause before duplication ──
-      // ── Extra rows: slide down (0.96-0.975), hold, dot morph (0.985-0.995) ──
+      // ── Extra rows: slide down (0.79-0.81) ──
       for (let r = 0; r < extraRowRefs.current.length; r++) {
         const g = extraRowRefs.current[r]
         if (!g) continue
-        const visible = v >= 0.96
+        const visible = v >= 0.79
         g.style.opacity = visible ? "1" : "0"
-        const slideT = Math.min(1, Math.max(0, (v - 0.96) / (0.975 - 0.96)))
+        const slideT = Math.min(1, Math.max(0, (v - 0.79) / 0.02))
         const yOffset = -rowYShift * (1 - slideT)
         g.style.transform = `translateY(${yOffset}px)`
       }
 
-      // ── Dot morph: each glyph's 4 bars converge to center dot (0.985-0.995) ──
+      // ── Dot morph + arc to circle (extraRectRefs) ──
       {
-        const DOT_R = 4
-        const DOT_SIZE = DOT_R * 2
         let ri = 0
         for (let r = 0; r < extraRows.length; r++) {
           for (let c = 0; c < extraRows[r]!.length; c++) {
             const bars = extraRows[r]![c]!
+            const dotCX = bars[0]!.cx
+            const dotCY = bars[0]!.cy
+
+            const targetAngle = (c / COLS) * Math.PI * 2 - Math.PI / 2
+            const startAngle = Math.atan2(dotCY - circleCY, dotCX - circleCX)
+            let deltaAngle = targetAngle - startAngle
+            if (deltaAngle > Math.PI) deltaAngle -= 2 * Math.PI
+            if (deltaAngle < -Math.PI) deltaAngle += 2 * Math.PI
+            const startDist = Math.sqrt(
+              (dotCX - circleCX) ** 2 + (dotCY - circleCY) ** 2,
+            )
+
             for (let b = 0; b < bars.length; b++) {
               const el = extraRectRefs.current[ri++]
               if (!el) continue
               const bar = bars[b]!
-              const dotT = Math.min(1, Math.max(0, (v - 0.985) / (0.995 - 0.985)))
-              const dotX = bar.cx - DOT_R
-              const dotY = bar.cy - DOT_R
-              el.setAttribute("x", String(bar.x + dotT * (dotX - bar.x)))
-              el.setAttribute("y", String(bar.y + dotT * (dotY - bar.y)))
-              el.setAttribute("width", String(Math.max(0, bar.width + dotT * (DOT_SIZE - bar.width))))
-              el.setAttribute("height", String(Math.max(0, bar.height + dotT * (DOT_SIZE - bar.height))))
-              el.setAttribute("rx", String(dotT * DOT_R))
-              el.setAttribute("ry", String(dotT * DOT_R))
+
+              // Phase 1: bars → dots (0.83-0.85)
+              const dotT = Math.min(1, Math.max(0, (v - 0.83) / 0.02))
+              let cx = bar.x + dotT * (bar.cx - DOT_R - bar.x)
+              let cy = bar.y + dotT * (bar.cy - DOT_R - bar.y)
+              let w = Math.max(0, bar.width + dotT * (DOT_SIZE - bar.width))
+              let h = Math.max(0, bar.height + dotT * (DOT_SIZE - bar.height))
+              let rr = dotT * DOT_R
+
+              // Phase 2: HOLD dots (0.85-0.87)
+              // Phase 3: arc to circle (0.87-0.96)
+              if (v >= 0.87) {
+                const arcT = easeInOut(
+                  Math.min(1, Math.max(0, (v - 0.87) / 0.09)),
+                )
+                const angle = startAngle + arcT * deltaAngle
+                const dist = startDist + arcT * (circleRadius - startDist)
+                const newCX = circleCX + Math.cos(angle) * dist
+                const newCY = circleCY + Math.sin(angle) * dist
+                cx = newCX - DOT_R
+                cy = newCY - DOT_R
+                w = DOT_SIZE
+                h = DOT_SIZE
+                rr = DOT_R
+              }
+
+              el.setAttribute("x", String(cx))
+              el.setAttribute("y", String(cy))
+              el.setAttribute("width", String(w))
+              el.setAttribute("height", String(h))
+              el.setAttribute("rx", String(rr))
+              el.setAttribute("ry", String(rr))
             }
           }
         }
@@ -731,6 +795,14 @@ export default function PolygonMorphOverlay({
         style={{ ...labelStyle, top: layoutInfo.barLabelY }}
       >
         Bar chart
+      </div>
+      <div
+        ref={(el) => {
+          labelRefs.current[3] = el
+        }}
+        style={{ ...labelStyle, top: radarLabelY }}
+      >
+        Radar chart
       </div>
 
       {/* SVG overlay */}
