@@ -693,7 +693,7 @@ export default function PolygonMorphOverlay({
       // ── Dot morph + arc to circle + spokes + radar (extraRectRefs) ──
       {
         const outerRingR = 0.9
-        const radarFractions = [outerRingR * 2 / 4, outerRingR * 3 / 4, outerRingR * 1 / 4, outerRingR * 4 / 4]
+        const radarFractions = [outerRingR * 3 / 4, outerRingR * 3 / 4, outerRingR * 4 / 4, outerRingR * 2 / 4]
         let ri = 0
         for (let r = 0; r < extraRows.length; r++) {
           for (let c = 0; c < extraRows[r]!.length; c++) {
