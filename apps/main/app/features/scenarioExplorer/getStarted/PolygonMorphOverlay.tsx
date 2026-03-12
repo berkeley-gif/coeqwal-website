@@ -292,6 +292,8 @@ export default function PolygonMorphOverlay({
   const dupeRefs = useRef<(SVGGElement | null)[]>([])
   const extraRowRefs = useRef<(SVGGElement | null)[]>([])
   const extraRectRefs = useRef<(SVGRectElement | null)[]>([])
+  const spokeRefs = useRef<(SVGLineElement | null)[]>([])
+  const ringRefs = useRef<(SVGCircleElement | null)[]>([])
   const labelRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const sampled = useMemo(() => {
@@ -688,8 +690,10 @@ export default function PolygonMorphOverlay({
         g.style.transform = `translateY(${yOffset}px)`
       }
 
-      // ── Dot morph + arc to circle (extraRectRefs) ──
+      // ── Dot morph + arc to circle + spokes + radar (extraRectRefs) ──
       {
+        const outerRingR = 0.9
+        const radarFractions = [outerRingR * 2 / 4, outerRingR * 3 / 4, outerRingR * 1 / 4, outerRingR * 4 / 4]
         let ri = 0
         for (let r = 0; r < extraRows.length; r++) {
           for (let c = 0; c < extraRows[r]!.length; c++) {
@@ -700,11 +704,32 @@ export default function PolygonMorphOverlay({
             const targetAngle = Math.PI + (c / COLS) * Math.PI * 2
             const startAngle = Math.atan2(dotCY - circleCY, dotCX - circleCX)
             let deltaAngle = targetAngle - startAngle
-            // Force all dots to sweep clockwise (positive delta)
             while (deltaAngle < 0) deltaAngle += 2 * Math.PI
             const startDist = Math.sqrt(
               (dotCX - circleCX) ** 2 + (dotCY - circleCY) ** 2,
             )
+            const finalAngle = startAngle + deltaAngle
+
+            // Spoke lines: grow from dot toward center (0.93-0.95)
+            const spoke = spokeRefs.current[c]
+            if (spoke) {
+              if (v >= 0.93) {
+                spoke.style.opacity = "1"
+                const spokeT = easeInOut(
+                  Math.min(1, Math.max(0, (v - 0.93) / 0.02)),
+                )
+                const outerX = circleCX + Math.cos(finalAngle) * circleRadius
+                const outerY = circleCY + Math.sin(finalAngle) * circleRadius
+                const innerX = outerX + spokeT * (circleCX - outerX)
+                const innerY = outerY + spokeT * (circleCY - outerY)
+                spoke.setAttribute("x1", String(outerX))
+                spoke.setAttribute("y1", String(outerY))
+                spoke.setAttribute("x2", String(innerX))
+                spoke.setAttribute("y2", String(innerY))
+              } else {
+                spoke.style.opacity = "0"
+              }
+            }
 
             for (let b = 0; b < bars.length; b++) {
               const el = extraRectRefs.current[ri++]
@@ -721,8 +746,9 @@ export default function PolygonMorphOverlay({
 
               // Phase 2: HOLD dots (0.85-0.87)
               // Phase 3: arc to circle (0.87-0.93)
-              // Phase 4: HOLD on circle (0.93-0.95)
-              // Phase 5: move inward to radar positions (0.95-0.99)
+              // Phase 4: spokes grow (0.93-0.95)
+              // Phase 5: concentric rings fade in (0.95-0.97)
+              // Phase 6: move inward to radar positions (0.97-0.995)
               if (v >= 0.87) {
                 const arcT = easeInOut(
                   Math.min(1, Math.max(0, (v - 0.87) / 0.06)),
@@ -732,13 +758,10 @@ export default function PolygonMorphOverlay({
                 let newCX = circleCX + Math.cos(angle) * dist
                 let newCY = circleCY + Math.sin(angle) * dist
 
-                // After arc completes, move inward to pseudo-random radii
-                if (v >= 0.95) {
-                  const radarFractions = [0.45, 0.75, 0.30, 0.60]
+                if (v >= 0.97) {
                   const radarDist = circleRadius * (radarFractions[c] ?? 0.5)
-                  const finalAngle = startAngle + deltaAngle
                   const inT = easeInOut(
-                    Math.min(1, Math.max(0, (v - 0.95) / 0.04)),
+                    Math.min(1, Math.max(0, (v - 0.97) / 0.025)),
                   )
                   newCX = circleCX + Math.cos(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
                   newCY = circleCY + Math.sin(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
@@ -760,6 +783,19 @@ export default function PolygonMorphOverlay({
             }
           }
         }
+      }
+
+      // ── Concentric rings: fade in from center outward (0.95-0.97) ──
+      for (let i = 0; i < 4; i++) {
+        const ring = ringRefs.current[i]
+        if (!ring) continue
+        ring.setAttribute("cx", String(circleCX))
+        ring.setAttribute("cy", String(circleCY))
+        const outerRingR = circleRadius * 0.9
+        ring.setAttribute("r", String(outerRingR * ((i + 1) / 4)))
+        const stagger = i * 0.004
+        const fadeT = Math.min(1, Math.max(0, (v - (0.95 + stagger)) / 0.008))
+        ring.style.opacity = String(fadeT)
       }
     })
     return unsub
@@ -922,6 +958,27 @@ export default function PolygonMorphOverlay({
             </g>
           ))
         })()}
+        {/* Concentric radar rings */}
+        {[1, 2, 3, 4].map((i) => (
+          <circle
+            key={`ring-${i}`}
+            ref={(el) => { ringRefs.current[i - 1] = el }}
+            fill="none"
+            stroke="rgba(0,0,0,0.15)"
+            strokeWidth={0.75}
+            style={{ opacity: 0 }}
+          />
+        ))}
+        {/* Radar spoke lines (dot → center) */}
+        {[0, 1, 2, 3].map((i) => (
+          <line
+            key={`spoke-${i}`}
+            ref={(el) => { spokeRefs.current[i] = el }}
+            stroke="rgba(0,0,0,0.25)"
+            strokeWidth={1}
+            style={{ opacity: 0 }}
+          />
+        ))}
       </svg>
     </>
   )
