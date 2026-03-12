@@ -483,7 +483,7 @@ export default function PolygonMorphOverlay({
           maxExtraDotCY = Math.max(maxExtraDotCY, bars[0]?.cy || 0)
         }
       }
-      const radarLabelY = maxExtraDotCY + 100 + 50 + 24
+      const radarLabelY = maxExtraDotCY + 100 - 50 - 40
 
       return {
         shapes: shapeData,
@@ -720,15 +720,30 @@ export default function PolygonMorphOverlay({
               let rr = dotT * DOT_R
 
               // Phase 2: HOLD dots (0.85-0.87)
-              // Phase 3: arc to circle (0.87-0.96)
+              // Phase 3: arc to circle (0.87-0.93)
+              // Phase 4: HOLD on circle (0.93-0.95)
+              // Phase 5: move inward to radar positions (0.95-0.99)
               if (v >= 0.87) {
                 const arcT = easeInOut(
-                  Math.min(1, Math.max(0, (v - 0.87) / 0.09)),
+                  Math.min(1, Math.max(0, (v - 0.87) / 0.06)),
                 )
                 const angle = startAngle + arcT * deltaAngle
                 const dist = startDist + arcT * (circleRadius - startDist)
-                const newCX = circleCX + Math.cos(angle) * dist
-                const newCY = circleCY + Math.sin(angle) * dist
+                let newCX = circleCX + Math.cos(angle) * dist
+                let newCY = circleCY + Math.sin(angle) * dist
+
+                // After arc completes, move inward to pseudo-random radii
+                if (v >= 0.95) {
+                  const radarFractions = [0.45, 0.75, 0.30, 0.60]
+                  const radarDist = circleRadius * (radarFractions[c] ?? 0.5)
+                  const finalAngle = startAngle + deltaAngle
+                  const inT = easeInOut(
+                    Math.min(1, Math.max(0, (v - 0.95) / 0.04)),
+                  )
+                  newCX = circleCX + Math.cos(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
+                  newCY = circleCY + Math.sin(finalAngle) * (circleRadius + inT * (radarDist - circleRadius))
+                }
+
                 cx = newCX - DOT_R
                 cy = newCY - DOT_R
                 w = DOT_SIZE
