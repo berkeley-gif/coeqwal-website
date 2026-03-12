@@ -23,7 +23,7 @@ import {
   useScrollValue,
 } from "@repo/scrollytelling"
 import type { MotionValue } from "@repo/motion"
-import { WATER_THEMES, THEME_LABEL_CONFIG } from "../content/themes"
+import { WATER_THEMES } from "../content/themes"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -58,7 +58,14 @@ interface ThemeCircle {
   description: string
 }
 
-/** Placeholder circle positions — tune visually against the aerial image */
+/** Throws at module load if a theme ID is missing from WATER_THEMES. */
+function requireTheme(id: string) {
+  const t = WATER_THEMES.find((t) => t.id === id)
+  if (!t) throw new Error(`WATER_THEMES: no entry for id "${id}"`)
+  return t
+}
+
+/** Circle positions — tune visually against the aerial image. Content comes from WATER_THEMES. */
 const CIRCLE_CONFIG: ThemeCircle[] = [
   {
     id: "cws",
@@ -66,11 +73,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 560,
     r: 130,
     photo: WATER_THEME_PHOTOS.cws!,
-    label:
-      THEME_LABEL_CONFIG.cws?.label ??
-      WATER_THEMES.find((t) => t.id === "cws")?.shortLabel ??
-      "Community water systems",
-    description: WATER_THEMES.find((t) => t.id === "cws")?.description ?? "",
+    label: requireTheme("cws").shortLabel,
+    description: requireTheme("cws").description,
   },
   {
     id: "ag_gw",
@@ -78,11 +82,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 873,
     r: 130,
     photo: WATER_THEME_PHOTOS.ag_gw!,
-    label:
-      THEME_LABEL_CONFIG.ag_gw?.label ??
-      WATER_THEMES.find((t) => t.id === "ag_gw")?.shortLabel ??
-      "Farms & groundwater",
-    description: WATER_THEMES.find((t) => t.id === "ag_gw")?.description ?? "",
+    label: requireTheme("ag_gw").shortLabel,
+    description: requireTheme("ag_gw").description,
   },
   {
     id: "eco",
@@ -90,11 +91,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 871,
     r: 130,
     photo: WATER_THEME_PHOTOS.eco!,
-    label:
-      THEME_LABEL_CONFIG.eco?.label ??
-      WATER_THEMES.find((t) => t.id === "eco")?.shortLabel ??
-      "Rivers & ecosystems",
-    description: WATER_THEMES.find((t) => t.id === "eco")?.description ?? "",
+    label: requireTheme("eco").shortLabel,
+    description: requireTheme("eco").description,
   },
   {
     id: "delta",
@@ -102,11 +100,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 558,
     r: 130,
     photo: WATER_THEME_PHOTOS.delta!,
-    label:
-      THEME_LABEL_CONFIG.delta?.label ??
-      WATER_THEMES.find((t) => t.id === "delta")?.shortLabel ??
-      "The Delta",
-    description: WATER_THEMES.find((t) => t.id === "delta")?.description ?? "",
+    label: requireTheme("delta").shortLabel,
+    description: requireTheme("delta").description,
   },
   {
     id: "governance",
@@ -114,12 +109,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 871,
     r: 130,
     photo: WATER_THEME_PHOTOS.governance ?? "",
-    label:
-      WATER_THEMES.find((t) => t.id === "governance")?.shortLabel ??
-      "Water operations and impacts",
-    description:
-      WATER_THEMES.find((t) => t.id === "governance")?.description ??
-      "How water management decisions affect trade-offs, equity and resilience",
+    label: requireTheme("governance").shortLabel,
+    description: requireTheme("governance").description,
   },
   {
     id: "climate",
@@ -127,12 +118,8 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     cy: 558,
     r: 130,
     photo: WATER_THEME_PHOTOS.climate ?? "",
-    label:
-      WATER_THEMES.find((t) => t.id === "climate")?.shortLabel ??
-      "Drought and climate risk",
-    description:
-      WATER_THEMES.find((t) => t.id === "climate")?.description ??
-      "How the water system performs under drought stress, climate variability, and extreme conditions",
+    label: requireTheme("climate").shortLabel,
+    description: requireTheme("climate").description,
   },
 ]
 

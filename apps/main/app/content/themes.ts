@@ -159,7 +159,7 @@ export const WATER_THEMES: Theme[] = [
   {
     id: "delta",
     label: "The Delta as\na living place",
-    shortLabel: "The Delta",
+    shortLabel: "The Delta as a living place",
     description:
       "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive.",
     heroImage: "/images/themes/delta_hero.jpg",
@@ -317,7 +317,7 @@ export const WATER_THEMES: Theme[] = [
   {
     id: "climate",
     label: "Drought, climate risk,\nand resilience",
-    shortLabel: "Climate resilience",
+    shortLabel: "Drought and climate risk",
     description:
       "How the water system performs under increasing climate variability, drought risk, and extreme conditions.",
     heroImage: "",
