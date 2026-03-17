@@ -20,3 +20,6 @@
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# archived / unused components
+/archive

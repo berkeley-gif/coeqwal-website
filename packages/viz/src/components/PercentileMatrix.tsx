@@ -1921,6 +1921,10 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = ({
     breakdownComponents,
     loadingScenarios,
     minYMaxTaf,
+    tooltipUnit,
+    yAxisMax,
+    yAxisReferenceValue,
+    yAxisSuffix,
   ])
 
   return (

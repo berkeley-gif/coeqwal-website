@@ -36,9 +36,9 @@ export interface ScenarioMetadata {
 
 /** Enriched scenario combining API data with local metadata */
 export interface Scenario {
-  // Identity
+  // Identity (both sourced from API short_code)
   scenarioId: string // e.g., "s0020"
-  shortCode: string // e.g., "s0020_DCRadjBL_2020LU_wTUCP"
+  shortCode: string // e.g., "s0020"
   isActive: boolean
 
   // User-friendly content (from local metadata)
