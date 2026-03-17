@@ -1,16 +1,19 @@
 "use client"
 
 /**
- * DeltaSection — Delta salinity, X2, and outflow section for the Data Explorer
+ * DeltaSection — Delta inflows, exports, outflow, salinity, and X2 for the Data Explorer
  *
  * Charts:
  *   1. April X2 position (km) — text stat (water month 7)
  *   2. September X2 position (km) — text stat (water month 12)
  *   3. Salinity at compliance points (EM, JP, RS, CO) — monthly percentile bands
  *   4. Salinity at pumping plants (Banks, Tracy/Jones) — monthly percentile bands
- *   5. Delta outflow (NDO) — monthly percentile bands (TAF)
+ *   5. Delta inflows (Sacramento at Hood, SJR at Vernalis) — monthly TAF bands
+ *   6. Delta exports (SWP at Banks, CVP at Tracy) — monthly TAF bands
+ *   7. Delta outflow (NDO) — monthly percentile bands (TAF)
  *
- * Data comes from the delta_monthly table via /api/statistics/scenarios/{id}/delta/monthly.
+ * Delta monthly data: /api/statistics/scenarios/{id}/delta/monthly
+ * Channel flow data:  /api/statistics/scenarios/{id}/channels/monthly
  */
 
 import React, { useMemo } from "react"
@@ -20,8 +23,8 @@ import type { ReservoirData, MonthlyPercentiles } from "@repo/viz"
 import { GridScenarioHeader, GridRow } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
 import { PercentileMatrixSkeleton } from "./PercentileMatrixSkeleton"
-import { useDeltaMonthly } from "@repo/data/coeqwal/hooks"
-import type { DeltaMonthlyStats } from "@repo/data/coeqwal"
+import { useDeltaMonthly, useChannelsMonthly } from "@repo/data/coeqwal/hooks"
+import type { DeltaMonthlyStats, ChannelMonthlyStats } from "@repo/data/coeqwal"
 
 // ============================================================================
 // Constants
@@ -58,6 +61,16 @@ const COMPLIANCE_VARS = ["em_ec", "jp_ec", "rs_ec", "co_ec"]
 const PUMPS_VARS = ["banks_ec", "tracy_ec"]
 const OUTFLOW_VARS = ["ndo"]
 
+const DELTA_INFLOW_CHANNELS = [
+  { id: "C_SAC041", label: "Sacramento River at Hood" },
+  { id: "C_SJR070", label: "San Joaquin River at Vernalis" },
+] as const
+
+const DELTA_EXPORT_CHANNELS = [
+  { id: "C_CAA003", label: "SWP exports (Banks)" },
+  { id: "C_DMC000", label: "CVP exports (Tracy)" },
+] as const
+
 /** Salinity band colors — teal/green, distinct from delivery blue and shortage orange */
 const SALINITY_BAND_COLORS = {
   range: "#e0f2f1",
@@ -72,6 +85,22 @@ const OUTFLOW_BAND_COLORS = {
   outer: "#90caf9",
   inner: "#42a5f5",
   median: "#1565c0",
+}
+
+/** Inflow band colors — indigo */
+const INFLOW_BAND_COLORS = {
+  range: "#e8eaf6",
+  outer: "#9fa8da",
+  inner: "#5c6bc0",
+  median: "#283593",
+}
+
+/** Export band colors — amber/orange */
+const EXPORT_BAND_COLORS = {
+  range: "#fff8e1",
+  outer: "#ffe082",
+  inner: "#ffb300",
+  median: "#e65100",
 }
 
 // ============================================================================
@@ -108,8 +137,90 @@ function buildReservoirData(variableCodes: string[]): ReservoirData[] {
 }
 
 // ============================================================================
+// Channel flow helpers
+// ============================================================================
+
+function channelRowsToPercentiles(
+  rows: ChannelMonthlyStats[],
+): MonthlyPercentiles {
+  const monthly: MonthlyPercentiles = {}
+  for (const row of rows) {
+    monthly[String(row.water_month)] = {
+      q0: row.flow_q0_taf ?? 0,
+      q10: row.flow_q10_taf ?? 0,
+      q30: row.flow_q30_taf ?? 0,
+      q50: row.flow_q50_taf ?? 0,
+      q70: row.flow_q70_taf ?? 0,
+      q90: row.flow_q90_taf ?? 0,
+      q100: row.flow_q100_taf ?? 0,
+      mean: row.flow_avg_taf ?? 0,
+    }
+  }
+  return monthly
+}
+
+function buildChannelEntities(
+  channels: ReadonlyArray<{ id: string; label: string }>,
+): ReservoirData[] {
+  return channels.map((ch) => ({
+    reservoirId: ch.id,
+    reservoirName: ch.label,
+    capacityTaf: 0,
+    deadPoolTaf: 0,
+    labelSubtitle: "TAF",
+  }))
+}
+
+// ============================================================================
 // Multi-scenario data hooks
 // ============================================================================
+
+function useMultiScenarioChannels(scenarios: string[]) {
+  const results = scenarios.map((scenarioId) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useChannelsMonthly(scenarioId)
+  })
+
+  const isLoading = results.some((r) => r.isLoading)
+  const loadingScenarios = scenarios.filter(
+    (_, i) => results[i]?.isLoading ?? false,
+  )
+
+  const allData: Record<string, ChannelMonthlyStats[]> = {}
+  results.forEach((result, index) => {
+    const scenarioId = scenarios[index]
+    if (!scenarioId || !result.rows.length) return
+    allData[scenarioId] = result.rows
+  })
+
+  return { allData, isLoading, loadingScenarios }
+}
+
+function buildChannelMatrix(
+  allData: Record<string, ChannelMonthlyStats[]>,
+  channelIds: readonly string[],
+): MatrixDataType {
+  const matrix: MatrixDataType = {}
+  for (const id of channelIds) {
+    matrix[id] = {}
+  }
+
+  for (const [scenarioId, rows] of Object.entries(allData)) {
+    const byChannel = new Map<string, ChannelMonthlyStats[]>()
+    for (const row of rows) {
+      if (!channelIds.includes(row.network_arc_id)) continue
+      if (!byChannel.has(row.network_arc_id))
+        byChannel.set(row.network_arc_id, [])
+      byChannel.get(row.network_arc_id)!.push(row)
+    }
+    for (const [channelId, channelRows] of byChannel.entries()) {
+      if (!matrix[channelId]) matrix[channelId] = {}
+      matrix[channelId][scenarioId] = channelRowsToPercentiles(channelRows)
+    }
+  }
+
+  return matrix
+}
 
 function useMultiScenarioDelta(scenarios: string[]) {
   const results = scenarios.map((scenarioId) => {
@@ -325,8 +436,14 @@ export default function DeltaSection({
 
   const { allData, isLoading, loadingScenarios } =
     useMultiScenarioDelta(scenarios)
+  const {
+    allData: channelData,
+    isLoading: channelsLoading,
+    loadingScenarios: channelLoadingScenarios,
+  } = useMultiScenarioChannels(scenarios)
 
   const hasData = !isLoading && Object.keys(allData).length > 0
+  const hasChannelData = !channelsLoading && Object.keys(channelData).length > 0
 
   // Extract X2 single-month stats (avg + cv) per scenario
   const aprilX2Stats = useMemo(() => {
@@ -369,12 +486,31 @@ export default function DeltaSection({
     [allData],
   )
 
+  const inflowIds = DELTA_INFLOW_CHANNELS.map((c) => c.id)
+  const exportIds = DELTA_EXPORT_CHANNELS.map((c) => c.id)
+  const inflowMatrix = useMemo(
+    () => buildChannelMatrix(channelData, inflowIds),
+    [channelData, inflowIds],
+  )
+  const exportMatrix = useMemo(
+    () => buildChannelMatrix(channelData, exportIds),
+    [channelData, exportIds],
+  )
+
   const complianceEntities = useMemo(
     () => buildReservoirData(COMPLIANCE_VARS),
     [],
   )
   const pumpsEntities = useMemo(() => buildReservoirData(PUMPS_VARS), [])
   const outflowEntities = useMemo(() => buildReservoirData(OUTFLOW_VARS), [])
+  const inflowEntities = useMemo(
+    () => buildChannelEntities(DELTA_INFLOW_CHANNELS),
+    [],
+  )
+  const exportEntities = useMemo(
+    () => buildChannelEntities(DELTA_EXPORT_CHANNELS),
+    [],
+  )
 
   const primaryScenario = scenarios[0] ?? null
 
@@ -382,7 +518,7 @@ export default function DeltaSection({
     return (
       <Box sx={{ p: theme.space.section.sm }}>
         <Typography color="text.secondary">
-          Select a scenario to view Delta salinity data.
+          Select a scenario to view Delta data.
         </Typography>
       </Box>
     )
@@ -546,6 +682,97 @@ export default function DeltaSection({
               loadingScenarios={loadingScenarios}
               minYMaxTaf={0}
               tooltipUnit=" µmhos/cm"
+            />
+          )}
+        </Box>
+      </Box>
+
+      {/* ── Delta Inflows (Sacramento at Hood, SJR at Vernalis) ── */}
+      <Box sx={chartCardSx}>
+        <SectionHeader
+          title="Delta inflows"
+          description={
+            <>
+              Monthly flow volumes (TAF) at the two primary Delta entry points:
+              the Sacramento River at Hood and the San Joaquin River at
+              Vernalis. These represent the majority of freshwater flowing into
+              the Delta.
+              <Box component="span" sx={{ display: "block", mt: 1.5 }}>
+                <BandsLegend colors={INFLOW_BAND_COLORS} />
+              </Box>
+            </>
+          }
+        />
+        <Box sx={{ mt: theme.space.component.lg }}>
+          {channelsLoading && !hasChannelData ? (
+            <PercentileMatrixSkeleton
+              scenarios={scenarios}
+              rowCount={2}
+              labelColumnWidth={200}
+            />
+          ) : !hasChannelData ? (
+            <Typography color="text.secondary" variant="body2">
+              No Delta inflow data available.
+            </Typography>
+          ) : (
+            <PercentileMatrix
+              reservoirs={inflowEntities}
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+              data={inflowMatrix}
+              responsive
+              labelColumnWidth={200}
+              showScenarioHeaders={false}
+              displayMode="volume"
+              volumeScaleMode="relative"
+              loadingScenarios={channelLoadingScenarios}
+              minYMaxTaf={0}
+            />
+          )}
+        </Box>
+      </Box>
+
+      {/* ── Delta Exports (SWP Banks, CVP Tracy) ────────────── */}
+      <Box sx={chartCardSx}>
+        <SectionHeader
+          title="Delta exports"
+          description={
+            <>
+              Monthly export volumes (TAF) at the two major Delta pumping
+              facilities: SWP exports at Banks Pumping Plant (California
+              Aqueduct) and CVP exports at Tracy (Delta-Mendota Canal). These
+              volumes are constrained by regulatory limits and upstream
+              conditions.
+              <Box component="span" sx={{ display: "block", mt: 1.5 }}>
+                <BandsLegend colors={EXPORT_BAND_COLORS} />
+              </Box>
+            </>
+          }
+        />
+        <Box sx={{ mt: theme.space.component.lg }}>
+          {channelsLoading && !hasChannelData ? (
+            <PercentileMatrixSkeleton
+              scenarios={scenarios}
+              rowCount={2}
+              labelColumnWidth={200}
+            />
+          ) : !hasChannelData ? (
+            <Typography color="text.secondary" variant="body2">
+              No Delta export data available.
+            </Typography>
+          ) : (
+            <PercentileMatrix
+              reservoirs={exportEntities}
+              scenarios={scenarios}
+              scenarioNames={scenarioNames}
+              data={exportMatrix}
+              responsive
+              labelColumnWidth={200}
+              showScenarioHeaders={false}
+              displayMode="volume"
+              volumeScaleMode="relative"
+              loadingScenarios={channelLoadingScenarios}
+              minYMaxTaf={0}
             />
           )}
         </Box>

@@ -546,7 +546,7 @@ export default function PolygonMorphOverlay({
         barLabel.style.opacity = String(t)
       }
       if (radarLabel) {
-        const t = Math.min(1, Math.max(0, (v - 0.90) / 0.03))
+        const t = Math.min(1, Math.max(0, (v - 0.9) / 0.03))
         radarLabel.style.opacity = String(t)
       }
 
