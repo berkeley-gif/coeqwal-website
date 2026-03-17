@@ -96,7 +96,7 @@ export const outcomeCategories = [
   },
   {
     id: "delta-salinity",
-    name: "Delta salinity",
+    name: "Delta",
     icon: <ScienceIcon fontSize="small" />,
   },
   {
@@ -527,7 +527,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
     showOnMap: true,
   },
 
-  // DELTA SALINITY
+  // DELTA
   {
     id: "salinity-in-delta-tier",
     name: "Freshwater for in-Delta uses tier",
