@@ -28,10 +28,10 @@ export function useScenarioList() {
   const scenarios = useMemo<Scenario[]>(() => {
     if (!rawScenarios) return []
     const enriched = rawScenarios.map((apiScenario) => {
-      const metadata = getScenarioMetadata(apiScenario.scenario_id)
+      const metadata = getScenarioMetadata(apiScenario.short_code)
       return {
         // Identity
-        scenarioId: apiScenario.scenario_id,
+        scenarioId: apiScenario.short_code,
         shortCode: apiScenario.short_code,
         isActive: apiScenario.is_active,
         // User-friendly content (from local metadata)
@@ -42,7 +42,7 @@ export function useScenarioList() {
         iconPath: metadata.iconPath,
         // Technical content (from API, for reference)
         apiName: apiScenario.name,
-        apiShortTitle: apiScenario.short_title,
+        apiShortTitle: apiScenario.name,
         apiDescription: apiScenario.description,
       }
     })

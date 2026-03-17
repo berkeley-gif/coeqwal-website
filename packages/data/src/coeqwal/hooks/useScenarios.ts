@@ -32,7 +32,7 @@ import type { ScenarioListItem } from "../types"
  *   return (
  *     <ul>
  *       {scenarios?.filter(s => s.is_active).map(scenario => (
- *         <li key={scenario.scenario_id}>{scenario.name}</li>
+ *         <li key={scenario.short_code}>{scenario.name}</li>
  *       ))}
  *     </ul>
  *   )
@@ -53,7 +53,7 @@ export function useScenarios() {
 
   // Derive active scenario IDs - commonly needed for fetching tier data
   const activeScenarioIds = useMemo(
-    () => scenarios?.filter((s) => s.is_active).map((s) => s.scenario_id) ?? [],
+    () => scenarios?.filter((s) => s.is_active).map((s) => s.short_code) ?? [],
     [scenarios],
   )
 

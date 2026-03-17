@@ -91,13 +91,11 @@ export interface ScenarioTiersResponse {
  */
 export interface ScenarioListItem {
   /** Unique scenario identifier (e.g., "s0020") */
-  scenario_id: string
-  /** Short code for display */
   short_code: string
+  /** Technical run name (e.g., "s0020_DCRadjBL_2020LU_wTUCP") */
+  run_name: string
   /** Full scenario name */
   name: string
-  /** Brief title for UI */
-  short_title: string
   /** Detailed description */
   description: string
   /** Whether this scenario is active/visible */
