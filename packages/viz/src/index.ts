@@ -72,6 +72,19 @@ export type {
 export { default as PackedDots } from "./components/PackedDots"
 export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
+export { default as BaselineScatter } from "./components/BaselineScatter"
+export type { BaselineScatterProps } from "./components/BaselineScatter"
+export { default as DotStripPlot } from "./components/DotStripPlot"
+export type { DotStripPlotProps } from "./components/DotStripPlot"
+export { default as DivergingLollipop } from "./components/DivergingLollipop"
+export type { DivergingLollipopProps } from "./components/DivergingLollipop"
+export { default as DumbbellChart } from "./components/DumbbellChart"
+export type { DumbbellChartProps } from "./components/DumbbellChart"
+export { default as PairedParallelPlot } from "./components/PairedParallelPlot"
+export type { PairedParallelPlotProps } from "./components/PairedParallelPlot"
+export { default as ArrowFieldPlot } from "./components/ArrowFieldPlot"
+export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
+
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
 

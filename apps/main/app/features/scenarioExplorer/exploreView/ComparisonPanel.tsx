@@ -23,6 +23,12 @@ import {
 } from "@repo/ui/mui"
 import {
   VerticalParallelLinePlotPeak,
+  BaselineScatter,
+  DotStripPlot,
+  DivergingLollipop,
+  DumbbellChart,
+  PairedParallelPlot,
+  ArrowFieldPlot,
   type VerticalParallelLineData,
   type AxisLayout,
 } from "@repo/viz"
@@ -35,12 +41,33 @@ import { formatOutcomeLabel } from "../../scenarios/components/shared"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
+type ChartMode =
+  | "parallel"
+  | "scatter"
+  | "dotstrip"
+  | "lollipop"
+  | "dumbbell"
+  | "paired"
+  | "arrows"
+
+const CHART_MODES: { key: ChartMode; label: string }[] = [
+  { key: "parallel", label: "Parallel" },
+  { key: "scatter", label: "Scatter" },
+  { key: "dotstrip", label: "Dot Strip" },
+  { key: "lollipop", label: "Lollipop" },
+  { key: "dumbbell", label: "Dumbbell" },
+  { key: "paired", label: "Paired" },
+  { key: "arrows", label: "Arrows" },
+]
+
 export default function ComparisonPanel() {
   const theme = useTheme()
   // At md (900px+) there is more horizontal than vertical space, so use the
   // standard horizontal parallel coordinates layout. Below md (tablet/phone)
   // use the vertical layout which works better in portrait orientation.
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"))
+
+  const [chartMode, setChartMode] = useState<ChartMode>("parallel")
 
   const {
     highlightedScenario,
@@ -197,77 +224,110 @@ export default function ComparisonPanel() {
 
   const checkboxSx = { padding: 0, margin: 0, transform: "scale(0.85)" }
 
-  const toggleControls = (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={relativeToBaseline}
-            onChange={(e) => setRelativeToBaseline(e.target.checked)}
-            sx={checkboxSx}
-          />
-        }
-        label={
-          <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-            relative to current operations
-          </Typography>
-        }
-        sx={{ mr: 1.5 }}
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={highlightBaseline}
-            onChange={(e) => setHighlightBaseline(e.target.checked)}
-            sx={checkboxSx}
-          />
-        }
-        label={
-          <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-            highlight current operations
-          </Typography>
-        }
-        sx={{ mr: 1.5 }}
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={defineOutcome}
-            onChange={(e) => setDefineOutcome(e.target.checked)}
-            sx={checkboxSx}
-          />
-        }
-        label={
-          <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-            define an outcome
-            <br />
-            (coming soon)
-          </Typography>
-        }
-        sx={{ mr: 1.5 }}
-      />
-      {/* Temporarily disabled overlay tiers
-      <FormControlLabel
-        control={
-          <Checkbox
-            size="small"
-            checked={overlayTiers}
-            onChange={(e) => setOverlayTiers(e.target.checked)}
-            sx={checkboxSx}
-          />
-        }
-        label={
-          <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-            overlay tiers
-          </Typography>
-        }
-      />
-      */}
+  const chartModeSelector = (
+    <Box sx={{ display: "flex", gap: 0.5 }}>
+      {CHART_MODES.map(({ key, label }) => (
+        <Typography
+          key={key}
+          component="span"
+          variant="compactCaption"
+          onClick={() => setChartMode(key)}
+          sx={{
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+            cursor: "pointer",
+            fontWeight: chartMode === key ? 600 : 400,
+            bgcolor:
+              chartMode === key ? theme.palette.grey[200] : "transparent",
+            color:
+              chartMode === key
+                ? theme.palette.grey[900]
+                : theme.palette.grey[500],
+            border: "1px solid",
+            borderColor:
+              chartMode === key ? theme.palette.grey[300] : "transparent",
+            "&:hover": {
+              bgcolor:
+                chartMode === key
+                  ? theme.palette.grey[200]
+                  : theme.palette.grey[100],
+            },
+            transition: "all 0.15s ease",
+            userSelect: "none",
+          }}
+        >
+          {label}
+        </Typography>
+      ))}
     </Box>
   )
+
+  const toggleControls = (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+      {chartModeSelector}
+      {chartMode === "parallel" && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={relativeToBaseline}
+                onChange={(e) => setRelativeToBaseline(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                relative to current operations
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={highlightBaseline}
+                onChange={(e) => setHighlightBaseline(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                highlight current operations
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={defineOutcome}
+                onChange={(e) => setDefineOutcome(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                define an outcome
+                <br />
+                (coming soon)
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
+    </Box>
+  )
+
+  const sharedChartColors = {
+    default: theme.palette.grey[600],
+    highlighted: theme.palette.blue.darkest,
+    background: theme.palette.grey[50],
+  }
 
   const chartElement = (
     <Box
@@ -280,8 +340,8 @@ export default function ComparisonPanel() {
         WebkitUserSelect: "none",
       }}
     >
-      {/* ── HTML axis labels above chart (desktop) ──────────────────── */}
-      {isDesktop && axisLayout.length > 0 && (
+      {/* ── HTML axis labels above chart (desktop, parallel only) ──── */}
+      {chartMode === "parallel" && isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
             position: "absolute",
@@ -336,8 +396,8 @@ export default function ComparisonPanel() {
         </Box>
       )}
 
-      {/* ── HTML axis labels left of chart (mobile) ─────────────────── */}
-      {!isDesktop && axisLayout.length > 0 && (
+      {/* ── HTML axis labels left of chart (mobile, parallel only) ── */}
+      {chartMode === "parallel" && !isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
             position: "absolute",
@@ -392,33 +452,123 @@ export default function ComparisonPanel() {
         </Box>
       )}
 
-      {/* ── The SVG chart ───────────────────────────────────────────── */}
-      <VerticalParallelLinePlotPeak
-        data={chartData}
-        axes={axes}
-        orientation={isDesktop ? "horizontal" : "vertical"}
-        responsive={true}
-        hideAxisLabels={true}
-        onAxesLayout={setAxisLayout}
-        margin={
-          isDesktop ? { top: 80, right: 20, bottom: 20, left: 20 } : undefined
-        }
-        showBaseline={highlightBaseline}
-        baselineData={baselineDataForChart}
-        overlayTiers={overlayTiers}
-        defineOutcome={defineOutcome}
-        colors={{
-          default: theme.palette.grey[600],
-          highlighted: theme.palette.blue.darkest,
-          background: theme.palette.grey[50],
-        }}
-        lineColors={lineColors}
-        onLineHover={setHoveredScenario}
-        onLineClick={(scenario) => handleScenarioClick(scenario.id)}
-        chosenIds={chosenIds}
-        highlightedIds={highlightedIds}
-        baselineId="s0020"
-      />
+      {/* ── Charts ─────────────────────────────────────────────────── */}
+      {chartMode === "parallel" && (
+        <VerticalParallelLinePlotPeak
+          data={chartData}
+          axes={axes}
+          orientation={isDesktop ? "horizontal" : "vertical"}
+          responsive={true}
+          hideAxisLabels={true}
+          onAxesLayout={setAxisLayout}
+          margin={
+            isDesktop
+              ? { top: 80, right: 20, bottom: 20, left: 20 }
+              : undefined
+          }
+          showBaseline={highlightBaseline}
+          baselineData={baselineDataForChart}
+          overlayTiers={overlayTiers}
+          defineOutcome={defineOutcome}
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+          baselineId="s0020"
+        />
+      )}
+
+      {chartMode === "scatter" && (
+        <BaselineScatter
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
+
+      {chartMode === "dotstrip" && (
+        <DotStripPlot
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
+
+      {chartMode === "lollipop" && (
+        <DivergingLollipop
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
+
+      {chartMode === "dumbbell" && (
+        <DumbbellChart
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
+
+      {chartMode === "paired" && (
+        <PairedParallelPlot
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
+
+      {chartMode === "arrows" && (
+        <ArrowFieldPlot
+          data={highlightedData}
+          axes={axes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={lineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+        />
+      )}
     </Box>
   )
 
