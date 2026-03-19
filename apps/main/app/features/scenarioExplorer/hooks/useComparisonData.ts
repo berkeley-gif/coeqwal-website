@@ -10,6 +10,7 @@ import {
   type TierHeatmapCell,
   type BumpRanking,
   type SankeyScenarioFlow,
+  type TierSankeyGroup,
   getThemeLineColor,
 } from "@repo/viz"
 import { getScenarioTheme } from "../../../content/scenarios"
@@ -17,6 +18,7 @@ import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 
 const PRIMARY_BASELINE_ID = "s0020"
+export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
 /**
  * Hook to transform tier data for VerticalParallelLinePlot
@@ -245,10 +247,44 @@ export function useComparisonData() {
     }
   }, [allScenariosData, scenarios])
 
-  // Sankey builder using ALL scenarios (unfiltered) for discovery/selection mode
+  // Multi-value outcome codes (for Sankey selector and "All Outcomes" aggregation)
+  const multiValueOutcomeCodes = useMemo(() => {
+    if (!allScenariosData) return [] as string[]
+    const firstScenario = Object.values(allScenariosData)[0]
+    if (!firstScenario) return [] as string[]
+    return OUTCOME_CODE_ORDER.filter(
+      (code) => firstScenario.tiers[code]?.type === "multi_value",
+    )
+  }, [allScenariosData])
+
+  // Sankey builder using ALL scenarios (unfiltered) for discovery/selection mode.
+  // When SANKEY_ALL_OUTCOMES, uses compound keys like "CWS_DEL:tier1" for per-outcome layout.
   const getAllSankeyData = useMemo(() => {
     return (outcomeCode: string): SankeyScenarioFlow[] => {
       if (!allScenariosData) return []
+
+      if (outcomeCode === SANKEY_ALL_OUTCOMES) {
+        return allScenarios
+          .map(({ id, name, color }) => {
+            const scenarioTiers = allScenariosData[id]?.tiers
+            if (!scenarioTiers) return null
+            const flows: { tier: string; value: number }[] = []
+            multiValueOutcomeCodes.forEach((code) => {
+              const ti = scenarioTiers[code]
+              if (ti?.type === "multi_value" && ti.data) {
+                ti.data.forEach((d) => {
+                  if (d.value > 0) {
+                    flows.push({ tier: `${code}:${d.tier}`, value: d.value })
+                  }
+                })
+              }
+            })
+            if (flows.length === 0) return null
+            return { scenarioId: id, scenarioName: name, color, flows }
+          })
+          .filter(Boolean) as SankeyScenarioFlow[]
+      }
+
       return allScenarios
         .map(({ id, name, color }) => {
           const tierInfo = allScenariosData[id]?.tiers[outcomeCode]
@@ -266,18 +302,38 @@ export function useComparisonData() {
         })
         .filter(Boolean) as SankeyScenarioFlow[]
     }
-  }, [allScenariosData, allScenarios])
+  }, [allScenariosData, allScenarios, multiValueOutcomeCodes])
 
-  // Weighted-average Sankey: one flow per scenario to its rounded tier
+  // Weighted-average Sankey: one flow per outcome to its rounded tier.
+  // When SANKEY_ALL_OUTCOMES, uses compound keys for per-outcome layout.
   const getWeightedSankeyData = useMemo(() => {
     return (outcomeCode: string): SankeyScenarioFlow[] => {
       if (!allScoreData) return []
+
+      if (outcomeCode === SANKEY_ALL_OUTCOMES) {
+        return allScenarios
+          .map(({ id, name, color }) => {
+            const scores = allScoreData[id]
+            if (!scores) return null
+            const flows: { tier: string; value: number }[] = []
+            OUTCOME_CODE_ORDER.forEach((code) => {
+              const s = scores[code]
+              if (!s) return
+              const t = Math.min(4, Math.max(1, Math.round(s.weighted_score)))
+              flows.push({ tier: `${code}:tier${t}`, value: 1 })
+            })
+            if (flows.length === 0) return null
+            return { scenarioId: id, scenarioName: name, color, flows }
+          })
+          .filter(Boolean) as SankeyScenarioFlow[]
+      }
+
       return allScenarios
         .map(({ id, name, color }) => {
           const score = allScoreData[id]?.[outcomeCode]
           if (!score) return null
           const tier = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
-          const tierKey = `tier${tier}` as "tier1" | "tier2" | "tier3" | "tier4"
+          const tierKey = `tier${tier}`
           return {
             scenarioId: id,
             scenarioName: name,
@@ -289,15 +345,11 @@ export function useComparisonData() {
     }
   }, [allScoreData, allScenarios])
 
-  // Multi-value outcome codes (for Sankey selector)
-  const multiValueOutcomeCodes = useMemo(() => {
-    if (!allScenariosData) return []
-    const firstScenario = Object.values(allScenariosData)[0]
-    if (!firstScenario) return []
-    return OUTCOME_CODE_ORDER.filter(
-      (code) => firstScenario.tiers[code]?.type === "multi_value",
-    )
-  }, [allScenariosData])
+  // Groups for the grouped Sankey layout (one group per outcome)
+  const sankeyGroups = useMemo<TierSankeyGroup[]>(
+    () => OUTCOME_CODE_ORDER.map((code) => ({ key: code, label: getOutcomeName(code) })),
+    [],
+  )
 
   return {
     data: parallelPlotData,
@@ -314,6 +366,7 @@ export function useComparisonData() {
     getSankeyData,
     getAllSankeyData,
     getWeightedSankeyData,
+    sankeyGroups,
     multiValueOutcomeCodes,
   }
 }

@@ -28,7 +28,7 @@ interface PolygonMorphOverlayProps {
   scrollProgress: MotionValue<number>
 }
 
-/* ── geometry helpers ────────────────────────────────── */
+/* geometry helpers */
 
 function resampleClosedPath(
   points: [number, number][],
@@ -110,7 +110,7 @@ function lerp(
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
 }
 
-/* ── grid & bar layout (stacked regions) ─────────────── */
+/* grid & bar layout (stacked regions) */
 
 interface GridLayout {
   gridX: number
@@ -168,7 +168,7 @@ function computeGridLayout(
     (tierRows[4] || 0)
   const totalGridHeight = totalRows * cell + 3 * ROW_GAP
 
-  // Upper region: grid (Distribution view) — top-aligned, starts just below label
+  // Top grid (distribution view)
   const gridRegionTop = panelHeight * 0.15 + LABEL_GAP
   const gridStartY = gridRegionTop
 
@@ -193,15 +193,15 @@ function computeGridLayout(
   const glyphBarH = (GLYPH_BAR_WIDTH * 0.8) / 4
   const glyphBarSpacing = (GLYPH_BAR_WIDTH * 0.2) / 5
 
-  // Bar chart label sits below the grid with a clean gap
+  // Bar chart label
   const gridBottom = gridStartY + totalGridHeight
   const barLabelTop = gridBottom + LABEL_GAP
   const barContentTop = barLabelTop + LABEL_GAP
 
-  // Lower region: bars — top-aligned below label
+  // Lower bars
   const barStartY = barContentTop
 
-  // Glyph final Y positions — top-aligned in the bar region
+  // Glyph final Y positions
   const glyphTopY = barContentTop
 
   // Mirror the grid layout into the bar region so clones can travel down as squares
@@ -274,7 +274,7 @@ function computeGridLayout(
   }
 }
 
-/* ── component ───────────────────────────────────────── */
+/* component */
 
 const MAX_POLYGONS = 120
 
@@ -528,7 +528,7 @@ export default function PolygonMorphOverlay({
     const circleRadius = 50
 
     const unsub = scrollProgress.on("change", (v) => {
-      // ── Labels ──
+      // Labels
       const mapLabel = labelRefs.current[0]
       const distLabel = labelRefs.current[1]
       const barLabel = labelRefs.current[2]
@@ -550,13 +550,13 @@ export default function PolygonMorphOverlay({
         radarLabel.style.opacity = String(t)
       }
 
-      // ── SVG visibility ──
+      // SVG visibility
       if (svgRef.current) {
         svgRef.current.style.opacity = v >= CROSSFADE_THRESHOLD ? "1" : "0"
         if (v < CROSSFADE_THRESHOLD) return
       }
 
-      // ── Primary paths: polygon → square → grid, then freeze ──
+      // Primary paths: polygon → square → grid, then freeze
       for (let i = 0; i < N; i++) {
         const el = primaryRefs.current[i]
         if (!el) continue
@@ -587,7 +587,7 @@ export default function PolygonMorphOverlay({
         }
       }
 
-      // ── Clone paths: orthogonal sequence — trimmed holds ──
+      // Clone paths: orthogonal sequence
       for (let i = 0; i < N; i++) {
         const el = cloneRefs.current[i]
         if (!el) continue
@@ -674,7 +674,7 @@ export default function PolygonMorphOverlay({
         el.setAttribute("d", pointsToD(pts))
       }
 
-      // ── Row 0 duplicate glyphs: fade in left to right ──
+      // Row 0 duplicate glyphs: fade in left to right
       for (let d = 0; d < dupeRefs.current.length; d++) {
         const g = dupeRefs.current[d]
         if (!g) continue
@@ -687,7 +687,7 @@ export default function PolygonMorphOverlay({
         g.style.opacity = String(t)
       }
 
-      // ── Extra rows: slide down (0.79-0.81) ──
+      // Extra rows: slide down (0.79-0.81)
       for (let r = 0; r < extraRowRefs.current.length; r++) {
         const g = extraRowRefs.current[r]
         if (!g) continue
@@ -698,7 +698,7 @@ export default function PolygonMorphOverlay({
         g.style.transform = `translateY(${yOffset}px)`
       }
 
-      // ── Dot morph + arc to circle + spokes + radar (extraRectRefs) ──
+      // Dot morph + arc to circle + spokes + radar (extraRectRefs)
       {
         const outerRingR = 0.9
         const radarFractions = [
@@ -805,7 +805,7 @@ export default function PolygonMorphOverlay({
         }
       }
 
-      // ── Concentric rings: fade in from center outward (0.95-0.97) ──
+      // Concentric rings: fade in from center outward (0.95-0.97)
       for (let i = 0; i < 4; i++) {
         const ring = ringRefs.current[i]
         if (!ring) continue

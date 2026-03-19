@@ -31,7 +31,7 @@ import {
   type AxisLayout,
 } from "@repo/viz"
 import { InfoIconButton, InfoTooltip } from "@repo/ui"
-import { useComparisonData } from "../hooks/useComparisonData"
+import { useComparisonData, SANKEY_ALL_OUTCOMES } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -154,6 +154,7 @@ export default function ComparisonPanel() {
     bumpRankings,
     getAllSankeyData,
     getWeightedSankeyData,
+    sankeyGroups,
     multiValueOutcomeCodes,
   } = useComparisonData()
 
@@ -216,11 +217,12 @@ export default function ComparisonPanel() {
     [scenarios],
   )
 
-  // Sankey: auto-select first multi-value outcome when available
+  // Sankey: default to "All Outcomes"; individual outcomes also valid
   const effectiveSankeyOutcome = useMemo(() => {
+    if (sankeyOutcome === SANKEY_ALL_OUTCOMES) return SANKEY_ALL_OUTCOMES
     if (sankeyOutcome && multiValueOutcomeCodes.includes(sankeyOutcome as never))
       return sankeyOutcome
-    return multiValueOutcomeCodes[0] || ""
+    return SANKEY_ALL_OUTCOMES
   }, [sankeyOutcome, multiValueOutcomeCodes])
 
   const sankeyData = useMemo(
@@ -393,28 +395,31 @@ export default function ComparisonPanel() {
               "&:focus": { borderColor: theme.palette.grey[500] },
             }}
           >
+            <option value={SANKEY_ALL_OUTCOMES}>All Outcomes</option>
             {multiValueOutcomeCodes.map((code) => (
               <option key={code} value={code}>
                 {getOutcomeName(code)}
               </option>
             ))}
           </Box>
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={sankeyShowDistribution}
-                onChange={(e) => setSankeyShowDistribution(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show locational distribution
-              </Typography>
-            }
-            sx={{ ml: 1 }}
-          />
+          {effectiveSankeyOutcome !== SANKEY_ALL_OUTCOMES && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sankeyShowDistribution}
+                  onChange={(e) => setSankeyShowDistribution(e.target.checked)}
+                  sx={checkboxSx}
+                />
+              }
+              label={
+                <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                  show locational distribution
+                </Typography>
+              }
+              sx={{ ml: 1 }}
+            />
+          )}
         </Box>
       )}
     </Box>
@@ -638,8 +643,9 @@ export default function ComparisonPanel() {
       {chartMode === "sankey" && (
         <TierSankey
           data={sankeyData}
-          outcomeName={getOutcomeName(effectiveSankeyOutcome)}
+          outcomeName={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? "All Outcomes" : getOutcomeName(effectiveSankeyOutcome)}
           tierColors={theme.palette.tiers}
+          groups={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? sankeyGroups : undefined}
           responsive
           onScenarioHover={(id) => {
             if (id) {
