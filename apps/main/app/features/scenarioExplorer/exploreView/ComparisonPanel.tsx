@@ -24,11 +24,9 @@ import {
 import {
   VerticalParallelLinePlotPeak,
   BaselineScatter,
-  DotStripPlot,
-  DivergingLollipop,
-  DumbbellChart,
-  PairedParallelPlot,
-  ArrowFieldPlot,
+  TierHeatmap,
+  BumpChart,
+  TierSankey,
   type VerticalParallelLineData,
   type AxisLayout,
 } from "@repo/viz"
@@ -38,26 +36,18 @@ import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
+import { getOutcomeName } from "../../../content/outcomes"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode =
-  | "parallel"
-  | "scatter"
-  | "dotstrip"
-  | "lollipop"
-  | "dumbbell"
-  | "paired"
-  | "arrows"
+type ChartMode = "parallel" | "scatter" | "bump" | "heatmap" | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "parallel", label: "Parallel" },
   { key: "scatter", label: "Scatter" },
-  { key: "dotstrip", label: "Dot Strip" },
-  { key: "lollipop", label: "Lollipop" },
-  { key: "dumbbell", label: "Dumbbell" },
-  { key: "paired", label: "Paired" },
-  { key: "arrows", label: "Arrows" },
+  { key: "bump", label: "Bump" },
+  { key: "heatmap", label: "Heatmap" },
+  { key: "sankey", label: "Sankey" },
 ]
 
 export default function ComparisonPanel() {
@@ -84,6 +74,7 @@ export default function ComparisonPanel() {
     defineOutcome,
     setDefineOutcome,
     selectedScenarios,
+    toggleScenario,
   } = useScenarioExplorerStore()
 
   const chosenIds = useMemo(
@@ -159,7 +150,16 @@ export default function ComparisonPanel() {
     baselineScenario,
     isLoading,
     hasData,
+    heatmapCells,
+    bumpRankings,
+    getAllSankeyData,
+    getWeightedSankeyData,
+    multiValueOutcomeCodes,
   } = useComparisonData()
+
+  // Sankey outcome selector state
+  const [sankeyOutcome, setSankeyOutcome] = useState<string>("")
+  const [sankeyShowDistribution, setSankeyShowDistribution] = useState(false)
 
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -180,6 +180,55 @@ export default function ComparisonPanel() {
         highlighted: scenario.id === highlightedScenario,
       })),
     [comparisonData, highlightedScenario],
+  )
+
+  // Scatter: exclude baseline (it lies on the diagonal and adds no information)
+  const scatterData = useMemo(
+    () => highlightedData.filter((s) => s.id !== "s0020"),
+    [highlightedData],
+  )
+  const scatterLineColors = useMemo(() => {
+    const colorMap = new Map(scenarios.map((s) => [s.id, s.color]))
+    return scatterData.map((d) => colorMap.get(d.id) || "#666666")
+  }, [scatterData, scenarios])
+
+  // Heatmap: scenario names and IDs in display order
+  const heatmapScenarioIds = useMemo(
+    () => scenarios.map((s) => s.id),
+    [scenarios],
+  )
+  const heatmapScenarioNames = useMemo(
+    () => scenarios.map((s) => s.name),
+    [scenarios],
+  )
+  const heatmapOutcomeNames = useMemo(
+    () => outcomeCodes.map(getOutcomeName),
+    [outcomeCodes],
+  )
+  const heatmapLineColors = useMemo(
+    () => scenarios.map((s) => s.color),
+    [scenarios],
+  )
+
+  // Bump: scenario list for BumpChart
+  const bumpScenarios = useMemo(
+    () => scenarios.map((s) => ({ id: s.id, name: s.name, color: s.color })),
+    [scenarios],
+  )
+
+  // Sankey: auto-select first multi-value outcome when available
+  const effectiveSankeyOutcome = useMemo(() => {
+    if (sankeyOutcome && multiValueOutcomeCodes.includes(sankeyOutcome as never))
+      return sankeyOutcome
+    return multiValueOutcomeCodes[0] || ""
+  }, [sankeyOutcome, multiValueOutcomeCodes])
+
+  const sankeyData = useMemo(
+    () =>
+      sankeyShowDistribution
+        ? getAllSankeyData(effectiveSankeyOutcome)
+        : getWeightedSankeyData(effectiveSankeyOutcome),
+    [getAllSankeyData, getWeightedSankeyData, effectiveSankeyOutcome, sankeyShowDistribution],
   )
 
   // Transform data to be relative to baseline when toggle is on.
@@ -317,6 +366,54 @@ export default function ComparisonPanel() {
               </Typography>
             }
             sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
+      {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          <Typography variant="compactCaption" sx={{ color: theme.palette.grey[600] }}>
+            Outcome:
+          </Typography>
+          <Box
+            component="select"
+            value={effectiveSankeyOutcome}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setSankeyOutcome(e.target.value)
+            }
+            sx={{
+              fontSize: "0.75rem",
+              border: `1px solid ${theme.palette.grey[300]}`,
+              borderRadius: 1,
+              px: 1,
+              py: 0.25,
+              background: theme.palette.background.paper,
+              color: theme.palette.grey[800],
+              outline: "none",
+              cursor: "pointer",
+              "&:focus": { borderColor: theme.palette.grey[500] },
+            }}
+          >
+            {multiValueOutcomeCodes.map((code) => (
+              <option key={code} value={code}>
+                {getOutcomeName(code)}
+              </option>
+            ))}
+          </Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={sankeyShowDistribution}
+                onChange={(e) => setSankeyShowDistribution(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show locational distribution
+              </Typography>
+            }
+            sx={{ ml: 1 }}
           />
         </Box>
       )}
@@ -482,12 +579,12 @@ export default function ComparisonPanel() {
 
       {chartMode === "scatter" && (
         <BaselineScatter
-          data={highlightedData}
+          data={scatterData}
           axes={axes}
           baselineData={baselineScenario ?? undefined}
           responsive
           colors={sharedChartColors}
-          lineColors={lineColors}
+          lineColors={scatterLineColors}
           onLineHover={setHoveredScenario}
           onLineClick={(scenario) => handleScenarioClick(scenario.id)}
           chosenIds={chosenIds}
@@ -495,80 +592,76 @@ export default function ComparisonPanel() {
         />
       )}
 
-      {chartMode === "dotstrip" && (
-        <DotStripPlot
-          data={highlightedData}
-          axes={axes}
-          baselineData={baselineScenario ?? undefined}
+      {chartMode === "bump" && (
+        <BumpChart
+          rankings={bumpRankings}
+          scenarios={bumpScenarios}
           responsive
-          colors={sharedChartColors}
-          lineColors={lineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          onScenarioHover={(id) => {
+            if (id) {
+              const found = comparisonData.find((d) => d.id === id)
+              setHoveredScenario(found ?? null)
+            } else {
+              setHoveredScenario(null)
+            }
+          }}
+          onScenarioClick={handleScenarioClick}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
         />
       )}
 
-      {chartMode === "lollipop" && (
-        <DivergingLollipop
-          data={highlightedData}
-          axes={axes}
-          baselineData={baselineScenario ?? undefined}
+      {chartMode === "heatmap" && (
+        <TierHeatmap
+          cells={heatmapCells}
+          scenarioIds={heatmapScenarioIds}
+          scenarioNames={heatmapScenarioNames}
+          outcomeNames={heatmapOutcomeNames}
           responsive
-          colors={sharedChartColors}
-          lineColors={lineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          lineColors={heatmapLineColors}
+          onCellHover={(cell) => {
+            if (cell) {
+              const found = comparisonData.find(
+                (d) => d.id === cell.scenarioId,
+              )
+              setHoveredScenario(found ?? null)
+            } else {
+              setHoveredScenario(null)
+            }
+          }}
+          onCellClick={(cell) => handleScenarioClick(cell.scenarioId)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
         />
       )}
 
-      {chartMode === "dumbbell" && (
-        <DumbbellChart
-          data={highlightedData}
-          axes={axes}
-          baselineData={baselineScenario ?? undefined}
+      {chartMode === "sankey" && (
+        <TierSankey
+          data={sankeyData}
+          outcomeName={getOutcomeName(effectiveSankeyOutcome)}
+          tierColors={theme.palette.tiers}
           responsive
-          colors={sharedChartColors}
-          lineColors={lineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          onScenarioHover={(id) => {
+            if (id) {
+              const found = sankeyData.find((d) => d.scenarioId === id)
+              if (found) {
+                setHoveredScenario({
+                  id: found.scenarioId,
+                  name: found.scenarioName,
+                  values: {},
+                  highlighted: false,
+                })
+              }
+            } else {
+              setHoveredScenario(null)
+            }
+          }}
+          onScenarioClick={toggleScenario}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
         />
       )}
 
-      {chartMode === "paired" && (
-        <PairedParallelPlot
-          data={highlightedData}
-          axes={axes}
-          baselineData={baselineScenario ?? undefined}
-          responsive
-          colors={sharedChartColors}
-          lineColors={lineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
-          chosenIds={chosenIds}
-          highlightedIds={highlightedIds}
-        />
-      )}
-
-      {chartMode === "arrows" && (
-        <ArrowFieldPlot
-          data={highlightedData}
-          axes={axes}
-          baselineData={baselineScenario ?? undefined}
-          responsive
-          colors={sharedChartColors}
-          lineColors={lineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
-          chosenIds={chosenIds}
-          highlightedIds={highlightedIds}
-        />
-      )}
     </Box>
   )
 

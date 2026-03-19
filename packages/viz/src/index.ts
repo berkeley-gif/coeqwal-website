@@ -85,6 +85,23 @@ export type { PairedParallelPlotProps } from "./components/PairedParallelPlot"
 export { default as ArrowFieldPlot } from "./components/ArrowFieldPlot"
 export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
+export { default as TierHeatmap } from "./components/TierHeatmap"
+export type {
+  TierHeatmapProps,
+  TierHeatmapCell,
+} from "./components/TierHeatmap"
+export { default as BumpChart } from "./components/BumpChart"
+export type {
+  BumpChartProps,
+  BumpRanking,
+  BumpScenario,
+} from "./components/BumpChart"
+export { default as TierSankey } from "./components/TierSankey"
+export type {
+  TierSankeyProps,
+  SankeyScenarioFlow,
+} from "./components/TierSankey"
+
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
 
