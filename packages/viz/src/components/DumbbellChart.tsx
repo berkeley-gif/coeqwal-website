@@ -130,7 +130,7 @@ const DumbbellChart: React.FC<DumbbellChartProps> = ({
           .attr("text-anchor", "middle")
           .attr("font-size", 10)
           .attr("fill", "#999")
-          .text(TIER_LABELS[i])
+          .text(TIER_LABELS[i] ?? "")
       })
 
       // Y-axis outcome labels
