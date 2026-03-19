@@ -53,8 +53,8 @@ function computeFillSegments(
     const s2 = scenarioYValues[i + 1]
     if (b1 == null || b2 == null || s1 == null || s2 == null) continue
 
-    const x1 = axisXPositions[i]
-    const x2 = axisXPositions[i + 1]
+    const x1 = axisXPositions[i] ?? 0
+    const x2 = axisXPositions[i + 1] ?? 0
     const yB1 = yScale(b1)
     const yB2 = yScale(b2)
     const yS1 = yScale(s1)
@@ -202,7 +202,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
           .attr("dominant-baseline", "middle")
           .attr("font-size", 9)
           .attr("fill", "#bbb")
-          .text(TIER_LABELS[i])
+          .text(TIER_LABELS[i] ?? "")
       })
 
       // Vertical axis lines + top labels
@@ -240,14 +240,14 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
       const nonBaselineData = data.filter((s) => s.id !== baselineData.id)
 
       // Build baseline values array
-      const baselineValues = axes.map((a) => baselineData.values[a])
+      const baselineValues = axes.map((a) => baselineData.values[a] ?? null)
 
       // For each scenario: fill area, then lines
       nonBaselineData.forEach((scenario, si) => {
         const origIdx = data.indexOf(scenario)
         const color = lineColors[origIdx] || colors.default
         const opacity = getOpacity(scenario.id)
-        const scenarioValues = axes.map((a) => scenario.values[a])
+        const scenarioValues = axes.map((a) => scenario.values[a] ?? null)
 
         // Fill segments between baseline and scenario
         const fillSegments = computeFillSegments(
@@ -276,7 +276,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
         const scenarioLine = d3
           .line<number>()
           .defined((_, i) => scenarioValues[i] != null)
-          .x((_, i) => axisXPositions[i])
+          .x((_, i) => axisXPositions[i] ?? 0)
           .y((_, i) => yScale(scenarioValues[i]!))
 
         g.append("path")
@@ -310,7 +310,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
           const v = scenarioValues[i]
           if (v == null) return
           g.append("circle")
-            .attr("cx", axisXPositions[i])
+            .attr("cx", axisXPositions[i] ?? 0)
             .attr("cy", yScale(v))
             .attr("r", 3.5)
             .attr("fill", color)
@@ -324,7 +324,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
       const baselineLine = d3
         .line<number>()
         .defined((_, i) => baselineValues[i] != null)
-        .x((_, i) => axisXPositions[i])
+        .x((_, i) => axisXPositions[i] ?? 0)
         .y((_, i) => yScale(baselineValues[i]!))
 
       g.append("path")

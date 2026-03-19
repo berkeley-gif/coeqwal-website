@@ -37,6 +37,7 @@ import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
 import { getOutcomeName } from "../../../content/outcomes"
+import { getScenarioTheme } from "../../../content/scenarios"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
@@ -162,6 +163,12 @@ export default function ComparisonPanel() {
   const [sankeyOutcome, setSankeyOutcome] = useState<string>("")
   const [sankeyShowDistribution, setSankeyShowDistribution] = useState(false)
 
+  // Scatter feature toggles
+  const [scatterConnectLines, setScatterConnectLines] = useState(false)
+  const [scatterOutcomeLabels, setScatterOutcomeLabels] = useState(true)
+  const [scatterSpreadDots, setScatterSpreadDots] = useState(false)
+  const [scatterThemeGrouping, setScatterThemeGrouping] = useState(false)
+
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
@@ -192,6 +199,14 @@ export default function ComparisonPanel() {
     const colorMap = new Map(scenarios.map((s) => [s.id, s.color]))
     return scatterData.map((d) => colorMap.get(d.id) || "#666666")
   }, [scatterData, scenarios])
+
+  const scenarioThemeMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    scatterData.forEach((s) => {
+      map[s.id] = getScenarioTheme(s.id)
+    })
+    return map
+  }, [scatterData])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -367,6 +382,58 @@ export default function ComparisonPanel() {
                 (coming soon)
               </Typography>
             }
+            sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
+      {chartMode === "scatter" && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={scatterConnectLines}
+                onChange={(e) => setScatterConnectLines(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>connect lines</Typography>}
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={scatterOutcomeLabels}
+                onChange={(e) => setScatterOutcomeLabels(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>outcome labels</Typography>}
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={scatterSpreadDots}
+                onChange={(e) => setScatterSpreadDots(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>spread dots</Typography>}
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={scatterThemeGrouping}
+                onChange={(e) => setScatterThemeGrouping(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>theme grouping</Typography>}
             sx={{ mr: 1.5 }}
           />
         </Box>
@@ -594,6 +661,11 @@ export default function ComparisonPanel() {
           onLineClick={(scenario) => handleScenarioClick(scenario.id)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
+          showConnectLines={scatterConnectLines}
+          showOutcomeLabels={scatterOutcomeLabels}
+          showSpreadDots={scatterSpreadDots}
+          scenarioThemes={scenarioThemeMap}
+          showThemeGrouping={scatterThemeGrouping}
         />
       )}
 
