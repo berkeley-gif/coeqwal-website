@@ -646,6 +646,8 @@ export default function ComparisonPanel() {
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
           baselineId="s0020"
+          showTierLabels={true}
+          relativeMode={relativeToBaseline}
         />
       )}
 

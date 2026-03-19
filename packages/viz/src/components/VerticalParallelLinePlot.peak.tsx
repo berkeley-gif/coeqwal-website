@@ -53,6 +53,10 @@ export interface VerticalParallelLinePlotProps {
   highlightedIds?: Set<string> | null
   /** Scenario ID to render with a gold halo (e.g. the baseline scenario). */
   baselineId?: string
+  /** Show tier tick labels on each axis. In relative mode, shows delta labels instead. */
+  showTierLabels?: boolean
+  /** When true, the data is relative-to-baseline (delta labels instead of tier labels). */
+  relativeMode?: boolean
 }
 
 const ARROW_PATH =
@@ -89,6 +93,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   chosenIds,
   highlightedIds,
   baselineId,
+  showTierLabels = false,
+  relativeMode = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -510,12 +516,36 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         axisGroup.selectAll(".tick-line").remove()
         axisGroup.selectAll(".tick-label").remove()
 
-        const ticks = [-1, -0.5, 0, 0.5, 1]
-        ticks.forEach((tick) => {
+        const tierTicks: { value: number; label: string }[] =
+          showTierLabels && !relativeMode
+            ? [
+                { value: -1, label: "Tier 4" },
+                { value: -1 / 3, label: "Tier 3" },
+                { value: 1 / 3, label: "Tier 2" },
+                { value: 1, label: "Tier 1" },
+              ]
+            : showTierLabels && relativeMode
+              ? [
+                  { value: -1, label: "−3 tiers" },
+                  { value: -2 / 3, label: "−2" },
+                  { value: -1 / 3, label: "−1" },
+                  { value: 0, label: "baseline" },
+                  { value: 1 / 3, label: "+1" },
+                  { value: 2 / 3, label: "+2" },
+                  { value: 1, label: "+3 tiers" },
+                ]
+              : [
+                  { value: -1, label: "-1" },
+                  { value: -0.5, label: "-0.5" },
+                  { value: 0, label: "0" },
+                  { value: 0.5, label: "0.5" },
+                  { value: 1, label: "1" },
+                ]
+
+        tierTicks.forEach(({ value: tick, label: tickLabel }) => {
           const pos = scales[axis]!(tick)
 
           if (isHoriz) {
-            // Horizontal tick marks on vertical axis; labels to the left of first axis only
             axisGroup
               .append("line")
               .attr("class", "tick-line")
@@ -526,7 +556,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("stroke", "#999")
               .attr("stroke-width", 1)
 
-            // Only show tick value labels on the leftmost axis to avoid clutter
             if (axisIndex === 0) {
               axisGroup
                 .append("text")
@@ -537,7 +566,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "9px")
                 .attr("fill", "#999")
-                .text(tick.toString())
+                .text(tickLabel)
             }
           } else {
             axisGroup
@@ -558,7 +587,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("text-anchor", "middle")
               .attr("font-size", "10px")
               .attr("fill", "#666")
-              .text(tick.toString())
+              .text(tickLabel)
           }
         })
 
@@ -1029,6 +1058,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       baselineId,
       overlayTiers,
       hideAxisLabels,
+      showTierLabels,
+      relativeMode,
       onAxesLayout,
       getLineStyle,
       applyStyles,
