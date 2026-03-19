@@ -266,6 +266,7 @@ export function useMultipleScenarioTiers() {
   return {
     allChartData, // Keyed by short code (e.g., allChartData[scenarioId]["CWS_DEL"])
     allScoreData, // Keyed by short code (e.g., allScoreData[scenarioId]["CWS_DEL"])
+    allScenariosData, // Raw API responses for Sankey / tier distribution access
     scenarioIds, // Export the dynamic list of scenario IDs
     outcomeNames,
     isLoading,

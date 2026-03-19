@@ -5,7 +5,13 @@ import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../scenarios/hooks"
-import { type VerticalParallelLineData, getThemeLineColor } from "@repo/viz"
+import {
+  type VerticalParallelLineData,
+  type TierHeatmapCell,
+  type BumpRanking,
+  type SankeyScenarioFlow,
+  getThemeLineColor,
+} from "@repo/viz"
 import { getScenarioTheme } from "../../../content/scenarios"
 import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
@@ -19,6 +25,7 @@ export function useComparisonData() {
   // scenarioIds comes from the API - no hardcoding needed
   const {
     allScoreData,
+    allScenariosData,
     scenarioIds: allScenarioIds,
     isLoading: tiersLoading,
     error: tiersError,
@@ -72,6 +79,21 @@ export function useComparisonData() {
       }
     })
   }, [scenarioIds, getDisplayName])
+
+  // All scenarios (unfiltered) for Sankey "all scenarios" mode
+  const allScenarios = useMemo(() => {
+    const themeCounters: Partial<Record<ThemeKey, number>> = {}
+    return allScenarioIds.map((id) => {
+      const theme = getScenarioTheme(id) as ThemeKey
+      const idx = themeCounters[theme] ?? 0
+      themeCounters[theme] = idx + 1
+      return {
+        id,
+        name: getDisplayName(id),
+        color: getThemeLineColor(theme, idx, id),
+      }
+    })
+  }, [allScenarioIds, getDisplayName])
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
     if (!allScoreData || Object.keys(allScoreData).length === 0) {
@@ -143,6 +165,140 @@ export function useComparisonData() {
     }
   }, [parallelPlotData, allScoreData, getDisplayName])
 
+  // Tier heatmap data: scenario × outcome matrix
+  const heatmapCells = useMemo<TierHeatmapCell[]>(() => {
+    if (!allScoreData || !allScenariosData) return []
+    const cells: TierHeatmapCell[] = []
+    scenarios.forEach(({ id: scenarioId, name }) => {
+      const scores = allScoreData[scenarioId]
+      const raw = allScenariosData[scenarioId]
+      if (!scores) return
+      OUTCOME_CODE_ORDER.forEach((code) => {
+        const score = scores[code]
+        if (!score) return
+        let tierLevel: number
+        if (raw?.tiers[code]?.type === "single_value" && raw.tiers[code].level) {
+          tierLevel = raw.tiers[code].level!
+        } else {
+          tierLevel = Math.min(
+            4,
+            Math.max(1, Math.round(score.weighted_score)),
+          )
+        }
+        cells.push({
+          scenarioId,
+          scenarioName: name,
+          outcomeCode: code,
+          outcomeName: getOutcomeName(code),
+          tierLevel,
+          normalizedScore: score.normalized_score,
+        })
+      })
+    })
+    return cells
+  }, [allScoreData, allScenariosData, scenarios])
+
+  // Bump chart data: scenario rankings across outcomes
+  const bumpRankings = useMemo<BumpRanking[]>(() => {
+    if (!allScoreData) return []
+    return OUTCOME_CODE_ORDER.map((code) => {
+      const scored = scenarios
+        .map(({ id }) => ({
+          scenarioId: id,
+          score: allScoreData[id]?.[code]?.normalized_score ?? -1,
+        }))
+        .sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score
+          return a.scenarioId.localeCompare(b.scenarioId)
+        })
+      return {
+        outcomeCode: code,
+        outcomeName: getOutcomeName(code),
+        rankings: scored.map(({ scenarioId }, i) => ({
+          scenarioId,
+          rank: i + 1,
+        })),
+      }
+    })
+  }, [allScoreData, scenarios])
+
+  // Sankey data builder: returns flows for a given multi-value outcome code
+  const getSankeyData = useMemo(() => {
+    return (outcomeCode: string): SankeyScenarioFlow[] => {
+      if (!allScenariosData) return []
+      return scenarios
+        .map(({ id, name, color }) => {
+          const tierInfo = allScenariosData[id]?.tiers[outcomeCode]
+          if (!tierInfo || tierInfo.type !== "multi_value" || !tierInfo.data)
+            return null
+          return {
+            scenarioId: id,
+            scenarioName: name,
+            color,
+            flows: tierInfo.data.map((d) => ({
+              tier: d.tier,
+              value: d.value,
+            })),
+          }
+        })
+        .filter(Boolean) as SankeyScenarioFlow[]
+    }
+  }, [allScenariosData, scenarios])
+
+  // Sankey builder using ALL scenarios (unfiltered) for discovery/selection mode
+  const getAllSankeyData = useMemo(() => {
+    return (outcomeCode: string): SankeyScenarioFlow[] => {
+      if (!allScenariosData) return []
+      return allScenarios
+        .map(({ id, name, color }) => {
+          const tierInfo = allScenariosData[id]?.tiers[outcomeCode]
+          if (!tierInfo || tierInfo.type !== "multi_value" || !tierInfo.data)
+            return null
+          return {
+            scenarioId: id,
+            scenarioName: name,
+            color,
+            flows: tierInfo.data.map((d) => ({
+              tier: d.tier,
+              value: d.value,
+            })),
+          }
+        })
+        .filter(Boolean) as SankeyScenarioFlow[]
+    }
+  }, [allScenariosData, allScenarios])
+
+  // Weighted-average Sankey: one flow per scenario to its rounded tier
+  const getWeightedSankeyData = useMemo(() => {
+    return (outcomeCode: string): SankeyScenarioFlow[] => {
+      if (!allScoreData) return []
+      return allScenarios
+        .map(({ id, name, color }) => {
+          const score = allScoreData[id]?.[outcomeCode]
+          if (!score) return null
+          const tier = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
+          const tierKey = `tier${tier}` as "tier1" | "tier2" | "tier3" | "tier4"
+          return {
+            scenarioId: id,
+            scenarioName: name,
+            color,
+            flows: [{ tier: tierKey, value: 1 }],
+          }
+        })
+        .filter(Boolean) as SankeyScenarioFlow[]
+    }
+  }, [allScoreData, allScenarios])
+
+  // Multi-value outcome codes (for Sankey selector)
+  const multiValueOutcomeCodes = useMemo(() => {
+    if (!allScenariosData) return []
+    const firstScenario = Object.values(allScenariosData)[0]
+    if (!firstScenario) return []
+    return OUTCOME_CODE_ORDER.filter(
+      (code) => firstScenario.tiers[code]?.type === "multi_value",
+    )
+  }, [allScenariosData])
+
   return {
     data: parallelPlotData,
     axes,
@@ -153,5 +309,11 @@ export function useComparisonData() {
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,
+    heatmapCells,
+    bumpRankings,
+    getSankeyData,
+    getAllSankeyData,
+    getWeightedSankeyData,
+    multiValueOutcomeCodes,
   }
 }
