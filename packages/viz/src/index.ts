@@ -100,6 +100,7 @@ export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,
   SankeyScenarioFlow,
+  TierSankeyGroup,
 } from "./components/TierSankey"
 
 // Export hooks

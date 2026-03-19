@@ -8,13 +8,19 @@ export interface SankeyScenarioFlow {
   scenarioId: string
   scenarioName: string
   color: string
-  flows: { tier: "tier1" | "tier2" | "tier3" | "tier4"; value: number }[]
+  flows: { tier: string; value: number }[]
+}
+
+export interface SankeyGroup {
+  key: string
+  label: string
 }
 
 export interface TierSankeyProps {
   data: SankeyScenarioFlow[]
   outcomeName: string
   tierColors?: Record<string, string>
+  groups?: SankeyGroup[]
   responsive?: boolean
   width?: number
   height?: number
@@ -24,10 +30,10 @@ export interface TierSankeyProps {
   chosenIds?: Set<string>
 }
 
-const MARGIN = { top: 20, right: 120, bottom: 20, left: 140 }
 const NODE_WIDTH = 18
 const NODE_PAD = 4
 const TIER_PAD = 24
+const GROUP_PAD = 16
 const DEFAULT_TIER_COLORS: Record<string, string> = {
   tier1: "#1ca367",
   tier2: "#31b2c5",
@@ -35,6 +41,12 @@ const DEFAULT_TIER_COLORS: Record<string, string> = {
   tier4: "#ee5d32",
 }
 const TIER_LABELS: Record<string, string> = {
+  tier1: "T1",
+  tier2: "T2",
+  tier3: "T3",
+  tier4: "T4",
+}
+const TIER_LABELS_FULL: Record<string, string> = {
   tier1: "Tier 1",
   tier2: "Tier 2",
   tier3: "Tier 3",
@@ -47,14 +59,22 @@ interface TooltipState {
   y: number
   scenarioName: string
   tier: string
+  group?: string
   value: number
   total: number
+}
+
+interface NodePos {
+  y0: number
+  y1: number
+  height: number
 }
 
 const TierSankey: React.FC<TierSankeyProps> = ({
   data,
   outcomeName,
   tierColors: tierColorsProp,
+  groups,
   responsive = true,
   width = 700,
   height = 500,
@@ -95,6 +115,10 @@ const TierSankey: React.FC<TierSankeyProps> = ({
     }
   }, [dimensions, responsive, width, height])
 
+  const isGrouped = groups && groups.length > 0
+  const rightMargin = isGrouped ? 160 : 120
+  const MARGIN = { top: 20, right: rightMargin, bottom: 20, left: 140 }
+
   const updateChart = useCallback(
     (w: number, h: number) => {
       const svg = d3.select(svgRef.current)
@@ -109,56 +133,115 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         .append("g")
         .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`)
 
-      // Left nodes: scenarios. Right nodes: tiers.
-      // Compute totals for vertical sizing.
       const scenarioTotals = data.map((s) =>
         s.flows.reduce((sum, f) => sum + f.value, 0),
       )
       const grandTotal = scenarioTotals.reduce((a, b) => a + b, 0)
       if (grandTotal === 0) return
 
-      const tierTotals: Record<string, number> = {}
-      TIER_ORDER.forEach((t) => (tierTotals[t] = 0))
-      data.forEach((s) => {
-        s.flows.forEach((f) => {
-          tierTotals[f.tier] = (tierTotals[f.tier] || 0) + f.value
-        })
-      })
-
       const leftX = 0
       const rightX = innerW - NODE_WIDTH
 
-      // Vertical layout: proportional heights
+      // Left nodes: proportional height per scenario
       const availableH = innerH - NODE_PAD * (data.length - 1)
       const pxPerUnit = availableH / grandTotal
 
-      // Left node positions
-      interface NodePos {
-        y0: number
-        y1: number
-        height: number
-      }
       const leftNodes: NodePos[] = []
       let cumY = 0
-      data.forEach((s, i) => {
+      data.forEach((_s, i) => {
         const nodeH = (scenarioTotals[i] ?? 0) * pxPerUnit
         leftNodes.push({ y0: cumY, y1: cumY + nodeH, height: nodeH })
         cumY += nodeH + NODE_PAD
       })
 
-      // Right node positions (with larger gaps between tiers)
-      const activeTierCount = TIER_ORDER.filter((t) => (tierTotals[t] ?? 0) > 0).length
-      const tierAvailH = innerH - TIER_PAD * Math.max(activeTierCount - 1, 0)
-      const tierPxPerUnit = tierAvailH / grandTotal
-      const rightNodes: Record<string, NodePos> = {}
-      let cumTierY = 0
-      TIER_ORDER.forEach((t) => {
-        const total = tierTotals[t] ?? 0
-        if (total === 0) return
-        const nodeH = total * tierPxPerUnit
-        rightNodes[t] = { y0: cumTierY, y1: cumTierY + nodeH, height: nodeH }
-        cumTierY += nodeH + TIER_PAD
+      // Collect all right-side node keys and their totals
+      const allRightKeys: string[] = []
+      const rightTotals: Record<string, number> = {}
+
+      if (isGrouped) {
+        for (const group of groups) {
+          for (const tier of TIER_ORDER) {
+            const key = `${group.key}:${tier}`
+            allRightKeys.push(key)
+            rightTotals[key] = 0
+          }
+        }
+      } else {
+        for (const tier of TIER_ORDER) {
+          allRightKeys.push(tier)
+          rightTotals[tier] = 0
+        }
+      }
+
+      data.forEach((s) => {
+        s.flows.forEach((f) => {
+          rightTotals[f.tier] = (rightTotals[f.tier] ?? 0) + f.value
+        })
       })
+
+      // Filter to active keys (non-zero totals)
+      const activeKeys = allRightKeys.filter((k) => (rightTotals[k] ?? 0) > 0)
+
+      // Right node layout: grouped mode has group-level spacing
+      const rightNodes: Record<string, NodePos> = {}
+      let tierPxPerUnit: number
+
+      if (isGrouped) {
+        const activeGroups = groups.filter((grp) =>
+          TIER_ORDER.some((t) => (rightTotals[`${grp.key}:${t}`] ?? 0) > 0),
+        )
+        const activeWithinGroupCount = activeKeys.length
+        const groupGapCount = Math.max(activeGroups.length - 1, 0)
+        const withinGroupGapCount = Math.max(activeWithinGroupCount - activeGroups.length, 0)
+        const tierAvailH =
+          innerH -
+          GROUP_PAD * groupGapCount -
+          TIER_PAD * withinGroupGapCount
+        tierPxPerUnit = tierAvailH / grandTotal
+
+        let cumRightY = 0
+        for (let gi = 0; gi < groups.length; gi++) {
+          const grp = groups[gi]!
+          let groupHasActive = false
+          for (const tier of TIER_ORDER) {
+            const key = `${grp.key}:${tier}`
+            const total = rightTotals[key] ?? 0
+            if (total === 0) continue
+            if (groupHasActive) {
+              cumRightY += TIER_PAD
+            }
+            groupHasActive = true
+            const nodeH = total * tierPxPerUnit
+            rightNodes[key] = {
+              y0: cumRightY,
+              y1: cumRightY + nodeH,
+              height: nodeH,
+            }
+            cumRightY += nodeH
+          }
+          if (groupHasActive && gi < groups.length - 1) {
+            cumRightY += GROUP_PAD
+          }
+        }
+      } else {
+        const activeTierCount = activeKeys.length
+        const tierAvailH =
+          innerH - TIER_PAD * Math.max(activeTierCount - 1, 0)
+        tierPxPerUnit = tierAvailH / grandTotal
+
+        let cumRightY = 0
+        for (const key of TIER_ORDER) {
+          const total = rightTotals[key] ?? 0
+          if (total === 0) continue
+          const nodeH = total * tierPxPerUnit
+          rightNodes[key] = {
+            y0: cumRightY,
+            y1: cumRightY + nodeH,
+            height: nodeH,
+          }
+          cumRightY += nodeH + TIER_PAD
+        }
+      }
 
       const getOpacity = (scenarioId: string) => {
         if (highlightedIds && highlightedIds.size > 0) {
@@ -170,44 +253,28 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         return 0.4
       }
 
-      // Track how much of each right node has been filled
+      // Track fill positions for each right node and each left node
       const tierFillY: Record<string, number> = {}
-      TIER_ORDER.forEach((t) => {
-        if (rightNodes[t]) tierFillY[t] = rightNodes[t].y0
-      })
-
-      // Track how much of each left node has been used
+      for (const key of Object.keys(rightNodes)) {
+        tierFillY[key] = rightNodes[key]!.y0
+      }
       const scenarioFillY = leftNodes.map((n) => n.y0)
 
-      // Create defs for gradient fills
-      const defs = svg.append("defs")
-
-      // Draw flows with gradients from scenario color -> tier color
-      let flowIdx = 0
+      // Draw flows — iterate data flows in declared order
       data.forEach((scenario, si) => {
         const opacity = getOpacity(scenario.scenarioId)
 
-        TIER_ORDER.forEach((tier) => {
-          const flow = scenario.flows.find((f) => f.tier === tier)
-          if (!flow || flow.value === 0 || !rightNodes[tier]) return
+        const sortedFlows = [...scenario.flows].sort((a, b) => {
+          const ya = rightNodes[a.tier]?.y0 ?? 0
+          const yb = rightNodes[b.tier]?.y0 ?? 0
+          return ya - yb
+        })
 
-          const gradId = `sankey-grad-${flowIdx++}`
-          const grad = defs
-            .append("linearGradient")
-            .attr("id", gradId)
-            .attr("gradientUnits", "userSpaceOnUse")
-            .attr("x1", MARGIN.left + leftX + NODE_WIDTH)
-            .attr("x2", MARGIN.left + rightX)
-            .attr("y1", 0)
-            .attr("y2", 0)
-          grad
-            .append("stop")
-            .attr("offset", "0%")
-            .attr("stop-color", scenario.color)
-          grad
-            .append("stop")
-            .attr("offset", "100%")
-            .attr("stop-color", tierColors[tier] ?? "#999")
+        for (const flow of sortedFlows) {
+          if (flow.value === 0 || !rightNodes[flow.tier]) continue
+
+          const tierKey = flow.tier
+          const baseTier = tierKey.includes(":") ? tierKey.split(":")[1]! : tierKey
 
           const flowH = flow.value * pxPerUnit
           const srcY0 = scenarioFillY[si] ?? 0
@@ -215,9 +282,9 @@ const TierSankey: React.FC<TierSankeyProps> = ({
           scenarioFillY[si] = srcY1
 
           const flowHTier = flow.value * tierPxPerUnit
-          const tgtY0 = tierFillY[tier] ?? 0
+          const tgtY0 = tierFillY[tierKey] ?? 0
           const tgtY1 = tgtY0 + flowHTier
-          tierFillY[tier] = tgtY1
+          tierFillY[tierKey] = tgtY1
 
           const path = d3.path()
           const midX = (leftX + NODE_WIDTH + rightX) / 2
@@ -227,9 +294,19 @@ const TierSankey: React.FC<TierSankeyProps> = ({
           path.bezierCurveTo(midX, tgtY1, midX, srcY1, leftX + NODE_WIDTH, srcY1)
           path.closePath()
 
+          const groupLabel = isGrouped
+            ? groups.find((grp) => tierKey.startsWith(grp.key + ":"))?.label
+            : undefined
+          const tierLabel = isGrouped
+            ? TIER_LABELS[baseTier] ?? baseTier
+            : TIER_LABELS_FULL[baseTier] ?? baseTier
+          const tooltipTier = groupLabel
+            ? `${groupLabel} ${tierLabel}`
+            : tierLabel
+
           g.append("path")
             .attr("d", path.toString())
-            .attr("fill", `url(#${gradId})`)
+            .attr("fill", scenario.color)
             .attr("fill-opacity", opacity)
             .attr("stroke", "none")
             .attr("cursor", "pointer")
@@ -241,7 +318,7 @@ const TierSankey: React.FC<TierSankeyProps> = ({
                   x: event.clientX - rect.left + 14,
                   y: event.clientY - rect.top - 14,
                   scenarioName: scenario.scenarioName,
-                  tier: TIER_LABELS[tier] ?? tier,
+                  tier: tooltipTier,
                   value: flow.value,
                   total: scenarioTotals[si] ?? 0,
                 })
@@ -256,7 +333,7 @@ const TierSankey: React.FC<TierSankeyProps> = ({
             .on("click", () =>
               onScenarioClickRef.current?.(scenario.scenarioId),
             )
-        })
+        }
       })
 
       // Draw left nodes (scenario bars)
@@ -285,27 +362,70 @@ const TierSankey: React.FC<TierSankeyProps> = ({
           )
       })
 
-      // Draw right nodes (tier bars)
-      TIER_ORDER.forEach((tier) => {
-        const node = rightNodes[tier]
-        if (!node) return
+      // Draw right nodes
+      if (isGrouped) {
+        for (const grp of groups) {
+          let groupMinY = Infinity
+          let groupMaxY = -Infinity
+          for (const tier of TIER_ORDER) {
+            const key = `${grp.key}:${tier}`
+            const node = rightNodes[key]
+            if (!node) continue
+            groupMinY = Math.min(groupMinY, node.y0)
+            groupMaxY = Math.max(groupMaxY, node.y1)
+            const baseTier = tier
+            g.append("rect")
+              .attr("x", rightX)
+              .attr("y", node.y0)
+              .attr("width", NODE_WIDTH)
+              .attr("height", Math.max(node.height, 1))
+              .attr("fill", tierColors[baseTier] ?? "#999")
+              .attr("rx", 2)
 
-        g.append("rect")
-          .attr("x", rightX)
-          .attr("y", node.y0)
-          .attr("width", NODE_WIDTH)
-          .attr("height", Math.max(node.height, 1))
-          .attr("fill", tierColors[tier] ?? "#999")
-          .attr("rx", 2)
+            g.append("text")
+              .attr("x", rightX + NODE_WIDTH + 6)
+              .attr("y", node.y0 + node.height / 2)
+              .attr("dominant-baseline", "central")
+              .attr("font-size", 9)
+              .attr("fill", "#888")
+              .text(TIER_LABELS[baseTier] ?? baseTier)
+          }
+          if (groupMinY < Infinity) {
+            g.append("text")
+              .attr("x", rightX + NODE_WIDTH + 28)
+              .attr("y", (groupMinY + groupMaxY) / 2)
+              .attr("dominant-baseline", "central")
+              .attr("font-size", 10)
+              .attr("font-weight", 600)
+              .attr("fill", "#555")
+              .text(
+                grp.label.length > 14
+                  ? grp.label.slice(0, 12) + "..."
+                  : grp.label,
+              )
+          }
+        }
+      } else {
+        for (const tier of TIER_ORDER) {
+          const node = rightNodes[tier]
+          if (!node) continue
+          g.append("rect")
+            .attr("x", rightX)
+            .attr("y", node.y0)
+            .attr("width", NODE_WIDTH)
+            .attr("height", Math.max(node.height, 1))
+            .attr("fill", tierColors[tier] ?? "#999")
+            .attr("rx", 2)
 
-        g.append("text")
-          .attr("x", rightX + NODE_WIDTH + 8)
-          .attr("y", node.y0 + node.height / 2)
-          .attr("dominant-baseline", "central")
-          .attr("font-size", 11)
-          .attr("fill", "#555")
-          .text(TIER_LABELS[tier] ?? tier)
-      })
+          g.append("text")
+            .attr("x", rightX + NODE_WIDTH + 8)
+            .attr("y", node.y0 + node.height / 2)
+            .attr("dominant-baseline", "central")
+            .attr("font-size", 11)
+            .attr("fill", "#555")
+            .text(TIER_LABELS_FULL[tier] ?? tier)
+        }
+      }
 
       // Title
       g.append("text")
@@ -316,7 +436,7 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         .attr("fill", "#888")
         .text(outcomeName)
     },
-    [data, outcomeName, highlightedIds, chosenIds, tierColors],
+    [data, outcomeName, highlightedIds, chosenIds, tierColors, groups, MARGIN.left, MARGIN.right],
   )
 
   useEffect(() => {
@@ -363,7 +483,7 @@ const TierSankey: React.FC<TierSankeyProps> = ({
             {tooltip.scenarioName}
           </div>
           <div style={{ color: "#666" }}>
-            {tooltip.tier}: {tooltip.value} of {tooltip.total} units
+            {tooltip.tier}: {tooltip.value} of {tooltip.total}
           </div>
           <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
             {tooltip.total > 0
@@ -377,4 +497,5 @@ const TierSankey: React.FC<TierSankeyProps> = ({
   )
 }
 
+export type { SankeyGroup as TierSankeyGroup }
 export default TierSankey
