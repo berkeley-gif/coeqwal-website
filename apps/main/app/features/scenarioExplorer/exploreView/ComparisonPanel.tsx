@@ -76,6 +76,7 @@ export default function ComparisonPanel() {
     setDefineOutcome,
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
   } = useScenarioExplorerStore()
 
   const chosenIds = useMemo(
@@ -287,6 +288,18 @@ export default function ComparisonPanel() {
     )
     setPinnedScenarioId(scenarioId)
   }
+
+  const handleBrushFilter = useCallback(
+    (filteredOutIds: string[]) => {
+      if (filteredOutIds.length === 0) return
+      const filteredOutSet = new Set(filteredOutIds)
+      const remaining = selectedScenarios.filter((id) => !filteredOutSet.has(id))
+      if (remaining.length !== selectedScenarios.length) {
+        selectScenarios(remaining)
+      }
+    },
+    [selectedScenarios, selectScenarios],
+  )
 
   const checkboxSx = { padding: 0, margin: 0, transform: "scale(0.85)" }
 
@@ -648,6 +661,8 @@ export default function ComparisonPanel() {
           baselineId="s0020"
           showTierLabels={true}
           relativeMode={relativeToBaseline}
+          baselineAbsoluteValues={baselineScenario?.values}
+          onBrushFilter={handleBrushFilter}
         />
       )}
 
