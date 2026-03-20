@@ -13,7 +13,7 @@
  */
 "use client"
 
-import { useEffect, useRef, useMemo } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
 import { Box, useTheme, Typography } from "@repo/ui/mui"
 import { ScrollToButton } from "@repo/ui"
@@ -25,6 +25,7 @@ import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
 
+const HERO_COLLAPSE_THRESHOLD = 40
 interface ThemePanelProps {
   // All the theme content and information
   theme: Theme | null
@@ -81,6 +82,42 @@ function SectionContentRenderer({ content }: { content: SectionContent }) {
   }
 }
 
+
+/**
+ * Tracks whether a scroll container has scrolled past a threshold.
+ */
+function useScrollCollapse(
+  containerRef: React.RefObject<HTMLElement | null>,
+  threshold: number,
+  enabled: boolean,
+): boolean {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    // Don't attach the listener if the panel isn't open yet 
+    if (!enabled) {
+      // Reset so the hero starts expanded every time the panel opens
+      setIsCollapsed(false)
+      return
+    }
+
+    const el = containerRef.current
+    if (!el) return
+
+    const handleScroll = () => {
+      // Only update state when the boolean changes 
+      const shouldCollapse = el.scrollTop > threshold
+      setIsCollapsed((prev) => (prev === shouldCollapse ? prev : shouldCollapse))
+    }
+
+    // passive: true, for mobile scroll performance
+    el.addEventListener("scroll", handleScroll, { passive: true })
+    return () => el.removeEventListener("scroll", handleScroll)
+  }, [containerRef, threshold, enabled])
+
+  return isCollapsed
+}
+
 export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
@@ -98,6 +135,14 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const activeSection = useWhichScrollSection(
     activeSectionIds,
     scrollContainerRef,
+  )
+
+  // Hero collapse state - driven by the panel's own scroll container
+  // Resets automatically when isOpen flips to false (panel closes)
+  const isHeroCollapsed = useScrollCollapse(
+    scrollContainerRef,
+    HERO_COLLAPSE_THRESHOLD,
+    isOpen,
   )
 
   // Lock scroll when open
@@ -152,17 +197,22 @@ export function ThemePanel({ theme }: ThemePanelProps) {
             }
             <Box sx={{ position: "sticky", top: 0, zIndex: 1, flexShrink: 0 }}>
               {/* Hero */}
-              <Box
-                sx={{
+              <motion.div
+                animate={{
+                  paddingTop: isHeroCollapsed ? 10 : 25,
+                  paddingBottom: isHeroCollapsed ? 10 : 25,
+                }}
+                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                style={{
                   display: "flex",
                   position: "relative",
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: muiTheme.space.gap.md,
-                  height: "auto",
+                  gap: muiTheme.space.listGap.lg,
                   overflow: "hidden",
                   backgroundColor: muiTheme.palette.grey[200],
-                  padding: `25px ${muiTheme.space.panel.padding}`,
+                  paddingLeft: muiTheme.space.panel.padding,
+                  paddingRight: muiTheme.space.panel.padding,
                 }}
               >
                 {theme.heroImage && (
@@ -180,7 +230,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                       height: "100%",
                       objectFit: "cover",
                       display: "block",
-                      filter: "brightness(0.6)",
+                      filter: isHeroCollapsed ? "brightness(0.4)" : "brightness(0.6)",
                       zIndex: muiTheme.zIndex.heroBackground,
                     }}
                   />
@@ -203,32 +253,70 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                     delay={0}
                   />
                 </Box>
-
-                {/* Theme title + inquiry overlaid on hero */}
+                {/* Title + inquiry - title always visible, inquiry collapses */}
                 <Box
                   sx={{
                     color: muiTheme.palette.common.white,
                     zIndex: muiTheme.zIndex.pageContent,
+                    flex: 1,
+                    minWidth: 0,
                   }}
                 >
-                  <Typography
-                    variant="h3"
-                    sx={{
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {theme.label.replace(/\n/g, " ")}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      maxWidth: "100%",
-                    }}
-                  >
-                    {theme.inquiry}
-                  </Typography>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isHeroCollapsed ? (
+                      <motion.div
+                        key="title-collapsed"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Typography
+                          variant="h5"
+                          sx={{ textTransform: "capitalize" }}
+                        >
+                          {theme.label.replace(/\n/g, " ")}
+                        </Typography>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="title-expanded"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Typography
+                          variant="h3"
+                          sx={{ textTransform: "capitalize" }}
+                        >
+                          {theme.label.replace(/\n/g, " ")}
+                        </Typography>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AnimatePresence initial={false}>
+                    {!isHeroCollapsed && (
+                      <motion.div
+                        key="inquiry"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{ maxWidth: "100%", mt: 0.5 }}
+                        >
+                          {theme.inquiry}
+                        </Typography>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Box>
-              </Box>
+              </motion.div>
 
               {/* Horizontal Scroll Tab Index */}
               <Box
@@ -343,7 +431,8 @@ export function ThemePanel({ theme }: ThemePanelProps) {
             </Box>
           </motion.div>
         </>
-      )}
-    </AnimatePresence>
+      )
+      }
+    </AnimatePresence >
   )
 }
