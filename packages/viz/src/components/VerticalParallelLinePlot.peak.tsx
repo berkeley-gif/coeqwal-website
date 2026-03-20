@@ -57,10 +57,22 @@ export interface VerticalParallelLinePlotProps {
   showTierLabels?: boolean
   /** When true, the data is relative-to-baseline (delta labels instead of tier labels). */
   relativeMode?: boolean
+  /** Original baseline values in [-1,1] per axis, for per-axis tier positioning in relative mode. */
+  baselineAbsoluteValues?: Record<string, number | null>
+  /** Called when brush/filter drag ends with the IDs of scenarios that are now filtered out. */
+  onBrushFilter?: (filteredOutIds: string[]) => void
 }
 
 const ARROW_PATH =
   "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z"
+
+
+const TIER_ABSOLUTE_POSITIONS = [
+  { tier: 1, pos: 1 },
+  { tier: 2, pos: 1 / 3 },
+  { tier: 3, pos: -1 / 3 },
+  { tier: 4, pos: -1 },
+] as const
 
 const DEFAULT_MARGIN_VERTICAL = { top: 40, right: 60, bottom: 50, left: 100 }
 const DEFAULT_MARGIN_HORIZONTAL = { top: 30, right: 20, bottom: 90, left: 20 }
@@ -95,6 +107,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   baselineId,
   showTierLabels = false,
   relativeMode = false,
+  baselineAbsoluteValues,
+  onBrushFilter,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -122,6 +136,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   // Track if any axis is currently being dragged (for connector line opacity)
   const isDragging = useRef<boolean>(false)
+
+  // Stable ref so drag-end handlers always call the latest callback
+  // without forcing updateChart to re-create.
+  const onBrushFilterRef = useRef(onBrushFilter)
+  onBrushFilterRef.current = onBrushFilter
 
   // Track currently hovered scenario for dimming other lines
   const hoveredScenarioRef = useRef<number | null>(null)
@@ -515,35 +534,38 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         // ── Tick marks ───────────────────────────────────────────────────────
         axisGroup.selectAll(".tick-line").remove()
         axisGroup.selectAll(".tick-label").remove()
+        axisGroup.selectAll(".baseline-indicator").remove()
 
-        const tierTicks: { value: number; label: string }[] =
-          showTierLabels && !relativeMode
-            ? [
-                { value: -1, label: "Tier 4" },
-                { value: -1 / 3, label: "Tier 3" },
-                { value: 1 / 3, label: "Tier 2" },
-                { value: 1, label: "Tier 1" },
-              ]
-            : showTierLabels && relativeMode
-              ? [
-                  { value: -1, label: "−3 tiers" },
-                  { value: -2 / 3, label: "−2" },
-                  { value: -1 / 3, label: "−1" },
-                  { value: 0, label: "baseline" },
-                  { value: 1 / 3, label: "+1" },
-                  { value: 2 / 3, label: "+2" },
-                  { value: 1, label: "+3 tiers" },
-                ]
-              : [
-                  { value: -1, label: "-1" },
-                  { value: -0.5, label: "-0.5" },
-                  { value: 0, label: "0" },
-                  { value: 0.5, label: "0.5" },
-                  { value: 1, label: "1" },
-                ]
+        let tierTicks: { value: number; label: string; isBaselineTier?: boolean }[]
 
-        tierTicks.forEach(({ value: tick, label: tickLabel }) => {
+        if (showTierLabels && relativeMode && baselineAbsoluteValues) {
+          const bv = baselineAbsoluteValues[axis] ?? 0
+          const baselineTier = bv >= 2 / 3 ? 1 : bv >= 0 ? 2 : bv >= -2 / 3 ? 3 : 4
+          tierTicks = TIER_ABSOLUTE_POSITIONS.map(({ tier, pos: absPos }) => ({
+            value: (absPos - bv) / 2,
+            label: `Tier ${tier}`,
+            isBaselineTier: tier === baselineTier,
+          }))
+        } else if (showTierLabels && !relativeMode) {
+          tierTicks = [
+            { value: -1, label: "Tier 4" },
+            { value: -1 / 3, label: "Tier 3" },
+            { value: 1 / 3, label: "Tier 2" },
+            { value: 1, label: "Tier 1" },
+          ]
+        } else {
+          tierTicks = [
+            { value: -1, label: "-1" },
+            { value: -0.5, label: "-0.5" },
+            { value: 0, label: "0" },
+            { value: 0.5, label: "0.5" },
+            { value: 1, label: "1" },
+          ]
+        }
+
+        tierTicks.forEach(({ value: tick, label: tickLabel, isBaselineTier }) => {
           const pos = scales[axis]!(tick)
+          const tickColor = isBaselineTier ? BASELINE_HALO_COLOR : "#999"
 
           if (isHoriz) {
             axisGroup
@@ -553,10 +575,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("x2", 4)
               .attr("y1", pos)
               .attr("y2", pos)
-              .attr("stroke", "#999")
-              .attr("stroke-width", 1)
+              .attr("stroke", tickColor)
+              .attr("stroke-width", isBaselineTier ? 2 : 1)
 
-            if (axisIndex === 0) {
+            if (axisIndex === 0 || (showTierLabels && relativeMode)) {
               axisGroup
                 .append("text")
                 .attr("class", "tick-label")
@@ -565,10 +587,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 .attr("text-anchor", "end")
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", "9px")
-                .attr("fill", "#999")
+                .attr("fill", tickColor)
+                .attr("font-weight", isBaselineTier ? "bold" : "normal")
                 .text(tickLabel)
             }
           } else {
+            const tickColorV = isBaselineTier ? BASELINE_HALO_COLOR : "#666"
             axisGroup
               .append("line")
               .attr("class", "tick-line")
@@ -576,8 +600,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("x2", pos)
               .attr("y1", -5)
               .attr("y2", 5)
-              .attr("stroke", "#666")
-              .attr("stroke-width", 1)
+              .attr("stroke", tickColorV)
+              .attr("stroke-width", isBaselineTier ? 2 : 1)
 
             axisGroup
               .append("text")
@@ -586,10 +610,38 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("y", -10)
               .attr("text-anchor", "middle")
               .attr("font-size", "10px")
-              .attr("fill", "#666")
+              .attr("fill", tickColorV)
+              .attr("font-weight", isBaselineTier ? "bold" : "normal")
               .text(tickLabel)
           }
         })
+
+        if (showTierLabels && relativeMode) {
+          const zeroPos = scales[axis]!(0)
+          if (isHoriz) {
+            axisGroup
+              .append("line")
+              .attr("class", "baseline-indicator")
+              .attr("x1", -6)
+              .attr("x2", 6)
+              .attr("y1", zeroPos)
+              .attr("y2", zeroPos)
+              .attr("stroke", BASELINE_HALO_COLOR)
+              .attr("stroke-width", 1.5)
+              .attr("stroke-dasharray", "3,2")
+          } else {
+            axisGroup
+              .append("line")
+              .attr("class", "baseline-indicator")
+              .attr("x1", zeroPos)
+              .attr("x2", zeroPos)
+              .attr("y1", -7)
+              .attr("y2", 7)
+              .attr("stroke", BASELINE_HALO_COLOR)
+              .attr("stroke-width", 1.5)
+              .attr("stroke-dasharray", "3,2")
+          }
+        }
 
         // ── Filter handles ───────────────────────────────────────────────────
         if (!filterRanges.current[axis]) {
@@ -696,6 +748,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                   .transition()
                   .duration(300)
                   .attr("opacity", 0.1)
+                if (onBrushFilterRef.current) {
+                  const out = data.filter((d) => !passesFilters(d)).map((d) => d.id)
+                  onBrushFilterRef.current(out)
+                }
               }),
           )
 
@@ -763,6 +819,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                   .transition()
                   .duration(300)
                   .attr("opacity", 0.1)
+                if (onBrushFilterRef.current) {
+                  const out = data.filter((d) => !passesFilters(d)).map((d) => d.id)
+                  onBrushFilterRef.current(out)
+                }
               }),
           )
 
@@ -1060,6 +1120,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       hideAxisLabels,
       showTierLabels,
       relativeMode,
+      baselineAbsoluteValues,
       onAxesLayout,
       getLineStyle,
       applyStyles,
