@@ -313,7 +313,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                       >
                         <Typography
                           variant="body1"
-                          sx={{ maxWidth: "100%", mt: 0.5 }}
+                          sx={{ maxWidth: "70ch", mt: 0.5 }}
                         >
                           {theme.inquiry}
                         </Typography>
