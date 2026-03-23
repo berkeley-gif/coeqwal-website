@@ -45,7 +45,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 variant="body1"
                 key={i}
                 sx={{
-                  maxWidth: "75ch",
+                  maxWidth: "70ch",
                 }}
               >
                 {parseBoldText(block.text)}

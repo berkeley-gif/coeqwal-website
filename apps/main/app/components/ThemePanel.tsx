@@ -24,8 +24,8 @@ import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
 import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
+import { themeValues } from "@repo/ui/themes/theme"
 
-const HERO_COLLAPSE_THRESHOLD = 40
 interface ThemePanelProps {
   // All the theme content and information
   theme: Theme | null
@@ -122,6 +122,11 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
 
+  const duration = {
+    fast: parseFloat(themeValues.transition.fast),
+    standard: parseFloat(themeValues.transition.standard),
+  }
+
   const isOpen = theme !== null
 
   // Ref for the scrollable content container
@@ -141,7 +146,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   // Resets automatically when isOpen flips to false (panel closes)
   const isHeroCollapsed = useScrollCollapse(
     scrollContainerRef,
-    HERO_COLLAPSE_THRESHOLD,
+    themeValues.layout.heroCollapseThreshold,
     isOpen,
   )
 
@@ -202,7 +207,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   paddingTop: isHeroCollapsed ? 10 : 25,
                   paddingBottom: isHeroCollapsed ? 10 : 25,
                 }}
-                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   display: "flex",
                   position: "relative",
@@ -269,7 +274,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: duration.fast }}
                       >
                         <Typography
                           variant="h5"
@@ -284,7 +289,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: duration.fast }}
                       >
                         <Typography
                           variant="h3"
@@ -303,12 +308,12 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
                         style={{ overflow: "hidden" }}
                       >
                         <Typography
                           variant="body1"
-                          sx={{ maxWidth: "100%", mt: 0.5 }}
+                          sx={{ maxWidth: "70ch", mt: 0.5 }}
                         >
                           {theme.inquiry}
                         </Typography>

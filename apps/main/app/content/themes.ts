@@ -152,9 +152,148 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Rivers, salmon and the Delta ecosystem",
     description:
       "Whether rivers, salmon, and the Delta estuary receive the flows they need to remain functional and resilient",
-    heroImage: "",
-    inquiry: "",
-    sections: [],
+    heroImage: "/images/themes/salmon_hero.jpg",
+    inquiry:
+      "Can California's rivers support healthy salmon populations and functioning ecosystems, while also providing water for people and farms?",
+    sections: [
+      {
+        id: "intro",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Rivers are essential sources of water, but they are more than channels that move water from mountains to farms and cities. They are living systems. Salmon depend on them to migrate, spawn, and survive. Wetlands, birds, and wildlife depend on them too.",
+            },
+          ],
+        },
+      },
+      {
+        id: "why-this-matters",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "California's rivers begin in the mountains and flow through valleys before reaching the Delta and the ocean. Along the way, they sustain ecosystems and provide water for farms and communities. Salmon are an important part of this story. They travel hundreds of miles between rivers and the ocean. They are part of Tribal traditions, fishing economies, and California's natural heritage. When salmon struggle, it signals stress in the broader river system.",
+            },
+            {
+              type: "paragraph",
+              text: "Over time, dams, reservoirs, diversions, and land use changes have reshaped how rivers flow. Spring floods that once spread across floodplains are now captured in reservoirs. Water is stored for later use. Channels are straighter and more controlled. These changes have improved water reliability, but they have also reduced natural habitat, changed water temperatures, and altered the timing of flows.",
+            },
+            {
+              type: "paragraph",
+              text: "Climate change adds new pressures. The snowpack is shrinking. Snow melts earlier in the year. Droughts are becoming more intense. Heat waves raise river temperatures. These changes affect how much water is available and when it moves through the system. Understanding how rivers function as living ecosystems, not just water delivery systems, is essential for shaping future water management decisions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-this-theme-focuses-on",
+        content: {
+          type: "boxes",
+          items: [
+            {
+              title: "Seasonal flow & ecosystem rhythms",
+              paragraphs: [
+                "Rivers naturally follow seasonal patterns. In winter and spring, snow and rain increase flows. Rivers may spill onto floodplains, creating habitat and supporting young fish. In summer and fall, flows decrease and temperatures rise. These seasonal rhythms shape habitat conditions for salmon and other species.",
+              ],
+            },
+            {
+              title: "Water management & salmon survival",
+              paragraphs: [
+                "Water management decisions influence both flow and temperature. Reservoir releases determine how much water moves downstream and when. Storage decisions affect cold-water availability, which is critical for species like winter-run Chinook salmon. If cold-water pools in reservoirs are depleted during hot months, winter-run Chinook salmon eggs may not survive, even if flow targets are met. This means that both timing and temperature matter.",
+              ],
+            },
+            {
+              title: "System connections & trade-offs",
+              paragraphs: [
+                "River systems are deeply connected. Decisions about reservoir storage, environmental flow requirements, and water deliveries affect multiple outcomes. Efforts to create more natural flow patterns, such as seasonal pulse flows, can improve habitat but may reduce water available for other uses. Choices in one part of the system can create ripple effects elsewhere.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-to-keep-in-mind",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "list",
+              items: [
+                "Rivers are shaped not only by how much water flows, but by when it flows. Timing can be as important as quantity.",
+                "Salmon depend on different conditions at different life stages, including cold water, sufficient flow, and connected habitat.",
+                "Reservoirs improve water storage for people and farms, but they also alter natural flow patterns and temperatures.",
+                "River ecosystems respond to droughts, floods, and sequences of extreme years. Short periods of stress can have lasting impacts.",
+                "Improving flows alone does not fully restore ecosystems. Habitat conditions, landscape changes, and invasive species also play a role.",
+                "For winter-run salmon, water temperature — especially cold water stored in reservoirs — can matter as much as flow volume.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-management-strategies-are-explored",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This theme allows you to explore how different water management choices affect:",
+            },
+            {
+              type: "list",
+              items: [
+                "Seasonal flow patterns in rivers",
+                "Storage in reservoirs",
+                "Salmon survival across life stages",
+                "Outflows to the Bay-Delta estuary",
+                "Water deliveries for communities and farms",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: "Looking at these factors together helps show how river systems respond under different climate and water use conditions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-the-models-show",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "**Trade-offs** – Water stored in reservoirs supports cities and farms, but holding water can reduce natural spring flows that benefit ecosystems. Releasing water to improve river conditions may reduce storage needed later for temperature control or supply reliability. Decisions about timing and volume of releases can shift outcomes across regions and sectors.",
+            },
+            {
+              type: "paragraph",
+              text: "**Equity** – River conditions affect communities differently. Tribal nations, fishing communities, farmers, and downstream towns may experience changes in distinct ways. Salmon declines can affect cultural traditions and local economies. Water rights and geographic location also shape who experiences shortages or protections first.",
+            },
+            {
+              type: "paragraph",
+              text: "**Resilience** – Resilience in rivers means being able to handle droughts, floods, and warming temperatures while maintaining ecosystem health. Protecting cold-water storage, maintaining habitat connectivity, and managing flows flexibly across seasons all influence how well river systems can adapt. Rivers respond not only to averages, but to stress over time.",
+            },
+          ],
+        },
+      },
+      {
+        id: "how-to-explore-further",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Explore how different water management choices shape seasonal river flows, water temperature, salmon survival, and habitat conditions across regions and climate futures.",
+            },
+          ],
+        },
+      },
+    ],
   },
   {
     id: "delta",
