@@ -527,6 +527,7 @@ export const themeValues = {
     collapsedTabHeight: 44, // px - collapsed tab row height (slightly taller than header to balance visual weight)
     headerShrinkStart: 120, // px - scroll position where header starts shrinking
     headerShrinkEnd: 240, // px - scroll position where header is fully shrunk
+    heroCollapseThreshold: 40, // px - the threshold at which a hero section collapses when you scroll down
     drawer: {
       width: 360, // px - open drawer width (used by MUI Drawer overrides)
       closedWidth: 60, // px - collapsed drawer width (used by MUI Drawer overrides)
