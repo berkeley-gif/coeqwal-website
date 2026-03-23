@@ -202,7 +202,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   paddingTop: isHeroCollapsed ? 10 : 25,
                   paddingBottom: isHeroCollapsed ? 10 : 25,
                 }}
-                transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: themeValues.transition.standard, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   display: "flex",
                   position: "relative",
@@ -269,7 +269,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: themeValues.transition.fast }}
                       >
                         <Typography
                           variant="h5"
@@ -284,7 +284,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+                        transition={{ duration: themeValues.transition.fast }}
                       >
                         <Typography
                           variant="h3"
@@ -303,7 +303,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: themeValues.transition.standard, ease: [0.4, 0, 0.2, 1] }}
                         style={{ overflow: "hidden" }}
                       >
                         <Typography
