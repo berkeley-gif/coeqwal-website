@@ -122,6 +122,11 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
 
+  const duration = {
+    fast: parseFloat(themeValues.transition.fast),
+    standard: parseFloat(themeValues.transition.standard),
+  }
+
   const isOpen = theme !== null
 
   // Ref for the scrollable content container
@@ -202,7 +207,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   paddingTop: isHeroCollapsed ? 10 : 25,
                   paddingBottom: isHeroCollapsed ? 10 : 25,
                 }}
-                transition={{ duration: themeValues.transition.standard, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   display: "flex",
                   position: "relative",
@@ -269,7 +274,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: themeValues.transition.fast }}
+                        transition={{ duration: duration.fast }}
                       >
                         <Typography
                           variant="h5"
@@ -284,7 +289,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: themeValues.transition.fast }}
+                        transition={{ duration: duration.fast }}
                       >
                         <Typography
                           variant="h3"
@@ -303,7 +308,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: themeValues.transition.standard, ease: [0.4, 0, 0.2, 1] }}
+                        transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
                         style={{ overflow: "hidden" }}
                       >
                         <Typography
