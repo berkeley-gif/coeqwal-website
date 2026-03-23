@@ -24,8 +24,8 @@ import { BoxSectionRenderer } from "./themePanels/BoxSectionRenderer"
 import { CenteredTextSection } from "./CenteredTextSection"
 import { useWhichScrollSection } from "../hooks/useWhichScrollSection"
 import { usePanelRoute } from "../hooks/usePanelRoute"
+import { themeValues } from "@repo/ui/themes/theme"
 
-const HERO_COLLAPSE_THRESHOLD = 40
 interface ThemePanelProps {
   // All the theme content and information
   theme: Theme | null
@@ -141,7 +141,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   // Resets automatically when isOpen flips to false (panel closes)
   const isHeroCollapsed = useScrollCollapse(
     scrollContainerRef,
-    HERO_COLLAPSE_THRESHOLD,
+    themeValues.layout.heroCollapseThreshold,
     isOpen,
   )
 
