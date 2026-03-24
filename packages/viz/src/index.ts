@@ -9,26 +9,6 @@ export type {
   ScenarioComparisonChartProps,
 } from "./types"
 
-// TODO: Remove this re-export once apps/storyline-flow imports d3 directly
-// (e.g. `import { select } from "d3"` instead of `import { d3 } from "@repo/viz"`).
-// Re-exporting the full D3 namespace through the barrel forces Turbopack to
-// parse every D3 submodule on first compile, adding ~10-15s to dev startup.
-export {
-  curveBasis,
-  timeFormat,
-  interpolateRgb,
-  range,
-  max,
-  scaleLinear,
-  area,
-  line,
-  mean,
-  extent,
-  ticks,
-  scaleBand,
-  select,
-} from "d3"
-export type { ScaleLinear, Area } from "d3"
 
 // Export components
 export { default as BarChart } from "./components/BarChart"
