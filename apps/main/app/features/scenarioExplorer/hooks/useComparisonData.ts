@@ -8,7 +8,6 @@ import {
 import {
   type VerticalParallelLineData,
   type TierHeatmapCell,
-  type BumpRanking,
   type SankeyScenarioFlow,
   type TierSankeyGroup,
   getThemeLineColor,
@@ -179,13 +178,13 @@ export function useComparisonData() {
         const score = scores[code]
         if (!score) return
         let tierLevel: number
-        if (raw?.tiers[code]?.type === "single_value" && raw.tiers[code].level) {
+        if (
+          raw?.tiers[code]?.type === "single_value" &&
+          raw.tiers[code].level
+        ) {
           tierLevel = raw.tiers[code].level!
         } else {
-          tierLevel = Math.min(
-            4,
-            Math.max(1, Math.round(score.weighted_score)),
-          )
+          tierLevel = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
         }
         cells.push({
           scenarioId,
@@ -199,30 +198,6 @@ export function useComparisonData() {
     })
     return cells
   }, [allScoreData, allScenariosData, scenarios])
-
-  // Bump chart data: scenario rankings across outcomes
-  const bumpRankings = useMemo<BumpRanking[]>(() => {
-    if (!allScoreData) return []
-    return OUTCOME_CODE_ORDER.map((code) => {
-      const scored = scenarios
-        .map(({ id }) => ({
-          scenarioId: id,
-          score: allScoreData[id]?.[code]?.normalized_score ?? -1,
-        }))
-        .sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score
-          return a.scenarioId.localeCompare(b.scenarioId)
-        })
-      return {
-        outcomeCode: code,
-        outcomeName: getOutcomeName(code),
-        rankings: scored.map(({ scenarioId }, i) => ({
-          scenarioId,
-          rank: i + 1,
-        })),
-      }
-    })
-  }, [allScoreData, scenarios])
 
   // Sankey data builder: returns flows for a given multi-value outcome code
   const getSankeyData = useMemo(() => {
@@ -332,7 +307,10 @@ export function useComparisonData() {
         .map(({ id, name, color }) => {
           const score = allScoreData[id]?.[outcomeCode]
           if (!score) return null
-          const tier = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
+          const tier = Math.min(
+            4,
+            Math.max(1, Math.round(score.weighted_score)),
+          )
           const tierKey = `tier${tier}`
           return {
             scenarioId: id,
@@ -347,7 +325,11 @@ export function useComparisonData() {
 
   // Groups for the grouped Sankey layout (one group per outcome)
   const sankeyGroups = useMemo<TierSankeyGroup[]>(
-    () => OUTCOME_CODE_ORDER.map((code) => ({ key: code, label: getOutcomeName(code) })),
+    () =>
+      OUTCOME_CODE_ORDER.map((code) => ({
+        key: code,
+        label: getOutcomeName(code),
+      })),
     [],
   )
 
@@ -362,7 +344,6 @@ export function useComparisonData() {
     error,
     hasData: parallelPlotData.length > 0,
     heatmapCells,
-    bumpRankings,
     getSankeyData,
     getAllSankeyData,
     getWeightedSankeyData,

@@ -16,20 +16,20 @@ export interface VerticalOutcomeGlyphProps {
  * VerticalOutcomeGlyph – small multiple 4-bar vertical chart matching horizontal style.
  * If no `values` provided falls back to VerticalBarChart's internal dummy values for demo.
  */
-const VerticalOutcomeGlyph: React.FC<VerticalOutcomeGlyphProps> = ({
-  values,
-  size = 60,
-  tierColors,
-}) => {
-  const tiers = values
-    ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
-        label,
-        color: tierColors[idx]!,
-        value: Math.abs(values[idx] ?? 0), // VerticalBarChart expects positive length
-      }))
-    : undefined
+const VerticalOutcomeGlyph: React.FC<VerticalOutcomeGlyphProps> = React.memo(
+  ({ values, size = 60, tierColors }) => {
+    const tiers = values
+      ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
+          label,
+          color: tierColors[idx]!,
+          value: Math.abs(values[idx] ?? 0), // VerticalBarChart expects positive length
+        }))
+      : undefined
 
-  return <VerticalBarChart size={size} tiers={tiers} />
-}
+    return <VerticalBarChart size={size} tiers={tiers} />
+  },
+)
 
-export default React.memo(VerticalOutcomeGlyph)
+VerticalOutcomeGlyph.displayName = "VerticalOutcomeGlyph"
+
+export default VerticalOutcomeGlyph

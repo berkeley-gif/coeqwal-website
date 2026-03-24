@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react"
 import BarChart from "./BarChart"
 
@@ -14,20 +16,20 @@ export interface OutcomeGlyphProps {
  * OutcomeGlyph – small multiple 4-bar horizontal chart reused across dashboard.
  * If no `values` provided falls back to BarChart’s internal dummy values for demo.
  */
-const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({
-  values,
-  size = 60,
-  tierColors,
-}) => {
-  const tiers = values
-    ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
-        label,
-        color: tierColors[idx]!,
-        value: Math.abs(values[idx] ?? 0), // BarChart expects positive length
-      }))
-    : undefined
+const OutcomeGlyph: React.FC<OutcomeGlyphProps> = React.memo(
+  ({ values, size = 60, tierColors }) => {
+    const tiers = values
+      ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
+          label,
+          color: tierColors[idx]!,
+          value: Math.abs(values[idx] ?? 0), // BarChart expects positive length
+        }))
+      : undefined
 
-  return <BarChart size={size} tiers={tiers} />
-}
+    return <BarChart size={size} tiers={tiers} />
+  },
+)
 
-export default React.memo(OutcomeGlyph)
+OutcomeGlyph.displayName = "OutcomeGlyph"
+
+export default OutcomeGlyph

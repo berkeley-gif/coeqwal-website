@@ -1,7 +1,15 @@
 /**
  * Utility functions for D3 visualizations
  */
-import * as d3 from "d3"
+import {
+  interpolateBlues,
+  interpolateGreens,
+  interpolateOranges,
+  interpolatePurples,
+  interpolateReds,
+  interpolateViridis,
+  scaleSequential,
+} from "d3"
 import { DecileData } from "../types"
 
 /**
@@ -20,7 +28,7 @@ export function createCategoricalColorScale(
 ): (index: number) => string {
   // For single item, return a mid-range color
   if (count <= 1) {
-    return () => d3.interpolateViridis(0.5)
+    return () => interpolateViridis(0.5)
   }
 
   // Distribute colors evenly across the spectrum
@@ -31,7 +39,7 @@ export function createCategoricalColorScale(
 
   return (index: number) => {
     const t = startOffset + (index / (count - 1)) * range
-    return d3.interpolateViridis(t)
+    return interpolateViridis(t)
   }
 }
 
@@ -116,17 +124,15 @@ export function createDecileColorScale(
   count: number = 10,
 ): (decile: number) => string {
   const colorInterpolator = {
-    blues: d3.interpolateBlues,
-    greens: d3.interpolateGreens,
-    purples: d3.interpolatePurples,
-    oranges: d3.interpolateOranges,
-    reds: d3.interpolateReds,
+    blues: interpolateBlues,
+    greens: interpolateGreens,
+    purples: interpolatePurples,
+    oranges: interpolateOranges,
+    reds: interpolateReds,
   }[scheme]
 
   return (decile: number) =>
-    d3.scaleSequential().domain([1, count]).interpolator(colorInterpolator)(
-      decile,
-    )
+    scaleSequential().domain([1, count]).interpolator(colorInterpolator)(decile)
 }
 
 /**

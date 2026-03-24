@@ -1,7 +1,18 @@
 "use client"
 
 import React, { useRef, useEffect, useState, useCallback } from "react"
-import * as d3 from "d3"
+import {
+  drag,
+  easeCubicOut,
+  easeQuadOut,
+  line,
+  scaleLinear,
+  scalePoint,
+  select,
+  transition,
+  type ScaleLinear,
+  type Selection,
+} from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
 export interface VerticalParallelLineData {
@@ -79,7 +90,7 @@ const DEFAULT_MARGIN_HORIZONTAL = { top: 30, right: 20, bottom: 90, left: 20 }
 const BASELINE_HALO_COLOR = "#C5A135"
 const BASELINE_HALO_WIDTH_EXTRA = 3
 
-const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
+const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.memo(({
   data,
   axes,
   title = "",
@@ -96,7 +107,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   lineColors = [],
   showBaseline = false,
   baselineData,
-  defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
   hideAxisLabels = false,
   onAxesLayout,
@@ -234,7 +244,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Apply styles to all scenarios in the SVG group (used after brush, hover, and sidebar changes)
   const applyStyles = useCallback(
     (
-      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      g: Selection<SVGGElement, unknown, null, undefined>,
       hoveredIndex: number | null,
       animate = false,
     ) => {
@@ -242,7 +252,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const s = getLineStyle(scenario, i, hoveredIndex)
         const line = g.select(`.line-${i}`)
         const sel = animate
-          ? (line.transition().duration(300).ease(d3.easeQuadOut) as any)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ? (line.transition().duration(300).ease(easeQuadOut) as any)
           : line
         sel.attr("opacity", s.lineOpacity).attr("stroke-width", s.strokeWidth)
 
@@ -250,7 +261,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const halo = g.select(`.line-halo-${i}`)
         if (!halo.empty()) {
           const hSel = animate
-            ? (halo.transition().duration(300).ease(d3.easeQuadOut) as any)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? (halo.transition().duration(300).ease(easeQuadOut) as any)
             : halo
           hSel
             .attr("opacity", s.lineOpacity)
@@ -262,7 +274,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             `.circle-${i}-${axisName.replace(/\s+/g, "-")}`,
           )
           const cSel = animate
-            ? (circle.transition().duration(300).ease(d3.easeQuadOut) as any)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ? (circle.transition().duration(300).ease(easeQuadOut) as any)
             : circle
           cSel.attr("opacity", s.circleOpacity).attr("r", s.circleRadius)
         })
@@ -272,7 +285,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   )
 
   const scheduleHoverClear = useCallback(
-    (g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
+    (g: Selection<SVGGElement, unknown, null, undefined>) => {
       if (hoverOutTimer.current) clearTimeout(hoverOutTimer.current)
       hoverOutTimer.current = setTimeout(() => {
         if (hoveredScenarioRef.current !== null) return
@@ -285,7 +298,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   const commitHoverIn = useCallback(
     (
-      g: d3.Selection<SVGGElement, unknown, null, undefined>,
+      g: Selection<SVGGElement, unknown, null, undefined>,
       d: VerticalParallelLineData,
       dataIndex: number,
     ) => {
@@ -322,12 +335,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       if (!data || data.length === 0 || !axes || axes.length === 0) return
 
       const isHoriz = orientation === "horizontal"
-      const svg = d3.select(svgRef.current)
+      const svg = select(svgRef.current)
       const innerWidth = newWidth - margin.left - margin.right
       const innerHeight = newHeight - margin.top - margin.bottom
 
       const t = animate
-        ? d3.transition().duration(500).ease(d3.easeCubicOut)
+        ? transition().duration(500).ease(easeCubicOut)
         : null
 
       svg
@@ -344,15 +357,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       //   axisScale = scalePoint → maps axis name to an x-position (left→right)
       //   scales[axis] = scaleLinear → maps value [-1,1] to a y-position (bottom→top, inverted)
 
-      const scales: Record<string, d3.ScaleLinear<number, number>> = {}
+      const scales: Record<string, ScaleLinear<number, number>> = {}
       axes.forEach((axis) => {
         scales[axis] = isHoriz
-          ? d3.scaleLinear().domain([-1, 1]).range([innerHeight, 0]) // inverted: high = top
-          : d3.scaleLinear().domain([-1, 1]).range([0, innerWidth])
+          ? scaleLinear().domain([-1, 1]).range([innerHeight, 0]) // inverted: high = top
+          : scaleLinear().domain([-1, 1]).range([0, innerWidth])
       })
 
-      const axisScale = d3
-        .scalePoint()
+      const axisScale = scalePoint()
         .domain(axes)
         .range(isHoriz ? [0, innerWidth] : [0, innerHeight])
         .padding(0)
@@ -365,6 +377,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", "chart-group")
           .attr("transform", `translate(${margin.left},${margin.top})`)
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const selection = animate ? g.transition(t as any) : g
         selection.attr("transform", `translate(${margin.left},${margin.top})`)
       }
@@ -394,8 +407,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("rx", 4)
       }
       const backgroundSelection = animate
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ? background.transition(t as any)
         : background
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(backgroundSelection as any)
         .attr("width", innerWidth)
         .attr("height", innerHeight)
@@ -419,6 +434,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("class", `axis-${axis.replace(/\s+/g, "-")}`)
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const axisSelection = animate ? axisGroup.transition(t as any) : axisGroup
         axisSelection.attr(
           "transform",
@@ -479,7 +495,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke-width", 2)
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const lineSelection = animate ? axisLine.transition(t as any) : axisLine
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(lineSelection as any)
           .attr("x1", 0)
           .attr("x2", isHoriz ? 0 : innerWidth)
@@ -662,6 +680,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             : `translate(${scales[axis]!(value)}, ${arrowGroupOffset}) scale(${arrowScale})`
 
         // Helper to invert event position to value
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invertEvent = (event: any) =>
           scales[axis]!.invert(isHoriz ? event.y : event.x)
 
@@ -713,16 +732,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("transform", `${arrowPathTransform} scale(${arrowScale})`)
           .style("pointer-events", "none")
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
         leftArrowUpdate.select(".touch-target").attr("r", isExpanded ? 20 : 16)
         leftArrowUpdate
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .attr("transform", (d: any) => groupTransform(d.position))
           .call(
-            d3
-              .drag<SVGGElement, any>()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            drag<SVGGElement, any>()
               .on("start", function () {
                 isDragging.current = true
-                d3.select(this).style("cursor", isHoriz ? "ns-resize" : "grabbing")
+                select(this).style("cursor", isHoriz ? "ns-resize" : "grabbing")
                 axisGroup
                   .select(".filter-range")
                   .transition()
@@ -735,14 +756,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 const maxBound = currentRange[1] - 0.1
                 const clampedValue = Math.max(-1, Math.min(maxBound, newValue))
 
-                d3.select(this).attr("transform", groupTransform(clampedValue))
+                select(this).attr("transform", groupTransform(clampedValue))
                 filterRanges.current[axis] = [clampedValue, currentRange[1]]
                 updateRangeIndicator(clampedValue, currentRange[1])
                 applyStyles(g, hoveredScenarioRef.current, true)
               })
               .on("end", function () {
                 isDragging.current = false
-                d3.select(this).style("cursor", isHoriz ? "ns-resize" : "grab")
+                select(this).style("cursor", isHoriz ? "ns-resize" : "grab")
                 axisGroup
                   .select(".filter-range")
                   .transition()
@@ -784,16 +805,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("transform", `${arrowPathTransform} scale(${arrowScale})`)
           .style("pointer-events", "none")
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
         rightArrowUpdate.select(".touch-target").attr("r", isExpanded ? 20 : 16)
         rightArrowUpdate
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .attr("transform", (d: any) => groupTransform(d.position))
           .call(
-            d3
-              .drag<SVGGElement, any>()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            drag<SVGGElement, any>()
               .on("start", function () {
                 isDragging.current = true
-                d3.select(this).style("cursor", isHoriz ? "ns-resize" : "grabbing")
+                select(this).style("cursor", isHoriz ? "ns-resize" : "grabbing")
                 axisGroup
                   .select(".filter-range")
                   .transition()
@@ -806,14 +829,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 const minBound = currentRange[0] + 0.1
                 const clampedValue = Math.min(1, Math.max(minBound, newValue))
 
-                d3.select(this).attr("transform", groupTransform(clampedValue))
+                select(this).attr("transform", groupTransform(clampedValue))
                 filterRanges.current[axis] = [currentRange[0], clampedValue]
                 updateRangeIndicator(currentRange[0], clampedValue)
                 applyStyles(g, hoveredScenarioRef.current, true)
               })
               .on("end", function () {
                 isDragging.current = false
-                d3.select(this).style("cursor", isHoriz ? "ns-resize" : "grab")
+                select(this).style("cursor", isHoriz ? "ns-resize" : "grab")
                 axisGroup
                   .select(".filter-range")
                   .transition()
@@ -876,12 +899,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       // ── Line generators ──────────────────────────────────────────────────────
       const baselineLineGen = isHoriz
-        ? d3
-            .line<[string, number]>()
+        ? line<[string, number]>()
             .x(([axisName]) => axisScale(axisName)!)
             .y(([axisName, value]) => scales[axisName]!(value))
-        : d3
-            .line<[string, number]>()
+        : line<[string, number]>()
             .x(([axisName, value]) => scales[axisName]!(value))
             .y(([axisName]) => axisScale(axisName)!)
 
@@ -905,8 +926,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         }
 
         const pathSelection = animate
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ? baselinePath.transition(t as any)
           : baselinePath
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ;(pathSelection as any).attr("d", baselineLineGen(baselinePathData))
 
         axes.forEach((axis) => {
@@ -926,20 +949,23 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("opacity", 0.9)
           }
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const circleSelection = animate ? circle.transition(t as any) : circle
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ;(circleSelection as any)
             .attr("cx", isHoriz ? axisScale(axis)! : scales[axis]!(value))
             .attr("cy", isHoriz ? scales[axis]!(value) : axisScale(axis)!)
         })
       } else {
         const baselineRemovalTransition = animate
-          ? d3.transition().duration(300)
+          ? transition().duration(300)
           : null
 
         const baselinePath = g.select(".baseline-path")
         if (!baselinePath.empty()) {
           if (animate) {
             baselinePath
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .transition(baselineRemovalTransition as any)
               .attr("opacity", 0)
               .remove()
@@ -955,6 +981,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           if (!circle.empty()) {
             if (animate) {
               circle
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 .transition(baselineRemovalTransition as any)
                 .attr("opacity", 0)
                 .remove()
@@ -999,16 +1026,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           jitterAxes.has(axisName) ? jPx : 0
 
         const jitteredLineGen = isHoriz
-          ? d3
-              .line<[string, number | null]>()
+          ? line<[string, number | null]>()
               .defined(([, v]) => v !== null)
               .x(([axisName]) => axisScale(axisName)!)
               .y(
                 ([axisName, value]) =>
                   scales[axisName]!(value as number) + jitterFor(axisName),
               )
-          : d3
-              .line<[string, number | null]>()
+          : line<[string, number | null]>()
               .defined(([, v]) => v !== null)
               .x(
                 ([axisName, value]) =>
@@ -1058,6 +1083,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
           g.append("circle")
             .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .datum(d as any)
             .attr("fill", lineColor)
             .attr("stroke", "white")
@@ -1140,7 +1166,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   // Re-apply styles when external highlight changes (sidebar hover / selection)
   useEffect(() => {
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     const g = svg.select<SVGGElement>("g")
     if (g.empty()) return
     applyStyles(g, hoveredScenarioRef.current)
@@ -1176,14 +1202,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             hoverOutTimer.current = null
           }
           onLineHover?.(null)
-          const svg = d3.select(svgRef.current)
+          const svg = select(svgRef.current)
           const g = svg.select<SVGGElement>("g")
           if (!g.empty()) applyStyles(g, null)
         }}
       />
     </div>
   )
-}
+})
 
-export default React.memo(VerticalParallelLinePlot)
+VerticalParallelLinePlot.displayName = "VerticalParallelLinePlotPeak"
+
+export default VerticalParallelLinePlot
 export { VerticalParallelLinePlot as VerticalParallelLinePlotPeak }

@@ -3,9 +3,6 @@
 /**
  * ComparisonPanel - Tradeoffs view with shared selection sidebar and parallel coordinates chart
  *
- * Layout:
- *   [ScenarioSelectionSidebar 240px] | [HydroclimateChooser + toggle controls + chart]
- *
  * The sidebar carries all scenario selection tools (checkboxes, GridControls,
  * SelectionBanner) wired to the shared store. The right panel renders chart
  * controls and the parallel coordinates visualization.
@@ -23,15 +20,17 @@ import {
 } from "@repo/ui/mui"
 import {
   VerticalParallelLinePlotPeak,
-  BaselineScatter,
+  ParityPlot,
   TierHeatmap,
-  BumpChart,
   TierSankey,
   type VerticalParallelLineData,
   type AxisLayout,
 } from "@repo/viz"
 import { InfoIconButton, InfoTooltip } from "@repo/ui"
-import { useComparisonData, SANKEY_ALL_OUTCOMES } from "../hooks/useComparisonData"
+import {
+  useComparisonData,
+  SANKEY_ALL_OUTCOMES,
+} from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -41,12 +40,11 @@ import { getScenarioTheme } from "../../../content/scenarios"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode = "parallel" | "scatter" | "bump" | "heatmap" | "sankey"
+type ChartMode = "parallel" | "parity" | "heatmap" | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "parallel", label: "Parallel" },
-  { key: "scatter", label: "Scatter" },
-  { key: "bump", label: "Bump" },
+  { key: "parity", label: "Parity" },
   { key: "heatmap", label: "Heatmap" },
   { key: "sankey", label: "Sankey" },
 ]
@@ -153,7 +151,6 @@ export default function ComparisonPanel() {
     isLoading,
     hasData,
     heatmapCells,
-    bumpRankings,
     getAllSankeyData,
     getWeightedSankeyData,
     sankeyGroups,
@@ -164,11 +161,10 @@ export default function ComparisonPanel() {
   const [sankeyOutcome, setSankeyOutcome] = useState<string>("")
   const [sankeyShowDistribution, setSankeyShowDistribution] = useState(false)
 
-  // Scatter feature toggles
-  const [scatterConnectLines, setScatterConnectLines] = useState(false)
-  const [scatterOutcomeLabels, setScatterOutcomeLabels] = useState(true)
-  const [scatterSpreadDots, setScatterSpreadDots] = useState(false)
-  const [scatterThemeGrouping, setScatterThemeGrouping] = useState(false)
+  const [parityConnectLines, setParityConnectLines] = useState(false)
+  const [parityOutcomeLabels, setParityOutcomeLabels] = useState(true)
+  const [paritySpreadDots, setParitySpreadDots] = useState(false)
+  const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -191,23 +187,23 @@ export default function ComparisonPanel() {
     [comparisonData, highlightedScenario],
   )
 
-  // Scatter: exclude baseline (it lies on the diagonal and adds no information)
-  const scatterData = useMemo(
+  // Exclude baseline (it lies on the diagonal and adds no information)
+  const parityData = useMemo(
     () => highlightedData.filter((s) => s.id !== "s0020"),
     [highlightedData],
   )
-  const scatterLineColors = useMemo(() => {
+  const parityLineColors = useMemo(() => {
     const colorMap = new Map(scenarios.map((s) => [s.id, s.color]))
-    return scatterData.map((d) => colorMap.get(d.id) || "#666666")
-  }, [scatterData, scenarios])
+    return parityData.map((d) => colorMap.get(d.id) || "#666666")
+  }, [parityData, scenarios])
 
   const scenarioThemeMap = useMemo(() => {
     const map: Record<string, string> = {}
-    scatterData.forEach((s) => {
+    parityData.forEach((s) => {
       map[s.id] = getScenarioTheme(s.id)
     })
     return map
-  }, [scatterData])
+  }, [parityData])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -227,16 +223,13 @@ export default function ComparisonPanel() {
     [scenarios],
   )
 
-  // Bump: scenario list for BumpChart
-  const bumpScenarios = useMemo(
-    () => scenarios.map((s) => ({ id: s.id, name: s.name, color: s.color })),
-    [scenarios],
-  )
-
   // Sankey: default to "All Outcomes"; individual outcomes also valid
   const effectiveSankeyOutcome = useMemo(() => {
     if (sankeyOutcome === SANKEY_ALL_OUTCOMES) return SANKEY_ALL_OUTCOMES
-    if (sankeyOutcome && multiValueOutcomeCodes.includes(sankeyOutcome as never))
+    if (
+      sankeyOutcome &&
+      multiValueOutcomeCodes.includes(sankeyOutcome as never)
+    )
       return sankeyOutcome
     return SANKEY_ALL_OUTCOMES
   }, [sankeyOutcome, multiValueOutcomeCodes])
@@ -246,7 +239,12 @@ export default function ComparisonPanel() {
       sankeyShowDistribution
         ? getAllSankeyData(effectiveSankeyOutcome)
         : getWeightedSankeyData(effectiveSankeyOutcome),
-    [getAllSankeyData, getWeightedSankeyData, effectiveSankeyOutcome, sankeyShowDistribution],
+    [
+      getAllSankeyData,
+      getWeightedSankeyData,
+      effectiveSankeyOutcome,
+      sankeyShowDistribution,
+    ],
   )
 
   // Transform data to be relative to baseline when toggle is on.
@@ -293,7 +291,9 @@ export default function ComparisonPanel() {
     (filteredOutIds: string[]) => {
       if (filteredOutIds.length === 0) return
       const filteredOutSet = new Set(filteredOutIds)
-      const remaining = selectedScenarios.filter((id) => !filteredOutSet.has(id))
+      const remaining = selectedScenarios.filter(
+        (id) => !filteredOutSet.has(id),
+      )
       if (remaining.length !== selectedScenarios.length) {
         selectScenarios(remaining)
       }
@@ -399,61 +399,87 @@ export default function ComparisonPanel() {
           />
         </Box>
       )}
-      {chartMode === "scatter" && (
+      {chartMode === "parity" && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           <FormControlLabel
             control={
               <Checkbox
                 size="small"
-                checked={scatterConnectLines}
-                onChange={(e) => setScatterConnectLines(e.target.checked)}
+                checked={parityConnectLines}
+                onChange={(e) => setParityConnectLines(e.target.checked)}
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>connect lines</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                connect lines
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
             control={
               <Checkbox
                 size="small"
-                checked={scatterOutcomeLabels}
-                onChange={(e) => setScatterOutcomeLabels(e.target.checked)}
+                checked={parityOutcomeLabels}
+                onChange={(e) => setParityOutcomeLabels(e.target.checked)}
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>outcome labels</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                outcome labels
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
             control={
               <Checkbox
                 size="small"
-                checked={scatterSpreadDots}
-                onChange={(e) => setScatterSpreadDots(e.target.checked)}
+                checked={paritySpreadDots}
+                onChange={(e) => setParitySpreadDots(e.target.checked)}
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>spread dots</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                spread dots
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
             control={
               <Checkbox
                 size="small"
-                checked={scatterThemeGrouping}
-                onChange={(e) => setScatterThemeGrouping(e.target.checked)}
+                checked={parityThemeGrouping}
+                onChange={(e) => setParityThemeGrouping(e.target.checked)}
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>theme grouping</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                theme grouping
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
         </Box>
       )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <Typography variant="compactCaption" sx={{ color: theme.palette.grey[600] }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[600] }}
+          >
             Outcome:
           </Typography>
           <Box
@@ -644,9 +670,7 @@ export default function ComparisonPanel() {
           hideAxisLabels={true}
           onAxesLayout={setAxisLayout}
           margin={
-            isDesktop
-              ? { top: 80, right: 20, bottom: 20, left: 20 }
-              : undefined
+            isDesktop ? { top: 80, right: 20, bottom: 20, left: 20 } : undefined
           }
           showBaseline={highlightBaseline}
           baselineData={baselineDataForChart}
@@ -666,42 +690,23 @@ export default function ComparisonPanel() {
         />
       )}
 
-      {chartMode === "scatter" && (
-        <BaselineScatter
-          data={scatterData}
+      {chartMode === "parity" && (
+        <ParityPlot
+          data={parityData}
           axes={axes}
           baselineData={baselineScenario ?? undefined}
           responsive
           colors={sharedChartColors}
-          lineColors={scatterLineColors}
+          lineColors={parityLineColors}
           onLineHover={setHoveredScenario}
           onLineClick={(scenario) => handleScenarioClick(scenario.id)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
-          showConnectLines={scatterConnectLines}
-          showOutcomeLabels={scatterOutcomeLabels}
-          showSpreadDots={scatterSpreadDots}
+          showConnectLines={parityConnectLines}
+          showOutcomeLabels={parityOutcomeLabels}
+          showSpreadDots={paritySpreadDots}
           scenarioThemes={scenarioThemeMap}
-          showThemeGrouping={scatterThemeGrouping}
-        />
-      )}
-
-      {chartMode === "bump" && (
-        <BumpChart
-          rankings={bumpRankings}
-          scenarios={bumpScenarios}
-          responsive
-          onScenarioHover={(id) => {
-            if (id) {
-              const found = comparisonData.find((d) => d.id === id)
-              setHoveredScenario(found ?? null)
-            } else {
-              setHoveredScenario(null)
-            }
-          }}
-          onScenarioClick={handleScenarioClick}
-          chosenIds={chosenIds}
-          highlightedIds={highlightedIds}
+          showThemeGrouping={parityThemeGrouping}
         />
       )}
 
@@ -715,9 +720,7 @@ export default function ComparisonPanel() {
           lineColors={heatmapLineColors}
           onCellHover={(cell) => {
             if (cell) {
-              const found = comparisonData.find(
-                (d) => d.id === cell.scenarioId,
-              )
+              const found = comparisonData.find((d) => d.id === cell.scenarioId)
               setHoveredScenario(found ?? null)
             } else {
               setHoveredScenario(null)
@@ -732,9 +735,17 @@ export default function ComparisonPanel() {
       {chartMode === "sankey" && (
         <TierSankey
           data={sankeyData}
-          outcomeName={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? "All Outcomes" : getOutcomeName(effectiveSankeyOutcome)}
+          outcomeName={
+            effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES
+              ? "All Outcomes"
+              : getOutcomeName(effectiveSankeyOutcome)
+          }
           tierColors={theme.palette.tiers}
-          groups={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? sankeyGroups : undefined}
+          groups={
+            effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES
+              ? sankeyGroups
+              : undefined
+          }
           responsive
           onScenarioHover={(id) => {
             if (id) {
@@ -756,7 +767,6 @@ export default function ComparisonPanel() {
           highlightedIds={highlightedIds}
         />
       )}
-
     </Box>
   )
 
