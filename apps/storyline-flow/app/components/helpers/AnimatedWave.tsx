@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef } from "react"
-import { d3 } from "@repo/viz"
+import { select, area, curveBasis, range } from "@repo/viz"
 import { useBreakpoint } from "@repo/ui/hooks"
 
 const numWaves = 4
@@ -30,7 +30,7 @@ const AnimatedWaves = ({
   useEffect(() => {
     if (!width || !height) return // Avoid rendering if dimensions are invalid
 
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     const heightPortion = portion[breakpoint] || 0.35
 
     // Clear previous SVG content to avoid overlapping waves
@@ -40,12 +40,11 @@ const AnimatedWaves = ({
 
     type WaveDataPoint = [number, number]
 
-    const area = d3
-      .area<WaveDataPoint>()
+    const waveArea = area<WaveDataPoint>()
       .x((d) => d[0])
       .y0((d) => d[1])
       .y1(height)
-      .curve(d3.curveBasis)
+      .curve(curveBasis)
 
     const waves: d3.Selection<
       SVGPathElement,
@@ -55,17 +54,15 @@ const AnimatedWaves = ({
     >[] = []
 
     for (let i = 0; i < numWaves; i++) {
-      const waveData: WaveDataPoint[] = d3
-        .range(width)
-        .map((x) => [
-          x,
-          height * heightPortion + Math.sin(x * 0.004 + i * 2) * 80 + i * 70,
-        ])
+      const waveData: WaveDataPoint[] = range(width).map((x) => [
+        x,
+        height * heightPortion + Math.sin(x * 0.004 + i * 2) * 80 + i * 70,
+      ])
 
       const wave = svg
         .append("path")
         .datum(waveData)
-        .attr("d", area)
+        .attr("d", waveArea)
         .attr("fill", colors[i] || "#00e5ff")
         .attr("opacity", 0.8 - i * 0.2)
 
@@ -77,17 +74,15 @@ const AnimatedWaves = ({
       const fallTime = Date.now() * 0.00075
 
       waves.forEach((wave, i) => {
-        const updatedData: WaveDataPoint[] = d3
-          .range(width)
-          .map((x) => [
-            x,
-            height * heightPortion +
-              Math.sin(x * 0.003 + i * 2 + shiftTime) *
-                (80 + 30 * Math.sin(fallTime * 0.5 + i)) +
-              i * 70,
-          ])
+        const updatedData: WaveDataPoint[] = range(width).map((x) => [
+          x,
+          height * heightPortion +
+            Math.sin(x * 0.003 + i * 2 + shiftTime) *
+              (80 + 30 * Math.sin(fallTime * 0.5 + i)) +
+            i * 70,
+        ])
 
-        wave.datum(updatedData).attr("d", area)
+        wave.datum(updatedData).attr("d", waveArea)
       })
 
       requestAnimationFrame(animateWaves)

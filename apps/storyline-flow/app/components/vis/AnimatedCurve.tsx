@@ -1,7 +1,17 @@
 "use client"
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import { d3 } from "@repo/viz"
+import {
+  timeFormat,
+  curveBasis,
+  max,
+  range,
+  interpolateRgb,
+  scaleLinear,
+  line,
+  area,
+} from "@repo/viz"
+import type { ScaleLinear, Area } from "@repo/viz"
 import rough from "roughjs"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { FlubberInterpolate } from "@repo/motion"
@@ -17,7 +27,7 @@ import { Box, useTheme } from "@repo/ui/mui"
 
 const startMonth = 9 // October
 const months = Array.from({ length: 12 }, (_, i) =>
-  d3.timeFormat("%b")(new Date(2024, (i + startMonth) % 12, 1)),
+  timeFormat("%b")(new Date(2024, (i + startMonth) % 12, 1)),
 )
 
 const margin = { top: 50, right: 30, bottom: 70, left: 100 }
@@ -71,8 +81,7 @@ export default function AnimatedCurve({
 
   const xScale = useMemo(
     () =>
-      d3
-        .scaleLinear()
+      scaleLinear()
         .domain([-0.5, months.length - 1 + 0.5])
         .range([margin.left, dimensions.width - margin.right]),
     [dimensions.width],
@@ -80,8 +89,7 @@ export default function AnimatedCurve({
 
   const yScale = useMemo(
     () =>
-      d3
-        .scaleLinear()
+      scaleLinear()
         .domain([0, 1])
         .range([dimensions.height - margin.bottom, margin.top]),
     [dimensions.height],
@@ -89,20 +97,18 @@ export default function AnimatedCurve({
 
   const areaGen = useMemo(
     () =>
-      d3
-        .area<{ x: number; y: number }>()
+      area<{ x: number; y: number }>()
         .x((d) => xScale(d.x))
         .y0(dimensions.height - margin.bottom)
         .y1((d) => yScale(d.y))
-        .curve(d3.curveBasis),
+        .curve(curveBasis),
     [xScale, yScale, dimensions.height],
   )
 
-  const lineGen = d3
-    .line<{ x: number; y: number }>()
+  const lineGen = line<{ x: number; y: number }>()
     .x((d) => xScale(d.x))
     .y((d) => yScale(d.y))
-    .curve(d3.curveBasis)
+    .curve(curveBasis)
 
   useEffect(() => {
     if (!svgRef.current || !pathRef.current) return
@@ -148,7 +154,7 @@ export default function AnimatedCurve({
 
         pathD = snowToFlatInterpolators[segmentIndex]?.(segmentT)
         // Gradual color change from snow white to medium color
-        fillColor = d3.interpolateRgb(SnowWaterColor, "#a7bfd0")(phaseProgress)
+        fillColor = interpolateRgb(SnowWaterColor, "#a7bfd0")(phaseProgress)
       } else {
         const phaseProgress = (tAll - 0.5) * 2 // Scale to 0-1 for this phase
         const segmentDuration = 1 / flatToMeltInterpolators.length
@@ -161,7 +167,7 @@ export default function AnimatedCurve({
 
         pathD = flatToMeltInterpolators[segmentIndex]?.(segmentT)
         // Continue color change from medium to steelblue
-        fillColor = d3.interpolateRgb("#a7bfd0", FreshWaterColor)(phaseProgress)
+        fillColor = interpolateRgb("#a7bfd0", FreshWaterColor)(phaseProgress)
       }
 
       g.innerHTML = ""
@@ -273,8 +279,8 @@ function Annotation({
   snowData,
 }: {
   dimensions: { width: number; height: number }
-  xScale: d3.ScaleLinear<number, number>
-  yScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
   monthIdx: number
   scrollYProgress: MotionValue<number>
   snowData: { x: number; y: number }[]
@@ -283,11 +289,10 @@ function Annotation({
   const width = xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)
   const pathRef = useRef<SVGPathElement | null>(null)
 
-  const lineGen = d3
-    .line<{ x: number; y: number }>()
+  const lineGen = line<{ x: number; y: number }>()
     .x((d) => xScale(d.x))
     .y((d) => yScale(d.y))
-    .curve(d3.curveBasis)
+    .curve(curveBasis)
 
   const snowPoint = snowData.find((d) => d.x === monthIdx)
   const pathString = lineGen([snowPoint!])!
@@ -360,7 +365,7 @@ function YAxis({
   yScale,
 }: {
   size: { width: number; height: number }
-  yScale: d3.ScaleLinear<number, number>
+  yScale: ScaleLinear<number, number>
   scrollYProgress: MotionValue<number>
 }) {
   const labels = ["Low", "High"]
@@ -433,7 +438,7 @@ function XAxis({
   xScale,
 }: {
   size: { width: number; height: number }
-  xScale: d3.ScaleLinear<number, number>
+  xScale: ScaleLinear<number, number>
   scrollYProgress: MotionValue<number>
 }) {
   const axisPathLength = usePlayAnimationOnce(
@@ -491,7 +496,7 @@ function XTick({
 
 function PathInterpolate(
   data: { x: number; y: number }[],
-  areaGenerate: d3.Area<{ x: number; y: number }>,
+  areaGenerate: Area<{ x: number; y: number }>,
   toFlat = true,
   steps = 8,
 ) {
@@ -513,19 +518,19 @@ function PathInterpolate(
 }
 
 function getSnowCurve(shape = 5, scale = 0.6) {
-  const xValues = d3.range(0, months.length, 0.1)
+  const xValues = range(0, months.length, 0.1)
   const raw = xValues.map((x) => {
     const y = Math.pow(x, shape - 1) * Math.exp(-x / scale)
     return y
   })
 
   // Normalize the curve so the peak is 1
-  const max = d3.max(raw) || 1
-  return xValues.map((x, i) => ({ x, y: (raw[i] ?? 0) / max }))
+  const maxVal = max(raw) || 1
+  return xValues.map((x, i) => ({ x, y: (raw[i] ?? 0) / maxVal }))
 }
 
 function getMeltCurve(peak = 8, stdDev = 1.2) {
-  const xValues = d3.range(0, months.length, 0.1)
+  const xValues = range(0, months.length, 0.1)
   return xValues.map((x) => ({
     x,
     y: Math.exp(-((x - peak) ** 2) / (2 * stdDev ** 2)),

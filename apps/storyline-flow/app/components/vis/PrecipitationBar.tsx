@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useMemo } from "react"
-import { d3 } from "@repo/viz"
+import { mean, extent, scaleBand, ticks, scaleLinear } from "@repo/viz"
 import { motion, MotionValue, useTransform } from "@repo/motion"
 import { debounce } from "lodash"
 import "./precipitation-bar.css"
@@ -98,27 +98,24 @@ function PrecipitationBar({
   )
 
   const average = useMemo(() => {
-    return parseFloat(d3.mean(data, (d) => d.value)?.toFixed(2) || "0.00")
+    return parseFloat(mean(data, (d) => d.value)?.toFixed(2) || "0.00")
   }, [data])
 
   const yExtents = useMemo(() => {
     if (data.length === 0) return [0, 0]
     //return [-15, 15]
-    return d3.extent(data, (d) => d.anomaly) as [number, number]
+    return extent(data, (d) => d.anomaly) as [number, number]
   }, [data])
 
   const yTicks = useMemo(() => {
-    return d3
-      .ticks(yExtents[0] as number, yExtents[1] as number, 5)
-      .map((d) => ({
-        value: d,
-        label: d > 0 ? `+${d}` : `${d}`,
-      }))
+    return ticks(yExtents[0] as number, yExtents[1] as number, 5).map((d) => ({
+      value: d,
+      label: d > 0 ? `+${d}` : `${d}`,
+    }))
   }, [yExtents])
 
   const xScale = useMemo(() => {
-    return d3
-      .scaleBand<number>()
+    return scaleBand<number>()
       .domain(data.map((d) => d.year))
       .range([margin.left, dimensions.width - margin.right])
       .paddingInner(0.1)
@@ -126,8 +123,7 @@ function PrecipitationBar({
   }, [dimensions.width, data])
 
   const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
+    return scaleLinear()
       .domain(yExtents)
       .range([dimensions.height - margin.bottom, margin.top])
       .nice()
