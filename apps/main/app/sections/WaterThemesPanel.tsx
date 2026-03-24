@@ -143,6 +143,7 @@ function getStaggerStart(index: number, rangeStart: number, rangeEnd: number) {
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 /** Photo fill clipped to a circle — owns its staggered opacity hook */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ThemeCirclePhoto({
   circle,
   index,
