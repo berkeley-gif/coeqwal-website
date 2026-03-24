@@ -185,7 +185,7 @@ export function WaterThemeCards({
             mt: 2,
           }}
         >
-          {(["climate", "governance"] as const).map((id, i) => {
+          {(["governance"] as const).map((id, i) => {
             const themeEntry = WATER_THEMES.find((t) => t.id === id)
             const description = themeEntry?.description ?? ""
             const label = (themeEntry?.label ?? id).replace(/\n/g, " ")

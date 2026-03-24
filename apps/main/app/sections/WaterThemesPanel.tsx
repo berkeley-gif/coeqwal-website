@@ -112,15 +112,6 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
     label: requireTheme("governance").shortLabel,
     description: requireTheme("governance").description,
   },
-  {
-    id: "climate",
-    cx: 2589,
-    cy: 558,
-    r: 130,
-    photo: WATER_THEME_PHOTOS.climate ?? "",
-    label: requireTheme("climate").shortLabel,
-    description: requireTheme("climate").description,
-  },
 ]
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -197,12 +188,14 @@ function ThemeCircleLabel({
   progress,
   prefersReducedMotion,
   onLearnMore,
+  comingSoon,
 }: {
   circle: ThemeCircle
   index: number
   progress: MotionValue<number>
   prefersReducedMotion: boolean | null
   onLearnMore?: () => void
+  comingSoon?: boolean
 }) {
   const theme = useTheme()
   const start = getStaggerStart(index, LABEL_START, LABEL_END)
@@ -212,10 +205,10 @@ function ThemeCircleLabel({
     prefersReducedMotion ? [1, 1] : [0, 1],
   )
 
-  const labelW = 340
+  const labelW = 400
   const gap = 20
   const labelX = circle.cx - circle.r - gap - labelW
-  const labelY = circle.cy - 120
+  const labelY = circle.cy - 140
 
   const themeColors = theme.palette.waterThemes[
     circle.id as keyof typeof theme.palette.waterThemes
@@ -226,7 +219,7 @@ function ThemeCircleLabel({
       x={labelX}
       y={labelY}
       width={labelW}
-      height={260}
+      height={320}
       style={{ opacity, overflow: "visible" }}
     >
       <div
@@ -250,13 +243,14 @@ function ThemeCircleLabel({
         </div>
         <div
           style={{
-            fontSize: "18px",
-            lineHeight: 1.5,
+            fontSize: theme.typography.displayBody.fontSize,
+            fontWeight: theme.typography.displayBody.fontWeight,
+            lineHeight: theme.typography.displayBody.lineHeight,
           }}
         >
           {circle.description}
         </div>
-        {onLearnMore && (
+        {onLearnMore ? (
           <div
             role="button"
             tabIndex={0}
@@ -272,7 +266,7 @@ function ThemeCircleLabel({
               alignItems: "center",
               gap: "6px",
               marginTop: "10px",
-              fontSize: "18px",
+              fontSize: theme.typography.displayBody.fontSize as string,
               fontWeight: 600,
               cursor: "pointer",
               pointerEvents: "auto",
@@ -281,7 +275,18 @@ function ThemeCircleLabel({
             Learn more
             <NavArrow />
           </div>
-        )}
+        ) : comingSoon ? (
+          <div
+            style={{
+              marginTop: "10px",
+              fontSize: theme.typography.displayBody.fontSize as string,
+              fontWeight: 600,
+              opacity: 0.5,
+            }}
+          >
+            Coming soon
+          </div>
+        ) : null}
       </div>
     </motion.foreignObject>
   )
@@ -367,6 +372,7 @@ function WaterThemesPanelContent({
           pointerEvents: "none",
         }}
       >
+        {/* Photo fills — commented out; re-enable if circle photos return
         <defs>
           {CIRCLE_CONFIG.map((c) => (
             <clipPath key={`clip-${c.id}`} id={`clip-${c.id}`}>
@@ -375,7 +381,6 @@ function WaterThemesPanelContent({
           ))}
         </defs>
 
-        {/* Photo fills (clipped to circles) */}
         {CIRCLE_CONFIG.map((c, i) => (
           <ThemeCirclePhoto
             key={`photo-${c.id}`}
@@ -385,6 +390,7 @@ function WaterThemesPanelContent({
             prefersReducedMotion={prefersReducedMotion}
           />
         ))}
+        */}
 
         {/* Dashed circle outlines (on top of photos) */}
         {CIRCLE_CONFIG.map((c) => (
@@ -402,18 +408,20 @@ function WaterThemesPanelContent({
         ))}
 
         {/* Labels via foreignObject */}
-        {CIRCLE_CONFIG.map((c, i) => (
-          <ThemeCircleLabel
-            key={`label-${c.id}`}
-            circle={c}
-            index={i}
-            progress={progress}
-            prefersReducedMotion={prefersReducedMotion}
-            onLearnMore={
-              c.id === "delta" ? () => openThemePanel("delta") : undefined
-            }
-          />
-        ))}
+        {CIRCLE_CONFIG.map((c, i) => {
+          const active = c.id === "eco" || c.id === "delta"
+          return (
+            <ThemeCircleLabel
+              key={`label-${c.id}`}
+              circle={c}
+              index={i}
+              progress={progress}
+              prefersReducedMotion={prefersReducedMotion}
+              onLearnMore={active ? () => openThemePanel(c.id) : undefined}
+              comingSoon={!active}
+            />
+          )
+        })}
       </svg>
 
       {/* Layer 4: Text content — headline + description */}
