@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { BaseHeader } from "@repo/ui"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "@repo/ui/mui"
 import { useTabs } from "../context/Tabs"
 import { usePanelRoute } from "../hooks/usePanelRoute"
@@ -18,6 +18,7 @@ import { WATER_THEMES } from "../content/themes"
  */
 export function Header() {
   const router = useRouter()
+  const pathname = usePathname()
   const theme = useTheme()
 
   // -- Context for the theme panels
@@ -33,10 +34,12 @@ export function Header() {
   const isPastHero = hasMounted && rawIsPastHero
 
   const handleLogoClick = () => {
-    // Guard: this handler references browser-only APIs.
-    // It will never be called on the server, but the function body
-    // is evaluated during prerendering, so we still need the guard.
     if (typeof window === "undefined") return
+
+    if (pathname !== "/") {
+      router.push("/")
+      return
+    }
 
     const start = window.scrollY
     if (start === 0) return
