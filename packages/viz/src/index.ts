@@ -2,7 +2,7 @@
 export type {
   ChartConfig,
   DecileData,
-  DecileChartProps,
+  DecileBarChartProps,
   TimeSeriesData,
   TimeSeriesChartProps,
   ScenarioComparisonData,
@@ -72,8 +72,8 @@ export type {
 export { default as PackedDots } from "./components/PackedDots"
 export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
-export { default as BaselineScatter } from "./components/BaselineScatter"
-export type { BaselineScatterProps } from "./components/BaselineScatter"
+export { default as ParityPlot } from "./components/ParityPlot"
+export type { ParityPlotProps } from "./components/ParityPlot"
 export { default as DotStripPlot } from "./components/DotStripPlot"
 export type { DotStripPlotProps } from "./components/DotStripPlot"
 export { default as DivergingLollipop } from "./components/DivergingLollipop"
@@ -90,12 +90,6 @@ export type {
   TierHeatmapProps,
   TierHeatmapCell,
 } from "./components/TierHeatmap"
-export { default as BumpChart } from "./components/BumpChart"
-export type {
-  BumpChartProps,
-  BumpRanking,
-  BumpScenario,
-} from "./components/BumpChart"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,

@@ -26,7 +26,7 @@ export interface DecileData {
   value: number
 }
 
-export interface DecileChartProps extends ChartConfig {
+export interface DecileBarChartProps extends ChartConfig {
   data: DecileData[] | Record<string, number | string>
   colorScheme?: "blues" | "greens" | "purples" | "oranges" | "reds"
   showValues?: boolean

@@ -20,7 +20,13 @@
  * color (#ffd87e) so its chart line and sidebar legend swatch match the
  * baseline ScenarioBadge exactly.
  */
-import * as d3 from "d3"
+import {
+  interpolateBuPu,
+  interpolateGnBu,
+  interpolateYlGn,
+  interpolateYlOrBr,
+  interpolateYlOrRd,
+} from "d3"
 
 // Local string-union mirror of ScenarioTheme (defined in apps/main/content/scenarios.ts).
 // Kept here to avoid a cross-package import.
@@ -44,11 +50,11 @@ const makeThemePalette = (interpolator: (t: number) => string): string[] =>
  * Index 0 is the lightest step in the sampled range; index 6 is the darkest.
  */
 export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
-  baseline: makeThemePalette(d3.interpolateYlOrBr),
-  ag_gw: makeThemePalette(d3.interpolateYlGn),
-  eco: makeThemePalette(d3.interpolateGnBu),
-  delta: makeThemePalette(d3.interpolateBuPu),
-  cws: makeThemePalette(d3.interpolateYlOrRd),
+  baseline: makeThemePalette(interpolateYlOrBr),
+  ag_gw: makeThemePalette(interpolateYlGn),
+  eco: makeThemePalette(interpolateGnBu),
+  delta: makeThemePalette(interpolateBuPu),
+  cws: makeThemePalette(interpolateYlOrRd),
 }
 
 /**
