@@ -61,7 +61,7 @@ const DEFAULT_COLORS = {
 }
 const DEFAULT_LINE_COLORS: string[] = []
 const HOVER_NOTIFY_MS = 80
-const JITTER_PX = 14
+const JITTER_PX = 20
 const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
 
@@ -413,15 +413,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const effectiveJitter = isCompare ? JITTER_PX * 0.55 : JITTER_PX
         const effectiveDotR = isCompare
           ? data.length > 15
-            ? 2.2
+            ? 3.5
             : data.length > 8
-              ? 2.8
-              : 3.2
+              ? 4.5
+              : 5.5
           : data.length > 15
-            ? 2.8
+            ? 3.5
             : data.length > 8
-              ? 3.2
-              : 4
+              ? 4.5
+              : 5.5
 
         type SubCol = {
           srcData: VerticalParallelLineData[]
@@ -538,12 +538,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(id) ? 1.0 : 0.12
+            return highlightedIds.has(id) ? 1.0 : 0.15
           }
           if (chosenIds && chosenIds.size > 0) {
-            return chosenIds.has(id) ? 0.85 : 0.2
+            return chosenIds.has(id) ? 0.9 : 0.25
           }
-          return 0.7
+          return 0.8
         }
 
         const T_DUR = hasAnimatedRef.current ? 0 : 500
@@ -552,8 +552,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const dotR = effectiveDotR
         const ringExtra = showThemeRings ? 3 : 0
         const baselineMarkHalfW = Math.min(
-          (isCompare ? subW : bandW) * 0.35,
-          isCompare ? 14 : 22,
+          (isCompare ? subW : bandW) * 0.4,
+          isCompare ? 18 : 28,
         )
 
         const baselinePointsByTag = new Map<string, [number, number][]>()
@@ -588,12 +588,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("y1", baseY)
                 .attr("x2", cx + baselineMarkHalfW)
                 .attr("y2", baseY)
-                .attr("stroke", tag === "comp" ? "#78909c" : "#37474f")
-                .attr("stroke-width", 1.8)
-                .attr("stroke-linecap", "round")
-                .attr("opacity", tag === "comp" ? 0.45 : 0.55)
+                .attr("stroke", tag === "comp" ? "#718096" : "#2d3748")
+                .attr("stroke-width", 2.5)
+                .attr("stroke-linecap", "square")
+                .attr("opacity", tag === "comp" ? 0.5 : 0.7)
               if (tag === "comp") {
-                mark.attr("stroke-dasharray", "4,3")
+                mark.attr("stroke-dasharray", "5,3")
               }
 
               srcData.forEach((scenario, si) => {
@@ -781,7 +781,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               } else {
                 select(this)
                   .attr("fill-opacity", isFocus ? 1.0 : 0.08)
-                  .attr("stroke-opacity", isFocus ? 0.9 : 0)
+                  .attr("stroke-opacity", isFocus ? 1.0 : 0.08)
                   .attr("r", isFocus ? dotR + 1.5 : dotR * 0.7)
               }
             })
@@ -802,7 +802,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               } else {
                 select(this)
                   .attr("fill-opacity", op)
-                  .attr("stroke-opacity", 0.7)
+                  .attr("stroke-opacity", Math.min(op + 0.1, 1))
                   .attr("r", dotR)
               }
             })
@@ -883,10 +883,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   .attr("cy", baseY)
                   .attr("r", 0)
                   .attr("fill", color)
-                  .attr("fill-opacity", tag === "comp" ? opacity * 0.65 : opacity)
-                  .attr("stroke", "#fff")
-                  .attr("stroke-width", 0.6)
-                  .attr("stroke-opacity", 0.7)
+                  .attr("fill-opacity", tag === "comp" ? opacity * 0.7 : opacity)
+                  .attr("stroke", color)
+                  .attr("stroke-width", 1.5)
+                  .attr("stroke-opacity", Math.min((tag === "comp" ? opacity * 0.7 : opacity) + 0.1, 1))
                   .attr("cursor", "pointer")
                   .attr("data-scenario-id", scenario.id)
                   .attr("data-axis", axis)
@@ -901,7 +901,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 dot
                   .on("mouseenter", function (event: MouseEvent) {
                     applyFocusVisuals(scenario.id)
-                    select(this).attr("r", dotR + 2).raise()
+                    select(this).attr("r", dotR + 2.5).raise()
                     if (themeRing) {
                       dotsLayer
                         .selectAll<SVGCircleElement, unknown>(
