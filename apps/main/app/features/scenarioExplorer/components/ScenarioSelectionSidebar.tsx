@@ -155,7 +155,7 @@ export default function ScenarioSelectionSidebar({
   return (
     <Box
       sx={{
-        width: 270,
+        width: 230,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",

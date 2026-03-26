@@ -66,8 +66,10 @@ interface HydroclimateChooserProps {
   showLabels?: boolean
   /** Whether to show the section title */
   showTitle?: boolean
-  /** Override icon circle size (width & height). Defaults to "44px". */
+  /** Override icon circle size (width & height). Defaults to "40px". */
   iconSize?: string
+  /** Override the MUI icon font-size inside the circle. Defaults to "1.5rem". */
+  iconFontSize?: string
 }
 
 export function HydroclimateChooser({
@@ -77,6 +79,7 @@ export function HydroclimateChooser({
   showLabels = false,
   showTitle = true,
   iconSize = "40px",
+  iconFontSize = "1.5rem",
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -194,7 +197,7 @@ export function HydroclimateChooser({
                     <IconComponent
                       sx={{
                         color: theme.palette.common.white,
-                        fontSize: "1.5rem",
+                        fontSize: iconFontSize,
                       }}
                     />
                   </Box>

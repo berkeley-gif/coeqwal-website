@@ -1076,6 +1076,8 @@ export default function ComparisonPanel() {
             layout="horizontal"
             showTitle={true}
             showLabels={false}
+            iconSize="28px"
+            iconFontSize="1rem"
             value={hydroclimatePeriod}
             onChange={setHydroclimatePeriod}
           />
