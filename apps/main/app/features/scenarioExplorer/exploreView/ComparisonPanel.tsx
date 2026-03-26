@@ -168,10 +168,9 @@ export default function ComparisonPanel() {
   const [paritySpreadDots, setParitySpreadDots] = useState(false)
   const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
-  const [deviationConnectLines, setDeviationConnectLines] = useState(false)
-  const [deviationOutcomeLabels, setDeviationOutcomeLabels] = useState(true)
-  const [deviationSpreadDots, setDeviationSpreadDots] = useState(false)
-  const [deviationThemeGrouping, setDeviationThemeGrouping] = useState(false)
+  const [deviationShowStaircase, setDeviationShowStaircase] = useState(true)
+  const [deviationShowPath, setDeviationShowPath] = useState(true)
+  const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
   const [deviationSortMode, setDeviationSortMode] = useState<
     "baseline" | "scenario"
   >("baseline")
@@ -542,14 +541,14 @@ export default function ComparisonPanel() {
             control={
               <Checkbox
                 size="small"
-                checked={deviationConnectLines}
-                onChange={(e) => setDeviationConnectLines(e.target.checked)}
+                checked={deviationShowStaircase}
+                onChange={(e) => setDeviationShowStaircase(e.target.checked)}
                 sx={checkboxSx}
               />
             }
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                connect lines
+                baseline staircase
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -558,14 +557,14 @@ export default function ComparisonPanel() {
             control={
               <Checkbox
                 size="small"
-                checked={deviationOutcomeLabels}
-                onChange={(e) => setDeviationOutcomeLabels(e.target.checked)}
+                checked={deviationShowPath}
+                onChange={(e) => setDeviationShowPath(e.target.checked)}
                 sx={checkboxSx}
               />
             }
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                outcome labels
+                scenario path
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -574,30 +573,14 @@ export default function ComparisonPanel() {
             control={
               <Checkbox
                 size="small"
-                checked={deviationSpreadDots}
-                onChange={(e) => setDeviationSpreadDots(e.target.checked)}
+                checked={deviationShowTierZones}
+                onChange={(e) => setDeviationShowTierZones(e.target.checked)}
                 sx={checkboxSx}
               />
             }
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                spread dots
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationThemeGrouping}
-                onChange={(e) => setDeviationThemeGrouping(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                theme grouping
+                tier zones
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -862,11 +845,9 @@ export default function ComparisonPanel() {
           onLineClick={handleChartLineClick}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
-          showConnectLines={deviationConnectLines}
-          showOutcomeLabels={deviationOutcomeLabels}
-          showSpreadDots={deviationSpreadDots}
-          scenarioThemes={scenarioThemeMap}
-          showThemeGrouping={deviationThemeGrouping}
+          showBaselineStaircase={deviationShowStaircase}
+          showScenarioPath={deviationShowPath}
+          showTierZones={deviationShowTierZones}
         />
       )}
 
