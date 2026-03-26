@@ -177,17 +177,11 @@ export default function ComparisonPanel() {
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(true)
   const [deviationShowPath, setDeviationShowPath] = useState(true)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
-  const [deviationShowGlyphs, setDeviationShowGlyphs] = useState(false)
-  const [deviationShowThemeRings, setDeviationShowThemeRings] = useState(false)
-  const [deviationSortMode, setDeviationSortMode] = useState<
-    "baseline" | "scenario"
-  >("baseline")
   const [deviationClimateMode, setDeviationClimateMode] = useState<
     "off" | "morph" | "compare"
   >("off")
   const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
-  const [deviationComparisonHC, setDeviationComparisonHC] =
-    useState("warmer-drier-iv")
+  const [deviationComparisonHC] = useState("warmer-wetter")
 
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -227,36 +221,6 @@ export default function ComparisonPanel() {
     })
     return map
   }, [parityData])
-
-  const waterThemeRingBgBaseline = theme.palette.waterThemes.baseline.background
-  const waterThemeRingBgAgGw = theme.palette.waterThemes.ag_gw.background
-  const waterThemeRingBgEco = theme.palette.waterThemes.eco.background
-  const waterThemeRingBgDelta = theme.palette.waterThemes.delta.background
-  const waterThemeRingBgCws = theme.palette.waterThemes.cws.background
-
-  /** Water-theme ring colors — primitive deps avoid new map identity every parent render */
-  const deviationThemeRingColors = useMemo(() => {
-    const ringByTheme: Record<string, string> = {
-      baseline: waterThemeRingBgBaseline,
-      ag_gw: waterThemeRingBgAgGw,
-      eco: waterThemeRingBgEco,
-      delta: waterThemeRingBgDelta,
-      cws: waterThemeRingBgCws,
-    }
-    const map: Record<string, string> = {}
-    parityData.forEach((s) => {
-      const bg = ringByTheme[getScenarioTheme(s.id)]
-      if (bg) map[s.id] = bg
-    })
-    return map
-  }, [
-    parityData,
-    waterThemeRingBgBaseline,
-    waterThemeRingBgAgGw,
-    waterThemeRingBgEco,
-    waterThemeRingBgDelta,
-    waterThemeRingBgCws,
-  ])
 
   // Mock comparison hydroclimate data → VerticalParallelLineData[]
   const mockHC =
@@ -298,28 +262,15 @@ export default function ComparisonPanel() {
     return { id: "s0020", name: "Baseline (comparison)", values, highlighted: false }
   }, [mockHC])
 
-  const mockHCOptions = useMemo(
-    () =>
-      Object.entries(mockHydroclimateTiers.hydroclimates).map(
-        ([key, hc]) => ({ key, label: (hc as { label: string }).label }),
-      ),
-    [],
-  )
-
-  // Deviation plot: sort outcome columns by tier score (best on left)
+  // Deviation plot: sort outcome columns by baseline tier score (best on left)
   const deviationSortedAxes = useMemo(() => {
-    const sortSource =
-      deviationSortMode === "scenario" && highlightedScenario
-        ? parityData.find((s) => s.id === highlightedScenario)
-        : null
-    const source = sortSource ?? baselineScenario
-    if (!source) return axes
+    if (!baselineScenario) return axes
     return [...axes].sort((a, b) => {
-      const va = source.values[a] ?? 0
-      const vb = source.values[b] ?? 0
+      const va = baselineScenario.values[a] ?? 0
+      const vb = baselineScenario.values[b] ?? 0
       return vb - va
     })
-  }, [axes, baselineScenario, parityData, deviationSortMode, highlightedScenario])
+  }, [axes, baselineScenario])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -598,37 +549,6 @@ export default function ComparisonPanel() {
       )}
       {chartMode === "deviation" && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
-          <Typography
-            variant="compactCaption"
-            sx={{ color: theme.palette.grey[500], mr: 0.25 }}
-          >
-            Sort:
-          </Typography>
-          <Box
-            component="select"
-            value={deviationSortMode}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setDeviationSortMode(
-                e.target.value as "baseline" | "scenario",
-              )
-            }
-            sx={{
-              fontSize: "0.72rem",
-              border: `1px solid ${theme.palette.grey[300]}`,
-              borderRadius: theme.borderRadius.xs,
-              px: 0.75,
-              py: 0.25,
-              mr: 2,
-              background: theme.palette.background.paper,
-              color: theme.palette.grey[800],
-              outline: "none",
-              cursor: "pointer",
-              "&:focus": { borderColor: theme.palette.grey[500] },
-            }}
-          >
-            <option value="baseline">Baseline tier</option>
-            <option value="scenario">Selected scenario</option>
-          </Box>
           <FormControlLabel
             control={
               <Checkbox
@@ -656,7 +576,7 @@ export default function ComparisonPanel() {
             }
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                scenario path
+                scenario path on hover
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -677,131 +597,57 @@ export default function ComparisonPanel() {
             }
             sx={{ mr: 1.5 }}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationShowGlyphs}
-                onChange={(e) => setDeviationShowGlyphs(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                difference ticks
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationShowThemeRings}
-                onChange={(e) => setDeviationShowThemeRings(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                theme rings
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 0.5,
               ml: 1,
               pl: 1,
               borderLeft: `1px solid ${theme.palette.grey[300]}`,
             }}
           >
-            <Typography
-              variant="compactCaption"
-              sx={{ color: theme.palette.grey[500], mr: 0.25 }}
-            >
-              Climate:
-            </Typography>
-            <Box
-              component="select"
-              value={deviationClimateMode}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setDeviationClimateMode(
-                  e.target.value as "off" | "morph" | "compare",
-                )
-              }
-              sx={{
-                fontSize: "0.72rem",
-                border: `1px solid ${theme.palette.grey[300]}`,
-                borderRadius: theme.borderRadius.xs,
-                px: 0.75,
-                py: 0.25,
-                background: theme.palette.background.paper,
-                color: theme.palette.grey[800],
-                outline: "none",
-                cursor: "pointer",
-                "&:focus": { borderColor: theme.palette.grey[500] },
-              }}
-            >
-              <option value="off">Off</option>
-              <option value="morph">Morph</option>
-              <option value="compare">Compare</option>
-            </Box>
-            {deviationClimateMode !== "off" && (
-              <Box
-                component="select"
-                value={deviationComparisonHC}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                  setDeviationComparisonHC(e.target.value)
-                }
-                sx={{
-                  fontSize: "0.72rem",
-                  border: `1px solid ${theme.palette.grey[300]}`,
-                  borderRadius: theme.borderRadius.xs,
-                  px: 0.75,
-                  py: 0.25,
-                  background: theme.palette.background.paper,
-                  color: theme.palette.grey[800],
-                  outline: "none",
-                  cursor: "pointer",
-                  "&:focus": { borderColor: theme.palette.grey[500] },
-                }}
-              >
-                {mockHCOptions.map(({ key, label }) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </Box>
-            )}
-            {deviationClimateMode === "morph" && (
-              <Box
-                component="button"
-                onClick={() => setDeviationMorphShowComp((p) => !p)}
-                sx={{
-                  fontSize: "0.72rem",
-                  border: `1px solid ${theme.palette.grey[300]}`,
-                  borderRadius: theme.borderRadius.xs,
-                  px: 1,
-                  py: 0.25,
-                  background: deviationMorphShowComp
-                    ? theme.palette.grey[200]
-                    : theme.palette.background.paper,
-                  color: theme.palette.grey[800],
-                  cursor: "pointer",
-                  outline: "none",
-                  fontWeight: deviationMorphShowComp ? 600 : 400,
-                  "&:hover": { background: theme.palette.grey[100] },
-                }}
-              >
-                {deviationMorphShowComp
-                  ? deviationComparisonLabel
-                  : "Historical"}
-              </Box>
-            )}
+            {(["historical", "comparison"] as const).map((mode) => {
+              const isComp = mode === "comparison"
+              const isActive = isComp
+                ? deviationClimateMode === "morph" && deviationMorphShowComp
+                : deviationClimateMode !== "morph" || !deviationMorphShowComp
+              return (
+                <Box
+                  key={mode}
+                  component="button"
+                  onClick={() => {
+                    if (isComp) {
+                      setDeviationClimateMode("morph")
+                      setDeviationMorphShowComp(true)
+                    } else {
+                      if (deviationClimateMode === "morph") {
+                        setDeviationMorphShowComp(false)
+                      }
+                    }
+                  }}
+                  sx={{
+                    fontSize: "0.72rem",
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    borderRight: isComp ? undefined : "none",
+                    borderRadius: isComp
+                      ? `0 ${theme.borderRadius.xs}px ${theme.borderRadius.xs}px 0`
+                      : `${theme.borderRadius.xs}px 0 0 ${theme.borderRadius.xs}px`,
+                    px: 1,
+                    py: 0.25,
+                    background: isActive
+                      ? theme.palette.grey[200]
+                      : theme.palette.background.paper,
+                    color: theme.palette.grey[800],
+                    cursor: "pointer",
+                    outline: "none",
+                    fontWeight: isActive ? 600 : 400,
+                    "&:hover": { background: theme.palette.grey[100] },
+                  }}
+                >
+                  {isComp ? deviationComparisonLabel : "Historical"}
+                </Box>
+              )
+            })}
           </Box>
         </Box>
       )}
@@ -1072,9 +918,8 @@ export default function ComparisonPanel() {
           showBaselineStaircase={deviationShowStaircase}
           showScenarioPath={deviationShowPath}
           showTierZones={deviationShowTierZones}
-          showDifferenceGlyphs={deviationShowGlyphs}
-          showThemeRings={deviationShowThemeRings}
-          scenarioThemeRingColors={deviationThemeRingColors}
+          showDifferenceGlyphs={false}
+          showThemeRings={false}
           comparisonData={
             deviationClimateMode !== "off"
               ? deviationComparisonData
