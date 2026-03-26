@@ -179,7 +179,7 @@ export function MobileModal({
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "calc(100vw - 32px)",
+            width: "calc(100vw - 16px)",
             maxWidth,
             maxHeight,
             ...(height !== undefined && { height }),

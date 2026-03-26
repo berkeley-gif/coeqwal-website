@@ -388,9 +388,9 @@ export default function ScenarioExplorerNew() {
         noPadding
         noContentScroll
         subHeader={<SelectionBanner />}
-        maxWidth="90vw"
-        maxHeight="90vh"
-        height="90vh"
+        maxWidth="96vw"
+        maxHeight="96vh"
+        height="96vh"
       >
         {exploreMode === "comparison" && <ComparisonPanel />}
         {exploreMode === "equity" && <EquityPanel />}
