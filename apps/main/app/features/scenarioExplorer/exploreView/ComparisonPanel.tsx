@@ -171,6 +171,8 @@ export default function ComparisonPanel() {
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(true)
   const [deviationShowPath, setDeviationShowPath] = useState(true)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
+  const [deviationShowGlyphs, setDeviationShowGlyphs] = useState(false)
+  const [deviationShowThemeRings, setDeviationShowThemeRings] = useState(false)
   const [deviationSortMode, setDeviationSortMode] = useState<
     "baseline" | "scenario"
   >("baseline")
@@ -213,6 +215,18 @@ export default function ComparisonPanel() {
     })
     return map
   }, [parityData])
+
+  /** Water-theme background colors for deviation chart scenario rings */
+  const deviationThemeRingColors = useMemo(() => {
+    const map: Record<string, string> = {}
+    const wt = theme.palette.waterThemes
+    parityData.forEach((s) => {
+      const key = getScenarioTheme(s.id) as keyof typeof wt
+      const c = wt[key]
+      if (c?.background) map[s.id] = c.background
+    })
+    return map
+  }, [parityData, theme.palette.waterThemes])
 
   // Deviation plot: sort outcome columns by tier score (best on left)
   const deviationSortedAxes = useMemo(() => {
@@ -585,6 +599,38 @@ export default function ComparisonPanel() {
             }
             sx={{ mr: 1.5 }}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowGlyphs}
+                onChange={(e) => setDeviationShowGlyphs(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                difference ticks
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowThemeRings}
+                onChange={(e) => setDeviationShowThemeRings(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                theme rings
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
         </Box>
       )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
@@ -848,6 +894,9 @@ export default function ComparisonPanel() {
           showBaselineStaircase={deviationShowStaircase}
           showScenarioPath={deviationShowPath}
           showTierZones={deviationShowTierZones}
+          showDifferenceGlyphs={deviationShowGlyphs}
+          showThemeRings={deviationShowThemeRings}
+          scenarioThemeRingColors={deviationThemeRingColors}
         />
       )}
 
