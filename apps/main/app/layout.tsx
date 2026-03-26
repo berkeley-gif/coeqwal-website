@@ -4,12 +4,13 @@
  * Sets up theme, translations, and font loading for the entire app.
  */
 
-import { StrictMode } from "react"
+import { StrictMode, Suspense } from "react"
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { DataProvider } from "@repo/data/providers"
 import { FontLoader } from "./components/FontLoader"
+import { ActiveThemePanel } from "./components/ActiveThemePanel"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -29,7 +30,14 @@ export default function RootLayout({
           <FontLoader kitId="rxm7kha" />
           <TranslationProvider initialLocale="en">
             <DataProvider>
-              <ThemeRegistry>{children}</ThemeRegistry>
+              <ThemeRegistry>
+
+                <Suspense fallback={null}>
+                  <ActiveThemePanel />
+                </Suspense>
+
+                {children}
+              </ThemeRegistry>
             </DataProvider>
           </TranslationProvider>
         </StrictMode>
