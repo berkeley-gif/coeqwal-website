@@ -38,19 +38,19 @@ The repository is managed with **Turborepo + pnpm workspaces** and split into tw
 
 The main app (`apps/main`) has three routes:
 
-- `/` -- Home page with a video hero, intro section, and the three-tab system overlaid on a persistent Mapbox map
-- `/about` -- Project information, partner logos, and contact details
-- `/data` -- Scenario data downloads (ZIP and CSV)
+- `/` Home page with a video hero, intro section, and the three-tab system overlaid on a persistent Mapbox map
+- `/about` Project information, partner logos, and contact details
+- `/data` Scenario data downloads (ZIP and CSV)
 
 Key features live in `apps/main/app/features/`:
 
-- **`map/`** -- Mapbox instance with base layers (rivers, basins), visualization layers (outcomes, tier markers), overlay panels, camera presets, and its own Zustand store
-- **`scenarioExplorer/`** -- Multi-view scenario explorer with list, comparison, equity, and data explorer views
-- **`scenarios/`** -- Scenario selection components and data hooks
-- **`glossary/`** -- Floating glossary panel
-- **`tooltips/`** -- Tier tooltips, map feature tooltips, and scroll tooltips
+- **`map/`** Mapbox instance with base layers (rivers, basins), visualization layers (outcomes, tier markers), overlay panels, camera presets, and its own Zustand store
+- **`scenarioExplorer/`** Multi-view scenario explorer with list, comparison, equity, and data explorer views
+- **`scenarios/`** Scenario selection components and data hooks
+- **`glossary/`** Floating glossary panel
+- **`tooltips/`** Tier tooltips, map feature tooltips, and scroll tooltips
 
-Styling uses **MUI v7 with Emotion** (CSS-in-JS via the `sx` prop and a shared theme from `@repo/ui/themes`). There is no Tailwind or CSS Modules.
+Styling uses **MUI v7 with Emotion** (CSS-in-JS via the `sx` prop and a shared theme from `@repo/ui/themes`). This choice was made so facilitate design system collaboration. It does however greatly expand the hydration boundary for the site, effectively limiting our SSR options. That said, we are using i18n, map layers, and d3 extensively in the site, which also greatly expands our hydration boundary.
 
 State management combines **Zustand** stores (map state, scenario explorer state) with **React Context** (tab state) and URL query-parameter sync for the active tab.
 

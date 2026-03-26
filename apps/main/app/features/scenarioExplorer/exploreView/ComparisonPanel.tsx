@@ -47,7 +47,7 @@ type ChartMode = "parallel" | "parity" | "deviation" | "heatmap" | "sankey"
 const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "parallel", label: "Parallel" },
   { key: "parity", label: "Parity" },
-  { key: "deviation", label: "Deviation" },
+  { key: "deviation", label: "Column" },
   { key: "heatmap", label: "Heatmap" },
   { key: "sankey", label: "Sankey" },
 ]

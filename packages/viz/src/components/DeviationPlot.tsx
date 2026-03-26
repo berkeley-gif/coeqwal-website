@@ -38,18 +38,32 @@ function toTier(v: number): number {
 const CHANGE_THRESHOLD = 0.05
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
-const TIER_ZONE_COLORS = ["#e8f5e9", "#fffde7", "#fff3e0", "#ffebee"] as const
-const MARGIN = { top: 20, right: 20, bottom: 20, left: 20 }
-const COLOR_IMPROVED = "#4caf50"
-const COLOR_WORSENED = "#e53935"
+const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
+const MARGIN = { top: 28, right: 24, bottom: 48, left: 52 }
+
+const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
+  "Community deliveries": ["Community", "deliveries"],
+  "Agricultural revenue": ["Agricultural", "revenue"],
+  "Environmental flows": ["Environmental", "flows"],
+  "Reservoir storage": ["Reservoir", "storage"],
+  "Groundwater storage": ["Groundwater", "storage"],
+  "Delta estuary ecology": ["Delta estuary", "ecology"],
+  "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
+  "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
+  "Winter-run salmon": ["Winter-run", "salmon"],
+}
+const COLOR_IMPROVED = "#2e7d32"
+const COLOR_WORSENED = "#c62828"
 const DEFAULT_COLORS = {
-  default: "#666",
+  default: "#546e7a",
   highlighted: "#1a3a5c",
-  background: "#f8f9fa",
+  background: "#ffffff",
 }
 const DEFAULT_LINE_COLORS: string[] = []
 const HOVER_NOTIFY_MS = 80
 const JITTER_PX = 14
+const FONT_FAMILY =
+  '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
 
 function hashJitter(id: string, axis: string): number {
   const s = id + ":" + axis
@@ -106,13 +120,13 @@ function showTooltip(
   el.style.left = `${x}px`
   el.style.top = `${y}px`
   el.innerHTML =
-    `<div style="font-weight:600;color:#333">${scenarioName}</div>` +
+    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em">${scenarioName}</div>` +
     (summary
-      ? `<div style="color:#555;font-size:10px;margin-top:3px">${summary}</div>`
+      ? `<div style="color:#718096;font-size:9.5px;margin-top:3px;letter-spacing:0.01em">${summary}</div>`
       : "") +
-    `<div style="color:#666;margin-top:2px">${outcomeName}</div>` +
-    `<div style="color:#888;font-size:10px;margin-top:2px">Baseline: ${baselineTier} · Scenario: ${scenarioTier}</div>` +
-    `<div style="font-size:10px;margin-top:1px">Change: <span style="color:${changeColor(change)};font-weight:600">${change}</span></div>`
+    `<div style="color:#4a5568;margin-top:4px;font-size:10.5px">${outcomeName}</div>` +
+    `<div style="color:#a0aec0;font-size:9.5px;margin-top:3px;letter-spacing:0.02em">Baseline ${baselineTier} \u2192 Scenario ${scenarioTier}</div>` +
+    `<div style="font-size:10px;margin-top:2px;letter-spacing:0.01em"><span style="color:${changeColor(change)};font-weight:600">${change}</span></div>`
 }
 
 function hideTooltip(el: HTMLDivElement) {
@@ -300,34 +314,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("y2", newY)
             })
 
-          svg
-            .selectAll<SVGRectElement, unknown>("rect.improve-shade")
-            .each(function () {
-              const el = select(this)
-              const axis = el.attr("data-axis")
-              if (!axis) return
-              const bv = targetBaseline.values[axis]
-              if (bv == null) return
-              const newBaseY = scales.yScale(toTier(bv))
-              el.transition()
-                .duration(MORPH_DUR)
-                .attr("height", newBaseY - scales.yScale(0.5))
-            })
-
-          svg
-            .selectAll<SVGRectElement, unknown>("rect.worsen-shade")
-            .each(function () {
-              const el = select(this)
-              const axis = el.attr("data-axis")
-              if (!axis) return
-              const bv = targetBaseline.values[axis]
-              if (bv == null) return
-              const newBaseY = scales.yScale(toTier(bv))
-              el.transition()
-                .duration(MORPH_DUR)
-                .attr("y", newBaseY)
-                .attr("height", scales.yScale(4.5) - newBaseY)
-            })
 
           svg
             .selectAll<SVGLineElement, unknown>("line.diff-glyph")
@@ -427,15 +413,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const effectiveJitter = isCompare ? JITTER_PX * 0.55 : JITTER_PX
         const effectiveDotR = isCompare
           ? data.length > 15
-            ? 2.5
+            ? 2.2
             : data.length > 8
-              ? 3
-              : 3.5
+              ? 2.8
+              : 3.2
           : data.length > 15
-            ? 3
+            ? 2.8
             : data.length > 8
-              ? 3.5
-              : 4.5
+              ? 3.2
+              : 4
 
         type SubCol = {
           srcData: VerticalParallelLineData[]
@@ -475,25 +461,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               },
             ]
 
-        g.append("rect")
-          .attr("width", innerW)
-          .attr("height", innerH)
-          .attr("fill", colors.background)
-          .attr("rx", 4)
-
-        if (showTierZones) {
-          TIER_POSITIONS.forEach((t, i) => {
-            const y0 = yScale(t - 0.5)
-            const y1 = yScale(t + 0.5)
-            g.append("rect")
-              .attr("x", 0)
-              .attr("y", y0)
-              .attr("width", innerW)
-              .attr("height", y1 - y0)
-              .attr("fill", TIER_ZONE_COLORS[i] ?? "#f5f5f5")
-              .attr("opacity", 0.35)
-          })
-        }
+        TIER_POSITIONS.forEach((t, i) => {
+          const y0 = yScale(t - 0.5)
+          const y1 = yScale(t + 0.5)
+          g.append("rect")
+            .attr("x", 0)
+            .attr("y", y0)
+            .attr("width", innerW)
+            .attr("height", y1 - y0)
+            .attr("fill", showTierZones ? (TIER_BAND_COLORS[i] ?? "#fff") : colors.background)
+        })
 
         TIER_POSITIONS.forEach((t) => {
           g.append("line")
@@ -501,38 +478,57 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("y1", yScale(t))
             .attr("x2", innerW)
             .attr("y2", yScale(t))
-            .attr("stroke", "#ddd")
-            .attr("stroke-width", 0.5)
+            .attr("stroke", "#cbd5e0")
+            .attr("stroke-width", 1)
+        })
+
+        axes.forEach((axis, idx) => {
+          const colX = xScale(axis)!
+          if (idx % 2 === 1) {
+            g.append("rect")
+              .attr("x", colX)
+              .attr("y", 0)
+              .attr("width", bandW)
+              .attr("height", innerH)
+              .attr("fill", "rgba(0,0,0,0.018)")
+              .attr("pointer-events", "none")
+          }
+          if (idx > 0) {
+            g.append("line")
+              .attr("x1", colX)
+              .attr("y1", 0)
+              .attr("x2", colX)
+              .attr("y2", innerH)
+              .attr("stroke", "#e2e8f0")
+              .attr("stroke-width", 0.5)
+              .attr("pointer-events", "none")
+          }
         })
 
         TIER_POSITIONS.forEach((t, i) => {
           g.append("text")
-            .attr("x", -6)
+            .attr("x", -10)
             .attr("y", yScale(t))
             .attr("text-anchor", "end")
             .attr("dominant-baseline", "middle")
-            .attr("font-size", 10)
-            .attr("fill", "#999")
+            .attr("font-size", 12)
+            .attr("font-family", FONT_FAMILY)
+            .attr("font-weight", 500)
+            .attr("fill", "#4a5568")
+            .attr("letter-spacing", "0.01em")
             .text(TIER_LABELS[i] ?? "")
         })
-
-        g.append("text")
-          .attr("transform", "rotate(-90)")
-          .attr("x", -innerH / 2)
-          .attr("y", -14)
-          .attr("text-anchor", "middle")
-          .attr("font-size", 10)
-          .attr("fill", "#bbb")
-          .text("\u2191 Better \u00b7 Tier \u00b7 Worse \u2193")
 
         if (isMorph) {
           g.append("text")
             .attr("class", "climate-label")
             .attr("x", innerW)
-            .attr("y", -6)
+            .attr("y", -10)
             .attr("text-anchor", "end")
             .attr("font-size", 9)
-            .attr("fill", "#888")
+            .attr("font-family", FONT_FAMILY)
+            .attr("fill", "#78909c")
+            .attr("letter-spacing", "0.04em")
             .text(
               morphShowCompRef.current
                 ? (comparisonLabel ?? "Comparison")
@@ -583,38 +579,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
               baselinePointsByTag.get(tag)!.push([cx, baseY])
 
-              if (bgTint) {
-                g.append("rect")
-                  .attr("x", colX + xOff)
-                  .attr("y", yScale(0.5))
-                  .attr("width", w)
-                  .attr("height", yScale(4.5) - yScale(0.5))
-                  .attr("fill", bgTint)
-                  .attr("rx", 2)
-                  .attr("pointer-events", "none")
-              }
-
-              g.append("rect")
-                .attr("class", "improve-shade")
-                .attr("data-axis", axis)
-                .attr("data-tag", tag)
-                .attr("x", colX + xOff + 1)
-                .attr("y", yScale(0.5))
-                .attr("width", w - 2)
-                .attr("height", baseY - yScale(0.5))
-                .attr("fill", COLOR_IMPROVED)
-                .attr("opacity", 0.03)
-              g.append("rect")
-                .attr("class", "worsen-shade")
-                .attr("data-axis", axis)
-                .attr("data-tag", tag)
-                .attr("x", colX + xOff + 1)
-                .attr("y", baseY)
-                .attr("width", w - 2)
-                .attr("height", yScale(4.5) - baseY)
-                .attr("fill", COLOR_WORSENED)
-                .attr("opacity", 0.03)
-
               const mark = g
                 .append("line")
                 .attr("class", "baseline-mark")
@@ -624,10 +588,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("y1", baseY)
                 .attr("x2", cx + baselineMarkHalfW)
                 .attr("y2", baseY)
-                .attr("stroke", tag === "comp" ? "#6a9bc3" : "#555")
-                .attr("stroke-width", 2.5)
+                .attr("stroke", tag === "comp" ? "#78909c" : "#37474f")
+                .attr("stroke-width", 1.8)
                 .attr("stroke-linecap", "round")
-                .attr("opacity", tag === "comp" ? 0.5 : 0.6)
+                .attr("opacity", tag === "comp" ? 0.45 : 0.55)
               if (tag === "comp") {
                 mark.attr("stroke-dasharray", "4,3")
               }
@@ -698,36 +662,42 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           }
 
           const labelCx = colX + bandW / 2
-          const label = axis
-          const maxLabelW = bandW - 4
-          const charW = 5.5
-          const maxChars = Math.floor(maxLabelW / charW)
-          if (label.length <= maxChars) {
+          const labelFontSize = isCompare ? 9 : 12
+          const labelColor = "#4a5568"
+          const labelLineH = labelFontSize * 1.3
+          const curated = LABEL_BREAK_POINTS[axis]
+          if (curated) {
             g.append("text")
               .attr("x", labelCx)
-              .attr("y", innerH + 14)
+              .attr("y", innerH + labelLineH + 2)
               .attr("text-anchor", "middle")
-              .attr("font-size", isCompare ? 8 : 9.5)
-              .attr("fill", "#666")
-              .text(label)
+              .attr("font-size", labelFontSize)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-weight", 500)
+              .attr("fill", labelColor)
+              .attr("letter-spacing", "0.01em")
+              .text(curated[0])
+            g.append("text")
+              .attr("x", labelCx)
+              .attr("y", innerH + labelLineH * 2 + 2)
+              .attr("text-anchor", "middle")
+              .attr("font-size", labelFontSize)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-weight", 500)
+              .attr("fill", labelColor)
+              .attr("letter-spacing", "0.01em")
+              .text(curated[1])
           } else {
-            const mid = Math.ceil(label.length / 2)
-            let splitIdx = label.lastIndexOf(" ", mid)
-            if (splitIdx <= 0) splitIdx = mid
             g.append("text")
               .attr("x", labelCx)
-              .attr("y", innerH + 12)
+              .attr("y", innerH + labelLineH + 2)
               .attr("text-anchor", "middle")
-              .attr("font-size", isCompare ? 7.5 : 9)
-              .attr("fill", "#666")
-              .text(label.slice(0, splitIdx).trim())
-            g.append("text")
-              .attr("x", labelCx)
-              .attr("y", innerH + 22)
-              .attr("text-anchor", "middle")
-              .attr("font-size", isCompare ? 7.5 : 9)
-              .attr("fill", "#666")
-              .text(label.slice(splitIdx).trim())
+              .attr("font-size", labelFontSize)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-weight", 500)
+              .attr("fill", labelColor)
+              .attr("letter-spacing", "0.01em")
+              .text(axis)
           }
         })
 
@@ -741,26 +711,30 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("class", `staircase staircase-${tag}`)
             .attr("d", stairLine(pts) ?? "")
             .attr("fill", "none")
-            .attr("stroke", tag === "comp" ? "#6a9bc3" : "#888")
-            .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", tag === "comp" ? "3,3" : "5,4")
-            .attr("stroke-opacity", 0.45)
+            .attr("stroke", tag === "comp" ? "#90a4ae" : "#546e7a")
+            .attr("stroke-width", 1.2)
+            .attr("stroke-dasharray", tag === "comp" ? "3,3" : "6,4")
+            .attr("stroke-opacity", 0.4)
             .attr("pointer-events", "none")
         })
 
         if (isCompare) {
           g.append("text")
             .attr("x", 4)
-            .attr("y", -6)
-            .attr("font-size", 8)
-            .attr("fill", "#888")
+            .attr("y", -10)
+            .attr("font-size", 8.5)
+            .attr("font-family", FONT_FAMILY)
+            .attr("fill", "#78909c")
+            .attr("letter-spacing", "0.04em")
             .text("Historical")
           g.append("text")
             .attr("x", innerW)
-            .attr("y", -6)
+            .attr("y", -10)
             .attr("text-anchor", "end")
-            .attr("font-size", 8)
-            .attr("fill", "#6a9bc3")
+            .attr("font-size", 8.5)
+            .attr("font-family", FONT_FAMILY)
+            .attr("fill", "#78909c")
+            .attr("letter-spacing", "0.04em")
             .text(comparisonLabel ?? "Comparison")
         }
 
@@ -786,9 +760,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("d", pathGen(pts) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
-            .attr("stroke-width", 2)
-            .attr("stroke-opacity", 0.55)
+            .attr("stroke-width", 1.5)
+            .attr("stroke-opacity", 0.45)
             .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
             .attr("pointer-events", "none")
         }
 
@@ -801,13 +776,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const isRing = this.classList.contains("theme-ring")
               if (isRing) {
                 select(this)
-                  .attr("opacity", isFocus ? 1 : 0.12)
-                  .attr("stroke-opacity", isFocus ? 1 : 0.18)
+                  .attr("opacity", isFocus ? 1 : 0.08)
+                  .attr("stroke-opacity", isFocus ? 1 : 0.1)
               } else {
                 select(this)
-                  .attr("fill-opacity", isFocus ? 1.0 : 0.1)
-                  .attr("stroke-opacity", isFocus ? 1.0 : 0.05)
-                  .attr("r", isFocus ? dotR + 1.5 : dotR * 0.8)
+                  .attr("fill-opacity", isFocus ? 1.0 : 0.08)
+                  .attr("stroke-opacity", isFocus ? 0.9 : 0)
+                  .attr("r", isFocus ? dotR + 1.5 : dotR * 0.7)
               }
             })
         }
@@ -827,7 +802,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               } else {
                 select(this)
                   .attr("fill-opacity", op)
-                  .attr("stroke-opacity", Math.min(op + 0.1, 1))
+                  .attr("stroke-opacity", 0.7)
                   .attr("r", dotR)
               }
             })
@@ -908,13 +883,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   .attr("cy", baseY)
                   .attr("r", 0)
                   .attr("fill", color)
-                  .attr("fill-opacity", tag === "comp" ? opacity * 0.7 : opacity)
-                  .attr("stroke", color)
-                  .attr("stroke-width", 1)
-                  .attr(
-                    "stroke-opacity",
-                    Math.min((tag === "comp" ? opacity * 0.7 : opacity) + 0.1, 1),
-                  )
+                  .attr("fill-opacity", tag === "comp" ? opacity * 0.65 : opacity)
+                  .attr("stroke", "#fff")
+                  .attr("stroke-width", 0.6)
+                  .attr("stroke-opacity", 0.7)
                   .attr("cursor", "pointer")
                   .attr("data-scenario-id", scenario.id)
                   .attr("data-axis", axis)
@@ -929,7 +901,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 dot
                   .on("mouseenter", function (event: MouseEvent) {
                     applyFocusVisuals(scenario.id)
-                    select(this).attr("r", dotR + 2.5).raise()
+                    select(this).attr("r", dotR + 2).raise()
                     if (themeRing) {
                       dotsLayer
                         .selectAll<SVGCircleElement, unknown>(
@@ -1068,21 +1040,25 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           <div
             style={{
               position: "absolute",
-              top: 4,
-              right: 8,
-              fontSize: 10,
-              color: "#666",
+              top: 6,
+              right: 10,
+              fontSize: 9.5,
+              fontFamily: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+              color: "#4a5568",
               zIndex: 5,
               pointerEvents: "none",
               textAlign: "right",
-              maxWidth: "55%",
-              lineHeight: 1.35,
+              maxWidth: "50%",
+              lineHeight: 1.4,
+              letterSpacing: "0.01em",
+              background: "rgba(255,255,255,0.85)",
+              borderRadius: 6,
+              padding: "3px 8px",
             }}
           >
-            <span style={{ fontWeight: 600 }}>Pinned:</span> {pinnedName}
-            <span style={{ color: "#999" }}>
-              {" "}
-              &middot; double-click dot to toggle &middot; Esc to clear
+            <span style={{ fontWeight: 600, color: "#2d3748" }}>{pinnedName}</span>
+            <span style={{ color: "#a0aec0", fontSize: 8.5 }}>
+              {" "}&middot; dbl-click to unpin
             </span>
           </div>
         )}
@@ -1098,15 +1074,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           style={{
             display: "none",
             position: "absolute",
-            background: "rgba(255,255,255,0.96)",
-            border: "1px solid #ddd",
-            borderRadius: 6,
-            padding: "6px 10px",
+            background: "rgba(255,255,255,0.97)",
+            border: "1px solid #eceff1",
+            borderRadius: 8,
+            padding: "8px 12px",
             fontSize: 11,
-            lineHeight: 1.5,
+            fontFamily: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+            lineHeight: 1.55,
             pointerEvents: "none",
             zIndex: 10,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
             whiteSpace: "normal",
             maxWidth: 280,
           }}
