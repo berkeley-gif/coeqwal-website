@@ -35,7 +35,7 @@ function toTier(v: number): number {
   return 4 - (v + 1) * 1.5
 }
 
-const CHANGE_THRESHOLD = 0.05
+
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
 const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
@@ -52,8 +52,7 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
   "Winter-run salmon": ["Winter-run", "salmon"],
 }
-const COLOR_IMPROVED = "#2e7d32"
-const COLOR_WORSENED = "#c62828"
+
 const DEFAULT_COLORS = {
   default: "#546e7a",
   highlighted: "#1a3a5c",
@@ -105,35 +104,6 @@ function computeColumnDodge(
   return result
 }
 
-function summarizeVsBaseline(
-  scenario: VerticalParallelLineData,
-  baseline: VerticalParallelLineData,
-  axisList: string[],
-): { improved: number; worse: number; unchanged: number } {
-  let improved = 0
-  let worse = 0
-  let unchanged = 0
-  for (const axis of axisList) {
-    const bv = baseline.values[axis]
-    const sv = scenario.values[axis]
-    if (bv == null || sv == null) continue
-    const diff = toTier(bv) - toTier(sv)
-    if (Math.abs(diff) <= CHANGE_THRESHOLD) unchanged++
-    else if (diff > CHANGE_THRESHOLD) improved++
-    else worse++
-  }
-  return { improved, worse, unchanged }
-}
-
-function formatOutcomeCount(n: number): string {
-  return `${n} outcome${n === 1 ? "" : "s"}`
-}
-
-function changeColor(change: string): string {
-  if (change.startsWith("+")) return COLOR_IMPROVED
-  if (change.startsWith("-")) return COLOR_WORSENED
-  return "#888"
-}
 
 /** Imperatively show the tooltip DOM element — no React state updates. */
 function showTooltip(
@@ -141,23 +111,14 @@ function showTooltip(
   x: number,
   y: number,
   scenarioName: string,
-  summary: string | undefined,
   outcomeName: string,
-  baselineTier: string,
-  scenarioTier: string,
-  change: string,
 ) {
   el.style.display = "block"
   el.style.left = `${x}px`
   el.style.top = `${y}px`
   el.innerHTML =
     `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em">${scenarioName}</div>` +
-    (summary
-      ? `<div style="color:#718096;font-size:9.5px;margin-top:3px;letter-spacing:0.01em">${summary}</div>`
-      : "") +
-    `<div style="color:#4a5568;margin-top:4px;font-size:10.5px">${outcomeName}</div>` +
-    `<div style="color:#a0aec0;font-size:9.5px;margin-top:3px;letter-spacing:0.02em">Baseline ${baselineTier} \u2192 Scenario ${scenarioTier}</div>` +
-    `<div style="font-size:10px;margin-top:2px;letter-spacing:0.01em"><span style="color:${changeColor(change)};font-weight:600">${change}</span></div>`
+    `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>`
 }
 
 function hideTooltip(el: HTMLDivElement) {
@@ -834,26 +795,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             })
         }
 
-        const scenarioSummaries = new Map<string, string | undefined>()
-        subcolumns[0]!.srcData.forEach((scenario) => {
-          const s = summarizeVsBaseline(
-            scenario,
-            subcolumns[0]!.srcBaseline,
-            axes,
-          )
-          const parts: string[] = []
-          if (s.improved > 0)
-            parts.push(`improved on ${formatOutcomeCount(s.improved)}`)
-          if (s.worse > 0)
-            parts.push(`worse on ${formatOutcomeCount(s.worse)}`)
-          if (s.unchanged > 0)
-            parts.push(`unchanged on ${formatOutcomeCount(s.unchanged)}`)
-          scenarioSummaries.set(
-            scenario.id,
-            parts.length > 0 ? parts.join(" \u00b7 ") : undefined,
-          )
-        })
-
         axes.forEach((axis) => {
           const colX = xScale(axis)!
 
@@ -953,27 +894,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     const rect =
                       containerRef.current?.getBoundingClientRect()
                     if (el && rect) {
-                      const diff = bt - st
-                      const sign = diff > 0 ? "+" : ""
-                      const changeStr = `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`
-                      const tagLabel =
-                        tag === "comp"
-                          ? ` (${comparisonLabel})`
-                          : isCompare
-                            ? " (historical)"
-                            : ""
                       showTooltip(
                         el,
                         event.clientX - rect.left + 14,
                         event.clientY - rect.top - 14,
-                        scenario.name + tagLabel,
-                        tag === "hist"
-                          ? scenarioSummaries.get(scenario.id)
-                          : undefined,
+                        scenario.name,
                         axis,
-                        `Tier ${bt.toFixed(1)}`,
-                        `Tier ${st.toFixed(1)}`,
-                        changeStr,
                       )
                     }
 

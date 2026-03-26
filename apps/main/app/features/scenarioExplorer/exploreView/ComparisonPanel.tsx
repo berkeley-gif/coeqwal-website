@@ -290,15 +290,15 @@ export default function ComparisonPanel() {
     [scenarios],
   )
 
-  // Sankey: default to "All Outcomes"; individual outcomes also valid
+  // Sankey: default to first multi-value outcome (Community water deliveries)
   const effectiveSankeyOutcome = useMemo(() => {
-    if (sankeyOutcome === SANKEY_ALL_OUTCOMES) return SANKEY_ALL_OUTCOMES
     if (
       sankeyOutcome &&
+      sankeyOutcome !== SANKEY_ALL_OUTCOMES &&
       multiValueOutcomeCodes.includes(sankeyOutcome as never)
     )
       return sankeyOutcome
-    return SANKEY_ALL_OUTCOMES
+    return multiValueOutcomeCodes[0] ?? SANKEY_ALL_OUTCOMES
   }, [sankeyOutcome, multiValueOutcomeCodes])
 
   const sankeyData = useMemo(
@@ -720,14 +720,13 @@ export default function ComparisonPanel() {
               "&:focus": { borderColor: theme.palette.grey[500] },
             }}
           >
-            <option value={SANKEY_ALL_OUTCOMES}>All Outcomes</option>
             {multiValueOutcomeCodes.map((code) => (
               <option key={code} value={code}>
                 {getOutcomeName(code)}
               </option>
             ))}
           </Box>
-          {effectiveSankeyOutcome !== SANKEY_ALL_OUTCOMES && (
+          {effectiveSankeyOutcome && effectiveSankeyOutcome !== SANKEY_ALL_OUTCOMES && (
             <FormControlLabel
               control={
                 <Checkbox
