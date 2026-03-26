@@ -174,7 +174,7 @@ export default function ComparisonPanel() {
   const [paritySpreadDots, setParitySpreadDots] = useState(false)
   const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
-  const [deviationShowStaircase, setDeviationShowStaircase] = useState(true)
+  const [deviationShowStaircase, setDeviationShowStaircase] = useState(false)
   const [deviationShowPath, setDeviationShowPath] = useState(true)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
   const [deviationClimateMode, setDeviationClimateMode] = useState<
