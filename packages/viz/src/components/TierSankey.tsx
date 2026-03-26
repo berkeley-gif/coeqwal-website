@@ -58,10 +58,7 @@ interface TooltipState {
   x: number
   y: number
   scenarioName: string
-  tier: string
-  group?: string
-  value: number
-  total: number
+  outcomeName: string
 }
 
 interface NodePos {
@@ -276,9 +273,6 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
             if (flow.value === 0 || !rightNodes[flow.tier]) continue
 
             const tierKey = flow.tier
-            const baseTier = tierKey.includes(":")
-              ? tierKey.split(":")[1]!
-              : tierKey
 
             const flowH = flow.value * pxPerUnit
             const srcY0 = scenarioFillY[si] ?? 0
@@ -308,12 +302,6 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
             const groupLabel = isGrouped
               ? groups.find((grp) => tierKey.startsWith(grp.key + ":"))?.label
               : undefined
-            const tierLabel = isGrouped
-              ? (TIER_LABELS[baseTier] ?? baseTier)
-              : (TIER_LABELS_FULL[baseTier] ?? baseTier)
-            const tooltipTier = groupLabel
-              ? `${groupLabel} ${tierLabel}`
-              : tierLabel
 
             g.append("path")
               .attr("d", path.toString())
@@ -329,9 +317,7 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
                     x: event.clientX - rect.left + 14,
                     y: event.clientY - rect.top - 14,
                     scenarioName: scenario.scenarioName,
-                    tier: tooltipTier,
-                    value: flow.value,
-                    total: scenarioTotals[si] ?? 0,
+                    outcomeName: groupLabel ?? outcomeName,
                   })
                 }
                 onScenarioHoverRef.current?.(scenario.scenarioId)
@@ -505,15 +491,7 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
             <div style={{ fontWeight: 600, color: "#333" }}>
               {tooltip.scenarioName}
             </div>
-            <div style={{ color: "#666" }}>
-              {tooltip.tier}: {tooltip.value} of {tooltip.total}
-            </div>
-            <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
-              {tooltip.total > 0
-                ? ((tooltip.value / tooltip.total) * 100).toFixed(0)
-                : 0}
-              %
-            </div>
+            <div style={{ color: "#666" }}>{tooltip.outcomeName}</div>
           </div>
         )}
       </div>

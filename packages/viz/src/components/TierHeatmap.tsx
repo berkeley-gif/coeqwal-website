@@ -37,8 +37,6 @@ interface TooltipState {
   y: number
   scenarioName: string
   outcomeName: string
-  tierLevel: number
-  normalizedScore: number
 }
 
 const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
@@ -154,8 +152,6 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
                     y: event.clientY - rect.top - 14,
                     scenarioName: cell.scenarioName,
                     outcomeName: cell.outcomeName,
-                    tierLevel: cell.tierLevel,
-                    normalizedScore: cell.normalizedScore,
                   })
                 }
                 onCellHoverRef.current?.(cell)
@@ -303,10 +299,6 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
               {tooltip.scenarioName}
             </div>
             <div style={{ color: "#666" }}>{tooltip.outcomeName}</div>
-            <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
-              Tier {tooltip.tierLevel} &middot; Score:{" "}
-              {(tooltip.normalizedScore * 100).toFixed(0)}%
-            </div>
           </div>
         )}
       </div>

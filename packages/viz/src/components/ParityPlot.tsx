@@ -58,16 +58,13 @@ function showParityTooltip(
   y: number,
   scenarioName: string,
   outcomeName: string,
-  baselinePct: string,
-  scenarioPct: string,
 ) {
   el.style.display = "block"
   el.style.left = `${x}px`
   el.style.top = `${y}px`
   el.innerHTML =
     `<div style="font-weight:600;color:#333">${scenarioName}</div>` +
-    `<div style="color:#666">${outcomeName}</div>` +
-    `<div style="color:#888;font-size:10px;margin-top:2px">Baseline: ${baselinePct}% &middot; Scenario: ${scenarioPct}%</div>`
+    `<div style="color:#666;margin-top:2px">${outcomeName}</div>`
 }
 
 function hideParityTooltip(el: HTMLDivElement) {
@@ -413,8 +410,6 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                     event.clientY - rect.top - 14,
                     scenario.name,
                     axis,
-                    (((bv + 1) / 2) * 100).toFixed(0),
-                    (((sv + 1) / 2) * 100).toFixed(0),
                   )
                 }
 
