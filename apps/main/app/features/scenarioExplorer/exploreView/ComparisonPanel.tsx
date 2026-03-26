@@ -172,6 +172,9 @@ export default function ComparisonPanel() {
   const [deviationOutcomeLabels, setDeviationOutcomeLabels] = useState(true)
   const [deviationSpreadDots, setDeviationSpreadDots] = useState(false)
   const [deviationThemeGrouping, setDeviationThemeGrouping] = useState(false)
+  const [deviationSortMode, setDeviationSortMode] = useState<
+    "baseline" | "scenario"
+  >("baseline")
 
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -211,6 +214,21 @@ export default function ComparisonPanel() {
     })
     return map
   }, [parityData])
+
+  // Deviation plot: sort outcome columns by tier score (best on left)
+  const deviationSortedAxes = useMemo(() => {
+    const sortSource =
+      deviationSortMode === "scenario" && highlightedScenario
+        ? parityData.find((s) => s.id === highlightedScenario)
+        : null
+    const source = sortSource ?? baselineScenario
+    if (!source) return axes
+    return [...axes].sort((a, b) => {
+      const va = source.values[a] ?? 0
+      const vb = source.values[b] ?? 0
+      return vb - va
+    })
+  }, [axes, baselineScenario, parityData, deviationSortMode, highlightedScenario])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -488,7 +506,38 @@ export default function ComparisonPanel() {
         </Box>
       )}
       {chartMode === "deviation" && (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[500], mr: 0.25 }}
+          >
+            Sort:
+          </Typography>
+          <Box
+            component="select"
+            value={deviationSortMode}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setDeviationSortMode(
+                e.target.value as "baseline" | "scenario",
+              )
+            }
+            sx={{
+              fontSize: "0.72rem",
+              border: `1px solid ${theme.palette.grey[300]}`,
+              borderRadius: theme.borderRadius.xs,
+              px: 0.75,
+              py: 0.25,
+              mr: 2,
+              background: theme.palette.background.paper,
+              color: theme.palette.grey[800],
+              outline: "none",
+              cursor: "pointer",
+              "&:focus": { borderColor: theme.palette.grey[500] },
+            }}
+          >
+            <option value="baseline">Baseline tier</option>
+            <option value="scenario">Selected scenario</option>
+          </Box>
           <FormControlLabel
             control={
               <Checkbox
@@ -804,7 +853,7 @@ export default function ComparisonPanel() {
       {chartMode === "deviation" && (
         <DeviationPlot
           data={parityData}
-          axes={axes}
+          axes={deviationSortedAxes}
           baselineData={baselineScenario ?? undefined}
           responsive
           colors={sharedChartColors}
