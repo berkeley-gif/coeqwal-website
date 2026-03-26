@@ -30,9 +30,8 @@ export function useResizeObserver<T extends HTMLElement>(
       if (!Array.isArray(entries) || !entries.length) return
 
       const entry = entries[0]
-      if (!entry) return // Exit if entry is undefined
+      if (!entry) return
 
-      // Get dimensions from content rect or bounding client rect
       let width, height
 
       if ("contentRect" in entry && entry.contentRect) {
@@ -43,11 +42,13 @@ export function useResizeObserver<T extends HTMLElement>(
         width = rect.width
         height = rect.height
       } else {
-        // Exit if we can't get dimensions
         return
       }
 
-      setDimensions({ width, height })
+      setDimensions((prev) => {
+        if (prev.width === width && prev.height === height) return prev
+        return { width, height }
+      })
     })
 
     // Store the observer reference
@@ -58,12 +59,12 @@ export function useResizeObserver<T extends HTMLElement>(
       resizeObserver.observe(targetRef.current)
     }
 
-    // Get initial dimensions
     if (targetRef.current) {
       const rect = targetRef.current.getBoundingClientRect()
-      setDimensions({
-        width: rect.width,
-        height: rect.height,
+      setDimensions((prev) => {
+        if (prev.width === rect.width && prev.height === rect.height)
+          return prev
+        return { width: rect.width, height: rect.height }
       })
     }
 

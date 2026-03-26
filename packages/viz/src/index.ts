@@ -92,6 +92,8 @@ export type { PackedDotsProps, DotDatum } from "./components/PackedDots"
 
 export { default as ParityPlot } from "./components/ParityPlot"
 export type { ParityPlotProps } from "./components/ParityPlot"
+export { default as DeviationPlot } from "./components/DeviationPlot"
+export type { DeviationPlotProps } from "./components/DeviationPlot"
 export { default as DotStripPlot } from "./components/DotStripPlot"
 export type { DotStripPlotProps } from "./components/DotStripPlot"
 export { default as DivergingLollipop } from "./components/DivergingLollipop"
