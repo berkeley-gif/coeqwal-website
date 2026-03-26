@@ -144,9 +144,153 @@ export const WATER_THEMES: Theme[] = [
     shortLabel: "Farms and groundwater",
     description:
       "Whether agricultural water deliveries can sustain food protection, while preventing over-draft of groundwater basins",
-    heroImage: "",
-    inquiry: "",
-    sections: [],
+    heroImage: "/images/themes/farms-groundwater_hero.jpg",
+    inquiry:
+      "How can California continue to grow food and support farming communities, while protecting groundwater and sustaining the system for the future?",
+    sections: [
+      {
+        id: "intro",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Farms depend on reliable water. But water comes from two main sources: rivers and reservoirs (surface water), and groundwater stored underground. These two systems are closely connected. When one is stressed, pressure shifts to the other.",
+            },
+          ],
+        },
+      },
+      {
+        id: "why-this-matters",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "California grows a large share of the nation's fruits, nuts, and vegetables. Farming supports jobs, local economies, and food systems across the country. But agriculture is also one of the largest water users in the state.",
+            },
+            {
+              type: "paragraph",
+              text: "In wet years, farms receive more surface water deliveries from reservoirs and canals. In dry years, when surface supplies are reduced, farmers often pump more groundwater to make up the difference. Over time, heavy groundwater pumping can lower water tables, increase costs for farmers, and cause land subsidence. Some regions, especially in the San Joaquin Valley, have seen long-term groundwater declines.",
+            },
+            {
+              type: "paragraph",
+              text: "New groundwater laws, such as the Sustainable Groundwater Management Act (SGMA), require regions to bring groundwater use into balance over time. This may involve reducing pumping, shifting crops, or retiring land. At the same time, climate change is reducing snowpack and increasing drought intensity, making surface water supplies less reliable.",
+            },
+            {
+              type: "paragraph",
+              text: "Understanding how surface water deliveries, groundwater use, agricultural production, and climate stress interact is essential for planning a stable and sustainable food future.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-this-theme-focuses-on",
+        content: {
+          type: "boxes",
+          items: [
+            {
+              title: "Surface water and groundwater as a connected system",
+              paragraphs: [
+                "Surface water and groundwater are part of a single, connected system. Reservoir storage determines how much water can be delivered through canals. When surface deliveries are reduced, farmers often rely more heavily on groundwater. Over time, this can lead to declining groundwater levels if pumping exceeds recharge.",
+              ],
+            },
+            {
+              title: "Groundwater sustainability and agricultural adaptation",
+              paragraphs: [
+                "Groundwater changes slowly over time. Long-term trends matter more than single years. As groundwater laws are implemented, some regions may need to reduce pumping. Farmers may respond by fallowing land, changing crops, improving efficiency, or shifting water sources. These changes can affect both production and local economies.",
+              ],
+            },
+            {
+              title: "System connections and trade-offs",
+              paragraphs: [
+                "Decisions about groundwater, land use, and surface water deliveries affect multiple parts of the system. Reducing groundwater pumping may improve long-term sustainability but can reduce agricultural production in the short term. Changes in one region may also shift pressures to other regions or water sources, creating complex system-wide responses.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-to-keep-in-mind",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "list",
+              items: [
+                "Farms rely on both surface water deliveries and groundwater pumping. When one source becomes less available, the other often compensates.",
+                "Groundwater systems respond slowly. Long-term trends are more important than year-to-year changes.",
+                "Changes in water availability do not always lead to immediate impacts. Farmers can adapt by shifting crops, using stored water, or reducing planted acreage.",
+                "Results reflect long-term patterns across many years, not predictions for a single year.",
+                "Different regions experience change differently. For example, the Sacramento Valley and San Joaquin Valley face different groundwater conditions and constraints.",
+                "System-wide averages may appear stable, but important differences can exist across regions and communities.",
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: "what-management-strategies-are-explored",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "This theme allows you to explore how different water management choices affect:",
+            },
+            {
+              type: "list",
+              items: [
+                "Agricultural production and revenue",
+                "Groundwater pumping limits",
+                "Changes in irrigated acreage",
+                "Surface water deliveries to farms",
+                "Reservoir storage patterns",
+                "Long-term groundwater storage trends",
+              ],
+            },
+            {
+              type: "paragraph",
+              text: "Some scenarios explore groundwater pumping restrictions in the San Joaquin Valley or across the Central Valley. Others explore land-use changes or combined strategies that include both groundwater limits and changes to surface water management. Looking at these strategies together helps reveal how farms respond under different policy, climate, and operational conditions.",
+            },
+          ],
+        },
+      },
+      {
+        id: "what-the-models-show",
+        content: {
+          type: "mixed",
+          gap: "40px",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "**Trade-offs** – Restricting groundwater pumping can improve groundwater storage over time but may reduce agricultural production in some regions. In some cases, limits in one area may shift pressure to other water sources or regions. Climate stress can intensify these trade-offs. Under warmer and drier conditions, surface water supplies decline, increasing reliance on groundwater just as it is being constrained.",
+            },
+            {
+              type: "paragraph",
+              text: "**Equity** – Impacts are not evenly distributed. Adverse effects are often concentrated in regions like the San Joaquin Valley, where groundwater declines have historically been more severe. Other regions, such as parts of the Sacramento Valley, may experience more stable conditions under certain scenarios. Water rights and infrastructure also influence who experiences shortages or reliability.",
+            },
+            {
+              type: "paragraph",
+              text: "**Resilience** – Resilience in this system means balancing short-term reliability with long-term sustainability. A system that relies heavily on groundwater during drought may maintain production in the short term but risk long-term depletion. A system that stabilizes groundwater but significantly reduces production may face economic challenges. Resilience depends on the ability to adapt to changing conditions while maintaining both agricultural viability and groundwater health.",
+            },
+          ],
+        },
+      },
+      {
+        id: "how-to-explore-further",
+        content: {
+          type: "mixed",
+          blocks: [
+            {
+              type: "paragraph",
+              text: "Explore how different water management choices affect agricultural production, groundwater storage, and water deliveries across regions and climate conditions.",
+            },
+          ],
+        },
+      },
+    ],
   },
   {
     id: "eco",
