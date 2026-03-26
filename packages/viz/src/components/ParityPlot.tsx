@@ -98,6 +98,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
+    const lastNotifiedIdRef = useRef<string | null>(null)
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
       null,
     )
@@ -417,10 +418,13 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                   )
                 }
 
-                hoverNotifyTimerRef.current = setTimeout(() => {
-                  hoverNotifyTimerRef.current = null
-                  onLineHoverRef.current?.(scenario)
-                }, HOVER_NOTIFY_MS)
+                if (lastNotifiedIdRef.current !== scenario.id) {
+                  hoverNotifyTimerRef.current = setTimeout(() => {
+                    hoverNotifyTimerRef.current = null
+                    lastNotifiedIdRef.current = scenario.id
+                    onLineHoverRef.current?.(scenario)
+                  }, HOVER_NOTIFY_MS)
+                }
               })
               .on("mouseleave", function () {
                 if (hoverNotifyTimerRef.current !== null) {
@@ -432,6 +436,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                   .attr("fill-opacity", opacity)
                   .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
                 if (tooltipRef.current) hideParityTooltip(tooltipRef.current)
+                lastNotifiedIdRef.current = null
                 onLineHoverRef.current?.(null)
               })
               .on("click", () => onLineClickRef.current?.(scenario))
