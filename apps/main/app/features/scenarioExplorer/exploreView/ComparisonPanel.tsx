@@ -649,6 +649,41 @@ export default function ComparisonPanel() {
               )
             })}
           </Box>
+          {/* Legend */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              ml: "auto",
+              pl: 1,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <svg width="18" height="14" viewBox="0 0 18 14" style={{ display: "block" }}>
+                <line x1="1" y1="2" x2="1" y2="12" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+                <line x1="17" y1="2" x2="17" y2="12" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
+                <line x1="1" y1="7" x2="17" y2="7" stroke="#2d3748" strokeWidth="2" strokeLinecap="square" opacity="0.7" />
+              </svg>
+              <Typography
+                variant="compactCaption"
+                sx={{ color: theme.palette.grey[600], fontWeight: 500, whiteSpace: "nowrap" }}
+              >
+                Baseline
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <svg width="14" height="14" viewBox="0 0 14 14" style={{ display: "block" }}>
+                <circle cx="7" cy="7" r="5" fill="#546e7a" stroke="#546e7a" strokeWidth="1.5" fillOpacity="0.8" />
+              </svg>
+              <Typography
+                variant="compactCaption"
+                sx={{ color: theme.palette.grey[600], fontWeight: 500, whiteSpace: "nowrap" }}
+              >
+                Scenario
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (

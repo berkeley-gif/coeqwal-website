@@ -39,7 +39,7 @@ const CHANGE_THRESHOLD = 0.05
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
 const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
-const MARGIN = { top: 28, right: 24, bottom: 48, left: 52 }
+const MARGIN = { top: 28, right: 12, bottom: 48, left: 52 }
 
 const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "Community deliveries": ["Community", "deliveries"],
@@ -339,12 +339,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const bv = targetBaseline.values[axis]
               if (bv == null) return
               const newY = scales.yScale(toTier(bv))
+              const halfTick = parseFloat(el.attr("data-half-tick") ?? "0")
               el.transition()
                 .duration(MORPH_DUR)
-                .attr("y1", newY)
-                .attr("y2", newY)
+                .attr("y1", newY - halfTick)
+                .attr("y2", newY + halfTick)
             })
-
 
           svg
             .selectAll<SVGLineElement, unknown>("line.diff-glyph")
@@ -383,14 +383,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             }
           }
 
-          svg
-            .select<SVGTextElement>("text.climate-label")
-            .text(
-              morphShowComparison
-                ? (comparisonLabel ?? "Comparison")
-                : "Historical",
-            )
-
           return
         }
 
@@ -409,7 +401,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const xScale = scaleBand<string>()
           .domain(axes)
           .range([0, innerW])
-          .padding(0.12)
+          .padding(0.18)
 
         const yScale = scaleLinear().domain([0.5, 4.5]).range([0, innerH])
         const bandW = xScale.bandwidth()
@@ -441,7 +433,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const subW = isCompare ? bandW * SUB_RATIO : bandW
         const subGap = isCompare ? bandW * (1 - 2 * SUB_RATIO) : 0
         const compXOff = subW + subGap
-        const effectiveJitter = (isCompare ? subW : bandW) * 0.38
+        const effectiveJitter = (isCompare ? subW : bandW) * 0.25
         const effectiveDotR = isCompare
           ? data.length > 15
             ? 3.5
@@ -513,13 +505,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("stroke-width", 1)
         })
 
+        const stepW = xScale.step()
         axes.forEach((axis, idx) => {
           const colX = xScale(axis)!
           if (idx % 2 === 1) {
+            const fillX = colX - (stepW - bandW) / 2
             g.append("rect")
-              .attr("x", colX)
+              .attr("x", fillX)
               .attr("y", 0)
-              .attr("width", bandW)
+              .attr("width", stepW)
               .attr("height", innerH)
               .attr("fill", "rgba(0,0,0,0.018)")
               .attr("pointer-events", "none")
@@ -540,23 +534,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .text(TIER_LABELS[i] ?? "")
         })
 
-        if (isMorph) {
-          g.append("text")
-            .attr("class", "climate-label")
-            .attr("x", innerW)
-            .attr("y", -10)
-            .attr("text-anchor", "end")
-            .attr("font-size", 9)
-            .attr("font-family", FONT_FAMILY)
-            .attr("fill", "#78909c")
-            .attr("letter-spacing", "0.04em")
-            .text(
-              morphShowCompRef.current
-                ? (comparisonLabel ?? "Comparison")
-                : "Historical",
-            )
-        }
-
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
             return highlightedIds.has(id) ? 1.0 : 0.15
@@ -572,10 +549,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const hasScenarioColors = lineColors.length > 0
         const dotR = effectiveDotR
         const ringExtra = showThemeRings ? 3 : 0
-        const baselineMarkHalfW = Math.min(
-          (isCompare ? subW : bandW) * 0.4,
-          isCompare ? 18 : 28,
-        )
+        const baselineMarkHalfW = (isCompare ? subW : bandW) * 0.45
 
         const dodgeMap = new Map<string, number>()
         const dotDiam = dotR * 2 + 1.5
@@ -598,6 +572,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const baselinePointsByTag = new Map<string, [number, number][]>()
         subcolumns.forEach(({ tag }) => baselinePointsByTag.set(tag, []))
 
+        const baselineInfos: {
+          axis: string
+          tag: string
+          cx: number
+          baseY: number
+          colX: number
+          w: number
+        }[] = []
+
         const dotPositions = new Map<
           string,
           { cx: number; cy: number; color: string; si: number }[]
@@ -617,23 +600,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const baseY = yScale(bt)
 
               baselinePointsByTag.get(tag)!.push([cx, baseY])
-
-              const mark = g
-                .append("line")
-                .attr("class", "baseline-mark")
-                .attr("data-axis", axis)
-                .attr("data-tag", tag)
-                .attr("x1", cx - baselineMarkHalfW)
-                .attr("y1", baseY)
-                .attr("x2", cx + baselineMarkHalfW)
-                .attr("y2", baseY)
-                .attr("stroke", tag === "comp" ? "#718096" : "#2d3748")
-                .attr("stroke-width", 2.5)
-                .attr("stroke-linecap", "square")
-                .attr("opacity", tag === "comp" ? 0.5 : 0.7)
-              if (tag === "comp") {
-                mark.attr("stroke-dasharray", "5,3")
-              }
+              baselineInfos.push({ axis, tag, cx, baseY, colX, w })
 
               srcData.forEach((scenario, si) => {
                 const sv = scenario.values[axis]
@@ -757,28 +724,48 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("pointer-events", "none")
         })
 
-        if (isCompare) {
-          g.append("text")
-            .attr("x", 4)
-            .attr("y", -10)
-            .attr("font-size", 8.5)
-            .attr("font-family", FONT_FAMILY)
-            .attr("fill", "#78909c")
-            .attr("letter-spacing", "0.04em")
-            .text("Historical")
-          g.append("text")
-            .attr("x", innerW)
-            .attr("y", -10)
-            .attr("text-anchor", "end")
-            .attr("font-size", 8.5)
-            .attr("font-family", FONT_FAMILY)
-            .attr("fill", "#78909c")
-            .attr("letter-spacing", "0.04em")
-            .text(comparisonLabel ?? "Comparison")
-        }
-
+        const baselineLayer = g.append("g").attr("class", "baselines")
         const pathLayer = g.append("g").attr("class", "scenario-path")
         const dotsLayer = g.append("g").attr("class", "dots")
+
+        const TICK_HALF = 6
+        baselineInfos.forEach(({ axis, tag, cx, baseY, colX, w }) => {
+          const isComp = tag === "comp"
+          const strokeColor = isComp ? "#718096" : "#2d3748"
+          const opacity = isComp ? 0.5 : 0.7
+          const bracketHalfW = (isCompare ? w : w) * 0.45
+          const edgeL = cx - bracketHalfW
+          const edgeR = cx + bracketHalfW
+          baselineLayer
+            .append("line")
+            .attr("class", "baseline-mark")
+            .attr("data-axis", axis)
+            .attr("data-tag", tag)
+            .attr("x1", edgeL)
+            .attr("y1", baseY)
+            .attr("x2", edgeR)
+            .attr("y2", baseY)
+            .attr("stroke", strokeColor)
+            .attr("stroke-width", 2)
+            .attr("stroke-linecap", "square")
+            .attr("opacity", opacity)
+          ;[edgeL, edgeR].forEach((ex) => {
+            baselineLayer
+              .append("line")
+              .attr("class", "baseline-mark")
+              .attr("data-axis", axis)
+              .attr("data-tag", tag)
+              .attr("data-half-tick", TICK_HALF)
+              .attr("x1", ex)
+              .attr("y1", baseY - TICK_HALF)
+              .attr("x2", ex)
+              .attr("y2", baseY + TICK_HALF)
+              .attr("stroke", strokeColor)
+              .attr("stroke-width", 2)
+              .attr("stroke-linecap", "round")
+              .attr("opacity", opacity)
+          })
+        })
 
         const drawPathForScenario = (scenarioId: string) => {
           pathLayer.selectAll("*").remove()
