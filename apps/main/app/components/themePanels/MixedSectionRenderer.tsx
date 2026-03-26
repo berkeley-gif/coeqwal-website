@@ -13,6 +13,7 @@ import { motion } from "@repo/motion"
 import { useTheme } from "@repo/ui/mui"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
 import type { MixedSection } from "../../content/themes"
+import { themeValues } from "@repo/ui/themes/theme"
 
 function parseBoldText(text: string): React.ReactNode {
   const parts = text.split(/\*\*(.*?)\*\*/g)
@@ -45,7 +46,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 variant="body1"
                 key={i}
                 sx={{
-                  maxWidth: "70ch",
+                  maxWidth: themeValues.spacing.paragraphMaxSize
                 }}
               >
                 {parseBoldText(block.text)}

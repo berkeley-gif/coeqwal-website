@@ -621,6 +621,8 @@ export const themeValues = {
     displayBlock: {
       padding: "clamp(28px, 3.5vw, 44px)",
     },
+
+    paragraphMaxSize: "70ch"
   },
 
   /* --------------------------------------------------------
