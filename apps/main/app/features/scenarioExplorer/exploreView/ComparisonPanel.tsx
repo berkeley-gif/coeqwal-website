@@ -8,7 +8,7 @@
  * controls and the parallel coordinates visualization.
  */
 
-import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect, startTransition } from "react"
 import {
   Box,
   Typography,
@@ -36,8 +36,9 @@ import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
-import { getOutcomeName } from "../../../content/outcomes"
+import { getOutcomeName, OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 import { getScenarioTheme } from "../../../content/scenarios"
+import mockHydroclimateTiers from "../data/mockHydroclimateTiers.json"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
@@ -93,21 +94,26 @@ export default function ComparisonPanel() {
   // the chart uses for external-source highlighting.
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastHoveredIdRef = useRef<string | null>(null)
 
   const [hoveredScenario, setHoveredScenarioRaw] =
     useState<VerticalParallelLineData | null>(null)
 
   const setHoveredScenario = useCallback(
     (scenario: VerticalParallelLineData | null) => {
+      const nextId = scenario?.id ?? null
+      if (nextId === lastHoveredIdRef.current) return
+      lastHoveredIdRef.current = nextId
+
       if (hoverTimerRef.current) {
         clearTimeout(hoverTimerRef.current)
         hoverTimerRef.current = null
       }
       if (scenario) {
-        setHoveredScenarioRaw(scenario)
+        startTransition(() => setHoveredScenarioRaw(scenario))
       } else {
         hoverTimerRef.current = setTimeout(
-          () => setHoveredScenarioRaw(null),
+          () => startTransition(() => setHoveredScenarioRaw(null)),
           200,
         )
       }
@@ -176,6 +182,12 @@ export default function ComparisonPanel() {
   const [deviationSortMode, setDeviationSortMode] = useState<
     "baseline" | "scenario"
   >("baseline")
+  const [deviationClimateMode, setDeviationClimateMode] = useState<
+    "off" | "morph" | "compare"
+  >("off")
+  const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
+  const [deviationComparisonHC, setDeviationComparisonHC] =
+    useState("warmer-drier-iv")
 
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -245,6 +257,54 @@ export default function ComparisonPanel() {
     waterThemeRingBgDelta,
     waterThemeRingBgCws,
   ])
+
+  // Mock comparison hydroclimate data → VerticalParallelLineData[]
+  const mockHC =
+    (mockHydroclimateTiers.hydroclimates as Record<string, { label: string; description: string; scenarios: Record<string, Record<string, number>> }>)[deviationComparisonHC]
+  const deviationComparisonLabel = mockHC?.label ?? deviationComparisonHC
+
+  const deviationComparisonData = useMemo<VerticalParallelLineData[]>(() => {
+    if (!mockHC) return []
+    const nameMap = new Map(scenarios.map((s) => [s.id, s.name]))
+    return parityData
+      .filter((s) => mockHC.scenarios[s.id])
+      .map((s) => {
+        const raw = mockHC.scenarios[s.id]!
+        const values: Record<string, number | null> = {}
+        OUTCOME_CODE_ORDER.forEach((code) => {
+          const ns = raw[code]
+          const displayName = getOutcomeName(code)
+          values[displayName] = ns != null ? ns * 2 - 1 : null
+        })
+        return {
+          id: s.id,
+          name: nameMap.get(s.id) ?? s.id,
+          values,
+          highlighted: false,
+        }
+      })
+  }, [mockHC, parityData, scenarios])
+
+  const deviationComparisonBaseline = useMemo<
+    VerticalParallelLineData | undefined
+  >(() => {
+    if (!mockHC?.scenarios["s0020"]) return undefined
+    const raw = mockHC.scenarios["s0020"]!
+    const values: Record<string, number | null> = {}
+    OUTCOME_CODE_ORDER.forEach((code) => {
+      const ns = raw[code]
+      values[getOutcomeName(code)] = ns != null ? ns * 2 - 1 : null
+    })
+    return { id: "s0020", name: "Baseline (comparison)", values, highlighted: false }
+  }, [mockHC])
+
+  const mockHCOptions = useMemo(
+    () =>
+      Object.entries(mockHydroclimateTiers.hydroclimates).map(
+        ([key, hc]) => ({ key, label: (hc as { label: string }).label }),
+      ),
+    [],
+  )
 
   // Deviation plot: sort outcome columns by tier score (best on left)
   const deviationSortedAxes = useMemo(() => {
@@ -649,6 +709,100 @@ export default function ComparisonPanel() {
             }
             sx={{ mr: 1.5 }}
           />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              ml: 1,
+              pl: 1,
+              borderLeft: `1px solid ${theme.palette.grey[300]}`,
+            }}
+          >
+            <Typography
+              variant="compactCaption"
+              sx={{ color: theme.palette.grey[500], mr: 0.25 }}
+            >
+              Climate:
+            </Typography>
+            <Box
+              component="select"
+              value={deviationClimateMode}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                setDeviationClimateMode(
+                  e.target.value as "off" | "morph" | "compare",
+                )
+              }
+              sx={{
+                fontSize: "0.72rem",
+                border: `1px solid ${theme.palette.grey[300]}`,
+                borderRadius: theme.borderRadius.xs,
+                px: 0.75,
+                py: 0.25,
+                background: theme.palette.background.paper,
+                color: theme.palette.grey[800],
+                outline: "none",
+                cursor: "pointer",
+                "&:focus": { borderColor: theme.palette.grey[500] },
+              }}
+            >
+              <option value="off">Off</option>
+              <option value="morph">Morph</option>
+              <option value="compare">Compare</option>
+            </Box>
+            {deviationClimateMode !== "off" && (
+              <Box
+                component="select"
+                value={deviationComparisonHC}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                  setDeviationComparisonHC(e.target.value)
+                }
+                sx={{
+                  fontSize: "0.72rem",
+                  border: `1px solid ${theme.palette.grey[300]}`,
+                  borderRadius: theme.borderRadius.xs,
+                  px: 0.75,
+                  py: 0.25,
+                  background: theme.palette.background.paper,
+                  color: theme.palette.grey[800],
+                  outline: "none",
+                  cursor: "pointer",
+                  "&:focus": { borderColor: theme.palette.grey[500] },
+                }}
+              >
+                {mockHCOptions.map(({ key, label }) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </Box>
+            )}
+            {deviationClimateMode === "morph" && (
+              <Box
+                component="button"
+                onClick={() => setDeviationMorphShowComp((p) => !p)}
+                sx={{
+                  fontSize: "0.72rem",
+                  border: `1px solid ${theme.palette.grey[300]}`,
+                  borderRadius: theme.borderRadius.xs,
+                  px: 1,
+                  py: 0.25,
+                  background: deviationMorphShowComp
+                    ? theme.palette.grey[200]
+                    : theme.palette.background.paper,
+                  color: theme.palette.grey[800],
+                  cursor: "pointer",
+                  outline: "none",
+                  fontWeight: deviationMorphShowComp ? 600 : 400,
+                  "&:hover": { background: theme.palette.grey[100] },
+                }}
+              >
+                {deviationMorphShowComp
+                  ? deviationComparisonLabel
+                  : "Historical"}
+              </Box>
+            )}
+          </Box>
         </Box>
       )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
@@ -921,6 +1075,19 @@ export default function ComparisonPanel() {
           showDifferenceGlyphs={deviationShowGlyphs}
           showThemeRings={deviationShowThemeRings}
           scenarioThemeRingColors={deviationThemeRingColors}
+          comparisonData={
+            deviationClimateMode !== "off"
+              ? deviationComparisonData
+              : undefined
+          }
+          comparisonBaselineData={
+            deviationClimateMode !== "off"
+              ? deviationComparisonBaseline
+              : undefined
+          }
+          comparisonLabel={deviationComparisonLabel}
+          climateMode={deviationClimateMode}
+          morphShowComparison={deviationMorphShowComp}
         />
       )}
 

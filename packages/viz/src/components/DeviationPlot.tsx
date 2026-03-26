@@ -24,6 +24,11 @@ export interface DeviationPlotProps {
   showDifferenceGlyphs?: boolean
   showThemeRings?: boolean
   scenarioThemeRingColors?: Record<string, string>
+  comparisonData?: VerticalParallelLineData[]
+  comparisonBaselineData?: VerticalParallelLineData
+  comparisonLabel?: string
+  climateMode?: "off" | "morph" | "compare"
+  morphShowComparison?: boolean
 }
 
 function toTier(v: number): number {
@@ -134,11 +139,25 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     showDifferenceGlyphs = false,
     showThemeRings = false,
     scenarioThemeRingColors = undefined,
+    comparisonData,
+    comparisonBaselineData,
+    comparisonLabel = "Comparison",
+    climateMode = "off",
+    morphShowComparison = false,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
+    const prevMorphValRef = useRef(morphShowComparison)
+    const scalesRef = useRef<{
+      yScale: (n: number) => number
+      xScale: (s: string) => number | undefined
+      bandW: number
+      innerH: number
+    } | null>(null)
+    const morphShowCompRef = useRef(morphShowComparison)
+    const lastNotifiedIdRef = useRef<string | null>(null)
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
       null,
     )
@@ -179,6 +198,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     }, [])
 
     useEffect(() => {
+      morphShowCompRef.current = morphShowComparison
+    }, [morphShowComparison])
+
+    useEffect(() => {
       if (pinnedScenarioId && !data.some((s) => s.id === pinnedScenarioId)) {
         setPinnedScenarioId(null)
       }
@@ -200,6 +223,160 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         }
         if (tooltipRef.current) hideTooltip(tooltipRef.current)
 
+        // ── Morph: transition existing elements instead of rebuild ────
+        const morphToggled = morphShowComparison !== prevMorphValRef.current
+        prevMorphValRef.current = morphShowComparison
+        if (
+          morphToggled &&
+          climateMode === "morph" &&
+          scalesRef.current &&
+          comparisonData?.length &&
+          comparisonBaselineData &&
+          baselineData
+        ) {
+          const scales = scalesRef.current
+          const targetData = morphShowComparison ? comparisonData : data
+          const targetBaseline = morphShowComparison
+            ? comparisonBaselineData
+            : baselineData
+          const dataMap = new Map(targetData.map((s) => [s.id, s]))
+          const svg = select(svgRef.current)
+          const MORPH_DUR = 600
+
+          svg
+            .selectAll<SVGCircleElement, unknown>(
+              "circle[data-axis]:not(.theme-ring)",
+            )
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) {
+                el.transition().duration(MORPH_DUR).attr("fill-opacity", 0)
+                return
+              }
+              const sv = scenario.values[axis]
+              if (sv == null) {
+                el.transition().duration(MORPH_DUR).attr("fill-opacity", 0)
+                return
+              }
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("cy", scales.yScale(toTier(sv)))
+            })
+
+          svg
+            .selectAll<SVGCircleElement, unknown>(
+              "circle.theme-ring[data-axis]",
+            )
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) return
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("cy", scales.yScale(toTier(sv)))
+            })
+
+          svg
+            .selectAll<SVGLineElement, unknown>("line.baseline-mark")
+            .each(function () {
+              const el = select(this)
+              const axis = el.attr("data-axis")
+              if (!axis) return
+              const bv = targetBaseline.values[axis]
+              if (bv == null) return
+              const newY = scales.yScale(toTier(bv))
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("y1", newY)
+                .attr("y2", newY)
+            })
+
+          svg
+            .selectAll<SVGRectElement, unknown>("rect.improve-shade")
+            .each(function () {
+              const el = select(this)
+              const axis = el.attr("data-axis")
+              if (!axis) return
+              const bv = targetBaseline.values[axis]
+              if (bv == null) return
+              const newBaseY = scales.yScale(toTier(bv))
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("height", newBaseY - scales.yScale(0.5))
+            })
+
+          svg
+            .selectAll<SVGRectElement, unknown>("rect.worsen-shade")
+            .each(function () {
+              const el = select(this)
+              const axis = el.attr("data-axis")
+              if (!axis) return
+              const bv = targetBaseline.values[axis]
+              if (bv == null) return
+              const newBaseY = scales.yScale(toTier(bv))
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("y", newBaseY)
+                .attr("height", scales.yScale(4.5) - newBaseY)
+            })
+
+          svg
+            .selectAll<SVGLineElement, unknown>("line.diff-glyph")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const bv = targetBaseline.values[axis]
+              const scenario = dataMap.get(sid)
+              const sv = scenario?.values[axis]
+              if (bv == null || sv == null) return
+              el.transition()
+                .duration(MORPH_DUR)
+                .attr("y1", scales.yScale(toTier(bv)))
+                .attr("y2", scales.yScale(toTier(sv)))
+            })
+
+          if (showBaselineStaircase) {
+            const newPts: [number, number][] = []
+            axes.forEach((axis) => {
+              const bv = targetBaseline.values[axis]
+              if (bv == null) return
+              const cx = (scales.xScale(axis) ?? 0) + scales.bandW / 2
+              newPts.push([cx, scales.yScale(toTier(bv))])
+            })
+            if (newPts.length >= 2) {
+              const stairLine = line<[number, number]>()
+                .x((d) => d[0])
+                .y((d) => d[1])
+              svg
+                .select<SVGPathElement>("path.staircase")
+                .transition()
+                .duration(MORPH_DUR)
+                .attr("d", stairLine(newPts) ?? "")
+            }
+          }
+
+          svg
+            .select<SVGTextElement>("text.climate-label")
+            .text(
+              morphShowComparison
+                ? (comparisonLabel ?? "Comparison")
+                : "Historical",
+            )
+
+          return
+        }
+
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (!baselineData || w <= 0 || h <= 0) return
@@ -219,6 +396,84 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const yScale = scaleLinear().domain([0.5, 4.5]).range([0, innerH])
         const bandW = xScale.bandwidth()
+
+        scalesRef.current = {
+          yScale: (n: number) => yScale(n),
+          xScale: (s: string) => xScale(s),
+          bandW,
+          innerH,
+        }
+
+        const isMorph =
+          climateMode === "morph" &&
+          !!comparisonData?.length &&
+          !!comparisonBaselineData
+        const isCompare =
+          climateMode === "compare" &&
+          !!comparisonData?.length &&
+          !!comparisonBaselineData
+
+        const activeData =
+          isMorph && morphShowCompRef.current ? comparisonData! : data
+        const activeBaseline =
+          isMorph && morphShowCompRef.current
+            ? comparisonBaselineData!
+            : baselineData
+
+        const SUB_RATIO = 0.42
+        const subW = isCompare ? bandW * SUB_RATIO : bandW
+        const subGap = isCompare ? bandW * (1 - 2 * SUB_RATIO) : 0
+        const compXOff = subW + subGap
+        const effectiveJitter = isCompare ? JITTER_PX * 0.55 : JITTER_PX
+        const effectiveDotR = isCompare
+          ? data.length > 15
+            ? 2.5
+            : data.length > 8
+              ? 3
+              : 3.5
+          : data.length > 15
+            ? 3
+            : data.length > 8
+              ? 3.5
+              : 4.5
+
+        type SubCol = {
+          srcData: VerticalParallelLineData[]
+          srcBaseline: VerticalParallelLineData
+          xOff: number
+          w: number
+          tag: "hist" | "comp"
+          bgTint: string | null
+        }
+        const subcolumns: SubCol[] = isCompare
+          ? [
+              {
+                srcData: data,
+                srcBaseline: baselineData,
+                xOff: 0,
+                w: subW,
+                tag: "hist",
+                bgTint: null,
+              },
+              {
+                srcData: comparisonData!,
+                srcBaseline: comparisonBaselineData!,
+                xOff: compXOff,
+                w: subW,
+                tag: "comp",
+                bgTint: "rgba(50,100,170,0.06)",
+              },
+            ]
+          : [
+              {
+                srcData: activeData,
+                srcBaseline: activeBaseline,
+                xOff: 0,
+                w: bandW,
+                tag: "hist",
+                bgTint: null,
+              },
+            ]
 
         g.append("rect")
           .attr("width", innerW)
@@ -270,6 +525,21 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           .attr("fill", "#bbb")
           .text("\u2191 Better \u00b7 Tier \u00b7 Worse \u2193")
 
+        if (isMorph) {
+          g.append("text")
+            .attr("class", "climate-label")
+            .attr("x", innerW)
+            .attr("y", -6)
+            .attr("text-anchor", "end")
+            .attr("font-size", 9)
+            .attr("fill", "#888")
+            .text(
+              morphShowCompRef.current
+                ? (comparisonLabel ?? "Comparison")
+                : "Historical",
+            )
+        }
+
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
             return highlightedIds.has(id) ? 1.0 : 0.12
@@ -283,11 +553,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const T_DUR = hasAnimatedRef.current ? 0 : 500
         hasAnimatedRef.current = true
         const hasScenarioColors = lineColors.length > 0
-        const dotR = data.length > 15 ? 3 : data.length > 8 ? 3.5 : 4.5
+        const dotR = effectiveDotR
         const ringExtra = showThemeRings ? 3 : 0
-        const baselineMarkHalfW = Math.min(bandW * 0.35, 22)
+        const baselineMarkHalfW = Math.min(
+          (isCompare ? subW : bandW) * 0.35,
+          isCompare ? 14 : 22,
+        )
 
-        const baselinePoints: [number, number][] = []
+        const baselinePointsByTag = new Map<string, [number, number][]>()
+        subcolumns.forEach(({ tag }) => baselinePointsByTag.set(tag, []))
+
         const dotPositions = new Map<
           string,
           { cx: number; cy: number; color: string; si: number }[]
@@ -297,81 +572,142 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         axes.forEach((axis) => {
           const colX = xScale(axis)!
-          const colCx = colX + bandW / 2
-          const bv = baselineData.values[axis]
-          if (bv == null) return
-          const bt = toTier(bv)
-          const baseY = yScale(bt)
 
-          baselinePoints.push([colCx, baseY])
+          subcolumns.forEach(
+            ({ srcData, srcBaseline, xOff, w, tag, bgTint }) => {
+              const cx = colX + xOff + w / 2
+              const bv = srcBaseline.values[axis]
+              if (bv == null) return
+              const bt = toTier(bv)
+              const baseY = yScale(bt)
 
-          g.append("rect")
-            .attr("x", colX + 1)
-            .attr("y", yScale(0.5))
-            .attr("width", bandW - 2)
-            .attr("height", baseY - yScale(0.5))
-            .attr("fill", COLOR_IMPROVED)
-            .attr("opacity", 0.03)
-          g.append("rect")
-            .attr("x", colX + 1)
-            .attr("y", baseY)
-            .attr("width", bandW - 2)
-            .attr("height", yScale(4.5) - baseY)
-            .attr("fill", COLOR_WORSENED)
-            .attr("opacity", 0.03)
+              baselinePointsByTag.get(tag)!.push([cx, baseY])
 
-          g.append("line")
-            .attr("x1", colCx - baselineMarkHalfW)
-            .attr("y1", baseY)
-            .attr("x2", colCx + baselineMarkHalfW)
-            .attr("y2", baseY)
-            .attr("stroke", "#555")
-            .attr("stroke-width", 2.5)
-            .attr("stroke-linecap", "round")
-            .attr("opacity", 0.6)
+              if (bgTint) {
+                g.append("rect")
+                  .attr("x", colX + xOff)
+                  .attr("y", yScale(0.5))
+                  .attr("width", w)
+                  .attr("height", yScale(4.5) - yScale(0.5))
+                  .attr("fill", bgTint)
+                  .attr("rx", 2)
+                  .attr("pointer-events", "none")
+              }
 
-          data.forEach((scenario, si) => {
-            const sv = scenario.values[axis]
-            if (sv == null) return
-            const st = toTier(sv)
-            const dotY = yScale(st)
-            const jitter = hashJitter(scenario.id, axis) * JITTER_PX
-            const dotX = colCx + jitter
-            const color = hasScenarioColors
-              ? (lineColors[si] || colors.default)
-              : colors.default
+              g.append("rect")
+                .attr("class", "improve-shade")
+                .attr("data-axis", axis)
+                .attr("data-tag", tag)
+                .attr("x", colX + xOff + 1)
+                .attr("y", yScale(0.5))
+                .attr("width", w - 2)
+                .attr("height", baseY - yScale(0.5))
+                .attr("fill", COLOR_IMPROVED)
+                .attr("opacity", 0.03)
+              g.append("rect")
+                .attr("class", "worsen-shade")
+                .attr("data-axis", axis)
+                .attr("data-tag", tag)
+                .attr("x", colX + xOff + 1)
+                .attr("y", baseY)
+                .attr("width", w - 2)
+                .attr("height", yScale(4.5) - baseY)
+                .attr("fill", COLOR_WORSENED)
+                .attr("opacity", 0.03)
 
-            if (!dotPositions.has(scenario.id)) {
-              dotPositions.set(scenario.id, [])
-            }
-            dotPositions
-              .get(scenario.id)!
-              .push({ cx: dotX, cy: dotY, color, si })
-
-            if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
-              glyphsLayer
+              const mark = g
                 .append("line")
-                .attr("x1", dotX)
+                .attr("class", "baseline-mark")
+                .attr("data-axis", axis)
+                .attr("data-tag", tag)
+                .attr("x1", cx - baselineMarkHalfW)
                 .attr("y1", baseY)
-                .attr("x2", dotX)
-                .attr("y2", dotY)
-                .attr("stroke", color)
+                .attr("x2", cx + baselineMarkHalfW)
+                .attr("y2", baseY)
+                .attr("stroke", tag === "comp" ? "#6a9bc3" : "#555")
+                .attr("stroke-width", 2.5)
+                .attr("stroke-linecap", "round")
+                .attr("opacity", tag === "comp" ? 0.5 : 0.6)
+              if (tag === "comp") {
+                mark.attr("stroke-dasharray", "4,3")
+              }
+
+              srcData.forEach((scenario, si) => {
+                const sv = scenario.values[axis]
+                if (sv == null) return
+                const st = toTier(sv)
+                const dotY = yScale(st)
+                const jitter =
+                  hashJitter(scenario.id, axis) * effectiveJitter
+                const dotCx = cx + jitter
+                const color = hasScenarioColors
+                  ? (lineColors[si] || colors.default)
+                  : colors.default
+
+                if (tag === "hist") {
+                  if (!dotPositions.has(scenario.id))
+                    dotPositions.set(scenario.id, [])
+                  dotPositions
+                    .get(scenario.id)!
+                    .push({ cx: dotCx, cy: dotY, color, si })
+                }
+
+                if (
+                  showDifferenceGlyphs &&
+                  Math.abs(dotY - baseY) > 0.5
+                ) {
+                  glyphsLayer
+                    .append("line")
+                    .attr("class", "diff-glyph")
+                    .attr("data-scenario-id", scenario.id)
+                    .attr("data-axis", axis)
+                    .attr("data-tag", tag)
+                    .attr("x1", dotCx)
+                    .attr("y1", baseY)
+                    .attr("x2", dotCx)
+                    .attr("y2", dotY)
+                    .attr("stroke", color)
+                    .attr("stroke-width", 1)
+                    .attr("stroke-opacity", 0.35)
+                    .attr("pointer-events", "none")
+                }
+              })
+            },
+          )
+
+          if (isCompare) {
+            const histBv = baselineData.values[axis]
+            const compBv = comparisonBaselineData!.values[axis]
+            if (histBv != null && compBv != null) {
+              const histY = yScale(toTier(histBv))
+              const compY = yScale(toTier(compBv))
+              const histCx = colX + subW / 2
+              const compCx = colX + compXOff + subW / 2
+              g.append("line")
+                .attr("class", "baseline-bridge")
+                .attr("x1", histCx + baselineMarkHalfW)
+                .attr("y1", histY)
+                .attr("x2", compCx - baselineMarkHalfW)
+                .attr("y2", compY)
+                .attr("stroke", "#aaa")
                 .attr("stroke-width", 1)
-                .attr("stroke-opacity", 0.35)
+                .attr("stroke-dasharray", "2,2")
+                .attr("stroke-opacity", 0.45)
                 .attr("pointer-events", "none")
             }
-          })
+          }
 
+          const labelCx = colX + bandW / 2
           const label = axis
           const maxLabelW = bandW - 4
           const charW = 5.5
           const maxChars = Math.floor(maxLabelW / charW)
           if (label.length <= maxChars) {
             g.append("text")
-              .attr("x", colCx)
+              .attr("x", labelCx)
               .attr("y", innerH + 14)
               .attr("text-anchor", "middle")
-              .attr("font-size", 9.5)
+              .attr("font-size", isCompare ? 8 : 9.5)
               .attr("fill", "#666")
               .text(label)
           } else {
@@ -379,34 +715,53 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             let splitIdx = label.lastIndexOf(" ", mid)
             if (splitIdx <= 0) splitIdx = mid
             g.append("text")
-              .attr("x", colCx)
+              .attr("x", labelCx)
               .attr("y", innerH + 12)
               .attr("text-anchor", "middle")
-              .attr("font-size", 9)
+              .attr("font-size", isCompare ? 7.5 : 9)
               .attr("fill", "#666")
               .text(label.slice(0, splitIdx).trim())
             g.append("text")
-              .attr("x", colCx)
+              .attr("x", labelCx)
               .attr("y", innerH + 22)
               .attr("text-anchor", "middle")
-              .attr("font-size", 9)
+              .attr("font-size", isCompare ? 7.5 : 9)
               .attr("fill", "#666")
               .text(label.slice(splitIdx).trim())
           }
         })
 
-        if (showBaselineStaircase && baselinePoints.length >= 2) {
+        subcolumns.forEach(({ tag }) => {
+          const pts = baselinePointsByTag.get(tag)
+          if (!showBaselineStaircase || !pts || pts.length < 2) return
           const stairLine = line<[number, number]>()
             .x((d) => d[0])
             .y((d) => d[1])
           g.append("path")
-            .attr("d", stairLine(baselinePoints) ?? "")
+            .attr("class", `staircase staircase-${tag}`)
+            .attr("d", stairLine(pts) ?? "")
             .attr("fill", "none")
-            .attr("stroke", "#888")
+            .attr("stroke", tag === "comp" ? "#6a9bc3" : "#888")
             .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", "5,4")
+            .attr("stroke-dasharray", tag === "comp" ? "3,3" : "5,4")
             .attr("stroke-opacity", 0.45)
             .attr("pointer-events", "none")
+        })
+
+        if (isCompare) {
+          g.append("text")
+            .attr("x", 4)
+            .attr("y", -6)
+            .attr("font-size", 8)
+            .attr("fill", "#888")
+            .text("Historical")
+          g.append("text")
+            .attr("x", innerW)
+            .attr("y", -6)
+            .attr("text-anchor", "end")
+            .attr("font-size", 8)
+            .attr("fill", "#6a9bc3")
+            .text(comparisonLabel ?? "Comparison")
         }
 
         const pathLayer = g.append("g").attr("class", "scenario-path")
@@ -416,9 +771,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           pathLayer.selectAll("*").remove()
           if (!showScenarioPath) return
           const pts = dotPositions.get(scenarioId)
-          const scenario = data.find((s) => s.id === scenarioId)
+          const activeList = subcolumns[0]!.srcData
+          const scenario = activeList.find((s) => s.id === scenarioId)
           if (!pts || pts.length < 2 || !scenario) return
-          const si = data.indexOf(scenario)
+          const si = activeList.indexOf(scenario)
           const color = hasScenarioColors
             ? (lineColors[si] || colors.default)
             : colors.default
@@ -437,8 +793,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         }
 
         const applyFocusVisuals = (focusId: string) => {
-          dotsLayer.selectAll<SVGCircleElement, unknown>("circle").each(
-            function () {
+          dotsLayer
+            .selectAll<SVGCircleElement, unknown>("circle")
+            .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
               const isFocus = sid === focusId
               const isRing = this.classList.contains("theme-ring")
@@ -452,13 +809,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   .attr("stroke-opacity", isFocus ? 1.0 : 0.05)
                   .attr("r", isFocus ? dotR + 1.5 : dotR * 0.8)
               }
-            },
-          )
+            })
         }
 
         const resetDotVisuals = () => {
-          dotsLayer.selectAll<SVGCircleElement, unknown>("circle").each(
-            function () {
+          dotsLayer
+            .selectAll<SVGCircleElement, unknown>("circle")
+            .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
               const op = getOpacity(sid)
               const isRing = this.classList.contains("theme-ring")
@@ -473,14 +830,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   .attr("stroke-opacity", Math.min(op + 0.1, 1))
                   .attr("r", dotR)
               }
-            },
-          )
+            })
         }
 
-        // Pre-compute per-scenario summary strings (done once at build time).
         const scenarioSummaries = new Map<string, string | undefined>()
-        data.forEach((scenario) => {
-          const s = summarizeVsBaseline(scenario, baselineData, axes)
+        subcolumns[0]!.srcData.forEach((scenario) => {
+          const s = summarizeVsBaseline(
+            scenario,
+            subcolumns[0]!.srcBaseline,
+            axes,
+          )
           const parts: string[] = []
           if (s.improved > 0)
             parts.push(`improved on ${formatOutcomeCount(s.improved)}`)
@@ -495,131 +854,166 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         })
 
         axes.forEach((axis) => {
-          const colCx = xScale(axis)! + bandW / 2
-          const bv = baselineData.values[axis]
-          if (bv == null) return
-          const bt = toTier(bv)
-          const baseY = yScale(bt)
+          const colX = xScale(axis)!
 
-          data.forEach((scenario, si) => {
-            const sv = scenario.values[axis]
-            if (sv == null) return
-            const st = toTier(sv)
-            const dotY = yScale(st)
-            const opacity = getOpacity(scenario.id)
-            const jitter = hashJitter(scenario.id, axis) * JITTER_PX
-            const dotX = colCx + jitter
-            const color = hasScenarioColors
-              ? (lineColors[si] || colors.default)
-              : colors.default
-            const themeRing =
-              showThemeRings && scenarioThemeRingColors?.[scenario.id]
+          subcolumns.forEach(
+            ({ srcData, srcBaseline, xOff, w, tag }) => {
+              const cx = colX + xOff + w / 2
+              const bv = srcBaseline.values[axis]
+              if (bv == null) return
+              const bt = toTier(bv)
+              const baseY = yScale(bt)
 
-            if (themeRing) {
-              dotsLayer
-                .append("circle")
-                .attr("class", "theme-ring")
-                .attr("cx", dotX)
-                .attr("cy", baseY)
-                .attr("r", 0)
-                .attr("fill", "none")
-                .attr("stroke", themeRing)
-                .attr("stroke-width", 2)
-                .attr("opacity", 0.85)
-                .attr("pointer-events", "none")
-                .attr("data-scenario-id", scenario.id)
-                .transition()
-                .duration(T_DUR)
-                .attr("cy", dotY)
-                .attr("r", dotR + ringExtra)
-            }
+              srcData.forEach((scenario, si) => {
+                const sv = scenario.values[axis]
+                if (sv == null) return
+                const st = toTier(sv)
+                const dotY = yScale(st)
+                const opacity = getOpacity(scenario.id)
+                const jitter =
+                  hashJitter(scenario.id, axis) * effectiveJitter
+                const dotCx = cx + jitter
+                const color = hasScenarioColors
+                  ? (lineColors[si] || colors.default)
+                  : colors.default
+                const themeRing =
+                  tag === "hist" &&
+                  showThemeRings &&
+                  scenarioThemeRingColors?.[scenario.id]
 
-            const dot = dotsLayer
-              .append("circle")
-              .attr("cx", dotX)
-              .attr("cy", baseY)
-              .attr("r", 0)
-              .attr("fill", color)
-              .attr("fill-opacity", opacity)
-              .attr("stroke", color)
-              .attr("stroke-width", 1)
-              .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
-              .attr("cursor", "pointer")
-              .attr("data-scenario-id", scenario.id)
-
-            dot.transition().duration(T_DUR).attr("cy", dotY).attr("r", dotR)
-
-            // All hover interaction is 100% imperative — no React state updates.
-            dot
-              .on("mouseenter", function (event: MouseEvent) {
-                applyFocusVisuals(scenario.id)
-                select(this).attr("r", dotR + 2.5).raise()
                 if (themeRing) {
                   dotsLayer
-                    .selectAll<SVGCircleElement, unknown>("circle.theme-ring")
-                    .filter(function () {
-                      return (
-                        this.getAttribute("data-scenario-id") === scenario.id
-                      )
-                    })
-                    .raise()
+                    .append("circle")
+                    .attr("class", "theme-ring")
+                    .attr("cx", dotCx)
+                    .attr("cy", baseY)
+                    .attr("r", 0)
+                    .attr("fill", "none")
+                    .attr("stroke", themeRing)
+                    .attr("stroke-width", 2)
+                    .attr("opacity", 0.85)
+                    .attr("pointer-events", "none")
+                    .attr("data-scenario-id", scenario.id)
+                    .attr("data-axis", axis)
+                    .attr("data-tag", tag)
+                    .transition()
+                    .duration(T_DUR)
+                    .attr("cy", dotY)
+                    .attr("r", dotR + ringExtra)
                 }
 
-                if (showScenarioPath) drawPathForScenario(scenario.id)
-
-                if (hoverNotifyTimerRef.current !== null) {
-                  clearTimeout(hoverNotifyTimerRef.current)
-                  hoverNotifyTimerRef.current = null
-                }
-
-                const el = tooltipRef.current
-                const rect = containerRef.current?.getBoundingClientRect()
-                if (el && rect) {
-                  const diff = bt - st
-                  const sign = diff > 0 ? "+" : ""
-                  const changeStr = `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`
-                  showTooltip(
-                    el,
-                    event.clientX - rect.left + 14,
-                    event.clientY - rect.top - 14,
-                    scenario.name,
-                    scenarioSummaries.get(scenario.id),
-                    axis,
-                    `Tier ${bt.toFixed(1)}`,
-                    `Tier ${st.toFixed(1)}`,
-                    changeStr,
+                const dot = dotsLayer
+                  .append("circle")
+                  .attr("cx", dotCx)
+                  .attr("cy", baseY)
+                  .attr("r", 0)
+                  .attr("fill", color)
+                  .attr("fill-opacity", tag === "comp" ? opacity * 0.7 : opacity)
+                  .attr("stroke", color)
+                  .attr("stroke-width", 1)
+                  .attr(
+                    "stroke-opacity",
+                    Math.min((tag === "comp" ? opacity * 0.7 : opacity) + 0.1, 1),
                   )
-                }
+                  .attr("cursor", "pointer")
+                  .attr("data-scenario-id", scenario.id)
+                  .attr("data-axis", axis)
+                  .attr("data-tag", tag)
 
-                hoverNotifyTimerRef.current = setTimeout(() => {
-                  hoverNotifyTimerRef.current = null
-                  onLineHoverRef.current?.(scenario)
-                }, HOVER_NOTIFY_MS)
+                dot
+                  .transition()
+                  .duration(T_DUR)
+                  .attr("cy", dotY)
+                  .attr("r", dotR)
+
+                dot
+                  .on("mouseenter", function (event: MouseEvent) {
+                    applyFocusVisuals(scenario.id)
+                    select(this).attr("r", dotR + 2.5).raise()
+                    if (themeRing) {
+                      dotsLayer
+                        .selectAll<SVGCircleElement, unknown>(
+                          "circle.theme-ring",
+                        )
+                        .filter(function () {
+                          return (
+                            this.getAttribute("data-scenario-id") ===
+                            scenario.id
+                          )
+                        })
+                        .raise()
+                    }
+
+                    if (showScenarioPath) drawPathForScenario(scenario.id)
+
+                    if (hoverNotifyTimerRef.current !== null) {
+                      clearTimeout(hoverNotifyTimerRef.current)
+                      hoverNotifyTimerRef.current = null
+                    }
+
+                    const el = tooltipRef.current
+                    const rect =
+                      containerRef.current?.getBoundingClientRect()
+                    if (el && rect) {
+                      const diff = bt - st
+                      const sign = diff > 0 ? "+" : ""
+                      const changeStr = `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`
+                      const tagLabel =
+                        tag === "comp"
+                          ? ` (${comparisonLabel})`
+                          : isCompare
+                            ? " (historical)"
+                            : ""
+                      showTooltip(
+                        el,
+                        event.clientX - rect.left + 14,
+                        event.clientY - rect.top - 14,
+                        scenario.name + tagLabel,
+                        tag === "hist"
+                          ? scenarioSummaries.get(scenario.id)
+                          : undefined,
+                        axis,
+                        `Tier ${bt.toFixed(1)}`,
+                        `Tier ${st.toFixed(1)}`,
+                        changeStr,
+                      )
+                    }
+
+                    if (lastNotifiedIdRef.current !== scenario.id) {
+                      hoverNotifyTimerRef.current = setTimeout(() => {
+                        hoverNotifyTimerRef.current = null
+                        lastNotifiedIdRef.current = scenario.id
+                        onLineHoverRef.current?.(scenario)
+                      }, HOVER_NOTIFY_MS)
+                    }
+                  })
+                  .on("mouseleave", function () {
+                    if (hoverNotifyTimerRef.current !== null) {
+                      clearTimeout(hoverNotifyTimerRef.current)
+                      hoverNotifyTimerRef.current = null
+                    }
+                    if (pinnedScenarioId) {
+                      applyFocusVisuals(pinnedScenarioId)
+                      drawPathForScenario(pinnedScenarioId)
+                    } else {
+                      resetDotVisuals()
+                      pathLayer.selectAll("*").remove()
+                    }
+                    if (tooltipRef.current) hideTooltip(tooltipRef.current)
+                    lastNotifiedIdRef.current = null
+                    onLineHoverRef.current?.(null)
+                  })
+                  .on("click", () => onLineClickRef.current?.(scenario))
+                  .on("dblclick", function (event: MouseEvent) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    setPinnedScenarioId((prev) =>
+                      prev === scenario.id ? null : scenario.id,
+                    )
+                  })
               })
-              .on("mouseleave", function () {
-                if (hoverNotifyTimerRef.current !== null) {
-                  clearTimeout(hoverNotifyTimerRef.current)
-                  hoverNotifyTimerRef.current = null
-                }
-                if (pinnedScenarioId) {
-                  applyFocusVisuals(pinnedScenarioId)
-                  drawPathForScenario(pinnedScenarioId)
-                } else {
-                  resetDotVisuals()
-                  pathLayer.selectAll("*").remove()
-                }
-                if (tooltipRef.current) hideTooltip(tooltipRef.current)
-                onLineHoverRef.current?.(null)
-              })
-              .on("click", () => onLineClickRef.current?.(scenario))
-              .on("dblclick", function (event: MouseEvent) {
-                event.preventDefault()
-                event.stopPropagation()
-                setPinnedScenarioId((prev) =>
-                  prev === scenario.id ? null : scenario.id,
-                )
-              })
-          })
+            },
+          )
         })
 
         if (pinnedScenarioId) {
@@ -642,6 +1036,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         showThemeRings,
         scenarioThemeRingColors,
         pinnedScenarioId,
+        comparisonData,
+        comparisonBaselineData,
+        comparisonLabel,
+        climateMode,
+        morphShowComparison,
       ],
     )
 
