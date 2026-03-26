@@ -216,17 +216,35 @@ export default function ComparisonPanel() {
     return map
   }, [parityData])
 
-  /** Water-theme background colors for deviation chart scenario rings */
+  const waterThemeRingBgBaseline = theme.palette.waterThemes.baseline.background
+  const waterThemeRingBgAgGw = theme.palette.waterThemes.ag_gw.background
+  const waterThemeRingBgEco = theme.palette.waterThemes.eco.background
+  const waterThemeRingBgDelta = theme.palette.waterThemes.delta.background
+  const waterThemeRingBgCws = theme.palette.waterThemes.cws.background
+
+  /** Water-theme ring colors — primitive deps avoid new map identity every parent render */
   const deviationThemeRingColors = useMemo(() => {
+    const ringByTheme: Record<string, string> = {
+      baseline: waterThemeRingBgBaseline,
+      ag_gw: waterThemeRingBgAgGw,
+      eco: waterThemeRingBgEco,
+      delta: waterThemeRingBgDelta,
+      cws: waterThemeRingBgCws,
+    }
     const map: Record<string, string> = {}
-    const wt = theme.palette.waterThemes
     parityData.forEach((s) => {
-      const key = getScenarioTheme(s.id) as keyof typeof wt
-      const c = wt[key]
-      if (c?.background) map[s.id] = c.background
+      const bg = ringByTheme[getScenarioTheme(s.id)]
+      if (bg) map[s.id] = bg
     })
     return map
-  }, [parityData, theme.palette.waterThemes])
+  }, [
+    parityData,
+    waterThemeRingBgBaseline,
+    waterThemeRingBgAgGw,
+    waterThemeRingBgEco,
+    waterThemeRingBgDelta,
+    waterThemeRingBgCws,
+  ])
 
   // Deviation plot: sort outcome columns by tier score (best on left)
   const deviationSortedAxes = useMemo(() => {
@@ -697,13 +715,19 @@ export default function ComparisonPanel() {
     </Box>
   )
 
+  const chartSharedGrey600 = theme.palette.grey[600]
+  const chartSharedGrey50 = theme.palette.grey[50]
+  const chartSharedBlueDarkest = theme.palette.blue.darkest
+
+  // Primitive color deps — theme.palette.grey is a new object ref each render;
+  // unstable sharedChartColors was retriggering chart D3 redraws on sidebar hover.
   const sharedChartColors = useMemo(
     () => ({
-      default: theme.palette.grey[600],
-      highlighted: theme.palette.blue.darkest,
-      background: theme.palette.grey[50],
+      default: chartSharedGrey600,
+      highlighted: chartSharedBlueDarkest,
+      background: chartSharedGrey50,
     }),
-    [theme.palette.grey, theme.palette.blue.darkest],
+    [chartSharedGrey600, chartSharedGrey50, chartSharedBlueDarkest],
   )
 
   const chartElement = (

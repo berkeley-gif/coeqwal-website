@@ -36,19 +36,12 @@ const TIER_VALUES = [-1, -1 / 3, 1 / 3, 1]
 const TIER_LABELS = ["Tier 4", "Tier 3", "Tier 2", "Tier 1"]
 const MARGIN = { top: 20, right: 20, bottom: 55, left: 70 }
 
-interface TooltipState {
-  x: number
-  y: number
-  scenarioName: string
-  outcomeName: string
-  baselinePct: string
-  scenarioPct: string
-}
-
 const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c", background: "#f8f9fa" }
 const DEFAULT_LINE_COLORS: string[] = []
 
 const JITTER_PX = 14
+const HOVER_NOTIFY_MS = 80
+
 function hashJitter(id: string, axis: string): number {
   const s = id + ":" + axis
   let h = 0
@@ -56,6 +49,29 @@ function hashJitter(id: string, axis: string): number {
     h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
   }
   return ((h & 0xffff) / 0xffff) * 2 - 1
+}
+
+/** Imperatively show/hide the tooltip DOM element — no React state. */
+function showParityTooltip(
+  el: HTMLDivElement,
+  x: number,
+  y: number,
+  scenarioName: string,
+  outcomeName: string,
+  baselinePct: string,
+  scenarioPct: string,
+) {
+  el.style.display = "block"
+  el.style.left = `${x}px`
+  el.style.top = `${y}px`
+  el.innerHTML =
+    `<div style="font-weight:600;color:#333">${scenarioName}</div>` +
+    `<div style="color:#666">${outcomeName}</div>` +
+    `<div style="color:#888;font-size:10px;margin-top:2px">Baseline: ${baselinePct}% &middot; Scenario: ${scenarioPct}%</div>`
+}
+
+function hideParityTooltip(el: HTMLDivElement) {
+  el.style.display = "none"
 }
 
 const ParityPlot: React.FC<ParityPlotProps> = React.memo(
@@ -80,13 +96,16 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
+    const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null,
+    )
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
-    const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
     const onLineHoverRef = useRef(onLineHover)
     useEffect(() => {
@@ -107,8 +126,22 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
       }
     }, [dimensions, responsive, width, height])
 
+    useEffect(() => {
+      return () => {
+        if (hoverNotifyTimerRef.current !== null) {
+          clearTimeout(hoverNotifyTimerRef.current)
+        }
+      }
+    }, [])
+
     const updateChart = useCallback(
       (w: number, h: number) => {
+        if (hoverNotifyTimerRef.current !== null) {
+          clearTimeout(hoverNotifyTimerRef.current)
+          hoverNotifyTimerRef.current = null
+        }
+        if (tooltipRef.current) hideParityTooltip(tooltipRef.current)
+
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (!baselineData || w <= 0 || h <= 0) return
@@ -365,25 +398,40 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                   .attr("stroke-opacity", 1)
                   .raise()
 
-                const rect = containerRef.current?.getBoundingClientRect()
-                if (rect) {
-                  setTooltip({
-                    x: event.clientX - rect.left + 14,
-                    y: event.clientY - rect.top - 14,
-                    scenarioName: scenario.name,
-                    outcomeName: axis,
-                    baselinePct: (((bv + 1) / 2) * 100).toFixed(0),
-                    scenarioPct: (((sv + 1) / 2) * 100).toFixed(0),
-                  })
+                if (hoverNotifyTimerRef.current !== null) {
+                  clearTimeout(hoverNotifyTimerRef.current)
+                  hoverNotifyTimerRef.current = null
                 }
-                onLineHoverRef.current?.(scenario)
+
+                const el = tooltipRef.current
+                const rect = containerRef.current?.getBoundingClientRect()
+                if (el && rect) {
+                  showParityTooltip(
+                    el,
+                    event.clientX - rect.left + 14,
+                    event.clientY - rect.top - 14,
+                    scenario.name,
+                    axis,
+                    (((bv + 1) / 2) * 100).toFixed(0),
+                    (((sv + 1) / 2) * 100).toFixed(0),
+                  )
+                }
+
+                hoverNotifyTimerRef.current = setTimeout(() => {
+                  hoverNotifyTimerRef.current = null
+                  onLineHoverRef.current?.(scenario)
+                }, HOVER_NOTIFY_MS)
               })
               .on("mouseleave", function () {
+                if (hoverNotifyTimerRef.current !== null) {
+                  clearTimeout(hoverNotifyTimerRef.current)
+                  hoverNotifyTimerRef.current = null
+                }
                 select(this)
                   .attr("r", baseRadius)
                   .attr("fill-opacity", opacity)
                   .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
-                setTooltip(null)
+                if (tooltipRef.current) hideParityTooltip(tooltipRef.current)
                 onLineHoverRef.current?.(null)
               })
               .on("click", () => onLineClickRef.current?.(scenario))
@@ -517,34 +565,23 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
           height={currentHeight}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
-        {tooltip && (
-          <div
-            style={{
-              position: "absolute",
-              left: tooltip.x,
-              top: tooltip.y,
-              background: "rgba(255,255,255,0.96)",
-              border: "1px solid #ddd",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: 11,
-              lineHeight: 1.5,
-              pointerEvents: "none",
-              zIndex: 10,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <div style={{ fontWeight: 600, color: "#333" }}>
-              {tooltip.scenarioName}
-            </div>
-            <div style={{ color: "#666" }}>{tooltip.outcomeName}</div>
-            <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
-              Baseline: {tooltip.baselinePct}% &middot; Scenario:{" "}
-              {tooltip.scenarioPct}%
-            </div>
-          </div>
-        )}
+        <div
+          ref={tooltipRef}
+          style={{
+            display: "none",
+            position: "absolute",
+            background: "rgba(255,255,255,0.96)",
+            border: "1px solid #ddd",
+            borderRadius: 6,
+            padding: "6px 10px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            pointerEvents: "none",
+            zIndex: 10,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            whiteSpace: "nowrap",
+          }}
+        />
       </div>
     )
   },

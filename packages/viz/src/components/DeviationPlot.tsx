@@ -21,27 +21,20 @@ export interface DeviationPlotProps {
   showBaselineStaircase?: boolean
   showScenarioPath?: boolean
   showTierZones?: boolean
-  /** Vertical tick from baseline mark to each scenario dot (magnitude cue). */
   showDifferenceGlyphs?: boolean
-  /** Extra ring around each dot using scenario water-theme color. */
   showThemeRings?: boolean
-  /** scenarioId → hex stroke color for theme rings (from app theme). */
   scenarioThemeRingColors?: Record<string, string>
 }
 
-/** Convert normalized value [-1, 1] to absolute tier position [4, 1]. */
 function toTier(v: number): number {
   return 4 - (v + 1) * 1.5
 }
 
 const CHANGE_THRESHOLD = 0.05
-
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
 const TIER_ZONE_COLORS = ["#e8f5e9", "#fffde7", "#fff3e0", "#ffebee"] as const
-
 const MARGIN = { top: 20, right: 20, bottom: 20, left: 20 }
-
 const COLOR_IMPROVED = "#4caf50"
 const COLOR_WORSENED = "#e53935"
 const DEFAULT_COLORS = {
@@ -50,8 +43,9 @@ const DEFAULT_COLORS = {
   background: "#f8f9fa",
 }
 const DEFAULT_LINE_COLORS: string[] = []
-
+const HOVER_NOTIFY_MS = 80
 const JITTER_PX = 14
+
 function hashJitter(id: string, axis: string): number {
   const s = id + ":" + axis
   let h = 0
@@ -85,15 +79,39 @@ function formatOutcomeCount(n: number): string {
   return `${n} outcome${n === 1 ? "" : "s"}`
 }
 
-interface TooltipState {
-  x: number
-  y: number
-  scenarioName: string
-  outcomeName: string
-  baselineTier: string
-  scenarioTier: string
-  change: string
-  summary?: string
+function changeColor(change: string): string {
+  if (change.startsWith("+")) return COLOR_IMPROVED
+  if (change.startsWith("-")) return COLOR_WORSENED
+  return "#888"
+}
+
+/** Imperatively show the tooltip DOM element — no React state updates. */
+function showTooltip(
+  el: HTMLDivElement,
+  x: number,
+  y: number,
+  scenarioName: string,
+  summary: string | undefined,
+  outcomeName: string,
+  baselineTier: string,
+  scenarioTier: string,
+  change: string,
+) {
+  el.style.display = "block"
+  el.style.left = `${x}px`
+  el.style.top = `${y}px`
+  el.innerHTML =
+    `<div style="font-weight:600;color:#333">${scenarioName}</div>` +
+    (summary
+      ? `<div style="color:#555;font-size:10px;margin-top:3px">${summary}</div>`
+      : "") +
+    `<div style="color:#666;margin-top:2px">${outcomeName}</div>` +
+    `<div style="color:#888;font-size:10px;margin-top:2px">Baseline: ${baselineTier} · Scenario: ${scenarioTier}</div>` +
+    `<div style="font-size:10px;margin-top:1px">Change: <span style="color:${changeColor(change)};font-weight:600">${change}</span></div>`
+}
+
+function hideTooltip(el: HTMLDivElement) {
+  el.style.display = "none"
 }
 
 const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
@@ -119,7 +137,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
+    const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null,
+    )
     const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(
       null,
     )
@@ -128,7 +150,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
-    const [tooltip, setTooltip] = useState<TooltipState | null>(null)
 
     const onLineHoverRef = useRef(onLineHover)
     useEffect(() => {
@@ -163,8 +184,22 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [data, pinnedScenarioId])
 
+    useEffect(() => {
+      return () => {
+        if (hoverNotifyTimerRef.current !== null) {
+          clearTimeout(hoverNotifyTimerRef.current)
+        }
+      }
+    }, [])
+
     const updateChart = useCallback(
       (w: number, h: number) => {
+        if (hoverNotifyTimerRef.current !== null) {
+          clearTimeout(hoverNotifyTimerRef.current)
+          hoverNotifyTimerRef.current = null
+        }
+        if (tooltipRef.current) hideTooltip(tooltipRef.current)
+
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (!baselineData || w <= 0 || h <= 0) return
@@ -183,7 +218,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           .padding(0.12)
 
         const yScale = scaleLinear().domain([0.5, 4.5]).range([0, innerH])
-
         const bandW = xScale.bandwidth()
 
         g.append("rect")
@@ -264,7 +298,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         axes.forEach((axis) => {
           const colX = xScale(axis)!
           const colCx = colX + bandW / 2
-
           const bv = baselineData.values[axis]
           if (bv == null) return
           const bt = toTier(bv)
@@ -311,7 +344,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             if (!dotPositions.has(scenario.id)) {
               dotPositions.set(scenario.id, [])
             }
-            dotPositions.get(scenario.id)!.push({ cx: dotX, cy: dotY, color, si })
+            dotPositions
+              .get(scenario.id)!
+              .push({ cx: dotX, cy: dotY, color, si })
 
             if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
               glyphsLayer
@@ -331,7 +366,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const maxLabelW = bandW - 4
           const charW = 5.5
           const maxChars = Math.floor(maxLabelW / charW)
-
           if (label.length <= maxChars) {
             g.append("text")
               .attr("x", colCx)
@@ -344,22 +378,20 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             const mid = Math.ceil(label.length / 2)
             let splitIdx = label.lastIndexOf(" ", mid)
             if (splitIdx <= 0) splitIdx = mid
-            const line1 = label.slice(0, splitIdx).trim()
-            const line2 = label.slice(splitIdx).trim()
             g.append("text")
               .attr("x", colCx)
               .attr("y", innerH + 12)
               .attr("text-anchor", "middle")
               .attr("font-size", 9)
               .attr("fill", "#666")
-              .text(line1)
+              .text(label.slice(0, splitIdx).trim())
             g.append("text")
               .attr("x", colCx)
               .attr("y", innerH + 22)
               .attr("text-anchor", "middle")
               .attr("font-size", 9)
               .attr("fill", "#666")
-              .text(line2)
+              .text(label.slice(splitIdx).trim())
           }
         })
 
@@ -445,6 +477,23 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           )
         }
 
+        // Pre-compute per-scenario summary strings (done once at build time).
+        const scenarioSummaries = new Map<string, string | undefined>()
+        data.forEach((scenario) => {
+          const s = summarizeVsBaseline(scenario, baselineData, axes)
+          const parts: string[] = []
+          if (s.improved > 0)
+            parts.push(`improved on ${formatOutcomeCount(s.improved)}`)
+          if (s.worse > 0)
+            parts.push(`worse on ${formatOutcomeCount(s.worse)}`)
+          if (s.unchanged > 0)
+            parts.push(`unchanged on ${formatOutcomeCount(s.unchanged)}`)
+          scenarioSummaries.set(
+            scenario.id,
+            parts.length > 0 ? parts.join(" \u00b7 ") : undefined,
+          )
+        })
+
         axes.forEach((axis) => {
           const colCx = xScale(axis)! + bandW / 2
           const bv = baselineData.values[axis]
@@ -498,31 +547,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
 
-            dot
-              .transition()
-              .duration(T_DUR)
-              .attr("cy", dotY)
-              .attr("r", dotR)
+            dot.transition().duration(T_DUR).attr("cy", dotY).attr("r", dotR)
 
-            const summaryLine = (() => {
-              const s = summarizeVsBaseline(scenario, baselineData, axes)
-              const parts: string[] = []
-              if (s.improved > 0) {
-                parts.push(
-                  `improved on ${formatOutcomeCount(s.improved)}`,
-                )
-              }
-              if (s.worse > 0) {
-                parts.push(`worse on ${formatOutcomeCount(s.worse)}`)
-              }
-              if (s.unchanged > 0) {
-                parts.push(
-                  `unchanged on ${formatOutcomeCount(s.unchanged)}`,
-                )
-              }
-              return parts.length > 0 ? parts.join(" · ") : undefined
-            })()
-
+            // All hover interaction is 100% imperative — no React state updates.
             dot
               .on("mouseenter", function (event: MouseEvent) {
                 applyFocusVisuals(scenario.id)
@@ -540,35 +567,49 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
                 if (showScenarioPath) drawPathForScenario(scenario.id)
 
+                if (hoverNotifyTimerRef.current !== null) {
+                  clearTimeout(hoverNotifyTimerRef.current)
+                  hoverNotifyTimerRef.current = null
+                }
+
+                const el = tooltipRef.current
                 const rect = containerRef.current?.getBoundingClientRect()
-                if (rect) {
+                if (el && rect) {
                   const diff = bt - st
                   const sign = diff > 0 ? "+" : ""
-                  setTooltip({
-                    x: event.clientX - rect.left + 14,
-                    y: event.clientY - rect.top - 14,
-                    scenarioName: scenario.name,
-                    outcomeName: axis,
-                    baselineTier: `Tier ${bt.toFixed(1)}`,
-                    scenarioTier: `Tier ${st.toFixed(1)}`,
-                    change: `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`,
-                    summary: summaryLine,
-                  })
+                  const changeStr = `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`
+                  showTooltip(
+                    el,
+                    event.clientX - rect.left + 14,
+                    event.clientY - rect.top - 14,
+                    scenario.name,
+                    scenarioSummaries.get(scenario.id),
+                    axis,
+                    `Tier ${bt.toFixed(1)}`,
+                    `Tier ${st.toFixed(1)}`,
+                    changeStr,
+                  )
                 }
-                onLineHoverRef.current?.(scenario)
+
+                hoverNotifyTimerRef.current = setTimeout(() => {
+                  hoverNotifyTimerRef.current = null
+                  onLineHoverRef.current?.(scenario)
+                }, HOVER_NOTIFY_MS)
               })
               .on("mouseleave", function () {
+                if (hoverNotifyTimerRef.current !== null) {
+                  clearTimeout(hoverNotifyTimerRef.current)
+                  hoverNotifyTimerRef.current = null
+                }
                 if (pinnedScenarioId) {
                   applyFocusVisuals(pinnedScenarioId)
                   drawPathForScenario(pinnedScenarioId)
-                  setTooltip(null)
-                  onLineHoverRef.current?.(null)
                 } else {
                   resetDotVisuals()
                   pathLayer.selectAll("*").remove()
-                  setTooltip(null)
-                  onLineHoverRef.current?.(null)
                 }
+                if (tooltipRef.current) hideTooltip(tooltipRef.current)
+                onLineHoverRef.current?.(null)
               })
               .on("click", () => onLineClickRef.current?.(scenario))
               .on("dblclick", function (event: MouseEvent) {
@@ -642,7 +683,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             <span style={{ fontWeight: 600 }}>Pinned:</span> {pinnedName}
             <span style={{ color: "#999" }}>
               {" "}
-              · double-click dot to toggle · Esc to clear
+              &middot; double-click dot to toggle &middot; Esc to clear
             </span>
           </div>
         )}
@@ -652,55 +693,25 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           height={currentHeight}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
-        {tooltip && (
-          <div
-            style={{
-              position: "absolute",
-              left: tooltip.x,
-              top: tooltip.y,
-              background: "rgba(255,255,255,0.96)",
-              border: "1px solid #ddd",
-              borderRadius: 6,
-              padding: "6px 10px",
-              fontSize: 11,
-              lineHeight: 1.5,
-              pointerEvents: "none",
-              zIndex: 10,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-              whiteSpace: "normal",
-              maxWidth: 280,
-            }}
-          >
-            <div style={{ fontWeight: 600, color: "#333" }}>
-              {tooltip.scenarioName}
-            </div>
-            {tooltip.summary && (
-              <div style={{ color: "#555", fontSize: 10, marginTop: 3 }}>
-                {tooltip.summary}
-              </div>
-            )}
-            <div style={{ color: "#666", marginTop: 2 }}>{tooltip.outcomeName}</div>
-            <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
-              Baseline: {tooltip.baselineTier} &middot; Scenario:{" "}
-              {tooltip.scenarioTier}
-            </div>
-            <div style={{ fontSize: 10, marginTop: 1 }}>
-              Change:{" "}
-              <span
-                style={{
-                  color: tooltip.change.startsWith("+")
-                    ? COLOR_IMPROVED
-                    : tooltip.change.startsWith("-")
-                      ? COLOR_WORSENED
-                      : "#888",
-                  fontWeight: 600,
-                }}
-              >
-                {tooltip.change}
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Tooltip element — always mounted, toggled via display:none imperatively */}
+        <div
+          ref={tooltipRef}
+          style={{
+            display: "none",
+            position: "absolute",
+            background: "rgba(255,255,255,0.96)",
+            border: "1px solid #ddd",
+            borderRadius: 6,
+            padding: "6px 10px",
+            fontSize: 11,
+            lineHeight: 1.5,
+            pointerEvents: "none",
+            zIndex: 10,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+            whiteSpace: "normal",
+            maxWidth: 280,
+          }}
+        />
       </div>
     )
   },
