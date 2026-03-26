@@ -61,17 +61,48 @@ const DEFAULT_COLORS = {
 }
 const DEFAULT_LINE_COLORS: string[] = []
 const HOVER_NOTIFY_MS = 80
-const JITTER_PX = 20
+
 const FONT_FAMILY =
   '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif'
 
-function hashJitter(id: string, axis: string): number {
-  const s = id + ":" + axis
-  let h = 0
-  for (let i = 0; i < s.length; i++) {
-    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
+function computeColumnDodge(
+  entries: { id: string; y: number }[],
+  dotDiam: number,
+  halfSpread: number,
+): Map<string, number> {
+  const result = new Map<string, number>()
+  if (entries.length === 0) return result
+  if (entries.length === 1) {
+    result.set(entries[0]!.id, 0)
+    return result
   }
-  return ((h & 0xffff) / 0xffff) * 2 - 1
+  const sorted = [...entries].sort((a, b) => a.y - b.y)
+  const groups: (typeof sorted)[] = []
+  let group = [sorted[0]!]
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i]!.y - group[0]!.y <= dotDiam * 1.1) {
+      group.push(sorted[i]!)
+    } else {
+      groups.push(group)
+      group = [sorted[i]!]
+    }
+  }
+  groups.push(group)
+  for (const g of groups) {
+    if (g.length === 1) {
+      result.set(g[0]!.id, 0)
+    } else {
+      const minStep = dotDiam + 1
+      const totalSpread = Math.min((g.length - 1) * minStep, halfSpread * 2)
+      const step = totalSpread / (g.length - 1)
+      const start = -totalSpread / 2
+      const stable = [...g].sort((a, b) => a.id.localeCompare(b.id))
+      stable.forEach((dot, i) => {
+        result.set(dot.id, start + i * step)
+      })
+    }
+  }
+  return result
 }
 
 function summarizeVsBaseline(
@@ -410,7 +441,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const subW = isCompare ? bandW * SUB_RATIO : bandW
         const subGap = isCompare ? bandW * (1 - 2 * SUB_RATIO) : 0
         const compXOff = subW + subGap
-        const effectiveJitter = isCompare ? JITTER_PX * 0.55 : JITTER_PX
+        const effectiveJitter = (isCompare ? subW : bandW) * 0.38
         const effectiveDotR = isCompare
           ? data.length > 15
             ? 3.5
@@ -493,16 +524,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               .attr("fill", "rgba(0,0,0,0.018)")
               .attr("pointer-events", "none")
           }
-          if (idx > 0) {
-            g.append("line")
-              .attr("x1", colX)
-              .attr("y1", 0)
-              .attr("x2", colX)
-              .attr("y2", innerH)
-              .attr("stroke", "#e2e8f0")
-              .attr("stroke-width", 0.5)
-              .attr("pointer-events", "none")
-          }
         })
 
         TIER_POSITIONS.forEach((t, i) => {
@@ -556,6 +577,24 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           isCompare ? 18 : 28,
         )
 
+        const dodgeMap = new Map<string, number>()
+        const dotDiam = dotR * 2 + 1.5
+        subcolumns.forEach(({ srcData, srcBaseline, tag }) => {
+          axes.forEach((axis) => {
+            if (srcBaseline.values[axis] == null) return
+            const entries: { id: string; y: number }[] = []
+            srcData.forEach((scenario) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              entries.push({ id: scenario.id, y: yScale(toTier(sv)) })
+            })
+            const offsets = computeColumnDodge(entries, dotDiam, effectiveJitter)
+            offsets.forEach((off, id) => {
+              dodgeMap.set(`${tag}:${axis}:${id}`, off)
+            })
+          })
+        })
+
         const baselinePointsByTag = new Map<string, [number, number][]>()
         subcolumns.forEach(({ tag }) => baselinePointsByTag.set(tag, []))
 
@@ -601,9 +640,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 if (sv == null) return
                 const st = toTier(sv)
                 const dotY = yScale(st)
-                const jitter =
-                  hashJitter(scenario.id, axis) * effectiveJitter
-                const dotCx = cx + jitter
+                const dotCx =
+                  cx +
+                  (dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0)
                 const color = hasScenarioColors
                   ? (lineColors[si] || colors.default)
                   : colors.default
@@ -845,9 +884,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 const st = toTier(sv)
                 const dotY = yScale(st)
                 const opacity = getOpacity(scenario.id)
-                const jitter =
-                  hashJitter(scenario.id, axis) * effectiveJitter
-                const dotCx = cx + jitter
+                const dotCx =
+                  cx +
+                  (dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0)
                 const color = hasScenarioColors
                   ? (lineColors[si] || colors.default)
                   : colors.default

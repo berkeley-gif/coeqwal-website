@@ -12,27 +12,27 @@ Dependencies and configurations set at the root level are overriden by local dep
 
 The repository is managed with **Turborepo + pnpm workspaces** and split into two top-level directories:
 
-- `apps/` -- standalone Next.js applications
-- `packages/` -- shared libraries consumed by the apps
+- `apps/` standalone Next.js applications
+- `packages/` shared libraries consumed by the apps
 
 ### Applications
 
-- **`apps/main`** -- The primary COEQWAL website. A Next.js 15 (App Router) application with an interactive Mapbox map, a scenario explorer, data visualizations, and a three-tab system (Learn / Explore / Share). All pages are statically exported.
-- **`apps/storyline-flow`** -- A standalone storyline app focused on water flow narratives (Next.js 15, static export).
-- **`apps/storyline-climate`** -- A standalone storyline app focused on climate scenarios (Next.js 15, static export).
+- **`apps/main`** The primary COEQWAL website. A Next.js 15 (App Router) application with an interactive Mapbox map, a scenario explorer, data visualizations, and a three-tab system (Learn / Explore / Share). All pages are statically exported.
+- **`apps/storyline-flow`** A standalone storyline app focused on water flow narratives (Next.js 15, static export).
+- **`apps/storyline-climate`** A standalone storyline app focused on climate scenarios (Next.js 15, static export).
 
 ### Shared packages
 
-- **`@repo/ui`** -- Shared UI component library built on MUI v7 and Emotion. Exports components (header, panels, chips, tooltips, inputs, modals), a centralized MUI re-export entry point, theme configuration, and UI hooks.
-- **`@repo/data`** -- Data fetching and caching layer using SWR. Provides COEQWAL API types, fetch functions, React hooks, cache key management, a `DataProvider`, and static GIS data (GeoJSON files).
-- **`@repo/viz`** -- D3-based visualization components for water data: bar charts, line charts, percentile band charts, rose charts, spill charts, parallel line plots, glyph components, and shared D3 utilities.
-- **`@repo/map`** -- Mapbox GL mapping components via react-map-gl. Includes the core `Map` component, `MapProvider` context, geocoding control, declarative layer management hooks, spatial query hooks (point-in-polygon), and transition utilities.
-- **`@repo/state`** -- Shared state management utilities. Re-exports Zustand and Immer, and provides a shared drawer store.
-- **`@repo/motion`** -- Animation wrapper around Framer Motion.
-- **`@repo/i18n`** -- Internationalization provider and translation hooks.
-- **`@repo/utils`** -- General utilities including an `ErrorBoundary` component.
-- **`@repo/typescript-config`** -- Shared TypeScript configuration presets (base, Next.js, React library).
-- **`@repo/eslint-config`** -- Shared ESLint configuration.
+- **`@repo/ui`** Shared UI component library built on MUI v7 and Emotion. Exports components (header, panels, chips, tooltips, inputs, modals), a centralized MUI re-export entry point, theme configuration, and UI hooks.
+- **`@repo/data`** Data fetching and caching layer using SWR. Provides COEQWAL API types, fetch functions, React hooks, cache key management, a `DataProvider`, and static GIS data (GeoJSON files).
+- **`@repo/viz`** D3-based visualization components for water data: bar charts, line charts, percentile band charts, rose charts, spill charts, parallel line plots, glyph components, and shared D3 utilities.
+- **`@repo/map`** Mapbox GL mapping components via react-map-gl. Includes the core `Map` component, `MapProvider` context, geocoding control, declarative layer management hooks, spatial query hooks (point-in-polygon), and transition utilities.
+- **`@repo/state`** Shared state management utilities. Re-exports Zustand and Immer, and provides a shared drawer store.
+- **`@repo/motion`** Animation wrapper around Framer Motion.
+- **`@repo/i18n`** Internationalization provider and translation hooks.
+- **`@repo/utils`** General utilities including an `ErrorBoundary` component.
+- **`@repo/typescript-config`** Shared TypeScript configuration presets (base, Next.js, React library).
+- **`@repo/eslint-config`** Shared ESLint configuration.
 
 ### Main app architecture
 
