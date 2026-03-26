@@ -127,8 +127,6 @@ export function ThemePanel({ theme }: ThemePanelProps) {
     standard: parseFloat(themeValues.transition.standard),
   }), [])
 
-
-
   const isOpen = theme !== null
 
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"))
