@@ -423,7 +423,7 @@ export default function ComparisonPanel() {
   )
 
   const toggleControls = (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
       {chartModeSelector}
       {chartMode === "parallel" && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -1161,7 +1161,9 @@ export default function ComparisonPanel() {
         <Box
           sx={{
             flex: 1,
-            p: theme.space.component.lg,
+            px: theme.space.component.lg,
+            pt: theme.space.component.xs,
+            pb: theme.space.component.sm,
             overflow: "hidden",
           }}
         >
@@ -1169,7 +1171,9 @@ export default function ComparisonPanel() {
             sx={{
               backgroundColor: theme.palette.background.paper,
               borderRadius: theme.borderRadius.md,
-              p: theme.space.component.lg,
+              px: theme.space.component.lg,
+              pt: theme.space.component.sm,
+              pb: theme.space.component.lg,
               boxShadow: theme.shadow.subtle,
               height: "100%",
             }}
