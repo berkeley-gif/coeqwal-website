@@ -18,18 +18,23 @@ export interface DeviationPlotProps {
   onLineClick?: (data: VerticalParallelLineData) => void
   chosenIds?: Set<string>
   highlightedIds?: Set<string> | null
-  /** Draw a thin dashed line connecting baseline marks across columns. */
   showBaselineStaircase?: boolean
-  /** Draw a polyline connecting a hovered scenario's dots across columns. */
   showScenarioPath?: boolean
-  /** Show subtle alternating tier-zone bands across the chart. */
   showTierZones?: boolean
+  /** Vertical tick from baseline mark to each scenario dot (magnitude cue). */
+  showDifferenceGlyphs?: boolean
+  /** Extra ring around each dot using scenario water-theme color. */
+  showThemeRings?: boolean
+  /** scenarioId → hex stroke color for theme rings (from app theme). */
+  scenarioThemeRingColors?: Record<string, string>
 }
 
 /** Convert normalized value [-1, 1] to absolute tier position [4, 1]. */
 function toTier(v: number): number {
   return 4 - (v + 1) * 1.5
 }
+
+const CHANGE_THRESHOLD = 0.05
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
@@ -56,6 +61,30 @@ function hashJitter(id: string, axis: string): number {
   return ((h & 0xffff) / 0xffff) * 2 - 1
 }
 
+function summarizeVsBaseline(
+  scenario: VerticalParallelLineData,
+  baseline: VerticalParallelLineData,
+  axisList: string[],
+): { improved: number; worse: number; unchanged: number } {
+  let improved = 0
+  let worse = 0
+  let unchanged = 0
+  for (const axis of axisList) {
+    const bv = baseline.values[axis]
+    const sv = scenario.values[axis]
+    if (bv == null || sv == null) continue
+    const diff = toTier(bv) - toTier(sv)
+    if (Math.abs(diff) <= CHANGE_THRESHOLD) unchanged++
+    else if (diff > CHANGE_THRESHOLD) improved++
+    else worse++
+  }
+  return { improved, worse, unchanged }
+}
+
+function formatOutcomeCount(n: number): string {
+  return `${n} outcome${n === 1 ? "" : "s"}`
+}
+
 interface TooltipState {
   x: number
   y: number
@@ -64,6 +93,7 @@ interface TooltipState {
   baselineTier: string
   scenarioTier: string
   change: string
+  summary?: string
 }
 
 const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
@@ -83,11 +113,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     showBaselineStaircase = true,
     showScenarioPath = true,
     showTierZones = true,
+    showDifferenceGlyphs = false,
+    showThemeRings = false,
+    scenarioThemeRingColors = undefined,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
-    const hoveredIdRef = useRef<string | null>(null)
+    const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(
+      null,
+    )
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
     )
@@ -114,6 +149,20 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [dimensions, responsive, width, height])
 
+    useEffect(() => {
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setPinnedScenarioId(null)
+      }
+      window.addEventListener("keydown", onKey)
+      return () => window.removeEventListener("keydown", onKey)
+    }, [])
+
+    useEffect(() => {
+      if (pinnedScenarioId && !data.some((s) => s.id === pinnedScenarioId)) {
+        setPinnedScenarioId(null)
+      }
+    }, [data, pinnedScenarioId])
+
     const updateChart = useCallback(
       (w: number, h: number) => {
         const svg = select(svgRef.current)
@@ -137,14 +186,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const bandW = xScale.bandwidth()
 
-        // ── Background ──────────────────────────────────────────────────
         g.append("rect")
           .attr("width", innerW)
           .attr("height", innerH)
           .attr("fill", colors.background)
           .attr("rx", 4)
 
-        // ── Tier zone bands ─────────────────────────────────────────────
         if (showTierZones) {
           TIER_POSITIONS.forEach((t, i) => {
             const y0 = yScale(t - 0.5)
@@ -159,7 +206,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           })
         }
 
-        // ── Horizontal gridlines ────────────────────────────────────────
         TIER_POSITIONS.forEach((t) => {
           g.append("line")
             .attr("x1", 0)
@@ -170,7 +216,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("stroke-width", 0.5)
         })
 
-        // ── Y-axis tier labels ──────────────────────────────────────────
         TIER_POSITIONS.forEach((t, i) => {
           g.append("text")
             .attr("x", -6)
@@ -191,7 +236,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           .attr("fill", "#bbb")
           .text("\u2191 Better \u00b7 Tier \u00b7 Worse \u2193")
 
-        // ── Per-column shading & baseline marks ─────────────────────────
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
             return highlightedIds.has(id) ? 1.0 : 0.12
@@ -206,16 +250,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         hasAnimatedRef.current = true
         const hasScenarioColors = lineColors.length > 0
         const dotR = data.length > 15 ? 3 : data.length > 8 ? 3.5 : 4.5
+        const ringExtra = showThemeRings ? 3 : 0
         const baselineMarkHalfW = Math.min(bandW * 0.35, 22)
 
-        // Pre-compute baseline positions for the staircase line
         const baselinePoints: [number, number][] = []
-
-        // Pre-compute dot positions keyed by scenario id for cross-highlight
         const dotPositions = new Map<
           string,
           { cx: number; cy: number; color: string; si: number }[]
         >()
+
+        const glyphsLayer = g.append("g").attr("class", "difference-glyphs")
 
         axes.forEach((axis) => {
           const colX = xScale(axis)!
@@ -228,7 +272,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
           baselinePoints.push([colCx, baseY])
 
-          // Subtle per-column shading above/below baseline
           g.append("rect")
             .attr("x", colX + 1)
             .attr("y", yScale(0.5))
@@ -244,7 +287,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("fill", COLOR_WORSENED)
             .attr("opacity", 0.03)
 
-          // Baseline mark
           g.append("line")
             .attr("x1", colCx - baselineMarkHalfW)
             .attr("y1", baseY)
@@ -255,16 +297,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("stroke-linecap", "round")
             .attr("opacity", 0.6)
 
-          // Scenario dots
           data.forEach((scenario, si) => {
             const sv = scenario.values[axis]
             if (sv == null) return
             const st = toTier(sv)
             const dotY = yScale(st)
-
             const jitter = hashJitter(scenario.id, axis) * JITTER_PX
             const dotX = colCx + jitter
-
             const color = hasScenarioColors
               ? (lineColors[si] || colors.default)
               : colors.default
@@ -273,9 +312,21 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               dotPositions.set(scenario.id, [])
             }
             dotPositions.get(scenario.id)!.push({ cx: dotX, cy: dotY, color, si })
+
+            if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
+              glyphsLayer
+                .append("line")
+                .attr("x1", dotX)
+                .attr("y1", baseY)
+                .attr("x2", dotX)
+                .attr("y2", dotY)
+                .attr("stroke", color)
+                .attr("stroke-width", 1)
+                .attr("stroke-opacity", 0.35)
+                .attr("pointer-events", "none")
+            }
           })
 
-          // X-axis outcome label
           const label = axis
           const maxLabelW = bandW - 4
           const charW = 5.5
@@ -312,7 +363,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           }
         })
 
-        // ── Baseline staircase line ─────────────────────────────────────
         if (showBaselineStaircase && baselinePoints.length >= 2) {
           const stairLine = line<[number, number]>()
             .x((d) => d[0])
@@ -327,13 +377,74 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("pointer-events", "none")
         }
 
-        // ── Scenario path layer (drawn on hover via D3 imperative update) ──
         const pathLayer = g.append("g").attr("class", "scenario-path")
-
-        // ── Dots layer (above path so dots are clickable) ───────────────
         const dotsLayer = g.append("g").attr("class", "dots")
 
-        // Draw all dots and attach interaction handlers
+        const drawPathForScenario = (scenarioId: string) => {
+          pathLayer.selectAll("*").remove()
+          if (!showScenarioPath) return
+          const pts = dotPositions.get(scenarioId)
+          const scenario = data.find((s) => s.id === scenarioId)
+          if (!pts || pts.length < 2 || !scenario) return
+          const si = data.indexOf(scenario)
+          const color = hasScenarioColors
+            ? (lineColors[si] || colors.default)
+            : colors.default
+          const pathGen = line<(typeof pts)[number]>()
+            .x((d) => d.cx)
+            .y((d) => d.cy)
+          pathLayer
+            .append("path")
+            .attr("d", pathGen(pts) ?? "")
+            .attr("fill", "none")
+            .attr("stroke", color)
+            .attr("stroke-width", 2)
+            .attr("stroke-opacity", 0.55)
+            .attr("stroke-linejoin", "round")
+            .attr("pointer-events", "none")
+        }
+
+        const applyFocusVisuals = (focusId: string) => {
+          dotsLayer.selectAll<SVGCircleElement, unknown>("circle").each(
+            function () {
+              const sid = this.getAttribute("data-scenario-id") ?? ""
+              const isFocus = sid === focusId
+              const isRing = this.classList.contains("theme-ring")
+              if (isRing) {
+                select(this)
+                  .attr("opacity", isFocus ? 1 : 0.12)
+                  .attr("stroke-opacity", isFocus ? 1 : 0.18)
+              } else {
+                select(this)
+                  .attr("fill-opacity", isFocus ? 1.0 : 0.1)
+                  .attr("stroke-opacity", isFocus ? 1.0 : 0.05)
+                  .attr("r", isFocus ? dotR + 1.5 : dotR * 0.8)
+              }
+            },
+          )
+        }
+
+        const resetDotVisuals = () => {
+          dotsLayer.selectAll<SVGCircleElement, unknown>("circle").each(
+            function () {
+              const sid = this.getAttribute("data-scenario-id") ?? ""
+              const op = getOpacity(sid)
+              const isRing = this.classList.contains("theme-ring")
+              if (isRing) {
+                select(this)
+                  .attr("opacity", 0.85)
+                  .attr("stroke-opacity", 1)
+                  .attr("r", dotR + ringExtra)
+              } else {
+                select(this)
+                  .attr("fill-opacity", op)
+                  .attr("stroke-opacity", Math.min(op + 0.1, 1))
+                  .attr("r", dotR)
+              }
+            },
+          )
+        }
+
         axes.forEach((axis) => {
           const colCx = xScale(axis)! + bandW / 2
           const bv = baselineData.values[axis]
@@ -352,6 +463,27 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             const color = hasScenarioColors
               ? (lineColors[si] || colors.default)
               : colors.default
+            const themeRing =
+              showThemeRings && scenarioThemeRingColors?.[scenario.id]
+
+            if (themeRing) {
+              dotsLayer
+                .append("circle")
+                .attr("class", "theme-ring")
+                .attr("cx", dotX)
+                .attr("cy", baseY)
+                .attr("r", 0)
+                .attr("fill", "none")
+                .attr("stroke", themeRing)
+                .attr("stroke-width", 2)
+                .attr("opacity", 0.85)
+                .attr("pointer-events", "none")
+                .attr("data-scenario-id", scenario.id)
+                .transition()
+                .duration(T_DUR)
+                .attr("cy", dotY)
+                .attr("r", dotR + ringExtra)
+            }
 
             const dot = dotsLayer
               .append("circle")
@@ -372,56 +504,41 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               .attr("cy", dotY)
               .attr("r", dotR)
 
+            const summaryLine = (() => {
+              const s = summarizeVsBaseline(scenario, baselineData, axes)
+              const parts: string[] = []
+              if (s.improved > 0) {
+                parts.push(
+                  `improved on ${formatOutcomeCount(s.improved)}`,
+                )
+              }
+              if (s.worse > 0) {
+                parts.push(`worse on ${formatOutcomeCount(s.worse)}`)
+              }
+              if (s.unchanged > 0) {
+                parts.push(
+                  `unchanged on ${formatOutcomeCount(s.unchanged)}`,
+                )
+              }
+              return parts.length > 0 ? parts.join(" · ") : undefined
+            })()
+
             dot
               .on("mouseenter", function (event: MouseEvent) {
-                hoveredIdRef.current = scenario.id
-
-                // Cross-highlight: brighten this scenario's dots, dim the rest
-                dotsLayer
-                  .selectAll<SVGCircleElement, unknown>("circle")
-                  .attr("fill-opacity", function () {
-                    return this.getAttribute("data-scenario-id") ===
-                      scenario.id
-                      ? 1.0
-                      : 0.1
-                  })
-                  .attr("stroke-opacity", function () {
-                    return this.getAttribute("data-scenario-id") ===
-                      scenario.id
-                      ? 1.0
-                      : 0.05
-                  })
-                  .attr("r", function () {
-                    return this.getAttribute("data-scenario-id") ===
-                      scenario.id
-                      ? dotR + 1.5
-                      : dotR * 0.8
-                  })
-
+                applyFocusVisuals(scenario.id)
                 select(this).attr("r", dotR + 2.5).raise()
-
-                // Draw scenario path polyline
-                if (showScenarioPath) {
-                  pathLayer.selectAll("*").remove()
-                  const pts = dotPositions.get(scenario.id)
-                  if (pts && pts.length >= 2) {
-                    const sorted = [...pts]
-                    const pathGen = line<
-                      (typeof sorted)[number]
-                    >()
-                      .x((d) => d.cx)
-                      .y((d) => d.cy)
-                    pathLayer
-                      .append("path")
-                      .attr("d", pathGen(sorted) ?? "")
-                      .attr("fill", "none")
-                      .attr("stroke", color)
-                      .attr("stroke-width", 2)
-                      .attr("stroke-opacity", 0.55)
-                      .attr("stroke-linejoin", "round")
-                      .attr("pointer-events", "none")
-                  }
+                if (themeRing) {
+                  dotsLayer
+                    .selectAll<SVGCircleElement, unknown>("circle.theme-ring")
+                    .filter(function () {
+                      return (
+                        this.getAttribute("data-scenario-id") === scenario.id
+                      )
+                    })
+                    .raise()
                 }
+
+                if (showScenarioPath) drawPathForScenario(scenario.id)
 
                 const rect = containerRef.current?.getBoundingClientRect()
                 if (rect) {
@@ -435,32 +552,39 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     baselineTier: `Tier ${bt.toFixed(1)}`,
                     scenarioTier: `Tier ${st.toFixed(1)}`,
                     change: `${sign}${diff.toFixed(1)} tier${Math.abs(diff) === 1 ? "" : "s"}`,
+                    summary: summaryLine,
                   })
                 }
                 onLineHoverRef.current?.(scenario)
               })
               .on("mouseleave", function () {
-                hoveredIdRef.current = null
-
-                // Restore all dots to their normal opacity
-                dotsLayer
-                  .selectAll<SVGCircleElement, unknown>("circle")
-                  .each(function () {
-                    const sid = this.getAttribute("data-scenario-id") ?? ""
-                    const op = getOpacity(sid)
-                    select(this)
-                      .attr("fill-opacity", op)
-                      .attr("stroke-opacity", Math.min(op + 0.1, 1))
-                      .attr("r", dotR)
-                  })
-
-                pathLayer.selectAll("*").remove()
-                setTooltip(null)
-                onLineHoverRef.current?.(null)
+                if (pinnedScenarioId) {
+                  applyFocusVisuals(pinnedScenarioId)
+                  drawPathForScenario(pinnedScenarioId)
+                  setTooltip(null)
+                  onLineHoverRef.current?.(null)
+                } else {
+                  resetDotVisuals()
+                  pathLayer.selectAll("*").remove()
+                  setTooltip(null)
+                  onLineHoverRef.current?.(null)
+                }
               })
               .on("click", () => onLineClickRef.current?.(scenario))
+              .on("dblclick", function (event: MouseEvent) {
+                event.preventDefault()
+                event.stopPropagation()
+                setPinnedScenarioId((prev) =>
+                  prev === scenario.id ? null : scenario.id,
+                )
+              })
           })
         })
+
+        if (pinnedScenarioId) {
+          applyFocusVisuals(pinnedScenarioId)
+          drawPathForScenario(pinnedScenarioId)
+        }
       },
       [
         data,
@@ -473,6 +597,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         showBaselineStaircase,
         showScenarioPath,
         showTierZones,
+        showDifferenceGlyphs,
+        showThemeRings,
+        scenarioThemeRingColors,
+        pinnedScenarioId,
       ],
     )
 
@@ -481,6 +609,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         updateChart(currentWidth, currentHeight)
       }
     }, [currentWidth, currentHeight, updateChart])
+
+    const pinnedName = pinnedScenarioId
+      ? data.find((s) => s.id === pinnedScenarioId)?.name
+      : null
 
     return (
       <div
@@ -492,6 +624,28 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           position: "relative",
         }}
       >
+        {pinnedName && (
+          <div
+            style={{
+              position: "absolute",
+              top: 4,
+              right: 8,
+              fontSize: 10,
+              color: "#666",
+              zIndex: 5,
+              pointerEvents: "none",
+              textAlign: "right",
+              maxWidth: "55%",
+              lineHeight: 1.35,
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>Pinned:</span> {pinnedName}
+            <span style={{ color: "#999" }}>
+              {" "}
+              · double-click dot to toggle · Esc to clear
+            </span>
+          </div>
+        )}
         <svg
           ref={svgRef}
           width={currentWidth}
@@ -513,13 +667,19 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               pointerEvents: "none",
               zIndex: 10,
               boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
-              whiteSpace: "nowrap",
+              whiteSpace: "normal",
+              maxWidth: 280,
             }}
           >
             <div style={{ fontWeight: 600, color: "#333" }}>
               {tooltip.scenarioName}
             </div>
-            <div style={{ color: "#666" }}>{tooltip.outcomeName}</div>
+            {tooltip.summary && (
+              <div style={{ color: "#555", fontSize: 10, marginTop: 3 }}>
+                {tooltip.summary}
+              </div>
+            )}
+            <div style={{ color: "#666", marginTop: 2 }}>{tooltip.outcomeName}</div>
             <div style={{ color: "#888", fontSize: 10, marginTop: 2 }}>
               Baseline: {tooltip.baselineTier} &middot; Scenario:{" "}
               {tooltip.scenarioTier}
