@@ -45,6 +45,9 @@ interface TooltipState {
   scenarioPct: string
 }
 
+const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c", background: "#f8f9fa" }
+const DEFAULT_LINE_COLORS: string[] = []
+
 const JITTER_PX = 14
 function hashJitter(id: string, axis: string): number {
   const s = id + ":" + axis
@@ -63,8 +66,8 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
     responsive = true,
     width = 500,
     height = 500,
-    colors = { default: "#666", highlighted: "#1a3a5c", background: "#f8f9fa" },
-    lineColors = [],
+    colors = DEFAULT_COLORS,
+    lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
     chosenIds,
@@ -77,6 +80,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    const hasAnimatedRef = useRef(false)
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
     )
@@ -232,7 +236,8 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
 
         const baseRadius = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
 
-        const T_DUR = 600
+        const T_DUR = hasAnimatedRef.current ? 0 : 600
+        hasAnimatedRef.current = true
 
         // Theme grouping: convex hull backgrounds
         if (showThemeGrouping && scenarioThemes) {

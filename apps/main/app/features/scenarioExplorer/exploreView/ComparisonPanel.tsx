@@ -21,6 +21,7 @@ import {
 import {
   VerticalParallelLinePlotPeak,
   ParityPlot,
+  DeviationPlot,
   TierHeatmap,
   TierSankey,
   type VerticalParallelLineData,
@@ -40,11 +41,12 @@ import { getScenarioTheme } from "../../../content/scenarios"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode = "parallel" | "parity" | "heatmap" | "sankey"
+type ChartMode = "parallel" | "parity" | "deviation" | "heatmap" | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "parallel", label: "Parallel" },
   { key: "parity", label: "Parity" },
+  { key: "deviation", label: "Deviation" },
   { key: "heatmap", label: "Heatmap" },
   { key: "sankey", label: "Sankey" },
 ]
@@ -166,6 +168,13 @@ export default function ComparisonPanel() {
   const [paritySpreadDots, setParitySpreadDots] = useState(false)
   const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
+  const [deviationShowStaircase, setDeviationShowStaircase] = useState(true)
+  const [deviationShowPath, setDeviationShowPath] = useState(true)
+  const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
+  const [deviationSortMode, setDeviationSortMode] = useState<
+    "baseline" | "scenario"
+  >("baseline")
+
   // Map display names → outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
@@ -204,6 +213,21 @@ export default function ComparisonPanel() {
     })
     return map
   }, [parityData])
+
+  // Deviation plot: sort outcome columns by tier score (best on left)
+  const deviationSortedAxes = useMemo(() => {
+    const sortSource =
+      deviationSortMode === "scenario" && highlightedScenario
+        ? parityData.find((s) => s.id === highlightedScenario)
+        : null
+    const source = sortSource ?? baselineScenario
+    if (!source) return axes
+    return [...axes].sort((a, b) => {
+      const va = source.values[a] ?? 0
+      const vb = source.values[b] ?? 0
+      return vb - va
+    })
+  }, [axes, baselineScenario, parityData, deviationSortMode, highlightedScenario])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -280,12 +304,25 @@ export default function ComparisonPanel() {
     return baselineScenario
   }, [baselineScenario, relativeToBaseline])
 
-  const handleScenarioClick = (scenarioId: string) => {
-    setHighlightedScenario(
-      highlightedScenario === scenarioId ? null : scenarioId,
-    )
-    setPinnedScenarioId(scenarioId)
-  }
+  const highlightedScenarioRef = useRef(highlightedScenario)
+  useEffect(() => {
+    highlightedScenarioRef.current = highlightedScenario
+  }, [highlightedScenario])
+
+  const handleScenarioClick = useCallback(
+    (scenarioId: string) => {
+      setHighlightedScenario(
+        highlightedScenarioRef.current === scenarioId ? null : scenarioId,
+      )
+      setPinnedScenarioId(scenarioId)
+    },
+    [setHighlightedScenario, setPinnedScenarioId],
+  )
+
+  const handleChartLineClick = useCallback(
+    (scenario: VerticalParallelLineData) => handleScenarioClick(scenario.id),
+    [handleScenarioClick],
+  )
 
   const handleBrushFilter = useCallback(
     (filteredOutIds: string[]) => {
@@ -467,6 +504,89 @@ export default function ComparisonPanel() {
           />
         </Box>
       )}
+      {chartMode === "deviation" && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[500], mr: 0.25 }}
+          >
+            Sort:
+          </Typography>
+          <Box
+            component="select"
+            value={deviationSortMode}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              setDeviationSortMode(
+                e.target.value as "baseline" | "scenario",
+              )
+            }
+            sx={{
+              fontSize: "0.72rem",
+              border: `1px solid ${theme.palette.grey[300]}`,
+              borderRadius: theme.borderRadius.xs,
+              px: 0.75,
+              py: 0.25,
+              mr: 2,
+              background: theme.palette.background.paper,
+              color: theme.palette.grey[800],
+              outline: "none",
+              cursor: "pointer",
+              "&:focus": { borderColor: theme.palette.grey[500] },
+            }}
+          >
+            <option value="baseline">Baseline tier</option>
+            <option value="scenario">Selected scenario</option>
+          </Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowStaircase}
+                onChange={(e) => setDeviationShowStaircase(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                baseline staircase
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowPath}
+                onChange={(e) => setDeviationShowPath(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                scenario path
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowTierZones}
+                onChange={(e) => setDeviationShowTierZones(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                tier zones
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
         <Box
           sx={{
@@ -531,11 +651,14 @@ export default function ComparisonPanel() {
     </Box>
   )
 
-  const sharedChartColors = {
-    default: theme.palette.grey[600],
-    highlighted: theme.palette.blue.darkest,
-    background: theme.palette.grey[50],
-  }
+  const sharedChartColors = useMemo(
+    () => ({
+      default: theme.palette.grey[600],
+      highlighted: theme.palette.blue.darkest,
+      background: theme.palette.grey[50],
+    }),
+    [theme.palette.grey, theme.palette.blue.darkest],
+  )
 
   const chartElement = (
     <Box
@@ -679,7 +802,7 @@ export default function ComparisonPanel() {
           colors={sharedChartColors}
           lineColors={lineColors}
           onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          onLineClick={handleChartLineClick}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
           baselineId="s0020"
@@ -699,7 +822,7 @@ export default function ComparisonPanel() {
           colors={sharedChartColors}
           lineColors={parityLineColors}
           onLineHover={setHoveredScenario}
-          onLineClick={(scenario) => handleScenarioClick(scenario.id)}
+          onLineClick={handleChartLineClick}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
           showConnectLines={parityConnectLines}
@@ -707,6 +830,24 @@ export default function ComparisonPanel() {
           showSpreadDots={paritySpreadDots}
           scenarioThemes={scenarioThemeMap}
           showThemeGrouping={parityThemeGrouping}
+        />
+      )}
+
+      {chartMode === "deviation" && (
+        <DeviationPlot
+          data={parityData}
+          axes={deviationSortedAxes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={parityLineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={handleChartLineClick}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+          showBaselineStaircase={deviationShowStaircase}
+          showScenarioPath={deviationShowPath}
+          showTierZones={deviationShowTierZones}
         />
       )}
 
