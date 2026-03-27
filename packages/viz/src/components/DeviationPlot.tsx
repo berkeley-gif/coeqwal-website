@@ -75,32 +75,43 @@ function computeColumnDodge(
     result.set(entries[0]!.id, 0)
     return result
   }
+
+  const minDist = dotDiam + 1
+  const placed: { id: string; y: number; x: number }[] = []
   const sorted = [...entries].sort((a, b) => a.y - b.y)
-  const groups: (typeof sorted)[] = []
-  let group = [sorted[0]!]
-  for (let i = 1; i < sorted.length; i++) {
-    if (sorted[i]!.y - group[0]!.y <= dotDiam * 1.1) {
-      group.push(sorted[i]!)
-    } else {
-      groups.push(group)
-      group = [sorted[i]!]
+
+  for (const entry of sorted) {
+    let bestX = 0
+    let bestCost = Infinity
+
+    const candidates = [0]
+    for (const p of placed) {
+      if (Math.abs(p.y - entry.y) < minDist) {
+        candidates.push(p.x + minDist, p.x - minDist)
+      }
     }
-  }
-  groups.push(group)
-  for (const g of groups) {
-    if (g.length === 1) {
-      result.set(g[0]!.id, 0)
-    } else {
-      const minStep = dotDiam + 1
-      const totalSpread = Math.min((g.length - 1) * minStep, halfSpread * 2)
-      const step = totalSpread / (g.length - 1)
-      const start = -totalSpread / 2
-      const stable = [...g].sort((a, b) => a.id.localeCompare(b.id))
-      stable.forEach((dot, i) => {
-        result.set(dot.id, start + i * step)
-      })
+
+    for (const cx of candidates) {
+      if (Math.abs(cx) > halfSpread) continue
+      let overlaps = false
+      for (const p of placed) {
+        const dx = Math.abs(cx - p.x)
+        const dy = Math.abs(entry.y - p.y)
+        if (dx < minDist && dy < minDist) {
+          overlaps = true
+          break
+        }
+      }
+      if (!overlaps && Math.abs(cx) < bestCost) {
+        bestCost = Math.abs(cx)
+        bestX = cx
+      }
     }
+
+    placed.push({ ...entry, x: bestX })
+    result.set(entry.id, bestX)
   }
+
   return result
 }
 
@@ -495,9 +506,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .text(TIER_LABELS[i] ?? "")
         })
 
+        const sidebarHighlightActive =
+          !pinnedScenarioId && highlightedIds && highlightedIds.size > 0
+
         const getOpacity = (id: string) => {
-          if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(id) ? 1.0 : 0.15
+          if (sidebarHighlightActive) {
+            return highlightedIds!.has(id) ? 1.0 : 0.08
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(id) ? 0.9 : 0.25
@@ -568,9 +582,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 if (sv == null) return
                 const st = toTier(sv)
                 const dotY = yScale(st)
-                const dotCx =
-                  cx +
-                  (dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0)
+                const dodgeOff =
+                  dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0
+                const dotCx = cx + dodgeOff
                 const color = hasScenarioColors
                   ? (lineColors[si] || colors.default)
                   : colors.default
@@ -858,12 +872,19 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   .attr("data-scenario-id", scenario.id)
                   .attr("data-axis", axis)
                   .attr("data-tag", tag)
+                  .attr("data-base-r", dotR)
+
+                const targetR = sidebarHighlightActive
+                  ? highlightedIds!.has(scenario.id)
+                    ? dotR + 1.5
+                    : dotR * 0.7
+                  : dotR
 
                 dot
                   .transition()
                   .duration(T_DUR)
                   .attr("cy", dotY)
-                  .attr("r", dotR)
+                  .attr("r", targetR)
 
                 dot
                   .on("mouseenter", function (event: MouseEvent) {
@@ -891,13 +912,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     }
 
                     const el = tooltipRef.current
-                    const rect =
-                      containerRef.current?.getBoundingClientRect()
-                    if (el && rect) {
+                    if (el) {
                       showTooltip(
                         el,
-                        event.clientX - rect.left + 14,
-                        event.clientY - rect.top - 14,
+                        MARGIN.left + colX + bandW / 2,
+                        MARGIN.top + 6,
                         scenario.name,
                         axis,
                       )
@@ -943,6 +962,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         if (pinnedScenarioId) {
           applyFocusVisuals(pinnedScenarioId)
           drawPathForScenario(pinnedScenarioId)
+        } else if (highlightedIds && highlightedIds.size > 0) {
+          const hId = highlightedIds.values().next().value as string
+          if (hId) drawPathForScenario(hId)
         }
       },
       [
@@ -973,6 +995,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         updateChart(currentWidth, currentHeight)
       }
     }, [currentWidth, currentHeight, updateChart])
+
 
     const pinnedName = pinnedScenarioId
       ? data.find((s) => s.id === pinnedScenarioId)?.name
@@ -1038,6 +1061,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
             whiteSpace: "normal",
             maxWidth: 280,
+            transform: "translateX(-50%)",
           }}
         />
       </div>
