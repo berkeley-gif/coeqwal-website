@@ -8,7 +8,14 @@
  * controls and the parallel coordinates visualization.
  */
 
-import React, { useMemo, useState, useRef, useCallback, useEffect, startTransition } from "react"
+import React, {
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  startTransition,
+} from "react"
 import {
   Box,
   Typography,
@@ -223,8 +230,16 @@ export default function ComparisonPanel() {
   }, [parityData])
 
   // Mock comparison hydroclimate data → VerticalParallelLineData[]
-  const mockHC =
-    (mockHydroclimateTiers.hydroclimates as Record<string, { label: string; description: string; scenarios: Record<string, Record<string, number>> }>)[deviationComparisonHC]
+  const mockHC = (
+    mockHydroclimateTiers.hydroclimates as Record<
+      string,
+      {
+        label: string
+        description: string
+        scenarios: Record<string, Record<string, number>>
+      }
+    >
+  )[deviationComparisonHC]
   const deviationComparisonLabel = mockHC?.label ?? deviationComparisonHC
 
   const deviationComparisonData = useMemo<VerticalParallelLineData[]>(() => {
@@ -259,7 +274,12 @@ export default function ComparisonPanel() {
       const ns = raw[code]
       values[getOutcomeName(code)] = ns != null ? ns * 2 - 1 : null
     })
-    return { id: "s0020", name: "Baseline (comparison)", values, highlighted: false }
+    return {
+      id: "s0020",
+      name: "Baseline (comparison)",
+      values,
+      highlighted: false,
+    }
   }, [mockHC])
 
   // Deviation plot: sort outcome columns by baseline tier score (best on left)
@@ -548,7 +568,14 @@ export default function ComparisonPanel() {
         </Box>
       )}
       {chartMode === "deviation" && (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 0.5,
+            alignItems: "center",
+          }}
+        >
           <FormControlLabel
             control={
               <Checkbox
@@ -660,25 +687,78 @@ export default function ComparisonPanel() {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <svg width="18" height="14" viewBox="0 0 18 14" style={{ display: "block" }}>
-                <line x1="1" y1="2" x2="1" y2="12" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-                <line x1="17" y1="2" x2="17" y2="12" stroke="#2d3748" strokeWidth="2" strokeLinecap="round" opacity="0.7" />
-                <line x1="1" y1="7" x2="17" y2="7" stroke="#2d3748" strokeWidth="2" strokeLinecap="square" opacity="0.7" />
+              <svg
+                width="18"
+                height="14"
+                viewBox="0 0 18 14"
+                style={{ display: "block" }}
+              >
+                <line
+                  x1="1"
+                  y1="2"
+                  x2="1"
+                  y2="12"
+                  stroke="#2d3748"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+                <line
+                  x1="17"
+                  y1="2"
+                  x2="17"
+                  y2="12"
+                  stroke="#2d3748"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  opacity="0.7"
+                />
+                <line
+                  x1="1"
+                  y1="7"
+                  x2="17"
+                  y2="7"
+                  stroke="#2d3748"
+                  strokeWidth="2"
+                  strokeLinecap="square"
+                  opacity="0.7"
+                />
               </svg>
               <Typography
                 variant="compactCaption"
-                sx={{ color: theme.palette.grey[600], fontWeight: 500, whiteSpace: "nowrap" }}
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                }}
               >
                 Baseline
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <svg width="14" height="14" viewBox="0 0 14 14" style={{ display: "block" }}>
-                <circle cx="7" cy="7" r="5" fill="#546e7a" stroke="#546e7a" strokeWidth="1.5" fillOpacity="0.8" />
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 14 14"
+                style={{ display: "block" }}
+              >
+                <circle
+                  cx="7"
+                  cy="7"
+                  r="5"
+                  fill="#546e7a"
+                  stroke="#546e7a"
+                  strokeWidth="1.5"
+                  fillOpacity="0.8"
+                />
               </svg>
               <Typography
                 variant="compactCaption"
-                sx={{ color: theme.palette.grey[600], fontWeight: 500, whiteSpace: "nowrap" }}
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                }}
               >
                 Scenario
               </Typography>
@@ -726,24 +806,27 @@ export default function ComparisonPanel() {
               </option>
             ))}
           </Box>
-          {effectiveSankeyOutcome && effectiveSankeyOutcome !== SANKEY_ALL_OUTCOMES && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={sankeyShowDistribution}
-                  onChange={(e) => setSankeyShowDistribution(e.target.checked)}
-                  sx={checkboxSx}
-                />
-              }
-              label={
-                <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                  show locational distribution
-                </Typography>
-              }
-              sx={{ ml: 1 }}
-            />
-          )}
+          {effectiveSankeyOutcome &&
+            effectiveSankeyOutcome !== SANKEY_ALL_OUTCOMES && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={sankeyShowDistribution}
+                    onChange={(e) =>
+                      setSankeyShowDistribution(e.target.checked)
+                    }
+                    sx={checkboxSx}
+                  />
+                }
+                label={
+                  <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                    show locational distribution
+                  </Typography>
+                }
+                sx={{ ml: 1 }}
+              />
+            )}
         </Box>
       )}
     </Box>
@@ -955,9 +1038,7 @@ export default function ComparisonPanel() {
           showDifferenceGlyphs={false}
           showThemeRings={false}
           comparisonData={
-            deviationClimateMode !== "off"
-              ? deviationComparisonData
-              : undefined
+            deviationClimateMode !== "off" ? deviationComparisonData : undefined
           }
           comparisonBaselineData={
             deviationClimateMode !== "off"
