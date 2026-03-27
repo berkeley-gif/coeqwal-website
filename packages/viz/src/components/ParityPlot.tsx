@@ -254,10 +254,13 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
           .attr("fill", "#666")
           .text("\u2190 Worse \u00b7 Scenario Performance \u00b7 Better \u2192")
 
+        const sidebarHighlightActive =
+          highlightedIds && highlightedIds.size > 0
+
         // Opacity logic
         const getOpacity = (id: string) => {
-          if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(id) ? 1.0 : 0.12
+          if (sidebarHighlightActive) {
+            return highlightedIds!.has(id) ? 1.0 : 0.08
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(id) ? 0.85 : 0.2
@@ -383,11 +386,19 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
               .attr("stroke-width", 1.5)
               .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
               .attr("cursor", "pointer")
+              .attr("data-scenario-id", scenario.id)
+              .attr("data-base-r", baseRadius)
+            const targetR = sidebarHighlightActive
+              ? highlightedIds!.has(scenario.id)
+                ? baseRadius + 1.5
+                : baseRadius * 0.7
+              : baseRadius
+
             dot
               .transition()
               .duration(T_DUR)
               .attr("cy", cy)
-              .attr("r", baseRadius)
+              .attr("r", targetR)
             dot
               .on("mouseenter", function (event: MouseEvent) {
                 select(this)
@@ -406,8 +417,8 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                 if (el && rect) {
                   showParityTooltip(
                     el,
-                    event.clientX - rect.left + 14,
-                    event.clientY - rect.top - 14,
+                    event.clientX - rect.left,
+                    event.clientY - rect.top - 70,
                     scenario.name,
                     axis,
                   )
@@ -526,6 +537,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
               .text(ld.label)
           })
         }
+
       },
       [
         data,
@@ -580,6 +592,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
             zIndex: 10,
             boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
             whiteSpace: "nowrap",
+            transform: "translateX(-50%)",
           }}
         />
       </div>

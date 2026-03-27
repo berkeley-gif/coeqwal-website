@@ -148,8 +148,8 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
                 const rect = containerRef.current?.getBoundingClientRect()
                 if (rect) {
                   setTooltip({
-                    x: event.clientX - rect.left + 14,
-                    y: event.clientY - rect.top - 14,
+                    x: event.clientX - rect.left,
+                    y: event.clientY - rect.top - 70,
                     scenarioName: cell.scenarioName,
                     outcomeName: cell.outcomeName,
                   })
@@ -293,6 +293,7 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
               zIndex: 10,
               boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
               whiteSpace: "nowrap",
+              transform: "translateX(-50%)",
             }}
           >
             <div style={{ fontWeight: 600, color: "#333" }}>
