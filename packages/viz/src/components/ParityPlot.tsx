@@ -36,7 +36,11 @@ const TIER_VALUES = [-1, -1 / 3, 1 / 3, 1]
 const TIER_LABELS = ["Tier 4", "Tier 3", "Tier 2", "Tier 1"]
 const MARGIN = { top: 20, right: 20, bottom: 55, left: 70 }
 
-const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c", background: "#f8f9fa" }
+const DEFAULT_COLORS = {
+  default: "#666",
+  highlighted: "#1a3a5c",
+  background: "#f8f9fa",
+}
 const DEFAULT_LINE_COLORS: string[] = []
 
 const JITTER_PX = 14
@@ -254,8 +258,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
           .attr("fill", "#666")
           .text("\u2190 Worse \u00b7 Scenario Performance \u00b7 Better \u2192")
 
-        const sidebarHighlightActive =
-          highlightedIds && highlightedIds.size > 0
+        const sidebarHighlightActive = highlightedIds && highlightedIds.size > 0
 
         // Opacity logic
         const getOpacity = (id: string) => {
@@ -394,11 +397,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
                 : baseRadius * 0.7
               : baseRadius
 
-            dot
-              .transition()
-              .duration(T_DUR)
-              .attr("cy", cy)
-              .attr("r", targetR)
+            dot.transition().duration(T_DUR).attr("cy", cy).attr("r", targetR)
             dot
               .on("mouseenter", function (event: MouseEvent) {
                 select(this)
@@ -537,7 +536,6 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
               .text(ld.label)
           })
         }
-
       },
       [
         data,

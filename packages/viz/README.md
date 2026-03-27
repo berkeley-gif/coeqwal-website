@@ -211,15 +211,21 @@ these through `useMemo`, the memo will recompute every render.
 
 ```tsx
 // BAD — theme.palette.grey is a new object ref each render
-const chartColors = useMemo(() => ({
-  default: theme.palette.grey[600],
-}), [theme.palette.grey])           // unstable dep
+const chartColors = useMemo(
+  () => ({
+    default: theme.palette.grey[600],
+  }),
+  [theme.palette.grey],
+) // unstable dep
 
 // GOOD — extract primitive strings first
 const grey600 = theme.palette.grey[600]
-const chartColors = useMemo(() => ({
-  default: grey600,
-}), [grey600])                       // stable primitive dep
+const chartColors = useMemo(
+  () => ({
+    default: grey600,
+  }),
+  [grey600],
+) // stable primitive dep
 ```
 
 ### 5. Guard entrance animations
@@ -242,7 +248,9 @@ dep array:
 
 ```tsx
 const onLineHoverRef = useRef(onLineHover)
-useEffect(() => { onLineHoverRef.current = onLineHover }, [onLineHover])
+useEffect(() => {
+  onLineHoverRef.current = onLineHover
+}, [onLineHover])
 
 // Inside updateChart, use onLineHoverRef.current — not onLineHover
 ```

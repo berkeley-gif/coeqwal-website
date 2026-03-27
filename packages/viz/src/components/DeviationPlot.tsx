@@ -35,7 +35,6 @@ function toTier(v: number): number {
   return 4 - (v + 1) * 1.5
 }
 
-
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
 const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
@@ -114,7 +113,6 @@ function computeColumnDodge(
 
   return result
 }
-
 
 /** Imperatively show the tooltip DOM element — no React state updates. */
 function showTooltip(
@@ -261,9 +259,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const MORPH_DUR = 600
 
           svg
-            .selectAll<SVGCircleElement, unknown>(
-              "circle[data-axis]:not(.theme-ring)",
-            )
+            .selectAll<
+              SVGCircleElement,
+              unknown
+            >("circle[data-axis]:not(.theme-ring)")
             .each(function () {
               const el = select(this)
               const sid = el.attr("data-scenario-id")
@@ -285,9 +284,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             })
 
           svg
-            .selectAll<SVGCircleElement, unknown>(
-              "circle.theme-ring[data-axis]",
-            )
+            .selectAll<
+              SVGCircleElement,
+              unknown
+            >("circle.theme-ring[data-axis]")
             .each(function () {
               const el = select(this)
               const sid = el.attr("data-scenario-id")
@@ -464,7 +464,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("y", y0)
             .attr("width", innerW)
             .attr("height", y1 - y0)
-            .attr("fill", showTierZones ? (TIER_BAND_COLORS[i] ?? "#fff") : colors.background)
+            .attr(
+              "fill",
+              showTierZones
+                ? (TIER_BAND_COLORS[i] ?? "#fff")
+                : colors.background,
+            )
         })
 
         TIER_POSITIONS.forEach((t) => {
@@ -537,7 +542,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               if (sv == null) return
               entries.push({ id: scenario.id, y: yScale(toTier(sv)) })
             })
-            const offsets = computeColumnDodge(entries, dotDiam, effectiveJitter)
+            const offsets = computeColumnDodge(
+              entries,
+              dotDiam,
+              effectiveJitter,
+            )
             offsets.forEach((off, id) => {
               dodgeMap.set(`${tag}:${axis}:${id}`, off)
             })
@@ -586,7 +595,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0
                 const dotCx = cx + dodgeOff
                 const color = hasScenarioColors
-                  ? (lineColors[si] || colors.default)
+                  ? lineColors[si] || colors.default
                   : colors.default
 
                 if (tag === "hist") {
@@ -597,10 +606,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     .push({ cx: dotCx, cy: dotY, color, si })
                 }
 
-                if (
-                  showDifferenceGlyphs &&
-                  Math.abs(dotY - baseY) > 0.5
-                ) {
+                if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
                   glyphsLayer
                     .append("line")
                     .attr("class", "diff-glyph")
@@ -751,7 +757,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           if (!pts || pts.length < 2 || !scenario) return
           const si = activeList.indexOf(scenario)
           const color = hasScenarioColors
-            ? (lineColors[si] || colors.default)
+            ? lineColors[si] || colors.default
             : colors.default
           const pathGen = line<(typeof pts)[number]>()
             .x((d) => d.cx)
@@ -812,151 +818,150 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         axes.forEach((axis) => {
           const colX = xScale(axis)!
 
-          subcolumns.forEach(
-            ({ srcData, srcBaseline, xOff, w, tag }) => {
-              const cx = colX + xOff + w / 2
-              const bv = srcBaseline.values[axis]
-              if (bv == null) return
-              const bt = toTier(bv)
-              const baseY = yScale(bt)
+          subcolumns.forEach(({ srcData, srcBaseline, xOff, w, tag }) => {
+            const cx = colX + xOff + w / 2
+            const bv = srcBaseline.values[axis]
+            if (bv == null) return
+            const bt = toTier(bv)
+            const baseY = yScale(bt)
 
-              srcData.forEach((scenario, si) => {
-                const sv = scenario.values[axis]
-                if (sv == null) return
-                const st = toTier(sv)
-                const dotY = yScale(st)
-                const opacity = getOpacity(scenario.id)
-                const dotCx =
-                  cx +
-                  (dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0)
-                const color = hasScenarioColors
-                  ? (lineColors[si] || colors.default)
-                  : colors.default
-                const themeRing =
-                  tag === "hist" &&
-                  showThemeRings &&
-                  scenarioThemeRingColors?.[scenario.id]
+            srcData.forEach((scenario, si) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              const st = toTier(sv)
+              const dotY = yScale(st)
+              const opacity = getOpacity(scenario.id)
+              const dotCx =
+                cx + (dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0)
+              const color = hasScenarioColors
+                ? lineColors[si] || colors.default
+                : colors.default
+              const themeRing =
+                tag === "hist" &&
+                showThemeRings &&
+                scenarioThemeRingColors?.[scenario.id]
 
-                if (themeRing) {
-                  dotsLayer
-                    .append("circle")
-                    .attr("class", "theme-ring")
-                    .attr("cx", dotCx)
-                    .attr("cy", baseY)
-                    .attr("r", 0)
-                    .attr("fill", "none")
-                    .attr("stroke", themeRing)
-                    .attr("stroke-width", 2)
-                    .attr("opacity", 0.85)
-                    .attr("pointer-events", "none")
-                    .attr("data-scenario-id", scenario.id)
-                    .attr("data-axis", axis)
-                    .attr("data-tag", tag)
-                    .transition()
-                    .duration(T_DUR)
-                    .attr("cy", dotY)
-                    .attr("r", dotR + ringExtra)
-                }
-
-                const dot = dotsLayer
+              if (themeRing) {
+                dotsLayer
                   .append("circle")
+                  .attr("class", "theme-ring")
                   .attr("cx", dotCx)
                   .attr("cy", baseY)
                   .attr("r", 0)
-                  .attr("fill", color)
-                  .attr("fill-opacity", tag === "comp" ? opacity * 0.7 : opacity)
-                  .attr("stroke", color)
-                  .attr("stroke-width", 1.5)
-                  .attr("stroke-opacity", Math.min((tag === "comp" ? opacity * 0.7 : opacity) + 0.1, 1))
-                  .attr("cursor", "pointer")
+                  .attr("fill", "none")
+                  .attr("stroke", themeRing)
+                  .attr("stroke-width", 2)
+                  .attr("opacity", 0.85)
+                  .attr("pointer-events", "none")
                   .attr("data-scenario-id", scenario.id)
                   .attr("data-axis", axis)
                   .attr("data-tag", tag)
-                  .attr("data-base-r", dotR)
-
-                const targetR = sidebarHighlightActive
-                  ? highlightedIds!.has(scenario.id)
-                    ? dotR + 1.5
-                    : dotR * 0.7
-                  : dotR
-
-                dot
                   .transition()
                   .duration(T_DUR)
                   .attr("cy", dotY)
-                  .attr("r", targetR)
+                  .attr("r", dotR + ringExtra)
+              }
 
-                dot
-                  .on("mouseenter", function (event: MouseEvent) {
-                    applyFocusVisuals(scenario.id)
-                    select(this).attr("r", dotR + 2.5).raise()
-                    if (themeRing) {
-                      dotsLayer
-                        .selectAll<SVGCircleElement, unknown>(
-                          "circle.theme-ring",
+              const dot = dotsLayer
+                .append("circle")
+                .attr("cx", dotCx)
+                .attr("cy", baseY)
+                .attr("r", 0)
+                .attr("fill", color)
+                .attr("fill-opacity", tag === "comp" ? opacity * 0.7 : opacity)
+                .attr("stroke", color)
+                .attr("stroke-width", 1.5)
+                .attr(
+                  "stroke-opacity",
+                  Math.min((tag === "comp" ? opacity * 0.7 : opacity) + 0.1, 1),
+                )
+                .attr("cursor", "pointer")
+                .attr("data-scenario-id", scenario.id)
+                .attr("data-axis", axis)
+                .attr("data-tag", tag)
+                .attr("data-base-r", dotR)
+
+              const targetR = sidebarHighlightActive
+                ? highlightedIds!.has(scenario.id)
+                  ? dotR + 1.5
+                  : dotR * 0.7
+                : dotR
+
+              dot
+                .transition()
+                .duration(T_DUR)
+                .attr("cy", dotY)
+                .attr("r", targetR)
+
+              dot
+                .on("mouseenter", function (event: MouseEvent) {
+                  applyFocusVisuals(scenario.id)
+                  select(this)
+                    .attr("r", dotR + 2.5)
+                    .raise()
+                  if (themeRing) {
+                    dotsLayer
+                      .selectAll<SVGCircleElement, unknown>("circle.theme-ring")
+                      .filter(function () {
+                        return (
+                          this.getAttribute("data-scenario-id") === scenario.id
                         )
-                        .filter(function () {
-                          return (
-                            this.getAttribute("data-scenario-id") ===
-                            scenario.id
-                          )
-                        })
-                        .raise()
-                    }
+                      })
+                      .raise()
+                  }
 
-                    if (showScenarioPath) drawPathForScenario(scenario.id)
+                  if (showScenarioPath) drawPathForScenario(scenario.id)
 
-                    if (hoverNotifyTimerRef.current !== null) {
-                      clearTimeout(hoverNotifyTimerRef.current)
-                      hoverNotifyTimerRef.current = null
-                    }
+                  if (hoverNotifyTimerRef.current !== null) {
+                    clearTimeout(hoverNotifyTimerRef.current)
+                    hoverNotifyTimerRef.current = null
+                  }
 
-                    const el = tooltipRef.current
-                    if (el) {
-                      showTooltip(
-                        el,
-                        MARGIN.left + colX + bandW / 2,
-                        MARGIN.top + 6,
-                        scenario.name,
-                        axis,
-                      )
-                    }
-
-                    if (lastNotifiedIdRef.current !== scenario.id) {
-                      hoverNotifyTimerRef.current = setTimeout(() => {
-                        hoverNotifyTimerRef.current = null
-                        lastNotifiedIdRef.current = scenario.id
-                        onLineHoverRef.current?.(scenario)
-                      }, HOVER_NOTIFY_MS)
-                    }
-                  })
-                  .on("mouseleave", function () {
-                    if (hoverNotifyTimerRef.current !== null) {
-                      clearTimeout(hoverNotifyTimerRef.current)
-                      hoverNotifyTimerRef.current = null
-                    }
-                    if (pinnedScenarioId) {
-                      applyFocusVisuals(pinnedScenarioId)
-                      drawPathForScenario(pinnedScenarioId)
-                    } else {
-                      resetDotVisuals()
-                      pathLayer.selectAll("*").remove()
-                    }
-                    if (tooltipRef.current) hideTooltip(tooltipRef.current)
-                    lastNotifiedIdRef.current = null
-                    onLineHoverRef.current?.(null)
-                  })
-                  .on("click", () => onLineClickRef.current?.(scenario))
-                  .on("dblclick", function (event: MouseEvent) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    setPinnedScenarioId((prev) =>
-                      prev === scenario.id ? null : scenario.id,
+                  const el = tooltipRef.current
+                  if (el) {
+                    showTooltip(
+                      el,
+                      MARGIN.left + colX + bandW / 2,
+                      MARGIN.top + 6,
+                      scenario.name,
+                      axis,
                     )
-                  })
-              })
-            },
-          )
+                  }
+
+                  if (lastNotifiedIdRef.current !== scenario.id) {
+                    hoverNotifyTimerRef.current = setTimeout(() => {
+                      hoverNotifyTimerRef.current = null
+                      lastNotifiedIdRef.current = scenario.id
+                      onLineHoverRef.current?.(scenario)
+                    }, HOVER_NOTIFY_MS)
+                  }
+                })
+                .on("mouseleave", function () {
+                  if (hoverNotifyTimerRef.current !== null) {
+                    clearTimeout(hoverNotifyTimerRef.current)
+                    hoverNotifyTimerRef.current = null
+                  }
+                  if (pinnedScenarioId) {
+                    applyFocusVisuals(pinnedScenarioId)
+                    drawPathForScenario(pinnedScenarioId)
+                  } else {
+                    resetDotVisuals()
+                    pathLayer.selectAll("*").remove()
+                  }
+                  if (tooltipRef.current) hideTooltip(tooltipRef.current)
+                  lastNotifiedIdRef.current = null
+                  onLineHoverRef.current?.(null)
+                })
+                .on("click", () => onLineClickRef.current?.(scenario))
+                .on("dblclick", function (event: MouseEvent) {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setPinnedScenarioId((prev) =>
+                    prev === scenario.id ? null : scenario.id,
+                  )
+                })
+            })
+          })
         })
 
         if (pinnedScenarioId) {
@@ -996,7 +1001,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [currentWidth, currentHeight, updateChart])
 
-
     const pinnedName = pinnedScenarioId
       ? data.find((s) => s.id === pinnedScenarioId)?.name
       : null
@@ -1018,7 +1022,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               top: 6,
               right: 10,
               fontSize: 9.5,
-              fontFamily: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+              fontFamily:
+                '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
               color: "#4a5568",
               zIndex: 5,
               pointerEvents: "none",
@@ -1031,9 +1036,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               padding: "3px 8px",
             }}
           >
-            <span style={{ fontWeight: 600, color: "#2d3748" }}>{pinnedName}</span>
+            <span style={{ fontWeight: 600, color: "#2d3748" }}>
+              {pinnedName}
+            </span>
             <span style={{ color: "#a0aec0", fontSize: 8.5 }}>
-              {" "}&middot; dbl-click to unpin
+              {" "}
+              &middot; dbl-click to unpin
             </span>
           </div>
         )}
@@ -1054,11 +1062,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             borderRadius: 8,
             padding: "8px 12px",
             fontSize: 11,
-            fontFamily: '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+            fontFamily:
+              '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
             lineHeight: 1.55,
             pointerEvents: "none",
             zIndex: 10,
-            boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
+            boxShadow:
+              "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
             whiteSpace: "normal",
             maxWidth: 280,
             transform: "translateX(-50%)",
