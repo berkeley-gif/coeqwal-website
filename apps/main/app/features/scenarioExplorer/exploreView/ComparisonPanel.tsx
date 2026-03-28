@@ -44,7 +44,7 @@ import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
 import { getOutcomeName, OUTCOME_CODE_ORDER } from "../../../content/outcomes"
-import { getScenarioTheme } from "../../../content/scenarios"
+import { useScenarioList } from "../../scenarios/hooks"
 import mockHydroclimateTiers from "../data/mockHydroclimateTiers.json"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
@@ -86,6 +86,8 @@ export default function ComparisonPanel() {
     toggleScenario,
     selectScenarios,
   } = useScenarioExplorerStore()
+
+  const { getThemeForScenario } = useScenarioList()
 
   const chosenIds = useMemo(
     () => new Set(selectedScenarios),
@@ -224,10 +226,10 @@ export default function ComparisonPanel() {
   const scenarioThemeMap = useMemo(() => {
     const map: Record<string, string> = {}
     parityData.forEach((s) => {
-      map[s.id] = getScenarioTheme(s.id)
+      map[s.id] = getThemeForScenario(s.id)
     })
     return map
-  }, [parityData])
+  }, [parityData, getThemeForScenario])
 
   // Mock comparison hydroclimate data → VerticalParallelLineData[]
   const mockHC = (

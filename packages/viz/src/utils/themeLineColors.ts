@@ -23,6 +23,7 @@
 import {
   interpolateBuPu,
   interpolateGnBu,
+  interpolateGreys,
   interpolateYlGn,
   interpolateYlOrBr,
   interpolateYlOrRd,
@@ -30,7 +31,13 @@ import {
 
 // Local string-union mirror of ScenarioTheme (defined in apps/main/content/scenarios.ts).
 // Kept here to avoid a cross-package import.
-export type ThemeKey = "baseline" | "ag_gw" | "eco" | "delta" | "cws"
+export type ThemeKey =
+  | "baseline"
+  | "ag_gw"
+  | "eco"
+  | "delta"
+  | "cws"
+  | "unthemed"
 
 // Range within each interpolator to sample from.
 // Start at 0.4 to skip the pale/light end; end at 0.95 to avoid pure black.
@@ -55,6 +62,7 @@ export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
   eco: makeThemePalette(interpolateGnBu),
   delta: makeThemePalette(interpolateBuPu),
   cws: makeThemePalette(interpolateYlOrRd),
+  unthemed: makeThemePalette(interpolateGreys),
 }
 
 /**

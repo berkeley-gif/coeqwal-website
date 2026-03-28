@@ -175,13 +175,23 @@ export function useScenarioTiers(scenarioId: string | null) {
   }
 }
 
-export function useMultipleScenarioTiers() {
+/**
+ * Fetch tier data for multiple scenarios.
+ *
+ * @param idMapping — Optional mapping of display IDs to fetch IDs.
+ *   When provided, fetches tier data for `Object.values(idMapping)` (the
+ *   resolved short_codes for the active hydroclimate) and re-keys all output
+ *   data structures using `Object.keys(idMapping)` (the sibling group IDs).
+ *   When omitted, falls back to fetching all active scenario IDs directly.
+ */
+export function useMultipleScenarioTiers(
+  idMapping?: Record<string, string>,
+) {
   const theme = useTheme()
   const { mutate } = useSWRConfig()
 
-  // Use shared hooks for scenarios and tier list (cached, deduplicated)
   const {
-    activeScenarioIds: scenarioIds,
+    activeScenarioIds: fallbackIds,
     error: scenariosError,
     isLoading: scenariosLoading,
   } = useScenarios()
@@ -192,64 +202,83 @@ export function useMultipleScenarioTiers() {
     isLoading: tiersLoading,
   } = useTiers()
 
-  // Fetch all scenario tier data in a single batched request
-  // SWR key includes scenario IDs so it refetches when list changes
+  // When a mapping is provided, fetch only the resolved IDs (typically 24).
+  // Otherwise fall back to all active IDs (legacy behavior).
+  const fetchIds = useMemo(
+    () => (idMapping ? Object.values(idMapping) : fallbackIds),
+    [idMapping, fallbackIds],
+  )
+
+  // Reverse map for re-keying: resolved short_code → sibling group ID
+  const reverseMap = useMemo(() => {
+    if (!idMapping) return null
+    const m = new Map<string, string>()
+    Object.entries(idMapping).forEach(([groupId, resolvedId]) => {
+      m.set(resolvedId, groupId)
+    })
+    return m
+  }, [idMapping])
+
   const {
-    data: allScenariosData,
+    data: rawScenariosData,
     error: scenarioTiersError,
     isLoading: scenarioTiersLoading,
   } = useSWR(
-    scenarioIds.length > 0 ? CACHE_KEYS.allScenarioTiers(scenarioIds) : null,
-    () => fetchAllScenarioTiers(scenarioIds),
+    fetchIds.length > 0 ? CACHE_KEYS.allScenarioTiers(fetchIds) : null,
+    () => fetchAllScenarioTiers(fetchIds),
+  )
+
+  // Re-key from resolved IDs to sibling group IDs when mapping is active
+  const allScenariosData = useMemo(() => {
+    if (!rawScenariosData) return undefined
+    if (!reverseMap) return rawScenariosData
+    const result: Record<string, ScenarioTiersResponse> = {}
+    Object.entries(rawScenariosData).forEach(([resolvedId, data]) => {
+      const groupId = reverseMap.get(resolvedId) ?? resolvedId
+      result[groupId] = data
+    })
+    return result
+  }, [rawScenariosData, reverseMap])
+
+  // Scenario IDs to expose: sibling group IDs (mapping keys) or raw IDs
+  const scenarioIds = useMemo(
+    () => (idMapping ? Object.keys(idMapping) : fallbackIds),
+    [idMapping, fallbackIds],
   )
 
   // Pre-populate per-scenario cache entries after bulk fetch
-  // This allows useScenarioTiers to find cached data when navigating to detail view
   useEffect(() => {
-    if (allScenariosData) {
-      Object.entries(allScenariosData).forEach(([scenarioId, tierData]) => {
+    if (rawScenariosData) {
+      Object.entries(rawScenariosData).forEach(([scenarioId, tierData]) => {
         mutate(CACHE_KEYS.scenarioTiers(scenarioId), tierData, false)
       })
     }
-  }, [allScenariosData, mutate])
+  }, [rawScenariosData, mutate])
 
-  // Memoize theme colors to prevent recalculation
   const themeColors = useMemo(() => getThemeColorsForApi(theme), [theme])
 
-  // Convert all scenario data to chart format
-  // Data is keyed by short code (e.g., allChartData[scenarioId]["CWS_DEL"])
   const allChartData = useMemo(() => {
     if (!allScenariosData) return {}
-
     const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
-
     Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
       result[scenarioId] = processScenarioData(scenarioData, themeColors)
     })
-
     return result
   }, [allScenariosData, themeColors])
 
-  // Extract score data for all scenarios (for sorting and parallel plots)
-  // Data is keyed by short code (e.g., allScoreData[scenarioId]["CWS_DEL"])
   const allScoreData = useMemo(() => {
     if (!allScenariosData) return {}
-
     const result: Record<string, Record<string, OutcomeScoreData>> = {}
-
     Object.entries(allScenariosData).forEach(([scenarioId, scenarioData]) => {
       result[scenarioId] = extractScoreData(scenarioData)
     })
-
     return result
   }, [allScenariosData])
 
-  // Get outcome names from tier list
   const outcomeNames = useMemo(() => buildOutcomeNames(allTiers), [allTiers])
 
   const isLoading = scenariosLoading || scenarioTiersLoading || tiersLoading
 
-  // Combine errors (shared hooks return string errors, SWR returns Error objects)
   const error = useMemo(() => {
     if (scenariosError) return `Failed to load scenarios: ${scenariosError}`
     if (scenarioTiersError) {
@@ -264,10 +293,10 @@ export function useMultipleScenarioTiers() {
   }, [scenariosError, scenarioTiersError, tiersError])
 
   return {
-    allChartData, // Keyed by short code (e.g., allChartData[scenarioId]["CWS_DEL"])
-    allScoreData, // Keyed by short code (e.g., allScoreData[scenarioId]["CWS_DEL"])
-    allScenariosData, // Raw API responses for Sankey / tier distribution access
-    scenarioIds, // Export the dynamic list of scenario IDs
+    allChartData,
+    allScoreData,
+    allScenariosData,
+    scenarioIds,
     outcomeNames,
     isLoading,
     error,

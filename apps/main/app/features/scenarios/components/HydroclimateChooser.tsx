@@ -18,7 +18,13 @@ import {
   LocalFireDepartmentIcon,
 } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
-import { hydroclimateOptions } from "../../../content/scenarios"
+import {
+  hydroclimateOptions,
+  HYDROCLIMATE_ID_MAP,
+} from "../../../content/scenarios"
+
+/** Set of hydroclimate option values that have actual scenario data */
+const AVAILABLE_HYDROCLIMATES = new Set(Object.keys(HYDROCLIMATE_ID_MAP))
 
 // Icon and background color configuration for each hydroclimate
 // Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
@@ -86,8 +92,7 @@ export function HydroclimateChooser({
   const isVertical = layout === "vertical"
 
   const handleSelect = (optionValue: string) => {
-    // Only allow selection of historical for now
-    if (optionValue === "historical" && onChange) {
+    if (AVAILABLE_HYDROCLIMATES.has(optionValue) && onChange) {
       onChange(optionValue)
     }
   }
@@ -110,7 +115,7 @@ export function HydroclimateChooser({
             whiteSpace: "nowrap",
           }}
         >
-          View outcomes by climate (coming soon)
+          View outcomes by hydroclimate
         </Typography>
       )}
 
@@ -127,7 +132,7 @@ export function HydroclimateChooser({
             const config = HYDROCLIMATE_CONFIG[option.value]
             const IconComponent = config?.icon || HistoryIcon
             const isSelected = value === option.value
-            const isDisabled = option.value !== "historical"
+            const isDisabled = !AVAILABLE_HYDROCLIMATES.has(option.value)
 
             const iconButton = (
               <span style={{ display: "inline-flex" }}>
@@ -223,7 +228,6 @@ export function HydroclimateChooser({
               </span>
             )
 
-            // Only show tooltip for the historical option
             if (!isDisabled) {
               return (
                 <HybridTooltip

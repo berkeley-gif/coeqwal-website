@@ -110,6 +110,7 @@ export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
   eco: { label: "Rivers, salmon and the Delta ecosystem" },
   delta: { label: "The Delta as a living place" },
   cws: { label: "Community water systems" },
+  unthemed: { label: "Other scenarios" },
 }
 
 /** Active themes available for filtering */
@@ -119,6 +120,7 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
   "eco",
   "delta",
   "cws",
+  "unthemed",
 ]
 
 // =============================================================================

@@ -12,7 +12,6 @@ import {
   type TierSankeyGroup,
   getThemeLineColor,
 } from "@repo/viz"
-import { getScenarioTheme } from "../../../content/scenarios"
 import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
 
@@ -20,33 +19,48 @@ const PRIMARY_BASELINE_ID = "s0020"
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
 /**
- * Hook to transform tier data for VerticalParallelLinePlot
+ * Hook to transform tier data for VerticalParallelLinePlot.
+ *
+ * Reads the active hydroclimatePeriod from the store, resolves each sibling
+ * group to the correct variant's short_code, and passes the mapping into
+ * useMultipleScenarioTiers so only 24 scenarios are fetched per hydroclimate.
+ * All returned data is keyed by sibling group IDs, making downstream code
+ * hydroclimate-agnostic.
  */
 export function useComparisonData() {
-  // scenarioIds comes from the API - no hardcoding needed
+  const { buildIdMapping, getDisplayName, getThemeForScenario } =
+    useScenarioList()
+
+  const {
+    hydroclimatePeriod,
+    showAlternativeBaselines,
+    showOnlyChosen,
+    selectedScenarios,
+  } = useScenarioExplorerStore()
+
+  const idMapping = useMemo(
+    () => buildIdMapping(hydroclimatePeriod),
+    [buildIdMapping, hydroclimatePeriod],
+  )
+
   const {
     allScoreData,
     allScenariosData,
     scenarioIds: allScenarioIds,
     isLoading: tiersLoading,
     error: tiersError,
-  } = useMultipleScenarioTiers()
-  const { getDisplayName } = useScenarioList()
-
-  const { showAlternativeBaselines, showOnlyChosen, selectedScenarios } =
-    useScenarioExplorerStore()
+  } = useMultipleScenarioTiers(idMapping)
 
   const isLoading = tiersLoading
   const error = tiersError
 
-  // Apply baseline filter and ensure s0020 is always listed first.
-  // When showAlternativeBaselines is false, only s0020 is shown from the baseline theme.
   const scenarioIds = useMemo(() => {
     let filtered = showAlternativeBaselines
       ? allScenarioIds
       : allScenarioIds.filter(
           (id) =>
-            getScenarioTheme(id) !== "baseline" || id === PRIMARY_BASELINE_ID,
+            getThemeForScenario(id) !== "baseline" ||
+            id === PRIMARY_BASELINE_ID,
         )
     if (showOnlyChosen && selectedScenarios.length > 0) {
       const chosen = new Set(selectedScenarios)
@@ -62,6 +76,7 @@ export function useComparisonData() {
     showAlternativeBaselines,
     showOnlyChosen,
     selectedScenarios,
+    getThemeForScenario,
   ])
 
   // Build scenarios array with dynamic names and theme-aligned colors.
@@ -70,7 +85,7 @@ export function useComparisonData() {
   const scenarios = useMemo(() => {
     const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return scenarioIds.map((id) => {
-      const theme = getScenarioTheme(id) as ThemeKey
+      const theme = getThemeForScenario(id) as ThemeKey
       const idx = themeCounters[theme] ?? 0
       themeCounters[theme] = idx + 1
       return {
@@ -79,13 +94,12 @@ export function useComparisonData() {
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [scenarioIds, getDisplayName])
+  }, [scenarioIds, getDisplayName, getThemeForScenario])
 
-  // All scenarios (unfiltered) for Sankey "all scenarios" mode
   const allScenarios = useMemo(() => {
     const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return allScenarioIds.map((id) => {
-      const theme = getScenarioTheme(id) as ThemeKey
+      const theme = getThemeForScenario(id) as ThemeKey
       const idx = themeCounters[theme] ?? 0
       themeCounters[theme] = idx + 1
       return {
@@ -94,7 +108,7 @@ export function useComparisonData() {
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [allScenarioIds, getDisplayName])
+  }, [allScenarioIds, getDisplayName, getThemeForScenario])
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
     if (!allScoreData || Object.keys(allScoreData).length === 0) {
