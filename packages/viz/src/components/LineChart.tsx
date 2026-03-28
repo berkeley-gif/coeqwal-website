@@ -76,7 +76,7 @@ const LineChart: React.FC<LineChartProps> = React.memo(
         "Sep",
       ]
 
-      // Month number to water year index mapping (1=Jan → 3, 10=Oct → 0)
+      // Month number to water year index mapping (1=Jan -> 3, 10=Oct -> 0)
       const monthToWaterYearIndex: { [key: string]: number } = {
         "10": 0,
         "11": 1,

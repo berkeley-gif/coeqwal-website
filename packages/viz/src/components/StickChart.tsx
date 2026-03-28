@@ -25,7 +25,7 @@ export interface StickChartProps {
  */
 const StickChart: React.FC<StickChartProps> = React.memo(
   ({ size = 80, tiers, seed }) => {
-    // Default tier configuration: red → orange → blue → green
+    // Default tier configuration: red -> orange -> blue -> green
     const defaultTiers = [
       { label: "Tier 1", color: "#f96262" }, // red
       { label: "Tier 2", color: "#f89740" }, // orange

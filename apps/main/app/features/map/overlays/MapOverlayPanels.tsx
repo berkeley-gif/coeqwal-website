@@ -305,7 +305,7 @@ export default function MapOverlayPanels() {
   }, [strategyPhase])
 
   // Phase 1: Panel entrance — each slides up from below the viewport
-  // and fades in with ease-out cubic (fast start → gentle settle).
+  // and fades in with ease-out cubic (fast start -> gentle settle).
   // Only one panel animates at a time; each waits for the previous to land.
   const strategy = usePanelEntrance(
     scenarioIntroProgress,

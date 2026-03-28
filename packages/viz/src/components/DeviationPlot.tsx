@@ -75,40 +75,40 @@ function computeColumnDodge(
     return result
   }
 
-  const minDist = dotDiam + 1
-  const placed: { id: string; y: number; x: number }[] = []
+  const idealDist = dotDiam + 1
   const sorted = [...entries].sort((a, b) => a.y - b.y)
 
-  for (const entry of sorted) {
-    let bestX = 0
-    let bestCost = Infinity
+  // Group entries that collide vertically (same or near-same tier)
+  const groups: { id: string; y: number }[][] = []
+  let currentGroup: { id: string; y: number }[] = [sorted[0]!]
+  for (let i = 1; i < sorted.length; i++) {
+    if (Math.abs(sorted[i]!.y - sorted[i - 1]!.y) < idealDist) {
+      currentGroup.push(sorted[i]!)
+    } else {
+      groups.push(currentGroup)
+      currentGroup = [sorted[i]!]
+    }
+  }
+  groups.push(currentGroup)
 
-    const candidates = [0]
-    for (const p of placed) {
-      if (Math.abs(p.y - entry.y) < minDist) {
-        candidates.push(p.x + minDist, p.x - minDist)
-      }
+  for (const group of groups) {
+    if (group.length === 1) {
+      result.set(group[0]!.id, 0)
+      continue
     }
 
-    for (const cx of candidates) {
-      if (Math.abs(cx) > halfSpread) continue
-      let overlaps = false
-      for (const p of placed) {
-        const dx = Math.abs(cx - p.x)
-        const dy = Math.abs(entry.y - p.y)
-        if (dx < minDist && dy < minDist) {
-          overlaps = true
-          break
-        }
-      }
-      if (!overlaps && Math.abs(cx) < bestCost) {
-        bestCost = Math.abs(cx)
-        bestX = cx
-      }
-    }
+    // Compute spacing: use ideal spacing if it fits, otherwise compress
+    // to fill the available width with even overlap
+    const totalIdealWidth = (group.length - 1) * idealDist
+    const step =
+      totalIdealWidth <= halfSpread * 2
+        ? idealDist
+        : (halfSpread * 2) / (group.length - 1)
 
-    placed.push({ ...entry, x: bestX })
-    result.set(entry.id, bestX)
+    const startX = -((group.length - 1) * step) / 2
+    group.forEach((entry, i) => {
+      result.set(entry.id, startX + i * step)
+    })
   }
 
   return result
@@ -156,7 +156,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     scenarioThemeRingColors = undefined,
     comparisonData,
     comparisonBaselineData,
-    comparisonLabel = "Comparison",
+    comparisonLabel: _comparisonLabel = "Comparison",
     climateMode = "off",
     morphShowComparison = false,
   }) => {
@@ -405,7 +405,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const subW = isCompare ? bandW * SUB_RATIO : bandW
         const subGap = isCompare ? bandW * (1 - 2 * SUB_RATIO) : 0
         const compXOff = subW + subGap
-        const effectiveJitter = (isCompare ? subW : bandW) * 0.25
+        const effectiveJitter = (isCompare ? subW : bandW) * 0.45
         const effectiveDotR = isCompare
           ? data.length > 15
             ? 3.5
@@ -576,7 +576,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const colX = xScale(axis)!
 
           subcolumns.forEach(
-            ({ srcData, srcBaseline, xOff, w, tag, bgTint }) => {
+            ({ srcData, srcBaseline, xOff, w, tag }) => {
               const cx = colX + xOff + w / 2
               const bv = srcBaseline.values[axis]
               if (bv == null) return
@@ -710,7 +710,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const dotsLayer = g.append("g").attr("class", "dots")
 
         const TICK_HALF = 6
-        baselineInfos.forEach(({ axis, tag, cx, baseY, colX, w }) => {
+        baselineInfos.forEach(({ axis, tag, cx, baseY, w }) => {
           const isComp = tag === "comp"
           const strokeColor = isComp ? "#718096" : "#2d3748"
           const opacity = isComp ? 0.5 : 0.7
@@ -894,7 +894,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("r", targetR)
 
               dot
-                .on("mouseenter", function (event: MouseEvent) {
+                .on("mouseenter", function () {
                   applyFocusVisuals(scenario.id)
                   select(this)
                     .attr("r", dotR + 2.5)
@@ -989,7 +989,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         pinnedScenarioId,
         comparisonData,
         comparisonBaselineData,
-        comparisonLabel,
         climateMode,
         morphShowComparison,
       ],

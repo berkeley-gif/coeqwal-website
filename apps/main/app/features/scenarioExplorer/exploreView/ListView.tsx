@@ -34,8 +34,8 @@ interface ListViewProps {
 
 export default function ListView({
   onTierClick,
-  highlightedIds,
-  onScenarioHover,
+  highlightedIds: _highlightedIds,
+  onScenarioHover: _onScenarioHover,
 }: ListViewProps) {
   const theme = useTheme()
 
@@ -244,7 +244,7 @@ export default function ListView({
   const scrollListToTop = () =>
     listScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
 
-  // Click a theme badge → select all scenarios of that theme and float them to top.
+  // Click a theme badge -> select all scenarios of that theme and float them to top.
   // Clicking the active theme again deselects those scenarios and clears the filter.
   const handleThemeBadgeClick = (theme: ScenarioTheme) => {
     if (selectedTheme === theme) {
@@ -264,7 +264,7 @@ export default function ListView({
     scrollListToTop()
   }
 
-  // Click an operation icon → float matching scenarios to top and select them.
+  // Click an operation icon -> float matching scenarios to top and select them.
   // Clicking the active icon again deselects those scenarios and clears the filter.
   const handleIconClick = (iconId: string) => {
     if (selectedIconId === iconId) {

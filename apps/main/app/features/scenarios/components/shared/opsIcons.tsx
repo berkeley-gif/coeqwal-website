@@ -3,8 +3,8 @@
  *
  * This module provides:
  * - `OpsCircleIcon` — A generic circle-with-text SVG component
- * - `ICON_REGISTRY` — All icon definitions (id → rendering config + tooltip metadata)
- * - `SCENARIO_ICONS` — Scenario ID → ordered array of icon IDs
+ * - `ICON_REGISTRY` — All icon definitions (id -> rendering config + tooltip metadata)
+ * - `SCENARIO_ICONS` — Scenario ID -> ordered array of icon IDs
  * - `getScenarioIconDefs()` — Helper to get resolved icon definitions for a scenario
  */
 

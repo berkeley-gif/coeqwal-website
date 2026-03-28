@@ -13,12 +13,18 @@
  */
 
 import React, { useState, useCallback } from "react"
-import { Box, Typography, useTheme, PlayArrowIcon, ViewListIcon } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  PlayArrowIcon,
+  ViewListIcon,
+} from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
-import SelectionBanner from "./components/SelectionBanner"
+// import SelectionBanner from "./components/SelectionBanner"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
 import ListView from "./exploreView/ListView"
@@ -55,21 +61,17 @@ export default function ScenarioExplorer() {
 
   // Hover coordination
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
-  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(null)
-
-  const handleSidebarRowHover = useCallback(
-    (ids: string[] | null) => {
-      setHighlightedIds(ids ? new Set(ids) : null)
-    },
-    [],
+  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
+    null,
   )
 
-  const handleToolScenarioHover = useCallback(
-    (scenarioId: string | null) => {
-      setHoveredScenarioId(scenarioId)
-    },
-    [],
-  )
+  const handleSidebarRowHover = useCallback((ids: string[] | null) => {
+    setHighlightedIds(ids ? new Set(ids) : null)
+  }, [])
+
+  const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
+    setHoveredScenarioId(scenarioId)
+  }, [])
 
   return (
     <Box

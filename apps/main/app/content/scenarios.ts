@@ -85,7 +85,7 @@ export const HYDROCLIMATE_ID_MAP: Record<string, number> = {
   "warmer-drier-i": 4,
 }
 
-/** Reverse lookup: API hydroclimate_id → frontend string value */
+/** Reverse lookup: API hydroclimate_id -> frontend string value */
 export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
   2: "historical",
   3: "warmer-wetter",

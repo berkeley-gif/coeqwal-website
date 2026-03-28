@@ -96,7 +96,7 @@ export default function ComparisonPanel({
   )
 
   // ── Hover state ─────────────────────────────────────────────────────────
-  // Chart hover feeds into hoveredScenario (debounced) → onScenarioHover.
+  // Chart hover feeds into hoveredScenario (debounced) -> onScenarioHover.
   // External highlights arrive via highlightedIds prop from the layout shell.
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastHoveredIdRef = useRef<string | null>(null)
@@ -189,7 +189,7 @@ export default function ComparisonPanel({
   const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
   const [deviationComparisonHC] = useState("warmer-wetter")
 
-  // Map display names → outcome codes for tooltip lookups
+  // Map display names -> outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
     [axes, outcomeCodes],
@@ -222,7 +222,7 @@ export default function ComparisonPanel({
     return map
   }, [parityData, getThemeForScenario])
 
-  // Mock comparison hydroclimate data → VerticalParallelLineData[]
+  // Mock comparison hydroclimate data -> VerticalParallelLineData[]
   const mockHC = (
     mockHydroclimateTiers.hydroclimates as Record<
       string,

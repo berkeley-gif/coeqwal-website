@@ -350,12 +350,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
       // ── Scales ──────────────────────────────────────────────────────────────
       //
       // Vertical mode:
-      //   axisScale = scalePoint → maps axis name to a y-position (top→bottom)
-      //   scales[axis] = scaleLinear → maps value [-1,1] to an x-position (left→right)
+      //   axisScale = scalePoint -> maps axis name to a y-position (top->bottom)
+      //   scales[axis] = scaleLinear -> maps value [-1,1] to an x-position (left->right)
       //
       // Horizontal mode:
-      //   axisScale = scalePoint → maps axis name to an x-position (left→right)
-      //   scales[axis] = scaleLinear → maps value [-1,1] to a y-position (bottom→top, inverted)
+      //   axisScale = scalePoint -> maps axis name to an x-position (left->right)
+      //   scales[axis] = scaleLinear -> maps value [-1,1] to a y-position (bottom->top, inverted)
 
       const scales: Record<string, ScaleLinear<number, number>> = {}
       axes.forEach((axis) => {
@@ -667,7 +667,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
         }
         const currentFilter = filterRanges.current[axis]
 
-        // Arrow path visual transform: in horizontal mode rotate to point right (→)
+        // Arrow path visual transform: in horizontal mode rotate to point right (->)
         // so the handle visually suggests it sits on a vertical axis.
         const arrowPathTransform = isHoriz
           ? `translate(-8, -6) rotate(-90, 8, 6)` // points right, placed right of axis

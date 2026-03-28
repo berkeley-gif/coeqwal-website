@@ -3,7 +3,7 @@
 /**
  * ToggleSortButton - Single-click sort toggle button
  *
- * Cycles through sort states: unsorted → ascending → descending → unsorted
+ * Cycles through sort states: unsorted -> ascending -> descending -> unsorted
  * Uses MUI's SwapVert icon for unsorted, and directional arrows for sorted states.
  * Larger and easier to click than the dual-arrow SortButton.
  */
@@ -44,7 +44,7 @@ export function ToggleSortButton({
 }: ToggleSortButtonProps) {
   const isSorted = sortState !== null
 
-  // Cycle through states: null → asc → desc → null
+  // Cycle through states: null -> asc -> desc -> null
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     if (sortState === null) {
