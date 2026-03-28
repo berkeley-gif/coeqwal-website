@@ -29,6 +29,8 @@ export interface DeviationPlotProps {
   comparisonLabel?: string
   climateMode?: "off" | "morph" | "compare"
   morphShowComparison?: boolean
+  /** Map of scenario ID to theme/group string — used to cluster same-theme dots together */
+  scenarioThemes?: Record<string, string>
 }
 
 function toTier(v: number): number {
@@ -67,6 +69,7 @@ function computeColumnDodge(
   entries: { id: string; y: number }[],
   dotDiam: number,
   halfSpread: number,
+  themeMap?: Record<string, string>,
 ): Map<string, number> {
   const result = new Map<string, number>()
   if (entries.length === 0) return result
@@ -75,71 +78,103 @@ function computeColumnDodge(
     return result
   }
 
-  const idealDist = dotDiam + 1
-  const sorted = [...entries].sort((a, b) => a.y - b.y)
+  const minDist = dotDiam + 1
 
-  // Group entries that collide vertically (same or near-same tier)
-  const groups: { id: string; y: number }[][] = []
-  let currentGroup: { id: string; y: number }[] = [sorted[0]!]
-  for (let i = 1; i < sorted.length; i++) {
-    if (Math.abs(sorted[i]!.y - sorted[i - 1]!.y) < idealDist) {
-      currentGroup.push(sorted[i]!)
-    } else {
-      groups.push(currentGroup)
-      currentGroup = [sorted[i]!]
-    }
-  }
-  groups.push(currentGroup)
+  // Detect distinct tier values
+  const tierSet = new Set(entries.map((e) => e.y))
+  const isSingleTier = tierSet.size === 1
 
-  for (const group of groups) {
-    if (group.length === 1) {
-      result.set(group[0]!.id, 0)
-      continue
-    }
-
-    // Sub-group by exact y value so same-tier dots stay adjacent.
-    // Sort sub-groups largest-first so the densest tier lands in the center.
-    const subMap = new Map<number, { id: string; y: number }[]>()
-    for (const e of group) {
-      const key = e.y
-      if (!subMap.has(key)) subMap.set(key, [])
-      subMap.get(key)!.push(e)
-    }
-    const subGroups = [...subMap.values()].sort(
-      (a, b) => b.length - a.length,
-    )
-
-    // Interleave sub-groups outward from center: largest in the middle,
-    // next-largest alternating left/right.
-    const ordered: { id: string; y: number }[] = []
-    const center: { id: string; y: number }[] = []
-    const left: { id: string; y: number }[][] = []
-    const right: { id: string; y: number }[][] = []
-    subGroups.forEach((sg, i) => {
-      if (i === 0) {
-        center.push(...sg)
-      } else if (i % 2 === 1) {
-        left.push(sg)
-      } else {
-        right.push(sg)
-      }
-    })
-    // Build final order: left groups (reversed) | center | right groups
-    for (const sg of left.reverse()) ordered.push(...sg)
-    ordered.push(...center)
-    for (const sg of right) ordered.push(...sg)
-
-    // Compute spacing: use ideal spacing if it fits, otherwise compress
-    const totalIdealWidth = (ordered.length - 1) * idealDist
+  if (isSingleTier) {
+    // All dots share the same tier — use a clean centered horizontal line
+    // with even spacing, compressing if needed to stay within halfSpread.
+    // Sort by theme so same-theme dots cluster together.
+    const ordered = themeMap
+      ? [...entries].sort((a, b) => {
+          const ta = themeMap[a.id] ?? ""
+          const tb = themeMap[b.id] ?? ""
+          return ta.localeCompare(tb)
+        })
+      : entries
+    const n = ordered.length
+    const totalIdeal = (n - 1) * minDist
     const step =
-      totalIdealWidth <= halfSpread * 2
-        ? idealDist
-        : (halfSpread * 2) / (ordered.length - 1)
-
-    const startX = -((ordered.length - 1) * step) / 2
+      totalIdeal <= halfSpread * 2
+        ? minDist
+        : (halfSpread * 2) / (n - 1)
+    const startX = -((n - 1) * step) / 2
     ordered.forEach((entry, i) => {
       result.set(entry.id, startX + i * step)
     })
+    return result
+  }
+
+  // Multiple tiers — greedy center-first placement with 2D collision.
+  // Process largest same-tier groups first so they claim center positions.
+  const tierMap = new Map<number, { id: string; y: number }[]>()
+  for (const e of entries) {
+    if (!tierMap.has(e.y)) tierMap.set(e.y, [])
+    tierMap.get(e.y)!.push(e)
+  }
+  const processingOrder = [...tierMap.values()]
+    .sort((a, b) => b.length - a.length)
+    .flat()
+
+  const placed: { y: number; x: number }[] = []
+
+  for (const entry of processingOrder) {
+    let bestX = 0
+
+    if (placed.length === 0) {
+      placed.push({ y: entry.y, x: 0 })
+      result.set(entry.id, 0)
+      continue
+    }
+
+    // Try x=0 first, then expand outward
+    let found = false
+    for (let dist = 0; dist <= halfSpread; dist += minDist * 0.5) {
+      const candidates = dist === 0 ? [0] : [dist, -dist]
+      for (const cx of candidates) {
+        if (Math.abs(cx) > halfSpread) continue
+        let overlaps = false
+        for (const p of placed) {
+          if (Math.abs(cx - p.x) < minDist && Math.abs(entry.y - p.y) < minDist) {
+            overlaps = true
+            break
+          }
+        }
+        if (!overlaps) {
+          bestX = cx
+          found = true
+          break
+        }
+      }
+      if (found) break
+    }
+
+    // Fallback: pick position with least overlap within halfSpread
+    if (!found) {
+      let minOverlapAmt = Infinity
+      for (let dist = 0; dist <= halfSpread; dist += minDist * 0.25) {
+        const candidates = dist === 0 ? [0] : [dist, -dist]
+        for (const cx of candidates) {
+          let maxOverlap = 0
+          for (const p of placed) {
+            if (Math.abs(entry.y - p.y) < minDist) {
+              const overlap = minDist - Math.abs(cx - p.x)
+              if (overlap > maxOverlap) maxOverlap = overlap
+            }
+          }
+          if (maxOverlap < minOverlapAmt) {
+            minOverlapAmt = maxOverlap
+            bestX = cx
+          }
+        }
+      }
+    }
+
+    placed.push({ y: entry.y, x: bestX })
+    result.set(entry.id, bestX)
   }
 
   return result
@@ -190,6 +225,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     comparisonLabel: _comparisonLabel = "Comparison",
     climateMode = "off",
     morphShowComparison = false,
+    scenarioThemes,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -577,6 +613,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               entries,
               dotDiam,
               effectiveJitter,
+              scenarioThemes,
             )
             offsets.forEach((off, id) => {
               dodgeMap.set(`${tag}:${axis}:${id}`, off)
@@ -1020,6 +1057,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         comparisonBaselineData,
         climateMode,
         morphShowComparison,
+        scenarioThemes,
       ],
     )
 

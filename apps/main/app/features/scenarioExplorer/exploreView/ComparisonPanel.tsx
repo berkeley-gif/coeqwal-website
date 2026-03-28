@@ -1041,6 +1041,7 @@ export default function ComparisonPanel({
           comparisonLabel={deviationComparisonLabel}
           climateMode={deviationClimateMode}
           morphShowComparison={deviationMorphShowComp}
+          scenarioThemes={scenarioThemeMap}
         />
       )}
 
