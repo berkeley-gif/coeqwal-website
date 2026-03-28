@@ -28,7 +28,7 @@ const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
     {
       mode: "list",
       icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Grid",
+      label: "List",
     },
     {
       mode: "comparison",
