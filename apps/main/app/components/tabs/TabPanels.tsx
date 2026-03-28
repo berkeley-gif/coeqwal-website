@@ -21,6 +21,7 @@ import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
 
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
+import SharePanel from "../tabPanels/Share"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 }, // is this used?
@@ -126,8 +127,7 @@ export default function TabPanels() {
       case "share":
         return (
           <TabPanel tabKey="share" ref={panelRef}>
-            <h2>Share</h2>
-            <p style={{ height: "500px" }}>Coming soon...</p>
+            <SharePanel />
           </TabPanel>
         )
     }

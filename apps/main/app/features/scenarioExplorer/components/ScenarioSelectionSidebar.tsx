@@ -39,16 +39,6 @@ const THEME_ORDER: ScenarioTheme[] = [
 ]
 const PRIMARY_BASELINE_ID = "s0020"
 
-/** Extract the first sentence, capped at maxLen characters */
-function truncateToFirstSentence(text: string, maxLen: number): string {
-  const firstPeriod = text.indexOf(".")
-  const short =
-    firstPeriod > 0 && firstPeriod < maxLen
-      ? text.slice(0, firstPeriod + 1)
-      : text.slice(0, maxLen)
-  return short.length < text.length ? `${short.trimEnd()}…` : short
-}
-
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
@@ -79,6 +69,9 @@ export default function ScenarioSelectionSidebar({
     setShowAlternativeBaselines,
     setShowDefinitions,
     setShowKeyOperations,
+    sharedScenarioIds,
+    addToShare,
+    setShowShareDrawer,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -146,8 +139,8 @@ export default function ScenarioSelectionSidebar({
       if (bucket)
         bucket.push({
           id: s.scenarioId,
-          name: s.label,
-          description: s.description,
+          name: s.shortLabel,
+          description: s.label,
         })
     })
 
@@ -245,6 +238,13 @@ export default function ScenarioSelectionSidebar({
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
         />
+        {sharedScenarioIds.length > 0 && (
+          <ToggleChip
+            label={`Share (${sharedScenarioIds.length})`}
+            active={true}
+            onClick={() => setShowShareDrawer(true)}
+          />
+        )}
       </Box>
 
       {/* Scrollable scenario list */}
@@ -444,10 +444,43 @@ export default function ScenarioSelectionSidebar({
                             mt: 0.125,
                           }}
                         >
-                          {truncateToFirstSentence(description, 120)}
+                          {description}
                         </Typography>
                       )}
                     </Box>
+
+                    {/* Share button */}
+                    {(() => {
+                      const isShared = sharedScenarioIds.includes(id)
+                      return (
+                        <Tooltip
+                          title={isShared ? "Added to share" : "Add to share"}
+                          arrow
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              addToShare(id)
+                            }}
+                            sx={{
+                              p: 0.25,
+                              flexShrink: 0,
+                              opacity: isShared || isActive ? 1 : 0,
+                              color: isShared
+                                ? theme.palette.blue.bright
+                                : isActive
+                                  ? "rgba(255,255,255,0.7)"
+                                  : theme.palette.grey[500],
+                              transition: "opacity 200ms ease",
+                              "*:hover > &": { opacity: 1 },
+                            }}
+                          >
+                            <icons.IosShare sx={{ fontSize: "0.8rem" }} />
+                          </IconButton>
+                        </Tooltip>
+                      )
+                    })()}
 
                     {/* Pin button */}
                     <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
@@ -468,7 +501,6 @@ export default function ScenarioSelectionSidebar({
                               : theme.palette.grey[500],
                           transition: "opacity 200ms ease",
                           ".MuiBox-root:hover > &": { opacity: 1 },
-                          // Show on parent row hover
                           "*:hover > &": { opacity: 1 },
                         }}
                       >

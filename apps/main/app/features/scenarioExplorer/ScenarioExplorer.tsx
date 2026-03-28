@@ -24,6 +24,7 @@ import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
+import ShareDrawer from "./components/ShareDrawer"
 // import SelectionBanner from "./components/SelectionBanner"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
@@ -208,6 +209,7 @@ export default function ScenarioExplorer() {
       </Box>
 
       <KeyboardShortcuts />
+      <ShareDrawer />
     </Box>
   )
 }
