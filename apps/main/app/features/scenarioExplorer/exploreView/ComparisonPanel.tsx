@@ -34,14 +34,12 @@ import {
   type VerticalParallelLineData,
   type AxisLayout,
 } from "@repo/viz"
-import { InfoIconButton, InfoTooltip } from "@repo/ui"
+import { InfoIconButton } from "@repo/ui"
 import {
   useComparisonData,
   SANKEY_ALL_OUTCOMES,
 } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
-import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
-import { HydroclimateChooser } from "../../scenarios/components"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
 import { getOutcomeName, OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -59,11 +57,16 @@ const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "sankey", label: "Sankey" },
 ]
 
-export default function ComparisonPanel() {
+interface ComparisonPanelProps {
+  highlightedIds?: Set<string> | null
+  onScenarioHover?: (scenarioId: string | null) => void
+}
+
+export default function ComparisonPanel({
+  highlightedIds = null,
+  onScenarioHover,
+}: ComparisonPanelProps) {
   const theme = useTheme()
-  // At md (900px+) there is more horizontal than vertical space, so use the
-  // standard horizontal parallel coordinates layout. Below md (tablet/phone)
-  // use the vertical layout which works better in portrait orientation.
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"))
 
   const [chartMode, setChartMode] = useState<ChartMode>("parallel")
@@ -72,8 +75,6 @@ export default function ComparisonPanel() {
     highlightedScenario,
     setHighlightedScenario,
     setPinnedScenarioId,
-    hydroclimatePeriod,
-    setHydroclimatePeriod,
     relativeToBaseline,
     setRelativeToBaseline,
     highlightBaseline,
@@ -95,13 +96,8 @@ export default function ComparisonPanel() {
   )
 
   // ── Hover state ─────────────────────────────────────────────────────────
-  // Chart hover is handled internally by the D3 layer (hoveredScenarioRef +
-  // commitHoverIn / scheduleHoverClear). The `onLineHover` callback only
-  // propagates the hovered scenario to the sidebar for row highlighting.
-  //
-  // Sidebar hover (row or theme badge) feeds into `highlightedIds`, which
-  // the chart uses for external-source highlighting.
-  const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
+  // Chart hover feeds into hoveredScenario (debounced) → onScenarioHover.
+  // External highlights arrive via highlightedIds prop from the layout shell.
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastHoveredIdRef = useRef<string | null>(null)
 
@@ -130,9 +126,10 @@ export default function ComparisonPanel() {
     [],
   )
 
-  const handleSidebarHover = useCallback((ids: string[] | null) => {
-    setHighlightedIds(ids ? new Set(ids) : null)
-  }, [])
+  // Propagate chart hover to parent for sidebar highlighting
+  useEffect(() => {
+    onScenarioHover?.(hoveredScenario?.id ?? null)
+  }, [hoveredScenario, onScenarioHover])
 
   // Axis layout positions reported by the chart for HTML label positioning
   const [axisLayout, setAxisLayout] = useState<AxisLayout[]>([])
@@ -196,12 +193,6 @@ export default function ComparisonPanel() {
   const axisCodeMap = useMemo(
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
     [axes, outcomeCodes],
-  )
-
-  // Build scenarioId, gives color map for the sidebar's chart legend swatches
-  const scenarioColors = useMemo(
-    () => Object.fromEntries(scenarios.map(({ id, color }) => [id, color])),
-    [scenarios],
   )
 
   const highlightedData = useMemo(
@@ -1156,151 +1147,48 @@ export default function ComparisonPanel() {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         height: "100%",
         overflow: "hidden",
       }}
     >
-      {/* ── Left: shared scenario selection sidebar ─────────────────────────── */}
-      <ScenarioSelectionSidebar
-        scenarioColors={scenarioColors}
-        hoveredScenarioId={hoveredScenario?.id ?? null}
-        onRowHover={handleSidebarHover}
-      />
+      {/* Chart toggle controls */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          px: theme.space.component.lg,
+          pt: theme.space.component.sm,
+        }}
+      >
+        {toggleControls}
+      </Box>
 
-      {/* ── Right: hydroclimate chooser + chart controls + chart ─────────────── */}
+      {/* Chart */}
       <Box
         sx={{
           flex: 1,
-          display: "flex",
-          flexDirection: "column",
+          px: theme.space.component.lg,
+          pt: theme.space.component.xs,
+          pb: theme.space.component.sm,
           overflow: "hidden",
         }}
       >
-        {/* Hydroclimate chooser + methodology link */}
         <Box
           sx={{
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: theme.borderRadius.md,
             px: theme.space.component.lg,
             pt: theme.space.component.sm,
             pb: theme.space.component.lg,
-            borderBottom: `1px solid ${theme.palette.divider}`,
+            boxShadow: theme.shadow.subtle,
+            height: "100%",
           }}
         >
-          <HydroclimateChooser
-            layout="horizontal"
-            showTitle={true}
-            showLabels={false}
-            iconSize="28px"
-            iconFontSize="1rem"
-            value={hydroclimatePeriod}
-            onChange={setHydroclimatePeriod}
-          />
-          <InfoTooltip
-            placement="bottom"
-            description={
-              <Box
-                sx={{ maxWidth: 340, fontSize: "0.82rem", lineHeight: 1.55 }}
-              >
-                <p style={{ margin: "0 0 8px" }}>
-                  Each line represents a scenario scored across nine outcome
-                  categories. Each category contains indicators that experts
-                  have classified into four tiers (Tier 1 = best, Tier 4 =
-                  worst).
-                </p>
-                <p style={{ margin: "0 0 8px" }}>
-                  The position on each axis is a normalized weighted average of
-                  those tier assignments. The weighted score is:
-                </p>
-                <p
-                  style={{
-                    margin: "0 0 4px",
-                    fontFamily: "monospace",
-                    fontSize: "0.78rem",
-                  }}
-                >
-                  W = (1p₁ + 2p₂ + 3p₃ + 4p₄) / (p₁ + p₂ + p₃ + p₄)
-                </p>
-                <p style={{ margin: "0 0 8px", fontSize: "0.78rem" }}>
-                  where p<sub>i</sub> is the proportion of indicators in Tier i.
-                </p>
-                <p style={{ margin: "0 0 4px" }}>
-                  This is then normalized to a 0-1 scale:
-                </p>
-                <p
-                  style={{
-                    margin: "0 0 8px",
-                    fontFamily: "monospace",
-                    fontSize: "0.78rem",
-                  }}
-                >
-                  S = (4 - W) / 3
-                </p>
-                <p style={{ margin: 0 }}>
-                  S = 1 means all indicators are in Tier 1. S = 0 means all
-                  indicators are in Tier 4. Higher is better.
-                </p>
-              </Box>
-            }
-          >
-            <Typography
-              variant="caption"
-              sx={{
-                ml: "auto",
-                flexShrink: 0,
-                cursor: "pointer",
-                color: theme.palette.grey[500],
-                textDecoration: "underline",
-                textDecorationStyle: "dotted",
-                textUnderlineOffset: 3,
-                "&:hover": { color: theme.palette.grey[800] },
-              }}
-            >
-              Methodology
-            </Typography>
-          </InfoTooltip>
-        </Box>
-
-        {/* Chart toggle controls */}
-        <Box
-          sx={{
-            flexShrink: 0,
-            px: theme.space.component.lg,
-            pt: theme.space.component.sm,
-          }}
-        >
-          {toggleControls}
-        </Box>
-
-        {/* Chart */}
-        <Box
-          sx={{
-            flex: 1,
-            px: theme.space.component.lg,
-            pt: theme.space.component.xs,
-            pb: theme.space.component.sm,
-            overflow: "hidden",
-          }}
-        >
-          <Box
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: theme.borderRadius.md,
-              px: theme.space.component.lg,
-              pt: theme.space.component.sm,
-              pb: theme.space.component.lg,
-              boxShadow: theme.shadow.subtle,
-              height: "100%",
-            }}
-          >
-            {chartElement}
-          </Box>
+          {chartElement}
         </Box>
       </Box>
 
-      {/* ── Outcome info tooltip portal ─────────────────────────────── */}
+      {/* Outcome info tooltip portal */}
       <TierTooltipPortal
         outcomeCode={activeInfoTooltip}
         anchorEl={tooltipAnchor}
