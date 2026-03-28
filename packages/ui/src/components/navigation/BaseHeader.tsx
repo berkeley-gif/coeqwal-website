@@ -380,7 +380,7 @@ export function BaseHeader({
    *   - Toolbar
    *     - Logo (left)
    *     - Desktop: Water stories | Get data | About | Language switcher
-   *     - Mobile: Language switcher (optional) | Hamburger → Drawer
+   *     - Mobile: Language switcher (optional) | Hamburger -> Drawer
    * - Mobile drawer (slides from right)
    * ======================================== */
   return (

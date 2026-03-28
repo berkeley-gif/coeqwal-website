@@ -44,7 +44,7 @@ export interface ReservoirData {
    */
   labelSubtitle?: string
   /**
-   * Optional key→value attribute pairs rendered below the subtitle.
+   * Optional key->value attribute pairs rendered below the subtitle.
    * Each pair is displayed as a small uppercase key label + bold value,
    * matching the "Capacity / Dead pool" styling in reservoir charts.
    * Requires capacityTaf === 0 (no reservoir mode) to activate.
@@ -573,7 +573,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
 
           // Check data type:
           // - CWS with stats: has annualAvgTaf > 0 (show delivery/reliability/shortage)
-          // - Entity with attributes: capacityTaf === 0, labelAttributes present (reservoir-style key→value rows)
+          // - Entity with attributes: capacityTaf === 0, labelAttributes present (reservoir-style key->value rows)
           // - CWS without stats: capacityTaf === 0 and no annualAvgTaf, no labelAttributes (show name only)
           // - Reservoir: has capacityTaf > 0 (show system/capacity/dead pool)
           const isCwsWithStats =
@@ -679,7 +679,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             }
           } else if (hasLabelAttributes) {
             // Entity with custom label attributes (e.g. refuge demand units).
-            // Renders a subtitle line + key→value pairs in reservoir-label style.
+            // Renders a subtitle line + key->value pairs in reservoir-label style.
             let attrY = rowTop + 68
 
             if (reservoir.labelSubtitle) {

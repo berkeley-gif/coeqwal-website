@@ -53,7 +53,7 @@ export function useScenarioList() {
     })
   }, [rawScenarios])
 
-  /** Variant map: sibling_group → { hydroclimate_id → short_code } */
+  /** Variant map: sibling_group -> { hydroclimate_id -> short_code } */
   const variantMap = useMemo(() => {
     const map = new Map<string, Record<number, string>>()
     if (!rawScenarios) return map

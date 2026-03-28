@@ -320,7 +320,7 @@ function useMultiScenarioRefugeShortage(scenarios: string[]) {
 
 /**
  * Fetch period-of-record summaries for all selected scenarios.
- * Builds a CellStatsMap (duId → scenarioId → {annualAvgTaf, reliabilityPct})
+ * Builds a CellStatsMap (duId -> scenarioId -> {annualAvgTaf, reliabilityPct})
  * so PercentileMatrix can render per-cell stats below each chart.
  */
 function useMultiScenarioRefugePeriod(scenarios: string[]) {
@@ -340,7 +340,7 @@ function useMultiScenarioRefugePeriod(scenarios: string[]) {
       const duStats = cellStats[summary.du_id]!
       duStats[scenarioId] = {
         annualAvgTaf: summary.annual_delivery_avg_taf ?? undefined,
-        // Convert shortage_pct_95 → fulfillment (higher = better, matches AG/CWS convention)
+        // Convert shortage_pct_95 -> fulfillment (higher = better, matches AG/CWS convention)
         reliabilityPct:
           summary.reliability_pct_95 != null
             ? 100 - summary.reliability_pct_95

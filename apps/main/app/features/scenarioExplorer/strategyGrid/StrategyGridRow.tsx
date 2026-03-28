@@ -526,7 +526,7 @@ function NonCompactRowContent({
               },
             }),
             gap: theme.space.gap.sm,
-            // No margin - gap handles header→content spacing
+            // No margin - gap handles header->content spacing
             mt: 0,
             maxWidth: "100%",
             width: "100%",

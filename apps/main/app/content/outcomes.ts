@@ -82,7 +82,7 @@ export function getOutcomeCodeFromMetricId(
 
 /**
  * Get display name from Data Explorer metric ID.
- * Combines metric→code and code→name lookups.
+ * Combines metric->code and code->name lookups.
  */
 export function getOutcomeNameFromMetricId(metricId: string): string {
   const code = METRIC_ID_TO_OUTCOME_CODE[metricId]

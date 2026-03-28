@@ -34,8 +34,11 @@ export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
  */
 function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
   const { hydroclimatePeriod } = useScenarioExplorerStore()
-  const { buildIdMapping, getDisplayName, isLoading: scenariosLoading } =
-    useScenarioList()
+  const {
+    buildIdMapping,
+    getDisplayName,
+    isLoading: scenariosLoading,
+  } = useScenarioList()
 
   const idMapping = useMemo(
     () => buildIdMapping(hydroclimatePeriod),

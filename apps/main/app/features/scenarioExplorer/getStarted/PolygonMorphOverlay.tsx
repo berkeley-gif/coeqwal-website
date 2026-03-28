@@ -556,7 +556,7 @@ export default function PolygonMorphOverlay({
         if (v < CROSSFADE_THRESHOLD) return
       }
 
-      // Primary paths: polygon → square → grid, then freeze
+      // Primary paths: polygon -> square -> grid, then freeze
       for (let i = 0; i < N; i++) {
         const el = primaryRefs.current[i]
         if (!el) continue
@@ -614,22 +614,22 @@ export default function PolygonMorphOverlay({
         // 1. Drop (Y)
         const dropStart = 0.44 + stagger
         const dropEnd = 0.5 + stagger
-        // HOLD 0.50 → 0.53
+        // HOLD 0.50 -> 0.53
         // 2. Narrow (width)
         const narrowStart = 0.53 + stagger
         const narrowEnd = 0.56 + stagger
         // 3. Combine rows (Y)
         const combineStart = 0.56 + stagger
         const combineEnd = 0.59 + stagger
-        // HOLD 0.59 → 0.62
+        // HOLD 0.59 -> 0.62
         // 4. Compress left (X)
         const compressStart = 0.62 + stagger
         const compressEnd = 0.65 + stagger
-        // HOLD 0.65 → 0.67
+        // HOLD 0.65 -> 0.67
         // 5. Glyph width (X)
         const glyphXStart = 0.67 + stagger
         const glyphXEnd = 0.7 + stagger
-        // HOLD 0.70 → 0.72
+        // HOLD 0.70 -> 0.72
         // 6. Glyph height (Y, no stagger)
         const glyphYStart = 0.72
         const glyphYEnd = 0.75
@@ -749,7 +749,7 @@ export default function PolygonMorphOverlay({
               if (!el) continue
               const bar = bars[b]!
 
-              // Phase 1: bars → dots (0.83-0.85)
+              // Phase 1: bars -> dots (0.83-0.85)
               const dotT = Math.min(1, Math.max(0, (v - 0.83) / 0.02))
               let cx = bar.x + dotT * (bar.cx - DOT_R - bar.x)
               let cy = bar.y + dotT * (bar.cy - DOT_R - bar.y)
@@ -890,7 +890,7 @@ export default function PolygonMorphOverlay({
         }}
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Primary paths: polygon → grid squares (freeze) */}
+        {/* Primary paths: polygon -> grid squares (freeze) */}
         {shapes.map((s, i) => (
           <path
             key={`p-${i}`}
@@ -904,7 +904,7 @@ export default function PolygonMorphOverlay({
             d={s.rawD}
           />
         ))}
-        {/* Clone paths: grid squares → bars */}
+        {/* Clone paths: grid squares -> bars */}
         {shapes.map((s, i) => (
           <path
             key={`c-${i}`}
@@ -993,7 +993,7 @@ export default function PolygonMorphOverlay({
             style={{ opacity: 0 }}
           />
         ))}
-        {/* Radar spoke lines (dot → center) */}
+        {/* Radar spoke lines (dot -> center) */}
         {[0, 1, 2, 3].map((i) => (
           <line
             key={`spoke-${i}`}

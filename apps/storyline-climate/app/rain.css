@@ -45,7 +45,7 @@ body.back-row-toggle .rain.back-row {
   margin-left: 7px; /* centers the streak in 15px container */
   background: var(--rain-color);
   border-radius: 1px; /* soft edges */
-  /* fade from nothing → solid (no rgba needed) */
+  /* fade from nothing -> solid (no rgba needed) */
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 40%, black);
   mask-image: linear-gradient(to bottom, transparent, black 40%, black);
   /* animation: stem var(--rain-speed, 2s) linear infinite; */

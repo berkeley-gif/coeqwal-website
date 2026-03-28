@@ -25,7 +25,7 @@ export interface BarChartProps {
  */
 const BarChart: React.FC<BarChartProps> = React.memo(
   ({ size = 80, tiers, seed }) => {
-    // Default tier configuration: green → blue → orange → red (reversed order)
+    // Default tier configuration: green -> blue -> orange -> red (reversed order)
     const defaultTiers = [
       { label: "Tier 1", color: "#2cc83b" }, // green
       { label: "Tier 2", color: "#2064d4" }, // blue

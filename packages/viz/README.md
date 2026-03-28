@@ -115,7 +115,7 @@ export default MyChart
 ### When React.memo matters
 
 All components are wrapped in `React.memo`. For D3 imperative charts this prevents unnecessary
-`useEffect` → full-redraw cycles when a parent re-renders with identical props. For pure-SVG
+`useEffect` -> full-redraw cycles when a parent re-renders with identical props. For pure-SVG
 glyphs (BarChart, RoseChart, etc.) it prevents re-diffing the JSX tree.
 
 ### Declarative vs. imperative components

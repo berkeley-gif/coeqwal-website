@@ -276,7 +276,11 @@ export default function ScenarioSelectionSidebar({
             allIds.length > 0 &&
             allIds.some((id) => selectedScenarios.includes(id))
 
-          if (items.length === 0 && !showAlternativeBaselines && themeKey === "baseline") {
+          if (
+            items.length === 0 &&
+            !showAlternativeBaselines &&
+            themeKey === "baseline"
+          ) {
             // Still show the baseline header with just the primary baseline
           } else if (items.length === 0) {
             return null
@@ -427,8 +431,8 @@ export default function ScenarioSelectionSidebar({
                           letterSpacing: "0.01em",
                         }}
                       >
-                      {name}
-                    </Typography>
+                        {name}
+                      </Typography>
                       {showDefinitions && description && (
                         <Typography
                           sx={{

@@ -184,9 +184,7 @@ export function useScenarioTiers(scenarioId: string | null) {
  *   data structures using `Object.keys(idMapping)` (the sibling group IDs).
  *   When omitted, falls back to fetching all active scenario IDs directly.
  */
-export function useMultipleScenarioTiers(
-  idMapping?: Record<string, string>,
-) {
+export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
   const theme = useTheme()
   const { mutate } = useSWRConfig()
 
@@ -209,7 +207,7 @@ export function useMultipleScenarioTiers(
     [idMapping, fallbackIds],
   )
 
-  // Reverse map for re-keying: resolved short_code → sibling group ID
+  // Reverse map for re-keying: resolved short_code -> sibling group ID
   const reverseMap = useMemo(() => {
     if (!idMapping) return null
     const m = new Map<string, string>()
