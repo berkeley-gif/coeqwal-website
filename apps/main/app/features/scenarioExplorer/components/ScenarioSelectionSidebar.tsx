@@ -21,8 +21,9 @@ import {
   IconButton,
   Tooltip,
   icons,
+  InputBase,
 } from "@repo/ui/mui"
-import { ScenarioBadge, CompactSearchBar } from "@repo/ui"
+import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { type ScenarioTheme } from "../../../content/scenarios"
@@ -37,6 +38,16 @@ const THEME_ORDER: ScenarioTheme[] = [
   "unthemed",
 ]
 const PRIMARY_BASELINE_ID = "s0020"
+
+/** Extract the first sentence, capped at maxLen characters */
+function truncateToFirstSentence(text: string, maxLen: number): string {
+  const firstPeriod = text.indexOf(".")
+  const short =
+    firstPeriod > 0 && firstPeriod < maxLen
+      ? text.slice(0, firstPeriod + 1)
+      : text.slice(0, maxLen)
+  return short.length < text.length ? `${short.trimEnd()}…` : short
+}
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -163,24 +174,42 @@ export default function ScenarioSelectionSidebar({
         backgroundColor: theme.palette.grey[50],
       }}
     >
-      {/* ── Search ──────────────────────────────────────────────────────────── */}
+      {/* ── Search + toggle row (aligned with tool toolbar height) ────────── */}
       <Box
         sx={{
           flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
           px: 1,
-          pt: 1,
-          pb: 0.5,
+          minHeight: 44,
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
-        <CompactSearchBar
+        <InputBase
           value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search scenarios…"
-          showLabel={false}
-          inputId="sidebar-scenario-search"
-          ariaLabel="Search scenarios"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search…"
+          size="small"
+          inputProps={{ "aria-label": "Search scenarios" }}
+          sx={{
+            flex: 1,
+            fontSize: "0.8125rem",
+            "& .MuiInputBase-input": {
+              py: 0.5,
+              px: 0.5,
+            },
+          }}
         />
+        {searchQuery && (
+          <IconButton
+            size="small"
+            onClick={() => setSearchQuery("")}
+            sx={{ p: 0.25 }}
+          >
+            <icons.Close sx={{ fontSize: "0.875rem" }} />
+          </IconButton>
+        )}
       </Box>
 
       {/* Visibility toggles */}
@@ -411,7 +440,7 @@ export default function ScenarioSelectionSidebar({
                             mt: 0.125,
                           }}
                         >
-                          {description}
+                          {truncateToFirstSentence(description, 120)}
                         </Typography>
                       )}
                     </Box>
