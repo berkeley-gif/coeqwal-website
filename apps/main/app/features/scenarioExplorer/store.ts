@@ -57,6 +57,10 @@ interface ScenarioExplorerState {
   showKeyOperations: boolean
   showMap: boolean
 
+  // Share staging
+  sharedScenarioIds: string[]
+  showShareDrawer: boolean
+
   // Chart toggles (comparison panel)
   relativeToBaseline: boolean
   highlightBaseline: boolean
@@ -104,6 +108,12 @@ interface ScenarioExplorerActions {
   setShowKeyOperations: (show: boolean) => void
   setShowMap: (show: boolean) => void
 
+  // Share staging
+  addToShare: (id: string) => void
+  removeFromShare: (id: string) => void
+  clearShared: () => void
+  setShowShareDrawer: (open: boolean) => void
+
   // Chart toggles
   setRelativeToBaseline: (show: boolean) => void
   setHighlightBaseline: (show: boolean) => void
@@ -144,6 +154,8 @@ const initialState: ScenarioExplorerState = {
   showDefinitions: false,
   showKeyOperations: false,
   showMap: false,
+  sharedScenarioIds: [],
+  showShareDrawer: false,
   relativeToBaseline: true,
   highlightBaseline: false,
   overlayTiers: false,
@@ -257,6 +269,31 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowMap: (show) =>
       set((state) => {
         state.showMap = show
+      }),
+
+    // Share staging
+    addToShare: (id) =>
+      set((state) => {
+        if (!state.sharedScenarioIds.includes(id)) {
+          state.sharedScenarioIds.push(id)
+        }
+        state.showShareDrawer = true
+      }),
+
+    removeFromShare: (id) =>
+      set((state) => {
+        const idx = state.sharedScenarioIds.indexOf(id)
+        if (idx > -1) state.sharedScenarioIds.splice(idx, 1)
+      }),
+
+    clearShared: () =>
+      set((state) => {
+        state.sharedScenarioIds = []
+      }),
+
+    setShowShareDrawer: (open) =>
+      set((state) => {
+        state.showShareDrawer = open
       }),
 
     // Chart toggles

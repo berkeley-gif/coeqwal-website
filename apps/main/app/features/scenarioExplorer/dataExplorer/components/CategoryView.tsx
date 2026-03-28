@@ -1160,7 +1160,7 @@ export default function CategoryView() {
             },
           }}
         >
-          Choose scenarios {'->'}
+          Choose scenarios {"->"}
         </Button>
       </Box>
     )

@@ -575,56 +575,54 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         axes.forEach((axis) => {
           const colX = xScale(axis)!
 
-          subcolumns.forEach(
-            ({ srcData, srcBaseline, xOff, w, tag }) => {
-              const cx = colX + xOff + w / 2
-              const bv = srcBaseline.values[axis]
-              if (bv == null) return
-              const bt = toTier(bv)
-              const baseY = yScale(bt)
+          subcolumns.forEach(({ srcData, srcBaseline, xOff, w, tag }) => {
+            const cx = colX + xOff + w / 2
+            const bv = srcBaseline.values[axis]
+            if (bv == null) return
+            const bt = toTier(bv)
+            const baseY = yScale(bt)
 
-              baselinePointsByTag.get(tag)!.push([cx, baseY])
-              baselineInfos.push({ axis, tag, cx, baseY, colX, w })
+            baselinePointsByTag.get(tag)!.push([cx, baseY])
+            baselineInfos.push({ axis, tag, cx, baseY, colX, w })
 
-              srcData.forEach((scenario, si) => {
-                const sv = scenario.values[axis]
-                if (sv == null) return
-                const st = toTier(sv)
-                const dotY = yScale(st)
-                const dodgeOff =
-                  dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0
-                const dotCx = cx + dodgeOff
-                const color = hasScenarioColors
-                  ? lineColors[si] || colors.default
-                  : colors.default
+            srcData.forEach((scenario, si) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              const st = toTier(sv)
+              const dotY = yScale(st)
+              const dodgeOff =
+                dodgeMap.get(`${tag}:${axis}:${scenario.id}`) ?? 0
+              const dotCx = cx + dodgeOff
+              const color = hasScenarioColors
+                ? lineColors[si] || colors.default
+                : colors.default
 
-                if (tag === "hist") {
-                  if (!dotPositions.has(scenario.id))
-                    dotPositions.set(scenario.id, [])
-                  dotPositions
-                    .get(scenario.id)!
-                    .push({ cx: dotCx, cy: dotY, color, si })
-                }
+              if (tag === "hist") {
+                if (!dotPositions.has(scenario.id))
+                  dotPositions.set(scenario.id, [])
+                dotPositions
+                  .get(scenario.id)!
+                  .push({ cx: dotCx, cy: dotY, color, si })
+              }
 
-                if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
-                  glyphsLayer
-                    .append("line")
-                    .attr("class", "diff-glyph")
-                    .attr("data-scenario-id", scenario.id)
-                    .attr("data-axis", axis)
-                    .attr("data-tag", tag)
-                    .attr("x1", dotCx)
-                    .attr("y1", baseY)
-                    .attr("x2", dotCx)
-                    .attr("y2", dotY)
-                    .attr("stroke", color)
-                    .attr("stroke-width", 1)
-                    .attr("stroke-opacity", 0.35)
-                    .attr("pointer-events", "none")
-                }
-              })
-            },
-          )
+              if (showDifferenceGlyphs && Math.abs(dotY - baseY) > 0.5) {
+                glyphsLayer
+                  .append("line")
+                  .attr("class", "diff-glyph")
+                  .attr("data-scenario-id", scenario.id)
+                  .attr("data-axis", axis)
+                  .attr("data-tag", tag)
+                  .attr("x1", dotCx)
+                  .attr("y1", baseY)
+                  .attr("x2", dotCx)
+                  .attr("y2", dotY)
+                  .attr("stroke", color)
+                  .attr("stroke-width", 1)
+                  .attr("stroke-opacity", 0.35)
+                  .attr("pointer-events", "none")
+              }
+            })
+          })
 
           if (isCompare) {
             const histBv = baselineData.values[axis]
