@@ -13,10 +13,8 @@ import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-import {
-  useScenarioList,
-  type Scenario,
-} from "../../scenarios/hooks/useScenarioList"
+import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import type { Scenario } from "../../scenarios/hooks/useScenarioList"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
 
@@ -26,6 +24,7 @@ const THEME_ORDER: Record<ScenarioTheme, number> = {
   eco: 2,
   delta: 3,
   cws: 4,
+  unthemed: 5,
 }
 
 interface ListViewProps {
@@ -47,22 +46,33 @@ export default function ListView({
   modalToolbar,
 }: ListViewProps) {
   const theme = useTheme()
+
+  const { hydroclimatePeriod } = useScenarioExplorerStore()
+  const {
+    siblingGroups,
+    buildIdMapping,
+    isLoading: scenariosLoading,
+    error: scenariosError,
+  } = useScenarioList()
+
+  const idMapping = useMemo(
+    () => buildIdMapping(hydroclimatePeriod),
+    [buildIdMapping, hydroclimatePeriod],
+  )
+
   const {
     allChartData,
     outcomeNames,
     allScoreData,
     isLoading: dataLoading,
     error: dataError,
-  } = useMultipleScenarioTiers()
+  } = useMultipleScenarioTiers(idMapping)
 
-  // Helper to get chart data for a specific scenario
+  // Use siblingGroups (24) instead of full scenarios (72)
+  const scenarios = siblingGroups
+
   const getChartDataForScenario = (scenarioId: string) =>
     allChartData[scenarioId] ?? {}
-  const {
-    scenarios,
-    isLoading: scenariosLoading,
-    error: scenariosError,
-  } = useScenarioList()
 
   const [sortBy, setSortBy] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")

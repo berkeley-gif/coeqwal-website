@@ -15,11 +15,7 @@ import React, { useMemo, useState, useCallback } from "react"
 import { PackedDots } from "@repo/viz"
 import type { DotDatum } from "@repo/viz"
 import { Box, Typography, Tooltip } from "@repo/ui/mui"
-import {
-  getScenarioLabel,
-  getScenarioDescription,
-  hasScenarioMetadata,
-} from "../content/scenarios"
+import { useScenarioList } from "../features/scenarios/hooks"
 
 interface ScenarioDotsProps {
   /** Array of scenario IDs (e.g., ["s0035", "s0036"]) */
@@ -49,14 +45,17 @@ export default function ScenarioDots({
   fillColor = "#ffffff",
   onHoverChange,
 }: ScenarioDotsProps) {
+  const { scenarioMap } = useScenarioList()
+
   const dots: DotDatum[] = useMemo(
     () =>
       scenarioIds.map((id) => {
-        if (hasScenarioMetadata(id)) {
+        const scenario = scenarioMap.get(id)
+        if (scenario) {
           return {
             id,
-            label: getScenarioLabel(id),
-            description: getScenarioDescription(id),
+            label: scenario.label,
+            description: scenario.description,
           }
         }
         return {
@@ -65,7 +64,7 @@ export default function ScenarioDots({
           description: "(coming soon)",
         }
       }),
-    [scenarioIds],
+    [scenarioIds, scenarioMap],
   )
 
   const [activeDot, setActiveDot] = useState<DotDatum | null>(null)

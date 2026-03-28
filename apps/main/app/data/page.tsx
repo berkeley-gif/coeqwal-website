@@ -31,37 +31,18 @@ import {
   getFileDownloadUrl,
   fetchScenariosForDownload,
 } from "../lib/api/fileDownloadApi"
-import {
-  getScenarioLabel,
-  getScenarioTheme,
-  type ScenarioTheme,
-} from "../content/scenarios"
+import { type ScenarioTheme } from "../content/scenarios"
+import { useScenarioList } from "../features/scenarios/hooks"
 import { THEME_LABEL_CONFIG } from "../content/themes"
 
-// Theme order matches ScenarioSelectionSidebar
 const THEME_ORDER: ScenarioTheme[] = [
   "baseline",
   "cws",
   "ag_gw",
   "eco",
   "delta",
+  "unthemed",
 ]
-
-/** Group a scenario list by theme, preserving THEME_ORDER, dropping empty groups. */
-function groupByTheme<T extends { scenario_id: string }>(
-  items: T[],
-): { theme: ScenarioTheme; scenarios: T[] }[] {
-  const buckets = new Map<ScenarioTheme, T[]>()
-  THEME_ORDER.forEach((t) => buckets.set(t, []))
-  items.forEach((s) => {
-    const t = getScenarioTheme(s.scenario_id)
-    buckets.get(t)?.push(s)
-  })
-  return THEME_ORDER.map((t) => ({
-    theme: t,
-    scenarios: buckets.get(t) ?? [],
-  })).filter(({ scenarios }) => scenarios.length > 0)
-}
 
 // ── Shared dropdown option components ────────────────────────────────────────
 
@@ -72,7 +53,7 @@ function groupByTheme<T extends { scenario_id: string }>(
  */
 function ScenarioOption({ scenarioId }: { scenarioId: string }) {
   const theme = useTheme()
-  const label = getScenarioLabel(scenarioId)
+  const { getDisplayName } = useScenarioList()
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
@@ -93,19 +74,15 @@ function ScenarioOption({ scenarioId }: { scenarioId: string }) {
         variant="body2"
         sx={{ lineHeight: 1.3, color: theme.palette.text.primary }}
       >
-        {label}
+        {getDisplayName(scenarioId)}
       </Typography>
     </Box>
   )
 }
 
-/**
- * Compact single-line renderValue for the closed Select state.
- * SCENARIOID (overline) + full label, matching the StrategyHeader eyebrow style.
- */
 function SelectedScenarioValue({ scenarioId }: { scenarioId: string }) {
   const theme = useTheme()
-  const label = getScenarioLabel(scenarioId)
+  const { getDisplayName } = useScenarioList()
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -124,7 +101,7 @@ function SelectedScenarioValue({ scenarioId }: { scenarioId: string }) {
         {scenarioId}
       </Typography>
       <Typography component="span" variant="body2">
-        {label}
+        {getDisplayName(scenarioId)}
       </Typography>
     </Box>
   )
@@ -261,6 +238,7 @@ export default function DataPage() {
   const [error, setError] = useState<string | null>(null)
 
   const theme = useTheme()
+  const { getThemeForScenario } = useScenarioList()
 
   useEffect(() => {
     let alive = true
@@ -310,8 +288,31 @@ export default function DataPage() {
     (scenario) => scenario.files.output_csv || scenario.files.sv_csv,
   )
 
-  const zipGroups = useMemo(() => groupByTheme(zipScenarios), [zipScenarios])
-  const csvGroups = useMemo(() => groupByTheme(csvScenarios), [csvScenarios])
+  const zipGroups = useMemo(() => {
+    const buckets = new Map<ScenarioTheme, typeof zipScenarios>()
+    THEME_ORDER.forEach((t) => buckets.set(t, []))
+    zipScenarios.forEach((s) => {
+      const t = getThemeForScenario(s.scenario_id)
+      buckets.get(t)?.push(s)
+    })
+    return THEME_ORDER.map((t) => ({
+      theme: t,
+      scenarios: buckets.get(t) ?? [],
+    })).filter(({ scenarios: g }) => g.length > 0)
+  }, [zipScenarios, getThemeForScenario])
+
+  const csvGroups = useMemo(() => {
+    const buckets = new Map<ScenarioTheme, typeof csvScenarios>()
+    THEME_ORDER.forEach((t) => buckets.set(t, []))
+    csvScenarios.forEach((s) => {
+      const t = getThemeForScenario(s.scenario_id)
+      buckets.get(t)?.push(s)
+    })
+    return THEME_ORDER.map((t) => ({
+      theme: t,
+      scenarios: buckets.get(t) ?? [],
+    })).filter(({ scenarios: g }) => g.length > 0)
+  }, [csvScenarios, getThemeForScenario])
 
   // Get selected scenario data
   const selectedZipScenario = scenarios.find(

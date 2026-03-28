@@ -27,11 +27,7 @@ import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
-import {
-  getScenarioTheme,
-  getScenarioShortLabel,
-  type ScenarioTheme,
-} from "../../../content/scenarios"
+import { type ScenarioTheme } from "../../../content/scenarios"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import GridControls from "../strategyGrid/GridControls"
 
@@ -47,6 +43,7 @@ const THEME_ORDER: ScenarioTheme[] = [
   "ag_gw",
   "eco",
   "delta",
+  "unthemed",
 ]
 const PRIMARY_BASELINE_ID = "s0020"
 
@@ -104,32 +101,29 @@ export default function ScenarioSelectionSidebar({
     }
   }
 
-  const { scenarios, isLoading } = useScenarioList()
+  const { siblingGroups, isLoading } = useScenarioList()
 
   const scenariosByTheme = useMemo(() => {
-    const activeScenarios = scenarios.filter((s) => s.isActive)
-
     // Full (unfiltered) theme membership — used by theme checkboxes so they
     // can select/deselect an entire theme even when "show only selected" hides rows.
     const allGroups = new Map<ScenarioTheme, string[]>()
     THEME_ORDER.forEach((t) => allGroups.set(t, []))
-    activeScenarios.forEach((s) => {
-      const t = getScenarioTheme(s.scenarioId)
-      allGroups.get(t)?.push(s.scenarioId)
+    siblingGroups.forEach((s) => {
+      allGroups.get(s.theme)?.push(s.scenarioId)
     })
 
     const filtered = (() => {
       if (showOnlyChosen) {
-        return activeScenarios.filter((s) =>
+        return siblingGroups.filter((s) =>
           selectedScenarios.includes(s.scenarioId),
         )
       }
       if (!showAlternativeBaselines) {
-        return activeScenarios.filter(
+        return siblingGroups.filter(
           (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
         )
       }
-      return activeScenarios
+      return siblingGroups
     })()
 
     const displayGroups = new Map<
@@ -139,10 +133,8 @@ export default function ScenarioSelectionSidebar({
     THEME_ORDER.forEach((t) => displayGroups.set(t, []))
 
     filtered.forEach((s) => {
-      const t = getScenarioTheme(s.scenarioId)
-      const shortLabel = getScenarioShortLabel(s.scenarioId)
-      const bucket = displayGroups.get(t)
-      if (bucket) bucket.push({ id: s.scenarioId, shortLabel })
+      const bucket = displayGroups.get(s.theme)
+      if (bucket) bucket.push({ id: s.scenarioId, shortLabel: s.shortLabel })
     })
 
     return THEME_ORDER.map((t) => ({
@@ -150,7 +142,7 @@ export default function ScenarioSelectionSidebar({
       items: displayGroups.get(t) ?? [],
       allIds: allGroups.get(t) ?? [],
     }))
-  }, [scenarios, showOnlyChosen, showAlternativeBaselines, selectedScenarios])
+  }, [siblingGroups, showOnlyChosen, showAlternativeBaselines, selectedScenarios])
 
   return (
     <Box

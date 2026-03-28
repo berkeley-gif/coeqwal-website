@@ -30,7 +30,6 @@ import {
 } from "@dnd-kit/sortable"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
-import { getScenarioTheme } from "../../../content/scenarios"
 
 // Transform utility - only use translate, ignore scale to prevent chip resizing
 function transformToCSS(
@@ -131,7 +130,7 @@ export default function SelectionBanner() {
   const theme = useTheme()
   const { selectedScenarios, clearScenarios, toggleScenario, selectScenarios } =
     useScenarioExplorerStore()
-  const { getDisplayName } = useScenarioList()
+  const { getDisplayName, getThemeForScenario } = useScenarioList()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -224,7 +223,7 @@ export default function SelectionBanner() {
                     </Typography>
 
                     {selectedScenarios.map((scenarioId) => {
-                      const themeKey = getScenarioTheme(scenarioId)
+                      const themeKey = getThemeForScenario(scenarioId)
                       const themeColors = theme.palette.waterThemes[themeKey]
                       return (
                         <SortableChip

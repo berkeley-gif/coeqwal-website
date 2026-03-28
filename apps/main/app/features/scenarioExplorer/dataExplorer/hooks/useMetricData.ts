@@ -3,6 +3,7 @@ import {
   useMultipleScenarioTiers,
   useScenarioList,
 } from "../../../scenarios/hooks"
+import { useScenarioExplorerStore } from "../../store"
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
 import {
   getOutcomeCodeFromMetricId,
@@ -16,13 +17,10 @@ import {
 export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
   const tierMetricData = useTierMetricData(scenarioIds, metric)
 
-  // For tier metrics, use the tier API result
   if (metric.isTier) {
     return tierMetricData
   }
 
-  // For now, for non-tier metrics, return placeholder data
-  // TODO: Implement when detailed metrics API is available
   return {
     data: null,
     isLoading: false,
@@ -31,22 +29,24 @@ export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
 }
 
 /**
- * Hook to fetch tier metric data for multiple scenarios
- *
- * Uses useMultipleScenarioTiers which fetches all scenario tier data in parallel,
- * then filters to the selected scenarios. This approach respects React hooks rules
- * by always calling the same hooks in the same order.
+ * Hook to fetch tier metric data for multiple scenarios.
+ * Uses hydroclimate-aware ID mapping so only 24 scenarios are fetched.
  */
 function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
-  // Fetch all scenario tier data (handles hooks rules internally)
+  const { hydroclimatePeriod } = useScenarioExplorerStore()
+  const { buildIdMapping, getDisplayName, isLoading: scenariosLoading } =
+    useScenarioList()
+
+  const idMapping = useMemo(
+    () => buildIdMapping(hydroclimatePeriod),
+    [buildIdMapping, hydroclimatePeriod],
+  )
+
   const {
     allChartData,
     isLoading: tiersLoading,
     error: tiersError,
-  } = useMultipleScenarioTiers()
-
-  // Get scenario metadata for display names
-  const { getDisplayName, isLoading: scenariosLoading } = useScenarioList()
+  } = useMultipleScenarioTiers(idMapping)
 
   const isLoading = tiersLoading || scenariosLoading
   const error = tiersError

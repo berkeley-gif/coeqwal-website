@@ -13,11 +13,7 @@
 import React from "react"
 import { Box, Typography } from "@repo/ui/mui"
 import { TruncatedText } from "@repo/ui"
-import {
-  getScenarioLabel,
-  getScenarioDescription,
-  hasScenarioMetadata,
-} from "../content/scenarios"
+import { useScenarioList } from "../features/scenarios/hooks"
 
 interface ScenarioListProps {
   /** Array of scenario IDs (e.g., ["s0035", "s0036"]) */
@@ -33,6 +29,8 @@ export default function ScenarioList({
   color = "inherit",
   highlightedId,
 }: ScenarioListProps) {
+  const { scenarioMap } = useScenarioList()
+
   if (scenarioIds.length === 0) return null
 
   return (
@@ -49,9 +47,9 @@ export default function ScenarioList({
       }}
     >
       {scenarioIds.map((id) => {
-        const known = hasScenarioMetadata(id)
-        const name = known ? getScenarioLabel(id) : "(coming soon)"
-        const desc = known ? getScenarioDescription(id) : ""
+        const scenario = scenarioMap.get(id)
+        const name = scenario?.label ?? "(coming soon)"
+        const desc = scenario?.description ?? ""
         const isHighlighted = highlightedId === id
 
         return (

@@ -122,7 +122,7 @@ pnpm dev
 or
 
 ```sh
-pnpm dev --filter=main
+pnpm dev --filtermain
 ```
 
 This is recommended while developing because running the whole `pnpm dev` will slow down your dev builds and hot reload because it will start every package/app that has a dev task and their watchers.

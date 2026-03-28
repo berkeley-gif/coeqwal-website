@@ -376,6 +376,7 @@ const palette = {
     eco: { background: "#CDDFF1", text: "#1E4F6E" },
     delta: { background: "#DED6F0", text: "#3A2888" },
     cws: { background: "#ffe5cc", text: "#7a3000" },
+    unthemed: { background: "#e0e0e0", text: "#616161" },
   },
 
   // Data visualization colors for outcome categories
