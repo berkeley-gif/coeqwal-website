@@ -97,16 +97,47 @@ function computeColumnDodge(
       continue
     }
 
+    // Sub-group by exact y value so same-tier dots stay adjacent.
+    // Sort sub-groups largest-first so the densest tier lands in the center.
+    const subMap = new Map<number, { id: string; y: number }[]>()
+    for (const e of group) {
+      const key = e.y
+      if (!subMap.has(key)) subMap.set(key, [])
+      subMap.get(key)!.push(e)
+    }
+    const subGroups = [...subMap.values()].sort(
+      (a, b) => b.length - a.length,
+    )
+
+    // Interleave sub-groups outward from center: largest in the middle,
+    // next-largest alternating left/right.
+    const ordered: { id: string; y: number }[] = []
+    const center: { id: string; y: number }[] = []
+    const left: { id: string; y: number }[][] = []
+    const right: { id: string; y: number }[][] = []
+    subGroups.forEach((sg, i) => {
+      if (i === 0) {
+        center.push(...sg)
+      } else if (i % 2 === 1) {
+        left.push(sg)
+      } else {
+        right.push(sg)
+      }
+    })
+    // Build final order: left groups (reversed) | center | right groups
+    for (const sg of left.reverse()) ordered.push(...sg)
+    ordered.push(...center)
+    for (const sg of right) ordered.push(...sg)
+
     // Compute spacing: use ideal spacing if it fits, otherwise compress
-    // to fill the available width with even overlap
-    const totalIdealWidth = (group.length - 1) * idealDist
+    const totalIdealWidth = (ordered.length - 1) * idealDist
     const step =
       totalIdealWidth <= halfSpread * 2
         ? idealDist
-        : (halfSpread * 2) / (group.length - 1)
+        : (halfSpread * 2) / (ordered.length - 1)
 
-    const startX = -((group.length - 1) * step) / 2
-    group.forEach((entry, i) => {
+    const startX = -((ordered.length - 1) * step) / 2
+    ordered.forEach((entry, i) => {
       result.set(entry.id, startX + i * step)
     })
   }
