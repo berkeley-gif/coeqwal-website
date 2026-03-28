@@ -14,18 +14,9 @@ import type { ScenarioTheme } from "../../content/scenarios"
 // ============================================================================
 
 /**
- * The current tool mode within the "Choose scenarios" view.
- * - list: Default grid view of all scenarios
- * - map: Spatial visualization with map overlay
- * - comparison: Parallel coordinates chart comparison
- * - equity: Equity analysis tool with map on right
+ * The current tool within the explorer view.
  */
-export type ExploreMode =
-  | "list"
-  | "map"
-  | "comparison"
-  | "equity"
-  | "resilience"
+export type ExploreMode = "list" | "comparison" | "equity" | "resilience"
 
 /**
  * The main view within the Explore section.
@@ -62,6 +53,9 @@ interface ScenarioExplorerState {
 
   // Display options
   showAlternativeBaselines: boolean
+  showDefinitions: boolean
+  showKeyOperations: boolean
+  showMap: boolean
 
   // Chart toggles (comparison panel)
   relativeToBaseline: boolean
@@ -106,6 +100,9 @@ interface ScenarioExplorerActions {
 
   // Display options
   setShowAlternativeBaselines: (show: boolean) => void
+  setShowDefinitions: (show: boolean) => void
+  setShowKeyOperations: (show: boolean) => void
+  setShowMap: (show: boolean) => void
 
   // Chart toggles
   setRelativeToBaseline: (show: boolean) => void
@@ -144,6 +141,9 @@ const initialState: ScenarioExplorerState = {
   showThemeBadges: false,
   selectedIconId: null,
   showAlternativeBaselines: false,
+  showDefinitions: false,
+  showKeyOperations: false,
+  showMap: false,
   relativeToBaseline: true,
   highlightBaseline: false,
   overlayTiers: false,
@@ -242,6 +242,21 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowAlternativeBaselines: (show) =>
       set((state) => {
         state.showAlternativeBaselines = show
+      }),
+
+    setShowDefinitions: (show) =>
+      set((state) => {
+        state.showDefinitions = show
+      }),
+
+    setShowKeyOperations: (show) =>
+      set((state) => {
+        state.showKeyOperations = show
+      }),
+
+    setShowMap: (show) =>
+      set((state) => {
+        state.showMap = show
       }),
 
     // Chart toggles

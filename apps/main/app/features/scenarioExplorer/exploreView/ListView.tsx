@@ -9,7 +9,6 @@
 
 import React, { useMemo, useState, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { MobileModal } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
@@ -28,22 +27,15 @@ const THEME_ORDER: Record<ScenarioTheme, number> = {
 }
 
 interface ListViewProps {
-  compact?: boolean
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  /** When provided, controls the expanded modal externally */
-  isExpanded?: boolean
-  /** Callback to close the expanded modal */
-  onCloseExpand?: () => void
-  /** Toolbar content to render inside the expanded modal (e.g. search bar, controls) */
-  modalToolbar?: React.ReactNode
+  highlightedIds?: Set<string> | null
+  onScenarioHover?: (scenarioId: string | null) => void
 }
 
 export default function ListView({
-  compact = false,
   onTierClick,
-  isExpanded: isExpandedProp,
-  onCloseExpand,
-  modalToolbar,
+  highlightedIds,
+  onScenarioHover,
 }: ListViewProps) {
   const theme = useTheme()
 
@@ -295,13 +287,6 @@ export default function ListView({
   const [localSelectedOutcomes, setLocalSelectedOutcomes] = React.useState<
     Record<string, string>
   >({})
-  // Use external expand control when provided, otherwise internal state
-  const [isExpandedInternal, setIsExpandedInternal] = useState(false)
-  const externallyControlled = isExpandedProp !== undefined
-  const isExpanded = externallyControlled ? isExpandedProp : isExpandedInternal
-  const closeExpand = externallyControlled
-    ? () => onCloseExpand?.()
-    : () => setIsExpandedInternal(false)
 
   const handleOutcomeSelect = (scenarioId: string, outcome: string) => {
     setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
@@ -359,7 +344,7 @@ export default function ListView({
     showMapView: false,
     showOnlyChosen,
     showAlternativeBaselines,
-    compact,
+    compact: false,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
@@ -370,260 +355,57 @@ export default function ListView({
     onIconClick: handleIconClick,
   }
 
-  if (!compact) {
-    return (
-      <>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "calc(100vh - 220px)",
-            overflow: "hidden",
-            backgroundColor: theme.palette.grey[100],
-          }}
-        >
-          {/* Fixed header area */}
-          <Box
-            sx={{
-              flexShrink: 0,
-              px: theme.space.section.md,
-              // Match SearchBar's py: component.lg so dividers start at same distance from top
-              pt: theme.space.component.lg,
-              backgroundColor: theme.palette.grey[100],
-            }}
-          >
-            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
-          </Box>
-
-          {/* Scrollable content */}
-          <Box
-            ref={listScrollRef}
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: "auto",
-              overscrollBehavior: "contain",
-              px: theme.space.section.md,
-              pt: "10px",
-              pb: theme.space.section.xl,
-              // Top border to indicate scrollable area
-              borderTop: theme.border.medium,
-            }}
-          >
-            {showNoResultsMessage && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.grey[600],
-                  fontStyle: "italic",
-                  mb: 2,
-                  mt: 1,
-                }}
-              >
-                No scenarios match &ldquo;{searchQuery}&rdquo;
-              </Typography>
-            )}
-            <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
-          </Box>
-        </Box>
-
-        {/* Expanded modal view */}
-        <MobileModal
-          open={isExpanded}
-          onClose={closeExpand}
-          maxWidth="95vw"
-          maxHeight="95vh"
-          contentAriaLabel="Scenario list expanded view"
-        >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              height: "85vh",
-              overflow: "hidden",
-              backgroundColor: theme.palette.grey[100],
-            }}
-          >
-            {/* Toolbar (search, controls) */}
-            {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
-
-            {/* Fixed header area */}
-            <Box
-              sx={{
-                flexShrink: 0,
-                px: theme.space.section.md,
-                pt: theme.space.component.lg,
-                backgroundColor: theme.palette.grey[100],
-              }}
-            >
-              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
-            </Box>
-
-            {/* Scrollable content */}
-            <Box
-              sx={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: "auto",
-                overscrollBehavior: "contain",
-                px: theme.space.section.md,
-                pt: "10px",
-                pb: theme.space.section.xl,
-                borderTop: theme.border.medium,
-              }}
-            >
-              {showNoResultsMessage && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    fontStyle: "italic",
-                    mb: 2,
-                    mt: 1,
-                  }}
-                >
-                  No scenarios match &ldquo;{searchQuery}&rdquo;
-                </Typography>
-              )}
-              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
-            </Box>
-          </Box>
-        </MobileModal>
-      </>
-    )
-  }
-
-  // Compact mode
-  const isMapMode = !!onTierClick
-
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        overflow: "hidden",
+        backgroundColor: theme.palette.grey[100],
+      }}
+    >
+      {/* Fixed header area */}
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
+          flexShrink: 0,
+          px: theme.space.section.md,
+          pt: theme.space.component.lg,
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        <Box
-          ref={listScrollRef}
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            overscrollBehavior: "contain",
-            px: theme.space.section.sm,
-            pt: theme.space.component.md,
-            pb: theme.space.section.xl,
-            // Top border to indicate scrollable area
-            borderTop: theme.border.medium,
-          }}
-        >
-          {showNoResultsMessage && (
-            <Typography
-              variant="body2"
-              sx={{
-                color: theme.palette.grey[600],
-                fontStyle: "italic",
-                mb: 2,
-              }}
-            >
-              No scenarios match &ldquo;{searchQuery}&rdquo;
-            </Typography>
-          )}
-          {isMapMode ? (
-            <>
-              <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
-              {/* Map mode instructions — below "Choose scenarios" header */}
-              <Box sx={{ mb: 1 }}>
-                <Typography
-                  variant="caption"
-                  sx={{ color: theme.palette.grey[500], display: "block" }}
-                >
-                  Click on an outcome to see on the map
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ color: theme.palette.grey[500], display: "block" }}
-                >
-                  Add a location to view its outcome under different scenarios
-                  (coming soon)
-                </Typography>
-              </Box>
-              <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
-            </>
-          ) : (
-            <StrategyGrid {...strategyGridProps} renderMode="all" />
-          )}
-        </Box>
+        <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
       </Box>
 
-      {/* Expanded modal view */}
-      <MobileModal
-        open={isExpanded}
-        onClose={closeExpand}
-        maxWidth="95vw"
-        maxHeight="95vh"
-        contentAriaLabel="Scenario list expanded view"
+      {/* Scrollable content */}
+      <Box
+        ref={listScrollRef}
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+          px: theme.space.section.md,
+          pt: "10px",
+          pb: theme.space.section.xl,
+          borderTop: theme.border.medium,
+        }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            height: "85vh",
-            overflow: "hidden",
-          }}
-        >
-          {/* Toolbar (search, controls) */}
-          {modalToolbar && <Box sx={{ flexShrink: 0 }}>{modalToolbar}</Box>}
-
-          {/* Fixed header area */}
-          <Box
+        {showNoResultsMessage && (
+          <Typography
+            variant="body2"
             sx={{
-              flexShrink: 0,
-              px: theme.space.section.md,
-              pt: theme.space.component.lg,
-              backgroundColor: theme.palette.grey[100],
+              color: theme.palette.grey[600],
+              fontStyle: "italic",
+              mb: 2,
+              mt: 1,
             }}
           >
-            <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
-          </Box>
-
-          {/* Scrollable content */}
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: "auto",
-              overscrollBehavior: "contain",
-              px: theme.space.section.md,
-              pt: "10px",
-              pb: theme.space.section.xl,
-              borderTop: theme.border.medium,
-              backgroundColor: theme.palette.grey[100],
-            }}
-          >
-            {showNoResultsMessage && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.grey[600],
-                  fontStyle: "italic",
-                  mb: 2,
-                  mt: 1,
-                }}
-              >
-                No scenarios match &ldquo;{searchQuery}&rdquo;
-              </Typography>
-            )}
-            <StrategyGrid
-              {...strategyGridProps}
-              compact={false}
-              renderMode="contentOnly"
-            />
-          </Box>
-        </Box>
-      </MobileModal>
-    </>
+            No scenarios match &ldquo;{searchQuery}&rdquo;
+          </Typography>
+        )}
+        <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
+      </Box>
+    </Box>
   )
 }

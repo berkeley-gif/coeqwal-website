@@ -2,17 +2,13 @@
  * exploreView - barrel exports for explore view sub-feature
  *
  * Components:
- * - ListPanel: Container for the scenario list (handles list/map modes)
- * - ListView: The actual scenario grid component (internal to ListPanel)
- * - ComparisonPanel: The comparison chart panel
- * - EquityPanel: The equity analysis tool panel
- *
- * Types are exported from ../store.ts (ExploreMode, MainView)
+ * - ListView: Scenario grid tool (StrategyGrid with tier outcome glyphs)
+ * - ComparisonPanel: Tradeoffs tool with parallel coords / parity / deviation charts
+ * - EquityPanel: Equity analysis tool
+ * - ResiliencePanel: Resilience analysis tool
  */
 
-export { default } from "./ListPanel"
-export { default as ListPanel } from "./ListPanel"
+export { default as ListView } from "./ListView"
 export { default as ComparisonPanel } from "./ComparisonPanel"
 export { default as EquityPanel } from "./EquityPanel"
 export { default as ResiliencePanel } from "./ResiliencePanel"
-export { default as ListView } from "./ListView"

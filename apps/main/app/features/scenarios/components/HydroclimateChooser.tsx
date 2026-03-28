@@ -76,6 +76,8 @@ interface HydroclimateChooserProps {
   iconSize?: string
   /** Override the MUI icon font-size inside the circle. Defaults to "1.5rem". */
   iconFontSize?: string
+  /** When true, only show options that have data (hide disabled/coming-soon) */
+  hideDisabled?: boolean
 }
 
 export function HydroclimateChooser({
@@ -86,6 +88,7 @@ export function HydroclimateChooser({
   showTitle = true,
   iconSize = "40px",
   iconFontSize = "1.5rem",
+  hideDisabled = false,
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -133,6 +136,10 @@ export function HydroclimateChooser({
             const IconComponent = config?.icon || HistoryIcon
             const isSelected = value === option.value
             const isDisabled = !AVAILABLE_HYDROCLIMATES.has(option.value)
+
+            if (hideDisabled && isDisabled) {
+              return null
+            }
 
             const iconButton = (
               <span style={{ display: "inline-flex" }}>
