@@ -17,7 +17,7 @@ import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
 
 const SIDEBAR_WIDTH = 280
-const MAP_WIDTH_PERCENT = 33.33
+const MAP_WIDTH_PERCENT = 25
 
 interface UnifiedToolLayoutProps {
   sidebar: React.ReactNode
@@ -54,7 +54,6 @@ export default function UnifiedToolLayout({
         display: "flex",
         height: "100%",
         overflow: "hidden",
-        backgroundColor: theme.palette.background.paper,
       }}
     >
       {/* Sidebar (fixed width, always visible) */}
@@ -67,6 +66,7 @@ export default function UnifiedToolLayout({
           height: "100%",
           overflow: "hidden",
           borderRight: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
         }}
       >
         {sidebar}
@@ -81,9 +81,10 @@ export default function UnifiedToolLayout({
           height: "100%",
           overflow: "hidden",
           minWidth: 0,
+          backgroundColor: theme.palette.background.paper,
         }}
       >
-        {/* Shared toolbar: tool tabs + hydroclimate + map toggle */}
+        {/* Shared toolbar */}
         <Box
           sx={{
             flexShrink: 0,
@@ -97,7 +98,7 @@ export default function UnifiedToolLayout({
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map panel (optional, right side) */}
+      {/* Map reveal area — transparent so the persistent fixed-position map shows through */}
       {showMap && (
         <Box
           sx={{
@@ -105,7 +106,7 @@ export default function UnifiedToolLayout({
             flexShrink: 0,
             height: "100%",
             pointerEvents: "auto",
-            borderLeft: `1px solid ${theme.palette.divider}`,
+            backgroundColor: "transparent",
           }}
         />
       )}
