@@ -33,7 +33,7 @@ export default function ResiliencePanel() {
         component="h2"
         sx={{ color: theme.palette.text.primary }}
       >
-        Resilience view
+        Resilience tool
       </Typography>
       <Typography
         variant="body2"
