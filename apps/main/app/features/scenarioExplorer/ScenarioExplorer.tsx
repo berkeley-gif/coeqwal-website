@@ -44,11 +44,14 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, setMainView, exploreMode } = useScenarioExplorerStore()
+  const { mainView, setMainView, exploreMode, showMap } =
+    useScenarioExplorerStore()
   const mapMode = useMapMode()
 
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
+  const needsTransparentBg =
+    isGetStartedMapMode || (mainView === "explorer" && showMap)
 
   // Hover coordination
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
@@ -75,7 +78,7 @@ export default function ScenarioExplorer() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        backgroundColor: isGetStartedMapMode
+        backgroundColor: needsTransparentBg
           ? "transparent"
           : theme.palette.explore.background,
         color: theme.palette.text.primary,
