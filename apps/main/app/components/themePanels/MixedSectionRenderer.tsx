@@ -94,10 +94,6 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                       slotProps={{
                         primary: {
                           sx: {
-                            // Match body1 for consistency — MUI ListItemText
-                            // defaults to body2 which is visually inconsistent
-                            // with surrounding paragraphs
-                            ...muiTheme.typography.body1,
                             maxWidth: themeValues.spacing.paragraphMaxSize,
                           },
                         },
