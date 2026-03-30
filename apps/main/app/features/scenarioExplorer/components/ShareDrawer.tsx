@@ -17,6 +17,85 @@ import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 
 const DRAWER_WIDTH = 360
+const TAB_WIDTH = 32
+
+function ShareTab({
+  count,
+  isOpen,
+  onClick,
+}: {
+  count: number
+  isOpen: boolean
+  onClick: () => void
+}) {
+  const theme = useTheme()
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      sx={{
+        position: "fixed",
+        right: isOpen ? DRAWER_WIDTH : 0,
+        top: "50%",
+        transform: "translateY(-50%)",
+        zIndex: (theme.zIndex?.drawer ?? 1200) + 1,
+        transition: "right 225ms cubic-bezier(0, 0, 0.2, 1)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        gap: 0.5,
+        width: TAB_WIDTH,
+        py: 1.5,
+        px: 0.5,
+        border: "none",
+        borderRadius: "8px 0 0 8px",
+        cursor: "pointer",
+        backgroundColor: theme.palette.blue.bright,
+        color: "#fff",
+        boxShadow: "-2px 0 8px rgba(0,0,0,0.15)",
+        "&:hover": {
+          backgroundColor: theme.palette.blue.darkest,
+        },
+      }}
+    >
+      <icons.IosShare sx={{ fontSize: "1rem" }} />
+      <Typography
+        sx={{
+          writingMode: "vertical-rl",
+          textOrientation: "mixed",
+          fontSize: "0.6875rem",
+          fontWeight: 600,
+          letterSpacing: "0.05em",
+          lineHeight: 1,
+        }}
+      >
+        Share
+      </Typography>
+      {count > 0 && (
+        <Box
+          sx={{
+            mt: 0.25,
+            minWidth: 18,
+            height: 18,
+            borderRadius: "9px",
+            backgroundColor: "#fff",
+            color: theme.palette.blue.bright,
+            fontSize: "0.625rem",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1,
+          }}
+        >
+          {count}
+        </Box>
+      )}
+    </Box>
+  )
+}
 
 export default function ShareDrawer() {
   const theme = useTheme()
@@ -58,6 +137,12 @@ export default function ShareDrawer() {
   }
 
   return (
+    <>
+    <ShareTab
+      count={sharedScenarioIds.length}
+      isOpen={showShareDrawer}
+      onClick={() => setShowShareDrawer(!showShareDrawer)}
+    />
     <Drawer
       anchor="right"
       variant="persistent"
@@ -178,5 +263,6 @@ export default function ShareDrawer() {
         </Box>
       )}
     </Drawer>
+    </>
   )
 }

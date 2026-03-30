@@ -1,16 +1,23 @@
 "use client"
 
-import React, { useMemo } from "react"
-import { Box, Typography, Button, useTheme } from "@repo/ui/mui"
+import React, { useMemo, useState } from "react"
+import { Box, Typography, Button, Tooltip, useTheme, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 import { useScenarioList } from "../../features/scenarios/hooks"
 import { useMultipleScenarioTiers } from "../../features/scenarios/hooks/useTierData"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 
+function buildShareUrl(ids: string[], climate: string): string {
+  const parts = [`tab=share`, `scenarios=${ids.join(",")}`]
+  if (climate !== "historical") parts.push(`climate=${climate}`)
+  return `${window.location.origin}/?${parts.join("&")}`
+}
+
 export default function SharePanel() {
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
+  const [copied, setCopied] = useState(false)
 
   const { sharedScenarioIds, hydroclimatePeriod } = useScenarioExplorerStore()
 
@@ -96,7 +103,7 @@ export default function SharePanel() {
         }}
       >
         {sharedScenarioIds.length} scenario
-        {sharedScenarioIds.length !== 1 ? "s" : ""} staged for sharing
+        {sharedScenarioIds.length !== 1 ? "s" : ""}
       </Typography>
 
       <Box
@@ -124,7 +131,6 @@ export default function SharePanel() {
         })}
       </Box>
 
-      {/* Stub actions for future expansion */}
       <Box
         sx={{
           display: "flex",
@@ -134,18 +140,41 @@ export default function SharePanel() {
           borderTop: `1px solid rgba(255,255,255,0.2)`,
         }}
       >
-        <Button
-          variant="outlined"
-          size="small"
-          disabled
-          sx={{
-            textTransform: "none",
-            color: theme.palette.text.secondary,
-            borderColor: "rgba(255,255,255,0.3)",
-          }}
-        >
-          Copy link
-        </Button>
+        <Tooltip title={copied ? "Copied!" : "Copy shareable URL to clipboard"} arrow>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={async () => {
+              const url = buildShareUrl(sharedScenarioIds, hydroclimatePeriod)
+              try {
+                await navigator.clipboard.writeText(url)
+              } catch {
+                const ta = document.createElement("textarea")
+                ta.value = url
+                document.body.appendChild(ta)
+                ta.select()
+                document.execCommand("copy")
+                document.body.removeChild(ta)
+              }
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            }}
+            startIcon={
+              copied ? (
+                <icons.Check sx={{ fontSize: "1rem" }} />
+              ) : (
+                <icons.ContentCopy sx={{ fontSize: "1rem" }} />
+              )
+            }
+            sx={{
+              textTransform: "none",
+              color: theme.palette.text.secondary,
+              borderColor: "rgba(255,255,255,0.3)",
+            }}
+          >
+            {copied ? "Copied!" : "Copy link"}
+          </Button>
+        </Tooltip>
         <Button
           variant="outlined"
           size="small"

@@ -22,6 +22,7 @@ import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
+import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 }, // is this used?
@@ -72,14 +73,27 @@ export default function TabPanels() {
     }
   }, [isInTabsArea, activeTab, searchParams, router])
 
-  // On initial load with ?tab=..., sync state + scroll once
+  // On initial load with ?tab=..., sync state + scroll once.
+  // Also rehydrate ?scenarios= and ?climate= into the scenario explorer store.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const urlTab = params.get("tab") as TabKey | null
 
     if (urlTab && urlTab !== activeTab) {
-      // Set initial active tab from URL
       navigateToTab(urlTab)
+    }
+
+    const scenariosParam = params.get("scenarios")
+    if (scenariosParam) {
+      const ids = scenariosParam.split(",").filter(Boolean)
+      if (ids.length > 0) {
+        useScenarioExplorerStore.getState().setSharedScenarioIds(ids)
+      }
+    }
+
+    const climateParam = params.get("climate")
+    if (climateParam) {
+      useScenarioExplorerStore.getState().setHydroclimatePeriod(climateParam)
     }
 
     if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {
