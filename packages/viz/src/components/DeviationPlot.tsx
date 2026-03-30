@@ -98,9 +98,7 @@ function computeColumnDodge(
     const n = ordered.length
     const totalIdeal = (n - 1) * minDist
     const step =
-      totalIdeal <= halfSpread * 2
-        ? minDist
-        : (halfSpread * 2) / (n - 1)
+      totalIdeal <= halfSpread * 2 ? minDist : (halfSpread * 2) / (n - 1)
     const startX = -((n - 1) * step) / 2
     ordered.forEach((entry, i) => {
       result.set(entry.id, startX + i * step)
@@ -138,7 +136,10 @@ function computeColumnDodge(
         if (Math.abs(cx) > halfSpread) continue
         let overlaps = false
         for (const p of placed) {
-          if (Math.abs(cx - p.x) < minDist && Math.abs(entry.y - p.y) < minDist) {
+          if (
+            Math.abs(cx - p.x) < minDist &&
+            Math.abs(entry.y - p.y) < minDist
+          ) {
             overlaps = true
             break
           }

@@ -140,7 +140,10 @@ export default function SharePanel() {
           borderTop: `1px solid rgba(255,255,255,0.2)`,
         }}
       >
-        <Tooltip title={copied ? "Copied!" : "Copy shareable URL to clipboard"} arrow>
+        <Tooltip
+          title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
+          arrow
+        >
           <Button
             variant="outlined"
             size="small"
