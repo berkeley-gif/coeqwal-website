@@ -138,98 +138,26 @@ export default function ShareDrawer() {
 
   return (
     <>
-    <ShareTab
-      count={sharedScenarioIds.length}
-      isOpen={showShareDrawer}
-      onClick={() => setShowShareDrawer(!showShareDrawer)}
-    />
-    <Drawer
-      anchor="right"
-      variant="persistent"
-      open={showShareDrawer}
-      sx={{
-        "& .MuiDrawer-paper": {
-          width: DRAWER_WIDTH,
-          boxSizing: "border-box",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
-        },
-      }}
-    >
-      {/* Header */}
-      <Box
+      <ShareTab
+        count={sharedScenarioIds.length}
+        isOpen={showShareDrawer}
+        onClick={() => setShowShareDrawer(!showShareDrawer)}
+      />
+      <Drawer
+        anchor="right"
+        variant="persistent"
+        open={showShareDrawer}
         sx={{
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          px: 2,
-          py: 1.5,
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          "& .MuiDrawer-paper": {
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+            display: "flex",
+            flexDirection: "column",
+            boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
+          },
         }}
       >
-        <Typography
-          sx={{
-            fontWeight: 600,
-            fontSize: "0.9375rem",
-            color: theme.palette.text.primary,
-          }}
-        >
-          Share ({sharedScenarioIds.length})
-        </Typography>
-        <IconButton
-          size="small"
-          onClick={() => setShowShareDrawer(false)}
-          sx={{ p: 0.5 }}
-        >
-          <icons.Close sx={{ fontSize: "1.125rem" }} />
-        </IconButton>
-      </Box>
-
-      {/* Scrollable card list */}
-      <Box
-        sx={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          px: 1.5,
-          py: 1.5,
-        }}
-      >
-        {sharedScenarioIds.length === 0 ? (
-          <Typography
-            sx={{
-              fontSize: "0.8125rem",
-              color: theme.palette.grey[500],
-              textAlign: "center",
-              mt: 4,
-            }}
-          >
-            No scenarios staged.
-            <br />
-            Click the share icon on a scenario to add it.
-          </Typography>
-        ) : (
-          sharedScenarioIds.map((id) => {
-            const info = scenarioLookup.get(id)
-            return (
-              <ShareScenarioCard
-                key={id}
-                scenarioId={id}
-                name={info?.name ?? id}
-                description={info?.description ?? ""}
-                chartData={allChartData[id]}
-                outcomeNames={outcomeNames}
-                onRemove={removeFromShare}
-              />
-            )
-          })
-        )}
-      </Box>
-
-      {/* Footer actions */}
-      {sharedScenarioIds.length > 0 && (
+        {/* Header */}
         <Box
           sx={{
             flexShrink: 0,
@@ -238,31 +166,103 @@ export default function ShareDrawer() {
             justifyContent: "space-between",
             px: 2,
             py: 1.5,
-            borderTop: `1px solid ${theme.palette.divider}`,
+            borderBottom: `1px solid ${theme.palette.divider}`,
           }}
         >
-          <Button
-            size="small"
-            onClick={clearShared}
+          <Typography
             sx={{
-              textTransform: "none",
-              color: theme.palette.grey[600],
-              fontSize: "0.75rem",
+              fontWeight: 600,
+              fontSize: "0.9375rem",
+              color: theme.palette.text.primary,
             }}
           >
-            Clear all
-          </Button>
-          <Button
-            variant="contained"
+            Share ({sharedScenarioIds.length})
+          </Typography>
+          <IconButton
             size="small"
-            onClick={handleGoToShare}
-            sx={{ textTransform: "none", fontSize: "0.8125rem" }}
+            onClick={() => setShowShareDrawer(false)}
+            sx={{ p: 0.5 }}
           >
-            Go to Share
-          </Button>
+            <icons.Close sx={{ fontSize: "1.125rem" }} />
+          </IconButton>
         </Box>
-      )}
-    </Drawer>
+
+        {/* Scrollable card list */}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            px: 1.5,
+            py: 1.5,
+          }}
+        >
+          {sharedScenarioIds.length === 0 ? (
+            <Typography
+              sx={{
+                fontSize: "0.8125rem",
+                color: theme.palette.grey[500],
+                textAlign: "center",
+                mt: 4,
+              }}
+            >
+              No scenarios staged.
+              <br />
+              Click the share icon on a scenario to add it.
+            </Typography>
+          ) : (
+            sharedScenarioIds.map((id) => {
+              const info = scenarioLookup.get(id)
+              return (
+                <ShareScenarioCard
+                  key={id}
+                  scenarioId={id}
+                  name={info?.name ?? id}
+                  description={info?.description ?? ""}
+                  chartData={allChartData[id]}
+                  outcomeNames={outcomeNames}
+                  onRemove={removeFromShare}
+                />
+              )
+            })
+          )}
+        </Box>
+
+        {/* Footer actions */}
+        {sharedScenarioIds.length > 0 && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              px: 2,
+              py: 1.5,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Button
+              size="small"
+              onClick={clearShared}
+              sx={{
+                textTransform: "none",
+                color: theme.palette.grey[600],
+                fontSize: "0.75rem",
+              }}
+            >
+              Clear all
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleGoToShare}
+              sx={{ textTransform: "none", fontSize: "0.8125rem" }}
+            >
+              Go to Share
+            </Button>
+          </Box>
+        )}
+      </Drawer>
     </>
   )
 }
