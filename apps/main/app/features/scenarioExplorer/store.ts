@@ -112,6 +112,7 @@ interface ScenarioExplorerActions {
   addToShare: (id: string) => void
   removeFromShare: (id: string) => void
   clearShared: () => void
+  setSharedScenarioIds: (ids: string[]) => void
   setShowShareDrawer: (open: boolean) => void
 
   // Chart toggles
@@ -289,6 +290,11 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     clearShared: () =>
       set((state) => {
         state.sharedScenarioIds = []
+      }),
+
+    setSharedScenarioIds: (ids) =>
+      set((state) => {
+        state.sharedScenarioIds = ids
       }),
 
     setShowShareDrawer: (open) =>
