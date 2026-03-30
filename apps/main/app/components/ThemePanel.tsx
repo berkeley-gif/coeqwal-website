@@ -15,7 +15,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "@repo/motion"
-import { Box, useTheme, Typography } from "@repo/ui/mui"
+import { Box, useTheme, Typography, useMediaQuery } from "@repo/ui/mui"
 import { ScrollToButton } from "@repo/ui"
 import { Panel } from "@repo/ui"
 import type { Theme, SectionContent } from "../content/themes"
@@ -123,12 +123,16 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
 
-  const duration = {
+  const duration = useMemo(() => ({
     fast: parseFloat(themeValues.transition.fast),
     standard: parseFloat(themeValues.transition.standard),
-  }
+  }), [])
+
+
 
   const isOpen = theme !== null
+
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"))
 
   // Ref for the scrollable content container
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -142,6 +146,28 @@ export function ThemePanel({ theme }: ThemePanelProps) {
     activeSectionIds,
     scrollContainerRef,
   )
+
+  // Ref for the tab bar scroll container
+  const tabBarRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll the active tab into view when the section changes
+  useEffect(() => {
+    if (!tabBarRef.current || !activeSection) return
+
+    const tabBar = tabBarRef.current
+    const activeTab = tabBar.querySelector<HTMLElement>(
+      `[data-section-id="${activeSection}"]`
+    )
+    if (!activeTab) return
+
+    // Center the active tab in the tab bar.
+    // offsetLeft gives the tab's position relative to its parent (the tab bar).
+    // We subtract half the bar width and add half the tab width to center it.
+    const scrollTarget =
+      activeTab.offsetLeft - tabBar.offsetWidth / 2 + activeTab.offsetWidth / 2
+
+    tabBar.scrollTo({ left: scrollTarget, behavior: "smooth" })
+  }, [activeSection])
 
   // Hero collapse state - driven by the panel's own scroll container
   // Resets automatically when isOpen flips to false (panel closes)
@@ -205,8 +231,12 @@ export function ThemePanel({ theme }: ThemePanelProps) {
               {/* Hero */}
               <motion.div
                 animate={{
-                  paddingTop: isHeroCollapsed ? 10 : 25,
-                  paddingBottom: isHeroCollapsed ? 10 : 25,
+                  paddingTop: isHeroCollapsed ?
+                    (isMobile ? 8 : 10) :
+                    (isMobile ? 14 : 25),
+                  paddingBottom: isHeroCollapsed ?
+                    (isMobile ? 8 : 10) :
+                    (isMobile ? 14 : 25),
                 }}
                 transition={{
                   duration: duration.standard,
@@ -215,9 +245,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                 style={{
                   display: "flex",
                   position: "relative",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: muiTheme.space.listGap.lg,
+                  flexDirection: isMobile ? "column" : "row",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? muiTheme.spacing(1) : muiTheme.space.listGap.lg,
                   overflow: "hidden",
                   backgroundColor: muiTheme.palette.grey[200],
                   paddingLeft: muiTheme.space.panel.padding,
@@ -246,10 +276,17 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                     }}
                   />
                 )}
-                {/* Close button — top left, arrow pointing left */}
+                {/* Close button + Mobile Title 
+                top left, arrow pointing left */}
                 <Box
                   sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 1,
                     zIndex: muiTheme.zIndex.pageContent,
+                    width: isMobile ? "100%" : "auto",
+                    minWidth: 0,
                   }}
                 >
                   <ScrollToButton
@@ -263,95 +300,122 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                     animationComplete={true}
                     delay={0}
                   />
+
+                  {/*
+                 * Mobile-only title — always shows the compact h5 variant.
+                 * Desktop has the animated h3 - h5 collapse below.
+                 */}
+
+                  {isMobile && (
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        color: muiTheme.palette.common.white,
+                        zIndex: muiTheme.zIndex.pageContent,
+                        flex: 1,
+                        minWidth: 0,
+                        // Prevent long theme names from overflowing on small screens
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {theme.label.replace(/\n/g, " ")}
+                    </Typography>
+                  )}
                 </Box>
                 {/* Title + inquiry - title always visible, inquiry collapses */}
-                <Box
-                  sx={{
-                    color: muiTheme.palette.common.white,
-                    zIndex: muiTheme.zIndex.pageContent,
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    {isHeroCollapsed ? (
-                      <motion.div
-                        key="title-collapsed"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: duration.fast }}
-                      >
-                        <Typography
-                          variant="h5"
-                          sx={{ textTransform: "capitalize" }}
+                {!isMobile && (
+                  <Box
+                    sx={{
+                      color: muiTheme.palette.common.white,
+                      zIndex: muiTheme.zIndex.pageContent,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      {isHeroCollapsed ? (
+                        <motion.div
+                          key="title-collapsed"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: duration.fast }}
                         >
-                          {theme.label.replace(/\n/g, " ")}
-                        </Typography>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="title-expanded"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: duration.fast }}
-                      >
-                        <Typography
-                          variant="h3"
-                          sx={{ textTransform: "capitalize" }}
+                          <Typography
+                            variant="h5"
+                            sx={{ textTransform: "capitalize" }}
+                          >
+                            {theme.label.replace(/\n/g, " ")}
+                          </Typography>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="title-expanded"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: duration.fast }}
                         >
-                          {theme.label.replace(/\n/g, " ")}
-                        </Typography>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                          <Typography
+                            variant="h3"
+                            sx={{ textTransform: "capitalize" }}
+                          >
+                            {theme.label.replace(/\n/g, " ")}
+                          </Typography>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                  <AnimatePresence initial={false}>
-                    {!isHeroCollapsed && (
-                      <motion.div
-                        key="inquiry"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{
-                          duration: duration.standard,
-                          ease: [0.4, 0, 0.2, 1],
-                        }}
-                        style={{ overflow: "hidden" }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{ maxWidth: themeValues.spacing.paragraphMaxSize, mt: 0.5 }}
+                    <AnimatePresence initial={false}>
+                      {!isHeroCollapsed && (
+                        <motion.div
+                          key="inquiry"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{
+                            duration: duration.standard,
+                            ease: [0.4, 0, 0.2, 1],
+                          }}
+                          style={{ overflow: "hidden" }}
                         >
-                          {theme.inquiry}
-                        </Typography>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Box>
+                          <Typography
+                            variant="body1"
+                            sx={{ maxWidth: themeValues.spacing.paragraphMaxSize, mt: 0.5 }}
+                          >
+                            {theme.inquiry}
+                          </Typography>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Box>
+                )}
               </motion.div>
 
               {/* Horizontal Scroll Tab Index */}
               <Box
+                ref={tabBarRef}
                 component="nav"
                 role="tablist"
                 aria-label="Index for the theme sections"
                 sx={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: muiTheme.zIndex.appBar,
-                  flexShrink: 0,
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-evenly",
+                  justifyContent: isMobile ? "flex-start" : "space-evenly",
                   width: "100%",
                   height: muiTheme.layout.collapsedTabHeight,
-                  ...muiTheme.typography.nav,
                   background: muiTheme.palette.brand.panelMedium,
-                  lineHeight: 1,
                   overflowX: "auto",
+                  // Hide the scrollbar visually but keep it functional.
+                  // scrollbarWidth targets Firefox; ::-webkit-scrollbar targets Chrome/Safari.
                   scrollbarWidth: "none",
+                  "&::-webkit-scrollbar": { display: "none" },
+                  px: isMobile ? 1 : 0,
+                  gap: isMobile ? 0.5 : 0,
+                  // Prevent tab bar from being taller than its declared height
+                  flexShrink: 0,
                 }}
               >
                 {theme.sections
@@ -362,21 +426,29 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                       <Box
                         key={section.id}
                         component="button"
+                        data-section-id={section.id}
                         onClick={() => scrollToSection(section.id)}
                         aria-pressed={isActive}
                         aria-label={SECTION_LABELS[section.id]?.long}
                         sx={{
                           display: "inline-flex",
                           alignItems: "center",
-                          px: 1.25,
+                          flexShrink: 0,
+                          px: isMobile ? 1 : 1.25,
                           py: 0.5,
                           border: "none",
+                          minHeight: muiTheme.layout.collapsedTabHeight,
                           borderRadius: muiTheme.borderRadius.sm ?? "4px",
                           cursor: "pointer",
                           background: "transparent",
                           color: muiTheme.palette.common.white,
                           textShadow: "none",
                           transition: "background-color 0.15s",
+                          // WCAG 2.4.7: focus visible indicator
+                          "&:focus-visible": {
+                            outline: `2px solid ${muiTheme.palette.common.white}`,
+                            outlineOffset: -2,
+                          },
                         }}
                       >
                         <Typography
