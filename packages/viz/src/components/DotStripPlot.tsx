@@ -178,8 +178,7 @@ const DotStripPlot: React.FC<DotStripPlotProps> = ({
         return -spread / 2 + (index / (scenarioCount - 1)) * spread
       }
 
-      const dotRadius =
-        scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
+      const dotRadius = scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
 
       // Baseline diamonds (drawn first, behind scenario dots)
       if (baselineData) {

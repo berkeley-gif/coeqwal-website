@@ -82,7 +82,6 @@ function SectionContentRenderer({ content }: { content: SectionContent }) {
   }
 }
 
-
 /**
  * Tracks whether a scroll container has scrolled past a threshold.
  */
@@ -91,10 +90,10 @@ function useScrollCollapse(
   threshold: number,
   enabled: boolean,
 ): boolean {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   useEffect(() => {
-    // Don't attach the listener if the panel isn't open yet 
+    // Don't attach the listener if the panel isn't open yet
     if (!enabled) {
       // Reset so the hero starts expanded every time the panel opens
       setIsCollapsed(false)
@@ -105,9 +104,11 @@ function useScrollCollapse(
     if (!el) return
 
     const handleScroll = () => {
-      // Only update state when the boolean changes 
+      // Only update state when the boolean changes
       const shouldCollapse = el.scrollTop > threshold
-      setIsCollapsed((prev) => (prev === shouldCollapse ? prev : shouldCollapse))
+      setIsCollapsed((prev) =>
+        prev === shouldCollapse ? prev : shouldCollapse,
+      )
     }
 
     // passive: true, for mobile scroll performance
@@ -122,10 +123,13 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
 
-  const duration = useMemo(() => ({
-    fast: parseFloat(themeValues.transition.fast),
-    standard: parseFloat(themeValues.transition.standard),
-  }), [])
+  const duration = useMemo(
+    () => ({
+      fast: parseFloat(themeValues.transition.fast),
+      standard: parseFloat(themeValues.transition.standard),
+    }),
+    [],
+  )
 
   const isOpen = theme !== null
 
@@ -153,7 +157,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
     const tabBar = tabBarRef.current
     const activeTab = tabBar.querySelector<HTMLElement>(
-      `[data-section-id="${activeSection}"]`
+      `[data-section-id="${activeSection}"]`,
     )
     if (!activeTab) return
 
@@ -228,20 +232,33 @@ export function ThemePanel({ theme }: ThemePanelProps) {
               {/* Hero */}
               <motion.div
                 animate={{
-                  paddingTop: isHeroCollapsed ?
-                    (isMobile ? 8 : 10) :
-                    (isMobile ? 14 : 25),
-                  paddingBottom: isHeroCollapsed ?
-                    (isMobile ? 8 : 10) :
-                    (isMobile ? 14 : 25),
+                  paddingTop: isHeroCollapsed
+                    ? isMobile
+                      ? 8
+                      : 10
+                    : isMobile
+                      ? 14
+                      : 25,
+                  paddingBottom: isHeroCollapsed
+                    ? isMobile
+                      ? 8
+                      : 10
+                    : isMobile
+                      ? 14
+                      : 25,
                 }}
-                transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
+                transition={{
+                  duration: duration.standard,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
                 style={{
                   display: "flex",
                   position: "relative",
                   flexDirection: isMobile ? "column" : "row",
                   alignItems: isMobile ? "flex-start" : "center",
-                  gap: isMobile ? muiTheme.spacing(1) : muiTheme.space.listGap.lg,
+                  gap: isMobile
+                    ? muiTheme.spacing(1)
+                    : muiTheme.space.listGap.lg,
                   overflow: "hidden",
                   backgroundColor: muiTheme.palette.grey[200],
                   paddingLeft: muiTheme.space.panel.padding,
@@ -263,7 +280,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                       height: "100%",
                       objectFit: "cover",
                       display: "block",
-                      filter: isHeroCollapsed ? "brightness(0.4)" : "brightness(0.6)",
+                      filter: isHeroCollapsed
+                        ? "brightness(0.4)"
+                        : "brightness(0.6)",
                       zIndex: muiTheme.zIndex.heroBackground,
                     }}
                   />
@@ -294,9 +313,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   />
 
                   {/*
-                 * Mobile-only title — always shows the compact h5 variant.
-                 * Desktop has the animated h3 - h5 collapse below.
-                 */}
+                   * Mobile-only title — always shows the compact h5 variant.
+                   * Desktop has the animated h3 - h5 collapse below.
+                   */}
 
                   {isMobile && (
                     <Typography
@@ -367,12 +386,18 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: "auto", opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: duration.standard, ease: [0.4, 0, 0.2, 1] }}
+                          transition={{
+                            duration: duration.standard,
+                            ease: [0.4, 0, 0.2, 1],
+                          }}
                           style={{ overflow: "hidden" }}
                         >
                           <Typography
                             variant="body1"
-                            sx={{ maxWidth: themeValues.spacing.paragraphMaxSize, mt: 0.5 }}
+                            sx={{
+                              maxWidth: themeValues.spacing.paragraphMaxSize,
+                              mt: 0.5,
+                            }}
                           >
                             {theme.inquiry}
                           </Typography>
@@ -506,8 +531,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
             </Box>
           </motion.div>
         </>
-      )
-      }
-    </AnimatePresence >
+      )}
+    </AnimatePresence>
   )
 }

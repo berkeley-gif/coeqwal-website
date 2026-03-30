@@ -209,9 +209,7 @@ const BaselineScatter: React.FC<BaselineScatterProps> = ({
         .attr("text-anchor", "middle")
         .attr("font-size", 12)
         .attr("fill", "#666")
-        .text(
-          "\u2190 Worse \u00b7 Scenario Performance \u00b7 Better \u2192",
-        )
+        .text("\u2190 Worse \u00b7 Scenario Performance \u00b7 Better \u2192")
 
       // ── Opacity logic ───────────────────────────────────────────────
       const getOpacity = (id: string) => {
@@ -224,8 +222,7 @@ const BaselineScatter: React.FC<BaselineScatterProps> = ({
         return 0.7
       }
 
-      const baseRadius =
-        data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+      const baseRadius = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
 
       const T_DUR = 600
 
@@ -261,10 +258,7 @@ const BaselineScatter: React.FC<BaselineScatterProps> = ({
           if (!hull) return
           hullG
             .append("path")
-            .attr(
-              "d",
-              `M${hull.map((p) => p.join(",")).join("L")}Z`,
-            )
+            .attr("d", `M${hull.map((p) => p.join(",")).join("L")}Z`)
             .attr("fill", themeColorScale(theme))
             .attr("fill-opacity", 0)
             .attr("stroke", themeColorScale(theme))
@@ -346,12 +340,9 @@ const BaselineScatter: React.FC<BaselineScatterProps> = ({
             .attr("stroke-width", 1.5)
             .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
             .attr("cursor", "pointer")
+          dot.transition().duration(T_DUR).attr("cy", cy).attr("r", baseRadius)
           dot
-            .transition()
-            .duration(T_DUR)
-            .attr("cy", cy)
-            .attr("r", baseRadius)
-          dot.on("mouseenter", function (event: MouseEvent) {
+            .on("mouseenter", function (event: MouseEvent) {
               d3.select(this)
                 .attr("r", baseRadius + 3)
                 .attr("fill-opacity", 1)
@@ -435,10 +426,8 @@ const BaselineScatter: React.FC<BaselineScatterProps> = ({
               const ay1 = a.cy + a.dy - LABEL_H - PAD
               const bx1 = b.cx + b.dx - PAD
               const by1 = b.cy + b.dy - LABEL_H - PAD
-              const overlapX =
-                Math.min(ax1 + aw, bx1 + bw) - Math.max(ax1, bx1)
-              const overlapY =
-                Math.min(ay1 + ah, by1 + bh) - Math.max(ay1, by1)
+              const overlapX = Math.min(ax1 + aw, bx1 + bw) - Math.max(ax1, bx1)
+              const overlapY = Math.min(ay1 + ah, by1 + bh) - Math.max(ay1, by1)
               if (overlapX <= 0 || overlapY <= 0) continue
               anyOverlap = true
               if (overlapX < overlapY) {

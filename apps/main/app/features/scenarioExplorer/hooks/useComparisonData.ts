@@ -179,13 +179,13 @@ export function useComparisonData() {
         const score = scores[code]
         if (!score) return
         let tierLevel: number
-        if (raw?.tiers[code]?.type === "single_value" && raw.tiers[code].level) {
+        if (
+          raw?.tiers[code]?.type === "single_value" &&
+          raw.tiers[code].level
+        ) {
           tierLevel = raw.tiers[code].level!
         } else {
-          tierLevel = Math.min(
-            4,
-            Math.max(1, Math.round(score.weighted_score)),
-          )
+          tierLevel = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
         }
         cells.push({
           scenarioId,
@@ -332,7 +332,10 @@ export function useComparisonData() {
         .map(({ id, name, color }) => {
           const score = allScoreData[id]?.[outcomeCode]
           if (!score) return null
-          const tier = Math.min(4, Math.max(1, Math.round(score.weighted_score)))
+          const tier = Math.min(
+            4,
+            Math.max(1, Math.round(score.weighted_score)),
+          )
           const tierKey = `tier${tier}`
           return {
             scenarioId: id,
@@ -347,7 +350,11 @@ export function useComparisonData() {
 
   // Groups for the grouped Sankey layout (one group per outcome)
   const sankeyGroups = useMemo<TierSankeyGroup[]>(
-    () => OUTCOME_CODE_ORDER.map((code) => ({ key: code, label: getOutcomeName(code) })),
+    () =>
+      OUTCOME_CODE_ORDER.map((code) => ({
+        key: code,
+        label: getOutcomeName(code),
+      })),
     [],
   )
 

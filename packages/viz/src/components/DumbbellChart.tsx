@@ -171,8 +171,7 @@ const DumbbellChart: React.FC<DumbbellChartProps> = ({
         }
       })
 
-      const dotRadius =
-        scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
+      const dotRadius = scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
 
       const diamond = d3
         .symbol()

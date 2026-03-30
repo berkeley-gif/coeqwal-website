@@ -31,7 +31,10 @@ import {
   type AxisLayout,
 } from "@repo/viz"
 import { InfoIconButton, InfoTooltip } from "@repo/ui"
-import { useComparisonData, SANKEY_ALL_OUTCOMES } from "../hooks/useComparisonData"
+import {
+  useComparisonData,
+  SANKEY_ALL_OUTCOMES,
+} from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import ScenarioSelectionSidebar from "../components/ScenarioSelectionSidebar"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -236,7 +239,10 @@ export default function ComparisonPanel() {
   // Sankey: default to "All Outcomes"; individual outcomes also valid
   const effectiveSankeyOutcome = useMemo(() => {
     if (sankeyOutcome === SANKEY_ALL_OUTCOMES) return SANKEY_ALL_OUTCOMES
-    if (sankeyOutcome && multiValueOutcomeCodes.includes(sankeyOutcome as never))
+    if (
+      sankeyOutcome &&
+      multiValueOutcomeCodes.includes(sankeyOutcome as never)
+    )
       return sankeyOutcome
     return SANKEY_ALL_OUTCOMES
   }, [sankeyOutcome, multiValueOutcomeCodes])
@@ -246,7 +252,12 @@ export default function ComparisonPanel() {
       sankeyShowDistribution
         ? getAllSankeyData(effectiveSankeyOutcome)
         : getWeightedSankeyData(effectiveSankeyOutcome),
-    [getAllSankeyData, getWeightedSankeyData, effectiveSankeyOutcome, sankeyShowDistribution],
+    [
+      getAllSankeyData,
+      getWeightedSankeyData,
+      effectiveSankeyOutcome,
+      sankeyShowDistribution,
+    ],
   )
 
   // Transform data to be relative to baseline when toggle is on.
@@ -293,7 +304,9 @@ export default function ComparisonPanel() {
     (filteredOutIds: string[]) => {
       if (filteredOutIds.length === 0) return
       const filteredOutSet = new Set(filteredOutIds)
-      const remaining = selectedScenarios.filter((id) => !filteredOutSet.has(id))
+      const remaining = selectedScenarios.filter(
+        (id) => !filteredOutSet.has(id),
+      )
       if (remaining.length !== selectedScenarios.length) {
         selectScenarios(remaining)
       }
@@ -410,7 +423,11 @@ export default function ComparisonPanel() {
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>connect lines</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                connect lines
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
@@ -422,7 +439,11 @@ export default function ComparisonPanel() {
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>outcome labels</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                outcome labels
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
@@ -434,7 +455,11 @@ export default function ComparisonPanel() {
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>spread dots</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                spread dots
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
           <FormControlLabel
@@ -446,14 +471,28 @@ export default function ComparisonPanel() {
                 sx={checkboxSx}
               />
             }
-            label={<Typography variant="compactCaption" sx={{ ml: 0.5 }}>theme grouping</Typography>}
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                theme grouping
+              </Typography>
+            }
             sx={{ mr: 1.5 }}
           />
         </Box>
       )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <Typography variant="compactCaption" sx={{ color: theme.palette.grey[600] }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            variant="compactCaption"
+            sx={{ color: theme.palette.grey[600] }}
+          >
             Outcome:
           </Typography>
           <Box
@@ -644,9 +683,7 @@ export default function ComparisonPanel() {
           hideAxisLabels={true}
           onAxesLayout={setAxisLayout}
           margin={
-            isDesktop
-              ? { top: 80, right: 20, bottom: 20, left: 20 }
-              : undefined
+            isDesktop ? { top: 80, right: 20, bottom: 20, left: 20 } : undefined
           }
           showBaseline={highlightBaseline}
           baselineData={baselineDataForChart}
@@ -715,9 +752,7 @@ export default function ComparisonPanel() {
           lineColors={heatmapLineColors}
           onCellHover={(cell) => {
             if (cell) {
-              const found = comparisonData.find(
-                (d) => d.id === cell.scenarioId,
-              )
+              const found = comparisonData.find((d) => d.id === cell.scenarioId)
               setHoveredScenario(found ?? null)
             } else {
               setHoveredScenario(null)
@@ -732,9 +767,17 @@ export default function ComparisonPanel() {
       {chartMode === "sankey" && (
         <TierSankey
           data={sankeyData}
-          outcomeName={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? "All Outcomes" : getOutcomeName(effectiveSankeyOutcome)}
+          outcomeName={
+            effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES
+              ? "All Outcomes"
+              : getOutcomeName(effectiveSankeyOutcome)
+          }
           tierColors={theme.palette.tiers}
-          groups={effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES ? sankeyGroups : undefined}
+          groups={
+            effectiveSankeyOutcome === SANKEY_ALL_OUTCOMES
+              ? sankeyGroups
+              : undefined
+          }
           responsive
           onScenarioHover={(id) => {
             if (id) {
@@ -756,7 +799,6 @@ export default function ComparisonPanel() {
           highlightedIds={highlightedIds}
         />
       )}
-
     </Box>
   )
 

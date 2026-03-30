@@ -264,10 +264,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
           fillG
             .append("path")
             .attr("d", path + "Z")
-            .attr(
-              "fill",
-              seg.improving ? IMPROVE_COLOR : DECLINE_COLOR,
-            )
+            .attr("fill", seg.improving ? IMPROVE_COLOR : DECLINE_COLOR)
             .attr("fill-opacity", opacity * 0.22)
             .attr("stroke", "none")
         })
@@ -361,10 +358,7 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = ({
         const diamond = d3.symbol().type(d3.symbolDiamond).size(50)
         g.append("path")
           .attr("d", diamond()!)
-          .attr(
-            "transform",
-            `translate(${axisXPositions[i]},${yScale(v)})`,
-          )
+          .attr("transform", `translate(${axisXPositions[i]},${yScale(v)})`)
           .attr("fill", BASELINE_COLOR)
           .attr("fill-opacity", 0.9)
           .attr("stroke", "#A08520")

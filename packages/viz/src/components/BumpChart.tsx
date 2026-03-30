@@ -101,10 +101,7 @@ const BumpChart: React.FC<BumpChartProps> = ({
         .range([0, innerW])
         .padding(0.3)
 
-      const yScale = d3
-        .scaleLinear()
-        .domain([1, maxRank])
-        .range([0, innerH])
+      const yScale = d3.scaleLinear().domain([1, maxRank]).range([0, innerH])
 
       // Gridlines
       for (let rank = 1; rank <= maxRank; rank++) {
@@ -220,9 +217,7 @@ const BumpChart: React.FC<BumpChartProps> = ({
               onScenarioHoverRef.current?.(scenario.id)
             })
             .on("mouseleave", function () {
-              d3.select(this)
-                .attr("r", dotRadius)
-                .attr("fill-opacity", opacity)
+              d3.select(this).attr("r", dotRadius).attr("fill-opacity", opacity)
               setTooltip(null)
               onScenarioHoverRef.current?.(null)
             })

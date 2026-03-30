@@ -185,9 +185,7 @@ const TierHeatmap: React.FC<TierHeatmapProps> = ({
       })
 
       // Y-axis: scenario names with optional color indicator
-      const yAxis = g
-        .append("g")
-        .attr("class", "y-axis")
+      const yAxis = g.append("g").attr("class", "y-axis")
 
       scenarioNames.forEach((sName, si) => {
         const y = (yScale(sName) ?? 0) + yScale.bandwidth() / 2
@@ -213,9 +211,7 @@ const TierHeatmap: React.FC<TierHeatmapProps> = ({
       })
 
       // X-axis: outcome names (rotated)
-      const xAxis = g
-        .append("g")
-        .attr("transform", `translate(0,${innerH})`)
+      const xAxis = g.append("g").attr("transform", `translate(0,${innerH})`)
 
       outcomeNames.forEach((oName) => {
         const x = (xScale(oName) ?? 0) + xScale.bandwidth() / 2

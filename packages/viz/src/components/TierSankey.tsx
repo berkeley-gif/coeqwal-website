@@ -192,11 +192,12 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         )
         const activeWithinGroupCount = activeKeys.length
         const groupGapCount = Math.max(activeGroups.length - 1, 0)
-        const withinGroupGapCount = Math.max(activeWithinGroupCount - activeGroups.length, 0)
+        const withinGroupGapCount = Math.max(
+          activeWithinGroupCount - activeGroups.length,
+          0,
+        )
         const tierAvailH =
-          innerH -
-          GROUP_PAD * groupGapCount -
-          TIER_PAD * withinGroupGapCount
+          innerH - GROUP_PAD * groupGapCount - TIER_PAD * withinGroupGapCount
         tierPxPerUnit = tierAvailH / grandTotal
 
         let cumRightY = 0
@@ -225,8 +226,7 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         }
       } else {
         const activeTierCount = activeKeys.length
-        const tierAvailH =
-          innerH - TIER_PAD * Math.max(activeTierCount - 1, 0)
+        const tierAvailH = innerH - TIER_PAD * Math.max(activeTierCount - 1, 0)
         tierPxPerUnit = tierAvailH / grandTotal
 
         let cumRightY = 0
@@ -274,7 +274,9 @@ const TierSankey: React.FC<TierSankeyProps> = ({
           if (flow.value === 0 || !rightNodes[flow.tier]) continue
 
           const tierKey = flow.tier
-          const baseTier = tierKey.includes(":") ? tierKey.split(":")[1]! : tierKey
+          const baseTier = tierKey.includes(":")
+            ? tierKey.split(":")[1]!
+            : tierKey
 
           const flowH = flow.value * pxPerUnit
           const srcY0 = scenarioFillY[si] ?? 0
@@ -291,15 +293,22 @@ const TierSankey: React.FC<TierSankeyProps> = ({
           path.moveTo(leftX + NODE_WIDTH, srcY0)
           path.bezierCurveTo(midX, srcY0, midX, tgtY0, rightX, tgtY0)
           path.lineTo(rightX, tgtY1)
-          path.bezierCurveTo(midX, tgtY1, midX, srcY1, leftX + NODE_WIDTH, srcY1)
+          path.bezierCurveTo(
+            midX,
+            tgtY1,
+            midX,
+            srcY1,
+            leftX + NODE_WIDTH,
+            srcY1,
+          )
           path.closePath()
 
           const groupLabel = isGrouped
             ? groups.find((grp) => tierKey.startsWith(grp.key + ":"))?.label
             : undefined
           const tierLabel = isGrouped
-            ? TIER_LABELS[baseTier] ?? baseTier
-            : TIER_LABELS_FULL[baseTier] ?? baseTier
+            ? (TIER_LABELS[baseTier] ?? baseTier)
+            : (TIER_LABELS_FULL[baseTier] ?? baseTier)
           const tooltipTier = groupLabel
             ? `${groupLabel} ${tierLabel}`
             : tierLabel
@@ -311,7 +320,10 @@ const TierSankey: React.FC<TierSankeyProps> = ({
             .attr("stroke", "none")
             .attr("cursor", "pointer")
             .on("mouseenter", function (event: MouseEvent) {
-              d3.select(this).attr("fill-opacity", Math.min(opacity + 0.3, 0.85))
+              d3.select(this).attr(
+                "fill-opacity",
+                Math.min(opacity + 0.3, 0.85),
+              )
               const rect = containerRef.current?.getBoundingClientRect()
               if (rect) {
                 setTooltip({
@@ -436,7 +448,16 @@ const TierSankey: React.FC<TierSankeyProps> = ({
         .attr("fill", "#888")
         .text(outcomeName)
     },
-    [data, outcomeName, highlightedIds, chosenIds, tierColors, groups, MARGIN.left, MARGIN.right],
+    [
+      data,
+      outcomeName,
+      highlightedIds,
+      chosenIds,
+      tierColors,
+      groups,
+      MARGIN.left,
+      MARGIN.right,
+    ],
   )
 
   useEffect(() => {

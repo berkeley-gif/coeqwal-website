@@ -102,7 +102,12 @@ export function CenteredTextSection({
             textAlign: "center",
           }}
         >
-          <Typography variant="body1" sx={{ maxSize: themeValues.spacing.paragraphMaxSize }}>{text}</Typography>
+          <Typography
+            variant="body1"
+            sx={{ maxSize: themeValues.spacing.paragraphMaxSize }}
+          >
+            {text}
+          </Typography>
         </Box>
       )}
     </Box>

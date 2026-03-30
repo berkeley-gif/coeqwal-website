@@ -172,8 +172,7 @@ const DivergingLollipop: React.FC<DivergingLollipopProps> = ({
         }
       })
 
-      const headRadius =
-        scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
+      const headRadius = scenarioCount > 15 ? 3 : scenarioCount > 8 ? 3.5 : 4.5
 
       // Draw per-outcome: baseline anchor, then stems and heads
       axes.forEach((axis) => {

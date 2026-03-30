@@ -196,8 +196,7 @@ const ArrowFieldPlot: React.FC<ArrowFieldPlotProps> = ({
         }
       })
 
-      const arrowHeadSize =
-        scenarioCount > 15 ? 4 : scenarioCount > 8 ? 5 : 6
+      const arrowHeadSize = scenarioCount > 15 ? 4 : scenarioCount > 8 ? 5 : 6
 
       // Draw arrows per outcome
       axes.forEach((axis) => {
@@ -337,8 +336,7 @@ const ArrowFieldPlot: React.FC<ArrowFieldPlotProps> = ({
             {tooltip.outcomeName} &mdash;{" "}
             <span
               style={{
-                color:
-                  tooltip.direction === "improves" ? "#4caf50" : "#ef5350",
+                color: tooltip.direction === "improves" ? "#4caf50" : "#ef5350",
               }}
             >
               {tooltip.direction}
