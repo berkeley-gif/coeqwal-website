@@ -9,7 +9,7 @@ import {
   Box,
   OpacityIcon,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
@@ -48,7 +48,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 variant="body1"
                 key={i}
                 sx={{
-                  maxWidth: themeValues.spacing.paragraphMaxSize
+                  maxWidth: themeValues.spacing.paragraphMaxSize,
                 }}
               >
                 {parseBoldText(block.text)}
@@ -56,22 +56,25 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             )
           case "list":
             return (
-              <List key={i}
+              <List
+                key={i}
                 sx={{
                   // Remove default list padding — the Panel component
                   // already owns horizontal spacing
                   px: 0,
                   // Tighter vertical padding on mobile
                   py: isMobile ? 0 : 1,
-                }}>
+                }}
+              >
                 {block.items.map((item, j) => (
                   <ListItem
                     sx={{
-                      // Reduce horizontal padding on mobile 
+                      // Reduce horizontal padding on mobile
                       px: isMobile ? 0 : 1,
                       alignItems: "flex-start",
                     }}
-                    key={j}>
+                    key={j}
+                  >
                     <ListItemIcon
                       sx={{
                         color: muiTheme.palette.blue.darkest,
@@ -97,7 +100,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                             ...muiTheme.typography.body1,
                             maxWidth: themeValues.spacing.paragraphMaxSize,
                           },
-                        }
+                        },
                       }}
                       primary={parseBoldText(item)}
                     />

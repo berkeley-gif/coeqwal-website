@@ -123,10 +123,13 @@ export function ThemePanel({ theme }: ThemePanelProps) {
   const { closeThemePanel } = usePanelRoute()
   const muiTheme = useTheme()
 
-  const duration = useMemo(() => ({
-    fast: parseFloat(themeValues.transition.fast),
-    standard: parseFloat(themeValues.transition.standard),
-  }), [])
+  const duration = useMemo(
+    () => ({
+      fast: parseFloat(themeValues.transition.fast),
+      standard: parseFloat(themeValues.transition.standard),
+    }),
+    [],
+  )
 
   const isOpen = theme !== null
 
@@ -154,7 +157,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
 
     const tabBar = tabBarRef.current
     const activeTab = tabBar.querySelector<HTMLElement>(
-      `[data-section-id="${activeSection}"]`
+      `[data-section-id="${activeSection}"]`,
     )
     if (!activeTab) return
 
@@ -229,12 +232,20 @@ export function ThemePanel({ theme }: ThemePanelProps) {
               {/* Hero */}
               <motion.div
                 animate={{
-                  paddingTop: isHeroCollapsed ?
-                    (isMobile ? 8 : 10) :
-                    (isMobile ? 14 : 25),
-                  paddingBottom: isHeroCollapsed ?
-                    (isMobile ? 8 : 10) :
-                    (isMobile ? 14 : 25),
+                  paddingTop: isHeroCollapsed
+                    ? isMobile
+                      ? 8
+                      : 10
+                    : isMobile
+                      ? 14
+                      : 25,
+                  paddingBottom: isHeroCollapsed
+                    ? isMobile
+                      ? 8
+                      : 10
+                    : isMobile
+                      ? 14
+                      : 25,
                 }}
                 transition={{
                   duration: duration.standard,
@@ -245,7 +256,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   position: "relative",
                   flexDirection: isMobile ? "column" : "row",
                   alignItems: isMobile ? "flex-start" : "center",
-                  gap: isMobile ? muiTheme.spacing(1) : muiTheme.space.listGap.lg,
+                  gap: isMobile
+                    ? muiTheme.spacing(1)
+                    : muiTheme.space.listGap.lg,
                   overflow: "hidden",
                   backgroundColor: muiTheme.palette.grey[200],
                   paddingLeft: muiTheme.space.panel.padding,
@@ -300,9 +313,9 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   />
 
                   {/*
-                 * Mobile-only title — always shows the compact h5 variant.
-                 * Desktop has the animated h3 - h5 collapse below.
-                 */}
+                   * Mobile-only title — always shows the compact h5 variant.
+                   * Desktop has the animated h3 - h5 collapse below.
+                   */}
 
                   {isMobile && (
                     <Typography
@@ -381,7 +394,10 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                         >
                           <Typography
                             variant="body1"
-                            sx={{ maxWidth: themeValues.spacing.paragraphMaxSize, mt: 0.5 }}
+                            sx={{
+                              maxWidth: themeValues.spacing.paragraphMaxSize,
+                              mt: 0.5,
+                            }}
                           >
                             {theme.inquiry}
                           </Typography>
