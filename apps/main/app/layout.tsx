@@ -31,7 +31,6 @@ export default function RootLayout({
           <TranslationProvider initialLocale="en">
             <DataProvider>
               <ThemeRegistry>
-
                 <Suspense fallback={null}>
                   <ActiveThemePanel />
                 </Suspense>

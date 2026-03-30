@@ -623,7 +623,7 @@ export const themeValues = {
       padding: "clamp(28px, 3.5vw, 44px)",
     },
 
-    paragraphMaxSize: "70ch"
+    paragraphMaxSize: "70ch",
   },
 
   /* --------------------------------------------------------

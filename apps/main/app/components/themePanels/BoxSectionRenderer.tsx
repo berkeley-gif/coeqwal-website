@@ -29,7 +29,7 @@ export function BoxSectionRenderer({ content }: { content: BoxSection }) {
           variants={fadeInRight}
           sx={{
             display: "flex",
-            // Stack title above content on mobile 
+            // Stack title above content on mobile
             flexDirection: isMobile ? "column" : "row",
             boxShadow: muiTheme.shadow.lg,
             gap: isMobile
