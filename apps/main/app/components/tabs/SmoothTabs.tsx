@@ -8,7 +8,6 @@ import { TwoColumnInterstitial } from "@repo/ui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
-import { usePanelRoute } from "../../hooks/usePanelRoute"
 import { smoothScrollToCenter } from "../../utils/smoothScrollToCenter"
 
 /** Renders the active tab's description panel content */
@@ -19,8 +18,6 @@ function TabDescription({
   tab: TabKey
   onScrollPromptClick: () => void
 }) {
-  const { openThemePanel } = usePanelRoute()
-
   switch (tab) {
     case "learn":
       return (
