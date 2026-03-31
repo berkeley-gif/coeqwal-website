@@ -8,11 +8,13 @@ import {
   ListItemIcon,
   Box,
   OpacityIcon,
+  useMediaQuery,
+  useTheme,
 } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
-import { useTheme } from "@repo/ui/mui"
 import { fadeInRight } from "../../lib/constants/motionAnimations"
 import type { MixedSection } from "../../content/themes"
+import { themeValues } from "@repo/ui/themes/theme"
 
 function parseBoldText(text: string): React.ReactNode {
   const parts = text.split(/\*\*(.*?)\*\*/g)
@@ -23,6 +25,7 @@ function parseBoldText(text: string): React.ReactNode {
 
 export function MixedSectionRenderer({ content }: { content: MixedSection }) {
   const muiTheme = useTheme()
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down("sm"))
 
   return (
     <Box
@@ -45,7 +48,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 variant="body1"
                 key={i}
                 sx={{
-                  maxWidth: "70ch",
+                  maxWidth: themeValues.spacing.paragraphMaxSize,
                 }}
               >
                 {parseBoldText(block.text)}
@@ -53,19 +56,47 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             )
           case "list":
             return (
-              <List key={i}>
+              <List
+                key={i}
+                sx={{
+                  // Remove default list padding — the Panel component
+                  // already owns horizontal spacing
+                  px: 0,
+                  // Tighter vertical padding on mobile
+                  py: isMobile ? 0 : 1,
+                }}
+              >
                 {block.items.map((item, j) => (
-                  <ListItem key={j}>
+                  <ListItem
+                    sx={{
+                      // Reduce horizontal padding on mobile
+                      px: isMobile ? 0 : 1,
+                      alignItems: "flex-start",
+                    }}
+                    key={j}
+                  >
                     <ListItemIcon
                       sx={{
                         color: muiTheme.palette.blue.darkest,
+                        // Align icon with first line of text, not center of item
+                        mt: "4px",
+                        minWidth: isMobile ? "32px" : "40px",
                       }}
                     >
-                      <OpacityIcon />
+                      <OpacityIcon
+                        sx={{ fontSize: isMobile ? "1rem" : "1.25rem" }}
+                      />
                     </ListItemIcon>
                     <ListItemText
                       sx={{
-                        maxWidth: "65ch",
+                        maxWidth: themeValues.spacing.paragraphMaxSize,
+                      }}
+                      slotProps={{
+                        primary: {
+                          sx: {
+                            maxWidth: themeValues.spacing.paragraphMaxSize,
+                          },
+                        },
                       }}
                       primary={parseBoldText(item)}
                     />
@@ -75,10 +106,14 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
             )
           case "image":
             return (
-              <figure
+              <Box
                 key={i}
-                style={{
-                  margin: "30px",
+                component="figure"
+                sx={{
+                  margin: 0,
+                  // Tighter margin on mobile — avoids competing with Panel padding
+                  mx: isMobile ? 0 : "30px",
+                  my: isMobile ? "16px" : "30px",
                   display: "flex",
                   alignItems: "center",
                   flexDirection: "column",
@@ -94,17 +129,30 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                   alt={block.alt}
                   sx={{
                     width: "100%",
-                    maxWidth: "800px",
+                    // On desktop, cap image width so it doesn't stretch too wide
+                    maxWidth: isMobile ? "100%" : "800px",
                     margin: "0 auto",
                     height: "auto",
+                    display: "block",
+                    borderRadius: muiTheme.borderRadius.md,
                   }}
                 />
                 {block.caption && (
-                  <figcaption style={{ marginTop: 8, fontSize: "0.85em" }}>
+                  <Typography
+                    component="figcaption"
+                    variant="caption"
+                    sx={{
+                      mt: 1,
+                      color: muiTheme.palette.grey[600],
+                      textAlign: "center",
+                      // Match image width constraint
+                      maxWidth: isMobile ? "100%" : "800px",
+                    }}
+                  >
                     {block.caption}
-                  </figcaption>
+                  </Typography>
                 )}
-              </figure>
+              </Box>
             )
           default: {
             const _exhaustive: never = block

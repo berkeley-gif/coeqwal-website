@@ -22,7 +22,6 @@ import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
 import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
-import { ActiveThemePanel } from "./components/ActiveThemePanel"
 
 export default function Home() {
   return (
@@ -34,7 +33,6 @@ export default function Home() {
           Tab order: Skip Link > Header nav > Map controls > Main content */}
       <Suspense fallback={null}>
         <Header />
-        <ActiveThemePanel />
       </Suspense>
 
       {/* DynamicMap - renders once, stays mounted across tab switches */}
