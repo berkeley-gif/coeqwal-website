@@ -60,19 +60,30 @@ function ShareTab({
         },
       }}
     >
-      <icons.IosShare sx={{ fontSize: "1rem" }} />
-      <Typography
+      <icons.IosShare sx={{ fontSize: "0.875rem" }} />
+      <Box
         sx={{
-          writingMode: "vertical-rl",
-          textOrientation: "mixed",
-          fontSize: "0.6875rem",
-          fontWeight: 600,
-          letterSpacing: "0.05em",
-          lineHeight: 1,
+          width: TAB_WIDTH,
+          height: 34,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
         }}
       >
-        Share
-      </Typography>
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            fontWeight: 600,
+            letterSpacing: "0.05em",
+            lineHeight: 1,
+            transform: "rotate(-90deg)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Share
+        </Typography>
+      </Box>
       {count > 0 && (
         <Box
           sx={{
