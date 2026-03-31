@@ -16,7 +16,7 @@ import type { ScenarioTheme } from "../../content/scenarios"
 /**
  * The current tool within the explorer view.
  */
-export type ExploreMode = "list" | "comparison" | "equity" | "resilience"
+export type ExploreMode = "list" | "comparison" | "equity" | "resilience" | "data"
 
 /**
  * The main view within the Explore section.

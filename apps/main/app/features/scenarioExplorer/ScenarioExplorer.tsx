@@ -29,6 +29,7 @@ import ShareDrawer from "./components/ShareDrawer"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
 import ListView from "./exploreView/ListView"
+import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore, type MainView } from "./store"
 import { useMapMode } from "../map/store"
 
@@ -201,6 +202,7 @@ export default function ScenarioExplorer() {
                   )}
                   {exploreMode === "equity" && <EquityPanel />}
                   {exploreMode === "resilience" && <ResiliencePanel />}
+                  {exploreMode === "data" && <DataExplorerView />}
                 </UnifiedToolLayout>
               </Box>
             </>
@@ -209,7 +211,7 @@ export default function ScenarioExplorer() {
       </Box>
 
       <KeyboardShortcuts />
-      <ShareDrawer />
+      {mainView === "explorer" && <ShareDrawer />}
     </Box>
   )
 }

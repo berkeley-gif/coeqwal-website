@@ -18,6 +18,7 @@ import {
   CompareArrowsIcon,
   AppsIcon,
   AutorenewIcon,
+  InsightsIcon,
   Switch,
 } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
@@ -44,6 +45,11 @@ const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
       mode: "resilience",
       icon: <AutorenewIcon sx={{ fontSize: "1.1rem" }} />,
       label: "Resilience",
+    },
+    {
+      mode: "data",
+      icon: <InsightsIcon sx={{ fontSize: "1.1rem" }} />,
+      label: "Data in depth",
     },
   ]
 
