@@ -57,6 +57,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   compact = false,
   renderMode = "all",
   showOperations = true,
+  outcomesOnly = false,
   sortBy,
   sortDirection = "asc",
   onSortChange,
@@ -146,17 +147,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
            * - sm (600-1399px): 4 columns (checkbox + scenario + operations + empty), outcomes wrap below
            * - 1400px+: Full 4 columns with outcomes inline
            */
-          gridTemplateColumns: {
-            xs: theme.scenarios.grid.columns.xs,
-            sm: showOperations
-              ? theme.scenarios.grid.columns.sm
-              : "32px minmax(0, 1fr) 0fr 1fr",
-          },
-          [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
-            gridTemplateColumns: showOperations
-              ? theme.scenarios.grid.columns.full
-              : "32px 0.382fr 0fr 1fr",
-          },
+          gridTemplateColumns: outcomesOnly
+            ? "1fr"
+            : {
+                xs: theme.scenarios.grid.columns.xs,
+                sm: showOperations
+                  ? theme.scenarios.grid.columns.sm
+                  : "32px minmax(0, 1fr) 0fr 1fr",
+              },
+          ...(!outcomesOnly && {
+            [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
+              gridTemplateColumns: showOperations
+                ? theme.scenarios.grid.columns.full
+                : "32px 0.382fr 0fr 1fr",
+            },
+          }),
           /**
            * Grid gap configuration:
            * - rowGap: Varies by mode (compact uses larger gap between rows)
@@ -185,6 +190,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
+            outcomesOnly={outcomesOnly}
             activeTooltip={activeTooltip}
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}
@@ -215,6 +221,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
+            outcomesOnly={outcomesOnly}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
             selectedOutcomes={selectedOutcomes}

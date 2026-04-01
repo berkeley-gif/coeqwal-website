@@ -31,6 +31,7 @@ import {
   StrategyHeader,
   OperationsIconGroup,
 } from "../../scenarios/components/shared"
+import { useScrollSyncRef } from "./useScrollSync"
 const PRIMARY_BASELINE_ID = "s0020"
 
 interface ScenarioSelectionSidebarProps {
@@ -45,6 +46,7 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
+  const sidebarScrollRef = useScrollSyncRef("sidebar")
 
   const {
     selectedScenarios,
@@ -140,7 +142,7 @@ export default function ScenarioSelectionSidebar({
           variant="subtitle2"
           sx={{ color: theme.palette.grey[900], fontWeight: 500 }}
         >
-          Choose scenarios
+          Scenario library
         </Typography>
 
         {showKeyOperations && (
@@ -236,6 +238,7 @@ export default function ScenarioSelectionSidebar({
 
       {/* ── Scrollable scenario list ─────────────────────────────────────── */}
       <Box
+        ref={sidebarScrollRef}
         sx={{
           flex: 1,
           minHeight: 0,

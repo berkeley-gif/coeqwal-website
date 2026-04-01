@@ -54,6 +54,8 @@ export interface StrategyGridContentProps {
   layoutMode: LayoutMode
   /** When false, hides the key operations column */
   showOperations?: boolean
+  /** When true, only outcomes are shown (no checkbox, title, or ops columns) */
+  outcomesOnly?: boolean
   /** Outcome names with display info */
   outcomeNames: OutcomeName[]
   /** Get chart data for a scenario */
@@ -113,6 +115,7 @@ export function StrategyGridContent({
   compact,
   layoutMode,
   showOperations = true,
+  outcomesOnly = false,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcomes,
@@ -222,6 +225,7 @@ export function StrategyGridContent({
             compact={compact}
             layoutMode={layoutMode}
             showOperations={showOperations}
+            outcomesOnly={outcomesOnly}
             showAlternativeBaselines={showAlternativeBaselines}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}

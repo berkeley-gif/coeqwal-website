@@ -44,6 +44,8 @@ export interface StrategyGridHeaderProps {
   layoutMode: LayoutMode
   /** When false, hides the key operations column header */
   showOperations?: boolean
+  /** When true, only outcome labels are shown (scenario/ops headers hidden) */
+  outcomesOnly?: boolean
   /** Active tooltip outcome name */
   activeTooltip: string | null
   /** Current sort column */
@@ -80,6 +82,7 @@ export function StrategyGridHeader({
   compact,
   layoutMode,
   showOperations = true,
+  outcomesOnly = false,
   activeTooltip,
   sortBy,
   sortDirection,
@@ -104,6 +107,22 @@ export function StrategyGridHeader({
   // Compact mode uses simplified header
   if (compact) {
     return <CompactHeader controls={controls} />
+  }
+
+  // outcomesOnly: only show outcome category labels, no scenario/ops headers
+  if (outcomesOnly) {
+    return (
+      <OutcomeCategoryLabels
+        outcomeNames={outcomeNames}
+        activeTooltip={activeTooltip}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        sortEnabled={sortEnabled}
+        onTooltipToggle={onTooltipToggle}
+        onSortChange={onSortChange}
+        outcomesOnly
+      />
+    )
   }
 
   // Full mode: 4 columns with outcome labels in header
@@ -347,6 +366,7 @@ interface OutcomeCategoryLabelsProps {
   sortEnabled: boolean
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  outcomesOnly?: boolean
 }
 
 function OutcomeCategoryLabels({
@@ -357,24 +377,23 @@ function OutcomeCategoryLabels({
   sortEnabled,
   onTooltipToggle,
   onSortChange,
+  outcomesOnly = false,
 }: OutcomeCategoryLabelsProps) {
   const theme = useTheme()
 
   return (
     <Box
       sx={{
-        gridColumn: "4",
+        gridColumn: outcomesOnly ? "1 / -1" : "4",
         display: { xs: "none", sm: "grid" },
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
         pb: theme.scenarios.grid.header.categoryLabels,
         pl: theme.scenarios.grid.divider.gap,
-        /**
-         * Divider pull-up: negates the grid row gap (8px)
-         * so the border appears continuous with the header above.
-         */
-        mt: theme.scenarios.grid.divider.pullUp,
-        borderLeft: `1px solid ${theme.palette.grey[300]}`,
+        ...(!outcomesOnly && {
+          mt: theme.scenarios.grid.divider.pullUp,
+          borderLeft: `1px solid ${theme.palette.grey[300]}`,
+        }),
         alignSelf: "stretch",
       }}
     >
