@@ -59,6 +59,8 @@ export interface StrategyGridProps {
   // Badge / icon click-to-select
   /** Select all scenarios sharing a theme when badge is clicked */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Toggle all scenarios in a theme group (select/deselect) */
+  onThemeGroupToggle?: (themeKey: string) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
 }

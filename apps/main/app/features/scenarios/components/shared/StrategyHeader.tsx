@@ -34,6 +34,8 @@ export interface StrategyHeaderProps {
   descriptionMaxWidth?: string | number | object
   /** Called when title is clicked */
   onTitleClick?: () => void
+  /** Whether to show the theme badge (defaults to true) */
+  showThemeBadge?: boolean
   /** Called when the theme badge is clicked — selects all scenarios of that theme */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
 }
@@ -300,11 +302,12 @@ export function StrategyHeader({
   showDescription = true,
   titleVariant = "body2",
   descriptionMaxWidth,
+  showThemeBadge = true,
   onTitleClick,
   onThemeBadgeClick,
 }: StrategyHeaderProps) {
   const theme = useTheme()
-  const showAllThemeBadges = true
+  const showAllThemeBadges = showThemeBadge
   const themeLabel = strategy.theme
     ? THEME_LABEL_CONFIG[strategy.theme]?.label
     : undefined
