@@ -33,6 +33,8 @@ export interface DeviationPlotProps {
   scenarioThemes?: Record<string, string>
   /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
   morphGeneration?: number
+  pinnedScenarioIds?: Set<string>
+  onPinnedToggle?: (scenarioId: string) => void
 }
 
 function toTier(v: number): number {
@@ -230,7 +232,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     morphShowComparison = false,
     scenarioThemes,
     morphGeneration,
+    pinnedScenarioIds: pinnedScenarioIdsProp,
+    onPinnedToggle,
   }) => {
+    const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
@@ -245,9 +250,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     const morphShowCompRef = useRef(morphShowComparison)
     const lastNotifiedIdRef = useRef<string | null>(null)
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-      null,
-    )
-    const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(
       null,
     )
     const dimensions = useResizeObserver(
@@ -276,6 +278,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     useEffect(() => {
       onLineClickRef.current = onLineClick
     }, [onLineClick])
+    const onPinnedToggleRef = useRef(onPinnedToggle)
+    useEffect(() => {
+      onPinnedToggleRef.current = onPinnedToggle
+    }, [onPinnedToggle])
 
     useEffect(() => {
       if (responsive && dimensions.width > 0 && dimensions.height > 0) {
@@ -287,23 +293,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [dimensions, responsive, width, height])
 
-    useEffect(() => {
-      const onKey = (e: KeyboardEvent) => {
-        if (e.key === "Escape") setPinnedScenarioId(null)
-      }
-      window.addEventListener("keydown", onKey)
-      return () => window.removeEventListener("keydown", onKey)
-    }, [])
 
     useEffect(() => {
       morphShowCompRef.current = morphShowComparison
     }, [morphShowComparison])
 
-    useEffect(() => {
-      if (pinnedScenarioId && !data.some((s) => s.id === pinnedScenarioId)) {
-        setPinnedScenarioId(null)
-      }
-    }, [data, pinnedScenarioId])
 
     useEffect(() => {
       return () => {
@@ -707,10 +701,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .text(TIER_LABELS[i] ?? "")
         })
 
+        const hasPinned = pinnedScenarioIds.size > 0
         const sidebarHighlightActive =
-          !pinnedScenarioId && highlightedIds && highlightedIds.size > 0
+          !hasPinned && highlightedIds && highlightedIds.size > 0
 
         const getOpacity = (id: string) => {
+          if (pinnedScenarioIds.has(id)) return 1.0
           if (sidebarHighlightActive) {
             return highlightedIds!.has(id) ? 1.0 : 0.08
           }
@@ -944,7 +940,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         })
 
         const drawPathForScenario = (scenarioId: string) => {
-          pathLayer.selectAll("*").remove()
+          pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
           if (!showScenarioPath) return
           const pts = dotPositions.get(scenarioId)
           const activeList = subcolumns[0]!.srcData
@@ -959,6 +955,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .y((d) => d.cy)
           pathLayer
             .append("path")
+            .attr("data-path-id", scenarioId)
             .attr("d", pathGen(pts) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
@@ -975,16 +972,30 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
               const isFocus = sid === focusId
+              const isPin = pinnedScenarioIds.has(sid)
               const isRing = this.classList.contains("theme-ring")
               if (isRing) {
                 select(this)
-                  .attr("opacity", isFocus ? 1 : 0.08)
-                  .attr("stroke-opacity", isFocus ? 1 : 0.1)
+                  .attr("opacity", isFocus || isPin ? 1 : 0.08)
+                  .attr("stroke-opacity", isFocus || isPin ? 1 : 0.1)
               } else {
                 select(this)
-                  .attr("fill-opacity", isFocus ? 1.0 : 0.08)
-                  .attr("stroke-opacity", isFocus ? 1.0 : 0.08)
-                  .attr("r", isFocus ? dotR + 1.5 : dotR * 0.7)
+                  .attr("fill-opacity", isFocus || isPin ? 1.0 : 0.08)
+                  .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.08)
+                  .attr("r", isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7)
+              }
+            })
+        }
+
+        const boostPinnedDots = (ids: Set<string>) => {
+          dotsLayer
+            .selectAll<SVGCircleElement, unknown>("circle")
+            .each(function () {
+              const sid = this.getAttribute("data-scenario-id") ?? ""
+              if (!ids.has(sid)) return
+              const isRing = this.classList.contains("theme-ring")
+              if (!isRing) {
+                select(this).attr("r", dotR + 3).attr("fill-opacity", 1)
               }
             })
         }
@@ -1076,11 +1087,14 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("data-tag", tag)
                 .attr("data-base-r", dotR)
 
-              const targetR = sidebarHighlightActive
-                ? highlightedIds!.has(scenario.id)
-                  ? dotR + 1.5
-                  : dotR * 0.7
-                : dotR
+              const isPinnedDot = pinnedScenarioIds.has(scenario.id)
+              const targetR = isPinnedDot
+                ? dotR + 3
+                : sidebarHighlightActive
+                  ? highlightedIds!.has(scenario.id)
+                    ? dotR + 1.5
+                    : dotR * 0.7
+                  : dotR
 
               dot
                 .transition()
@@ -1136,11 +1150,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     clearTimeout(hoverNotifyTimerRef.current)
                     hoverNotifyTimerRef.current = null
                   }
-                  if (pinnedScenarioId) {
-                    applyFocusVisuals(pinnedScenarioId)
-                    drawPathForScenario(pinnedScenarioId)
+                  resetDotVisuals()
+                  if (hasPinned) {
+                    pathLayer.selectAll("*").remove()
+                    pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
+                    boostPinnedDots(pinnedScenarioIds)
                   } else {
-                    resetDotVisuals()
                     pathLayer.selectAll("*").remove()
                   }
                   if (tooltipRef.current) hideTooltip(tooltipRef.current)
@@ -1148,18 +1163,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   onLineHoverRef.current?.(null)
                 })
                 .on("click", () => {
-                  setPinnedScenarioId((prev) =>
-                    prev === scenario.id ? null : scenario.id,
-                  )
+                  onPinnedToggleRef.current?.(scenario.id)
                   onLineClickRef.current?.(scenario)
                 })
             })
           })
         })
 
-        if (pinnedScenarioId) {
-          applyFocusVisuals(pinnedScenarioId)
-          drawPathForScenario(pinnedScenarioId)
+        if (hasPinned) {
+          pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
+          boostPinnedDots(pinnedScenarioIds)
         } else if (highlightedIds && highlightedIds.size > 0) {
           const hId = highlightedIds.values().next().value as string
           if (hId) drawPathForScenario(hId)
@@ -1179,7 +1192,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         showDifferenceGlyphs,
         showThemeRings,
         scenarioThemeRingColors,
-        pinnedScenarioId,
+        pinnedScenarioIds,
         comparisonData,
         comparisonBaselineData,
         climateMode,
@@ -1194,10 +1207,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [currentWidth, currentHeight, updateChart])
 
-    const pinnedName = pinnedScenarioId
-      ? data.find((s) => s.id === pinnedScenarioId)?.name
-      : null
-
     return (
       <div
         ref={containerRef}
@@ -1208,36 +1217,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           position: "relative",
         }}
       >
-        {pinnedName && (
-          <div
-            style={{
-              position: "absolute",
-              top: 6,
-              right: 10,
-              fontSize: 9.5,
-              fontFamily:
-                '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
-              color: "#4a5568",
-              zIndex: 5,
-              pointerEvents: "none",
-              textAlign: "right",
-              maxWidth: "50%",
-              lineHeight: 1.4,
-              letterSpacing: "0.01em",
-              background: "rgba(255,255,255,0.85)",
-              borderRadius: 6,
-              padding: "3px 8px",
-            }}
-          >
-            <span style={{ fontWeight: 600, color: "#2d3748" }}>
-              {pinnedName}
-            </span>
-            <span style={{ color: "#a0aec0", fontSize: 8.5 }}>
-              {" "}
-              &middot; dbl-click to unpin
-            </span>
-          </div>
-        )}
         <svg
           ref={svgRef}
           width={currentWidth}

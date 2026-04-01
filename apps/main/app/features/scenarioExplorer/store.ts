@@ -42,7 +42,7 @@ interface ScenarioExplorerState {
   // Scenario selection (shared across all views)
   selectedScenarios: string[]
   highlightedScenario: string | null
-  pinnedScenarioId: string | null
+  pinnedScenarioIds: string[]
 
   // Filtering
   searchQuery: string
@@ -97,7 +97,8 @@ interface ScenarioExplorerActions {
   selectScenarios: (scenarioIds: string[]) => void
   clearScenarios: () => void
   setHighlightedScenario: (scenarioId: string | null) => void
-  setPinnedScenarioId: (scenarioId: string | null) => void
+  togglePinnedScenario: (scenarioId: string) => void
+  clearPinnedScenarios: () => void
 
   // Filtering
   setSearchQuery: (query: string) => void
@@ -157,7 +158,7 @@ const initialState: ScenarioExplorerState = {
   exploreMode: "list",
   selectedScenarios: [],
   highlightedScenario: null,
-  pinnedScenarioId: null,
+  pinnedScenarioIds: [],
   searchQuery: "",
   showOnlyChosen: false,
   selectedTheme: null,
@@ -225,9 +226,19 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.highlightedScenario = scenarioId
       }),
 
-    setPinnedScenarioId: (scenarioId) =>
+    togglePinnedScenario: (scenarioId) =>
       set((state) => {
-        state.pinnedScenarioId = scenarioId
+        const idx = state.pinnedScenarioIds.indexOf(scenarioId)
+        if (idx >= 0) {
+          state.pinnedScenarioIds.splice(idx, 1)
+        } else {
+          state.pinnedScenarioIds.push(scenarioId)
+        }
+      }),
+
+    clearPinnedScenarios: () =>
+      set((state) => {
+        state.pinnedScenarioIds = []
       }),
 
     // Filtering
@@ -374,7 +385,7 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.selectedScenarios = []
         state.highlightedScenario = null
-        state.pinnedScenarioId = null
+        state.pinnedScenarioIds = []
         state.selectedTier = null
       }),
 

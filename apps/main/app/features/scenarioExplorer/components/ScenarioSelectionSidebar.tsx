@@ -63,8 +63,8 @@ export default function ScenarioSelectionSidebar({
     selectedScenarios,
     toggleScenario,
     highlightedScenario,
-    pinnedScenarioId,
-    setPinnedScenarioId,
+    pinnedScenarioIds,
+    togglePinnedScenario,
     showOnlyChosen,
     showAlternativeBaselines,
     showDefinitions,
@@ -303,10 +303,11 @@ export default function ScenarioSelectionSidebar({
 
         {filteredScenarios.flatMap((scenario, index) => {
           const isChosen = selectedScenarios.includes(scenario.scenarioId)
-          const isPinned = pinnedScenarioId === scenario.scenarioId
+          const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
           const color = scenarioColors?.[scenario.scenarioId]
           const accentColor = color || theme.palette.blue.bright
           const isActive =
+            isPinned ||
             scenario.scenarioId === highlightedScenario ||
             scenario.scenarioId === hoveredScenarioId
 
@@ -540,18 +541,14 @@ export default function ScenarioSelectionSidebar({
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation()
-                      setPinnedScenarioId(
-                        isPinned ? null : scenario.scenarioId,
-                      )
+                      togglePinnedScenario(scenario.scenarioId)
                     }}
                     sx={{
                       p: 0.25,
                       opacity: isPinned || isActive ? 1 : 0,
                       color: isPinned
-                        ? theme.palette.blue.bright
-                        : isActive
-                          ? "rgba(255,255,255,0.7)"
-                          : theme.palette.grey[500],
+                        ? accentColor
+                        : theme.palette.grey[500],
                       transition: "opacity 200ms ease",
                       "*:hover > &": { opacity: 1 },
                     }}

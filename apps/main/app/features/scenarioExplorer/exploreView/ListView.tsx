@@ -98,7 +98,7 @@ export default function ListView({
     setShowAlternativeBaselines,
     searchQuery,
     setSearchQuery,
-    pinnedScenarioId,
+    pinnedScenarioIds,
     selectedTheme,
     showOnlyTheme,
     setSelectedTheme,
@@ -151,15 +151,13 @@ export default function ListView({
       })
     }
 
-    // Helper to move pinned scenario to top
+    // Helper to move pinned scenarios to top
     const applyPinning = (scenarioList: typeof baseScenarios) => {
-      if (!pinnedScenarioId) return scenarioList
-      const pinnedIndex = scenarioList.findIndex(
-        (s) => s.scenarioId === pinnedScenarioId,
-      )
-      if (pinnedIndex <= 0) return scenarioList // Already at top or not found
-      const pinned = scenarioList[pinnedIndex]!
-      return [pinned, ...scenarioList.filter((_, i) => i !== pinnedIndex)]
+      if (pinnedScenarioIds.length === 0) return scenarioList
+      const pinnedSet = new Set(pinnedScenarioIds)
+      const pinned = scenarioList.filter((s) => pinnedSet.has(s.scenarioId))
+      const rest = scenarioList.filter((s) => !pinnedSet.has(s.scenarioId))
+      return [...pinned, ...rest]
     }
 
     // Helper to apply theme grouping: theme-matching scenarios float to top
@@ -248,7 +246,7 @@ export default function ListView({
     sortDirection,
     allScoreData,
     scenarios,
-    pinnedScenarioId,
+    pinnedScenarioIds,
     selectedTheme,
     showOnlyTheme,
     selectedIconId,
