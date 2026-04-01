@@ -175,6 +175,7 @@ export default function ComparisonPanel({
     sankeyGroups,
     multiValueOutcomeCodes,
     morphGeneration,
+    allScenariosData,
   } = useComparisonData()
 
   // Sankey outcome selector state
@@ -190,6 +191,8 @@ export default function ComparisonPanel({
   const [deviationShowPath, setDeviationShowPath] = useState(false)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
   const [deviationDimUnpinned, setDeviationDimUnpinned] = useState(false)
+  const [deviationShowDistribution, setDeviationShowDistribution] =
+    useState(false)
   const deviationClimateMode = "off" as const
   const deviationMorphShowComp = false
 
@@ -198,6 +201,53 @@ export default function ComparisonPanel({
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
     [axes, outcomeCodes],
   )
+
+  const TIER_KEY_TO_NUM: Record<string, number> = {
+    tier1: 1,
+    tier2: 2,
+    tier3: 3,
+    tier4: 4,
+  }
+
+  const distributionData = useMemo(() => {
+    if (!allScenariosData || pinnedScenarioIds.length === 0) return undefined
+    const result: Record<
+      string,
+      Record<
+        string,
+        { tier: number; count: number; normalized: number }[]
+      >
+    > = {}
+    for (const id of pinnedScenarioIds) {
+      const scenarioTiers = allScenariosData[id]?.tiers
+      if (!scenarioTiers) continue
+      const outcomeMap: Record<
+        string,
+        { tier: number; count: number; normalized: number }[]
+      > = {}
+      outcomeCodes.forEach((code, i) => {
+        const tierInfo = scenarioTiers[code]
+        const displayName = axes[i]
+        if (!tierInfo || !displayName) return
+        if (tierInfo.type === "multi_value" && tierInfo.data) {
+          outcomeMap[displayName] = tierInfo.data
+            .filter((d) => d.value > 0)
+            .map((d) => ({
+              tier: TIER_KEY_TO_NUM[d.tier] ?? 4,
+              count: Math.round(d.value),
+              normalized: d.normalized,
+            }))
+        } else if (tierInfo.type === "single_value" && tierInfo.level) {
+          outcomeMap[displayName] = [
+            { tier: tierInfo.level, count: 1, normalized: 1 },
+          ]
+        }
+      })
+      result[id] = outcomeMap
+    }
+    return result
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allScenariosData, pinnedScenarioIds, outcomeCodes, axes])
 
   const highlightedData = useMemo(
     () =>
@@ -577,6 +627,25 @@ export default function ComparisonPanel({
             }
             sx={{ mr: 1.5 }}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowDistribution}
+                disabled={pinnedScenarioIds.length === 0}
+                onChange={(e) =>
+                  setDeviationShowDistribution(e.target.checked)
+                }
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show distributions
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
           {/* Legend */}
           <Box
             sx={{
@@ -947,6 +1016,8 @@ export default function ComparisonPanel({
           pinnedScenarioIds={pinnedSet}
           onPinnedToggle={togglePinnedScenario}
           dimUnpinned={deviationDimUnpinned}
+          showDistribution={deviationShowDistribution}
+          distributionData={distributionData}
         />
       )}
 
