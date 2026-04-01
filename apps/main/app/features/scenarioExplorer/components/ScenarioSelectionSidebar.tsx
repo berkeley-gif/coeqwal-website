@@ -3,10 +3,12 @@
 /**
  * ScenarioSelectionSidebar — Persistent left-hand scenario list panel.
  *
- * Renders (top to bottom):
- * 1. Search bar (filters scenario list by name/description)
- * 2. Visibility toggles: definitions, baselines, key operations
- * 3. Theme-grouped scenario list with checkboxes, pin, and color swatch
+ * Matches the StrategyGrid "Choose scenarios" visual style:
+ * 1. "Choose scenarios" header with key-ops column toggle
+ * 2. Search bar (filters by name/description)
+ * 3. Visibility chips: Definitions, Baselines, Key ops, Chosen only
+ * 4. Scrollable scenario list with StrategyHeader labels, checkboxes,
+ *    and a collapsible key operations column
  *
  * All state is read/written via useScenarioExplorerStore so changes
  * propagate to every tool automatically.
@@ -23,20 +25,12 @@ import {
   icons,
   InputBase,
 } from "@repo/ui/mui"
-import { ScenarioBadge } from "@repo/ui"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
-import { type ScenarioTheme } from "../../../content/scenarios"
-import { THEME_LABEL_CONFIG } from "../../../content/themes"
-
-const THEME_ORDER: ScenarioTheme[] = [
-  "baseline",
-  "cws",
-  "ag_gw",
-  "eco",
-  "delta",
-  "unthemed",
-]
+import {
+  StrategyHeader,
+  OperationsIconGroup,
+} from "../../scenarios/components/shared"
 const PRIMARY_BASELINE_ID = "s0020"
 
 interface ScenarioSelectionSidebarProps {
@@ -55,7 +49,6 @@ export default function ScenarioSelectionSidebar({
   const {
     selectedScenarios,
     toggleScenario,
-    selectScenarios,
     highlightedScenario,
     pinnedScenarioId,
     setPinnedScenarioId,
@@ -87,25 +80,9 @@ export default function ScenarioSelectionSidebar({
     return () => clearTimeout(timer)
   }, [activeScenarioId])
 
-  const toggleTheme = (itemIds: string[]) => {
-    const allChosen = itemIds.every((id) => selectedScenarios.includes(id))
-    if (allChosen) {
-      selectScenarios(selectedScenarios.filter((id) => !itemIds.includes(id)))
-    } else {
-      const toAdd = itemIds.filter((id) => !selectedScenarios.includes(id))
-      selectScenarios([...selectedScenarios, ...toAdd])
-    }
-  }
-
   const { siblingGroups, isLoading } = useScenarioList()
 
-  const scenariosByTheme = useMemo(() => {
-    const allGroups = new Map<ScenarioTheme, string[]>()
-    THEME_ORDER.forEach((t) => allGroups.set(t, []))
-    siblingGroups.forEach((s) => {
-      allGroups.get(s.theme)?.push(s.scenarioId)
-    })
-
+  const filteredScenarios = useMemo(() => {
     let filtered = siblingGroups.slice()
 
     if (showOnlyChosen) {
@@ -128,27 +105,7 @@ export default function ScenarioSelectionSidebar({
       )
     }
 
-    const displayGroups = new Map<
-      ScenarioTheme,
-      { id: string; name: string; description: string }[]
-    >()
-    THEME_ORDER.forEach((t) => displayGroups.set(t, []))
-
-    filtered.forEach((s) => {
-      const bucket = displayGroups.get(s.theme)
-      if (bucket)
-        bucket.push({
-          id: s.scenarioId,
-          name: s.shortLabel,
-          description: s.label,
-        })
-    })
-
-    return THEME_ORDER.map((t) => ({
-      theme: t,
-      items: displayGroups.get(t) ?? [],
-      allIds: allGroups.get(t) ?? [],
-    }))
+    return filtered
   }, [
     siblingGroups,
     showOnlyChosen,
@@ -167,7 +124,40 @@ export default function ScenarioSelectionSidebar({
         backgroundColor: theme.palette.grey[50],
       }}
     >
-      {/* ── Search + toggle row (aligned with tool toolbar height) ────────── */}
+      {/* ── Header: "Choose scenarios" + key-ops column header ─────────── */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 1.5,
+          py: 1,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ color: theme.palette.grey[900], fontWeight: 500 }}
+        >
+          Choose scenarios
+        </Typography>
+
+        {showKeyOperations && (
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: theme.palette.grey[600],
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
+            Key operations
+          </Typography>
+        )}
+      </Box>
+
+      {/* ── Search row ───────────────────────────────────────────────────── */}
       <Box
         sx={{
           flexShrink: 0,
@@ -175,7 +165,7 @@ export default function ScenarioSelectionSidebar({
           alignItems: "center",
           gap: 0.5,
           px: 1,
-          minHeight: 44,
+          minHeight: 40,
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
@@ -188,10 +178,7 @@ export default function ScenarioSelectionSidebar({
           sx={{
             flex: 1,
             fontSize: "0.8125rem",
-            "& .MuiInputBase-input": {
-              py: 0.5,
-              px: 0.5,
-            },
+            "& .MuiInputBase-input": { py: 0.5, px: 0.5 },
           }}
         />
         {searchQuery && (
@@ -205,7 +192,7 @@ export default function ScenarioSelectionSidebar({
         )}
       </Box>
 
-      {/* Visibility toggles */}
+      {/* ── Visibility chip toggles ──────────────────────────────────────── */}
       <Box
         sx={{
           flexShrink: 0,
@@ -247,280 +234,220 @@ export default function ScenarioSelectionSidebar({
         )}
       </Box>
 
-      {/* Scrollable scenario list */}
+      {/* ── Scrollable scenario list ─────────────────────────────────────── */}
       <Box
         sx={{
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          pt: 0.75,
           pb: 4,
         }}
       >
         {isLoading && (
           <Typography
             variant="caption"
-            sx={{ px: 1.5, color: theme.palette.grey[500] }}
+            sx={{ px: 1.5, py: 1, color: theme.palette.grey[500] }}
           >
             Loading…
           </Typography>
         )}
 
-        {scenariosByTheme.map(({ theme: themeKey, items, allIds }) => {
-          const visibleIds = items.map(({ id }) => id)
-          const allChosen =
-            allIds.length > 0 &&
-            allIds.every((id) => selectedScenarios.includes(id))
-          const someChosen =
-            allIds.length > 0 &&
-            allIds.some((id) => selectedScenarios.includes(id))
-
-          if (
-            items.length === 0 &&
-            !showAlternativeBaselines &&
-            themeKey === "baseline"
-          ) {
-            // Still show the baseline header with just the primary baseline
-          } else if (items.length === 0) {
-            return null
-          }
+        {filteredScenarios.map((scenario) => {
+          const isChosen = selectedScenarios.includes(scenario.scenarioId)
+          const isPinned = pinnedScenarioId === scenario.scenarioId
+          const color = scenarioColors?.[scenario.scenarioId]
+          const accentColor = color || theme.palette.blue.bright
+          const isActive =
+            scenario.scenarioId === highlightedScenario ||
+            scenario.scenarioId === hoveredScenarioId
 
           return (
-            <Box key={themeKey} sx={{ mb: 0.75 }}>
-              {/* Theme header */}
-              <Box
-                onMouseEnter={() =>
-                  visibleIds.length > 0 && onRowHover?.(visibleIds)
-                }
-                onMouseLeave={() => onRowHover?.(null)}
+            <Box
+              key={scenario.scenarioId}
+              ref={(el: HTMLDivElement | null) => {
+                if (el)
+                  scenarioRowRefs.current.set(scenario.scenarioId, el)
+                else scenarioRowRefs.current.delete(scenario.scenarioId)
+              }}
+              onMouseEnter={() => onRowHover?.([scenario.scenarioId])}
+              onMouseLeave={() => onRowHover?.(null)}
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1,
+                px: 1.5,
+                py: 1,
+                cursor: "pointer",
+                borderLeft: `3px solid ${
+                  isActive || isChosen || isPinned
+                    ? accentColor
+                    : "transparent"
+                }`,
+                borderBottom: `1px solid ${theme.palette.grey[200]}`,
+                backgroundColor: isHighlightedBg(isActive, theme.palette.grey[900]),
+                transition:
+                  "background-color 200ms ease, border-color 200ms ease",
+                "&:hover": {
+                  backgroundColor: isActive
+                    ? theme.palette.grey[900]
+                    : theme.palette.interaction.selectedBackground,
+                  borderLeftColor: accentColor,
+                },
+              }}
+            >
+              {/* Checkbox */}
+              <Checkbox
+                size="small"
+                checked={isChosen}
+                onChange={() => toggleScenario(scenario.scenarioId)}
+                onClick={(e) => e.stopPropagation()}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  px: 1.5,
-                  py: 0.25,
-                  borderRadius: theme.borderRadius.xs,
-                  "&:hover": {
-                    backgroundColor:
-                      theme.palette.interaction.selectedBackground,
-                  },
+                  padding: 0,
+                  flexShrink: 0,
+                  mt: "2px",
+                  transform: "scale(0.85)",
+                  color: isActive ? "rgba(255,255,255,0.5)" : undefined,
+                  "&.Mui-checked": isActive
+                    ? { color: "rgba(255,255,255,0.85)" }
+                    : {},
                 }}
-              >
-                <Checkbox
-                  size="small"
-                  checked={allChosen}
-                  indeterminate={someChosen && !allChosen}
-                  onChange={() => toggleTheme(allIds)}
+              />
+
+              {/* Color swatch (chart legend) */}
+              {color && (
+                <Box
+                  aria-hidden="true"
                   sx={{
-                    padding: 0,
+                    width: isActive ? 20 : 14,
+                    height: 3,
+                    borderRadius: "1.5px",
+                    backgroundColor: color,
                     flexShrink: 0,
-                    transform: "scale(0.8)",
+                    mt: "10px",
+                    transition: "width 200ms ease",
                   }}
                 />
-                <Box
-                  onClick={() => toggleTheme(allIds)}
-                  sx={{ cursor: "pointer", display: "flex" }}
-                >
-                  <ScenarioBadge
-                    label={THEME_LABEL_CONFIG[themeKey].label}
-                    backgroundColor={
-                      theme.palette.waterThemes[themeKey].background
-                    }
-                    color={theme.palette.waterThemes[themeKey].text}
-                    sx={{ display: "block" }}
-                  />
-                </Box>
+              )}
+
+              {/* Scenario label (StrategyHeader) */}
+              <Box
+                onClick={() => toggleScenario(scenario.scenarioId)}
+                sx={{ flex: 1, minWidth: 0 }}
+              >
+                <StrategyHeader
+                  strategy={scenario}
+                  titleVariant="body2"
+                  showDescription={showDefinitions}
+                  descriptionMaxWidth="none"
+                />
               </Box>
 
-              {/* Scenario rows */}
-              {items.map(({ id, name, description }) => {
-                const isChosen = selectedScenarios.includes(id)
-                const isPinned = pinnedScenarioId === id
-                const color = scenarioColors?.[id]
-                const accentColor = color || theme.palette.blue.bright
-                const isActive =
-                  id === highlightedScenario || id === hoveredScenarioId
+              {/* Key operations column (collapsible) */}
+              <Box
+                sx={{
+                  overflow: "hidden",
+                  width: showKeyOperations ? "auto" : 0,
+                  opacity: showKeyOperations ? 1 : 0,
+                  flexShrink: 0,
+                  transition: "width 300ms ease, opacity 250ms ease",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  pt: "2px",
+                }}
+              >
+                <OperationsIconGroup
+                  scenarioId={scenario.scenarioId}
+                  size="sm"
+                />
+              </Box>
 
-                return (
-                  <Box
-                    key={id}
-                    ref={(el: HTMLDivElement | null) => {
-                      if (el) scenarioRowRefs.current.set(id, el)
-                      else scenarioRowRefs.current.delete(id)
-                    }}
-                    onMouseEnter={() => onRowHover?.([id])}
-                    onMouseLeave={() => onRowHover?.(null)}
-                    sx={{
-                      position: "relative",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 0.5,
-                      pl: 1.25,
-                      pr: 0.5,
-                      py: 0.25,
-                      cursor: "pointer",
-                      borderLeft: `3px solid ${
-                        isActive || isChosen || isPinned
-                          ? accentColor
-                          : "transparent"
-                      }`,
-                      backgroundColor: isActive
-                        ? theme.palette.grey[900]
-                        : "transparent",
-                      transition:
-                        "background-color 200ms ease, border-color 200ms ease",
-                      "&:hover": {
-                        backgroundColor: isActive
-                          ? theme.palette.grey[900]
-                          : theme.palette.interaction.selectedBackground,
-                        borderLeftColor: accentColor,
-                      },
-                    }}
-                  >
-                    {/* Checkbox */}
-                    <Checkbox
-                      size="small"
-                      checked={isChosen}
-                      onChange={() => toggleScenario(id)}
-                      onClick={(e) => e.stopPropagation()}
-                      sx={{
-                        padding: 0,
-                        flexShrink: 0,
-                        mt: "2px",
-                        transform: "scale(0.75)",
-                        color: isActive ? "rgba(255,255,255,0.5)" : undefined,
-                        "&.Mui-checked": isActive
-                          ? { color: "rgba(255,255,255,0.85)" }
-                          : {},
-                      }}
-                    />
-
-                    {/* Color swatch (chart legend) */}
-                    {color && (
-                      <Box
-                        aria-hidden="true"
-                        sx={{
-                          width: isActive ? 20 : 14,
-                          height: 3,
-                          borderRadius: "1.5px",
-                          backgroundColor: color,
-                          flexShrink: 0,
-                          mt: "7px",
-                          transition: "width 200ms ease",
-                        }}
-                      />
-                    )}
-
-                    {/* Label + optional description */}
-                    <Box
-                      onClick={() => toggleScenario(id)}
-                      sx={{ flex: 1, minWidth: 0 }}
+              {/* Action buttons */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.25,
+                  flexShrink: 0,
+                  mt: "2px",
+                }}
+              >
+                {/* Share */}
+                {(() => {
+                  const isShared = sharedScenarioIds.includes(
+                    scenario.scenarioId,
+                  )
+                  return (
+                    <Tooltip
+                      title={isShared ? "Added to share" : "Add to share"}
+                      arrow
                     >
-                      <Typography
-                        sx={{
-                          fontSize: "0.8125rem",
-                          lineHeight: 1.35,
-                          fontWeight: isActive ? 600 : 400,
-                          color: isActive
-                            ? "#fff"
-                            : isChosen
-                              ? theme.palette.text.primary
-                              : theme.palette.grey[600],
-                          transition: "color 200ms ease",
-                          letterSpacing: "0.01em",
-                        }}
-                      >
-                        {name}
-                      </Typography>
-                      {showDefinitions && description && (
-                        <Typography
-                          sx={{
-                            fontSize: "0.6875rem",
-                            lineHeight: 1.3,
-                            color: isActive
-                              ? "rgba(255,255,255,0.6)"
-                              : theme.palette.grey[500],
-                            mt: 0.125,
-                          }}
-                        >
-                          {description}
-                        </Typography>
-                      )}
-                    </Box>
-
-                    {/* Share button */}
-                    {(() => {
-                      const isShared = sharedScenarioIds.includes(id)
-                      return (
-                        <Tooltip
-                          title={isShared ? "Added to share" : "Add to share"}
-                          arrow
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              addToShare(id)
-                            }}
-                            sx={{
-                              p: 0.25,
-                              flexShrink: 0,
-                              opacity: isShared || isActive ? 1 : 0,
-                              color: isShared
-                                ? theme.palette.blue.bright
-                                : isActive
-                                  ? "rgba(255,255,255,0.7)"
-                                  : theme.palette.grey[500],
-                              transition: "opacity 200ms ease",
-                              "*:hover > &": { opacity: 1 },
-                            }}
-                          >
-                            <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-                          </IconButton>
-                        </Tooltip>
-                      )
-                    })()}
-
-                    {/* Pin button */}
-                    <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
                       <IconButton
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setPinnedScenarioId(isPinned ? null : id)
+                          addToShare(scenario.scenarioId)
                         }}
                         sx={{
                           p: 0.25,
-                          flexShrink: 0,
-                          opacity: isPinned || isActive ? 1 : 0,
-                          color: isPinned
+                          opacity: isShared || isActive ? 1 : 0,
+                          color: isShared
                             ? theme.palette.blue.bright
                             : isActive
                               ? "rgba(255,255,255,0.7)"
                               : theme.palette.grey[500],
                           transition: "opacity 200ms ease",
-                          ".MuiBox-root:hover > &": { opacity: 1 },
                           "*:hover > &": { opacity: 1 },
                         }}
                       >
-                        <icons.PushPin
-                          sx={{
-                            fontSize: "0.875rem",
-                            transform: isPinned ? "none" : "rotate(45deg)",
-                          }}
-                        />
+                        <icons.IosShare sx={{ fontSize: "0.8rem" }} />
                       </IconButton>
                     </Tooltip>
-                  </Box>
-                )
-              })}
+                  )
+                })()}
+
+                {/* Pin */}
+                <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setPinnedScenarioId(
+                        isPinned ? null : scenario.scenarioId,
+                      )
+                    }}
+                    sx={{
+                      p: 0.25,
+                      opacity: isPinned || isActive ? 1 : 0,
+                      color: isPinned
+                        ? theme.palette.blue.bright
+                        : isActive
+                          ? "rgba(255,255,255,0.7)"
+                          : theme.palette.grey[500],
+                      transition: "opacity 200ms ease",
+                      "*:hover > &": { opacity: 1 },
+                    }}
+                  >
+                    <icons.PushPin
+                      sx={{
+                        fontSize: "0.875rem",
+                        transform: isPinned ? "none" : "rotate(45deg)",
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             </Box>
           )
         })}
       </Box>
     </Box>
   )
+}
+
+function isHighlightedBg(isActive: boolean, grey900: string) {
+  return isActive ? grey900 : "transparent"
 }
 
 /** Small toggle chip used in the visibility controls row */

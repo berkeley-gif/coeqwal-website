@@ -34,7 +34,7 @@ interface ListViewProps {
 
 export default function ListView({
   onTierClick,
-  highlightedIds: _highlightedIds,
+  highlightedIds,
   onScenarioHover: _onScenarioHover,
 }: ListViewProps) {
   const theme = useTheme()
@@ -295,6 +295,14 @@ export default function ListView({
   const isLoading = dataLoading || scenariosLoading
   const error = dataError || scenariosError
 
+  const mergedHighlighted = useMemo(() => {
+    if (!highlightedIds && matchingScenarioIds.size === 0)
+      return new Set<string>()
+    const set = new Set(matchingScenarioIds)
+    if (highlightedIds) highlightedIds.forEach((id) => set.add(id))
+    return set
+  }, [highlightedIds, matchingScenarioIds])
+
   if (isLoading) {
     return (
       <Box
@@ -329,7 +337,7 @@ export default function ListView({
     allScoreData,
     outcomeNames: outcomeNames || [],
     scenarios: sortedScenarios,
-    highlightedScenarios: matchingScenarioIds,
+    highlightedScenarios: mergedHighlighted,
     showSearchDivider: hasSearchResults,
     themeMatchingScenarioIds,
     showThemeDivider,
@@ -345,6 +353,7 @@ export default function ListView({
     showOnlyChosen,
     showAlternativeBaselines,
     compact: false,
+    showOperations: false,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,

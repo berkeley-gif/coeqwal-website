@@ -46,6 +46,8 @@ export interface StrategyGridProps {
   // Layout
   compact?: boolean
   renderMode?: "all" | "headersOnly" | "contentOnly"
+  /** When false, hides the key operations column (col 3) from the grid */
+  showOperations?: boolean
 
   // Sorting (optional)
   sortBy?: string | null

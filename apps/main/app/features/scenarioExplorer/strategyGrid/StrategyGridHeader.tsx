@@ -42,6 +42,8 @@ export interface StrategyGridHeaderProps {
   compact: boolean
   /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
+  /** When false, hides the key operations column header */
+  showOperations?: boolean
   /** Active tooltip outcome name */
   activeTooltip: string | null
   /** Current sort column */
@@ -77,6 +79,7 @@ export function StrategyGridHeader({
   outcomeNames,
   compact,
   layoutMode,
+  showOperations = true,
   activeTooltip,
   sortBy,
   sortDirection,
@@ -110,7 +113,7 @@ export function StrategyGridHeader({
   return (
     <>
       {/* Column headers row */}
-      <ColumnHeaders layoutMode={layoutMode} />
+      <ColumnHeaders layoutMode={layoutMode} showOperations={showOperations} />
 
       {/* Controls in cols 1-2, same row as DividerContinuation / OutcomeCategoryLabels */}
       {controls && (
@@ -120,8 +123,8 @@ export function StrategyGridHeader({
         />
       )}
 
-      {/* Divider continuation for Column 3 - only in full mode */}
-      {showOutcomeLabels && <DividerContinuation column={3} />}
+      {/* Divider continuation for Column 3 - only in full mode when operations visible */}
+      {showOutcomeLabels && showOperations && <DividerContinuation column={3} />}
 
       {/* Outcome category labels (Column 4) - only in full mode */}
       {showOutcomeLabels && (
@@ -205,9 +208,10 @@ function ControlsRow({
  */
 interface ColumnHeadersProps {
   layoutMode: LayoutMode
+  showOperations?: boolean
 }
 
-function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
+function ColumnHeaders({ layoutMode, showOperations = true }: ColumnHeadersProps) {
   const theme = useTheme()
 
   // In full mode, column 4 is visible; in wrapped mode, it's not
@@ -218,7 +222,7 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
       {/* Columns 1-2: "Choose scenarios" (spans checkbox + scenario columns) */}
       <Box
         sx={{
-          gridColumn: "1 / 3",
+          gridColumn: showOperations ? "1 / 3" : "1 / 3",
           display: { xs: "none", sm: "flex" },
           alignItems: "flex-start",
           alignSelf: "stretch",
@@ -237,33 +241,32 @@ function ColumnHeaders({ layoutMode }: ColumnHeadersProps) {
         </Typography>
       </Box>
 
-      {/* Column 3: "Key operations" */}
-      <Box
-        sx={{
-          gridColumn: "3",
-          display: { xs: "none", sm: "flex" },
-          alignItems: "flex-start",
-          alignSelf: "stretch",
-          // In wrapped mode, no divider and no left padding (aligns with icons below)
-          // In full mode, divider with standard gap
-          pl: isFullMode ? theme.scenarios.grid.divider.gap : 0,
-          pb: theme.scenarios.grid.header.standard,
-          // Vertical divider only in full mode
-          borderLeft: isFullMode
-            ? `1px solid ${theme.palette.grey[300]}`
-            : "none",
-        }}
-      >
-        <Typography
-          variant="subtitle2"
+      {/* Column 3: "Key operations" — hidden when showOperations is false */}
+      {showOperations && (
+        <Box
           sx={{
-            color: theme.palette.grey[600],
-            fontWeight: 500,
+            gridColumn: "3",
+            display: { xs: "none", sm: "flex" },
+            alignItems: "flex-start",
+            alignSelf: "stretch",
+            pl: isFullMode ? theme.scenarios.grid.divider.gap : 0,
+            pb: theme.scenarios.grid.header.standard,
+            borderLeft: isFullMode
+              ? `1px solid ${theme.palette.grey[300]}`
+              : "none",
           }}
         >
-          Key operations
-        </Typography>
-      </Box>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: theme.palette.grey[600],
+              fontWeight: 500,
+            }}
+          >
+            Key operations
+          </Typography>
+        </Box>
+      )}
 
       {/* Column 4: "Key outcomes" - only in full mode */}
       {isFullMode && (
