@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useState, useRef, useCallback } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, InputBase, IconButton, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
@@ -97,12 +97,19 @@ export default function ListView({
     setShowOnlyChosen,
     setShowAlternativeBaselines,
     searchQuery,
+    setSearchQuery,
     pinnedScenarioId,
     selectedTheme,
     showOnlyTheme,
     setSelectedTheme,
     selectedIconId,
     setSelectedIconId,
+    showKeyOperations,
+    setShowKeyOperations,
+    showDefinitions,
+    setShowDefinitions,
+    sharedScenarioIds,
+    setShowShareDrawer,
   } = useScenarioExplorerStore()
 
   const {
@@ -381,7 +388,8 @@ export default function ListView({
     showOnlyChosen,
     showAlternativeBaselines,
     compact: false,
-    outcomesOnly: true,
+    outcomesOnly: false,
+    showOperations: showKeyOperations,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,
@@ -407,12 +415,104 @@ export default function ListView({
       <Box
         sx={{
           flexShrink: 0,
-          px: theme.space.section.md,
-          pt: theme.space.component.lg,
           backgroundColor: theme.palette.grey[100],
         }}
       >
-        <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+        {/* Search + toggle chips */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            px: theme.space.section.md,
+            py: 0.75,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              minWidth: 160,
+              maxWidth: 240,
+            }}
+          >
+            <InputBase
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search…"
+              size="small"
+              inputProps={{ "aria-label": "Search scenarios" }}
+              sx={{
+                flex: 1,
+                fontSize: "0.8125rem",
+                "& .MuiInputBase-input": { py: 0.5, px: 0.5 },
+              }}
+            />
+            {searchQuery && (
+              <IconButton
+                size="small"
+                onClick={() => setSearchQuery("")}
+                sx={{ p: 0.25 }}
+              >
+                <icons.Close sx={{ fontSize: "0.875rem" }} />
+              </IconButton>
+            )}
+          </Box>
+
+          <Box
+            sx={{
+              width: "1px",
+              height: 20,
+              backgroundColor: theme.palette.divider,
+              flexShrink: 0,
+            }}
+          />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.25,
+              flexWrap: "wrap",
+            }}
+          >
+            <ToggleChip
+              label="Definitions"
+              active={showDefinitions}
+              onClick={() => setShowDefinitions(!showDefinitions)}
+            />
+            <ToggleChip
+              label="Baselines"
+              active={showAlternativeBaselines}
+              onClick={() =>
+                setShowAlternativeBaselines(!showAlternativeBaselines)
+              }
+            />
+            <ToggleChip
+              label="Key operations"
+              active={showKeyOperations}
+              onClick={() => setShowKeyOperations(!showKeyOperations)}
+            />
+            <ToggleChip
+              label="Chosen only"
+              active={showOnlyChosen}
+              onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+            />
+            {sharedScenarioIds.length > 0 && (
+              <ToggleChip
+                label={`Share (${sharedScenarioIds.length})`}
+                active={true}
+                onClick={() => setShowShareDrawer(true)}
+              />
+            )}
+          </Box>
+        </Box>
+
+        <Box sx={{ px: theme.space.section.md, pt: theme.space.component.sm }}>
+          <StrategyGrid {...strategyGridProps} renderMode="headersOnly" />
+        </Box>
       </Box>
 
       {/* Scrollable content */}
@@ -444,6 +544,48 @@ export default function ListView({
         )}
         <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
       </Box>
+    </Box>
+  )
+}
+
+function ToggleChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  const theme = useTheme()
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        px: 0.75,
+        py: 0.25,
+        border: "none",
+        borderRadius: "10px",
+        cursor: "pointer",
+        fontSize: "0.6875rem",
+        fontWeight: active ? 600 : 400,
+        lineHeight: 1.3,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[600],
+        background: active
+          ? theme.palette.interaction.selectedBackground
+          : theme.palette.grey[200],
+        transition: "all 150ms ease",
+        "&:hover": {
+          background: theme.palette.interaction.selectedBackground,
+        },
+      }}
+    >
+      {label}
     </Box>
   )
 }

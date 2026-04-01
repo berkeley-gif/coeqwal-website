@@ -308,38 +308,6 @@ export function StrategyGridContent({
                   </Box>
                 </Box>,
               )
-            } else if (!showAllThemeDividers) {
-              // Sorted: per-row inline badge above each row
-              rows.push(
-                <Box
-                  key={`theme-badge-${scenario.scenarioId}`}
-                  sx={{
-                    gridColumn: "1 / -1",
-                    display: "flex",
-                    alignItems: "center",
-                    mt: 0.5,
-                    px: 0.5,
-                  }}
-                >
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: "0.6rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                      color: themeColors.text,
-                      backgroundColor: themeColors.background,
-                      px: "5px",
-                      py: "1.5px",
-                      borderRadius: "2px",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {themeConfig.label}
-                  </Box>
-                </Box>,
-              )
             }
           }
         }

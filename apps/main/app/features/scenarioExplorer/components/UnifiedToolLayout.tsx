@@ -35,10 +35,14 @@ export default function UnifiedToolLayout({
   const showKeyOperations = useScenarioExplorerStore(
     (s) => s.showKeyOperations,
   )
+  const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
 
-  const sidebarWidth = showKeyOperations
-    ? SIDEBAR_WIDTH_EXPANDED
-    : SIDEBAR_WIDTH_COLLAPSED
+  const isListMode = exploreMode === "list"
+  const sidebarWidth = isListMode
+    ? 0
+    : showKeyOperations
+      ? SIDEBAR_WIDTH_EXPANDED
+      : SIDEBAR_WIDTH_COLLAPSED
 
   useEffect(() => {
     if (showMap) {
@@ -72,9 +76,11 @@ export default function UnifiedToolLayout({
           flexDirection: "column",
           height: "100%",
           overflow: "hidden",
-          borderRight: `1px solid ${theme.palette.divider}`,
+          borderRight: isListMode
+            ? "none"
+            : `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
-          transition: "width 300ms ease",
+          transition: "width 300ms ease, border-right 300ms ease",
         }}
       >
         {sidebar}
