@@ -47,11 +47,6 @@ export default function AboutPage() {
       width: 311,
     },
     {
-      src: "/images/about/logos/cwc.png",
-      alt: "CWC logo",
-      width: 380,
-    },
-    {
       src: "/images/about/logos/noaa_fisheries.png",
       alt: "AGWA logo",
       width: 201,
@@ -78,9 +73,14 @@ export default function AboutPage() {
       width: 330,
     },
     {
-      src: "/images/about/logos/union-concerned-scientists.png",
-      alt: "Union of Concerned Scientists logo",
-      width: 205,
+      src: "/images/about/logos/agwa.png",
+      alt: "AGWA logo",
+      width: 311,
+    },
+    {
+      src: "/images/about/logos/noaa_fisheries.png",
+      alt: "AGWA logo",
+      width: 201,
     },
   ]
   useEffect(() => {
