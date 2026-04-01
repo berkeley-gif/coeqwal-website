@@ -441,6 +441,36 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             }
           }
 
+          svg
+            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-path-id")
+              if (!sid) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) return
+              const pts: [number, number][] = []
+              axes.forEach((axis) => {
+                const sv = scenario.values[axis]
+                if (sv == null) return
+                const dotEl = svg.select<SVGCircleElement>(
+                  `circle[data-scenario-id="${sid}"][data-axis="${axis}"]:not(.theme-ring)`,
+                )
+                const cx = dotEl.empty()
+                  ? (scales.xScale(axis) ?? 0) + scales.bandW / 2
+                  : parseFloat(dotEl.attr("cx"))
+                pts.push([cx, scales.yScale(toTier(sv))])
+              })
+              if (pts.length >= 2) {
+                const pathGen = line<[number, number]>()
+                  .x((d) => d[0])
+                  .y((d) => d[1])
+                el.transition()
+                  .duration(MORPH_DUR)
+                  .attr("d", pathGen(pts) ?? "")
+              }
+            })
+
           return
         }
 
@@ -552,6 +582,36 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("d", stairLine(newPts) ?? "")
             }
           }
+
+          svg
+            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-path-id")
+              if (!sid) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) return
+              const pts: [number, number][] = []
+              axes.forEach((axis) => {
+                const sv = scenario.values[axis]
+                if (sv == null) return
+                const dotEl = svg.select<SVGCircleElement>(
+                  `circle[data-scenario-id="${sid}"][data-axis="${axis}"]:not(.theme-ring)`,
+                )
+                const cx = dotEl.empty()
+                  ? (scales.xScale(axis) ?? 0) + scales.bandW / 2
+                  : parseFloat(dotEl.attr("cx"))
+                pts.push([cx, scales.yScale(toTier(sv))])
+              })
+              if (pts.length >= 2) {
+                const pathGen = line<[number, number]>()
+                  .x((d) => d[0])
+                  .y((d) => d[1])
+                el.transition()
+                  .duration(HC_DUR)
+                  .attr("d", pathGen(pts) ?? "")
+              }
+            })
 
           return
         }
