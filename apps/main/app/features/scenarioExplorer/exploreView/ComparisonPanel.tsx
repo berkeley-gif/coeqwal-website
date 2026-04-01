@@ -162,6 +162,7 @@ export default function ComparisonPanel({
     lineColors,
     scenarios,
     baselineScenario,
+    historicalBaselineScores,
     isLoading,
     hasData,
     heatmapCells,
@@ -276,15 +277,20 @@ export default function ComparisonPanel({
     }
   }, [mockHC])
 
-  // Deviation plot: sort outcome columns by baseline tier score (best on left)
+  // Deviation plot: sort outcome columns by historical baseline tier score
+  // so columns stay stable when switching hydroclimate periods.
+  // Winter-run salmon is pinned to the last position.
+  const salmonLabel = getOutcomeName("WRC_SALMON_AB")
   const deviationSortedAxes = useMemo(() => {
-    if (!baselineScenario) return axes
+    if (!historicalBaselineScores) return axes
     return [...axes].sort((a, b) => {
-      const va = baselineScenario.values[a] ?? 0
-      const vb = baselineScenario.values[b] ?? 0
+      if (a === salmonLabel) return 1
+      if (b === salmonLabel) return -1
+      const va = historicalBaselineScores[a] ?? 0
+      const vb = historicalBaselineScores[b] ?? 0
       return vb - va
     })
-  }, [axes, baselineScenario])
+  }, [axes, historicalBaselineScores, salmonLabel])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(

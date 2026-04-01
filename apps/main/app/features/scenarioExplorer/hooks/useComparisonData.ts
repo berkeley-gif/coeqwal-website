@@ -1,10 +1,13 @@
 import { useMemo, useRef } from "react"
+import useSWR from "swr"
 import {
   useMultipleScenarioTiers,
   useScenarioList,
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../scenarios/hooks"
+import { fetchScenarioTiers } from "@repo/data/coeqwal"
+import { CACHE_KEYS } from "@repo/data/cache"
 import {
   type VerticalParallelLineData,
   type TierHeatmapCell,
@@ -191,6 +194,40 @@ export function useComparisonData() {
     }
   }, [parallelPlotData, allScoreData, getDisplayName])
 
+  // Stable column ordering: always use the historical hydroclimate's baseline
+  // scores so deviation chart columns don't rearrange on HC switch.
+  const historicalIdMapping = useMemo(
+    () => buildIdMapping("historical"),
+    [buildIdMapping],
+  )
+  const historicalBaselineId = historicalIdMapping[PRIMARY_BASELINE_ID]
+
+  const { data: historicalBaselineTiers } = useSWR(
+    historicalBaselineId
+      ? CACHE_KEYS.scenarioTiers(historicalBaselineId)
+      : null,
+    () =>
+      historicalBaselineId
+        ? fetchScenarioTiers(historicalBaselineId)
+        : null,
+  )
+
+  const historicalBaselineScores = useMemo<Record<
+    string,
+    number | null
+  > | null>(() => {
+    if (!historicalBaselineTiers) return null
+    const values: Record<string, number | null> = {}
+    OUTCOME_CODE_ORDER.forEach((code) => {
+      const tier = historicalBaselineTiers.tiers[code]
+      values[getOutcomeName(code)] =
+        tier?.normalized_score !== undefined
+          ? tier.normalized_score * 2 - 1
+          : null
+    })
+    return values
+  }, [historicalBaselineTiers])
+
   // Tier heatmap data: scenario × outcome matrix
   const heatmapCells = useMemo<TierHeatmapCell[]>(() => {
     if (!allScoreData || !allScenariosData) return []
@@ -365,6 +402,7 @@ export function useComparisonData() {
     lineColors,
     scenarios,
     baselineScenario,
+    historicalBaselineScores,
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,
