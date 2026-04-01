@@ -267,6 +267,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
 
+    // Store the initial (historical) baseline Y positions so we can show a ghost
+    const initialBaselineRef = useRef<
+      Map<string, number> | null
+    >(null)
+    // Track whether we've ever morphed away from the initial hydroclimate
+    const hasMorphedRef = useRef(false)
+
     // Hydroclimate morph detection
     const shouldMorphNextRef = useRef(false)
     const prevMorphGenRef = useRef(morphGeneration)
@@ -481,10 +488,91 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           baselineData
         ) {
           shouldMorphNextRef.current = false
+          hasMorphedRef.current = true
           const scales = scalesRef.current
           const dataMap = new Map(data.map((s) => [s.id, s]))
           const svg = select(svgRef.current)
           const HC_DUR = 600
+
+          // Show/hide ghost baseline trace
+          if (initialBaselineRef.current) {
+            const ghostPositionsStored = initialBaselineRef.current
+            let isBackToInitial = true
+            axes.forEach((axis) => {
+              const storedY = ghostPositionsStored.get(axis)
+              const bv = baselineData.values[axis]
+              if (storedY == null || bv == null) return
+              const newY = scales.yScale(toTier(bv))
+              if (Math.abs(newY - storedY) > 1) isBackToInitial = false
+            })
+
+            const ghostSel = svg.select("g.ghost-baselines")
+            if (isBackToInitial && !ghostSel.empty()) {
+              ghostSel
+                .selectAll("line")
+                .transition()
+                .duration(HC_DUR)
+                .attr("opacity", 0)
+                .on("end", function () {
+                  select(this).remove()
+                })
+            } else if (!isBackToInitial && (ghostSel.empty() || ghostSel.selectAll("*").empty())) {
+              const gHost =
+                ghostSel.empty()
+                  ? svg
+                      .select("g")
+                      .insert("g", "g.baselines")
+                      .attr("class", "ghost-baselines")
+                  : ghostSel
+              const ghostPositions = initialBaselineRef.current
+              axes.forEach((axis) => {
+                const ghostY = ghostPositions.get(axis)
+                if (ghostY == null) return
+                const colX = scales.xScale(axis) ?? 0
+                const bw = scales.bandW
+                const cx = colX + bw / 2
+                const bracketHalfW = bw * 0.45
+                const edgeL = cx - bracketHalfW
+                const edgeR = cx + bracketHalfW
+                gHost
+                  .append("line")
+                  .attr("class", "ghost-baseline")
+                  .attr("data-axis", axis)
+                  .attr("x1", edgeL)
+                  .attr("y1", ghostY)
+                  .attr("x2", edgeR)
+                  .attr("y2", ghostY)
+                  .attr("stroke", "#2d3748")
+                  .attr("stroke-width", 2)
+                  .attr("stroke-dasharray", "6,4")
+                  .attr("stroke-linecap", "square")
+                  .attr("opacity", 0)
+                  .attr("pointer-events", "none")
+                  .transition()
+                  .duration(HC_DUR)
+                  .attr("opacity", 0.55)
+                ;[edgeL, edgeR].forEach((ex) => {
+                  gHost
+                    .append("line")
+                    .attr("class", "ghost-baseline")
+                    .attr("data-axis", axis)
+                    .attr("x1", ex)
+                    .attr("y1", ghostY - 5)
+                    .attr("x2", ex)
+                    .attr("y2", ghostY + 5)
+                    .attr("stroke", "#2d3748")
+                    .attr("stroke-width", 2)
+                    .attr("stroke-dasharray", "6,4")
+                    .attr("stroke-linecap", "round")
+                    .attr("opacity", 0)
+                    .attr("pointer-events", "none")
+                    .transition()
+                    .duration(HC_DUR)
+                    .attr("opacity", 0.55)
+                })
+              })
+            }
+          }
 
           svg
             .selectAll<
@@ -966,12 +1054,66 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("pointer-events", "none")
         })
 
+        // Capture baseline positions for the ghost trace on every full rebuild.
+        // This resets the ghost reference whenever data/scenarios change.
+        const posMap = new Map<string, number>()
+        baselineInfos.forEach(({ axis, tag, baseY }) => {
+          if (tag === "hist") posMap.set(axis, baseY)
+        })
+        initialBaselineRef.current = posMap
+        hasMorphedRef.current = false
+
+        const ghostLayer = g.append("g").attr("class", "ghost-baselines")
         const baselineLayer = g.append("g").attr("class", "baselines")
         const pathLayer = g.append("g").attr("class", "scenario-path")
         const distributionLayer = g
           .append("g")
           .attr("class", "distribution-dots")
         const dotsLayer = g.append("g").attr("class", "dots")
+
+        // Render ghost baseline if we've morphed away from the initial hydroclimate
+        if (hasMorphedRef.current && initialBaselineRef.current) {
+          const ghostPositions = initialBaselineRef.current
+          baselineInfos
+            .filter(({ tag }) => tag === "hist")
+            .forEach(({ axis, cx, w }) => {
+              const ghostY = ghostPositions.get(axis)
+              if (ghostY == null) return
+              const bracketHalfW = (isCompare ? w : w) * 0.45
+              const edgeL = cx - bracketHalfW
+              const edgeR = cx + bracketHalfW
+              ghostLayer
+                .append("line")
+                .attr("class", "ghost-baseline")
+                .attr("data-axis", axis)
+                .attr("x1", edgeL)
+                .attr("y1", ghostY)
+                .attr("x2", edgeR)
+                .attr("y2", ghostY)
+                .attr("stroke", "#2d3748")
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "6,4")
+                .attr("stroke-linecap", "square")
+                .attr("opacity", 0.55)
+                .attr("pointer-events", "none")
+              ;[edgeL, edgeR].forEach((ex) => {
+                ghostLayer
+                  .append("line")
+                  .attr("class", "ghost-baseline")
+                  .attr("data-axis", axis)
+                  .attr("x1", ex)
+                  .attr("y1", ghostY - 5)
+                  .attr("x2", ex)
+                  .attr("y2", ghostY + 5)
+                  .attr("stroke", "#2d3748")
+                  .attr("stroke-width", 2)
+                  .attr("stroke-dasharray", "6,4")
+                  .attr("stroke-linecap", "round")
+                  .attr("opacity", 0.55)
+                  .attr("pointer-events", "none")
+              })
+            })
+        }
 
         const TICK_HALF = 6
         baselineInfos.forEach(({ axis, tag, cx, baseY, w }) => {
