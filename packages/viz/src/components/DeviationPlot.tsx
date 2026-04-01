@@ -20,6 +20,7 @@ export interface DeviationPlotProps {
   highlightedIds?: Set<string> | null
   showBaselineStaircase?: boolean
   showScenarioPath?: boolean
+  showAllPaths?: boolean
   showTierZones?: boolean
   showDifferenceGlyphs?: boolean
   showThemeRings?: boolean
@@ -227,6 +228,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     highlightedIds,
     showBaselineStaircase = true,
     showScenarioPath = true,
+    showAllPaths = false,
     showTierZones = true,
     showDifferenceGlyphs = false,
     showThemeRings = false,
@@ -863,15 +865,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           !hasPinned && highlightedIds && highlightedIds.size > 0
 
         const getOpacity = (id: string) => {
-          if (pinnedScenarioIds.has(id)) return 1.0
-          if (dimUnpinned && hasPinned) return 0.1
-          if (sidebarHighlightActive) {
-            return highlightedIds!.has(id) ? 1.0 : 0.08
+          if (dimUnpinned && hasPinned) {
+            return pinnedScenarioIds.has(id) ? 1.0 : 0.1
           }
-          if (chosenIds && chosenIds.size > 0) {
-            return chosenIds.has(id) ? 0.9 : 0.25
-          }
-          return 0.8
+          return 1.0
         }
 
         const T_DUR = hasAnimatedRef.current ? 0 : 500
@@ -1156,7 +1153,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const drawPathForScenario = (scenarioId: string) => {
           pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
-          if (!showScenarioPath) return
+          if (!showScenarioPath && !showAllPaths) return
           const pts = dotPositions.get(scenarioId)
           const activeList = subcolumns[0]!.srcData
           const scenario = activeList.find((s) => s.id === scenarioId)
@@ -1165,6 +1162,14 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const color = hasScenarioColors
             ? lineColors[si] || colors.default
             : colors.default
+          const isPinned = pinnedScenarioIds.has(scenarioId)
+          const isHighlighted =
+            highlightedIds && highlightedIds.has(scenarioId)
+          const isBackground =
+            showAllPaths && !isPinned && !isHighlighted
+          const dimmed = dimUnpinned && hasPinned && !isPinned
+          let strokeOp = isBackground ? 0.55 : 0.45
+          if (dimmed) strokeOp = 0.07
           const pathGen = line<(typeof pts)[number]>()
             .x((d) => d.cx)
             .y((d) => d.cy)
@@ -1174,8 +1179,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("d", pathGen(pts) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
-            .attr("stroke-width", 1.5)
-            .attr("stroke-opacity", 0.45)
+            .attr("stroke-width", isBackground ? 1.2 : 1.5)
+            .attr("stroke-opacity", strokeOp)
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
             .attr("pointer-events", "none")
@@ -1366,12 +1371,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     hoverNotifyTimerRef.current = null
                   }
                   resetDotVisuals()
+                  pathLayer.selectAll("*").remove()
+                  if (showAllPaths) {
+                    data.forEach((s) => drawPathForScenario(s.id))
+                  }
                   if (hasPinned) {
-                    pathLayer.selectAll("*").remove()
                     pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
                     boostPinnedDots(pinnedScenarioIds)
-                  } else {
-                    pathLayer.selectAll("*").remove()
                   }
                   if (tooltipRef.current) hideTooltip(tooltipRef.current)
                   lastNotifiedIdRef.current = null
@@ -1385,10 +1391,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           })
         })
 
+        if (showAllPaths) {
+          data.forEach((scenario) => {
+            drawPathForScenario(scenario.id)
+          })
+        }
+
         if (hasPinned) {
           pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
           boostPinnedDots(pinnedScenarioIds)
-        } else if (highlightedIds && highlightedIds.size > 0) {
+        } else if (!showAllPaths && highlightedIds && highlightedIds.size > 0) {
           const hId = highlightedIds.values().next().value as string
           if (hId) drawPathForScenario(hId)
         }
@@ -1468,6 +1480,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         highlightedIds,
         showBaselineStaircase,
         showScenarioPath,
+        showAllPaths,
         showTierZones,
         showDifferenceGlyphs,
         showThemeRings,
