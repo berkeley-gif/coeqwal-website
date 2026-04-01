@@ -337,6 +337,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }
 
           // Transition dots
+          const morphHasPinned = pinnedScenarioIds.size > 0
           svg
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
             .each(function () {
@@ -355,6 +356,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 el.transition().duration(HC_DUR).attr("fill-opacity", 0)
                 return
               }
+              const restoreOp =
+                dimUnpinned && morphHasPinned && !pinnedScenarioIds.has(sid)
+                  ? 0.1
+                  : 1.0
               const r = scales.rScale(toTier(sv))
               const angle = getAngle(axisIdx)
               const dodgeOff = parseFloat(el.attr("data-dodge") ?? "0")
@@ -371,6 +376,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   scales.cy + r * Math.sin(angle) +
                     dodgeOff * Math.sin(perpAngle),
                 )
+                .attr("fill-opacity", restoreOp)
+                .attr("stroke-opacity", Math.min(restoreOp + 0.1, 1))
             })
 
           // Transition baseline highlight polygon

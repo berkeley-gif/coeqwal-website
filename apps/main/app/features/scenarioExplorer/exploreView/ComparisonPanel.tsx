@@ -184,6 +184,7 @@ export default function ComparisonPanel({
     multiValueOutcomeCodes,
     morphGeneration,
     allScenariosData,
+    hcRangeData,
   } = useComparisonData()
 
   // Sankey outcome selector state
@@ -209,6 +210,9 @@ export default function ComparisonPanel({
   const [deviationDimUnpinned, setDeviationDimUnpinned] = useState(false)
   const [deviationShowDistribution, setDeviationShowDistribution] =
     useState(false)
+  const [deviationShowHCRange, setDeviationShowHCRange] = useState(false)
+  const [deviationShowBaselineFill, setDeviationShowBaselineFill] =
+    useState(true)
   const deviationClimateMode = "off" as const
   const deviationMorphShowComp = false
 
@@ -791,6 +795,42 @@ export default function ComparisonPanel({
             }
             sx={{ mr: 1.5 }}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowHCRange}
+                onChange={(e) =>
+                  setDeviationShowHCRange(e.target.checked)
+                }
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                HC range
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowBaselineFill}
+                onChange={(e) =>
+                  setDeviationShowBaselineFill(e.target.checked)
+                }
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                baseline fill
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
           {/* Legend */}
           <Box
             sx={{
@@ -1190,6 +1230,9 @@ export default function ComparisonPanel({
           dimUnpinned={deviationDimUnpinned}
           showDistribution={deviationShowDistribution}
           distributionData={distributionData}
+          showHCRange={deviationShowHCRange}
+          hcRangeData={hcRangeData}
+          showBaselineFill={deviationShowBaselineFill}
         />
       )}
 
