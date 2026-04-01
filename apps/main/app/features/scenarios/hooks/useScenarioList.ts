@@ -36,7 +36,7 @@ export function useScenarioList() {
         shortCode: apiScenario.short_code,
         isActive: apiScenario.is_active,
         label: apiScenario.name,
-        description: apiScenario.description,
+        description: apiScenario.short_description ?? "",
         shortLabel: metadata.shortLabel ?? apiScenario.name,
         theme: metadata.theme,
         iconPath: metadata.iconPath,

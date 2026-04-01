@@ -51,7 +51,7 @@ export interface Scenario {
 
   /** Display label (from API name) */
   label: string
-  /** Full description (from API description) */
+  /** Short summary description (1-2 sentences, from API short_description) */
   description: string
   /** Compact label for tight spaces (local shortLabel or API name) */
   shortLabel: string

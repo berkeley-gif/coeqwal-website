@@ -7,7 +7,7 @@
  * Uses useScenarioList hook to get enriched scenario data from API + local metadata.
  */
 
-import React, { useMemo, useState, useRef } from "react"
+import React, { useMemo, useState, useRef, useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
@@ -16,6 +16,7 @@ import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import type { Scenario } from "../../scenarios/hooks/useScenarioList"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
+import { useScrollSyncRef } from "../components/useScrollSync"
 
 const THEME_ORDER: Record<ScenarioTheme, number> = {
   baseline: 0,
@@ -68,7 +69,15 @@ export default function ListView({
 
   const [sortBy, setSortBy] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const listScrollRef = useRef<HTMLDivElement>(null)
+  const listScrollLocalRef = useRef<HTMLDivElement>(null)
+  const syncRef = useScrollSyncRef("content")
+  const listScrollRef = useCallback(
+    (el: HTMLDivElement | null) => {
+      listScrollLocalRef.current = el
+      syncRef(el)
+    },
+    [syncRef],
+  )
 
   const handleSortChange = (
     outcome: string | null,
@@ -242,7 +251,7 @@ export default function ListView({
   }
 
   const scrollListToTop = () =>
-    listScrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })
+    listScrollLocalRef.current?.scrollTo({ top: 0, behavior: "smooth" })
 
   // Click a theme badge -> select all scenarios of that theme and float them to top.
   // Clicking the active theme again deselects those scenarios and clears the filter.
@@ -353,7 +362,7 @@ export default function ListView({
     showOnlyChosen,
     showAlternativeBaselines,
     compact: false,
-    showOperations: false,
+    outcomesOnly: true,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,
     onShowAlternativeBaselinesChange: setShowAlternativeBaselines,

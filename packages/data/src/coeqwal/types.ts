@@ -96,8 +96,8 @@ export interface ScenarioListItem {
   run_name: string
   /** Full scenario name */
   name: string
-  /** Detailed description */
-  description: string
+  /** Short summary description (1-2 sentences) */
+  short_description: string | null
   /** Whether this scenario is active/visible */
   is_active: boolean
   /** Hydroclimate variant (e.g., 2 = historical, 3 = warmer-wetter, 4 = warmer-drier) */

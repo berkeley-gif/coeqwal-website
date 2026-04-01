@@ -48,6 +48,8 @@ export interface StrategyGridProps {
   renderMode?: "all" | "headersOnly" | "contentOnly"
   /** When false, hides the key operations column (col 3) from the grid */
   showOperations?: boolean
+  /** When true, hides scenario title (col 2) and ops (col 3) — shows only outcomes */
+  outcomesOnly?: boolean
 
   // Sorting (optional)
   sortBy?: string | null

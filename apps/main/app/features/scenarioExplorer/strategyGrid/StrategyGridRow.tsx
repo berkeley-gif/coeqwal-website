@@ -37,6 +37,8 @@ export interface StrategyGridRowProps {
   layoutMode: LayoutMode
   /** When false, hides the key operations column */
   showOperations?: boolean
+  /** When true, only outcomes are shown (no checkbox, title, or ops) */
+  outcomesOnly?: boolean
   /** Show alternative baseline scenarios */
   showAlternativeBaselines: boolean
   /** Outcome names with display info */
@@ -84,6 +86,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   compact,
   layoutMode,
   showOperations = true,
+  outcomesOnly = false,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcome,
@@ -173,9 +176,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         gridColumn: "1 / -1",
         display: "grid",
         // Subgrid inherits parent's column tracks; compact uses simple 2-col
-        gridTemplateColumns: compact
-          ? "32px 1fr"
-          : { xs: "subgrid", sm: "subgrid" },
+        gridTemplateColumns: outcomesOnly
+          ? "1fr"
+          : compact
+            ? "32px 1fr"
+            : { xs: "subgrid", sm: "subgrid" },
         backgroundColor: isHighlighted ? theme.palette.common.white : "#faf8f5",
         borderRadius: theme.borderRadius.sm,
         // Compact mode uses row-level padding; non-compact uses column-level
@@ -202,60 +207,63 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         ...(isFirst && { marginTop: theme.scenarios.grid.row.firstOffset }),
       }}
     >
-      {/* Column 1: Checkbox */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end", // Align checkbox closer to scenario title
-          alignItems: "flex-start",
-          alignSelf: "start",
-          // Non-compact: offset by eyebrow height + margin so checkbox center
-          // aligns with the scenario title's first text line.
-          // Eyebrow row = badge height (0.6rem × 1.4 lineHeight + 3px py×2 ≈ 16.4px)
-          // + mb 4px. Add half of title line-height, subtract half of checkbox height.
-          ...(!compact && {
-            pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
-            pb: theme.scenarios.grid.row.padding,
-          }),
-          // Compact: checkbox spans all rows
-          ...(compact && { gridRow: "1 / -1" }),
-        }}
-      >
-        <Checkbox
-          checked={isChosen}
-          onChange={() => onToggleScenario(scenario.scenarioId)}
-          // WCAG 4.1.2: Provide context for which scenario this checkbox controls
-          inputProps={{
-            "aria-label": `Select ${scenario.label} scenario`,
-          }}
-          sx={{
-            padding: 0,
-            margin: 0,
-            cursor: "pointer",
-            transform: "scale(0.9)",
-          }}
-        />
-      </Box>
-
-      {/* Content: compact vs non-compact layout */}
-      {compact ? (
-        <CompactRowContent
-          scenario={scenario}
+      {outcomesOnly ? (
+        <OutcomesOnlyRowContent
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
-          onThemeBadgeClick={onThemeBadgeClick}
-          onIconClick={onIconClick}
         />
       ) : (
-        <NonCompactRowContent
-          scenario={scenario}
-          layoutMode={layoutMode}
-          showOperations={showOperations}
-          outcomeNames={outcomeNames}
-          renderOutcomeItem={renderOutcomeItem}
-          onThemeBadgeClick={onThemeBadgeClick}
-          onIconClick={onIconClick}
-        />
+        <>
+          {/* Column 1: Checkbox */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "flex-start",
+              alignSelf: "start",
+              ...(!compact && {
+                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
+                pb: theme.scenarios.grid.row.padding,
+              }),
+              ...(compact && { gridRow: "1 / -1" }),
+            }}
+          >
+            <Checkbox
+              checked={isChosen}
+              onChange={() => onToggleScenario(scenario.scenarioId)}
+              inputProps={{
+                "aria-label": `Select ${scenario.label} scenario`,
+              }}
+              sx={{
+                padding: 0,
+                margin: 0,
+                cursor: "pointer",
+                transform: "scale(0.9)",
+              }}
+            />
+          </Box>
+
+          {/* Content: compact vs non-compact layout */}
+          {compact ? (
+            <CompactRowContent
+              scenario={scenario}
+              outcomeNames={outcomeNames}
+              renderOutcomeItem={renderOutcomeItem}
+              onThemeBadgeClick={onThemeBadgeClick}
+              onIconClick={onIconClick}
+            />
+          ) : (
+            <NonCompactRowContent
+              scenario={scenario}
+              layoutMode={layoutMode}
+              showOperations={showOperations}
+              outcomeNames={outcomeNames}
+              renderOutcomeItem={renderOutcomeItem}
+              onThemeBadgeClick={onThemeBadgeClick}
+              onIconClick={onIconClick}
+            />
+          )}
+        </>
       )}
     </Box>
   )
@@ -542,6 +550,39 @@ function NonCompactRowContent({
         </Box>
       </Box>
     </>
+  )
+}
+
+/**
+ * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
+ * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
+ */
+function OutcomesOnlyRowContent({
+  outcomeNames,
+  renderOutcomeItem,
+}: {
+  outcomeNames: OutcomeName[]
+  renderOutcomeItem: (shortCode: string, displayName: string) => React.ReactNode
+}) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      sx={{
+        gridColumn: "1 / -1",
+        display: "grid",
+        gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
+        gap: theme.space.gap.sm,
+        pt: theme.scenarios.grid.glyphOffset,
+        pb: theme.scenarios.grid.row.padding,
+        pl: theme.scenarios.grid.divider.gap,
+        borderLeft: { sm: `1px solid ${theme.palette.grey[300]}` },
+      }}
+    >
+      {outcomeNames.map(({ shortCode, displayName }) =>
+        renderOutcomeItem(shortCode, displayName),
+      )}
+    </Box>
   )
 }
 
