@@ -72,8 +72,8 @@ export default function ComparisonPanel({
 
   const {
     highlightedScenario,
-    setHighlightedScenario,
-    setPinnedScenarioId,
+    pinnedScenarioIds,
+    togglePinnedScenario,
     relativeToBaseline,
     setRelativeToBaseline,
     highlightBaseline,
@@ -92,6 +92,11 @@ export default function ComparisonPanel({
   const chosenIds = useMemo(
     () => new Set(selectedScenarios),
     [selectedScenarios],
+  )
+
+  const pinnedSet = useMemo(
+    () => new Set(pinnedScenarioIds),
+    [pinnedScenarioIds],
   )
 
   // ── Hover state ─────────────────────────────────────────────────────────
@@ -310,24 +315,11 @@ export default function ComparisonPanel({
     return baselineScenario
   }, [baselineScenario, relativeToBaseline])
 
-  const highlightedScenarioRef = useRef(highlightedScenario)
-  useEffect(() => {
-    highlightedScenarioRef.current = highlightedScenario
-  }, [highlightedScenario])
-
-  const handleScenarioClick = useCallback(
-    (scenarioId: string) => {
-      setHighlightedScenario(
-        highlightedScenarioRef.current === scenarioId ? null : scenarioId,
-      )
-      setPinnedScenarioId(scenarioId)
-    },
-    [setHighlightedScenario, setPinnedScenarioId],
-  )
-
   const handleChartLineClick = useCallback(
-    (scenario: VerticalParallelLineData) => handleScenarioClick(scenario.id),
-    [handleScenarioClick],
+    (_scenario: VerticalParallelLineData) => {
+      // Pinning is handled by onPinnedToggle prop on the chart
+    },
+    [],
   )
 
   const handleBrushFilter = useCallback(
@@ -934,6 +926,8 @@ export default function ComparisonPanel({
           morphShowComparison={deviationMorphShowComp}
           scenarioThemes={scenarioThemeMap}
           morphGeneration={morphGeneration}
+          pinnedScenarioIds={pinnedSet}
+          onPinnedToggle={togglePinnedScenario}
         />
       )}
 
@@ -953,7 +947,7 @@ export default function ComparisonPanel({
               setHoveredScenario(null)
             }
           }}
-          onCellClick={(cell) => handleScenarioClick(cell.scenarioId)}
+          onCellClick={(cell) => togglePinnedScenario(cell.scenarioId)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
           morphGeneration={morphGeneration}
