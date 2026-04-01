@@ -40,9 +40,9 @@ export type ThemeKey =
   | "unthemed"
 
 // Range within each interpolator to sample from.
-// Start at 0.4 to skip the pale/light end; end at 0.95 to avoid pure black.
-const PALETTE_START = 0.4
-const PALETTE_END = 0.95
+// Start at 0.55 to skip pastels; end at 0.92 to avoid near-black.
+const PALETTE_START = 0.55
+const PALETTE_END = 0.92
 const PALETTE_STEPS = 7
 
 const makeThemePalette = (interpolator: (t: number) => string): string[] =>
