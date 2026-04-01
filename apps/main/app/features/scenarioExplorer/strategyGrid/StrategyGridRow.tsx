@@ -15,10 +15,12 @@ import {
   OutcomeGlyphItem,
   OperationsIconGroup,
   StrategyHeader,
+  TierSummaryCell,
   type ChartDataPoint,
   type OutcomeName,
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
+import { useScenarioExplorerStore } from "../store"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 
@@ -104,6 +106,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onIconClick,
 }: StrategyGridRowProps) {
   const theme = useTheme()
+  const outcomeDisplayMode = useScenarioExplorerStore(
+    (s) => s.outcomeDisplayMode,
+  )
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
@@ -111,10 +116,17 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   // Refs to store glyph container elements for tooltip anchoring
   const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
+  const handleOutcomeClick = (shortCode: string) => {
+    const anchor = glyphRefs.current[shortCode]
+    if (anchor) {
+      onTooltipToggle(shortCode, anchor)
+    }
+    onTierClick?.(scenario.scenarioId, shortCode)
+  }
+
   /**
-   * Render a single outcome glyph item.
-   * Handles all the display logic for labels, controls, and interaction.
-   * Clicking the glyph triggers the contextual tooltip with scenario data.
+   * Render a single outcome item — either a summary cell or full glyph
+   * depending on the outcomeDisplayMode store value.
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
     const chartData = scenarioChartData[shortCode]
@@ -122,8 +134,25 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === shortCode
 
-    // In aligned grid mode, labels and controls are in the header row
-    // In all other modes (compact, map view, xs-md responsive), show below glyph
+    if (outcomeDisplayMode === "summary") {
+      return (
+        <Box
+          key={shortCode}
+          ref={(el: HTMLDivElement | null) => {
+            glyphRefs.current[shortCode] = el
+          }}
+        >
+          <TierSummaryCell
+            chartData={chartData}
+            isActive={isActive}
+            isTooltipActive={activeTooltip === shortCode}
+            onClick={() => handleOutcomeClick(shortCode)}
+          />
+        </Box>
+      )
+    }
+
+    // Distribution mode — full glyph
     const showLabelBelowGlyph = !isAlignedGrid
     const showControlsBelowGlyph = !isAlignedGrid
 
@@ -146,15 +175,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           showInfoButton={showControlsBelowGlyph}
           showSortButton={showControlsBelowGlyph && sortEnabled}
           sortState={isSorted ? sortDirection : null}
-          // Click glyph to open contextual tooltip AND trigger map visualization
-          onGlyphClick={() => {
-            const anchor = glyphRefs.current[shortCode]
-            if (anchor) {
-              onTooltipToggle(shortCode, anchor)
-            }
-            // Also trigger map visualization if handler provided (pass outcomeCode)
-            onTierClick?.(scenario.scenarioId, shortCode)
-          }}
+          onGlyphClick={() => handleOutcomeClick(shortCode)}
           onInfoClick={(e) => {
             onTooltipToggle(shortCode, e.currentTarget)
           }}
@@ -573,8 +594,8 @@ function OutcomesOnlyRowContent({
         display: "grid",
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
-        pt: theme.scenarios.grid.glyphOffset,
-        pb: theme.scenarios.grid.row.padding,
+        pt: "6px",
+        pb: "6px",
         pl: theme.scenarios.grid.divider.gap,
         borderLeft: { sm: `1px solid ${theme.palette.grey[300]}` },
       }}

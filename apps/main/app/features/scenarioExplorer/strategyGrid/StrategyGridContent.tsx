@@ -14,7 +14,7 @@
  */
 
 import React, { useCallback } from "react"
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type {
   ChartDataPoint,
   OutcomeName,
@@ -24,6 +24,7 @@ import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
 import type { ScenarioTheme } from "../../../content/scenarios"
+import { THEME_LABEL_CONFIG } from "../../../content/themes"
 
 export interface StrategyGridContentProps {
   /** Scenarios to display */
@@ -205,16 +206,54 @@ export function StrategyGridContent({
         const shouldShowIconDivider =
           showIconDivider && isIconMatch && !isNextIconMatch
 
-        // Show divider whenever adjacent scenarios belong to different theme groups
-        const shouldShowThemeGroupDivider =
+        // Show theme subheader when this is the first scenario in a new theme group
+        const prevScenario = index > 0 ? filteredArray[index - 1] : undefined
+        const isNewThemeGroup =
           showAllThemeDividers &&
-          nextScenario !== undefined &&
-          scenario.theme !== nextScenario.theme
+          (index === 0 || scenario.theme !== prevScenario?.theme)
 
         const rows: React.ReactNode[] = []
 
+        // Theme group subheader
+        if (isNewThemeGroup && scenario.theme) {
+          const themeConfig = THEME_LABEL_CONFIG[scenario.theme as ScenarioTheme]
+          const themeColors =
+            theme.palette.waterThemes[scenario.theme as ScenarioTheme]
+          if (themeConfig && themeColors) {
+            rows.push(
+              <Box
+                key={`theme-header-${scenario.theme}-${index}`}
+                sx={{
+                  gridColumn: "1 / -1",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mt: index === 0 ? 0 : theme.space.section.xs,
+                  mb: 0.5,
+                  px: 0.5,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor: themeColors.text,
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography
+                  variant="smallSectionLabel"
+                  sx={{ color: themeColors.text }}
+                >
+                  {themeConfig.label}
+                </Typography>
+              </Box>,
+            )
+          }
+        }
+
         // Main scenario row
-        // Use context-aware tooltip handler to include scenario info for accessibility
         rows.push(
           <StrategyGridRow
             key={scenario.scenarioId}
@@ -290,20 +329,6 @@ export function StrategyGridContent({
           )
         }
 
-        // Theme group boundary divider — between every theme group in the default sort
-        if (shouldShowThemeGroupDivider) {
-          rows.push(
-            <Box
-              key={`theme-group-divider-${scenario.scenarioId}`}
-              sx={{
-                gridColumn: "1 / -1",
-                my: theme.space.section.sm,
-                height: "1px",
-                backgroundColor: theme.palette.grey[300],
-              }}
-            />,
-          )
-        }
 
         return rows
       })}

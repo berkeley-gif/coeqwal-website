@@ -32,6 +32,8 @@ import {
   OperationsIconGroup,
 } from "../../scenarios/components/shared"
 import { useScrollSyncRef } from "./useScrollSync"
+import { THEME_LABEL_CONFIG } from "../../../content/themes"
+import type { ScenarioTheme } from "../../../content/scenarios"
 const PRIMARY_BASELINE_ID = "s0020"
 
 interface ScenarioSelectionSidebarProps {
@@ -256,7 +258,7 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {filteredScenarios.map((scenario) => {
+        {filteredScenarios.flatMap((scenario, index) => {
           const isChosen = selectedScenarios.includes(scenario.scenarioId)
           const isPinned = pinnedScenarioId === scenario.scenarioId
           const color = scenarioColors?.[scenario.scenarioId]
@@ -265,7 +267,52 @@ export default function ScenarioSelectionSidebar({
             scenario.scenarioId === highlightedScenario ||
             scenario.scenarioId === hoveredScenarioId
 
-          return (
+          const prevScenario =
+            index > 0 ? filteredScenarios[index - 1] : undefined
+          const isNewThemeGroup =
+            index === 0 || scenario.theme !== prevScenario?.theme
+
+          const items: React.ReactNode[] = []
+
+          if (isNewThemeGroup && scenario.theme) {
+            const themeConfig =
+              THEME_LABEL_CONFIG[scenario.theme as ScenarioTheme]
+            const themeColors =
+              theme.palette.waterThemes[scenario.theme as ScenarioTheme]
+            if (themeConfig && themeColors) {
+              items.push(
+                <Box
+                  key={`theme-header-${scenario.theme}-${index}`}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    px: 1.5,
+                    pt: index === 0 ? 1 : 1.5,
+                    pb: 0.5,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      backgroundColor: themeColors.text,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography
+                    variant="smallSectionLabel"
+                    sx={{ color: themeColors.text }}
+                  >
+                    {themeConfig.label}
+                  </Typography>
+                </Box>,
+              )
+            }
+          }
+
+          items.push(
             <Box
               key={scenario.scenarioId}
               ref={(el: HTMLDivElement | null) => {
@@ -441,8 +488,10 @@ export default function ScenarioSelectionSidebar({
                   </IconButton>
                 </Tooltip>
               </Box>
-            </Box>
+            </Box>,
           )
+
+          return items
         })}
       </Box>
     </Box>

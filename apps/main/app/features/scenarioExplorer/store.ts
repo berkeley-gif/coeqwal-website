@@ -60,6 +60,7 @@ interface ScenarioExplorerState {
   showAlternativeBaselines: boolean
   showDefinitions: boolean
   showKeyOperations: boolean
+  outcomeDisplayMode: "summary" | "distribution"
   showMap: boolean
 
   // Share staging
@@ -111,6 +112,7 @@ interface ScenarioExplorerActions {
   setShowAlternativeBaselines: (show: boolean) => void
   setShowDefinitions: (show: boolean) => void
   setShowKeyOperations: (show: boolean) => void
+  setOutcomeDisplayMode: (mode: "summary" | "distribution") => void
   setShowMap: (show: boolean) => void
 
   // Share staging
@@ -159,6 +161,7 @@ const initialState: ScenarioExplorerState = {
   showAlternativeBaselines: false,
   showDefinitions: false,
   showKeyOperations: false,
+  outcomeDisplayMode: "summary",
   showMap: false,
   sharedScenarioIds: [],
   showShareDrawer: false,
@@ -270,6 +273,11 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowKeyOperations: (show) =>
       set((state) => {
         state.showKeyOperations = show
+      }),
+
+    setOutcomeDisplayMode: (mode) =>
+      set((state) => {
+        state.outcomeDisplayMode = mode
       }),
 
     setShowMap: (show) =>
