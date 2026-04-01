@@ -189,6 +189,7 @@ export default function ComparisonPanel({
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(false)
   const [deviationShowPath, setDeviationShowPath] = useState(false)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
+  const [deviationDimUnpinned, setDeviationDimUnpinned] = useState(false)
   const deviationClimateMode = "off" as const
   const deviationMorphShowComp = false
 
@@ -555,6 +556,23 @@ export default function ComparisonPanel({
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
                 tier zones
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationDimUnpinned}
+                disabled={pinnedScenarioIds.length === 0}
+                onChange={(e) => setDeviationDimUnpinned(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                focus pinned
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -928,6 +946,7 @@ export default function ComparisonPanel({
           morphGeneration={morphGeneration}
           pinnedScenarioIds={pinnedSet}
           onPinnedToggle={togglePinnedScenario}
+          dimUnpinned={deviationDimUnpinned}
         />
       )}
 

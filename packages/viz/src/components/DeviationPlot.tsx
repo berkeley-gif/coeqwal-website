@@ -35,6 +35,7 @@ export interface DeviationPlotProps {
   morphGeneration?: number
   pinnedScenarioIds?: Set<string>
   onPinnedToggle?: (scenarioId: string) => void
+  dimUnpinned?: boolean
 }
 
 function toTier(v: number): number {
@@ -234,6 +235,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     morphGeneration,
     pinnedScenarioIds: pinnedScenarioIdsProp,
     onPinnedToggle,
+    dimUnpinned = false,
   }) => {
     const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
     const svgRef = useRef<SVGSVGElement>(null)
@@ -707,6 +709,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const getOpacity = (id: string) => {
           if (pinnedScenarioIds.has(id)) return 1.0
+          if (dimUnpinned && hasPinned) return 0.1
           if (sidebarHighlightActive) {
             return highlightedIds!.has(id) ? 1.0 : 0.08
           }
@@ -1193,6 +1196,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         showThemeRings,
         scenarioThemeRingColors,
         pinnedScenarioIds,
+        dimUnpinned,
         comparisonData,
         comparisonBaselineData,
         climateMode,
