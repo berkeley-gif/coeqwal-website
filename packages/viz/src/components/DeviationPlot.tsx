@@ -1245,10 +1245,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     .attr("cy", startY + row * locDotDiam)
                     .attr("r", locDotR)
                     .attr("fill", color)
-                    .attr("fill-opacity", 0.45)
-                    .attr("stroke", color)
-                    .attr("stroke-width", 0.6)
-                    .attr("stroke-opacity", 0.6)
+                    .attr("fill-opacity", 0.85)
+                    .attr("stroke", "rgba(0,0,0,0.25)")
+                    .attr("stroke-width", 0.5)
                     .attr("pointer-events", "none")
                     .attr("class", "dist-dot")
                 }
