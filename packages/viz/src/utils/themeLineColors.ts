@@ -39,18 +39,26 @@ export type ThemeKey =
   | "cws"
   | "unthemed"
 
-// Range within each interpolator to sample from.
-// Start at 0.55 to skip pastels; end at 0.92 to avoid near-black.
-const PALETTE_START = 0.55
-const PALETTE_END = 0.92
+// Sample 7 evenly spaced points from each interpolator, then reorder
+// so that consecutive indices get maximally distant colors.
+const PALETTE_START = 0.3
+const PALETTE_END = 0.97
 const PALETTE_STEPS = 7
 
-const makeThemePalette = (interpolator: (t: number) => string): string[] =>
-  Array.from({ length: PALETTE_STEPS }, (_, i) =>
+// Interleave order: [0,4,2,6,1,5,3] maximises distance between
+// consecutive slots so the first 2–4 scenarios assigned are always
+// highly distinguishable, regardless of how many are active.
+const INTERLEAVE = [0, 4, 2, 6, 1, 5, 3]
+
+const makeThemePalette = (interpolator: (t: number) => string): string[] => {
+  const linear = Array.from({ length: PALETTE_STEPS }, (_, i) =>
     interpolator(
-      PALETTE_START + (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
+      PALETTE_START +
+        (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
     ),
   )
+  return INTERLEAVE.map((idx) => linear[idx]!)
+}
 
 /**
  * Seven mid-to-dark colors per theme, sampled from D3 multi-hue interpolators.
