@@ -29,6 +29,7 @@ import {
   VerticalParallelLinePlotPeak,
   ParityPlot,
   DeviationPlot,
+  RadarPlot,
   TierHeatmap,
   TierSankey,
   type VerticalParallelLineData,
@@ -46,9 +47,16 @@ import { useScenarioList } from "../../scenarios/hooks"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode = "parallel" | "parity" | "deviation" | "heatmap" | "sankey"
+type ChartMode =
+  | "radar"
+  | "parallel"
+  | "parity"
+  | "deviation"
+  | "heatmap"
+  | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
+  { key: "radar", label: "Radar" },
   { key: "parallel", label: "Parallel" },
   { key: "parity", label: "Parity" },
   { key: "deviation", label: "Column" },
@@ -68,7 +76,7 @@ export default function ComparisonPanel({
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"))
 
-  const [chartMode, setChartMode] = useState<ChartMode>("parallel")
+  const [chartMode, setChartMode] = useState<ChartMode>("radar")
 
   const {
     highlightedScenario,
@@ -187,8 +195,16 @@ export default function ComparisonPanel({
   const [paritySpreadDots, setParitySpreadDots] = useState(false)
   const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
+  const [radarHighlightBaseline, setRadarHighlightBaseline] = useState(true)
+  const [radarShowPath, setRadarShowPath] = useState(true)
+  const [radarShowAllPaths, setRadarShowAllPaths] = useState(false)
+  const [radarShowTierZones, setRadarShowTierZones] = useState(true)
+  const [radarDimUnpinned, setRadarDimUnpinned] = useState(false)
+  const [radarShowDistribution, setRadarShowDistribution] = useState(false)
+
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(false)
   const [deviationShowPath, setDeviationShowPath] = useState(false)
+  const [deviationShowAllPaths, setDeviationShowAllPaths] = useState(false)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
   const [deviationDimUnpinned, setDeviationDimUnpinned] = useState(false)
   const [deviationShowDistribution, setDeviationShowDistribution] =
@@ -553,6 +569,119 @@ export default function ComparisonPanel({
           />
         </Box>
       )}
+      {chartMode === "radar" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 0.5,
+            alignItems: "center",
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarHighlightBaseline}
+                onChange={(e) =>
+                  setRadarHighlightBaseline(e.target.checked)
+                }
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                highlight baseline
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarShowPath}
+                onChange={(e) => setRadarShowPath(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                scenario path on hover
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarShowAllPaths}
+                onChange={(e) => setRadarShowAllPaths(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show all paths
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarShowTierZones}
+                onChange={(e) => setRadarShowTierZones(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                tier zones
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarDimUnpinned}
+                disabled={pinnedScenarioIds.length === 0}
+                onChange={(e) => setRadarDimUnpinned(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                focus pinned
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={radarShowDistribution}
+                disabled={pinnedScenarioIds.length === 0}
+                onChange={(e) =>
+                  setRadarShowDistribution(e.target.checked)
+                }
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show distributions
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
       {chartMode === "deviation" && (
         <Box
           sx={{
@@ -590,6 +719,22 @@ export default function ComparisonPanel({
             label={
               <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
                 scenario path on hover
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowAllPaths}
+                onChange={(e) => setDeviationShowAllPaths(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show all paths
               </Typography>
             }
             sx={{ mr: 1.5 }}
@@ -992,6 +1137,32 @@ export default function ComparisonPanel({
         />
       )}
 
+      {chartMode === "radar" && (
+        <RadarPlot
+          data={parityData}
+          axes={deviationSortedAxes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={parityLineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={handleChartLineClick}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+          highlightBaseline={radarHighlightBaseline}
+          showScenarioPath={radarShowPath}
+          showAllPaths={radarShowAllPaths}
+          showTierZones={radarShowTierZones}
+          scenarioThemes={scenarioThemeMap}
+          morphGeneration={morphGeneration}
+          pinnedScenarioIds={pinnedSet}
+          onPinnedToggle={togglePinnedScenario}
+          dimUnpinned={radarDimUnpinned}
+          showDistribution={radarShowDistribution}
+          distributionData={distributionData}
+        />
+      )}
+
       {chartMode === "deviation" && (
         <DeviationPlot
           data={parityData}
@@ -1006,6 +1177,7 @@ export default function ComparisonPanel({
           highlightedIds={highlightedIds}
           showBaselineStaircase={deviationShowStaircase}
           showScenarioPath={deviationShowPath}
+          showAllPaths={deviationShowAllPaths}
           showTierZones={deviationShowTierZones}
           showDifferenceGlyphs={false}
           showThemeRings={false}
