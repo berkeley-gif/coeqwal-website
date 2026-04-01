@@ -35,6 +35,8 @@ export interface StrategyGridRowProps {
   compact: boolean
   /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
+  /** When false, hides the key operations column */
+  showOperations?: boolean
   /** Show alternative baseline scenarios */
   showAlternativeBaselines: boolean
   /** Outcome names with display info */
@@ -81,6 +83,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   isChosen,
   compact,
   layoutMode,
+  showOperations = true,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcome,
@@ -247,6 +250,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <NonCompactRowContent
           scenario={scenario}
           layoutMode={layoutMode}
+          showOperations={showOperations}
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
           onThemeBadgeClick={onThemeBadgeClick}
@@ -383,6 +387,7 @@ function CompactRowContent({
 interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay
   layoutMode: LayoutMode
+  showOperations?: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
@@ -392,6 +397,7 @@ interface NonCompactRowContentProps {
 function NonCompactRowContent({
   scenario,
   layoutMode,
+  showOperations = true,
   outcomeNames,
   renderOutcomeItem,
   onThemeBadgeClick,
@@ -428,44 +434,42 @@ function NonCompactRowContent({
       </Box>
 
       {/* Column 3: Key operations - at xs, stacks in column 2 under scenario */}
-      <Box
-        sx={{
-          gridColumn: { xs: "2", sm: "3" },
-          // Vertical divider only in full mode
-          borderLeft: isWrappedMode
-            ? "none"
-            : { sm: `1px solid ${theme.palette.grey[300]}` },
-          // Full mode: gap after divider; responsive: match scenario title padding
-          pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
-          pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: theme.space.gap.md,
-          justifyContent: "flex-start",
-          alignItems: "flex-start",
-          // Full mode: row padding; responsive: match scenario title padding
-          pt: theme.scenarios.grid.row.padding,
-          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
-        }}
-      >
-        {/* Key operations header - only at xs breakpoint */}
-        <Typography
-          variant="subtitle2"
+      {showOperations && (
+        <Box
           sx={{
-            display: { xs: "block", sm: "none" },
-            color: theme.palette.grey[600],
-            fontWeight: 500,
+            gridColumn: { xs: "2", sm: "3" },
+            borderLeft: isWrappedMode
+              ? "none"
+              : { sm: `1px solid ${theme.palette.grey[300]}` },
+            pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
+            pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: theme.space.gap.md,
+            justifyContent: "flex-start",
+            alignItems: "flex-start",
+            pt: theme.scenarios.grid.row.padding,
+            pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
           }}
         >
-          Key operations
-        </Typography>
-        <OperationsIconGroup
-          scenarioId={scenario.scenarioId}
-          theme={scenario.theme}
-          size="md"
-          onIconClick={onIconClick}
-        />
-      </Box>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              display: { xs: "block", sm: "none" },
+              color: theme.palette.grey[600],
+              fontWeight: 500,
+            }}
+          >
+            Key operations
+          </Typography>
+          <OperationsIconGroup
+            scenarioId={scenario.scenarioId}
+            theme={scenario.theme}
+            size="md"
+            onIconClick={onIconClick}
+          />
+        </Box>
+      )}
 
       {/* Column 4: Outcome glyphs - wraps below in wrapped mode */}
       <Box

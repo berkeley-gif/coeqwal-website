@@ -4,11 +4,10 @@
  * UnifiedToolLayout — Persistent three-panel chrome for the Scenario Explorer.
  *
  * Layout:
- *   [Sidebar (fixed width)] [Tool area (flex 1)] [Map panel (optional, 1/3)]
+ *   [Sidebar (dynamic width)] [Tool area (flex 1)] [Map panel (optional, 1/3)]
  *
- * The sidebar and toolbar stay mounted while tool content swaps in/out.
- * The map panel is toggled via `showMap` in the store and drives the
- * persistent map layer via mapActions.
+ * Sidebar width animates between collapsed and expanded states based on
+ * whether the key operations column is visible.
  */
 
 import React, { useEffect } from "react"
@@ -16,7 +15,8 @@ import { Box, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import { mapActions } from "../../map/store"
 
-const SIDEBAR_WIDTH = 280
+const SIDEBAR_WIDTH_COLLAPSED = 320
+const SIDEBAR_WIDTH_EXPANDED = 480
 const MAP_WIDTH_PERCENT = 25
 
 interface UnifiedToolLayoutProps {
@@ -32,6 +32,13 @@ export default function UnifiedToolLayout({
 }: UnifiedToolLayoutProps) {
   const theme = useTheme()
   const showMap = useScenarioExplorerStore((s) => s.showMap)
+  const showKeyOperations = useScenarioExplorerStore(
+    (s) => s.showKeyOperations,
+  )
+
+  const sidebarWidth = showKeyOperations
+    ? SIDEBAR_WIDTH_EXPANDED
+    : SIDEBAR_WIDTH_COLLAPSED
 
   useEffect(() => {
     if (showMap) {
@@ -56,10 +63,10 @@ export default function UnifiedToolLayout({
         overflow: "hidden",
       }}
     >
-      {/* Sidebar (fixed width, always visible) */}
+      {/* Sidebar (dynamic width, always visible) */}
       <Box
         sx={{
-          width: SIDEBAR_WIDTH,
+          width: sidebarWidth,
           flexShrink: 0,
           display: "flex",
           flexDirection: "column",
@@ -67,6 +74,7 @@ export default function UnifiedToolLayout({
           overflow: "hidden",
           borderRight: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
+          transition: "width 300ms ease",
         }}
       >
         {sidebar}
@@ -114,4 +122,4 @@ export default function UnifiedToolLayout({
   )
 }
 
-export { SIDEBAR_WIDTH }
+export { SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_WIDTH_EXPANDED }

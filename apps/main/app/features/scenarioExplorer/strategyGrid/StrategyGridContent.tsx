@@ -52,6 +52,8 @@ export interface StrategyGridContentProps {
   compact: boolean
   /** Layout mode for responsive behavior */
   layoutMode: LayoutMode
+  /** When false, hides the key operations column */
+  showOperations?: boolean
   /** Outcome names with display info */
   outcomeNames: OutcomeName[]
   /** Get chart data for a scenario */
@@ -110,6 +112,7 @@ export function StrategyGridContent({
   showAlternativeBaselines,
   compact,
   layoutMode,
+  showOperations = true,
   outcomeNames,
   getChartDataForScenario,
   selectedOutcomes,
@@ -218,6 +221,7 @@ export function StrategyGridContent({
             isChosen={selectedScenarios.includes(scenario.scenarioId)}
             compact={compact}
             layoutMode={layoutMode}
+            showOperations={showOperations}
             showAlternativeBaselines={showAlternativeBaselines}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}

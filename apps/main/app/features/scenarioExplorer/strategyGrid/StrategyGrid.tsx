@@ -56,6 +56,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onShowAlternativeBaselinesChange,
   compact = false,
   renderMode = "all",
+  showOperations = true,
   sortBy,
   sortDirection = "asc",
   onSortChange,
@@ -147,11 +148,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
            */
           gridTemplateColumns: {
             xs: theme.scenarios.grid.columns.xs,
-            sm: theme.scenarios.grid.columns.sm,
+            sm: showOperations
+              ? theme.scenarios.grid.columns.sm
+              : "32px minmax(0, 1fr) 0fr 1fr",
           },
-          // Custom breakpoint for full 4-column layout at 1400px+
           [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
-            gridTemplateColumns: theme.scenarios.grid.columns.full,
+            gridTemplateColumns: showOperations
+              ? theme.scenarios.grid.columns.full
+              : "32px 0.382fr 0fr 1fr",
           },
           /**
            * Grid gap configuration:
@@ -180,6 +184,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             outcomeNames={outcomeNames}
             compact={compact}
             layoutMode={layoutMode}
+            showOperations={showOperations}
             activeTooltip={activeTooltip}
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}
@@ -209,6 +214,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             showAlternativeBaselines={showAlternativeBaselines}
             compact={compact}
             layoutMode={layoutMode}
+            showOperations={showOperations}
             outcomeNames={outcomeNames}
             getChartDataForScenario={getChartDataForScenario}
             selectedOutcomes={selectedOutcomes}
