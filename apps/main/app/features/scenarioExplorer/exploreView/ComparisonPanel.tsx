@@ -41,9 +41,8 @@ import {
 } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
-import { getOutcomeName, OUTCOME_CODE_ORDER } from "../../../content/outcomes"
+import { getOutcomeName } from "../../../content/outcomes"
 import { useScenarioList } from "../../scenarios/hooks"
-import mockHydroclimateTiers from "../data/mockHydroclimateTiers.json"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
@@ -185,11 +184,8 @@ export default function ComparisonPanel({
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(false)
   const [deviationShowPath, setDeviationShowPath] = useState(false)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
-  const [deviationClimateMode, setDeviationClimateMode] = useState<
-    "off" | "morph" | "compare"
-  >("off")
-  const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
-  const [deviationComparisonHC] = useState("warmer-wetter")
+  const deviationClimateMode = "off" as const
+  const deviationMorphShowComp = false
 
   // Map display names -> outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
@@ -223,59 +219,6 @@ export default function ComparisonPanel({
     })
     return map
   }, [parityData, getThemeForScenario])
-
-  // Mock comparison hydroclimate data -> VerticalParallelLineData[]
-  const mockHC = (
-    mockHydroclimateTiers.hydroclimates as Record<
-      string,
-      {
-        label: string
-        description: string
-        scenarios: Record<string, Record<string, number>>
-      }
-    >
-  )[deviationComparisonHC]
-  const deviationComparisonLabel = mockHC?.label ?? deviationComparisonHC
-
-  const deviationComparisonData = useMemo<VerticalParallelLineData[]>(() => {
-    if (!mockHC) return []
-    const nameMap = new Map(scenarios.map((s) => [s.id, s.name]))
-    return parityData
-      .filter((s) => mockHC.scenarios[s.id])
-      .map((s) => {
-        const raw = mockHC.scenarios[s.id]!
-        const values: Record<string, number | null> = {}
-        OUTCOME_CODE_ORDER.forEach((code) => {
-          const ns = raw[code]
-          const displayName = getOutcomeName(code)
-          values[displayName] = ns != null ? ns * 2 - 1 : null
-        })
-        return {
-          id: s.id,
-          name: nameMap.get(s.id) ?? s.id,
-          values,
-          highlighted: false,
-        }
-      })
-  }, [mockHC, parityData, scenarios])
-
-  const deviationComparisonBaseline = useMemo<
-    VerticalParallelLineData | undefined
-  >(() => {
-    if (!mockHC?.scenarios["s0020"]) return undefined
-    const raw = mockHC.scenarios["s0020"]!
-    const values: Record<string, number | null> = {}
-    OUTCOME_CODE_ORDER.forEach((code) => {
-      const ns = raw[code]
-      values[getOutcomeName(code)] = ns != null ? ns * 2 - 1 : null
-    })
-    return {
-      id: "s0020",
-      name: "Baseline (comparison)",
-      values,
-      highlighted: false,
-    }
-  }, [mockHC])
 
   // Deviation plot: sort outcome columns by historical baseline tier score
   // so columns stay stable when switching hydroclimate periods.
@@ -624,58 +567,6 @@ export default function ComparisonPanel({
             }
             sx={{ mr: 1.5 }}
           />
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              ml: 1,
-              pl: 1,
-              borderLeft: `1px solid ${theme.palette.grey[300]}`,
-            }}
-          >
-            {(["historical", "comparison"] as const).map((mode) => {
-              const isComp = mode === "comparison"
-              const isActive = isComp
-                ? deviationClimateMode === "morph" && deviationMorphShowComp
-                : deviationClimateMode !== "morph" || !deviationMorphShowComp
-              return (
-                <Box
-                  key={mode}
-                  component="button"
-                  onClick={() => {
-                    if (isComp) {
-                      setDeviationClimateMode("morph")
-                      setDeviationMorphShowComp(true)
-                    } else {
-                      if (deviationClimateMode === "morph") {
-                        setDeviationMorphShowComp(false)
-                      }
-                    }
-                  }}
-                  sx={{
-                    fontSize: "0.72rem",
-                    border: `1px solid ${theme.palette.grey[300]}`,
-                    borderRight: isComp ? undefined : "none",
-                    borderRadius: isComp
-                      ? `0 ${theme.borderRadius.xs}px ${theme.borderRadius.xs}px 0`
-                      : `${theme.borderRadius.xs}px 0 0 ${theme.borderRadius.xs}px`,
-                    px: 1,
-                    py: 0.25,
-                    background: isActive
-                      ? theme.palette.grey[200]
-                      : theme.palette.background.paper,
-                    color: theme.palette.grey[800],
-                    cursor: "pointer",
-                    outline: "none",
-                    fontWeight: isActive ? 600 : 400,
-                    "&:hover": { background: theme.palette.grey[100] },
-                  }}
-                >
-                  {isComp ? deviationComparisonLabel : "Historical"}
-                </Box>
-              )
-            })}
-          </Box>
           {/* Legend */}
           <Box
             sx={{
@@ -1039,15 +930,6 @@ export default function ComparisonPanel({
           showTierZones={deviationShowTierZones}
           showDifferenceGlyphs={false}
           showThemeRings={false}
-          comparisonData={
-            deviationClimateMode !== "off" ? deviationComparisonData : undefined
-          }
-          comparisonBaselineData={
-            deviationClimateMode !== "off"
-              ? deviationComparisonBaseline
-              : undefined
-          }
-          comparisonLabel={deviationComparisonLabel}
           climateMode={deviationClimateMode}
           morphShowComparison={deviationMorphShowComp}
           scenarioThemes={scenarioThemeMap}

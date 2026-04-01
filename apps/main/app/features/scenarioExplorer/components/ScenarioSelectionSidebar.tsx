@@ -413,12 +413,14 @@ export default function ScenarioSelectionSidebar({
                     : "transparent"
                 }`,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
-                backgroundColor: isHighlightedBg(isActive, theme.palette.grey[900]),
+                backgroundColor: isActive
+                  ? `${accentColor}1A`
+                  : "transparent",
                 transition:
                   "background-color 200ms ease, border-color 200ms ease",
                 "&:hover": {
                   backgroundColor: isActive
-                    ? theme.palette.grey[900]
+                    ? `${accentColor}26`
                     : theme.palette.interaction.selectedBackground,
                   borderLeftColor: accentColor,
                 },
@@ -435,10 +437,6 @@ export default function ScenarioSelectionSidebar({
                   flexShrink: 0,
                   mt: "2px",
                   transform: "scale(0.85)",
-                  color: isActive ? "rgba(255,255,255,0.5)" : undefined,
-                  "&.Mui-checked": isActive
-                    ? { color: "rgba(255,255,255,0.85)" }
-                    : {},
                 }}
               />
 
@@ -575,10 +573,6 @@ export default function ScenarioSelectionSidebar({
       </Box>
     </Box>
   )
-}
-
-function isHighlightedBg(isActive: boolean, grey900: string) {
-  return isActive ? grey900 : "transparent"
 }
 
 /** Small toggle chip used in the visibility controls row */
