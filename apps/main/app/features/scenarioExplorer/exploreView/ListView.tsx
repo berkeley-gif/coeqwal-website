@@ -40,7 +40,7 @@ export default function ListView({
 }: ListViewProps) {
   const theme = useTheme()
 
-  const { hydroclimatePeriod } = useScenarioExplorerStore()
+  const { hydroclimatePeriod, setIsSortActive } = useScenarioExplorerStore()
   const {
     siblingGroups,
     buildIdMapping,
@@ -85,6 +85,7 @@ export default function ListView({
   ) => {
     setSortBy(outcome)
     setSortDirection(direction)
+    setIsSortActive(outcome !== null)
   }
 
   const {
@@ -253,6 +254,24 @@ export default function ListView({
   const scrollListToTop = () =>
     listScrollLocalRef.current?.scrollTo({ top: 0, behavior: "smooth" })
 
+  const handleThemeGroupToggle = (themeKey: string) => {
+    const themeIds = scenarios
+      .filter((s) => s.theme === themeKey)
+      .map((s) => s.scenarioId)
+    if (themeIds.length === 0) return
+    const allSelected = themeIds.every((id) =>
+      selectedScenarios.includes(id),
+    )
+    if (allSelected) {
+      selectScenarios(
+        selectedScenarios.filter((id) => !themeIds.includes(id)),
+      )
+    } else {
+      const merged = Array.from(new Set([...selectedScenarios, ...themeIds]))
+      selectScenarios(merged)
+    }
+  }
+
   // Click a theme badge -> select all scenarios of that theme and float them to top.
   // Clicking the active theme again deselects those scenarios and clears the filter.
   const handleThemeBadgeClick = (theme: ScenarioTheme) => {
@@ -370,6 +389,7 @@ export default function ListView({
     sortDirection,
     onSortChange: handleSortChange,
     onThemeBadgeClick: handleThemeBadgeClick,
+    onThemeGroupToggle: handleThemeGroupToggle,
     onIconClick: handleIconClick,
   }
 

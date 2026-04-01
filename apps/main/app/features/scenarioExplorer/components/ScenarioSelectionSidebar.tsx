@@ -34,7 +34,16 @@ import {
 import { useScrollSyncRef } from "./useScrollSync"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
+
 const PRIMARY_BASELINE_ID = "s0020"
+const THEME_ORDER: Record<ScenarioTheme, number> = {
+  baseline: 0,
+  ag_gw: 1,
+  eco: 2,
+  delta: 3,
+  cws: 4,
+  unthemed: 5,
+}
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -69,6 +78,8 @@ export default function ScenarioSelectionSidebar({
     sharedScenarioIds,
     addToShare,
     setShowShareDrawer,
+    isSortActive,
+    selectScenarios,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -109,6 +120,12 @@ export default function ScenarioSelectionSidebar({
       )
     }
 
+    filtered.sort((a, b) => {
+      const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
+      const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
+      return aOrder - bOrder
+    })
+
     return filtered
   }, [
     siblingGroups,
@@ -117,6 +134,32 @@ export default function ScenarioSelectionSidebar({
     selectedScenarios,
     searchQuery,
   ])
+
+  const themeScenarioIds = useMemo(() => {
+    const map = new Map<string, string[]>()
+    for (const s of filteredScenarios) {
+      if (s.theme) {
+        const ids = map.get(s.theme) ?? []
+        ids.push(s.scenarioId)
+        map.set(s.theme, ids)
+      }
+    }
+    return map
+  }, [filteredScenarios])
+
+  const handleThemeToggle = (themeKey: string) => {
+    const ids = themeScenarioIds.get(themeKey) ?? []
+    if (ids.length === 0) return
+    const allSelected = ids.every((id) => selectedScenarios.includes(id))
+    if (allSelected) {
+      selectScenarios(
+        selectedScenarios.filter((id) => !ids.includes(id)),
+      )
+    } else {
+      const merged = new Set([...selectedScenarios, ...ids])
+      selectScenarios([...merged])
+    }
+  }
 
   return (
     <Box
@@ -270,7 +313,8 @@ export default function ScenarioSelectionSidebar({
           const prevScenario =
             index > 0 ? filteredScenarios[index - 1] : undefined
           const isNewThemeGroup =
-            index === 0 || scenario.theme !== prevScenario?.theme
+            !isSortActive &&
+            (index === 0 || scenario.theme !== prevScenario?.theme)
 
           const items: React.ReactNode[] = []
 
@@ -280,33 +324,67 @@ export default function ScenarioSelectionSidebar({
             const themeColors =
               theme.palette.waterThemes[scenario.theme as ScenarioTheme]
             if (themeConfig && themeColors) {
+              const themeKey = scenario.theme as string
+              const themeIds = themeScenarioIds.get(themeKey) ?? []
+              const allChecked =
+                themeIds.length > 0 &&
+                themeIds.every((id) => selectedScenarios.includes(id))
+              const someChecked =
+                !allChecked &&
+                themeIds.some((id) => selectedScenarios.includes(id))
+
               items.push(
                 <Box
                   key={`theme-header-${scenario.theme}-${index}`}
+                  onClick={() => handleThemeToggle(themeKey)}
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
+                    gap: 0.75,
                     px: 1.5,
                     pt: index === 0 ? 1 : 1.5,
                     pb: 0.5,
+                    cursor: "pointer",
+                    borderRadius: "4px",
+                    "&:hover": {
+                      backgroundColor: `${themeColors.background}66`,
+                    },
                   }}
                 >
-                  <Box
+                  <Checkbox
+                    size="small"
+                    checked={allChecked}
+                    indeterminate={someChecked}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={() => handleThemeToggle(themeKey)}
                     sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: themeColors.text,
+                      padding: 0,
                       flexShrink: 0,
+                      transform: "scale(0.8)",
+                      color: themeColors.text,
+                      "&.Mui-checked": { color: themeColors.text },
+                      "&.MuiCheckbox-indeterminate": {
+                        color: themeColors.text,
+                      },
                     }}
                   />
-                  <Typography
-                    variant="smallSectionLabel"
-                    sx={{ color: themeColors.text }}
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: "0.6rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                      color: themeColors.text,
+                      backgroundColor: themeColors.background,
+                      px: "5px",
+                      py: "1.5px",
+                      borderRadius: "2px",
+                      lineHeight: 1.2,
+                    }}
                   >
                     {themeConfig.label}
-                  </Typography>
+                  </Box>
                 </Box>,
               )
             }
@@ -390,6 +468,7 @@ export default function ScenarioSelectionSidebar({
                   titleVariant="body2"
                   showDescription={showDefinitions}
                   descriptionMaxWidth="none"
+                  showThemeBadge={isSortActive}
                 />
               </Box>
 
