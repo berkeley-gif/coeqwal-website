@@ -1051,6 +1051,71 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("pointer-events", "none")
         })
 
+        // Above/below baseline column tints
+        const tintLayer = g.append("g").attr("class", "baseline-tints")
+        const histBaselineInfos = baselineInfos.filter(
+          ({ tag }) => tag === "hist",
+        )
+        histBaselineInfos.forEach(({ axis, baseY }) => {
+          const colX = xScale(axis)!
+          const colLeft = colX - (stepW - bandW) / 2
+          tintLayer
+            .append("rect")
+            .attr("x", colLeft)
+            .attr("y", 0)
+            .attr("width", stepW)
+            .attr("height", Math.max(0, baseY))
+            .attr("fill", "rgba(56,161,105,0.06)")
+            .attr("pointer-events", "none")
+          tintLayer
+            .append("rect")
+            .attr("x", colLeft)
+            .attr("y", baseY)
+            .attr("width", stepW)
+            .attr("height", Math.max(0, innerH - baseY))
+            .attr("fill", "rgba(229,62,62,0.06)")
+            .attr("pointer-events", "none")
+        })
+
+        // "above / below baseline" labels in the first column
+        if (histBaselineInfos.length > 0) {
+          const first = histBaselineInfos[0]!
+          const lx = xScale(first.axis)! + bandW / 2
+
+          if (first.baseY > 18) {
+            tintLayer
+              .append("text")
+              .attr("x", lx)
+              .attr("y", first.baseY / 2)
+              .attr("text-anchor", "middle")
+              .attr("dominant-baseline", "middle")
+              .attr("font-size", 10)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-style", "italic")
+              .attr("font-weight", 400)
+              .attr("fill", "rgba(56,161,105,0.45)")
+              .attr("pointer-events", "none")
+              .text("above baseline")
+          }
+
+          const belowH = innerH - first.baseY
+          if (belowH > 18) {
+            tintLayer
+              .append("text")
+              .attr("x", lx)
+              .attr("y", first.baseY + belowH / 2)
+              .attr("text-anchor", "middle")
+              .attr("dominant-baseline", "middle")
+              .attr("font-size", 10)
+              .attr("font-family", FONT_FAMILY)
+              .attr("font-style", "italic")
+              .attr("font-weight", 400)
+              .attr("fill", "rgba(229,62,62,0.45)")
+              .attr("pointer-events", "none")
+              .text("below baseline")
+          }
+        }
+
         // Capture baseline positions for the ghost trace on every full rebuild.
         // This resets the ghost reference whenever data/scenarios change.
         const posMap = new Map<string, number>()

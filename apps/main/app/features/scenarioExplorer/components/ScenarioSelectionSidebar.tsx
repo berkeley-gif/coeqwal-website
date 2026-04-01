@@ -334,6 +334,13 @@ export default function ScenarioSelectionSidebar({
                 !allChecked &&
                 themeIds.some((id) => selectedScenarios.includes(id))
 
+              const allThemePinned =
+                themeIds.length > 0 &&
+                themeIds.every((id) => pinnedScenarioIds.includes(id))
+              const allThemeShared =
+                themeIds.length > 0 &&
+                themeIds.every((id) => sharedScenarioIds.includes(id))
+
               items.push(
                 <Box
                   key={`theme-header-${scenario.theme}-${index}`}
@@ -349,6 +356,9 @@ export default function ScenarioSelectionSidebar({
                     borderRadius: "4px",
                     "&:hover": {
                       backgroundColor: `${themeColors.background}66`,
+                    },
+                    "&:hover .theme-action-icon": {
+                      opacity: 1,
                     },
                   }}
                 >
@@ -386,6 +396,80 @@ export default function ScenarioSelectionSidebar({
                   >
                     {themeConfig.label}
                   </Box>
+
+                  <Box sx={{ flex: 1 }} />
+
+                  {/* Share all in theme */}
+                  <Tooltip
+                    title={
+                      allThemeShared
+                        ? "All shared"
+                        : `Share all ${themeConfig.label} scenarios`
+                    }
+                    arrow
+                  >
+                    <IconButton
+                      className="theme-action-icon"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        themeIds.forEach((id) => addToShare(id))
+                      }}
+                      sx={{
+                        p: 0.25,
+                        opacity: allThemeShared ? 1 : 0,
+                        color: allThemeShared
+                          ? theme.palette.blue.bright
+                          : themeColors.text,
+                        transition: "opacity 200ms ease",
+                      }}
+                    >
+                      <icons.IosShare sx={{ fontSize: "0.8rem" }} />
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* Pin all in theme */}
+                  <Tooltip
+                    title={
+                      allThemePinned
+                        ? `Unpin all ${themeConfig.label}`
+                        : `Pin all ${themeConfig.label} scenarios`
+                    }
+                    arrow
+                  >
+                    <IconButton
+                      className="theme-action-icon"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (allThemePinned) {
+                          themeIds.forEach((id) => togglePinnedScenario(id))
+                        } else {
+                          themeIds.forEach((id) => {
+                            if (!pinnedScenarioIds.includes(id))
+                              togglePinnedScenario(id)
+                          })
+                        }
+                      }}
+                      sx={{
+                        p: 0.25,
+                        opacity: allThemePinned ? 1 : 0,
+                        color: allThemePinned
+                          ? themeColors.text
+                          : themeColors.text,
+                        transition: "opacity 200ms ease",
+                      }}
+                    >
+                      <icons.PushPin
+                        sx={{
+                          fontSize: "0.875rem",
+                          transform: allThemePinned
+                            ? "none"
+                            : "rotate(45deg)",
+                        }}
+                      />
+                    </IconButton>
+                  </Tooltip>
                 </Box>,
               )
             }
