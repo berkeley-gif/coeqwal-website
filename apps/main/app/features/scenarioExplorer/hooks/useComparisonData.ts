@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import {
   useMultipleScenarioTiers,
   useScenarioList,
@@ -53,6 +53,17 @@ export function useComparisonData() {
 
   const isLoading = tiersLoading
   const error = tiersError
+
+  // Track hydroclimate changes to drive morph transitions.
+  // Increment morphGeneration each time hydroclimatePeriod actually changes
+  // so chart components can detect when to animate vs. when to hard-redraw.
+  const prevHCRef = useRef(hydroclimatePeriod)
+  const morphGenRef = useRef(0)
+  if (prevHCRef.current !== hydroclimatePeriod) {
+    prevHCRef.current = hydroclimatePeriod
+    morphGenRef.current += 1
+  }
+  const morphGeneration = morphGenRef.current
 
   const scenarioIds = useMemo(() => {
     let filtered = showAlternativeBaselines
@@ -363,5 +374,6 @@ export function useComparisonData() {
     getWeightedSankeyData,
     sankeyGroups,
     multiValueOutcomeCodes,
+    morphGeneration,
   }
 }

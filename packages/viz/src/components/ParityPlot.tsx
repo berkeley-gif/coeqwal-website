@@ -30,6 +30,8 @@ export interface ParityPlotProps {
   showSpreadDots?: boolean
   scenarioThemes?: Record<string, string>
   showThemeGrouping?: boolean
+  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  morphGeneration?: number
 }
 
 const TIER_VALUES = [-1, -1 / 3, 1 / 3, 1]
@@ -94,6 +96,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
     showSpreadDots = false,
     scenarioThemes,
     showThemeGrouping = false,
+    morphGeneration,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -108,6 +111,22 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
+
+    // Hydroclimate morph detection
+    const shouldMorphNextRef = useRef(false)
+    const prevMorphGenRef = useRef(morphGeneration)
+    const scalesRef = useRef<{
+      xScale: (n: number) => number
+      yScale: (n: number) => number
+    } | null>(null)
+    if (
+      morphGeneration !== undefined &&
+      prevMorphGenRef.current !== undefined &&
+      morphGeneration !== prevMorphGenRef.current
+    ) {
+      shouldMorphNextRef.current = true
+    }
+    prevMorphGenRef.current = morphGeneration
 
     const onLineHoverRef = useRef(onLineHover)
     useEffect(() => {
@@ -144,6 +163,52 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
         }
         if (tooltipRef.current) hideParityTooltip(tooltipRef.current)
 
+        // ── Hydroclimate morph: transition dots to new positions ──
+        if (
+          shouldMorphNextRef.current &&
+          scalesRef.current &&
+          baselineData
+        ) {
+          shouldMorphNextRef.current = false
+          const sc = scalesRef.current
+          const HC_DUR = 600
+          const svg = select(svgRef.current)
+          const dataMap = new Map(data.map((s) => [s.id, s]))
+
+          svg
+            .selectAll<SVGCircleElement, unknown>(
+              "circle[data-scenario-id][data-axis]",
+            )
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) {
+                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
+                return
+              }
+              const bv = baselineData.values[axis]
+              const sv = scenario.values[axis]
+              if (bv == null || sv == null) {
+                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
+                return
+              }
+              let newCx = sc.xScale(bv)
+              if (showSpreadDots) {
+                newCx += hashJitter(sid, axis) * JITTER_PX
+              }
+              el.transition()
+                .duration(HC_DUR)
+                .attr("cx", newCx)
+                .attr("cy", sc.yScale(sv))
+            })
+
+          return
+        }
+        shouldMorphNextRef.current = false
+
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (!baselineData || w <= 0 || h <= 0) return
@@ -165,6 +230,11 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
 
         const xScale = scaleLinear().domain([-1, 1]).range([0, size])
         const yScale = scaleLinear().domain([-1, 1]).range([size, 0])
+
+        scalesRef.current = {
+          xScale: (n: number) => xScale(n),
+          yScale: (n: number) => yScale(n),
+        }
 
         // Background
         g.append("rect")
@@ -390,6 +460,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
               .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
+              .attr("data-axis", axis)
               .attr("data-base-r", baseRadius)
             const targetR = sidebarHighlightActive
               ? highlightedIds!.has(scenario.id)

@@ -169,6 +169,7 @@ export default function ComparisonPanel({
     getWeightedSankeyData,
     sankeyGroups,
     multiValueOutcomeCodes,
+    morphGeneration,
   } = useComparisonData()
 
   // Sankey outcome selector state
@@ -990,6 +991,7 @@ export default function ComparisonPanel({
           relativeMode={relativeToBaseline}
           baselineAbsoluteValues={baselineScenario?.values}
           onBrushFilter={handleBrushFilter}
+          morphGeneration={morphGeneration}
         />
       )}
 
@@ -1010,6 +1012,7 @@ export default function ComparisonPanel({
           showSpreadDots={paritySpreadDots}
           scenarioThemes={scenarioThemeMap}
           showThemeGrouping={parityThemeGrouping}
+          morphGeneration={morphGeneration}
         />
       )}
 
@@ -1042,6 +1045,7 @@ export default function ComparisonPanel({
           climateMode={deviationClimateMode}
           morphShowComparison={deviationMorphShowComp}
           scenarioThemes={scenarioThemeMap}
+          morphGeneration={morphGeneration}
         />
       )}
 
@@ -1064,6 +1068,7 @@ export default function ComparisonPanel({
           onCellClick={(cell) => handleScenarioClick(cell.scenarioId)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
+          morphGeneration={morphGeneration}
         />
       )}
 
@@ -1100,6 +1105,7 @@ export default function ComparisonPanel({
           onScenarioClick={toggleScenario}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
+          morphGeneration={morphGeneration}
         />
       )}
     </Box>

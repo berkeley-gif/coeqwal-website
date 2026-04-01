@@ -26,6 +26,8 @@ export interface TierHeatmapProps {
   onCellClick?: (cell: TierHeatmapCell) => void
   highlightedIds?: Set<string> | null
   chosenIds?: Set<string>
+  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  morphGeneration?: number
 }
 
 const MARGIN = { top: 10, right: 20, bottom: 100, left: 160 }
@@ -53,6 +55,7 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
     onCellClick,
     highlightedIds,
     chosenIds,
+    morphGeneration,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -62,6 +65,18 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
     const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+    // Hydroclimate morph detection
+    const shouldMorphNextRef = useRef(false)
+    const prevMorphGenRef = useRef(morphGeneration)
+    if (
+      morphGeneration !== undefined &&
+      prevMorphGenRef.current !== undefined &&
+      morphGeneration !== prevMorphGenRef.current
+    ) {
+      shouldMorphNextRef.current = true
+    }
+    prevMorphGenRef.current = morphGeneration
 
     const onCellHoverRef = useRef(onCellHover)
     useEffect(() => {
@@ -84,6 +99,50 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
 
     const updateChart = useCallback(
       (w: number, h: number) => {
+        // ── Hydroclimate morph: transition cell colors ──
+        if (shouldMorphNextRef.current && cells.length > 0) {
+          shouldMorphNextRef.current = false
+          const HC_DUR = 600
+          const svg = select(svgRef.current)
+          const cellMap = new Map(
+            cells.map((c) => [`${c.scenarioId}__${c.outcomeName}`, c]),
+          )
+          const colorScale = (tier: number) =>
+            TIER_COLOR_SCALE[Math.min(Math.max(tier - 1, 0), 3)]
+
+          svg
+            .selectAll<SVGRectElement, unknown>("rect.hm-cell")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const oName = el.attr("data-outcome")
+              if (!sid || !oName) return
+              const cell = cellMap.get(`${sid}__${oName}`)
+              if (!cell) return
+              el.transition()
+                .duration(HC_DUR)
+                .attr("fill", colorScale(cell.tierLevel) ?? "#deebf7")
+            })
+
+          svg
+            .selectAll<SVGTextElement, unknown>("text.hm-label")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const oName = el.attr("data-outcome")
+              if (!sid || !oName) return
+              const cell = cellMap.get(`${sid}__${oName}`)
+              if (!cell) return
+              el.text(cell.tierLevel).attr(
+                "fill",
+                cell.tierLevel <= 2 ? "#fff" : "#333",
+              )
+            })
+
+          return
+        }
+        shouldMorphNextRef.current = false
+
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
         if (cells.length === 0 || w <= 0 || h <= 0) return
@@ -135,6 +194,9 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
             const y = yScale(sName) ?? 0
 
             g.append("rect")
+              .attr("class", "hm-cell")
+              .attr("data-scenario-id", scenarioId)
+              .attr("data-outcome", oName)
               .attr("x", x)
               .attr("y", y)
               .attr("width", xScale.bandwidth())
@@ -166,6 +228,9 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
             // Tier number inside cell when large enough
             if (xScale.bandwidth() > 24 && yScale.bandwidth() > 18) {
               g.append("text")
+                .attr("class", "hm-label")
+                .attr("data-scenario-id", scenarioId)
+                .attr("data-outcome", oName)
                 .attr("x", x + xScale.bandwidth() / 2)
                 .attr("y", y + yScale.bandwidth() / 2)
                 .attr("text-anchor", "middle")
