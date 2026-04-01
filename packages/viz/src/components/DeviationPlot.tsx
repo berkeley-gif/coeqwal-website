@@ -42,6 +42,9 @@ export interface DeviationPlotProps {
     string,
     Record<string, { tier: number; count: number; normalized: number }[]>
   >
+  showHCRange?: boolean
+  hcRangeData?: Record<string, Record<string, { min: number; max: number }>>
+  showBaselineFill?: boolean
 }
 
 function toTier(v: number): number {
@@ -245,6 +248,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     dimUnpinned = false,
     showDistribution = false,
     distributionData,
+    showHCRange = false,
+    hcRangeData,
+    showBaselineFill = true,
   }) => {
     const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
     const svgRef = useRef<SVGSVGElement>(null)
@@ -576,6 +582,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             }
           }
 
+          const morphHasPinned = pinnedScenarioIds.size > 0
           svg
             .selectAll<
               SVGCircleElement,
@@ -596,9 +603,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 el.transition().duration(HC_DUR).attr("fill-opacity", 0)
                 return
               }
+              const restoreOp =
+                dimUnpinned && morphHasPinned && !pinnedScenarioIds.has(sid)
+                  ? 0.1
+                  : 1.0
               el.transition()
                 .duration(HC_DUR)
                 .attr("cy", scales.yScale(toTier(sv)))
+                .attr("fill-opacity", restoreOp)
+                .attr("stroke-opacity", Math.min(restoreOp + 0.1, 1))
             })
 
           svg
@@ -612,12 +625,19 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const axis = el.attr("data-axis")
               if (!sid || !axis) return
               const scenario = dataMap.get(sid)
-              if (!scenario) return
+              if (!scenario) {
+                el.transition().duration(HC_DUR).attr("opacity", 0)
+                return
+              }
               const sv = scenario.values[axis]
-              if (sv == null) return
+              if (sv == null) {
+                el.transition().duration(HC_DUR).attr("opacity", 0)
+                return
+              }
               el.transition()
                 .duration(HC_DUR)
                 .attr("cy", scales.yScale(toTier(sv)))
+                .attr("opacity", 0.85)
             })
 
           svg
@@ -627,13 +647,19 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const axis = el.attr("data-axis")
               if (!axis) return
               const bv = baselineData.values[axis]
-              if (bv == null) return
+              if (bv == null) {
+                el.transition().duration(HC_DUR).attr("opacity", 0)
+                return
+              }
+              const tag = el.attr("data-tag")
+              const origOpacity = tag === "comp" ? 0.5 : 0.7
               const newY = scales.yScale(toTier(bv))
               const halfTick = parseFloat(el.attr("data-half-tick") ?? "0")
               el.transition()
                 .duration(HC_DUR)
                 .attr("y1", newY - halfTick)
                 .attr("y2", newY + halfTick)
+                .attr("opacity", origOpacity)
             })
 
           svg
@@ -646,11 +672,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const bv = baselineData.values[axis]
               const scenario = dataMap.get(sid)
               const sv = scenario?.values[axis]
-              if (bv == null || sv == null) return
+              if (bv == null || sv == null) {
+                el.transition().duration(HC_DUR).attr("opacity", 0)
+                return
+              }
               el.transition()
                 .duration(HC_DUR)
                 .attr("y1", scales.yScale(toTier(bv)))
                 .attr("y2", scales.yScale(toTier(sv)))
+                .attr("opacity", 1)
             })
 
           if (showBaselineStaircase) {
@@ -1056,7 +1086,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const histBaselineInfos = baselineInfos.filter(
           ({ tag }) => tag === "hist",
         )
-        histBaselineInfos.forEach(({ axis, baseY }) => {
+        if (showBaselineFill) histBaselineInfos.forEach(({ axis, baseY }) => {
           const colX = xScale(axis)!
           const colLeft = colX - (stepW - bandW) / 2
           tintLayer
@@ -1078,7 +1108,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         })
 
         // "above / below baseline" labels in the first column
-        if (histBaselineInfos.length > 0) {
+        if (showBaselineFill && histBaselineInfos.length > 0) {
           const first = histBaselineInfos[0]!
           const lx = xScale(first.axis)! + bandW / 2
 
@@ -1127,6 +1157,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const ghostLayer = g.append("g").attr("class", "ghost-baselines")
         const baselineLayer = g.append("g").attr("class", "baselines")
+        const whiskerLayer = g.append("g").attr("class", "hc-range-whiskers")
         const pathLayer = g.append("g").attr("class", "scenario-path")
         const distributionLayer = g
           .append("g")
@@ -1470,6 +1501,58 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           if (hId) drawPathForScenario(hId)
         }
 
+        // HC range corridor — shaded band showing min–max envelope across
+        // hydroclimates for each scenario
+        if (showHCRange && hcRangeData) {
+          const activeList = subcolumns[0]!.srcData
+          activeList.forEach((scenario, si) => {
+            const scenarioRange = hcRangeData[scenario.id]
+            if (!scenarioRange) return
+            const color = hasScenarioColors
+              ? lineColors[si] || colors.default
+              : colors.default
+            const isPinned = pinnedScenarioIds.has(scenario.id)
+            const dimmed = dimUnpinned && hasPinned && !isPinned
+            const fillOp = dimmed ? 0.02 : 0.10
+            const strokeOp = dimmed ? 0.05 : 0.25
+
+            const upperPts: [number, number][] = []
+            const lowerPts: [number, number][] = []
+
+            axes.forEach((axis) => {
+              const range = scenarioRange[axis]
+              if (!range) return
+              const dodgeKey = `hist:${axis}:${scenario.id}`
+              const dodgeOff = dodgeMap.get(dodgeKey) ?? 0
+              const colX = xScale(axis)!
+              const cx =
+                colX + subcolumns[0]!.xOff + subcolumns[0]!.w / 2 + dodgeOff
+              const minY = yScale(toTier(range.min))
+              const maxY = yScale(toTier(range.max))
+              upperPts.push([cx, Math.min(minY, maxY)])
+              lowerPts.push([cx, Math.max(minY, maxY)])
+            })
+
+            if (upperPts.length < 2) return
+
+            const ribbonPts = [...upperPts, ...lowerPts.reverse()]
+            const pathD =
+              ribbonPts
+                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
+                .join(" ") + " Z"
+
+            whiskerLayer
+              .append("path")
+              .attr("d", pathD)
+              .attr("fill", color)
+              .attr("fill-opacity", fillOp)
+              .attr("stroke", color)
+              .attr("stroke-width", 0.75)
+              .attr("stroke-opacity", strokeOp)
+              .attr("pointer-events", "none")
+          })
+        }
+
         if (showDistribution && distributionData && hasPinned) {
           const activeList = subcolumns[0]!.srcData
           const pinnedArr = Array.from(pinnedScenarioIds)
@@ -1554,6 +1637,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         dimUnpinned,
         showDistribution,
         distributionData,
+        showHCRange,
+        hcRangeData,
+        showBaselineFill,
         comparisonData,
         comparisonBaselineData,
         climateMode,

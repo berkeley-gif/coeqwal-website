@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR, { useSWRConfig } from "swr"
 import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
@@ -227,15 +227,27 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     { keepPreviousData: true },
   )
 
-  // Re-key from resolved IDs to sibling group IDs when mapping is active
+  // Re-key from resolved IDs to sibling group IDs when mapping is active.
+  // Guard against keepPreviousData returning stale data keyed by the old
+  // hydroclimate's resolved IDs while reverseMap has already updated.
+  const lastValidDataRef = useRef<Record<string, ScenarioTiersResponse> | undefined>(undefined)
   const allScenariosData = useMemo(() => {
-    if (!rawScenariosData) return undefined
-    if (!reverseMap) return rawScenariosData
+    if (!rawScenariosData) return lastValidDataRef.current
+    if (!reverseMap) {
+      lastValidDataRef.current = rawScenariosData
+      return rawScenariosData
+    }
+    const rawKeys = Object.keys(rawScenariosData)
+    const matchCount = rawKeys.filter((k) => reverseMap.has(k)).length
+    if (rawKeys.length > 0 && matchCount === 0) {
+      return lastValidDataRef.current
+    }
     const result: Record<string, ScenarioTiersResponse> = {}
     Object.entries(rawScenariosData).forEach(([resolvedId, data]) => {
       const groupId = reverseMap.get(resolvedId) ?? resolvedId
       result[groupId] = data
     })
+    lastValidDataRef.current = result
     return result
   }, [rawScenariosData, reverseMap])
 
