@@ -1147,13 +1147,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                   lastNotifiedIdRef.current = null
                   onLineHoverRef.current?.(null)
                 })
-                .on("click", () => onLineClickRef.current?.(scenario))
-                .on("dblclick", function (event: MouseEvent) {
-                  event.preventDefault()
-                  event.stopPropagation()
+                .on("click", () => {
                   setPinnedScenarioId((prev) =>
                     prev === scenario.id ? null : scenario.id,
                   )
+                  onLineClickRef.current?.(scenario)
                 })
             })
           })
