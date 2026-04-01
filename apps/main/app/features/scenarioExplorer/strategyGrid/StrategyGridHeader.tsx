@@ -25,7 +25,6 @@ import {
   formatOutcomeLabel,
   type OutcomeName,
 } from "../../scenarios/components/shared"
-import { GridControls } from "./GridControls"
 
 /**
  * Layout mode for responsive grid behavior
@@ -87,26 +86,12 @@ export function StrategyGridHeader({
   sortBy,
   sortDirection,
   sortEnabled,
-  showOnlyChosen = false,
-  showAlternativeBaselines = false,
-  onShowOnlyChosenChange,
-  onShowAlternativeBaselinesChange,
   onTooltipToggle,
   onSortChange,
 }: StrategyGridHeaderProps) {
-  const controls =
-    onShowOnlyChosenChange && onShowAlternativeBaselinesChange ? (
-      <GridControls
-        showOnlyChosen={showOnlyChosen}
-        showAlternativeBaselines={showAlternativeBaselines}
-        onShowOnlyChosenChange={onShowOnlyChosenChange}
-        onShowAlternativeBaselinesChange={onShowAlternativeBaselinesChange}
-      />
-    ) : null
-
   // Compact mode uses simplified header
   if (compact) {
-    return <CompactHeader controls={controls} />
+    return <CompactHeader />
   }
 
   // outcomesOnly: only show outcome category labels, no scenario/ops headers
@@ -134,14 +119,6 @@ export function StrategyGridHeader({
       {/* Column headers row */}
       <ColumnHeaders layoutMode={layoutMode} showOperations={showOperations} />
 
-      {/* Controls in cols 1-2, same row as DividerContinuation / OutcomeCategoryLabels */}
-      {controls && (
-        <ControlsRow
-          controls={controls}
-          showOutcomeLabels={showOutcomeLabels}
-        />
-      )}
-
       {/* Divider continuation for Column 3 - only in full mode when operations visible */}
       {showOutcomeLabels && showOperations && <DividerContinuation column={3} />}
 
@@ -164,7 +141,7 @@ export function StrategyGridHeader({
 /**
  * Compact header - simplified single-row header for mobile/condensed view
  */
-function CompactHeader({ controls }: { controls: React.ReactNode }) {
+function CompactHeader() {
   const theme = useTheme()
 
   return (
@@ -184,40 +161,8 @@ function CompactHeader({ controls }: { controls: React.ReactNode }) {
           fontWeight: 500,
         }}
       >
-        Choose scenarios
+        Scenario library
       </Typography>
-      {controls}
-    </Box>
-  )
-}
-
-/**
- * ControlsRow - GridControls placed in cols 1-2, below the "Choose scenarios" header.
- * Aligns with DividerContinuation and OutcomeCategoryLabels in the same grid row.
- */
-function ControlsRow({
-  controls,
-  showOutcomeLabels,
-}: {
-  controls: React.ReactNode
-  showOutcomeLabels: boolean
-}) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      sx={{
-        gridColumn: "1 / 3",
-        display: { xs: "none", sm: "flex" },
-        alignItems: "center",
-        pr: theme.scenarios.grid.divider.gap,
-        pb: showOutcomeLabels
-          ? theme.scenarios.grid.header.categoryLabels
-          : theme.space.component.sm,
-        mt: showOutcomeLabels ? theme.scenarios.grid.divider.pullUp : 0,
-      }}
-    >
-      {controls}
     </Box>
   )
 }
@@ -256,7 +201,7 @@ function ColumnHeaders({ layoutMode, showOperations = true }: ColumnHeadersProps
             fontWeight: 500,
           }}
         >
-          Choose scenarios
+          Scenario library
         </Typography>
       </Box>
 

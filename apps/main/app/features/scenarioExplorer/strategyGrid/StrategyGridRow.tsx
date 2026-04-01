@@ -243,8 +243,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               alignItems: "flex-start",
               alignSelf: "start",
               ...(!compact && {
-                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
-                pb: theme.scenarios.grid.row.padding,
+                pt: `calc(${theme.spacing(1)} + 19px)`,
+                pb: 1,
               }),
               ...(compact && { gridRow: "1 / -1" }),
             }}
@@ -309,6 +309,8 @@ function CompactRowContent({
   onIconClick,
 }: CompactRowContentProps) {
   const theme = useTheme()
+  const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
+  const isSortActive = useScenarioExplorerStore((s) => s.isSortActive)
 
   return (
     <Box
@@ -331,6 +333,8 @@ function CompactRowContent({
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
+          showDescription={showDefinitions}
+          showThemeBadge={isSortActive}
           onThemeBadgeClick={onThemeBadgeClick}
         />
         <Box
@@ -433,6 +437,8 @@ function NonCompactRowContent({
   onIconClick,
 }: NonCompactRowContentProps) {
   const theme = useTheme()
+  const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
+  const isSortActive = useScenarioExplorerStore((s) => s.isSortActive)
 
   // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
@@ -445,18 +451,17 @@ function NonCompactRowContent({
       <Box
         sx={{
           gridColumn: { xs: "2", sm: "2" },
-          // Standard gap before divider
           pr: theme.scenarios.grid.divider.gap,
-          pt: theme.scenarios.grid.row.padding,
-          // In responsive views (<1400px), no bottom padding since content wraps below
-          // In full mode, standard row padding
-          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
+          pt: 1,
+          pb: isResponsiveView ? 0 : 1,
           alignSelf: "start",
         }}
       >
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
+          showDescription={showDefinitions}
+          showThemeBadge={isSortActive}
           descriptionMaxWidth="none"
           onThemeBadgeClick={onThemeBadgeClick}
         />
@@ -477,8 +482,8 @@ function NonCompactRowContent({
             gap: theme.space.gap.md,
             justifyContent: "flex-start",
             alignItems: "flex-start",
-            pt: theme.scenarios.grid.row.padding,
-            pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
+            pt: 1,
+            pb: isResponsiveView ? 0 : 1,
           }}
         >
           <Typography
@@ -517,9 +522,9 @@ function NonCompactRowContent({
           // sm wrapped: 8px top padding (+ 8px rowGap = 16px total)
           // Full mode: glyph alignment offset to align with scenario title
           pt: isResponsiveView
-            ? { xs: theme.space.gap.lg, sm: theme.space.gap.md }
-            : { sm: theme.scenarios.grid.glyphOffset },
-          pb: { sm: theme.scenarios.grid.row.padding },
+            ? { xs: theme.space.gap.md, sm: theme.space.gap.sm }
+            : { sm: "6px" },
+          pb: { sm: 1 },
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
