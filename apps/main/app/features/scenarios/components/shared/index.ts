@@ -35,6 +35,10 @@ export {
 } from "./opsIcons"
 export type { IconDef, OpsCircleIconProps } from "./opsIcons"
 
+// Tier summary
+export { TierSummaryCell } from "./TierSummaryCell"
+export type { TierSummaryCellProps } from "./TierSummaryCell"
+
 // Types
 export type { ChartDataPoint, OutcomeName, ScenarioForDisplay } from "./types"
 export { isSingleValueTier } from "./types"
