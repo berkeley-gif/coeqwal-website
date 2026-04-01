@@ -72,6 +72,8 @@ export interface VerticalParallelLinePlotProps {
   baselineAbsoluteValues?: Record<string, number | null>
   /** Called when brush/filter drag ends with the IDs of scenarios that are now filtered out. */
   onBrushFilter?: (filteredOutIds: string[]) => void
+  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  morphGeneration?: number
 }
 
 const ARROW_PATH =
@@ -119,6 +121,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
   relativeMode = false,
   baselineAbsoluteValues,
   onBrushFilter,
+  morphGeneration,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -158,6 +161,19 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
   // Debounce mouseout so micro-movements between a line and its circles
   // (or between adjacent path segments) don't cause rapid dim/undim flicker.
   const hoverOutTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // ── Hydroclimate morph detection ────────────────────────────────────────────
+  const shouldMorphNextRef = useRef(false)
+  const skipRebuildRef = useRef(false)
+  const prevMorphGenRef = useRef(morphGeneration)
+  if (
+    morphGeneration !== undefined &&
+    prevMorphGenRef.current !== undefined &&
+    morphGeneration !== prevMorphGenRef.current
+  ) {
+    shouldMorphNextRef.current = true
+  }
+  prevMorphGenRef.current = morphGeneration
 
   // ── Unified style resolver ──────────────────────────────────────────────────
   // Single source of truth for every visual property of a scenario line/circle.
@@ -334,6 +350,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
     (newWidth: number, newHeight: number, animate = true) => {
       if (!data || data.length === 0 || !axes || axes.length === 0) return
 
+      if (skipRebuildRef.current) {
+        skipRebuildRef.current = false
+        return
+      }
+
       const isHoriz = orientation === "horizontal"
       const svg = select(svgRef.current)
       const innerWidth = newWidth - margin.left - margin.right
@@ -391,6 +412,114 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
       if (hoverOutTimer.current) {
         clearTimeout(hoverOutTimer.current)
         hoverOutTimer.current = null
+      }
+
+      // ── Hydroclimate morph: transition existing elements to new positions ──
+      if (shouldMorphNextRef.current) {
+        shouldMorphNextRef.current = false
+        skipRebuildRef.current = true
+
+        const MORPH_DUR = 600
+        const MJ_COUNT = 4
+        const MJ_PX = 4
+        const mjAxes = new Set(axes.slice(-MJ_COUNT))
+        const mjPx = (idx: number) => {
+          if (data.length <= 1) return 0
+          return ((idx / (data.length - 1)) * 2 - 1) * MJ_PX
+        }
+
+        data.forEach((d, di) => {
+          const jPx = mjPx(di)
+          const jFor = (a: string) => (mjAxes.has(a) ? jPx : 0)
+          const pd = axes.map(
+            (a) => [a, d.values[a]] as [string, number | null],
+          )
+
+          const jGen = isHoriz
+            ? line<[string, number | null]>()
+                .defined(([, v]) => v !== null)
+                .x(([a]) => axisScale(a)!)
+                .y(([a, v]) => scales[a]!(v as number) + jFor(a))
+            : line<[string, number | null]>()
+                .defined(([, v]) => v !== null)
+                .x(([a, v]) => scales[a]!(v as number) + jFor(a))
+                .y(([a]) => axisScale(a)!)
+
+          const newD = jGen(pd)
+
+          g.select(`.line-${di}`)
+            .transition()
+            .duration(MORPH_DUR)
+            .ease(easeCubicOut)
+            .attr("d", newD)
+
+          const halo = g.select(`.line-halo-${di}`)
+          if (!halo.empty()) {
+            halo
+              .transition()
+              .duration(MORPH_DUR)
+              .ease(easeCubicOut)
+              .attr("d", newD)
+          }
+
+          axes.forEach((axis) => {
+            const val = d.values[axis]
+            const cSel = g.select(
+              `.circle-${di}-${axis.replace(/\s+/g, "-")}`,
+            )
+            if (cSel.empty()) return
+            if (val == null) {
+              cSel
+                .transition()
+                .duration(MORPH_DUR)
+                .ease(easeCubicOut)
+                .attr("opacity", 0)
+              return
+            }
+            const j = jFor(axis)
+            cSel
+              .transition()
+              .duration(MORPH_DUR)
+              .ease(easeCubicOut)
+              .attr(
+                "cx",
+                isHoriz ? axisScale(axis)! : scales[axis]!(val) + j,
+              )
+              .attr(
+                "cy",
+                isHoriz ? scales[axis]!(val) + j : axisScale(axis)!,
+              )
+          })
+        })
+
+        if (showBaseline && baselineData) {
+          const bGen = isHoriz
+            ? line<[string, number]>()
+                .x(([a]) => axisScale(a)!)
+                .y(([a, v]) => scales[a]!(v))
+            : line<[string, number]>()
+                .x(([a, v]) => scales[a]!(v))
+                .y(([a]) => axisScale(a)!)
+          const bPd = axes.map(
+            (a) => [a, baselineData.values[a] || 0] as [string, number],
+          )
+          g.select(".baseline-path")
+            .transition()
+            .duration(MORPH_DUR)
+            .ease(easeCubicOut)
+            .attr("d", bGen(bPd))
+          axes.forEach((axis) => {
+            const v = baselineData.values[axis] || 0
+            g.select(`.baseline-circle-${axis.replace(/\s+/g, "-")}`)
+              .transition()
+              .duration(MORPH_DUR)
+              .ease(easeCubicOut)
+              .attr("cx", isHoriz ? axisScale(axis)! : scales[axis]!(v))
+              .attr("cy", isHoriz ? scales[axis]!(v) : axisScale(axis)!)
+          })
+        }
+
+        return
       }
 
       g.selectAll("[class^='line-']").remove()

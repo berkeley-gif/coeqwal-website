@@ -224,6 +224,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
   } = useSWR(
     fetchIds.length > 0 ? CACHE_KEYS.allScenarioTiers(fetchIds) : null,
     () => fetchAllScenarioTiers(fetchIds),
+    { keepPreviousData: true },
   )
 
   // Re-key from resolved IDs to sibling group IDs when mapping is active

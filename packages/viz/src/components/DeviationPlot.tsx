@@ -31,6 +31,8 @@ export interface DeviationPlotProps {
   morphShowComparison?: boolean
   /** Map of scenario ID to theme/group string — used to cluster same-theme dots together */
   scenarioThemes?: Record<string, string>
+  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  morphGeneration?: number
 }
 
 function toTier(v: number): number {
@@ -227,6 +229,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     climateMode = "off",
     morphShowComparison = false,
     scenarioThemes,
+    morphGeneration,
   }) => {
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -252,6 +255,18 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
+
+    // Hydroclimate morph detection
+    const shouldMorphNextRef = useRef(false)
+    const prevMorphGenRef = useRef(morphGeneration)
+    if (
+      morphGeneration !== undefined &&
+      prevMorphGenRef.current !== undefined &&
+      morphGeneration !== prevMorphGenRef.current
+    ) {
+      shouldMorphNextRef.current = true
+    }
+    prevMorphGenRef.current = morphGeneration
 
     const onLineHoverRef = useRef(onLineHover)
     useEffect(() => {
@@ -425,6 +440,119 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
           return
         }
+
+        // ── Hydroclimate morph: transition dots/baselines to new values ──
+        if (
+          shouldMorphNextRef.current &&
+          scalesRef.current &&
+          baselineData
+        ) {
+          shouldMorphNextRef.current = false
+          const scales = scalesRef.current
+          const dataMap = new Map(data.map((s) => [s.id, s]))
+          const svg = select(svgRef.current)
+          const HC_DUR = 600
+
+          svg
+            .selectAll<
+              SVGCircleElement,
+              unknown
+            >("circle[data-axis]:not(.theme-ring)")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) {
+                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
+                return
+              }
+              const sv = scenario.values[axis]
+              if (sv == null) {
+                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
+                return
+              }
+              el.transition()
+                .duration(HC_DUR)
+                .attr("cy", scales.yScale(toTier(sv)))
+            })
+
+          svg
+            .selectAll<
+              SVGCircleElement,
+              unknown
+            >("circle.theme-ring[data-axis]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const scenario = dataMap.get(sid)
+              if (!scenario) return
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              el.transition()
+                .duration(HC_DUR)
+                .attr("cy", scales.yScale(toTier(sv)))
+            })
+
+          svg
+            .selectAll<SVGLineElement, unknown>("line.baseline-mark")
+            .each(function () {
+              const el = select(this)
+              const axis = el.attr("data-axis")
+              if (!axis) return
+              const bv = baselineData.values[axis]
+              if (bv == null) return
+              const newY = scales.yScale(toTier(bv))
+              const halfTick = parseFloat(el.attr("data-half-tick") ?? "0")
+              el.transition()
+                .duration(HC_DUR)
+                .attr("y1", newY - halfTick)
+                .attr("y2", newY + halfTick)
+            })
+
+          svg
+            .selectAll<SVGLineElement, unknown>("line.diff-glyph")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-scenario-id")
+              const axis = el.attr("data-axis")
+              if (!sid || !axis) return
+              const bv = baselineData.values[axis]
+              const scenario = dataMap.get(sid)
+              const sv = scenario?.values[axis]
+              if (bv == null || sv == null) return
+              el.transition()
+                .duration(HC_DUR)
+                .attr("y1", scales.yScale(toTier(bv)))
+                .attr("y2", scales.yScale(toTier(sv)))
+            })
+
+          if (showBaselineStaircase) {
+            const newPts: [number, number][] = []
+            axes.forEach((axis) => {
+              const bv = baselineData.values[axis]
+              if (bv == null) return
+              const cx = (scales.xScale(axis) ?? 0) + scales.bandW / 2
+              newPts.push([cx, scales.yScale(toTier(bv))])
+            })
+            if (newPts.length >= 2) {
+              const stairLine = line<[number, number]>()
+                .x((d) => d[0])
+                .y((d) => d[1])
+              svg
+                .select<SVGPathElement>("path.staircase")
+                .transition()
+                .duration(HC_DUR)
+                .attr("d", stairLine(newPts) ?? "")
+            }
+          }
+
+          return
+        }
+        shouldMorphNextRef.current = false
 
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()

@@ -28,6 +28,8 @@ export interface TierSankeyProps {
   onScenarioClick?: (scenarioId: string) => void
   highlightedIds?: Set<string> | null
   chosenIds?: Set<string>
+  /** Monotonically increasing counter — triggers crossfade on data change */
+  morphGeneration?: number
 }
 
 const NODE_WIDTH = 18
@@ -80,6 +82,7 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
     onScenarioClick,
     highlightedIds,
     chosenIds,
+    morphGeneration,
   }) => {
     const tierColors = useMemo(
       () => ({ ...DEFAULT_TIER_COLORS, ...tierColorsProp }),
@@ -93,6 +96,18 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
     const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+    // Hydroclimate crossfade detection
+    const shouldCrossfadeRef = useRef(false)
+    const prevMorphGenRef = useRef(morphGeneration)
+    if (
+      morphGeneration !== undefined &&
+      prevMorphGenRef.current !== undefined &&
+      morphGeneration !== prevMorphGenRef.current
+    ) {
+      shouldCrossfadeRef.current = true
+    }
+    prevMorphGenRef.current = morphGeneration
 
     const onScenarioHoverRef = useRef(onScenarioHover)
     useEffect(() => {
@@ -120,6 +135,13 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
     const updateChart = useCallback(
       (w: number, h: number) => {
         const svg = select(svgRef.current)
+
+        const isCrossfade = shouldCrossfadeRef.current
+        if (isCrossfade) {
+          shouldCrossfadeRef.current = false
+          svg.style("opacity", "0")
+        }
+
         svg.selectAll("*").remove()
         if (data.length === 0 || w <= 0 || h <= 0) return
 
@@ -432,6 +454,10 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
           .attr("font-size", 12)
           .attr("fill", "#888")
           .text(outcomeName)
+
+        if (isCrossfade) {
+          svg.transition().duration(400).style("opacity", "1")
+        }
       },
       [
         data,
