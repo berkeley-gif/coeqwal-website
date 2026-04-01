@@ -403,6 +403,7 @@ export function useComparisonData() {
     scenarios,
     baselineScenario,
     historicalBaselineScores,
+    allScenariosData,
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,

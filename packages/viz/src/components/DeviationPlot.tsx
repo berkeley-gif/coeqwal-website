@@ -36,6 +36,11 @@ export interface DeviationPlotProps {
   pinnedScenarioIds?: Set<string>
   onPinnedToggle?: (scenarioId: string) => void
   dimUnpinned?: boolean
+  showDistribution?: boolean
+  distributionData?: Record<
+    string,
+    Record<string, { tier: number; count: number; normalized: number }[]>
+  >
 }
 
 function toTier(v: number): number {
@@ -236,6 +241,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     pinnedScenarioIds: pinnedScenarioIdsProp,
     onPinnedToggle,
     dimUnpinned = false,
+    showDistribution = false,
+    distributionData,
   }) => {
     const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
     const svgRef = useRef<SVGSVGElement>(null)
@@ -901,6 +908,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const baselineLayer = g.append("g").attr("class", "baselines")
         const pathLayer = g.append("g").attr("class", "scenario-path")
+        const distributionLayer = g
+          .append("g")
+          .attr("class", "distribution-dots")
         const dotsLayer = g.append("g").attr("class", "dots")
 
         const TICK_HALF = 6
@@ -1180,6 +1190,72 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const hId = highlightedIds.values().next().value as string
           if (hId) drawPathForScenario(hId)
         }
+
+        if (showDistribution && distributionData && hasPinned) {
+          const activeList = subcolumns[0]!.srcData
+          const pinnedArr = Array.from(pinnedScenarioIds)
+          const pinCount = pinnedArr.length
+          const locDotR = 2.5
+          const locDotDiam = locDotR * 2 + 1
+          const tierBandH = yScale(1.5) - yScale(0.5)
+
+          pinnedArr.forEach((scenarioId, pinIdx) => {
+            const outcomeBuckets = distributionData[scenarioId]
+            if (!outcomeBuckets) return
+            const si = activeList.findIndex((s) => s.id === scenarioId)
+            const color =
+              si >= 0 && hasScenarioColors
+                ? lineColors[si] || colors.default
+                : colors.default
+
+            axes.forEach((axis) => {
+              const buckets = outcomeBuckets[axis]
+              if (!buckets || buckets.length === 0) return
+              const colX = xScale(axis)!
+              const colW = subcolumns[0]!.w
+              const sliceW =
+                pinCount === 1 ? colW : colW / pinCount
+              const sliceLeft =
+                colX + subcolumns[0]!.xOff + pinIdx * sliceW
+              const availW = sliceW * 0.85
+              const sliceCenter = sliceLeft + sliceW / 2
+
+              buckets.forEach(({ tier, count }) => {
+                if (count <= 0) return
+                const tierY = yScale(tier)
+                const maxCols = Math.max(
+                  1,
+                  Math.floor(availW / locDotDiam),
+                )
+                const rows = Math.ceil(count / maxCols)
+                const cols = Math.min(count, maxCols)
+                const gridW = cols * locDotDiam
+                const gridH = rows * locDotDiam
+                const startX = sliceCenter - gridW / 2 + locDotR
+                const maxGridH = tierBandH * 0.7
+                const startY =
+                  tierY - Math.min(gridH, maxGridH) / 2 + locDotR
+
+                for (let d = 0; d < count; d++) {
+                  const col = d % maxCols
+                  const row = Math.floor(d / maxCols)
+                  distributionLayer
+                    .append("circle")
+                    .attr("cx", startX + col * locDotDiam)
+                    .attr("cy", startY + row * locDotDiam)
+                    .attr("r", locDotR)
+                    .attr("fill", color)
+                    .attr("fill-opacity", 0.45)
+                    .attr("stroke", color)
+                    .attr("stroke-width", 0.6)
+                    .attr("stroke-opacity", 0.6)
+                    .attr("pointer-events", "none")
+                    .attr("class", "dist-dot")
+                }
+              })
+            })
+          })
+        }
       },
       [
         data,
@@ -1197,6 +1273,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         scenarioThemeRingColors,
         pinnedScenarioIds,
         dimUnpinned,
+        showDistribution,
+        distributionData,
         comparisonData,
         comparisonBaselineData,
         climateMode,
