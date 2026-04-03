@@ -3,8 +3,7 @@
 import React, { useMemo, useState } from "react"
 import { Box, Typography, Button, Tooltip, useTheme, icons } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
-import { useScenarioList } from "../../features/scenarios/hooks"
-import { useMultipleScenarioTiers } from "../../features/scenarios/hooks/useTierData"
+import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 
@@ -21,14 +20,8 @@ export default function SharePanel() {
 
   const { sharedScenarioIds, hydroclimatePeriod } = useScenarioExplorerStore()
 
-  const { siblingGroups, buildIdMapping } = useScenarioList()
-
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
-  )
-
-  const { allChartData, outcomeNames } = useMultipleScenarioTiers(idMapping)
+  const { siblingGroups, allChartData, outcomeNames } =
+    useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<string, { name: string; description: string }>()

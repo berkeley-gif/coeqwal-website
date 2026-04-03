@@ -269,19 +269,19 @@ There is no separate hydroclimate API endpoint. The flow is:
 ### Data Hooks
 
 ```typescript
-// Scenario list with sibling group mapping
-import { useScenarioList } from "../../scenarios/hooks"
-const { siblingGroups, buildIdMapping, getDisplayName } = useScenarioList()
+// Tier data with automatic hydroclimate resolution (preferred for tool panels)
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+const { allChartData, allScoreData, siblingGroups, getDisplayName, isLoading } =
+  useResolvedScenarioTiers()
 
-// Comparison chart data (handles hydroclimate resolution internally)
+// Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, parallel plot transforms)
 import { useComparisonData } from "../hooks/useComparisonData"
 const { data, axes, lineColors, baselineScenario, isLoading } =
   useComparisonData()
 
-// Raw tier data for multiple scenarios
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-const { allChartData, allScoreData, allScenariosData, isLoading } =
-  useMultipleScenarioTiers(idMapping)
+// Lower-level: scenario list with manual hydroclimate mapping (for advanced use cases)
+import { useScenarioList } from "../../scenarios/hooks"
+const { siblingGroups, buildIdMapping, getDisplayName } = useScenarioList()
 ```
 
 ## How to Add a New Tool
@@ -295,10 +295,13 @@ Create `exploreView/YourToolPanel.tsx`:
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 
 export default function YourToolPanel() {
   const theme = useTheme()
-  const { selectedScenarios, hydroclimatePeriod } = useScenarioExplorerStore()
+  const { selectedScenarios } = useScenarioExplorerStore()
+  const { allChartData, allScoreData, siblingGroups, isLoading, error } =
+    useResolvedScenarioTiers()
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
@@ -339,7 +342,7 @@ For developers porting an external visualization (e.g., the tier treemap from CO
 
 - [ ] **Replace the placeholder** in `EquityPanel.tsx` with your React component
 - [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimatePeriod`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
-- [ ] **Fetch data via hooks** — use `useScenarioList().buildIdMapping(hydroclimatePeriod)` then `useMultipleScenarioTiers(idMapping)`. Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
+- [ ] **Fetch data via hooks** — use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
 - [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click, `setSelectedTier()` to drive map visualization
 - [ ] **Use MUI `sx` prop** for all styling — no Tailwind. Import from `@repo/ui/mui`.
 - [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>` — standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
