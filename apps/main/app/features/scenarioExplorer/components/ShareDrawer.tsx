@@ -11,8 +11,7 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
-import { useScenarioList } from "../../scenarios/hooks"
-import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 
@@ -118,17 +117,10 @@ export default function ShareDrawer() {
     setShowShareDrawer,
     removeFromShare,
     clearShared,
-    hydroclimatePeriod,
   } = useScenarioExplorerStore()
 
-  const { siblingGroups, buildIdMapping } = useScenarioList()
-
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
-  )
-
-  const { allChartData, outcomeNames } = useMultipleScenarioTiers(idMapping)
+  const { siblingGroups, allChartData, outcomeNames } =
+    useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<string, { name: string; description: string }>()

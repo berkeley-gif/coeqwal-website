@@ -18,8 +18,7 @@ import {
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import type { Scenario } from "../../scenarios/hooks/useScenarioList"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
@@ -47,26 +46,15 @@ export default function ListView({
 }: ListViewProps) {
   const theme = useTheme()
 
-  const { hydroclimatePeriod, setIsSortActive } = useScenarioExplorerStore()
+  const { setIsSortActive } = useScenarioExplorerStore()
   const {
     siblingGroups,
-    buildIdMapping,
-    isLoading: scenariosLoading,
-    error: scenariosError,
-  } = useScenarioList()
-
-  const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
-  )
-
-  const {
     allChartData,
     outcomeNames,
     allScoreData,
     isLoading: dataLoading,
     error: dataError,
-  } = useMultipleScenarioTiers(idMapping)
+  } = useResolvedScenarioTiers()
 
   // Use siblingGroups (24) instead of full scenarios (72)
   const scenarios = siblingGroups
@@ -328,8 +316,8 @@ export default function ListView({
     setLocalSelectedOutcomes((prev) => ({ ...prev, [scenarioId]: outcome }))
   }
 
-  const isLoading = dataLoading || scenariosLoading
-  const error = dataError || scenariosError
+  const isLoading = dataLoading
+  const error = dataError
 
   const mergedHighlighted = useMemo(() => {
     if (!highlightedIds && matchingScenarioIds.size === 0)

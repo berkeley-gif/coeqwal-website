@@ -190,42 +190,31 @@ import type {
 
 This section walks through the full data-fetching flow for a new tool panel in the Scenario Explorer (e.g., the Equity panel).
 
-### Step 1: Get the scenario list and hydroclimate mapping
+### Step 1: Get tier data with `useResolvedScenarioTiers`
 
-The sidebar shows 24 "sibling groups" (one per strategy). The user picks a hydroclimate period from the toolbar. You need to resolve the selected sibling group IDs to the actual scenario short codes for that hydroclimate.
-
-```typescript
-import { useScenarioList } from "../../scenarios/hooks"
-import { useScenarioExplorerStore } from "../store"
-
-const { selectedScenarios, hydroclimatePeriod } = useScenarioExplorerStore()
-const { buildIdMapping, getDisplayName, siblingGroups } = useScenarioList()
-
-// Resolve sibling group IDs -> actual scenario codes for the active climate
-// e.g., { "s0020": "s0020", "s0021": "s0047", ... }
-const idMapping = buildIdMapping(hydroclimatePeriod)
-```
-
-`buildIdMapping` takes a hydroclimate string (`"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`, etc.) and uses `HYDROCLIMATE_ID_MAP` to look up the numeric ID, then resolves each sibling group to the correct variant's short code. Falls back to the historical variant when a climate variant doesn't exist.
-
-### Step 2: Fetch tier data for the selected scenarios
-
-Pass `idMapping` to `useMultipleScenarioTiers`. It fetches in bulk, caches with SWR, and re-keys the results from resolved IDs back to sibling group IDs so you can look up data using the same IDs as `selectedScenarios`.
+The sidebar shows 24 scenario strategies. Hydroclimate chooser is on the toolbar. Each strategy has variants for different hydroclimates, which we call "siblings" in the codebase. The `useResolvedScenarioTiers` hook handles all of this automatically. It reads the active hydroclimate from the store, resolves sibling group IDs to the correct variant, fetches tier data in bulk via SWR, and re-keys results back to sibling group IDs.
 
 ```typescript
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 
 const {
   allChartData,
   allScoreData,
   allScenariosData,
   outcomeNames,
+  siblingGroups,
+  getDisplayName,
+  getThemeForScenario,
   isLoading,
   error,
-} = useMultipleScenarioTiers(idMapping)
+} = useResolvedScenarioTiers()
 ```
 
-**What you get back:**
+No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
+
+> **TODO:** The hydroclimate options and the `HYDROCLIMATE_ID_MAP` mapping are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will return the list of hydroclimate options with their metadata (`id`, `short_code`, `name`, `description`, `has_data` flag) directly from the database, making this a single source of truth. This will be implemented once the team finalizes naming and descriptions for the hydroclimates. Until then, the client-side `buildIdMapping()` approach is the correct pattern (encapsulated inside `useResolvedScenarioTiers`).
+
+**What you get back (in addition to `siblingGroups`, `getDisplayName`, `getThemeForScenario`):**
 
 | Property           | Type                                                        | Contents                                                                                     |
 | ------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -236,11 +225,15 @@ const {
 | `isLoading`        | `boolean`                                                   | True while any data is being fetched                                                         |
 | `error`            | `string \| null`                                            | Error message if any fetch failed                                                            |
 
-### Step 3: Use the data
+### Step 2: Use the data
 
 Filter to the scenarios the user has selected:
 
 ```typescript
+import { useScenarioExplorerStore } from "../store"
+
+const { selectedScenarios } = useScenarioExplorerStore()
+
 const selectedData = useMemo(() => {
   if (!allScenariosData) return {}
   const result: Record<string, ScenarioTiersResponse> = {}
@@ -273,7 +266,7 @@ const score = allScoreData["s0020"]?.["CWS_DEL"]
 // { weighted_score, normalized_score, gini, band_upper, band_lower }
 ```
 
-### Step 4: Single-scenario fetching (if needed)
+### Step 3: Single-scenario fetching (if needed)
 
 For detail views where you need data for just one scenario:
 
@@ -289,13 +282,15 @@ const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
 
 ### Important: don't fetch directly
 
-Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` in your component. Always use the app-level hooks (`useMultipleScenarioTiers`, `useScenarioTiers`, `useScenarioList`) because they:
+Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` in your component. Use `useResolvedScenarioTiers()` for multi-scenario data (the common case), or `useScenarioTiers(id)` for single-scenario detail views. These hooks:
 
-- Resolve hydroclimate variants via `idMapping`
+- Resolve hydroclimate variants automatically (no manual `buildIdMapping` calls)
 - Re-key data from resolved IDs back to sibling group IDs
 - Pre-populate the SWR cache so individual scenario lookups are instant
 - Apply theme colors to chart data
 - Return outcomes in the canonical display order
+
+For advanced use cases like cross-hydroclimate comparisons (fetching data for multiple climates simultaneously), use `buildIdMapping` directly via `useScenarioList`. See `useComparisonData.ts` for an example.
 
 ## To add new data sources
 
