@@ -106,13 +106,43 @@ const { scenarios, isLoading, error } = useScenarios()
 
 #### `useScenarioTiers(scenarioId)`
 
-Fetches tier scores for a specific scenario.
+Fetches tier scores for a single scenario.
 
 ```tsx
 import { useScenarioTiers } from "@repo/data/coeqwal/hooks"
 
-const { data, isLoading, error } = useScenarioTiers("s0020")
-// data: ScenarioTiersResponse - { scenario: "s0020", tiers: { AG_REV: { weighted_score, ... }, ... } }
+const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
+  useScenarioTiers("s0020")
+// chartData["CWS_DEL"] -> ChartDataPoint[] (pre-processed for rendering)
+// scoreData["CWS_DEL"] -> OutcomeScoreData (weighted_score, normalized_score, gini, ...)
+// rawData -> ScenarioTiersResponse (raw API response)
+```
+
+#### `useMultipleScenarioTiers(idMapping?)`
+
+Fetches tier scores for all scenarios in a single batched request via `/api/tiers/batch`. When `idMapping` is provided, fetches only the resolved IDs and re-keys output to sibling group IDs. Uses `keepPreviousData` to avoid loading flashes during hydroclimate switches.
+
+```tsx
+import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+
+const { allChartData, allScoreData, allScenariosData, scenarioIds, outcomeNames, isLoading, isValidating, error } =
+  useMultipleScenarioTiers(idMapping)
+```
+
+> **Prefer `useResolvedScenarioTiers()`** (below) over calling this directly — it handles hydroclimate resolution automatically.
+
+#### `useResolvedScenarioTiers()`
+
+Convenience hook that reads the active hydroclimate from the store, resolves sibling group IDs, and calls `useMultipleScenarioTiers` under the hood. This is the recommended hook for any tool panel that needs tier data.
+
+```tsx
+import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
+
+const {
+  allChartData, allScoreData, allScenariosData, outcomeNames,
+  siblingGroups, getDisplayName, getThemeForScenario,
+  idMapping, isLoading, isValidating, error,
+} = useResolvedScenarioTiers()
 ```
 
 ### Fetchers
@@ -129,12 +159,18 @@ Use fetchers when you need to:
 import {
   fetchTierList,
   fetchScenarioTiers,
+  fetchAllScenarioTiers,
   fetchScenarioList,
+  fetchTierLocationData,
 } from "@repo/data/coeqwal"
 
 const tiers = await fetchTierList()
 const scenarios = await fetchScenarioList()
 const scenarioData = await fetchScenarioTiers("s0020")
+const allData = await fetchAllScenarioTiers(["s0020", "s0021", "s0029"])
+// Uses /api/tiers/batch — one SQL query for all scenarios
+const locations = await fetchTierLocationData("s0020", "CWS_DEL")
+// Per-location tier assignments for map/treemap visualization
 ```
 
 Fetchers throw `FetchError` on failure:
