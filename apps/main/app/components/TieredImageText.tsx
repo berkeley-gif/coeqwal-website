@@ -129,7 +129,7 @@ export function TieredImageText({
         </Box>
       </Box>
 
-      {/* Image — at the bottom */}
+      {/* Image.at the bottom */}
       <Box
         component="div"
         id="bottomImage"

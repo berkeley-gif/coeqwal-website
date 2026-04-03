@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * CoeqwalPanel — standardised content section
+ * CoeqwalPanel.standardised content section
  *
  * Provides consistent layout, typography and spacing:
  *
@@ -11,8 +11,8 @@
  *   - optional CTA slot
  *   - optional children slot (for card grids, etc.)
  *
- * layout="single"  — everything stacked left-aligned in one column
- * layout="split"   — headline spans full width; description sits in the
+ * layout="single" .everything stacked left-aligned in one column
+ * layout="split"  .headline spans full width; description sits in the
  *                    right half only
  */
 
@@ -35,21 +35,21 @@ export interface CoeqwalPanelProps {
   id?: string
   /** Overline label rendered above the headline */
   eyebrow?: string
-  /** Primary heading — accepts JSX so callers can embed <br /> etc. Optional
+  /** Primary heading.accepts JSX so callers can embed <br /> etc. Optional
    *  when the headline is handled externally (e.g. MorphingHeadline overlay). */
   headline?: React.ReactNode
   /** Body description rendered below the headline */
   description?: React.ReactNode
-  /** CTA slot — rendered below description (e.g. an arrow link) */
+  /** CTA slot.rendered below description (e.g. an arrow link) */
   cta?: React.ReactNode
   /**
-   * "single"  — headline + description stacked in one column (default)
-   * "split"   — headline spans full width; description in right half only
+   * "single" .headline + description stacked in one column (default)
+   * "split"  .headline spans full width; description in right half only
    */
   layout?: "single" | "split"
   /** Section background colour (default: theme.palette.common.white) */
   background?: string
-  /** Minimum height of the section — useful for scroll-driven panels that need
+  /** Minimum height of the section.useful for scroll-driven panels that need
    *  extra scroll runway for animations to play out */
   minHeight?: string | number
   /** Override text colour for all typography within the panel
@@ -57,12 +57,12 @@ export interface CoeqwalPanelProps {
   textColor?: string
   /** Bottom border (e.g. RULE constant). Omit for no border. */
   borderBottom?: string
-  /** Content rendered below the text block — card grids, etc. */
+  /** Content rendered below the text block.card grids, etc. */
   children?: React.ReactNode
   /** When provided, replaces the default whileInView entrance with a
    *  scroll-driven style (e.g. pass a MotionValue<number> for opacity). */
   contentMotionStyle?: object
-  /** Extra sx merged into the description/CTA wrapper box — useful for
+  /** Extra sx merged into the description/CTA wrapper box.useful for
    *  adjusting alignment when the headline is an external overlay. */
   descriptionSx?: SxProps<Theme>
   /** Top margin above the children slot (default: 5 = 40px).
@@ -73,8 +73,8 @@ export interface CoeqwalPanelProps {
    *  Typography wrapper so callers can supply the correct variant pair. */
   responsiveHeadline?: React.ReactNode
   /** Vertical content alignment when minHeight is set.
-   *  "center" (default) — vertically centres content.
-   *  "top" — content starts at the top (useful when descriptionSx handles positioning). */
+   *  "center" (default).vertically centres content.
+   *  "top".content starts at the top (useful when descriptionSx handles positioning). */
   contentAlign?: "center" | "top"
 }
 
@@ -141,7 +141,7 @@ export function CoeqwalPanel({
             : { maxWidth: "680px" }
         }
       >
-        {/* Responsive headline — visible on xs–md only; lg+ uses MorphingHeadline overlay */}
+        {/* Responsive headline.visible on xs–md only; lg+ uses MorphingHeadline overlay */}
         {responsiveHeadline && (
           <Box
             sx={{
@@ -154,7 +154,7 @@ export function CoeqwalPanel({
           </Box>
         )}
 
-        {/* Headline block — full width in both layouts */}
+        {/* Headline block.full width in both layouts */}
         {(eyebrow || headline) && (
           <Box
             sx={
@@ -202,7 +202,7 @@ export function CoeqwalPanel({
         )}
       </MotionBox>
 
-      {/* Below-the-fold slot — card grids, etc. */}
+      {/* Below-the-fold slot.card grids, etc. */}
       {children && <Box sx={{ mt: childrenMt }}>{children}</Box>}
     </Box>
   )

@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * WaterThemesPanel — Sticky scrollytelling panel for the "What water issues
+ * WaterThemesPanel.Sticky scrollytelling panel for the "What water issues
  * matter to you?" section of the IntroSection.
  *
  * Scroll phases:
@@ -65,7 +65,7 @@ function requireTheme(id: string) {
   return t
 }
 
-/** Circle positions — tune visually against the aerial image. Content comes from WATER_THEMES. */
+/** Circle positions.tune visually against the aerial image. Content comes from WATER_THEMES. */
 const CIRCLE_CONFIG: ThemeCircle[] = [
   {
     id: "cws",
@@ -118,7 +118,7 @@ const CIRCLE_CONFIG: ThemeCircle[] = [
 /* STAGGER TIMING                                                              */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-/** Left-to-right reveal order — sorted by cx position */
+/** Left-to-right reveal order.sorted by cx position */
 const SORTED_INDICES = CIRCLE_CONFIG.map((c, i) => ({ cx: c.cx, i }))
   .sort((a, b) => a.cx - b.cx)
   .map((entry) => entry.i)
@@ -139,10 +139,10 @@ function getStaggerStart(index: number, rangeStart: number, rangeEnd: number) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────── */
-/* PER-CIRCLE SUB-COMPONENTS (each calls its own hooks — lint-safe)            */
+/* PER-CIRCLE SUB-COMPONENTS (each calls its own hooks.lint-safe)            */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-/** Photo fill clipped to a circle — owns its staggered opacity hook */
+/** Photo fill clipped to a circle.owns its staggered opacity hook */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ThemeCirclePhoto({
   circle,
@@ -182,7 +182,7 @@ function ThemeCirclePhoto({
   )
 }
 
-/** Label card positioned at 9:00 — owns its staggered opacity hook */
+/** Label card positioned at 9:00.owns its staggered opacity hook */
 function ThemeCircleLabel({
   circle,
   index,
@@ -311,7 +311,7 @@ function WaterThemesPanelContent({
   // Local scroll progress (0–1) within this StickyScrollSection
   const progress = useScrollProgress()
 
-  // Phase opacities — when reduced motion, show final state
+  // Phase opacities.when reduced motion, show final state
   // Image fades out after the last theme circle/label has appeared
   const imageOpacity = useScrollValue(
     progress,
@@ -359,7 +359,7 @@ function WaterThemesPanelContent({
         }}
       />
 
-      {/* Layer 3: SVG overlay — circles, photos, labels */}
+      {/* Layer 3: SVG overlay.circles, photos, labels */}
       <svg
         viewBox={`0 0 ${IMG_W} ${IMG_H}`}
         preserveAspectRatio="xMidYMax meet"
@@ -373,7 +373,7 @@ function WaterThemesPanelContent({
           pointerEvents: "none",
         }}
       >
-        {/* Photo fills — commented out; re-enable if circle photos return
+        {/* Photo fills.commented out; re-enable if circle photos return
         <defs>
           {CIRCLE_CONFIG.map((c) => (
             <clipPath key={`clip-${c.id}`} id={`clip-${c.id}`}>
@@ -425,7 +425,7 @@ function WaterThemesPanelContent({
         })}
       </svg>
 
-      {/* Layer 4: Text content — headline + description */}
+      {/* Layer 4: Text content.headline + description */}
       <motion.div
         style={{
           position: "relative",
@@ -436,7 +436,7 @@ function WaterThemesPanelContent({
           paddingTop: theme.space.panel.topOffset,
         }}
       >
-        {/* Responsive headline — visible on xs–md only */}
+        {/* Responsive headline.visible on xs–md only */}
         <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
           <Typography
             variant="h2Main"
@@ -454,7 +454,7 @@ function WaterThemesPanelContent({
           </Typography>
         </Box>
 
-        {/* Description — right column on md+, matching CoeqwalPanel split layout */}
+        {/* Description.right column on md+, matching CoeqwalPanel split layout */}
         <Box
           sx={{
             display: "grid",
@@ -471,7 +471,7 @@ function WaterThemesPanelContent({
               maxWidth: "calc(100% - 40px)",
             }}
           >
-            Water is important to all of us — from farmers in the Central Valley
+            Water is important to all of us.from farmers in the Central Valley
             to communities in the Delta, from salmon in the Sacramento River to
             urban water users in Los Angeles. We can consider how decisions
             affect the issues people care about.
@@ -517,7 +517,7 @@ export function WaterThemesPanel({
           borderBottom={borderBottom}
         />
       </StickyScrollSection>
-      {/* Dock marker — positioned 75vh above the section end via
+      {/* Dock marker.positioned 75vh above the section end via
           position:relative so getBoundingClientRect() reflects the offset.
           The headline starts scrolling away once this marker's top crosses y=0,
           which happens ~75vh before the section ends (after photos/labels

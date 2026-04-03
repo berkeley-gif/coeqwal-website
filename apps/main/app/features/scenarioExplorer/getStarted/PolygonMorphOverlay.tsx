@@ -456,7 +456,7 @@ export default function PolygonMorphOverlay({
       row0.push(bars)
     }
 
-    // Row 1+: full rows below — each bar stores its parent glyph center
+    // Row 1+: full rows below.each bar stores its parent glyph center
     const extraRows: BarRect[][][] = []
     for (let r = 1; r < NUM_ROWS; r++) {
       const rowGlyphs: BarRect[][] = []

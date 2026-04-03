@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * UnifiedToolLayout — Persistent three-panel chrome for the Scenario Explorer.
+ * UnifiedToolLayout.Persistent three-panel chrome for the Scenario Explorer.
  *
  * Layout:
  *   [Sidebar (dynamic width)] [Tool area (flex 1)] [Map panel (optional, 1/3)]
@@ -110,7 +110,7 @@ export default function UnifiedToolLayout({
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map reveal area — transparent so the persistent fixed-position map shows through */}
+      {/* Map reveal area.transparent so the persistent fixed-position map shows through */}
       {showMap && (
         <Box
           sx={{

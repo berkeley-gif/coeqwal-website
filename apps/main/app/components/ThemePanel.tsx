@@ -1,5 +1,5 @@
 /**
- * Theme Panel — A Panel that comes up from the bottom of the screen to display theme narratives
+ * Theme Panel.A Panel that comes up from the bottom of the screen to display theme narratives
  * Renders when a theme is active (theme-prop is non-null)
  *
  * Structure:
@@ -74,7 +74,7 @@ function SectionContentRenderer({ content }: { content: SectionContent }) {
     case "boxes":
       return <BoxSectionRenderer content={content} />
     default: {
-      // Exhaustive check — TypeScript will error here if a new
+      // Exhaustive check.TypeScript will error here if a new
       // SectionContent type is added but not handled
       const _exhaustive: never = content
       return null
@@ -195,7 +195,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [isOpen, closeThemePanel])
 
-  // Scroll to section inside the panel container — not window
+  // Scroll to section inside the panel container.not window
   const scrollToSection = (sectionId: string) => {
     const el = scrollContainerRef.current?.querySelector(`#${sectionId}`)
     el?.scrollIntoView({ behavior: "smooth", block: "start" })
@@ -269,7 +269,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   <Box
                     component="img"
                     src={theme.heroImage}
-                    // Decorative — title is rendered as text below
+                    // Decorative.title is rendered as text below
                     alt=""
                     aria-hidden="true"
                     sx={{
@@ -313,7 +313,7 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                   />
 
                   {/*
-                   * Mobile-only title — always shows the compact h5 variant.
+                   * Mobile-only title.always shows the compact h5 variant.
                    * Desktop has the animated h3 - h5 collapse below.
                    */}
 

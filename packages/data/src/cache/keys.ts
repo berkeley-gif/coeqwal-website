@@ -298,7 +298,7 @@ export const CACHE_KEYS = {
   ENV_FLOW_SEASONS: "/api/statistics/env-flow-seasons",
 
   /**
-   * Monthly % unimpaired flow statistics (Metric 1) — all channels in scenario
+   * Monthly % unimpaired flow statistics (Metric 1).all channels in scenario
    * @param scenarioId - Scenario ID
    * @param channelId - Optional single channel filter
    */

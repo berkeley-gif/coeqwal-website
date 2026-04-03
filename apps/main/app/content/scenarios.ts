@@ -65,7 +65,7 @@ export interface Scenario {
   hydroclimateId: number
   /** Short code of the baseline scenario this derives from, or null */
   baselineScenario: string | null
-  /** Sibling group — same strategy under different hydroclimates */
+  /** Sibling group.same strategy under different hydroclimates */
   siblingGroup: string
 }
 

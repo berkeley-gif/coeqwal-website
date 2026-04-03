@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ResiliencePanel — Resilience analysis tool content.
+ * ResiliencePanel.Resilience analysis tool content.
  *
  * Sidebar, hydroclimate chooser, and map are handled by the persistent
  * UnifiedToolLayout chrome. This component renders only the tool-specific

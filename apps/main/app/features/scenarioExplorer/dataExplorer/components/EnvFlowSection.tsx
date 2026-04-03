@@ -1,11 +1,11 @@
 "use client"
 
 /**
- * EnvFlowSection — Environmental River Flows section for the Data Explorer
+ * EnvFlowSection.Environmental River Flows section for the Data Explorer
  *
  * Displays two chart modes selectable via dropdown:
- *   "volume"         — Monthly flow volume (TAF/month or CFS) percentile bands
- *   "pct_unimpaired" — Monthly % of natural unimpaired flow percentile bands
+ *   "volume"        .Monthly flow volume (TAF/month or CFS) percentile bands
+ *   "pct_unimpaired".Monthly % of natural unimpaired flow percentile bands
  *
  * Both views share the same monthly data fetch (708 rows per scenario).
  * Per-cell stats: annual avg flow (TAF/yr, summed from 12 monthly averages)
@@ -286,9 +286,9 @@ function computeAnnualAvgCfs(rows: ChannelMonthlyStats[]): number | null {
 
 /**
  * Fetches monthly data for all scenarios and derives:
- *   - volumeMatrix  — flow volume percentiles (TAF or CFS)
- *   - pctMatrix     — % unimpaired percentiles
- *   - annualCellStats — per-cell annual avg flow (TAF/yr) + annual avg CFS
+ *   - volumeMatrix .flow volume percentiles (TAF or CFS)
+ *   - pctMatrix    .% unimpaired percentiles
+ *   - annualCellStats.per-cell annual avg flow (TAF/yr) + annual avg CFS
  *
  * A single fetch powers both chart modes.
  */

@@ -1,5 +1,5 @@
 // apps/main/components/ActiveThemePanel.tsx
-// Thin client wrapper — owns the lookup, passes single theme down
+// Thin client wrapper.owns the lookup, passes single theme down
 "use client"
 
 import { usePanelRoute } from "../hooks/usePanelRoute"

@@ -274,7 +274,7 @@ export function HotspotMarkers({
               },
             }}
           >
-            {/* Pin marker — omitted for ENV_FLOWS, which uses TierMarkers diamonds */}
+            {/* Pin marker.omitted for ENV_FLOWS, which uses TierMarkers diamonds */}
             {outcomeCode !== "ENV_FLOWS" && (
               <Box
                 sx={{

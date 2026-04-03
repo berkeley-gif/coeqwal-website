@@ -1,5 +1,5 @@
 /**
- * useTabNavigation — dispatches tab changes to context state.
+ * useTabNavigation.dispatches tab changes to context state.
  *
  * URL responsibility: this hook does NOT write ?tab= to the URL.
  * TabPanels owns the ?tab= parameter because it needs to add/remove it

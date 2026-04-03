@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * EquityPanel — Equity analysis tool content.
+ * EquityPanel.Equity analysis tool content.
  *
  * Sidebar, hydroclimate chooser, and map are handled by the persistent
  * UnifiedToolLayout chrome. This component renders the tool-specific

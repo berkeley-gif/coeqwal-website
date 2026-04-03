@@ -81,7 +81,7 @@ export function CenterImageText({
         paddingTop: `${paddingTop}px`,
       }}
     >
-      {/* Image — centered on mobile and desktop */}
+      {/* Image.centered on mobile and desktop */}
       <Box
         component="img"
         src={imgSrc}

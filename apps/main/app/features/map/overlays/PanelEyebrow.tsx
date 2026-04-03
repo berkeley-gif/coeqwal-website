@@ -24,7 +24,7 @@ export function PanelEyebrow({ children }: PanelEyebrowProps) {
       component="span"
       sx={{
         fontFamily: theme.typography.fontFamily,
-        fontSize: "0.875rem", // 14px — matches c
+        fontSize: "0.875rem", // 14px.matches c
         fontWeight: 600,
         lineHeight: 1,
         letterSpacing: "0.12em",

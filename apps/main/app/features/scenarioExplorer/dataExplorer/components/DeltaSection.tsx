@@ -1,16 +1,16 @@
 "use client"
 
 /**
- * DeltaSection — Delta inflows, exports, outflow, salinity, and X2 for the Data Explorer
+ * DeltaSection.Delta inflows, exports, outflow, salinity, and X2 for the Data Explorer
  *
  * Charts:
- *   1. April X2 position (km) — text stat (water month 7)
- *   2. September X2 position (km) — text stat (water month 12)
- *   3. Salinity at compliance points (EM, JP, RS, CO) — monthly percentile bands
- *   4. Salinity at pumping plants (Banks, Tracy/Jones) — monthly percentile bands
- *   5. Delta inflows (Sacramento at Hood, SJR at Vernalis) — monthly TAF bands
- *   6. Delta exports (SWP at Banks, CVP at Tracy) — monthly TAF bands
- *   7. Delta outflow (NDO) — monthly percentile bands (TAF)
+ *   1. April X2 position (km).text stat (water month 7)
+ *   2. September X2 position (km).text stat (water month 12)
+ *   3. Salinity at compliance points (EM, JP, RS, CO).monthly percentile bands
+ *   4. Salinity at pumping plants (Banks, Tracy/Jones).monthly percentile bands
+ *   5. Delta inflows (Sacramento at Hood, SJR at Vernalis).monthly TAF bands
+ *   6. Delta exports (SWP at Banks, CVP at Tracy).monthly TAF bands
+ *   7. Delta outflow (NDO).monthly percentile bands (TAF)
  *
  * Delta monthly data: /api/statistics/scenarios/{id}/delta/monthly
  * Channel flow data:  /api/statistics/scenarios/{id}/channels/monthly
@@ -71,7 +71,7 @@ const DELTA_EXPORT_CHANNELS = [
   { id: "C_DMC000", label: "CVP exports (Tracy)" },
 ] as const
 
-/** Salinity band colors — teal/green, distinct from delivery blue and shortage orange */
+/** Salinity band colors.teal/green, distinct from delivery blue and shortage orange */
 const SALINITY_BAND_COLORS = {
   range: "#e0f2f1",
   outer: "#b2dfdb",
@@ -79,7 +79,7 @@ const SALINITY_BAND_COLORS = {
   median: "#00695c",
 }
 
-/** Outflow band colors — blue, matching reservoir/flow conventions */
+/** Outflow band colors.blue, matching reservoir/flow conventions */
 const OUTFLOW_BAND_COLORS = {
   range: "#e3f2fd",
   outer: "#90caf9",
@@ -87,7 +87,7 @@ const OUTFLOW_BAND_COLORS = {
   median: "#1565c0",
 }
 
-/** Inflow band colors — indigo */
+/** Inflow band colors.indigo */
 const INFLOW_BAND_COLORS = {
   range: "#e8eaf6",
   outer: "#9fa8da",
@@ -95,7 +95,7 @@ const INFLOW_BAND_COLORS = {
   median: "#283593",
 }
 
-/** Export band colors — amber/orange */
+/** Export band colors.amber/orange */
 const EXPORT_BAND_COLORS = {
   range: "#fff8e1",
   outer: "#ffe082",

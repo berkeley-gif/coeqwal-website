@@ -8,7 +8,7 @@
 import type { ScenarioTheme } from "./scenarios"
 
 // =============================================================================
-// Block types — content blocks for theme sections
+// Block types.content blocks for theme sections
 // =============================================================================
 
 export type ParagraphBlock = {
@@ -37,7 +37,7 @@ export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
 export interface MixedSection {
   type: "mixed"
   blocks: ContentBlock[]
-  /** Optional gap between blocks — defaults to theme spacing if omitted */
+  /** Optional gap between blocks.defaults to theme spacing if omitted */
   gap?: string | number
 }
 
@@ -76,7 +76,7 @@ export type ThemeSectionId = (typeof THEME_SECTION_IDS)[number]
 export interface Theme {
   /** Stable identifier (e.g. "delta") */
   id: string
-  /** Display label — may contain \n for line-breaks in circle layouts */
+  /** Display label.may contain \n for line-breaks in circle layouts */
   label: string
   /** Short label for compact UI contexts (tabs, chips, dropdowns) */
   shortLabel: string
@@ -124,7 +124,7 @@ export const ACTIVE_THEMES: ScenarioTheme[] = [
 ]
 
 // =============================================================================
-// WATER_THEMES — content for each theme page
+// WATER_THEMES.content for each theme page
 // =============================================================================
 
 export const WATER_THEMES: Theme[] = [
@@ -374,7 +374,7 @@ export const WATER_THEMES: Theme[] = [
                 "Reservoirs improve water storage for people and farms, but they also alter natural flow patterns and temperatures.",
                 "River ecosystems respond to droughts, floods, and sequences of extreme years. Short periods of stress can have lasting impacts.",
                 "Improving flows alone does not fully restore ecosystems. Habitat conditions, landscape changes, and invasive species also play a role.",
-                "For winter-run salmon, water temperature — especially cold water stored in reservoirs — can matter as much as flow volume.",
+                "For winter-run salmon, water temperature.especially cold water stored in reservoirs.can matter as much as flow volume.",
               ],
             },
           ],
@@ -509,7 +509,7 @@ export const WATER_THEMES: Theme[] = [
               title: "Water management & ecosystem health",
               paragraphs: [
                 "Water management decisions shape what happens inside the Delta. Freshwater flows influence salinity levels and where they occur. Pumping shifts how water moves through the system. Reservoir storage affects both supply and temperature. These forces interact to influence habitat conditions and ecosystem resilience.",
-                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta — sometimes improving habitat, sometimes increasing stress.",
+                "Salinity depends not only on how much water is present, but also on how water moves and mixes across levees, channels, and wetlands. Small changes in flow or pumping can shift ecological conditions in different parts of the Delta.sometimes improving habitat, sometimes increasing stress.",
               ],
             },
             {

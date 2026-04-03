@@ -1,11 +1,11 @@
 /**
- * Operations Icons — Centralized icon definitions and reusable components
+ * Operations Icons.Centralized icon definitions and reusable components
  *
  * This module provides:
- * - `OpsCircleIcon` — A generic circle-with-text SVG component
- * - `ICON_REGISTRY` — All icon definitions (id -> rendering config + tooltip metadata)
- * - `SCENARIO_ICONS` — Scenario ID -> ordered array of icon IDs
- * - `getScenarioIconDefs()` — Helper to get resolved icon definitions for a scenario
+ * - `OpsCircleIcon`.A generic circle-with-text SVG component
+ * - `ICON_REGISTRY`.All icon definitions (id -> rendering config + tooltip metadata)
+ * - `SCENARIO_ICONS`.Scenario ID -> ordered array of icon IDs
+ * - `getScenarioIconDefs()`.Helper to get resolved icon definitions for a scenario
  */
 
 import React from "react"
@@ -49,7 +49,7 @@ interface CircleIconDef extends BaseIconDef {
 export type IconDef = SvgFileIconDef | CircleIconDef
 
 // ============================================================================
-// OpsCircleIcon — Generic reusable circle-with-text SVG component
+// OpsCircleIcon.Generic reusable circle-with-text SVG component
 // ============================================================================
 
 export interface OpsCircleIconProps {
@@ -324,7 +324,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "Historical agricultural land use based on 2004-2013 survey data.",
   },
 
-  // ── New circle icons — BiOps ─────────────────────────────────────────────
+  // ── New circle icons.BiOps ─────────────────────────────────────────────
 
   biops_2019: {
     id: "biops_2019",
@@ -354,7 +354,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "USBR 2024 Proposed Action biological opinion for Delta operations.",
   },
 
-  // ── New circle icons — USBR / DWR ───────────────────────────────────────
+  // ── New circle icons.USBR / DWR ───────────────────────────────────────
 
   usbr_alt2v1: {
     id: "usbr_alt2v1",
@@ -384,7 +384,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "DWR 2025 Adaptation strategy for State Water Project operations.",
   },
 
-  // ── New circle icons — Delta / exports ───────────────────────────────────
+  // ── New circle icons.Delta / exports ───────────────────────────────────
 
   limit_delta_exports: {
     id: "limit_delta_exports",
@@ -404,7 +404,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     description: "Delta conveyance tunnel infrastructure for water transport.",
   },
 
-  // ── New circle icons — Unimpaired flow ───────────────────────────────────
+  // ── New circle icons.Unimpaired flow ───────────────────────────────────
 
   unimpaired_35: {
     id: "unimpaired_35",
@@ -439,7 +439,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     description: "65% of unimpaired flow dedicated to environmental purposes.",
   },
 
-  // ── New circle icons — Functional flows ──────────────────────────────────
+  // ── New circle icons.Functional flows ──────────────────────────────────
 
   functional_flows: {
     id: "functional_flows",
@@ -461,7 +461,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
     customSvg: SalmonSilhouette,
   },
 
-  // ── New circle icons — Crossed out (strikethrough) ───────────────────────
+  // ── New circle icons.Crossed out (strikethrough) ───────────────────────
 
   no_flow_req: {
     id: "no_flow_req",
@@ -490,7 +490,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "Delta outflow requirements have been removed in this scenario.",
   },
 
-  // ── New circle icons — Pumping limits ────────────────────────────────────
+  // ── New circle icons.Pumping limits ────────────────────────────────────
 
   limit_sj_pumping: {
     id: "limit_sj_pumping",
@@ -511,7 +511,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "SGMA groundwater pumping limits applied across the entire Central Valley.",
   },
 
-  // ── New circle icons — Reduced ag acreage ──────────────────────────────
+  // ── New circle icons.Reduced ag acreage ──────────────────────────────
 
   reduced_sj_ag: {
     id: "reduced_sj_ag",
@@ -532,7 +532,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "Reduced agricultural acreage across the entire Central Valley to improve groundwater sustainability under SGMA.",
   },
 
-  // ── New circle icons — Shasta / Reservoir ──────────────────────────────
+  // ── New circle icons.Shasta / Reservoir ──────────────────────────────
 
   shasta_carryover: {
     id: "shasta_carryover",
@@ -544,7 +544,7 @@ export const ICON_REGISTRY: Record<string, IconDef> = {
       "Increase Shasta Reservoir carryover storage target by 20%, with CVP Settlement Contractor allocations reduced as needed.",
   },
 
-  // ── New circle icons — CWS allocation priorities ─────────────────────────
+  // ── New circle icons.CWS allocation priorities ─────────────────────────
 
   cws_hhs: {
     id: "cws_hhs",

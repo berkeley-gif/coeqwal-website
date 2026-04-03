@@ -59,7 +59,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
               <List
                 key={i}
                 sx={{
-                  // Remove default list padding — the Panel component
+                  // Remove default list padding.the Panel component
                   // already owns horizontal spacing
                   px: 0,
                   // Tighter vertical padding on mobile
@@ -111,7 +111,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 component="figure"
                 sx={{
                   margin: 0,
-                  // Tighter margin on mobile — avoids competing with Panel padding
+                  // Tighter margin on mobile.avoids competing with Panel padding
                   mx: isMobile ? 0 : "30px",
                   my: isMobile ? "16px" : "30px",
                   display: "flex",

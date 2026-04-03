@@ -799,7 +799,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           if (hId) drawPolygonForScenario(hId)
         }
 
-        // 8. Distribution dots — arranged along tier circle arcs
+        // 8. Distribution dots.arranged along tier circle arcs
         if (showDistribution && distributionData && hasPinned) {
           const pinnedArr = Array.from(pinnedScenarioIds)
           const pinCount = pinnedArr.length

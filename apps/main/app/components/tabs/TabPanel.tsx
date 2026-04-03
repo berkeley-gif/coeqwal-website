@@ -51,7 +51,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
         }}
       >
         {children}
-        {/* Share is the last tab — no "advance" footer needed */}
+        {/* Share is the last tab.no "advance" footer needed */}
         {tabKey !== "share" && <AutoAdvanceFooter />}
       </div>
     )

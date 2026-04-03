@@ -210,7 +210,7 @@ function ColumnHeaders({
         </Typography>
       </Box>
 
-      {/* Column 3: "Key operations" — hidden when showOperations is false */}
+      {/* Column 3: "Key operations".hidden when showOperations is false */}
       {showOperations && (
         <Box
           sx={{

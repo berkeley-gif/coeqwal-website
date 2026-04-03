@@ -19,14 +19,14 @@ The Scenario Explorer store (`scenarioExplorer/store.ts`) demonstrates the patte
 
 **Shared store** holds cross-cutting state that every tool panel needs:
 
-- `selectedScenarios` — the sidebar checkboxes write to it; each tool panel reads it
-- `hydroclimatePeriod` — the toolbar's `HydroclimateChooser` writes to it; any panel can pass it to `buildIdMapping()` to get the right scenario IDs for fetching
-- `searchQuery` — the sidebar handles search filtering before scenarios reach the panel
-- `highlightedScenario`, `pinnedScenarioIds` — enable cross-component hover highlighting and pinning
-- `showMap` — controls the map reveal panel
-- `selectedTier` — `{ strategy, outcome } | null`, for telling the persistent map which outcome to visualize
+- `selectedScenarios`.the sidebar checkboxes write to it; each tool panel reads it
+- `hydroclimatePeriod`.the toolbar's `HydroclimateChooser` writes to it; any panel can pass it to `buildIdMapping()` to get the right scenario IDs for fetching
+- `searchQuery`.the sidebar handles search filtering before scenarios reach the panel
+- `highlightedScenario`, `pinnedScenarioIds`.enable cross-component hover highlighting and pinning
+- `showMap`.controls the map reveal panel
+- `selectedTier`.`{ strategy, outcome } | null`, for telling the persistent map which outcome to visualize
 
-When a new visualization tool is added, it automatically gets all of these capabilities by reading from the store — no wiring required.
+When a new visualization tool is added, it automatically gets all of these capabilities by reading from the store.no wiring required.
 
 **Local component state** (`useState`) holds tool-specific settings:
 
@@ -101,7 +101,7 @@ OutcomePolygonLayer / TierMarkers / TierLocationLabels / HotspotMarkers
 
 ### How it works
 
-1. **`mapActions.setOutcomeVisualization(outcomeCode, scenarioId)`** — Sets which outcome to visualize on the map. The outcome code (e.g., `"CWS_DEL"`, `"GW_STOR"`, `"RES_STOR"`) is looked up in `OUTCOME_LAYER_REGISTRY` (`features/map/config/outcomeLayerRegistry.ts`), which defines:
+1. **`mapActions.setOutcomeVisualization(outcomeCode, scenarioId)`**.Sets which outcome to visualize on the map. The outcome code (e.g., `"CWS_DEL"`, `"GW_STOR"`, `"RES_STOR"`) is looked up in `OUTCOME_LAYER_REGISTRY` (`features/map/config/outcomeLayerRegistry.ts`), which defines:
 
    - Which Mapbox tileset layer to use (demand-units, WBA, delta, reservoir)
    - How to match feature IDs to tier data

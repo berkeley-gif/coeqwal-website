@@ -48,7 +48,7 @@ function TabDescription({
       return (
         <TwoColumnInterstitial
           headline="What if we managed water differently?"
-          body="Explore how water allocations change under different scenarios through three lenses — trade-offs, equity, and resilience — and discover new possibilities for California's water future."
+          body="Explore how water allocations change under different scenarios through three lenses.trade-offs, equity, and resilience.and discover new possibilities for California's water future."
           linkListLabel=""
           links={[]}
         />
@@ -269,7 +269,7 @@ export default function SmoothTabs() {
         })}
       </div>
 
-      {/* Full-width tab description — visible when expanded or opened by click */}
+      {/* Full-width tab description.visible when expanded or opened by click */}
       <AnimatePresence initial={false}>
         {showDescriptions && (
           <motion.div

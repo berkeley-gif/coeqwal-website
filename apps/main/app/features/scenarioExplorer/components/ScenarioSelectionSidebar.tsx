@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ScenarioSelectionSidebar — Persistent left-hand scenario list panel.
+ * ScenarioSelectionSidebar.Persistent left-hand scenario list panel.
  *
  * Matches the StrategyGrid "Choose scenarios" visual style:
  * 1. "Choose scenarios" header with key-ops column toggle

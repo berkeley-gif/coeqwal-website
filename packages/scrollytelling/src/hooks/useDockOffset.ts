@@ -19,7 +19,7 @@
  *   to this container's bottom edge reaching the bottom of the viewport.
  *
  * @example
- * // Headline docks to the third panel — scrolls away once the panel's top
+ * // Headline docks to the third panel.scrolls away once the panel's top
  * // hits the viewport top.
  * const dockOffsetMV = useDockOffset(thirdPanelRef, containerRef)
  *
@@ -46,7 +46,7 @@ export function useDockOffset(
 
   useEffect(() => {
     const handleScroll = () => {
-      // Cancel any pending frame — we only need the latest position
+      // Cancel any pending frame.we only need the latest position
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current)
       }

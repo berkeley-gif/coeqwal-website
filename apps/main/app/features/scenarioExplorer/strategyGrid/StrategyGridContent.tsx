@@ -144,7 +144,7 @@ export function StrategyGridContent({
 
   // Filter scenarios: chosen-only takes precedence, then baseline visibility
   const displayScenarios = (() => {
-    // When showing only chosen scenarios, respect that fully — no baseline filtering
+    // When showing only chosen scenarios, respect that fully.no baseline filtering
     if (showOnlyChosen) {
       return scenarios.filter((s) => selectedScenarios.includes(s.scenarioId))
     }
@@ -359,7 +359,7 @@ export function StrategyGridContent({
           )
         }
 
-        // Theme group divider — separates theme-matching scenarios from the rest
+        // Theme group divider.separates theme-matching scenarios from the rest
         if (shouldShowThemeDivider) {
           rows.push(
             <Box
@@ -374,7 +374,7 @@ export function StrategyGridContent({
           )
         }
 
-        // Icon group divider — separates icon-matching scenarios from the rest
+        // Icon group divider.separates icon-matching scenarios from the rest
         if (shouldShowIconDivider) {
           rows.push(
             <Box

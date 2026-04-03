@@ -178,7 +178,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 /**
  * Fetch tier data for multiple scenarios.
  *
- * @param idMapping — Optional mapping of display IDs to fetch IDs.
+ * @param idMapping.Optional mapping of display IDs to fetch IDs.
  *   When provided, fetches tier data for `Object.values(idMapping)` (the
  *   resolved short_codes for the active hydroclimate) and re-keys all output
  *   data structures using `Object.keys(idMapping)` (the sibling group IDs).
@@ -293,7 +293,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
 
   // Only report loading when there's truly no data to show.
   // During hydroclimate switches, keepPreviousData provides stale data while
-  // the new fetch is in flight — SWR's isLoading is true in that case because
+  // the new fetch is in flight.SWR's isLoading is true in that case because
   // it doesn't count previous data as "loaded."  We use allScenariosData
   // (which holds lastValidDataRef) to avoid flashing a spinner.
   const isLoading =

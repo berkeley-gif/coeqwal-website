@@ -34,7 +34,7 @@ export function useLearnScrollama() {
 
       // When naturally scrolling into the central-valley step, ease the content
       // to the viewport center using the same animation as the "Scroll to Explore"
-      // button. Only fires on downward entry — not when scrolling back up.
+      // button. Only fires on downward entry.not when scrolling back up.
       if (data === "central-valley" && direction === "down") {
         smoothScrollToCenter("central-valley-content")
       }

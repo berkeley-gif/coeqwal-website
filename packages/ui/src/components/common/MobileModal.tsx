@@ -193,7 +193,7 @@ export function MobileModal({
             outline: "none",
           }}
         >
-          {/* Header — full strip when title present, close-only slim strip otherwise */}
+          {/* Header.full strip when title present, close-only slim strip otherwise */}
           {(title || showCloseButton) && (
             <Box
               sx={{

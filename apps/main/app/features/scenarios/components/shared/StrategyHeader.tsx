@@ -36,7 +36,7 @@ export interface StrategyHeaderProps {
   onTitleClick?: () => void
   /** Whether to show the theme badge (defaults to true) */
   showThemeBadge?: boolean
-  /** Called when the theme badge is clicked — selects all scenarios of that theme */
+  /** Called when the theme badge is clicked.selects all scenarios of that theme */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
 }
 
