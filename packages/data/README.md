@@ -113,9 +113,6 @@ import { useScenarioTiers } from "@repo/data/coeqwal/hooks"
 
 const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
   useScenarioTiers("s0020")
-// chartData["CWS_DEL"] -> ChartDataPoint[] (pre-processed for rendering)
-// scoreData["CWS_DEL"] -> OutcomeScoreData (weighted_score, normalized_score, gini, ...)
-// rawData -> ScenarioTiersResponse (raw API response)
 ```
 
 #### `useMultipleScenarioTiers(idMapping?)`
@@ -230,7 +227,7 @@ import type {
 
 ## How to Get Data for a Visualization Tool
 
-This section walks through the full data-fetching flow for a new tool panel in the Scenario Explorer (e.g., the Equity panel).
+This section walks through the full data-fetching flow for a new tool panel in the Scenario Explorer (e.g., the distribution/equity panel).
 
 ### Step 1: Get tier data with `useResolvedScenarioTiers`
 
@@ -272,34 +269,30 @@ No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
 
 ### Step 2: Use the data...it's already cached!
 
-`allScenariosData` contains tier data for **all 24 scenarios**, re-keyed to the active hydroclimate. The SWR cache holds tier data for **all available hydroclimates** (prefetched when the Explore tab mounts), so switching hydroclimates returns data instantly from cache too. By the time your tool panel renders, everything is already loaded. Calling `useResolvedScenarioTiers()` just subscribes to that cached data; it does **not** trigger additional API requests.
+The SWR cache holds tier data for **all available hydroclimates** (prefetched when the Explore tab mounts), so switching hydroclimates returns data instantly from cache too. By the time your tool panel renders, everything is already loaded. Calling `useResolvedScenarioTiers()` just subscribes to that cached data; it does **not** trigger additional API requests.
 
 **Do not** call `useMultipleScenarioTiers`, `fetchAllScenarioTiers`, or `fetchScenarioTiers` to get data for individual scenarios. Just index into `allScenariosData`.
 
-For a tool that compares two scenarios at a time (like the tier visualization):
+For a tool that compares two scenarios at a time (like the distributional tier visualization):
 
 ```typescript
 import { useScenarioExplorerStore } from "../store"
 
 const { selectedScenarios, pinnedScenarioIds } = useScenarioExplorerStore()
 
-// Pick the two scenarios to compare — e.g., first pinned + first selected
+// Pick the two scenarios to compare
 const [scenarioA, scenarioB] = useMemo(() => {
   const pinned = [...pinnedScenarioIds]
   const selected = [...selectedScenarios]
   return [pinned[0] ?? selected[0], selected.find((id) => id !== pinned[0]) ?? selected[1]]
 }, [pinnedScenarioIds, selectedScenarios])
 
-// All tier data for both is already in cache — just index into it
+// All tier data for both is already in cache. Just index into it.
 const tiersA = allScenariosData?.[scenarioA]
 const tiersB = allScenariosData?.[scenarioB]
 
 // Access a specific outcome
 const cwsA = tiersA?.tiers["CWS_DEL"]
-// cwsA.type: "multi_value" | "single_value"
-// cwsA.weighted_score, cwsA.normalized_score, cwsA.gini
-// cwsA.data: [{ tier: "tier1", value: 70, normalized: 0.7 }, ...] (multi_value)
-// cwsA.level: 2 (single_value)
 ```
 
 For filtering to all selected scenarios:
@@ -317,56 +310,26 @@ const selectedData = useMemo(() => {
 }, [allScenariosData, selectedScenarios])
 ```
 
-Pre-processed data is also available:
+### Step 3: Map integration (coloring polygons)
+
+The persistent Mapbox map already has polygon geometry baked into its vector tiles — you do **not** need to fetch GeoJSON. To color map polygons by tier level, use the map store:
 
 ```typescript
-// Chart-ready data (themed colors applied)
-const chartPoints = allChartData["s0020"]?.["CWS_DEL"]
-// ChartDataPoint[] ready for D3 rendering
+import { useMapActions } from "../../map/store"
 
-// Score data for comparisons
-const score = allScoreData["s0020"]?.["CWS_DEL"]
-// { weighted_score, normalized_score, gini, band_upper, band_lower }
+const mapActions = useMapActions()
+
+// Tell the map to color polygons for a specific outcome
+mapActions.setOutcomeVisualization({
+  outcomeCode: "CWS_DEL",
+  scenarioId: "s0020",
+  tierColorMap: { 1: "#2ecc71", 2: "#3498db", 3: "#e67e22", 4: "#e74c3c" },
+})
 ```
 
-### Step 3: Per-location tier-map data (for treemap / map visualizations)
+The map layer system reads this state and applies fill colors to the pre-existing Mapbox vector tile polygons. See `@repo/state` README for full map integration details.
 
-The aggregate tier data from Step 1 tells you how many locations are in each tier for a given outcome. If your visualization needs the individual locations, use the tier-map fetcher:
-
-```typescript
-import useSWR from "swr"
-import { fetchTierLocationData } from "@repo/data/coeqwal"
-import { CACHE_KEYS } from "@repo/data/cache"
-
-// Fetch GeoJSON FeatureCollection for one scenario + one outcome
-const { data: locationData } = useSWR(
-  scenarioId ? CACHE_KEYS.tierLocations(scenarioId, "CWS_DEL") : null,
-  () => fetchTierLocationData(scenarioId, "CWS_DEL"),
-)
-
-// locationData.features[].properties:
-//   location_id, location_name, tier_level (1-4), tier_value, location_type
-// locationData.metadata:
-//   scenario, tier_code, tier_name, tier_type, feature_count
-```
-
-> **Note:** The response contains per-location tier assignments (location_id, tier_level, etc.), **not** polygon geometry. The actual polygon geometry is already encoded in the Mapbox vector tiles that the persistent map renders. The API data is used to style/color those pre-existing tiles. See `@repo/state` README for map integration details.
-
-To fetch location data for **all outcomes** of a scenario:
-
-```typescript
-import { useTiers } from "@repo/data/coeqwal/hooks"
-
-const { tiers } = useTiers() // [{ short_code: "AG_REV", ... }, ...]
-
-// Fetch location data for each multi_value outcome
-const locationQueries = tiers
-  ?.filter((t) => t.tier_type === "multi_value")
-  .map((t) => ({
-    key: CACHE_KEYS.tierLocations(scenarioId, t.short_code),
-    fetcher: () => fetchTierLocationData(scenarioId, t.short_code),
-  }))
-```
+> **`fetchTierLocationData`** exists in `@repo/data` for cases where you need the raw per-location tier assignments (location_id, tier_level, location_name) outside the map — e.g., for building a data table or a non-map visualization of individual locations. It returns tier-level metadata, **not** polygon geometry.
 
 ### Step 4: Single-scenario fetching (if needed)
 
@@ -409,7 +372,7 @@ Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` directly
 - Apply theme colors to chart data
 - Return outcomes in the canonical display order
 
-For per-location data (GeoJSON), wrap `fetchTierLocationData()` in `useSWR()` with the appropriate cache key as shown in Step 3.
+For map polygon coloring, use `mapActions.setOutcomeVisualization()` as shown in Step 3 — the geometry is already in the Mapbox vector tiles.
 
 For advanced use cases like cross-hydroclimate comparisons (fetching data for multiple climates simultaneously), use `buildIdMapping` directly via `useScenarioList`. See `useComparisonData.ts` for an example.
 
