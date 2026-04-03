@@ -24,6 +24,7 @@ import {
   CircularProgress,
   Checkbox,
   FormControlLabel,
+  Switch,
 } from "@repo/ui/mui"
 import {
   VerticalParallelLinePlotPeak,
@@ -87,12 +88,13 @@ export default function ComparisonPanel({
     highlightBaseline,
     setHighlightBaseline,
     overlayTiers,
-    setOverlayTiers: _setOverlayTiers,
     defineOutcome,
     setDefineOutcome,
     selectedScenarios,
     toggleScenario,
     selectScenarios,
+    outcomeDisplayMode,
+    setOutcomeDisplayMode,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -107,7 +109,6 @@ export default function ComparisonPanel({
     [pinnedScenarioIds],
   )
 
-  // ── Hover state ─────────────────────────────────────────────────────────
   // Chart hover feeds into hoveredScenario (debounced) -> onScenarioHover.
   // External highlights arrive via highlightedIds prop from the layout shell.
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -233,10 +234,7 @@ export default function ComparisonPanel({
     if (!allScenariosData || pinnedScenarioIds.length === 0) return undefined
     const result: Record<
       string,
-      Record<
-        string,
-        { tier: number; count: number; normalized: number }[]
-      >
+      Record<string, { tier: number; count: number; normalized: number }[]>
     > = {}
     for (const id of pinnedScenarioIds) {
       const scenarioTiers = allScenariosData[id]?.tiers
@@ -450,7 +448,29 @@ export default function ComparisonPanel({
 
   const toggleControls = (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-      {chartModeSelector}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        {chartModeSelector}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Distributions
+          </Typography>
+          <Switch
+            size="small"
+            checked={outcomeDisplayMode === "distribution"}
+            onChange={(_, checked) =>
+              setOutcomeDisplayMode(checked ? "distribution" : "summary")
+            }
+            sx={{ ml: -0.5 }}
+          />
+        </Box>
+      </Box>
       {chartMode === "parallel" && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           <FormControlLabel
@@ -587,9 +607,7 @@ export default function ComparisonPanel({
               <Checkbox
                 size="small"
                 checked={radarHighlightBaseline}
-                onChange={(e) =>
-                  setRadarHighlightBaseline(e.target.checked)
-                }
+                onChange={(e) => setRadarHighlightBaseline(e.target.checked)}
                 sx={checkboxSx}
               />
             }
@@ -671,9 +689,7 @@ export default function ComparisonPanel({
                 size="small"
                 checked={radarShowDistribution}
                 disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) =>
-                  setRadarShowDistribution(e.target.checked)
-                }
+                onChange={(e) => setRadarShowDistribution(e.target.checked)}
                 sx={checkboxSx}
               />
             }
@@ -782,9 +798,7 @@ export default function ComparisonPanel({
                 size="small"
                 checked={deviationShowDistribution}
                 disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) =>
-                  setDeviationShowDistribution(e.target.checked)
-                }
+                onChange={(e) => setDeviationShowDistribution(e.target.checked)}
                 sx={checkboxSx}
               />
             }
@@ -800,9 +814,7 @@ export default function ComparisonPanel({
               <Checkbox
                 size="small"
                 checked={deviationShowHCRange}
-                onChange={(e) =>
-                  setDeviationShowHCRange(e.target.checked)
-                }
+                onChange={(e) => setDeviationShowHCRange(e.target.checked)}
                 sx={checkboxSx}
               />
             }
@@ -818,9 +830,7 @@ export default function ComparisonPanel({
               <Checkbox
                 size="small"
                 checked={deviationShowBaselineFill}
-                onChange={(e) =>
-                  setDeviationShowBaselineFill(e.target.checked)
-                }
+                onChange={(e) => setDeviationShowBaselineFill(e.target.checked)}
                 sx={checkboxSx}
               />
             }
@@ -1013,7 +1023,7 @@ export default function ComparisonPanel({
         WebkitUserSelect: "none",
       }}
     >
-      {/* ── HTML axis labels above chart (desktop, parallel only) ──── */}
+      {/* Axis labels above chart (desktop parallel only) */}
       {chartMode === "parallel" && isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -1069,7 +1079,7 @@ export default function ComparisonPanel({
         </Box>
       )}
 
-      {/* ── HTML axis labels left of chart (mobile, parallel only) ── */}
+      {/* Axis labels left of chart (mobile parallel only) */}
       {chartMode === "parallel" && !isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -1125,7 +1135,6 @@ export default function ComparisonPanel({
         </Box>
       )}
 
-      {/* ── Charts ─────────────────────────────────────────────────── */}
       {chartMode === "parallel" && (
         <VerticalParallelLinePlotPeak
           data={chartData}

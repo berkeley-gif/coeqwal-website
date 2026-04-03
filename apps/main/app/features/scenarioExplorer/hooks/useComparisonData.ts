@@ -6,10 +6,7 @@ import {
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../scenarios/hooks"
-import {
-  fetchScenarioTiers,
-  fetchAllScenarioTiers,
-} from "@repo/data/coeqwal"
+import { fetchScenarioTiers, fetchAllScenarioTiers } from "@repo/data/coeqwal"
 import { CACHE_KEYS } from "@repo/data/cache"
 import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import {
@@ -212,9 +209,7 @@ export function useComparisonData() {
       ? CACHE_KEYS.scenarioTiers(historicalBaselineId)
       : null,
     () =>
-      historicalBaselineId
-        ? fetchScenarioTiers(historicalBaselineId)
-        : null,
+      historicalBaselineId ? fetchScenarioTiers(historicalBaselineId) : null,
   )
 
   const historicalBaselineScores = useMemo<Record<
@@ -234,17 +229,15 @@ export function useComparisonData() {
   }, [historicalBaselineTiers])
 
   // Fetch tier data for all three hydroclimates to compute cross-HC ranges.
-  const allHCPeriods = useMemo(
-    () => Object.keys(HYDROCLIMATE_ID_MAP),
-    [],
-  )
+  const allHCPeriods = useMemo(() => Object.keys(HYDROCLIMATE_ID_MAP), [])
   const otherHCPeriods = useMemo(
     () => allHCPeriods.filter((p) => p !== hydroclimatePeriod),
     [allHCPeriods, hydroclimatePeriod],
   )
 
   const otherHCMappings = useMemo(
-    () => otherHCPeriods.map((p) => ({ period: p, mapping: buildIdMapping(p) })),
+    () =>
+      otherHCPeriods.map((p) => ({ period: p, mapping: buildIdMapping(p) })),
     [otherHCPeriods, buildIdMapping],
   )
 
@@ -258,16 +251,12 @@ export function useComparisonData() {
   )
 
   const { data: rawOtherHC0 } = useSWR(
-    otherHC0Ids.length > 0
-      ? CACHE_KEYS.allScenarioTiers(otherHC0Ids)
-      : null,
+    otherHC0Ids.length > 0 ? CACHE_KEYS.allScenarioTiers(otherHC0Ids) : null,
     () => fetchAllScenarioTiers(otherHC0Ids),
     { keepPreviousData: true },
   )
   const { data: rawOtherHC1 } = useSWR(
-    otherHC1Ids.length > 0
-      ? CACHE_KEYS.allScenarioTiers(otherHC1Ids)
-      : null,
+    otherHC1Ids.length > 0 ? CACHE_KEYS.allScenarioTiers(otherHC1Ids) : null,
     () => fetchAllScenarioTiers(otherHC1Ids),
     { keepPreviousData: true },
   )
@@ -325,14 +314,18 @@ export function useComparisonData() {
       activeScores[sid] = vals
     })
 
-    const allHCScoreSets = [activeScores, otherHCScores0, otherHCScores1].filter(
-      Boolean,
-    ) as Record<string, Record<string, number | null>>[]
+    const allHCScoreSets = [
+      activeScores,
+      otherHCScores0,
+      otherHCScores1,
+    ].filter(Boolean) as Record<string, Record<string, number | null>>[]
 
     if (allHCScoreSets.length < 2) return undefined
 
-    const result: Record<string, Record<string, { min: number; max: number }>> =
-      {}
+    const result: Record<
+      string,
+      Record<string, { min: number; max: number }>
+    > = {}
     const outcomeNames = OUTCOME_CODE_ORDER.map(getOutcomeName)
 
     for (const sid of Object.keys(activeScores)) {

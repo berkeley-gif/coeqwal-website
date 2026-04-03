@@ -53,8 +53,7 @@ const INTERLEAVE = [0, 4, 2, 6, 1, 5, 3]
 const makeThemePalette = (interpolator: (t: number) => string): string[] => {
   const linear = Array.from({ length: PALETTE_STEPS }, (_, i) =>
     interpolator(
-      PALETTE_START +
-        (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
+      PALETTE_START + (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
     ),
   )
   return INTERLEAVE.map((idx) => linear[idx]!)

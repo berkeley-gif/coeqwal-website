@@ -97,9 +97,5 @@ export function interpolateTierColor(
   const [r1, g1, b1] = hexToRgb(colors[index]!)
   const [r2, g2, b2] = hexToRgb(colors[index + 1]!)
 
-  return rgbToHex(
-    r1 + (r2 - r1) * t,
-    g1 + (g2 - g1) * t,
-    b1 + (b2 - b1) * t,
-  )
+  return rgbToHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t)
 }

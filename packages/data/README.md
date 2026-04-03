@@ -186,6 +186,117 @@ import type {
 } from "@repo/data/coeqwal"
 ```
 
+## How to Get Data for a Visualization Tool
+
+This section walks through the full data-fetching flow for a new tool panel in the Scenario Explorer (e.g., the Equity panel).
+
+### Step 1: Get the scenario list and hydroclimate mapping
+
+The sidebar shows 24 "sibling groups" (one per strategy). The user picks a hydroclimate period from the toolbar. You need to resolve the selected sibling group IDs to the actual scenario short codes for that hydroclimate.
+
+```typescript
+import { useScenarioList } from "../../scenarios/hooks"
+import { useScenarioExplorerStore } from "../store"
+
+const { selectedScenarios, hydroclimatePeriod } = useScenarioExplorerStore()
+const { buildIdMapping, getDisplayName, siblingGroups } = useScenarioList()
+
+// Resolve sibling group IDs -> actual scenario codes for the active climate
+// e.g., { "s0020": "s0020", "s0021": "s0047", ... }
+const idMapping = buildIdMapping(hydroclimatePeriod)
+```
+
+`buildIdMapping` takes a hydroclimate string (`"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`, etc.) and uses `HYDROCLIMATE_ID_MAP` to look up the numeric ID, then resolves each sibling group to the correct variant's short code. Falls back to the historical variant when a climate variant doesn't exist.
+
+### Step 2: Fetch tier data for the selected scenarios
+
+Pass `idMapping` to `useMultipleScenarioTiers`. It fetches in bulk, caches with SWR, and re-keys the results from resolved IDs back to sibling group IDs so you can look up data using the same IDs as `selectedScenarios`.
+
+```typescript
+import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+
+const {
+  allChartData,
+  allScoreData,
+  allScenariosData,
+  outcomeNames,
+  isLoading,
+  error,
+} = useMultipleScenarioTiers(idMapping)
+```
+
+**What you get back:**
+
+| Property           | Type                                                        | Contents                                                                                     |
+| ------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `allChartData`     | `Record<scenarioId, Record<outcomeCode, ChartDataPoint[]>>` | Pre-processed data for bar/distribution charts, keyed by scenario then outcome code          |
+| `allScoreData`     | `Record<scenarioId, Record<outcomeCode, OutcomeScoreData>>` | Scores per outcome: `weighted_score`, `normalized_score`, `gini`, `band_upper`, `band_lower` |
+| `allScenariosData` | `Record<scenarioId, ScenarioTiersResponse>`                 | Raw API response per scenario (tiers with type, level, data array)                           |
+| `outcomeNames`     | `OutcomeInfo[]`                                             | Display-ordered list of `{ shortCode, displayName }`                                         |
+| `isLoading`        | `boolean`                                                   | True while any data is being fetched                                                         |
+| `error`            | `string \| null`                                            | Error message if any fetch failed                                                            |
+
+### Step 3: Use the data
+
+Filter to the scenarios the user has selected:
+
+```typescript
+const selectedData = useMemo(() => {
+  if (!allScenariosData) return {}
+  const result: Record<string, ScenarioTiersResponse> = {}
+  for (const id of selectedScenarios) {
+    if (allScenariosData[id]) {
+      result[id] = allScenariosData[id]
+    }
+  }
+  return result
+}, [allScenariosData, selectedScenarios])
+```
+
+Access individual outcome data:
+
+```typescript
+// Raw tier info for one scenario + one outcome
+const cwsTier = allScenariosData["s0020"]?.tiers["CWS_DEL"]
+// cwsTier.type: "multi_value" | "single_value"
+// cwsTier.weighted_score: number
+// cwsTier.normalized_score: number
+// cwsTier.data: MultiValueTierData[] (for multi_value types)
+// cwsTier.level: number (for single_value types)
+
+// Pre-processed chart data
+const chartPoints = allChartData["s0020"]?.["CWS_DEL"]
+// ChartDataPoint[] ready for D3 rendering
+
+// Score data for comparisons
+const score = allScoreData["s0020"]?.["CWS_DEL"]
+// { weighted_score, normalized_score, gini, band_upper, band_lower }
+```
+
+### Step 4: Single-scenario fetching (if needed)
+
+For detail views where you need data for just one scenario:
+
+```typescript
+import { useScenarioTiers } from "../../scenarios/hooks"
+
+const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
+  useScenarioTiers("s0020")
+
+// chartData["CWS_DEL"] -> ChartDataPoint[]
+// scoreData["CWS_DEL"] -> OutcomeScoreData
+```
+
+### Important: don't fetch directly
+
+Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` in your component. Always use the app-level hooks (`useMultipleScenarioTiers`, `useScenarioTiers`, `useScenarioList`) because they:
+
+- Resolve hydroclimate variants via `idMapping`
+- Re-key data from resolved IDs back to sibling group IDs
+- Pre-populate the SWR cache so individual scenario lookups are instant
+- Apply theme colors to chart data
+- Return outcomes in the canonical display order
+
 ## To add new data sources
 
 1. **Add types** in `src/coeqwal/types.ts`

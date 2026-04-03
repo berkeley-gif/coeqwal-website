@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect, useCallback, useState } from "react"
+import React, { useRef, useEffect, useCallback, useState, useMemo } from "react"
 import { scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
@@ -40,12 +40,7 @@ function toTier(v: number): number {
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
-const TIER_BAND_COLORS = [
-  "#edf2f7",
-  "#ffffff",
-  "#edf2f7",
-  "#ffffff",
-] as const
+const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
 
 const DEFAULT_COLORS = {
   default: "#546e7a",
@@ -177,13 +172,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
-    chosenIds,
     highlightedIds,
     highlightBaseline = true,
     showScenarioPath = true,
     showAllPaths = false,
     showTierZones = true,
-    scenarioThemes: _scenarioThemes,
     morphGeneration,
     pinnedScenarioIds: pinnedScenarioIdsProp,
     onPinnedToggle,
@@ -191,7 +184,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     showDistribution = false,
     distributionData,
   }) => {
-    const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
+    const pinnedScenarioIds = useMemo(
+      () => pinnedScenarioIdsProp ?? new Set<string>(),
+      [pinnedScenarioIdsProp],
+    )
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
@@ -368,12 +364,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .duration(HC_DUR)
                 .attr(
                   "cx",
-                  scales.cx + r * Math.cos(angle) +
+                  scales.cx +
+                    r * Math.cos(angle) +
                     dodgeOff * Math.cos(perpAngle),
                 )
                 .attr(
                   "cy",
-                  scales.cy + r * Math.sin(angle) +
+                  scales.cy +
+                    r * Math.sin(angle) +
                     dodgeOff * Math.sin(perpAngle),
                 )
                 .attr("fill-opacity", restoreOp)
@@ -461,8 +459,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           !hasPinned && highlightedIds && highlightedIds.size > 0
 
         const hasScenarioColors = lineColors.length > 0
-        const dotR =
-          data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+        const dotR = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
 
         const getOpacity = (id: string) => {
           if (dimUnpinned && hasPinned) {
@@ -617,20 +614,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .x((d) => d.x)
             .y((d) => d.y)
           const isPinned = pinnedScenarioIds.has(scenarioId)
-          const isHighlighted =
-            highlightedIds && highlightedIds.has(scenarioId)
-          const isBackground =
-            showAllPaths && !isPinned && !isHighlighted
+          const isHighlighted = highlightedIds && highlightedIds.has(scenarioId)
+          const isBackground = showAllPaths && !isPinned && !isHighlighted
           const dimmed = dimUnpinned && hasPinned && !isPinned
           let strokeOp = isBackground ? 0.55 : 0.45
           if (dimmed) strokeOp = 0.07
           pathLayer
             .append("path")
             .attr("data-path-id", scenarioId)
-            .attr(
-              "d",
-              pathGen([...pts, pts[0]!]) ?? "",
-            )
+            .attr("d", pathGen([...pts, pts[0]!]) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
             .attr("stroke-width", isBackground ? 1.2 : 1.5)
@@ -650,14 +642,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               select(this)
                 .attr("fill-opacity", isFocus || isPin ? 1.0 : 0.08)
                 .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.08)
-                .attr(
-                  "r",
-                  isFocus
-                    ? dotR + 1.5
-                    : isPin
-                      ? dotR + 3
-                      : dotR * 0.7,
-                )
+                .attr("r", isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7)
             })
         }
 
@@ -667,7 +652,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
               if (!ids.has(sid)) return
-              select(this).attr("r", dotR + 3).attr("fill-opacity", 1)
+              select(this)
+                .attr("r", dotR + 3)
+                .attr("fill-opacity", 1)
             })
         }
 
@@ -729,16 +716,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("cy", cy)
               .attr("r", 0)
               .attr("fill", color)
-              .attr(
-                "fill-opacity",
-                opacity,
-              )
+              .attr("fill-opacity", opacity)
               .attr("stroke", color)
               .attr("stroke-width", 1.5)
-              .attr(
-                "stroke-opacity",
-                Math.min(opacity + 0.1, 1),
-              )
+              .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
               .attr("data-axis", axis)
@@ -754,7 +735,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             dot
               .on("mouseenter", function () {
                 applyFocusVisuals(scenario.id)
-                select(this).attr("r", dotR + 2.5).raise()
+                select(this)
+                  .attr("r", dotR + 2.5)
+                  .raise()
 
                 if (showScenarioPath) drawPolygonForScenario(scenario.id)
 
@@ -784,9 +767,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 resetDotVisuals()
                 if (hasPinned) {
                   pathLayer.selectAll("*").remove()
-                  pinnedScenarioIds.forEach((id) =>
-                    drawPolygonForScenario(id),
-                  )
+                  pinnedScenarioIds.forEach((id) => drawPolygonForScenario(id))
                   boostPinnedDots(pinnedScenarioIds)
                 } else {
                   pathLayer.selectAll("*").remove()
@@ -841,7 +822,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               if (!buckets || buckets.length === 0) return
               const axisAngle = getAngle(axisIdx)
 
-              const arcSlice = pinCount === 1 ? maxArcSpan : maxArcSpan / pinCount
+              const arcSlice =
+                pinCount === 1 ? maxArcSpan : maxArcSpan / pinCount
               const sliceCenter =
                 pinCount === 1
                   ? axisAngle
@@ -862,21 +844,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 )
                 const rows = Math.ceil(count / maxDotsPerRow)
                 const cols = Math.min(count, maxDotsPerRow)
-                const usedArc =
-                  cols > 1
-                    ? (cols * locDotDiam) / layoutR
-                    : 0
+                const usedArc = cols > 1 ? (cols * locDotDiam) / layoutR : 0
 
                 for (let d = 0; d < count; d++) {
                   const col = d % maxDotsPerRow
                   const row = Math.floor(d / maxDotsPerRow)
-                  const colFrac =
-                    cols === 1 ? 0 : (col / (cols - 1)) * 2 - 1
+                  const colFrac = cols === 1 ? 0 : (col / (cols - 1)) * 2 - 1
                   const dotAngle = sliceCenter + colFrac * (usedArc / 2)
                   const radialOff =
-                    rows <= 1
-                      ? 0
-                      : (row - (rows - 1) / 2) * locDotDiam
+                    rows <= 1 ? 0 : (row - (rows - 1) / 2) * locDotDiam
                   const effR = tierR + radialOff
                   const dx = cx + effR * Math.cos(dotAngle)
                   const dy = cy + effR * Math.sin(dotAngle)
@@ -906,11 +882,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           const angleDeg = (angle * 180) / Math.PI
           const isLeft = angleDeg > 90 || angleDeg < -90
-          const anchor = Math.abs(angleDeg + 90) < 5
-            ? "middle"
-            : isLeft
-              ? "end"
-              : "start"
+          const anchor =
+            Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
 
           const curated = LABEL_BREAK_POINTS[axis]
           if (curated) {
@@ -954,7 +927,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         baselineData,
         lineColors,
         colors,
-        chosenIds,
         highlightedIds,
         highlightBaseline,
         showScenarioPath,

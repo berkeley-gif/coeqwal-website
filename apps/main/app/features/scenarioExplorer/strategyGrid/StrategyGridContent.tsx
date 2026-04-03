@@ -231,7 +231,8 @@ export function StrategyGridContent({
 
         // Theme display: group subheader (unsorted) or per-row badge (sorted)
         if (scenario.theme) {
-          const themeConfig = THEME_LABEL_CONFIG[scenario.theme as ScenarioTheme]
+          const themeConfig =
+            THEME_LABEL_CONFIG[scenario.theme as ScenarioTheme]
           const themeColors =
             theme.palette.waterThemes[scenario.theme as ScenarioTheme]
 
@@ -387,7 +388,6 @@ export function StrategyGridContent({
             />,
           )
         }
-
 
         return rows
       })}

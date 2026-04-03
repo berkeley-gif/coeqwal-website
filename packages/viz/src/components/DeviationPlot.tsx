@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect, useState, useCallback } from "react"
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { scaleBand, scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
@@ -227,7 +227,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
-    chosenIds,
     highlightedIds,
     showBaselineStaircase = true,
     showScenarioPath = true,
@@ -238,7 +237,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     scenarioThemeRingColors = undefined,
     comparisonData,
     comparisonBaselineData,
-    comparisonLabel: _comparisonLabel = "Comparison",
     climateMode = "off",
     morphShowComparison = false,
     scenarioThemes,
@@ -252,7 +250,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     hcRangeData,
     showBaselineFill = true,
   }) => {
-    const pinnedScenarioIds = pinnedScenarioIdsProp ?? new Set<string>()
+    const pinnedScenarioIds = useMemo(
+      () => pinnedScenarioIdsProp ?? new Set<string>(),
+      [pinnedScenarioIdsProp],
+    )
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
@@ -276,9 +277,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     const [currentHeight, setCurrentHeight] = useState(height)
 
     // Store the initial (historical) baseline Y positions so we can show a ghost
-    const initialBaselineRef = useRef<
-      Map<string, number> | null
-    >(null)
+    const initialBaselineRef = useRef<Map<string, number> | null>(null)
     // Track whether we've ever morphed away from the initial hydroclimate
     const hasMorphedRef = useRef(false)
 
@@ -317,11 +316,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [dimensions, responsive, width, height])
 
-
     useEffect(() => {
       morphShowCompRef.current = morphShowComparison
     }, [morphShowComparison])
-
 
     useEffect(() => {
       return () => {
@@ -490,11 +487,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         }
 
         // ── Hydroclimate morph: transition dots/baselines to new values ──
-        if (
-          shouldMorphNextRef.current &&
-          scalesRef.current &&
-          baselineData
-        ) {
+        if (shouldMorphNextRef.current && scalesRef.current && baselineData) {
           shouldMorphNextRef.current = false
           hasMorphedRef.current = true
           const scales = scalesRef.current
@@ -524,14 +517,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .on("end", function () {
                   select(this).remove()
                 })
-            } else if (!isBackToInitial && (ghostSel.empty() || ghostSel.selectAll("*").empty())) {
-              const gHost =
-                ghostSel.empty()
-                  ? svg
-                      .select("g")
-                      .insert("g", "g.baselines")
-                      .attr("class", "ghost-baselines")
-                  : ghostSel
+            } else if (
+              !isBackToInitial &&
+              (ghostSel.empty() || ghostSel.selectAll("*").empty())
+            ) {
+              const gHost = ghostSel.empty()
+                ? svg
+                    .select("g")
+                    .insert("g", "g.baselines")
+                    .attr("class", "ghost-baselines")
+                : ghostSel
               const ghostPositions = initialBaselineRef.current
               axes.forEach((axis) => {
                 const ghostY = ghostPositions.get(axis)
@@ -1086,26 +1081,27 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         const histBaselineInfos = baselineInfos.filter(
           ({ tag }) => tag === "hist",
         )
-        if (showBaselineFill) histBaselineInfos.forEach(({ axis, baseY }) => {
-          const colX = xScale(axis)!
-          const colLeft = colX - (stepW - bandW) / 2
-          tintLayer
-            .append("rect")
-            .attr("x", colLeft)
-            .attr("y", 0)
-            .attr("width", stepW)
-            .attr("height", Math.max(0, baseY))
-            .attr("fill", "rgba(56,161,105,0.06)")
-            .attr("pointer-events", "none")
-          tintLayer
-            .append("rect")
-            .attr("x", colLeft)
-            .attr("y", baseY)
-            .attr("width", stepW)
-            .attr("height", Math.max(0, innerH - baseY))
-            .attr("fill", "rgba(229,62,62,0.06)")
-            .attr("pointer-events", "none")
-        })
+        if (showBaselineFill)
+          histBaselineInfos.forEach(({ axis, baseY }) => {
+            const colX = xScale(axis)!
+            const colLeft = colX - (stepW - bandW) / 2
+            tintLayer
+              .append("rect")
+              .attr("x", colLeft)
+              .attr("y", 0)
+              .attr("width", stepW)
+              .attr("height", Math.max(0, baseY))
+              .attr("fill", "rgba(56,161,105,0.06)")
+              .attr("pointer-events", "none")
+            tintLayer
+              .append("rect")
+              .attr("x", colLeft)
+              .attr("y", baseY)
+              .attr("width", stepW)
+              .attr("height", Math.max(0, innerH - baseY))
+              .attr("fill", "rgba(229,62,62,0.06)")
+              .attr("pointer-events", "none")
+          })
 
         // "above / below baseline" labels in the first column
         if (showBaselineFill && histBaselineInfos.length > 0) {
@@ -1259,10 +1255,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             ? lineColors[si] || colors.default
             : colors.default
           const isPinned = pinnedScenarioIds.has(scenarioId)
-          const isHighlighted =
-            highlightedIds && highlightedIds.has(scenarioId)
-          const isBackground =
-            showAllPaths && !isPinned && !isHighlighted
+          const isHighlighted = highlightedIds && highlightedIds.has(scenarioId)
+          const isBackground = showAllPaths && !isPinned && !isHighlighted
           const dimmed = dimUnpinned && hasPinned && !isPinned
           let strokeOp = isBackground ? 0.55 : 0.45
           if (dimmed) strokeOp = 0.07
@@ -1298,7 +1292,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 select(this)
                   .attr("fill-opacity", isFocus || isPin ? 1.0 : 0.08)
                   .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.08)
-                  .attr("r", isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7)
+                  .attr(
+                    "r",
+                    isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7,
+                  )
               }
             })
         }
@@ -1311,7 +1308,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               if (!ids.has(sid)) return
               const isRing = this.classList.contains("theme-ring")
               if (!isRing) {
-                select(this).attr("r", dotR + 3).attr("fill-opacity", 1)
+                select(this)
+                  .attr("r", dotR + 3)
+                  .attr("fill-opacity", 1)
               }
             })
         }
@@ -1513,7 +1512,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               : colors.default
             const isPinned = pinnedScenarioIds.has(scenario.id)
             const dimmed = dimUnpinned && hasPinned && !isPinned
-            const fillOp = dimmed ? 0.02 : 0.10
+            const fillOp = dimmed ? 0.02 : 0.1
             const strokeOp = dimmed ? 0.05 : 0.25
 
             const upperPts: [number, number][] = []
@@ -1575,28 +1574,22 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               if (!buckets || buckets.length === 0) return
               const colX = xScale(axis)!
               const colW = subcolumns[0]!.w
-              const sliceW =
-                pinCount === 1 ? colW : colW / pinCount
-              const sliceLeft =
-                colX + subcolumns[0]!.xOff + pinIdx * sliceW
+              const sliceW = pinCount === 1 ? colW : colW / pinCount
+              const sliceLeft = colX + subcolumns[0]!.xOff + pinIdx * sliceW
               const availW = sliceW * 0.85
               const sliceCenter = sliceLeft + sliceW / 2
 
               buckets.forEach(({ tier, count }) => {
                 if (count <= 0) return
                 const tierY = yScale(tier)
-                const maxCols = Math.max(
-                  1,
-                  Math.floor(availW / locDotDiam),
-                )
+                const maxCols = Math.max(1, Math.floor(availW / locDotDiam))
                 const rows = Math.ceil(count / maxCols)
                 const cols = Math.min(count, maxCols)
                 const gridW = cols * locDotDiam
                 const gridH = rows * locDotDiam
                 const startX = sliceCenter - gridW / 2 + locDotR
                 const maxGridH = tierBandH * 0.7
-                const startY =
-                  tierY - Math.min(gridH, maxGridH) / 2 + locDotR
+                const startY = tierY - Math.min(gridH, maxGridH) / 2 + locDotR
 
                 for (let d = 0; d < count; d++) {
                   const col = d % maxCols
@@ -1624,7 +1617,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         baselineData,
         lineColors,
         colors,
-        chosenIds,
         highlightedIds,
         showBaselineStaircase,
         showScenarioPath,

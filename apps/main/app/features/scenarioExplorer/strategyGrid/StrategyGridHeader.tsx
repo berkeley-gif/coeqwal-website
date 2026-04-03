@@ -120,7 +120,9 @@ export function StrategyGridHeader({
       <ColumnHeaders layoutMode={layoutMode} showOperations={showOperations} />
 
       {/* Divider continuation for Column 3 - only in full mode when operations visible */}
-      {showOutcomeLabels && showOperations && <DividerContinuation column={3} />}
+      {showOutcomeLabels && showOperations && (
+        <DividerContinuation column={3} />
+      )}
 
       {/* Outcome category labels (Column 4) - only in full mode */}
       {showOutcomeLabels && (
@@ -175,7 +177,10 @@ interface ColumnHeadersProps {
   showOperations?: boolean
 }
 
-function ColumnHeaders({ layoutMode, showOperations = true }: ColumnHeadersProps) {
+function ColumnHeaders({
+  layoutMode,
+  showOperations = true,
+}: ColumnHeadersProps) {
   const theme = useTheme()
 
   // In full mode, column 4 is visible; in wrapped mode, it's not

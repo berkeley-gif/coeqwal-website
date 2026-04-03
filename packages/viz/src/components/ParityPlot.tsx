@@ -164,11 +164,7 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
         if (tooltipRef.current) hideParityTooltip(tooltipRef.current)
 
         // ── Hydroclimate morph: transition dots to new positions ──
-        if (
-          shouldMorphNextRef.current &&
-          scalesRef.current &&
-          baselineData
-        ) {
+        if (shouldMorphNextRef.current && scalesRef.current && baselineData) {
           shouldMorphNextRef.current = false
           const sc = scalesRef.current
           const HC_DUR = 600
@@ -176,9 +172,10 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
           const dataMap = new Map(data.map((s) => [s.id, s]))
 
           svg
-            .selectAll<SVGCircleElement, unknown>(
-              "circle[data-scenario-id][data-axis]",
-            )
+            .selectAll<
+              SVGCircleElement,
+              unknown
+            >("circle[data-scenario-id][data-axis]")
             .each(function () {
               const el = select(this)
               const sid = el.attr("data-scenario-id")
