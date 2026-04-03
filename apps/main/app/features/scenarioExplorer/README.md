@@ -1,535 +1,361 @@
-# Scenario Explorer (Explore Section)
+# Scenario Explorer
 
 The Scenario Explorer is the main interface for exploring water allocation scenarios in the COEQWAL application. It provides multiple tools for viewing, comparing, and analyzing scenario data.
 
 ## Overview
 
 - **Purpose**: Water allocation scenario exploration interface
-- **Framework**: Next.js 14+ (App Router) with React 19
-- **State Management**: Zustand with Immer
+- **Framework**: Next.js 15 (App Router) with React 19
+- **State Management**: Zustand with Immer (`@repo/state`)
+- **Styling**: MUI v7 (`@repo/ui/mui`) — no Tailwind
 - **Location**: `apps/main/app/features/scenarioExplorer/`
 
 ## Architecture
 
-The Explore section uses a two-level navigation structure:
-
 ### Main App Navigation
 
-The app has three main tabs defined in `app/types/tabs.ts`:
+The top-level tab bar has two entries controlled by `mainView` state:
 
-- Learn
-- **Explore** (this section)
-- Share
-
-### Explore Sub-Navigation
-
-Within the Explore tab, there are two main views controlled by `mainView` state:
-
-1. **"Choose scenarios"** (`mainView: "explorer"`) - Contains the exploration tools
-2. **"Explore data in depth"** (`mainView: "data"`) - Detailed data analysis
+| View          | Label       | Description                                 |
+| ------------- | ----------- | ------------------------------------------- |
+| `get-started` | Get started | Onboarding / intro view                     |
+| `explorer`    | Go to tools | All exploration tools via UnifiedToolLayout |
 
 ### Tool Modes
 
-Within "Choose scenarios", four tool modes are available (controlled by `exploreMode` state):
+When `mainView === "explorer"`, five tool tabs are shown in the toolbar (controlled by `exploreMode` state):
 
-| Mode         | Icon           | Description                            |
-| ------------ | -------------- | -------------------------------------- |
-| `list`       | List icon      | Default grid view of all scenarios     |
-| `map`        | Map icon       | Spatial visualization with map overlay |
-| `comparison` | Compare arrows | Parallel coordinates chart comparison  |
-| `equity`     | Apps icon      | Equity tool (panel left, map right)    |
+| Mode         | Icon              | Label         | Description                                                                 |
+| ------------ | ----------------- | ------------- | --------------------------------------------------------------------------- |
+| `list`       | ViewListIcon      | List          | Default grid view of all scenarios (StrategyGrid)                           |
+| `comparison` | CompareArrowsIcon | Tradeoffs     | Parallel coordinates / radar / parity / deviation / heatmap / sankey charts |
+| `equity`     | AppsIcon          | Equity        | Equity analysis tool (placeholder)                                          |
+| `resilience` | AutorenewIcon     | Resilience    | Resilience analysis tool (placeholder)                                      |
+| `data`       | InsightsIcon      | Data in depth | Detailed data explorer with per-category sections                           |
+
+### Layout: UnifiedToolLayout
+
+All tools are rendered inside `UnifiedToolLayout`, which provides a persistent three-panel chrome:
+
+```
+[Sidebar (320–480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
+```
+
+- **Sidebar**: `ScenarioSelectionSidebar` — scenario checkboxes, search, theme filter, pinning. Hidden (width 0) in list mode; 320px normally; 480px when key operations column is expanded.
+- **Toolbar**: `ToolToolbar` — distribution toggle, show-map toggle, hydroclimate chooser, tool tab buttons.
+- **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
+- **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
 ## Folder Structure
 
 ```
 apps/main/app/features/scenarioExplorer/
-├── ScenarioExplorer.tsx          # Main orchestrator component
-├── store.ts                       # Zustand state management
-├── README.md                      # This file
+├── ScenarioExplorer.tsx              # Main orchestrator — tab bar + UnifiedToolLayout
+├── store.ts                          # Zustand state management
+├── types.ts                          # Shared TypeScript types
+├── README.md                         # This file
 │
-├── exploreView/                   # Explore tools (list/map/comparison/equity)
-│   ├── index.ts                  # Barrel exports
-│   ├── ListPanel.tsx             # Container for scenario list (handles list/map modes)
-│   ├── ListView.tsx              # The actual scenario grid component
-│   ├── ComparisonPanel.tsx       # Comparison chart panel
-│   └── EquityPanel.tsx           # Equity tool panel
+├── getStarted/                       # "Get started" onboarding view
+│   ├── GetStartedView.tsx            # Main get-started component
+│   ├── TierAnimationSection.tsx      # Animated tier intro
+│   ├── useTierAnimationData.ts       # Data hook for tier animation
+│   └── PolygonMorphOverlay.tsx       # Decorative polygon morph
 │
-├── dataExplorer/                  # "Explore data in depth" view
-│   ├── DataExplorerView.tsx      # Main data explorer component
+├── exploreView/                      # Tool panels (list/comparison/equity/resilience)
+│   ├── index.ts                      # Barrel exports
+│   ├── ListView.tsx                  # Scenario grid (StrategyGrid wrapper)
+│   ├── ComparisonPanel.tsx           # Tradeoffs — multiple chart types
+│   ├── EquityPanel.tsx               # Equity tool (placeholder)
+│   └── ResiliencePanel.tsx           # Resilience tool (placeholder)
+│
+├── dataExplorer/                     # "Data in depth" view
+│   ├── DataExplorerView.tsx          # Main data explorer component
+│   ├── README.md                     # Data explorer documentation
+│   ├── hooks/
+│   │   └── useMetricData.ts          # Data transformation for metrics
+│   ├── utils/
+│   │   └── exportUtils.ts            # CSV/image export utilities
 │   └── components/
-│       ├── MapView.tsx           # Standalone map visualization
-│       ├── TableView.tsx         # Table data view
-│       ├── CategoryView.tsx      # Category-based view
-│       ├── ReservoirView.tsx     # Reservoir-specific view
-│       └── TemporalControls.tsx  # Time-based controls
+│       ├── CategoryView.tsx          # Category-based data view
+│       ├── ChartGridContext.tsx       # Aligned chart grid provider
+│       ├── AlignedScenarioGrid.tsx   # Scenario-aligned grid layout
+│       ├── ReservoirView.tsx         # Reservoir-specific view
+│       ├── ReservoirPercentilesSection.tsx
+│       ├── SpillFrequencySection.tsx
+│       ├── CwsSection.tsx            # Community water system section
+│       ├── AgSection.tsx             # Agricultural delivery section
+│       ├── RefugeSection.tsx         # Wildlife refuge section
+│       ├── EnvFlowSection.tsx        # Environmental flow section
+│       ├── DeltaSection.tsx          # Delta statistics section
+│       ├── TableView.tsx             # Tabular data view
+│       ├── MapView.tsx               # Standalone map visualization
+│       ├── TemporalControls.tsx      # Time-period controls
+│       └── PercentileMatrixSkeleton.tsx  # Loading skeleton
 │
-├── components/                    # Shared UI components
-│   ├── SearchBar.tsx             # Search input with toolbar slots
-│   ├── SelectionBanner.tsx       # Shows selected scenario count
-│   ├── ViewModeControls.tsx      # Toggle switches for view options
-│   ├── KeyboardShortcuts.tsx     # Global keyboard handler
-│   ├── ComparisonHeader.tsx      # Header for comparison view
-│   └── TogglePair.tsx            # Toggle button component
+├── components/                       # Shared UI components
+│   ├── UnifiedToolLayout.tsx         # Three-panel layout chrome
+│   ├── ToolToolbar.tsx               # Shared toolbar (toggles + hydroclimate + tool tabs)
+│   ├── ScenarioSelectionSidebar.tsx  # Sidebar with checkboxes, search, theme filter
+│   ├── SearchBar.tsx                 # Search input connected to store
+│   ├── ThemeFilter.tsx               # Theme badge filter
+│   ├── SelectionBanner.tsx           # Shows selected scenario count
+│   ├── ComparisonHeader.tsx          # Header/legend for comparison view
+│   ├── ShareDrawer.tsx               # Share staging drawer
+│   ├── ShareScenarioCard.tsx         # Card for shared scenario
+│   ├── KeyboardShortcuts.tsx         # Global keyboard handler
+│   ├── TogglePair.tsx                # Toggle button component
+│   └── useScrollSync.ts             # Scroll synchronization hook
 │
-├── strategyGrid/                  # Reusable grid layout system
-│   ├── StrategyGrid.tsx          # Main grid component
-│   ├── StrategyGridRow.tsx       # Individual row component
-│   ├── StrategyGridHeader.tsx    # Grid header with sorting
-│   ├── StrategyGridContent.tsx   # Grid content wrapper
-│   └── GridControls.tsx          # Grid control buttons
+├── strategyGrid/                     # Reusable grid layout system
+│   ├── index.ts                      # Barrel exports
+│   ├── types.ts                      # Grid types
+│   ├── StrategyGrid.tsx              # Main grid component
+│   ├── StrategyGridRow.tsx           # Individual row component
+│   ├── StrategyGridHeader.tsx        # Grid header with sorting
+│   ├── StrategyGridContent.tsx       # Grid content wrapper
+│   └── GridControls.tsx              # Grid control buttons
 │
 ├── hooks/
-│   └── useComparisonData.ts      # Data transformation for comparison chart
+│   └── useComparisonData.ts          # Data transformation for comparison charts
 │
-└── config/
-    └── outcomeDefinitions.tsx    # Outcome/metric definitions and colors
+├── config/
+│   └── outcomeDefinitions.tsx        # Outcome/metric definitions and colors
+│
+└── data/
+    └── mockHydroclimateTiers.json    # Mock data for development
 ```
 
-## Key components
+## Key Components
 
-### ScenarioExplorer.tsx (Main orchestrator)
+### ScenarioExplorer.tsx (Main Orchestrator)
 
-The root component that manages the overall layout and navigation. It reads navigation state from the Zustand store and renders the appropriate views.
+Renders the top-level tab bar and, when `mainView === "explorer"`, wraps everything in `UnifiedToolLayout`. Manages hover coordination between sidebar and tool panels.
 
-**State from Store:**
+**State from Store:** `mainView`, `exploreMode`, `showMap`
 
-- `mainView`: `"explorer" | "data"` - Toggles between sub-tabs
-- `exploreMode`: `"list" | "map" | "comparison"` - Current tool mode
-
-**Local UI State:**
-
-- `isListExpanded`: Controls the expanded modal for list view
-
-**Layout:**
-
-- Tab navigation at top (full width)
-- Split-panel layout below tabs:
-  - Left column: Tool panel (comparison chart when in comparison mode)
-  - Right column: Scenario list with search
-
-### ListPanel.tsx
-
-Container for the scenario list that handles different explore modes. This is the right panel in split views.
-
-**What it does:**
-
-- Wraps `ListView` and passes mode-specific props
-- Manages map state via `mapActions` when in map mode
-- Handles tier click events for map visualization
-
-**Note:** The actual map visualization is rendered at a higher level in the app. In map mode, `ListPanel` just:
-
-1. Activates the map via store actions
-2. Shows `ListView` in compact mode
-3. Handles clicks to visualize outcomes on the map
-
-**Props:**
+**Routing logic:**
 
 ```typescript
-interface ListPanelProps {
-  isExpanded?: boolean // External modal control
-  onCloseExpand?: () => void
-  modalToolbar?: React.ReactNode // Content for expanded modal
-}
+{exploreMode === "list" && <ListView />}
+{exploreMode === "comparison" && <ComparisonPanel />}
+{exploreMode === "equity" && <EquityPanel />}
+{exploreMode === "resilience" && <ResiliencePanel />}
+{exploreMode === "data" && <DataExplorerView />}
 ```
 
-### ListView.tsx
+### UnifiedToolLayout.tsx
 
-The actual scenario grid component. Displays scenarios in a scrollable list with search, filter, and sort capabilities.
+Persistent three-panel chrome. Receives `sidebar`, `toolbar`, and `children` as props.
 
-**Props:**
-
-```typescript
-interface ListViewProps {
-  compact?: boolean // Compact mode for split views
-  onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  isExpanded?: boolean
-  onCloseExpand?: () => void
-  modalToolbar?: React.ReactNode
-}
-```
-
-**State from Store:**
-
-- `selectedScenarios`, `toggleScenario`
-- `searchQuery`, `pinnedScenarioId`
-- `showOnlyChosen`, `showDefinitions`
-
-**Local State:**
-
-- `sortBy`, `sortDirection` - Sorting is component-local
-- `localSelectedOutcomes` - Outcome selection per scenario
-- `isExpandedInternal` - Fallback when not externally controlled
-
-**Features:**
-
-- Search filtering by name, description, ID
-- Sorting by outcome scores
-- Expandable modal view
-- Pinned scenario support
-- Compact mode for map/comparison views
+- Sidebar width: 0 in list mode, 320px normally, 480px with key operations
+- Map panel: transparent 25% reveal area when `showMap` is true
+- Manages map mode via `mapActions` from the map store
 
 ### ComparisonPanel.tsx
 
-Left panel displaying a parallel coordinates chart for scenario comparison. Gets state directly from the store.
+The most complex tool panel. Supports six chart modes:
 
-**State from Store:**
+| Chart    | Component                      |
+| -------- | ------------------------------ |
+| Radar    | `RadarPlot`                    |
+| Parallel | `VerticalParallelLinePlotPeak` |
+| Parity   | `ParityPlot`                   |
+| Column   | `DeviationPlot`                |
+| Heatmap  | `TierHeatmap`                  |
+| Sankey   | `TierSankey`                   |
 
-- `highlightedScenario`, `setHighlightedScenario`
-- `setPinnedScenarioId`
+All chart components are from `@repo/viz`. Each chart mode has its own set of toggle controls (checkboxes). Data comes from `useComparisonData()`.
 
-**Local UI State:**
+### EquityPanel.tsx / ResiliencePanel.tsx
 
-- `overlayTiers`, `highlightBaseline`, `relativeToBaseline`, `defineOutcome`
-- `isExpanded`, `hoveredScenario`
+Currently placeholder panels. Ready for implementation — the layout chrome (sidebar, toolbar, map) is already provided by `UnifiedToolLayout`.
 
-**Features:**
+### ListView.tsx
 
-- `VerticalParallelLinePlotPeak` visualization
-- Toggle: relative to baseline
-- Toggle: highlight baseline (current operations)
-- Toggle: overlay tiers
-- Expandable modal view
-- Hover tooltips with scenario names
-- Click to highlight/pin scenarios
-
-### EquityPanel.tsx
-
-Left panel for the equity tool. Equity mode shows the panel on the left and the map on the right.
-
-**Layout:**
-
-- Left column: EquityPanel with search, hydroclimate chooser
-- Right column: Map (transparent, map rendered at app level)
-
-**State from Store:**
-
-- `selectedScenarios`
-
-**Local UI State:**
-
-- `isExpanded`: Controls modal expansion
-- `selectedHydroclimate`: Currently selected climate scenario
-
-**Features:**
-
-- Search bar for filtering scenarios
-- Hydroclimate scenario chooser
-- Expandable modal view
-- Map activation via `mapActions`
-
-**Map Integration:**
-
-```typescript
-useEffect(() => {
-  mapActions.setMapMode("explore")
-  return () => {
-    mapActions.setMapMode("hidden")
-    mapActions.clearOutcomeVisualization()
-  }
-}, [])
-```
-
-### MapView.tsx (in dataExplorer/components/)
-
-Spatial visualization of outcomes on an interactive map.
-
-**Features:**
-
-- Metric/scenario selectors
-- Temporal controls
-- Tier markers on map
-- Export screenshot functionality
-- Uses Mapbox via `@repo/map` package
+Renders scenarios using the `StrategyGrid` system. Supports search filtering, outcome sorting, and hover coordination with the comparison panel.
 
 ## State Management
 
-The Zustand store in `store.ts` manages shared state across all explore tools.
+### Store (`store.ts`)
 
-### Design Principles
+The Zustand store (with Immer) manages state shared across components.
 
-1. **Shared state in Zustand**: State that is accessed by multiple components (e.g., `selectedScenarios`, `exploreMode`)
-2. **Local state in components**: UI-specific state that doesn't need to be shared (e.g., modal open/close, hover states, chart toggles)
+#### Navigation
 
-### Types
+| Property      | Type          | Default         | Description            |
+| ------------- | ------------- | --------------- | ---------------------- |
+| `mainView`    | `MainView`    | `"get-started"` | Current top-level view |
+| `exploreMode` | `ExploreMode` | `"list"`        | Active tool tab        |
 
-```typescript
-// Tool mode within "Choose scenarios" view
-type ExploreMode = "list" | "map" | "comparison" | "equity"
+#### Scenario Selection
 
-// Main view within Explore section
-type MainView = "explorer" | "data"
-```
+| Property              | Type           | Default | Description                             |
+| --------------------- | -------------- | ------- | --------------------------------------- |
+| `selectedScenarios`   | `string[]`     | `[]`    | IDs of selected (checked) scenarios     |
+| `highlightedScenario` | `string\|null` | `null`  | Currently hovered/highlighted scenario  |
+| `pinnedScenarioIds`   | `string[]`     | `[]`    | Pinned scenarios (persist across views) |
 
-### State
+#### Filtering
 
-| Property              | Type                            | Description                          |
-| --------------------- | ------------------------------- | ------------------------------------ |
-| `mainView`            | `MainView`                      | Current main view (explorer or data) |
-| `exploreMode`         | `ExploreMode`                   | Current tool mode within explorer    |
-| `selectedScenarios`   | `string[]`                      | IDs of selected scenarios            |
-| `highlightedScenario` | `string \| null`                | Currently highlighted scenario       |
-| `pinnedScenarioId`    | `string \| null`                | Scenario pinned to top of list       |
-| `searchQuery`         | `string`                        | Current search text                  |
-| `showOnlyChosen`      | `boolean`                       | Filter to selected only              |
-| `showDefinitions`     | `boolean`                       | Show outcome definitions             |
-| `selectedTier`        | `{ strategy, outcome } \| null` | Currently selected tier              |
+| Property          | Type                  | Default | Description                    |
+| ----------------- | --------------------- | ------- | ------------------------------ |
+| `searchQuery`     | `string`              | `""`    | Text filter for scenario names |
+| `showOnlyChosen`  | `boolean`             | `false` | Show only selected scenarios   |
+| `selectedTheme`   | `ScenarioTheme\|null` | `null`  | Active theme filter            |
+| `showOnlyTheme`   | `boolean`             | `false` | Strict theme filtering         |
+| `showThemeBadges` | `boolean`             | `false` | Show theme badges on rows      |
+| `selectedIconId`  | `string\|null`        | `null`  | Active icon filter             |
 
-### Actions
+#### Display Options
 
-```typescript
-// Navigation
-setMainView(view: MainView)
-setExploreMode(mode: ExploreMode)
+| Property                   | Type                        | Default          | Description                                 |
+| -------------------------- | --------------------------- | ---------------- | ------------------------------------------- |
+| `showAlternativeBaselines` | `boolean`                   | `false`          | Show alternative baseline scenarios         |
+| `showDefinitions`          | `boolean`                   | `false`          | Show outcome definitions                    |
+| `showKeyOperations`        | `boolean`                   | `false`          | Show key operations column (widens sidebar) |
+| `outcomeDisplayMode`       | `"summary"\|"distribution"` | `"distribution"` | How outcomes are rendered                   |
+| `showMap`                  | `boolean`                   | `false`          | Show map panel                              |
 
-// Scenario selection
-toggleScenario(scenarioId: string)
-selectScenarios(scenarioIds: string[])
-clearScenarios()
-setHighlightedScenario(scenarioId: string | null)
-setPinnedScenarioId(scenarioId: string | null)
+#### Comparison Panel
 
-// Filtering
-setSearchQuery(query: string)
-setShowOnlyChosen(show: boolean)
+| Property             | Type      | Default | Description                      |
+| -------------------- | --------- | ------- | -------------------------------- |
+| `relativeToBaseline` | `boolean` | `true`  | Show values relative to baseline |
+| `highlightBaseline`  | `boolean` | `false` | Highlight baseline scenario      |
+| `overlayTiers`       | `boolean` | `false` | Overlay tier zones on chart      |
+| `defineOutcome`      | `boolean` | `false` | Define-an-outcome mode           |
 
-// Display options
-setShowDefinitions(show: boolean)
+#### Hydroclimate
 
-// Tier selection
-setSelectedTier(tier: { strategy: string; outcome: string } | null)
+| Property             | Type     | Default        | Description                                                                              |
+| -------------------- | -------- | -------------- | ---------------------------------------------------------------------------------------- |
+| `hydroclimatePeriod` | `string` | `"historical"` | Active hydroclimate period (e.g., `"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`) |
 
-// Reset functions
-resetFilters()
-resetSelections()
-resetAll()
-```
+#### Other
 
-### Usage
-
-```typescript
-import { useScenarioExplorerStore } from "../store"
-
-function MyComponent() {
-  const { selectedScenarios, toggleScenario, searchQuery, setSearchQuery } =
-    useScenarioExplorerStore()
-
-  // Use state and actions...
-}
-```
+| Property            | Type                        | Default | Description                    |
+| ------------------- | --------------------------- | ------- | ------------------------------ |
+| `isSortActive`      | `boolean`                   | `false` | Whether outcome sort is active |
+| `selectedTier`      | `{strategy, outcome}\|null` | `null`  | Selected tier for map viz      |
+| `sharedScenarioIds` | `string[]`                  | `[]`    | Scenarios staged for sharing   |
+| `showShareDrawer`   | `boolean`                   | `false` | Share drawer open state        |
 
 ### When to Use Zustand vs Local State
 
 **Use Zustand for:**
 
-- State shared across multiple components (e.g., `selectedScenarios`)
+- State shared across multiple components (e.g., `selectedScenarios`, `hydroclimatePeriod`)
 - Navigation state (e.g., `mainView`, `exploreMode`)
-- State that needs to persist across view changes
+- State that must persist across view changes
 
-**Use Local React State for:**
+**Use local React state for:**
 
-- UI-specific toggles (e.g., chart options, modal open/close)
+- UI-specific toggles (e.g., chart mode, modal open/close)
 - Hover states and ephemeral interactions
 - Component-specific sorting and filtering
-- Loading and error states
+
+## Data Flow
+
+### Hydroclimate Resolution
+
+There is no separate hydroclimate API endpoint. The flow is:
+
+1. User picks a hydroclimate in `HydroclimateChooser` → store's `hydroclimatePeriod` (e.g., `"historical"`)
+2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (`"historical" → 2`)
+3. `GET /api/scenarios` returns all 72+ scenarios, each with `hydroclimate_id` and `sibling_group`
+4. `useScenarioList().buildIdMapping(hydroclimatePeriod)` resolves sibling group IDs → actual scenario codes for the active hydroclimate
+5. `useMultipleScenarioTiers(idMapping)` fetches tier data for the resolved codes and re-keys results back to sibling group IDs
+
+### Data Hooks
+
+```typescript
+// Scenario list with sibling group mapping
+import { useScenarioList } from "../../scenarios/hooks"
+const { siblingGroups, buildIdMapping, getDisplayName } = useScenarioList()
+
+// Comparison chart data (handles hydroclimate resolution internally)
+import { useComparisonData } from "../hooks/useComparisonData"
+const { data, axes, lineColors, baselineScenario, isLoading } =
+  useComparisonData()
+
+// Raw tier data for multiple scenarios
+import { useMultipleScenarioTiers } from "../../scenarios/hooks"
+const { allChartData, allScoreData, allScenariosData, isLoading } =
+  useMultipleScenarioTiers(idMapping)
+```
 
 ## How to Add a New Tool
 
-Follow these steps to add a new exploration tool to the "Choose scenarios" view:
+### Step 1: Create Your Tool Component
 
-### Step 1: Add the Mode Type
-
-In `store.ts`, add your new mode to the type:
-
-```typescript
-export type ExploreMode = "list" | "map" | "comparison" | "yourNewTool"
-```
-
-### Step 2: Add a Toolbar Button
-
-In `ScenarioExplorer.tsx`, find the mode buttons array (around line 110) and add your tool:
-
-```typescript
-{[
-  { mode: "list" as ExploreMode, icon: <ViewListIcon />, tip: "List view" },
-  { mode: "map" as ExploreMode, icon: <MapIcon />, tip: "Map view" },
-  { mode: "comparison" as ExploreMode, icon: <CompareArrowsIcon />, tip: "Comparison view" },
-  // Add your new tool here:
-  {
-    mode: "yourNewTool" as ExploreMode,
-    icon: <YourIcon sx={{ fontSize: "1.2rem" }} />,
-    tip: "Your Tool Name"
-  },
-].map(({ mode, icon, tip }) => (
-  // ... existing rendering code
-))}
-```
-
-### Step 3: Create Your Tool Component
-
-Create a new file `exploreView/YourNewToolPanel.tsx`:
+Create `exploreView/YourToolPanel.tsx`:
 
 ```typescript
 "use client"
 
-import React, { useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 
-export default function YourNewToolPanel() {
+export default function YourToolPanel() {
   const theme = useTheme()
-
-  // Get shared state from store
-  const {
-    selectedScenarios,
-    highlightedScenario,
-    setHighlightedScenario,
-    setPinnedScenarioId,
-  } = useScenarioExplorerStore()
-
-  // Local UI state
-  const [isExpanded, setIsExpanded] = useState(false)
+  const { selectedScenarios, hydroclimatePeriod } = useScenarioExplorerStore()
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        overflow: "hidden",
-      }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Your tool implementation */}
-      <Typography>Your New Tool</Typography>
     </Box>
   )
 }
 ```
 
-### Step 4: Add Conditional Rendering
+### Step 2: Export from Barrel
 
-In `ScenarioExplorer.tsx`, add rendering logic for your tool.
-
-**For left panel tools** (like ComparisonPanel), add in the left column Box:
+In `exploreView/index.ts`:
 
 ```typescript
-{/* Left column — map or comparison panel */}
-<Box sx={{ width: needsSplit ? "50%" : "0%", /* ... */ }}>
-  {exploreMode === "comparison" && <ComparisonPanel />}
-  {/* Add your tool here */}
-  {exploreMode === "yourNewTool" && <YourNewToolPanel />}
-</Box>
+export { default as YourToolPanel } from "./YourToolPanel"
 ```
 
-**Update the `needsSplit` logic** if your tool needs split layout:
+### Step 3: Add Rendering in ScenarioExplorer.tsx
+
+Inside the `UnifiedToolLayout` children:
 
 ```typescript
-const needsSplit = mainView === "explorer" && exploreMode !== "list"
-// Or be more specific:
-const needsSplit =
-  mainView === "explorer" &&
-  (exploreMode === "map" ||
-    exploreMode === "comparison" ||
-    exploreMode === "yourNewTool")
+{exploreMode === "yourTool" && <YourToolPanel />}
 ```
 
-### Step 5: Export from Barrel
+### Step 4: Add the Mode Type (if creating a new tab)
 
-In `exploreView/index.ts`, add your export:
+If you need a new toolbar tab (rather than replacing an existing placeholder):
 
-```typescript
-export { default } from "./ListPanel"
-export { default as ListPanel } from "./ListPanel"
-export { default as ComparisonPanel } from "./ComparisonPanel"
-export { default as EquityPanel } from "./EquityPanel"
-export { default as ListView } from "./ListView"
-export { default as YourNewToolPanel } from "./YourNewToolPanel" // Add this
-```
+1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
+2. Add to `TOOL_TABS` in `ToolToolbar.tsx`
 
-## Key Patterns
+If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist — just replace the placeholder component contents.
 
-### Split-Panel Layout
+## Quick Checklist: Integrating a New Visualization
 
-Non-list modes use a 50/50 split layout:
+For developers porting an external visualization (e.g., the tier treemap from COEQWALTierVisualization) into the Equity panel:
 
-- Left panel: Tool visualization (comparison chart, etc.)
-- Right panel: Scenario list (compact mode)
-
-```typescript
-const needsSplit = mainView === "explorer" && exploreMode !== "list"
-
-<Box sx={{ width: needsSplit ? "50%" : "0%" }}>
-  {/* Left panel content */}
-</Box>
-<Box sx={{ width: needsSplit ? "50%" : "100%" }}>
-  {/* Right panel content */}
-</Box>
-```
-
-### Modal Expansion
-
-Both ListView and ComparisonPanel support expandable modals using `MobileModal` from `@repo/ui`:
-
-```typescript
-import { MobileModal } from "@repo/ui"
-
-<MobileModal
-  open={isExpanded}
-  onClose={() => setIsExpanded(false)}
-  maxWidth="95vw"
-  maxHeight="95vh"
-  contentAriaLabel="Your content description"
->
-  {/* Expanded content */}
-</MobileModal>
-```
-
-### Map Integration
-
-For map-related tools, use the map store actions:
-
-```typescript
-import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
-
-// Set map mode
-mapActions.setMapMode("explore") // or "hidden"
-
-// Visualize an outcome
-mapActions.setOutcomeVisualization(outcomeCode, scenarioId)
-
-// Clear visualization
-mapActions.clearOutcomeVisualization()
-```
-
-### Data Hooks
-
-Use existing hooks for scenario data:
-
-```typescript
-// Get comparison data for parallel coordinates
-import { useComparisonData } from "../hooks/useComparisonData"
-const { data, axes, lineColors, baselineScenario, isLoading } =
-  useComparisonData()
-
-// Get scenario list with metadata
-import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
-const { scenarios, isLoading, error } = useScenarioList()
-
-// Get tier data for multiple scenarios
-import { useMultipleScenarioTiers } from "../../scenarios/hooks"
-const { allChartData, outcomeNames, allScoreData, isLoading } =
-  useMultipleScenarioTiers()
-```
+- [ ] **Replace the placeholder** in `EquityPanel.tsx` with your React component
+- [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimatePeriod`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
+- [ ] **Fetch data via hooks** — use `useScenarioList().buildIdMapping(hydroclimatePeriod)` then `useMultipleScenarioTiers(idMapping)`. Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
+- [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click, `setSelectedTier()` to drive map visualization
+- [ ] **Use MUI `sx` prop** for all styling — no Tailwind. Import from `@repo/ui/mui`.
+- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>` — standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
+- [ ] **Port `UnitVisPositionCalculation.ts` as-is** — it's pure D3 math with no framework dependencies. Place it alongside your panel or in a `utils/` subdirectory.
+- [ ] **Do not create a separate map** — the persistent Mapbox map is shared. Call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` to show polygons. All polygon geometry is pre-loaded in Mapbox vector tilesets; no deck.gl needed. (See `packages/state/README.md` "Persistent Map Integration" section.)
+- [ ] **Keep visualization-specific state local** — view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
+- [ ] **Export is already wired** — `EquityPanel` is already exported from `exploreView/index.ts` and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
 
 ## Dependencies
 
-The Scenario Explorer uses several internal packages:
-
-| Package        | Purpose                                                 |
-| -------------- | ------------------------------------------------------- |
-| `@repo/ui`     | UI components (Box, Typography, MobileModal, etc.)      |
-| `@repo/ui/mui` | Material-UI components                                  |
-| `@repo/viz`    | Visualization components (VerticalParallelLinePlotPeak) |
-| `@repo/map`    | Map components and store                                |
-| `@repo/data`   | Data fetching utilities                                 |
-| `@repo/state`  | Zustand with Immer                                      |
+| Package        | Purpose                                                              |
+| -------------- | -------------------------------------------------------------------- |
+| `@repo/ui`     | UI components (CompactSearchBar, InfoTooltip, MobileModal, etc.)     |
+| `@repo/ui/mui` | MUI components (Box, Typography, useTheme, icons, etc.)              |
+| `@repo/viz`    | D3-based chart components (RadarPlot, ParityPlot, TierHeatmap, etc.) |
+| `@repo/map`    | Mapbox / react-map-gl map components and store                       |
+| `@repo/data`   | SWR-based data fetching hooks and API types                          |
+| `@repo/state`  | Zustand + Immer re-exports                                           |
+| `@repo/i18n`   | Internationalization                                                 |

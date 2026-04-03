@@ -4,8 +4,8 @@
  * EquityPanel — Equity analysis tool content.
  *
  * Sidebar, hydroclimate chooser, and map are handled by the persistent
- * UnifiedToolLayout chrome. This component renders only the tool-specific
- * content area.
+ * UnifiedToolLayout chrome. This component renders the tool-specific
+ * content.
  */
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
@@ -34,19 +34,6 @@ export default function EquityPanel() {
         sx={{ color: theme.palette.text.primary }}
       >
         Equity tool
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          maxWidth: "40ch",
-          textAlign: "center",
-          color: theme.palette.text.secondary,
-          opacity: 0.7,
-          mt: 2,
-        }}
-      >
-        Equity analysis tools are coming soon. This panel will help you explore
-        distributional impacts across communities and regions.
       </Typography>
     </Box>
   )

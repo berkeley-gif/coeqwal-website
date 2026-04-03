@@ -8,7 +8,14 @@
  */
 
 import React, { useMemo, useState, useRef, useCallback } from "react"
-import { Box, Typography, useTheme, InputBase, IconButton, icons } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  InputBase,
+  IconButton,
+  icons,
+} from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
@@ -264,13 +271,9 @@ export default function ListView({
       .filter((s) => s.theme === themeKey)
       .map((s) => s.scenarioId)
     if (themeIds.length === 0) return
-    const allSelected = themeIds.every((id) =>
-      selectedScenarios.includes(id),
-    )
+    const allSelected = themeIds.every((id) => selectedScenarios.includes(id))
     if (allSelected) {
-      selectScenarios(
-        selectedScenarios.filter((id) => !themeIds.includes(id)),
-      )
+      selectScenarios(selectedScenarios.filter((id) => !themeIds.includes(id)))
     } else {
       const merged = Array.from(new Set([...selectedScenarios, ...themeIds]))
       selectScenarios(merged)

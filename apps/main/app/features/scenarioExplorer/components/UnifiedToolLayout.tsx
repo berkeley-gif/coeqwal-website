@@ -32,9 +32,7 @@ export default function UnifiedToolLayout({
 }: UnifiedToolLayoutProps) {
   const theme = useTheme()
   const showMap = useScenarioExplorerStore((s) => s.showMap)
-  const showKeyOperations = useScenarioExplorerStore(
-    (s) => s.showKeyOperations,
-  )
+  const showKeyOperations = useScenarioExplorerStore((s) => s.showKeyOperations)
   const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
 
   const isListMode = exploreMode === "list"

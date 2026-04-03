@@ -152,9 +152,7 @@ export default function ScenarioSelectionSidebar({
     if (ids.length === 0) return
     const allSelected = ids.every((id) => selectedScenarios.includes(id))
     if (allSelected) {
-      selectScenarios(
-        selectedScenarios.filter((id) => !ids.includes(id)),
-      )
+      selectScenarios(selectedScenarios.filter((id) => !ids.includes(id)))
     } else {
       const merged = new Set([...selectedScenarios, ...ids])
       selectScenarios([...merged])
@@ -463,9 +461,7 @@ export default function ScenarioSelectionSidebar({
                       <icons.PushPin
                         sx={{
                           fontSize: "0.875rem",
-                          transform: allThemePinned
-                            ? "none"
-                            : "rotate(45deg)",
+                          transform: allThemePinned ? "none" : "rotate(45deg)",
                         }}
                       />
                     </IconButton>
@@ -479,8 +475,7 @@ export default function ScenarioSelectionSidebar({
             <Box
               key={scenario.scenarioId}
               ref={(el: HTMLDivElement | null) => {
-                if (el)
-                  scenarioRowRefs.current.set(scenario.scenarioId, el)
+                if (el) scenarioRowRefs.current.set(scenario.scenarioId, el)
                 else scenarioRowRefs.current.delete(scenario.scenarioId)
               }}
               onMouseEnter={() => onRowHover?.([scenario.scenarioId])}
@@ -493,14 +488,10 @@ export default function ScenarioSelectionSidebar({
                 py: 1,
                 cursor: "pointer",
                 borderLeft: `3px solid ${
-                  isActive || isChosen || isPinned
-                    ? accentColor
-                    : "transparent"
+                  isActive || isChosen || isPinned ? accentColor : "transparent"
                 }`,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
-                backgroundColor: isActive
-                  ? `${accentColor}1A`
-                  : "transparent",
+                backgroundColor: isActive ? `${accentColor}1A` : "transparent",
                 transition:
                   "background-color 200ms ease, border-color 200ms ease",
                 "&:hover": {
@@ -630,9 +621,7 @@ export default function ScenarioSelectionSidebar({
                     sx={{
                       p: 0.25,
                       opacity: isPinned || isActive ? 1 : 0,
-                      color: isPinned
-                        ? accentColor
-                        : theme.palette.grey[500],
+                      color: isPinned ? accentColor : theme.palette.grey[500],
                       transition: "opacity 200ms ease",
                       "*:hover > &": { opacity: 1 },
                     }}

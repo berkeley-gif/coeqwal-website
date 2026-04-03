@@ -122,7 +122,7 @@ pnpm dev
 or
 
 ```sh
-pnpm dev --filtermain
+pnpm dev --filter main
 ```
 
 This is recommended while developing because running the whole `pnpm dev` will slow down your dev builds and hot reload because it will start every package/app that has a dev task and their watchers.
@@ -184,7 +184,6 @@ This Turborepo has been customized to meet the needs of the COEQWAL project. Key
 ### Shared packages:
 
 - The shared `eslint-config`, `typescript-config` and `ui` are standard for Turborepo setups, but these can be customized for the project.
-- We have `ui`, `i18n`, and `map` packages. We can set up a shared data package, a common parameters library package, an api package, and a viz/D3 package.
 - The Viz Team should feel free to set up packages to support their common work.
 
 ## React StrictMode

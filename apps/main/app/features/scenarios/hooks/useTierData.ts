@@ -230,7 +230,9 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
   // Re-key from resolved IDs to sibling group IDs when mapping is active.
   // Guard against keepPreviousData returning stale data keyed by the old
   // hydroclimate's resolved IDs while reverseMap has already updated.
-  const lastValidDataRef = useRef<Record<string, ScenarioTiersResponse> | undefined>(undefined)
+  const lastValidDataRef = useRef<
+    Record<string, ScenarioTiersResponse> | undefined
+  >(undefined)
   const allScenariosData = useMemo(() => {
     if (!rawScenariosData) return lastValidDataRef.current
     if (!reverseMap) {

@@ -6,7 +6,7 @@
  * Layout (left to right):
  * 1. "Show map" toggle (label + MUI Switch)
  * 2. "View by climate" — hydroclimate chooser icons
- * 3. Tool tabs (Grid, Tradeoffs, Equity, Resilience)
+ * 3. Tool tabs (List, Tradeoffs, Equity, Resilience, Data in depth)
  */
 
 import React from "react"
@@ -60,8 +60,6 @@ export default function ToolToolbar() {
     setExploreMode,
     hydroclimatePeriod,
     setHydroclimatePeriod,
-    outcomeDisplayMode,
-    setOutcomeDisplayMode,
     showMap,
     setShowMap,
   } = useScenarioExplorerStore()
@@ -77,39 +75,6 @@ export default function ToolToolbar() {
         minHeight: 44,
       }}
     >
-      {/* ── Outcome display mode toggle ──────────────────────────────────── */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Distributions
-        </Typography>
-        <Switch
-          size="small"
-          checked={outcomeDisplayMode === "distribution"}
-          onChange={(_, checked) =>
-            setOutcomeDisplayMode(checked ? "distribution" : "summary")
-          }
-          sx={{ ml: -0.5 }}
-        />
-      </Box>
-
-      {/* ── Divider ────────────────────────────────────────────────────────── */}
-      <Box
-        sx={{
-          width: "1px",
-          height: 24,
-          backgroundColor: theme.palette.divider,
-          flexShrink: 0,
-        }}
-      />
-
-      {/* ── Show map toggle ────────────────────────────────────────────────── */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography
           variant="caption"
@@ -129,7 +94,6 @@ export default function ToolToolbar() {
         />
       </Box>
 
-      {/* ── Divider ────────────────────────────────────────────────────────── */}
       <Box
         sx={{
           width: "1px",
@@ -139,7 +103,6 @@ export default function ToolToolbar() {
         }}
       />
 
-      {/* ── View by climate ────────────────────────────────────────────────── */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
         <Typography
           variant="caption"
@@ -163,7 +126,6 @@ export default function ToolToolbar() {
         />
       </Box>
 
-      {/* ── Divider ────────────────────────────────────────────────────────── */}
       <Box
         sx={{
           width: "1px",
@@ -172,8 +134,6 @@ export default function ToolToolbar() {
           flexShrink: 0,
         }}
       />
-
-      {/* ── Tool tabs ──────────────────────────────────────────────────────── */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
         {TOOL_TABS.map(({ mode, icon, label }) => {
           const active = exploreMode === mode
