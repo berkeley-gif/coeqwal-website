@@ -270,15 +270,41 @@ No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
 | `isValidating`     | `boolean`                                                   | True whenever a background fetch is in flight (including HC switches). Use this for a subtle "updating" indicator if desired. |
 | `error`            | `string \| null`                                            | Error message if any fetch failed                                                            |
 
-### Step 2: Use the data
+### Step 2: Use the data...it's already cached!
 
-Filter to the scenarios the user has selected:
+`allScenariosData` contains tier data for **all 24 scenarios**, re-keyed to the active hydroclimate. The SWR cache holds tier data for **all available hydroclimates** (prefetched when the Explore tab mounts), so switching hydroclimates returns data instantly from cache too. By the time your tool panel renders, everything is already loaded. Calling `useResolvedScenarioTiers()` just subscribes to that cached data; it does **not** trigger additional API requests.
+
+**Do not** call `useMultipleScenarioTiers`, `fetchAllScenarioTiers`, or `fetchScenarioTiers` to get data for individual scenarios. Just index into `allScenariosData`.
+
+For a tool that compares two scenarios at a time (like the tier visualization):
 
 ```typescript
 import { useScenarioExplorerStore } from "../store"
 
-const { selectedScenarios } = useScenarioExplorerStore()
+const { selectedScenarios, pinnedScenarioIds } = useScenarioExplorerStore()
 
+// Pick the two scenarios to compare — e.g., first pinned + first selected
+const [scenarioA, scenarioB] = useMemo(() => {
+  const pinned = [...pinnedScenarioIds]
+  const selected = [...selectedScenarios]
+  return [pinned[0] ?? selected[0], selected.find((id) => id !== pinned[0]) ?? selected[1]]
+}, [pinnedScenarioIds, selectedScenarios])
+
+// All tier data for both is already in cache — just index into it
+const tiersA = allScenariosData?.[scenarioA]
+const tiersB = allScenariosData?.[scenarioB]
+
+// Access a specific outcome
+const cwsA = tiersA?.tiers["CWS_DEL"]
+// cwsA.type: "multi_value" | "single_value"
+// cwsA.weighted_score, cwsA.normalized_score, cwsA.gini
+// cwsA.data: [{ tier: "tier1", value: 70, normalized: 0.7 }, ...] (multi_value)
+// cwsA.level: 2 (single_value)
+```
+
+For filtering to all selected scenarios:
+
+```typescript
 const selectedData = useMemo(() => {
   if (!allScenariosData) return {}
   const result: Record<string, ScenarioTiersResponse> = {}
@@ -291,18 +317,10 @@ const selectedData = useMemo(() => {
 }, [allScenariosData, selectedScenarios])
 ```
 
-Access individual outcome data:
+Pre-processed data is also available:
 
 ```typescript
-// Raw tier info for one scenario + one outcome
-const cwsTier = allScenariosData["s0020"]?.tiers["CWS_DEL"]
-// cwsTier.type: "multi_value" | "single_value"
-// cwsTier.weighted_score: number
-// cwsTier.normalized_score: number
-// cwsTier.data: MultiValueTierData[] (for multi_value types)
-// cwsTier.level: number (for single_value types)
-
-// Pre-processed chart data
+// Chart-ready data (themed colors applied)
 const chartPoints = allChartData["s0020"]?.["CWS_DEL"]
 // ChartDataPoint[] ready for D3 rendering
 
