@@ -346,7 +346,7 @@ export default function TierAnimationSection({
       return
     }
 
-    // Tile boundaries clip polygons into fragments — keep the largest per DU_ID
+    // Tile boundaries clip polygons into fragments.keep the largest per DU_ID
     const bestRings = new Map<
       string,
       { ring: [number, number][]; cData: (typeof centroids)[0] }

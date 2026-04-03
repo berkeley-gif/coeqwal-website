@@ -162,7 +162,7 @@ export default function VisualizationLayers() {
         ) {
           // 404: geometry table not yet populated for this tier type.
           // 5xx: transient backend error.
-          // Both are known limitations — log as warning so the Next.js dev
+          // Both are known limitations.log as warning so the Next.js dev
           // overlay is not triggered for expected backend gaps.
           console.warn(
             `Tier data unavailable for ${tierCode} (HTTP ${err.status})`,

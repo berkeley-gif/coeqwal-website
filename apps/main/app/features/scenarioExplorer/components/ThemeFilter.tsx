@@ -6,8 +6,8 @@
  * Styled to match HydroclimateChooser: a label above, inline controls below.
  * Controls:
  *  - CompactSelect dropdown: pick a water theme or "All" (clears filter)
- *  - Checkbox: "Only this group" — hides non-matching scenarios
- *  - Switch: "Badges" — toggles theme badge visibility on scenario cards
+ *  - Checkbox: "Only this group".hides non-matching scenarios
+ *  - Switch: "Badges".toggles theme badge visibility on scenario cards
  */
 
 import React from "react"

@@ -7,7 +7,7 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 - **Purpose**: Water allocation scenario exploration interface
 - **Framework**: Next.js 15 (App Router) with React 19
 - **State Management**: Zustand with Immer (`@repo/state`)
-- **Styling**: MUI v7 (`@repo/ui/mui`) — no Tailwind
+- **Styling**: MUI v7 (`@repo/ui/mui`).no Tailwind
 - **Location**: `apps/main/app/features/scenarioExplorer/`
 
 ## Architecture
@@ -41,8 +41,8 @@ All tools are rendered inside `UnifiedToolLayout`, which provides a persistent t
 [Sidebar (320–480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
 ```
 
-- **Sidebar**: `ScenarioSelectionSidebar` — scenario checkboxes, search, theme filter, pinning. Hidden (width 0) in list mode; 320px normally; 480px when key operations column is expanded.
-- **Toolbar**: `ToolToolbar` — distribution toggle, show-map toggle, hydroclimate chooser, tool tab buttons.
+- **Sidebar**: `ScenarioSelectionSidebar`.scenario checkboxes, search, theme filter, pinning. Hidden (width 0) in list mode; 320px normally; 480px when key operations column is expanded.
+- **Toolbar**: `ToolToolbar`.distribution toggle, show-map toggle, hydroclimate chooser, tool tab buttons.
 - **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
@@ -50,7 +50,7 @@ All tools are rendered inside `UnifiedToolLayout`, which provides a persistent t
 
 ```
 apps/main/app/features/scenarioExplorer/
-├── ScenarioExplorer.tsx              # Main orchestrator — tab bar + UnifiedToolLayout
+├── ScenarioExplorer.tsx              # Main orchestrator.tab bar + UnifiedToolLayout
 ├── store.ts                          # Zustand state management
 ├── types.ts                          # Shared TypeScript types
 ├── README.md                         # This file
@@ -64,7 +64,7 @@ apps/main/app/features/scenarioExplorer/
 ├── exploreView/                      # Tool panels (list/comparison/equity/resilience)
 │   ├── index.ts                      # Barrel exports
 │   ├── ListView.tsx                  # Scenario grid (StrategyGrid wrapper)
-│   ├── ComparisonPanel.tsx           # Tradeoffs — multiple chart types
+│   ├── ComparisonPanel.tsx           # Tradeoffs.multiple chart types
 │   ├── EquityPanel.tsx               # Equity tool (placeholder)
 │   └── ResiliencePanel.tsx           # Resilience tool (placeholder)
 │
@@ -168,7 +168,7 @@ All chart components are from `@repo/viz`. Each chart mode has its own set of to
 
 ### EquityPanel.tsx / ResiliencePanel.tsx
 
-Currently placeholder panels. Ready for implementation — the layout chrome (sidebar, toolbar, map) is already provided by `UnifiedToolLayout`.
+Currently placeholder panels. Ready for implementation.the layout chrome (sidebar, toolbar, map) is already provided by `UnifiedToolLayout`.
 
 ### ListView.tsx
 
@@ -334,7 +334,7 @@ If you need a new toolbar tab (rather than replacing an existing placeholder):
 1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
 2. Add to `TOOL_TABS` in `ToolToolbar.tsx`
 
-If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist — just replace the placeholder component contents.
+If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist.just replace the placeholder component contents.
 
 ## Quick Checklist: Integrating a New Visualization
 
@@ -342,14 +342,14 @@ For developers porting an external visualization (e.g., the tier treemap from CO
 
 - [ ] **Replace the placeholder** in `EquityPanel.tsx` with your React component
 - [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimatePeriod`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
-- [ ] **Fetch data via hooks** — use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
+- [ ] **Fetch data via hooks**.use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
 - [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click, `setSelectedTier()` to drive map visualization
-- [ ] **Use MUI `sx` prop** for all styling — no Tailwind. Import from `@repo/ui/mui`.
-- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>` — standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
-- [ ] **Port `UnitVisPositionCalculation.ts` as-is** — it's pure D3 math with no framework dependencies. Place it alongside your panel or in a `utils/` subdirectory.
-- [ ] **Do not create a separate map** — the persistent Mapbox map is shared. Call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` to show polygons. All polygon geometry is pre-loaded in Mapbox vector tilesets; no deck.gl needed. (See `packages/state/README.md` "Persistent Map Integration" section.)
-- [ ] **Keep visualization-specific state local** — view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
-- [ ] **Export is already wired** — `EquityPanel` is already exported from `exploreView/index.ts` and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
+- [ ] **Use MUI `sx` prop** for all styling.no Tailwind. Import from `@repo/ui/mui`.
+- [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>`.standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
+- [ ] **Port `UnitVisPositionCalculation.ts` as-is**.it's pure D3 math with no framework dependencies. Place it alongside your panel or in a `utils/` subdirectory.
+- [ ] **Do not create a separate map**.the persistent Mapbox map is shared. Call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` to show polygons. All polygon geometry is pre-loaded in Mapbox vector tilesets; no deck.gl needed. (See `packages/state/README.md` "Persistent Map Integration" section.)
+- [ ] **Keep visualization-specific state local**.view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
+- [ ] **Export is already wired**.`EquityPanel` is already exported from `exploreView/index.ts` and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
 
 ## Dependencies
 

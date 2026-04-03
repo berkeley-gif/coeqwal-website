@@ -4,9 +4,9 @@
  * Hooks for fetching environmental river flow statistics
  *
  * Three metrics across 59 CalSim channel reaches:
- *   Metric 1 — Monthly and seasonal % of natural unimpaired flow
- *   Metric 2 — Seasonal % of functional flow (EFLOWS) targets (~17 reaches)
- *   Metric 3 — Pearson r flow alteration index (period of record)
+ *   Metric 1.Monthly and seasonal % of natural unimpaired flow
+ *   Metric 2.Seasonal % of functional flow (EFLOWS) targets (~17 reaches)
+ *   Metric 3.Pearson r flow alteration index (period of record)
  *
  * Water months: 1=October ... 12=September
  * CFS: cubic feet per second (raw flow)
@@ -32,7 +32,7 @@ import type {
 /**
  * Fetch all 59 channel reach entities with watershed and capability attributes.
  *
- * This is a static list — it rarely changes between ETL runs.
+ * This is a static list.it rarely changes between ETL runs.
  * Use to populate channel selectors and decorate channel rows with metadata.
  *
  * @param channelClass - Optional filter: 'stream', 'canal', or 'reservoir_release'

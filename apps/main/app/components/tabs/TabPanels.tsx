@@ -54,7 +54,7 @@ export default function TabPanels() {
   // Sole owner of the ?tab= URL parameter.
   // Adds ?tab= when user scrolls into the tabs area, removes it when they leave.
   // Also updates ?tab= when activeTab changes (click, auto-advance, URL init).
-  // useTabNavigation only dispatches context state — it does not touch the URL.
+  // useTabNavigation only dispatches context state.it does not touch the URL.
   useEffect(() => {
     const urlTab = searchParams.get("tab") as TabKey | null
     const params = new URLSearchParams(searchParams.toString())

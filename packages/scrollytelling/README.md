@@ -57,8 +57,8 @@ Container that tracks scroll progress and provides it to children via React Cont
 | `as`        | `React.ElementType` | `"section"`                  | HTML element to render      |
 | `offset`    | `[string, string]`  | `["start start", "end end"]` | Framer Motion scroll offset |
 | `debug`     | `boolean`           | `false`                      | Show progress overlay       |
-| `id`        | `string`            | —                            | Section ID                  |
-| `ariaLabel` | `string`            | —                            | Accessible label            |
+| `id`        | `string`            |.                           | Section ID                  |
+| `ariaLabel` | `string`            |.                           | Accessible label            |
 
 #### `<ScrollElement>`
 
@@ -67,8 +67,8 @@ Animated child that responds to parent section's scroll progress.
 | Prop        | Type                                           | Default        | Description                    |
 | ----------- | ---------------------------------------------- | -------------- | ------------------------------ |
 | `enter`     | `[number, number]`                             | **(required)** | Progress range for fade-in     |
-| `hold`      | `[number, number]`                             | —              | Progress range to stay visible |
-| `exit`      | `[number, number]`                             | —              | Progress range for fade-out    |
+| `hold`      | `[number, number]`                             |.             | Progress range to stay visible |
+| `exit`      | `[number, number]`                             |.             | Progress range for fade-out    |
 | `animation` | `"fade" \| "slideUp" \| "slideLeft" \| "none"` | `"fade"`       | Animation type                 |
 
 #### `<StickyElement>`

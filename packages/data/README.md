@@ -129,7 +129,7 @@ const { allChartData, allScoreData, allScenariosData, scenarioIds, outcomeNames,
   useMultipleScenarioTiers(idMapping)
 ```
 
-> **Prefer `useResolvedScenarioTiers()`** (below) over calling this directly — it handles hydroclimate resolution automatically.
+> **Prefer `useResolvedScenarioTiers()`** (below) over calling this directly.it handles hydroclimate resolution automatically.
 
 #### `useResolvedScenarioTiers()`
 
@@ -155,6 +155,14 @@ Use fetchers when you need to:
 - Build custom hooks with different caching behavior
 - Fetch data outside of React (scripts, tests)
 
+| Fetcher | Description |
+| --- | --- |
+| `fetchTierList()` | Tier definitions (short codes, names, types) |
+| `fetchScenarioList()` | All scenario metadata |
+| `fetchScenarioTiers(id)` | Tier data for a single scenario |
+| `fetchAllScenarioTiers(ids)` | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` — one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable. |
+| `fetchTierLocationData(id, code)` | Per-location tier assignments for a scenario + outcome (for map/treemap) |
+
 ```tsx
 import {
   fetchTierList,
@@ -168,9 +176,7 @@ const tiers = await fetchTierList()
 const scenarios = await fetchScenarioList()
 const scenarioData = await fetchScenarioTiers("s0020")
 const allData = await fetchAllScenarioTiers(["s0020", "s0021", "s0029"])
-// Uses /api/tiers/batch — one SQL query for all scenarios
 const locations = await fetchTierLocationData("s0020", "CWS_DEL")
-// Per-location tier assignments for map/treemap visualization
 ```
 
 Fetchers throw `FetchError` on failure:
@@ -248,7 +254,7 @@ const {
 
 No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
 
-> **Prefetching:** When the Explore tab mounts, tier data for all three hydroclimates is prefetched in the background via `usePrefetchTiers` (in `ScenarioExplorer.tsx`). This uses the batch endpoint (`/api/tiers/batch`) to fetch ~24 scenarios per hydroclimate in a single request. By the time a user switches hydroclimates from the toolbar, the data is already cached — no loading spinner.
+> **Prefetching:** When the Explore tab mounts, tier data for all three hydroclimates is prefetched in the background via `usePrefetchTiers` (in `ScenarioExplorer.tsx`). This uses the batch endpoint (`/api/tiers/batch`) to fetch ~24 scenarios per hydroclimate in a single request. By the time a user switches hydroclimates from the toolbar, the data is already cached.no loading spinner.
 
 > **TODO:** The hydroclimate options and the `HYDROCLIMATE_ID_MAP` mapping are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will return the list of hydroclimate options with their metadata (`id`, `short_code`, `name`, `description`, `has_data` flag) directly from the database, making this a single source of truth. This will be implemented once the team finalizes naming and descriptions for the hydroclimates. Until then, the client-side `buildIdMapping()` approach is the correct pattern (encapsulated inside `useResolvedScenarioTiers`).
 
@@ -260,7 +266,7 @@ No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
 | `allScoreData`     | `Record<scenarioId, Record<outcomeCode, OutcomeScoreData>>` | Scores per outcome: `weighted_score`, `normalized_score`, `gini`, `band_upper`, `band_lower` |
 | `allScenariosData` | `Record<scenarioId, ScenarioTiersResponse>`                 | Raw API response per scenario (tiers with type, level, data array)                           |
 | `outcomeNames`     | `OutcomeInfo[]`                                             | Display-ordered list of `{ shortCode, displayName }`                                         |
-| `isLoading`        | `boolean`                                                   | True only on initial load (no data at all). **Not** true during hydroclimate switches — stale data is displayed while the new data loads in the background. |
+| `isLoading`        | `boolean`                                                   | True only on initial load (no data at all). **Not** true during hydroclimate switches.stale data is displayed while the new data loads in the background. |
 | `isValidating`     | `boolean`                                                   | True whenever a background fetch is in flight (including HC switches). Use this for a subtle "updating" indicator if desired. |
 | `error`            | `string \| null`                                            | Error message if any fetch failed                                                            |
 
@@ -364,13 +370,13 @@ If you're porting a standalone prototype (like the distributional tier visualiza
 
 | Old (raw fetch)                                | New (turborepo hooks/fetchers)                                |
 | ---------------------------------------------- | ------------------------------------------------------------- |
-| `fetch('/api/tiers/scenarios/{id}/tiers')`     | `useResolvedScenarioTiers()` — all scenarios, pre-fetched     |
+| `fetch('/api/tiers/scenarios/{id}/tiers')`     | `useResolvedScenarioTiers()`.all scenarios, pre-fetched     |
 | `fetch('/api/tiers/list')`                     | `useTiers()` from `@repo/data/coeqwal/hooks`                 |
-| `fetch('/api/tier-map/{id}/{code}')`           | Not needed — polygon geometry is in the Mapbox vector tiles. Use `mapActions.setOutcomeVisualization()` to color them. |
-| `fetch('/api/tier-map/{id}/{code}/locations')` | `fetchTierLocationData(id, code)` — returns per-location tier assignments (no geometry) |
+| `fetch('/api/tier-map/{id}/{code}')`           | Not needed.polygon geometry is in the Mapbox vector tiles. Use `mapActions.setOutcomeVisualization()` to color them. |
+| `fetch('/api/tier-map/{id}/{code}/locations')` | `fetchTierLocationData(id, code)`.returns per-location tier assignments (no geometry) |
 | `fetch('/api/tier-map/scenarios')`             | `siblingGroups` + `getDisplayName()` from `useResolvedScenarioTiers()` |
 | Hardcoded scenario ID/title map                | `getDisplayName(id)` from `useResolvedScenarioTiers()`        |
-| Fuse.js search index                           | `searchQuery` from `useScenarioExplorerStore()` — sidebar handles filtering |
+| Fuse.js search index                           | `searchQuery` from `useScenarioExplorerStore()`.sidebar handles filtering |
 | Own scenario dropdown                          | Sidebar checkboxes write to `selectedScenarios` in the store  |
 | Own hydroclimate picker                        | Toolbar `HydroclimateChooser` writes to `hydroclimatePeriod` in the store |
 
@@ -380,7 +386,7 @@ Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` directly
 
 - Resolve hydroclimate variants automatically (no manual `buildIdMapping` calls)
 - Re-key data from resolved IDs back to sibling group IDs
-- Use the batch endpoint (`/api/tiers/batch`) under the hood — one SQL query for all scenarios instead of N individual requests
+- Use the batch endpoint (`/api/tiers/batch`) under the hood.one SQL query for all scenarios instead of N individual requests
 - Pre-populate the SWR cache so individual scenario lookups are instant
 - Apply theme colors to chart data
 - Return outcomes in the canonical display order

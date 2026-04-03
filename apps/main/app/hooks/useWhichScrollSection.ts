@@ -1,5 +1,5 @@
 /**
- * useWhichScrollSection — Tracks which section is currently being read
+ * useWhichScrollSection.Tracks which section is currently being read
  * within a scrollable container.
  *
  * Strategy: on every scroll event, find the section whose top is

@@ -14,9 +14,9 @@ import type { SxProps, Theme } from "@mui/material"
 export interface ScenarioBadgeProps {
   /** Badge label text */
   label: string
-  /** Background color — defaults to accent.gold */
+  /** Background color.defaults to accent.gold */
   backgroundColor?: string
-  /** Text color — defaults to dark amber */
+  /** Text color.defaults to dark amber */
   color?: string
   sx?: SxProps<Theme>
 }

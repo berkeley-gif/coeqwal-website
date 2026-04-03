@@ -1,11 +1,11 @@
 "use client"
 
 /**
- * ToolToolbar — Shared toolbar rendered above the active tool content.
+ * ToolToolbar.Shared toolbar rendered above the active tool content.
  *
  * Layout (left to right):
  * 1. "Show map" toggle (label + MUI Switch)
- * 2. "View by climate" — hydroclimate chooser icons
+ * 2. "View by climate".hydroclimate chooser icons
  * 3. Tool tabs (List, Tradeoffs, Equity, Resilience, Data in depth)
  */
 

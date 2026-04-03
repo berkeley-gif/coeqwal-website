@@ -488,7 +488,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                         : 0.01
             const absRawMax =
               Math.ceil((maxValue * 1.1) / absIncrement) * absIncrement
-            // Guard against degenerate [0,0] domain — same as relative mode.
+            // Guard against degenerate [0,0] domain.same as relative mode.
             // A flat domain causes D3 to place every value at 50% height.
             const absComputedMax = absRawMax > 0 ? absRawMax : 0.001
             // If caller supplied a hard ceiling (e.g. 120 for % unimpaired), honour it.
@@ -698,7 +698,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
             }
 
             reservoir.labelAttributes!.forEach(({ key, value }) => {
-              // Key — small uppercase label
+              // Key.small uppercase label
               g.append("text")
                 .attr("x", labelX)
                 .attr("y", attrY)
@@ -710,7 +710,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
                 .attr("fill", COLORS.text)
                 .attr("letter-spacing", "0.05em")
                 .text(key)
-              // Value — bold, tabular figures
+              // Value.bold, tabular figures
               g.append("text")
                 .attr("x", labelX)
                 .attr("y", attrY + 14)
@@ -921,7 +921,7 @@ const PercentileMatrix: React.FC<PercentileMatrixProps> = React.memo(
               .attr("stroke", isRefLine ? COLORS.gridStrong : COLORS.grid)
               .attr("stroke-width", isRefLine ? 1 : 0.5)
 
-            // Y-axis label — use enough decimal places for the domain range
+            // Y-axis label.use enough decimal places for the domain range
             const domainMax = reservoirYDomain[1]
             const rawLabel =
               displayMode === "percentage"

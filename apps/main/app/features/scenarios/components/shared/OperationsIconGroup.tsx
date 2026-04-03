@@ -19,13 +19,13 @@ import { getScenarioIconDefs, renderIconDef } from "./opsIcons"
 export interface OperationsIconGroupProps {
   /** Scenario ID (e.g., "s0020", "s0025") */
   scenarioId: string
-  /** Scenario theme (currently unused — icons are driven by scenario ID) */
+  /** Scenario theme (currently unused.icons are driven by scenario ID) */
   theme?: ScenarioTheme
   /** Icon size variant */
   size?: "sm" | "md" | "lg"
   /** Layout direction */
   layout?: "horizontal" | "vertical"
-  /** Called when an icon is clicked — receives the icon ID for cross-scenario selection */
+  /** Called when an icon is clicked.receives the icon ID for cross-scenario selection */
   onIconClick?: (iconId: string) => void
 }
 

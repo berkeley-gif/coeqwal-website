@@ -125,7 +125,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   }
 
   /**
-   * Render a single outcome item — either a summary cell or full glyph
+   * Render a single outcome item.either a summary cell or full glyph
    * depending on the outcomeDisplayMode store value.
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
@@ -152,7 +152,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       )
     }
 
-    // Distribution mode — full glyph
+    // Distribution mode.full glyph
     const showLabelBelowGlyph = !isAlignedGrid
     const showControlsBelowGlyph = !isAlignedGrid
 
@@ -580,7 +580,7 @@ function NonCompactRowContent({
 }
 
 /**
- * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
+ * Outcomes-only row content.just the outcome glyphs, no title/ops/checkbox.
  * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
  */
 function OutcomesOnlyRowContent({

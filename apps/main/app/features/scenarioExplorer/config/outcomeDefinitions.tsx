@@ -91,7 +91,7 @@ export const outcomeCategories = [
   },
   {
     id: "environmental-water",
-    name: "Environmental water — refuges",
+    name: "Environmental water.refuges",
     icon: <SetMealIcon fontSize="small" />,
   },
   {
@@ -613,7 +613,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
     aggregations: ["annual-average", "annual-cv"],
     spatialType: "delta-node",
     description:
-      "Net Delta outflow — total flow leaving the Delta toward San Francisco Bay",
+      "Net Delta outflow.total flow leaving the Delta toward San Francisco Bay",
     isTier: false,
     showOnMap: true,
   },

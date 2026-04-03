@@ -15,9 +15,9 @@
  * const panel3Ref = useRef(null)
  *
  * const boundaries = usePanelBoundaries(containerRef, [panel1Ref, panel2Ref, panel3Ref])
- * // boundaries.panels[2].start — progress when panel 3 top reaches viewport top
- * // boundaries.panels[2].mid   — progress at panel 3 midpoint
- * // boundaries.panels[2].end   — progress when panel 3 bottom reaches viewport top
+ * // boundaries.panels[2].start.progress when panel 3 top reaches viewport top
+ * // boundaries.panels[2].mid  .progress at panel 3 midpoint
+ * // boundaries.panels[2].end  .progress when panel 3 bottom reaches viewport top
  */
 
 import { useState, useEffect, useRef } from "react"

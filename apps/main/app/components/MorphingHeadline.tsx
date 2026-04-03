@@ -96,7 +96,7 @@ export interface MorphingHeadlineProps {
    * Scroll progress at which the first headline (index 0) should be fully gone
    * and the second headline (index 1) should be fully visible.
    *
-   * Computed via useMeetingProgress() in the consumer — e.g. pass the progress
+   * Computed via useMeetingProgress() in the consumer.e.g. pass the progress
    * value when VideoHero's bottom meets the MorphingHeadline's top. The crossfade
    * spans from crossfadeAt * 0.5 (midpoint of Panel 0) to crossfadeAt.
    *
@@ -113,7 +113,7 @@ export interface MorphingHeadlineProps {
   shiftAmount?: number
   /**
    * When provided, the headline "docks" to this element's bottom once it scrolls
-   * past the headline's top — so the headline scrolls away with the page instead
+   * past the headline's top.so the headline scrolls away with the page instead
    * of floating over subsequent content. Use with the final panel ref.
    */
   dockRef?: React.RefObject<HTMLElement | null>
@@ -139,7 +139,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
     // WCAG 2.3.3: Respect user's reduced motion preference (reacts to changes)
     const prefersReducedMotion = useReducedMotion()
 
-    // Viewport height in pixels — updated on resize so the exit Y distance always
+    // Viewport height in pixels.updated on resize so the exit Y distance always
     // matches the 1:1 natural scroll rate of the sticky paragraph that exits alongside it.
     const [windowHeight, setWindowHeight] = useState(900)
     useEffect(() => {
@@ -163,7 +163,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       layoutEffect: false,
     })
 
-    // Exit opacity: easeOut mirrors Panel3Text's paragraph fade — fast at first,
+    // Exit opacity: easeOut mirrors Panel3Text's paragraph fade.fast at first,
     // slowing near zero, so both elements visually exit at the same perceived rate.
     // Fallback uses [0, 1] -> [1, 1] (non-degenerate constant 1) instead of [1, 1]
     // which would cause 0/0 = NaN in Framer Motion's interpolator.
@@ -183,7 +183,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
     )
 
     // Combined: invisible before appearRange, fades out during exitRange.
-    // Guard explicitly against NaN — ?? only catches null/undefined, not NaN.
+    // Guard explicitly against NaN.?? only catches null/undefined, not NaN.
     const combinedOpacity = useTransform(
       [appearOpacity, exitOpacity] as MotionValue<number>[],
       ([a, e]: number[]) => {
@@ -251,7 +251,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
         }
 
         if (index === 1 && crossfadeAt !== undefined) {
-          // "What is COEQWAL?" — fade in synchronized with Panel 0 fade-out.
+          // "What is COEQWAL?".fade in synchronized with Panel 0 fade-out.
           // Starts at crossfadeAt * 0.25, completes at crossfadeAt.
           const fadeInStart = crossfadeAt * 0.25
           const fadeInEnd = crossfadeAt
@@ -300,7 +300,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
       headlines.map((_, i) => (i === 0 ? 1 : 0)),
     )
 
-    // Dock offset — rAF-safe, no forced layout flush on scroll.
+    // Dock offset.rAF-safe, no forced layout flush on scroll.
     // Returns a MotionValue that drives both the animated branch (direct DOM write)
     // and the reduced-motion branch (via useMotionValueEvent below).
     const dockOffsetMV = useDockOffset(dockRef, containerRef)
@@ -312,7 +312,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
 
     // Y transform: combines mid-panel shift (for circles) and exit scroll-away.
     // The exit segment uses easeIn (quadratic) so the headline starts slowly —
-    // matching the circles' gradual upward glide — then builds momentum off-screen.
+    // matching the circles' gradual upward glide.then builds momentum off-screen.
     // Shift and hold segments stay linear.
     const exitYInput: number[] = []
     const exitYOutput: number[] = []

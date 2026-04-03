@@ -238,7 +238,7 @@ export default function VideoHero({
         </IconButton>
       )}
 
-      {/* Content — diagonal: headline upper-left, paragraph lower-right */}
+      {/* Content.diagonal: headline upper-left, paragraph lower-right */}
       <Box
         sx={{
           gridArea: "stack",
@@ -252,7 +252,7 @@ export default function VideoHero({
           pointerEvents: "none",
         }}
       >
-        {/* Headline — marginTop offsets exactly the fixed header height */}
+        {/* Headline.marginTop offsets exactly the fixed header height */}
         <Box
           sx={{
             display: hideHeadline ? { xs: "block", lg: "none" } : "block",
@@ -276,7 +276,7 @@ export default function VideoHero({
           </Typography>
         </Box>
 
-        {/* Paragraph — lower left */}
+        {/* Paragraph.lower left */}
         <Typography
           variant="displayBody"
           component="p"

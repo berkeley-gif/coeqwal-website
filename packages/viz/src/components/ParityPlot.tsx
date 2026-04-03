@@ -30,7 +30,7 @@ export interface ParityPlotProps {
   showSpreadDots?: boolean
   scenarioThemes?: Record<string, string>
   showThemeGrouping?: boolean
-  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter.triggers morph transitions instead of full rebuild */
   morphGeneration?: number
 }
 
@@ -57,7 +57,7 @@ function hashJitter(id: string, axis: string): number {
   return ((h & 0xffff) / 0xffff) * 2 - 1
 }
 
-/** Imperatively show/hide the tooltip DOM element — no React state. */
+/** Imperatively show/hide the tooltip DOM element.no React state. */
 function showParityTooltip(
   el: HTMLDivElement,
   x: number,

@@ -175,7 +175,7 @@ function Snowmelt() {
               {"less water is available"}
             </span>
             {
-              " in rivers and reservoirs during the dry summer when we — humans and ecosystems — "
+              " in rivers and reservoirs during the dry summer when we.humans and ecosystems."
             }
             <span style={{ fontWeight: "bold" }}>{"need it most"}</span>
             {"."}

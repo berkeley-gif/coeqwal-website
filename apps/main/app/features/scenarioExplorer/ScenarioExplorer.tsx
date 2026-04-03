@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * ScenarioExplorer — Main scenario exploration interface.
+ * ScenarioExplorer.Main scenario exploration interface.
  *
  * Top-level navigation: Get Started | Go to tools
  *

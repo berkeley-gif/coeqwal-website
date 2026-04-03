@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * TierSummaryCell — Compact heatmap cell for tier outcome data.
+ * TierSummaryCell.Compact heatmap cell for tier outcome data.
  *
  * Displays a color-blended background (from theme tier palette) with a
  * tier label ("Optimal", "At-risk", etc.) and optional numeric score.

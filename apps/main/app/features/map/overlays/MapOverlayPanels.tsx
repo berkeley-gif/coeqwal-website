@@ -50,7 +50,7 @@ import { mapActions, useIsOutcomeVisualizationActive } from "../store"
 import type { SectionId } from "../config/sectionLayers"
 import { useLearnScrollama, SCROLLAMA_CONFIG } from "../hooks/useLearnScrollama"
 
-// Phase thresholds for useScrollPhase — stable module-level constants so
+// Phase thresholds for useScrollPhase.stable module-level constants so
 // the hook's internal useEffect dep array never triggers unnecessary re-runs.
 // Phase 1: Panels enter one at a time (0.03–0.55), each sliding up with easing
 const STRATEGY_PHASE_THRESHOLDS = {
@@ -70,7 +70,7 @@ const SUMMARY_PHASE_THRESHOLDS = {
   hold: [0.59, 1.0] as ProgressRange,
 }
 
-// Ease-out cubic — fast start, gentle deceleration into final position
+// Ease-out cubic.fast start, gentle deceleration into final position
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 
 const PANEL_POSITIONS = {
@@ -160,7 +160,7 @@ export default function MapOverlayPanels() {
   // so no MutationObserver needed.
   const scenarioIntroRef = useRef<HTMLDivElement>(null)
 
-  // Tooltip target/container ref pairs — one per right-side panel
+  // Tooltip target/container ref pairs.one per right-side panel
   const panelRefs = {
     strategy: {
       target: useRef<HTMLDivElement>(null),
@@ -245,7 +245,7 @@ export default function MapOverlayPanels() {
   // Paragraph position: fixed at top (no animation, just scrolls naturally)
   const paragraphTop = PANEL_POSITIONS.paragraphTop
 
-  // Panel phases — useScrollPhase replaces the manual useTransform + latch +
+  // Panel phases.useScrollPhase replaces the manual useTransform + latch +
   // useState + useMotionValueEvent chains that previously managed each panel's
   // opacity and pointer events.
   //
@@ -281,7 +281,7 @@ export default function MapOverlayPanels() {
   // Simplified progress listener: drives the padding transition and early
   // camera shift. When the scroll section first enters the viewport bottom
   // (progress > 0.01), we immediately set the active section so the map
-  // camera pans left in sync with the paragraph padding reduction — rather
+  // camera pans left in sync with the paragraph padding reduction.rather
   // than waiting for Scrollama's step-enter (which fires at offset 0.5).
   useMotionValueEvent(scenarioIntroProgress, "change", (latest) => {
     const entering = latest > 0.01
@@ -304,7 +304,7 @@ export default function MapOverlayPanels() {
     }
   }, [strategyPhase])
 
-  // Phase 1: Panel entrance — each slides up from below the viewport
+  // Phase 1: Panel entrance.each slides up from below the viewport
   // and fades in with ease-out cubic (fast start -> gentle settle).
   // Only one panel animates at a time; each waits for the previous to land.
   const strategy = usePanelEntrance(
@@ -324,7 +324,7 @@ export default function MapOverlayPanels() {
     SUMMARY_PHASE_THRESHOLDS.enter,
   )
 
-  // Phase 2: Tooltip opacity — sequenced AFTER all panels are in position.
+  // Phase 2: Tooltip opacity.sequenced AFTER all panels are in position.
   // Panels finish entering at ~0.59, tooltips run 0.62–0.90.
   // Each: 0.02 fade in, 0.03 hold, 0.02 fade out = 0.07 per tooltip,
   // with ~0.005 gap between. Longer hold gives readers time to absorb.
@@ -396,7 +396,7 @@ export default function MapOverlayPanels() {
         debug={SCROLLAMA_CONFIG.debug}
       >
         {/* ==================== SECTION 1: California overview ====================
-            Short scroll runway — no visible content.
+            Short scroll runway.no visible content.
             Fires the Scrollama "california" step as soon as the section enters
             the viewport, triggering the Central Valley zoom via useLearnScrollama.
             50vh gives the zoom animation time to play and the momentum of an
@@ -981,7 +981,7 @@ export default function MapOverlayPanels() {
                 </Box>
               </Box>
 
-              {/* Scroll spacer — gives the summary tooltip (progress 0.74–0.84)
+              {/* Scroll spacer.gives the summary tooltip (progress 0.74–0.84)
                 enough runway before the wrapper exits the viewport. */}
               <Box sx={{ height: "100vh" }} aria-hidden="true" />
             </Box>

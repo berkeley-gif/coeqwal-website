@@ -1,5 +1,5 @@
 /**
- * usePanelRoute — manages the ?theme= URL parameter for theme panels.
+ * usePanelRoute.manages the ?theme= URL parameter for theme panels.
  *
  * Uses router.push (not replace) so the browser back button closes/reopens
  * the panel, giving users a familiar "back to dismiss" interaction.

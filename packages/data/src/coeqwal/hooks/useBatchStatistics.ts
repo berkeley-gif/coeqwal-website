@@ -97,7 +97,7 @@ export function useBatchStatistics(
     {
       revalidateOnFocus: false,
       // When scenarios change the cache key changes, so fresh data is fetched
-      // automatically — no need to suppress deduplication.
+      // automatically.no need to suppress deduplication.
       revalidateOnReconnect: true,
     },
   )

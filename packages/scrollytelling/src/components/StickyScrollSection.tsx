@@ -33,7 +33,7 @@ import type { ScrollOffset, ScrollSectionContextValue } from "../types"
 import { ScrollSectionContext } from "./ScrollSection"
 
 interface StickyScrollSectionProps {
-  /** Scroll runway length — controls how long content stays pinned (default: "200vh") */
+  /** Scroll runway length.controls how long content stays pinned (default: "200vh") */
   height?: string
   /** CSS top offset for the sticky container (default: "0px") */
   stickyTop?: string | number

@@ -77,7 +77,7 @@ function rgbToHex(r: number, g: number, b: number): string {
  * Linearly interpolate between adjacent tier colors based on score.
  *
  * 1.0 = pure tier1, 2.0 = pure tier2, 1.5 = 50/50 blend of tier1+tier2, etc.
- * Uses theme.palette.tiers exclusively — no hardcoded colors.
+ * Uses theme.palette.tiers exclusively.no hardcoded colors.
  */
 export function interpolateTierColor(
   score: number,

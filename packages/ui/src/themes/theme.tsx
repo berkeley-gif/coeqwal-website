@@ -277,7 +277,7 @@ const palette = {
   brand: {
     sky: "#92C1D5", // Top of gradient - sky blue
     water: "#64A4D6", // Bottom of gradient - water blue
-    panelLight: "#EDE9E4", // Frontmatter panel background — undertone.stone
+    panelLight: "#EDE9E4", // Frontmatter panel background.undertone.stone
     panelMedium: "#3D7DB5", // Panel 1 background
     panelDark: "#193D6B", // Panel 3 background
   },
@@ -331,7 +331,7 @@ const palette = {
   undertone: {
     cool: "#f7fafc", // Cool blue-grey undertone (same as grey[50])
     warm: "#faf8f5", // Warm cream undertone
-    stone: "#EDE9E4", // Warm stone — panel backgrounds on light pages
+    stone: "#EDE9E4", // Warm stone.panel backgrounds on light pages
   },
 
   // Ambient/mood elements
@@ -363,12 +363,12 @@ const palette = {
 
   // Ink colors for light-background content panels (About, Water themes, etc.)
   ink: {
-    heading: "#333333", // Strong dark — section headings (h5)
-    body: "#555555", // Mid dark — body paragraphs
-    subtle: "rgba(85, 85, 85, 0.55)", // Muted — overline eyebrows
+    heading: "#333333", // Strong dark.section headings (h5)
+    body: "#555555", // Mid dark.body paragraphs
+    subtle: "rgba(85, 85, 85, 0.55)", // Muted.overline eyebrows
   },
 
-  // Water theme colors — background + text for each scenario theme
+  // Water theme colors.background + text for each scenario theme
   // Keys match ScenarioTheme / WATER_THEMES ids (packages/data/src/coeqwal/themes.ts)
   waterThemes: {
     baseline: { background: "#ffd87e", text: "#7a5200" },

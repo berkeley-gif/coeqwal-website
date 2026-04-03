@@ -354,7 +354,7 @@ export default function ComparisonPanel({
   // Transform data to be relative to baseline when toggle is on.
   // Both values are in [-1, 1] (mapped from normalized_score in [0,1] via ns*2-1),
   // so their raw difference spans [-2, 2]. Dividing by 2 keeps the result in [-1, 1],
-  // which is equivalent to (scenario_ns - baseline_ns) — the direct difference in
+  // which is equivalent to (scenario_ns - baseline_ns).the direct difference in
   // normalized scores. Zero = same as baseline; ±1 = maximum possible divergence.
   const chartData = useMemo(() => {
     if (!relativeToBaseline || !baselineScenario) return highlightedData
@@ -1001,7 +1001,7 @@ export default function ComparisonPanel({
   const chartSharedGrey50 = theme.palette.grey[50]
   const chartSharedBlueDarkest = theme.palette.blue.darkest
 
-  // Primitive color deps — theme.palette.grey is a new object ref each render;
+  // Primitive color deps.theme.palette.grey is a new object ref each render;
   // unstable sharedChartColors was retriggering chart D3 redraws on sidebar hover.
   const sharedChartColors = useMemo(
     () => ({

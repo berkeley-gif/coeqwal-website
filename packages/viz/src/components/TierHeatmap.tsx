@@ -26,7 +26,7 @@ export interface TierHeatmapProps {
   onCellClick?: (cell: TierHeatmapCell) => void
   highlightedIds?: Set<string> | null
   chosenIds?: Set<string>
-  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter.triggers morph transitions instead of full rebuild */
   morphGeneration?: number
 }
 

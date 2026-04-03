@@ -77,7 +77,7 @@ const IntroSection = () => {
   const videoHeroRef = useRef<HTMLDivElement>(null)
   const aboutPanelRef = useRef<HTMLDivElement>(null)
   const waterThemesPanelRef = useRef<HTMLDivElement>(null)
-  // Dock marker at the END of the 300vh sticky section — MorphingHeadline
+  // Dock marker at the END of the 300vh sticky section.MorphingHeadline
   // docks here so it only scrolls away once the full section is done.
   const waterThemesDockRef = useRef<HTMLDivElement>(null)
 
@@ -186,7 +186,7 @@ const IntroSection = () => {
 
   return (
     <Box ref={containerRef} sx={{ pointerEvents: "auto" }}>
-      {/* Morphing headline — fixed overlay, upper-left.
+      {/* Morphing headline.fixed overlay, upper-left.
           panelBoundaries is geometry-driven via useMeetingProgress.
           crossfadeAt synchronises the 0 to 1 fade precisely at the panel border.
           No exitRange: the final headline ("What water issues") stays fixed —
@@ -210,7 +210,7 @@ const IntroSection = () => {
         />
       </div>
 
-      {/* About COEQWAL — headline handled by MorphingHeadline overlay on lg+;
+      {/* About COEQWAL.headline handled by MorphingHeadline overlay on lg+;
           responsiveHeadline fills in on smaller screens */}
       <div ref={aboutPanelRef}>
         <CoeqwalPanel
@@ -257,7 +257,7 @@ const IntroSection = () => {
         />
       </div>
 
-      {/* Water themes — sticky scrollytelling with circle overlays */}
+      {/* Water themes.sticky scrollytelling with circle overlays */}
       <WaterThemesPanel
         panelRef={waterThemesPanelRef}
         dockRef={waterThemesDockRef}

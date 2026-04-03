@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * WaterThemeCards — extracted from IntroSection for safekeeping.
+ * WaterThemeCards.extracted from IntroSection for safekeeping.
  *
  * Contains the ThemeCard component and the grid layouts for the
  * four main water-theme cards + two provisional theme cards.
@@ -36,7 +36,7 @@ const WATER_THEME_PHOTOS: Partial<Record<string, string>> = {
 /* THEME CARD                                                                   */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
-/** Water-theme card — coloured header, photo, description */
+/** Water-theme card.coloured header, photo, description */
 function ThemeCard({
   label,
   description,
@@ -136,7 +136,7 @@ export function WaterThemeCards({
 }) {
   return (
     <>
-      {/* Four main theme cards — reveal the grid as it enters the viewport */}
+      {/* Four main theme cards.reveal the grid as it enters the viewport */}
       <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5}>
         <Box
           sx={{

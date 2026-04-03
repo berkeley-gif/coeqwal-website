@@ -1,7 +1,7 @@
 "use client"
 
 /**
- * RefugeSection — Wildlife Refuge Environmental Water section for the Data Explorer
+ * RefugeSection.Wildlife Refuge Environmental Water section for the Data Explorer
  *
  * Displays delivery, shortage, and reliability data for 18 wildlife refuge and
  * wetland demand units in the Sacramento and San Joaquin hydrologic regions.
@@ -69,7 +69,7 @@ const REGION_OPTIONS = [
   { value: "TULARE" as const, label: "Tulare" },
 ]
 
-/** Delivery band colors — blue, matching COLORS in PercentileMatrix */
+/** Delivery band colors.blue, matching COLORS in PercentileMatrix */
 const DELIVERY_BAND_COLORS = {
   range: "#d9eafb", // q0-q100 (lightest)
   outer: "#c5dbf3", // q10-q90
@@ -77,7 +77,7 @@ const DELIVERY_BAND_COLORS = {
   median: "#2c5aa0", // q50 (darkest)
 }
 
-/** Shortage band colors — orange/amber, matching COLORS_SHORTAGE in PercentileMatrix */
+/** Shortage band colors.orange/amber, matching COLORS_SHORTAGE in PercentileMatrix */
 const SHORTAGE_BAND_COLORS = {
   range: "#fef3e2",
   outer: "#fdd49e",
@@ -435,7 +435,7 @@ export default function RefugeSection({
 
   // Build ReservoirData[] for PercentileMatrix.
   // Use labelSubtitle for the du_id + region identifier line,
-  // and labelAttributes for managed_by / cs3_type — styled like reservoir chart labels.
+  // and labelAttributes for managed_by / cs3_type.styled like reservoir chart labels.
   const reservoirData: ReservoirData[] = useMemo(
     () =>
       filteredDUs.map((du) => ({
@@ -567,7 +567,7 @@ export default function RefugeSection({
                     The center line is the median; outer bands are the extremes.
                     Per-scenario annual averages and P95 reliability are shown
                     below each chart. Relative scale normalizes each row to its
-                    own maximum — useful when refuges receive very different
+                    own maximum.useful when refuges receive very different
                     volumes.
                     <Box
                       component="span"
