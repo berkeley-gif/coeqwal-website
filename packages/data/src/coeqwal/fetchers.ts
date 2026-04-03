@@ -153,17 +153,23 @@ export async function fetchScenarioTierByCode(
 }
 
 /**
- * Fetch tier data for multiple scenarios in parallel
+ * Batch response from /api/tiers/batch
+ */
+interface BatchScenarioTiersResponse {
+  scenarios: Record<string, ScenarioTiersResponse>
+  count: number
+}
+
+/**
+ * Fetch tier data for multiple scenarios in a single batched request.
  *
- * Uses Promise.allSettled so a single failing scenario does not abort the
- * entire batch. Rejected entries are silently omitted from the result, so
- * callers should check whether a given scenario ID is present in the map.
- *
- * Note: This fires parallel requests. For large numbers of scenarios,
- * consider using lazy loading (useScenarioTiersLazy) instead.
+ * Uses the `/api/tiers/batch` endpoint which runs one SQL query for all
+ * scenarios instead of N individual requests. Falls back to parallel
+ * per-scenario requests if the batch endpoint fails (e.g., on older API
+ * versions).
  *
  * @param scenarioIds - Array of scenario IDs
- * @returns Map of scenarioId -> ScenarioTiersResponse (only fulfilled entries)
+ * @returns Map of scenarioId -> ScenarioTiersResponse
  *
  * @example
  * ```typescript
@@ -174,19 +180,29 @@ export async function fetchScenarioTierByCode(
 export async function fetchAllScenarioTiers(
   scenarioIds: string[],
 ): Promise<Record<string, ScenarioTiersResponse>> {
-  const results = await Promise.allSettled(
-    scenarioIds.map((id) => fetchScenarioTiers(id)),
-  )
+  if (scenarioIds.length === 0) return {}
 
-  const record: Record<string, ScenarioTiersResponse> = {}
-  scenarioIds.forEach((id, i) => {
-    const result = results[i]
-    if (result?.status === "fulfilled") {
-      record[id] = result.value
-    }
-  })
+  try {
+    const batch = await apiFetcher<BatchScenarioTiersResponse>(
+      ENDPOINTS.batchScenarioTiers(scenarioIds),
+      { baseUrl: DEFAULT_API_BASE, timeout: 30000 },
+    )
+    return batch.scenarios
+  } catch {
+    // Fallback: parallel per-scenario requests (for older API deployments)
+    const results = await Promise.allSettled(
+      scenarioIds.map((id) => fetchScenarioTiers(id)),
+    )
 
-  return record
+    const record: Record<string, ScenarioTiersResponse> = {}
+    scenarioIds.forEach((id, i) => {
+      const result = results[i]
+      if (result?.status === "fulfilled") {
+        record[id] = result.value
+      }
+    })
+    return record
+  }
 }
 
 /**
