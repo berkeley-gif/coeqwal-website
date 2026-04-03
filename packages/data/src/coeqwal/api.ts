@@ -35,6 +35,13 @@ export const ENDPOINTS = {
     `/tiers/scenarios/${scenarioId}/tiers/${tierCode}`,
 
   /**
+   * Batch tier data for multiple scenarios in one request
+   * @param scenarioIds - Array of scenario IDs
+   */
+  batchScenarioTiers: (scenarioIds: string[]) =>
+    `/tiers/batch?scenarios=${scenarioIds.join(",")}`,
+
+  /**
    * Tier location data for map visualization
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param tierCode - Tier short code (e.g., "AG_REV")

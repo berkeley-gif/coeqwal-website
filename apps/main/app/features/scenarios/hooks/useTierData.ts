@@ -221,6 +221,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     data: rawScenariosData,
     error: scenarioTiersError,
     isLoading: scenarioTiersLoading,
+    isValidating: scenarioTiersValidating,
   } = useSWR(
     fetchIds.length > 0 ? CACHE_KEYS.allScenarioTiers(fetchIds) : null,
     () => fetchAllScenarioTiers(fetchIds),
@@ -290,7 +291,17 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
 
   const outcomeNames = useMemo(() => buildOutcomeNames(allTiers), [allTiers])
 
-  const isLoading = scenariosLoading || scenarioTiersLoading || tiersLoading
+  // Only report loading when there's truly no data to show.
+  // During hydroclimate switches, keepPreviousData provides stale data while
+  // the new fetch is in flight — SWR's isLoading is true in that case because
+  // it doesn't count previous data as "loaded."  We use allScenariosData
+  // (which holds lastValidDataRef) to avoid flashing a spinner.
+  const isLoading =
+    scenariosLoading ||
+    tiersLoading ||
+    (scenarioTiersLoading && !allScenariosData)
+
+  const isValidating = scenarioTiersValidating
 
   const error = useMemo(() => {
     if (scenariosError) return `Failed to load scenarios: ${scenariosError}`
@@ -312,6 +323,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     scenarioIds,
     outcomeNames,
     isLoading,
+    isValidating,
     error,
   }
 }

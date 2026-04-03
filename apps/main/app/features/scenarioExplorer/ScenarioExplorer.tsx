@@ -32,6 +32,7 @@ import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore, type MainView } from "./store"
 import { useMapMode } from "../map/store"
+import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
 // Top-level navigation tabs
 
@@ -55,6 +56,8 @@ export default function ScenarioExplorer() {
   const { mainView, setMainView, exploreMode, showMap } =
     useScenarioExplorerStore()
   const mapMode = useMapMode()
+
+  usePrefetchTiers()
 
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
