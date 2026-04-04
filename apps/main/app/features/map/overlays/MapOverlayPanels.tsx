@@ -44,7 +44,8 @@ import {
   StrategyInfoPanel,
   KeyOperationsPanel,
   KeyOutcomesPanel,
-  SummaryPanel,
+  // SummaryPanel temporarily disabled — fetches heavy GeoJSON for polygon centroids
+  // SummaryPanel,
 } from "./scenarioPanels"
 import { mapActions, useIsOutcomeVisualizationActive } from "../store"
 import type { SectionId } from "../config/sectionLayers"
@@ -931,53 +932,18 @@ export default function MapOverlayPanels() {
                     />
                   </RightPanelSlot>
 
-                  {/* Summary panel */}
-                  <RightPanelSlot
+                  {/* SummaryPanel temporarily disabled — fetches heavy GeoJSON
+                     for polygon centroids. Re-enable once centroids are available
+                     from a lightweight endpoint or hardcoded. */}
+                  {/* <RightPanelSlot
                     entrance={summary}
                     pointerEvents={summaryPE}
                     containerRef={panelRefs.summary.container}
                     targetRef={panelRefs.summary.target}
-                    tooltip={
-                      <ScrollTooltip
-                        targetRef={panelRefs.summary.target}
-                        containerRef={panelRefs.summary.container}
-                        content={
-                          <>
-                            <Typography
-                              variant="tooltipHeader"
-                              sx={{ mb: theme.space.component.xs }}
-                            >
-                              Scenario summary
-                            </Typography>
-                            Finally, a summary has been created for each
-                            scenario.
-                            <Typography
-                              variant="tooltipHeader"
-                              sx={{
-                                mt: theme.space.component.sm,
-                                mb: theme.space.component.xs,
-                              }}
-                            >
-                              Try this:
-                            </Typography>
-                            <Box component="span" sx={{ display: "block" }}>
-                              Click any outcome chart above to get a summary
-                              specific to that outcome, including the locations
-                              most affected. Click a location chip to zoom the
-                              map directly to that location.
-                            </Box>
-                          </>
-                        }
-                        position="left"
-                        offsetY={20}
-                        opacity={summaryTooltipOpacity}
-                        isClosed={closedTooltips.has("summary")}
-                        onClose={() => closeTooltip("summary")}
-                      />
-                    }
+                    tooltip={...}
                   >
                     <SummaryPanel scenarioId={LEARN_SCENARIO_ID} />
-                  </RightPanelSlot>
+                  </RightPanelSlot> */}
                 </Box>
               </Box>
 

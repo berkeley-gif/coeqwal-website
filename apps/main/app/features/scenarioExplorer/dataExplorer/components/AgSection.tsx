@@ -321,7 +321,7 @@ function AgTierCharts({
                 variant="caption"
                 sx={{ color: theme.palette.grey[400] }}
               >
-                —
+                -
               </Typography>
             </Box>
           )

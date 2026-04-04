@@ -407,7 +407,7 @@ function X2StatCell({ avg, cv }: { avg: number | null; cv: number | null }) {
           fontFeatureSettings: "'tnum' 1",
         }}
       >
-        {avg != null ? `${avg.toFixed(1)} km` : "—"}
+        {avg != null ? `${avg.toFixed(1)} km` : "-"}
       </Typography>
       <Typography
         variant="caption"

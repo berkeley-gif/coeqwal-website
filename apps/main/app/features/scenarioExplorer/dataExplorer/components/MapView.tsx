@@ -20,12 +20,14 @@ import {
   outcomeCategories,
   getOutcomeCategoryColor,
 } from "../../config/outcomeDefinitions"
-import {
-  fetchTierLocationData,
-  type TierLocationResponse,
-} from "@repo/data/coeqwal"
+// GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+// TODO: replace with lightweight /locations endpoint when MapView is re-enabled.
+// import {
+//   fetchTierLocationData,
+//   type TierLocationResponse,
+// } from "@repo/data/coeqwal"
 import { getOutcomeCodeFromMetricId } from "../../../../content/outcomes"
-import TierMarkers from "../../../map/visualizationLayers/components/TierMarkers"
+// import TierMarkers from "../../../map/visualizationLayers/components/TierMarkers"
 import { TierLegend } from "../../../scenarios/components"
 import TemporalControls from "./TemporalControls"
 import type {
@@ -75,9 +77,9 @@ function MapViewContent() {
   // Map container ref for screenshot
   const mapContainerRef = React.useRef<HTMLDivElement>(null)
 
-  // Fetch tier location data for map visualization
-  const [tierLocationData, setTierLocationData] =
-    React.useState<TierLocationResponse | null>(null)
+  // GeoJSON fetch disabled — heavy on bandwidth. MapView is currently not rendered.
+  // TODO: replace with lightweight /locations endpoint when MapView is re-enabled.
+  const tierLocationData = null
   const [isLoadingMap, setIsLoadingMap] = React.useState(false)
   const [mapError, setMapError] = React.useState<string | null>(null)
 
@@ -99,51 +101,13 @@ function MapViewContent() {
     ? outcomeCategories.find((c) => c.id === metric.category)
     : null
 
-  // Fetch tier location data when metric or scenario changes
+  // GeoJSON fetch disabled — see import block comment.
+  // TODO: re-enable when MapView is brought back with lightweight data.
   React.useEffect(() => {
     if (!metric || !selectedScenario || !metric.showOnMap || !metric.isTier) {
-      setTierLocationData(null)
       return
     }
-
-    let cancelled = false
-
-    async function fetchData() {
-      // Type guard: ensure metric is defined in this scope
-      if (!metric) return
-
-      try {
-        setIsLoadingMap(true)
-        setMapError(null)
-
-        const tierCode = getOutcomeCodeFromMetricId(metric.id)
-        if (!tierCode || tierCode === metric.id) {
-          console.warn(`No tier code mapping for metric: ${metric.id}`)
-          setTierLocationData(null)
-          return
-        }
-
-        // Fetch tier location data using the tier code
-        const data = await fetchTierLocationData(selectedScenario, tierCode)
-
-        if (!cancelled) {
-          setTierLocationData(data)
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setMapError(
-            err instanceof Error ? err.message : "Failed to fetch map data",
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingMap(false)
-        }
-      }
-    }
-
-    fetchData()
-
+    // fetch disabled
     return () => {
       cancelled = true
     }
@@ -439,12 +403,8 @@ function MapViewContent() {
         >
           <NavigationControl position="bottom-right" />
 
-          {/* Render tier markers when data is available */}
-          {tierLocationData &&
-            tierLocationData.features &&
-            tierLocationData.features.length > 0 && (
-              <TierMarkers data={tierLocationData} />
-            )}
+          {/* TierMarkers disabled — GeoJSON fetch removed.
+              TODO: re-enable with lightweight data when MapView is brought back. */}
         </Map>
 
         {/* Status overlay */}

@@ -51,7 +51,7 @@ import RefugeSection from "./RefugeSection"
 import DeltaSection from "./DeltaSection"
 import { GridScenarioHeader } from "./AlignedScenarioGrid"
 import { ChartGridProvider } from "./ChartGridContext"
-import { fetchTierLocationData } from "@repo/data/coeqwal"
+import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
 import { useAllReservoirsList } from "@repo/data/coeqwal/hooks"
 import { useScenarioList } from "../../../scenarios/hooks"
 
@@ -136,14 +136,15 @@ function SectionHeader({
 function useReservoirTierColors(scenarios: string[]) {
   const theme = useTheme()
 
-  // Fetch tier location data for each scenario
-  // Using a combined SWR key for all scenarios
+  // Fetch lightweight tier assignments (no geometry) for each scenario
   const { data: allLocationData } = useSWR(
     scenarios.length > 0 ? ["reservoir-tier-locations", ...scenarios] : null,
     async () => {
       const results = await Promise.all(
         scenarios.map((scenarioId) =>
-          fetchTierLocationData(scenarioId, "RES_STOR").catch(() => null),
+          fetchTierLocationAssignments(scenarioId, "RES_STOR").catch(
+            () => null,
+          ),
         ),
       )
       return results
@@ -153,7 +154,6 @@ function useReservoirTierColors(scenarios: string[]) {
 
   // Build the cell color mapping: scenarioId -> reservoirId -> color
   const cellColors = useMemo(() => {
-    // Tier level to color mapping from theme
     const tierLevelColors: Record<number, string> = {
       1: theme.palette.tiers.tier1,
       2: theme.palette.tiers.tier2,
@@ -167,18 +167,16 @@ function useReservoirTierColors(scenarios: string[]) {
 
     scenarios.forEach((scenarioId, index) => {
       const locationData = allLocationData[index]
-      if (!locationData?.features) return
+      if (!locationData?.locations) return
 
       const scenarioColors: Record<string, string> = {}
-      locationData.features.forEach((feature) => {
+      locationData.locations.forEach((loc) => {
         // Tier location uses "FOLSM", percentile data uses "S_FOLSM"
         // Add S_ prefix to match percentile reservoir IDs
-        const locationId = feature.properties.location_id
-        const reservoirId = locationId.startsWith("S_")
-          ? locationId
-          : `S_${locationId}`
-        const tierLevel = feature.properties.tier_level
-        const color = tierLevelColors[tierLevel] || theme.palette.tiers.tier3
+        const reservoirId = loc.location_id.startsWith("S_")
+          ? loc.location_id
+          : `S_${loc.location_id}`
+        const color = tierLevelColors[loc.tier_level] || theme.palette.tiers.tier3
         scenarioColors[reservoirId] = color
       })
       colors[scenarioId] = scenarioColors
@@ -259,7 +257,7 @@ function StorageTierCharts({
                 variant="caption"
                 sx={{ color: theme.palette.grey[400] }}
               >
-                —
+                -
               </Typography>
             </Box>
           )

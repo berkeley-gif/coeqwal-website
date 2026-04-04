@@ -52,6 +52,7 @@ import type {
   ChannelsSeasonalResponse,
   ChannelsPeriodSummaryResponse,
   DeltaMonthlyResponse,
+  TierLocationAssignmentsResponse,
 } from "./types"
 
 /**
@@ -234,6 +235,42 @@ export async function fetchTierLocationData(
 
   return apiFetcher<TierLocationResponse>(
     ENDPOINTS.tierLocations(scenarioId, tierCode),
+    {
+      baseUrl: DEFAULT_API_BASE,
+    },
+  )
+}
+
+/**
+ * Fetch lightweight tier assignments per location (no geometry).
+ *
+ * Use this for treemaps, data tables, or any non-map visualization that needs
+ * to know which locations fall into which tier. Much lighter than
+ * fetchTierLocationData, which returns full GeoJSON with polygon coordinates.
+ *
+ * @param scenarioId - Scenario ID (e.g., "s0020")
+ * @param tierCode - Tier short code (e.g., "CWS_DEL", "AG_REV")
+ * @returns Tier assignments with location metadata (no geometry)
+ *
+ * @example
+ * ```typescript
+ * const data = await fetchTierLocationAssignments("s0020", "CWS_DEL")
+ * const tier4 = data.locations.filter(l => l.tier_level === 4)
+ * ```
+ */
+export async function fetchTierLocationAssignments(
+  scenarioId: string,
+  tierCode: string,
+): Promise<TierLocationAssignmentsResponse> {
+  if (!scenarioId) {
+    throw new Error("Scenario ID is required")
+  }
+  if (!tierCode) {
+    throw new Error("Tier code is required")
+  }
+
+  return apiFetcher<TierLocationAssignmentsResponse>(
+    ENDPOINTS.tierLocationAssignments(scenarioId, tierCode),
     {
       baseUrl: DEFAULT_API_BASE,
     },

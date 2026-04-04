@@ -8,9 +8,8 @@
  * Includes:
  * - BasemapDimOverlay (dims the map when visualization is active)
  * - OutcomePolygonLayer (demand-units, WBA, delta, reservoir)
- * - TierMarkers (non-polygon outcomes)
+ * - TierMarkers (non-polygon outcomes with hardcoded coordinates)
  * - TierLocationLabels (reservoirs, pumping plants, compliance stations)
- * - HotspotMarkers
  * - Tooltips (unified via useMapTooltips hook)
  */
 
@@ -20,7 +19,6 @@ import { useMap, Source, Layer } from "@repo/map"
 // Components
 import TierMarkers from "./components/TierMarkers"
 import { TierLocationLabels } from "./components/TierLocationLabels"
-import { HotspotMarkers } from "./components/HotspotMarkers"
 import { OutcomePolygonLayer } from "./components/OutcomePolygonLayer"
 import { PoiMarker } from "./components/PoiMarker"
 
@@ -35,11 +33,9 @@ import { BASEMAP_DIM_OPACITY } from "../config/outcomeLayerRegistry"
 import { MapFeatureTooltip } from "../../tooltips/MapFeatureTooltip"
 
 // API
-import {
-  fetchTierLocationData,
-  type TierLocationResponse,
-} from "@repo/data/coeqwal"
+import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
 import { FetchError } from "@repo/data/fetching"
+import type { TierLocation } from "./types"
 
 // Store
 import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
@@ -115,63 +111,48 @@ export default function VisualizationLayers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearTooltipsSignal])
 
-  // Tier location data for React-rendered markers (non-polygon outcomes)
-  const [tierData, setTierData] = useState<TierLocationResponse | null>(null)
+  // Lightweight tier location assignments for React-rendered markers (non-polygon outcomes)
+  const [tierLocations, setTierLocations] = useState<TierLocation[]>([])
+  const [tierCode, setTierCode] = useState<string | null>(null)
 
-  // Fetch tier data for non-Mapbox outcomes
+  // Fetch tier assignments (no geometry) for non-Mapbox outcomes
   useEffect(() => {
     if (!config || !scenarioId || usesMapboxLayers) {
-      setTierData(null)
+      setTierLocations([])
+      setTierCode(null)
       return
     }
 
     if (mapMode === "hidden") {
-      setTierData(null)
+      setTierLocations([])
+      setTierCode(null)
       return
     }
 
-    const tierCode = config.tierCode
-
+    const code = config.tierCode
     let cancelled = false
 
     async function fetchData() {
       try {
-        console.log("VisualizationLayers - Fetching tier data for:", {
-          outcome,
-          tierCode,
-          scenarioId,
-          usesMapboxLayers,
-        })
-        const data = await fetchTierLocationData(scenarioId, tierCode)
-
+        const data = await fetchTierLocationAssignments(scenarioId, code)
         if (!cancelled) {
-          console.log(
-            "VisualizationLayers - Tier data received:",
-            data.features.length,
-            "features",
-          )
-          setTierData(data)
-
-          // Camera zoom is handled by useOutcomeVisualization for outcomes
-          // with a cameraPreset (Delta views). Other outcomes keep the current position.
+          setTierLocations(data.locations)
+          setTierCode(data.tier_code)
         }
       } catch (err) {
         if (
           err instanceof FetchError &&
           (err.status === 404 || err.status >= 500)
         ) {
-          // 404: geometry table not yet populated for this tier type.
-          // 5xx: transient backend error.
-          // Both are known limitations.log as warning so the Next.js dev
-          // overlay is not triggered for expected backend gaps.
           console.warn(
-            `Tier data unavailable for ${tierCode} (HTTP ${err.status})`,
+            `Tier data unavailable for ${code} (HTTP ${err.status})`,
           )
         } else {
           console.error("Failed to fetch tier location data:", err)
         }
         if (!cancelled) {
-          setTierData(null)
+          setTierLocations([])
+          setTierCode(null)
         }
       }
     }
@@ -225,12 +206,14 @@ export default function VisualizationLayers() {
       )}
 
       {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
-      {tierData &&
+      {tierLocations.length > 0 &&
         !usesMapboxLayers &&
+        tierCode &&
         outcomeCode !== "FW_EXP" &&
         outcomeCode !== "FW_DELTA_USES" && (
           <TierMarkers
-            data={tierData}
+            locations={tierLocations}
+            tierCode={tierCode}
             onHover={handlePointHover}
             onClick={handlePointClick}
           />
@@ -241,29 +224,16 @@ export default function VisualizationLayers() {
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
       {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
-        (tierData != null || Object.keys(locationData).length > 0) && (
+        (tierLocations.length > 0 ||
+          Object.keys(locationData).length > 0) && (
           <TierLocationLabels
-            data={tierData ?? undefined}
             locationItems={
-              tierData == null ? Object.values(locationData) : undefined
+              tierLocations.length > 0
+                ? tierLocations
+                : Object.values(locationData)
             }
           />
         )}
-
-      {/* Hotspot markers for tier 4 locations (hidden in get-started mode) */}
-      <HotspotMarkers
-        outcomeCode={outcomeCode}
-        scenarioId={scenarioId}
-        visible={
-          !isGetStartedMode &&
-          !!outcomeCode &&
-          (outcomeCode === "CWS_DEL" ||
-            outcomeCode === "WRC_SALMON_AB" ||
-            outcomeCode === "AG_REV" ||
-            outcomeCode === "ENV_FLOWS" ||
-            outcomeCode === "GW_STOR")
-        }
-      />
 
       {/* Pinned tooltips (multiple allowed) */}
       {pinnedFeatures.map((feature) => (

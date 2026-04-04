@@ -354,7 +354,7 @@ export default function SpillFrequencySection({
                     variant="compactCaption"
                     sx={{ color: theme.palette.grey[400] }}
                   >
-                    —
+                    -
                   </Typography>
                 )}
               </Box>

@@ -280,7 +280,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
 
         // Middle headlines: fade in mirroring the previous headline's fade-out window
         // (based on the previous panel's size), fade out before this panel ends.
-        // Using the previous panel's size ensures the crossfade is simultaneous —
+        // Using the previous panel's size ensures the crossfade is simultaneous -
         // both headlines are animating over the exact same scroll range.
         const prevPanelSize = panelStart - (panelStarts[index - 1] ?? 0)
         return {
@@ -311,7 +311,7 @@ const MorphingHeadline = forwardRef<HTMLDivElement, MorphingHeadlineProps>(
     useMotionValueEvent(dockOffsetMV, "change", setDockOffset)
 
     // Y transform: combines mid-panel shift (for circles) and exit scroll-away.
-    // The exit segment uses easeIn (quadratic) so the headline starts slowly —
+    // The exit segment uses easeIn (quadratic) so the headline starts slowly -
     // matching the circles' gradual upward glide.then builds momentum off-screen.
     // Shift and hold segments stay linear.
     const exitYInput: number[] = []

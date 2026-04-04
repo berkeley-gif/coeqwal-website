@@ -170,6 +170,39 @@ export interface TierLocationResponse {
 }
 
 // ============================================================================
+// Tier Location Assignment Types (lightweight, no geometry)
+// ============================================================================
+
+/**
+ * A single location's tier assignment from /api/tier-map/:id/:code/locations
+ */
+export interface TierLocationAssignment {
+  location_id: string
+  location_name: string
+  location_type: string
+  tier_level: number
+  tier_value: number
+  display_order: number
+}
+
+/**
+ * Response from /api/tier-map/:scenarioId/:tierCode/locations
+ * Lightweight: tier assignments only, no polygon geometry.
+ */
+export interface TierLocationAssignmentsResponse {
+  scenario: string
+  tier_code: string
+  tier_name: string
+  tier_type: "multi_value" | "single_value"
+  locations: TierLocationAssignment[]
+  metadata: {
+    total_locations: number
+    location_types: string[]
+    tier_counts: Record<number, number>
+  }
+}
+
+// ============================================================================
 // Statistics Types (for reservoir percentile charts)
 // ============================================================================
 
