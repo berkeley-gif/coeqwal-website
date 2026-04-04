@@ -412,12 +412,8 @@ export default function TierAnimationSection({
     return (
       <Box
         sx={{
-          mx: theme.space.section.sm,
-          my: theme.space.section.sm,
           minHeight: "50vh",
-          borderRadius: theme.borderRadius.lg,
           backgroundColor: theme.palette.common.white,
-          border: theme.border.heavy,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -431,7 +427,6 @@ export default function TierAnimationSection({
   }
 
   const blueBg = theme.palette.tabPanels.explore
-  const spacing = theme.space.section.sm * 8
 
   return (
     <div
@@ -440,10 +435,6 @@ export default function TierAnimationSection({
         position: "relative",
         minHeight: SCROLL_RUNWAY,
         clipPath: "inset(0)",
-        paddingLeft: spacing,
-        paddingRight: spacing,
-        paddingTop: spacing,
-        paddingBottom: spacing,
       }}
     >
       <StickyElement top={0}>
@@ -451,10 +442,8 @@ export default function TierAnimationSection({
           ref={panelRef}
           sx={{
             position: "relative",
-            height: "80vh",
-            borderRadius: theme.borderRadius.lg,
+            height: "100vh",
             backgroundColor: "transparent",
-            border: theme.border.heavy,
             overflow: "hidden",
             boxShadow: `0 0 0 100vmax ${blueBg}`,
           }}

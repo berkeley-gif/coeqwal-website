@@ -1,38 +1,61 @@
 "use client"
 
 /**
- * ContentPanel - Full-viewport rounded panel with border
+ * ContentPanel — Full-viewport colored section with heading and
+ * reading-width-constrained body content.
  */
 
 import React from "react"
-import { Box, useTheme } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 import type { SxProps, Theme } from "@mui/material"
 
 export interface ContentPanelProps {
-  /** Panel content */
+  /** Panel content (rendered inside a max-width wrapper) */
   children?: React.ReactNode
-  /** Override minimum height (default: fills viewport minus vertical margins) */
+  /** Background color for the full-bleed panel */
+  background?: string
+  /** Heading text rendered above the body */
+  heading?: string
+  /** Override minimum height (default: 100vh) */
   minHeight?: string | number
-  /** Additional sx props */
+  /** Additional sx props applied to the outer container */
   sx?: SxProps<Theme>
 }
 
-export function ContentPanel({ children, minHeight, sx }: ContentPanelProps) {
+export function ContentPanel({
+  children,
+  background,
+  heading,
+  minHeight,
+  sx,
+}: ContentPanelProps) {
   const theme = useTheme()
 
   return (
-    <Box
-      sx={{
-        mx: theme.space.section.sm,
-        my: theme.space.section.sm,
-        minHeight: minHeight ?? "50vh",
-        borderRadius: theme.borderRadius.lg,
-        backgroundColor: theme.palette.common.white,
-        border: theme.border.heavy,
-        ...sx,
-      }}
-    >
-      {children}
+    <Box sx={{ backgroundColor: background, ...sx }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          minHeight: minHeight ?? "100vh",
+          pt: theme.space.panel.padding,
+          px: theme.space.panel.padding,
+          pb: theme.space.panel.padding,
+        }}
+      >
+        {heading && (
+          <Typography
+            variant="h4"
+            component="h2"
+            fontWeight={300}
+            color="text.secondary"
+          >
+            {heading}
+          </Typography>
+        )}
+        <Box sx={{ maxWidth: theme.space.paragraphMaxSize }}>{children}</Box>
+      </Box>
     </Box>
   )
 }
