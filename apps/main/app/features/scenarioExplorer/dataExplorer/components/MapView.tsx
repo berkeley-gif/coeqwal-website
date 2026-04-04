@@ -101,17 +101,6 @@ function MapViewContent() {
     ? outcomeCategories.find((c) => c.id === metric.category)
     : null
 
-  // GeoJSON fetch disabled — see import block comment.
-  // TODO: re-enable when MapView is brought back with lightweight data.
-  React.useEffect(() => {
-    if (!metric || !selectedScenario || !metric.showOnMap || !metric.isTier) {
-      return
-    }
-    // fetch disabled
-    return () => {
-      cancelled = true
-    }
-  }, [metric, selectedScenario])
 
   // Empty state when no scenarios selected
   if (selectedScenarios.length === 0) {
@@ -461,31 +450,7 @@ function MapViewContent() {
           </Box>
         )}
 
-        {/* Info overlay when data is loaded */}
-        {tierLocationData && !isLoadingMap && !mapError && (
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: theme.space.component.lg,
-              right: theme.space.component.lg,
-              p: theme.space.component.md,
-              backgroundColor: theme.background.whiteOverlay[95],
-              borderRadius: theme.borderRadius.md,
-              boxShadow: theme.shadow.subtle,
-              maxWidth: "320px",
-            }}
-          >
-            <Typography
-              variant="compactSubtitle"
-              sx={{ color: theme.palette.text.primary }}
-            >
-              <strong>{tierLocationData.metadata.feature_count}</strong>{" "}
-              location
-              {tierLocationData.metadata.feature_count !== 1 ? "s" : ""} •{" "}
-              <strong>{metric?.name}</strong> • {selectedScenario}
-            </Typography>
-          </Box>
-        )}
+        {/* Info overlay disabled — tierLocationData is null while MapView is disabled. */}
       </Box>
     </Box>
   )
