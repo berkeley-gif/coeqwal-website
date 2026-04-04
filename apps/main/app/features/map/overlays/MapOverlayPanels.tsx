@@ -273,7 +273,7 @@ export default function MapOverlayPanels() {
   const strategyPE = strategyPhase === "before" ? "none" : "auto"
   const keyOperationsPE = keyOperationsPhase === "before" ? "none" : "auto"
   const keyOutcomesPE = keyOutcomesPhase === "before" ? "none" : "auto"
-  const summaryPE = summaryPhase === "before" ? "none" : "auto"
+  const _summaryPE = summaryPhase === "before" ? "none" : "auto"
 
   // Track when scenario-intro has been scrolled into, to reduce left/right padding
   const [scenarioIntroPaddingReduced, setScenarioIntroPaddingReduced] =
@@ -320,7 +320,7 @@ export default function MapOverlayPanels() {
     scenarioIntroProgress,
     KEY_OUTCOMES_PHASE_THRESHOLDS.enter,
   )
-  const summary = usePanelEntrance(
+  const _summary = usePanelEntrance(
     scenarioIntroProgress,
     SUMMARY_PHASE_THRESHOLDS.enter,
   )
@@ -936,8 +936,8 @@ export default function MapOverlayPanels() {
                      for polygon centroids. Re-enable once centroids are available
                      from a lightweight endpoint or hardcoded. */}
                   {/* <RightPanelSlot
-                    entrance={summary}
-                    pointerEvents={summaryPE}
+                    entrance={_summary}
+                    pointerEvents={_summaryPE}
                     containerRef={panelRefs.summary.container}
                     targetRef={panelRefs.summary.target}
                     tooltip={...}

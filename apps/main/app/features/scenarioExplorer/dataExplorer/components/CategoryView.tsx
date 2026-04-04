@@ -176,7 +176,8 @@ function useReservoirTierColors(scenarios: string[]) {
         const reservoirId = loc.location_id.startsWith("S_")
           ? loc.location_id
           : `S_${loc.location_id}`
-        const color = tierLevelColors[loc.tier_level] || theme.palette.tiers.tier3
+        const color =
+          tierLevelColors[loc.tier_level] || theme.palette.tiers.tier3
         scenarioColors[reservoirId] = color
       })
       colors[scenarioId] = scenarioColors

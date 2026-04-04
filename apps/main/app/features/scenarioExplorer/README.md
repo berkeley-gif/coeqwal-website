@@ -7,12 +7,12 @@ The Scenario Explorer is the main interface for exploring water allocation scena
 - **Purpose**: Water allocation scenario exploration interface
 - **Framework**: Next.js 15 (App Router) with React 19
 - **State Management**: Zustand with Immer (`@repo/state`)
-- **Styling**: MUI v7 (`@repo/ui/mui`).no Tailwind
+- **Styling**: MUI v7 (`@repo/ui/mui`)
 - **Location**: `apps/main/app/features/scenarioExplorer/`
 
 ## Architecture
 
-### Main App Navigation
+### Main app navigation
 
 The top-level tab bar has two entries controlled by `mainView` state:
 
@@ -21,32 +21,32 @@ The top-level tab bar has two entries controlled by `mainView` state:
 | `get-started` | Get started | Onboarding / intro view                     |
 | `explorer`    | Go to tools | All exploration tools via UnifiedToolLayout |
 
-### Tool Modes
+### Tool modes
 
-When `mainView === "explorer"`, five tool tabs are shown in the toolbar (controlled by `exploreMode` state):
+When `mainView === "explorer"`, five tool tabs are currently shown in the toolbar (controlled by `exploreMode` state):
 
-| Mode         | Icon              | Label         | Description                                                                 |
-| ------------ | ----------------- | ------------- | --------------------------------------------------------------------------- |
-| `list`       | ViewListIcon      | List          | Default grid view of all scenarios (StrategyGrid)                           |
-| `comparison` | CompareArrowsIcon | Tradeoffs     | Parallel coordinates / radar / parity / deviation / heatmap / sankey charts |
-| `equity`     | AppsIcon          | Equity        | Equity analysis tool (placeholder)                                          |
-| `resilience` | AutorenewIcon     | Resilience    | Resilience analysis tool (placeholder)                                      |
-| `data`       | InsightsIcon      | Data in depth | Detailed data explorer with per-category sections                           |
+| Mode         | Label         | Description                                       |
+| ------------ | ------------- | ------------------------------------------------- |
+| `list`       | List          | Default grid view of all scenarios (StrategyGrid) |
+| `comparison` | Tradeoffs     | Radar plot                                        |
+| `equity`     | Equity        | Equity analysis tool (placeholder)                |
+| `resilience` | Resilience    | Resilience analysis tool (placeholder)            |
+| `data`       | Data in depth | Detailed data explorer with per-category sections |
 
 ### Layout: UnifiedToolLayout
 
 All tools are rendered inside `UnifiedToolLayout`, which provides a persistent three-panel chrome:
 
 ```
-[Sidebar (320–480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
+[Sidebar (320-480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
 ```
 
-- **Sidebar**: `ScenarioSelectionSidebar`.scenario checkboxes, search, theme filter, pinning. Hidden (width 0) in list mode; 320px normally; 480px when key operations column is expanded.
+- **Sidebar**: `ScenarioSelectionSidebar`.scenario checkboxes, search, theme filter, pinning
 - **Toolbar**: `ToolToolbar`.distribution toggle, show-map toggle, hydroclimate chooser, tool tab buttons.
 - **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
-## Folder Structure
+## Folder structure
 
 ```
 apps/main/app/features/scenarioExplorer/
@@ -116,7 +116,9 @@ apps/main/app/features/scenarioExplorer/
 │   └── GridControls.tsx              # Grid control buttons
 │
 ├── hooks/
-│   └── useComparisonData.ts          # Data transformation for comparison charts
+│   ├── useComparisonData.ts          # Data transformation for comparison charts
+│   ├── usePrefetchTiers.ts           # Prefetches tier data for all hydroclimates on tab load
+│   └── useResolvedScenarioTiers.ts   # Resolves hydroclimate + fetches tier data (main data hook)
 │
 ├── config/
 │   └── outcomeDefinitions.tsx        # Outcome/metric definitions and colors
@@ -125,9 +127,9 @@ apps/main/app/features/scenarioExplorer/
     └── mockHydroclimateTiers.json    # Mock data for development
 ```
 
-## Key Components
+## Key components
 
-### ScenarioExplorer.tsx (Main Orchestrator)
+### ScenarioExplorer.tsx (main orchestrator)
 
 Renders the top-level tab bar and, when `mainView === "explorer"`, wraps everything in `UnifiedToolLayout`. Manages hover coordination between sidebar and tool panels.
 
@@ -153,7 +155,7 @@ Persistent three-panel chrome. Receives `sidebar`, `toolbar`, and `children` as 
 
 ### ComparisonPanel.tsx
 
-The most complex tool panel. Supports six chart modes:
+The most complex tool panel. Supports six experimental chart modes (to be reduced to radar chart):
 
 | Chart    | Component                      |
 | -------- | ------------------------------ |
@@ -174,7 +176,7 @@ Currently placeholder panels. Ready for implementation.the layout chrome (sideba
 
 Renders scenarios using the `StrategyGrid` system. Supports search filtering, outcome sorting, and hover coordination with the comparison panel.
 
-## State Management
+## State management
 
 ### Store (`store.ts`)
 
@@ -187,7 +189,7 @@ The Zustand store (with Immer) manages state shared across components.
 | `mainView`    | `MainView`    | `"get-started"` | Current top-level view |
 | `exploreMode` | `ExploreMode` | `"list"`        | Active tool tab        |
 
-#### Scenario Selection
+#### Scenario selection
 
 | Property              | Type           | Default | Description                             |
 | --------------------- | -------------- | ------- | --------------------------------------- |
@@ -206,7 +208,7 @@ The Zustand store (with Immer) manages state shared across components.
 | `showThemeBadges` | `boolean`             | `false` | Show theme badges on rows      |
 | `selectedIconId`  | `string\|null`        | `null`  | Active icon filter             |
 
-#### Display Options
+#### Display options
 
 | Property                   | Type                        | Default          | Description                                 |
 | -------------------------- | --------------------------- | ---------------- | ------------------------------------------- |
@@ -216,7 +218,7 @@ The Zustand store (with Immer) manages state shared across components.
 | `outcomeDisplayMode`       | `"summary"\|"distribution"` | `"distribution"` | How outcomes are rendered                   |
 | `showMap`                  | `boolean`                   | `false`          | Show map panel                              |
 
-#### Comparison Panel
+#### Comparison panel
 
 | Property             | Type      | Default | Description                      |
 | -------------------- | --------- | ------- | -------------------------------- |
@@ -240,7 +242,7 @@ The Zustand store (with Immer) manages state shared across components.
 | `sharedScenarioIds` | `string[]`                  | `[]`    | Scenarios staged for sharing   |
 | `showShareDrawer`   | `boolean`                   | `false` | Share drawer open state        |
 
-### When to Use Zustand vs Local State
+### When to use Zustand vs local state
 
 **Use Zustand for:**
 
@@ -254,25 +256,37 @@ The Zustand store (with Immer) manages state shared across components.
 - Hover states and ephemeral interactions
 - Component-specific sorting and filtering
 
-## Data Flow
+## Data flow
 
-### Hydroclimate Resolution
+### Hydroclimate resolution
 
 There is no separate hydroclimate API endpoint. The flow is:
 
-1. User picks a hydroclimate in `HydroclimateChooser` → store's `hydroclimatePeriod` (e.g., `"historical"`)
-2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (`"historical" → 2`)
+1. User picks a hydroclimate in `HydroclimateChooser` -> store's `hydroclimatePeriod` (e.g., `"historical"`)
+2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (e.g., `"historical"` -> `2`)
 3. `GET /api/scenarios` returns all 72+ scenarios, each with `hydroclimate_id` and `sibling_group`
-4. `useScenarioList().buildIdMapping(hydroclimatePeriod)` resolves sibling group IDs → actual scenario codes for the active hydroclimate
-5. `useMultipleScenarioTiers(idMapping)` fetches tier data for the resolved codes and re-keys results back to sibling group IDs
+4. `buildIdMapping(hydroclimatePeriod)` resolves sibling group IDs -> actual scenario codes for the active hydroclimate
+5. `useMultipleScenarioTiers(idMapping)` batch-fetches tier data for the resolved codes and re-keys results back to sibling group IDs
 
-### Data Hooks
+You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-5 into a single hook call. See `packages/data/README.md` for details.
+
+### Data hooks
 
 ```typescript
-// Tier data with automatic hydroclimate resolution (preferred for tool panels)
+// Primary hook - tier data with automatic hydroclimate resolution
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-const { allChartData, allScoreData, siblingGroups, getDisplayName, isLoading } =
-  useResolvedScenarioTiers()
+const {
+  allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
+  allChartData, // Pre-processed chart data, keyed by scenario then outcome code
+  allScoreData, // Scores per outcome: weighted_score, normalized_score, gini, etc.
+  outcomeNames, // Display-ordered list of { shortCode, displayName }
+  siblingGroups, // Scenario group metadata
+  getDisplayName, // (id) -> human-readable scenario name
+  getThemeForScenario, // (id) -> theme key for color assignment
+  isLoading, // True only on initial load
+  isValidating, // True during background revalidation
+  error,
+} = useResolvedScenarioTiers()
 
 // Comparison chart data (extends useResolvedScenarioTiers with cross-HC ranges, parallel plot transforms)
 import { useComparisonData } from "../hooks/useComparisonData"
@@ -284,9 +298,9 @@ import { useScenarioList } from "../../scenarios/hooks"
 const { siblingGroups, buildIdMapping, getDisplayName } = useScenarioList()
 ```
 
-## How to Add a New Tool
+## How to add a new tool
 
-### Step 1: Create Your Tool Component
+### Step 1: Create your tool component
 
 Create `exploreView/YourToolPanel.tsx`:
 
@@ -311,7 +325,7 @@ export default function YourToolPanel() {
 }
 ```
 
-### Step 2: Export from Barrel
+### Step 2: Export from barrel
 
 In `exploreView/index.ts`:
 
@@ -319,7 +333,7 @@ In `exploreView/index.ts`:
 export { default as YourToolPanel } from "./YourToolPanel"
 ```
 
-### Step 3: Add Rendering in ScenarioExplorer.tsx
+### Step 3: Add rendering in ScenarioExplorer.tsx
 
 Inside the `UnifiedToolLayout` children:
 
@@ -327,38 +341,130 @@ Inside the `UnifiedToolLayout` children:
 {exploreMode === "yourTool" && <YourToolPanel />}
 ```
 
-### Step 4: Add the Mode Type (if creating a new tab)
+### Step 4: Add the mode type (if creating a new tab)
 
 If you need a new toolbar tab (rather than replacing an existing placeholder):
 
 1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
 2. Add to `TOOL_TABS` in `ToolToolbar.tsx`
 
-If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist.just replace the placeholder component contents.
+If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist. Just replace the placeholder component contents.
 
-## Quick Checklist: Integrating a New Visualization
+## Quick checklist: integrating a new visualization
 
-For developers porting an external visualization (e.g., the tier treemap from COEQWALTierVisualization) into the Equity panel:
+For developers porting an external visualization:
 
-- [ ] **Replace the placeholder** in `EquityPanel.tsx` with your React component
+- [ ] **Replace the placeholder content** in `EquityPanel.tsx` with your React component
 - [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimatePeriod`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
 - [ ] **Fetch data via hooks**.use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
-- [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click, `setSelectedTier()` to drive map visualization
-- [ ] **Use MUI `sx` prop** for all styling.no Tailwind. Import from `@repo/ui/mui`.
+- [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click. For map visualization, use `mapActions.setOutcomeVisualization()` (see "Map integration" below).
+- [ ] **Use MUI `sx` prop** for all styling. Please remember to remove any imports from other css. Import from `@repo/ui/mui`.
 - [ ] **D3 rendering** goes in `useEffect` + `useRef<SVGSVGElement>`.standard React + D3 pattern. The existing `@repo/viz` components do this; use them as reference.
-- [ ] **Port `UnitVisPositionCalculation.ts` as-is**.it's pure D3 math with no framework dependencies. Place it alongside your panel or in a `utils/` subdirectory.
-- [ ] **Do not create a separate map**.the persistent Mapbox map is shared. Call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` to show polygons. All polygon geometry is pre-loaded in Mapbox vector tilesets; no deck.gl needed. (See `packages/state/README.md` "Persistent Map Integration" section.)
-- [ ] **Keep visualization-specific state local**.view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
+- [ ] **Port pure d3 visualizations as-is**. You can place them directly in your component, or if there is a case for reuse, in the `@repo/viz`package.
+- [ ] **Please use the site persistent Mapbox map** See "Map integration" below. We can add an option to change the basemap.
+- [ ] **Render custom dot markers** on the shared map using `setMotionChildren` from `useMap()`. Do not modify the existing marker components (`TierMarkers.tsx`, `TierLocationLabels.tsx`). See "Custom dot markers" under "Map integration" below.
+- [ ] **Keep visualization-specific state local** i.e. view mode, color mode, internal search, etc. as `useState`. Only cross-cutting state goes in the store.
 - [ ] **Export is already wired**.`EquityPanel` is already exported from `exploreView/index.ts` and rendered in `ScenarioExplorer.tsx` when `exploreMode === "equity"`.
 
-## Dependencies
+## Map integration
 
-| Package        | Purpose                                                              |
-| -------------- | -------------------------------------------------------------------- |
-| `@repo/ui`     | UI components (CompactSearchBar, InfoTooltip, MobileModal, etc.)     |
-| `@repo/ui/mui` | MUI components (Box, Typography, useTheme, icons, etc.)              |
-| `@repo/viz`    | D3-based chart components (RadarPlot, ParityPlot, TierHeatmap, etc.) |
-| `@repo/map`    | Mapbox / react-map-gl map components and store                       |
-| `@repo/data`   | SWR-based data fetching hooks and API types                          |
-| `@repo/state`  | Zustand + Immer re-exports                                           |
-| `@repo/i18n`   | Internationalization                                                 |
+The app has a single persistent Mapbox map that lives behind the UI. When the user toggles "Show map" in the toolbar, a transparent 25% reveal area opens on the right side of the layout. The tools don't create or manage the map. Instead, they communicate with the map through the **map store** (`apps/main/app/features/map/store.ts`).
+
+The pattern: user clicks an element in the visualization -> write to the map store -> the `VisualizationLayers` component (which is always mounted on the map) reads that state and renders the appropriate polygons, markers, or line layers.
+
+### How to show a tier outcome on the map
+
+```typescript
+import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
+
+// Which outcome is currently shown on the map? (null if none)
+const activeVisualization = useActiveOutcomeVisualization()
+const activeOutcome = activeVisualization?.outcomeCode ?? null
+// e.g. "CWS_DEL" if the user clicked that outcome, or null if nothing is active
+
+// On click, toggle the outcome on/off
+const handleOutcomeClick = (outcomeCode: string, scenarioId: string) => {
+  if (activeOutcome === outcomeCode) {
+    mapActions.clearOutcomeVisualization()
+  } else {
+    mapActions.setOutcomeVisualization(outcomeCode, scenarioId)
+  }
+}
+
+// Use activeOutcome to highlight the corresponding element in your UI
+const isActive = (code: string) => code === activeOutcome
+// e.g. <Box sx={{ border: isActive("CWS_DEL") ? "2px solid blue" : "none" }}>
+```
+
+That's it. The `VisualizationLayers` component handles the rest:
+
+- Looks up which Mapbox tileset has the geometry for that outcome (see the outcome-to-tileset table in `packages/data/README.md`)
+- Colors the polygons/markers by tier level
+- Shows tooltips on hover/click
+
+### Custom dot markers
+
+The existing map markers (diamonds in `TierMarkers.tsx`, labels in `TierLocationLabels.tsx`) are used by other parts of the app. If your visualization needs its own marker style (e.g., large colored dots), use `setMotionChildren` from `useMap()` to inject your own `<Marker>` components onto the shared map without touching the existing marker components.
+
+```typescript
+import { useMap } from "@repo/map/client"
+import { Marker } from "@repo/map"
+import { useEffect } from "react"
+
+// Inside your component:
+const { setMotionChildren } = useMap()
+
+// locations: array of { location_id, lng, lat, tierLevel } you want to show
+useEffect(() => {
+  if (!locations.length) {
+    setMotionChildren?.(null)
+    return
+  }
+
+  setMotionChildren?.(
+    <>
+      {locations.map((loc) => (
+        <Marker
+          key={loc.location_id}
+          longitude={loc.lng}
+          latitude={loc.lat}
+          anchor="center"
+        >
+          <div
+            style={{
+              width: 14,
+              height: 14,
+              borderRadius: "50%",
+              backgroundColor: tierColor(loc.tierLevel),
+              border: "none",
+            }}
+          />
+        </Marker>
+      ))}
+    </>
+  )
+
+  return () => setMotionChildren?.(null) // clean up on unmount
+}, [locations, setMotionChildren])
+```
+
+`setMotionChildren` renders React elements directly inside the `<Map>` component (wrapped in `<AnimatePresence>` for enter/exit animations). You can pass any JSX, like `<Marker>` positions elements at geographic coordinates.
+
+Clean up by calling `setMotionChildren(null)` when your component unmounts or when the markers should be removed.
+
+### What your component should do
+
+1. **Set the visualization**: call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element
+2. **Clear it**: call `mapActions.clearOutcomeVisualization()` when the user clicks the same element again (toggle off) or navigates away
+3. **Highlight the active element**: read `useActiveOutcomeVisualization()` and visually indicate which outcome is currently shown on the map (e.g., an element border or highlight color)
+4. **Render custom markers**: use `setMotionChildren` from `useMap()` to show your own dot markers on the map (see above)
+
+### What you do not need to do
+
+- Create map layers, sources, or polygons
+- Fetch GeoJSON geometry
+- Handle the "Show map" toggle (the toolbar and `UnifiedToolLayout` manage that)
+
+### Reference implementation
+
+`KeyOutcomesPanel.tsx` (`apps/main/app/features/map/overlays/scenarioPanels/`) shows how to toggle outcome visualization on the map via `mapActions.setOutcomeVisualization()`. For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.

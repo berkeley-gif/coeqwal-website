@@ -105,12 +105,12 @@ export default MyChart
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`"use client"`**       | Every component file starts with this directive. All components use browser APIs or D3.                                                                    |
 | **Component definition** | `const Name: React.FC<NameProps> = React.memo(({ ... }) => { ... })`                                                                                       |
-| **Export**               | `export default Name`.memo wraps the definition, not the export.                                                                                         |
+| **Export**               | `export default Name` - memo wraps the definition, not the export.                                                                                         |
 | **displayName**          | `Name.displayName = "Name"` after the closing `})` and before the export. Required because `React.memo` around an anonymous arrow loses the inferred name. |
 | **Props interface**      | Named `ComponentNameProps`, exported, defined in the same file unless genuinely shared across components.                                                  |
 | **D3 imports**           | Named imports only: `import { scaleLinear, select } from "d3"`. Never `import * as d3`.                                                                    |
 | **D3 rendering**         | `useCallback` draw function + `useEffect` that calls it. Never a monolithic `useEffect` that mixes sizing and drawing.                                     |
-| **Responsive sizing**    | `useResizeObserver` hook with `currentWidth`/`currentHeight` state, synced via a dedicated `useEffect`. Never `clientWidth`.                               |
+| **Responsive sizing**    | `useResizeObserver` hook with `currentWidth`/`currentHeight` state, synced via a dedicated `useEffect`. Never use `clientWidth`.                           |
 
 ### When React.memo matters
 
@@ -198,7 +198,7 @@ references every render**, which defeats `React.memo` and recreates the `updateC
 // BAD - new object identity every render
 ({ colors = { default: "#666", highlighted: "#1a3a5c" } }) => { … }
 
-// GOOD.stable reference
+// GOOD - stable reference
 const DEFAULT_COLORS = { default: "#666", highlighted: "#1a3a5c" }
 ({ colors = DEFAULT_COLORS }) => { … }
 ```
@@ -210,7 +210,7 @@ MUI's `useTheme()` may return objects (`theme.palette.grey`, `theme.palette.wate
 these through `useMemo`, the memo will recompute every render.
 
 ```tsx
-// BAD.theme.palette.grey is a new object ref each render
+// BAD - theme.palette.grey is a new object ref each render
 const chartColors = useMemo(
   () => ({
     default: theme.palette.grey[600],
@@ -218,7 +218,7 @@ const chartColors = useMemo(
   [theme.palette.grey],
 ) // unstable dep
 
-// GOOD.extract primitive strings first
+// GOOD - extract primitive strings first
 const grey600 = theme.palette.grey[600]
 const chartColors = useMemo(
   () => ({
@@ -252,7 +252,7 @@ useEffect(() => {
   onLineHoverRef.current = onLineHover
 }, [onLineHover])
 
-// Inside updateChart, use onLineHoverRef.current.not onLineHover
+// Inside updateChart, use onLineHoverRef.current - not onLineHover
 ```
 
 ### Quick checklist for new D3 charts
@@ -279,15 +279,6 @@ useEffect(() => {
 The barrel file (`src/index.ts`) re-exports every component as a named export alongside its
 props type. It also exports:
 
-- **`useResizeObserver`**.shared responsive sizing hook
-- **D3 utilities**.`parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
-- **Color palettes**.`THEME_LINE_PALETTES`, `getThemeLineColor` from `utils/themeLineColors.ts`
-
-## Scripts
-
-| Command                               | What it does           |
-| ------------------------------------- | ---------------------- |
-| `pnpm --filter @repo/viz build`       | TypeScript compilation |
-| `pnpm --filter @repo/viz lint`        | ESLint check           |
-| `pnpm --filter @repo/viz check-types` | `tsc --noEmit`         |
-| `pnpm --filter @repo/viz format`      | Prettier               |
+- **`useResizeObserver`** - shared responsive sizing hook
+- **D3 utilities** - `parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
+- **Color palettes** - `THEME_LINE_PALETTES`, `getThemeLineColor` from `utils/themeLineColors.ts`
