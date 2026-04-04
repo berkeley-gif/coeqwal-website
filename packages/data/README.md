@@ -161,8 +161,16 @@ Fetches tier scores for all scenarios in a single batched request via `/api/tier
 ```tsx
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
 
-const { allChartData, allScoreData, allScenariosData, scenarioIds, outcomeNames, isLoading, isValidating, error } =
-  useMultipleScenarioTiers(idMapping)
+const {
+  allChartData,
+  allScoreData,
+  allScenariosData,
+  scenarioIds,
+  outcomeNames,
+  isLoading,
+  isValidating,
+  error,
+} = useMultipleScenarioTiers(idMapping)
 ```
 
 > **Prefer `useResolvedScenarioTiers()`** (below) over calling this directly.it handles hydroclimate resolution automatically.
@@ -175,9 +183,17 @@ Convenience hook that reads the active hydroclimate from the store, resolves sib
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 
 const {
-  allChartData, allScoreData, allScenariosData, outcomeNames,
-  siblingGroups, getDisplayName, getThemeForScenario,
-  idMapping, isLoading, isValidating, error,
+  allChartData,
+  allScoreData,
+  allScenariosData,
+  outcomeNames,
+  siblingGroups,
+  getDisplayName,
+  getThemeForScenario,
+  idMapping,
+  isLoading,
+  isValidating,
+  error,
 } = useResolvedScenarioTiers()
 ```
 
@@ -191,14 +207,14 @@ Use fetchers when you need to:
 - Build custom hooks with different caching behavior
 - Fetch data outside of React (scripts, tests)
 
-| Fetcher | Description |
-| --- | --- |
-| `fetchTierList()` | Tier definitions (short codes, names, types) |
-| `fetchScenarioList()` | All scenario metadata |
-| `fetchScenarioTiers(id)` | Tier data for a single scenario |
-| `fetchAllScenarioTiers(ids)` | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable. |
-| `fetchTierLocationAssignments(id, code)` | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2). |
-| `fetchTierLocationData(id, code)` | **GeoJSON** FeatureCollection with full polygon geometry - heavy on bandwidth. Currently not called anywhere in the app (all callers have been migrated to the lightweight endpoint or commented out). Retained for future use if raw polygon coordinates are ever needed. |
+| Fetcher                                  | Description                                                                                                                                                                                                                                                                |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fetchTierList()`                        | Tier definitions (short codes, names, types)                                                                                                                                                                                                                               |
+| `fetchScenarioList()`                    | All scenario metadata                                                                                                                                                                                                                                                      |
+| `fetchScenarioTiers(id)`                 | Tier data for a single scenario                                                                                                                                                                                                                                            |
+| `fetchAllScenarioTiers(ids)`             | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable.                                                                   |
+| `fetchTierLocationAssignments(id, code)` | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2).                                                                                                                                                                            |
+| `fetchTierLocationData(id, code)`        | **GeoJSON** FeatureCollection with full polygon geometry - heavy on bandwidth. Currently not called anywhere in the app (all callers have been migrated to the lightweight endpoint or commented out). Retained for future use if raw polygon coordinates are ever needed. |
 
 ```tsx
 import {
@@ -279,15 +295,15 @@ import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useScenarioExplorerStore } from "../store"
 
 const {
-  allScenariosData,   // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
-  allChartData,       // Pre-processed chart data, keyed by scenario then outcome code
-  allScoreData,       // Scores per outcome: weighted_score, normalized_score, gini, etc.
-  outcomeNames,       // Display-ordered list of { shortCode, displayName }
-  siblingGroups,      // Scenario group metadata
-  getDisplayName,     // (id) => human-readable scenario name
-  getThemeForScenario,// (id) => theme key for color assignment
-  isLoading,          // True only on initial load - NOT during hydroclimate switches
-  isValidating,       // True during background fetches (use for subtle "updating" indicator, not really used bc our data is relatively static)
+  allScenariosData, // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
+  allChartData, // Pre-processed chart data, keyed by scenario then outcome code
+  allScoreData, // Scores per outcome: weighted_score, normalized_score, gini, etc.
+  outcomeNames, // Display-ordered list of { shortCode, displayName }
+  siblingGroups, // Scenario group metadata
+  getDisplayName, // (id) => human-readable scenario name
+  getThemeForScenario, // (id) => theme key for color assignment
+  isLoading, // True only on initial load - NOT during hydroclimate switches
+  isValidating, // True during background fetches (use for subtle "updating" indicator, not really used bc our data is relatively static)
   error,
 } = useResolvedScenarioTiers()
 
@@ -306,7 +322,7 @@ When the user switches hydroclimates via the toolbar `HydroclimateChooser`, `use
 2. Looks up which scenario IDs belong to that hydroclimate (via `HYDROCLIMATE_ID_MAP` -> `buildIdMapping`)
 3. Returns tier data keyed by sibling group IDs (not the raw scenario IDs)
 
-This means your component code doesn't change when the user switches hydroclimates. `allScenariosData["s0020"]` always returns data for the *active* hydroclimate's version of that scenario. The hook handles the resolution transparently.
+This means your component code doesn't change when the user switches hydroclimates. `allScenariosData["s0020"]` always returns data for the _active_ hydroclimate's version of that scenario. The hook handles the resolution transparently.
 
 > **Future:** The hydroclimate options and `HYDROCLIMATE_ID_MAP` are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will replace this with database-driven metadata (once the team decides it). This won't affect this code. `useResolvedScenarioTiers()` will be updated internally.
 
@@ -314,16 +330,16 @@ This means your component code doesn't change when the user switches hydroclimat
 
 **Pre-cached (available instantly, loaded on Explore tab activation):**
 
-| Data | How to access | What it contains |
-| --- | --- | --- |
-| Scenario list + display names | `scenarioIds`, `getDisplayName("s0020")` | Scenario IDs and human-readable names |
-| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]` | weighted_score, normalized_score, gini, tier distribution counts |
-| Tier list (outcome definitions) | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order |
+| Data                                                | How to access                                    | What it contains                                                 |
+| --------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------- |
+| Scenario list + display names                       | `scenarioIds`, `getDisplayName("s0020")`         | Scenario IDs and human-readable names                            |
+| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]`  | weighted_score, normalized_score, gini, tier distribution counts |
+| Tier list (outcome definitions)                     | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order                       |
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
 
-| Data | How to access | What it contains |
-| --- | --- | --- |
+| Data                          | How to access                                          | What it contains                                                                         |
+| ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
 | Per-location tier assignments | `useSWR(key, () => fetchTierLocationAssignments(...))` | Every location's tier_level for one scenario+outcome (one request returns all locations) |
 
 All data goes through SWR. Once fetched, everything is cached for subsequent renders. Pre-cached data is bulk-fetched before your component renders; per-location assignments are fetched the first time your component requests a specific scenario+outcome pair.
@@ -338,7 +354,7 @@ const scenarioIds = allScenariosData ? Object.keys(allScenariosData) : []
 // ["s0020", "s0021", "s0029", ...]
 
 // Human-readable name for display
-getDisplayName("s0020")  // "Current operations"
+getDisplayName("s0020") // "Current operations"
 
 // --- Aggregate scores (pre-cached, instant access) ---
 
@@ -415,16 +431,16 @@ The map layer system reads this state and applies fill colors to the pre-existin
 
 **How each outcome type renders on the map:**
 
-| Outcome | Geometry source | Rendering |
-| --- | --- | --- |
-| CWS_DEL, AG_REV | Mapbox `demand-units` tileset | Polygon fill via `setOutcomeVisualization()` |
-| GW_STOR | Mapbox `calsim-wba` tileset | Polygon fill via `setOutcomeVisualization()` |
-| RES_STOR | Mapbox `california-reservoir` tileset | Polygon fill + labeled markers |
-| DELTA_ECO | Mapbox `delta-water` tileset | Polygon fill |
-| WRC_SALMON_AB | Mapbox `sacramento-river-body` tileset | Line layer coloring |
-| ENV_FLOWS | **Hardcoded coordinates** in `TierMarkers.tsx` | React diamond markers |
-| FW_DELTA_USES | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers |
-| FW_EXP | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers |
+| Outcome         | Geometry source                                       | Rendering                                    |
+| --------------- | ----------------------------------------------------- | -------------------------------------------- |
+| CWS_DEL, AG_REV | Mapbox `demand-units` tileset                         | Polygon fill via `setOutcomeVisualization()` |
+| GW_STOR         | Mapbox `calsim-wba` tileset                           | Polygon fill via `setOutcomeVisualization()` |
+| RES_STOR        | Mapbox `california-reservoir` tileset                 | Polygon fill + labeled markers               |
+| DELTA_ECO       | Mapbox `delta-water` tileset                          | Polygon fill                                 |
+| WRC_SALMON_AB   | Mapbox `sacramento-river-body` tileset                | Line layer coloring                          |
+| ENV_FLOWS       | **Hardcoded coordinates** in `TierMarkers.tsx`        | React diamond markers                        |
+| FW_DELTA_USES   | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers                        |
+| FW_EXP          | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers                        |
 
 > **TODO:** Incorporate **ENV_FLOWS**, **FW_DELTA_USES**, and **FW_EXP** hardcoded coordinates into Mapbox tilesets as dedicated point layers, then remove the hardcoded coordinates from `TierMarkers.tsx` and `TierLocationLabels.tsx` and use `setOutcomeVisualization()` like the other outcomes.
 

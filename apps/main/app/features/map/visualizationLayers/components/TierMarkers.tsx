@@ -27,16 +27,16 @@ const ENV_FLOWS_COORDINATES: Record<string, [number, number]> = {
   MOK028: [-121.33569, 38.19941],
   MCD005: [-120.93038, 37.37076],
   SAC000: [-121.89059, 38.04598],
-  SAC049: [-121.50203, 38.45570],
+  SAC049: [-121.50203, 38.4557],
   SAC122: [-121.82241, 39.02399],
-  SAC148: [-121.99830, 39.23212],
-  SAC257: [-122.18690, 40.28875],
+  SAC148: [-121.9983, 39.23212],
+  SAC257: [-122.1869, 40.28875],
   SJR127: [-120.89662, 37.29453],
   SAC289: [-122.35625, 40.53738],
   SJR070: [-121.26529, 37.67577],
-  STS011: [-121.16420, 37.70396],
+  STS011: [-121.1642, 37.70396],
   TUO003: [-121.14185, 37.60423],
-  YUB002: [-121.57730, 39.14433],
+  YUB002: [-121.5773, 39.14433],
 }
 
 const ENV_FLOWS_NAMES: Record<string, string> = {
@@ -93,8 +93,7 @@ export default function TierMarkers({
     }
   }
 
-  const isDiamond =
-    tierCode === "ENV_FLOWS"
+  const isDiamond = tierCode === "ENV_FLOWS"
 
   const buildFeatureInfo = (
     loc: TierLocation,
@@ -111,7 +110,7 @@ export default function TierMarkers({
     tierValue: loc.tier_value ?? 0,
     locationName: loc.location_name,
     locationType: "Environmental Flow",
-    properties: loc,
+    properties: { ...loc },
     urbName: null,
     modName: null,
     subName: null,

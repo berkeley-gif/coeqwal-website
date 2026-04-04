@@ -92,7 +92,7 @@ export function SummaryPanel({
     DemandUnitProperties
   > | null>(null)
   // Store coordinates from GeoJSON API (more reliable than Mapbox query)
-  const [geoJsonCoords, setGeoJsonCoords] = useState<
+  const [geoJsonCoords, _setGeoJsonCoords] = useState<
     Map<string, [number, number]>
   >(new Map())
 

@@ -80,8 +80,8 @@ function MapViewContent() {
   // GeoJSON fetch disabled — heavy on bandwidth. MapView is currently not rendered.
   // TODO: replace with lightweight /locations endpoint when MapView is re-enabled.
   const tierLocationData = null
-  const [isLoadingMap, setIsLoadingMap] = React.useState(false)
-  const [mapError, setMapError] = React.useState<string | null>(null)
+  const [isLoadingMap, _setIsLoadingMap] = React.useState(false)
+  const [mapError, _setMapError] = React.useState<string | null>(null)
 
   // Screenshot handler
   const handleScreenshot = async () => {

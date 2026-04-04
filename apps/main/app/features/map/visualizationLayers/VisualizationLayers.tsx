@@ -144,9 +144,7 @@ export default function VisualizationLayers() {
           err instanceof FetchError &&
           (err.status === 404 || err.status >= 500)
         ) {
-          console.warn(
-            `Tier data unavailable for ${code} (HTTP ${err.status})`,
-          )
+          console.warn(`Tier data unavailable for ${code} (HTTP ${err.status})`)
         } else {
           console.error("Failed to fetch tier location data:", err)
         }
@@ -224,8 +222,7 @@ export default function VisualizationLayers() {
         <TierLocationLabels tierLookup={tierLevelMap} />
       )}
       {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
-        (tierLocations.length > 0 ||
-          Object.keys(locationData).length > 0) && (
+        (tierLocations.length > 0 || Object.keys(locationData).length > 0) && (
           <TierLocationLabels
             locationItems={
               tierLocations.length > 0
