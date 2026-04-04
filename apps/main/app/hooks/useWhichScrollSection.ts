@@ -42,7 +42,7 @@ export function useWhichScrollSection(
       let newId: string
 
       if (isNearBottom) {
-        // Force last section active when near bottom —
+        // Force last section active when near bottom -
         // handles short sections that never reach the top threshold
         newId = sectionIds[sectionIds.length - 1] ?? sectionIds[0] ?? ""
       } else {

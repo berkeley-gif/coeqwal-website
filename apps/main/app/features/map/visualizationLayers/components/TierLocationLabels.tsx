@@ -10,7 +10,6 @@
 import React from "react"
 import { Marker } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import type { TierLocationResponse } from "@repo/data/coeqwal"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
 import type { TierLocation } from "../types"
 
@@ -79,13 +78,7 @@ interface LocationData {
 interface TierLocationLabelsProps {
   /** Tier lookup for reservoirs: CalSim ID -> tier level */
   tierLookup?: Record<string, number>
-  /** Tier location data from GeoJSON endpoint (includes geometry) */
-  data?: TierLocationResponse
-  /**
-   * Fallback: plain location items from the /locations endpoint.
-   * Used when the GeoJSON endpoint is unavailable (e.g. geometry table not
-   * yet populated). Coordinates come from STATION_COORDINATES.
-   */
+  /** Plain location items from the /locations endpoint. Coordinates come from STATION_COORDINATES. */
   locationItems?: TierLocation[]
 }
 
@@ -95,7 +88,6 @@ interface TierLocationLabelsProps {
 
 export function TierLocationLabels({
   tierLookup,
-  data,
   locationItems,
 }: TierLocationLabelsProps) {
   const theme = useTheme()
@@ -138,28 +130,8 @@ export function TierLocationLabels({
         })
       }
     })
-  } else if (data) {
-    // Station mode: GeoJSON from tier-map endpoint. Uses hardcoded coordinates
-    // (geometry in the response is ignored; only tier_level is taken from it).
-    locations = data.features
-      .filter((f) => f.geometry?.type === "Point")
-      .map((f) => {
-        const locationId = f.properties.location_id
-        const coords = STATION_COORDINATES[locationId]
-        if (!coords) return null
-        return {
-          id: locationId,
-          name: STATION_NAMES[locationId] || locationId,
-          tier: f.properties.tier_level,
-          longitude: coords[0],
-          latitude: coords[1],
-        }
-      })
-      .filter((loc): loc is LocationData => loc !== null)
   } else if (locationItems) {
-    // Fallback station mode: plain /locations data when GeoJSON endpoint is
-    // unavailable (geometry table not yet populated). Coordinates come from
-    // the hardcoded STATION_COORDINATES lookup.
+    // Station mode: coordinates from hardcoded STATION_COORDINATES lookup
     locations = locationItems
       .map((loc) => {
         const coords = STATION_COORDINATES[loc.location_id]

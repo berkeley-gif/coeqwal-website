@@ -42,12 +42,22 @@ export const ENDPOINTS = {
     `/tiers/batch?scenarios=${scenarioIds.join(",")}`,
 
   /**
-   * Tier location data for map visualization
+   * Tier location GeoJSON (includes full polygon geometry — heavy).
+   * Prefer `tierLocationAssignments` for treemap/table use cases.
    * @param scenarioId - Scenario ID (e.g., "s0020")
    * @param tierCode - Tier short code (e.g., "AG_REV")
    */
   tierLocations: (scenarioId: string, tierCode: string) =>
     `/tier-map/${scenarioId}/${tierCode}`,
+
+  /**
+   * Lightweight tier assignments per location (no geometry).
+   * Returns location_id, location_name, tier_level, tier_value, display_order.
+   * @param scenarioId - Scenario ID (e.g., "s0020")
+   * @param tierCode - Tier short code (e.g., "CWS_DEL", "AG_REV")
+   */
+  tierLocationAssignments: (scenarioId: string, tierCode: string) =>
+    `/tier-map/${scenarioId}/${tierCode}/locations`,
 
   // Statistics endpoints (reservoir percentiles)
 

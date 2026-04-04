@@ -137,7 +137,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <WaterIcon />,
     term: "Groundwater",
     definition:
-      "Water that is stored underground in aquifers—layers of rock, sand, and soil that hold water. Groundwater is pumped from wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
+      "Water that is stored underground in aquifers-layers of rock, sand, and soil that hold water. Groundwater is pumped from wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
   },
   {
     icon: <CloudIcon />,

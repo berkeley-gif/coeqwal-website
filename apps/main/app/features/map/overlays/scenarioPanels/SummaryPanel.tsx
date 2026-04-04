@@ -32,7 +32,9 @@ import {
   getTierColorsFromTheme,
 } from "../../../../content/tiers"
 import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
-import { fetchTierLocationData } from "@repo/data/coeqwal"
+// GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+// TODO: replace with lightweight /locations endpoint + hardcoded centroids
+// import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { getOutcomeName } from "../../../../content/outcomes"
 import { useActiveOutcomeVisualization } from "../../store"
 import { useMap } from "@repo/map"
@@ -117,64 +119,10 @@ export function SummaryPanel({
 
         if (cancelled) return
 
-        // Also fetch GeoJSON data for reliable coordinates and API names
+        // GeoJSON fetch disabled — heavy on bandwidth (full polygon geometry).
+        // TODO: replace with lightweight /locations endpoint + hardcoded centroids
+        // for demand units, or compute centroids from Mapbox tiles via querySourceFeatures.
         const apiNamesMap = new Map<string, string>()
-        try {
-          const geoJsonData = await fetchTierLocationData(scenarioId, tierCode)
-          if (!cancelled) {
-            const coordsMap = new Map<string, [number, number]>()
-
-            geoJsonData.features.forEach((feature) => {
-              const locationId = feature.properties.location_id
-              const locationName = feature.properties.location_name
-
-              // Store API location_name (can be used as fallback)
-              if (locationName && locationName !== locationId) {
-                apiNamesMap.set(locationId, locationName)
-              }
-
-              if (feature.geometry.type === "Point") {
-                const coords = feature.geometry.coordinates as number[]
-                coordsMap.set(locationId, [coords[0]!, coords[1]!])
-              } else if (feature.geometry.type === "Polygon") {
-                // Calculate centroid for polygon
-                const ring = (feature.geometry.coordinates as number[][][])[0]
-                if (ring && ring.length > 0) {
-                  let sumLng = 0,
-                    sumLat = 0
-                  ring.forEach((pt) => {
-                    sumLng += pt[0]!
-                    sumLat += pt[1]!
-                  })
-                  coordsMap.set(locationId, [
-                    sumLng / ring.length,
-                    sumLat / ring.length,
-                  ])
-                }
-              } else if (feature.geometry.type === "MultiPolygon") {
-                // Use first polygon's centroid
-                const ring = (
-                  feature.geometry.coordinates as number[][][][]
-                )[0]?.[0]
-                if (ring && ring.length > 0) {
-                  let sumLng = 0,
-                    sumLat = 0
-                  ring.forEach((pt) => {
-                    sumLng += pt[0]!
-                    sumLat += pt[1]!
-                  })
-                  coordsMap.set(locationId, [
-                    sumLng / ring.length,
-                    sumLat / ring.length,
-                  ])
-                }
-              }
-            })
-            setGeoJsonCoords(coordsMap)
-          }
-        } catch {
-          // Silently handle GeoJSON fetch errors
-        }
 
         // Try to get feature properties from the map for location names
         // to enrich the summary with actual location names from Mapbox

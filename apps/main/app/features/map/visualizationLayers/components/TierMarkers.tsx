@@ -4,220 +4,80 @@
  * TierMarkers - Map markers showing tier data by location
  *
  * Displays markers on the map for each location with tier data.
+ * Uses lightweight tier assignments (no geometry) with hardcoded coordinates.
  * Reports hover/click events to parent for unified tooltip handling.
  */
 
-import React, { useState, useEffect } from "react"
-import { Marker, useMap } from "@repo/map"
+import React from "react"
+import { Marker } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import type { TierLocationResponse } from "@repo/data/coeqwal"
+import type { TierLocation } from "../types"
 import type { HoveredFeatureInfo } from "../types"
 import { getTierLabel } from "../../../../content/tiers"
 
+// =============================================================================
+// COORDINATE LOOKUPS (fixed physical locations)
+// =============================================================================
+
+const ENV_FLOWS_COORDINATES: Record<string, [number, number]> = {
+  AMR004: [-121.44652, 38.58742],
+  TRN111: [-122.80357, 40.71986],
+  FTR029: [-121.60595, 39.13874],
+  FTR003: [-121.64106, 38.82422],
+  MOK028: [-121.33569, 38.19941],
+  MCD005: [-120.93038, 37.37076],
+  SAC000: [-121.89059, 38.04598],
+  SAC049: [-121.50203, 38.45570],
+  SAC122: [-121.82241, 39.02399],
+  SAC148: [-121.99830, 39.23212],
+  SAC257: [-122.18690, 40.28875],
+  SJR127: [-120.89662, 37.29453],
+  SAC289: [-122.35625, 40.53738],
+  SJR070: [-121.26529, 37.67577],
+  STS011: [-121.16420, 37.70396],
+  TUO003: [-121.14185, 37.60423],
+  YUB002: [-121.57730, 39.14433],
+}
+
+const ENV_FLOWS_NAMES: Record<string, string> = {
+  AMR004: "American River at I-80 Bridge",
+  TRN111: "Trinity River at Lewiston",
+  FTR029: "Feather River at Yuba City",
+  FTR003: "Feather River",
+  MOK028: "Mokelumne River",
+  MCD005: "Merced River at Stevinson",
+  SAC000: "Sacramento at confluence",
+  SAC049: "Sacramento River at Freeport",
+  SAC122: "Sacramento River at Tisdale Weir",
+  SAC148: "Sacramento River at Colusa Weir",
+  SAC257: "Sacramento River above Bend Bridge",
+  SJR127: "San Joaquin at Salt Slough",
+  SAC289: "Sacramento River (South Bonnieville)",
+  SJR070: "San Joaquin near Vernalis",
+  STS011: "Stanislaus River",
+  TUO003: "Tuolumne River",
+  YUB002: "Yuba River at Marysville",
+}
+
+// =============================================================================
+// COMPONENT
+// =============================================================================
+
 interface TierMarkersProps {
-  data: TierLocationResponse
-  /** Called when a marker is hovered */
+  locations: TierLocation[]
+  tierCode: string
   onHover?: (feature: HoveredFeatureInfo | null) => void
-  /** Called when a marker is clicked */
   onClick?: (feature: HoveredFeatureInfo) => void
 }
 
-/**
- * TierMarkers to render tier data on the map
- * Displays GeoJSON FeatureCollection with points and polygons
- * Colored by tier level
- */
 export default function TierMarkers({
-  data,
+  locations,
+  tierCode,
   onHover,
   onClick,
 }: TierMarkersProps) {
   const theme = useTheme()
-  const mapAPI = useMap()
-  const [mapReady, setMapReady] = useState(false)
 
-  // Separate by geometry type
-  const pointFeatures = data.features.filter((f) => f.geometry.type === "Point")
-  const polygonFeatures = data.features.filter(
-    (f) => f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
-  )
-
-  // Wait for map to be ready
-  useEffect(() => {
-    mapAPI.withMap((map) => {
-      if (map.isStyleLoaded()) {
-        setMapReady(true)
-      } else {
-        map.once("styledata", () => setMapReady(true))
-      }
-    })
-  }, [mapAPI])
-
-  // Clean up old layers when data changes (new tier selected)
-  useEffect(() => {
-    // Remove all previous tier layers (only if style is loaded)
-    mapAPI.withMap((mapRef) => {
-      const map = mapRef.getMap()
-
-      // Wait for style to be loaded before accessing layers/sources
-      if (!map.isStyleLoaded()) {
-        return // Style not ready, cleanup will happen when polygon effect runs
-      }
-
-      const existingLayers = map.getStyle().layers
-      const existingSources = Object.keys(map.getStyle().sources)
-
-      // Remove all tier-polygon layers
-      existingLayers.forEach((layer) => {
-        if (
-          layer.id.startsWith("tier-polygon-") &&
-          layer.id !== `tier-polygon-fill-${data.metadata.tier_code}`
-        ) {
-          map.removeLayer(layer.id)
-        }
-      })
-
-      // Remove all tier-polygons sources
-      existingSources.forEach((sourceId) => {
-        if (
-          sourceId.startsWith("tier-polygons-") &&
-          sourceId !== `tier-polygons-${data.metadata.tier_code}`
-        ) {
-          map.removeSource(sourceId)
-        }
-      })
-    })
-  }, [data, mapAPI])
-
-  // Add polygon layers directly via map API (more reliable than declarative)
-  useEffect(() => {
-    if (!mapReady || polygonFeatures.length === 0) return
-
-    const cleanup = mapAPI.withMap((mapRef) => {
-      const map = mapRef.getMap()
-
-      // Double-check style is loaded (safety check)
-      if (!map.isStyleLoaded()) return
-
-      const sourceId = `tier-polygons-${data.metadata.tier_code}`
-      const fillLayerId = `tier-polygon-fill-${data.metadata.tier_code}`
-      const outlineLayerId = `tier-polygon-outline-${data.metadata.tier_code}`
-
-      // Remove ALL previous tier layers first
-      const existingLayers = map.getStyle().layers
-      existingLayers.forEach((layer) => {
-        if (layer.id.startsWith("tier-polygon-")) {
-          map.removeLayer(layer.id)
-        }
-      })
-
-      // Remove ALL previous tier sources
-      Object.keys(map.getStyle().sources).forEach((srcId) => {
-        if (srcId.startsWith("tier-polygons-")) {
-          map.removeSource(srcId)
-        }
-      })
-
-      // Add source
-      map.addSource(sourceId, {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: polygonFeatures as GeoJSON.Feature[],
-        },
-      })
-
-      // Add fill layer
-      map.addLayer({
-        id: fillLayerId,
-        type: "fill",
-        source: sourceId,
-        paint: {
-          "fill-color": [
-            "match",
-            ["get", "tier_level"],
-            1,
-            theme.palette.tiers.tier1,
-            2,
-            theme.palette.tiers.tier2,
-            3,
-            theme.palette.tiers.tier3,
-            4,
-            theme.palette.tiers.tier4,
-            theme.palette.grey[500],
-          ],
-          "fill-opacity": 0.7,
-        },
-      })
-
-      // Add outline layer
-      map.addLayer({
-        id: outlineLayerId,
-        type: "line",
-        source: sourceId,
-        paint: {
-          "line-color": [
-            "match",
-            ["get", "tier_level"],
-            1,
-            theme.palette.tiers.tier1,
-            2,
-            theme.palette.tiers.tier2,
-            3,
-            theme.palette.tiers.tier3,
-            4,
-            theme.palette.tiers.tier4,
-            theme.palette.grey[500],
-          ],
-          "line-width": 2,
-        },
-      })
-
-      // Add click handler for polygon features
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handleClick = (e: any) => {
-        const feature = e.features?.[0]
-        if (feature && feature.properties && onClick) {
-          const featureInfo: HoveredFeatureInfo = {
-            longitude: e.lngLat.lng,
-            latitude: e.lngLat.lat,
-            geometryType: "polygon",
-            layerType: "point", // Using point since these are tier-polygon layers
-            featureId: feature.properties.location_id as string,
-            tierLevel: feature.properties.tier_level as number,
-            tierLabel: getTierLabel(feature.properties.tier_level as number),
-            tierValue: feature.properties.tier_value as number,
-            locationName: feature.properties.location_name as string,
-            locationType: feature.properties.location_type_display as string,
-            properties: feature.properties,
-            urbName: null,
-            modName: null,
-            subName: null,
-            comments: null,
-            type: null,
-            classType: null,
-            hydroRegion: null,
-            gisAcres: null,
-          }
-          onClick(featureInfo)
-        }
-      }
-
-      map.on("click", fillLayerId, handleClick)
-
-      // Cleanup
-      return () => {
-        map.off("click", fillLayerId, handleClick)
-        if (map.getLayer(fillLayerId)) map.removeLayer(fillLayerId)
-        if (map.getLayer(outlineLayerId)) map.removeLayer(outlineLayerId)
-        if (map.getSource(sourceId)) map.removeSource(sourceId)
-      }
-    })
-
-    return cleanup
-  }, [mapAPI, mapReady, polygonFeatures, data, theme, onClick])
-
-  // Get tier color
   const getTierColor = (tier: number): string => {
     switch (tier) {
       case 1:
@@ -233,9 +93,11 @@ export default function TierMarkers({
     }
   }
 
-  // Build feature info for tooltip callbacks
+  const isDiamond =
+    tierCode === "ENV_FLOWS"
+
   const buildFeatureInfo = (
-    feature: (typeof pointFeatures)[0],
+    loc: TierLocation,
     lng: number,
     lat: number,
   ): HoveredFeatureInfo => ({
@@ -243,14 +105,13 @@ export default function TierMarkers({
     latitude: lat,
     geometryType: "point",
     layerType: "point",
-    featureId: feature.properties.location_id,
-    tierLevel: feature.properties.tier_level,
-    tierLabel: getTierLabel(feature.properties.tier_level),
-    tierValue: feature.properties.tier_value,
-    locationName: feature.properties.location_name,
-    locationType: feature.properties.location_type_display,
-    properties: feature.properties,
-    // These are for polygon layers, null for points
+    featureId: loc.location_id,
+    tierLevel: loc.tier_level,
+    tierLabel: getTierLabel(loc.tier_level),
+    tierValue: loc.tier_value ?? 0,
+    locationName: loc.location_name,
+    locationType: "Environmental Flow",
+    properties: loc,
     urbName: null,
     modName: null,
     subName: null,
@@ -261,23 +122,23 @@ export default function TierMarkers({
     gisAcres: null,
   })
 
-  // Determine if markers should use diamond shape (Environmental flows)
-  // Check tier_code OR tier_name for robustness
-  const isDiamond =
-    data.metadata.tier_code === "ENV_FLOWS" ||
-    data.metadata.tier_name?.toLowerCase().includes("environmental")
-
   return (
     <>
-      {/* Point markers */}
-      {pointFeatures.map((feature) => {
-        const coords = feature.geometry.coordinates as [number, number]
+      {locations.map((loc) => {
+        const coords = ENV_FLOWS_COORDINATES[loc.location_id]
+        if (!coords) return null
+
         const [lng, lat] = coords
-        const featureInfo = buildFeatureInfo(feature, lng, lat)
+        const name = ENV_FLOWS_NAMES[loc.location_id] || loc.location_name
+        const featureInfo = buildFeatureInfo(
+          { ...loc, location_name: name },
+          lng,
+          lat,
+        )
 
         return (
           <Marker
-            key={feature.properties.location_id}
+            key={loc.location_id}
             longitude={lng}
             latitude={lat}
             anchor="center"
@@ -286,14 +147,12 @@ export default function TierMarkers({
               style={{
                 width: 20,
                 height: 20,
-                backgroundColor: getTierColor(feature.properties.tier_level),
-                // Diamond: white outline to match rivers; Circle: standard onDark border
+                backgroundColor: getTierColor(loc.tier_level),
                 border: isDiamond
                   ? `2px solid ${theme.palette.common.white}E6`
                   : theme.border.onDark,
                 boxShadow: theme.shadow.sm,
                 cursor: "pointer",
-                // Diamond: rotate first, then scale for narrow diamond; Circle: use border-radius
                 borderRadius: isDiamond
                   ? theme.borderRadius.xs
                   : theme.borderRadius.circle,

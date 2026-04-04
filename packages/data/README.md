@@ -6,11 +6,11 @@ Shared data fetching package for COEQWAL applications. Provides a typed integrat
 
 ```
 External API (api.coeqwal.org)
-       ↓
+       |
 @repo/data (fetchers, types, caching)
-       ↓
-App-level hooks (compose + enrich) ← import and use these
-       ↓
+       |
+App-level hooks (compose + enrich) <-- import and use these
+       |
 React components
 ```
 
@@ -21,7 +21,7 @@ React components
 - **Type safety**: Typed fetchers and responses, i.e. no type assertions at consumer level
 - **Consistent pattern**: All hooks return `{ <data>, isLoading, error }` where the data property name varies by hook
 
-## Installation
+## Installation (for new apps)
 
 Install in monorepo apps via workspace dependencies.
 
@@ -90,7 +90,13 @@ Fetches tier definitions: short codes (e.g., `AG_REV`), names, and types.
 import { useTiers } from "@repo/data/coeqwal/hooks"
 
 const { tiers, isLoading, error } = useTiers()
-// tiers: TierListItem[] - [{ short_code: "AG_REV", name: "Agricultural Revenue", ... }]
+// tiers: TierListItem[] - [{
+//   short_code: "AG_REV",
+//   name: "Agricultural Revenue",
+//   description: "Revenue from agricultural water deliveries",
+//   tier_type: "multi_value",
+//   tier_count: 4
+// }, ...]
 ```
 
 #### `useScenarios()`
@@ -101,7 +107,16 @@ Fetches scenario definitions: IDs (e.g., `s0020`), names, and active status.
 import { useScenarios } from "@repo/data/coeqwal/hooks"
 
 const { scenarios, isLoading, error } = useScenarios()
-// scenarios: ScenarioListItem[] - [{ scenario_id: "s0020", name: "Baseline", ... }]
+// scenarios: ScenarioListItem[] - [{
+//   short_code: "s0020",
+//   run_name: "s0020_DCRadjBL_2020LU_wTUCP",
+//   name: "Current operations",
+//   short_description: "Baseline scenario with current Delta regulations",
+//   is_active: true,
+//   hydroclimate_id: 2,
+//   baseline_scenario: null,
+//   sibling_group: "s0020"
+// }, ...]
 ```
 
 #### `useScenarioTiers(scenarioId)`
@@ -113,6 +128,30 @@ import { useScenarioTiers } from "@repo/data/coeqwal/hooks"
 
 const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
   useScenarioTiers("s0020")
+
+// chartData: Record<outcomeCode, ChartDataPoint[]>
+// chartData["CWS_DEL"] -> [{ name: "Tier 1", value: 70, color: "#2ecc71" }, ...]
+
+// scoreData: Record<outcomeCode, OutcomeScoreData>
+// scoreData["CWS_DEL"] -> {
+//   shortCode: "CWS_DEL", type: "multi_value",
+//   weighted_score: 1.8, normalized_score: 0.73,
+//   gini: 0.12, band_upper: 0.85, band_lower: 0.61
+// }
+
+// rawData: ScenarioTiersResponse
+// rawData.tiers["CWS_DEL"] -> {
+//   name: "Community Water Systems Delivery", type: "multi_value",
+//   weighted_score: 1.8, normalized_score: 0.73, gini: 0.12,
+//   data: [{ tier: "tier1", value: 70, normalized: 0.7 },
+//          { tier: "tier2", value: 20, normalized: 0.2 },
+//          { tier: "tier3", value: 8, normalized: 0.08 },
+//          { tier: "tier4", value: 2, normalized: 0.02 }],
+//   total: 100
+// }
+
+// outcomeNames: OutcomeInfo[]
+// [{ shortCode: "CWS_DEL", displayName: "Community Water Systems Delivery" }, ...]
 ```
 
 #### `useMultipleScenarioTiers(idMapping?)`
@@ -157,8 +196,9 @@ Use fetchers when you need to:
 | `fetchTierList()` | Tier definitions (short codes, names, types) |
 | `fetchScenarioList()` | All scenario metadata |
 | `fetchScenarioTiers(id)` | Tier data for a single scenario |
-| `fetchAllScenarioTiers(ids)` | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` — one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable. |
-| `fetchTierLocationData(id, code)` | Per-location tier assignments for a scenario + outcome (for map/treemap) |
+| `fetchAllScenarioTiers(ids)` | **Batch** tier data for multiple scenarios. Hits `/api/tiers/batch` - one SQL query instead of N individual requests. Falls back to parallel per-scenario requests if the batch endpoint is unavailable. |
+| `fetchTierLocationAssignments(id, code)` | Per-location tier assignments (no geometry) - lightweight. Use for treemap/tables (see Step 2). |
+| `fetchTierLocationData(id, code)` | **GeoJSON** FeatureCollection with full polygon geometry - heavy on bandwidth. Currently not called anywhere in the app (all callers have been migrated to the lightweight endpoint or commented out). Retained for future use if raw polygon coordinates are ever needed. |
 
 ```tsx
 import {
@@ -166,14 +206,12 @@ import {
   fetchScenarioTiers,
   fetchAllScenarioTiers,
   fetchScenarioList,
-  fetchTierLocationData,
 } from "@repo/data/coeqwal"
 
 const tiers = await fetchTierList()
 const scenarios = await fetchScenarioList()
 const scenarioData = await fetchScenarioTiers("s0020")
 const allData = await fetchAllScenarioTiers(["s0020", "s0021", "s0029"])
-const locations = await fetchTierLocationData("s0020", "CWS_DEL")
 ```
 
 Fetchers throw `FetchError` on failure:
@@ -208,6 +246,7 @@ CACHE_KEYS.SCENARIOS        // "/api/scenarios"
 // Dynamic keys
 CACHE_KEYS.scenarioTiers("s0020")              // "/api/tiers/scenarios/s0020/tiers"
 CACHE_KEYS.allScenarioTiers(["s0020", ...])    // ["all-scenario-tiers", "s0020", ...]
+CACHE_KEYS.tierLocations("s0020", "CWS_DEL")  // "/tier-map/s0020/CWS_DEL/locations"
 ```
 
 ### Types
@@ -225,94 +264,139 @@ import type {
 } from "@repo/data/coeqwal"
 ```
 
-## How to Get Data for a Visualization Tool
+## How to get data for a tier visualization tool
 
-This section walks through the full data-fetching flow for a new tool panel in the Scenario Explorer (e.g., the distribution/equity panel).
+This section walks through the data-fetching flow for a new tool in the Scenario Explorer.
 
-### Step 1: Get tier data with `useResolvedScenarioTiers`
+### Step 1: Subscribe to general scenario and tier data (already cached)
 
-The sidebar shows 24 scenario strategies. Hydroclimate chooser is on the toolbar. Each strategy has variants for different hydroclimates, which we call "siblings" in the codebase. The `useResolvedScenarioTiers` hook handles all of this automatically. It reads the active hydroclimate from the store, resolves sibling group IDs to the correct variant, fetches tier data in bulk via SWR, and re-keys results back to sibling group IDs.
+Tier data for **all 24 scenarios across all hydroclimates** is prefetched when the Explore tab mounts (via `usePrefetchTiers` in `ScenarioExplorer.tsx`, using the batch endpoint `/api/tiers/batch`). By the time your tool panel renders, everything is already in the SWR cache.
+
+To access it, call `useResolvedScenarioTiers()`. This does not trigger additional API requests. It subscribes to the cached data, keyed to the active hydroclimate. Switching hydroclimate data is instant (should not see the loading spinner).
 
 ```typescript
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
-
-const {
-  allChartData,
-  allScoreData,
-  allScenariosData,
-  outcomeNames,
-  siblingGroups,
-  getDisplayName,
-  getThemeForScenario,
-  isLoading,
-  error,
-} = useResolvedScenarioTiers()
-```
-
-No need to call `buildIdMapping` or `useMultipleScenarioTiers` directly.
-
-> **Prefetching:** When the Explore tab mounts, tier data for all three hydroclimates is prefetched in the background via `usePrefetchTiers` (in `ScenarioExplorer.tsx`). This uses the batch endpoint (`/api/tiers/batch`) to fetch ~24 scenarios per hydroclimate in a single request. By the time a user switches hydroclimates from the toolbar, the data is already cached.no loading spinner.
-
-> **TODO:** The hydroclimate options and the `HYDROCLIMATE_ID_MAP` mapping are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will return the list of hydroclimate options with their metadata (`id`, `short_code`, `name`, `description`, `has_data` flag) directly from the database, making this a single source of truth. This will be implemented once the team finalizes naming and descriptions for the hydroclimates. Until then, the client-side `buildIdMapping()` approach is the correct pattern (encapsulated inside `useResolvedScenarioTiers`).
-
-**What you get back (in addition to `siblingGroups`, `getDisplayName`, `getThemeForScenario`):**
-
-| Property           | Type                                                        | Contents                                                                                     |
-| ------------------ | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `allChartData`     | `Record<scenarioId, Record<outcomeCode, ChartDataPoint[]>>` | Pre-processed data for bar/distribution charts, keyed by scenario then outcome code          |
-| `allScoreData`     | `Record<scenarioId, Record<outcomeCode, OutcomeScoreData>>` | Scores per outcome: `weighted_score`, `normalized_score`, `gini`, `band_upper`, `band_lower` |
-| `allScenariosData` | `Record<scenarioId, ScenarioTiersResponse>`                 | Raw API response per scenario (tiers with type, level, data array)                           |
-| `outcomeNames`     | `OutcomeInfo[]`                                             | Display-ordered list of `{ shortCode, displayName }`                                         |
-| `isLoading`        | `boolean`                                                   | True only on initial load (no data at all). **Not** true during hydroclimate switches.stale data is displayed while the new data loads in the background. |
-| `isValidating`     | `boolean`                                                   | True whenever a background fetch is in flight (including HC switches). Use this for a subtle "updating" indicator if desired. |
-| `error`            | `string \| null`                                            | Error message if any fetch failed                                                            |
-
-### Step 2: Use the data...it's already cached!
-
-The SWR cache holds tier data for **all available hydroclimates** (prefetched when the Explore tab mounts), so switching hydroclimates returns data instantly from cache too. By the time your tool panel renders, everything is already loaded. Calling `useResolvedScenarioTiers()` just subscribes to that cached data; it does **not** trigger additional API requests.
-
-**Do not** call `useMultipleScenarioTiers`, `fetchAllScenarioTiers`, or `fetchScenarioTiers` to get data for individual scenarios. Just index into `allScenariosData`.
-
-For a tool that compares two scenarios at a time (like the distributional tier visualization):
-
-```typescript
 import { useScenarioExplorerStore } from "../store"
 
+const {
+  allScenariosData,   // Record<scenarioId, ScenarioTiersResponse> - all 24 scenarios
+  allChartData,       // Pre-processed chart data, keyed by scenario then outcome code
+  allScoreData,       // Scores per outcome: weighted_score, normalized_score, gini, etc.
+  outcomeNames,       // Display-ordered list of { shortCode, displayName }
+  siblingGroups,      // Scenario group metadata
+  getDisplayName,     // (id) => human-readable scenario name
+  getThemeForScenario,// (id) => theme key for color assignment
+  isLoading,          // True only on initial load - NOT during hydroclimate switches
+  isValidating,       // True during background fetches (use for subtle "updating" indicator, not really used bc our data is relatively static)
+  error,
+} = useResolvedScenarioTiers()
+
 const { selectedScenarios, pinnedScenarioIds } = useScenarioExplorerStore()
-
-// Pick the two scenarios to compare
-const [scenarioA, scenarioB] = useMemo(() => {
-  const pinned = [...pinnedScenarioIds]
-  const selected = [...selectedScenarios]
-  return [pinned[0] ?? selected[0], selected.find((id) => id !== pinned[0]) ?? selected[1]]
-}, [pinnedScenarioIds, selectedScenarios])
-
-// All tier data for both is already in cache. Just index into it.
-const tiersA = allScenariosData?.[scenarioA]
-const tiersB = allScenariosData?.[scenarioB]
-
-// Access a specific outcome
-const cwsA = tiersA?.tiers["CWS_DEL"]
 ```
 
-For filtering to all selected scenarios:
+Do not call `useMultipleScenarioTiers`, `fetchAllScenarioTiers`, or `fetchScenarioTiers` for individual scenarios. Just index into `allScenariosData`.
+
+**How hydroclimates work (behind the scenes):**
+
+The app has three hydroclimates currently. Each hydroclimate has its own set of ~24 scenario IDs. These are different model runs but share "sibling group" IDs (e.g., sibling group `s0020` has scenario `s0020` in historical, `s0028` in another, and `s0052` in another hydroclimate).
+
+When the user switches hydroclimates via the toolbar `HydroclimateChooser`, `useResolvedScenarioTiers()` automatically:
+
+1. Reads the active hydroclimate from the store (`hydroclimatePeriod`)
+2. Looks up which scenario IDs belong to that hydroclimate (via `HYDROCLIMATE_ID_MAP` -> `buildIdMapping`)
+3. Returns tier data keyed by sibling group IDs (not the raw scenario IDs)
+
+This means your component code doesn't change when the user switches hydroclimates. `allScenariosData["s0020"]` always returns data for the *active* hydroclimate's version of that scenario. The hook handles the resolution transparently.
+
+> **Future:** The hydroclimate options and `HYDROCLIMATE_ID_MAP` are currently hardcoded in `apps/main/app/content/scenarios.ts`. A planned `/api/hydroclimates` endpoint will replace this with database-driven metadata (once the team decides it). This won't affect this code. `useResolvedScenarioTiers()` will be updated internally.
+
+### Step 2: Use the data
+
+**Pre-cached (available instantly, loaded on Explore tab activation):**
+
+| Data | How to access | What it contains |
+| --- | --- | --- |
+| Scenario list + display names | `scenarioIds`, `getDisplayName("s0020")` | Scenario IDs and human-readable names |
+| Aggregate tier scores (all scenarios, all outcomes) | `allScenariosData?.["s0020"]?.tiers["CWS_DEL"]` | weighted_score, normalized_score, gini, tier distribution counts |
+| Tier list (outcome definitions) | `outcomeNames` from `useResolvedScenarioTiers()` | Outcome codes, names, types, display order |
+
+**Fetched on demand (first access triggers an API call, then cached by SWR):**
+
+| Data | How to access | What it contains |
+| --- | --- | --- |
+| Per-location tier assignments | `useSWR(key, () => fetchTierLocationAssignments(...))` | Every location's tier_level for one scenario+outcome (one request returns all locations) |
+
+All data goes through SWR. Once fetched, everything is cached for subsequent renders. Pre-cached data is bulk-fetched before your component renders; per-location assignments are fetched the first time your component requests a specific scenario+outcome pair.
 
 ```typescript
-const selectedData = useMemo(() => {
-  if (!allScenariosData) return {}
-  const result: Record<string, ScenarioTiersResponse> = {}
-  for (const id of selectedScenarios) {
-    if (allScenariosData[id]) {
-      result[id] = allScenariosData[id]
-    }
-  }
-  return result
-}, [allScenariosData, selectedScenarios])
+import useSWR from "swr"
+import { CACHE_KEYS } from "@repo/data/cache"
+import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
+
+// All scenario IDs for the active hydroclimate
+const scenarioIds = allScenariosData ? Object.keys(allScenariosData) : []
+// ["s0020", "s0021", "s0029", ...]
+
+// Human-readable name for display
+getDisplayName("s0020")  // "Current operations"
+
+// --- Aggregate scores (pre-cached, instant access) ---
+
+const tiersA = allScenariosData?.["s0020"]
+const tiersB = allScenariosData?.["s0021"]
+
+const cwsA = tiersA?.tiers["CWS_DEL"]
+// cwsA.weighted_score: 2.5      - average tier level (used for sorting scenarios)
+// cwsA.normalized_score: 0.5    - 0-1 normalized (no longer used)
+// cwsA.gini: 0.292              - inequality measure (not sure if team wants to use)
+// cwsA.total: 76                - total locations
+// cwsA.data: [                  - tier distribution counts (used in bar chart glyphs)
+//   { tier: "tier1", value: 31, normalized: 0.408 },
+//   { tier: "tier2", value: 6, normalized: 0.079 },
+//   { tier: "tier3", value: 9, normalized: 0.118 },
+//   { tier: "tier4", value: 30, normalized: 0.395 },
+// ]
+
+// --- Per-location tier values (fetched on first access, then cached by SWR) ---
+
+// One request per scenario+outcome returns all locations at once.
+// Uses the lightweight /locations endpoint (no polygon geometry).
+// Do not use fetchTierLocationData. That returns full GeoJSON and is much heavier.
+const { data: locationsA } = useSWR(
+  CACHE_KEYS.tierLocations("s0020", "CWS_DEL"),
+  () => fetchTierLocationAssignments("s0020", "CWS_DEL"),
+)
+const { data: locationsB } = useSWR(
+  CACHE_KEYS.tierLocations("s0021", "CWS_DEL"),
+  () => fetchTierLocationAssignments("s0021", "CWS_DEL"),
+)
+// First call fetches from API; subsequent renders with the same
+// scenario+outcome return the cached response instantly.
+
+// locationsA response shape (all 121 locations in one response):
+// {
+//   scenario: "s0020",
+//   tier_code: "CWS_DEL",
+//   tier_name: "Community water system deliveries",
+//   tier_type: "multi_value",
+//   locations: [
+//     { location_id: "02_NU", location_name: "02_NU",
+//       location_type: "demand_unit", tier_level: 1, tier_value: null, display_order: 1 },
+//     { location_id: "03_PU1", location_name: "03_PU1",
+//       location_type: "demand_unit", tier_level: 2, tier_value: 1, display_order: 80 },
+//     ...121 locations total
+//   ],
+//   metadata: {
+//     total_locations: 121,
+//     location_types: ["demand_unit"],
+//     tier_counts: { 1: 73, 2: 6, 3: 9, 4: 33 }
+//   }
+// }
 ```
 
 ### Step 3: Map integration (coloring polygons)
 
-The persistent Mapbox map already has polygon geometry baked into its vector tiles — you do **not** need to fetch GeoJSON. To color map polygons by tier level, use the map store:
+The persistent Mapbox map already has polygon geometry baked into its vector tiles. You do not need to fetch GeoJSON. To color map polygons by tier level, use the map store:
 
 ```typescript
 import { useMapActions } from "../../map/store"
@@ -329,52 +413,22 @@ mapActions.setOutcomeVisualization({
 
 The map layer system reads this state and applies fill colors to the pre-existing Mapbox vector tile polygons. See `@repo/state` README for full map integration details.
 
-> **`fetchTierLocationData`** exists in `@repo/data` for cases where you need the raw per-location tier assignments (location_id, tier_level, location_name) outside the map — e.g., for building a data table or a non-map visualization of individual locations. It returns tier-level metadata, **not** polygon geometry.
+**How each outcome type renders on the map:**
 
-### Step 4: Single-scenario fetching (if needed)
+| Outcome | Geometry source | Rendering |
+| --- | --- | --- |
+| CWS_DEL, AG_REV | Mapbox `demand-units` tileset | Polygon fill via `setOutcomeVisualization()` |
+| GW_STOR | Mapbox `calsim-wba` tileset | Polygon fill via `setOutcomeVisualization()` |
+| RES_STOR | Mapbox `california-reservoir` tileset | Polygon fill + labeled markers |
+| DELTA_ECO | Mapbox `delta-water` tileset | Polygon fill |
+| WRC_SALMON_AB | Mapbox `sacramento-river-body` tileset | Line layer coloring |
+| ENV_FLOWS | **Hardcoded coordinates** in `TierMarkers.tsx` | React diamond markers |
+| FW_DELTA_USES | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers |
+| FW_EXP | **Hardcoded coordinates** in `TierLocationLabels.tsx` | React labeled markers |
 
-For detail views where you need data for just one scenario:
+> **TODO:** Incorporate **ENV_FLOWS**, **FW_DELTA_USES**, and **FW_EXP** hardcoded coordinates into Mapbox tilesets as dedicated point layers, then remove the hardcoded coordinates from `TierMarkers.tsx` and `TierLocationLabels.tsx` and use `setOutcomeVisualization()` like the other outcomes.
 
-```typescript
-import { useScenarioTiers } from "../../scenarios/hooks"
-
-const { chartData, scoreData, rawData, outcomeNames, isLoading, error } =
-  useScenarioTiers("s0020")
-
-// chartData["CWS_DEL"] -> ChartDataPoint[]
-// scoreData["CWS_DEL"] -> OutcomeScoreData
-```
-
-### Migration from standalone fetch calls
-
-If you're porting a standalone prototype (like the distributional tier visualization), here's what replaces each raw `fetch()` call:
-
-| Old (raw fetch)                                | New (turborepo hooks/fetchers)                                |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| `fetch('/api/tiers/scenarios/{id}/tiers')`     | `useResolvedScenarioTiers()`.all scenarios, pre-fetched     |
-| `fetch('/api/tiers/list')`                     | `useTiers()` from `@repo/data/coeqwal/hooks`                 |
-| `fetch('/api/tier-map/{id}/{code}')`           | Not needed.polygon geometry is in the Mapbox vector tiles. Use `mapActions.setOutcomeVisualization()` to color them. |
-| `fetch('/api/tier-map/{id}/{code}/locations')` | `fetchTierLocationData(id, code)`.returns per-location tier assignments (no geometry) |
-| `fetch('/api/tier-map/scenarios')`             | `siblingGroups` + `getDisplayName()` from `useResolvedScenarioTiers()` |
-| Hardcoded scenario ID/title map                | `getDisplayName(id)` from `useResolvedScenarioTiers()`        |
-| Fuse.js search index                           | `searchQuery` from `useScenarioExplorerStore()`.sidebar handles filtering |
-| Own scenario dropdown                          | Sidebar checkboxes write to `selectedScenarios` in the store  |
-| Own hydroclimate picker                        | Toolbar `HydroclimateChooser` writes to `hydroclimatePeriod` in the store |
-
-### Important: don't fetch directly
-
-Do **not** call `fetch()` or the raw fetchers from `@repo/data/coeqwal` directly in your component for tier scores. Use `useResolvedScenarioTiers()` for multi-scenario data (the common case), or `useScenarioTiers(id)` for single-scenario detail views. These hooks:
-
-- Resolve hydroclimate variants automatically (no manual `buildIdMapping` calls)
-- Re-key data from resolved IDs back to sibling group IDs
-- Use the batch endpoint (`/api/tiers/batch`) under the hood.one SQL query for all scenarios instead of N individual requests
-- Pre-populate the SWR cache so individual scenario lookups are instant
-- Apply theme colors to chart data
-- Return outcomes in the canonical display order
-
-For map polygon coloring, use `mapActions.setOutcomeVisualization()` as shown in Step 3 — the geometry is already in the Mapbox vector tiles.
-
-For advanced use cases like cross-hydroclimate comparisons (fetching data for multiple climates simultaneously), use `buildIdMapping` directly via `useScenarioList`. See `useComparisonData.ts` for an example.
+No outcome should fetch GeoJSON from the API for map rendering. The `fetchTierLocationData` (GeoJSON) fetcher exists in `@repo/data` but is currently not called anywhere in the app.
 
 ## To add new data sources
 
