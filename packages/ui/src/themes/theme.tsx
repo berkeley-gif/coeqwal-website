@@ -301,10 +301,13 @@ const palette = {
     glossary: "#FFB347", // Warm orange
   },
 
-  // Greens
+  // California landscape
   nature: {
     earth: "#9ABD3D",
     forest: "#7b9d3f", // Forest green
+    sage: "#5c7054", // Muted sage
+    clay: "#7a5c3f", // Warm earth / delta soil
+    plum: "#3a2858", // Deep plum / dusk
   },
 
   // Common colors (mirrored in MUI palette.common for consistency)
