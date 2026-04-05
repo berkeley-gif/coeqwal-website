@@ -20,6 +20,9 @@ interface Beat2Layout {
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
   beat2Layout?: Beat2Layout | null
+  onOutcomeClick?: (code: string) => void
+  selectedOutcomeCode?: string | null
+  interactive?: boolean
 }
 
 function clamp01(v: number) {
@@ -29,6 +32,9 @@ function clamp01(v: number) {
 export default function BeatTextOverlay({
   progress,
   beat2Layout,
+  onOutcomeClick,
+  selectedOutcomeCode,
+  interactive,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const beat1Ref = useRef<HTMLDivElement>(null)
@@ -123,7 +129,7 @@ export default function BeatTextOverlay({
         </Typography>
         <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
           <Typography variant="storyBody" component="p">
-            We can group these parts of the system into categories:
+            We can group these parts of the system into categories.
           </Typography>
         </Box>
         <Box ref={levelsLineRef} sx={{ mt: 2, opacity: 0 }}>
@@ -186,23 +192,36 @@ export default function BeatTextOverlay({
       >
         {beat2Layout && (
           <>
-            {beat2Layout.items.map((item, i) => (
-              <Box
-                key={item.code}
-                ref={(el: HTMLDivElement | null) => {
-                  beat2ItemRefs.current[i] = el
-                }}
-                style={{
-                  position: "absolute",
-                  top: item.y,
-                  left: item.x,
-                  width: item.columnWidth,
-                  opacity: 0,
-                }}
-              >
-                <Typography variant="storyBody">{item.label}</Typography>
-              </Box>
-            ))}
+            {beat2Layout.items.map((item, i) => {
+              const isSelected = selectedOutcomeCode === item.code
+              return (
+                <Box
+                  key={item.code}
+                  ref={(el: HTMLDivElement | null) => {
+                    beat2ItemRefs.current[i] = el
+                  }}
+                  onClick={interactive ? () => onOutcomeClick?.(item.code) : undefined}
+                  style={{
+                    position: "absolute",
+                    top: item.y,
+                    left: item.x,
+                    width: item.columnWidth,
+                    opacity: 0,
+                  }}
+                  sx={{
+                    pointerEvents: interactive ? "auto" : "none",
+                    cursor: interactive ? "pointer" : "default",
+                  }}
+                >
+                  <Typography
+                    variant="storyBody"
+                    sx={{ fontWeight: isSelected ? 600 : undefined }}
+                  >
+                    {item.label}
+                  </Typography>
+                </Box>
+              )
+            })}
           </>
         )}
       </Box>

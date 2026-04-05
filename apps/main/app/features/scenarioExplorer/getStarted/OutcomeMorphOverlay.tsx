@@ -30,6 +30,9 @@ interface OutcomeMorphOverlayProps {
     string,
     { x: number; y: number; maxWidth: number }
   >
+  onOutcomeClick?: (code: string) => void
+  selectedOutcomeCode?: string | null
+  interactive?: boolean
 }
 
 export const GRID_PAD = 12
@@ -149,6 +152,9 @@ export default function OutcomeMorphOverlay({
   progress,
   squaresPerRow,
   distributionPositionMap,
+  onOutcomeClick,
+  selectedOutcomeCode,
+  interactive,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
@@ -238,7 +244,7 @@ export default function OutcomeMorphOverlay({
         inset: 0,
         width: "100%",
         height: "100%",
-        pointerEvents: "none",
+        pointerEvents: interactive ? "auto" : "none",
         zIndex: 2,
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
@@ -248,22 +254,31 @@ export default function OutcomeMorphOverlay({
           pathRefsMap.current.set(group.code, [])
         }
         const refs = pathRefsMap.current.get(group.code)!
+        const isSelected = selectedOutcomeCode === group.code
 
-        return group.shapes.map((shape, i) => (
-          <path
-            key={`${group.code}-${i}`}
-            ref={(el) => {
-              refs[i] = el
-            }}
-            d={shape.rawD}
-            fill={shape.color}
-            fillOpacity={0.75}
-            stroke={shape.color}
-            strokeWidth={0.5}
-            strokeOpacity={0.4}
-            style={{ opacity: 0 }}
-          />
-        ))
+        return (
+          <g
+            key={group.code}
+            onClick={interactive ? () => onOutcomeClick?.(group.code) : undefined}
+            style={{ cursor: interactive ? "pointer" : "default" }}
+          >
+            {group.shapes.map((shape, i) => (
+              <path
+                key={`${group.code}-${i}`}
+                ref={(el) => {
+                  refs[i] = el
+                }}
+                d={shape.rawD}
+                fill={shape.color}
+                fillOpacity={isSelected ? 1 : 0.75}
+                stroke={shape.color}
+                strokeWidth={0.5}
+                strokeOpacity={0.4}
+                style={{ opacity: 0, transition: "fill-opacity 0.2s" }}
+              />
+            ))}
+          </g>
+        )
       })}
     </svg>
   )

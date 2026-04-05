@@ -21,7 +21,7 @@ import {
   lineSegmentPoints,
   POINTS_PER_SHAPE,
 } from "@repo/viz"
-import { mapActions } from "../../map/store"
+import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
 import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
@@ -209,14 +209,20 @@ export default function TierAnimationSection() {
 
     const currentVal = progress.get()
     const startFrom = currentVal >= 1 ? 0 : currentVal
-    if (startFrom === 0) progress.set(0)
+    if (startFrom === 0) {
+      progress.set(0)
+      mapActions.setOutcomeVisualization("AG_REV", "s0020")
+    }
 
     const remaining = (1 - startFrom) * TOTAL_DURATION
     setPlayState("playing")
     controlsRef.current = animate(progress, 1, {
       duration: remaining,
       ease: "linear",
-      onComplete: () => setPlayState("finished"),
+      onComplete: () => {
+        setPlayState("finished")
+        mapActions.clearOutcomeVisualization()
+      },
     })
   }, [progress])
 
@@ -229,7 +235,21 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     progress.set(0)
     setPlayState("idle")
+    mapActions.setOutcomeVisualization("AG_REV", "s0020")
   }, [progress])
+
+  const activeVisualization = useActiveOutcomeVisualization()
+  const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
+
+  const isInteractive = playState === "finished"
+
+  const handleOutcomeClick = useCallback(
+    (code: string) => {
+      mapActions.clearMapTooltips()
+      mapActions.toggleOutcomeVisualization(code, "s0020")
+    },
+    [],
+  )
 
   useEffect(() => {
     return () => {
@@ -1100,6 +1120,9 @@ export default function TierAnimationSection() {
                 progress={progress}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
                 distributionPositionMap={distributionPositionMap}
+                onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
+                selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
+                interactive={isInteractive}
               />
             </motion.div>
           )}
@@ -1115,7 +1138,13 @@ export default function TierAnimationSection() {
           */}
 
           {/* Cross-fading beat text */}
-          <BeatTextOverlay progress={progress} beat2Layout={outcomeLayout} />
+          <BeatTextOverlay
+            progress={progress}
+            beat2Layout={outcomeLayout}
+            onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
+            selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
+            interactive={isInteractive}
+          />
 
           {/* Playback controls */}
           <Box

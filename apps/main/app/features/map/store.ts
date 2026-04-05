@@ -136,6 +136,16 @@ export const mapActions = {
   clearOutcomeVisualization: () =>
     useMapStore.setState({ activeOutcomeVisualization: null }),
 
+  toggleOutcomeVisualization: (outcomeCode: string, scenarioId = "s0020") => {
+    const current = useMapStore.getState().activeOutcomeVisualization
+    useMapStore.setState({
+      activeOutcomeVisualization:
+        current?.outcomeCode === outcomeCode
+          ? null
+          : { outcomeCode, scenarioId },
+    })
+  },
+
   // Tooltips
   clearMapTooltips: () =>
     useMapStore.setState((state) => ({
