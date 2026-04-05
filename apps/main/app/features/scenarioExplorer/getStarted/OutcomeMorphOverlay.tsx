@@ -28,7 +28,13 @@ interface OutcomeMorphOverlayProps {
   squaresPerRow: number
   distributionPositionMap: Record<
     string,
-    { x: number; y: number; labelY: number; maxWidth: number }
+    {
+      x: number
+      y: number
+      labelY: number
+      maxWidth: number
+      locationDescription: string
+    }
   >
   onOutcomeClick?: (code: string) => void
   selectedOutcomeCode?: string | null
@@ -158,6 +164,7 @@ export default function OutcomeMorphOverlay({
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
+  const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
@@ -204,17 +211,23 @@ export default function OutcomeMorphOverlay({
       const boundsRight = shapes.length > 0
         ? Math.max(maxX + pad, gridTargetX + maxColWidth)
         : gridTargetX + maxColWidth
+      const locationDescription =
+        pos?.locationDescription ?? `${outcome.polygons.length} locations`
+      const countY = shapes.length > 0 ? maxY + pad + 14 : gridTargetY + 46
       const bounds = {
         x: boundsLeft,
         y: boundsTop,
         width: boundsRight - boundsLeft,
-        height: boundsBottom - boundsTop,
+        height: Math.max(boundsBottom, countY + 4) - boundsTop,
       }
 
       return {
         code: outcome.code,
         shapes,
         bounds,
+        locationDescription,
+        countY,
+        countX: gridTargetX + GRID_PAD,
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
@@ -255,6 +268,12 @@ export default function OutcomeMorphOverlay({
           )
           el.setAttribute("d", pointsToD(pts))
           el.style.opacity = String(opacity)
+        }
+
+        const countEl = countRefsMap.current.get(group.code)
+        if (countEl) {
+          const countFade = v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.02)
+          countEl.style.opacity = String(countFade)
         }
       }
     })
@@ -312,6 +331,21 @@ export default function OutcomeMorphOverlay({
                 style={{ opacity: 0, transition: "fill-opacity 0.2s" }}
               />
             ))}
+            {group.locationDescription && (
+              <text
+                ref={(el) => {
+                  countRefsMap.current.set(group.code, el)
+                }}
+                x={group.countX}
+                y={group.countY}
+                fontSize={11}
+                fontFamily="inherit"
+                fill="#555"
+                style={{ opacity: 0 }}
+              >
+                {group.locationDescription}
+              </text>
+            )}
           </g>
         )
       })}
