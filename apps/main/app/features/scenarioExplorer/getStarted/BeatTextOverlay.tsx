@@ -57,7 +57,7 @@ export default function BeatTextOverlay({
       }
 
       if (beat2PanelRef.current) {
-        const fadeIn = clamp01((v - 0.20) / 0.04)
+        const fadeIn = clamp01((v - 0.2) / 0.04)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
@@ -95,8 +95,6 @@ export default function BeatTextOverlay({
     lg: "420px",
     xl: "460px",
   }
-
-  const insetPx = 24
 
   return (
     <Box
@@ -137,14 +135,28 @@ export default function BeatTextOverlay({
             We can create levels of outcomes per location within these groups.
           </Typography>
         </Box>
-        <Box ref={tierLegendRef} sx={{ mt: 2.5, opacity: 0, display: "flex", flexDirection: "column", gap: 1 }}>
-          {([
-            { color: theme.palette.tiers.tier1, label: "Thriving" },
-            { color: theme.palette.tiers.tier2, label: "Functioning" },
-            { color: theme.palette.tiers.tier3, label: "At risk" },
-            { color: theme.palette.tiers.tier4, label: "Critical" },
-          ] as const).map(({ color, label }) => (
-            <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box
+          ref={tierLegendRef}
+          sx={{
+            mt: 2.5,
+            opacity: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          {(
+            [
+              { color: theme.palette.tiers.tier1, label: "Thriving" },
+              { color: theme.palette.tiers.tier2, label: "Functioning" },
+              { color: theme.palette.tiers.tier3, label: "At risk" },
+              { color: theme.palette.tiers.tier4, label: "Critical" },
+            ] as const
+          ).map(({ color, label }) => (
+            <Box
+              key={label}
+              sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+            >
               <Box
                 sx={{
                   width: 16,
@@ -200,7 +212,9 @@ export default function BeatTextOverlay({
                   ref={(el: HTMLDivElement | null) => {
                     beat2ItemRefs.current[i] = el
                   }}
-                  onClick={interactive ? () => onOutcomeClick?.(item.code) : undefined}
+                  onClick={
+                    interactive ? () => onOutcomeClick?.(item.code) : undefined
+                  }
                   style={{
                     position: "absolute",
                     top: item.y,

@@ -115,19 +115,31 @@ export function rectPoints(
 
   for (let i = 0; i <= ARC_PTS; i++) {
     const a = Math.PI * 1.5 + (i / ARC_PTS) * (Math.PI / 2)
-    path.push([cx + hw - cr + cr * Math.cos(a), cy - hh + cr + cr * Math.sin(a)])
+    path.push([
+      cx + hw - cr + cr * Math.cos(a),
+      cy - hh + cr + cr * Math.sin(a),
+    ])
   }
   for (let i = 0; i <= ARC_PTS; i++) {
     const a = 0 + (i / ARC_PTS) * (Math.PI / 2)
-    path.push([cx + hw - cr + cr * Math.cos(a), cy + hh - cr + cr * Math.sin(a)])
+    path.push([
+      cx + hw - cr + cr * Math.cos(a),
+      cy + hh - cr + cr * Math.sin(a),
+    ])
   }
   for (let i = 0; i <= ARC_PTS; i++) {
     const a = Math.PI / 2 + (i / ARC_PTS) * (Math.PI / 2)
-    path.push([cx - hw + cr + cr * Math.cos(a), cy + hh - cr + cr * Math.sin(a)])
+    path.push([
+      cx - hw + cr + cr * Math.cos(a),
+      cy + hh - cr + cr * Math.sin(a),
+    ])
   }
   for (let i = 0; i <= ARC_PTS; i++) {
     const a = Math.PI + (i / ARC_PTS) * (Math.PI / 2)
-    path.push([cx - hw + cr + cr * Math.cos(a), cy - hh + cr + cr * Math.sin(a)])
+    path.push([
+      cx - hw + cr + cr * Math.cos(a),
+      cy - hh + cr + cr * Math.sin(a),
+    ])
   }
 
   return resampleClosedPath(path, n)

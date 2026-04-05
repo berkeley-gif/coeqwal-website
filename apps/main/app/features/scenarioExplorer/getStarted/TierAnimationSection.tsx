@@ -26,6 +26,7 @@ import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
+import { CALIFORNIA_CENTERED_VIEW } from "../../map/config/cameraPresets"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
@@ -222,6 +223,34 @@ export default function TierAnimationSection() {
       onComplete: () => {
         setPlayState("finished")
         mapActions.clearOutcomeVisualization()
+
+        // Reset all animation polygon layers to a clean state so
+        // OutcomePolygonLayer can manage them for interactive toggling.
+        const map = mapAPI.mapRef?.current?.getMap?.()
+        if (map?.isStyleLoaded?.()) {
+          try {
+            for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+              if (map.getLayer(fill)) {
+                map.setPaintProperty(fill, "fill-opacity-transition", {
+                  duration: 0,
+                  delay: 0,
+                })
+                map.setPaintProperty(fill, "fill-opacity", 0)
+                map.setFilter(fill, null)
+              }
+              if (map.getLayer(outline)) {
+                map.setPaintProperty(outline, "line-opacity", 0)
+              }
+            }
+            for (const lineLayer of ANIM_LINE_LAYERS) {
+              if (map.getLayer(lineLayer)) {
+                map.setPaintProperty(lineLayer, "line-opacity", 0)
+              }
+            }
+          } catch {
+            /* ok */
+          }
+        }
       },
     })
   }, [progress])
@@ -246,9 +275,30 @@ export default function TierAnimationSection() {
   const handleOutcomeClick = useCallback(
     (code: string) => {
       mapActions.clearMapTooltips()
+
+      const isToggleOff = selectedOutcomeCode === code
       mapActions.toggleOutcomeVisualization(code, "s0020")
+
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (!map) return
+
+      if (isToggleOff) {
+        map.easeTo({
+          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+          zoom: CAM_ZOOM,
+          duration: 1000,
+        })
+      } else {
+        const config = getOutcomeConfig(code)
+        const target = config?.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
+        map.easeTo({
+          center: { lng: target.longitude, lat: target.latitude },
+          zoom: target.zoom,
+          duration: 1000,
+        })
+      }
     },
-    [],
+    [selectedOutcomeCode, mapAPI.mapRef],
   )
 
   useEffect(() => {
