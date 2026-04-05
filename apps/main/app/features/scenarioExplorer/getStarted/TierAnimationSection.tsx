@@ -19,6 +19,7 @@ import { useTierAnimationData } from "./useTierAnimationData"
 import { type PolygonMorphData } from "./PolygonMorphOverlay"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
+  getOutcomeProgressRange,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import ResearcherIllustrations from "./ResearcherIllustrations"
@@ -302,6 +303,12 @@ export default function TierAnimationSection() {
     tierColorLookupRef.current = lookup
   }, [outcomeLocations])
 
+  /** Pre-compute the schedule for hiding map polygons as SVG takes over.
+   *  Populated after outcomeGroups is computed. */
+  const hideScheduleRef = useRef<
+    { fadeStart: number; morphStart: number; duIds: string[] }[]
+  >([])
+
   /** Build a Mapbox match expression blending from `fromHex` to each DU's
    *  tier color at ratio `t` (0 = all from, 1 = all tier). */
   function buildBlendedTierExpr(fromHex: string, t: number): unknown[] | null {
@@ -419,7 +426,8 @@ export default function TierAnimationSection() {
         }
         phase = "beat1" // keep as beat1 so the above guard runs once
       } else {
-        // Beat 2+: ensure final tier colors are locked in
+        // Beat 2+: tier colors locked in; progressively hide DUs
+        // as their SVG copies start animating.
         if (phase !== "beat2") {
           try {
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
@@ -434,6 +442,39 @@ export default function TierAnimationSection() {
             /* ok */
           }
           phase = "beat2"
+        }
+
+        // Per-group fade: each group fades from 0.65 → 0 over its
+        // fadeStart..morphStart window instead of snapping to 0.
+        const caseExpr: unknown[] = ["case"]
+        let anyActive = false
+        for (const entry of hideScheduleRef.current) {
+          if (v < entry.fadeStart) continue
+          anyActive = true
+          const fadeDuration = entry.morphStart - entry.fadeStart
+          const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+          const opacity = 0.65 * (1 - t)
+          caseExpr.push(
+            ["in", ["get", "DU_ID"], ["literal", entry.duIds]],
+            opacity,
+          )
+        }
+        caseExpr.push(0.65) // default for not-yet-animated
+
+        try {
+          if (map.getLayer("demand-units")) {
+            if (anyActive) {
+              map.setPaintProperty(
+                "demand-units",
+                "fill-opacity",
+                caseExpr as never,
+              )
+            } else {
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+          }
+        } catch {
+          /* ok */
         }
       }
     })
@@ -606,6 +647,20 @@ export default function TierAnimationSection() {
       return { code, label, polygons }
     }).filter((g) => g.polygons.length > 0)
   }, [allScreenPolygons, outcomeLocations])
+
+  useEffect(() => {
+    const total = outcomeGroups.length
+    const schedule: { fadeStart: number; morphStart: number; duIds: string[] }[] = []
+    for (let i = 0; i < total; i++) {
+      const group = outcomeGroups[i]!
+      const locData = outcomeLocations[group.code]
+      if (!locData || locData.ids.size === 0) continue
+      const [morphStart] = getOutcomeProgressRange(i, total)
+      const fadeStart = morphStart - 0.02
+      schedule.push({ fadeStart, morphStart, duIds: [...locData.ids] })
+    }
+    hideScheduleRef.current = schedule
+  }, [outcomeGroups, outcomeLocations])
 
   /* ── Error state ── */
   if (error) {
