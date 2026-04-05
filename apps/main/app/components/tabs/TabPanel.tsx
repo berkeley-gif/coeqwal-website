@@ -2,6 +2,7 @@
 
 import { forwardRef, type ReactNode } from "react"
 import { useTheme } from "@repo/ui/mui"
+import { useMapMode } from "../../features/map/store"
 import AutoAdvanceFooter from "./AutoAdvanceFooter"
 
 type TabPanelProps = {
@@ -12,6 +13,7 @@ type TabPanelProps = {
 const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
   ({ tabKey, children }, ref) => {
     const theme = useTheme()
+    const mapMode = useMapMode()
     const thisPanelId = `panel-${tabKey}`
 
     // Map tab panels (in Learn, Explore) need transparent backgrounds and no padding
@@ -21,13 +23,14 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const backgroundColor = isMapTab ? "transparent" : undefined
     const padding = isMapTab ? "0" : `2rem ${theme.space.panel.padding}`
 
-    // Explore tab gets a fixed viewport height so it doesn't cause page scroll
-    // Offset = collapsed header + docked SmoothTabs height
+    // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
+    // EXCEPT when in get-started mode which uses page scroll like the learn tab.
     const headerAndTabsOffset =
       theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
-    const exploreStyles: React.CSSProperties = isExploreTab
-      ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
-      : {}
+    const exploreStyles: React.CSSProperties =
+      isExploreTab && mapMode !== "get-started"
+        ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
+        : {}
 
     // Map tabs need pointerEvents: "none" so the persistent map behind them
     // can receive drag/pan events. Child components re-enable pointer events as needed.

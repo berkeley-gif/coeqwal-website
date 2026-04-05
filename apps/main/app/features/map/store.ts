@@ -15,7 +15,7 @@ import {
 // Types
 // ============================================================================
 
-/** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel), get-started (visible background, non-interactive) */
+/** Map mode: hidden (preloading), learn (scrollytelling), explore (fixed panel), get-started (visible background with page-scroll interaction) */
 export type MapMode = "hidden" | "learn" | "explore" | "get-started"
 
 /** Outcome visualization state used by both Learn and Explore modes */
@@ -65,8 +65,6 @@ interface MapState {
   // Lightweight highlight tooltip driven by the tier animation overlay
   locationHighlight: LocationHighlight | null
 
-  // Whether the persistent map should accept pointer events in get-started mode
-  getStartedMapInteractive: boolean
 }
 
 const initialState: MapState = {
@@ -82,7 +80,6 @@ const initialState: MapState = {
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
   locationHighlight: null,
-  getStartedMapInteractive: false,
 }
 
 // ============================================================================
@@ -176,9 +173,6 @@ export const mapActions = {
   clearLocationHighlight: () =>
     useMapStore.setState({ locationHighlight: null }),
 
-  // Get-started map interactivity
-  setGetStartedMapInteractive: (interactive: boolean) =>
-    useMapStore.setState({ getStartedMapInteractive: interactive }),
 }
 
 // ============================================================================
@@ -233,10 +227,6 @@ export const useIsOutcomeVisualizationActive = () =>
 // Tooltips
 export const useClearTooltipsSignal = () =>
   useMapStore((s) => s.clearTooltipsSignal)
-
-// Get-started map interactivity
-export const useGetStartedMapInteractive = () =>
-  useMapStore((s) => s.getStartedMapInteractive)
 
 // Location highlight
 export const useLocationHighlight = () =>

@@ -80,7 +80,7 @@ const getContainerStyles = (
     case "explore":
       return { ...base, opacity: 1, pointerEvents: "auto" }
     case "get-started":
-      return { ...base, opacity: 1, pointerEvents: "none" }
+      return { ...base, opacity: 1, pointerEvents: "auto" }
     default:
       return base
   }
