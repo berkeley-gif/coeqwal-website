@@ -3,7 +3,7 @@
 import { useRef, useEffect, useMemo } from "react"
 import type { MotionValue } from "@repo/motion"
 import {
-  type PolygonMorphData,
+  type ShapeMorphData,
   resampleClosedPath,
   rectPoints,
   pointsToD,
@@ -12,12 +12,12 @@ import {
   POINTS_PER_SHAPE,
   SQUARE_SIZE,
   SQUARE_GAP,
-} from "./PolygonMorphOverlay"
+} from "@repo/viz"
 
 export interface OutcomeGroup {
   code: string
   label: string
-  polygons: PolygonMorphData[]
+  polygons: ShapeMorphData[]
 }
 
 interface OutcomeMorphOverlayProps {
@@ -34,7 +34,7 @@ export const MAX_POLYGONS_PER_OUTCOME = 140
 
 /** Compute pixel height of a distribution grid for layout planning. */
 export function computeDistributionHeight(
-  polygons: PolygonMorphData[],
+  polygons: ShapeMorphData[],
   squaresPerRow: number,
   maxWidth: number,
 ): number {
@@ -59,7 +59,7 @@ export function computeDistributionHeight(
 }
 
 function computeOutcomeLayout(
-  polygons: PolygonMorphData[],
+  polygons: ShapeMorphData[],
   targetX: number,
   targetY: number,
   maxWidth: number,
@@ -71,8 +71,7 @@ function computeOutcomeLayout(
     Math.max(1, Math.floor((maxWidth - GRID_PAD * 2) / cell)),
   )
 
-  // Group polygons by tier so each tier gets its own row(s)
-  const byTier = new Map<number, PolygonMorphData[]>()
+  const byTier = new Map<number, ShapeMorphData[]>()
   for (const poly of polygons) {
     const list = byTier.get(poly.tier) ?? []
     list.push(poly)
@@ -97,8 +96,10 @@ function computeOutcomeLayout(
       const gridX = targetX + GRID_PAD + col * cell + SQUARE_SIZE / 2
       const gridY = targetY + row * cell + SQUARE_SIZE / 2
 
-      const poly = group[i]!
-      const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
+      const shape = group[i]!
+      const resampled = shape.screenShape.length === POINTS_PER_SHAPE
+        ? shape.screenShape
+        : resampleClosedPath(shape.screenShape, POINTS_PER_SHAPE)
       const squareTarget = rectPoints(
         gridX,
         gridY,
@@ -110,9 +111,9 @@ function computeOutcomeLayout(
       results.push({
         resampled,
         squareTarget,
-        rawD: pointsToD(poly.screenPoly),
-        color: poly.color,
-        tier: poly.tier,
+        rawD: pointsToD(shape.screenShape),
+        color: shape.color,
+        tier: shape.tier,
       })
     }
     currentRow += Math.ceil(group.length / cols)

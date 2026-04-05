@@ -14,9 +14,20 @@ import {
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
+import {
+  type ShapeMorphData,
+  diamondPoints,
+  circlePoints,
+  lineSegmentPoints,
+  POINTS_PER_SHAPE,
+} from "@repo/viz"
 import { mapActions } from "../../map/store"
+import {
+  getOutcomeConfig,
+  RESERVOIR_CALSIM_TO_GNISIDLABEL,
+} from "../../map/config/outcomeLayerRegistry"
+import { getOutcomeLocationCoordinates, SALMON_RIVER_CENTROID } from "../../map/config/outcomeLocations"
 import { useTierAnimationData } from "./useTierAnimationData"
-import { type PolygonMorphData } from "./PolygonMorphOverlay"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
   getOutcomeProgressRange,
@@ -93,7 +104,27 @@ const OUTCOME_DISPLAY_ORDER = OUTCOME_CODE_ORDER.map((code) => ({
   label: getOutcomeName(code),
 }))
 
-const ACTIVE_OUTCOMES = new Set(["CWS_DEL", "AG_REV"])
+/** All polygon Mapbox layers that may need suppression/cleanup during animation. */
+const ANIM_POLYGON_LAYERS = [
+  { fill: "demand-units", outline: "demand-units-outline" },
+  { fill: "calsim-wba", outline: "calsim-wba-outline" },
+  { fill: "california-reservoir", outline: "california-reservoir-outline" },
+  { fill: "delta-water", outline: "delta-water-outline" },
+] as const
+
+const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
+
+const ACTIVE_OUTCOMES = new Set([
+  "CWS_DEL",
+  "AG_REV",
+  "ENV_FLOWS",
+  "GW_STOR",
+  "RES_STOR",
+  "DELTA_ECO",
+  "FW_DELTA_USES",
+  "FW_EXP",
+  "WRC_SALMON_AB",
+])
 
 const LAYOUT_LINE_HEIGHT = 32
 const LAYOUT_LABEL_GAP = 8
@@ -203,10 +234,10 @@ export default function TierAnimationSection() {
       const map = mapAPI.mapRef?.current?.getMap?.()
       if (!map?.isStyleLoaded?.()) return
       try {
-        if (map.getLayer("demand-units"))
-          map.setPaintProperty("demand-units", "fill-opacity", 0)
-        if (map.getLayer("demand-units-outline"))
-          map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
+          if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
+        }
       } catch {
         /* ok */
       }
@@ -259,6 +290,7 @@ export default function TierAnimationSection() {
         polygonsAllowedRef.current = true
 
         try {
+          // Set up demand-units for the beat-1 color cycling
           if (map.getLayer("demand-units")) {
             map.setPaintProperty("demand-units", "fill-opacity", 0)
             map.setPaintProperty(
@@ -272,8 +304,11 @@ export default function TierAnimationSection() {
               "transparent",
             )
           }
-          if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+          // Suppress all other polygon layers until their beat-2 turn
+          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+            if (fill === "demand-units") continue // already handled above
+            if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
+            if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
           }
         } catch {
           /* ok */
@@ -317,11 +352,19 @@ export default function TierAnimationSection() {
     tierColorLookupRef.current = lookup
   }, [outcomeLocations])
 
-  /** Pre-compute the schedule for hiding map polygons as SVG takes over.
-   *  Populated after outcomeGroups is computed. */
-  const hideScheduleRef = useRef<
-    { fadeStart: number; morphStart: number; duIds: string[] }[]
-  >([])
+  /** Pre-compute the schedule for hiding map features as SVG takes over.
+   *  Supports polygon layers (per-feature fade), line layers (global opacity),
+   *  and react-marker (no Mapbox layer to hide). */
+  interface HideScheduleEntry {
+    code: string
+    geometryType: "polygon" | "line" | "react-marker"
+    mapboxLayerId: string
+    idProperty: string
+    fadeStart: number
+    morphStart: number
+    locationIds: string[]
+  }
+  const hideScheduleRef = useRef<HideScheduleEntry[]>([])
 
   /** Build a Mapbox match expression blending from `fromHex` to each DU's
    *  tier color at ratio `t` (0 = all from, 1 = all tier). */
@@ -473,7 +516,7 @@ export default function TierAnimationSection() {
         }
         phase = "beat1"
       } else {
-        // Beat 2+: tier colors locked in; progressively hide DUs
+        // Beat 2+: tier colors locked in; progressively hide features
         // as their SVG copies start animating.
         if (phase !== "beat2") {
           try {
@@ -485,43 +528,89 @@ export default function TierAnimationSection() {
                 expr as never,
               )
             }
+            // Show non-demand-unit polygon layers at their default styling
+            for (const { fill } of ANIM_POLYGON_LAYERS) {
+              if (fill === "demand-units") continue
+              if (map.getLayer(fill)) {
+                map.setPaintProperty(fill, "fill-opacity", 0.65)
+              }
+            }
           } catch {
             /* ok */
           }
           phase = "beat2"
         }
 
-        // Per-group fade: each group fades from 0.65 → 0 over its
-        // fadeStart..morphStart window instead of snapping to 0.
-        const caseExpr: unknown[] = ["case"]
-        let anyActive = false
+        // Group hide schedule entries by Mapbox layer for polygon outcomes
+        const layerEntries = new Map<string, { idProperty: string; entries: typeof hideScheduleRef.current }>()
+        const lineEntries: typeof hideScheduleRef.current = []
+
         for (const entry of hideScheduleRef.current) {
           if (v < entry.fadeStart) continue
-          anyActive = true
+          if (entry.geometryType === "polygon" && entry.mapboxLayerId) {
+            let bucket = layerEntries.get(entry.mapboxLayerId)
+            if (!bucket) {
+              bucket = { idProperty: entry.idProperty, entries: [] }
+              layerEntries.set(entry.mapboxLayerId, bucket)
+            }
+            bucket.entries.push(entry)
+          } else if (entry.geometryType === "line" && entry.mapboxLayerId) {
+            lineEntries.push(entry)
+          }
+          // react-marker: no Mapbox layer to hide (SVG replaces them)
+        }
+
+        // Per-layer polygon fade
+        for (const [layerId, { idProperty, entries }] of layerEntries) {
+          if (!map.getLayer(layerId)) continue
+          const caseExpr: unknown[] = ["case"]
+          for (const entry of entries) {
+            const fadeDuration = entry.morphStart - entry.fadeStart
+            const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+            const opacity = 0.65 * (1 - t)
+            caseExpr.push(
+              ["in", ["get", idProperty], ["literal", entry.locationIds]],
+              opacity,
+            )
+          }
+          caseExpr.push(0.65)
+          try {
+            map.setPaintProperty(layerId, "fill-opacity", caseExpr as never)
+          } catch {
+            /* ok */
+          }
+        }
+
+        // For polygon layers with no active entries, restore default opacity
+        const allPolygonLayers = new Set<string>()
+        for (const entry of hideScheduleRef.current) {
+          if (entry.geometryType === "polygon" && entry.mapboxLayerId) {
+            allPolygonLayers.add(entry.mapboxLayerId)
+          }
+        }
+        for (const layerId of allPolygonLayers) {
+          if (layerEntries.has(layerId)) continue
+          try {
+            if (map.getLayer(layerId)) {
+              map.setPaintProperty(layerId, "fill-opacity", 0.65)
+            }
+          } catch {
+            /* ok */
+          }
+        }
+
+        // Line outcome fade
+        for (const entry of lineEntries) {
           const fadeDuration = entry.morphStart - entry.fadeStart
           const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
-          const opacity = 0.65 * (1 - t)
-          caseExpr.push(
-            ["in", ["get", "DU_ID"], ["literal", entry.duIds]],
-            opacity,
-          )
-        }
-        caseExpr.push(0.65) // default for not-yet-animated
-
-        try {
-          if (map.getLayer("demand-units")) {
-            if (anyActive) {
-              map.setPaintProperty(
-                "demand-units",
-                "fill-opacity",
-                caseExpr as never,
-              )
-            } else {
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+          const opacity = 1 - t
+          try {
+            if (map.getLayer(entry.mapboxLayerId)) {
+              map.setPaintProperty(entry.mapboxLayerId, "line-opacity", opacity)
             }
+          } catch {
+            /* ok */
           }
-        } catch {
-          /* ok */
         }
       }
     })
@@ -531,10 +620,13 @@ export default function TierAnimationSection() {
       const map = mapRef.getMap?.()
       if (map?.isStyleLoaded?.()) {
         try {
-          if (map.getLayer("demand-units"))
-            map.setPaintProperty("demand-units", "fill-opacity", 0)
-          if (map.getLayer("demand-units-outline"))
-            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+            if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
+            if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
+          }
+          for (const lineLayer of ANIM_LINE_LAYERS) {
+            if (map.getLayer(lineLayer)) map.setPaintProperty(lineLayer, "line-opacity", 1)
+          }
         } catch {
           /* ok */
         }
@@ -560,11 +652,11 @@ export default function TierAnimationSection() {
     }
   }, [isLoading, measurePanel])
 
-  /* ── Compute SVG polygon data from Mapbox demand-units layer ── */
+  /* ── Collect screen shapes from Mapbox layers + coordinate lookups ── */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
 
-  const computePolygonData = useCallback(() => {
+  const collectOutcomeShapes = useCallback(() => {
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
       retryTimerRef.current = null
@@ -574,7 +666,7 @@ export default function TierAnimationSection() {
     if (centroids.length === 0 && allLocationIds.size === 0) return
 
     const map = mapAPI.mapRef.current.getMap?.()
-    if (!map || !map.isStyleLoaded?.() || !map.getLayer("demand-units")) return
+    if (!map || !map.isStyleLoaded?.()) return
 
     const panelEl = panelRef.current
     const panelRect = panelEl.getBoundingClientRect()
@@ -582,113 +674,186 @@ export default function TierAnimationSection() {
     const svgOriginY = panelRect.top + panelEl.clientTop
 
     const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
+    const screenMap = new Map<string, ScreenPolygon>()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let features: any[] = []
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const layer = map.getLayer("demand-units") as any
-      const sourceId: string | undefined = layer?.source
-      const sourceLayer: string | undefined =
-        layer?.sourceLayer ?? layer?.["source-layer"]
-      if (sourceId && sourceLayer) {
-        features = map.querySourceFeatures(sourceId, { sourceLayer })
-      }
-    } catch {
-      /* fall through */
-    }
-    if (features.length === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      features = map.queryRenderedFeatures(undefined as any, {
-        layers: ["demand-units"],
+    // ── 1. Query polygon-based Mapbox layers per the registry ──
+    const layersToQuery = new Map<string, { idProperty: string; sourceLayerName?: string }>()
+
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const config = getOutcomeConfig(code)
+      if (!config || config.geometryType !== "polygon") continue
+      if (!config.mapboxLayerId || layersToQuery.has(config.mapboxLayerId)) continue
+      layersToQuery.set(config.mapboxLayerId, {
+        idProperty: config.idProperty ?? "DU_ID",
+        sourceLayerName: config.sourceLayer,
       })
     }
 
-    if (features.length === 0) {
-      retryTimerRef.current = setTimeout(computePolygonData, 1000)
+    let anyPolygonsFound = false
+    for (const [layerId, { idProperty, sourceLayerName }] of layersToQuery) {
+      if (!map.getLayer(layerId)) continue
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let features: any[] = []
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const layer = map.getLayer(layerId) as any
+        const sourceId: string | undefined = layer?.source
+        const srcLayer: string | undefined =
+          sourceLayerName ?? layer?.sourceLayer ?? layer?.["source-layer"]
+        if (sourceId && srcLayer) {
+          features = map.querySourceFeatures(sourceId, { sourceLayer: srcLayer })
+        }
+      } catch {
+        /* fall through */
+      }
+      if (features.length === 0) {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          features = map.queryRenderedFeatures(undefined as any, {
+            layers: [layerId],
+          })
+        } catch {
+          /* ok */
+        }
+      }
+
+      if (features.length > 0) anyPolygonsFound = true
+
+      const bestRings = new Map<string, { ring: [number, number][] }>()
+      for (const f of features) {
+        const featureId: string | undefined = f.properties?.[idProperty]
+        if (!featureId) continue
+        const ring = extractOuterRing(f.geometry)
+        if (!ring || ring.length < 3) continue
+        const existing = bestRings.get(featureId)
+        if (!existing || ring.length > existing.ring.length) {
+          bestRings.set(featureId, { ring })
+        }
+      }
+
+      for (const [featureId, { ring }] of bestRings) {
+        const screenPoly: [number, number][] = []
+        for (const [lng, lat] of ring) {
+          try {
+            const pt = map.project([lng, lat])
+            screenPoly.push([pt.x - svgOriginX, pt.y - svgOriginY])
+          } catch {
+            /* vertex outside projection bounds */
+          }
+        }
+        if (screenPoly.length < 3) continue
+
+        let cx = 0, cy = 0
+        for (const [x, y] of screenPoly) { cx += x; cy += y }
+        cx /= screenPoly.length
+        cy /= screenPoly.length
+        const centroidScreen: [number, number] = [cx, cy]
+
+        const cData = centroidLookup.get(featureId)
+        if (cData) {
+          try {
+            const pt = map.project([cData.lng, cData.lat])
+            centroidScreen[0] = pt.x - svgOriginX
+            centroidScreen[1] = pt.y - svgOriginY
+          } catch {
+            /* keep computed centroid */
+          }
+        }
+
+        screenMap.set(featureId, { screenPoly, centroidScreen })
+      }
+    }
+
+    // ── 2. React-marker outcomes: project coordinates to screen shapes ──
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const config = getOutcomeConfig(code)
+      if (!config || config.geometryType !== "react-marker") continue
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+
+      for (const locId of locData.ids) {
+        if (screenMap.has(locId)) continue
+        const coords = getOutcomeLocationCoordinates(code, locId)
+        if (!coords) continue
+
+        try {
+          const pt = map.project(coords)
+          const sx = pt.x - svgOriginX
+          const sy = pt.y - svgOriginY
+
+          let screenPoly: [number, number][]
+          if (code === "ENV_FLOWS") {
+            screenPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
+          } else {
+            screenPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
+          }
+          screenMap.set(locId, { screenPoly, centroidScreen: [sx, sy] })
+        } catch {
+          /* outside projection bounds */
+        }
+      }
+    }
+
+    // ── 3. Line outcomes: representative shape at centroid ──
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const config = getOutcomeConfig(code)
+      if (!config || config.geometryType !== "line") continue
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+
+      // WRC_SALMON_AB is single-value; use a synthetic ID
+      const syntheticId = [...locData.ids][0] ?? code
+      if (screenMap.has(syntheticId)) continue
+
+      try {
+        const pt = map.project(SALMON_RIVER_CENTROID)
+        const sx = pt.x - svgOriginX
+        const sy = pt.y - svgOriginY
+        const screenPoly = lineSegmentPoints(sx - 15, sy, sx + 15, sy, 8, POINTS_PER_SHAPE)
+        screenMap.set(syntheticId, { screenPoly, centroidScreen: [sx, sy] })
+      } catch {
+        /* outside projection bounds */
+      }
+    }
+
+    if (!anyPolygonsFound && screenMap.size === 0) {
+      retryTimerRef.current = setTimeout(collectOutcomeShapes, 1000)
       return
     }
 
-    // Collect best rings for ALL DU features (not just AG_REV ones)
-    const bestRings = new Map<
-      string,
-      { ring: [number, number][] }
-    >()
-    for (const f of features) {
-      const duId: string | undefined = f.properties?.DU_ID
-      if (!duId) continue
-      const ring = extractOuterRing(f.geometry)
-      if (!ring || ring.length < 3) continue
-      const existing = bestRings.get(duId)
-      if (!existing || ring.length > existing.ring.length) {
-        bestRings.set(duId, { ring })
-      }
-    }
-
-    // Project all polygons to screen coordinates
-    const screenMap = new Map<string, ScreenPolygon>()
-
-    for (const [duId, { ring }] of bestRings) {
-      const screenPoly: [number, number][] = []
-      for (const [lng, lat] of ring) {
-        try {
-          const pt = map.project([lng, lat])
-          screenPoly.push([pt.x - svgOriginX, pt.y - svgOriginY])
-        } catch {
-          /* vertex outside projection bounds */
-        }
-      }
-      if (screenPoly.length < 3) continue
-
-      // Compute centroid from screen polygon vertices
-      let cx = 0, cy = 0
-      for (const [x, y] of screenPoly) { cx += x; cy += y }
-      cx /= screenPoly.length
-      cy /= screenPoly.length
-
-      const centroidScreen: [number, number] = [cx, cy]
-
-      // If the DU has GeoJSON centroid data (AG_REV), use that for more accuracy
-      const cData = centroidLookup.get(duId)
-      if (cData) {
-        try {
-          const pt = map.project([cData.lng, cData.lat])
-          centroidScreen[0] = pt.x - svgOriginX
-          centroidScreen[1] = pt.y - svgOriginY
-        } catch {
-          /* keep computed centroid */
-        }
-      }
-
-      screenMap.set(duId, { screenPoly, centroidScreen })
-
-    }
-
     setAllScreenPolygons(screenMap)
-  }, [centroids, allLocationIds, mapAPI])
+  }, [centroids, allLocationIds, outcomeLocations, mapAPI])
 
-  computePolygonDataRef.current = computePolygonData
+  computePolygonDataRef.current = collectOutcomeShapes
 
   useEffect(() => {
-    window.addEventListener("resize", computePolygonData)
-    return () => window.removeEventListener("resize", computePolygonData)
-  }, [computePolygonData])
+    window.addEventListener("resize", collectOutcomeShapes)
+    return () => window.removeEventListener("resize", collectOutcomeShapes)
+  }, [collectOutcomeShapes])
 
-  /* ── Build per-outcome polygon groups for the morph overlay ── */
+  /* ── Build per-outcome shape groups for the morph overlay ── */
   const outcomeGroups: OutcomeGroup[] = useMemo(() => {
     if (allScreenPolygons.size === 0) return []
     return OUTCOME_DISPLAY_ORDER.map(({ code, label }) => {
       const locData = outcomeLocations[code]
       if (!locData) return { code, label, polygons: [] }
-      const polygons: PolygonMorphData[] = []
-      for (const duId of locData.ids) {
-        const screen = allScreenPolygons.get(duId)
+      const polygons: ShapeMorphData[] = []
+      for (const locId of locData.ids) {
+        // RES_STOR: API returns CalSim IDs; screen map uses gnisidlabel
+        let screenKey = locId
+        if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
+          const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
+          if (gnisName) screenKey = gnisName
+        }
+        const screen = allScreenPolygons.get(screenKey)
         if (!screen) continue
         polygons.push({
-          screenPoly: screen.screenPoly,
+          screenShape: screen.screenPoly,
           centroidScreen: screen.centroidScreen,
-          color: locData.colorMap[duId] || "#888888",
-          tier: locData.tierMap[duId] || 1,
+          color: locData.colorMap[locId] || "#888888",
+          tier: locData.tierMap[locId] || 1,
+          sourceId: locId,
         })
       }
       return { code, label, polygons }
@@ -702,14 +867,36 @@ export default function TierAnimationSection() {
 
   useEffect(() => {
     const total = activeOutcomeGroups.length
-    const schedule: { fadeStart: number; morphStart: number; duIds: string[] }[] = []
+    const schedule: HideScheduleEntry[] = []
     for (let i = 0; i < total; i++) {
       const group = activeOutcomeGroups[i]!
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
+      const config = getOutcomeConfig(group.code)
+      if (!config) continue
       const [morphStart] = getOutcomeProgressRange(i, total)
       const fadeStart = morphStart - 0.02
-      schedule.push({ fadeStart, morphStart, duIds: [...locData.ids] })
+
+      // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
+      let locationIds = [...locData.ids]
+      if (group.code === "RES_STOR") {
+        const mapped = new Set<string>()
+        for (const id of locationIds) {
+          const gnis = RESERVOIR_CALSIM_TO_GNISIDLABEL[id]
+          if (gnis) mapped.add(gnis)
+        }
+        locationIds = [...mapped]
+      }
+
+      schedule.push({
+        code: group.code,
+        geometryType: config.geometryType as "polygon" | "line" | "react-marker",
+        mapboxLayerId: config.mapboxLayerId,
+        idProperty: config.idProperty ?? "",
+        fadeStart,
+        morphStart,
+        locationIds,
+      })
     }
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])

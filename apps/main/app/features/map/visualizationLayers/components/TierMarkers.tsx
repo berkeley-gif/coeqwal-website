@@ -14,50 +14,10 @@ import { useTheme } from "@repo/ui/mui"
 import type { TierLocation } from "../types"
 import type { HoveredFeatureInfo } from "../types"
 import { getTierLabel } from "../../../../content/tiers"
-
-// =============================================================================
-// COORDINATE LOOKUPS (fixed physical locations)
-// =============================================================================
-
-const ENV_FLOWS_COORDINATES: Record<string, [number, number]> = {
-  AMR004: [-121.44652, 38.58742],
-  TRN111: [-122.80357, 40.71986],
-  FTR029: [-121.60595, 39.13874],
-  FTR003: [-121.64106, 38.82422],
-  MOK028: [-121.33569, 38.19941],
-  MCD005: [-120.93038, 37.37076],
-  SAC000: [-121.89059, 38.04598],
-  SAC049: [-121.50203, 38.4557],
-  SAC122: [-121.82241, 39.02399],
-  SAC148: [-121.9983, 39.23212],
-  SAC257: [-122.1869, 40.28875],
-  SJR127: [-120.89662, 37.29453],
-  SAC289: [-122.35625, 40.53738],
-  SJR070: [-121.26529, 37.67577],
-  STS011: [-121.1642, 37.70396],
-  TUO003: [-121.14185, 37.60423],
-  YUB002: [-121.5773, 39.14433],
-}
-
-const ENV_FLOWS_NAMES: Record<string, string> = {
-  AMR004: "American River at I-80 Bridge",
-  TRN111: "Trinity River at Lewiston",
-  FTR029: "Feather River at Yuba City",
-  FTR003: "Feather River",
-  MOK028: "Mokelumne River",
-  MCD005: "Merced River at Stevinson",
-  SAC000: "Sacramento at confluence",
-  SAC049: "Sacramento River at Freeport",
-  SAC122: "Sacramento River at Tisdale Weir",
-  SAC148: "Sacramento River at Colusa Weir",
-  SAC257: "Sacramento River above Bend Bridge",
-  SJR127: "San Joaquin at Salt Slough",
-  SAC289: "Sacramento River (South Bonnieville)",
-  SJR070: "San Joaquin near Vernalis",
-  STS011: "Stanislaus River",
-  TUO003: "Tuolumne River",
-  YUB002: "Yuba River at Marysville",
-}
+import {
+  ENV_FLOWS_COORDINATES,
+  ENV_FLOWS_NAMES,
+} from "../../config/outcomeLocations"
 
 // =============================================================================
 // COMPONENT

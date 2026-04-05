@@ -2,10 +2,28 @@
 
 import { useRef, useEffect, useMemo } from "react"
 import type { MotionValue } from "@repo/motion"
+import {
+  POINTS_PER_SHAPE,
+  SQUARE_SIZE,
+  SQUARE_GAP,
+  resampleClosedPath,
+  rectPoints,
+  pointsToD,
+  easeInOut,
+  lerp,
+} from "@repo/viz"
 
-export const POINTS_PER_SHAPE = 96
-export const SQUARE_SIZE = 10
-export const SQUARE_GAP = 2
+export {
+  POINTS_PER_SHAPE,
+  SQUARE_SIZE,
+  SQUARE_GAP,
+  resampleClosedPath,
+  rectPoints,
+  pointsToD,
+  easeInOut,
+  lerp,
+}
+
 const ROW_GAP = 6
 const BAR_HEIGHT = SQUARE_SIZE
 const BAR_GAP = 2
@@ -17,97 +35,6 @@ export interface PolygonMorphData {
   centroidScreen: [number, number]
   color: string
   tier: number
-}
-
-interface PolygonMorphOverlayProps {
-  polygons: PolygonMorphData[]
-  panelWidth: number
-  panelHeight: number
-  fillOpacity: number
-  strokeWidth: number
-  scrollProgress: MotionValue<number>
-}
-
-/* geometry helpers (exported for reuse by OutcomeMorphOverlay) */
-
-export function resampleClosedPath(
-  points: [number, number][],
-  n: number,
-): [number, number][] {
-  if (points.length < 2)
-    return Array(n).fill(points[0] ?? [0, 0]) as [number, number][]
-
-  const closed = [...points]
-  const first = closed[0]!
-  const last = closed[closed.length - 1]!
-  if (first[0] !== last[0] || first[1] !== last[1]) closed.push(first)
-
-  const cumDist = [0]
-  for (let i = 1; i < closed.length; i++) {
-    const cur = closed[i]!
-    const prev = closed[i - 1]!
-    const dx = cur[0] - prev[0]
-    const dy = cur[1] - prev[1]
-    cumDist.push(cumDist[i - 1]! + Math.sqrt(dx * dx + dy * dy))
-  }
-  const total = cumDist[cumDist.length - 1]!
-  if (total === 0) return Array(n).fill(first) as [number, number][]
-
-  const out: [number, number][] = []
-  for (let i = 0; i < n; i++) {
-    const target = (i / n) * total
-    let s = 0
-    while (s < cumDist.length - 2 && cumDist[s + 1]! < target) s++
-    const segLen = cumDist[s + 1]! - cumDist[s]!
-    const t = segLen > 0 ? (target - cumDist[s]!) / segLen : 0
-    const a = closed[s]!
-    const b = closed[s + 1]!
-    out.push([a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])])
-  }
-  return out
-}
-
-export function rectPoints(
-  cx: number,
-  cy: number,
-  w: number,
-  h: number,
-  n: number,
-): [number, number][] {
-  const hw = w / 2,
-    hh = h / 2
-  return resampleClosedPath(
-    [
-      [cx - hw, cy - hh],
-      [cx + hw, cy - hh],
-      [cx + hw, cy + hh],
-      [cx - hw, cy + hh],
-    ],
-    n,
-  )
-}
-
-export function pointsToD(pts: [number, number][]): string {
-  if (pts.length === 0) return ""
-  const p0 = pts[0]!
-  let d = `M${p0[0].toFixed(1)},${p0[1].toFixed(1)}`
-  for (let i = 1; i < pts.length; i++) {
-    const p = pts[i]!
-    d += `L${p[0].toFixed(1)},${p[1].toFixed(1)}`
-  }
-  return d + "Z"
-}
-
-export function easeInOut(t: number): number {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-}
-
-export function lerp(
-  a: [number, number],
-  b: [number, number],
-  t: number,
-): [number, number] {
-  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]
 }
 
 /* grid & bar layout (stacked regions) */
