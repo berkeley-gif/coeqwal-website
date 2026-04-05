@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo } from "react"
+import { useRef, useEffect, useMemo, useCallback } from "react"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
@@ -13,11 +13,24 @@ import {
   SQUARE_SIZE,
   SQUARE_GAP,
 } from "@repo/viz"
+import { useHoverPin } from "@repo/ui/hooks"
+import { getTierLabel } from "../../../content/tiers"
+import {
+  ENV_FLOWS_NAMES,
+  STATION_NAMES,
+} from "../../map/config/outcomeLocations"
+import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
 
 export interface OutcomeGroup {
   code: string
   label: string
   polygons: ShapeMorphData[]
+}
+
+export interface LocationInfo {
+  code: string
+  sourceId: string
+  tier: number
 }
 
 interface OutcomeMorphOverlayProps {
@@ -39,6 +52,18 @@ interface OutcomeMorphOverlayProps {
   onOutcomeClick?: (code: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
+  onLocationHover?: (info: LocationInfo | null) => void
+  onLocationPin?: (info: LocationInfo | null) => void
+}
+
+function getLocationName(code: string, sourceId: string): string {
+  if (code === "ENV_FLOWS") return ENV_FLOWS_NAMES[sourceId] ?? sourceId
+  if (code === "FW_EXP" || code === "FW_DELTA_USES")
+    return STATION_NAMES[sourceId] ?? sourceId
+  if (code === "RES_STOR")
+    return RESERVOIR_CALSIM_TO_GNISIDLABEL[sourceId] ?? sourceId
+  if (code === "DELTA_ECO") return "Sacramento-San Joaquin Delta"
+  return sourceId
 }
 
 export const GRID_PAD = 12
@@ -97,6 +122,7 @@ function computeOutcomeLayout(
     rawD: string
     color: string
     tier: number
+    sourceId: string
   }[] = []
 
   let currentRow = 0
@@ -127,6 +153,7 @@ function computeOutcomeLayout(
         rawD: pointsToD(shape.screenShape),
         color: shape.color,
         tier: shape.tier,
+        sourceId: shape.sourceId,
       })
     }
     currentRow += Math.ceil(group.length / cols)
@@ -161,10 +188,35 @@ export default function OutcomeMorphOverlay({
   onOutcomeClick,
   selectedOutcomeCode,
   interactive,
+  onLocationHover,
+  onLocationPin,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
   const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
+
+  const locationIsEqual = useCallback(
+    (a: LocationInfo, b: LocationInfo) =>
+      a.code === b.code && a.sourceId === b.sourceId,
+    [],
+  )
+
+  const handleActiveChange = useCallback(
+    (item: LocationInfo | null) => {
+      onLocationHover?.(item)
+    },
+    [onLocationHover],
+  )
+
+  const { activeItem: activeLocation, handlers: locHandlers, clearAll: clearLocationHoverPin } =
+    useHoverPin<LocationInfo>({
+      isEqual: locationIsEqual,
+      onActiveChange: handleActiveChange,
+    })
+
+  useEffect(() => {
+    clearLocationHoverPin()
+  }, [selectedOutcomeCode, clearLocationHoverPin])
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
@@ -232,6 +284,31 @@ export default function OutcomeMorphOverlay({
       }
     })
   }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap])
+
+  const tooltipInfo = useMemo(() => {
+    if (!activeLocation) return null
+    const group = outcomeShapes.find((g) => g.code === activeLocation.code)
+    if (!group) return null
+    const shape = group.shapes.find(
+      (s) => s.sourceId === activeLocation.sourceId,
+    )
+    if (!shape) return null
+    let cx = 0,
+      cy = 0
+    for (const [px, py] of shape.squareTarget) {
+      cx += px
+      cy += py
+    }
+    cx /= shape.squareTarget.length
+    cy /= shape.squareTarget.length
+    return {
+      x: cx,
+      y: cy - SQUARE_SIZE / 2 - 4,
+      name: getLocationName(activeLocation.code, activeLocation.sourceId),
+      tier: getTierLabel(activeLocation.tier),
+      color: shape.color,
+    }
+  }, [activeLocation, outcomeShapes])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
@@ -316,21 +393,67 @@ export default function OutcomeMorphOverlay({
               fill="transparent"
               pointerEvents={interactive ? "all" : "none"}
             />
-            {group.shapes.map((shape, i) => (
-              <path
-                key={`${group.code}-${i}`}
-                ref={(el) => {
-                  refs[i] = el
-                }}
-                d={shape.rawD}
-                fill={shape.color}
-                fillOpacity={isSelected ? 1 : 0.75}
-                stroke={shape.color}
-                strokeWidth={0.5}
-                strokeOpacity={0.4}
-                style={{ opacity: 0, transition: "fill-opacity 0.2s" }}
-              />
-            ))}
+            {group.shapes.map((shape, i) => {
+              const isLocationActive =
+                interactive &&
+                activeLocation !== null &&
+                activeLocation.code === group.code &&
+                activeLocation.sourceId === shape.sourceId
+              return (
+                <path
+                  key={`${group.code}-${i}`}
+                  ref={(el) => {
+                    refs[i] = el
+                  }}
+                  d={shape.rawD}
+                  fill={shape.color}
+                  fillOpacity={
+                    isLocationActive ? 1 : isSelected ? 0.9 : 0.75
+                  }
+                  stroke={isLocationActive ? "#fff" : shape.color}
+                  strokeWidth={isLocationActive ? 1.5 : 0.5}
+                  strokeOpacity={isLocationActive ? 1 : 0.4}
+                  style={{
+                    opacity: 0,
+                    transition:
+                      "fill-opacity 0.15s, stroke 0.15s, stroke-width 0.15s",
+                  }}
+                  pointerEvents={interactive && isSelected ? "all" : "none"}
+                  onMouseEnter={
+                    interactive && isSelected
+                      ? () =>
+                          locHandlers.onMouseEnter({
+                            code: group.code,
+                            sourceId: shape.sourceId,
+                            tier: shape.tier,
+                          })
+                      : undefined
+                  }
+                  onMouseLeave={
+                    interactive && isSelected
+                      ? locHandlers.onMouseLeave
+                      : undefined
+                  }
+                  onClick={
+                    interactive && isSelected
+                      ? (e) => {
+                          e.stopPropagation()
+                          locHandlers.onClick({
+                            code: group.code,
+                            sourceId: shape.sourceId,
+                            tier: shape.tier,
+                          })
+                          onLocationPin?.({
+                            code: group.code,
+                            sourceId: shape.sourceId,
+                            tier: shape.tier,
+                          })
+                        }
+                      : undefined
+                  }
+                />
+              )
+            })}
             {group.locationDescription && (
               <text
                 ref={(el) => {
@@ -349,6 +472,42 @@ export default function OutcomeMorphOverlay({
           </g>
         )
       })}
+
+      {tooltipInfo && (
+        <foreignObject
+          x={tooltipInfo.x - 100}
+          y={tooltipInfo.y - 40}
+          width={200}
+          height={40}
+          style={{ pointerEvents: "none", overflow: "visible" }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
+              margin: "0 auto",
+              padding: "3px 8px",
+              borderRadius: 4,
+              background: "rgba(255,255,255,0.92)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+              fontFamily: "inherit",
+              fontSize: 11,
+              lineHeight: 1.3,
+              textAlign: "center",
+              color: "#333",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ fontWeight: 600, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+              {tooltipInfo.name}
+            </span>
+            <span style={{ color: tooltipInfo.color, fontWeight: 500 }}>
+              {tooltipInfo.tier}
+            </span>
+          </div>
+        </foreignObject>
+      )}
     </svg>
   )
 }
