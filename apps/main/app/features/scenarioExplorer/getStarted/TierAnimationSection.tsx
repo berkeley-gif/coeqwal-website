@@ -234,6 +234,7 @@ export default function TierAnimationSection() {
         setPlayState("finished")
         mapActions.clearOutcomeVisualization()
         mapActions.clearLocationHighlight()
+        mapActions.setGetStartedMapInteractive(true)
 
         // Reset all animation polygon layers to a clean state so
         // OutcomePolygonLayer can manage them for interactive toggling.
@@ -275,6 +276,7 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     applyPanelOffsetRef.current()
     mapActions.clearLocationHighlight()
+    mapActions.setGetStartedMapInteractive(false)
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -482,6 +484,7 @@ export default function TierAnimationSection() {
       clearInterval(suppressInterval)
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
+      mapActions.setGetStartedMapInteractive(false)
 
       if (mapAPI.mapRef?.current) {
         try {
@@ -1393,6 +1396,7 @@ export default function TierAnimationSection() {
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
+        pointerEvents: isInteractive ? "none" : undefined,
       }}
     >
       {/* Static heading — fades when animation starts */}
@@ -1485,6 +1489,7 @@ export default function TierAnimationSection() {
               display: "flex",
               gap: 1.5,
               alignItems: "center",
+              pointerEvents: "auto",
             }}
           >
             {/* Rewind — visible once the animation has started */}

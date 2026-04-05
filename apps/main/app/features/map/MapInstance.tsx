@@ -13,6 +13,7 @@ import {
   useActiveSection,
   useCameraView,
   useExplorePanelWidth,
+  useGetStartedMapInteractive,
   mapActions,
   type MapMode,
 } from "./store"
@@ -54,6 +55,7 @@ const getContainerStyles = (
     transition: { fade: string; fast: string }
   },
   scrollOffset: number = 0,
+  getStartedInteractive: boolean = false,
 ): React.CSSProperties => {
   const base: React.CSSProperties = {
     position: "fixed",
@@ -80,7 +82,11 @@ const getContainerStyles = (
     case "explore":
       return { ...base, opacity: 1, pointerEvents: "auto" }
     case "get-started":
-      return { ...base, opacity: 1, pointerEvents: "none" }
+      return {
+        ...base,
+        opacity: 1,
+        pointerEvents: getStartedInteractive ? "auto" : "none",
+      }
     default:
       return base
   }
@@ -109,6 +115,7 @@ export default function MapInstance({
   const activeSection = useActiveSection()
   const cameraView = useCameraView()
   const explorePanelWidth = useExplorePanelWidth()
+  const getStartedInteractive = useGetStartedMapInteractive()
 
   const isLearnMode = mapMode === "learn"
   const isExploreMode = mapMode === "explore"
@@ -221,6 +228,7 @@ export default function MapInstance({
     mapMode,
     theme,
     isLearnMode ? learnMapScrollOffset : 0,
+    getStartedInteractive,
   )
 
   return (
