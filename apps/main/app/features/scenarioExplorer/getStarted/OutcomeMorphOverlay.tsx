@@ -173,11 +173,11 @@ export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.7
-  const beat2End = 0.96
+  const beat2Start = 0.80
+  const beat2End = 1.0
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
-  return [start, start + sliceWidth * 0.8]
+  return [start, start + sliceWidth * 0.9]
 }
 
 export default function OutcomeMorphOverlay({

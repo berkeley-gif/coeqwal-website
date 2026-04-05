@@ -52,30 +52,30 @@ export default function BeatTextOverlay({
       }
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.18) / 0.04)
+        const fadeIn = clamp01((v - 0.30) / 0.04)
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
       if (beat2PanelRef.current) {
-        const fadeIn = clamp01((v - 0.2) / 0.04)
+        const fadeIn = clamp01((v - 0.32) / 0.04)
         beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
       for (let i = 0; i < OUTCOME_CODE_ORDER.length; i++) {
         const el = beat2ItemRefs.current[i]
         if (!el) continue
-        const itemStart = 0.22 + i * 0.035
+        const itemStart = 0.34 + i * 0.035
         const fadeIn = clamp01((v - itemStart) / 0.03)
         el.style.opacity = String(fadeIn)
       }
 
       if (levelsLineRef.current) {
-        const fadeIn = clamp01((v - 0.54) / 0.04)
+        const fadeIn = clamp01((v - 0.66) / 0.04)
         levelsLineRef.current.style.opacity = String(fadeIn)
       }
 
       if (tierLegendRef.current) {
-        const fadeIn = clamp01((v - 0.58) / 0.04)
+        const fadeIn = clamp01((v - 0.70) / 0.04)
         tierLegendRef.current.style.opacity = String(fadeIn)
       }
 
