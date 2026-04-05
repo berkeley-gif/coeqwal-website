@@ -138,7 +138,7 @@ export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.70
+  const beat2Start = 0.7
   const beat2End = 0.96
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
@@ -259,7 +259,9 @@ export default function OutcomeMorphOverlay({
         return (
           <g
             key={group.code}
-            onClick={interactive ? () => onOutcomeClick?.(group.code) : undefined}
+            onClick={
+              interactive ? () => onOutcomeClick?.(group.code) : undefined
+            }
             style={{ cursor: interactive ? "pointer" : "default" }}
           >
             {group.shapes.map((shape, i) => (
