@@ -64,6 +64,17 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
 
   const padding = theme.space.panel.padding
 
+  const textColor = theme.palette.undertone.warm
+  const shadow = theme.textShadow.displayBody
+
+  const panelWidth = {
+    xs: "100%",
+    sm: "340px",
+    md: "380px",
+    lg: "420px",
+    xl: "460px",
+  }
+
   return (
     <Box
       sx={{
@@ -71,6 +82,10 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
         inset: 0,
         zIndex: 3,
         pointerEvents: "none",
+        "& .MuiTypography-root": {
+          color: textColor,
+          textShadow: shadow,
+        },
       }}
     >
       {/* Beat 1 */}
@@ -82,38 +97,28 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           left: 0,
           p: padding,
           opacity: 0,
+          width: panelWidth,
         }}
       >
-        <Typography
-          variant="h4"
-          component="p"
-          fontWeight={300}
-          color="text.secondary"
-          sx={{ maxWidth: theme.space.paragraphMaxSize }}
-        >
+        <Typography variant="storyBody" component="p">
           Different water management scenarios bring water to different parts
           of the system.
         </Typography>
       </Box>
 
-      {/* Beat 2 */}
+      {/* Beat 2 — right-aligned */}
       <Box
         sx={{
           position: "absolute",
           top: 0,
-          left: 0,
+          right: 0,
           p: padding,
           pt: `calc(${padding} + 4vh)`,
+          width: panelWidth,
         }}
       >
         <Box ref={beat2IntroRef} sx={{ opacity: 0 }}>
-          <Typography
-            variant="h4"
-            component="p"
-            fontWeight={300}
-            color="text.secondary"
-            sx={{ maxWidth: theme.space.paragraphMaxSize }}
-          >
+          <Typography variant="storyBody" component="p">
             We can group these parts of the system into categories:
           </Typography>
         </Box>
@@ -126,13 +131,7 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
               }}
               sx={{ opacity: 0, mt: 0.75 }}
             >
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{ maxWidth: theme.space.paragraphMaxSize }}
-              >
-                {outcome}
-              </Typography>
+              <Typography variant="storyBody">{outcome}</Typography>
             </Box>
           ))}
         </Box>
@@ -147,15 +146,10 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           left: 0,
           p: padding,
           opacity: 0,
+          width: panelWidth,
         }}
       >
-        <Typography
-          variant="h4"
-          component="p"
-          fontWeight={300}
-          color="text.secondary"
-          sx={{ maxWidth: theme.space.paragraphMaxSize }}
-        >
+        <Typography variant="storyBody" component="p">
           Each outcome has a group of researchers behind it. Click here to
           learn more about their methodologies.
         </Typography>

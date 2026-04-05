@@ -112,6 +112,8 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import PauseIcon from "@mui/icons-material/Pause"
+import ReplayIcon from "@mui/icons-material/Replay"
 import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
@@ -176,6 +178,8 @@ export {
   ArrowForwardIcon,
   FiberManualRecordIcon,
   PlayArrowIcon,
+  PauseIcon,
+  ReplayIcon,
   InfoIcon,
   UnfoldMoreIcon,
   MyLocationIcon,

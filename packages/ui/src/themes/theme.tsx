@@ -289,7 +289,7 @@ const palette = {
     medium: "#2d89b6", // Medium blue
     bright: "#449cd9", // Bright blue - links/interactive
     light: "#77a2d9", // Light blue
-    pale: "#cef1f5", // Pale cyan/ice blue
+    pale: "#BDE1E4", // Soft teal / sea glass
     softSky: "#B4D2F0", // Soft sky blue (compare to brand.sky...do we need both?)
   },
 

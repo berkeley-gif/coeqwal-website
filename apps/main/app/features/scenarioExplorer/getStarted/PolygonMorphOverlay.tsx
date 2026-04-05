@@ -3,9 +3,9 @@
 import { useRef, useEffect, useMemo } from "react"
 import type { MotionValue } from "@repo/motion"
 
-const POINTS_PER_SHAPE = 96
-const SQUARE_SIZE = 10
-const SQUARE_GAP = 2
+export const POINTS_PER_SHAPE = 96
+export const SQUARE_SIZE = 10
+export const SQUARE_GAP = 2
 const ROW_GAP = 6
 const BAR_HEIGHT = SQUARE_SIZE
 const BAR_GAP = 2
@@ -28,9 +28,9 @@ interface PolygonMorphOverlayProps {
   scrollProgress: MotionValue<number>
 }
 
-/* geometry helpers */
+/* geometry helpers (exported for reuse by OutcomeMorphOverlay) */
 
-function resampleClosedPath(
+export function resampleClosedPath(
   points: [number, number][],
   n: number,
 ): [number, number][] {
@@ -67,7 +67,7 @@ function resampleClosedPath(
   return out
 }
 
-function rectPoints(
+export function rectPoints(
   cx: number,
   cy: number,
   w: number,
@@ -87,7 +87,7 @@ function rectPoints(
   )
 }
 
-function pointsToD(pts: [number, number][]): string {
+export function pointsToD(pts: [number, number][]): string {
   if (pts.length === 0) return ""
   const p0 = pts[0]!
   let d = `M${p0[0].toFixed(1)},${p0[1].toFixed(1)}`
@@ -98,11 +98,11 @@ function pointsToD(pts: [number, number][]): string {
   return d + "Z"
 }
 
-function easeInOut(t: number): number {
+export function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
 }
 
-function lerp(
+export function lerp(
   a: [number, number],
   b: [number, number],
   t: number,
