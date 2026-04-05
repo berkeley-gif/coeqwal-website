@@ -14,7 +14,8 @@
  */
 
 import { useEffect, useState, useMemo, useRef } from "react"
-import { useMap, Source, Layer } from "@repo/map"
+import { useMap, Source, Layer, Popup } from "@repo/map"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 
 // Components
 import TierMarkers from "./components/TierMarkers"
@@ -38,7 +39,12 @@ import { FetchError } from "@repo/data/fetching"
 import type { TierLocation } from "./types"
 
 // Store
-import { useMapMode, useGeocoderMarker, useClearTooltipsSignal } from "../store"
+import {
+  useMapMode,
+  useGeocoderMarker,
+  useClearTooltipsSignal,
+  useLocationHighlight,
+} from "../store"
 
 // Large polygon covering California and surrounding area for dim overlay
 const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
@@ -64,9 +70,11 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
 }
 
 export default function VisualizationLayers() {
+  const theme = useTheme()
   const map = useMap()
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
+  const locationHighlight = useLocationHighlight()
 
   // Get outcome visualization data
   const {
@@ -250,6 +258,49 @@ export default function VisualizationLayers() {
           isPinned={false}
           onClose={() => {}}
         />
+      )}
+
+      {/* Lightweight tooltip from tier animation overlay hover/pin */}
+      {locationHighlight && (
+        <Popup
+          key="location-highlight"
+          longitude={locationHighlight.longitude}
+          latitude={locationHighlight.latitude}
+          anchor="bottom"
+          closeButton={false}
+          closeOnClick={false}
+          offset={12}
+        >
+          <Box sx={{ p: theme.space.component.md, minWidth: 140, maxWidth: 260 }}>
+            <Typography
+              variant="tooltipHeader"
+              sx={{ color: theme.palette.blue.darkest, mb: 0.5 }}
+            >
+              {locationHighlight.name}
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: theme.space.gap.sm,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: theme.borderRadius.xs,
+                  backgroundColor: locationHighlight.tierColor,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="dashboard">
+                <strong>Tier {locationHighlight.tierLevel}:</strong>{" "}
+                {locationHighlight.tierLabel}
+              </Typography>
+            </Box>
+          </Box>
+        </Popup>
       )}
     </>
   )
