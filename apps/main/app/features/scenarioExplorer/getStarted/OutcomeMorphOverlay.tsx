@@ -69,7 +69,7 @@ function computeOutcomeLayout(
  * Each outcome gets a slice for its polygon morph animation.
  * The first outcome (CWS_DEL) starts at 0.34 (after the intro text fades in).
  */
-function getOutcomeProgressRange(
+export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
