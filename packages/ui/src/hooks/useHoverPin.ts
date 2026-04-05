@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 
 export interface UseHoverPinOptions<T> {
   /** Custom equality check for items. Default: `===` */
@@ -48,10 +48,24 @@ export function useHoverPin<T>(
 
   const active = pinned ?? hovered
 
-  const fireChange = useCallback(
-    (next: T | null) => onActiveChangeRef.current?.(next),
-    [],
-  )
+  // Fire the callback in an effect (after render) so we never trigger
+  // a setState in another component during this component's render.
+  const prevActiveRef = useRef<T | null>(null)
+  useEffect(() => {
+    const prev = prevActiveRef.current
+    const changed =
+      prev === null && active !== null
+        ? true
+        : prev !== null && active === null
+          ? true
+          : prev !== null && active !== null
+            ? !isEqual(prev, active)
+            : false
+    prevActiveRef.current = active
+    if (changed) {
+      onActiveChangeRef.current?.(active)
+    }
+  })
 
   const onMouseEnter = useCallback(
     (item: T) => {
@@ -73,21 +87,18 @@ export function useHoverPin<T>(
       setPinned((prev) => {
         if (prev !== null && isEqual(prev, item)) {
           suppressUntilRef.current = Date.now() + suppressionMs
-          fireChange(null)
           return null
         }
-        fireChange(item)
         return item
       })
     },
-    [isEqual, suppressionMs, fireChange],
+    [isEqual, suppressionMs],
   )
 
   const clearAll = useCallback(() => {
     setHovered(null)
     setPinned(null)
-    fireChange(null)
-  }, [fireChange])
+  }, [])
 
   return {
     hoveredItem: hovered,

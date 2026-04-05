@@ -25,6 +25,16 @@ export interface OutcomeVisualization {
   scenarioId: string
 }
 
+/** Lightweight tooltip driven by the tier animation overlay hover/pin */
+export interface LocationHighlight {
+  longitude: number
+  latitude: number
+  name: string
+  tierLevel: number
+  tierLabel: string
+  tierColor: string
+}
+
 // ============================================================================
 // State
 // ============================================================================
@@ -51,6 +61,9 @@ interface MapState {
 
   // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
   clearTooltipsSignal: number
+
+  // Lightweight highlight tooltip driven by the tier animation overlay
+  locationHighlight: LocationHighlight | null
 }
 
 const initialState: MapState = {
@@ -65,6 +78,7 @@ const initialState: MapState = {
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
+  locationHighlight: null,
 }
 
 // ============================================================================
@@ -151,6 +165,12 @@ export const mapActions = {
     useMapStore.setState((state) => ({
       clearTooltipsSignal: state.clearTooltipsSignal + 1,
     })),
+
+  // Location highlight (tier animation overlay hover)
+  setLocationHighlight: (highlight: LocationHighlight) =>
+    useMapStore.setState({ locationHighlight: highlight }),
+  clearLocationHighlight: () =>
+    useMapStore.setState({ locationHighlight: null }),
 }
 
 // ============================================================================
@@ -205,3 +225,7 @@ export const useIsOutcomeVisualizationActive = () =>
 // Tooltips
 export const useClearTooltipsSignal = () =>
   useMapStore((s) => s.clearTooltipsSignal)
+
+// Location highlight
+export const useLocationHighlight = () =>
+  useMapStore((s) => s.locationHighlight)

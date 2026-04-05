@@ -42,6 +42,7 @@ import BeatTextOverlay from "./BeatTextOverlay"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
+import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 
 const TOTAL_DURATION = 30
@@ -232,6 +233,7 @@ export default function TierAnimationSection() {
       onComplete: () => {
         setPlayState("finished")
         mapActions.clearOutcomeVisualization()
+        mapActions.clearLocationHighlight()
 
         // Reset all animation polygon layers to a clean state so
         // OutcomePolygonLayer can manage them for interactive toggling.
@@ -272,6 +274,7 @@ export default function TierAnimationSection() {
   const handleRewind = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
     applyPanelOffsetRef.current()
+    mapActions.clearLocationHighlight()
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -283,25 +286,39 @@ export default function TierAnimationSection() {
   const isInteractive = playState === "finished"
 
   const highlightRef = useRef<{
-    layerId: string
+    fillId: string
+    outlineId: string
     idProperty: string
-    prevWidth: unknown
+    prevFillOpacity: unknown
+    prevLineWidth: unknown
+    prevLineColor: unknown
   } | null>(null)
+
+  const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
+    new Map(),
+  )
+  useEffect(() => {
+    centroidLookupRef.current = new Map(
+      centroids.map((c) => [c.id, { lng: c.lng, lat: c.lat }]),
+    )
+  }, [centroids])
 
   const handleLocationActive = useCallback(
     (info: LocationInfo | null) => {
       const map = mapAPI.mapRef?.current?.getMap?.()
       if (!map?.isStyleLoaded?.()) return
 
+      // ── Restore previous state ──
       if (highlightRef.current) {
-        const { layerId, prevWidth } = highlightRef.current
+        const { fillId, outlineId, prevFillOpacity, prevLineWidth, prevLineColor } =
+          highlightRef.current
         try {
-          if (map.getLayer(layerId)) {
-            map.setPaintProperty(
-              layerId,
-              "line-width",
-              prevWidth as never,
-            )
+          if (map.getLayer(fillId)) {
+            map.setPaintProperty(fillId, "fill-opacity", prevFillOpacity as never)
+          }
+          if (map.getLayer(outlineId)) {
+            map.setPaintProperty(outlineId, "line-width", prevLineWidth as never)
+            map.setPaintProperty(outlineId, "line-color", prevLineColor as never)
           }
         } catch {
           /* ok */
@@ -309,13 +326,16 @@ export default function TierAnimationSection() {
         highlightRef.current = null
       }
 
+      mapActions.clearLocationHighlight()
+
       if (!info) return
 
       const config = getOutcomeConfig(info.code)
       if (!config || config.geometryType !== "polygon") return
 
+      const fillId = config.mapboxLayerId
       const outlineId = `${config.mapboxLayerId}-outline`
-      if (!map.getLayer(outlineId)) return
+      if (!map.getLayer(fillId)) return
 
       const idProp = config.idProperty ?? "DU_ID"
       let featureId = info.sourceId
@@ -323,22 +343,78 @@ export default function TierAnimationSection() {
         featureId =
           RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
       }
+
       try {
-        const prevWidth = map.getPaintProperty(outlineId, "line-width")
+        const prevFillOpacity = map.getPaintProperty(fillId, "fill-opacity")
+        const prevLineWidth = map.getLayer(outlineId)
+          ? map.getPaintProperty(outlineId, "line-width")
+          : 0.5
+        const prevLineColor = map.getLayer(outlineId)
+          ? map.getPaintProperty(outlineId, "line-color")
+          : "#888"
+
         highlightRef.current = {
-          layerId: outlineId,
+          fillId,
+          outlineId,
           idProperty: idProp,
-          prevWidth,
+          prevFillOpacity,
+          prevLineWidth,
+          prevLineColor,
         }
-        map.setPaintProperty(outlineId, "line-width", [
+
+        // Opaque fill for the hovered feature
+        map.setPaintProperty(fillId, "fill-opacity", [
           "case",
           ["==", ["get", idProp], featureId],
-          3,
-          typeof prevWidth === "number" ? prevWidth : 0.5,
+          1,
+          typeof prevFillOpacity === "number" ? prevFillOpacity : 0.55,
         ] as never)
+
+        // White stroke outline for the hovered feature
+        if (map.getLayer(outlineId)) {
+          map.setPaintProperty(outlineId, "line-color", [
+            "case",
+            ["==", ["get", idProp], featureId],
+            "#ffffff",
+            typeof prevLineColor === "string" ? prevLineColor : "#888",
+          ] as never)
+          map.setPaintProperty(outlineId, "line-width", [
+            "case",
+            ["==", ["get", idProp], featureId],
+            2.5,
+            typeof prevLineWidth === "number" ? prevLineWidth : 0.5,
+          ] as never)
+        }
       } catch {
         /* ok */
       }
+
+      // ── Tooltip: resolve lat/lng and push to store ──
+      let coords: [number, number] | null = null
+      const centroid = centroidLookupRef.current.get(info.sourceId)
+      if (centroid) {
+        coords = [centroid.lng, centroid.lat]
+      } else {
+        coords = getOutcomeLocationCoordinates(info.code, info.sourceId)
+      }
+      if (!coords) return
+
+      const locKey = `${info.code}:${info.sourceId}`
+      const nameMap = locationNameMapRef.current
+      const name =
+        nameMap[locKey] ?? getDemandUnitDisplayName(info.sourceId)
+      const tierLabel = getTierLabel(info.tier)
+      const locData = outcomeLocationsRef.current[info.code]
+      const tierColor = locData?.colorMap[info.sourceId] ?? "#888"
+
+      mapActions.setLocationHighlight({
+        longitude: coords[0],
+        latitude: coords[1],
+        name,
+        tierLevel: info.tier,
+        tierLabel,
+        tierColor,
+      })
     },
     [mapAPI.mapRef],
   )
@@ -1117,6 +1193,9 @@ export default function TierAnimationSection() {
     }
     return names
   }, [outcomeLocations])
+
+  const locationNameMapRef = useRef(locationNameMap)
+  locationNameMapRef.current = locationNameMap
 
   const activeOutcomeGroups = useMemo(
     () => outcomeGroups.filter((g) => ACTIVE_OUTCOMES.has(g.code)),
