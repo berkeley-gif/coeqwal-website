@@ -121,12 +121,16 @@ export default function OutcomeMorphOverlay({
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
 
   const outcomeShapes = useMemo(() => {
-    const rightColumnX = panelWidth * 0.55
-    const maxColumnWidth = panelWidth * 0.42
+    const panelLeft = panelWidth * (2 / 3)
+    const insetPx = 24
+    const rightColumnX = panelLeft + insetPx
+    const maxColumnWidth = panelWidth * (1 / 3) - insetPx * 2
 
-    const headerHeight = panelHeight * 0.12
-    const outcomeSlotHeight =
-      (panelHeight * 0.75 - headerHeight) / Math.max(outcomes.length, 1)
+    const topPad = 44
+    const labelLineHeight = 24
+    const gapAfterLabel = 6
+    const slotHeight =
+      (panelHeight - topPad * 2) / Math.max(outcomes.length, 1)
 
     return outcomes.map((outcome, oi) => {
       const sampled =
@@ -140,8 +144,8 @@ export default function OutcomeMorphOverlay({
             })()
           : outcome.polygons
 
-      const labelY = headerHeight + oi * outcomeSlotHeight
-      const gridTargetY = labelY + 28
+      const labelY = topPad + oi * slotHeight
+      const gridTargetY = labelY + labelLineHeight + gapAfterLabel
 
       const shapes = computeOutcomeLayout(
         sampled,
