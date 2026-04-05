@@ -34,6 +34,7 @@ import {
 import { useTierAnimationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
+  type LocationInfo,
   getOutcomeProgressRange,
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
@@ -276,9 +277,71 @@ export default function TierAnimationSection() {
 
   const isInteractive = playState === "finished"
 
+  const highlightRef = useRef<{
+    layerId: string
+    idProperty: string
+    prevWidth: unknown
+  } | null>(null)
+
+  const handleLocationActive = useCallback(
+    (info: LocationInfo | null) => {
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (!map?.isStyleLoaded?.()) return
+
+      if (highlightRef.current) {
+        const { layerId, prevWidth } = highlightRef.current
+        try {
+          if (map.getLayer(layerId)) {
+            map.setPaintProperty(
+              layerId,
+              "line-width",
+              prevWidth as never,
+            )
+          }
+        } catch {
+          /* ok */
+        }
+        highlightRef.current = null
+      }
+
+      if (!info) return
+
+      const config = getOutcomeConfig(info.code)
+      if (!config || config.geometryType !== "polygon") return
+
+      const outlineId = `${config.mapboxLayerId}-outline`
+      if (!map.getLayer(outlineId)) return
+
+      const idProp = config.idProperty ?? "DU_ID"
+      let featureId = info.sourceId
+      if (info.code === "RES_STOR") {
+        featureId =
+          RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+      }
+      try {
+        const prevWidth = map.getPaintProperty(outlineId, "line-width")
+        highlightRef.current = {
+          layerId: outlineId,
+          idProperty: idProp,
+          prevWidth,
+        }
+        map.setPaintProperty(outlineId, "line-width", [
+          "case",
+          ["==", ["get", idProp], featureId],
+          3,
+          typeof prevWidth === "number" ? prevWidth : 0.5,
+        ] as never)
+      } catch {
+        /* ok */
+      }
+    },
+    [mapAPI.mapRef],
+  )
+
   const handleOutcomeClick = useCallback(
     (code: string) => {
       mapActions.clearMapTooltips()
+      handleLocationActive(null)
 
       const isToggleOff = selectedOutcomeCode === code
       mapActions.toggleOutcomeVisualization(code, "s0020")
@@ -302,7 +365,7 @@ export default function TierAnimationSection() {
         })
       }
     },
-    [selectedOutcomeCode, mapAPI.mapRef],
+    [selectedOutcomeCode, mapAPI.mapRef, handleLocationActive],
   )
 
   useEffect(() => {
@@ -1242,6 +1305,7 @@ export default function TierAnimationSection() {
                 onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
                 selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
                 interactive={isInteractive}
+                onLocationHover={isInteractive ? handleLocationActive : undefined}
               />
             </motion.div>
           )}
