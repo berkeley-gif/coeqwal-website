@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useMemo, useCallback } from "react"
+import { useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
@@ -315,8 +315,8 @@ export default function OutcomeMorphOverlay({
     }
   }, [activeLocation, outcomeShapes, locationNameMap])
 
-  useEffect(() => {
-    const unsub = progress.on("change", (v) => {
+  useLayoutEffect(() => {
+    const handler = (v: number) => {
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
         if (!refs) continue
@@ -358,7 +358,9 @@ export default function OutcomeMorphOverlay({
           countEl.style.opacity = String(countFade)
         }
       }
-    })
+    }
+    const unsub = progress.on("change", handler)
+    handler(progress.get())
     return unsub
   }, [progress, outcomeShapes])
 
