@@ -915,7 +915,7 @@ export default function TierAnimationSection() {
     const introTextY = topPad
     const itemStartY = topPad + LAYOUT_LINE_HEIGHT + LAYOUT_INTRO_GAP
 
-    const midpoint = Math.ceil(OUTCOME_CODE_ORDER.length / 2)
+    const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
     const cursors: [number, number] = [itemStartY, itemStartY]
     const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
 
@@ -925,7 +925,7 @@ export default function TierAnimationSection() {
       const code = OUTCOME_CODE_ORDER[idx]!
       const label = getOutcomeName(code)
       const isActive = ACTIVE_OUTCOMES.has(code)
-      const col: 0 | 1 = idx < midpoint ? 0 : 1
+      const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
 
       const y = cursors[col]
       const x = colX[col]
