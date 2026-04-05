@@ -209,6 +209,7 @@ export default function TierAnimationSection() {
 
   const handlePlay = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
+    computePolygonDataRef.current()
 
     const currentVal = progress.get()
     const startFrom = currentVal >= 1 ? 0 : currentVal
@@ -264,6 +265,7 @@ export default function TierAnimationSection() {
 
   const handleRewind = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
+    computePolygonDataRef.current()
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -933,6 +935,32 @@ export default function TierAnimationSection() {
     window.addEventListener("resize", collectOutcomeShapes)
     return () => window.removeEventListener("resize", collectOutcomeShapes)
   }, [collectOutcomeShapes])
+
+  useEffect(() => {
+    if (!panelInView || playState !== "idle") return
+    const el = panelRef.current
+    if (!el) return
+
+    let scrollParent: Element | null = el.parentElement
+    while (scrollParent) {
+      const overflow = getComputedStyle(scrollParent).overflowY
+      if (overflow === "auto" || overflow === "scroll") break
+      scrollParent = scrollParent.parentElement
+    }
+    if (!scrollParent) return
+
+    let timer: ReturnType<typeof setTimeout>
+    const onScroll = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => computePolygonDataRef.current(), 150)
+    }
+
+    scrollParent.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      clearTimeout(timer)
+      scrollParent.removeEventListener("scroll", onScroll)
+    }
+  }, [panelInView, playState])
 
   /* ── Build per-outcome shape groups for the morph overlay ── */
   const outcomeGroups: OutcomeGroup[] = useMemo(() => {
