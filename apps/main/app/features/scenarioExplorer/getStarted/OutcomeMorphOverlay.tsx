@@ -26,10 +26,37 @@ interface OutcomeMorphOverlayProps {
   panelHeight: number
   progress: MotionValue<number>
   squaresPerRow: number
+  distributionYMap: Record<string, number>
 }
 
-const GRID_PAD = 12
-const MAX_POLYGONS_PER_OUTCOME = 140
+export const GRID_PAD = 12
+export const MAX_POLYGONS_PER_OUTCOME = 140
+
+/** Compute pixel height of a distribution grid for layout planning. */
+export function computeDistributionHeight(
+  polygons: PolygonMorphData[],
+  squaresPerRow: number,
+  maxWidth: number,
+): number {
+  const cell = SQUARE_SIZE + SQUARE_GAP
+  const cols = Math.min(
+    squaresPerRow,
+    Math.max(1, Math.floor((maxWidth - GRID_PAD * 2) / cell)),
+  )
+  const sampleCount = Math.min(polygons.length, MAX_POLYGONS_PER_OUTCOME)
+  if (sampleCount === 0) return 0
+  const step = polygons.length / sampleCount
+  const byTier = new Map<number, number>()
+  for (let i = 0; i < sampleCount; i++) {
+    const poly = polygons[Math.floor(i * step)]!
+    byTier.set(poly.tier, (byTier.get(poly.tier) ?? 0) + 1)
+  }
+  let totalRows = 0
+  for (const count of byTier.values()) {
+    totalRows += Math.ceil(count / cols)
+  }
+  return totalRows * cell
+}
 
 function computeOutcomeLayout(
   polygons: PolygonMorphData[],
@@ -116,6 +143,7 @@ export default function OutcomeMorphOverlay({
   panelHeight,
   progress,
   squaresPerRow,
+  distributionYMap,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
@@ -125,12 +153,6 @@ export default function OutcomeMorphOverlay({
     const insetPx = 24
     const rightColumnX = panelLeft + insetPx
     const maxColumnWidth = panelWidth * (1 / 3) - insetPx * 2
-
-    const topPad = 44
-    const labelLineHeight = 24
-    const gapAfterLabel = 6
-    const slotHeight =
-      (panelHeight - topPad * 2) / Math.max(outcomes.length, 1)
 
     return outcomes.map((outcome, oi) => {
       const sampled =
@@ -144,8 +166,7 @@ export default function OutcomeMorphOverlay({
             })()
           : outcome.polygons
 
-      const labelY = topPad + oi * slotHeight
-      const gridTargetY = labelY + labelLineHeight + gapAfterLabel
+      const gridTargetY = distributionYMap[outcome.code] ?? 0
 
       const shapes = computeOutcomeLayout(
         sampled,
@@ -161,7 +182,7 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, panelHeight, squaresPerRow])
+  }, [outcomes, panelWidth, squaresPerRow, distributionYMap])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {

@@ -3,24 +3,38 @@
 import { useRef, useEffect } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
-import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
+import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
+
+interface Beat2Layout {
+  items: {
+    code: string
+    label: string
+    y: number
+    isActive: boolean
+  }[]
+  introTextY: number
+  levelsTextY: number
+}
 
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
+  beat2Layout?: Beat2Layout | null
 }
 
 function clamp01(v: number) {
   return Math.min(1, Math.max(0, v))
 }
 
-export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
+export default function BeatTextOverlay({
+  progress,
+  beat2Layout,
+}: BeatTextOverlayProps) {
   const theme = useTheme()
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
   const beat2LevelsRef = useRef<HTMLDivElement>(null)
-  const beat3Ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
@@ -54,26 +68,23 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
       }
 
       // TODO(beat3): restore beat 3 text fade
-      // if (beat3Ref.current) {
-      //   const fadeIn = clamp01((v - 0.76) / 0.05)
-      //   beat3Ref.current.style.opacity = String(fadeIn)
-      // }
     })
     return unsub
   }, [progress])
 
   const padding = theme.space.panel.padding
-
   const textColor = theme.palette.undertone.warm
   const shadow = theme.textShadow.displayBody
 
-  const panelWidth = {
+  const beat1PanelWidth = {
     xs: "100%",
     sm: "340px",
     md: "380px",
     lg: "420px",
     xl: "460px",
   }
+
+  const insetPx = 24
 
   return (
     <Box
@@ -93,7 +104,7 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           left: 0,
           p: padding,
           opacity: 0,
-          width: panelWidth,
+          width: beat1PanelWidth,
           "& .MuiTypography-root": {
             color: textColor,
             textShadow: shadow,
@@ -119,60 +130,85 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           opacity: 0,
         }}
       />
+
+      {/* Beat 2 — text items, absolutely positioned from shared layout */}
       <Box
         sx={{
           position: "absolute",
           top: 0,
           right: 0,
-          px: padding,
-          pt: theme.space.displayBlock.padding,
-          pb: theme.space.displayBlock.padding,
-          width: panelWidth,
-          overflowY: "auto",
-          maxHeight: "100%",
+          bottom: 0,
+          width: "33.33%",
           "& .MuiTypography-root": {
             color: theme.palette.text.primary,
           },
         }}
       >
-        <Box ref={beat2IntroRef} sx={{ opacity: 0 }}>
-          <Typography variant="storyBody" component="p">
-            We can group these parts of the system into categories:
-          </Typography>
-        </Box>
-        <Box sx={{ mt: 2 }}>
-          {OUTCOME_CODE_ORDER.map((code, i) => (
+        {beat2Layout && (
+          <>
             <Box
-              key={code}
-              ref={(el: HTMLDivElement | null) => {
-                beat2ItemRefs.current[i] = el
+              ref={beat2IntroRef}
+              style={{
+                position: "absolute",
+                top: beat2Layout.introTextY,
+                left: insetPx,
+                right: insetPx,
+                opacity: 0,
               }}
-              sx={{ opacity: 0, mt: 0.75, mb: 1.5 }}
             >
-              <Typography variant="storyBody">
-                {getOutcomeName(code)}
+              <Typography variant="storyBody" component="p">
+                We can group these parts of the system into categories:
               </Typography>
             </Box>
-          ))}
-        </Box>
-        <Box ref={beat2LevelsRef} sx={{ opacity: 0, mt: 3 }}>
-          <Typography variant="storyBody" component="p">
-            We can create levels of outcome for each location within these
-            groups.
-          </Typography>
-        </Box>
+
+            {beat2Layout.items.map((item, i) => (
+              <Box
+                key={item.code}
+                ref={(el: HTMLDivElement | null) => {
+                  beat2ItemRefs.current[i] = el
+                }}
+                style={{
+                  position: "absolute",
+                  top: item.y,
+                  left: insetPx,
+                  right: insetPx,
+                  opacity: 0,
+                }}
+              >
+                <Typography variant="storyBody">
+                  {item.label}
+                </Typography>
+              </Box>
+            ))}
+
+            <Box
+              ref={beat2LevelsRef}
+              style={{
+                position: "absolute",
+                top: beat2Layout.levelsTextY,
+                left: insetPx,
+                right: insetPx,
+                opacity: 0,
+              }}
+            >
+              <Typography variant="storyBody" component="p">
+                We can create levels of outcome for each location within these
+                groups.
+              </Typography>
+            </Box>
+          </>
+        )}
       </Box>
 
       {/* TODO(beat3): restore beat 3 text
       <Box
-        ref={beat3Ref}
         sx={{
           position: "absolute",
           top: "25%",
           left: 0,
           p: padding,
           opacity: 0,
-          width: panelWidth,
+          width: beat1PanelWidth,
         }}
       >
         <Typography variant="storyBody" component="p">
