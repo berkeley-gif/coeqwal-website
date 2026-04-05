@@ -1,23 +1,30 @@
 "use client"
 
 import { useRef, useState, useEffect, useCallback } from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
-import { useScroll, useTransform, motion } from "@repo/motion"
+import {
+  Box,
+  Typography,
+  useTheme,
+  CircularProgress,
+  IconButton,
+  PlayArrowIcon,
+} from "@repo/ui/mui"
+import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
-import { StickyElement } from "@repo/scrollytelling"
 import { useMap } from "@repo/map"
 import { mapActions } from "../../map/store"
 import { useTierAnimationData } from "./useTierAnimationData"
 import PolygonMorphOverlay, {
   type PolygonMorphData,
 } from "./PolygonMorphOverlay"
+import BeatTextOverlay from "./BeatTextOverlay"
+import ResearcherIllustrations from "./ResearcherIllustrations"
 
-const SCROLL_RUNWAY = "1600vh"
+const TOTAL_DURATION = 30
 
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
-/** Linearly interpolate a value across zoom stops, matching Mapbox's interpolation. */
 function lerpZoom(z: number, ...stops: [number, number][]): number {
   if (stops.length === 0) return 0
   if (z <= stops[0]![0]) return stops[0]![1]
@@ -32,7 +39,6 @@ function lerpZoom(z: number, ...stops: [number, number][]): number {
   return stops[stops.length - 1]![1]
 }
 
-/** Extract the outer ring from a GeoJSON Polygon or MultiPolygon geometry. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractOuterRing(geometry: any): [number, number][] | null {
   if (!geometry) return null
@@ -50,23 +56,11 @@ function extractOuterRing(geometry: any): [number, number][] | null {
   return null
 }
 
-interface TierAnimationSectionProps {
-  scrollContainerRef: React.RefObject<HTMLElement | null>
-}
-
-export default function TierAnimationSection({
-  scrollContainerRef,
-}: TierAnimationSectionProps) {
+export default function TierAnimationSection() {
   const theme = useTheme()
   const mapAPI = useMap()
-  const {
-    centroids,
-    tierDistribution: _tierDistribution,
-    isLoading,
-    error,
-  } = useTierAnimationData()
+  const { centroids, isLoading, error } = useTierAnimationData()
 
-  const runwayRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const cameraSetRef = useRef(false)
 
@@ -80,18 +74,46 @@ export default function TierAnimationSection({
     strokeWidth: 0.8,
   })
   const [panelInView, setPanelInView] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  // Tracks whether the camera has settled and polygons should be allowed to show
   const polygonsAllowedRef = useRef(false)
 
-  // Activate persistent map with AG_REV visualization on mount.
-  // Suppress demand-unit polygon visibility until the camera settles.
+  /* ── Time-based progress (0 → 1) ── */
+  const progress = useMotionValue(0)
+
+  // Beat 2 overlay: global 0.30–0.75 → 0–1
+  const beat2Progress = useTransform(progress, [0.3, 0.75], [0, 1])
+  // Map visibility: fully visible through beat 1, fades during early beat 2
+  const mapOpacity = useTransform(progress, [0, 0.3, 0.4], [1, 1, 0])
+  // SVG overlay fades out for beat 3
+  const overlayOpacity = useTransform(progress, [0.73, 0.78], [1, 0])
+  // Static heading fades once animation begins
+  const headingOpacity = useTransform(progress, [0, 0.02, 0.06], [1, 1, 0])
+
+  const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
+
+  const handlePlay = useCallback(() => {
+    if (controlsRef.current) controlsRef.current.stop()
+    progress.set(0)
+    setIsPlaying(true)
+    controlsRef.current = animate(progress, 1, {
+      duration: TOTAL_DURATION,
+      ease: "linear",
+      onComplete: () => setIsPlaying(false),
+    })
+  }, [progress])
+
+  useEffect(() => {
+    return () => {
+      controlsRef.current?.stop()
+    }
+  }, [])
+
+  /* ── Activate persistent map with AG_REV visualization ── */
   useEffect(() => {
     mapActions.setMapMode("get-started")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
 
-    // Continuously suppress polygon opacity until polygonsAllowedRef is set.
-    // This overrides OutcomePolygonLayer's RAF-based fade-in.
     const suppressInterval = setInterval(() => {
       if (polygonsAllowedRef.current) {
         clearInterval(suppressInterval)
@@ -127,9 +149,9 @@ export default function TierAnimationSection({
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Detect when the runway scrolls into view
+  /* ── Detect when panel scrolls into view ── */
   useEffect(() => {
-    const el = runwayRef.current
+    const el = panelRef.current
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -141,8 +163,7 @@ export default function TierAnimationSection({
     return () => observer.disconnect()
   }, [])
 
-  // Fly camera to match the learn map's scenario-intro position (CALIFORNIA_CENTERED_VIEW).
-  // Hide demand-unit polygons during the ease, then fade them in once the camera settles.
+  /* ── Fly camera once panel is visible ── */
   useEffect(() => {
     if (!panelInView || isLoading || !mapAPI.mapRef?.current) return
     if (cameraSetRef.current) return
@@ -151,14 +172,9 @@ export default function TierAnimationSection({
       if (!mapAPI.mapRef?.current) return
       const map = mapAPI.mapRef.current.getMap?.()
 
-      // After camera settles: compute SVG polygon data, then fade Mapbox polygons in
       const onMoveEnd = () => {
         if (!map) return
-
-        // Compute SVG data now that the camera is stable
         computePolygonDataRef.current()
-
-        // Allow polygons to show (stops the suppress interval)
         polygonsAllowedRef.current = true
 
         try {
@@ -174,10 +190,7 @@ export default function TierAnimationSection({
             map.setPaintProperty(
               "demand-units-outline",
               "line-opacity-transition",
-              {
-                duration: 600,
-                delay: 0,
-              },
+              { duration: 600, delay: 0 },
             )
             map.setPaintProperty("demand-units-outline", "line-opacity", 1)
           }
@@ -202,80 +215,87 @@ export default function TierAnimationSection({
     return () => clearTimeout(timer)
   }, [panelInView, isLoading, mapAPI.mapRef])
 
-  const { scrollYProgress } = useScroll({
-    target: runwayRef,
-    container: scrollContainerRef,
-    offset: ["start start", "end end"],
-    layoutEffect: false,
-  })
-
-  const mapOpacity = useTransform(scrollYProgress, [0, 0.02, 0.08], [1, 1, 0])
-
-  // At CROSSFADE_THRESHOLD, hide Mapbox polygons so the SVG overlay takes over.
-  // Before the threshold, Mapbox renders AG polygons normally (no race conditions).
-  const CROSSFADE_THRESHOLD = 0.15
-
-  const svgReady = polygonData.length > 0
-
+  /* ── Beat-1 map effects + Mapbox polygon visibility ── */
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    let currentlyVisible = true
-    const fillOpacityExpr = lerpZoom(CAM_ZOOM, [5, 0.75], [8, 0.55], [10, 0.35])
+    const fillOpacityBase = lerpZoom(
+      CAM_ZOOM,
+      [5, 0.75],
+      [8, 0.55],
+      [10, 0.35],
+    )
+    let mapHidden = false
 
-    const unsubscribe = scrollYProgress.on("change", (v) => {
+    const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
 
-      // Keep Mapbox visible until SVG polygon data is ready
-      const shouldBeVisible = !svgReady || v < CROSSFADE_THRESHOLD
-      if (shouldBeVisible === currentlyVisible) return
-      currentlyVisible = shouldBeVisible
+      if (v < 0.01) {
+        if (mapHidden) {
+          try {
+            if (map.getLayer("demand-units"))
+              map.setPaintProperty(
+                "demand-units",
+                "fill-opacity",
+                fillOpacityBase,
+              )
+            if (map.getLayer("demand-units-outline"))
+              map.setPaintProperty("demand-units-outline", "line-opacity", 1)
+          } catch {
+            /* ok */
+          }
+          mapHidden = false
+        }
+        return
+      }
 
-      try {
-        if (map.getLayer("demand-units")) {
-          map.setPaintProperty(
-            "demand-units",
-            "fill-opacity",
-            shouldBeVisible ? fillOpacityExpr : 0,
-          )
+      if (v < 0.3) {
+        const beat1T = v / 0.3
+        const pulse = Math.sin(beat1T * Math.PI * 3)
+        const opacity = 0.15 + fillOpacityBase * (0.5 + 0.5 * pulse)
+        try {
+          if (map.getLayer("demand-units"))
+            map.setPaintProperty("demand-units", "fill-opacity", opacity)
+        } catch {
+          /* ok */
         }
-        if (map.getLayer("demand-units-outline")) {
-          map.setPaintProperty(
-            "demand-units-outline",
-            "line-opacity",
-            shouldBeVisible ? 1 : 0,
-          )
+        mapHidden = false
+      } else if (!mapHidden) {
+        try {
+          if (map.getLayer("demand-units"))
+            map.setPaintProperty("demand-units", "fill-opacity", 0)
+          if (map.getLayer("demand-units-outline"))
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
+        } catch {
+          /* ok */
         }
-      } catch {
-        /* layer may not exist yet */
+        mapHidden = true
       }
     })
 
     return () => {
-      unsubscribe()
+      unsub()
       const map = mapRef.getMap?.()
       if (map?.isStyleLoaded?.()) {
         try {
-          if (map.getLayer("demand-units")) {
+          if (map.getLayer("demand-units"))
             map.setPaintProperty(
               "demand-units",
               "fill-opacity",
-              fillOpacityExpr,
+              fillOpacityBase,
             )
-          }
-          if (map.getLayer("demand-units-outline")) {
+          if (map.getLayer("demand-units-outline"))
             map.setPaintProperty("demand-units-outline", "line-opacity", 1)
-          }
         } catch {
           /* ok */
         }
       }
     }
-  }, [scrollYProgress, mapAPI.mapRef, isLoading, svgReady])
+  }, [progress, mapAPI.mapRef, isLoading])
 
-  // Measure panel size for particle end positions
+  /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {
     if (!panelRef.current) return
     const rect = panelRef.current.getBoundingClientRect()
@@ -293,8 +313,7 @@ export default function TierAnimationSection({
     }
   }, [isLoading, measurePanel])
 
-  // Query polygon geometries from the Mapbox demand-units layer and project
-  // each vertex to panel-relative screen coordinates.
+  /* ── Compute SVG polygon data from Mapbox demand-units layer ── */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
 
@@ -312,14 +331,11 @@ export default function TierAnimationSection({
 
     const panelEl = panelRef.current
     const panelRect = panelEl.getBoundingClientRect()
-    // SVG uses position:absolute;inset:0 so its origin is inside the border
     const svgOriginX = panelRect.left + panelEl.clientLeft
     const svgOriginY = panelRect.top + panelEl.clientTop
 
     const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
 
-    // querySourceFeatures returns all loaded tile data (including off-screen),
-    // giving more complete coverage than queryRenderedFeatures.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let features: any[] = []
     try {
@@ -346,7 +362,6 @@ export default function TierAnimationSection({
       return
     }
 
-    // Tile boundaries clip polygons into fragments.keep the largest per DU_ID
     const bestRings = new Map<
       string,
       { ring: [number, number][]; cData: (typeof centroids)[0] }
@@ -400,7 +415,6 @@ export default function TierAnimationSection({
     setPolygonData(result)
   }, [centroids, mapAPI])
 
-  // Keep ref in sync so the camera effect can call the latest version
   computePolygonDataRef.current = computePolygonData
 
   useEffect(() => {
@@ -408,6 +422,7 @@ export default function TierAnimationSection({
     return () => window.removeEventListener("resize", computePolygonData)
   }, [computePolygonData])
 
+  /* ── Error state ── */
   if (error) {
     return (
       <Box
@@ -426,100 +441,135 @@ export default function TierAnimationSection({
     )
   }
 
-  const blueBg = theme.palette.tabPanels.explore
+  const forestBg = theme.palette.nature.forest
 
   return (
-    <div
-      ref={runwayRef}
-      style={{
+    <Box
+      ref={panelRef}
+      sx={{
         position: "relative",
-        minHeight: SCROLL_RUNWAY,
+        height: "100vh",
+        backgroundColor: "transparent",
+        overflow: "hidden",
         clipPath: "inset(0)",
       }}
     >
-      <StickyElement top={0}>
+      {/* Static heading — fades when animation starts */}
+      <motion.div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          padding: theme.space.panel.padding,
+          zIndex: 4,
+          pointerEvents: "none",
+          opacity: headingOpacity,
+        }}
+      >
+        <Typography variant="h3" component="h2" color="text.secondary">
+          Key outcomes
+        </Typography>
+      </motion.div>
+
+      {isLoading ? (
         <Box
-          ref={panelRef}
           sx={{
-            position: "relative",
-            height: "100vh",
-            backgroundColor: "transparent",
-            overflow: "hidden",
-            boxShadow: `0 0 0 100vmax ${blueBg}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100%",
           }}
         >
-          {/* Header */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              p: theme.space.panel.padding,
-              zIndex: 3,
-              pointerEvents: "none",
-            }}
-          >
-            <Typography variant="h3" component="h2" color="text.secondary">
-              Key outcomes
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ mt: 1, maxWidth: 420, color: "text.secondary" }}
-            >
-              Each polygon on the map represents an agricultural district
-              receiving surface water.
-            </Typography>
-          </Box>
+          <CircularProgress size={40} />
+        </Box>
+      ) : (
+        <>
+          {/* Background cover: transparent → forest green as map fades */}
+          <MapFade opacity={mapOpacity} color={forestBg} />
 
-          {isLoading ? (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
+          {/* SVG polygon morph overlay — active during Beat 2 */}
+          {polygonData.length > 0 && panelSize && (
+            <motion.div
+              style={{
+                opacity: overlayOpacity,
+                position: "absolute",
+                inset: 0,
               }}
             >
-              <CircularProgress size={40} />
-            </Box>
-          ) : (
-            <>
-              {/* White overlay that fades IN to cover the persistent map */}
-              <MapFade opacity={mapOpacity} />
-
-              {/* Polygon shapes morph into squares then into tier lines */}
-              {polygonData.length > 0 && panelSize && (
-                <PolygonMorphOverlay
-                  polygons={polygonData}
-                  panelWidth={panelSize.width}
-                  panelHeight={panelSize.height}
-                  fillOpacity={mapStyle.fillOpacity}
-                  strokeWidth={mapStyle.strokeWidth}
-                  scrollProgress={scrollYProgress}
-                />
-              )}
-            </>
+              <PolygonMorphOverlay
+                polygons={polygonData}
+                panelWidth={panelSize.width}
+                panelHeight={panelSize.height}
+                fillOpacity={mapStyle.fillOpacity}
+                strokeWidth={mapStyle.strokeWidth}
+                scrollProgress={beat2Progress}
+              />
+            </motion.div>
           )}
-        </Box>
-      </StickyElement>
-    </div>
+
+          {/* Researcher illustrations — Beat 3 */}
+          {panelSize && (
+            <ResearcherIllustrations
+              progress={progress}
+              panelWidth={panelSize.width}
+              panelHeight={panelSize.height}
+            />
+          )}
+
+          {/* Cross-fading beat text */}
+          <BeatTextOverlay progress={progress} />
+
+          {/* Play / Replay button */}
+          {!isPlaying && (
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: "10%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 5,
+              }}
+            >
+              <IconButton
+                onClick={handlePlay}
+                sx={{
+                  width: 64,
+                  height: 64,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(8px)",
+                  color: "text.secondary",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.35)",
+                  },
+                }}
+              >
+                <PlayArrowIcon sx={{ fontSize: 36 }} />
+              </IconButton>
+            </Box>
+          )}
+        </>
+      )}
+    </Box>
   )
 }
 
-function MapFade({ opacity }: { opacity: MotionValue<number> }) {
-  const inverseOpacity = useTransform(opacity, (v) => 1 - v)
+function MapFade({
+  opacity,
+  color,
+}: {
+  opacity: MotionValue<number>
+  color: string
+}) {
+  const fadeOpacity = useTransform(opacity, (v) => 1 - v)
 
   return (
     <motion.div
       style={{
         position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: "25%",
-        backgroundColor: "white",
-        opacity: inverseOpacity,
+        inset: 0,
+        backgroundColor: color,
+        opacity: fadeOpacity,
         pointerEvents: "none",
         zIndex: 1,
       }}

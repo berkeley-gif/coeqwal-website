@@ -141,7 +141,7 @@ export default function GetStartedView() {
       </ContentPanel>
 
       {/* ── Map panel (TierAnimationSection) ── */}
-      <TierAnimationSection scrollContainerRef={scrollContainerRef} />
+      <TierAnimationSection />
 
       {/* ── Key outcomes ── */}
       <ContentPanel
