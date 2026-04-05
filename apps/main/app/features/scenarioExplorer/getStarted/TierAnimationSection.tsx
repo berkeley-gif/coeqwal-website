@@ -150,6 +150,7 @@ const ACTIVE_OUTCOMES = new Set([
 const LAYOUT_LINE_HEIGHT = 32
 const LAYOUT_LABEL_GAP = 8
 const LAYOUT_DIST_GAP = 6
+const LAYOUT_COUNT_HEIGHT = 18
 const LAYOUT_POST_DIST_GAP = 12
 
 interface OutcomeLayoutItem {
@@ -162,6 +163,7 @@ interface OutcomeLayoutItem {
   isActive: boolean
   distributionY: number
   distributionHeight: number
+  locationCount: number
 }
 
 interface ScreenPolygon {
@@ -1038,17 +1040,22 @@ export default function TierAnimationSection() {
 
       const distributionY = cursors[col] + LAYOUT_DIST_GAP
       let distributionHeight = 0
+      let locationCount = 0
 
       if (isActive) {
         const group = outcomeGroups.find((g) => g.code === code)
         if (group && group.polygons.length > 0) {
+          locationCount = group.polygons.length
           distributionHeight = computeDistributionHeight(
             group.polygons,
             sqPerRow,
             colWidth,
           )
           cursors[col] +=
-            LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
+            LAYOUT_DIST_GAP +
+            distributionHeight +
+            LAYOUT_COUNT_HEIGHT +
+            LAYOUT_POST_DIST_GAP
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
         }
@@ -1066,6 +1073,7 @@ export default function TierAnimationSection() {
         isActive,
         distributionY,
         distributionHeight,
+        locationCount,
       })
     }
 
@@ -1074,9 +1082,34 @@ export default function TierAnimationSection() {
 
   const distributionPositionMap = useMemo(() => {
     if (!outcomeLayout) return {}
+    const describeLocations = (code: string, count: number): string => {
+      switch (code) {
+        case "ENV_FLOWS":
+          return `${count} river & tributary reaches`
+        case "RES_STOR":
+          return `${count} reservoirs`
+        case "DELTA_ECO":
+          return "Sacramento-San Joaquin Delta"
+        case "FW_EXP":
+          return "Banks & Jones Pumping Plants"
+        case "FW_DELTA_USES":
+          return "Emmaton & Jersey Point"
+        case "WRC_SALMON_AB":
+          return "population health along the Sacramento"
+        default:
+          return `${count} locations`
+      }
+    }
+
     const map: Record<
       string,
-      { x: number; y: number; labelY: number; maxWidth: number }
+      {
+        x: number
+        y: number
+        labelY: number
+        maxWidth: number
+        locationDescription: string
+      }
     > = {}
     for (const item of outcomeLayout.items) {
       if (item.isActive && item.distributionHeight > 0) {
@@ -1085,6 +1118,10 @@ export default function TierAnimationSection() {
           y: item.distributionY,
           labelY: item.y,
           maxWidth: item.columnWidth,
+          locationDescription: describeLocations(
+            item.code,
+            item.locationCount,
+          ),
         }
       }
     }
