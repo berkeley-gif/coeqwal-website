@@ -49,17 +49,11 @@ export function KeyOutcomesPanel({
   // Handler to show outcome data on the map (toggle behavior)
   const handleShowOnMap = useCallback(
     (code: OutcomeCode) => {
-      handleClose() // Close tooltip when showing on map
-      mapActions.clearMapTooltips() // Clear any pinned map tooltips
-
-      // Toggle: if same outcome is already selected, clear it; otherwise set it
-      if (selectedOutcomeCode === code) {
-        mapActions.clearOutcomeVisualization()
-      } else {
-        mapActions.setOutcomeVisualization(code, "s0020")
-      }
+      handleClose()
+      mapActions.clearMapTooltips()
+      mapActions.toggleOutcomeVisualization(code, "s0020")
     },
-    [handleClose, selectedOutcomeCode],
+    [handleClose],
   )
 
   // Helper to check if outcome has valid data (by code)

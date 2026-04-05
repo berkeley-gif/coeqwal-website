@@ -382,13 +382,10 @@ const activeVisualization = useActiveOutcomeVisualization()
 const activeOutcome = activeVisualization?.outcomeCode ?? null
 // e.g. "CWS_DEL" if the user clicked that outcome, or null if nothing is active
 
-// On click, toggle the outcome on/off
-const handleOutcomeClick = (outcomeCode: string, scenarioId: string) => {
-  if (activeOutcome === outcomeCode) {
-    mapActions.clearOutcomeVisualization()
-  } else {
-    mapActions.setOutcomeVisualization(outcomeCode, scenarioId)
-  }
+// On click, toggle the outcome on/off (single call handles the compare-and-toggle)
+const handleOutcomeClick = (outcomeCode: string) => {
+  mapActions.clearMapTooltips()
+  mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)
 }
 
 // Use activeOutcome to highlight the corresponding element in your UI
@@ -454,10 +451,11 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 
 ### What your component should do
 
-1. **Set the visualization**: call `mapActions.setOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element
-2. **Clear it**: call `mapActions.clearOutcomeVisualization()` when the user clicks the same element again (toggle off) or navigates away
-3. **Highlight the active element**: read `useActiveOutcomeVisualization()` and visually indicate which outcome is currently shown on the map (e.g., an element border or highlight color)
-4. **Render custom markers**: use `setMotionChildren` from `useMap()` to show your own dot markers on the map (see above)
+1. **Toggle the visualization**: call `mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)` when the user clicks an element. This single call handles both set and clear (if the same outcome is already active, it clears it; otherwise it sets the new one).
+2. **Clear tooltips**: call `mapActions.clearMapTooltips()` before toggling to dismiss any pinned map tooltips from a previous selection.
+3. **Highlight the active element**: read `useActiveOutcomeVisualization()` and visually indicate which outcome is currently shown on the map (e.g., an element border or highlight color).
+4. **Clear on navigate**: call `mapActions.clearOutcomeVisualization()` when the user navigates away from the view.
+5. **Render custom markers** (optional): use `setMotionChildren` from `useMap()` to show your own dot markers on the map (see above).
 
 ### What you do not need to do
 
@@ -465,6 +463,9 @@ Clean up by calling `setMotionChildren(null)` when your component unmounts or wh
 - Fetch GeoJSON geometry
 - Handle the "Show map" toggle (the toolbar and `UnifiedToolLayout` manage that)
 
-### Reference implementation
+### Reference implementations
 
-`KeyOutcomesPanel.tsx` (`apps/main/app/features/map/overlays/scenarioPanels/`) shows how to toggle outcome visualization on the map via `mapActions.setOutcomeVisualization()`. For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.
+- **`KeyOutcomesPanel.tsx`** (`apps/main/app/features/map/overlays/scenarioPanels/`) — Learn mode glyph toggle using `mapActions.toggleOutcomeVisualization()`.
+- **`TierAnimationSection.tsx`** (`apps/main/app/features/scenarioExplorer/getStarted/`) — Get-started animation with post-animation outcome toggle on both text labels and SVG distribution shapes.
+
+For the `setMotionChildren` API, see `packages/map/src/context/MapContext.tsx` and `packages/map/src/Map.tsx` where the injected children are rendered inside `<AnimatePresence>`.
