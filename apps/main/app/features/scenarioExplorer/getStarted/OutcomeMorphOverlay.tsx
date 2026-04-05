@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useLayoutEffect, useMemo, useCallback } from "react"
+import { useRef, useLayoutEffect, useMemo } from "react"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
@@ -13,7 +13,6 @@ import {
   SQUARE_SIZE,
   SQUARE_GAP,
 } from "@repo/viz"
-import { useHoverPin } from "@repo/ui/hooks"
 import { getTierLabel } from "../../../content/tiers"
 import {
   ENV_FLOWS_NAMES,
@@ -52,8 +51,14 @@ interface OutcomeMorphOverlayProps {
   onOutcomeClick?: (code: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
-  onLocationHover?: (info: LocationInfo | null) => void
-  onLocationPin?: (info: LocationInfo | null) => void
+  /** All active (hovered + pinned) locations driven by the parent */
+  activeLocationSet?: Map<string, LocationInfo>
+  /** The currently hovered location (for tooltip positioning) */
+  hoveredLocation?: LocationInfo | null
+  /** Callbacks into the shared hover/pin state machine in the parent */
+  onLocationEnter?: (info: LocationInfo) => void
+  onLocationLeave?: () => void
+  onLocationClick?: (info: LocationInfo) => void
   /** Maps "outcomeCode:sourceId" → human-readable name from Mapbox features */
   locationNameMap?: Record<string, string>
 }
@@ -173,7 +178,7 @@ export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.80
+  const beat2Start = 0.8
   const beat2End = 1.0
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
@@ -190,36 +195,16 @@ export default function OutcomeMorphOverlay({
   onOutcomeClick,
   selectedOutcomeCode,
   interactive,
-  onLocationHover,
-  onLocationPin,
+  activeLocationSet,
+  hoveredLocation,
+  onLocationEnter,
+  onLocationLeave,
+  onLocationClick,
   locationNameMap,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
   const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
-
-  const locationIsEqual = useCallback(
-    (a: LocationInfo, b: LocationInfo) =>
-      a.code === b.code && a.sourceId === b.sourceId,
-    [],
-  )
-
-  const handleActiveChange = useCallback(
-    (item: LocationInfo | null) => {
-      onLocationHover?.(item)
-    },
-    [onLocationHover],
-  )
-
-  const { activeItem: activeLocation, handlers: locHandlers, clearAll: clearLocationHoverPin } =
-    useHoverPin<LocationInfo>({
-      isEqual: locationIsEqual,
-      onActiveChange: handleActiveChange,
-    })
-
-  useEffect(() => {
-    clearLocationHoverPin()
-  }, [selectedOutcomeCode, clearLocationHoverPin])
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
@@ -249,7 +234,10 @@ export default function OutcomeMorphOverlay({
         squaresPerRow,
       )
 
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity
       for (const s of shapes) {
         for (const [px, py] of s.squareTarget) {
           if (px < minX) minX = px
@@ -260,12 +248,14 @@ export default function OutcomeMorphOverlay({
       }
       const pad = SQUARE_SIZE / 2
       const labelY = pos?.labelY ?? gridTargetY
-      const boundsTop = shapes.length > 0 ? Math.min(labelY, minY - pad) : labelY
+      const boundsTop =
+        shapes.length > 0 ? Math.min(labelY, minY - pad) : labelY
       const boundsBottom = shapes.length > 0 ? maxY + pad : labelY + 32
       const boundsLeft = shapes.length > 0 ? minX - pad : gridTargetX
-      const boundsRight = shapes.length > 0
-        ? Math.max(maxX + pad, gridTargetX + maxColWidth)
-        : gridTargetX + maxColWidth
+      const boundsRight =
+        shapes.length > 0
+          ? Math.max(maxX + pad, gridTargetX + maxColWidth)
+          : gridTargetX + maxColWidth
       const locationDescription =
         pos?.locationDescription ?? `${outcome.polygons.length} locations`
       const countY = shapes.length > 0 ? maxY + pad + 14 : gridTargetY + 46
@@ -289,11 +279,11 @@ export default function OutcomeMorphOverlay({
   }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap])
 
   const tooltipInfo = useMemo(() => {
-    if (!activeLocation) return null
-    const group = outcomeShapes.find((g) => g.code === activeLocation.code)
+    if (!hoveredLocation) return null
+    const group = outcomeShapes.find((g) => g.code === hoveredLocation.code)
     if (!group) return null
     const shape = group.shapes.find(
-      (s) => s.sourceId === activeLocation.sourceId,
+      (s) => s.sourceId === hoveredLocation.sourceId,
     )
     if (!shape) return null
     let cx = 0,
@@ -308,12 +298,13 @@ export default function OutcomeMorphOverlay({
       x: cx,
       y: cy - SQUARE_SIZE / 2 - 4,
       name:
-        locationNameMap?.[`${activeLocation.code}:${activeLocation.sourceId}`] ??
-        getLocationName(activeLocation.code, activeLocation.sourceId),
-      tier: getTierLabel(activeLocation.tier),
+        locationNameMap?.[
+          `${hoveredLocation.code}:${hoveredLocation.sourceId}`
+        ] ?? getLocationName(hoveredLocation.code, hoveredLocation.sourceId),
+      tier: getTierLabel(hoveredLocation.tier),
       color: shape.color,
     }
-  }, [activeLocation, outcomeShapes, locationNameMap])
+  }, [hoveredLocation, outcomeShapes, locationNameMap])
 
   useLayoutEffect(() => {
     const handler = (v: number) => {
@@ -354,7 +345,8 @@ export default function OutcomeMorphOverlay({
 
         const countEl = countRefsMap.current.get(group.code)
         if (countEl) {
-          const countFade = v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.02)
+          const countFade =
+            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.02)
           countEl.style.opacity = String(countFade)
         }
       }
@@ -403,9 +395,8 @@ export default function OutcomeMorphOverlay({
             {group.shapes.map((shape, i) => {
               const isLocationActive =
                 interactive &&
-                activeLocation !== null &&
-                activeLocation.code === group.code &&
-                activeLocation.sourceId === shape.sourceId
+                activeLocationSet != null &&
+                activeLocationSet.has(`${group.code}:${shape.sourceId}`)
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -414,9 +405,7 @@ export default function OutcomeMorphOverlay({
                   }}
                   d={shape.rawD}
                   fill={shape.color}
-                  fillOpacity={
-                    isLocationActive ? 1 : isSelected ? 0.9 : 0.75
-                  }
+                  fillOpacity={isLocationActive ? 1 : isSelected ? 0.9 : 0.75}
                   stroke={isLocationActive ? "#fff" : shape.color}
                   strokeWidth={isLocationActive ? 1.5 : 0.5}
                   strokeOpacity={isLocationActive ? 1 : 0.4}
@@ -429,7 +418,7 @@ export default function OutcomeMorphOverlay({
                   onMouseEnter={
                     interactive && isSelected
                       ? () =>
-                          locHandlers.onMouseEnter({
+                          onLocationEnter?.({
                             code: group.code,
                             sourceId: shape.sourceId,
                             tier: shape.tier,
@@ -438,19 +427,14 @@ export default function OutcomeMorphOverlay({
                   }
                   onMouseLeave={
                     interactive && isSelected
-                      ? locHandlers.onMouseLeave
+                      ? () => onLocationLeave?.()
                       : undefined
                   }
                   onClick={
                     interactive && isSelected
                       ? (e) => {
                           e.stopPropagation()
-                          locHandlers.onClick({
-                            code: group.code,
-                            sourceId: shape.sourceId,
-                            tier: shape.tier,
-                          })
-                          onLocationPin?.({
+                          onLocationClick?.({
                             code: group.code,
                             sourceId: shape.sourceId,
                             tier: shape.tier,
@@ -506,7 +490,14 @@ export default function OutcomeMorphOverlay({
               whiteSpace: "nowrap",
             }}
           >
-            <span style={{ fontWeight: 600, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+            <span
+              style={{
+                fontWeight: 600,
+                maxWidth: 200,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
               {tooltipInfo.name}
             </span>
             <span style={{ color: tooltipInfo.color, fontWeight: 500 }}>

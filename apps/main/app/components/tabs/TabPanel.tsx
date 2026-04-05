@@ -29,7 +29,10 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
       theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
     const exploreStyles: React.CSSProperties =
       isExploreTab && mapMode !== "get-started"
-        ? { height: `calc(100vh - ${headerAndTabsOffset}px)`, overflow: "hidden" }
+        ? {
+            height: `calc(100vh - ${headerAndTabsOffset}px)`,
+            overflow: "hidden",
+          }
         : {}
 
     // Map tabs need pointerEvents: "none" so the persistent map behind them

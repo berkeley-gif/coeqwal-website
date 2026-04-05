@@ -52,7 +52,7 @@ export default function BeatTextOverlay({
       }
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.30) / 0.04)
+        const fadeIn = clamp01((v - 0.3) / 0.04)
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
@@ -75,7 +75,7 @@ export default function BeatTextOverlay({
       }
 
       if (tierLegendRef.current) {
-        const fadeIn = clamp01((v - 0.70) / 0.04)
+        const fadeIn = clamp01((v - 0.7) / 0.04)
         tierLegendRef.current.style.opacity = String(fadeIn)
       }
 
