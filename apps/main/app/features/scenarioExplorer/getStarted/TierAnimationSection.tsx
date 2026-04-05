@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useCallback } from "react"
+import { useRef, useState, useEffect, useCallback, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -8,15 +8,18 @@ import {
   CircularProgress,
   IconButton,
   PlayArrowIcon,
+  PauseIcon,
+  ReplayIcon,
 } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
 import { mapActions } from "../../map/store"
 import { useTierAnimationData } from "./useTierAnimationData"
-import PolygonMorphOverlay, {
-  type PolygonMorphData,
-} from "./PolygonMorphOverlay"
+import { type PolygonMorphData } from "./PolygonMorphOverlay"
+import OutcomeMorphOverlay, {
+  type OutcomeGroup,
+} from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import ResearcherIllustrations from "./ResearcherIllustrations"
 
@@ -25,18 +28,24 @@ const TOTAL_DURATION = 30
 const CAM_CENTER: [number, number] = [-120.2, 38.5]
 const CAM_ZOOM = 5.82
 
-function lerpZoom(z: number, ...stops: [number, number][]): number {
-  if (stops.length === 0) return 0
-  if (z <= stops[0]![0]) return stops[0]![1]
-  for (let i = 1; i < stops.length; i++) {
-    const [z0, v0] = stops[i - 1]!
-    const [z1, v1] = stops[i]!
-    if (z <= z1) {
-      const t = (z - z0) / (z1 - z0)
-      return v0 + t * (v1 - v0)
-    }
-  }
-  return stops[stops.length - 1]![1]
+const BEAT1_COLORS = ["#BDE1E4", "#92C1D5", "#186b88"] as const
+const BEAT1_CYCLE = 90
+
+/** Mapbox fill-color expression that smoothly cycles each polygon through the
+ *  three beat-1 blues. Each polygon sits at a different point on the cycle
+ *  (based on its tile ID), and advancing `phase` shifts all of them in unison
+ *  so the whole map slowly morphs through the palette. */
+function beat1FillExpr(phase: number): unknown[] {
+  const c = BEAT1_COLORS
+  return [
+    "interpolate-hcl",
+    ["linear"],
+    ["%", ["+", ["coalesce", ["id"], 0], Math.round(phase)], BEAT1_CYCLE],
+    0,  c[0],
+    30, c[1],
+    60, c[2],
+    89, c[0],
+  ]
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,10 +65,33 @@ function extractOuterRing(geometry: any): [number, number][] | null {
   return null
 }
 
+const OUTCOME_DISPLAY_ORDER: { code: string; label: string }[] = [
+  { code: "CWS_DEL", label: "Community water system deliveries" },
+  { code: "AG_REV", label: "Agricultural revenues" },
+  { code: "ENV_FLOWS", label: "River ecology" },
+  { code: "DELTA_ECO", label: "Bay Delta estuary ecology" },
+  { code: "WRC_SALMON_AB", label: "Winter-run salmon abundance" },
+  { code: "FW_DELTA_USES", label: "Freshwater for in-Delta uses" },
+  { code: "FW_EXP", label: "Freshwater for Delta exports" },
+  { code: "RES_STOR", label: "Reservoir storage" },
+  { code: "GW_STOR", label: "Groundwater storage" },
+]
+
+interface ScreenPolygon {
+  screenPoly: [number, number][]
+  centroidScreen: [number, number]
+}
+
 export default function TierAnimationSection() {
   const theme = useTheme()
   const mapAPI = useMap()
-  const { centroids, isLoading, error } = useTierAnimationData()
+  const {
+    centroids,
+    outcomeLocations,
+    allLocationIds,
+    isLoading,
+    error,
+  } = useTierAnimationData()
 
   const panelRef = useRef<HTMLDivElement>(null)
   const cameraSetRef = useRef(false)
@@ -68,23 +100,21 @@ export default function TierAnimationSection() {
     width: number
     height: number
   } | null>(null)
-  const [polygonData, setPolygonData] = useState<PolygonMorphData[]>([])
-  const [mapStyle, setMapStyle] = useState({
-    fillOpacity: 0.65,
-    strokeWidth: 0.8,
-  })
+  const [allScreenPolygons, setAllScreenPolygons] = useState<
+    Map<string, ScreenPolygon>
+  >(new Map())
   const [panelInView, setPanelInView] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [playState, setPlayState] = useState<
+    "idle" | "playing" | "paused" | "finished"
+  >("idle")
 
   const polygonsAllowedRef = useRef(false)
 
   /* ── Time-based progress (0 → 1) ── */
   const progress = useMotionValue(0)
 
-  // Beat 2 overlay: global 0.30–0.75 → 0–1
-  const beat2Progress = useTransform(progress, [0.3, 0.75], [0, 1])
-  // Map visibility: fully visible through beat 1, fades during early beat 2
-  const mapOpacity = useTransform(progress, [0, 0.3, 0.4], [1, 1, 0])
+  // Map visibility: stays visible through beat 2 (dimmed, not hidden)
+  const mapOpacity = useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
   // SVG overlay fades out for beat 3
   const overlayOpacity = useTransform(progress, [0.73, 0.78], [1, 0])
   // Static heading fades once animation begins
@@ -94,13 +124,29 @@ export default function TierAnimationSection() {
 
   const handlePlay = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    progress.set(0)
-    setIsPlaying(true)
+
+    const currentVal = progress.get()
+    const startFrom = currentVal >= 1 ? 0 : currentVal
+    if (startFrom === 0) progress.set(0)
+
+    const remaining = (1 - startFrom) * TOTAL_DURATION
+    setPlayState("playing")
     controlsRef.current = animate(progress, 1, {
-      duration: TOTAL_DURATION,
+      duration: remaining,
       ease: "linear",
-      onComplete: () => setIsPlaying(false),
+      onComplete: () => setPlayState("finished"),
     })
+  }, [progress])
+
+  const handlePause = useCallback(() => {
+    if (controlsRef.current) controlsRef.current.stop()
+    setPlayState("paused")
+  }, [])
+
+  const handleRewind = useCallback(() => {
+    if (controlsRef.current) controlsRef.current.stop()
+    progress.set(0)
+    setPlayState("idle")
   }, [progress])
 
   useEffect(() => {
@@ -178,21 +224,21 @@ export default function TierAnimationSection() {
         polygonsAllowedRef.current = true
 
         try {
-          const fo = lerpZoom(CAM_ZOOM, [5, 0.75], [8, 0.55], [10, 0.35])
           if (map.getLayer("demand-units")) {
-            map.setPaintProperty("demand-units", "fill-opacity-transition", {
-              duration: 600,
-              delay: 0,
-            })
-            map.setPaintProperty("demand-units", "fill-opacity", fo)
+            map.setPaintProperty("demand-units", "fill-opacity", 0)
+            map.setPaintProperty(
+              "demand-units",
+              "fill-color",
+              beat1FillExpr(0) as never,
+            )
+            map.setPaintProperty(
+              "demand-units",
+              "fill-outline-color",
+              "transparent",
+            )
           }
           if (map.getLayer("demand-units-outline")) {
-            map.setPaintProperty(
-              "demand-units-outline",
-              "line-opacity-transition",
-              { duration: 600, delay: 0 },
-            )
-            map.setPaintProperty("demand-units-outline", "line-opacity", 1)
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
           }
         } catch {
           /* ok */
@@ -215,63 +261,100 @@ export default function TierAnimationSection() {
     return () => clearTimeout(timer)
   }, [panelInView, isLoading, mapAPI.mapRef])
 
-  /* ── Beat-1 map effects + Mapbox polygon visibility ── */
+  /* ── Beat-1 map effects + selective Beat-2 opacity ── */
+  const animatedDuIdsRef = useRef<string[]>([])
+
+  useEffect(() => {
+    // Pre-compute the list of DU_IDs that will be animated in Beat 2
+    const ids: string[] = []
+    for (const data of Object.values(outcomeLocations)) {
+      for (const id of data.ids) ids.push(id)
+    }
+    animatedDuIdsRef.current = [...new Set(ids)]
+  }, [outcomeLocations])
+
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
-    const fillOpacityBase = lerpZoom(
-      CAM_ZOOM,
-      [5, 0.75],
-      [8, 0.55],
-      [10, 0.35],
-    )
-    let mapHidden = false
+    let phase: "idle" | "beat1" | "beat2" = "idle"
 
     const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
       if (!map?.isStyleLoaded?.()) return
 
       if (v < 0.01) {
-        if (mapHidden) {
+        if (phase !== "idle") {
           try {
-            if (map.getLayer("demand-units"))
+            if (map.getLayer("demand-units")) {
+              map.setPaintProperty("demand-units", "fill-opacity", 0)
               map.setPaintProperty(
                 "demand-units",
-                "fill-opacity",
-                fillOpacityBase,
+                "fill-color",
+                beat1FillExpr(0) as never,
               )
+            }
             if (map.getLayer("demand-units-outline"))
-              map.setPaintProperty("demand-units-outline", "line-opacity", 1)
+              map.setPaintProperty("demand-units-outline", "line-opacity", 0)
           } catch {
             /* ok */
           }
-          mapHidden = false
+          phase = "idle"
         }
         return
       }
 
       if (v < 0.3) {
         const beat1T = v / 0.3
-        const pulse = Math.sin(beat1T * Math.PI * 3)
-        const opacity = 0.15 + fillOpacityBase * (0.5 + 0.5 * pulse)
+
+        const fadeIn = Math.min(1, beat1T / 0.33)
+        const base = 0.65 * fadeIn
+        const breath = fadeIn >= 1 ? 0.05 * Math.sin(beat1T * Math.PI * 4) : 0
+        const opacity = base + breath
+
+        const colorPhase = beat1T * BEAT1_CYCLE
+
         try {
-          if (map.getLayer("demand-units"))
+          if (map.getLayer("demand-units")) {
+            map.setPaintProperty(
+              "demand-units",
+              "fill-color",
+              beat1FillExpr(colorPhase) as never,
+            )
             map.setPaintProperty("demand-units", "fill-opacity", opacity)
+          }
         } catch {
           /* ok */
         }
-        mapHidden = false
-      } else if (!mapHidden) {
-        try {
-          if (map.getLayer("demand-units"))
-            map.setPaintProperty("demand-units", "fill-opacity", 0)
-          if (map.getLayer("demand-units-outline"))
-            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
-        } catch {
-          /* ok */
+        phase = "beat1"
+      } else {
+        // Beat 2+: selectively hide animated DUs, dim the rest
+        if (phase !== "beat2") {
+          const ids = animatedDuIdsRef.current
+          try {
+            if (map.getLayer("demand-units")) {
+              if (ids.length > 0) {
+                // Animated DUs → hidden; others → dimmed
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-opacity",
+                  [
+                    "match",
+                    ["get", "DU_ID"],
+                    ids,
+                    0,
+                    0.3,
+                  ] as never,
+                )
+              } else {
+                map.setPaintProperty("demand-units", "fill-opacity", 0.3)
+              }
+            }
+          } catch {
+            /* ok */
+          }
+          phase = "beat2"
         }
-        mapHidden = true
       }
     })
 
@@ -281,19 +364,15 @@ export default function TierAnimationSection() {
       if (map?.isStyleLoaded?.()) {
         try {
           if (map.getLayer("demand-units"))
-            map.setPaintProperty(
-              "demand-units",
-              "fill-opacity",
-              fillOpacityBase,
-            )
+            map.setPaintProperty("demand-units", "fill-opacity", 0)
           if (map.getLayer("demand-units-outline"))
-            map.setPaintProperty("demand-units-outline", "line-opacity", 1)
+            map.setPaintProperty("demand-units-outline", "line-opacity", 0)
         } catch {
           /* ok */
         }
       }
     }
-  }, [progress, mapAPI.mapRef, isLoading])
+  }, [progress, mapAPI.mapRef, isLoading, outcomeLocations])
 
   /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {
@@ -323,8 +402,8 @@ export default function TierAnimationSection() {
       retryTimerRef.current = null
     }
 
-    if (!mapAPI.mapRef?.current || !panelRef.current || centroids.length === 0)
-      return
+    if (!mapAPI.mapRef?.current || !panelRef.current) return
+    if (centroids.length === 0 && allLocationIds.size === 0) return
 
     const map = mapAPI.mapRef.current.getMap?.()
     if (!map || !map.isStyleLoaded?.() || !map.getLayer("demand-units")) return
@@ -362,25 +441,26 @@ export default function TierAnimationSection() {
       return
     }
 
+    // Collect best rings for ALL DU features (not just AG_REV ones)
     const bestRings = new Map<
       string,
-      { ring: [number, number][]; cData: (typeof centroids)[0] }
+      { ring: [number, number][] }
     >()
     for (const f of features) {
       const duId: string | undefined = f.properties?.DU_ID
       if (!duId) continue
-      const cData = centroidLookup.get(duId)
-      if (!cData) continue
       const ring = extractOuterRing(f.geometry)
       if (!ring || ring.length < 3) continue
       const existing = bestRings.get(duId)
       if (!existing || ring.length > existing.ring.length) {
-        bestRings.set(duId, { ring, cData })
+        bestRings.set(duId, { ring })
       }
     }
 
-    const result: PolygonMorphData[] = []
-    for (const [, { ring, cData }] of bestRings) {
+    // Project all polygons to screen coordinates
+    const screenMap = new Map<string, ScreenPolygon>()
+
+    for (const [duId, { ring }] of bestRings) {
       const screenPoly: [number, number][] = []
       for (const [lng, lat] of ring) {
         try {
@@ -392,28 +472,32 @@ export default function TierAnimationSection() {
       }
       if (screenPoly.length < 3) continue
 
-      let centroidPt: { x: number; y: number }
-      try {
-        centroidPt = map.project([cData.lng, cData.lat])
-      } catch {
-        continue
+      // Compute centroid from screen polygon vertices
+      let cx = 0, cy = 0
+      for (const [x, y] of screenPoly) { cx += x; cy += y }
+      cx /= screenPoly.length
+      cy /= screenPoly.length
+
+      const centroidScreen: [number, number] = [cx, cy]
+
+      // If the DU has GeoJSON centroid data (AG_REV), use that for more accuracy
+      const cData = centroidLookup.get(duId)
+      if (cData) {
+        try {
+          const pt = map.project([cData.lng, cData.lat])
+          centroidScreen[0] = pt.x - svgOriginX
+          centroidScreen[1] = pt.y - svgOriginY
+        } catch {
+          /* keep computed centroid */
+        }
       }
 
-      result.push({
-        screenPoly,
-        centroidScreen: [centroidPt.x - svgOriginX, centroidPt.y - svgOriginY],
-        color: cData.color,
-        tier: cData.tier,
-      })
+      screenMap.set(duId, { screenPoly, centroidScreen })
+
     }
 
-    const zoom = map.getZoom()
-    const fo = lerpZoom(zoom, [5, 0.75], [8, 0.55], [10, 0.35])
-    const sw = lerpZoom(zoom, [5, 0.5], [7, 1], [9, 2])
-    setMapStyle({ fillOpacity: fo, strokeWidth: sw })
-
-    setPolygonData(result)
-  }, [centroids, mapAPI])
+    setAllScreenPolygons(screenMap)
+  }, [centroids, allLocationIds, mapAPI])
 
   computePolygonDataRef.current = computePolygonData
 
@@ -421,6 +505,27 @@ export default function TierAnimationSection() {
     window.addEventListener("resize", computePolygonData)
     return () => window.removeEventListener("resize", computePolygonData)
   }, [computePolygonData])
+
+  /* ── Build per-outcome polygon groups for the morph overlay ── */
+  const outcomeGroups: OutcomeGroup[] = useMemo(() => {
+    if (allScreenPolygons.size === 0) return []
+    return OUTCOME_DISPLAY_ORDER.map(({ code, label }) => {
+      const locData = outcomeLocations[code]
+      if (!locData) return { code, label, polygons: [] }
+      const polygons: PolygonMorphData[] = []
+      for (const duId of locData.ids) {
+        const screen = allScreenPolygons.get(duId)
+        if (!screen) continue
+        polygons.push({
+          screenPoly: screen.screenPoly,
+          centroidScreen: screen.centroidScreen,
+          color: locData.colorMap[duId] || "#888888",
+          tier: locData.tierMap[duId] || 1,
+        })
+      }
+      return { code, label, polygons }
+    }).filter((g) => g.polygons.length > 0)
+  }, [allScreenPolygons, outcomeLocations])
 
   /* ── Error state ── */
   if (error) {
@@ -488,8 +593,8 @@ export default function TierAnimationSection() {
           {/* Background cover: transparent → forest green as map fades */}
           <MapFade opacity={mapOpacity} color={forestBg} />
 
-          {/* SVG polygon morph overlay — active during Beat 2 */}
-          {polygonData.length > 0 && panelSize && (
+          {/* Outcome polygon morph overlay — active during Beat 2 */}
+          {outcomeGroups.length > 0 && panelSize && (
             <motion.div
               style={{
                 opacity: overlayOpacity,
@@ -497,13 +602,11 @@ export default function TierAnimationSection() {
                 inset: 0,
               }}
             >
-              <PolygonMorphOverlay
-                polygons={polygonData}
+              <OutcomeMorphOverlay
+                outcomes={outcomeGroups}
                 panelWidth={panelSize.width}
                 panelHeight={panelSize.height}
-                fillOpacity={mapStyle.fillOpacity}
-                strokeWidth={mapStyle.strokeWidth}
-                scrollProgress={beat2Progress}
+                progress={progress}
               />
             </motion.div>
           )}
@@ -520,17 +623,56 @@ export default function TierAnimationSection() {
           {/* Cross-fading beat text */}
           <BeatTextOverlay progress={progress} />
 
-          {/* Play / Replay button */}
-          {!isPlaying && (
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: "10%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: 5,
-              }}
-            >
+          {/* Playback controls */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "10%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 5,
+              display: "flex",
+              gap: 1.5,
+              alignItems: "center",
+            }}
+          >
+            {/* Rewind — visible once the animation has started */}
+            {playState !== "idle" && (
+              <IconButton
+                onClick={handleRewind}
+                sx={{
+                  width: 48,
+                  height: 48,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  backdropFilter: "blur(8px)",
+                  color: "text.secondary",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.3)",
+                  },
+                }}
+              >
+                <ReplayIcon sx={{ fontSize: 24 }} />
+              </IconButton>
+            )}
+
+            {/* Play / Pause toggle */}
+            {playState === "playing" ? (
+              <IconButton
+                onClick={handlePause}
+                sx={{
+                  width: 64,
+                  height: 64,
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  backdropFilter: "blur(8px)",
+                  color: "text.secondary",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.35)",
+                  },
+                }}
+              >
+                <PauseIcon sx={{ fontSize: 36 }} />
+              </IconButton>
+            ) : (
               <IconButton
                 onClick={handlePlay}
                 sx={{
@@ -546,8 +688,8 @@ export default function TierAnimationSection() {
               >
                 <PlayArrowIcon sx={{ fontSize: 36 }} />
               </IconButton>
-            </Box>
-          )}
+            )}
+          </Box>
         </>
       )}
     </Box>

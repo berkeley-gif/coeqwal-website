@@ -8,6 +8,18 @@ import { API_BASE } from "../../../lib/constants/api"
 const DEMO_SCENARIO_ID = "s0020"
 const TIER_CODE = "AG_REV"
 
+const OUTCOME_CODES_FOR_ANIMATION = [
+  "CWS_DEL",
+  "AG_REV",
+  "ENV_FLOWS",
+  "RES_STOR",
+  "GW_STOR",
+  "DELTA_ECO",
+  "FW_EXP",
+  "FW_DELTA_USES",
+  "WRC_SALMON_AB",
+] as const
+
 interface TierLocationRaw {
   location_id: string
   location_name: string
@@ -31,11 +43,19 @@ export interface Centroid {
   color: string
 }
 
+export interface OutcomeLocationData {
+  ids: Set<string>
+  tierMap: Record<string, TierLevel>
+  colorMap: Record<string, string>
+}
+
 export interface TierAnimationData {
   tierColorMap: Record<string, string>
   centroids: Centroid[]
   tierDistribution: [number, number, number, number]
   tierColors: [string, string, string, string]
+  outcomeLocations: Record<string, OutcomeLocationData>
+  allLocationIds: Set<string>
   isLoading: boolean
   error: string | null
 }
@@ -98,6 +118,9 @@ export function useTierAnimationData(): TierAnimationData {
 
   const [locations, setLocations] = useState<TierLocationsResponse | null>(null)
   const [geojson, setGeojson] = useState<GeoJSONResponse | null>(null)
+  const [outcomeLocationResponses, setOutcomeLocationResponses] = useState<
+    Record<string, TierLocationsResponse>
+  >({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -106,11 +129,22 @@ export function useTierAnimationData(): TierAnimationData {
 
     async function fetchData() {
       try {
-        const [locRes, geoRes] = await Promise.all([
+        const outcomeFetches = OUTCOME_CODES_FOR_ANIMATION.map((code) =>
+          fetch(
+            `${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${code}/locations`,
+          ).then(async (res) => {
+            if (!res.ok) return { code, data: null }
+            const data: TierLocationsResponse = await res.json()
+            return { code, data }
+          }),
+        )
+
+        const [locRes, geoRes, ...outcomeResults] = await Promise.all([
           fetch(
             `${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}/locations`,
           ),
           fetch(`${API_BASE}/tier-map/${DEMO_SCENARIO_ID}/${TIER_CODE}`),
+          ...outcomeFetches,
         ])
 
         if (!locRes.ok || !geoRes.ok) {
@@ -122,9 +156,15 @@ export function useTierAnimationData(): TierAnimationData {
         const locData: TierLocationsResponse = await locRes.json()
         const geoData: GeoJSONResponse = await geoRes.json()
 
+        const outcomeMap: Record<string, TierLocationsResponse> = {}
+        for (const result of outcomeResults) {
+          if (result.data) outcomeMap[result.code] = result.data
+        }
+
         if (!cancelled) {
           setLocations(locData)
           setGeojson(geoData)
+          setOutcomeLocationResponses(outcomeMap)
           setIsLoading(false)
         }
       } catch (e) {
@@ -181,11 +221,38 @@ export function useTierAnimationData(): TierAnimationData {
     ]
   }, [locations])
 
+  const outcomeLocations = useMemo(() => {
+    const result: Record<string, OutcomeLocationData> = {}
+    for (const [code, resp] of Object.entries(outcomeLocationResponses)) {
+      const ids = new Set<string>()
+      const tierMap: Record<string, TierLevel> = {}
+      const colorMap: Record<string, string> = {}
+      for (const loc of resp.locations) {
+        ids.add(loc.location_id)
+        const level = loc.tier_level as TierLevel
+        tierMap[loc.location_id] = level
+        colorMap[loc.location_id] = tierColors[level] || "#888888"
+      }
+      result[code] = { ids, tierMap, colorMap }
+    }
+    return result
+  }, [outcomeLocationResponses, tierColors])
+
+  const allLocationIds = useMemo(() => {
+    const all = new Set<string>()
+    for (const data of Object.values(outcomeLocations)) {
+      for (const id of data.ids) all.add(id)
+    }
+    return all
+  }, [outcomeLocations])
+
   return {
     tierColorMap,
     centroids,
     tierDistribution,
     tierColors: colorTuple,
+    outcomeLocations,
+    allLocationIds,
     isLoading,
     error,
   }
