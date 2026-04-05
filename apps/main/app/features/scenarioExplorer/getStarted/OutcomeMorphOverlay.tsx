@@ -26,7 +26,7 @@ interface OutcomeMorphOverlayProps {
   panelHeight: number
   progress: MotionValue<number>
   squaresPerRow: number
-  distributionYMap: Record<string, number>
+  distributionPositionMap: Record<string, { x: number; y: number; maxWidth: number }>
 }
 
 export const GRID_PAD = 12
@@ -144,16 +144,13 @@ export default function OutcomeMorphOverlay({
   panelHeight,
   progress,
   squaresPerRow,
-  distributionYMap,
+  distributionPositionMap,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
-    const insetPx = 24
-    const rightColumnX = panelLeft + insetPx
-    const maxColumnWidth = panelWidth * (1 / 3) - insetPx * 2
 
     return outcomes.map((outcome, oi) => {
       const sampled =
@@ -167,13 +164,16 @@ export default function OutcomeMorphOverlay({
             })()
           : outcome.polygons
 
-      const gridTargetY = distributionYMap[outcome.code] ?? 0
+      const pos = distributionPositionMap[outcome.code]
+      const gridTargetX = panelLeft + (pos?.x ?? 24)
+      const gridTargetY = pos?.y ?? 0
+      const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
 
       const shapes = computeOutcomeLayout(
         sampled,
-        rightColumnX,
+        gridTargetX,
         gridTargetY,
-        maxColumnWidth,
+        maxColWidth,
         squaresPerRow,
       )
 
@@ -183,7 +183,7 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, squaresPerRow, distributionYMap])
+  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {

@@ -137,6 +137,9 @@ interface OutcomeLayoutItem {
   code: string
   label: string
   y: number
+  x: number
+  column: 0 | 1
+  columnWidth: number
   isActive: boolean
   distributionY: number
   distributionHeight: number
@@ -693,6 +696,11 @@ export default function TierAnimationSection() {
     for (const [layerId, { idProperty, sourceLayerName }] of layersToQuery) {
       if (!map.getLayer(layerId)) continue
 
+      // Use querySourceFeatures exclusively — it ignores layer filters,
+      // returning ALL features from loaded tiles. queryRenderedFeatures
+      // would only return features matching the current layer filter
+      // (e.g., AG_REV's Agriculture-only filter on demand-units), which
+      // would silently exclude CWS_DEL and other filtered-out features.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let features: any[] = []
       try {
@@ -700,22 +708,12 @@ export default function TierAnimationSection() {
         const layer = map.getLayer(layerId) as any
         const sourceId: string | undefined = layer?.source
         const srcLayer: string | undefined =
-          sourceLayerName ?? layer?.sourceLayer ?? layer?.["source-layer"]
+          layer?.sourceLayer ?? layer?.["source-layer"] ?? sourceLayerName
         if (sourceId && srcLayer) {
           features = map.querySourceFeatures(sourceId, { sourceLayer: srcLayer })
         }
       } catch {
-        /* fall through */
-      }
-      if (features.length === 0) {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          features = map.queryRenderedFeatures(undefined as any, {
-            layers: [layerId],
-          })
-        } catch {
-          /* ok */
-        }
+        /* ok */
       }
 
       if (features.length > 0) anyPolygonsFound = true
@@ -817,7 +815,7 @@ export default function TierAnimationSection() {
       }
     }
 
-    if (!anyPolygonsFound && screenMap.size === 0) {
+    if (!anyPolygonsFound && layersToQuery.size > 0) {
       retryTimerRef.current = setTimeout(collectOutcomeShapes, 1000)
       return
     }
@@ -901,28 +899,39 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
-  /* ── Shared layout for Beat 2 text + distribution alignment ── */
+  /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
+  const COLUMN_GAP = 12
+
   const outcomeLayout = useMemo(() => {
     if (!panelSize) return null
     const { width } = panelSize
     const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
     const insetPx = 24
-    const maxColumnWidth = width * (1 / 3) - insetPx * 2
+    const panelWidth3 = width * (1 / 3)
+    const availableWidth = panelWidth3 - insetPx * 2
+    const colWidth = (availableWidth - COLUMN_GAP) / 2
     const topPad = Math.min(44, Math.max(28, width * 0.035))
 
-    let cursor = topPad
-    const introTextY = cursor
-    cursor += LAYOUT_LINE_HEIGHT + LAYOUT_INTRO_GAP
+    const introTextY = topPad
+    const itemStartY = topPad + LAYOUT_LINE_HEIGHT + LAYOUT_INTRO_GAP
+
+    const midpoint = Math.ceil(OUTCOME_CODE_ORDER.length / 2)
+    const cursors: [number, number] = [itemStartY, itemStartY]
+    const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
 
     const items: OutcomeLayoutItem[] = []
 
-    for (const code of OUTCOME_CODE_ORDER) {
+    for (let idx = 0; idx < OUTCOME_CODE_ORDER.length; idx++) {
+      const code = OUTCOME_CODE_ORDER[idx]!
       const label = getOutcomeName(code)
       const isActive = ACTIVE_OUTCOMES.has(code)
-      const y = cursor
-      cursor += LAYOUT_LINE_HEIGHT
+      const col: 0 | 1 = idx < midpoint ? 0 : 1
 
-      const distributionY = cursor + LAYOUT_DIST_GAP
+      const y = cursors[col]
+      const x = colX[col]
+      cursors[col] += LAYOUT_LINE_HEIGHT
+
+      const distributionY = cursors[col] + LAYOUT_DIST_GAP
       let distributionHeight = 0
 
       if (isActive) {
@@ -931,29 +940,36 @@ export default function TierAnimationSection() {
           distributionHeight = computeDistributionHeight(
             group.polygons,
             sqPerRow,
-            maxColumnWidth,
+            colWidth,
           )
-          cursor += LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
+          cursors[col] += LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
         } else {
-          cursor += LAYOUT_LABEL_GAP
+          cursors[col] += LAYOUT_LABEL_GAP
         }
       } else {
-        cursor += LAYOUT_LABEL_GAP
+        cursors[col] += LAYOUT_LABEL_GAP
       }
 
-      items.push({ code, label, y, isActive, distributionY, distributionHeight })
+      items.push({
+        code, label, y, x, column: col, columnWidth: colWidth,
+        isActive, distributionY, distributionHeight,
+      })
     }
 
-    const levelsTextY = cursor + LAYOUT_LEVELS_GAP
+    const levelsTextY = Math.max(cursors[0], cursors[1]) + LAYOUT_LEVELS_GAP
     return { items, introTextY, levelsTextY }
   }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
 
-  const distributionYMap = useMemo(() => {
+  const distributionPositionMap = useMemo(() => {
     if (!outcomeLayout) return {}
-    const map: Record<string, number> = {}
+    const map: Record<string, { x: number; y: number; maxWidth: number }> = {}
     for (const item of outcomeLayout.items) {
       if (item.isActive && item.distributionHeight > 0) {
-        map[item.code] = item.distributionY
+        map[item.code] = {
+          x: item.x,
+          y: item.distributionY,
+          maxWidth: item.columnWidth,
+        }
       }
     }
     return map
@@ -1041,7 +1057,7 @@ export default function TierAnimationSection() {
                 panelHeight={panelSize.height}
                 progress={progress}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
-                distributionYMap={distributionYMap}
+                distributionPositionMap={distributionPositionMap}
               />
             </motion.div>
           )}

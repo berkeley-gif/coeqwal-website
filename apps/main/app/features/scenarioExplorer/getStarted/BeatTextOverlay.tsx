@@ -10,6 +10,9 @@ interface Beat2Layout {
     code: string
     label: string
     y: number
+    x: number
+    column: 0 | 1
+    columnWidth: number
     isActive: boolean
   }[]
   introTextY: number
@@ -170,8 +173,8 @@ export default function BeatTextOverlay({
                 style={{
                   position: "absolute",
                   top: item.y,
-                  left: insetPx,
-                  right: insetPx,
+                  left: item.x,
+                  width: item.columnWidth,
                   opacity: 0,
                 }}
               >
