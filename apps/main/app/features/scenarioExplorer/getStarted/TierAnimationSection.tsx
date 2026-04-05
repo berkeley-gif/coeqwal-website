@@ -150,8 +150,6 @@ const LAYOUT_LINE_HEIGHT = 32
 const LAYOUT_LABEL_GAP = 8
 const LAYOUT_DIST_GAP = 6
 const LAYOUT_POST_DIST_GAP = 12
-const LAYOUT_LEVELS_GAP = 24
-const LAYOUT_INTRO_GAP = 16
 
 interface OutcomeLayoutItem {
   code: string
@@ -417,9 +415,9 @@ export default function TierAnimationSection() {
     // At BLEND_START the per-DU tier-color blend begins.
     // By BLEND_END the blend is complete and beat2 phase starts.
     const FREEZE_AT = 0.18
-    const CONVERGE_START = 0.38
-    const BLEND_START = 0.42
-    const BLEND_END = 0.48
+    const CONVERGE_START = 0.58
+    const BLEND_START = 0.62
+    const BLEND_END = 0.68
 
     let frozenColorPhase = 0
 
@@ -907,7 +905,7 @@ export default function TierAnimationSection() {
       const config = getOutcomeConfig(group.code)
       if (!config) continue
       const [morphStart] = getOutcomeProgressRange(i, total)
-      const fadeStart = morphStart - 0.02
+      const fadeStart = morphStart - 0.03
 
       // For RES_STOR, translate CalSim IDs to gnisidlabel for Mapbox matching
       let locationIds = [...locData.ids]
@@ -947,10 +945,10 @@ export default function TierAnimationSection() {
     const panelWidth3 = width * (1 / 3)
     const availableWidth = panelWidth3 - insetPx * 2
     const colWidth = (availableWidth - COLUMN_GAP) / 2
-    const topPad = Math.min(44, Math.max(28, width * 0.035))
+    const headerOffset = 132
+    const topPad = headerOffset + Math.min(44, Math.max(28, width * 0.035))
 
-    const introTextY = topPad
-    const itemStartY = topPad + LAYOUT_LINE_HEIGHT + LAYOUT_INTRO_GAP
+    const itemStartY = topPad
 
     const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
     const cursors: [number, number] = [itemStartY, itemStartY]
@@ -1001,8 +999,7 @@ export default function TierAnimationSection() {
       })
     }
 
-    const levelsTextY = Math.max(cursors[0], cursors[1]) + LAYOUT_LEVELS_GAP
-    return { items, introTextY, levelsTextY }
+    return { items }
   }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
 
   const distributionPositionMap = useMemo(() => {

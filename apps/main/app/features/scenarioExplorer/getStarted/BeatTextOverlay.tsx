@@ -15,8 +15,6 @@ interface Beat2Layout {
     columnWidth: number
     isActive: boolean
   }[]
-  introTextY: number
-  levelsTextY: number
 }
 
 interface BeatTextOverlayProps {
@@ -36,8 +34,9 @@ export default function BeatTextOverlay({
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
+  const levelsLineRef = useRef<HTMLDivElement>(null)
+  const tierLegendRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
-  const beat2LevelsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
@@ -46,28 +45,32 @@ export default function BeatTextOverlay({
         beat1Ref.current.style.opacity = String(fadeIn)
       }
 
-      if (beat2PanelRef.current) {
+      if (beat2IntroRef.current) {
         const fadeIn = clamp01((v - 0.18) / 0.04)
-        beat2PanelRef.current.style.opacity = String(fadeIn)
+        beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
-      if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.2) / 0.04)
-        // TODO(beat3): restore fadeOut at 0.70 for beat 3 transition
-        beat2IntroRef.current.style.opacity = String(fadeIn)
+      if (beat2PanelRef.current) {
+        const fadeIn = clamp01((v - 0.20) / 0.04)
+        beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
       for (let i = 0; i < OUTCOME_CODE_ORDER.length; i++) {
         const el = beat2ItemRefs.current[i]
         if (!el) continue
-        const itemStart = 0.22 + i * 0.015
+        const itemStart = 0.22 + i * 0.035
         const fadeIn = clamp01((v - itemStart) / 0.03)
         el.style.opacity = String(fadeIn)
       }
 
-      if (beat2LevelsRef.current) {
-        const fadeIn = clamp01((v - 0.38) / 0.04)
-        beat2LevelsRef.current.style.opacity = String(fadeIn)
+      if (levelsLineRef.current) {
+        const fadeIn = clamp01((v - 0.54) / 0.04)
+        levelsLineRef.current.style.opacity = String(fadeIn)
+      }
+
+      if (tierLegendRef.current) {
+        const fadeIn = clamp01((v - 0.58) / 0.04)
+        tierLegendRef.current.style.opacity = String(fadeIn)
       }
 
       // TODO(beat3): restore beat 3 text fade
@@ -103,8 +106,8 @@ export default function BeatTextOverlay({
         ref={beat1Ref}
         sx={{
           position: "absolute",
-          top: "40%",
-          left: 0,
+          top: "25%",
+          left: "10%",
           p: padding,
           opacity: 0,
           width: beat1PanelWidth,
@@ -118,6 +121,40 @@ export default function BeatTextOverlay({
           Different water management scenarios bring water to different parts of
           the system.
         </Typography>
+        <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+          <Typography variant="storyBody" component="p">
+            We can group these parts of the system into categories:
+          </Typography>
+        </Box>
+        <Box ref={levelsLineRef} sx={{ mt: 2, opacity: 0 }}>
+          <Typography variant="storyBody" component="p">
+            We can create levels of outcomes per location within these groups.
+          </Typography>
+        </Box>
+        <Box ref={tierLegendRef} sx={{ mt: 2.5, opacity: 0, display: "flex", flexDirection: "column", gap: 1 }}>
+          {([
+            { color: theme.palette.tiers.tier1, label: "Thriving" },
+            { color: theme.palette.tiers.tier2, label: "Functioning" },
+            { color: theme.palette.tiers.tier3, label: "At risk" },
+            { color: theme.palette.tiers.tier4, label: "Critical" },
+          ] as const).map(({ color, label }) => (
+            <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: 0.5,
+                  backgroundColor: color,
+                  flexShrink: 0,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                }}
+              />
+              <Typography variant="storyBody" component="span">
+                {label}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       </Box>
 
       {/* Beat 2 — white backdrop on the right third */}
@@ -149,21 +186,6 @@ export default function BeatTextOverlay({
       >
         {beat2Layout && (
           <>
-            <Box
-              ref={beat2IntroRef}
-              style={{
-                position: "absolute",
-                top: beat2Layout.introTextY,
-                left: insetPx,
-                right: insetPx,
-                opacity: 0,
-              }}
-            >
-              <Typography variant="storyBody" component="p">
-                We can group these parts of the system into categories:
-              </Typography>
-            </Box>
-
             {beat2Layout.items.map((item, i) => (
               <Box
                 key={item.code}
@@ -181,22 +203,6 @@ export default function BeatTextOverlay({
                 <Typography variant="storyBody">{item.label}</Typography>
               </Box>
             ))}
-
-            <Box
-              ref={beat2LevelsRef}
-              style={{
-                position: "absolute",
-                top: beat2Layout.levelsTextY,
-                left: insetPx,
-                right: insetPx,
-                opacity: 0,
-              }}
-            >
-              <Typography variant="storyBody" component="p">
-                We can create levels of outcome for each location within these
-                groups.
-              </Typography>
-            </Box>
           </>
         )}
       </Box>
