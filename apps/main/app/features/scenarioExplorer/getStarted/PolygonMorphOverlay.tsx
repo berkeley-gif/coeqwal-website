@@ -37,6 +37,15 @@ export interface PolygonMorphData {
   tier: number
 }
 
+interface PolygonMorphOverlayProps {
+  polygons: PolygonMorphData[]
+  panelWidth: number
+  panelHeight: number
+  fillOpacity: number
+  strokeWidth: number
+  scrollProgress: MotionValue<number>
+}
+
 /* grid & bar layout (stacked regions) */
 
 interface GridLayout {

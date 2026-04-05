@@ -26,7 +26,10 @@ interface OutcomeMorphOverlayProps {
   panelHeight: number
   progress: MotionValue<number>
   squaresPerRow: number
-  distributionPositionMap: Record<string, { x: number; y: number; maxWidth: number }>
+  distributionPositionMap: Record<
+    string,
+    { x: number; y: number; maxWidth: number }
+  >
 }
 
 export const GRID_PAD = 12
@@ -97,9 +100,10 @@ function computeOutcomeLayout(
       const gridY = targetY + row * cell + SQUARE_SIZE / 2
 
       const shape = group[i]!
-      const resampled = shape.screenShape.length === POINTS_PER_SHAPE
-        ? shape.screenShape
-        : resampleClosedPath(shape.screenShape, POINTS_PER_SHAPE)
+      const resampled =
+        shape.screenShape.length === POINTS_PER_SHAPE
+          ? shape.screenShape
+          : resampleClosedPath(shape.screenShape, POINTS_PER_SHAPE)
       const squareTarget = rectPoints(
         gridX,
         gridY,
@@ -131,7 +135,7 @@ export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.50
+  const beat2Start = 0.5
   const beat2End = 0.72
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
@@ -212,10 +216,7 @@ export default function OutcomeMorphOverlay({
             continue
           }
 
-          const morphT = Math.min(
-            1,
-            (v - morphStart) / (morphEnd - morphStart),
-          )
+          const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
           const easedT = easeInOut(morphT)
 
           const pts = shape.resampled.map((a, pi) =>

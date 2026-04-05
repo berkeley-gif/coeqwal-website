@@ -26,7 +26,10 @@ import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
-import { getOutcomeLocationCoordinates, SALMON_RIVER_CENTROID } from "../../map/config/outcomeLocations"
+import {
+  getOutcomeLocationCoordinates,
+  SALMON_RIVER_CENTROID,
+} from "../../map/config/outcomeLocations"
 import { useTierAnimationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
@@ -34,7 +37,8 @@ import OutcomeMorphOverlay, {
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
-import ResearcherIllustrations from "./ResearcherIllustrations"
+// TODO(beat3): restore ResearcherIllustrations import
+// import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 
 const TOTAL_DURATION = 30
@@ -49,9 +53,15 @@ const BEAT1_MID = BEAT1_COLORS[1] // convergence target
 function blendHex(a: string, b: string, t: number): string {
   const [r1, g1, b1] = parseHex(a)
   const [r2, g2, b2] = parseHex(b)
-  const r = Math.round(r1 + (r2 - r1) * t).toString(16).padStart(2, "0")
-  const g = Math.round(g1 + (g2 - g1) * t).toString(16).padStart(2, "0")
-  const bl = Math.round(b1 + (b2 - b1) * t).toString(16).padStart(2, "0")
+  const r = Math.round(r1 + (r2 - r1) * t)
+    .toString(16)
+    .padStart(2, "0")
+  const g = Math.round(g1 + (g2 - g1) * t)
+    .toString(16)
+    .padStart(2, "0")
+  const bl = Math.round(b1 + (b2 - b1) * t)
+    .toString(16)
+    .padStart(2, "0")
   return `#${r}${g}${bl}`
 }
 
@@ -59,17 +69,27 @@ function blendHex(a: string, b: string, t: number): string {
  *  three beat-1 blues. `convergence` (0-1) shrinks the palette toward a single
  *  blue so all polygons end up the same color before the tier-color blend. */
 function beat1FillExpr(phase: number, convergence = 0): unknown[] {
-  const c0 = convergence > 0 ? blendHex(BEAT1_COLORS[0], BEAT1_MID, convergence) : BEAT1_COLORS[0]
+  const c0 =
+    convergence > 0
+      ? blendHex(BEAT1_COLORS[0], BEAT1_MID, convergence)
+      : BEAT1_COLORS[0]
   const c1 = BEAT1_MID
-  const c2 = convergence > 0 ? blendHex(BEAT1_COLORS[2], BEAT1_MID, convergence) : BEAT1_COLORS[2]
+  const c2 =
+    convergence > 0
+      ? blendHex(BEAT1_COLORS[2], BEAT1_MID, convergence)
+      : BEAT1_COLORS[2]
   return [
     "interpolate-hcl",
     ["linear"],
     ["%", ["+", ["coalesce", ["id"], 0], Math.round(phase)], BEAT1_CYCLE],
-    0,  c0,
-    30, c1,
-    60, c2,
-    89, c0,
+    0,
+    c0,
+    30,
+    c1,
+    60,
+    c2,
+    89,
+    c0,
   ]
 }
 
@@ -153,13 +173,8 @@ interface ScreenPolygon {
 export default function TierAnimationSection() {
   const theme = useTheme()
   const mapAPI = useMap()
-  const {
-    centroids,
-    outcomeLocations,
-    allLocationIds,
-    isLoading,
-    error,
-  } = useTierAnimationData()
+  const { centroids, outcomeLocations, allLocationIds, isLoading, error } =
+    useTierAnimationData()
 
   const panelRef = useRef<HTMLDivElement>(null)
   const cameraSetRef = useRef(false)
@@ -239,7 +254,8 @@ export default function TierAnimationSection() {
       try {
         for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
           if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
-          if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
+          if (map.getLayer(outline))
+            map.setPaintProperty(outline, "line-opacity", 0)
         }
       } catch {
         /* ok */
@@ -310,8 +326,10 @@ export default function TierAnimationSection() {
           // Suppress all other polygon layers until their beat-2 turn
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
             if (fill === "demand-units") continue // already handled above
-            if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
-            if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
+            if (map.getLayer(fill))
+              map.setPaintProperty(fill, "fill-opacity", 0)
+            if (map.getLayer(outline))
+              map.setPaintProperty(outline, "line-opacity", 0)
           }
         } catch {
           /* ok */
@@ -480,7 +498,8 @@ export default function TierAnimationSection() {
         phase = "beat1"
       } else if (v < BLEND_START) {
         // Converge: collapse the 3-blue palette toward a single blue
-        const convergence = (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
+        const convergence =
+          (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
         const easedC = convergence * convergence
 
         try {
@@ -506,11 +525,7 @@ export default function TierAnimationSection() {
           if (map.getLayer("demand-units")) {
             const expr = buildBlendedTierExpr(BEAT1_MID, easedT)
             if (expr) {
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                expr as never,
-              )
+              map.setPaintProperty("demand-units", "fill-color", expr as never)
             }
             map.setPaintProperty("demand-units", "fill-opacity", 0.65)
           }
@@ -525,11 +540,7 @@ export default function TierAnimationSection() {
           try {
             const expr = buildBlendedTierExpr(BEAT1_MID, 1)
             if (expr && map.getLayer("demand-units")) {
-              map.setPaintProperty(
-                "demand-units",
-                "fill-color",
-                expr as never,
-              )
+              map.setPaintProperty("demand-units", "fill-color", expr as never)
             }
             // Show non-demand-unit polygon layers at their default styling
             for (const { fill } of ANIM_POLYGON_LAYERS) {
@@ -545,7 +556,10 @@ export default function TierAnimationSection() {
         }
 
         // Group hide schedule entries by Mapbox layer for polygon outcomes
-        const layerEntries = new Map<string, { idProperty: string; entries: typeof hideScheduleRef.current }>()
+        const layerEntries = new Map<
+          string,
+          { idProperty: string; entries: typeof hideScheduleRef.current }
+        >()
         const lineEntries: typeof hideScheduleRef.current = []
 
         for (const entry of hideScheduleRef.current) {
@@ -624,11 +638,14 @@ export default function TierAnimationSection() {
       if (map?.isStyleLoaded?.()) {
         try {
           for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-            if (map.getLayer(fill)) map.setPaintProperty(fill, "fill-opacity", 0)
-            if (map.getLayer(outline)) map.setPaintProperty(outline, "line-opacity", 0)
+            if (map.getLayer(fill))
+              map.setPaintProperty(fill, "fill-opacity", 0)
+            if (map.getLayer(outline))
+              map.setPaintProperty(outline, "line-opacity", 0)
           }
           for (const lineLayer of ANIM_LINE_LAYERS) {
-            if (map.getLayer(lineLayer)) map.setPaintProperty(lineLayer, "line-opacity", 1)
+            if (map.getLayer(lineLayer))
+              map.setPaintProperty(lineLayer, "line-opacity", 1)
           }
         } catch {
           /* ok */
@@ -680,12 +697,16 @@ export default function TierAnimationSection() {
     const screenMap = new Map<string, ScreenPolygon>()
 
     // ── 1. Query polygon-based Mapbox layers per the registry ──
-    const layersToQuery = new Map<string, { idProperty: string; sourceLayerName?: string }>()
+    const layersToQuery = new Map<
+      string,
+      { idProperty: string; sourceLayerName?: string }
+    >()
 
     for (const { code } of OUTCOME_DISPLAY_ORDER) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "polygon") continue
-      if (!config.mapboxLayerId || layersToQuery.has(config.mapboxLayerId)) continue
+      if (!config.mapboxLayerId || layersToQuery.has(config.mapboxLayerId))
+        continue
       layersToQuery.set(config.mapboxLayerId, {
         idProperty: config.idProperty ?? "DU_ID",
         sourceLayerName: config.sourceLayer,
@@ -710,7 +731,9 @@ export default function TierAnimationSection() {
         const srcLayer: string | undefined =
           layer?.sourceLayer ?? layer?.["source-layer"] ?? sourceLayerName
         if (sourceId && srcLayer) {
-          features = map.querySourceFeatures(sourceId, { sourceLayer: srcLayer })
+          features = map.querySourceFeatures(sourceId, {
+            sourceLayer: srcLayer,
+          })
         }
       } catch {
         /* ok */
@@ -742,8 +765,12 @@ export default function TierAnimationSection() {
         }
         if (screenPoly.length < 3) continue
 
-        let cx = 0, cy = 0
-        for (const [x, y] of screenPoly) { cx += x; cy += y }
+        let cx = 0,
+          cy = 0
+        for (const [x, y] of screenPoly) {
+          cx += x
+          cy += y
+        }
         cx /= screenPoly.length
         cy /= screenPoly.length
         const centroidScreen: [number, number] = [cx, cy]
@@ -808,7 +835,14 @@ export default function TierAnimationSection() {
         const pt = map.project(SALMON_RIVER_CENTROID)
         const sx = pt.x - svgOriginX
         const sy = pt.y - svgOriginY
-        const screenPoly = lineSegmentPoints(sx - 15, sy, sx + 15, sy, 8, POINTS_PER_SHAPE)
+        const screenPoly = lineSegmentPoints(
+          sx - 15,
+          sy,
+          sx + 15,
+          sy,
+          8,
+          POINTS_PER_SHAPE,
+        )
         screenMap.set(syntheticId, { screenPoly, centroidScreen: [sx, sy] })
       } catch {
         /* outside projection bounds */
@@ -888,7 +922,10 @@ export default function TierAnimationSection() {
 
       schedule.push({
         code: group.code,
-        geometryType: config.geometryType as "polygon" | "line" | "react-marker",
+        geometryType: config.geometryType as
+          | "polygon"
+          | "line"
+          | "react-marker",
         mapboxLayerId: config.mapboxLayerId,
         idProperty: config.idProperty ?? "",
         fadeStart,
@@ -942,7 +979,8 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
-          cursors[col] += LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
+          cursors[col] +=
+            LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
         }
@@ -951,8 +989,15 @@ export default function TierAnimationSection() {
       }
 
       items.push({
-        code, label, y, x, column: col, columnWidth: colWidth,
-        isActive, distributionY, distributionHeight,
+        code,
+        label,
+        y,
+        x,
+        column: col,
+        columnWidth: colWidth,
+        isActive,
+        distributionY,
+        distributionHeight,
       })
     }
 

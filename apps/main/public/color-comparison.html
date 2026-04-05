@@ -1,144 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Beat 1 Blue Comparison</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: system-ui, -apple-system, sans-serif;
-    background: #1a1a1a;
-    color: #e0e0e0;
-    padding: 40px;
-  }
-  h1 { font-weight: 300; font-size: 24px; margin-bottom: 32px; }
-  h2 { font-weight: 400; font-size: 16px; margin-bottom: 16px; color: #aaa; }
-  .row {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 48px;
-    flex-wrap: wrap;
-  }
-  .group { flex: 1; min-width: 320px; }
-  .swatches { display: flex; gap: 12px; }
-  .swatch {
-    width: 120px;
-    height: 120px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 8px;
-    font-size: 12px;
-    font-weight: 500;
-    position: relative;
-  }
-  .swatch .label {
-    background: rgba(0,0,0,0.45);
-    border-radius: 4px;
-    padding: 3px 6px;
-    color: #fff;
-    font-size: 11px;
-    line-height: 1.4;
-  }
-  .pair {
-    display: flex;
-    gap: 4px;
-    align-items: stretch;
-    margin-bottom: 12px;
-  }
-  .pair .swatch { width: 100px; height: 100px; }
-  .pair-label {
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-    color: #888;
-    padding-left: 8px;
-    min-width: 100px;
-  }
-  .divider {
-    border-top: 1px solid #333;
-    margin: 8px 0 32px;
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Beat 1 Blue Comparison</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: #1a1a1a;
+        color: #e0e0e0;
+        padding: 40px;
+      }
+      h1 {
+        font-weight: 300;
+        font-size: 24px;
+        margin-bottom: 32px;
+      }
+      h2 {
+        font-weight: 400;
+        font-size: 16px;
+        margin-bottom: 16px;
+        color: #aaa;
+      }
+      .row {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 48px;
+        flex-wrap: wrap;
+      }
+      .group {
+        flex: 1;
+        min-width: 320px;
+      }
+      .swatches {
+        display: flex;
+        gap: 12px;
+      }
+      .swatch {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        position: relative;
+      }
+      .swatch .label {
+        background: rgba(0, 0, 0, 0.45);
+        border-radius: 4px;
+        padding: 3px 6px;
+        color: #fff;
+        font-size: 11px;
+        line-height: 1.4;
+      }
+      .pair {
+        display: flex;
+        gap: 4px;
+        align-items: stretch;
+        margin-bottom: 12px;
+      }
+      .pair .swatch {
+        width: 100px;
+        height: 100px;
+      }
+      .pair-label {
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+        color: #888;
+        padding-left: 8px;
+        min-width: 100px;
+      }
+      .divider {
+        border-top: 1px solid #333;
+        margin: 8px 0 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Beat 1 — Blue Color Comparison</h1>
 
-<h1>Beat 1 — Blue Color Comparison</h1>
+    <h2>Your requested colors</h2>
+    <div class="swatches" style="margin-bottom: 32px">
+      <div class="swatch" style="background: #bde1e4">
+        <span class="label">#BDE1E4<br />Light teal</span>
+      </div>
+      <div class="swatch" style="background: #92c1d5">
+        <span class="label">#92C1D5<br />Medium sky</span>
+      </div>
+      <div class="swatch" style="background: #1e6880">
+        <span class="label">#1E6880<br />Dark teal</span>
+      </div>
+    </div>
 
-<h2>Your requested colors</h2>
-<div class="swatches" style="margin-bottom:32px">
-  <div class="swatch" style="background:#BDE1E4">
-    <span class="label">#BDE1E4<br>Light teal</span>
-  </div>
-  <div class="swatch" style="background:#92C1D5">
-    <span class="label">#92C1D5<br>Medium sky</span>
-  </div>
-  <div class="swatch" style="background:#1E6880">
-    <span class="label">#1E6880<br>Dark teal</span>
-  </div>
-</div>
+    <div class="divider"></div>
 
-<div class="divider"></div>
+    <h2>Side-by-side: Requested vs. closest theme color</h2>
 
-<h2>Side-by-side: Requested vs. closest theme color</h2>
+    <div class="pair">
+      <div class="swatch" style="background: #bde1e4">
+        <span class="label">#BDE1E4</span>
+      </div>
+      <div class="swatch" style="background: #cef1f5">
+        <span class="label">#cef1f5<br />blue.pale</span>
+      </div>
+      <div class="pair-label">Light — pale is lighter &amp; more icy</div>
+    </div>
 
-<div class="pair">
-  <div class="swatch" style="background:#BDE1E4">
-    <span class="label">#BDE1E4</span>
-  </div>
-  <div class="swatch" style="background:#cef1f5">
-    <span class="label">#cef1f5<br>blue.pale</span>
-  </div>
-  <div class="pair-label">Light — pale is lighter &amp; more icy</div>
-</div>
+    <div class="pair">
+      <div class="swatch" style="background: #92c1d5">
+        <span class="label">#92C1D5</span>
+      </div>
+      <div class="swatch" style="background: #92c1d5">
+        <span class="label">#92C1D5<br />brand.sky</span>
+      </div>
+      <div class="pair-label">Medium — exact match</div>
+    </div>
 
-<div class="pair">
-  <div class="swatch" style="background:#92C1D5">
-    <span class="label">#92C1D5</span>
-  </div>
-  <div class="swatch" style="background:#92C1D5">
-    <span class="label">#92C1D5<br>brand.sky</span>
-  </div>
-  <div class="pair-label">Medium — exact match</div>
-</div>
+    <div class="pair">
+      <div class="swatch" style="background: #1e6880">
+        <span class="label">#1E6880</span>
+      </div>
+      <div class="swatch" style="background: #186b88">
+        <span class="label">#186b88<br />blue.dark</span>
+      </div>
+      <div class="pair-label">Dark — nearly identical</div>
+    </div>
 
-<div class="pair">
-  <div class="swatch" style="background:#1E6880">
-    <span class="label">#1E6880</span>
-  </div>
-  <div class="swatch" style="background:#186b88">
-    <span class="label">#186b88<br>blue.dark</span>
-  </div>
-  <div class="pair-label">Dark — nearly identical</div>
-</div>
+    <div class="divider"></div>
 
-<div class="divider"></div>
-
-<h2>All theme blues for reference</h2>
-<div class="swatches">
-  <div class="swatch" style="background:#cef1f5">
-    <span class="label">#cef1f5<br>blue.pale</span>
-  </div>
-  <div class="swatch" style="background:#B4D2F0">
-    <span class="label">#B4D2F0<br>blue.softSky</span>
-  </div>
-  <div class="swatch" style="background:#92C1D5">
-    <span class="label">#92C1D5<br>brand.sky</span>
-  </div>
-  <div class="swatch" style="background:#77a2d9">
-    <span class="label">#77a2d9<br>blue.light</span>
-  </div>
-  <div class="swatch" style="background:#449cd9">
-    <span class="label">#449cd9<br>blue.bright</span>
-  </div>
-  <div class="swatch" style="background:#2d89b6">
-    <span class="label">#2d89b6<br>blue.medium</span>
-  </div>
-  <div class="swatch" style="background:#186b88">
-    <span class="label">#186b88<br>blue.dark</span>
-  </div>
-</div>
-
-</body>
+    <h2>All theme blues for reference</h2>
+    <div class="swatches">
+      <div class="swatch" style="background: #cef1f5">
+        <span class="label">#cef1f5<br />blue.pale</span>
+      </div>
+      <div class="swatch" style="background: #b4d2f0">
+        <span class="label">#B4D2F0<br />blue.softSky</span>
+      </div>
+      <div class="swatch" style="background: #92c1d5">
+        <span class="label">#92C1D5<br />brand.sky</span>
+      </div>
+      <div class="swatch" style="background: #77a2d9">
+        <span class="label">#77a2d9<br />blue.light</span>
+      </div>
+      <div class="swatch" style="background: #449cd9">
+        <span class="label">#449cd9<br />blue.bright</span>
+      </div>
+      <div class="swatch" style="background: #2d89b6">
+        <span class="label">#2d89b6<br />blue.medium</span>
+      </div>
+      <div class="swatch" style="background: #186b88">
+        <span class="label">#186b88<br />blue.dark</span>
+      </div>
+    </div>
+  </body>
 </html>
