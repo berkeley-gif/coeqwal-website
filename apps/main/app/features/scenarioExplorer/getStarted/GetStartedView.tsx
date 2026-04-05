@@ -64,7 +64,10 @@ export default function GetStartedView() {
       <ContentPanel
         background={exploreBg}
         heading="Welcome"
-        sx={{ pointerEvents: "auto", backgroundColor: mapActive ? exploreBg : "transparent" }}
+        sx={{
+          pointerEvents: "auto",
+          backgroundColor: mapActive ? exploreBg : "transparent",
+        }}
       >
         <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           COEQWAL uses the CalSim3 water planning model to evaluate how
@@ -78,7 +81,11 @@ export default function GetStartedView() {
       </ContentPanel>
 
       {/* ── Water Issues ── */}
-      <ContentPanel background={theme.palette.blue.dark} heading="Water Issues" sx={{ pointerEvents: "auto" }}>
+      <ContentPanel
+        background={theme.palette.blue.dark}
+        heading="Water Issues"
+        sx={{ pointerEvents: "auto" }}
+      >
         <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           COEQWAL scenarios are designed to address specific water issues. These
           include:
@@ -142,7 +149,11 @@ export default function GetStartedView() {
       </ContentPanel>
 
       {/* ── Data in depth ── */}
-      <ContentPanel background={exploreBg} heading="Data in depth" sx={{ pointerEvents: "auto" }}>
+      <ContentPanel
+        background={exploreBg}
+        heading="Data in depth"
+        sx={{ pointerEvents: "auto" }}
+      >
         <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           In addition to the key outcomes, there are dozens of detailed scenario
           outcome variables that describe different features of the systems,

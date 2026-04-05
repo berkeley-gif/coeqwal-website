@@ -225,7 +225,7 @@ export default function TierAnimationSection() {
         onComplete: () => {
           setPlayState("finished")
           mapActions.clearOutcomeVisualization()
-          mapActions.clearLocationHighlight()
+          mapActions.clearLocationHighlights()
 
           const map = mapAPI.mapRef?.current?.getMap?.()
           if (map?.isStyleLoaded?.()) {
@@ -308,7 +308,9 @@ export default function TierAnimationSection() {
   const handleRewind = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
     computePolygonDataRef.current()
-    mapActions.clearLocationHighlight()
+    setHoveredLocation(null)
+    setPinnedLocations(new Map())
+    mapActions.clearLocationHighlights()
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -319,14 +321,58 @@ export default function TierAnimationSection() {
 
   const isInteractive = playState === "finished"
 
-  const highlightRef = useRef<{
-    fillId: string
-    outlineId: string
-    idProperty: string
-    prevFillOpacity: unknown
-    prevLineWidth: unknown
-    prevLineColor: unknown
-  } | null>(null)
+  /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
+  const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(
+    null,
+  )
+  const [pinnedLocations, setPinnedLocations] = useState<
+    Map<string, LocationInfo>
+  >(new Map())
+
+  const locKey = useCallback(
+    (info: LocationInfo) => `${info.code}:${info.sourceId}`,
+    [],
+  )
+
+  const locHandlers = useMemo(
+    () => ({
+      onMouseEnter: (info: LocationInfo) => setHoveredLocation(info),
+      onMouseLeave: () => setHoveredLocation(null),
+      onClick: (info: LocationInfo) => {
+        setPinnedLocations((prev) => {
+          const key = locKey(info)
+          const next = new Map(prev)
+          if (next.has(key)) {
+            next.delete(key)
+          } else {
+            next.set(key, info)
+          }
+          return next
+        })
+      },
+    }),
+    [locKey],
+  )
+
+  const activeLocationSet = useMemo(() => {
+    const set = new Map(pinnedLocations)
+    if (hoveredLocation) {
+      const key = locKey(hoveredLocation)
+      if (!set.has(key)) set.set(key, hoveredLocation)
+    }
+    return set
+  }, [pinnedLocations, hoveredLocation, locKey])
+
+  const clearAllLocations = useCallback(() => {
+    setHoveredLocation(null)
+    setPinnedLocations(new Map())
+    mapActions.clearLocationHighlights()
+  }, [])
+
+  // Clear when outcome changes
+  useEffect(() => {
+    clearAllLocations()
+  }, [selectedOutcomeCode, clearAllLocations])
 
   const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
     new Map(),
@@ -337,93 +383,82 @@ export default function TierAnimationSection() {
     )
   }, [centroids])
 
-  const handleLocationActive = useCallback(
-    (info: LocationInfo | null) => {
-      const map = mapAPI.mapRef?.current?.getMap?.()
-      if (!map?.isStyleLoaded?.()) return
+  /* ── Apply map highlight for all active locations (no dimming) ── */
+  const prevHighlightLayerRef = useRef<{
+    fillId: string
+    outlineId: string
+  } | null>(null)
 
-      // ── Restore previous state ──
-      if (highlightRef.current) {
-        const { fillId, outlineId, prevFillOpacity, prevLineWidth, prevLineColor } =
-          highlightRef.current
-        try {
-          if (map.getLayer(fillId)) {
-            map.setPaintProperty(fillId, "fill-opacity", prevFillOpacity as never)
-          }
-          if (map.getLayer(outlineId)) {
-            map.setPaintProperty(outlineId, "line-width", prevLineWidth as never)
-            map.setPaintProperty(outlineId, "line-color", prevLineColor as never)
-          }
-        } catch {
-          /* ok */
-        }
-        highlightRef.current = null
-      }
+  useEffect(() => {
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (!map?.isStyleLoaded?.()) return
 
-      mapActions.clearLocationHighlight()
-
-      if (!info) return
-
-      const config = getOutcomeConfig(info.code)
-      if (!config || config.geometryType !== "polygon") return
-
-      const fillId = config.mapboxLayerId
-      const outlineId = `${config.mapboxLayerId}-outline`
-      if (!map.getLayer(fillId)) return
-
-      const idProp = config.idProperty ?? "DU_ID"
-      let featureId = info.sourceId
-      if (info.code === "RES_STOR") {
-        featureId =
-          RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
-      }
-
+    // Restore previous layer to default stroke
+    if (prevHighlightLayerRef.current) {
+      const { outlineId } = prevHighlightLayerRef.current
       try {
-        const prevFillOpacity = map.getPaintProperty(fillId, "fill-opacity")
-        const prevLineWidth = map.getLayer(outlineId)
-          ? map.getPaintProperty(outlineId, "line-width")
-          : 0.5
-        const prevLineColor = map.getLayer(outlineId)
-          ? map.getPaintProperty(outlineId, "line-color")
-          : "#888"
-
-        highlightRef.current = {
-          fillId,
-          outlineId,
-          idProperty: idProp,
-          prevFillOpacity,
-          prevLineWidth,
-          prevLineColor,
-        }
-
-        // Opaque fill for the hovered feature
-        map.setPaintProperty(fillId, "fill-opacity", [
-          "case",
-          ["==", ["get", idProp], featureId],
-          1,
-          typeof prevFillOpacity === "number" ? prevFillOpacity : 0.55,
-        ] as never)
-
-        // White stroke outline for the hovered feature
         if (map.getLayer(outlineId)) {
-          map.setPaintProperty(outlineId, "line-color", [
-            "case",
-            ["==", ["get", idProp], featureId],
-            "#ffffff",
-            typeof prevLineColor === "string" ? prevLineColor : "#888",
-          ] as never)
-          map.setPaintProperty(outlineId, "line-width", [
-            "case",
-            ["==", ["get", idProp], featureId],
-            2.5,
-            typeof prevLineWidth === "number" ? prevLineWidth : 0.5,
-          ] as never)
+          map.setPaintProperty(outlineId, "line-color", "#888" as never)
+          map.setPaintProperty(outlineId, "line-width", 0.5 as never)
         }
       } catch {
         /* ok */
       }
+      prevHighlightLayerRef.current = null
+    }
 
-      // ── Tooltip: resolve lat/lng and push to store ──
+    if (activeLocationSet.size === 0) {
+      mapActions.clearLocationHighlights()
+      return
+    }
+
+    // All active locations share the same outcome code
+    const firstInfo = activeLocationSet.values().next().value as LocationInfo
+    const config = getOutcomeConfig(firstInfo.code)
+    if (!config || config.geometryType !== "polygon") return
+
+    const fillId = config.mapboxLayerId
+    const outlineId = `${config.mapboxLayerId}-outline`
+    if (!map.getLayer(fillId)) return
+
+    const idProp = config.idProperty ?? "DU_ID"
+
+    // Build list of Mapbox feature IDs to highlight
+    const featureIds: string[] = []
+    for (const info of activeLocationSet.values()) {
+      let fid = info.sourceId
+      if (info.code === "RES_STOR") {
+        fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+      }
+      featureIds.push(fid)
+    }
+
+    try {
+      // White stroke on active features, default on others (no fill-opacity change)
+      if (map.getLayer(outlineId)) {
+        map.setPaintProperty(outlineId, "line-color", [
+          "case",
+          ["in", ["get", idProp], ["literal", featureIds]],
+          "#ffffff",
+          "#888",
+        ] as never)
+        map.setPaintProperty(outlineId, "line-width", [
+          "case",
+          ["in", ["get", idProp], ["literal", featureIds]],
+          2.5,
+          0.5,
+        ] as never)
+      }
+      prevHighlightLayerRef.current = { fillId, outlineId }
+    } catch {
+      /* ok */
+    }
+
+    // Build tooltip highlights for every active location
+    const highlights: import("../../map/store").LocationHighlight[] = []
+    const nameMap = locationNameMapRef.current
+
+    for (const [key, info] of activeLocationSet) {
       let coords: [number, number] | null = null
       const centroid = centroidLookupRef.current.get(info.sourceId)
       if (centroid) {
@@ -431,32 +466,62 @@ export default function TierAnimationSection() {
       } else {
         coords = getOutcomeLocationCoordinates(info.code, info.sourceId)
       }
-      if (!coords) return
+      if (!coords) continue
 
-      const locKey = `${info.code}:${info.sourceId}`
-      const nameMap = locationNameMapRef.current
-      const name =
-        nameMap[locKey] ?? getDemandUnitDisplayName(info.sourceId)
+      const nameKey = `${info.code}:${info.sourceId}`
+      const name = nameMap[nameKey] ?? getDemandUnitDisplayName(info.sourceId)
       const tierLabel = getTierLabel(info.tier)
-      const locData = outcomeLocationsRef.current[info.code]
-      const tierColor = locData?.colorMap[info.sourceId] ?? "#888"
+      const ld = outcomeLocationsRef.current[info.code]
+      const tierColor = ld?.colorMap[info.sourceId] ?? "#888"
+      const isPinned = pinnedLocations.has(key)
 
-      mapActions.setLocationHighlight({
+      highlights.push({
+        key,
         longitude: coords[0],
         latitude: coords[1],
         name,
         tierLevel: info.tier,
         tierLabel,
         tierColor,
+        pinned: isPinned,
       })
-    },
-    [mapAPI.mapRef],
-  )
+    }
+
+    // Sort: pinned first, hover-only last -- so pinned tooltips stay stable
+    highlights.sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1
+      if (!a.pinned && b.pinned) return 1
+      return 0
+    })
+
+    mapActions.setLocationHighlights(highlights)
+  }, [
+    activeLocationSet,
+    hoveredLocation,
+    pinnedLocations,
+    mapAPI.mapRef,
+    locKey,
+  ])
+
+  // Register a toggle callback so map tooltip clicks can unpin locations
+  const handleTooltipToggle = useCallback((key: string) => {
+    setPinnedLocations((prev) => {
+      const next = new Map(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      }
+      return next
+    })
+  }, [])
+  useEffect(() => {
+    mapActions.setOnLocationToggle(handleTooltipToggle)
+    return () => mapActions.setOnLocationToggle(null)
+  }, [handleTooltipToggle])
 
   const handleOutcomeClick = useCallback(
     (code: string) => {
       mapActions.clearMapTooltips()
-      handleLocationActive(null)
+      clearAllLocations()
 
       const isToggleOff = selectedOutcomeCode === code
       mapActions.toggleOutcomeVisualization(code, "s0020")
@@ -480,7 +545,7 @@ export default function TierAnimationSection() {
         })
       }
     },
-    [selectedOutcomeCode, mapAPI.mapRef, handleLocationActive],
+    [selectedOutcomeCode, mapAPI.mapRef, clearAllLocations],
   )
 
   useEffect(() => {
@@ -488,6 +553,98 @@ export default function TierAnimationSection() {
       controlsRef.current?.stop()
     }
   }, [])
+
+  /* ── Map hover/click → shared multi-pin state for visible outcome polygons ── */
+  const locHandlersRef = useRef(locHandlers)
+  locHandlersRef.current = locHandlers
+
+  useEffect(() => {
+    if (!isInteractive || !selectedOutcomeCode) return
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (!map) return
+
+    const config = getOutcomeConfig(selectedOutcomeCode)
+    if (!config) return
+
+    const locData = outcomeLocationsRef.current[selectedOutcomeCode]
+    if (!locData) return
+
+    const layerId = config.mapboxLayerId
+    const idProp = config.idProperty ?? "DU_ID"
+    const code = selectedOutcomeCode
+
+    const resolveLocId = (featureId: string): string | null => {
+      let lid = featureId
+      if (code === "RES_STOR") {
+        const reverse = Object.entries(RESERVOIR_CALSIM_TO_GNISIDLABEL).find(
+          ([, gnis]) => gnis === featureId,
+        )
+        if (reverse) lid = reverse[0]
+      }
+      return locData.ids.has(lid) ? lid : null
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const onMouseMove = (e: any) => {
+      if (!layerId || !map.getLayer(layerId)) return
+
+      const features = map.queryRenderedFeatures(e.point, { layers: [layerId] })
+      if (!features || features.length === 0) {
+        locHandlersRef.current.onMouseLeave()
+        map.getCanvas().style.cursor = ""
+        return
+      }
+
+      const featureId: string | undefined = features[0]?.properties?.[idProp]
+      if (!featureId) {
+        locHandlersRef.current.onMouseLeave()
+        return
+      }
+
+      const lid = resolveLocId(featureId)
+      if (!lid) {
+        locHandlersRef.current.onMouseLeave()
+        map.getCanvas().style.cursor = ""
+        return
+      }
+
+      map.getCanvas().style.cursor = "pointer"
+      const tier = locData.tierMap[lid] ?? 1
+      locHandlersRef.current.onMouseEnter({ code, sourceId: lid, tier })
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const onClick = (e: any) => {
+      if (!layerId || !map.getLayer(layerId)) return
+
+      const features = map.queryRenderedFeatures(e.point, { layers: [layerId] })
+      if (!features || features.length === 0) return
+
+      const featureId: string | undefined = features[0]?.properties?.[idProp]
+      if (!featureId) return
+
+      const lid = resolveLocId(featureId)
+      if (!lid) return
+
+      const tier = locData.tierMap[lid] ?? 1
+      locHandlersRef.current.onClick({ code, sourceId: lid, tier })
+    }
+
+    const onMouseLeave = () => {
+      locHandlersRef.current.onMouseLeave()
+      map.getCanvas().style.cursor = ""
+    }
+
+    map.on("mousemove", onMouseMove)
+    map.on("click", onClick)
+    map.on("mouseleave", layerId, onMouseLeave)
+    return () => {
+      map.off("mousemove", onMouseMove)
+      map.off("click", onClick)
+      map.off("mouseleave", layerId, onMouseLeave)
+      map.getCanvas().style.cursor = ""
+    }
+  }, [isInteractive, selectedOutcomeCode, mapAPI.mapRef])
 
   /* ── Activate persistent map with AG_REV visualization ── */
   useEffect(() => {
@@ -672,10 +829,10 @@ export default function TierAnimationSection() {
     // At CONVERGE_START the frozen blues collapse toward a single blue.
     // At BLEND_START the per-DU tier-color blend begins.
     // By BLEND_END the blend is complete and beat2 phase starts.
-    const FREEZE_AT = 0.30
-    const CONVERGE_START = 0.70
+    const FREEZE_AT = 0.3
+    const CONVERGE_START = 0.7
     const BLEND_START = 0.74
-    const BLEND_END = 0.80
+    const BLEND_END = 0.8
 
     let frozenColorPhase = 0
 
@@ -948,7 +1105,9 @@ export default function TierAnimationSection() {
     const screenMap = new Map<string, ScreenPolygon>()
     for (const [id, vp] of viewportDataRef.current) {
       screenMap.set(id, {
-        screenPoly: vp.screenPoly.map(([x, y]) => [x - ox, y - oy] as [number, number]),
+        screenPoly: vp.screenPoly.map(
+          ([x, y]) => [x - ox, y - oy] as [number, number],
+        ),
         centroidScreen: [vp.centroidScreen[0] - ox, vp.centroidScreen[1] - oy],
       })
     }
@@ -1401,10 +1560,7 @@ export default function TierAnimationSection() {
           y: item.distributionY,
           labelY: item.y,
           maxWidth: item.columnWidth,
-          locationDescription: describeLocations(
-            item.code,
-            item.locationCount,
-          ),
+          locationDescription: describeLocations(item.code, item.locationCount),
         }
       }
     }
@@ -1498,7 +1654,19 @@ export default function TierAnimationSection() {
                 onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
                 selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
                 interactive={isInteractive}
-                onLocationHover={isInteractive ? handleLocationActive : undefined}
+                activeLocationSet={
+                  isInteractive ? activeLocationSet : undefined
+                }
+                hoveredLocation={isInteractive ? hoveredLocation : null}
+                onLocationEnter={
+                  isInteractive ? locHandlers.onMouseEnter : undefined
+                }
+                onLocationLeave={
+                  isInteractive ? locHandlers.onMouseLeave : undefined
+                }
+                onLocationClick={
+                  isInteractive ? locHandlers.onClick : undefined
+                }
                 locationNameMap={locationNameMap}
               />
             </motion.div>
@@ -1591,7 +1759,6 @@ export default function TierAnimationSection() {
               </IconButton>
             )}
           </Box>
-
         </>
       )}
     </Box>

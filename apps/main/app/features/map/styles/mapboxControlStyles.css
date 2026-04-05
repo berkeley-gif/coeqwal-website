@@ -46,3 +46,15 @@
 .mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon {
   color: #2d89b6 !important;
 }
+
+/* Strip default Popup chrome for lightweight location-highlight tooltips */
+.location-highlight-popup .mapboxgl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.location-highlight-popup .mapboxgl-popup-tip {
+  display: none !important;
+}

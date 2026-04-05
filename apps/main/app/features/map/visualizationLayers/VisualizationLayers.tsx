@@ -15,7 +15,7 @@
 
 import { useEffect, useState, useMemo, useRef } from "react"
 import { useMap, Source, Layer, Popup } from "@repo/map"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 
 // Components
 import TierMarkers from "./components/TierMarkers"
@@ -43,7 +43,8 @@ import {
   useMapMode,
   useGeocoderMarker,
   useClearTooltipsSignal,
-  useLocationHighlight,
+  useLocationHighlights,
+  useOnLocationToggle,
 } from "../store"
 
 // Large polygon covering California and surrounding area for dim overlay
@@ -70,11 +71,11 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
 }
 
 export default function VisualizationLayers() {
-  const theme = useTheme()
   const map = useMap()
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
-  const locationHighlight = useLocationHighlight()
+  const locationHighlights = useLocationHighlights()
+  const onLocationToggle = useOnLocationToggle()
 
   // Get outcome visualization data
   const {
@@ -105,7 +106,8 @@ export default function VisualizationLayers() {
     polygonConfig: config,
     tierLevelMap,
     locationData,
-    polygonEnabled: isVisualizationActive && usesMapboxLayers,
+    polygonEnabled:
+      isVisualizationActive && usesMapboxLayers && mapMode !== "get-started",
   })
 
   // Clear all pinned tooltips when signal changes (triggered by glyph clicks)
@@ -240,18 +242,19 @@ export default function VisualizationLayers() {
           />
         )}
 
-      {/* Pinned tooltips (multiple allowed) */}
-      {pinnedFeatures.map((feature) => (
-        <MapFeatureTooltip
-          key={`pinned-${feature.featureId}`}
-          feature={feature}
-          isPinned={true}
-          onClose={() => clearPinned(feature)}
-        />
-      ))}
+      {/* Pinned tooltips (multiple allowed) — suppressed in get-started mode */}
+      {!isGetStartedMode &&
+        pinnedFeatures.map((feature) => (
+          <MapFeatureTooltip
+            key={`pinned-${feature.featureId}`}
+            feature={feature}
+            isPinned={true}
+            onClose={() => clearPinned(feature)}
+          />
+        ))}
 
-      {/* Hover tooltip (only if not already pinned) */}
-      {hoveredFeature && !isHoveredAlreadyPinned && (
+      {/* Hover tooltip (only if not already pinned) — suppressed in get-started mode */}
+      {!isGetStartedMode && hoveredFeature && !isHoveredAlreadyPinned && (
         <MapFeatureTooltip
           key="hover"
           feature={hoveredFeature}
@@ -260,48 +263,77 @@ export default function VisualizationLayers() {
         />
       )}
 
-      {/* Lightweight tooltip from tier animation overlay hover/pin */}
-      {locationHighlight && (
+      {/* Lightweight tooltips from tier animation overlay hover/pin */}
+      {locationHighlights.map((hl) => (
         <Popup
-          key="location-highlight"
-          longitude={locationHighlight.longitude}
-          latitude={locationHighlight.latitude}
+          key={hl.key}
+          className="location-highlight-popup"
+          longitude={hl.longitude}
+          latitude={hl.latitude}
           anchor="bottom"
           closeButton={false}
           closeOnClick={false}
           offset={12}
+          style={{ zIndex: 10 }}
         >
-          <Box sx={{ p: theme.space.component.md, minWidth: 140, maxWidth: 260 }}>
-            <Typography
-              variant="tooltipHeader"
-              sx={{ color: theme.palette.blue.darkest, mb: 0.5 }}
-            >
-              {locationHighlight.name}
-            </Typography>
+          <Box
+            onClick={
+              hl.pinned && onLocationToggle
+                ? () => onLocationToggle(hl.key)
+                : undefined
+            }
+            sx={{
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
+              p: "3px 8px",
+              borderRadius: "4px",
+              background: "rgba(255,255,255,0.92)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+              fontSize: 11,
+              lineHeight: 1.3,
+              textAlign: "center",
+              color: "#333",
+              whiteSpace: "nowrap",
+              cursor: hl.pinned ? "pointer" : "default",
+            }}
+          >
             <Box
+              component="span"
               sx={{
-                display: "flex",
+                fontWeight: 600,
+                maxWidth: 200,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {hl.name}
+            </Box>
+            <Box
+              component="span"
+              sx={{
+                display: "inline-flex",
                 alignItems: "center",
-                gap: theme.space.gap.sm,
+                gap: "4px",
+                fontWeight: 500,
+                color: hl.tierColor,
               }}
             >
               <Box
+                component="span"
                 sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: theme.borderRadius.xs,
-                  backgroundColor: locationHighlight.tierColor,
+                  width: 8,
+                  height: 8,
+                  borderRadius: "2px",
+                  backgroundColor: hl.tierColor,
                   flexShrink: 0,
                 }}
               />
-              <Typography variant="dashboard">
-                <strong>Tier {locationHighlight.tierLevel}:</strong>{" "}
-                {locationHighlight.tierLabel}
-              </Typography>
+              Tier {hl.tierLevel}: {hl.tierLabel}
             </Box>
           </Box>
         </Popup>
-      )}
+      ))}
     </>
   )
 }

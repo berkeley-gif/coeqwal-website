@@ -27,12 +27,14 @@ export interface OutcomeVisualization {
 
 /** Lightweight tooltip driven by the tier animation overlay hover/pin */
 export interface LocationHighlight {
+  key: string
   longitude: number
   latitude: number
   name: string
   tierLevel: number
   tierLabel: string
   tierColor: string
+  pinned?: boolean
 }
 
 // ============================================================================
@@ -62,9 +64,10 @@ interface MapState {
   // Tooltip control signal (incrementing triggers clearAllPinned in VisualizationLayers)
   clearTooltipsSignal: number
 
-  // Lightweight highlight tooltip driven by the tier animation overlay
-  locationHighlight: LocationHighlight | null
-
+  // Lightweight highlight tooltips driven by the tier animation overlay
+  locationHighlights: LocationHighlight[]
+  /** Callback for toggling a pinned location from a map tooltip click */
+  onLocationToggle: ((key: string) => void) | null
 }
 
 const initialState: MapState = {
@@ -79,7 +82,8 @@ const initialState: MapState = {
   explorePanelWidth: 50,
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
-  locationHighlight: null,
+  locationHighlights: [],
+  onLocationToggle: null,
 }
 
 // ============================================================================
@@ -167,12 +171,13 @@ export const mapActions = {
       clearTooltipsSignal: state.clearTooltipsSignal + 1,
     })),
 
-  // Location highlight (tier animation overlay hover)
-  setLocationHighlight: (highlight: LocationHighlight) =>
-    useMapStore.setState({ locationHighlight: highlight }),
-  clearLocationHighlight: () =>
-    useMapStore.setState({ locationHighlight: null }),
-
+  // Location highlights (tier animation overlay hover/pin)
+  setLocationHighlights: (highlights: LocationHighlight[]) =>
+    useMapStore.setState({ locationHighlights: highlights }),
+  clearLocationHighlights: () =>
+    useMapStore.setState({ locationHighlights: [], onLocationToggle: null }),
+  setOnLocationToggle: (fn: ((key: string) => void) | null) =>
+    useMapStore.setState({ onLocationToggle: fn }),
 }
 
 // ============================================================================
@@ -228,6 +233,7 @@ export const useIsOutcomeVisualizationActive = () =>
 export const useClearTooltipsSignal = () =>
   useMapStore((s) => s.clearTooltipsSignal)
 
-// Location highlight
-export const useLocationHighlight = () =>
-  useMapStore((s) => s.locationHighlight)
+// Location highlights
+export const useLocationHighlights = () =>
+  useMapStore((s) => s.locationHighlights)
+export const useOnLocationToggle = () => useMapStore((s) => s.onLocationToggle)

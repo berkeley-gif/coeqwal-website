@@ -88,9 +88,7 @@ export default function ScenarioExplorer() {
           : theme.palette.explore.background,
         color: theme.palette.text.primary,
         pointerEvents: isGetStartedMapMode ? "none" : "auto",
-        ...(isGetStartedMapMode
-          ? {}
-          : { height: "100%", overflow: "hidden" }),
+        ...(isGetStartedMapMode ? {} : { height: "100%", overflow: "hidden" }),
       }}
     >
       {/* Tab navigation */}
