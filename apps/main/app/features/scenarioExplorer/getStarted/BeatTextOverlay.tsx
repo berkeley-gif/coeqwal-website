@@ -35,8 +35,7 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
     const unsub = progress.on("change", (v) => {
       if (beat1Ref.current) {
         const fadeIn = clamp01((v - 0.02) / 0.04)
-        const fadeOut = 1 - clamp01((v - 0.24) / 0.06)
-        beat1Ref.current.style.opacity = String(Math.min(fadeIn, fadeOut))
+        beat1Ref.current.style.opacity = String(fadeIn)
       }
 
       if (beat2IntroRef.current) {

@@ -30,21 +30,41 @@ const CAM_ZOOM = 5.82
 
 const BEAT1_COLORS = ["#BDE1E4", "#92C1D5", "#186b88"] as const
 const BEAT1_CYCLE = 90
+const BEAT1_MID = BEAT1_COLORS[1] // convergence target
+
+function blendHex(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = parseHex(a)
+  const [r2, g2, b2] = parseHex(b)
+  const r = Math.round(r1 + (r2 - r1) * t).toString(16).padStart(2, "0")
+  const g = Math.round(g1 + (g2 - g1) * t).toString(16).padStart(2, "0")
+  const bl = Math.round(b1 + (b2 - b1) * t).toString(16).padStart(2, "0")
+  return `#${r}${g}${bl}`
+}
 
 /** Mapbox fill-color expression that smoothly cycles each polygon through the
- *  three beat-1 blues. Each polygon sits at a different point on the cycle
- *  (based on its tile ID), and advancing `phase` shifts all of them in unison
- *  so the whole map slowly morphs through the palette. */
-function beat1FillExpr(phase: number): unknown[] {
-  const c = BEAT1_COLORS
+ *  three beat-1 blues. `convergence` (0-1) shrinks the palette toward a single
+ *  blue so all polygons end up the same color before the tier-color blend. */
+function beat1FillExpr(phase: number, convergence = 0): unknown[] {
+  const c0 = convergence > 0 ? blendHex(BEAT1_COLORS[0], BEAT1_MID, convergence) : BEAT1_COLORS[0]
+  const c1 = BEAT1_MID
+  const c2 = convergence > 0 ? blendHex(BEAT1_COLORS[2], BEAT1_MID, convergence) : BEAT1_COLORS[2]
   return [
     "interpolate-hcl",
     ["linear"],
     ["%", ["+", ["coalesce", ["id"], 0], Math.round(phase)], BEAT1_CYCLE],
-    0,  c[0],
-    30, c[1],
-    60, c[2],
-    89, c[0],
+    0,  c0,
+    30, c1,
+    60, c2,
+    89, c0,
+  ]
+}
+
+function parseHex(hex: string): [number, number, number] {
+  const h = hex.replace("#", "")
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
   ]
 }
 
@@ -261,23 +281,57 @@ export default function TierAnimationSection() {
     return () => clearTimeout(timer)
   }, [panelInView, isLoading, mapAPI.mapRef])
 
-  /* ── Beat-1 map effects + selective Beat-2 opacity ── */
-  const animatedDuIdsRef = useRef<string[]>([])
+  /* ── Build a Mapbox fill-color expression that assigns tier colors ── */
+  const outcomeLocationsRef = useRef(outcomeLocations)
+  outcomeLocationsRef.current = outcomeLocations
+
+  /** Pre-compute per-DU tier color lookup (first outcome wins). */
+  const tierColorLookupRef = useRef<Map<string, string>>(new Map())
 
   useEffect(() => {
-    // Pre-compute the list of DU_IDs that will be animated in Beat 2
-    const ids: string[] = []
-    for (const data of Object.values(outcomeLocations)) {
-      for (const id of data.ids) ids.push(id)
+    const lookup = new Map<string, string>()
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const data = outcomeLocations[code]
+      if (!data) continue
+      for (const duId of data.ids) {
+        if (lookup.has(duId)) continue
+        const color = data.colorMap[duId]
+        if (color) lookup.set(duId, color)
+      }
     }
-    animatedDuIdsRef.current = [...new Set(ids)]
+    tierColorLookupRef.current = lookup
   }, [outcomeLocations])
 
+  /** Build a Mapbox match expression blending from `fromHex` to each DU's
+   *  tier color at ratio `t` (0 = all from, 1 = all tier). */
+  function buildBlendedTierExpr(fromHex: string, t: number): unknown[] | null {
+    const lookup = tierColorLookupRef.current
+    if (lookup.size === 0) return null
+
+    const [fr, fg, fb] = parseHex(fromHex)
+    const pairs: (string | unknown)[] = []
+    for (const [duId, tierHex] of lookup) {
+      const [tr, tg, tb] = parseHex(tierHex)
+      const r = Math.round(fr + (tr - fr) * t)
+      const g = Math.round(fg + (tg - fg) * t)
+      const b = Math.round(fb + (tb - fb) * t)
+      pairs.push(duId, `rgb(${r},${g},${b})`)
+    }
+    return ["match", ["get", "DU_ID"], ...pairs, fromHex]
+  }
+
+  /* ── Beat-1 map effects + Beat-2 tier color transition ── */
   useEffect(() => {
     const mapRef = mapAPI.mapRef?.current
     if (!mapRef || isLoading) return
 
     let phase: "idle" | "beat1" | "beat2" = "idle"
+
+    // At CONVERGE_START the 3-blue palette begins collapsing toward a
+    // single blue. By BLEND_START all polygons share the same blue and the
+    // per-DU tier-color blend begins. By 0.30 the blend is complete.
+    const CONVERGE_START = 0.18
+    const BLEND_START = 0.24
 
     const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
@@ -288,6 +342,10 @@ export default function TierAnimationSection() {
           try {
             if (map.getLayer("demand-units")) {
               map.setPaintProperty("demand-units", "fill-opacity", 0)
+              map.setPaintProperty("demand-units", "fill-color-transition", {
+                duration: 0,
+                delay: 0,
+              })
               map.setPaintProperty(
                 "demand-units",
                 "fill-color",
@@ -304,7 +362,8 @@ export default function TierAnimationSection() {
         return
       }
 
-      if (v < 0.3) {
+      if (v < BLEND_START) {
+        // Beat 1: cycling with optional palette convergence
         const beat1T = v / 0.3
 
         const fadeIn = Math.min(1, beat1T / 0.33)
@@ -314,12 +373,20 @@ export default function TierAnimationSection() {
 
         const colorPhase = beat1T * BEAT1_CYCLE
 
+        // After CONVERGE_START, gradually collapse the 3-blue palette
+        // toward a single blue so all polygons converge seamlessly.
+        let convergence = 0
+        if (v > CONVERGE_START) {
+          convergence = (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
+          convergence = convergence * convergence // ease-in: slow start
+        }
+
         try {
           if (map.getLayer("demand-units")) {
             map.setPaintProperty(
               "demand-units",
               "fill-color",
-              beat1FillExpr(colorPhase) as never,
+              beat1FillExpr(colorPhase, convergence) as never,
             )
             map.setPaintProperty("demand-units", "fill-opacity", opacity)
           }
@@ -327,28 +394,41 @@ export default function TierAnimationSection() {
           /* ok */
         }
         phase = "beat1"
+      } else if (v < 0.3) {
+        // Blend: all polygons are now the same blue; smoothly shift
+        // each DU from that blue to its tier color.
+        const blendT = (v - BLEND_START) / (0.3 - BLEND_START)
+        const easedT = 1 - Math.pow(1 - blendT, 2) // ease-out
+
+        try {
+          if (map.getLayer("demand-units")) {
+            if (phase === "beat1") {
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+            const expr = buildBlendedTierExpr(BEAT1_MID, easedT)
+            if (expr) {
+              map.setPaintProperty(
+                "demand-units",
+                "fill-color",
+                expr as never,
+              )
+            }
+          }
+        } catch {
+          /* ok */
+        }
+        phase = "beat1" // keep as beat1 so the above guard runs once
       } else {
-        // Beat 2+: selectively hide animated DUs, dim the rest
+        // Beat 2+: ensure final tier colors are locked in
         if (phase !== "beat2") {
-          const ids = animatedDuIdsRef.current
           try {
-            if (map.getLayer("demand-units")) {
-              if (ids.length > 0) {
-                // Animated DUs → hidden; others → dimmed
-                map.setPaintProperty(
-                  "demand-units",
-                  "fill-opacity",
-                  [
-                    "match",
-                    ["get", "DU_ID"],
-                    ids,
-                    0,
-                    0.3,
-                  ] as never,
-                )
-              } else {
-                map.setPaintProperty("demand-units", "fill-opacity", 0.3)
-              }
+            const expr = buildBlendedTierExpr(BEAT1_MID, 1)
+            if (expr && map.getLayer("demand-units")) {
+              map.setPaintProperty(
+                "demand-units",
+                "fill-color",
+                expr as never,
+              )
             }
           } catch {
             /* ok */
@@ -372,7 +452,7 @@ export default function TierAnimationSection() {
         }
       }
     }
-  }, [progress, mapAPI.mapRef, isLoading, outcomeLocations])
+  }, [progress, mapAPI.mapRef, isLoading])
 
   /* ── Measure panel for SVG coordinate mapping ── */
   const measurePanel = useCallback(() => {

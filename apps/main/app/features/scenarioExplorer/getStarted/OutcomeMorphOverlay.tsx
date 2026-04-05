@@ -29,6 +29,25 @@ interface OutcomeMorphOverlayProps {
 
 const GRID_PAD = 12
 const MAX_POLYGONS_PER_OUTCOME = 80
+const BEAT1_BLUES = ["#BDE1E4", "#92C1D5", "#186b88"] as const
+
+function parseHex(hex: string): [number, number, number] {
+  const h = hex.replace("#", "")
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ]
+}
+
+function interpolateColor(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = parseHex(a)
+  const [r2, g2, b2] = parseHex(b)
+  const r = Math.round(r1 + (r2 - r1) * t)
+  const g = Math.round(g1 + (g2 - g1) * t)
+  const bl = Math.round(b1 + (b2 - b1) * t)
+  return `rgb(${r},${g},${bl})`
+}
 
 function computeOutcomeLayout(
   polygons: PolygonMorphData[],
@@ -59,6 +78,7 @@ function computeOutcomeLayout(
       squareTarget,
       rawD: pointsToD(poly.screenPoly),
       color: poly.color,
+      startBlue: BEAT1_BLUES[i % BEAT1_BLUES.length],
       tier: poly.tier,
     }
   })
@@ -134,19 +154,36 @@ export default function OutcomeMorphOverlay({
         if (!refs) continue
 
         const [morphStart, morphEnd] = group.progressRange
-        const fadeStart = morphStart - 0.02
+        // Timeline: fadeIn → color transition → shape morph
+        const fadeStart = morphStart - 0.04
+        const colorStart = morphStart - 0.02
 
         for (let i = 0; i < group.shapes.length; i++) {
           const el = refs[i]
           if (!el) continue
           const shape = group.shapes[i]!
 
+          // Opacity: fade in, then stay at 1
           const opacity =
             v < fadeStart
               ? 0
-              : v < morphStart
-                ? Math.min(1, (v - fadeStart) / (morphStart - fadeStart))
+              : v < colorStart
+                ? Math.min(1, (v - fadeStart) / (colorStart - fadeStart))
                 : 1
+
+          // Color: blue → tier color during colorStart..morphStart
+          let fill: string
+          if (v < colorStart) {
+            fill = shape.startBlue
+          } else if (v < morphStart) {
+            const colorT = (v - colorStart) / (morphStart - colorStart)
+            fill = interpolateColor(shape.startBlue, shape.color, colorT)
+          } else {
+            fill = shape.color
+          }
+
+          el.setAttribute("fill", fill)
+          el.setAttribute("stroke", fill)
 
           if (v < morphStart) {
             el.setAttribute("d", shape.rawD)
@@ -198,9 +235,9 @@ export default function OutcomeMorphOverlay({
               refs[i] = el
             }}
             d={shape.rawD}
-            fill={shape.color}
+            fill={shape.startBlue}
             fillOpacity={0.75}
-            stroke={shape.color}
+            stroke={shape.startBlue}
             strokeWidth={0.5}
             strokeOpacity={0.4}
             style={{ opacity: 0 }}
