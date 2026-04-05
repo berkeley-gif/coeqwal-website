@@ -11,55 +11,18 @@ import React from "react"
 import { Marker } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
+import {
+  RESERVOIR_CONFIGS,
+  STATION_COORDINATES,
+  STATION_NAMES,
+} from "../../config/outcomeLocations"
 import type { TierLocation } from "../types"
 
-// =============================================================================
-// LOCATION CONFIGS
-// =============================================================================
-
-// Reservoir label configs: coordinates and vertical stagger to avoid overlap
-// All arms use consistent 60° angle pointing up-right from coordinate to label
-interface ReservoirConfig {
-  coordinates: [number, number]
-  staggerIndex: number // 0, 1, 2... for vertical spacing
-}
-
-const RESERVOIR_CONFIGS: Record<string, ReservoirConfig> = {
-  "Trinity Lake": { coordinates: [-122.68, 40.98], staggerIndex: 0 },
-  "Shasta Lake": { coordinates: [-122.23, 40.78], staggerIndex: 1 },
-  "Lake Oroville": { coordinates: [-121.44, 39.56], staggerIndex: 0 },
-  "Folsom Lake": { coordinates: [-121.12, 38.76], staggerIndex: 1 },
-  "New Melones Lake": { coordinates: [-120.53, 37.98], staggerIndex: 0 },
-  "San Luis Reservoir": { coordinates: [-121.13, 37.08], staggerIndex: 1 },
-  "Millerton Lake": { coordinates: [-119.66, 37.01], staggerIndex: 0 },
-}
-
-// Consistent arm geometry (60° angle from ground, label above-right of coordinate)
 const ARM_CONFIG = {
-  // Label offset from coordinate anchor
   baseOffset: [20, -35] as [number, number],
-  staggerStep: 25, // vertical spacing between stagger levels
-  // SVG line geometry (arm from label down-left to coordinate)
+  staggerStep: 25,
   lineLength: 40,
-  angle: 60, // degrees from horizontal (ground)
-}
-
-// Station coordinates by location_id (from API)
-const STATION_COORDINATES: Record<string, [number, number]> = {
-  // Compliance stations (in-Delta uses)
-  EM: [-121.742, 38.0802], // Emmaton
-  JP: [-121.685, 38.0519], // Jersey Point
-  // Pumping plants (Delta exports) - coordinates from API
-  CAA003: [-121.6209, 37.8007], // Banks Pumping Plant
-  DMC000: [-121.5854, 37.7967], // Jones Pumping Plant
-}
-
-// Station display names by location_id (from API)
-const STATION_NAMES: Record<string, string> = {
-  EM: "Emmaton (Salinity) Compliance Station",
-  JP: "Jersey Point (Salinity) Compliance Station",
-  CAA003: "Banks Pumping Plant",
-  DMC000: "Jones Pumping Plant",
+  angle: 60,
 }
 
 // =============================================================================
