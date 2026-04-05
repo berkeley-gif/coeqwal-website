@@ -214,57 +214,91 @@ export default function TierAnimationSection() {
 
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
 
+  /** Start (or resume) the progress animation. */
+  const beginProgressAnimation = useCallback(
+    (startFrom: number) => {
+      const remaining = (1 - startFrom) * TOTAL_DURATION
+      setPlayState("playing")
+      controlsRef.current = animate(progress, 1, {
+        duration: remaining,
+        ease: "linear",
+        onComplete: () => {
+          setPlayState("finished")
+          mapActions.clearOutcomeVisualization()
+          mapActions.clearLocationHighlight()
+
+          const map = mapAPI.mapRef?.current?.getMap?.()
+          if (map?.isStyleLoaded?.()) {
+            try {
+              for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+                if (map.getLayer(fill)) {
+                  map.setPaintProperty(fill, "fill-opacity-transition", {
+                    duration: 0,
+                    delay: 0,
+                  })
+                  map.setPaintProperty(fill, "fill-opacity", 0)
+                  map.setFilter(fill, null)
+                }
+                if (map.getLayer(outline)) {
+                  map.setPaintProperty(outline, "line-opacity", 0)
+                }
+              }
+              for (const lineLayer of ANIM_LINE_LAYERS) {
+                if (map.getLayer(lineLayer)) {
+                  map.setPaintProperty(lineLayer, "line-opacity", 0)
+                }
+              }
+            } catch {
+              /* ok */
+            }
+          }
+        },
+      })
+    },
+    [progress, mapAPI.mapRef],
+  )
+
   const handlePlay = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    computePolygonDataRef.current()
 
     const currentVal = progress.get()
     const startFrom = currentVal >= 1 ? 0 : currentVal
-    if (startFrom === 0) {
+    const isRestart = startFrom === 0
+
+    if (isRestart) {
       progress.set(0)
       mapActions.setOutcomeVisualization("AG_REV", "s0020")
     }
 
-    const remaining = (1 - startFrom) * TOTAL_DURATION
-    setPlayState("playing")
-    controlsRef.current = animate(progress, 1, {
-      duration: remaining,
-      ease: "linear",
-      onComplete: () => {
-        setPlayState("finished")
-        mapActions.clearOutcomeVisualization()
-        mapActions.clearLocationHighlight()
+    // When starting from the beginning, fly the camera home first so
+    // polygons align correctly even if the user panned/zoomed.
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (isRestart && map) {
+      const currentCenter = map.getCenter()
+      const currentZoom = map.getZoom()
+      const needsMove =
+        Math.abs(currentCenter.lng - CAM_CENTER[0]) > 0.01 ||
+        Math.abs(currentCenter.lat - CAM_CENTER[1]) > 0.01 ||
+        Math.abs(currentZoom - CAM_ZOOM) > 0.05
 
-        // Reset all animation polygon layers to a clean state so
-        // OutcomePolygonLayer can manage them for interactive toggling.
-        const map = mapAPI.mapRef?.current?.getMap?.()
-        if (map?.isStyleLoaded?.()) {
-          try {
-            for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
-              if (map.getLayer(fill)) {
-                map.setPaintProperty(fill, "fill-opacity-transition", {
-                  duration: 0,
-                  delay: 0,
-                })
-                map.setPaintProperty(fill, "fill-opacity", 0)
-                map.setFilter(fill, null)
-              }
-              if (map.getLayer(outline)) {
-                map.setPaintProperty(outline, "line-opacity", 0)
-              }
-            }
-            for (const lineLayer of ANIM_LINE_LAYERS) {
-              if (map.getLayer(lineLayer)) {
-                map.setPaintProperty(lineLayer, "line-opacity", 0)
-              }
-            }
-          } catch {
-            /* ok */
-          }
-        }
-      },
-    })
-  }, [progress])
+      if (needsMove) {
+        setPlayState("playing")
+        map.once("moveend", () => {
+          computePolygonDataRef.current()
+          beginProgressAnimation(0)
+        })
+        map.easeTo({
+          center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+          zoom: CAM_ZOOM,
+          duration: 800,
+        })
+        return
+      }
+    }
+
+    computePolygonDataRef.current()
+    beginProgressAnimation(startFrom)
+  }, [progress, mapAPI.mapRef, beginProgressAnimation])
 
   const handlePause = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
@@ -1133,6 +1167,29 @@ export default function TierAnimationSection() {
       window.removeEventListener("scroll", onScroll)
     }
   }, [panelInView])
+
+  // Re-project polygon coordinates when the map pans/zooms (expensive).
+  // Throttled to one recompute per animation frame.
+  useEffect(() => {
+    if (!panelInView) return
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (!map) return
+
+    let rafId: number | null = null
+    const onMove = () => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        computePolygonDataRef.current()
+        rafId = null
+      })
+    }
+
+    map.on("move", onMove)
+    return () => {
+      map.off("move", onMove)
+      if (rafId !== null) cancelAnimationFrame(rafId)
+    }
+  }, [panelInView, mapAPI.mapRef])
 
   /* ── Build per-outcome shape groups for the morph overlay ── */
   const outcomeGroups: OutcomeGroup[] = useMemo(() => {
