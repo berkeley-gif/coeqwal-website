@@ -3,18 +3,7 @@
 import { useRef, useEffect } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
-
-const KEY_OUTCOMES = [
-  "Community water system deliveries",
-  "Agricultural revenues",
-  "River ecology",
-  "Bay Delta estuary ecology",
-  "Winter-run salmon abundance",
-  "Freshwater for in-Delta uses",
-  "Freshwater for Delta exports",
-  "Reservoir storage",
-  "Groundwater storage",
-] as const
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
@@ -27,8 +16,10 @@ function clamp01(v: number) {
 export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
   const theme = useTheme()
   const beat1Ref = useRef<HTMLDivElement>(null)
+  const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const beat2LevelsRef = useRef<HTMLDivElement>(null)
   const beat3Ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -38,25 +29,35 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
         beat1Ref.current.style.opacity = String(fadeIn)
       }
 
-      if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.30) / 0.04)
-        const fadeOut = 1 - clamp01((v - 0.70) / 0.05)
-        beat2IntroRef.current.style.opacity = String(Math.min(fadeIn, fadeOut))
+      if (beat2PanelRef.current) {
+        const fadeIn = clamp01((v - 0.18) / 0.04)
+        beat2PanelRef.current.style.opacity = String(fadeIn)
       }
 
-      for (let i = 0; i < KEY_OUTCOMES.length; i++) {
+      if (beat2IntroRef.current) {
+        const fadeIn = clamp01((v - 0.20) / 0.04)
+        // TODO(beat3): restore fadeOut at 0.70 for beat 3 transition
+        beat2IntroRef.current.style.opacity = String(fadeIn)
+      }
+
+      for (let i = 0; i < OUTCOME_CODE_ORDER.length; i++) {
         const el = beat2ItemRefs.current[i]
         if (!el) continue
-        const itemStart = 0.34 + i * 0.035
+        const itemStart = 0.22 + i * 0.015
         const fadeIn = clamp01((v - itemStart) / 0.03)
-        const fadeOut = 1 - clamp01((v - 0.70) / 0.05)
-        el.style.opacity = String(Math.min(fadeIn, fadeOut))
+        el.style.opacity = String(fadeIn)
       }
 
-      if (beat3Ref.current) {
-        const fadeIn = clamp01((v - 0.76) / 0.05)
-        beat3Ref.current.style.opacity = String(fadeIn)
+      if (beat2LevelsRef.current) {
+        const fadeIn = clamp01((v - 0.38) / 0.04)
+        beat2LevelsRef.current.style.opacity = String(fadeIn)
       }
+
+      // TODO(beat3): restore beat 3 text fade
+      // if (beat3Ref.current) {
+      //   const fadeIn = clamp01((v - 0.76) / 0.05)
+      //   beat3Ref.current.style.opacity = String(fadeIn)
+      // }
     })
     return unsub
   }, [progress])
@@ -81,10 +82,6 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
         inset: 0,
         zIndex: 3,
         pointerEvents: "none",
-        "& .MuiTypography-root": {
-          color: textColor,
-          textShadow: shadow,
-        },
       }}
     >
       {/* Beat 1 */}
@@ -92,11 +89,15 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
         ref={beat1Ref}
         sx={{
           position: "absolute",
-          top: "25%",
+          top: "40%",
           left: 0,
           p: padding,
           opacity: 0,
           width: panelWidth,
+          "& .MuiTypography-root": {
+            color: textColor,
+            textShadow: shadow,
+          },
         }}
       >
         <Typography variant="storyBody" component="p">
@@ -105,15 +106,33 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
         </Typography>
       </Box>
 
-      {/* Beat 2 — right-aligned */}
+      {/* Beat 2 — white backdrop on the right third */}
+      <Box
+        ref={beat2PanelRef}
+        sx={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: "33.33%",
+          backgroundColor: theme.background.whiteOverlay[85],
+          opacity: 0,
+        }}
+      />
       <Box
         sx={{
           position: "absolute",
           top: 0,
           right: 0,
-          p: padding,
-          pt: `calc(${padding} + 4vh)`,
+          px: padding,
+          pt: theme.space.panel.topOffset,
+          pb: theme.space.panel.bottomOffset,
           width: panelWidth,
+          overflowY: "auto",
+          maxHeight: "100%",
+          "& .MuiTypography-root": {
+            color: theme.palette.text.primary,
+          },
         }}
       >
         <Box ref={beat2IntroRef} sx={{ opacity: 0 }}>
@@ -122,21 +141,29 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           </Typography>
         </Box>
         <Box sx={{ mt: 2 }}>
-          {KEY_OUTCOMES.map((outcome, i) => (
+          {OUTCOME_CODE_ORDER.map((code, i) => (
             <Box
-              key={outcome}
+              key={code}
               ref={(el: HTMLDivElement | null) => {
                 beat2ItemRefs.current[i] = el
               }}
-              sx={{ opacity: 0, mt: 0.75 }}
+              sx={{ opacity: 0, mt: 0.75, mb: 4 }}
             >
-              <Typography variant="storyBody">{outcome}</Typography>
+              <Typography variant="storyBody">
+                {getOutcomeName(code)}
+              </Typography>
             </Box>
           ))}
         </Box>
+        <Box ref={beat2LevelsRef} sx={{ opacity: 0, mt: 3 }}>
+          <Typography variant="storyBody" component="p">
+            We can create levels of outcome for each location within these
+            groups.
+          </Typography>
+        </Box>
       </Box>
 
-      {/* Beat 3 */}
+      {/* TODO(beat3): restore beat 3 text
       <Box
         ref={beat3Ref}
         sx={{
@@ -153,6 +180,7 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           learn more about their methodologies.
         </Typography>
       </Box>
+      */}
     </Box>
   )
 }
