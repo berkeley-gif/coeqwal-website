@@ -125,8 +125,8 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
           top: 0,
           right: 0,
           px: padding,
-          pt: theme.space.panel.topOffset,
-          pb: theme.space.panel.bottomOffset,
+          pt: theme.space.displayBlock.padding,
+          pb: theme.space.displayBlock.padding,
           width: panelWidth,
           overflowY: "auto",
           maxHeight: "100%",
@@ -147,7 +147,7 @@ export default function BeatTextOverlay({ progress }: BeatTextOverlayProps) {
               ref={(el: HTMLDivElement | null) => {
                 beat2ItemRefs.current[i] = el
               }}
-              sx={{ opacity: 0, mt: 0.75, mb: 4 }}
+              sx={{ opacity: 0, mt: 0.75, mb: 1.5 }}
             >
               <Typography variant="storyBody">
                 {getOutcomeName(code)}
