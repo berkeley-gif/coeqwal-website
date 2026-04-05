@@ -58,8 +58,8 @@ export default function ToolToolbar() {
   const {
     exploreMode,
     setExploreMode,
-    hydroclimatePeriod,
-    setHydroclimatePeriod,
+    hydroclimate,
+    setHydroclimate,
     showMap,
     setShowMap,
   } = useScenarioExplorerStore()
@@ -121,8 +121,8 @@ export default function ToolToolbar() {
           hideDisabled
           iconSize="28px"
           iconFontSize="1rem"
-          value={hydroclimatePeriod}
-          onChange={setHydroclimatePeriod}
+          value={hydroclimate}
+          onChange={setHydroclimate}
         />
       </Box>
 

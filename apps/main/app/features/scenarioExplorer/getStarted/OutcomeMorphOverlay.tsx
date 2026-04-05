@@ -28,7 +28,7 @@ interface OutcomeMorphOverlayProps {
 }
 
 const GRID_PAD = 12
-const MAX_POLYGONS_PER_OUTCOME = 80
+const MAX_POLYGONS_PER_OUTCOME = 140
 
 function computeOutcomeLayout(
   polygons: PolygonMorphData[],

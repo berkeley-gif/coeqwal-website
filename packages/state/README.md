@@ -20,7 +20,7 @@ The Scenario Explorer store (`scenarioExplorer/store.ts`) demonstrates the patte
 **Shared store** holds cross-cutting state that every tool panel needs:
 
 - `selectedScenarios` - the sidebar checkboxes write to it; each tool panel reads it
-- `hydroclimatePeriod` - the toolbar's `HydroclimateChooser` writes to it; data hooks use it to resolve the right scenario IDs automatically
+- `hydroclimate` - the toolbar's `HydroclimateChooser` writes to it; data hooks use it to resolve the right scenario IDs automatically
 - `searchQuery` - the sidebar handles search filtering before scenarios reach the panel
 - `highlightedScenario`, `pinnedScenarioIds` - enable cross-component hover highlighting and pinning
 - `showMap` - controls the map reveal panel
@@ -44,7 +44,7 @@ The table below lists which store properties a new tool panel should read from o
 | Property              | Type             | Why your panel needs it                                                                       |
 | --------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
 | `selectedScenarios`   | `string[]`       | Which scenarios to render. The sidebar checkboxes manage this.                                |
-| `hydroclimatePeriod`  | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.        |
+| `hydroclimate`        | `string`         | Passed to `useResolvedScenarioTiers()`, which handles hydroclimate resolution for you.        |
 | `highlightedScenario` | `string \| null` | Scenario the user is hovering in the sidebar. Visually emphasize it in your visualization.    |
 | `pinnedScenarioIds`   | `string[]`       | Pinned scenarios (persistent across views). Use for side-by-side comparison within your tool. |
 
@@ -71,7 +71,7 @@ Everything else is managed by the layout chrome (sidebar, toolbar, ScenarioExplo
 
 ### Adding a new visualization tool
 
-1. Read `selectedScenarios` and `hydroclimatePeriod` from the store
+1. Read `selectedScenarios` and `hydroclimate` from the store
 2. Use `useResolvedScenarioTiers()` to fetch tier data (handles hydroclimate resolution automatically). See `packages/data/README.md` for the full data-fetching walkthrough.
 3. Keep all visualization-specific state (view mode, color mode, search within the viz) as local component state
 4. Optionally write to `highlightedScenario` or call `togglePinnedScenario` for cross-panel coordination

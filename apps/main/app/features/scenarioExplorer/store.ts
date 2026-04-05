@@ -73,8 +73,8 @@ interface ScenarioExplorerState {
   overlayTiers: boolean
   defineOutcome: boolean
 
-  // Hydroclimate period selection (shared across all views)
-  hydroclimatePeriod: string
+  // Hydroclimate selection (shared across all views)
+  hydroclimate: string
 
   // Sort state (shared so sidebar can adapt its theme display)
   isSortActive: boolean
@@ -132,8 +132,8 @@ interface ScenarioExplorerActions {
   setOverlayTiers: (show: boolean) => void
   setDefineOutcome: (show: boolean) => void
 
-  // Hydroclimate period
-  setHydroclimatePeriod: (period: string) => void
+  // Hydroclimate
+  setHydroclimate: (value: string) => void
 
   // Sort state
   setIsSortActive: (active: boolean) => void
@@ -176,7 +176,7 @@ const initialState: ScenarioExplorerState = {
   highlightBaseline: false,
   overlayTiers: false,
   defineOutcome: false,
-  hydroclimatePeriod: "historical",
+  hydroclimate: "historical",
   isSortActive: false,
   selectedTier: null,
 }
@@ -354,10 +354,10 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.defineOutcome = show
       }),
 
-    // Hydroclimate period
-    setHydroclimatePeriod: (period) =>
+    // Hydroclimate
+    setHydroclimate: (value) =>
       set((state) => {
-        state.hydroclimatePeriod = period
+        state.hydroclimate = value
       }),
 
     // Sort state
