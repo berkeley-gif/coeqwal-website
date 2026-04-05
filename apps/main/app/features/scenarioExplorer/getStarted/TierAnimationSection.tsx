@@ -10,10 +10,6 @@ import {
   PlayArrowIcon,
   PauseIcon,
   ReplayIcon,
-  AddIcon,
-  RemoveIcon,
-  MyLocationIcon,
-  HomeIcon,
 } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
@@ -238,7 +234,6 @@ export default function TierAnimationSection() {
         setPlayState("finished")
         mapActions.clearOutcomeVisualization()
         mapActions.clearLocationHighlight()
-        mapActions.setGetStartedMapInteractive(true)
 
         // Reset all animation polygon layers to a clean state so
         // OutcomePolygonLayer can manage them for interactive toggling.
@@ -280,7 +275,6 @@ export default function TierAnimationSection() {
     if (controlsRef.current) controlsRef.current.stop()
     computePolygonDataRef.current()
     mapActions.clearLocationHighlight()
-    mapActions.setGetStartedMapInteractive(false)
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -290,46 +284,6 @@ export default function TierAnimationSection() {
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
   const isInteractive = playState === "finished"
-
-  const handleZoomIn = useCallback(() => {
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (map) map.zoomIn({ duration: 300 })
-  }, [mapAPI.mapRef])
-
-  const handleZoomOut = useCallback(() => {
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (map) map.zoomOut({ duration: 300 })
-  }, [mapAPI.mapRef])
-
-  const handleResetView = useCallback(() => {
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (map) {
-      map.easeTo({
-        center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
-        zoom: CAM_ZOOM,
-        duration: 800,
-      })
-    }
-    computePolygonDataRef.current()
-  }, [mapAPI.mapRef])
-
-  const handleGeolocate = useCallback(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const map = mapAPI.mapRef?.current?.getMap?.()
-        if (map) {
-          map.flyTo({
-            center: [pos.coords.longitude, pos.coords.latitude],
-            zoom: 10,
-            duration: 1500,
-          })
-        }
-      },
-      () => {},
-      { enableHighAccuracy: true, timeout: 5000 },
-    )
-  }, [mapAPI.mapRef])
 
   const highlightRef = useRef<{
     fillId: string
@@ -528,7 +482,6 @@ export default function TierAnimationSection() {
       clearInterval(suppressInterval)
       mapActions.setMapMode("hidden")
       mapActions.clearOutcomeVisualization()
-      mapActions.setGetStartedMapInteractive(false)
 
       if (mapAPI.mapRef?.current) {
         try {
@@ -1160,19 +1113,10 @@ export default function TierAnimationSection() {
     return () => window.removeEventListener("resize", onResize)
   }, [collectOutcomeShapes])
 
-  // Re-apply offset on scroll (cheap — no Mapbox queries)
+  // Re-apply offset on scroll (cheap — no Mapbox queries).
+  // With page-level scrolling, listen on window instead of a parent scroll container.
   useEffect(() => {
     if (!panelInView) return
-    const el = panelRef.current
-    if (!el) return
-
-    let scrollParent: Element | null = el.parentElement
-    while (scrollParent) {
-      const overflow = getComputedStyle(scrollParent).overflowY
-      if (overflow === "auto" || overflow === "scroll") break
-      scrollParent = scrollParent.parentElement
-    }
-    if (!scrollParent) return
 
     let rafId: number | null = null
     const onScroll = () => {
@@ -1183,10 +1127,10 @@ export default function TierAnimationSection() {
       })
     }
 
-    scrollParent.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("scroll", onScroll, { passive: true })
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId)
-      scrollParent.removeEventListener("scroll", onScroll)
+      window.removeEventListener("scroll", onScroll)
     }
   }, [panelInView])
 
@@ -1440,6 +1384,7 @@ export default function TierAnimationSection() {
         backgroundColor: "transparent",
         overflow: "hidden",
         clipPath: "inset(0)",
+        pointerEvents: "none",
       }}
     >
       {/* Static heading — fades when animation starts */}
@@ -1532,6 +1477,7 @@ export default function TierAnimationSection() {
               display: "flex",
               gap: 1.5,
               alignItems: "center",
+              pointerEvents: "auto",
             }}
           >
             {/* Rewind — visible once the animation has started */}
@@ -1589,78 +1535,6 @@ export default function TierAnimationSection() {
             )}
           </Box>
 
-          {/* Map controls — visible after animation finishes */}
-          {isInteractive && (
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 24,
-                left: 16,
-                zIndex: 5,
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.5,
-              }}
-            >
-              <IconButton
-                onClick={handleZoomIn}
-                size="small"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                  color: "text.primary",
-                  borderRadius: "4px 4px 0 0",
-                  "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
-                }}
-              >
-                <AddIcon sx={{ fontSize: 20 }} />
-              </IconButton>
-              <IconButton
-                onClick={handleZoomOut}
-                size="small"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                  color: "text.primary",
-                  borderRadius: "0 0 4px 4px",
-                  "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
-                }}
-              >
-                <RemoveIcon sx={{ fontSize: 20 }} />
-              </IconButton>
-              <IconButton
-                onClick={handleResetView}
-                size="small"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  mt: 0.5,
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                  color: "text.primary",
-                  borderRadius: 1,
-                  "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
-                }}
-              >
-                <HomeIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-              <IconButton
-                onClick={handleGeolocate}
-                size="small"
-                sx={{
-                  width: 36,
-                  height: 36,
-                  backgroundColor: "rgba(255,255,255,0.85)",
-                  color: "text.primary",
-                  borderRadius: 1,
-                  "&:hover": { backgroundColor: "rgba(255,255,255,1)" },
-                }}
-              >
-                <MyLocationIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Box>
-          )}
         </>
       )}
     </Box>

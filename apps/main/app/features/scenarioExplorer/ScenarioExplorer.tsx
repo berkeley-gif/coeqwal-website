@@ -81,15 +81,16 @@ export default function ScenarioExplorer() {
   return (
     <Box
       sx={{
-        height: "100%",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
         backgroundColor: needsTransparentBg
           ? "transparent"
           : theme.palette.explore.background,
         color: theme.palette.text.primary,
         pointerEvents: isGetStartedMapMode ? "none" : "auto",
+        ...(isGetStartedMapMode
+          ? {}
+          : { height: "100%", overflow: "hidden" }),
       }}
     >
       {/* Tab navigation */}
@@ -163,8 +164,9 @@ export default function ScenarioExplorer() {
         sx={{
           display: "flex",
           flex: 1,
-          overflow: "hidden",
-          pointerEvents: isGetStartedMapMode ? "none" : "auto",
+          ...(isGetStartedMapMode
+            ? {}
+            : { overflow: "hidden", pointerEvents: "auto" }),
         }}
       >
         <Box
@@ -172,8 +174,9 @@ export default function ScenarioExplorer() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
-            pointerEvents: "auto",
+            ...(isGetStartedMapMode
+              ? {}
+              : { overflow: "hidden", pointerEvents: "auto" }),
           }}
         >
           {mainView === "get-started" && <GetStartedView />}
