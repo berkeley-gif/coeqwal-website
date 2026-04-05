@@ -33,7 +33,7 @@ export function useMetricData(scenarioIds: string[], metric: OutcomeMetric) {
  * Uses hydroclimate-aware ID mapping so only 24 scenarios are fetched.
  */
 function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
-  const { hydroclimatePeriod } = useScenarioExplorerStore()
+  const { hydroclimate } = useScenarioExplorerStore()
   const {
     buildIdMapping,
     getDisplayName,
@@ -41,8 +41,8 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
   } = useScenarioList()
 
   const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
+    () => buildIdMapping(hydroclimate),
+    [buildIdMapping, hydroclimate],
   )
 
   const {

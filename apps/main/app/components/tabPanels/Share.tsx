@@ -18,7 +18,7 @@ export default function SharePanel() {
   const { navigateToTab } = useTabNavigation()
   const [copied, setCopied] = useState(false)
 
-  const { sharedScenarioIds, hydroclimatePeriod } = useScenarioExplorerStore()
+  const { sharedScenarioIds, hydroclimate } = useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
@@ -141,7 +141,7 @@ export default function SharePanel() {
             variant="outlined"
             size="small"
             onClick={async () => {
-              const url = buildShareUrl(sharedScenarioIds, hydroclimatePeriod)
+              const url = buildShareUrl(sharedScenarioIds, hydroclimate)
               try {
                 await navigator.clipboard.writeText(url)
               } catch {

@@ -295,7 +295,7 @@ export default function ComparisonPanel({
   }, [parityData, getThemeForScenario])
 
   // Deviation plot: sort outcome columns by historical baseline tier score
-  // so columns stay stable when switching hydroclimate periods.
+  // so columns stay stable when switching hydroclimates.
   // Winter-run salmon is pinned to the last position.
   const salmonLabel = getOutcomeName("WRC_SALMON_AB")
   const deviationSortedAxes = useMemo(() => {

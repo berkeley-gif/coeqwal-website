@@ -318,7 +318,7 @@ The app has three hydroclimates currently. Each hydroclimate has its own set of 
 
 When the user switches hydroclimates via the toolbar `HydroclimateChooser`, `useResolvedScenarioTiers()` automatically:
 
-1. Reads the active hydroclimate from the store (`hydroclimatePeriod`)
+1. Reads the active hydroclimate from the store (`hydroclimate`)
 2. Looks up which scenario IDs belong to that hydroclimate (via `HYDROCLIMATE_ID_MAP` -> `buildIdMapping`)
 3. Returns tier data keyed by sibling group IDs (not the raw scenario IDs)
 

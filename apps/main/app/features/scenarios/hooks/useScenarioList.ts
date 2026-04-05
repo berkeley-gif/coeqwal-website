@@ -85,12 +85,12 @@ export function useScenarioList() {
 
   /**
    * Build an ID mapping from sibling group IDs to the resolved short_code
-   * for a given hydroclimate period string (e.g., "historical", "warmer-wetter").
+   * for a given hydroclimate string (e.g., "historical", "warmer-wetter").
    * Falls back to the historical variant if the requested hydroclimate is missing.
    */
   const buildIdMapping = useCallback(
-    (hydroclimatePeriod: string): Record<string, string> => {
-      const hcId = HYDROCLIMATE_ID_MAP[hydroclimatePeriod] ?? HISTORICAL_HC_ID
+    (hydroclimate: string): Record<string, string> => {
+      const hcId = HYDROCLIMATE_ID_MAP[hydroclimate] ?? HISTORICAL_HC_ID
       const mapping: Record<string, string> = {}
       siblingGroups.forEach((group) => {
         const variants = variantMap.get(group.siblingGroup)

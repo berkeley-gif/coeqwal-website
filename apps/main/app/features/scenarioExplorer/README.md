@@ -231,7 +231,7 @@ The Zustand store (with Immer) manages state shared across components.
 
 | Property             | Type     | Default        | Description                                                                              |
 | -------------------- | -------- | -------------- | ---------------------------------------------------------------------------------------- |
-| `hydroclimatePeriod` | `string` | `"historical"` | Active hydroclimate period (e.g., `"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`) |
+| `hydroclimate`       | `string` | `"historical"` | Active hydroclimate (e.g., `"historical"`, `"warmer-wetter"`, `"warmer-drier-i"`) |
 
 #### Other
 
@@ -246,7 +246,7 @@ The Zustand store (with Immer) manages state shared across components.
 
 **Use Zustand for:**
 
-- State shared across multiple components (e.g., `selectedScenarios`, `hydroclimatePeriod`)
+- State shared across multiple components (e.g., `selectedScenarios`, `hydroclimate`)
 - Navigation state (e.g., `mainView`, `exploreMode`)
 - State that must persist across view changes
 
@@ -262,10 +262,10 @@ The Zustand store (with Immer) manages state shared across components.
 
 There is no separate hydroclimate API endpoint. The flow is:
 
-1. User picks a hydroclimate in `HydroclimateChooser` -> store's `hydroclimatePeriod` (e.g., `"historical"`)
+1. User picks a hydroclimate in `HydroclimateChooser` -> store's `hydroclimate` (e.g., `"historical"`)
 2. `HYDROCLIMATE_ID_MAP` in `content/scenarios.ts` maps the string to a numeric ID (e.g., `"historical"` -> `2`)
 3. `GET /api/scenarios` returns all 72+ scenarios, each with `hydroclimate_id` and `sibling_group`
-4. `buildIdMapping(hydroclimatePeriod)` resolves sibling group IDs -> actual scenario codes for the active hydroclimate
+4. `buildIdMapping(hydroclimate)` resolves sibling group IDs -> actual scenario codes for the active hydroclimate
 5. `useMultipleScenarioTiers(idMapping)` batch-fetches tier data for the resolved codes and re-keys results back to sibling group IDs
 
 You do not need to do this manually. `useResolvedScenarioTiers()` wraps steps 1-5 into a single hook call. See `packages/data/README.md` for details.
@@ -355,7 +355,7 @@ If you're implementing one of the existing placeholders (equity or resilience), 
 For developers porting an external visualization:
 
 - [ ] **Replace the placeholder content** in `EquityPanel.tsx` with your React component
-- [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimatePeriod`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
+- [ ] **Read shared state** from `useScenarioExplorerStore()`: `selectedScenarios`, `hydroclimate`, `highlightedScenario`, `pinnedScenarioIds` (see `packages/state/README.md` for the full property reference)
 - [ ] **Fetch data via hooks**.use `useResolvedScenarioTiers()` (handles hydroclimate resolution automatically). Do not call `fetch()` or raw fetchers directly. (See `packages/data/README.md` "How to Get Data" section for the full walkthrough.)
 - [ ] **Write back to store** when the user interacts: `setHighlightedScenario()` on hover, `togglePinnedScenario()` on click. For map visualization, use `mapActions.setOutcomeVisualization()` (see "Map integration" below).
 - [ ] **Use MUI `sx` prop** for all styling. Please remember to remove any imports from other css. Import from `@repo/ui/mui`.

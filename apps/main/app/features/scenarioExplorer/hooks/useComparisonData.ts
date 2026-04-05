@@ -26,7 +26,7 @@ export const SANKEY_ALL_OUTCOMES = "__ALL__"
 /**
  * Hook to transform tier data for VerticalParallelLinePlot.
  *
- * Reads the active hydroclimatePeriod from the store, resolves each sibling
+ * Reads the active hydroclimate from the store, resolves each sibling
  * group to the correct variant's short_code, and passes the mapping into
  * useMultipleScenarioTiers so only 24 scenarios are fetched per hydroclimate.
  * All returned data is keyed by sibling group IDs, making downstream code
@@ -37,15 +37,15 @@ export function useComparisonData() {
     useScenarioList()
 
   const {
-    hydroclimatePeriod,
+    hydroclimate,
     showAlternativeBaselines,
     showOnlyChosen,
     selectedScenarios,
   } = useScenarioExplorerStore()
 
   const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
+    () => buildIdMapping(hydroclimate),
+    [buildIdMapping, hydroclimate],
   )
 
   const {
@@ -60,12 +60,12 @@ export function useComparisonData() {
   const error = tiersError
 
   // Track hydroclimate changes to drive morph transitions.
-  // Increment morphGeneration each time hydroclimatePeriod actually changes
+  // Increment morphGeneration each time hydroclimate actually changes
   // so chart components can detect when to animate vs. when to hard-redraw.
-  const prevHCRef = useRef(hydroclimatePeriod)
+  const prevHCRef = useRef(hydroclimate)
   const morphGenRef = useRef(0)
-  if (prevHCRef.current !== hydroclimatePeriod) {
-    prevHCRef.current = hydroclimatePeriod
+  if (prevHCRef.current !== hydroclimate) {
+    prevHCRef.current = hydroclimate
     morphGenRef.current += 1
   }
   const morphGeneration = morphGenRef.current
@@ -231,8 +231,8 @@ export function useComparisonData() {
   // Fetch tier data for all three hydroclimates to compute cross-HC ranges.
   const allHCPeriods = useMemo(() => Object.keys(HYDROCLIMATE_ID_MAP), [])
   const otherHCPeriods = useMemo(
-    () => allHCPeriods.filter((p) => p !== hydroclimatePeriod),
-    [allHCPeriods, hydroclimatePeriod],
+    () => allHCPeriods.filter((p) => p !== hydroclimate),
+    [allHCPeriods, hydroclimate],
   )
 
   const otherHCMappings = useMemo(

@@ -93,7 +93,7 @@ export default function TabPanels() {
 
     const climateParam = params.get("climate")
     if (climateParam) {
-      useScenarioExplorerStore.getState().setHydroclimatePeriod(climateParam)
+      useScenarioExplorerStore.getState().setHydroclimate(climateParam)
     }
 
     if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {

@@ -4,10 +4,10 @@ import { useMultipleScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarioExplorerStore } from "../store"
 
 /**
- * Convenience hook that resolves the active hydroclimate period and fetches
+ * Convenience hook that resolves the active hydroclimate and fetches
  * tier data in a single call.
  *
- * Internally reads `hydroclimatePeriod` from the store, builds the sibling
+ * Internally reads `hydroclimate` from the store, builds the sibling
  * group and resolved scenario ID mapping, and passes it to
  * `useMultipleScenarioTiers`. Returns everything that hook returns, plus
  * the resolved `idMapping` and common scenario-list helpers.
@@ -16,7 +16,7 @@ import { useScenarioExplorerStore } from "../store"
  * hydroclimate.
  */
 export function useResolvedScenarioTiers() {
-  const { hydroclimatePeriod } = useScenarioExplorerStore()
+  const { hydroclimate } = useScenarioExplorerStore()
   const {
     buildIdMapping,
     getDisplayName,
@@ -26,8 +26,8 @@ export function useResolvedScenarioTiers() {
   } = useScenarioList()
 
   const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
+    () => buildIdMapping(hydroclimate),
+    [buildIdMapping, hydroclimate],
   )
 
   const tierData = useMultipleScenarioTiers(idMapping)
