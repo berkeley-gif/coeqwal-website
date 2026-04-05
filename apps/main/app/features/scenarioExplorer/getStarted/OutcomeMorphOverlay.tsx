@@ -28,7 +28,7 @@ interface OutcomeMorphOverlayProps {
   squaresPerRow: number
   distributionPositionMap: Record<
     string,
-    { x: number; y: number; maxWidth: number }
+    { x: number; y: number; labelY: number; maxWidth: number }
   >
   onOutcomeClick?: (code: string) => void
   selectedOutcomeCode?: string | null
@@ -187,9 +187,34 @@ export default function OutcomeMorphOverlay({
         squaresPerRow,
       )
 
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
+      for (const s of shapes) {
+        for (const [px, py] of s.squareTarget) {
+          if (px < minX) minX = px
+          if (py < minY) minY = py
+          if (px > maxX) maxX = px
+          if (py > maxY) maxY = py
+        }
+      }
+      const pad = SQUARE_SIZE / 2
+      const labelY = pos?.labelY ?? gridTargetY
+      const boundsTop = shapes.length > 0 ? Math.min(labelY, minY - pad) : labelY
+      const boundsBottom = shapes.length > 0 ? maxY + pad : labelY + 32
+      const boundsLeft = shapes.length > 0 ? minX - pad : gridTargetX
+      const boundsRight = shapes.length > 0
+        ? Math.max(maxX + pad, gridTargetX + maxColWidth)
+        : gridTargetX + maxColWidth
+      const bounds = {
+        x: boundsLeft,
+        y: boundsTop,
+        width: boundsRight - boundsLeft,
+        height: boundsBottom - boundsTop,
+      }
+
       return {
         code: outcome.code,
         shapes,
+        bounds,
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
@@ -264,6 +289,14 @@ export default function OutcomeMorphOverlay({
             }
             style={{ cursor: interactive ? "pointer" : "default" }}
           >
+            <rect
+              x={group.bounds.x}
+              y={group.bounds.y}
+              width={group.bounds.width}
+              height={group.bounds.height}
+              fill="transparent"
+              pointerEvents={interactive ? "all" : "none"}
+            />
             {group.shapes.map((shape, i) => (
               <path
                 key={`${group.code}-${i}`}

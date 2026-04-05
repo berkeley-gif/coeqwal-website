@@ -1074,12 +1074,16 @@ export default function TierAnimationSection() {
 
   const distributionPositionMap = useMemo(() => {
     if (!outcomeLayout) return {}
-    const map: Record<string, { x: number; y: number; maxWidth: number }> = {}
+    const map: Record<
+      string,
+      { x: number; y: number; labelY: number; maxWidth: number }
+    > = {}
     for (const item of outcomeLayout.items) {
       if (item.isActive && item.distributionHeight > 0) {
         map[item.code] = {
           x: item.x,
           y: item.distributionY,
+          labelY: item.y,
           maxWidth: item.columnWidth,
         }
       }
