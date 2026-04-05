@@ -20,6 +20,7 @@ import { type PolygonMorphData } from "./PolygonMorphOverlay"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
   getOutcomeProgressRange,
+  computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import ResearcherIllustrations from "./ResearcherIllustrations"
@@ -91,6 +92,24 @@ const OUTCOME_DISPLAY_ORDER = OUTCOME_CODE_ORDER.map((code) => ({
   code,
   label: getOutcomeName(code),
 }))
+
+const ACTIVE_OUTCOMES = new Set(["CWS_DEL", "AG_REV"])
+
+const LAYOUT_LINE_HEIGHT = 32
+const LAYOUT_LABEL_GAP = 8
+const LAYOUT_DIST_GAP = 6
+const LAYOUT_POST_DIST_GAP = 12
+const LAYOUT_LEVELS_GAP = 24
+const LAYOUT_INTRO_GAP = 16
+
+interface OutcomeLayoutItem {
+  code: string
+  label: string
+  y: number
+  isActive: boolean
+  distributionY: number
+  distributionHeight: number
+}
 
 interface ScreenPolygon {
   screenPoly: [number, number][]
@@ -676,11 +695,16 @@ export default function TierAnimationSection() {
     }).filter((g) => g.polygons.length > 0)
   }, [allScreenPolygons, outcomeLocations])
 
+  const activeOutcomeGroups = useMemo(
+    () => outcomeGroups.filter((g) => ACTIVE_OUTCOMES.has(g.code)),
+    [outcomeGroups],
+  )
+
   useEffect(() => {
-    const total = outcomeGroups.length
+    const total = activeOutcomeGroups.length
     const schedule: { fadeStart: number; morphStart: number; duIds: string[] }[] = []
     for (let i = 0; i < total; i++) {
-      const group = outcomeGroups[i]!
+      const group = activeOutcomeGroups[i]!
       const locData = outcomeLocations[group.code]
       if (!locData || locData.ids.size === 0) continue
       const [morphStart] = getOutcomeProgressRange(i, total)
@@ -688,7 +712,65 @@ export default function TierAnimationSection() {
       schedule.push({ fadeStart, morphStart, duIds: [...locData.ids] })
     }
     hideScheduleRef.current = schedule
-  }, [outcomeGroups, outcomeLocations])
+  }, [activeOutcomeGroups, outcomeLocations])
+
+  /* ── Shared layout for Beat 2 text + distribution alignment ── */
+  const outcomeLayout = useMemo(() => {
+    if (!panelSize) return null
+    const { width } = panelSize
+    const sqPerRow = theme.scenarios.tierGrid.squaresPerRow
+    const insetPx = 24
+    const maxColumnWidth = width * (1 / 3) - insetPx * 2
+    const topPad = Math.min(44, Math.max(28, width * 0.035))
+
+    let cursor = topPad
+    const introTextY = cursor
+    cursor += LAYOUT_LINE_HEIGHT + LAYOUT_INTRO_GAP
+
+    const items: OutcomeLayoutItem[] = []
+
+    for (const code of OUTCOME_CODE_ORDER) {
+      const label = getOutcomeName(code)
+      const isActive = ACTIVE_OUTCOMES.has(code)
+      const y = cursor
+      cursor += LAYOUT_LINE_HEIGHT
+
+      const distributionY = cursor + LAYOUT_DIST_GAP
+      let distributionHeight = 0
+
+      if (isActive) {
+        const group = outcomeGroups.find((g) => g.code === code)
+        if (group && group.polygons.length > 0) {
+          distributionHeight = computeDistributionHeight(
+            group.polygons,
+            sqPerRow,
+            maxColumnWidth,
+          )
+          cursor += LAYOUT_DIST_GAP + distributionHeight + LAYOUT_POST_DIST_GAP
+        } else {
+          cursor += LAYOUT_LABEL_GAP
+        }
+      } else {
+        cursor += LAYOUT_LABEL_GAP
+      }
+
+      items.push({ code, label, y, isActive, distributionY, distributionHeight })
+    }
+
+    const levelsTextY = cursor + LAYOUT_LEVELS_GAP
+    return { items, introTextY, levelsTextY }
+  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
+
+  const distributionYMap = useMemo(() => {
+    if (!outcomeLayout) return {}
+    const map: Record<string, number> = {}
+    for (const item of outcomeLayout.items) {
+      if (item.isActive && item.distributionHeight > 0) {
+        map[item.code] = item.distributionY
+      }
+    }
+    return map
+  }, [outcomeLayout])
 
   /* ── Error state ── */
   if (error) {
@@ -757,7 +839,7 @@ export default function TierAnimationSection() {
           <MapFade opacity={mapOpacity} color={forestBg} />
 
           {/* Outcome polygon morph overlay — active during Beat 2 */}
-          {outcomeGroups.length > 0 && panelSize && (
+          {activeOutcomeGroups.length > 0 && panelSize && (
             <motion.div
               style={{
                 opacity: overlayOpacity,
@@ -767,11 +849,12 @@ export default function TierAnimationSection() {
               }}
             >
               <OutcomeMorphOverlay
-                outcomes={outcomeGroups}
+                outcomes={activeOutcomeGroups}
                 panelWidth={panelSize.width}
                 panelHeight={panelSize.height}
                 progress={progress}
                 squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
+                distributionYMap={distributionYMap}
               />
             </motion.div>
           )}
@@ -787,7 +870,7 @@ export default function TierAnimationSection() {
           */}
 
           {/* Cross-fading beat text */}
-          <BeatTextOverlay progress={progress} />
+          <BeatTextOverlay progress={progress} beat2Layout={outcomeLayout} />
 
           {/* Playback controls */}
           <Box
