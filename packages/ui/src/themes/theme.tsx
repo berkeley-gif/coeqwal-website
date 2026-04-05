@@ -500,6 +500,7 @@ const background = {
   },
   whiteOverlay: {
     50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
+    85: "rgba(255, 255, 255, 0.85)", // Readable overlay with map context showing through
     95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
   },
 }
@@ -713,6 +714,11 @@ export const themeValues = {
       divider: { gap: 1.5, pullUp: -1 },
       header: { standard: 2, outcomes: 1, categoryLabels: 1 },
       glyphOffset: "14px",
+    },
+
+    // Tier grid layout (derived from COEQWALTierVisualization dotsPerRow formula)
+    tierGrid: {
+      squaresPerRow: 10,
     },
 
     // Learn mode panel styles

@@ -25,6 +25,7 @@ interface OutcomeMorphOverlayProps {
   panelWidth: number
   panelHeight: number
   progress: MotionValue<number>
+  squaresPerRow: number
 }
 
 const GRID_PAD = 12
@@ -35,45 +36,74 @@ function computeOutcomeLayout(
   targetX: number,
   targetY: number,
   maxWidth: number,
+  maxCols: number,
 ) {
   const cell = SQUARE_SIZE + SQUARE_GAP
-  const cols = Math.max(1, Math.floor((maxWidth - GRID_PAD * 2) / cell))
+  const cols = Math.min(
+    maxCols,
+    Math.max(1, Math.floor((maxWidth - GRID_PAD * 2) / cell)),
+  )
 
-  return polygons.map((poly, i) => {
-    const col = i % cols
-    const row = Math.floor(i / cols)
-    const gridX = targetX + GRID_PAD + col * cell + SQUARE_SIZE / 2
-    const gridY = targetY + row * cell + SQUARE_SIZE / 2
+  // Group polygons by tier so each tier gets its own row(s)
+  const byTier = new Map<number, PolygonMorphData[]>()
+  for (const poly of polygons) {
+    const list = byTier.get(poly.tier) ?? []
+    list.push(poly)
+    byTier.set(poly.tier, list)
+  }
+  const tierKeys = [...byTier.keys()].sort((a, b) => a - b)
 
-    const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
-    const squareTarget = rectPoints(
-      gridX,
-      gridY,
-      SQUARE_SIZE,
-      SQUARE_SIZE,
-      POINTS_PER_SHAPE,
-    )
+  const results: {
+    resampled: [number, number][]
+    squareTarget: [number, number][]
+    rawD: string
+    color: string
+    tier: number
+  }[] = []
 
-    return {
-      resampled,
-      squareTarget,
-      rawD: pointsToD(poly.screenPoly),
-      color: poly.color,
-      tier: poly.tier,
+  let currentRow = 0
+  for (const tier of tierKeys) {
+    const group = byTier.get(tier)!
+    for (let i = 0; i < group.length; i++) {
+      const col = i % cols
+      const row = currentRow + Math.floor(i / cols)
+      const gridX = targetX + GRID_PAD + col * cell + SQUARE_SIZE / 2
+      const gridY = targetY + row * cell + SQUARE_SIZE / 2
+
+      const poly = group[i]!
+      const resampled = resampleClosedPath(poly.screenPoly, POINTS_PER_SHAPE)
+      const squareTarget = rectPoints(
+        gridX,
+        gridY,
+        SQUARE_SIZE,
+        SQUARE_SIZE,
+        POINTS_PER_SHAPE,
+      )
+
+      results.push({
+        resampled,
+        squareTarget,
+        rawD: pointsToD(poly.screenPoly),
+        color: poly.color,
+        tier: poly.tier,
+      })
     }
-  })
+    currentRow += Math.ceil(group.length / cols)
+  }
+
+  return results
 }
 
 /**
- * Progress ranges for each outcome within Beat 2 (global progress 0.30–0.75).
+ * Progress ranges for each outcome within Beat 2 (global progress 0.50–0.72).
  * Each outcome gets a slice for its polygon morph animation.
- * The first outcome (CWS_DEL) starts at 0.34 (after the intro text fades in).
+ * Morphing begins at 0.50, after tier colors have settled on the map.
  */
 export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.34
+  const beat2Start = 0.50
   const beat2End = 0.72
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
@@ -85,6 +115,7 @@ export default function OutcomeMorphOverlay({
   panelWidth,
   panelHeight,
   progress,
+  squaresPerRow,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
@@ -117,6 +148,7 @@ export default function OutcomeMorphOverlay({
         rightColumnX,
         gridTargetY,
         maxColumnWidth,
+        squaresPerRow,
       )
 
       return {
@@ -125,7 +157,7 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, panelHeight])
+  }, [outcomes, panelWidth, panelHeight, squaresPerRow])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {

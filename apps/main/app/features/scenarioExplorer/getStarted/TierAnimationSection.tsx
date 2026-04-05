@@ -23,6 +23,7 @@ import OutcomeMorphOverlay, {
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import ResearcherIllustrations from "./ResearcherIllustrations"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 
 const TOTAL_DURATION = 30
 
@@ -86,17 +87,10 @@ function extractOuterRing(geometry: any): [number, number][] | null {
   return null
 }
 
-const OUTCOME_DISPLAY_ORDER: { code: string; label: string }[] = [
-  { code: "CWS_DEL", label: "Community water system deliveries" },
-  { code: "AG_REV", label: "Agricultural revenues" },
-  { code: "ENV_FLOWS", label: "River ecology" },
-  { code: "DELTA_ECO", label: "Bay Delta estuary ecology" },
-  { code: "WRC_SALMON_AB", label: "Winter-run salmon abundance" },
-  { code: "FW_DELTA_USES", label: "Freshwater for in-Delta uses" },
-  { code: "FW_EXP", label: "Freshwater for Delta exports" },
-  { code: "RES_STOR", label: "Reservoir storage" },
-  { code: "GW_STOR", label: "Groundwater storage" },
-]
+const OUTCOME_DISPLAY_ORDER = OUTCOME_CODE_ORDER.map((code) => ({
+  code,
+  label: getOutcomeName(code),
+}))
 
 interface ScreenPolygon {
   screenPoly: [number, number][]
@@ -134,10 +128,11 @@ export default function TierAnimationSection() {
   /* ── Time-based progress (0 → 1) ── */
   const progress = useMotionValue(0)
 
-  // Map visibility: stays visible through beat 2 (dimmed, not hidden)
-  const mapOpacity = useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
-  // SVG overlay fades out for beat 3
-  const overlayOpacity = useTransform(progress, [0.73, 0.78], [1, 0])
+  // Map visibility: stays visible through beat 2
+  // TODO(beat3): restore fade-out: useTransform(progress, [0, 0.72, 0.78], [1, 1, 0])
+  const mapOpacity = useTransform(progress, [0, 1], [1, 1])
+  // TODO(beat3): restore fade-out: useTransform(progress, [0.73, 0.78], [1, 0])
+  const overlayOpacity = useTransform(progress, [0, 1], [1, 1])
   // Static heading fades once animation begins
   const headingOpacity = useTransform(progress, [0, 0.02, 0.06], [1, 1, 0])
 
@@ -334,11 +329,16 @@ export default function TierAnimationSection() {
 
     let phase: "idle" | "beat1" | "beat2" = "idle"
 
-    // At CONVERGE_START the 3-blue palette begins collapsing toward a
-    // single blue. By BLEND_START all polygons share the same blue and the
-    // per-DU tier-color blend begins. By 0.30 the blend is complete.
-    const CONVERGE_START = 0.18
-    const BLEND_START = 0.24
+    // Blues cycle until FREEZE_AT, then hold still.
+    // At CONVERGE_START the frozen blues collapse toward a single blue.
+    // At BLEND_START the per-DU tier-color blend begins.
+    // By BLEND_END the blend is complete and beat2 phase starts.
+    const FREEZE_AT = 0.18
+    const CONVERGE_START = 0.38
+    const BLEND_START = 0.42
+    const BLEND_END = 0.48
+
+    let frozenColorPhase = 0
 
     const unsub = progress.on("change", (v) => {
       const map = mapRef.getMap?.()
@@ -365,12 +365,13 @@ export default function TierAnimationSection() {
             /* ok */
           }
           phase = "idle"
+          frozenColorPhase = 0
         }
         return
       }
 
-      if (v < BLEND_START) {
-        // Beat 1: cycling with optional palette convergence
+      if (v < CONVERGE_START) {
+        // Beat 1: blues cycling, then frozen
         const beat1T = v / 0.3
 
         const fadeIn = Math.min(1, beat1T / 0.33)
@@ -378,40 +379,66 @@ export default function TierAnimationSection() {
         const breath = fadeIn >= 1 ? 0.05 * Math.sin(beat1T * Math.PI * 4) : 0
         const opacity = base + breath
 
-        const colorPhase = beat1T * BEAT1_CYCLE
-
-        // After CONVERGE_START, gradually collapse the 3-blue palette
-        // toward a single blue so all polygons converge seamlessly.
-        let convergence = 0
-        if (v > CONVERGE_START) {
-          convergence = (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
-          convergence = convergence * convergence // ease-in: slow start
+        if (v < FREEZE_AT) {
+          // Actively cycling
+          const colorPhase = beat1T * BEAT1_CYCLE
+          frozenColorPhase = colorPhase
+          try {
+            if (map.getLayer("demand-units")) {
+              map.setPaintProperty(
+                "demand-units",
+                "fill-color",
+                beat1FillExpr(colorPhase) as never,
+              )
+              map.setPaintProperty("demand-units", "fill-opacity", opacity)
+            }
+          } catch {
+            /* ok */
+          }
+        } else {
+          // Frozen: keep the last color pattern, maintain opacity at 0.65
+          try {
+            if (map.getLayer("demand-units")) {
+              if (phase !== "beat1") {
+                map.setPaintProperty(
+                  "demand-units",
+                  "fill-color",
+                  beat1FillExpr(frozenColorPhase) as never,
+                )
+              }
+              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
+            }
+          } catch {
+            /* ok */
+          }
         }
+        phase = "beat1"
+      } else if (v < BLEND_START) {
+        // Converge: collapse the 3-blue palette toward a single blue
+        const convergence = (v - CONVERGE_START) / (BLEND_START - CONVERGE_START)
+        const easedC = convergence * convergence
 
         try {
           if (map.getLayer("demand-units")) {
             map.setPaintProperty(
               "demand-units",
               "fill-color",
-              beat1FillExpr(colorPhase, convergence) as never,
+              beat1FillExpr(frozenColorPhase, easedC) as never,
             )
-            map.setPaintProperty("demand-units", "fill-opacity", opacity)
+            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
           }
         } catch {
           /* ok */
         }
         phase = "beat1"
-      } else if (v < 0.3) {
+      } else if (v < BLEND_END) {
         // Blend: all polygons are now the same blue; smoothly shift
         // each DU from that blue to its tier color.
-        const blendT = (v - BLEND_START) / (0.3 - BLEND_START)
+        const blendT = (v - BLEND_START) / (BLEND_END - BLEND_START)
         const easedT = 1 - Math.pow(1 - blendT, 2) // ease-out
 
         try {
           if (map.getLayer("demand-units")) {
-            if (phase === "beat1") {
-              map.setPaintProperty("demand-units", "fill-opacity", 0.65)
-            }
             const expr = buildBlendedTierExpr(BEAT1_MID, easedT)
             if (expr) {
               map.setPaintProperty(
@@ -420,11 +447,12 @@ export default function TierAnimationSection() {
                 expr as never,
               )
             }
+            map.setPaintProperty("demand-units", "fill-opacity", 0.65)
           }
         } catch {
           /* ok */
         }
-        phase = "beat1" // keep as beat1 so the above guard runs once
+        phase = "beat1"
       } else {
         // Beat 2+: tier colors locked in; progressively hide DUs
         // as their SVG copies start animating.
@@ -735,6 +763,7 @@ export default function TierAnimationSection() {
                 opacity: overlayOpacity,
                 position: "absolute",
                 inset: 0,
+                zIndex: 4,
               }}
             >
               <OutcomeMorphOverlay
@@ -742,11 +771,12 @@ export default function TierAnimationSection() {
                 panelWidth={panelSize.width}
                 panelHeight={panelSize.height}
                 progress={progress}
+                squaresPerRow={theme.scenarios.tierGrid.squaresPerRow}
               />
             </motion.div>
           )}
 
-          {/* Researcher illustrations — Beat 3 */}
+          {/* TODO(beat3): restore ResearcherIllustrations
           {panelSize && (
             <ResearcherIllustrations
               progress={progress}
@@ -754,6 +784,7 @@ export default function TierAnimationSection() {
               panelHeight={panelSize.height}
             />
           )}
+          */}
 
           {/* Cross-fading beat text */}
           <BeatTextOverlay progress={progress} />
