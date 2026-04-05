@@ -31,7 +31,7 @@ import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore, type MainView } from "./store"
-import { useMapMode } from "../map/store"
+import { useMapMode, useGetStartedMapInteractive } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
 // Top-level navigation tabs
@@ -59,6 +59,7 @@ export default function ScenarioExplorer() {
 
   usePrefetchTiers()
 
+  const getStartedMapInteractive = useGetStartedMapInteractive()
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
   const needsTransparentBg =
@@ -173,7 +174,8 @@ export default function ScenarioExplorer() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            pointerEvents: "auto",
+            pointerEvents:
+              isGetStartedMapMode && getStartedMapInteractive ? "none" : "auto",
           }}
         >
           {mainView === "get-started" && <GetStartedView />}
