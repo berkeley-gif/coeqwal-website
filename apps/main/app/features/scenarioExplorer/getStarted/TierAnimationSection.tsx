@@ -189,6 +189,10 @@ export default function TierAnimationSection() {
   const [allScreenPolygons, setAllScreenPolygons] = useState<
     Map<string, ScreenPolygon>
   >(new Map())
+
+  // Viewport-space polygon data (raw map.project() output, no panel offset).
+  // Stable as long as the map hasn't panned/zoomed.
+  const viewportDataRef = useRef<Map<string, ScreenPolygon>>(new Map())
   const [panelInView, setPanelInView] = useState(false)
   const [playState, setPlayState] = useState<
     "idle" | "playing" | "paused" | "finished"
@@ -211,7 +215,7 @@ export default function TierAnimationSection() {
 
   const handlePlay = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    computePolygonDataRef.current()
+    applyPanelOffsetRef.current()
 
     const currentVal = progress.get()
     const startFrom = currentVal >= 1 ? 0 : currentVal
@@ -267,7 +271,7 @@ export default function TierAnimationSection() {
 
   const handleRewind = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    computePolygonDataRef.current()
+    applyPanelOffsetRef.current()
     progress.set(0)
     setPlayState("idle")
     mapActions.setOutcomeVisualization("AG_REV", "s0020")
@@ -443,6 +447,12 @@ export default function TierAnimationSection() {
         if (!map) return
         computePolygonDataRef.current()
         polygonsAllowedRef.current = true
+
+        // The panel may still be settling to its final scroll position
+        // after the camera fly. Schedule cheap offset re-applications to
+        // catch any drift without re-querying Mapbox.
+        setTimeout(() => applyPanelOffsetRef.current(), 200)
+        setTimeout(() => applyPanelOffsetRef.current(), 500)
 
         try {
           // Set up demand-units for the beat-1 color cycling
@@ -811,7 +821,37 @@ export default function TierAnimationSection() {
   /* ── Collect screen shapes from Mapbox layers + coordinate lookups ── */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
+  const applyPanelOffsetRef = useRef<() => void>(() => {})
 
+  /**
+   * Cheap: subtract the current panel viewport position from the stable
+   * viewport-space data stored in viewportDataRef. Safe to call frequently
+   * (scroll, resize, before play) without re-querying Mapbox.
+   */
+  const applyPanelOffset = useCallback(() => {
+    if (!panelRef.current || viewportDataRef.current.size === 0) return
+
+    const panelRect = panelRef.current.getBoundingClientRect()
+    const ox = panelRect.left + panelRef.current.clientLeft
+    const oy = panelRect.top + panelRef.current.clientTop
+
+    const screenMap = new Map<string, ScreenPolygon>()
+    for (const [id, vp] of viewportDataRef.current) {
+      screenMap.set(id, {
+        screenPoly: vp.screenPoly.map(([x, y]) => [x - ox, y - oy] as [number, number]),
+        centroidScreen: [vp.centroidScreen[0] - ox, vp.centroidScreen[1] - oy],
+      })
+    }
+    setAllScreenPolygons(screenMap)
+  }, [])
+
+  applyPanelOffsetRef.current = applyPanelOffset
+
+  /**
+   * Expensive: query Mapbox source features, project to viewport-space
+   * coordinates, and store in viewportDataRef. Then apply the panel offset
+   * to produce panel-relative screen coordinates.
+   */
   const collectOutcomeShapes = useCallback(() => {
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
@@ -824,13 +864,8 @@ export default function TierAnimationSection() {
     const map = mapAPI.mapRef.current.getMap?.()
     if (!map || !map.isStyleLoaded?.()) return
 
-    const panelEl = panelRef.current
-    const panelRect = panelEl.getBoundingClientRect()
-    const svgOriginX = panelRect.left + panelEl.clientLeft
-    const svgOriginY = panelRect.top + panelEl.clientTop
-
     const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
-    const screenMap = new Map<string, ScreenPolygon>()
+    const vpMap = new Map<string, ScreenPolygon>()
 
     // ── 1. Query polygon-based Mapbox layers per the registry ──
     const layersToQuery = new Map<
@@ -853,11 +888,8 @@ export default function TierAnimationSection() {
     for (const [layerId, { idProperty, sourceLayerName }] of layersToQuery) {
       if (!map.getLayer(layerId)) continue
 
-      // Use querySourceFeatures exclusively — it ignores layer filters,
-      // returning ALL features from loaded tiles. queryRenderedFeatures
-      // would only return features matching the current layer filter
-      // (e.g., AG_REV's Agriculture-only filter on demand-units), which
-      // would silently exclude CWS_DEL and other filtered-out features.
+      // querySourceFeatures ignores layer filters, returning ALL features
+      // from loaded tiles (unlike queryRenderedFeatures which respects them).
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let features: any[] = []
       try {
@@ -890,43 +922,43 @@ export default function TierAnimationSection() {
       }
 
       for (const [featureId, ring] of bestRings) {
-        const screenPoly: [number, number][] = []
+        const vpPoly: [number, number][] = []
         for (const [lng, lat] of ring) {
           try {
             const pt = map.project([lng, lat])
-            screenPoly.push([pt.x - svgOriginX, pt.y - svgOriginY])
+            vpPoly.push([pt.x, pt.y])
           } catch {
             /* vertex outside projection bounds */
           }
         }
-        if (screenPoly.length < 3) continue
+        if (vpPoly.length < 3) continue
 
         let cx = 0,
           cy = 0
-        for (const [x, y] of screenPoly) {
+        for (const [x, y] of vpPoly) {
           cx += x
           cy += y
         }
-        cx /= screenPoly.length
-        cy /= screenPoly.length
-        const centroidScreen: [number, number] = [cx, cy]
+        cx /= vpPoly.length
+        cy /= vpPoly.length
+        const centroid: [number, number] = [cx, cy]
 
         const cData = centroidLookup.get(featureId)
         if (cData) {
           try {
             const pt = map.project([cData.lng, cData.lat])
-            centroidScreen[0] = pt.x - svgOriginX
-            centroidScreen[1] = pt.y - svgOriginY
+            centroid[0] = pt.x
+            centroid[1] = pt.y
           } catch {
             /* keep computed centroid */
           }
         }
 
-        screenMap.set(featureId, { screenPoly, centroidScreen })
+        vpMap.set(featureId, { screenPoly: vpPoly, centroidScreen: centroid })
       }
     }
 
-    // ── 2. React-marker outcomes: project coordinates to screen shapes ──
+    // ── 2. React-marker outcomes: project coordinates to viewport shapes ──
     for (const { code } of OUTCOME_DISPLAY_ORDER) {
       const config = getOutcomeConfig(code)
       if (!config || config.geometryType !== "react-marker") continue
@@ -934,22 +966,22 @@ export default function TierAnimationSection() {
       if (!locData) continue
 
       for (const locId of locData.ids) {
-        if (screenMap.has(locId)) continue
+        if (vpMap.has(locId)) continue
         const coords = getOutcomeLocationCoordinates(code, locId)
         if (!coords) continue
 
         try {
           const pt = map.project(coords)
-          const sx = pt.x - svgOriginX
-          const sy = pt.y - svgOriginY
+          const sx = pt.x
+          const sy = pt.y
 
-          let screenPoly: [number, number][]
+          let vpPoly: [number, number][]
           if (code === "ENV_FLOWS") {
-            screenPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
+            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
           } else {
-            screenPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
+            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
           }
-          screenMap.set(locId, { screenPoly, centroidScreen: [sx, sy] })
+          vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
         } catch {
           /* outside projection bounds */
         }
@@ -963,15 +995,14 @@ export default function TierAnimationSection() {
       const locData = outcomeLocations[code]
       if (!locData) continue
 
-      // WRC_SALMON_AB is single-value; use a synthetic ID
       const syntheticId = [...locData.ids][0] ?? code
-      if (screenMap.has(syntheticId)) continue
+      if (vpMap.has(syntheticId)) continue
 
       try {
         const pt = map.project(SALMON_RIVER_CENTROID)
-        const sx = pt.x - svgOriginX
-        const sy = pt.y - svgOriginY
-        const screenPoly = lineSegmentPoints(
+        const sx = pt.x
+        const sy = pt.y
+        const vpPoly = lineSegmentPoints(
           sx - 15,
           sy,
           sx + 15,
@@ -979,7 +1010,7 @@ export default function TierAnimationSection() {
           8,
           POINTS_PER_SHAPE,
         )
-        screenMap.set(syntheticId, { screenPoly, centroidScreen: [sx, sy] })
+        vpMap.set(syntheticId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
       } catch {
         /* outside projection bounds */
       }
@@ -990,18 +1021,25 @@ export default function TierAnimationSection() {
       return
     }
 
-    setAllScreenPolygons(screenMap)
-  }, [centroids, allLocationIds, outcomeLocations, mapAPI])
+    viewportDataRef.current = vpMap
+    applyPanelOffset()
+  }, [centroids, allLocationIds, outcomeLocations, mapAPI, applyPanelOffset])
 
   computePolygonDataRef.current = collectOutcomeShapes
 
   useEffect(() => {
-    window.addEventListener("resize", collectOutcomeShapes)
-    return () => window.removeEventListener("resize", collectOutcomeShapes)
+    const onResize = () => {
+      if (viewportDataRef.current.size > 0) {
+        collectOutcomeShapes()
+      }
+    }
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
   }, [collectOutcomeShapes])
 
+  // Re-apply offset on scroll (cheap — no Mapbox queries)
   useEffect(() => {
-    if (!panelInView || playState !== "idle") return
+    if (!panelInView) return
     const el = panelRef.current
     if (!el) return
 
@@ -1013,18 +1051,21 @@ export default function TierAnimationSection() {
     }
     if (!scrollParent) return
 
-    let timer: ReturnType<typeof setTimeout>
+    let rafId: number | null = null
     const onScroll = () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => computePolygonDataRef.current(), 150)
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        applyPanelOffsetRef.current()
+        rafId = null
+      })
     }
 
     scrollParent.addEventListener("scroll", onScroll, { passive: true })
     return () => {
-      clearTimeout(timer)
+      if (rafId !== null) cancelAnimationFrame(rafId)
       scrollParent.removeEventListener("scroll", onScroll)
     }
-  }, [panelInView, playState])
+  }, [panelInView])
 
   /* ── Build per-outcome shape groups for the morph overlay ── */
   const outcomeGroups: OutcomeGroup[] = useMemo(() => {
