@@ -42,6 +42,7 @@ import BeatTextOverlay from "./BeatTextOverlay"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
+import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 
 const TOTAL_DURATION = 30
 
@@ -876,19 +877,19 @@ export default function TierAnimationSection() {
 
       if (features.length > 0) anyPolygonsFound = true
 
-      const bestRings = new Map<string, { ring: [number, number][] }>()
+      const bestRings = new Map<string, [number, number][]>()
       for (const f of features) {
         const featureId: string | undefined = f.properties?.[idProperty]
         if (!featureId) continue
         const ring = extractOuterRing(f.geometry)
         if (!ring || ring.length < 3) continue
         const existing = bestRings.get(featureId)
-        if (!existing || ring.length > existing.ring.length) {
-          bestRings.set(featureId, { ring })
+        if (!existing || ring.length > existing.length) {
+          bestRings.set(featureId, ring)
         }
       }
 
-      for (const [featureId, { ring }] of bestRings) {
+      for (const [featureId, ring] of bestRings) {
         const screenPoly: [number, number][] = []
         for (const [lng, lat] of ring) {
           try {
@@ -1052,6 +1053,29 @@ export default function TierAnimationSection() {
       return { code, label, polygons }
     }).filter((g) => g.polygons.length > 0)
   }, [allScreenPolygons, outcomeLocations])
+
+  const locationNameMap = useMemo(() => {
+    const names: Record<string, string> = {}
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+      for (const locId of locData.ids) {
+        const key = `${code}:${locId}`
+        const apiName = locData.nameMap[locId]
+        if (apiName && apiName !== locId) {
+          names[key] = apiName
+          continue
+        }
+        if (code === "AG_REV" || code === "CWS_DEL") {
+          const duName = getDemandUnitDisplayName(locId)
+          if (duName !== locId) {
+            names[key] = duName
+          }
+        }
+      }
+    }
+    return names
+  }, [outcomeLocations])
 
   const activeOutcomeGroups = useMemo(
     () => outcomeGroups.filter((g) => ACTIVE_OUTCOMES.has(g.code)),
@@ -1306,6 +1330,7 @@ export default function TierAnimationSection() {
                 selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
                 interactive={isInteractive}
                 onLocationHover={isInteractive ? handleLocationActive : undefined}
+                locationNameMap={locationNameMap}
               />
             </motion.div>
           )}

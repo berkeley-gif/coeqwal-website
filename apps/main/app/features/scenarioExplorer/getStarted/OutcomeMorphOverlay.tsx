@@ -54,6 +54,8 @@ interface OutcomeMorphOverlayProps {
   interactive?: boolean
   onLocationHover?: (info: LocationInfo | null) => void
   onLocationPin?: (info: LocationInfo | null) => void
+  /** Maps "outcomeCode:sourceId" → human-readable name from Mapbox features */
+  locationNameMap?: Record<string, string>
 }
 
 function getLocationName(code: string, sourceId: string): string {
@@ -190,6 +192,7 @@ export default function OutcomeMorphOverlay({
   interactive,
   onLocationHover,
   onLocationPin,
+  locationNameMap,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
@@ -304,11 +307,13 @@ export default function OutcomeMorphOverlay({
     return {
       x: cx,
       y: cy - SQUARE_SIZE / 2 - 4,
-      name: getLocationName(activeLocation.code, activeLocation.sourceId),
+      name:
+        locationNameMap?.[`${activeLocation.code}:${activeLocation.sourceId}`] ??
+        getLocationName(activeLocation.code, activeLocation.sourceId),
       tier: getTierLabel(activeLocation.tier),
       color: shape.color,
     }
-  }, [activeLocation, outcomeShapes])
+  }, [activeLocation, outcomeShapes, locationNameMap])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {

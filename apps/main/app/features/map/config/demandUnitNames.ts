@@ -1,13 +1,11 @@
 /**
  * Static mapping of demand unit IDs to their display names
  *
- * This provides a fallback when Mapbox tiles aren't loaded (e.g., at lower zoom levels).
- * The Mapbox tileset has Sub_Name, Urb_Name, and Mod_Name fields, but querySourceFeatures
- * only returns features from tiles currently in memory.
+ * Generated from the Mapbox demand-units tileset properties.
+ * The API tier endpoint echoes location_id as location_name for demand units,
+ * so this static map is the authoritative source for human-readable names.
  *
- * Priority: Sub_Name > Urb_Name > Mod_Name
- *
- * Add entries here for any demand units that need reliable name display.
+ * Priority for display: subName > urbName > modName > duId
  */
 
 export interface DemandUnitNameInfo {
@@ -18,53 +16,245 @@ export interface DemandUnitNameInfo {
 
 /**
  * Static name lookup for demand units
- * Key: DU_ID (e.g., "13_NU2")
+ * Key: DU_ID (e.g., "02_NA")
  * Value: Name info with Sub_Name, Urb_Name, Mod_Name
+ *
+ * Blank tileset values (" ") are omitted.
  */
 export const DEMAND_UNIT_NAMES: Record<string, DemandUnitNameInfo> = {
-  // Community Water Systems - small polygons that may not load in tiles
-  "13_NU2": {
-    urbName: "Palermo, Wyandotte, Vista Robles, and Bangor",
-    modName: "Non-Urban",
-  },
-  "24_NU4": {
-    urbName: "Small Communities",
-    modName: "Non-Urban",
-  },
-  "02_PU": {
-    subName: "Keswick",
-    urbName: "Shasta Co S.A. #25 - Keswick C.S.D.",
-  },
-  "02_SU": {
-    subName: "Redding",
-    urbName: "City of Redding",
-  },
-  "03_PU2": {
-    subName: "Bella Vista and Palo Cedro",
-    urbName: "Bella Vista W.D.",
-  },
-  "Musco Family Olive Company": {
-    urbName: "Musco Family Olive Company",
-  },
-
-  // Add more demand units as needed
-  // Format:
-  // "DU_ID": {
-  //   subName: "Sub Name if available",
-  //   urbName: "Urban Name if available",
-  //   modName: "Model Name if available",
-  // },
+  "02_NA": { modName: "Igo-ono C.S.D." },
+  "02_PA": { urbName: "Happy Valley", modName: "Clear Creek C.S.D." },
+  "02_PU": { urbName: "Keswick", modName: "Shasta Co S.A. #25 - Keswick C.S.D." },
+  "02_SA": { modName: "Anderson-cottonwood I.D." },
+  "02_SU": { urbName: "Redding", modName: "City of Redding - 2871" },
+  "02_NU": { modName: "City of Anderson W.S.A." },
+  "03_NA": { modName: "Non-District Ag" },
+  "03_PA": { modName: "Bella Vista W.D." },
+  "03_PU1": { urbName: "Sherman", modName: "Shasta Co S.A. #6 - Jones Valley" },
+  "03_PU3": { urbName: "Redding", modName: "City of Redding - Buckeye - 5272" },
+  "03_SA": { modName: "Anderson-cottonwood I.D." },
+  "03_SU": { urbName: "Redding", modName: "City of Redding - 2871" },
+  "04_NA": { modName: "O'connell M.W.D." },
+  "04_NU1": { urbName: "Red Bluff", modName: "City of Red Bluff W.S.A." },
+  "04_NU2": { urbName: "Corning", modName: "City of Corning W.S.A." },
+  "04_PA1": { modName: "Proberta W.D." },
+  "04_PA2": { modName: "Kirkwood W.D." },
+  "05_NA": { modName: "Sacramento River N.W.R." },
+  "05_NU": { urbName: "Redding", modName: "City of Red Bluff W.S.A." },
+  "06_NA": { modName: "Non-District Ag" },
+  "06_NU": { urbName: "Orland", modName: "City of Orland W.S.A." },
+  "06_PA": { modName: "Orland Unit Water Users Assn." },
+  "07N_NA": { modName: "Capay Rancho W.D." },
+  "07N_NU": { urbName: "Willows", modName: "California Water Service Co. (Willows)" },
+  "07N_PA": { modName: "Holthouse W.D." },
+  "07S_NA": { modName: "Yolo-zamora Irrigation District" },
+  "07S_NU": { urbName: "Arbuckle", modName: "Arbuckle C.S.D." },
+  "07S_PA": { modName: "Cortina Water District" },
+  "08N_NA": { modName: "Sacramento River N.W.R." },
+  "08N_NU": { urbName: "Hamilton City", modName: "Hamiliton City" },
+  "08N_PA": { modName: "Colusa Drain Mutual Water Company" },
+  "08N_PR1": { modName: "Sacramento N.W.R." },
+  "08N_PR2": { modName: "Delevan N.W.R." },
+  "08N_SA1": { modName: "Green Valley Corporation (5211)" },
+  "08N_SA2": { modName: "Glenn Colusa I.D." },
+  "08S_NA1": { modName: "Colusa Basin Drainage District" },
+  "08S_NA2": { modName: "Colusa Basin Drainage District" },
+  "08S_NU": { urbName: "Maxwell", modName: "Maxwell P.U.D." },
+  "08S_PA": { modName: "Colusa Drain Mutual Water Company" },
+  "08S_PR": { modName: "Colusa N.W.R." },
+  "08S_SA1": { modName: "Elizabeth Dommer/barb King" },
+  "08S_SA2": { modName: "Glenn Colusa I.D." },
+  "08S_SA3": { modName: "River Garden Farms" },
+  "09_NA": { modName: "Dayton Mutual Water Company" },
+  "09_PR": { subName: "Llano Seco Unit", modName: "Sacramento River NWR" },
+  "09_SA1": { modName: "Pacific Realty Associates, L..p. (M & T Chico Ranch)" },
+  "09_SA2": { modName: "Nene Ranch, Llc" },
+  "10_NA": { modName: "Lime Saddle District" },
+  "10_NU1": { urbName: "Chico", modName: "California Water Service Co. (Chico)" },
+  "11_NA": { modName: "Non-District Ag" },
+  "11_NU1": { urbName: "Oroville", modName: "Thermalito Irrigation District" },
+  "11_NU2": { urbName: "Biggs", modName: "City of Biggs" },
+  "11_PR": { subName: "Howard Slough Unit", modName: "Upper Butte Basin W.A." },
+  "11_SA1": { modName: "Western Canal Water District" },
+  "11_SA2": { modName: "Richvale I.D." },
+  "11_SA3": { modName: "Biggs-west Gridley W.D." },
+  "11_SA4": { modName: "Sutter Extension W.D." },
+  "12_NA": { modName: "Non-District Ag" },
+  "12_NU1": { urbName: "Oroville", modName: "California Water Service Co. (Oroville)" },
+  "12_SA": { modName: "FRSA Settlement Diverters" },
+  "13_NA": { modName: "South Feather Water and Power Agency" },
+  "13_NU1": { urbName: "Oroville", modName: "South Feather Water and Power Agency" },
+  "14_NA": { modName: "Nevada I.D." },
+  "15N_NA1": { modName: "Reclamation District No. 10" },
+  "15N_NA2": { modName: "Ramirez Water District" },
+  "15N_NU": { urbName: "Marysville", modName: "California Water Service Co. (Marysville)" },
+  "15N_SA": { modName: "FRSA Settlement Diverters" },
+  "15S_NA1": { modName: "Reclamation District No. 784" },
+  "15S_NA2": { modName: "Wheatland W.D." },
+  "15S_NU": { urbName: "Wheatland", modName: "City of Wheatland W.S.A." },
+  "15S_SA": { modName: "FRSA Settlement Diverters" },
+  "16_NA1": { modName: "Non-District Ag" },
+  "16_NA2": { modName: "Sutter Butte M.W.C." },
+  "16_PA": { modName: "Feather W.D." },
+  "16_PU": { urbName: "Yuba City", modName: "City of Yuba City W.S.A." },
+  "16_SA": { modName: "FRSA Settlement Diverters" },
+  "17N_NA": { modName: "Reclamation District No. 1004" },
+  "17N_NR": { modName: "Sutter and Butte Duck Clubs" },
+  "17N_PR": { modName: "Gray Lodge Wa" },
+  "17S_NA": { modName: "Sutter Butte M.W.C." },
+  "17S_NU": { urbName: "Sutter", modName: "Sutter C.S.D." },
+  "17S_PR": { modName: "Sutter N.W.R." },
+  "17S_SA": { modName: "FRSA Settlement Diverters" },
+  "18_NA": { modName: "Sutter Butte M.W.C." },
+  "18_SA": { modName: "Tarke, Stephen E. and Debra F." },
+  "19_SA": { modName: "Obrien, Frank and Janice" },
+  "20_NA1": { modName: "Yolo County F.C.W.C.D." },
+  "20_NA2": { modName: "Non-District Ag" },
+  "20_NU1": { urbName: "UC Davis", modName: "U.C. Davis" },
+  "20_NU2": { urbName: "Winters", modName: "City of Winters" },
+  "20_PA": { modName: "U.C. Davis" },
+  "21_NA": { modName: "Reclamation District No. 827" },
+  "21_PA": { modName: "Colusa Drain Mutual Water Company" },
+  "21_PU": { urbName: "West Sacramento", modName: "City of West Sacramento" },
+  "21_SA": { modName: "Tenhunfeld, Fred, Wallace Jack, Et Al" },
+  "22_NA": { modName: "Non-District Ag" },
+  "22_NU": { urbName: "Sac Int'l Airport - SCWA Zone 50", modName: "Sacramento County Water Agency" },
+  "22_SA1": { modName: "Pleasant Grove - Verona Mutual Water Company" },
+  "22_SA2": { modName: "FRSA Settlement Diverters" },
+  "23_NA": { modName: "Camp Far West I.D." },
+  "24_NA1": { modName: "Nevada I.D." },
+  "24_NA2": { modName: "Non-District Ag" },
+  "24_NA3": { modName: "Placer County Water Agency - 3" },
+  "24_NU1": { urbName: "Christian Valley Park", modName: "Christian Valley Park C.S.D." },
+  "24_NU2": { urbName: "Loomis", modName: "Placer County Water Agency" },
+  "24_NU3": { urbName: "Auburn/N. Auburn", modName: "Nevada I.D." },
+  "25_NA": { modName: "North Delta Water Agency" },
+  "25_NU": { urbName: "Dixon", modName: "California Water Service Co. (Dixon)" },
+  "25_PA1": { modName: "Solano I.D." },
+  "25_PA2": { modName: "Maine Prairie W.D." },
+  "25_PU": { urbName: "Vacaville", modName: "City of Vacaville" },
+  "26N_NA": { subName: "PCWA Zone 5", urbName: "Placer Vineyards", modName: "California American Water" },
+  "26N_NU1": { subName: "Arbors at Antelope", urbName: "North Highlands", modName: "Sacramento Suburban Water District" },
+  "26N_NU2": { urbName: "Carmichael", modName: "Carmichael Water District" },
+  "26N_NU3": { urbName: "Sacramento", modName: "City of Sacramento - North of American River" },
+  "26N_NU4": { subName: "Arcade-Town and Country (Outside ARPOU)", urbName: "Arcade-Town and Country (Outside ARPOU)", modName: "Sacramento Suburban Water District" },
+  "26N_NU5": { urbName: "Arden", modName: "California American Water" },
+  "26N_PU1": { urbName: "Roseville", modName: "City of Roseville" },
+  "26N_PU2": { subName: "City of Roseville Retail Area", urbName: "City of Roseville", modName: "San Juan Water District" },
+  "26N_PU3": { subName: "North of American River", urbName: "Folsom", modName: "City of Folsom" },
+  "26S_NU1": { urbName: "Sacramento", modName: "City of Sacramento - South of American River" },
+  "26S_NU2": { subName: "Rosemont (Within ARPOU)", urbName: "Rosemont (Within ARPOU)", modName: "California American Water" },
+  "26S_NU3": { urbName: "Parkway, Unicorporated Sacramento County", modName: "Fruitridge Vista W.C." },
+  "26S_NA": { modName: "Non-District Ag" },
+  "26S_PU1": { modName: "Folsom State Prison" },
+  "26S_PU2": { urbName: "Rancho Cordova", modName: "Golden State Water Company" },
+  "26S_PU3": { modName: "California Parks and Recreation" },
+  "26S_PU4": { subName: "Laguna, Franklin", urbName: "Laguna", modName: "Sacramento County Water Agency - Zone 41" },
+  "26S_PU5": { subName: "Elk Grove Water Service", urbName: "Elk Grove", modName: "Florin Resource Conservation District - within Zone 40" },
+  "26S_PU6": { urbName: "Sunrise", modName: "Sacramento County Water Agency - Zone 41" },
+  "50_NA": { modName: "Non-District Ag\\Urban" },
+  "50_PA1": { modName: "The West Side I.D." },
+  "50_PA2": { modName: "Byron Bethany I.D." },
+  "50_PU": { urbName: "City of Tracy", modName: "City of Tracy" },
+  "60N_NA1": { modName: "Jackson Valley I.D." },
+  "60N_NA2": { modName: "Galt I.D." },
+  "60N_NA3": { modName: "North San Joaquin W.C.D." },
+  "60N_NA4": { modName: "Woodbridge I.D." },
+  "60N_NA5": { modName: "Non-District Ag\\Urban" },
+  "60N_NU1": { urbName: "Galt", modName: "Galt I.D." },
+  "60N_NU2": { urbName: "Rancho Murieta", modName: "Non-District Urban" },
+  "60N_PU": { urbName: "SMUD Rancho Seco Power Plant", modName: "SMUD Rancho Seco Power Plant" },
+  "60S_NA1": { modName: "East of CSJWCD and SEWD" },
+  "60S_NA2": { modName: "South of CSJWCD" },
+  "60S_NU1": { urbName: "Stockton", modName: "SEWD and Calaveras Riparian" },
+  "60S_PA1": { modName: "SEWD and Calaveras Riparian" },
+  "60S_PA2": { modName: "CSJWCD" },
+  "61_NA1": { modName: "East of Modesto ID and Oakdale ID" },
+  "61_NA2": { modName: "Modesto ID" },
+  "61_NA3": { modName: "Tuolumne River Diversions (North Bank)" },
+  "61_NA4": { modName: "Stanislaus River Diversions" },
+  "61_NA5": { modName: "East Bank of SJR from Tuolumne to Stanislaus" },
+  "61_NA6": { modName: "East Bank SJR downstream of Stanislaus" },
+  "61_NU1": { subName: "Del Este Water Company", urbName: "Waterford", modName: "Modesto ID" },
+  "61_NU2": { urbName: "City of Escalon", modName: "Non-District Urban" },
+  "61_NU3": { urbName: "Ripon", modName: "Non-District Urban" },
+  "61_PA1": { subName: "North of Stanislaus River", modName: "Oakdale ID North of Stanislaus River" },
+  "61_PA2": { subName: "South of Stanislaus River", modName: "Oakdale ID South of Stanislaus River" },
+  "61_PA3": { modName: "South San Joaquin ID" },
+  "62_NA1": { modName: "East of Turlock ID, DAU209,196,198" },
+  "62_NA2": { modName: "Merced River Diversions (North Bank)" },
+  "62_NA3": { modName: "Turlock I.D." },
+  "62_NA4": { modName: "Tuolumne River Diversions (South Bank)" },
+  "62_NA5": { modName: "East Bank of SJR Merced to Tuolumne" },
+  "62_NA6": { subName: "North of Meced River", modName: "Merced ID North of Meced River" },
+  "62_NU": { subName: "Keyes Community S.D.", urbName: "Keyes", modName: "Turlock I.D." },
+  "63_NA1": { modName: "East of Merced ID DAU211,198,202" },
+  "63_NA2": { modName: "Merced River Diversions (South Bank)" },
+  "63_NA3": { subName: "South of Merced River", modName: "Merced ID South of Merced River" },
+  "63_NA4": { modName: "Merced River Diversions (South Bank)" },
+  "63_NU": { subName: "South of Merced River", urbName: "Livingston", modName: "Merced ID South of Merced River" },
+  "63_PR1": { modName: "Arena Unit" },
+  "63_PR2": { modName: "Lone Tree Unit" },
+  "63_PR3": { modName: "East Bear Creek Unit" },
+  "64_NA1": { urbName: "Madera Acres", modName: "East of Madera ID - DAU 213,199,204" },
+  "64_NA2": { modName: "West of Madera ID and Chowchilla WD" },
+  "64_NU": { subName: "CITY OF MADERA W.S.A.", urbName: "Madera", modName: "East of Madera ID - DAU 213,199,204" },
+  "64_PA1": { modName: "Madera I.D." },
+  "64_PA2": { modName: "Chowchilla W.D." },
+  "64_PA3": { modName: "Gravelly Ford W.D." },
+  "64_XA": { modName: "Columbia Canal Co." },
+  "71_NA1": { modName: "Non-District Ag\\Urban" },
+  "71_NA2": { modName: "Banta-Carbona I.D." },
+  "71_NA3": { modName: "Non-District Ag\\Urban" },
+  "71_NU": { urbName: "Patterson", modName: "Non-District Urban" },
+  "71_PA1": { subName: "Hospital W.D.", modName: "Hospital W.D." },
+  "71_PA2": { modName: "West Stanislaus I.D." },
+  "71_PA3": { subName: "Kern Canon W.D.", modName: "Kern Canon W.D." },
+  "71_PA4": { modName: "Patterson W.D." },
+  "71_PA5": { subName: "Salado W.D.", modName: "Salado W.D." },
+  "71_PA6": { subName: "Romero W.D.", modName: "Del Puerto Consolidated" },
+  "71_PA7": { modName: "Oak Flat W.D." },
+  "71_PA8": { subName: "Plain View W.D.", modName: "Byron Bethany I.D." },
+  "71_PU1": { subName: "Plain View W.D.", urbName: "Musco Family Olive Company", modName: "Byron Bethany I.D." },
+  "72_NA1": { modName: "Non-District Ag\\Urban" },
+  "72_NA2": { modName: "Non-District Ag\\Urban" },
+  "72_NU": { urbName: "Newman", modName: "Non-District Urban" },
+  "72_PA": { modName: "Laguna W.D." },
+  "72_PR1": { modName: "Volta WA" },
+  "72_PR2": { modName: "Blue Goose Unit" },
+  "72_PR3": { modName: "Non-District Ag\\Urban" },
+  "72_PR4": { modName: "Los Banos WA" },
+  "72_PR5": { modName: "Grasslands W.D. (North)" },
+  "72_PR6": { modName: "Grasslands W.D. (South)" },
+  "72_PU2": { urbName: "Dos Palos", modName: "Project Urban" },
+  "72_XA1": { modName: "San Luis Canal Co." },
+  "72_XA2": { subName: "Central California I.D. (South)", modName: "Central California I.D. (South)" },
+  "72_XA3": { subName: "Central California I.D. (North)", modName: "Central California I.D. (North)" },
+  "73_NA": { modName: "Non-District Ag\\Urban" },
+  "73_PA1": { subName: "San Luis W.D. (North)", modName: "San Luis W.D. (North)" },
+  "73_PA2": { modName: "Widren W.D." },
+  "73_PA3": { subName: "San Luis W.D. (South)", modName: "San Luis W.D. (South)" },
+  "73_XA": { subName: "Firebaugh Canal W.D. (North)", modName: "Firebaugh Canal W.D. (North)" },
+  "90_NA": {},
+  "90_PA1": { subName: "Westlands W.D. (East)", modName: "Priority Area 1" },
+  "90_PA2": { subName: "Westlands W.D. (West)", modName: "Distribution District #2" },
+  "90_PU": { urbName: "Avenal", modName: "Project Urban" },
 }
 
 /**
- * Get the best display name for a demand unit
- * Priority: Sub_Name > Urb_Name > Mod_Name > duId
+ * Get the best display name for a demand unit.
+ * Priority: subName > urbName > modName > duId
+ * Trims whitespace since tileset uses " " for blank values.
  */
 export function getDemandUnitDisplayName(duId: string): string {
   const info = DEMAND_UNIT_NAMES[duId]
   if (!info) return duId
 
-  return info.subName || info.urbName || info.modName || duId
+  const sub = info.subName?.trim()
+  const urb = info.urbName?.trim()
+  const mod = info.modName?.trim()
+
+  return sub || urb || mod || duId
 }
 
 /**

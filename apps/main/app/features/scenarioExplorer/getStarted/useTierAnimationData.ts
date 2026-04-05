@@ -47,6 +47,7 @@ export interface OutcomeLocationData {
   ids: Set<string>
   tierMap: Record<string, TierLevel>
   colorMap: Record<string, string>
+  nameMap: Record<string, string>
 }
 
 export interface TierAnimationData {
@@ -227,13 +228,15 @@ export function useTierAnimationData(): TierAnimationData {
       const ids = new Set<string>()
       const tierMap: Record<string, TierLevel> = {}
       const colorMap: Record<string, string> = {}
+      const nameMap: Record<string, string> = {}
       for (const loc of resp.locations) {
         ids.add(loc.location_id)
         const level = loc.tier_level as TierLevel
         tierMap[loc.location_id] = level
         colorMap[loc.location_id] = tierColors[level] || "#888888"
+        if (loc.location_name) nameMap[loc.location_id] = loc.location_name
       }
-      result[code] = { ids, tierMap, colorMap }
+      result[code] = { ids, tierMap, colorMap, nameMap }
     }
     return result
   }, [outcomeLocationResponses, tierColors])
