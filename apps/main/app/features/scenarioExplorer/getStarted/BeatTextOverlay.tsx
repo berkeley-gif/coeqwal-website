@@ -52,7 +52,7 @@ export default function BeatTextOverlay({
       }
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.20) / 0.04)
+        const fadeIn = clamp01((v - 0.2) / 0.04)
         // TODO(beat3): restore fadeOut at 0.70 for beat 3 transition
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
@@ -115,8 +115,8 @@ export default function BeatTextOverlay({
         }}
       >
         <Typography variant="storyBody" component="p">
-          Different water management scenarios bring water to different parts
-          of the system.
+          Different water management scenarios bring water to different parts of
+          the system.
         </Typography>
       </Box>
 
@@ -178,9 +178,7 @@ export default function BeatTextOverlay({
                   opacity: 0,
                 }}
               >
-                <Typography variant="storyBody">
-                  {item.label}
-                </Typography>
+                <Typography variant="storyBody">{item.label}</Typography>
               </Box>
             ))}
 

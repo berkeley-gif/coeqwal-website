@@ -15,15 +15,24 @@ const SYMBOLS: { label: string; path: string }[] = [
   // 3. Fish (River ecology)
   { label: "fish", path: "M-7,0 Q0,-5 7,0 Q0,5 -7,0 Z M7,0 L10,-3 L10,3 Z" },
   // 4. Wave (Estuary ecology)
-  { label: "wave", path: "M-8,-2 Q-4,-6 0,-2 Q4,2 8,-2 M-8,2 Q-4,-2 0,2 Q4,6 8,2" },
+  {
+    label: "wave",
+    path: "M-8,-2 Q-4,-6 0,-2 Q4,2 8,-2 M-8,2 Q-4,-2 0,2 Q4,6 8,2",
+  },
   // 5. Salmon (Winter-run)
-  { label: "salmon", path: "M-8,0 Q-2,-5 6,0 Q-2,5 -8,0 Z M6,0 L9,-3 L9,3 Z M-4,-1 L-3,-1" },
+  {
+    label: "salmon",
+    path: "M-8,0 Q-2,-5 6,0 Q-2,5 -8,0 Z M6,0 L9,-3 L9,3 Z M-4,-1 L-3,-1",
+  },
   // 6. Droplet variant (In-Delta freshwater)
   { label: "droplet2", path: "M0,-6 Q-4,1 0,6 Q4,1 0,-6 Z M-3,0 L3,0" },
   // 7. Arrow-flow (Delta exports)
   { label: "flow", path: "M-7,0 L4,0 M1,-3 L4,0 L1,3" },
   // 8. Dam (Reservoir storage)
-  { label: "dam", path: "M-7,4 L-7,-3 L7,-3 L7,4 M-9,4 L9,4 M-5,-3 L-5,-6 L5,-6 L5,-3" },
+  {
+    label: "dam",
+    path: "M-7,4 L-7,-3 L7,-3 L7,4 M-9,4 L9,4 M-5,-3 L-5,-6 L5,-6 L5,-3",
+  },
   // 9. Underground (Groundwater storage)
   { label: "gw", path: "M-7,0 L7,0 M0,0 L0,6 M-3,3 L3,3 M-5,6 L5,6" },
 ]
@@ -66,7 +75,10 @@ export default function ResearcherIllustrations({
 
         const appearStart = 0.78 + i * 0.018
         const appearEnd = appearStart + 0.03
-        const t = Math.min(1, Math.max(0, (v - appearStart) / (appearEnd - appearStart)))
+        const t = Math.min(
+          1,
+          Math.max(0, (v - appearStart) / (appearEnd - appearStart)),
+        )
 
         g.style.opacity = String(t)
         g.style.transform = `scale(${0.6 + 0.4 * t})`

@@ -67,42 +67,24 @@ export default function GetStartedView() {
         heading="Welcome"
         sx={{ backgroundColor: mapActive ? exploreBg : "transparent" }}
       >
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           COEQWAL uses the CalSim3 water planning model to evaluate how
           different water management strategies and climate futures affect
           outcomes for communities, farms, and the environment.
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           The library of scenarios can be explored in this section of the
           website.
         </Typography>
       </ContentPanel>
 
       {/* ── Water Issues ── */}
-      <ContentPanel
-        background={theme.palette.blue.dark}
-        heading="Water Issues"
-      >
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
-          COEQWAL scenarios are designed to address specific water issues.
-          These include:
+      <ContentPanel background={theme.palette.blue.dark} heading="Water Issues">
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
+          COEQWAL scenarios are designed to address specific water issues. These
+          include:
         </Typography>
-        <Box
-          component="ul"
-          sx={{ listStyle: "none", p: 0, mt: sp.md }}
-        >
+        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
           {WATER_ISSUE_THEMES.map(({ label, themeKey }) => (
             <Box component="li" key={themeKey} sx={{ mt: sp.sm }}>
               <Typography
@@ -130,11 +112,7 @@ export default function GetStartedView() {
             </Box>
           ))}
         </Box>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           If you are interested in one of these issues, we suggest you click on
           the text above.
         </Typography>
@@ -148,18 +126,11 @@ export default function GetStartedView() {
         background={theme.palette.nature.forest}
         heading="Key outcomes"
       >
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           All scenarios are described by nine key outcomes, listed below. Click
           on each to learn more.
         </Typography>
-        <Box
-          component="ul"
-          sx={{ listStyle: "none", p: 0, mt: sp.md }}
-        >
+        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
           {KEY_OUTCOMES.map((outcome) => (
             <Box component="li" key={outcome} sx={{ mt: sp.sm }}>
               <Typography variant="body1" color="text.secondary">
@@ -172,21 +143,13 @@ export default function GetStartedView() {
 
       {/* ── Data in depth ── */}
       <ContentPanel background={exploreBg} heading="Data in depth">
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
-          In addition to the key outcomes, there are dozens of detailed
-          scenario outcome variables that describe different features of the
-          systems, including river flows, reservoir and groundwater storage,
-          water deliveries, and Delta salinity.
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
+          In addition to the key outcomes, there are dozens of detailed scenario
+          outcome variables that describe different features of the systems,
+          including river flows, reservoir and groundwater storage, water
+          deliveries, and Delta salinity.
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           A full list of outcome variables can be accessed{" "}
           <Typography
             component="button"
@@ -206,11 +169,7 @@ export default function GetStartedView() {
           </Typography>
           .
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           Using the &ldquo;Data in Depth&rdquo; tool, users can generate
           summaries and plots of these different outcome variables to explore
           how they vary over space and time.
@@ -222,17 +181,10 @@ export default function GetStartedView() {
         background={theme.palette.blue.dark}
         heading="Before you start your exploration"
       >
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg }}
-        >
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
           There are a few important things to keep in mind:
         </Typography>
-        <Box
-          component="ul"
-          sx={{ pl: 2, mt: sp.md, color: "text.secondary" }}
-        >
+        <Box component="ul" sx={{ pl: 2, mt: sp.md, color: "text.secondary" }}>
           {CAVEATS.map((caveat, i) => (
             <Box component="li" key={i} sx={{ mt: sp.sm }}>
               <Typography variant="body1" color="text.secondary">

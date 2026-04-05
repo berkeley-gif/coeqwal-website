@@ -101,7 +101,6 @@ function MapViewContent() {
     ? outcomeCategories.find((c) => c.id === metric.category)
     : null
 
-
   // Empty state when no scenarios selected
   if (selectedScenarios.length === 0) {
     return (
