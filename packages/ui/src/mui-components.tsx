@@ -104,6 +104,7 @@ import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
 import MenuBookIcon from "@mui/icons-material/MenuBook"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import AddIcon from "@mui/icons-material/Add"
+import RemoveIcon from "@mui/icons-material/Remove"
 import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
@@ -172,6 +173,7 @@ export {
   MenuBookIcon,
   VisibilityIcon,
   AddIcon,
+  RemoveIcon,
   CheckIcon,
   CloseIcon,
   ArrowRightIcon,
