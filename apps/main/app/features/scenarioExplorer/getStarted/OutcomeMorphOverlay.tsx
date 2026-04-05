@@ -242,7 +242,6 @@ export default function OutcomeMorphOverlay({
         zIndex: 2,
       }}
       viewBox={`0 0 ${panelWidth} ${panelHeight}`}
-      preserveAspectRatio="none"
     >
       {outcomeShapes.map((group) => {
         if (!pathRefsMap.current.has(group.code)) {

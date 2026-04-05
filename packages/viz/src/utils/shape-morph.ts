@@ -85,25 +85,52 @@ export function resampleClosedPath(
 // SHAPE GENERATORS
 // ============================================================================
 
-/** Generate `n` resampled points for a rectangle centered at (cx, cy). */
+/** Generate `n` resampled points for a rounded rectangle centered at (cx, cy).
+ *  `r` controls the corner radius (default 2 for a subtle rounding). */
 export function rectPoints(
   cx: number,
   cy: number,
   w: number,
   h: number,
   n: number,
+  r = 2,
 ): [number, number][] {
   const hw = w / 2,
     hh = h / 2
-  return resampleClosedPath(
-    [
-      [cx - hw, cy - hh],
-      [cx + hw, cy - hh],
-      [cx + hw, cy + hh],
-      [cx - hw, cy + hh],
-    ],
-    n,
-  )
+  const cr = Math.min(r, hw, hh)
+  if (cr <= 0) {
+    return resampleClosedPath(
+      [
+        [cx - hw, cy - hh],
+        [cx + hw, cy - hh],
+        [cx + hw, cy + hh],
+        [cx - hw, cy + hh],
+      ],
+      n,
+    )
+  }
+
+  const ARC_PTS = 6
+  const path: [number, number][] = []
+
+  for (let i = 0; i <= ARC_PTS; i++) {
+    const a = Math.PI * 1.5 + (i / ARC_PTS) * (Math.PI / 2)
+    path.push([cx + hw - cr + cr * Math.cos(a), cy - hh + cr + cr * Math.sin(a)])
+  }
+  for (let i = 0; i <= ARC_PTS; i++) {
+    const a = 0 + (i / ARC_PTS) * (Math.PI / 2)
+    path.push([cx + hw - cr + cr * Math.cos(a), cy + hh - cr + cr * Math.sin(a)])
+  }
+  for (let i = 0; i <= ARC_PTS; i++) {
+    const a = Math.PI / 2 + (i / ARC_PTS) * (Math.PI / 2)
+    path.push([cx - hw + cr + cr * Math.cos(a), cy + hh - cr + cr * Math.sin(a)])
+  }
+  for (let i = 0; i <= ARC_PTS; i++) {
+    const a = Math.PI + (i / ARC_PTS) * (Math.PI / 2)
+    path.push([cx - hw + cr + cr * Math.cos(a), cy - hh + cr + cr * Math.sin(a)])
+  }
+
+  return resampleClosedPath(path, n)
 }
 
 /**
