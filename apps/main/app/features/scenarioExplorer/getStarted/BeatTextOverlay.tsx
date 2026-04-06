@@ -20,7 +20,7 @@ interface Beat2Layout {
 interface BeatTextOverlayProps {
   progress: MotionValue<number>
   beat2Layout?: Beat2Layout | null
-  onOutcomeClick?: (code: string) => void
+  onOutcomeClick?: (code: string, force?: boolean) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
   textHidden?: boolean
@@ -117,7 +117,6 @@ export default function BeatTextOverlay({
       sx={{
         position: "absolute",
         inset: 0,
-        zIndex: 3,
         pointerEvents: "none",
       }}
     >
@@ -200,6 +199,7 @@ export default function BeatTextOverlay({
           right: 0,
           bottom: 0,
           width: "33.33%",
+          zIndex: 3,
           backgroundColor: theme.background.whiteOverlay[85],
           opacity: 0,
         }}
@@ -213,6 +213,7 @@ export default function BeatTextOverlay({
           right: 0,
           bottom: 0,
           width: "33.33%",
+          zIndex: 5,
           "& .MuiTypography-root": {
             color: theme.palette.text.primary,
           },
@@ -229,7 +230,9 @@ export default function BeatTextOverlay({
                     beat2ItemRefs.current[i] = el
                   }}
                   onClick={
-                    interactive ? () => onOutcomeClick?.(item.code) : undefined
+                    interactive
+                      ? () => onOutcomeClick?.(item.code, true)
+                      : undefined
                   }
                   style={{
                     position: "absolute",
@@ -241,11 +244,23 @@ export default function BeatTextOverlay({
                   sx={{
                     pointerEvents: interactive ? "auto" : "none",
                     cursor: interactive ? "pointer" : "default",
+                    borderRadius: 1,
+                    px: 0.5,
+                    mx: -0.5,
+                    transition: "color 0.15s",
+                    ...(interactive && {
+                      "&:hover .MuiTypography-root": {
+                        color: theme.palette.blue.bright,
+                      },
+                    }),
                   }}
                 >
                   <Typography
                     variant="storyBody"
-                    sx={{ fontWeight: isSelected ? 600 : undefined }}
+                    sx={{
+                      fontWeight: isSelected ? 600 : undefined,
+                      transition: "color 0.15s",
+                    }}
                   >
                     {item.label}
                   </Typography>
