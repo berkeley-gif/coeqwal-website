@@ -1009,7 +1009,7 @@ const theme = createTheme({
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
       fontWeight: 500,
       lineHeight: 1.3,
-      color: palette.grey[600],
+      color: palette.ink.body,
     },
     outcomeLabel: {
       fontFamily: themeValues.fontFamily.text,

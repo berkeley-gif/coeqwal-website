@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useLayoutEffect, useMemo, useCallback } from "react"
+import { useTheme } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
@@ -240,6 +241,7 @@ export default function OutcomeMorphOverlay({
   spotlightedTier,
   onBarClick,
 }: OutcomeMorphOverlayProps) {
+  const theme = useTheme()
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
   const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
@@ -464,8 +466,9 @@ export default function OutcomeMorphOverlay({
 
         const countEl = countRefsMap.current.get(group.code)
         if (countEl) {
+          const fadeLen = Math.max(0.002, 1.0 - morphEnd)
           const countFade =
-            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.02)
+            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / fadeLen)
           countEl.style.opacity = String(countFade)
         }
       }
@@ -606,7 +609,7 @@ export default function OutcomeMorphOverlay({
                 y={group.countY}
                 fontSize={11}
                 fontFamily="inherit"
-                fill="#555"
+                fill={theme.palette.ink.body}
                 style={{ opacity: 0 }}
               >
                 {group.locationDescription}

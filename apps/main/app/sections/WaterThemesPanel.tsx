@@ -464,7 +464,7 @@ function WaterThemesPanelContent({
         >
           <Box />
           <Typography
-            variant="body1"
+            variant="displayBody"
             component="div"
             sx={{
               color: "text.primary",

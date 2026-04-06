@@ -1,9 +1,26 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useRef, useEffect, useMemo, useCallback } from "react"
+import {
+  Box,
+  Typography,
+  ToggleButton,
+  ToggleButtonGroup,
+  useTheme,
+} from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import { OUTCOME_CODE_ORDER } from "../../../content/outcomes"
+import type { EncodingMode } from "./OutcomeMorphOverlay"
+import { HydroclimateChooser } from "../../scenarios/components/HydroclimateChooser"
+import { useDrawerStore } from "@repo/state/drawer"
+
+interface ColumnEyebrow {
+  label: string
+  x: number
+  y: number
+  columnWidth: number
+  animationStart: number
+}
 
 interface Beat2Layout {
   items: {
@@ -15,6 +32,7 @@ interface Beat2Layout {
     columnWidth: number
     isActive: boolean
   }[]
+  eyebrows: ColumnEyebrow[]
 }
 
 interface BeatTextOverlayProps {
@@ -24,6 +42,12 @@ interface BeatTextOverlayProps {
   selectedOutcomeCode?: string | null
   interactive?: boolean
   textHidden?: boolean
+  scenarioName?: string
+  scenarioDescription?: string
+  encodingMode?: EncodingMode
+  onEncodingChange?: (mode: EncodingMode) => void
+  hydroclimate?: string
+  onHydroclimateChange?: (value: string) => void
 }
 
 function clamp01(v: number) {
@@ -37,14 +61,105 @@ export default function BeatTextOverlay({
   selectedOutcomeCode,
   interactive,
   textHidden = false,
+  scenarioName,
+  scenarioDescription,
+  encodingMode,
+  onEncodingChange,
+  hydroclimate,
+  onHydroclimateChange,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+
+  const GLOSSARY_TERMS = useMemo(
+    () => [
+      { pattern: /\bTUCPs?\b/g, glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)" },
+      { pattern: /\bSGMA\b/g, glossaryTerm: "Sustainable Groundwater Management Act (SGMA)" },
+    ],
+    [],
+  )
+
+  const handleGlossaryClick = useCallback(
+    (term: string) => (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setDrawerContent({ selectedTerm: term })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  const glossaryLinkStyles = useMemo(
+    () => ({
+      color: theme.palette.blue.bright,
+      borderBottom: `2px solid ${theme.palette.blue.bright}`,
+      cursor: "pointer",
+      background: "none",
+      border: "none",
+      borderBottomStyle: "solid" as const,
+      borderBottomWidth: "2px",
+      borderBottomColor: theme.palette.blue.bright,
+      padding: 0,
+      font: "inherit",
+      "&:hover": { borderBottomWidth: "3px" },
+      "&:focus-visible": {
+        outline: `2px solid ${theme.palette.blue.bright}`,
+        outlineOffset: "2px",
+        borderRadius: "2px",
+      },
+    }),
+    [theme.palette.blue.bright],
+  )
+
+  const descriptionWithLinks = useMemo(() => {
+    if (!scenarioDescription) return null
+    const combined = new RegExp(
+      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
+      "g",
+    )
+    const result: React.ReactNode[] = []
+    let lastIndex = 0
+    let match: RegExpExecArray | null
+    while ((match = combined.exec(scenarioDescription)) !== null) {
+      if (match.index > lastIndex)
+        result.push(scenarioDescription.slice(lastIndex, match.index))
+      const word = match[1] ?? ""
+      const punct = match[2] ?? ""
+      const term = GLOSSARY_TERMS.find((t) =>
+        new RegExp(`^${t.pattern.source}$`).test(word),
+      )
+      if (term) {
+        result.push(
+          <Box
+            component="button"
+            type="button"
+            key={`gl-${match.index}`}
+            onClick={handleGlossaryClick(term.glossaryTerm)}
+            tabIndex={0}
+            aria-label={`Open glossary for ${term.glossaryTerm}`}
+            sx={glossaryLinkStyles}
+          >
+            {word}
+          </Box>,
+        )
+        if (punct) result.push(punct)
+      }
+      lastIndex = match.index + match[0].length
+    }
+    if (lastIndex < scenarioDescription.length)
+      result.push(scenarioDescription.slice(lastIndex))
+    return result
+  }, [scenarioDescription, GLOSSARY_TERMS, handleGlossaryClick, glossaryLinkStyles])
+
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
   const beat2IntroRef = useRef<HTMLDivElement>(null)
   const levelsLineRef = useRef<HTMLDivElement>(null)
   const tierLegendRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const eyebrowRefs = useRef<(HTMLDivElement | null)[]>([])
+  const eyebrowDataRef = useRef<ColumnEyebrow[] | undefined>(undefined)
+  eyebrowDataRef.current = beat2Layout?.eyebrows
+  const scenarioHeaderRef = useRef<HTMLDivElement>(null)
   const textHiddenRef = useRef(textHidden)
   textHiddenRef.current = textHidden
 
@@ -83,6 +198,16 @@ export default function BeatTextOverlay({
         const itemStart = 0.34 + i * 0.035
         const fadeIn = clamp01((v - itemStart) / 0.03)
         el.style.opacity = String(fadeIn)
+      }
+
+      const eyebrows = eyebrowDataRef.current
+      if (eyebrows) {
+        for (let i = 0; i < eyebrows.length; i++) {
+          const el = eyebrowRefs.current[i]
+          if (!el) continue
+          const fadeIn = clamp01((v - eyebrows[i]!.animationStart) / 0.03)
+          el.style.opacity = String(fadeIn)
+        }
       }
 
       if (levelsLineRef.current) {
@@ -219,6 +344,145 @@ export default function BeatTextOverlay({
           },
         }}
       >
+        {/* Scenario header + encoding toggle — top of overlay panel */}
+        <Box
+          ref={scenarioHeaderRef}
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            px: 3,
+            pt: 2,
+            pb: 1.5,
+            pointerEvents: interactive ? "auto" : "none",
+            opacity: interactive ? 1 : 0,
+            transition: "opacity 0.4s ease",
+            borderBottom: interactive
+              ? `1px solid ${theme.palette.grey[200]}`
+              : "none",
+          }}
+        >
+          {scenarioName && (
+            <Typography
+              variant="subtitle1"
+              component="h3"
+              sx={{
+                fontWeight: 600,
+                mb: scenarioDescription ? 0.5 : 1.5,
+              }}
+            >
+              {scenarioName}
+            </Typography>
+          )}
+          {scenarioDescription && (
+            <Typography
+              variant="compactSubtitle"
+              component="p"
+              sx={{
+                color: theme.palette.grey[500],
+                mb: 1.5,
+              }}
+            >
+              {descriptionWithLinks}
+            </Typography>
+          )}
+          {encodingMode && onEncodingChange && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                mb: 0.5,
+              }}
+            >
+              <ToggleButtonGroup
+                value={encodingMode}
+                exclusive
+                onChange={(_, val) => {
+                  if (val) onEncodingChange(val as EncodingMode)
+                }}
+                size="small"
+                sx={{
+                  "& .MuiToggleButton-root": {
+                    color: theme.palette.grey[600],
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                    px: 1.25,
+                    py: 0.125,
+                    "&.Mui-selected": {
+                      backgroundColor: theme.palette.blue.bright,
+                      color: "#fff",
+                      borderColor: theme.palette.blue.bright,
+                      "&:hover": {
+                        backgroundColor: theme.palette.blue.dark,
+                      },
+                    },
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[100],
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="distribution">Distribution</ToggleButton>
+                <ToggleButton value="bar">Bar</ToggleButton>
+                <ToggleButton value="average">Average</ToggleButton>
+              </ToggleButtonGroup>
+              {onHydroclimateChange && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, ml: 1.5 }}>
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      letterSpacing: "0.02em",
+                      color: theme.palette.grey[600],
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    View by climate
+                  </Typography>
+                  <HydroclimateChooser
+                    value={hydroclimate}
+                    onChange={onHydroclimateChange}
+                    showTitle={false}
+                    showLabels={false}
+                    hideDisabled
+                    iconSize="26px"
+                    iconFontSize="0.95rem"
+                  />
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+
+        {beat2Layout?.eyebrows.map((eb, i) => (
+          <Box
+            key={`eyebrow-${i}`}
+            ref={(el: HTMLDivElement | null) => {
+              eyebrowRefs.current[i] = el
+            }}
+            style={{
+              position: "absolute",
+              top: eb.y,
+              left: eb.x,
+              width: eb.columnWidth,
+              opacity: 0,
+            }}
+          >
+            <Typography
+              variant="smallSectionLabel"
+              component="p"
+            >
+              {eb.label}
+            </Typography>
+          </Box>
+        ))}
+
         {beat2Layout && (
           <>
             {beat2Layout.items.map((item, i) => {
@@ -256,9 +520,10 @@ export default function BeatTextOverlay({
                   }}
                 >
                   <Typography
-                    variant="storyBody"
+                    variant="subtitle2"
                     sx={{
-                      fontWeight: isSelected ? 600 : undefined,
+                      ...theme.scenarios.panelTitle,
+                      fontWeight: isSelected ? 600 : 400,
                       transition: "color 0.15s",
                     }}
                   >

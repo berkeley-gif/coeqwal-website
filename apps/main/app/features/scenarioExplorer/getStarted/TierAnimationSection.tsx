@@ -10,8 +10,6 @@ import {
   PlayArrowIcon,
   PauseIcon,
   ReplayIcon,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
@@ -54,6 +52,7 @@ import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
+import { useScenarioExplorerStore } from "../store"
 
 const TOTAL_DURATION = 30
 
@@ -160,11 +159,11 @@ const ACTIVE_OUTCOMES = new Set([
   "WRC_SALMON_AB",
 ])
 
-const LAYOUT_LINE_HEIGHT = 32
-const LAYOUT_LABEL_GAP = 8
-const LAYOUT_DIST_GAP = 6
-const LAYOUT_COUNT_HEIGHT = 18
-const LAYOUT_POST_DIST_GAP = 12
+const LAYOUT_LINE_HEIGHT = 28
+const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
+const LAYOUT_DIST_GAP = 4
+const LAYOUT_COUNT_HEIGHT = 14
+const LAYOUT_POST_DIST_GAP = 16 // space.gap.lg (16px)
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
@@ -345,6 +344,8 @@ export default function TierAnimationSection() {
 
   /* ── Encoding mode: distribution | bar | average ── */
   const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
+  const setHydroclimate = useScenarioExplorerStore((s) => s.setHydroclimate)
   const [spotlightedTier, setSpotlightedTier] = useState<number | null>(null)
   const { chartData: tierChartData } = useScenarioTiers("s0020")
   const { scenarios } = useScenarios()
@@ -1763,14 +1764,37 @@ export default function TierAnimationSection() {
     const panelWidth3 = width * (1 / 3)
     const availableWidth = panelWidth3 - insetPx * 2
     const colWidth = (availableWidth - COLUMN_GAP) / 2
-    const headerOffset = 132
-    const topPad = headerOffset + Math.min(44, Math.max(28, width * 0.035))
+    const headerOffset = 128
+    const topPad = headerOffset + Math.min(32, Math.max(20, width * 0.025))
 
     const itemStartY = topPad
 
     const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
-    const cursors: [number, number] = [itemStartY, itemStartY]
     const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
+
+    const EYEBROW_HEIGHT = 24
+    const EYEBROW_GAP = 8
+
+    const eyebrows = [
+      {
+        label: "Consumptive uses",
+        x: colX[0],
+        y: itemStartY,
+        columnWidth: colWidth,
+        animationStart: 0.335,
+      },
+      {
+        label: "Non-consumptive uses",
+        x: colX[1],
+        y: itemStartY,
+        columnWidth: colWidth,
+        animationStart: 0,
+      },
+    ]
+
+    const firstItemY = itemStartY + EYEBROW_HEIGHT + EYEBROW_GAP
+    const cursors: [number, number] = [firstItemY, firstItemY]
+    let firstCol1Index = -1
 
     const items: OutcomeLayoutItem[] = []
 
@@ -1779,6 +1803,10 @@ export default function TierAnimationSection() {
       const label = getOutcomeName(code)
       const isActive = ACTIVE_OUTCOMES.has(code)
       const col: 0 | 1 = LEFT_COLUMN_CODES.has(code) ? 0 : 1
+
+      if (col === 1 && firstCol1Index === -1) {
+        firstCol1Index = idx
+      }
 
       const y = cursors[col]
       const x = colX[col]
@@ -1823,7 +1851,11 @@ export default function TierAnimationSection() {
       })
     }
 
-    return { items }
+    if (firstCol1Index >= 0) {
+      eyebrows[1]!.animationStart = 0.34 + firstCol1Index * 0.035 - 0.005
+    }
+
+    return { items, eyebrows }
   }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
 
   const distributionPositionMap = useMemo(() => {
@@ -1833,7 +1865,7 @@ export default function TierAnimationSection() {
         case "ENV_FLOWS":
           return `${count} river & tributary reaches`
         case "RES_STOR":
-          return `${count} reservoirs`
+          return `${count} major California reservoirs`
         case "DELTA_ECO":
           return "Sacramento-San Joaquin Delta"
         case "FW_EXP":
@@ -2006,85 +2038,13 @@ export default function TierAnimationSection() {
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
             interactive={isInteractive}
             textHidden={!textVisible}
+            scenarioName={s0020Scenario?.name ?? "Current operations"}
+            scenarioDescription={s0020Scenario?.short_description ?? undefined}
+            encodingMode={encodingMode}
+            onEncodingChange={setEncodingMode}
+            hydroclimate={hydroclimate}
+            onHydroclimateChange={setHydroclimate}
           />
-
-          {/* Scenario header + encoding toggle — visible after animation */}
-          {isInteractive && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: "8%",
-                left: "5%",
-                zIndex: 6,
-                pointerEvents: "auto",
-                maxWidth: { xs: "90%", sm: 380, md: 420 },
-                opacity: isInteractive ? 1 : 0,
-                transition: "opacity 0.4s ease",
-              }}
-            >
-              <Typography
-                variant="h5"
-                component="h3"
-                sx={{
-                  fontWeight: 700,
-                  color: theme.palette.undertone.warm,
-                  textShadow: theme.textShadow.displayBody,
-                  mb: 0.5,
-                }}
-              >
-                {s0020Scenario?.name ?? "Current operations"}
-              </Typography>
-              {s0020Scenario?.short_description && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.undertone.warm,
-                    textShadow: theme.textShadow.displayBody,
-                    mb: 2,
-                    opacity: 0.85,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {s0020Scenario.short_description}
-                </Typography>
-              )}
-              <ToggleButtonGroup
-                value={encodingMode}
-                exclusive
-                onChange={(_, val) => {
-                  if (val) setEncodingMode(val as EncodingMode)
-                }}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(8px)",
-                  borderRadius: 2,
-                  "& .MuiToggleButton-root": {
-                    color: theme.palette.undertone.warm,
-                    textShadow: theme.textShadow.displayBody,
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    textTransform: "none",
-                    fontWeight: 500,
-                    fontSize: "0.8rem",
-                    px: 2,
-                    py: 0.5,
-                    "&.Mui-selected": {
-                      backgroundColor: "rgba(255,255,255,0.3)",
-                      color: theme.palette.undertone.warm,
-                      fontWeight: 700,
-                    },
-                    "&:hover": {
-                      backgroundColor: "rgba(255,255,255,0.2)",
-                    },
-                  },
-                }}
-              >
-                <ToggleButton value="distribution">Distribution</ToggleButton>
-                <ToggleButton value="bar">Bar</ToggleButton>
-                <ToggleButton value="average">Average</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-          )}
 
           {isInteractive &&
             pinnedHighlights.length > 0 &&
