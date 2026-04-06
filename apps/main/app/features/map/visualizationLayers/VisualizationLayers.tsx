@@ -45,6 +45,8 @@ import {
   useClearTooltipsSignal,
   useLocationHighlights,
   getOnLocationToggle,
+  getOnLocationClick,
+  getOnLocationHover,
 } from "../store"
 
 // Large polygon covering California and surrounding area for dim overlay
@@ -221,8 +223,32 @@ export default function VisualizationLayers() {
           <TierMarkers
             locations={tierLocations}
             tierCode={tierCode}
-            onHover={handlePointHover}
-            onClick={handlePointClick}
+            onHover={
+              isGetStartedMode
+                ? (feature) => {
+                    if (!feature) {
+                      getOnLocationHover()?.(null)
+                    } else {
+                      getOnLocationHover()?.({
+                        code: outcomeCode!,
+                        sourceId: feature.featureId,
+                        tier: feature.tierLevel,
+                      })
+                    }
+                  }
+                : handlePointHover
+            }
+            onClick={
+              isGetStartedMode
+                ? (feature) => {
+                    getOnLocationClick()?.({
+                      code: outcomeCode!,
+                      sourceId: feature.featureId,
+                      tier: feature.tierLevel,
+                    })
+                  }
+                : handlePointClick
+            }
           />
         )}
 

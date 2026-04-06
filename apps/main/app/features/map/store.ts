@@ -91,6 +91,12 @@ export const useMapStore = create<MapState>()(immer(() => initialState))
 
 // Stored outside immer to avoid proxy/freeze issues with function values
 let _onLocationToggle: ((key: string) => void) | null = null
+let _onLocationClick:
+  | ((info: { code: string; sourceId: string; tier: number }) => void)
+  | null = null
+let _onLocationHover:
+  | ((info: { code: string; sourceId: string; tier: number } | null) => void)
+  | null = null
 
 // ============================================================================
 // Actions
@@ -176,12 +182,20 @@ export const mapActions = {
     useMapStore.setState({ locationHighlights: highlights }),
   clearLocationHighlights: () => {
     useMapStore.setState({ locationHighlights: [] })
-    _onLocationToggle = null
   },
   setOnLocationToggle: (fn: ((key: string) => void) | null) => {
     _onLocationToggle = fn
   },
-  getOnLocationToggle: () => _onLocationToggle,
+  setOnLocationClick: (
+    fn: ((info: { code: string; sourceId: string; tier: number }) => void) | null,
+  ) => {
+    _onLocationClick = fn
+  },
+  setOnLocationHover: (
+    fn: ((info: { code: string; sourceId: string; tier: number } | null) => void) | null,
+  ) => {
+    _onLocationHover = fn
+  },
 }
 
 // ============================================================================
@@ -241,3 +255,5 @@ export const useClearTooltipsSignal = () =>
 export const useLocationHighlights = () =>
   useMapStore((s) => s.locationHighlights)
 export const getOnLocationToggle = () => _onLocationToggle
+export const getOnLocationClick = () => _onLocationClick
+export const getOnLocationHover = () => _onLocationHover
