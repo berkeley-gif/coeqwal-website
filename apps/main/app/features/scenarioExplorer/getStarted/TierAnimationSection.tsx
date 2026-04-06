@@ -21,7 +21,11 @@ import {
   lineSegmentPoints,
   POINTS_PER_SHAPE,
 } from "@repo/viz"
-import { mapActions, useActiveOutcomeVisualization } from "../../map/store"
+import {
+  mapActions,
+  useActiveOutcomeVisualization,
+  useLocationHighlights,
+} from "../../map/store"
 import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
@@ -39,6 +43,7 @@ import OutcomeMorphOverlay, {
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
+import PinnedLocationsList from "./PinnedLocationsList"
 // TODO(beat3): restore ResearcherIllustrations import
 // import ResearcherIllustrations from "./ResearcherIllustrations"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
@@ -340,6 +345,7 @@ export default function TierAnimationSection() {
   const [pinnedLocations, setPinnedLocations] = useState<
     Map<string, LocationInfo>
   >(new Map())
+  const [cardHoveredKey, setCardHoveredKey] = useState<string | null>(null)
 
   const locKey = useCallback(
     (info: LocationInfo) => `${info.code}:${info.sourceId}`,
@@ -533,6 +539,26 @@ export default function TierAnimationSection() {
     mapAPI.mapRef,
     locKey,
   ])
+
+  const storeHighlights = useLocationHighlights()
+  const pinnedHighlights = useMemo(
+    () => storeHighlights.filter((h) => pinnedLocations.has(h.key)),
+    [storeHighlights, pinnedLocations],
+  )
+
+  const handlePinnedHoverEnter = useCallback(
+    (key: string) => {
+      setCardHoveredKey(key)
+      const info = pinnedLocations.get(key)
+      if (info) setHoveredLocation(info)
+    },
+    [pinnedLocations],
+  )
+
+  const handlePinnedHoverLeave = useCallback(() => {
+    setCardHoveredKey(null)
+    setHoveredLocation(null)
+  }, [])
 
   // Register store callbacks so map tooltips and TierMarkers can interact
   const handleTooltipToggle = useCallback((key: string) => {
@@ -1875,6 +1901,21 @@ export default function TierAnimationSection() {
             interactive={isInteractive}
             textHidden={!textVisible}
           />
+
+          {isInteractive &&
+            pinnedHighlights.length > 0 &&
+            selectedOutcomeCode !== "RES_STOR" &&
+            selectedOutcomeCode !== "FW_EXP" &&
+            selectedOutcomeCode !== "FW_DELTA_USES" && (
+              <PinnedLocationsList
+                highlights={pinnedHighlights}
+                onUnpin={handleTooltipToggle}
+                onHoverEnter={handlePinnedHoverEnter}
+                onHoverLeave={handlePinnedHoverLeave}
+                hoveredKey={cardHoveredKey}
+                mapRef={mapAPI.mapRef}
+              />
+            )}
 
           {/* Playback controls */}
           <Box

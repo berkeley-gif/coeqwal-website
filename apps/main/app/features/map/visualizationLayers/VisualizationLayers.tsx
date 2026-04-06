@@ -330,7 +330,13 @@ export default function VisualizationLayers() {
       )}
 
       {/* Lightweight tooltips from tier animation overlay hover/pin */}
-      {locationHighlights.map((hl) => (
+      {locationHighlights
+        .filter((hl) => {
+          if (!isGetStartedMode || !hl.pinned) return true
+          const code = hl.key.split(":")[0]
+          return code === "RES_STOR" || code === "FW_EXP" || code === "FW_DELTA_USES"
+        })
+        .map((hl) => (
         <Popup
           key={hl.key}
           className="location-highlight-popup"
