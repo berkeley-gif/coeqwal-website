@@ -27,6 +27,7 @@ import {
 const AVAILABLE_HYDROCLIMATES = new Set(Object.keys(HYDROCLIMATE_ID_MAP))
 
 // Icon and background color configuration for each hydroclimate
+// Note: bgColor values are hydroclimate-specific (climate gradients) and not in theme (are experimental for now)
 export const HYDROCLIMATE_CONFIG: Record<
   string,
   {
@@ -36,27 +37,27 @@ export const HYDROCLIMATE_CONFIG: Record<
 > = {
   historical: {
     icon: HistoryIcon,
-    bgColor: "#2d89b7",
+    bgColor: "#2d89b7", // Cool blue - historical baseline
   },
   "warmer-wetter": {
     icon: ThunderstormIcon,
-    bgColor: "#4caf50",
+    bgColor: "#4caf50", // Green - wetter conditions
   },
   "warmer-drier-i": {
     icon: WbSunnyIcon,
-    bgColor: "#f5a623",
+    bgColor: "#f5a623", // Yellow-orange - mild dry
   },
   "warmer-drier-ii": {
     icon: WbSunnyIcon,
-    bgColor: "#e65100",
+    bgColor: "#e65100", // Orange - moderate dry
   },
   "warmer-drier-iii": {
     icon: LocalFireDepartmentIcon,
-    bgColor: "#bf360c",
+    bgColor: "#bf360c", // Red-orange - severe dry
   },
   "warmer-drier-iv": {
     icon: LocalFireDepartmentIcon,
-    bgColor: "#8b0000",
+    bgColor: "#8b0000", // Dark red - extreme dry
   },
 }
 
@@ -183,7 +184,7 @@ export function HydroclimateChooser({
                       borderRadius: theme.borderRadius.circle,
                       backgroundColor: isDisabled
                         ? theme.palette.grey[400]
-                        : theme.palette.blue.bright,
+                        : config?.bgColor || theme.palette.blue.bright,
                       border: isSelected
                         ? theme.border.highlight
                         : "3px solid transparent",

@@ -43,7 +43,8 @@
       "js-yaml": "^4.1.1",
       "tmp": "^0.2.4",
       "diff": "^8.0.3",
-      "brace-expansion": "^2.0.1"
+      "brace-expansion": "^2.0.1",
+      "handlebars": "^4.7.9"
     }
   }
 }

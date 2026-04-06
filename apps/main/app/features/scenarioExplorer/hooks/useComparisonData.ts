@@ -1,14 +1,10 @@
 import { useMemo, useRef } from "react"
-import useSWR from "swr"
 import {
   useMultipleScenarioTiers,
   useScenarioList,
   OUTCOME_CODE_ORDER,
   getOutcomeName,
 } from "../../scenarios/hooks"
-import { fetchScenarioTiers, fetchAllScenarioTiers } from "@repo/data/coeqwal"
-import { CACHE_KEYS } from "@repo/data/cache"
-import type { ScenarioTiersResponse } from "@repo/data/coeqwal"
 import {
   type VerticalParallelLineData,
   type TierHeatmapCell,
@@ -18,7 +14,6 @@ import {
 } from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
-import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
 
 const PRIMARY_BASELINE_ID = "s0020"
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
@@ -26,7 +21,7 @@ export const SANKEY_ALL_OUTCOMES = "__ALL__"
 /**
  * Hook to transform tier data for VerticalParallelLinePlot.
  *
- * Reads the active hydroclimate from the store, resolves each sibling
+ * Reads the active hydroclimatePeriod from the store, resolves each sibling
  * group to the correct variant's short_code, and passes the mapping into
  * useMultipleScenarioTiers so only 24 scenarios are fetched per hydroclimate.
  * All returned data is keyed by sibling group IDs, making downstream code
@@ -37,15 +32,15 @@ export function useComparisonData() {
     useScenarioList()
 
   const {
-    hydroclimate,
+    hydroclimatePeriod,
     showAlternativeBaselines,
     showOnlyChosen,
     selectedScenarios,
   } = useScenarioExplorerStore()
 
   const idMapping = useMemo(
-    () => buildIdMapping(hydroclimate),
-    [buildIdMapping, hydroclimate],
+    () => buildIdMapping(hydroclimatePeriod),
+    [buildIdMapping, hydroclimatePeriod],
   )
 
   const {
@@ -60,12 +55,12 @@ export function useComparisonData() {
   const error = tiersError
 
   // Track hydroclimate changes to drive morph transitions.
-  // Increment morphGeneration each time hydroclimate actually changes
+  // Increment morphGeneration each time hydroclimatePeriod actually changes
   // so chart components can detect when to animate vs. when to hard-redraw.
-  const prevHCRef = useRef(hydroclimate)
+  const prevHCRef = useRef(hydroclimatePeriod)
   const morphGenRef = useRef(0)
-  if (prevHCRef.current !== hydroclimate) {
-    prevHCRef.current = hydroclimate
+  if (prevHCRef.current !== hydroclimatePeriod) {
+    prevHCRef.current = hydroclimatePeriod
     morphGenRef.current += 1
   }
   const morphGeneration = morphGenRef.current
@@ -195,161 +190,6 @@ export function useComparisonData() {
       highlighted: false,
     }
   }, [parallelPlotData, allScoreData, getDisplayName])
-
-  // Stable column ordering: always use the historical hydroclimate's baseline
-  // scores so deviation chart columns don't rearrange on HC switch.
-  const historicalIdMapping = useMemo(
-    () => buildIdMapping("historical"),
-    [buildIdMapping],
-  )
-  const historicalBaselineId = historicalIdMapping[PRIMARY_BASELINE_ID]
-
-  const { data: historicalBaselineTiers } = useSWR(
-    historicalBaselineId
-      ? CACHE_KEYS.scenarioTiers(historicalBaselineId)
-      : null,
-    () =>
-      historicalBaselineId ? fetchScenarioTiers(historicalBaselineId) : null,
-  )
-
-  const historicalBaselineScores = useMemo<Record<
-    string,
-    number | null
-  > | null>(() => {
-    if (!historicalBaselineTiers) return null
-    const values: Record<string, number | null> = {}
-    OUTCOME_CODE_ORDER.forEach((code) => {
-      const tier = historicalBaselineTiers.tiers[code]
-      values[getOutcomeName(code)] =
-        tier?.normalized_score !== undefined
-          ? tier.normalized_score * 2 - 1
-          : null
-    })
-    return values
-  }, [historicalBaselineTiers])
-
-  // Fetch tier data for all three hydroclimates to compute cross-HC ranges.
-  const allHCPeriods = useMemo(() => Object.keys(HYDROCLIMATE_ID_MAP), [])
-  const otherHCPeriods = useMemo(
-    () => allHCPeriods.filter((p) => p !== hydroclimate),
-    [allHCPeriods, hydroclimate],
-  )
-
-  const otherHCMappings = useMemo(
-    () =>
-      otherHCPeriods.map((p) => ({ period: p, mapping: buildIdMapping(p) })),
-    [otherHCPeriods, buildIdMapping],
-  )
-
-  const otherHC0Ids = useMemo(
-    () => (otherHCMappings[0] ? Object.values(otherHCMappings[0].mapping) : []),
-    [otherHCMappings],
-  )
-  const otherHC1Ids = useMemo(
-    () => (otherHCMappings[1] ? Object.values(otherHCMappings[1].mapping) : []),
-    [otherHCMappings],
-  )
-
-  const { data: rawOtherHC0 } = useSWR(
-    otherHC0Ids.length > 0 ? CACHE_KEYS.allScenarioTiers(otherHC0Ids) : null,
-    () => fetchAllScenarioTiers(otherHC0Ids),
-    { keepPreviousData: true },
-  )
-  const { data: rawOtherHC1 } = useSWR(
-    otherHC1Ids.length > 0 ? CACHE_KEYS.allScenarioTiers(otherHC1Ids) : null,
-    () => fetchAllScenarioTiers(otherHC1Ids),
-    { keepPreviousData: true },
-  )
-
-  const reKeyHC = (
-    raw: Record<string, ScenarioTiersResponse> | undefined,
-    mapping: Record<string, string>,
-  ): Record<string, Record<string, number | null>> | null => {
-    if (!raw) return null
-    const reverse = new Map<string, string>()
-    Object.entries(mapping).forEach(([gid, rid]) => reverse.set(rid, gid))
-    const result: Record<string, Record<string, number | null>> = {}
-    Object.entries(raw).forEach(([resolvedId, tierResp]) => {
-      const groupId = reverse.get(resolvedId) ?? resolvedId
-      const values: Record<string, number | null> = {}
-      OUTCOME_CODE_ORDER.forEach((code) => {
-        const tier = tierResp.tiers[code]
-        values[getOutcomeName(code)] =
-          tier?.normalized_score !== undefined
-            ? tier.normalized_score * 2 - 1
-            : null
-      })
-      result[groupId] = values
-    })
-    return result
-  }
-
-  const otherHCScores0 = useMemo(
-    () =>
-      otherHCMappings[0]
-        ? reKeyHC(rawOtherHC0, otherHCMappings[0].mapping)
-        : null,
-    [rawOtherHC0, otherHCMappings],
-  )
-  const otherHCScores1 = useMemo(
-    () =>
-      otherHCMappings[1]
-        ? reKeyHC(rawOtherHC1, otherHCMappings[1].mapping)
-        : null,
-    [rawOtherHC1, otherHCMappings],
-  )
-
-  const hcRangeData = useMemo<
-    Record<string, Record<string, { min: number; max: number }>> | undefined
-  >(() => {
-    if (!allScoreData) return undefined
-    const activeScores: Record<string, Record<string, number | null>> = {}
-    Object.entries(allScoreData).forEach(([sid, scores]) => {
-      const vals: Record<string, number | null> = {}
-      OUTCOME_CODE_ORDER.forEach((code) => {
-        const s = scores[code]
-        vals[getOutcomeName(code)] =
-          s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
-      })
-      activeScores[sid] = vals
-    })
-
-    const allHCScoreSets = [
-      activeScores,
-      otherHCScores0,
-      otherHCScores1,
-    ].filter(Boolean) as Record<string, Record<string, number | null>>[]
-
-    if (allHCScoreSets.length < 2) return undefined
-
-    const result: Record<
-      string,
-      Record<string, { min: number; max: number }>
-    > = {}
-    const outcomeNames = OUTCOME_CODE_ORDER.map(getOutcomeName)
-
-    for (const sid of Object.keys(activeScores)) {
-      const outcomeRanges: Record<string, { min: number; max: number }> = {}
-      for (const outcomeName of outcomeNames) {
-        let min = Infinity
-        let max = -Infinity
-        for (const scoreSet of allHCScoreSets) {
-          const v = scoreSet[sid]?.[outcomeName]
-          if (v != null) {
-            if (v < min) min = v
-            if (v > max) max = v
-          }
-        }
-        if (min !== Infinity && max !== -Infinity) {
-          outcomeRanges[outcomeName] = { min, max }
-        }
-      }
-      if (Object.keys(outcomeRanges).length > 0) {
-        result[sid] = outcomeRanges
-      }
-    }
-    return Object.keys(result).length > 0 ? result : undefined
-  }, [allScoreData, otherHCScores0, otherHCScores1])
 
   // Tier heatmap data: scenario × outcome matrix
   const heatmapCells = useMemo<TierHeatmapCell[]>(() => {
@@ -525,8 +365,6 @@ export function useComparisonData() {
     lineColors,
     scenarios,
     baselineScenario,
-    historicalBaselineScores,
-    allScenariosData,
     isLoading,
     error,
     hasData: parallelPlotData.length > 0,
@@ -537,6 +375,5 @@ export function useComparisonData() {
     sankeyGroups,
     multiValueOutcomeCodes,
     morphGeneration,
-    hcRangeData,
   }
 }

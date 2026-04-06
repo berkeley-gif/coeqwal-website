@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from "react"
+import { useMemo, useEffect } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR, { useSWRConfig } from "swr"
 import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
@@ -178,7 +178,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 /**
  * Fetch tier data for multiple scenarios.
  *
- * @param idMapping.Optional mapping of display IDs to fetch IDs.
+ * @param idMapping — Optional mapping of display IDs to fetch IDs.
  *   When provided, fetches tier data for `Object.values(idMapping)` (the
  *   resolved short_codes for the active hydroclimate) and re-keys all output
  *   data structures using `Object.keys(idMapping)` (the sibling group IDs).
@@ -221,36 +221,21 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     data: rawScenariosData,
     error: scenarioTiersError,
     isLoading: scenarioTiersLoading,
-    isValidating: scenarioTiersValidating,
   } = useSWR(
     fetchIds.length > 0 ? CACHE_KEYS.allScenarioTiers(fetchIds) : null,
     () => fetchAllScenarioTiers(fetchIds),
     { keepPreviousData: true },
   )
 
-  // Re-key from resolved IDs to sibling group IDs when mapping is active.
-  // Guard against keepPreviousData returning stale data keyed by the old
-  // hydroclimate's resolved IDs while reverseMap has already updated.
-  const lastValidDataRef = useRef<
-    Record<string, ScenarioTiersResponse> | undefined
-  >(undefined)
+  // Re-key from resolved IDs to sibling group IDs when mapping is active
   const allScenariosData = useMemo(() => {
-    if (!rawScenariosData) return lastValidDataRef.current
-    if (!reverseMap) {
-      lastValidDataRef.current = rawScenariosData
-      return rawScenariosData
-    }
-    const rawKeys = Object.keys(rawScenariosData)
-    const matchCount = rawKeys.filter((k) => reverseMap.has(k)).length
-    if (rawKeys.length > 0 && matchCount === 0) {
-      return lastValidDataRef.current
-    }
+    if (!rawScenariosData) return undefined
+    if (!reverseMap) return rawScenariosData
     const result: Record<string, ScenarioTiersResponse> = {}
     Object.entries(rawScenariosData).forEach(([resolvedId, data]) => {
       const groupId = reverseMap.get(resolvedId) ?? resolvedId
       result[groupId] = data
     })
-    lastValidDataRef.current = result
     return result
   }, [rawScenariosData, reverseMap])
 
@@ -291,17 +276,7 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
 
   const outcomeNames = useMemo(() => buildOutcomeNames(allTiers), [allTiers])
 
-  // Only report loading when there's truly no data to show.
-  // During hydroclimate switches, keepPreviousData provides stale data while
-  // the new fetch is in flight.SWR's isLoading is true in that case because
-  // it doesn't count previous data as "loaded."  We use allScenariosData
-  // (which holds lastValidDataRef) to avoid flashing a spinner.
-  const isLoading =
-    scenariosLoading ||
-    tiersLoading ||
-    (scenarioTiersLoading && !allScenariosData)
-
-  const isValidating = scenarioTiersValidating
+  const isLoading = scenariosLoading || scenarioTiersLoading || tiersLoading
 
   const error = useMemo(() => {
     if (scenariosError) return `Failed to load scenarios: ${scenariosError}`
@@ -323,7 +298,6 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     scenarioIds,
     outcomeNames,
     isLoading,
-    isValidating,
     error,
   }
 }

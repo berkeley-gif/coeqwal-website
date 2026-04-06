@@ -48,7 +48,7 @@ export interface StrategyGridProps {
   renderMode?: "all" | "headersOnly" | "contentOnly"
   /** When false, hides the key operations column (col 3) from the grid */
   showOperations?: boolean
-  /** When true, hides scenario title (col 2) and ops (col 3).shows only outcomes */
+  /** When true, hides scenario title (col 2) and ops (col 3) — shows only outcomes */
   outcomesOnly?: boolean
 
   // Sorting (optional)
@@ -59,8 +59,6 @@ export interface StrategyGridProps {
   // Badge / icon click-to-select
   /** Select all scenarios sharing a theme when badge is clicked */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
-  /** Toggle all scenarios in a theme group (select/deselect) */
-  onThemeGroupToggle?: (themeKey: string) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
 }

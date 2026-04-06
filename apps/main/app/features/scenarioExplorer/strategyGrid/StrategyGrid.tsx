@@ -62,7 +62,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   sortDirection = "asc",
   onSortChange,
   onThemeBadgeClick,
-  onThemeGroupToggle,
   onIconClick,
 }: StrategyGridProps) {
   const theme = useTheme()
@@ -238,7 +237,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onTooltipToggleWithContext={handleToggleWithContext}
             onSortChange={onSortChange}
             onThemeBadgeClick={onThemeBadgeClick}
-            onThemeGroupToggle={onThemeGroupToggle}
             onIconClick={onIconClick}
           />
         )}

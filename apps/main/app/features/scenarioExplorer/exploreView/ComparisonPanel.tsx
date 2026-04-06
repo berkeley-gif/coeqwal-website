@@ -24,13 +24,11 @@ import {
   CircularProgress,
   Checkbox,
   FormControlLabel,
-  Switch,
 } from "@repo/ui/mui"
 import {
   VerticalParallelLinePlotPeak,
   ParityPlot,
   DeviationPlot,
-  RadarPlot,
   TierHeatmap,
   TierSankey,
   type VerticalParallelLineData,
@@ -43,21 +41,15 @@ import {
 } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { formatOutcomeLabel } from "../../scenarios/components/shared"
-import { getOutcomeName } from "../../../content/outcomes"
+import { getOutcomeName, OUTCOME_CODE_ORDER } from "../../../content/outcomes"
 import { useScenarioList } from "../../scenarios/hooks"
+import mockHydroclimateTiers from "../data/mockHydroclimateTiers.json"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode =
-  | "radar"
-  | "parallel"
-  | "parity"
-  | "deviation"
-  | "heatmap"
-  | "sankey"
+type ChartMode = "parallel" | "parity" | "deviation" | "heatmap" | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
-  { key: "radar", label: "Radar" },
   { key: "parallel", label: "Parallel" },
   { key: "parity", label: "Parity" },
   { key: "deviation", label: "Column" },
@@ -77,24 +69,23 @@ export default function ComparisonPanel({
   const theme = useTheme()
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"))
 
-  const [chartMode, setChartMode] = useState<ChartMode>("radar")
+  const [chartMode, setChartMode] = useState<ChartMode>("parallel")
 
   const {
     highlightedScenario,
-    pinnedScenarioIds,
-    togglePinnedScenario,
+    setHighlightedScenario,
+    setPinnedScenarioId,
     relativeToBaseline,
     setRelativeToBaseline,
     highlightBaseline,
     setHighlightBaseline,
     overlayTiers,
+    setOverlayTiers: _setOverlayTiers,
     defineOutcome,
     setDefineOutcome,
     selectedScenarios,
     toggleScenario,
     selectScenarios,
-    outcomeDisplayMode,
-    setOutcomeDisplayMode,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -104,11 +95,7 @@ export default function ComparisonPanel({
     [selectedScenarios],
   )
 
-  const pinnedSet = useMemo(
-    () => new Set(pinnedScenarioIds),
-    [pinnedScenarioIds],
-  )
-
+  // ── Hover state ─────────────────────────────────────────────────────────
   // Chart hover feeds into hoveredScenario (debounced) -> onScenarioHover.
   // External highlights arrive via highlightedIds prop from the layout shell.
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -175,7 +162,6 @@ export default function ComparisonPanel({
     lineColors,
     scenarios,
     baselineScenario,
-    historicalBaselineScores,
     isLoading,
     hasData,
     heatmapCells,
@@ -184,8 +170,6 @@ export default function ComparisonPanel({
     sankeyGroups,
     multiValueOutcomeCodes,
     morphGeneration,
-    allScenariosData,
-    hcRangeData,
   } = useComparisonData()
 
   // Sankey outcome selector state
@@ -197,75 +181,20 @@ export default function ComparisonPanel({
   const [paritySpreadDots, setParitySpreadDots] = useState(false)
   const [parityThemeGrouping, setParityThemeGrouping] = useState(false)
 
-  const [radarHighlightBaseline, setRadarHighlightBaseline] = useState(true)
-  const [radarShowPath, setRadarShowPath] = useState(true)
-  const [radarShowAllPaths, setRadarShowAllPaths] = useState(false)
-  const [radarShowTierZones, setRadarShowTierZones] = useState(true)
-  const [radarDimUnpinned, setRadarDimUnpinned] = useState(false)
-  const [radarShowDistribution, setRadarShowDistribution] = useState(false)
-
   const [deviationShowStaircase, setDeviationShowStaircase] = useState(false)
   const [deviationShowPath, setDeviationShowPath] = useState(false)
-  const [deviationShowAllPaths, setDeviationShowAllPaths] = useState(false)
   const [deviationShowTierZones, setDeviationShowTierZones] = useState(true)
-  const [deviationDimUnpinned, setDeviationDimUnpinned] = useState(false)
-  const [deviationShowDistribution, setDeviationShowDistribution] =
-    useState(false)
-  const [deviationShowHCRange, setDeviationShowHCRange] = useState(false)
-  const [deviationShowBaselineFill, setDeviationShowBaselineFill] =
-    useState(true)
-  const deviationClimateMode = "off" as const
-  const deviationMorphShowComp = false
+  const [deviationClimateMode, setDeviationClimateMode] = useState<
+    "off" | "morph" | "compare"
+  >("off")
+  const [deviationMorphShowComp, setDeviationMorphShowComp] = useState(false)
+  const [deviationComparisonHC] = useState("warmer-wetter")
 
   // Map display names -> outcome codes for tooltip lookups
   const axisCodeMap = useMemo(
     () => new Map(axes.map((name, i) => [name, outcomeCodes[i]])),
     [axes, outcomeCodes],
   )
-
-  const TIER_KEY_TO_NUM: Record<string, number> = {
-    tier1: 1,
-    tier2: 2,
-    tier3: 3,
-    tier4: 4,
-  }
-
-  const distributionData = useMemo(() => {
-    if (!allScenariosData || pinnedScenarioIds.length === 0) return undefined
-    const result: Record<
-      string,
-      Record<string, { tier: number; count: number; normalized: number }[]>
-    > = {}
-    for (const id of pinnedScenarioIds) {
-      const scenarioTiers = allScenariosData[id]?.tiers
-      if (!scenarioTiers) continue
-      const outcomeMap: Record<
-        string,
-        { tier: number; count: number; normalized: number }[]
-      > = {}
-      outcomeCodes.forEach((code, i) => {
-        const tierInfo = scenarioTiers[code]
-        const displayName = axes[i]
-        if (!tierInfo || !displayName) return
-        if (tierInfo.type === "multi_value" && tierInfo.data) {
-          outcomeMap[displayName] = tierInfo.data
-            .filter((d) => d.value > 0)
-            .map((d) => ({
-              tier: TIER_KEY_TO_NUM[d.tier] ?? 4,
-              count: Math.round(d.value),
-              normalized: d.normalized,
-            }))
-        } else if (tierInfo.type === "single_value" && tierInfo.level) {
-          outcomeMap[displayName] = [
-            { tier: tierInfo.level, count: 1, normalized: 1 },
-          ]
-        }
-      })
-      result[id] = outcomeMap
-    }
-    return result
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allScenariosData, pinnedScenarioIds, outcomeCodes, axes])
 
   const highlightedData = useMemo(
     () =>
@@ -294,20 +223,68 @@ export default function ComparisonPanel({
     return map
   }, [parityData, getThemeForScenario])
 
-  // Deviation plot: sort outcome columns by historical baseline tier score
-  // so columns stay stable when switching hydroclimates.
-  // Winter-run salmon is pinned to the last position.
-  const salmonLabel = getOutcomeName("WRC_SALMON_AB")
+  // Mock comparison hydroclimate data -> VerticalParallelLineData[]
+  const mockHC = (
+    mockHydroclimateTiers.hydroclimates as Record<
+      string,
+      {
+        label: string
+        description: string
+        scenarios: Record<string, Record<string, number>>
+      }
+    >
+  )[deviationComparisonHC]
+  const deviationComparisonLabel = mockHC?.label ?? deviationComparisonHC
+
+  const deviationComparisonData = useMemo<VerticalParallelLineData[]>(() => {
+    if (!mockHC) return []
+    const nameMap = new Map(scenarios.map((s) => [s.id, s.name]))
+    return parityData
+      .filter((s) => mockHC.scenarios[s.id])
+      .map((s) => {
+        const raw = mockHC.scenarios[s.id]!
+        const values: Record<string, number | null> = {}
+        OUTCOME_CODE_ORDER.forEach((code) => {
+          const ns = raw[code]
+          const displayName = getOutcomeName(code)
+          values[displayName] = ns != null ? ns * 2 - 1 : null
+        })
+        return {
+          id: s.id,
+          name: nameMap.get(s.id) ?? s.id,
+          values,
+          highlighted: false,
+        }
+      })
+  }, [mockHC, parityData, scenarios])
+
+  const deviationComparisonBaseline = useMemo<
+    VerticalParallelLineData | undefined
+  >(() => {
+    if (!mockHC?.scenarios["s0020"]) return undefined
+    const raw = mockHC.scenarios["s0020"]!
+    const values: Record<string, number | null> = {}
+    OUTCOME_CODE_ORDER.forEach((code) => {
+      const ns = raw[code]
+      values[getOutcomeName(code)] = ns != null ? ns * 2 - 1 : null
+    })
+    return {
+      id: "s0020",
+      name: "Baseline (comparison)",
+      values,
+      highlighted: false,
+    }
+  }, [mockHC])
+
+  // Deviation plot: sort outcome columns by baseline tier score (best on left)
   const deviationSortedAxes = useMemo(() => {
-    if (!historicalBaselineScores) return axes
+    if (!baselineScenario) return axes
     return [...axes].sort((a, b) => {
-      if (a === salmonLabel) return 1
-      if (b === salmonLabel) return -1
-      const va = historicalBaselineScores[a] ?? 0
-      const vb = historicalBaselineScores[b] ?? 0
+      const va = baselineScenario.values[a] ?? 0
+      const vb = baselineScenario.values[b] ?? 0
       return vb - va
     })
-  }, [axes, historicalBaselineScores, salmonLabel])
+  }, [axes, baselineScenario])
 
   // Heatmap: scenario names and IDs in display order
   const heatmapScenarioIds = useMemo(
@@ -354,7 +331,7 @@ export default function ComparisonPanel({
   // Transform data to be relative to baseline when toggle is on.
   // Both values are in [-1, 1] (mapped from normalized_score in [0,1] via ns*2-1),
   // so their raw difference spans [-2, 2]. Dividing by 2 keeps the result in [-1, 1],
-  // which is equivalent to (scenario_ns - baseline_ns).the direct difference in
+  // which is equivalent to (scenario_ns - baseline_ns) — the direct difference in
   // normalized scores. Zero = same as baseline; ±1 = maximum possible divergence.
   const chartData = useMemo(() => {
     if (!relativeToBaseline || !baselineScenario) return highlightedData
@@ -384,11 +361,24 @@ export default function ComparisonPanel({
     return baselineScenario
   }, [baselineScenario, relativeToBaseline])
 
-  const handleChartLineClick = useCallback(
-    (_scenario: VerticalParallelLineData) => {
-      // Pinning is handled by onPinnedToggle prop on the chart
+  const highlightedScenarioRef = useRef(highlightedScenario)
+  useEffect(() => {
+    highlightedScenarioRef.current = highlightedScenario
+  }, [highlightedScenario])
+
+  const handleScenarioClick = useCallback(
+    (scenarioId: string) => {
+      setHighlightedScenario(
+        highlightedScenarioRef.current === scenarioId ? null : scenarioId,
+      )
+      setPinnedScenarioId(scenarioId)
     },
-    [],
+    [setHighlightedScenario, setPinnedScenarioId],
+  )
+
+  const handleChartLineClick = useCallback(
+    (scenario: VerticalParallelLineData) => handleScenarioClick(scenario.id),
+    [handleScenarioClick],
   )
 
   const handleBrushFilter = useCallback(
@@ -448,29 +438,7 @@ export default function ComparisonPanel({
 
   const toggleControls = (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {chartModeSelector}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: 1 }}>
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: 500,
-              color: theme.palette.text.primary,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Distributions
-          </Typography>
-          <Switch
-            size="small"
-            checked={outcomeDisplayMode === "distribution"}
-            onChange={(_, checked) =>
-              setOutcomeDisplayMode(checked ? "distribution" : "summary")
-            }
-            sx={{ ml: -0.5 }}
-          />
-        </Box>
-      </Box>
+      {chartModeSelector}
       {chartMode === "parallel" && (
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           <FormControlLabel
@@ -593,115 +561,6 @@ export default function ComparisonPanel({
           />
         </Box>
       )}
-      {chartMode === "radar" && (
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 0.5,
-            alignItems: "center",
-          }}
-        >
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarHighlightBaseline}
-                onChange={(e) => setRadarHighlightBaseline(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                highlight baseline
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarShowPath}
-                onChange={(e) => setRadarShowPath(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                scenario path on hover
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarShowAllPaths}
-                onChange={(e) => setRadarShowAllPaths(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show all paths
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarShowTierZones}
-                onChange={(e) => setRadarShowTierZones(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                tier zones
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarDimUnpinned}
-                disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) => setRadarDimUnpinned(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                focus pinned
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={radarShowDistribution}
-                disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) => setRadarShowDistribution(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show distributions
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-        </Box>
-      )}
       {chartMode === "deviation" && (
         <Box
           sx={{
@@ -747,22 +606,6 @@ export default function ComparisonPanel({
             control={
               <Checkbox
                 size="small"
-                checked={deviationShowAllPaths}
-                onChange={(e) => setDeviationShowAllPaths(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show all paths
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
                 checked={deviationShowTierZones}
                 onChange={(e) => setDeviationShowTierZones(e.target.checked)}
                 sx={checkboxSx}
@@ -775,72 +618,58 @@ export default function ComparisonPanel({
             }
             sx={{ mr: 1.5 }}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationDimUnpinned}
-                disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) => setDeviationDimUnpinned(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                focus pinned
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationShowDistribution}
-                disabled={pinnedScenarioIds.length === 0}
-                onChange={(e) => setDeviationShowDistribution(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show distributions
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationShowHCRange}
-                onChange={(e) => setDeviationShowHCRange(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                HC range
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={deviationShowBaselineFill}
-                onChange={(e) => setDeviationShowBaselineFill(e.target.checked)}
-                sx={checkboxSx}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                baseline fill
-              </Typography>
-            }
-            sx={{ mr: 1.5 }}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              ml: 1,
+              pl: 1,
+              borderLeft: `1px solid ${theme.palette.grey[300]}`,
+            }}
+          >
+            {(["historical", "comparison"] as const).map((mode) => {
+              const isComp = mode === "comparison"
+              const isActive = isComp
+                ? deviationClimateMode === "morph" && deviationMorphShowComp
+                : deviationClimateMode !== "morph" || !deviationMorphShowComp
+              return (
+                <Box
+                  key={mode}
+                  component="button"
+                  onClick={() => {
+                    if (isComp) {
+                      setDeviationClimateMode("morph")
+                      setDeviationMorphShowComp(true)
+                    } else {
+                      if (deviationClimateMode === "morph") {
+                        setDeviationMorphShowComp(false)
+                      }
+                    }
+                  }}
+                  sx={{
+                    fontSize: "0.72rem",
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    borderRight: isComp ? undefined : "none",
+                    borderRadius: isComp
+                      ? `0 ${theme.borderRadius.xs}px ${theme.borderRadius.xs}px 0`
+                      : `${theme.borderRadius.xs}px 0 0 ${theme.borderRadius.xs}px`,
+                    px: 1,
+                    py: 0.25,
+                    background: isActive
+                      ? theme.palette.grey[200]
+                      : theme.palette.background.paper,
+                    color: theme.palette.grey[800],
+                    cursor: "pointer",
+                    outline: "none",
+                    fontWeight: isActive ? 600 : 400,
+                    "&:hover": { background: theme.palette.grey[100] },
+                  }}
+                >
+                  {isComp ? deviationComparisonLabel : "Historical"}
+                </Box>
+              )
+            })}
+          </Box>
           {/* Legend */}
           <Box
             sx={{
@@ -1001,7 +830,7 @@ export default function ComparisonPanel({
   const chartSharedGrey50 = theme.palette.grey[50]
   const chartSharedBlueDarkest = theme.palette.blue.darkest
 
-  // Primitive color deps.theme.palette.grey is a new object ref each render;
+  // Primitive color deps — theme.palette.grey is a new object ref each render;
   // unstable sharedChartColors was retriggering chart D3 redraws on sidebar hover.
   const sharedChartColors = useMemo(
     () => ({
@@ -1023,7 +852,7 @@ export default function ComparisonPanel({
         WebkitUserSelect: "none",
       }}
     >
-      {/* Axis labels above chart (desktop parallel only) */}
+      {/* ── HTML axis labels above chart (desktop, parallel only) ──── */}
       {chartMode === "parallel" && isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -1079,7 +908,7 @@ export default function ComparisonPanel({
         </Box>
       )}
 
-      {/* Axis labels left of chart (mobile parallel only) */}
+      {/* ── HTML axis labels left of chart (mobile, parallel only) ── */}
       {chartMode === "parallel" && !isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -1135,6 +964,7 @@ export default function ComparisonPanel({
         </Box>
       )}
 
+      {/* ── Charts ─────────────────────────────────────────────────── */}
       {chartMode === "parallel" && (
         <VerticalParallelLinePlotPeak
           data={chartData}
@@ -1186,32 +1016,6 @@ export default function ComparisonPanel({
         />
       )}
 
-      {chartMode === "radar" && (
-        <RadarPlot
-          data={parityData}
-          axes={deviationSortedAxes}
-          baselineData={baselineScenario ?? undefined}
-          responsive
-          colors={sharedChartColors}
-          lineColors={parityLineColors}
-          onLineHover={setHoveredScenario}
-          onLineClick={handleChartLineClick}
-          chosenIds={chosenIds}
-          highlightedIds={highlightedIds}
-          highlightBaseline={radarHighlightBaseline}
-          showScenarioPath={radarShowPath}
-          showAllPaths={radarShowAllPaths}
-          showTierZones={radarShowTierZones}
-          scenarioThemes={scenarioThemeMap}
-          morphGeneration={morphGeneration}
-          pinnedScenarioIds={pinnedSet}
-          onPinnedToggle={togglePinnedScenario}
-          dimUnpinned={radarDimUnpinned}
-          showDistribution={radarShowDistribution}
-          distributionData={distributionData}
-        />
-      )}
-
       {chartMode === "deviation" && (
         <DeviationPlot
           data={parityData}
@@ -1226,22 +1030,22 @@ export default function ComparisonPanel({
           highlightedIds={highlightedIds}
           showBaselineStaircase={deviationShowStaircase}
           showScenarioPath={deviationShowPath}
-          showAllPaths={deviationShowAllPaths}
           showTierZones={deviationShowTierZones}
           showDifferenceGlyphs={false}
           showThemeRings={false}
+          comparisonData={
+            deviationClimateMode !== "off" ? deviationComparisonData : undefined
+          }
+          comparisonBaselineData={
+            deviationClimateMode !== "off"
+              ? deviationComparisonBaseline
+              : undefined
+          }
+          comparisonLabel={deviationComparisonLabel}
           climateMode={deviationClimateMode}
           morphShowComparison={deviationMorphShowComp}
           scenarioThemes={scenarioThemeMap}
           morphGeneration={morphGeneration}
-          pinnedScenarioIds={pinnedSet}
-          onPinnedToggle={togglePinnedScenario}
-          dimUnpinned={deviationDimUnpinned}
-          showDistribution={deviationShowDistribution}
-          distributionData={distributionData}
-          showHCRange={deviationShowHCRange}
-          hcRangeData={hcRangeData}
-          showBaselineFill={deviationShowBaselineFill}
         />
       )}
 
@@ -1261,7 +1065,7 @@ export default function ComparisonPanel({
               setHoveredScenario(null)
             }
           }}
-          onCellClick={(cell) => togglePinnedScenario(cell.scenarioId)}
+          onCellClick={(cell) => handleScenarioClick(cell.scenarioId)}
           chosenIds={chosenIds}
           highlightedIds={highlightedIds}
           morphGeneration={morphGeneration}
