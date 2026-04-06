@@ -209,6 +209,10 @@ export default function TierAnimationSection() {
 
   const polygonsAllowedRef = useRef(false)
 
+  /* ── Hide left-panel text when zoomed past threshold ── */
+  const [textVisible, setTextVisible] = useState(true)
+  const textVisibleRef = useRef(true)
+
   /* ── Time-based progress (0 → 1) ── */
   const progress = useMotionValue(0)
 
@@ -1132,7 +1136,11 @@ export default function TierAnimationSection() {
   /* ── Collect screen shapes from Mapbox layers + coordinate lookups ── */
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const computePolygonDataRef = useRef<() => void>(() => {})
+  const reprojectRef = useRef<() => void>(() => {})
   const applyPanelOffsetRef = useRef<() => void>(() => {})
+  const cachedGeoRingsRef = useRef<
+    Map<string, { ring: [number, number][]; centroidLng?: number; centroidLat?: number }>
+  >(new Map())
 
   /**
    * Cheap: subtract the current panel viewport position from the stable
@@ -1170,6 +1178,7 @@ export default function TierAnimationSection() {
       clearTimeout(retryTimerRef.current)
       retryTimerRef.current = null
     }
+    cachedGeoRingsRef.current = new Map()
 
     if (!mapAPI.mapRef?.current || !panelRef.current) return
     if (centroids.length === 0 && allLocationIds.size === 0) return
@@ -1236,7 +1245,6 @@ export default function TierAnimationSection() {
       }
 
       for (const [featureId, ring] of bestRings) {
-        // Compute geographic centroid from the ring for tooltip coordinate lookup
         let geoLng = 0,
           geoLat = 0
         for (const [lng, lat] of ring) {
@@ -1246,6 +1254,13 @@ export default function TierAnimationSection() {
         geoLng /= ring.length
         geoLat /= ring.length
         geoCentroids.set(featureId, { lng: geoLng, lat: geoLat })
+
+        const cData = centroidLookup.get(featureId)
+        cachedGeoRingsRef.current.set(featureId, {
+          ring,
+          centroidLng: cData?.lng,
+          centroidLat: cData?.lat,
+        })
 
         const vpPoly: [number, number][] = []
         for (const [lng, lat] of ring) {
@@ -1268,7 +1283,6 @@ export default function TierAnimationSection() {
         cy /= vpPoly.length
         const centroid: [number, number] = [cx, cy]
 
-        const cData = centroidLookup.get(featureId)
         if (cData) {
           try {
             const pt = map.project([cData.lng, cData.lat])
@@ -1351,17 +1365,128 @@ export default function TierAnimationSection() {
     applyPanelOffset()
   }, [centroids, allLocationIds, outcomeLocations, mapAPI, applyPanelOffset])
 
+  /**
+   * Re-project cached geographic data to screen without re-querying Mapbox.
+   * Safe to call on every map move/zoom — feature count stays stable.
+   */
+  const reprojectShapes = useCallback(() => {
+    if (!mapAPI.mapRef?.current || !panelRef.current) return
+    const map = mapAPI.mapRef.current.getMap?.()
+    if (!map) return
+    if (
+      cachedGeoRingsRef.current.size === 0 &&
+      viewportDataRef.current.size === 0
+    )
+      return
+
+    const vpMap = new Map<string, ScreenPolygon>()
+
+    for (const [featureId, data] of cachedGeoRingsRef.current) {
+      const vpPoly: [number, number][] = []
+      for (const [lng, lat] of data.ring) {
+        try {
+          const pt = map.project([lng, lat])
+          vpPoly.push([pt.x, pt.y])
+        } catch {
+          /* vertex outside projection bounds */
+        }
+      }
+      if (vpPoly.length < 3) continue
+
+      let cx = 0,
+        cy = 0
+      for (const [x, y] of vpPoly) {
+        cx += x
+        cy += y
+      }
+      cx /= vpPoly.length
+      cy /= vpPoly.length
+      const centroid: [number, number] = [cx, cy]
+
+      if (data.centroidLng != null && data.centroidLat != null) {
+        try {
+          const pt = map.project([data.centroidLng, data.centroidLat])
+          centroid[0] = pt.x
+          centroid[1] = pt.y
+        } catch {
+          /* keep computed centroid */
+        }
+      }
+
+      vpMap.set(featureId, { screenPoly: vpPoly, centroidScreen: centroid })
+    }
+
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const config = getOutcomeConfig(code)
+      if (!config || config.geometryType !== "react-marker") continue
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+
+      for (const locId of locData.ids) {
+        if (vpMap.has(locId)) continue
+        const coords = getOutcomeLocationCoordinates(code, locId)
+        if (!coords) continue
+        try {
+          const pt = map.project(coords)
+          const sx = pt.x
+          const sy = pt.y
+          let vpPoly: [number, number][]
+          if (code === "ENV_FLOWS") {
+            vpPoly = diamondPoints(sx, sy, 14, 20, POINTS_PER_SHAPE)
+          } else {
+            vpPoly = circlePoints(sx, sy, 8, POINTS_PER_SHAPE)
+          }
+          vpMap.set(locId, { screenPoly: vpPoly, centroidScreen: [sx, sy] })
+        } catch {
+          /* outside projection bounds */
+        }
+      }
+    }
+
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const config = getOutcomeConfig(code)
+      if (!config || config.geometryType !== "line") continue
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+      const syntheticId = [...locData.ids][0] ?? code
+      if (vpMap.has(syntheticId)) continue
+      try {
+        const pt = map.project(SALMON_RIVER_CENTROID)
+        const sx = pt.x
+        const sy = pt.y
+        const vpPoly = lineSegmentPoints(
+          sx - 15,
+          sy,
+          sx + 15,
+          sy,
+          8,
+          POINTS_PER_SHAPE,
+        )
+        vpMap.set(syntheticId, {
+          screenPoly: vpPoly,
+          centroidScreen: [sx, sy],
+        })
+      } catch {
+        /* outside projection bounds */
+      }
+    }
+
+    viewportDataRef.current = vpMap
+    applyPanelOffset()
+  }, [mapAPI, outcomeLocations, applyPanelOffset])
+
   computePolygonDataRef.current = collectOutcomeShapes
+  reprojectRef.current = reprojectShapes
 
   useEffect(() => {
     const onResize = () => {
       if (viewportDataRef.current.size > 0) {
-        collectOutcomeShapes()
+        reprojectShapes()
       }
     }
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
-  }, [collectOutcomeShapes])
+  }, [reprojectShapes])
 
   // Re-apply offset on scroll (cheap — no Mapbox queries).
   // With page-level scrolling, listen on window instead of a parent scroll container.
@@ -1384,18 +1509,24 @@ export default function TierAnimationSection() {
     }
   }, [panelInView])
 
-  // Re-project polygon coordinates when the map pans/zooms (expensive).
-  // Throttled to one recompute per animation frame.
+  // Re-project cached shapes when the map pans/zooms (no Mapbox re-query).
   useEffect(() => {
     if (!panelInView) return
     const map = mapAPI.mapRef?.current?.getMap?.()
     if (!map) return
 
+    const TEXT_FADE_ZOOM = 7
+
     let rafId: number | null = null
     const onMove = () => {
       if (rafId !== null) return
       rafId = requestAnimationFrame(() => {
-        computePolygonDataRef.current()
+        reprojectRef.current()
+        const shouldShow = map.getZoom() < TEXT_FADE_ZOOM
+        if (shouldShow !== textVisibleRef.current) {
+          textVisibleRef.current = shouldShow
+          setTextVisible(shouldShow)
+        }
         rafId = null
       })
     }
@@ -1739,13 +1870,13 @@ export default function TierAnimationSection() {
           )}
           */}
 
-          {/* Cross-fading beat text */}
           <BeatTextOverlay
             progress={progress}
             beat2Layout={outcomeLayout}
             onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
             interactive={isInteractive}
+            textHidden={!textVisible}
           />
 
           {/* Playback controls */}

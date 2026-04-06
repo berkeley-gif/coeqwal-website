@@ -23,6 +23,7 @@ interface BeatTextOverlayProps {
   onOutcomeClick?: (code: string) => void
   selectedOutcomeCode?: string | null
   interactive?: boolean
+  textHidden?: boolean
 }
 
 function clamp01(v: number) {
@@ -35,6 +36,7 @@ export default function BeatTextOverlay({
   onOutcomeClick,
   selectedOutcomeCode,
   interactive,
+  textHidden = false,
 }: BeatTextOverlayProps) {
   const theme = useTheme()
   const beat1Ref = useRef<HTMLDivElement>(null)
@@ -43,11 +45,25 @@ export default function BeatTextOverlay({
   const levelsLineRef = useRef<HTMLDivElement>(null)
   const tierLegendRef = useRef<HTMLDivElement>(null)
   const beat2ItemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const textHiddenRef = useRef(textHidden)
+  textHiddenRef.current = textHidden
+
+  useEffect(() => {
+    if (!beat1Ref.current) return
+    if (textHidden) {
+      beat1Ref.current.style.opacity = "0"
+    } else {
+      const v = progress.get()
+      beat1Ref.current.style.opacity = String(clamp01((v - 0.02) / 0.04))
+    }
+  }, [textHidden, progress])
 
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
       if (beat1Ref.current) {
-        const fadeIn = clamp01((v - 0.02) / 0.04)
+        const fadeIn = textHiddenRef.current
+          ? 0
+          : clamp01((v - 0.02) / 0.04)
         beat1Ref.current.style.opacity = String(fadeIn)
       }
 
