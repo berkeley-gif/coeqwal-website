@@ -1,11 +1,12 @@
 "use client"
 
-import { useRef, useLayoutEffect, useMemo } from "react"
+import { useRef, useLayoutEffect, useMemo, useCallback } from "react"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
   resampleClosedPath,
   rectPoints,
+  circlePoints,
   pointsToD,
   easeInOut,
   lerp,
@@ -19,6 +20,7 @@ import {
   STATION_NAMES,
 } from "../../map/config/outcomeLocations"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
+import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 
 export interface OutcomeGroup {
   code: string
@@ -31,6 +33,8 @@ export interface LocationInfo {
   sourceId: string
   tier: number
 }
+
+export type EncodingMode = "distribution" | "bar" | "average"
 
 interface OutcomeMorphOverlayProps {
   outcomes: OutcomeGroup[]
@@ -61,6 +65,10 @@ interface OutcomeMorphOverlayProps {
   onLocationClick?: (info: LocationInfo) => void
   /** Maps "outcomeCode:sourceId" → human-readable name from Mapbox features */
   locationNameMap?: Record<string, string>
+  encodingMode?: EncodingMode
+  tierChartData?: Record<string, ChartDataPoint[]>
+  spotlightedTier?: number | null
+  onBarClick?: (code: string, tier: number) => void
 }
 
 function getLocationName(code: string, sourceId: string): string {
@@ -102,12 +110,18 @@ export function computeDistributionHeight(
   return totalRows * cell
 }
 
+const BAR_HEIGHT = 10
+const BAR_SPACING = 4
+const BAR_MAX_WIDTH_FRACTION = 0.85
+const DOT_RADIUS = 8
+
 function computeOutcomeLayout(
   polygons: ShapeMorphData[],
   targetX: number,
   targetY: number,
   maxWidth: number,
   maxCols: number,
+  barValues?: number[],
 ) {
   const cell = SQUARE_SIZE + SQUARE_GAP
   const cols = Math.min(
@@ -123,9 +137,17 @@ function computeOutcomeLayout(
   }
   const tierKeys = [...byTier.keys()].sort((a, b) => a - b)
 
+  const maxBarWidth = (maxWidth - GRID_PAD * 2) * BAR_MAX_WIDTH_FRACTION
+  const barLeftX = targetX + GRID_PAD
+
+  const dotCx = targetX + GRID_PAD + maxWidth / 4
+  const dotCy = targetY + (tierKeys.length * (BAR_HEIGHT + BAR_SPACING)) / 2
+
   const results: {
     resampled: [number, number][]
     squareTarget: [number, number][]
+    barTarget: [number, number][]
+    dotTarget: [number, number][]
     rawD: string
     color: string
     tier: number
@@ -133,8 +155,18 @@ function computeOutcomeLayout(
   }[] = []
 
   let currentRow = 0
-  for (const tier of tierKeys) {
+  for (let ti = 0; ti < tierKeys.length; ti++) {
+    const tier = tierKeys[ti]!
     const group = byTier.get(tier)!
+
+    const normVal = barValues?.[ti] ?? 0.5
+    const barW = Math.max(4, normVal * maxBarWidth)
+    const barCx = barLeftX + barW / 2
+    const barCy =
+      targetY + ti * (BAR_HEIGHT + BAR_SPACING) + BAR_HEIGHT / 2
+    const barPts = rectPoints(barCx, barCy, barW, BAR_HEIGHT, POINTS_PER_SHAPE)
+    const dotPts = circlePoints(dotCx, dotCy, DOT_RADIUS, POINTS_PER_SHAPE)
+
     for (let i = 0; i < group.length; i++) {
       const col = i % cols
       const row = currentRow + Math.floor(i / cols)
@@ -157,6 +189,8 @@ function computeOutcomeLayout(
       results.push({
         resampled,
         squareTarget,
+        barTarget: barPts,
+        dotTarget: dotPts,
         rawD: pointsToD(shape.screenShape),
         color: shape.color,
         tier: shape.tier,
@@ -201,6 +235,10 @@ export default function OutcomeMorphOverlay({
   onLocationLeave,
   onLocationClick,
   locationNameMap,
+  encodingMode = "distribution",
+  tierChartData,
+  spotlightedTier,
+  onBarClick,
 }: OutcomeMorphOverlayProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
@@ -226,12 +264,16 @@ export default function OutcomeMorphOverlay({
       const gridTargetY = pos?.y ?? 0
       const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
 
+      const chartPoints = tierChartData?.[outcome.code]
+      const barValues = chartPoints?.map((p) => p.value)
+
       const shapes = computeOutcomeLayout(
         sampled,
         gridTargetX,
         gridTargetY,
         maxColWidth,
         squaresPerRow,
+        barValues,
       )
 
       let minX = Infinity,
@@ -276,7 +318,7 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap])
+  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap, tierChartData])
 
   const hoverTooltip = useMemo(() => {
     if (!hoveredLocation) return null
@@ -309,8 +351,81 @@ export default function OutcomeMorphOverlay({
     }
   }, [hoveredLocation, outcomeShapes, locationNameMap])
 
+  const prevEncodingRef = useRef<EncodingMode>("distribution")
+  const encodingMorphRef = useRef(1)
+  const encodingFromRef = useRef<EncodingMode>("distribution")
+  const encodingRafRef = useRef<number | null>(null)
+
+  const getTargetForMode = useCallback(
+    (
+      shape: (typeof outcomeShapes)[number]["shapes"][number],
+      mode: EncodingMode,
+    ) => {
+      switch (mode) {
+        case "bar":
+          return shape.barTarget
+        case "average":
+          return shape.dotTarget
+        default:
+          return shape.squareTarget
+      }
+    },
+    [],
+  )
+
+  useLayoutEffect(() => {
+    if (prevEncodingRef.current !== encodingMode && progress.get() >= 1) {
+      encodingFromRef.current = prevEncodingRef.current
+      encodingMorphRef.current = 0
+      prevEncodingRef.current = encodingMode
+
+      const startTime = performance.now()
+      const duration = 500
+
+      const tick = (now: number) => {
+        const elapsed = now - startTime
+        const t = Math.min(1, elapsed / duration)
+        encodingMorphRef.current = easeInOut(t)
+
+        for (const group of outcomeShapes) {
+          const refs = pathRefsMap.current.get(group.code)
+          if (!refs) continue
+          for (let i = 0; i < group.shapes.length; i++) {
+            const el = refs[i]
+            if (!el) continue
+            const shape = group.shapes[i]!
+            const from = getTargetForMode(shape, encodingFromRef.current)
+            const to = getTargetForMode(shape, encodingMode)
+            const pts = from.map((a, pi) =>
+              lerp(a, to[pi]!, encodingMorphRef.current),
+            )
+            el.setAttribute("d", pointsToD(pts))
+          }
+        }
+
+        if (t < 1) {
+          encodingRafRef.current = requestAnimationFrame(tick)
+        } else {
+          encodingRafRef.current = null
+        }
+      }
+      encodingRafRef.current = requestAnimationFrame(tick)
+    } else {
+      prevEncodingRef.current = encodingMode
+    }
+
+    return () => {
+      if (encodingRafRef.current != null) {
+        cancelAnimationFrame(encodingRafRef.current)
+        encodingRafRef.current = null
+      }
+    }
+  }, [encodingMode, outcomeShapes, progress, getTargetForMode])
+
   useLayoutEffect(() => {
     const handler = (v: number) => {
+      if (encodingRafRef.current != null) return
+
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
         if (!refs) continue
@@ -339,8 +454,9 @@ export default function OutcomeMorphOverlay({
           const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
           const easedT = easeInOut(morphT)
 
+          const target = getTargetForMode(shape, encodingMode)
           const pts = shape.resampled.map((a, pi) =>
-            lerp(a, shape.squareTarget[pi]!, easedT),
+            lerp(a, target[pi]!, easedT),
           )
           el.setAttribute("d", pointsToD(pts))
           el.style.opacity = String(opacity)
@@ -357,7 +473,7 @@ export default function OutcomeMorphOverlay({
     const unsub = progress.on("change", handler)
     handler(progress.get())
     return unsub
-  }, [progress, outcomeShapes])
+  }, [progress, outcomeShapes, encodingMode, getTargetForMode])
 
   return (
     <svg
@@ -400,6 +516,14 @@ export default function OutcomeMorphOverlay({
                 interactive &&
                 activeLocationSet != null &&
                 activeLocationSet.has(`${group.code}:${shape.sourceId}`)
+              const isDimmed =
+                interactive &&
+                spotlightedTier != null &&
+                shape.tier !== spotlightedTier
+              const isBarMode = encodingMode === "bar"
+              const isClickable =
+                interactive &&
+                (isSelected || (isBarMode && isSelected))
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -408,18 +532,37 @@ export default function OutcomeMorphOverlay({
                   }}
                   d={shape.rawD}
                   fill={shape.color}
-                  fillOpacity={isLocationActive ? 1 : isSelected ? 0.9 : 0.75}
-                  stroke={isLocationActive ? "#ffd87e" : shape.color}
-                  strokeWidth={isLocationActive ? 2 : 0.5}
-                  strokeOpacity={isLocationActive ? 1 : 0.4}
+                  fillOpacity={
+                    isDimmed
+                      ? 0.2
+                      : isLocationActive
+                        ? 1
+                        : isSelected
+                          ? 0.9
+                          : 0.75
+                  }
+                  stroke={
+                    isLocationActive
+                      ? "#ffd87e"
+                      : spotlightedTier === shape.tier
+                        ? "#ffd87e"
+                        : shape.color
+                  }
+                  strokeWidth={
+                    isLocationActive
+                      ? 2
+                      : spotlightedTier === shape.tier
+                        ? 1.5
+                        : 0.5
+                  }
+                  strokeOpacity={isDimmed ? 0.2 : isLocationActive ? 1 : 0.4}
                   style={{
                     opacity: 0,
-                    cursor:
-                      interactive && isSelected ? "pointer" : undefined,
+                    cursor: isClickable ? "pointer" : undefined,
                     transition:
-                      "fill-opacity 0.15s, stroke 0.15s, stroke-width 0.15s",
+                      "fill-opacity 0.2s, stroke 0.15s, stroke-width 0.15s, stroke-opacity 0.2s",
                   }}
-                  pointerEvents={interactive && isSelected ? "all" : "none"}
+                  pointerEvents={isClickable ? "all" : "none"}
                   onMouseEnter={
                     interactive && isSelected
                       ? () =>
@@ -439,11 +582,15 @@ export default function OutcomeMorphOverlay({
                     interactive && isSelected
                       ? (e) => {
                           e.stopPropagation()
-                          onLocationClick?.({
-                            code: group.code,
-                            sourceId: shape.sourceId,
-                            tier: shape.tier,
-                          })
+                          if (isBarMode && onBarClick) {
+                            onBarClick(group.code, shape.tier)
+                          } else {
+                            onLocationClick?.({
+                              code: group.code,
+                              sourceId: shape.sourceId,
+                              tier: shape.tier,
+                            })
+                          }
                         }
                       : undefined
                   }
