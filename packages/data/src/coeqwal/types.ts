@@ -104,7 +104,7 @@ export interface ScenarioListItem {
   hydroclimate_id: number
   /** Short code of the baseline scenario this derives from, or null for baselines */
   baseline_scenario: string | null
-  /** Sibling group ID.same scenario under different hydroclimates share this value */
+  /** Sibling group ID — same scenario under different hydroclimates share this value */
   sibling_group: string
 }
 
@@ -166,39 +166,6 @@ export interface TierLocationResponse {
     feature_count: number
     /** Types of locations included */
     location_types: string[]
-  }
-}
-
-// ============================================================================
-// Tier Location Assignment Types (lightweight, no geometry)
-// ============================================================================
-
-/**
- * A single location's tier assignment from /api/tier-map/:id/:code/locations
- */
-export interface TierLocationAssignment {
-  location_id: string
-  location_name: string
-  location_type: string
-  tier_level: number
-  tier_value: number
-  display_order: number
-}
-
-/**
- * Response from /api/tier-map/:scenarioId/:tierCode/locations
- * Lightweight: tier assignments only, no polygon geometry.
- */
-export interface TierLocationAssignmentsResponse {
-  scenario: string
-  tier_code: string
-  tier_name: string
-  tier_type: "multi_value" | "single_value"
-  locations: TierLocationAssignment[]
-  metadata: {
-    total_locations: number
-    location_types: string[]
-    tier_counts: Record<number, number>
   }
 }
 
@@ -1059,7 +1026,7 @@ export interface BatchStatisticsResponse {
  * from /api/statistics/refuge-demand-units
  */
 export interface RefugeDemandUnitData {
-  /** Demand unit ID (e.g., "08N_PR1").references du_refuge_entity.du_id */
+  /** Demand unit ID (e.g., "08N_PR1") — references du_refuge_entity.du_id */
   du_id: string
   /** Water balance area ID */
   wba_id: string
@@ -1105,7 +1072,7 @@ export interface RefugeDeliveryMonthlyStats {
   q70: number | null
   q90: number | null
   q100: number | null
-  /** Exceedance percentiles.exc_pX = value exceeded X% of time */
+  /** Exceedance percentiles — exc_pX = value exceeded X% of time */
   exc_p5: number | null
   exc_p10: number | null
   exc_p25: number | null
@@ -1277,12 +1244,12 @@ export interface EnvFlowSeasonsResponse {
  * Stores two parallel statistic families (migration 28 added the flow_q* columns):
  *
  *   Flow volume (all channels):
- *     flow_avg_cfs/taf .mean monthly flow
- *     flow_q{p}_cfs/taf.percentile bands of per-year monthly flow in CFS and TAF/month
- *     flow_exc_p{p}_cfs/taf.exceedance percentiles
+ *     flow_avg_cfs/taf  — mean monthly flow
+ *     flow_q{p}_cfs/taf — percentile bands of per-year monthly flow in CFS and TAF/month
+ *     flow_exc_p{p}_cfs/taf — exceedance percentiles
  *
  *   % unimpaired (channels with a UNIMP reference only):
- *     q* / exc_p*.percentile distribution of pct_unimpaired
+ *     q* / exc_p* — percentile distribution of pct_unimpaired
  *     NULL for Mokelumne reaches and any channel without unimp_sv_variable.
  */
 export interface ChannelMonthlyStats {
@@ -1296,7 +1263,7 @@ export interface ChannelMonthlyStats {
   flow_cv: number | null
   /** Mean monthly flow volume (TAF/month) across all simulated years */
   flow_avg_taf: number | null
-  /** Percentile bands of per-year monthly flow.CFS */
+  /** Percentile bands of per-year monthly flow — CFS */
   flow_q0_cfs: number | null
   flow_q10_cfs: number | null
   flow_q30_cfs: number | null
@@ -1304,7 +1271,7 @@ export interface ChannelMonthlyStats {
   flow_q70_cfs: number | null
   flow_q90_cfs: number | null
   flow_q100_cfs: number | null
-  /** Exceedance percentiles.CFS (exc_p5 = value exceeded 5 % of years) */
+  /** Exceedance percentiles — CFS (exc_p5 = value exceeded 5 % of years) */
   flow_exc_p5_cfs: number | null
   flow_exc_p10_cfs: number | null
   flow_exc_p25_cfs: number | null
@@ -1312,7 +1279,7 @@ export interface ChannelMonthlyStats {
   flow_exc_p75_cfs: number | null
   flow_exc_p90_cfs: number | null
   flow_exc_p95_cfs: number | null
-  /** Percentile bands of per-year monthly flow.TAF/month */
+  /** Percentile bands of per-year monthly flow — TAF/month */
   flow_q0_taf: number | null
   flow_q10_taf: number | null
   flow_q30_taf: number | null
@@ -1320,7 +1287,7 @@ export interface ChannelMonthlyStats {
   flow_q70_taf: number | null
   flow_q90_taf: number | null
   flow_q100_taf: number | null
-  /** Exceedance percentiles.TAF/month */
+  /** Exceedance percentiles — TAF/month */
   flow_exc_p5_taf: number | null
   flow_exc_p10_taf: number | null
   flow_exc_p25_taf: number | null
@@ -1332,7 +1299,7 @@ export interface ChannelMonthlyStats {
   // ── % unimpaired ─────────────────────────────────────────────────────────
   /** Mean of unimpaired reference flow (CFS) for this month */
   unimp_avg_cfs: number | null
-  /** Mean (C_{reach} / UNIMP) × 100 across years.NULL if no UNIMP reference */
+  /** Mean (C_{reach} / UNIMP) × 100 across years — NULL if no UNIMP reference */
   pct_unimpaired_avg: number | null
   pct_unimpaired_cv: number | null
   /** Percentile distribution of pct_unimpaired across years */
@@ -1367,9 +1334,9 @@ export interface ChannelsMonthlyResponse {
  * /api/statistics/scenarios/:scenarioId/channels/seasonal
  *
  * Contains three metric families (all may be partially NULL):
- *   flow_*       .raw CFS volume distribution (all 59 channels)
- *   unimp_* / pct_unimpaired_*.Metric 1 seasonal (57 channels; NULL for Mokelumne)
- *   pct_ff_* / ff_* / deviation_avg.Metric 2 (17 EFLOWS channels; NULL otherwise)
+ *   flow_*        — raw CFS volume distribution (all 59 channels)
+ *   unimp_* / pct_unimpaired_* — Metric 1 seasonal (57 channels; NULL for Mokelumne)
+ *   pct_ff_* / ff_* / deviation_avg — Metric 2 (17 EFLOWS channels; NULL otherwise)
  */
 export interface ChannelSeasonalStats {
   network_arc_id: string
@@ -1417,7 +1384,7 @@ export interface ChannelSeasonalStats {
   unimp_exc_p75: number | null
   unimp_exc_p90: number | null
   unimp_exc_p95: number | null
-  // % functional flows (Metric 2.NULL unless has_eflows = true)
+  // % functional flows (Metric 2 — NULL unless has_eflows = true)
   /** Mean (C_{reach} / EFLOWS_{reach}) × 100 across simulated years, by season */
   pct_ff_avg: number | null
   pct_ff_cv: number | null
@@ -1454,7 +1421,7 @@ export interface ChannelsSeasonalResponse {
  * One channel's period-of-record summary from
  * /api/statistics/scenarios/:scenarioId/channels/period-summary
  *
- * Metric 3.Pearson r flow alteration index (monthly simulated vs. unimpaired).
+ * Metric 3 — Pearson r flow alteration index (monthly simulated vs. unimpaired).
  * r ≈ +1: natural seasonal timing preserved.
  * r ≈ 0: seasonal pattern substantially altered.
  * NULL where no unimpaired reference variable exists.

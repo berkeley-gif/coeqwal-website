@@ -73,8 +73,6 @@ export { default as ParityPlot } from "./components/ParityPlot"
 export type { ParityPlotProps } from "./components/ParityPlot"
 export { default as DeviationPlot } from "./components/DeviationPlot"
 export type { DeviationPlotProps } from "./components/DeviationPlot"
-export { default as RadarPlot } from "./components/RadarPlot"
-export type { RadarPlotProps } from "./components/RadarPlot"
 export { default as DotStripPlot } from "./components/DotStripPlot"
 export type { DotStripPlotProps } from "./components/DotStripPlot"
 export { default as DivergingLollipop } from "./components/DivergingLollipop"
@@ -113,19 +111,3 @@ export {
 
 export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
 export type { ThemeKey } from "./utils/themeLineColors"
-
-// Shape morph utilities
-export {
-  POINTS_PER_SHAPE,
-  SQUARE_SIZE,
-  SQUARE_GAP,
-  resampleClosedPath,
-  rectPoints,
-  diamondPoints,
-  circlePoints,
-  lineSegmentPoints,
-  pointsToD,
-  easeInOut,
-  lerp,
-} from "./utils/shape-morph"
-export type { ShapeMorphData } from "./utils/shape-morph"

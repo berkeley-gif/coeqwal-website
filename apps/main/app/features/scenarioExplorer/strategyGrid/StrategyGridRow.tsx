@@ -125,7 +125,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   }
 
   /**
-   * Render a single outcome item.either a summary cell or full glyph
+   * Render a single outcome item — either a summary cell or full glyph
    * depending on the outcomeDisplayMode store value.
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
@@ -152,7 +152,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       )
     }
 
-    // Distribution mode.full glyph
+    // Distribution mode — full glyph
     const showLabelBelowGlyph = !isAlignedGrid
     const showControlsBelowGlyph = !isAlignedGrid
 
@@ -243,8 +243,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               alignItems: "flex-start",
               alignSelf: "start",
               ...(!compact && {
-                pt: `calc(${theme.spacing(1)} + 19px)`,
-                pb: 1,
+                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 19px)`,
+                pb: theme.scenarios.grid.row.padding,
               }),
               ...(compact && { gridRow: "1 / -1" }),
             }}
@@ -309,8 +309,6 @@ function CompactRowContent({
   onIconClick,
 }: CompactRowContentProps) {
   const theme = useTheme()
-  const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
-  const isSortActive = useScenarioExplorerStore((s) => s.isSortActive)
 
   return (
     <Box
@@ -333,8 +331,6 @@ function CompactRowContent({
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
-          showDescription={showDefinitions}
-          showThemeBadge={isSortActive}
           onThemeBadgeClick={onThemeBadgeClick}
         />
         <Box
@@ -437,8 +433,6 @@ function NonCompactRowContent({
   onIconClick,
 }: NonCompactRowContentProps) {
   const theme = useTheme()
-  const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
-  const isSortActive = useScenarioExplorerStore((s) => s.isSortActive)
 
   // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
@@ -451,17 +445,18 @@ function NonCompactRowContent({
       <Box
         sx={{
           gridColumn: { xs: "2", sm: "2" },
+          // Standard gap before divider
           pr: theme.scenarios.grid.divider.gap,
-          pt: 1,
-          pb: isResponsiveView ? 0 : 1,
+          pt: theme.scenarios.grid.row.padding,
+          // In responsive views (<1400px), no bottom padding since content wraps below
+          // In full mode, standard row padding
+          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
           alignSelf: "start",
         }}
       >
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
-          showDescription={showDefinitions}
-          showThemeBadge={isSortActive}
           descriptionMaxWidth="none"
           onThemeBadgeClick={onThemeBadgeClick}
         />
@@ -482,8 +477,8 @@ function NonCompactRowContent({
             gap: theme.space.gap.md,
             justifyContent: "flex-start",
             alignItems: "flex-start",
-            pt: 1,
-            pb: isResponsiveView ? 0 : 1,
+            pt: theme.scenarios.grid.row.padding,
+            pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
           }}
         >
           <Typography
@@ -522,9 +517,9 @@ function NonCompactRowContent({
           // sm wrapped: 8px top padding (+ 8px rowGap = 16px total)
           // Full mode: glyph alignment offset to align with scenario title
           pt: isResponsiveView
-            ? { xs: theme.space.gap.md, sm: theme.space.gap.sm }
-            : { sm: "6px" },
-          pb: { sm: 1 },
+            ? { xs: theme.space.gap.lg, sm: theme.space.gap.md }
+            : { sm: theme.scenarios.grid.glyphOffset },
+          pb: { sm: theme.scenarios.grid.row.padding },
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
@@ -580,7 +575,7 @@ function NonCompactRowContent({
 }
 
 /**
- * Outcomes-only row content.just the outcome glyphs, no title/ops/checkbox.
+ * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
  * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
  */
 function OutcomesOnlyRowContent({
@@ -599,8 +594,8 @@ function OutcomesOnlyRowContent({
         display: "grid",
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
-        pt: "6px",
-        pb: "6px",
+        pt: theme.scenarios.grid.glyphOffset,
+        pb: theme.scenarios.grid.row.padding,
         pl: theme.scenarios.grid.divider.gap,
         borderLeft: { sm: `1px solid ${theme.palette.grey[300]}` },
       }}

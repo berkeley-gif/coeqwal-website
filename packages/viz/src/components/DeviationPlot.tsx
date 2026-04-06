@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
+import React, { useRef, useEffect, useState, useCallback } from "react"
 import { scaleBand, scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
@@ -20,7 +20,6 @@ export interface DeviationPlotProps {
   highlightedIds?: Set<string> | null
   showBaselineStaircase?: boolean
   showScenarioPath?: boolean
-  showAllPaths?: boolean
   showTierZones?: boolean
   showDifferenceGlyphs?: boolean
   showThemeRings?: boolean
@@ -30,21 +29,10 @@ export interface DeviationPlotProps {
   comparisonLabel?: string
   climateMode?: "off" | "morph" | "compare"
   morphShowComparison?: boolean
-  /** Map of scenario ID to theme/group string.used to cluster same-theme dots together */
+  /** Map of scenario ID to theme/group string — used to cluster same-theme dots together */
   scenarioThemes?: Record<string, string>
-  /** Monotonically increasing counter.triggers morph transitions instead of full rebuild */
+  /** Monotonically increasing counter — triggers morph transitions instead of full rebuild */
   morphGeneration?: number
-  pinnedScenarioIds?: Set<string>
-  onPinnedToggle?: (scenarioId: string) => void
-  dimUnpinned?: boolean
-  showDistribution?: boolean
-  distributionData?: Record<
-    string,
-    Record<string, { tier: number; count: number; normalized: number }[]>
-  >
-  showHCRange?: boolean
-  hcRangeData?: Record<string, Record<string, { min: number; max: number }>>
-  showBaselineFill?: boolean
 }
 
 function toTier(v: number): number {
@@ -99,7 +87,7 @@ function computeColumnDodge(
   const isSingleTier = tierSet.size === 1
 
   if (isSingleTier) {
-    // All dots share the same tier.use a clean centered horizontal line
+    // All dots share the same tier — use a clean centered horizontal line
     // with even spacing, compressing if needed to stay within halfSpread.
     // Sort by theme so same-theme dots cluster together.
     const ordered = themeMap
@@ -120,7 +108,7 @@ function computeColumnDodge(
     return result
   }
 
-  // Multiple tiers.greedy center-first placement with 2D collision.
+  // Multiple tiers — greedy center-first placement with 2D collision.
   // Process largest same-tier groups first so they claim center positions.
   const tierMap = new Map<number, { id: string; y: number }[]>()
   for (const e of entries) {
@@ -195,7 +183,7 @@ function computeColumnDodge(
   return result
 }
 
-/** Imperatively show the tooltip DOM element.no React state updates. */
+/** Imperatively show the tooltip DOM element — no React state updates. */
 function showTooltip(
   el: HTMLDivElement,
   x: number,
@@ -227,33 +215,22 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     lineColors = DEFAULT_LINE_COLORS,
     onLineHover,
     onLineClick,
+    chosenIds,
     highlightedIds,
     showBaselineStaircase = true,
     showScenarioPath = true,
-    showAllPaths = false,
     showTierZones = true,
     showDifferenceGlyphs = false,
     showThemeRings = false,
     scenarioThemeRingColors = undefined,
     comparisonData,
     comparisonBaselineData,
+    comparisonLabel: _comparisonLabel = "Comparison",
     climateMode = "off",
     morphShowComparison = false,
     scenarioThemes,
     morphGeneration,
-    pinnedScenarioIds: pinnedScenarioIdsProp,
-    onPinnedToggle,
-    dimUnpinned = false,
-    showDistribution = false,
-    distributionData,
-    showHCRange = false,
-    hcRangeData,
-    showBaselineFill = true,
   }) => {
-    const pinnedScenarioIds = useMemo(
-      () => pinnedScenarioIdsProp ?? new Set<string>(),
-      [pinnedScenarioIdsProp],
-    )
     const svgRef = useRef<SVGSVGElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const tooltipRef = useRef<HTMLDivElement>(null)
@@ -270,16 +247,14 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
       null,
     )
+    const [pinnedScenarioId, setPinnedScenarioId] = useState<string | null>(
+      null,
+    )
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
     )
     const [currentWidth, setCurrentWidth] = useState(width)
     const [currentHeight, setCurrentHeight] = useState(height)
-
-    // Store the initial (historical) baseline Y positions so we can show a ghost
-    const initialBaselineRef = useRef<Map<string, number> | null>(null)
-    // Track whether we've ever morphed away from the initial hydroclimate
-    const hasMorphedRef = useRef(false)
 
     // Hydroclimate morph detection
     const shouldMorphNextRef = useRef(false)
@@ -301,10 +276,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     useEffect(() => {
       onLineClickRef.current = onLineClick
     }, [onLineClick])
-    const onPinnedToggleRef = useRef(onPinnedToggle)
-    useEffect(() => {
-      onPinnedToggleRef.current = onPinnedToggle
-    }, [onPinnedToggle])
 
     useEffect(() => {
       if (responsive && dimensions.width > 0 && dimensions.height > 0) {
@@ -317,8 +288,22 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
     }, [dimensions, responsive, width, height])
 
     useEffect(() => {
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setPinnedScenarioId(null)
+      }
+      window.addEventListener("keydown", onKey)
+      return () => window.removeEventListener("keydown", onKey)
+    }, [])
+
+    useEffect(() => {
       morphShowCompRef.current = morphShowComparison
     }, [morphShowComparison])
+
+    useEffect(() => {
+      if (pinnedScenarioId && !data.some((s) => s.id === pinnedScenarioId)) {
+        setPinnedScenarioId(null)
+      }
+    }, [data, pinnedScenarioId])
 
     useEffect(() => {
       return () => {
@@ -453,131 +438,21 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             }
           }
 
-          svg
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id")
-              if (!sid) return
-              const scenario = dataMap.get(sid)
-              if (!scenario) return
-              const pts: [number, number][] = []
-              axes.forEach((axis) => {
-                const sv = scenario.values[axis]
-                if (sv == null) return
-                const dotEl = svg.select<SVGCircleElement>(
-                  `circle[data-scenario-id="${sid}"][data-axis="${axis}"]:not(.theme-ring)`,
-                )
-                const cx = dotEl.empty()
-                  ? (scales.xScale(axis) ?? 0) + scales.bandW / 2
-                  : parseFloat(dotEl.attr("cx"))
-                pts.push([cx, scales.yScale(toTier(sv))])
-              })
-              if (pts.length >= 2) {
-                const pathGen = line<[number, number]>()
-                  .x((d) => d[0])
-                  .y((d) => d[1])
-                el.transition()
-                  .duration(MORPH_DUR)
-                  .attr("d", pathGen(pts) ?? "")
-              }
-            })
-
           return
         }
 
         // ── Hydroclimate morph: transition dots/baselines to new values ──
-        if (shouldMorphNextRef.current && scalesRef.current && baselineData) {
+        if (
+          shouldMorphNextRef.current &&
+          scalesRef.current &&
+          baselineData
+        ) {
           shouldMorphNextRef.current = false
-          hasMorphedRef.current = true
           const scales = scalesRef.current
           const dataMap = new Map(data.map((s) => [s.id, s]))
           const svg = select(svgRef.current)
           const HC_DUR = 600
 
-          // Show/hide ghost baseline trace
-          if (initialBaselineRef.current) {
-            const ghostPositionsStored = initialBaselineRef.current
-            let isBackToInitial = true
-            axes.forEach((axis) => {
-              const storedY = ghostPositionsStored.get(axis)
-              const bv = baselineData.values[axis]
-              if (storedY == null || bv == null) return
-              const newY = scales.yScale(toTier(bv))
-              if (Math.abs(newY - storedY) > 1) isBackToInitial = false
-            })
-
-            const ghostSel = svg.select("g.ghost-baselines")
-            if (isBackToInitial && !ghostSel.empty()) {
-              ghostSel
-                .selectAll("line")
-                .transition()
-                .duration(HC_DUR)
-                .attr("opacity", 0)
-                .on("end", function () {
-                  select(this).remove()
-                })
-            } else if (
-              !isBackToInitial &&
-              (ghostSel.empty() || ghostSel.selectAll("*").empty())
-            ) {
-              const gHost = ghostSel.empty()
-                ? svg
-                    .select("g")
-                    .insert("g", "g.baselines")
-                    .attr("class", "ghost-baselines")
-                : ghostSel
-              const ghostPositions = initialBaselineRef.current
-              axes.forEach((axis) => {
-                const ghostY = ghostPositions.get(axis)
-                if (ghostY == null) return
-                const colX = scales.xScale(axis) ?? 0
-                const bw = scales.bandW
-                const cx = colX + bw / 2
-                const bracketHalfW = bw * 0.45
-                const edgeL = cx - bracketHalfW
-                const edgeR = cx + bracketHalfW
-                gHost
-                  .append("line")
-                  .attr("class", "ghost-baseline")
-                  .attr("data-axis", axis)
-                  .attr("x1", edgeL)
-                  .attr("y1", ghostY)
-                  .attr("x2", edgeR)
-                  .attr("y2", ghostY)
-                  .attr("stroke", "#2d3748")
-                  .attr("stroke-width", 2)
-                  .attr("stroke-dasharray", "6,4")
-                  .attr("stroke-linecap", "square")
-                  .attr("opacity", 0)
-                  .attr("pointer-events", "none")
-                  .transition()
-                  .duration(HC_DUR)
-                  .attr("opacity", 0.55)
-                ;[edgeL, edgeR].forEach((ex) => {
-                  gHost
-                    .append("line")
-                    .attr("class", "ghost-baseline")
-                    .attr("data-axis", axis)
-                    .attr("x1", ex)
-                    .attr("y1", ghostY - 5)
-                    .attr("x2", ex)
-                    .attr("y2", ghostY + 5)
-                    .attr("stroke", "#2d3748")
-                    .attr("stroke-width", 2)
-                    .attr("stroke-dasharray", "6,4")
-                    .attr("stroke-linecap", "round")
-                    .attr("opacity", 0)
-                    .attr("pointer-events", "none")
-                    .transition()
-                    .duration(HC_DUR)
-                    .attr("opacity", 0.55)
-                })
-              })
-            }
-          }
-
-          const morphHasPinned = pinnedScenarioIds.size > 0
           svg
             .selectAll<
               SVGCircleElement,
@@ -598,15 +473,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 el.transition().duration(HC_DUR).attr("fill-opacity", 0)
                 return
               }
-              const restoreOp =
-                dimUnpinned && morphHasPinned && !pinnedScenarioIds.has(sid)
-                  ? 0.1
-                  : 1.0
               el.transition()
                 .duration(HC_DUR)
                 .attr("cy", scales.yScale(toTier(sv)))
-                .attr("fill-opacity", restoreOp)
-                .attr("stroke-opacity", Math.min(restoreOp + 0.1, 1))
             })
 
           svg
@@ -620,19 +489,12 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const axis = el.attr("data-axis")
               if (!sid || !axis) return
               const scenario = dataMap.get(sid)
-              if (!scenario) {
-                el.transition().duration(HC_DUR).attr("opacity", 0)
-                return
-              }
+              if (!scenario) return
               const sv = scenario.values[axis]
-              if (sv == null) {
-                el.transition().duration(HC_DUR).attr("opacity", 0)
-                return
-              }
+              if (sv == null) return
               el.transition()
                 .duration(HC_DUR)
                 .attr("cy", scales.yScale(toTier(sv)))
-                .attr("opacity", 0.85)
             })
 
           svg
@@ -642,19 +504,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const axis = el.attr("data-axis")
               if (!axis) return
               const bv = baselineData.values[axis]
-              if (bv == null) {
-                el.transition().duration(HC_DUR).attr("opacity", 0)
-                return
-              }
-              const tag = el.attr("data-tag")
-              const origOpacity = tag === "comp" ? 0.5 : 0.7
+              if (bv == null) return
               const newY = scales.yScale(toTier(bv))
               const halfTick = parseFloat(el.attr("data-half-tick") ?? "0")
               el.transition()
                 .duration(HC_DUR)
                 .attr("y1", newY - halfTick)
                 .attr("y2", newY + halfTick)
-                .attr("opacity", origOpacity)
             })
 
           svg
@@ -667,15 +523,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
               const bv = baselineData.values[axis]
               const scenario = dataMap.get(sid)
               const sv = scenario?.values[axis]
-              if (bv == null || sv == null) {
-                el.transition().duration(HC_DUR).attr("opacity", 0)
-                return
-              }
+              if (bv == null || sv == null) return
               el.transition()
                 .duration(HC_DUR)
                 .attr("y1", scales.yScale(toTier(bv)))
                 .attr("y2", scales.yScale(toTier(sv)))
-                .attr("opacity", 1)
             })
 
           if (showBaselineStaircase) {
@@ -697,36 +549,6 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("d", stairLine(newPts) ?? "")
             }
           }
-
-          svg
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id")
-              if (!sid) return
-              const scenario = dataMap.get(sid)
-              if (!scenario) return
-              const pts: [number, number][] = []
-              axes.forEach((axis) => {
-                const sv = scenario.values[axis]
-                if (sv == null) return
-                const dotEl = svg.select<SVGCircleElement>(
-                  `circle[data-scenario-id="${sid}"][data-axis="${axis}"]:not(.theme-ring)`,
-                )
-                const cx = dotEl.empty()
-                  ? (scales.xScale(axis) ?? 0) + scales.bandW / 2
-                  : parseFloat(dotEl.attr("cx"))
-                pts.push([cx, scales.yScale(toTier(sv))])
-              })
-              if (pts.length >= 2) {
-                const pathGen = line<[number, number]>()
-                  .x((d) => d[0])
-                  .y((d) => d[1])
-                el.transition()
-                  .duration(HC_DUR)
-                  .attr("d", pathGen(pts) ?? "")
-              }
-            })
 
           return
         }
@@ -885,15 +707,17 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .text(TIER_LABELS[i] ?? "")
         })
 
-        const hasPinned = pinnedScenarioIds.size > 0
         const sidebarHighlightActive =
-          !hasPinned && highlightedIds && highlightedIds.size > 0
+          !pinnedScenarioId && highlightedIds && highlightedIds.size > 0
 
         const getOpacity = (id: string) => {
-          if (dimUnpinned && hasPinned) {
-            return pinnedScenarioIds.has(id) ? 1.0 : 0.1
+          if (sidebarHighlightActive) {
+            return highlightedIds!.has(id) ? 1.0 : 0.08
           }
-          return 1.0
+          if (chosenIds && chosenIds.size > 0) {
+            return chosenIds.has(id) ? 0.9 : 0.25
+          }
+          return 0.8
         }
 
         const T_DUR = hasAnimatedRef.current ? 0 : 500
@@ -1076,133 +900,9 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .attr("pointer-events", "none")
         })
 
-        // Above/below baseline column tints
-        const tintLayer = g.append("g").attr("class", "baseline-tints")
-        const histBaselineInfos = baselineInfos.filter(
-          ({ tag }) => tag === "hist",
-        )
-        if (showBaselineFill)
-          histBaselineInfos.forEach(({ axis, baseY }) => {
-            const colX = xScale(axis)!
-            const colLeft = colX - (stepW - bandW) / 2
-            tintLayer
-              .append("rect")
-              .attr("x", colLeft)
-              .attr("y", 0)
-              .attr("width", stepW)
-              .attr("height", Math.max(0, baseY))
-              .attr("fill", "rgba(56,161,105,0.06)")
-              .attr("pointer-events", "none")
-            tintLayer
-              .append("rect")
-              .attr("x", colLeft)
-              .attr("y", baseY)
-              .attr("width", stepW)
-              .attr("height", Math.max(0, innerH - baseY))
-              .attr("fill", "rgba(229,62,62,0.06)")
-              .attr("pointer-events", "none")
-          })
-
-        // "above / below baseline" labels in the first column
-        if (showBaselineFill && histBaselineInfos.length > 0) {
-          const first = histBaselineInfos[0]!
-          const lx = xScale(first.axis)! + bandW / 2
-
-          if (first.baseY > 18) {
-            tintLayer
-              .append("text")
-              .attr("x", lx)
-              .attr("y", first.baseY / 2)
-              .attr("text-anchor", "middle")
-              .attr("dominant-baseline", "middle")
-              .attr("font-size", 10)
-              .attr("font-family", FONT_FAMILY)
-              .attr("font-style", "italic")
-              .attr("font-weight", 400)
-              .attr("fill", "rgba(56,161,105,0.45)")
-              .attr("pointer-events", "none")
-              .text("above baseline")
-          }
-
-          const belowH = innerH - first.baseY
-          if (belowH > 18) {
-            tintLayer
-              .append("text")
-              .attr("x", lx)
-              .attr("y", first.baseY + belowH / 2)
-              .attr("text-anchor", "middle")
-              .attr("dominant-baseline", "middle")
-              .attr("font-size", 10)
-              .attr("font-family", FONT_FAMILY)
-              .attr("font-style", "italic")
-              .attr("font-weight", 400)
-              .attr("fill", "rgba(229,62,62,0.45)")
-              .attr("pointer-events", "none")
-              .text("below baseline")
-          }
-        }
-
-        // Capture baseline positions for the ghost trace on every full rebuild.
-        // This resets the ghost reference whenever data/scenarios change.
-        const posMap = new Map<string, number>()
-        baselineInfos.forEach(({ axis, tag, baseY }) => {
-          if (tag === "hist") posMap.set(axis, baseY)
-        })
-        initialBaselineRef.current = posMap
-        hasMorphedRef.current = false
-
-        const ghostLayer = g.append("g").attr("class", "ghost-baselines")
         const baselineLayer = g.append("g").attr("class", "baselines")
-        const whiskerLayer = g.append("g").attr("class", "hc-range-whiskers")
         const pathLayer = g.append("g").attr("class", "scenario-path")
-        const distributionLayer = g
-          .append("g")
-          .attr("class", "distribution-dots")
         const dotsLayer = g.append("g").attr("class", "dots")
-
-        // Render ghost baseline if we've morphed away from the initial hydroclimate
-        if (hasMorphedRef.current && initialBaselineRef.current) {
-          const ghostPositions = initialBaselineRef.current
-          baselineInfos
-            .filter(({ tag }) => tag === "hist")
-            .forEach(({ axis, cx, w }) => {
-              const ghostY = ghostPositions.get(axis)
-              if (ghostY == null) return
-              const bracketHalfW = (isCompare ? w : w) * 0.45
-              const edgeL = cx - bracketHalfW
-              const edgeR = cx + bracketHalfW
-              ghostLayer
-                .append("line")
-                .attr("class", "ghost-baseline")
-                .attr("data-axis", axis)
-                .attr("x1", edgeL)
-                .attr("y1", ghostY)
-                .attr("x2", edgeR)
-                .attr("y2", ghostY)
-                .attr("stroke", "#2d3748")
-                .attr("stroke-width", 2)
-                .attr("stroke-dasharray", "6,4")
-                .attr("stroke-linecap", "square")
-                .attr("opacity", 0.55)
-                .attr("pointer-events", "none")
-              ;[edgeL, edgeR].forEach((ex) => {
-                ghostLayer
-                  .append("line")
-                  .attr("class", "ghost-baseline")
-                  .attr("data-axis", axis)
-                  .attr("x1", ex)
-                  .attr("y1", ghostY - 5)
-                  .attr("x2", ex)
-                  .attr("y2", ghostY + 5)
-                  .attr("stroke", "#2d3748")
-                  .attr("stroke-width", 2)
-                  .attr("stroke-dasharray", "6,4")
-                  .attr("stroke-linecap", "round")
-                  .attr("opacity", 0.55)
-                  .attr("pointer-events", "none")
-              })
-            })
-        }
 
         const TICK_HALF = 6
         baselineInfos.forEach(({ axis, tag, cx, baseY, w }) => {
@@ -1244,8 +944,8 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         })
 
         const drawPathForScenario = (scenarioId: string) => {
-          pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
-          if (!showScenarioPath && !showAllPaths) return
+          pathLayer.selectAll("*").remove()
+          if (!showScenarioPath) return
           const pts = dotPositions.get(scenarioId)
           const activeList = subcolumns[0]!.srcData
           const scenario = activeList.find((s) => s.id === scenarioId)
@@ -1254,23 +954,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           const color = hasScenarioColors
             ? lineColors[si] || colors.default
             : colors.default
-          const isPinned = pinnedScenarioIds.has(scenarioId)
-          const isHighlighted = highlightedIds && highlightedIds.has(scenarioId)
-          const isBackground = showAllPaths && !isPinned && !isHighlighted
-          const dimmed = dimUnpinned && hasPinned && !isPinned
-          let strokeOp = isBackground ? 0.55 : 0.45
-          if (dimmed) strokeOp = 0.07
           const pathGen = line<(typeof pts)[number]>()
             .x((d) => d.cx)
             .y((d) => d.cy)
           pathLayer
             .append("path")
-            .attr("data-path-id", scenarioId)
             .attr("d", pathGen(pts) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
-            .attr("stroke-width", isBackground ? 1.2 : 1.5)
-            .attr("stroke-opacity", strokeOp)
+            .attr("stroke-width", 1.5)
+            .attr("stroke-opacity", 0.45)
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
             .attr("pointer-events", "none")
@@ -1282,35 +975,16 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
             .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
               const isFocus = sid === focusId
-              const isPin = pinnedScenarioIds.has(sid)
               const isRing = this.classList.contains("theme-ring")
               if (isRing) {
                 select(this)
-                  .attr("opacity", isFocus || isPin ? 1 : 0.08)
-                  .attr("stroke-opacity", isFocus || isPin ? 1 : 0.1)
+                  .attr("opacity", isFocus ? 1 : 0.08)
+                  .attr("stroke-opacity", isFocus ? 1 : 0.1)
               } else {
                 select(this)
-                  .attr("fill-opacity", isFocus || isPin ? 1.0 : 0.08)
-                  .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.08)
-                  .attr(
-                    "r",
-                    isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7,
-                  )
-              }
-            })
-        }
-
-        const boostPinnedDots = (ids: Set<string>) => {
-          dotsLayer
-            .selectAll<SVGCircleElement, unknown>("circle")
-            .each(function () {
-              const sid = this.getAttribute("data-scenario-id") ?? ""
-              if (!ids.has(sid)) return
-              const isRing = this.classList.contains("theme-ring")
-              if (!isRing) {
-                select(this)
-                  .attr("r", dotR + 3)
-                  .attr("fill-opacity", 1)
+                  .attr("fill-opacity", isFocus ? 1.0 : 0.08)
+                  .attr("stroke-opacity", isFocus ? 1.0 : 0.08)
+                  .attr("r", isFocus ? dotR + 1.5 : dotR * 0.7)
               }
             })
         }
@@ -1402,14 +1076,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("data-tag", tag)
                 .attr("data-base-r", dotR)
 
-              const isPinnedDot = pinnedScenarioIds.has(scenario.id)
-              const targetR = isPinnedDot
-                ? dotR + 3
-                : sidebarHighlightActive
-                  ? highlightedIds!.has(scenario.id)
-                    ? dotR + 1.5
-                    : dotR * 0.7
-                  : dotR
+              const targetR = sidebarHighlightActive
+                ? highlightedIds!.has(scenario.id)
+                  ? dotR + 1.5
+                  : dotR * 0.7
+                : dotR
 
               dot
                 .transition()
@@ -1465,150 +1136,35 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                     clearTimeout(hoverNotifyTimerRef.current)
                     hoverNotifyTimerRef.current = null
                   }
-                  resetDotVisuals()
-                  pathLayer.selectAll("*").remove()
-                  if (showAllPaths) {
-                    data.forEach((s) => drawPathForScenario(s.id))
-                  }
-                  if (hasPinned) {
-                    pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
-                    boostPinnedDots(pinnedScenarioIds)
+                  if (pinnedScenarioId) {
+                    applyFocusVisuals(pinnedScenarioId)
+                    drawPathForScenario(pinnedScenarioId)
+                  } else {
+                    resetDotVisuals()
+                    pathLayer.selectAll("*").remove()
                   }
                   if (tooltipRef.current) hideTooltip(tooltipRef.current)
                   lastNotifiedIdRef.current = null
                   onLineHoverRef.current?.(null)
                 })
-                .on("click", () => {
-                  onPinnedToggleRef.current?.(scenario.id)
-                  onLineClickRef.current?.(scenario)
+                .on("click", () => onLineClickRef.current?.(scenario))
+                .on("dblclick", function (event: MouseEvent) {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  setPinnedScenarioId((prev) =>
+                    prev === scenario.id ? null : scenario.id,
+                  )
                 })
             })
           })
         })
 
-        if (showAllPaths) {
-          data.forEach((scenario) => {
-            drawPathForScenario(scenario.id)
-          })
-        }
-
-        if (hasPinned) {
-          pinnedScenarioIds.forEach((id) => drawPathForScenario(id))
-          boostPinnedDots(pinnedScenarioIds)
-        } else if (!showAllPaths && highlightedIds && highlightedIds.size > 0) {
+        if (pinnedScenarioId) {
+          applyFocusVisuals(pinnedScenarioId)
+          drawPathForScenario(pinnedScenarioId)
+        } else if (highlightedIds && highlightedIds.size > 0) {
           const hId = highlightedIds.values().next().value as string
           if (hId) drawPathForScenario(hId)
-        }
-
-        // HC range corridor.shaded band showing min–max envelope across
-        // hydroclimates for each scenario
-        if (showHCRange && hcRangeData) {
-          const activeList = subcolumns[0]!.srcData
-          activeList.forEach((scenario, si) => {
-            const scenarioRange = hcRangeData[scenario.id]
-            if (!scenarioRange) return
-            const color = hasScenarioColors
-              ? lineColors[si] || colors.default
-              : colors.default
-            const isPinned = pinnedScenarioIds.has(scenario.id)
-            const dimmed = dimUnpinned && hasPinned && !isPinned
-            const fillOp = dimmed ? 0.02 : 0.1
-            const strokeOp = dimmed ? 0.05 : 0.25
-
-            const upperPts: [number, number][] = []
-            const lowerPts: [number, number][] = []
-
-            axes.forEach((axis) => {
-              const range = scenarioRange[axis]
-              if (!range) return
-              const dodgeKey = `hist:${axis}:${scenario.id}`
-              const dodgeOff = dodgeMap.get(dodgeKey) ?? 0
-              const colX = xScale(axis)!
-              const cx =
-                colX + subcolumns[0]!.xOff + subcolumns[0]!.w / 2 + dodgeOff
-              const minY = yScale(toTier(range.min))
-              const maxY = yScale(toTier(range.max))
-              upperPts.push([cx, Math.min(minY, maxY)])
-              lowerPts.push([cx, Math.max(minY, maxY)])
-            })
-
-            if (upperPts.length < 2) return
-
-            const ribbonPts = [...upperPts, ...lowerPts.reverse()]
-            const pathD =
-              ribbonPts
-                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
-                .join(" ") + " Z"
-
-            whiskerLayer
-              .append("path")
-              .attr("d", pathD)
-              .attr("fill", color)
-              .attr("fill-opacity", fillOp)
-              .attr("stroke", color)
-              .attr("stroke-width", 0.75)
-              .attr("stroke-opacity", strokeOp)
-              .attr("pointer-events", "none")
-          })
-        }
-
-        if (showDistribution && distributionData && hasPinned) {
-          const activeList = subcolumns[0]!.srcData
-          const pinnedArr = Array.from(pinnedScenarioIds)
-          const pinCount = pinnedArr.length
-          const locDotR = 2.5
-          const locDotDiam = locDotR * 2 + 1
-          const tierBandH = yScale(1.5) - yScale(0.5)
-
-          pinnedArr.forEach((scenarioId, pinIdx) => {
-            const outcomeBuckets = distributionData[scenarioId]
-            if (!outcomeBuckets) return
-            const si = activeList.findIndex((s) => s.id === scenarioId)
-            const color =
-              si >= 0 && hasScenarioColors
-                ? lineColors[si] || colors.default
-                : colors.default
-
-            axes.forEach((axis) => {
-              const buckets = outcomeBuckets[axis]
-              if (!buckets || buckets.length === 0) return
-              const colX = xScale(axis)!
-              const colW = subcolumns[0]!.w
-              const sliceW = pinCount === 1 ? colW : colW / pinCount
-              const sliceLeft = colX + subcolumns[0]!.xOff + pinIdx * sliceW
-              const availW = sliceW * 0.85
-              const sliceCenter = sliceLeft + sliceW / 2
-
-              buckets.forEach(({ tier, count }) => {
-                if (count <= 0) return
-                const tierY = yScale(tier)
-                const maxCols = Math.max(1, Math.floor(availW / locDotDiam))
-                const rows = Math.ceil(count / maxCols)
-                const cols = Math.min(count, maxCols)
-                const gridW = cols * locDotDiam
-                const gridH = rows * locDotDiam
-                const startX = sliceCenter - gridW / 2 + locDotR
-                const maxGridH = tierBandH * 0.7
-                const startY = tierY - Math.min(gridH, maxGridH) / 2 + locDotR
-
-                for (let d = 0; d < count; d++) {
-                  const col = d % maxCols
-                  const row = Math.floor(d / maxCols)
-                  distributionLayer
-                    .append("circle")
-                    .attr("cx", startX + col * locDotDiam)
-                    .attr("cy", startY + row * locDotDiam)
-                    .attr("r", locDotR)
-                    .attr("fill", color)
-                    .attr("fill-opacity", 0.85)
-                    .attr("stroke", "rgba(0,0,0,0.25)")
-                    .attr("stroke-width", 0.5)
-                    .attr("pointer-events", "none")
-                    .attr("class", "dist-dot")
-                }
-              })
-            })
-          })
         }
       },
       [
@@ -1617,21 +1173,15 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         baselineData,
         lineColors,
         colors,
+        chosenIds,
         highlightedIds,
         showBaselineStaircase,
         showScenarioPath,
-        showAllPaths,
         showTierZones,
         showDifferenceGlyphs,
         showThemeRings,
         scenarioThemeRingColors,
-        pinnedScenarioIds,
-        dimUnpinned,
-        showDistribution,
-        distributionData,
-        showHCRange,
-        hcRangeData,
-        showBaselineFill,
+        pinnedScenarioId,
         comparisonData,
         comparisonBaselineData,
         climateMode,
@@ -1646,6 +1196,10 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
       }
     }, [currentWidth, currentHeight, updateChart])
 
+    const pinnedName = pinnedScenarioId
+      ? data.find((s) => s.id === pinnedScenarioId)?.name
+      : null
+
     return (
       <div
         ref={containerRef}
@@ -1656,13 +1210,43 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
           position: "relative",
         }}
       >
+        {pinnedName && (
+          <div
+            style={{
+              position: "absolute",
+              top: 6,
+              right: 10,
+              fontSize: 9.5,
+              fontFamily:
+                '"neue-haas-grotesk-text", Roboto, Helvetica, Arial, sans-serif',
+              color: "#4a5568",
+              zIndex: 5,
+              pointerEvents: "none",
+              textAlign: "right",
+              maxWidth: "50%",
+              lineHeight: 1.4,
+              letterSpacing: "0.01em",
+              background: "rgba(255,255,255,0.85)",
+              borderRadius: 6,
+              padding: "3px 8px",
+            }}
+          >
+            <span style={{ fontWeight: 600, color: "#2d3748" }}>
+              {pinnedName}
+            </span>
+            <span style={{ color: "#a0aec0", fontSize: 8.5 }}>
+              {" "}
+              &middot; dbl-click to unpin
+            </span>
+          </div>
+        )}
         <svg
           ref={svgRef}
           width={currentWidth}
           height={currentHeight}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
-        {/* Tooltip element.always mounted, toggled via display:none imperatively */}
+        {/* Tooltip element — always mounted, toggled via display:none imperatively */}
         <div
           ref={tooltipRef}
           style={{
