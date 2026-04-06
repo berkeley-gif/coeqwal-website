@@ -10,6 +10,8 @@ import {
   PlayArrowIcon,
   PauseIcon,
   ReplayIcon,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
@@ -39,6 +41,7 @@ import { useTierAnimationData } from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
   type LocationInfo,
+  type EncodingMode,
   getOutcomeProgressRange,
   computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
@@ -49,6 +52,8 @@ import PinnedLocationsList from "./PinnedLocationsList"
 import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../../content/outcomes"
 import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
+import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
+import { useScenarios } from "@repo/data/coeqwal/hooks"
 
 const TOTAL_DURATION = 30
 
@@ -338,6 +343,24 @@ export default function TierAnimationSection() {
 
   const isInteractive = playState === "finished"
 
+  /* ── Encoding mode: distribution | bar | average ── */
+  const [encodingMode, setEncodingMode] = useState<EncodingMode>("distribution")
+  const [spotlightedTier, setSpotlightedTier] = useState<number | null>(null)
+  const { chartData: tierChartData } = useScenarioTiers("s0020")
+  const { scenarios } = useScenarios()
+  const s0020Scenario = useMemo(
+    () => scenarios?.find((s) => s.short_code === "s0020"),
+    [scenarios],
+  )
+
+  useEffect(() => {
+    if (encodingMode !== "bar") setSpotlightedTier(null)
+  }, [encodingMode])
+
+  useEffect(() => {
+    setSpotlightedTier(null)
+  }, [selectedOutcomeCode])
+
   /* ── Multi-pin hover state (shared by overlay squares and map polygons) ── */
   const [hoveredLocation, setHoveredLocation] = useState<LocationInfo | null>(
     null,
@@ -485,7 +508,34 @@ export default function TierAnimationSection() {
           }
         }
 
-        if (pinnedFeatureIds.length > 0) {
+        if (spotlightedTier != null) {
+          const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
+          if (locData) {
+            const spotlightIds: string[] = []
+            for (const [locId, tier] of Object.entries(locData.tierMap)) {
+              if (tier === spotlightedTier) {
+                const fid =
+                  selectedOutcomeCode === "RES_STOR"
+                    ? (RESERVOIR_CALSIM_TO_GNISIDLABEL[locId] ?? locId)
+                    : locId
+                spotlightIds.push(fid)
+              }
+            }
+            if (spotlightIds.length > 0) {
+              const spotlightMatch = [
+                "in",
+                ["get", idProp],
+                ["literal", spotlightIds],
+              ]
+              map.setPaintProperty(fillId, "fill-opacity", [
+                "case",
+                spotlightMatch,
+                0.9,
+                0.12,
+              ] as never)
+            }
+          }
+        } else if (pinnedFeatureIds.length > 0) {
           const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
           map.setPaintProperty(fillId, "fill-opacity", [
             "step", ["zoom"],
@@ -577,6 +627,7 @@ export default function TierAnimationSection() {
     selectedOutcomeCode,
     mapAPI.mapRef,
     locKey,
+    spotlightedTier,
   ])
 
   const storeHighlights = useLocationHighlights()
@@ -1922,6 +1973,18 @@ export default function TierAnimationSection() {
                   isInteractive ? locHandlers.onClick : undefined
                 }
                 locationNameMap={locationNameMap}
+                encodingMode={isInteractive ? encodingMode : "distribution"}
+                tierChartData={tierChartData}
+                spotlightedTier={spotlightedTier}
+                onBarClick={
+                  isInteractive
+                    ? (code: string, tier: number) => {
+                        setSpotlightedTier((prev) =>
+                          prev === tier ? null : tier,
+                        )
+                      }
+                    : undefined
+                }
               />
             </motion.div>
           )}
@@ -1944,6 +2007,84 @@ export default function TierAnimationSection() {
             interactive={isInteractive}
             textHidden={!textVisible}
           />
+
+          {/* Scenario header + encoding toggle — visible after animation */}
+          {isInteractive && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "8%",
+                left: "5%",
+                zIndex: 6,
+                pointerEvents: "auto",
+                maxWidth: { xs: "90%", sm: 380, md: 420 },
+                opacity: isInteractive ? 1 : 0,
+                transition: "opacity 0.4s ease",
+              }}
+            >
+              <Typography
+                variant="h5"
+                component="h3"
+                sx={{
+                  fontWeight: 700,
+                  color: theme.palette.undertone.warm,
+                  textShadow: theme.textShadow.displayBody,
+                  mb: 0.5,
+                }}
+              >
+                {s0020Scenario?.name ?? "Current operations"}
+              </Typography>
+              {s0020Scenario?.short_description && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.undertone.warm,
+                    textShadow: theme.textShadow.displayBody,
+                    mb: 2,
+                    opacity: 0.85,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {s0020Scenario.short_description}
+                </Typography>
+              )}
+              <ToggleButtonGroup
+                value={encodingMode}
+                exclusive
+                onChange={(_, val) => {
+                  if (val) setEncodingMode(val as EncodingMode)
+                }}
+                size="small"
+                sx={{
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  backdropFilter: "blur(8px)",
+                  borderRadius: 2,
+                  "& .MuiToggleButton-root": {
+                    color: theme.palette.undertone.warm,
+                    textShadow: theme.textShadow.displayBody,
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: "0.8rem",
+                    px: 2,
+                    py: 0.5,
+                    "&.Mui-selected": {
+                      backgroundColor: "rgba(255,255,255,0.3)",
+                      color: theme.palette.undertone.warm,
+                      fontWeight: 700,
+                    },
+                    "&:hover": {
+                      backgroundColor: "rgba(255,255,255,0.2)",
+                    },
+                  },
+                }}
+              >
+                <ToggleButton value="distribution">Distribution</ToggleButton>
+                <ToggleButton value="bar">Bar</ToggleButton>
+                <ToggleButton value="average">Average</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+          )}
 
           {isInteractive &&
             pinnedHighlights.length > 0 &&
