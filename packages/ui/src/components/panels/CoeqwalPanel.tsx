@@ -190,7 +190,7 @@ export function CoeqwalPanel({
           >
             {description && (
               <Typography
-                variant="body1"
+                variant="displayBody"
                 component="div"
                 sx={{ color: fg, mb: cta ? 4 : 0 }}
               >
