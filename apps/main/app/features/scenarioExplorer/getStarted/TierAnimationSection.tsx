@@ -414,62 +414,59 @@ export default function TierAnimationSection() {
       ? getOutcomeConfig(selectedOutcomeCode)
       : null
 
-    if (!config || config.geometryType !== "polygon") {
+    if (!config) {
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
       return
     }
 
-    const fillId = config.mapboxLayerId
-    const outlineId = `${config.mapboxLayerId}-outline`
-    const idProp = config.idProperty ?? "DU_ID"
+    // ── Polygon-specific Mapbox paint changes ──
+    if (config.geometryType === "polygon") {
+      const fillId = config.mapboxLayerId
+      const outlineId = `${config.mapboxLayerId}-outline`
+      const idProp = config.idProperty ?? "DU_ID"
 
-    if (!map.getLayer(fillId)) {
-      if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
-      return
-    }
-
-    // Build feature ID lists: active (hovered+pinned) for outline, pinned-only for opacity
-    const activeFeatureIds: string[] = []
-    const pinnedFeatureIds: string[] = []
-    for (const [key, info] of activeLocationSet) {
-      let fid = info.sourceId
-      if (info.code === "RES_STOR") {
-        fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
-      }
-      activeFeatureIds.push(fid)
-      if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
-    }
-
-    // Gold outline: only change line-color for active features; leave line-width untouched
-    try {
-      if (map.getLayer(outlineId)) {
-        if (!origLineColorRef.current) {
-          origLineColorRef.current = map.getPaintProperty(outlineId, "line-color") ?? "#888"
+      if (map.getLayer(fillId)) {
+        const activeFeatureIds: string[] = []
+        const pinnedFeatureIds: string[] = []
+        for (const [key, info] of activeLocationSet) {
+          let fid = info.sourceId
+          if (info.code === "RES_STOR") {
+            fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+          }
+          activeFeatureIds.push(fid)
+          if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
         }
 
-        if (activeFeatureIds.length > 0) {
-          const activeMatch = ["in", ["get", idProp], ["literal", activeFeatureIds]]
-          map.setPaintProperty(outlineId, "line-color", [
-            "case", activeMatch, HIGHLIGHT_GOLD, origLineColorRef.current,
-          ] as never)
-        } else {
-          map.setPaintProperty(outlineId, "line-color", origLineColorRef.current as never)
-        }
-      }
+        try {
+          if (map.getLayer(outlineId)) {
+            if (!origLineColorRef.current) {
+              origLineColorRef.current = map.getPaintProperty(outlineId, "line-color") ?? "#888"
+            }
 
-      // Fill opacity: ONLY pinned features get boosted; hover does NOT change opacity
-      if (pinnedFeatureIds.length > 0) {
-        const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
-        map.setPaintProperty(fillId, "fill-opacity", [
-          "step", ["zoom"],
-          ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
-          ZOOM_THRESHOLD,
-          ZOOMED_IN_OPACITY,
-        ] as never)
-      } else {
-        map.setPaintProperty(fillId, "fill-opacity", ZOOM_AWARE_BASE_OPACITY as never)
+            if (activeFeatureIds.length > 0) {
+              const activeMatch = ["in", ["get", idProp], ["literal", activeFeatureIds]]
+              map.setPaintProperty(outlineId, "line-color", [
+                "case", activeMatch, HIGHLIGHT_GOLD, origLineColorRef.current,
+              ] as never)
+            } else {
+              map.setPaintProperty(outlineId, "line-color", origLineColorRef.current as never)
+            }
+          }
+
+          if (pinnedFeatureIds.length > 0) {
+            const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
+            map.setPaintProperty(fillId, "fill-opacity", [
+              "step", ["zoom"],
+              ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
+              ZOOM_THRESHOLD,
+              ZOOMED_IN_OPACITY,
+            ] as never)
+          } else {
+            map.setPaintProperty(fillId, "fill-opacity", ZOOM_AWARE_BASE_OPACITY as never)
+          }
+        } catch { /* ok */ }
       }
-    } catch { /* ok */ }
+    }
 
     // ── Store highlights (drives map Popups -- independent of map style) ──
     const highlights: import("../../map/store").LocationHighlight[] = []

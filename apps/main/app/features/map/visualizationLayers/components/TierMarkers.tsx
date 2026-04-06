@@ -28,6 +28,7 @@ interface TierMarkersProps {
   tierCode: string
   onHover?: (feature: HoveredFeatureInfo | null) => void
   onClick?: (feature: HoveredFeatureInfo) => void
+  highlightedIds?: Set<string>
 }
 
 export default function TierMarkers({
@@ -35,6 +36,7 @@ export default function TierMarkers({
   tierCode,
   onHover,
   onClick,
+  highlightedIds,
 }: TierMarkersProps) {
   const theme = useTheme()
 
@@ -95,6 +97,9 @@ export default function TierMarkers({
           lat,
         )
 
+        const isHighlighted = highlightedIds?.has(loc.location_id) ?? false
+        const goldAccent = "#ffd87e"
+
         return (
           <Marker
             key={loc.location_id}
@@ -104,19 +109,25 @@ export default function TierMarkers({
           >
             <div
               style={{
-                width: 20,
-                height: 20,
+                width: isHighlighted ? 26 : 20,
+                height: isHighlighted ? 26 : 20,
                 backgroundColor: getTierColor(loc.tier_level),
-                border: isDiamond
-                  ? `2px solid ${theme.palette.common.white}E6`
-                  : theme.border.onDark,
-                boxShadow: theme.shadow.sm,
+                border: isHighlighted
+                  ? `3px solid ${goldAccent}`
+                  : isDiamond
+                    ? `2px solid ${theme.palette.common.white}E6`
+                    : theme.border.onDark,
+                boxShadow: isHighlighted
+                  ? `0 2px 6px rgba(0,0,0,0.5)`
+                  : theme.shadow.sm,
                 cursor: "pointer",
                 borderRadius: isDiamond
                   ? theme.borderRadius.xs
                   : theme.borderRadius.circle,
                 transform: isDiamond ? "scale(0.5, 1) rotate(45deg)" : "none",
                 transformOrigin: "center",
+                transition:
+                  "width 0.15s, height 0.15s, border 0.15s, box-shadow 0.15s",
               }}
               onMouseEnter={() => onHover?.(featureInfo)}
               onMouseLeave={() => onHover?.(null)}

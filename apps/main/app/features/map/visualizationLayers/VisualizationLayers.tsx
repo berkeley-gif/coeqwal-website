@@ -182,6 +182,16 @@ export default function VisualizationLayers() {
     [isVisualizationActive, isGetStartedMode],
   )
 
+  const highlightedLocationIds = useMemo(() => {
+    if (locationHighlights.length === 0) return undefined
+    const ids = new Set<string>()
+    for (const h of locationHighlights) {
+      const colonIdx = h.key.indexOf(":")
+      if (colonIdx >= 0) ids.add(h.key.substring(colonIdx + 1))
+    }
+    return ids
+  }, [locationHighlights])
+
   return (
     <>
       {/* Basemap dim overlay - darkens map when visualization is active */}
@@ -249,12 +259,42 @@ export default function VisualizationLayers() {
                   }
                 : handlePointClick
             }
+            highlightedIds={highlightedLocationIds}
           />
         )}
 
       {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
       {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
-        <TierLocationLabels tierLookup={tierLevelMap} />
+        <TierLocationLabels
+          tierLookup={tierLevelMap}
+          highlightedIds={highlightedLocationIds}
+          onHover={
+            isGetStartedMode
+              ? (info) => {
+                  if (!info) {
+                    getOnLocationHover()?.(null)
+                  } else {
+                    getOnLocationHover()?.({
+                      code: outcomeCode!,
+                      sourceId: info.id,
+                      tier: info.tier,
+                    })
+                  }
+                }
+              : undefined
+          }
+          onClick={
+            isGetStartedMode
+              ? (info) => {
+                  getOnLocationClick()?.({
+                    code: outcomeCode!,
+                    sourceId: info.id,
+                    tier: info.tier,
+                  })
+                }
+              : undefined
+          }
+        />
       )}
       {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
         (tierLocations.length > 0 || Object.keys(locationData).length > 0) && (
@@ -264,6 +304,7 @@ export default function VisualizationLayers() {
                 ? tierLocations
                 : Object.values(locationData)
             }
+            highlightedIds={highlightedLocationIds}
           />
         )}
 
