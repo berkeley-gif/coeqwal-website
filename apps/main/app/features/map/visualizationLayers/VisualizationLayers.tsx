@@ -334,78 +334,78 @@ export default function VisualizationLayers() {
         .filter((hl) => {
           if (!isGetStartedMode || !hl.pinned) return true
           const code = hl.key.split(":")[0]
-          return code === "RES_STOR" || code === "FW_EXP" || code === "FW_DELTA_USES"
+          return (
+            code === "RES_STOR" || code === "FW_EXP" || code === "FW_DELTA_USES"
+          )
         })
         .map((hl) => (
-        <Popup
-          key={hl.key}
-          className="location-highlight-popup"
-          longitude={hl.longitude}
-          latitude={hl.latitude}
-          anchor="bottom"
-          closeButton={false}
-          closeOnClick={false}
-          offset={12}
-          style={{ zIndex: 10 }}
-        >
-          <Box
-            onClick={
-              hl.pinned
-                ? () => getOnLocationToggle()?.(hl.key)
-                : undefined
-            }
-            sx={{
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-              p: "3px 8px",
-              borderRadius: "4px",
-              background: "rgba(255,255,255,0.75)",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-              fontSize: 11,
-              lineHeight: 1.3,
-              textAlign: "center",
-              color: "#333",
-              whiteSpace: "nowrap",
-              cursor: hl.pinned ? "pointer" : "default",
-            }}
+          <Popup
+            key={hl.key}
+            className="location-highlight-popup"
+            longitude={hl.longitude}
+            latitude={hl.latitude}
+            anchor="bottom"
+            closeButton={false}
+            closeOnClick={false}
+            offset={12}
+            style={{ zIndex: 10 }}
           >
             <Box
-              component="span"
-              sx={{
-                fontWeight: 600,
-                maxWidth: 200,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {hl.name}
-            </Box>
-            <Box
-              component="span"
+              onClick={
+                hl.pinned ? () => getOnLocationToggle()?.(hl.key) : undefined
+              }
               sx={{
                 display: "inline-flex",
+                flexDirection: "column",
                 alignItems: "center",
-                gap: "4px",
-                fontWeight: 500,
-                color: hl.tierColor,
+                p: "3px 8px",
+                borderRadius: "4px",
+                background: "rgba(255,255,255,0.75)",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                fontSize: 11,
+                lineHeight: 1.3,
+                textAlign: "center",
+                color: "#333",
+                whiteSpace: "nowrap",
+                cursor: hl.pinned ? "pointer" : "default",
               }}
             >
               <Box
                 component="span"
                 sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "2px",
-                  backgroundColor: hl.tierColor,
-                  flexShrink: 0,
+                  fontWeight: 600,
+                  maxWidth: 200,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
-              />
-              Tier {hl.tierLevel}: {hl.tierLabel}
+              >
+                {hl.name}
+              </Box>
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  fontWeight: 500,
+                  color: hl.tierColor,
+                }}
+              >
+                <Box
+                  component="span"
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "2px",
+                    backgroundColor: hl.tierColor,
+                    flexShrink: 0,
+                  }}
+                />
+                Tier {hl.tierLevel}: {hl.tierLabel}
+              </Box>
             </Box>
-          </Box>
-        </Popup>
-      ))}
+          </Popup>
+        ))}
     </>
   )
 }

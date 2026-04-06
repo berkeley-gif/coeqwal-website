@@ -129,7 +129,9 @@ export default function PinnedLocationsList({
               y1={line.cardY}
               x2={line.featureX}
               y2={line.featureY}
-              stroke={active ? "rgba(255, 216, 126, 1)" : "rgba(255, 216, 126, 0.6)"}
+              stroke={
+                active ? "rgba(255, 216, 126, 1)" : "rgba(255, 216, 126, 0.6)"
+              }
               strokeWidth={active ? 2.5 : 1.5}
               strokeDasharray={active ? undefined : "4 3"}
               style={{ transition: "stroke 0.15s, stroke-width 0.15s" }}
