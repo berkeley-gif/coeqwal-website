@@ -66,8 +66,6 @@ interface MapState {
 
   // Lightweight highlight tooltips driven by the tier animation overlay
   locationHighlights: LocationHighlight[]
-  /** Callback for toggling a pinned location from a map tooltip click */
-  onLocationToggle: ((key: string) => void) | null
 }
 
 const initialState: MapState = {
@@ -83,7 +81,6 @@ const initialState: MapState = {
   activeOutcomeVisualization: null,
   clearTooltipsSignal: 0,
   locationHighlights: [],
-  onLocationToggle: null,
 }
 
 // ============================================================================
@@ -91,6 +88,9 @@ const initialState: MapState = {
 // ============================================================================
 
 export const useMapStore = create<MapState>()(immer(() => initialState))
+
+// Stored outside immer to avoid proxy/freeze issues with function values
+let _onLocationToggle: ((key: string) => void) | null = null
 
 // ============================================================================
 // Actions
@@ -174,10 +174,14 @@ export const mapActions = {
   // Location highlights (tier animation overlay hover/pin)
   setLocationHighlights: (highlights: LocationHighlight[]) =>
     useMapStore.setState({ locationHighlights: highlights }),
-  clearLocationHighlights: () =>
-    useMapStore.setState({ locationHighlights: [], onLocationToggle: null }),
-  setOnLocationToggle: (fn: ((key: string) => void) | null) =>
-    useMapStore.setState({ onLocationToggle: fn }),
+  clearLocationHighlights: () => {
+    useMapStore.setState({ locationHighlights: [] })
+    _onLocationToggle = null
+  },
+  setOnLocationToggle: (fn: ((key: string) => void) | null) => {
+    _onLocationToggle = fn
+  },
+  getOnLocationToggle: () => _onLocationToggle,
 }
 
 // ============================================================================
@@ -236,4 +240,4 @@ export const useClearTooltipsSignal = () =>
 // Location highlights
 export const useLocationHighlights = () =>
   useMapStore((s) => s.locationHighlights)
-export const useOnLocationToggle = () => useMapStore((s) => s.onLocationToggle)
+export const getOnLocationToggle = () => _onLocationToggle

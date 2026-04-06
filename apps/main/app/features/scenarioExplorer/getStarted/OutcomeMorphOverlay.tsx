@@ -53,7 +53,7 @@ interface OutcomeMorphOverlayProps {
   interactive?: boolean
   /** All active (hovered + pinned) locations driven by the parent */
   activeLocationSet?: Map<string, LocationInfo>
-  /** The currently hovered location (for tooltip positioning) */
+  /** Currently hovered location (for ephemeral overlay tooltip) */
   hoveredLocation?: LocationInfo | null
   /** Callbacks into the shared hover/pin state machine in the parent */
   onLocationEnter?: (info: LocationInfo) => void
@@ -278,7 +278,7 @@ export default function OutcomeMorphOverlay({
     })
   }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap])
 
-  const tooltipInfo = useMemo(() => {
+  const hoverTooltip = useMemo(() => {
     if (!hoveredLocation) return null
     const group = outcomeShapes.find((g) => g.code === hoveredLocation.code)
     if (!group) return null
@@ -286,6 +286,7 @@ export default function OutcomeMorphOverlay({
       (s) => s.sourceId === hoveredLocation.sourceId,
     )
     if (!shape) return null
+
     let cx = 0,
       cy = 0
     for (const [px, py] of shape.squareTarget) {
@@ -294,6 +295,7 @@ export default function OutcomeMorphOverlay({
     }
     cx /= shape.squareTarget.length
     cy /= shape.squareTarget.length
+
     return {
       x: cx,
       y: cy - SQUARE_SIZE / 2 - 4,
@@ -301,6 +303,7 @@ export default function OutcomeMorphOverlay({
         locationNameMap?.[
           `${hoveredLocation.code}:${hoveredLocation.sourceId}`
         ] ?? getLocationName(hoveredLocation.code, hoveredLocation.sourceId),
+      tierLevel: hoveredLocation.tier,
       tier: getTierLabel(hoveredLocation.tier),
       color: shape.color,
     }
@@ -406,7 +409,7 @@ export default function OutcomeMorphOverlay({
                   d={shape.rawD}
                   fill={shape.color}
                   fillOpacity={isLocationActive ? 1 : isSelected ? 0.9 : 0.75}
-                  stroke={isLocationActive ? "#fff" : shape.color}
+                  stroke={isLocationActive ? "#ffd87e" : shape.color}
                   strokeWidth={isLocationActive ? 1.5 : 0.5}
                   strokeOpacity={isLocationActive ? 1 : 0.4}
                   style={{
@@ -464,10 +467,10 @@ export default function OutcomeMorphOverlay({
         )
       })}
 
-      {tooltipInfo && (
+      {hoverTooltip && (
         <foreignObject
-          x={tooltipInfo.x - 100}
-          y={tooltipInfo.y - 40}
+          x={hoverTooltip.x - 100}
+          y={hoverTooltip.y - 40}
           width={200}
           height={40}
           style={{ pointerEvents: "none", overflow: "visible" }}
@@ -498,10 +501,27 @@ export default function OutcomeMorphOverlay({
                 textOverflow: "ellipsis",
               }}
             >
-              {tooltipInfo.name}
+              {hoverTooltip.name}
             </span>
-            <span style={{ color: tooltipInfo.color, fontWeight: 500 }}>
-              {tooltipInfo.tier}
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+                fontWeight: 500,
+                color: hoverTooltip.color,
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 2,
+                  backgroundColor: hoverTooltip.color,
+                  flexShrink: 0,
+                }}
+              />
+              Tier {hoverTooltip.tierLevel}: {hoverTooltip.tier}
             </span>
           </div>
         </foreignObject>
