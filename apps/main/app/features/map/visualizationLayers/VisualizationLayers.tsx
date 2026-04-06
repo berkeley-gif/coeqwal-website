@@ -44,7 +44,7 @@ import {
   useGeocoderMarker,
   useClearTooltipsSignal,
   useLocationHighlights,
-  useOnLocationToggle,
+  getOnLocationToggle,
 } from "../store"
 
 // Large polygon covering California and surrounding area for dim overlay
@@ -75,7 +75,6 @@ export default function VisualizationLayers() {
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
   const locationHighlights = useLocationHighlights()
-  const onLocationToggle = useOnLocationToggle()
 
   // Get outcome visualization data
   const {
@@ -278,8 +277,8 @@ export default function VisualizationLayers() {
         >
           <Box
             onClick={
-              hl.pinned && onLocationToggle
-                ? () => onLocationToggle(hl.key)
+              hl.pinned
+                ? () => getOnLocationToggle()?.(hl.key)
                 : undefined
             }
             sx={{

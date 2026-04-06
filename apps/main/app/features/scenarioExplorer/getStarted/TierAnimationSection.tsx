@@ -383,78 +383,94 @@ export default function TierAnimationSection() {
     )
   }, [centroids])
 
-  /* ── Apply map highlight for all active locations (no dimming) ── */
+  /* ── Apply map highlight for all active locations ── */
+  const HIGHLIGHT_GOLD = "#ffd87e"
+  const BASE_FILL_OPACITY = 0.65
+
   const prevHighlightLayerRef = useRef<{
     fillId: string
     outlineId: string
   } | null>(null)
 
   useEffect(() => {
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (!map?.isStyleLoaded?.()) return
-
-    // Restore previous layer to default stroke
-    if (prevHighlightLayerRef.current) {
-      const { outlineId } = prevHighlightLayerRef.current
-      try {
-        if (map.getLayer(outlineId)) {
-          map.setPaintProperty(outlineId, "line-color", "#888" as never)
-          map.setPaintProperty(outlineId, "line-width", 0.5 as never)
-        }
-      } catch {
-        /* ok */
-      }
-      prevHighlightLayerRef.current = null
-    }
-
     if (activeLocationSet.size === 0) {
+      // Clear map highlights if map is available
+      const map = mapAPI.mapRef?.current?.getMap?.()
+      if (map?.isStyleLoaded?.() && prevHighlightLayerRef.current) {
+        const { fillId, outlineId } = prevHighlightLayerRef.current
+        try {
+          if (map.getLayer(outlineId)) {
+            map.setPaintProperty(outlineId, "line-color", "#888" as never)
+            map.setPaintProperty(outlineId, "line-width", 0.5 as never)
+          }
+          if (map.getLayer(fillId)) {
+            map.setPaintProperty(fillId, "fill-opacity", BASE_FILL_OPACITY as never)
+          }
+        } catch { /* ok */ }
+        prevHighlightLayerRef.current = null
+      }
       mapActions.clearLocationHighlights()
       return
     }
 
-    // All active locations share the same outcome code
     const firstInfo = activeLocationSet.values().next().value as LocationInfo
     const config = getOutcomeConfig(firstInfo.code)
-    if (!config || config.geometryType !== "polygon") return
 
-    const fillId = config.mapboxLayerId
-    const outlineId = `${config.mapboxLayerId}-outline`
-    if (!map.getLayer(fillId)) return
-
-    const idProp = config.idProperty ?? "DU_ID"
-
-    // Build list of Mapbox feature IDs to highlight
-    const featureIds: string[] = []
-    for (const info of activeLocationSet.values()) {
-      let fid = info.sourceId
-      if (info.code === "RES_STOR") {
-        fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+    // ── Mapbox polygon highlight (gold stroke + full opacity) ──
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (map?.isStyleLoaded?.()) {
+      // Restore previous layer to defaults
+      if (prevHighlightLayerRef.current) {
+        const { fillId, outlineId } = prevHighlightLayerRef.current
+        try {
+          if (map.getLayer(outlineId)) {
+            map.setPaintProperty(outlineId, "line-color", "#888" as never)
+            map.setPaintProperty(outlineId, "line-width", 0.5 as never)
+          }
+          if (map.getLayer(fillId)) {
+            map.setPaintProperty(fillId, "fill-opacity", BASE_FILL_OPACITY as never)
+          }
+        } catch { /* ok */ }
+        prevHighlightLayerRef.current = null
       }
-      featureIds.push(fid)
+
+      if (config && config.geometryType === "polygon") {
+        const fillId = config.mapboxLayerId
+        const outlineId = `${config.mapboxLayerId}-outline`
+
+        if (map.getLayer(fillId)) {
+          const idProp = config.idProperty ?? "DU_ID"
+
+          const featureIds: string[] = []
+          for (const info of activeLocationSet.values()) {
+            let fid = info.sourceId
+            if (info.code === "RES_STOR") {
+              fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+            }
+            featureIds.push(fid)
+          }
+
+          const matchExpr = ["in", ["get", idProp], ["literal", featureIds]]
+
+          try {
+            if (map.getLayer(outlineId)) {
+              map.setPaintProperty(outlineId, "line-color", [
+                "case", matchExpr, HIGHLIGHT_GOLD, "#888",
+              ] as never)
+              map.setPaintProperty(outlineId, "line-width", [
+                "case", matchExpr, 2.5, 0.5,
+              ] as never)
+            }
+            map.setPaintProperty(fillId, "fill-opacity", [
+              "case", matchExpr, 1, BASE_FILL_OPACITY,
+            ] as never)
+            prevHighlightLayerRef.current = { fillId, outlineId }
+          } catch { /* ok */ }
+        }
+      }
     }
 
-    try {
-      // White stroke on active features, default on others (no fill-opacity change)
-      if (map.getLayer(outlineId)) {
-        map.setPaintProperty(outlineId, "line-color", [
-          "case",
-          ["in", ["get", idProp], ["literal", featureIds]],
-          "#ffffff",
-          "#888",
-        ] as never)
-        map.setPaintProperty(outlineId, "line-width", [
-          "case",
-          ["in", ["get", idProp], ["literal", featureIds]],
-          2.5,
-          0.5,
-        ] as never)
-      }
-      prevHighlightLayerRef.current = { fillId, outlineId }
-    } catch {
-      /* ok */
-    }
-
-    // Build tooltip highlights for every active location
+    // ── Store highlights (drives map Popups -- independent of map style) ──
     const highlights: import("../../map/store").LocationHighlight[] = []
     const nameMap = locationNameMapRef.current
 
@@ -487,7 +503,6 @@ export default function TierAnimationSection() {
       })
     }
 
-    // Sort: pinned first, hover-only last -- so pinned tooltips stay stable
     highlights.sort((a, b) => {
       if (a.pinned && !b.pinned) return -1
       if (!a.pinned && b.pinned) return 1
