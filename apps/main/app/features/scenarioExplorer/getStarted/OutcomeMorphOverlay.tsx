@@ -414,6 +414,8 @@ export default function OutcomeMorphOverlay({
                   strokeOpacity={isLocationActive ? 1 : 0.4}
                   style={{
                     opacity: 0,
+                    cursor:
+                      interactive && isSelected ? "pointer" : undefined,
                     transition:
                       "fill-opacity 0.15s, stroke 0.15s, stroke-width 0.15s",
                   }}

@@ -377,6 +377,9 @@ export default function TierAnimationSection() {
   const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
     new Map(),
   )
+  const geoCentroidsRef = useRef<Map<string, { lng: number; lat: number }>>(
+    new Map(),
+  )
   useEffect(() => {
     centroidLookupRef.current = new Map(
       centroids.map((c) => [c.id, { lng: c.lng, lat: c.lat }]),
@@ -476,12 +479,29 @@ export default function TierAnimationSection() {
 
     for (const [key, info] of activeLocationSet) {
       let coords: [number, number] | null = null
-      const centroid = centroidLookupRef.current.get(info.sourceId)
-      if (centroid) {
-        coords = [centroid.lng, centroid.lat]
-      } else {
+
+      // 1. AG_REV GeoJSON centroids (from useTierAnimationData)
+      const c1 = centroidLookupRef.current.get(info.sourceId)
+      if (c1) {
+        coords = [c1.lng, c1.lat]
+      }
+
+      // 2. Geo-centroids computed from Mapbox source features (all polygon outcomes)
+      if (!coords) {
+        let lookupId = info.sourceId
+        if (info.code === "RES_STOR") {
+          lookupId =
+            RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
+        }
+        const c2 = geoCentroidsRef.current.get(lookupId)
+        if (c2) coords = [c2.lng, c2.lat]
+      }
+
+      // 3. Hardcoded fallback (ENV_FLOWS, FW_EXP, FW_DELTA_USES, etc.)
+      if (!coords) {
         coords = getOutcomeLocationCoordinates(info.code, info.sourceId)
       }
+
       if (!coords) continue
 
       const nameKey = `${info.code}:${info.sourceId}`
@@ -518,7 +538,7 @@ export default function TierAnimationSection() {
     locKey,
   ])
 
-  // Register a toggle callback so map tooltip clicks can unpin locations
+  // Register store callbacks so map tooltips and TierMarkers can interact
   const handleTooltipToggle = useCallback((key: string) => {
     setPinnedLocations((prev) => {
       const next = new Map(prev)
@@ -530,8 +550,17 @@ export default function TierAnimationSection() {
   }, [])
   useEffect(() => {
     mapActions.setOnLocationToggle(handleTooltipToggle)
-    return () => mapActions.setOnLocationToggle(null)
-  }, [handleTooltipToggle])
+    mapActions.setOnLocationClick(locHandlers.onClick)
+    mapActions.setOnLocationHover((info) => {
+      if (info) locHandlers.onMouseEnter(info)
+      else locHandlers.onMouseLeave()
+    })
+    return () => {
+      mapActions.setOnLocationToggle(null)
+      mapActions.setOnLocationClick(null)
+      mapActions.setOnLocationHover(null)
+    }
+  }, [handleTooltipToggle, locHandlers])
 
   const handleOutcomeClick = useCallback(
     (code: string) => {
@@ -1150,6 +1179,7 @@ export default function TierAnimationSection() {
 
     const centroidLookup = new Map(centroids.map((c) => [c.id, c]))
     const vpMap = new Map<string, ScreenPolygon>()
+    const geoCentroids = new Map<string, { lng: number; lat: number }>()
 
     // ── 1. Query polygon-based Mapbox layers per the registry ──
     const layersToQuery = new Map<
@@ -1206,6 +1236,17 @@ export default function TierAnimationSection() {
       }
 
       for (const [featureId, ring] of bestRings) {
+        // Compute geographic centroid from the ring for tooltip coordinate lookup
+        let geoLng = 0,
+          geoLat = 0
+        for (const [lng, lat] of ring) {
+          geoLng += lng
+          geoLat += lat
+        }
+        geoLng /= ring.length
+        geoLat /= ring.length
+        geoCentroids.set(featureId, { lng: geoLng, lat: geoLat })
+
         const vpPoly: [number, number][] = []
         for (const [lng, lat] of ring) {
           try {
@@ -1305,6 +1346,7 @@ export default function TierAnimationSection() {
       return
     }
 
+    geoCentroidsRef.current = geoCentroids
     viewportDataRef.current = vpMap
     applyPanelOffset()
   }, [centroids, allLocationIds, outcomeLocations, mapAPI, applyPanelOffset])
