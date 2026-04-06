@@ -585,11 +585,14 @@ export default function TierAnimationSection() {
   }, [handleTooltipToggle, locHandlers])
 
   const handleOutcomeClick = useCallback(
-    (code: string) => {
+    (code: string, force?: boolean) => {
+      const isToggleOff = selectedOutcomeCode === code
+
+      if (isToggleOff && pinnedLocations.size > 0 && !force) return
+
       mapActions.clearMapTooltips()
       clearAllLocations()
 
-      const isToggleOff = selectedOutcomeCode === code
       mapActions.toggleOutcomeVisualization(code, "s0020")
 
       const map = mapAPI.mapRef?.current?.getMap?.()
@@ -611,7 +614,7 @@ export default function TierAnimationSection() {
         })
       }
     },
-    [selectedOutcomeCode, mapAPI.mapRef, clearAllLocations],
+    [selectedOutcomeCode, mapAPI.mapRef, clearAllLocations, pinnedLocations],
   )
 
   useEffect(() => {
@@ -1853,6 +1856,7 @@ export default function TierAnimationSection() {
                 position: "absolute",
                 inset: 0,
                 zIndex: 4,
+                pointerEvents: "none",
               }}
             >
               <OutcomeMorphOverlay
