@@ -164,7 +164,7 @@ const LAYOUT_POST_DIST_GAP = 12
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
 const ZOOM_THRESHOLD = 8
-const ZOOMED_IN_OPACITY = 0.6
+const ZOOMED_IN_OPACITY = 0.75
 const ZOOM_AWARE_BASE_OPACITY = [
   "step", ["zoom"], BASE_FILL_OPACITY, ZOOM_THRESHOLD, ZOOMED_IN_OPACITY,
 ]
@@ -346,6 +346,9 @@ export default function TierAnimationSection() {
     Map<string, LocationInfo>
   >(new Map())
   const [cardHoveredKey, setCardHoveredKey] = useState<string | null>(null)
+  const pinnedCacheRef = useRef<Map<string, Map<string, LocationInfo>>>(
+    new Map(),
+  )
 
   const locKey = useCallback(
     (info: LocationInfo) => `${info.code}:${info.sourceId}`,
@@ -381,17 +384,34 @@ export default function TierAnimationSection() {
     return set
   }, [pinnedLocations, hoveredLocation, locKey])
 
-  const clearAllLocations = useCallback(() => {
-    setHoveredLocation(null)
-    setPinnedLocations(new Map())
-    mapActions.clearLocationHighlights()
-  }, [])
-
-  // Clear when outcome changes
+  const prevOutcomeRef = useRef<string | null>(null)
   useEffect(() => {
-    clearAllLocations()
+    const prev = prevOutcomeRef.current
+    prevOutcomeRef.current = selectedOutcomeCode
+
+    if (prev && prev !== selectedOutcomeCode) {
+      setPinnedLocations((current) => {
+        if (current.size > 0) {
+          pinnedCacheRef.current.set(prev, new Map(current))
+        } else {
+          pinnedCacheRef.current.delete(prev)
+        }
+        return new Map()
+      })
+    }
+
+    setHoveredLocation(null)
+
+    const cached = selectedOutcomeCode
+      ? pinnedCacheRef.current.get(selectedOutcomeCode)
+      : undefined
+    if (cached && cached.size > 0) {
+      setPinnedLocations(new Map(cached))
+    }
+
     origLineColorRef.current = null
-  }, [selectedOutcomeCode, clearAllLocations])
+    origLineWidthRef.current = null
+  }, [selectedOutcomeCode])
 
   const centroidLookupRef = useRef<Map<string, { lng: number; lat: number }>>(
     new Map(),
@@ -408,14 +428,9 @@ export default function TierAnimationSection() {
   /* ── Apply map highlight for all active locations ── */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const origLineColorRef = useRef<any>(null)
+  const origLineWidthRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const map = mapAPI.mapRef?.current?.getMap?.()
-    if (!map?.isStyleLoaded?.()) {
-      if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
-      return
-    }
-
     const config = selectedOutcomeCode
       ? getOutcomeConfig(selectedOutcomeCode)
       : null
@@ -426,52 +441,70 @@ export default function TierAnimationSection() {
     }
 
     // ── Polygon-specific Mapbox paint changes ──
-    if (config.geometryType === "polygon") {
+    const map = mapAPI.mapRef?.current?.getMap?.()
+
+    const applyPaintChanges = () => {
+      if (!map || config.geometryType !== "polygon") return
       const fillId = config.mapboxLayerId
       const outlineId = `${config.mapboxLayerId}-outline`
       const idProp = config.idProperty ?? "DU_ID"
 
-      if (map.getLayer(fillId)) {
-        const activeFeatureIds: string[] = []
-        const pinnedFeatureIds: string[] = []
-        for (const [key, info] of activeLocationSet) {
-          let fid = info.sourceId
-          if (info.code === "RES_STOR") {
-            fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
-          }
-          activeFeatureIds.push(fid)
-          if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
+      if (!map.getLayer(fillId)) return
+
+      const activeFeatureIds: string[] = []
+      const pinnedFeatureIds: string[] = []
+      for (const [key, info] of activeLocationSet) {
+        let fid = info.sourceId
+        if (info.code === "RES_STOR") {
+          fid = RESERVOIR_CALSIM_TO_GNISIDLABEL[info.sourceId] ?? info.sourceId
         }
+        activeFeatureIds.push(fid)
+        if (pinnedLocations.has(key)) pinnedFeatureIds.push(fid)
+      }
 
-        try {
-          if (map.getLayer(outlineId)) {
-            if (!origLineColorRef.current) {
-              origLineColorRef.current = map.getPaintProperty(outlineId, "line-color") ?? "#888"
-            }
-
-            if (activeFeatureIds.length > 0) {
-              const activeMatch = ["in", ["get", idProp], ["literal", activeFeatureIds]]
-              map.setPaintProperty(outlineId, "line-color", [
-                "case", activeMatch, HIGHLIGHT_GOLD, origLineColorRef.current,
-              ] as never)
-            } else {
-              map.setPaintProperty(outlineId, "line-color", origLineColorRef.current as never)
-            }
+      try {
+        if (map.getLayer(outlineId)) {
+          if (!origLineColorRef.current) {
+            origLineColorRef.current = map.getPaintProperty(outlineId, "line-color") ?? "#888"
+          }
+          if (origLineWidthRef.current == null) {
+            origLineWidthRef.current = (map.getPaintProperty(outlineId, "line-width") ?? 1) as never
           }
 
-          if (pinnedFeatureIds.length > 0) {
-            const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
-            map.setPaintProperty(fillId, "fill-opacity", [
-              "step", ["zoom"],
-              ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
-              ZOOM_THRESHOLD,
-              ZOOMED_IN_OPACITY,
+          if (activeFeatureIds.length > 0) {
+            const activeMatch = ["in", ["get", idProp], ["literal", activeFeatureIds]]
+            map.setPaintProperty(outlineId, "line-color", [
+              "case", activeMatch, HIGHLIGHT_GOLD, origLineColorRef.current,
+            ] as never)
+            map.setPaintProperty(outlineId, "line-width", [
+              "case", activeMatch, 2, 1,
             ] as never)
           } else {
-            map.setPaintProperty(fillId, "fill-opacity", ZOOM_AWARE_BASE_OPACITY as never)
+            map.setPaintProperty(outlineId, "line-color", origLineColorRef.current as never)
+            map.setPaintProperty(outlineId, "line-width", origLineWidthRef.current as never)
           }
-        } catch { /* ok */ }
-      }
+        }
+
+        if (pinnedFeatureIds.length > 0) {
+          const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
+          map.setPaintProperty(fillId, "fill-opacity", [
+            "step", ["zoom"],
+            ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
+            ZOOM_THRESHOLD,
+            ZOOMED_IN_OPACITY,
+          ] as never)
+        } else {
+          map.setPaintProperty(fillId, "fill-opacity", ZOOM_AWARE_BASE_OPACITY as never)
+        }
+      } catch { /* ok */ }
+    }
+
+    let pendingIdle = false
+    if (map?.isStyleLoaded?.()) {
+      applyPaintChanges()
+    } else if (map) {
+      pendingIdle = true
+      map.once("idle", applyPaintChanges)
     }
 
     // ── Store highlights (drives map Popups -- independent of map style) ──
@@ -531,6 +564,12 @@ export default function TierAnimationSection() {
     })
 
     mapActions.setLocationHighlights(highlights)
+
+    return () => {
+      if (pendingIdle && map) {
+        map.off("idle", applyPaintChanges)
+      }
+    }
   }, [
     activeLocationSet,
     hoveredLocation,
@@ -591,7 +630,7 @@ export default function TierAnimationSection() {
       if (isToggleOff && pinnedLocations.size > 0 && !force) return
 
       mapActions.clearMapTooltips()
-      clearAllLocations()
+      setHoveredLocation(null)
 
       mapActions.toggleOutcomeVisualization(code, "s0020")
 
@@ -614,7 +653,7 @@ export default function TierAnimationSection() {
         })
       }
     },
-    [selectedOutcomeCode, mapAPI.mapRef, clearAllLocations, pinnedLocations],
+    [selectedOutcomeCode, mapAPI.mapRef, pinnedLocations],
   )
 
   useEffect(() => {

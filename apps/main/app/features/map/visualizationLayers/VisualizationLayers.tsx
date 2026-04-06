@@ -360,7 +360,7 @@ export default function VisualizationLayers() {
               alignItems: "center",
               p: "3px 8px",
               borderRadius: "4px",
-              background: "rgba(255,255,255,0.92)",
+              background: "rgba(255,255,255,0.75)",
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               fontSize: 11,
               lineHeight: 1.3,
