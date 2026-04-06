@@ -22,6 +22,10 @@ import {
 } from "../../map/config/outcomeLocations"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
 import type { ChartDataPoint } from "../../scenarios/components/shared/types"
+import {
+  computeTierScore,
+  getTierLevelForScore,
+} from "../../scenarios/components/shared/tierScore"
 
 export interface OutcomeGroup {
   code: string
@@ -111,10 +115,27 @@ export function computeDistributionHeight(
   return totalRows * cell
 }
 
-const BAR_HEIGHT = 10
-const BAR_SPACING = 4
-const BAR_MAX_WIDTH_FRACTION = 0.85
 const DOT_RADIUS = 8
+const GLYPH_SIZE = 60
+
+function hexToRgb(hex: string): [number, number, number] {
+  const h = hex.replace("#", "")
+  return [
+    parseInt(h.substring(0, 2), 16),
+    parseInt(h.substring(2, 4), 16),
+    parseInt(h.substring(4, 6), 16),
+  ]
+}
+
+function lerpColor(a: string, b: string, t: number): string {
+  const [r1, g1, b1] = hexToRgb(a)
+  const [r2, g2, b2] = hexToRgb(b)
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)))
+  const r = clamp(r1 + (r2 - r1) * t)
+  const g = clamp(g1 + (g2 - g1) * t)
+  const bv = clamp(b1 + (b2 - b1) * t)
+  return `#${[r, g, bv].map((v) => v.toString(16).padStart(2, "0")).join("")}`
+}
 
 function computeOutcomeLayout(
   polygons: ShapeMorphData[],
@@ -122,7 +143,8 @@ function computeOutcomeLayout(
   targetY: number,
   maxWidth: number,
   maxCols: number,
-  barValues?: number[],
+  chartPoints?: ChartDataPoint[],
+  tierColors?: { tier1: string; tier2: string; tier3: string; tier4: string },
 ) {
   const cell = SQUARE_SIZE + SQUARE_GAP
   const cols = Math.min(
@@ -138,11 +160,31 @@ function computeOutcomeLayout(
   }
   const tierKeys = [...byTier.keys()].sort((a, b) => a - b)
 
-  const maxBarWidth = (maxWidth - GRID_PAD * 2) * BAR_MAX_WIDTH_FRACTION
-  const barLeftX = targetX + GRID_PAD
+  const score = computeTierScore(chartPoints)
+  const tierLevel = score != null ? getTierLevelForScore(score) : null
+  const avgColor =
+    tierLevel != null && tierColors
+      ? tierColors[`tier${tierLevel}` as keyof typeof tierColors]
+      : null
 
-  const dotCx = targetX + GRID_PAD + maxWidth / 4
-  const dotCy = targetY + (tierKeys.length * (BAR_HEIGHT + BAR_SPACING)) / 2
+  const totalRows = tierKeys.reduce((sum, tier) => {
+    return sum + Math.ceil((byTier.get(tier)?.length ?? 0) / cols)
+  }, 0)
+  const gridWidth = cols * cell
+  const gridHeight = totalRows * cell
+
+  const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
+  const glyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
+
+  const numTiers = tierKeys.length
+  const barHeight = (GLYPH_SIZE * 0.8) / Math.max(numTiers, 1)
+  const barSpacing = (GLYPH_SIZE * 0.2) / (numTiers + 1)
+  const maxBarWidth = GLYPH_SIZE * 0.7
+  const barCornerRadius = barHeight / 4
+  const barLeftX = glyphLeft + GLYPH_SIZE * 0.15
+
+  const dotCx = glyphLeft + GLYPH_SIZE / 2
+  const dotCy = glyphTop + GLYPH_SIZE / 2
 
   const results: {
     resampled: [number, number][]
@@ -153,6 +195,8 @@ function computeOutcomeLayout(
     color: string
     tier: number
     sourceId: string
+    averageColor: string | null
+    isRepresentative: boolean
   }[] = []
 
   let currentRow = 0
@@ -160,12 +204,12 @@ function computeOutcomeLayout(
     const tier = tierKeys[ti]!
     const group = byTier.get(tier)!
 
-    const normVal = barValues?.[ti] ?? 0.5
-    const barW = Math.max(4, normVal * maxBarWidth)
+    const normVal = chartPoints?.[tier - 1]?.value ?? 0.5
+    const barW = Math.max(2, normVal * maxBarWidth)
     const barCx = barLeftX + barW / 2
     const barCy =
-      targetY + ti * (BAR_HEIGHT + BAR_SPACING) + BAR_HEIGHT / 2
-    const barPts = rectPoints(barCx, barCy, barW, BAR_HEIGHT, POINTS_PER_SHAPE)
+      glyphTop + barSpacing + ti * (barHeight + barSpacing) + barHeight / 2
+    const barPts = rectPoints(barCx, barCy, barW, barHeight, POINTS_PER_SHAPE, barCornerRadius)
     const dotPts = circlePoints(dotCx, dotCy, DOT_RADIUS, POINTS_PER_SHAPE)
 
     for (let i = 0; i < group.length; i++) {
@@ -196,12 +240,26 @@ function computeOutcomeLayout(
         color: shape.color,
         tier: shape.tier,
         sourceId: shape.sourceId,
+        averageColor: avgColor,
+        isRepresentative: i === 0,
       })
     }
     currentRow += Math.ceil(group.length / cols)
   }
 
-  return results
+  return {
+    shapes: results,
+    glyphMeta: {
+      glyphLeft,
+      glyphTop,
+      numTiers: tierKeys.length,
+      barHeight,
+      barSpacing,
+      maxBarWidth,
+      barCornerRadius,
+      barLeftX,
+    },
+  }
 }
 
 /**
@@ -245,6 +303,7 @@ export default function OutcomeMorphOverlay({
   const svgRef = useRef<SVGSVGElement>(null)
   const pathRefsMap = useRef<Map<string, (SVGPathElement | null)[]>>(new Map())
   const countRefsMap = useRef<Map<string, SVGTextElement | null>>(new Map())
+  const chromeRefsMap = useRef<Map<string, SVGGElement | null>>(new Map())
 
   const outcomeShapes = useMemo(() => {
     const panelLeft = panelWidth * (2 / 3)
@@ -267,16 +326,18 @@ export default function OutcomeMorphOverlay({
       const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
 
       const chartPoints = tierChartData?.[outcome.code]
-      const barValues = chartPoints?.map((p) => p.value)
+      const tierColors = theme.palette.tiers
 
-      const shapes = computeOutcomeLayout(
+      const layout = computeOutcomeLayout(
         sampled,
         gridTargetX,
         gridTargetY,
         maxColWidth,
         squaresPerRow,
-        barValues,
+        chartPoints,
+        tierColors,
       )
+      const shapes = layout.shapes
 
       let minX = Infinity,
         minY = Infinity,
@@ -313,6 +374,7 @@ export default function OutcomeMorphOverlay({
       return {
         code: outcome.code,
         shapes,
+        glyphMeta: layout.glyphMeta,
         bounds,
         locationDescription,
         countY,
@@ -320,7 +382,7 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap, tierChartData])
+  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap, tierChartData, theme.palette.tiers])
 
   const hoverTooltip = useMemo(() => {
     if (!hoveredLocation) return null
@@ -375,11 +437,30 @@ export default function OutcomeMorphOverlay({
     [],
   )
 
+  const getColorForMode = useCallback(
+    (
+      shape: (typeof outcomeShapes)[number]["shapes"][number],
+      mode: EncodingMode,
+    ) => {
+      if (mode === "average" && shape.averageColor) return shape.averageColor
+      return shape.color
+    },
+    [],
+  )
+
   useLayoutEffect(() => {
     if (prevEncodingRef.current !== encodingMode && progress.get() >= 1) {
-      encodingFromRef.current = prevEncodingRef.current
+      const fromMode = prevEncodingRef.current
+      encodingFromRef.current = fromMode
       encodingMorphRef.current = 0
       prevEncodingRef.current = encodingMode
+
+      const toBarOrAvg =
+        encodingMode === "bar" || encodingMode === "average"
+      const fromBarOrAvg =
+        fromMode === "bar" || fromMode === "average"
+      const toBar = encodingMode === "bar"
+      const fromBar = fromMode === "bar"
 
       const startTime = performance.now()
       const duration = 500
@@ -387,27 +468,103 @@ export default function OutcomeMorphOverlay({
       const tick = (now: number) => {
         const elapsed = now - startTime
         const t = Math.min(1, elapsed / duration)
-        encodingMorphRef.current = easeInOut(t)
+        const eased = easeInOut(t)
+        encodingMorphRef.current = eased
 
         for (const group of outcomeShapes) {
           const refs = pathRefsMap.current.get(group.code)
           if (!refs) continue
+
+          const chromeEl = chromeRefsMap.current.get(group.code)
+          if (chromeEl) {
+            if (toBar && !fromBar) {
+              chromeEl.style.opacity = String(eased)
+            } else if (!toBar && fromBar) {
+              chromeEl.style.opacity = String(1 - eased)
+            }
+          }
+
           for (let i = 0; i < group.shapes.length; i++) {
             const el = refs[i]
             if (!el) continue
             const shape = group.shapes[i]!
-            const from = getTargetForMode(shape, encodingFromRef.current)
+
+            const from = getTargetForMode(shape, fromMode)
             const to = getTargetForMode(shape, encodingMode)
-            const pts = from.map((a, pi) =>
-              lerp(a, to[pi]!, encodingMorphRef.current),
-            )
+            const pts = from.map((a, pi) => lerp(a, to[pi]!, eased))
             el.setAttribute("d", pointsToD(pts))
+
+            const fromColor = getColorForMode(shape, fromMode)
+            const toColor = getColorForMode(shape, encodingMode)
+            if (fromColor !== toColor) {
+              el.setAttribute("fill", lerpColor(fromColor, toColor, eased))
+            }
+
+            if (!shape.isRepresentative) {
+              if (toBarOrAvg && !fromBarOrAvg) {
+                el.style.opacity = String(1 - eased)
+              } else if (!toBarOrAvg && fromBarOrAvg) {
+                el.style.opacity = String(eased)
+              }
+            } else {
+              if (toBar) {
+                const startOp = fromBar ? 0.8 : 0.9
+                el.setAttribute(
+                  "fill-opacity",
+                  String(startOp + (0.8 - startOp) * eased),
+                )
+              } else if (fromBar) {
+                el.setAttribute(
+                  "fill-opacity",
+                  String(0.8 + (0.9 - 0.8) * eased),
+                )
+              }
+            }
+
+            if (toBarOrAvg && !fromBarOrAvg) {
+              el.setAttribute("stroke-opacity", String(0.4 * (1 - eased)))
+            } else if (!toBarOrAvg && fromBarOrAvg) {
+              el.setAttribute("stroke-opacity", String(0.4 * eased))
+            }
           }
         }
 
         if (t < 1) {
           encodingRafRef.current = requestAnimationFrame(tick)
         } else {
+          for (const group of outcomeShapes) {
+            const refs = pathRefsMap.current.get(group.code)
+            if (!refs) continue
+
+            const chromeEl = chromeRefsMap.current.get(group.code)
+            if (chromeEl) {
+              chromeEl.style.opacity = toBar ? "1" : "0"
+            }
+
+            for (let i = 0; i < group.shapes.length; i++) {
+              const el = refs[i]
+              if (!el) continue
+              const shape = group.shapes[i]!
+              el.setAttribute("fill", getColorForMode(shape, encodingMode))
+
+              if (!shape.isRepresentative && toBarOrAvg) {
+                el.style.opacity = "0"
+              } else {
+                el.style.opacity = "1"
+              }
+
+              if (toBar && shape.isRepresentative) {
+                el.setAttribute("fill-opacity", "0.8")
+              } else if (!toBarOrAvg) {
+                el.removeAttribute("fill-opacity")
+              }
+
+              el.setAttribute(
+                "stroke-opacity",
+                toBarOrAvg ? "0" : "0.4",
+              )
+            }
+          }
           encodingRafRef.current = null
         }
       }
@@ -422,9 +579,13 @@ export default function OutcomeMorphOverlay({
         encodingRafRef.current = null
       }
     }
-  }, [encodingMode, outcomeShapes, progress, getTargetForMode])
+  }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
   useLayoutEffect(() => {
+    const isBarOrAvg =
+      encodingMode === "bar" || encodingMode === "average"
+    const isBar = encodingMode === "bar"
+
     const handler = (v: number) => {
       if (encodingRafRef.current != null) return
 
@@ -435,12 +596,14 @@ export default function OutcomeMorphOverlay({
         const [morphStart, morphEnd] = group.progressRange
         const fadeStart = morphStart - 0.03
 
+        const chromeEl = chromeRefsMap.current.get(group.code)
+
         for (let i = 0; i < group.shapes.length; i++) {
           const el = refs[i]
           if (!el) continue
           const shape = group.shapes[i]!
 
-          const opacity =
+          const baseOpacity =
             v < fadeStart
               ? 0
               : v < morphStart
@@ -449,11 +612,17 @@ export default function OutcomeMorphOverlay({
 
           if (v < morphStart) {
             el.setAttribute("d", shape.rawD)
-            el.style.opacity = String(opacity)
+            el.setAttribute("fill", shape.color)
+            el.style.opacity = String(baseOpacity)
+            el.setAttribute("stroke-opacity", "0.4")
+            if (chromeEl) chromeEl.style.opacity = "0"
             continue
           }
 
-          const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
+          const morphT = Math.min(
+            1,
+            (v - morphStart) / (morphEnd - morphStart),
+          )
           const easedT = easeInOut(morphT)
 
           const target = getTargetForMode(shape, encodingMode)
@@ -461,14 +630,60 @@ export default function OutcomeMorphOverlay({
             lerp(a, target[pi]!, easedT),
           )
           el.setAttribute("d", pointsToD(pts))
-          el.style.opacity = String(opacity)
+
+          const targetColor = getColorForMode(shape, encodingMode)
+          if (targetColor !== shape.color) {
+            el.setAttribute(
+              "fill",
+              lerpColor(shape.color, targetColor, easedT),
+            )
+          } else {
+            el.setAttribute("fill", shape.color)
+          }
+
+          if (isBarOrAvg && !shape.isRepresentative) {
+            el.style.opacity = String(baseOpacity * (1 - easedT))
+          } else {
+            el.style.opacity = String(baseOpacity)
+          }
+
+          if (isBar && shape.isRepresentative) {
+            el.setAttribute(
+              "fill-opacity",
+              String(0.9 + (0.8 - 0.9) * easedT),
+            )
+          }
+
+          if (isBarOrAvg) {
+            el.setAttribute(
+              "stroke-opacity",
+              String(0.4 * (1 - easedT)),
+            )
+          }
+        }
+
+        if (chromeEl) {
+          if (isBar) {
+            if (v < morphStart) {
+              chromeEl.style.opacity = "0"
+            } else if (v >= morphEnd) {
+              chromeEl.style.opacity = "1"
+            } else {
+              const morphT = Math.min(
+                1,
+                (v - morphStart) / (morphEnd - morphStart),
+              )
+              chromeEl.style.opacity = String(easeInOut(morphT))
+            }
+          } else {
+            chromeEl.style.opacity = "0"
+          }
         }
 
         const countEl = countRefsMap.current.get(group.code)
         if (countEl) {
-          const fadeLen = Math.max(0.002, 1.0 - morphEnd)
           const countFade =
-            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / fadeLen)
+            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.01)
           countEl.style.opacity = String(countFade)
         }
       }
@@ -476,7 +691,7 @@ export default function OutcomeMorphOverlay({
     const unsub = progress.on("change", handler)
     handler(progress.get())
     return unsub
-  }, [progress, outcomeShapes, encodingMode, getTargetForMode])
+  }, [progress, outcomeShapes, encodingMode, getTargetForMode, getColorForMode])
 
   return (
     <svg
@@ -514,6 +729,57 @@ export default function OutcomeMorphOverlay({
               fill="transparent"
               pointerEvents={interactive ? "all" : "none"}
             />
+            <g
+              ref={(el) => {
+                chromeRefsMap.current.set(group.code, el)
+              }}
+              style={{ opacity: 0 }}
+            >
+              {Array.from(
+                { length: group.glyphMeta.numTiers },
+                (_, ti) => {
+                  const y =
+                    group.glyphMeta.glyphTop +
+                    group.glyphMeta.barSpacing +
+                    ti * (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
+                  return (
+                    <rect
+                      key={`track-${ti}`}
+                      x={group.glyphMeta.barLeftX}
+                      y={y}
+                      width={group.glyphMeta.maxBarWidth}
+                      height={group.glyphMeta.barHeight}
+                      fill="#d8d8d8"
+                      rx={group.glyphMeta.barCornerRadius}
+                    />
+                  )
+                },
+              )}
+              {[0.25, 0.5, 0.75].map((frac, li) => (
+                <line
+                  key={`grid-${li}`}
+                  x1={
+                    group.glyphMeta.barLeftX +
+                    group.glyphMeta.maxBarWidth * frac
+                  }
+                  y1={
+                    group.glyphMeta.glyphTop + group.glyphMeta.barSpacing
+                  }
+                  x2={
+                    group.glyphMeta.barLeftX +
+                    group.glyphMeta.maxBarWidth * frac
+                  }
+                  y2={
+                    group.glyphMeta.glyphTop +
+                    GLYPH_SIZE -
+                    group.glyphMeta.barSpacing
+                  }
+                  stroke="#ddd"
+                  strokeWidth={0.5}
+                  strokeDasharray="1,2"
+                />
+              ))}
+            </g>
             {group.shapes.map((shape, i) => {
               const isLocationActive =
                 interactive &&
@@ -524,6 +790,8 @@ export default function OutcomeMorphOverlay({
                 spotlightedTier != null &&
                 shape.tier !== spotlightedTier
               const isBarMode = encodingMode === "bar"
+              const isAvgMode = encodingMode === "average"
+              const isBarOrAvg = isBarMode || isAvgMode
               const isClickable =
                 interactive &&
                 (isSelected || (isBarMode && isSelected))
@@ -534,31 +802,49 @@ export default function OutcomeMorphOverlay({
                     refs[i] = el
                   }}
                   d={shape.rawD}
-                  fill={shape.color}
+                  fill={
+                    encodingMode === "average" && shape.averageColor
+                      ? shape.averageColor
+                      : shape.color
+                  }
                   fillOpacity={
                     isDimmed
                       ? 0.2
-                      : isLocationActive
-                        ? 1
-                        : isSelected
-                          ? 0.9
-                          : 0.75
+                      : isBarOrAvg && shape.isRepresentative
+                        ? 0.8
+                        : isLocationActive
+                          ? 1
+                          : isSelected
+                            ? 0.9
+                            : 0.75
                   }
                   stroke={
-                    isLocationActive
-                      ? "#ffd87e"
-                      : spotlightedTier === shape.tier
+                    isBarOrAvg
+                      ? "none"
+                      : isLocationActive
                         ? "#ffd87e"
-                        : shape.color
+                        : spotlightedTier === shape.tier
+                          ? "#ffd87e"
+                          : shape.color
                   }
                   strokeWidth={
-                    isLocationActive
-                      ? 2
-                      : spotlightedTier === shape.tier
-                        ? 1.5
-                        : 0.5
+                    isBarOrAvg
+                      ? 0
+                      : isLocationActive
+                        ? 2
+                        : spotlightedTier === shape.tier
+                          ? 1.5
+                          : 0.5
                   }
-                  strokeOpacity={isDimmed ? 0.2 : isLocationActive ? 1 : 0.4}
+                  strokeOpacity={
+                    isBarOrAvg
+                      ? 0
+                      : isDimmed
+                        ? 0.2
+                        : isLocationActive
+                          ? 1
+                          : 0.4
+                  }
                   style={{
                     opacity: 0,
                     cursor: isClickable ? "pointer" : undefined,
