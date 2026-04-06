@@ -200,7 +200,7 @@ export default function BeatTextOverlay({
           bottom: 0,
           width: "33.33%",
           zIndex: 3,
-          backgroundColor: theme.background.whiteOverlay[85],
+          backgroundColor: "rgba(255, 255, 255, 0.75)",
           opacity: 0,
         }}
       />

@@ -170,7 +170,7 @@ export default function PinnedLocationsList({
               alignItems: "center",
               p: "3px 8px",
               borderRadius: "4px",
-              background: "rgba(255,255,255,0.92)",
+              background: "rgba(255,255,255,0.75)",
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               fontSize: 11,
               lineHeight: 1.3,
@@ -180,7 +180,7 @@ export default function PinnedLocationsList({
               cursor: "pointer",
               transition: "box-shadow 0.15s, background 0.15s",
               "&:hover": {
-                background: "rgba(255,255,255,1)",
+                background: "rgba(255,255,255,0.9)",
                 boxShadow: "0 0 0 2px #ffd87e, 0 2px 8px rgba(0,0,0,0.18)",
               },
             }}

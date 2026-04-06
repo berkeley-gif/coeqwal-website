@@ -410,7 +410,7 @@ export default function OutcomeMorphOverlay({
                   fill={shape.color}
                   fillOpacity={isLocationActive ? 1 : isSelected ? 0.9 : 0.75}
                   stroke={isLocationActive ? "#ffd87e" : shape.color}
-                  strokeWidth={isLocationActive ? 1.5 : 0.5}
+                  strokeWidth={isLocationActive ? 2 : 0.5}
                   strokeOpacity={isLocationActive ? 1 : 0.4}
                   style={{
                     opacity: 0,
