@@ -187,12 +187,18 @@ export const mapActions = {
     _onLocationToggle = fn
   },
   setOnLocationClick: (
-    fn: ((info: { code: string; sourceId: string; tier: number }) => void) | null,
+    fn:
+      | ((info: { code: string; sourceId: string; tier: number }) => void)
+      | null,
   ) => {
     _onLocationClick = fn
   },
   setOnLocationHover: (
-    fn: ((info: { code: string; sourceId: string; tier: number } | null) => void) | null,
+    fn:
+      | ((
+          info: { code: string; sourceId: string; tier: number } | null,
+        ) => void)
+      | null,
   ) => {
     _onLocationHover = fn
   },

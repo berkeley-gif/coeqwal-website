@@ -73,8 +73,14 @@ export default function BeatTextOverlay({
 
   const GLOSSARY_TERMS = useMemo(
     () => [
-      { pattern: /\bTUCPs?\b/g, glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)" },
-      { pattern: /\bSGMA\b/g, glossaryTerm: "Sustainable Groundwater Management Act (SGMA)" },
+      {
+        pattern: /\bTUCPs?\b/g,
+        glossaryTerm: "Temporary Urgent Change Petitions (TUCPs)",
+      },
+      {
+        pattern: /\bSGMA\b/g,
+        glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
+      },
     ],
     [],
   )
@@ -148,7 +154,12 @@ export default function BeatTextOverlay({
     if (lastIndex < scenarioDescription.length)
       result.push(scenarioDescription.slice(lastIndex))
     return result
-  }, [scenarioDescription, GLOSSARY_TERMS, handleGlossaryClick, glossaryLinkStyles])
+  }, [
+    scenarioDescription,
+    GLOSSARY_TERMS,
+    handleGlossaryClick,
+    glossaryLinkStyles,
+  ])
 
   const beat1Ref = useRef<HTMLDivElement>(null)
   const beat2PanelRef = useRef<HTMLDivElement>(null)
@@ -176,9 +187,7 @@ export default function BeatTextOverlay({
   useEffect(() => {
     const unsub = progress.on("change", (v) => {
       if (beat1Ref.current) {
-        const fadeIn = textHiddenRef.current
-          ? 0
-          : clamp01((v - 0.02) / 0.04)
+        const fadeIn = textHiddenRef.current ? 0 : clamp01((v - 0.02) / 0.04)
         beat1Ref.current.style.opacity = String(fadeIn)
       }
 
@@ -432,7 +441,14 @@ export default function BeatTextOverlay({
                 <ToggleButton value="average">Average</ToggleButton>
               </ToggleButtonGroup>
               {onHydroclimateChange && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, ml: 1.5 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.75,
+                    ml: 1.5,
+                  }}
+                >
                   <Typography
                     component="span"
                     sx={{
@@ -474,10 +490,7 @@ export default function BeatTextOverlay({
               opacity: 0,
             }}
           >
-            <Typography
-              variant="smallSectionLabel"
-              component="p"
-            >
+            <Typography variant="smallSectionLabel" component="p">
               {eb.label}
             </Typography>
           </Box>

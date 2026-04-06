@@ -170,7 +170,11 @@ const BASE_FILL_OPACITY = 0.75
 const ZOOM_THRESHOLD = 8
 const ZOOMED_IN_OPACITY = 0.75
 const ZOOM_AWARE_BASE_OPACITY = [
-  "step", ["zoom"], BASE_FILL_OPACITY, ZOOM_THRESHOLD, ZOOMED_IN_OPACITY,
+  "step",
+  ["zoom"],
+  BASE_FILL_OPACITY,
+  ZOOM_THRESHOLD,
+  ZOOMED_IN_OPACITY,
 ]
 
 interface OutcomeLayoutItem {
@@ -489,23 +493,45 @@ export default function TierAnimationSection() {
       try {
         if (map.getLayer(outlineId)) {
           if (!origLineColorRef.current) {
-            origLineColorRef.current = map.getPaintProperty(outlineId, "line-color") ?? "#888"
+            origLineColorRef.current =
+              map.getPaintProperty(outlineId, "line-color") ?? "#888"
           }
           if (origLineWidthRef.current == null) {
-            origLineWidthRef.current = (map.getPaintProperty(outlineId, "line-width") ?? 1) as never
+            origLineWidthRef.current = (map.getPaintProperty(
+              outlineId,
+              "line-width",
+            ) ?? 1) as never
           }
 
           if (activeFeatureIds.length > 0) {
-            const activeMatch = ["in", ["get", idProp], ["literal", activeFeatureIds]]
+            const activeMatch = [
+              "in",
+              ["get", idProp],
+              ["literal", activeFeatureIds],
+            ]
             map.setPaintProperty(outlineId, "line-color", [
-              "case", activeMatch, HIGHLIGHT_GOLD, origLineColorRef.current,
+              "case",
+              activeMatch,
+              HIGHLIGHT_GOLD,
+              origLineColorRef.current,
             ] as never)
             map.setPaintProperty(outlineId, "line-width", [
-              "case", activeMatch, 2, 1,
+              "case",
+              activeMatch,
+              2,
+              1,
             ] as never)
           } else {
-            map.setPaintProperty(outlineId, "line-color", origLineColorRef.current as never)
-            map.setPaintProperty(outlineId, "line-width", origLineWidthRef.current as never)
+            map.setPaintProperty(
+              outlineId,
+              "line-color",
+              origLineColorRef.current as never,
+            )
+            map.setPaintProperty(
+              outlineId,
+              "line-width",
+              origLineWidthRef.current as never,
+            )
           }
         }
 
@@ -537,17 +563,28 @@ export default function TierAnimationSection() {
             }
           }
         } else if (pinnedFeatureIds.length > 0) {
-          const pinnedMatch = ["in", ["get", idProp], ["literal", pinnedFeatureIds]]
+          const pinnedMatch = [
+            "in",
+            ["get", idProp],
+            ["literal", pinnedFeatureIds],
+          ]
           map.setPaintProperty(fillId, "fill-opacity", [
-            "step", ["zoom"],
+            "step",
+            ["zoom"],
             ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
             ZOOM_THRESHOLD,
             ZOOMED_IN_OPACITY,
           ] as never)
         } else {
-          map.setPaintProperty(fillId, "fill-opacity", ZOOM_AWARE_BASE_OPACITY as never)
+          map.setPaintProperty(
+            fillId,
+            "fill-opacity",
+            ZOOM_AWARE_BASE_OPACITY as never,
+          )
         }
-      } catch { /* ok */ }
+      } catch {
+        /* ok */
+      }
     }
 
     let pendingIdle = false
@@ -1256,7 +1293,10 @@ export default function TierAnimationSection() {
   const reprojectRef = useRef<() => void>(() => {})
   const applyPanelOffsetRef = useRef<() => void>(() => {})
   const cachedGeoRingsRef = useRef<
-    Map<string, { ring: [number, number][]; centroidLng?: number; centroidLat?: number }>
+    Map<
+      string,
+      { ring: [number, number][]; centroidLng?: number; centroidLat?: number }
+    >
   >(new Map())
 
   /**

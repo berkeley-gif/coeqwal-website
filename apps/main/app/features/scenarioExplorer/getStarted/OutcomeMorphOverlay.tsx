@@ -209,7 +209,14 @@ function computeOutcomeLayout(
     const barCx = barLeftX + barW / 2
     const barCy =
       glyphTop + barSpacing + ti * (barHeight + barSpacing) + barHeight / 2
-    const barPts = rectPoints(barCx, barCy, barW, barHeight, POINTS_PER_SHAPE, barCornerRadius)
+    const barPts = rectPoints(
+      barCx,
+      barCy,
+      barW,
+      barHeight,
+      POINTS_PER_SHAPE,
+      barCornerRadius,
+    )
     const dotPts = circlePoints(dotCx, dotCy, DOT_RADIUS, POINTS_PER_SHAPE)
 
     for (let i = 0; i < group.length; i++) {
@@ -382,7 +389,14 @@ export default function OutcomeMorphOverlay({
         progressRange: getOutcomeProgressRange(oi, outcomes.length),
       }
     })
-  }, [outcomes, panelWidth, squaresPerRow, distributionPositionMap, tierChartData, theme.palette.tiers])
+  }, [
+    outcomes,
+    panelWidth,
+    squaresPerRow,
+    distributionPositionMap,
+    tierChartData,
+    theme.palette.tiers,
+  ])
 
   const hoverTooltip = useMemo(() => {
     if (!hoveredLocation) return null
@@ -455,10 +469,8 @@ export default function OutcomeMorphOverlay({
       encodingMorphRef.current = 0
       prevEncodingRef.current = encodingMode
 
-      const toBarOrAvg =
-        encodingMode === "bar" || encodingMode === "average"
-      const fromBarOrAvg =
-        fromMode === "bar" || fromMode === "average"
+      const toBarOrAvg = encodingMode === "bar" || encodingMode === "average"
+      const fromBarOrAvg = fromMode === "bar" || fromMode === "average"
       const toBar = encodingMode === "bar"
       const fromBar = fromMode === "bar"
 
@@ -559,10 +571,7 @@ export default function OutcomeMorphOverlay({
                 el.removeAttribute("fill-opacity")
               }
 
-              el.setAttribute(
-                "stroke-opacity",
-                toBarOrAvg ? "0" : "0.4",
-              )
+              el.setAttribute("stroke-opacity", toBarOrAvg ? "0" : "0.4")
             }
           }
           encodingRafRef.current = null
@@ -582,8 +591,7 @@ export default function OutcomeMorphOverlay({
   }, [encodingMode, outcomeShapes, progress, getTargetForMode, getColorForMode])
 
   useLayoutEffect(() => {
-    const isBarOrAvg =
-      encodingMode === "bar" || encodingMode === "average"
+    const isBarOrAvg = encodingMode === "bar" || encodingMode === "average"
     const isBar = encodingMode === "bar"
 
     const handler = (v: number) => {
@@ -619,10 +627,7 @@ export default function OutcomeMorphOverlay({
             continue
           }
 
-          const morphT = Math.min(
-            1,
-            (v - morphStart) / (morphEnd - morphStart),
-          )
+          const morphT = Math.min(1, (v - morphStart) / (morphEnd - morphStart))
           const easedT = easeInOut(morphT)
 
           const target = getTargetForMode(shape, encodingMode)
@@ -633,10 +638,7 @@ export default function OutcomeMorphOverlay({
 
           const targetColor = getColorForMode(shape, encodingMode)
           if (targetColor !== shape.color) {
-            el.setAttribute(
-              "fill",
-              lerpColor(shape.color, targetColor, easedT),
-            )
+            el.setAttribute("fill", lerpColor(shape.color, targetColor, easedT))
           } else {
             el.setAttribute("fill", shape.color)
           }
@@ -648,17 +650,11 @@ export default function OutcomeMorphOverlay({
           }
 
           if (isBar && shape.isRepresentative) {
-            el.setAttribute(
-              "fill-opacity",
-              String(0.9 + (0.8 - 0.9) * easedT),
-            )
+            el.setAttribute("fill-opacity", String(0.9 + (0.8 - 0.9) * easedT))
           }
 
           if (isBarOrAvg) {
-            el.setAttribute(
-              "stroke-opacity",
-              String(0.4 * (1 - easedT)),
-            )
+            el.setAttribute("stroke-opacity", String(0.4 * (1 - easedT)))
           }
         }
 
@@ -735,26 +731,23 @@ export default function OutcomeMorphOverlay({
               }}
               style={{ opacity: 0 }}
             >
-              {Array.from(
-                { length: group.glyphMeta.numTiers },
-                (_, ti) => {
-                  const y =
-                    group.glyphMeta.glyphTop +
-                    group.glyphMeta.barSpacing +
-                    ti * (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
-                  return (
-                    <rect
-                      key={`track-${ti}`}
-                      x={group.glyphMeta.barLeftX}
-                      y={y}
-                      width={group.glyphMeta.maxBarWidth}
-                      height={group.glyphMeta.barHeight}
-                      fill="#d8d8d8"
-                      rx={group.glyphMeta.barCornerRadius}
-                    />
-                  )
-                },
-              )}
+              {Array.from({ length: group.glyphMeta.numTiers }, (_, ti) => {
+                const y =
+                  group.glyphMeta.glyphTop +
+                  group.glyphMeta.barSpacing +
+                  ti * (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
+                return (
+                  <rect
+                    key={`track-${ti}`}
+                    x={group.glyphMeta.barLeftX}
+                    y={y}
+                    width={group.glyphMeta.maxBarWidth}
+                    height={group.glyphMeta.barHeight}
+                    fill="#d8d8d8"
+                    rx={group.glyphMeta.barCornerRadius}
+                  />
+                )
+              })}
               {[0.25, 0.5, 0.75].map((frac, li) => (
                 <line
                   key={`grid-${li}`}
@@ -762,9 +755,7 @@ export default function OutcomeMorphOverlay({
                     group.glyphMeta.barLeftX +
                     group.glyphMeta.maxBarWidth * frac
                   }
-                  y1={
-                    group.glyphMeta.glyphTop + group.glyphMeta.barSpacing
-                  }
+                  y1={group.glyphMeta.glyphTop + group.glyphMeta.barSpacing}
                   x2={
                     group.glyphMeta.barLeftX +
                     group.glyphMeta.maxBarWidth * frac
@@ -793,8 +784,7 @@ export default function OutcomeMorphOverlay({
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
               const isClickable =
-                interactive &&
-                (isSelected || (isBarMode && isSelected))
+                interactive && (isSelected || (isBarMode && isSelected))
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -837,13 +827,7 @@ export default function OutcomeMorphOverlay({
                           : 0.5
                   }
                   strokeOpacity={
-                    isBarOrAvg
-                      ? 0
-                      : isDimmed
-                        ? 0.2
-                        : isLocationActive
-                          ? 1
-                          : 0.4
+                    isBarOrAvg ? 0 : isDimmed ? 0.2 : isLocationActive ? 1 : 0.4
                   }
                   style={{
                     opacity: 0,
