@@ -43,6 +43,9 @@ interface TierLocationLabelsProps {
   tierLookup?: Record<string, number>
   /** Plain location items from the /locations endpoint. Coordinates come from STATION_COORDINATES. */
   locationItems?: TierLocation[]
+  highlightedIds?: Set<string>
+  onHover?: (info: { id: string; name: string; tier: number } | null) => void
+  onClick?: (info: { id: string; name: string; tier: number }) => void
 }
 
 // =============================================================================
@@ -52,6 +55,9 @@ interface TierLocationLabelsProps {
 export function TierLocationLabels({
   tierLookup,
   locationItems,
+  highlightedIds,
+  onHover,
+  onClick,
 }: TierLocationLabelsProps) {
   const theme = useTheme()
 
@@ -129,6 +135,12 @@ export function TierLocationLabels({
           -verticalOffset,
         ]
 
+        const isHighlighted =
+          highlightedIds?.has(location.id) ||
+          highlightedIds?.has(location.name) ||
+          false
+        const goldAccent = "#ffd87e"
+
         return (
           <Marker
             key={location.id}
@@ -137,8 +149,29 @@ export function TierLocationLabels({
             anchor="bottom-left"
             offset={offset}
           >
-            <div style={{ position: "relative", pointerEvents: "none" }}>
-              {/* Leader line with consistent 60° angle from label down to coordinate */}
+            <div
+              style={{
+                position: "relative",
+                pointerEvents: onHover || onClick ? "auto" : "none",
+                cursor: onClick ? "pointer" : undefined,
+              }}
+              onMouseEnter={() =>
+                onHover?.({
+                  id: location.id,
+                  name: location.name,
+                  tier: location.tier,
+                })
+              }
+              onMouseLeave={() => onHover?.(null)}
+              onClick={() =>
+                onClick?.({
+                  id: location.id,
+                  name: location.name,
+                  tier: location.tier,
+                })
+              }
+            >
+              {/* Leader line */}
               <svg
                 style={{
                   position: "absolute",
@@ -147,6 +180,7 @@ export function TierLocationLabels({
                   width: armDx + 5,
                   height: armDy + 20,
                   overflow: "visible",
+                  pointerEvents: "none",
                 }}
               >
                 <line
@@ -154,8 +188,12 @@ export function TierLocationLabels({
                   y1={10}
                   x2={0}
                   y2={10 + armDy}
-                  stroke={`${theme.palette.common.white}CC`}
-                  strokeWidth="1.5"
+                  stroke={
+                    isHighlighted
+                      ? goldAccent
+                      : `${theme.palette.common.white}CC`
+                  }
+                  strokeWidth={isHighlighted ? "2" : "1.5"}
                 />
               </svg>
               {/* Label */}
@@ -168,8 +206,13 @@ export function TierLocationLabels({
                   borderRadius: theme.borderRadius.sm,
                   fontWeight: theme.typography.fontWeightSemiBold,
                   whiteSpace: "nowrap",
-                  boxShadow: theme.shadow.subtle,
-                  border: theme.border.subtleOutline,
+                  boxShadow: isHighlighted
+                    ? `0 2px 6px rgba(0,0,0,0.5)`
+                    : theme.shadow.subtle,
+                  border: isHighlighted
+                    ? `2px solid ${goldAccent}`
+                    : theme.border.subtleOutline,
+                  transition: "border 0.15s, box-shadow 0.15s",
                 }}
               >
                 {location.name}
