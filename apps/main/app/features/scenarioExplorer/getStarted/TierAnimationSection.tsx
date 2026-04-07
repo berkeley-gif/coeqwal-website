@@ -143,6 +143,15 @@ const ANIM_POLYGON_LAYERS = [
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
 
+/** Filter demand-units to only classes that correspond to tracked outcomes.
+ *  Excludes "N/A" and other untracked classes that would otherwise show
+ *  as spurious polygons during the beat-1 cycling animation. */
+const DU_CLASS_FILTER = [
+  "in",
+  ["get", "Class"],
+  ["literal", ["Agriculture", "Urban", "Refuge"]],
+]
+
 const ACTIVE_OUTCOMES = new Set([
   "CWS_DEL",
   "AG_REV",
@@ -960,6 +969,7 @@ export default function TierAnimationSection() {
         try {
           // Set up demand-units for the beat-1 color cycling
           if (map.getLayer("demand-units")) {
+            map.setFilter("demand-units", DU_CLASS_FILTER as never)
             map.setPaintProperty("demand-units", "fill-opacity", 0)
             map.setPaintProperty(
               "demand-units",
