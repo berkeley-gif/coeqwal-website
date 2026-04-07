@@ -629,7 +629,7 @@ export const themeValues = {
 
     paragraphMaxWidth: {
       default: "70ch",
-      compact: "40ch",
+      compact: "35ch",
     },
   },
 

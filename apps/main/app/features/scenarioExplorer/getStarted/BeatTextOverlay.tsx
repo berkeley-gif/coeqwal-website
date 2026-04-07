@@ -562,6 +562,7 @@ export default function BeatTextOverlay({
             opacity: 0,
             transition: "opacity 0.6s ease",
             pointerEvents: "auto",
+            "& .MuiTypography-root": { textShadow: "none" },
           }}
         >
           <StoryCtaButton
@@ -863,13 +864,43 @@ export default function BeatTextOverlay({
                   opacity: 0,
                   transition: "opacity 0.6s ease",
                   pointerEvents: interactive ? "auto" : "none",
-                  mt: 2,
+                  mt: 6,
                 }}
               >
-                <StoryCtaButton
-                  label="Add a location to track"
+                <Box
+                  component="button"
+                  type="button"
                   onClick={onAddLocation}
-                />
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    color: theme.palette.grey[600],
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                    borderRadius: "4px",
+                    background: "transparent",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                    fontFamily: "inherit",
+                    px: 1.25,
+                    py: 0.125,
+                    cursor: "pointer",
+                    transition: "background 0.15s, border-color 0.15s",
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[100],
+                      borderColor: theme.palette.grey[400],
+                    },
+                    "&:focus-visible": {
+                      outline: `2px solid ${theme.palette.blue.bright}`,
+                      outlineOffset: "2px",
+                    },
+                  }}
+                >
+                  Add a location to track
+                  <ArrowForwardIcon sx={{ fontSize: "0.85rem" }} />
+                </Box>
               </Box>
             </Box>
 
