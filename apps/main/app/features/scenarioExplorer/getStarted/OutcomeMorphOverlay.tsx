@@ -270,15 +270,15 @@ function computeOutcomeLayout(
 }
 
 /**
- * Progress ranges for each outcome within Beat 2 (global progress 0.70–0.96).
+ * Progress ranges for each outcome within Beat 2 (global progress 0.67–1.0).
  * Each outcome gets a slice for its polygon morph animation.
- * Morphing begins at 0.70, after tier colors have settled on the map.
+ * Morphing begins at 0.67, after tier colors have settled on the map.
  */
 export function getOutcomeProgressRange(
   index: number,
   total: number,
 ): [number, number] {
-  const beat2Start = 0.8
+  const beat2Start = 0.67
   const beat2End = 1.0
   const sliceWidth = (beat2End - beat2Start) / Math.max(total, 1)
   const start = beat2Start + index * sliceWidth
