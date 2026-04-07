@@ -328,14 +328,52 @@ export default function TierAnimationSection() {
 
   const handleRewind = useCallback(() => {
     if (controlsRef.current) controlsRef.current.stop()
-    computePolygonDataRef.current()
     setHoveredLocation(null)
     setPinnedLocations(new Map())
     mapActions.clearLocationHighlights()
+    mapActions.clearOutcomeVisualization()
+    mapActions.clearMapTooltips()
     progress.set(0)
     setPlayState("idle")
-    mapActions.setOutcomeVisualization("AG_REV", "s0020")
-  }, [progress])
+
+    // Reset all Mapbox layers to their pre-animation state
+    const map = mapAPI.mapRef?.current?.getMap?.()
+    if (map?.isStyleLoaded?.()) {
+      try {
+        for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+          if (map.getLayer(fill)) {
+            map.setPaintProperty(fill, "fill-opacity-transition", {
+              duration: 0,
+              delay: 0,
+            })
+            map.setPaintProperty(fill, "fill-opacity", 0)
+            map.setFilter(fill, null)
+          }
+          if (map.getLayer(outline)) {
+            map.setPaintProperty(outline, "line-opacity", 0)
+          }
+        }
+        for (const lineLayer of ANIM_LINE_LAYERS) {
+          if (map.getLayer(lineLayer)) {
+            map.setPaintProperty(lineLayer, "line-opacity", 0)
+          }
+        }
+      } catch {
+        /* ok */
+      }
+
+      // Fly camera back to starting position
+      map.easeTo({
+        center: { lng: CAM_CENTER[0], lat: CAM_CENTER[1] },
+        zoom: CAM_ZOOM,
+        bearing: 0,
+        pitch: 0,
+        duration: 800,
+      })
+    }
+
+    computePolygonDataRef.current()
+  }, [progress, mapAPI.mapRef])
 
   const activeVisualization = useActiveOutcomeVisualization()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
