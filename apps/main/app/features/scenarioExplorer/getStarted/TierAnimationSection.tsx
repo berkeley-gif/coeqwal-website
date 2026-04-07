@@ -32,7 +32,10 @@ import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
 } from "../../map/config/outcomeLocations"
-import { useTierAnimationData } from "./useTierAnimationData"
+import {
+  useTierAnimationData,
+  useOutcomeTierOverrides,
+} from "./useTierAnimationData"
 import OutcomeMorphOverlay, {
   type OutcomeGroup,
   type LocationInfo,
@@ -403,6 +406,7 @@ export default function TierAnimationSection() {
     return mapping["s0020"] ?? "s0020"
   }, [buildIdMapping, hydroclimate])
   const { chartData: tierChartData } = useScenarioTiers(resolvedScenarioId)
+  const tierOverrides = useOutcomeTierOverrides(resolvedScenarioId)
   const { scenarios } = useScenarios()
   const s0020Scenario = useMemo(
     () => scenarios?.find((s) => s.short_code === "s0020"),
@@ -1762,6 +1766,7 @@ export default function TierAnimationSection() {
     return OUTCOME_DISPLAY_ORDER.map(({ code, label }) => {
       const locData = outcomeLocations[code]
       if (!locData) return { code, label, polygons: [] }
+      const override = tierOverrides[code]
       const polygons: ShapeMorphData[] = []
       for (const locId of locData.ids) {
         // RES_STOR: API returns CalSim IDs; screen map uses gnisidlabel
@@ -1775,14 +1780,14 @@ export default function TierAnimationSection() {
         polygons.push({
           screenShape: screen.screenPoly,
           centroidScreen: screen.centroidScreen,
-          color: locData.colorMap[locId] || "#888888",
-          tier: locData.tierMap[locId] || 1,
+          color: override?.colorMap[locId] ?? locData.colorMap[locId] ?? "#888888",
+          tier: override?.tierMap[locId] ?? locData.tierMap[locId] ?? 1,
           sourceId: locId,
         })
       }
       return { code, label, polygons }
     }).filter((g) => g.polygons.length > 0)
-  }, [allScreenPolygons, outcomeLocations])
+  }, [allScreenPolygons, outcomeLocations, tierOverrides])
 
   const locationNameMap = useMemo(() => {
     const names: Record<string, string> = {}
