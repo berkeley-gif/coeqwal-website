@@ -489,6 +489,8 @@ export default function BeatTextOverlay({
             "& .MuiTypography-root": {
               color: textColor,
               textShadow: shadow,
+              fontSize: theme.typography.storyBody.fontSize,
+              lineHeight: theme.typography.storyBody.lineHeight,
             },
           }}
         >
@@ -979,7 +981,7 @@ export default function BeatTextOverlay({
           width: _beat1PanelWidth,
         }}
       >
-        <Typography variant="storyBody" component="p">
+        <Typography variant="body1" component="p">
           Each outcome has a group of researchers behind it. Click here to
           learn more about their methodologies.
         </Typography>
