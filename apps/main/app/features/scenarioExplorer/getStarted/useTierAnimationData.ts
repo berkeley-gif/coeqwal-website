@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import { getTierColorsFromTheme, type TierLevel } from "../../../content/tiers"
 import { API_BASE } from "../../../lib/constants/api"
@@ -259,4 +259,78 @@ export function useTierAnimationData(): TierAnimationData {
     isLoading,
     error,
   }
+}
+
+/**
+ * Lightweight companion to useTierAnimationData that fetches only per-location
+ * tier levels for a non-base hydroclimate variant. Returns {} when on the base
+ * scenario so the caller falls through to useTierAnimationData's data.
+ *
+ * Designed to never trigger a loading flash — old overrides stay visible until
+ * the new fetch completes. Failures per-outcome are silently skipped so outcomes
+ * without data for a given hydroclimate fall back to the base (s0020) tiers.
+ */
+export function useOutcomeTierOverrides(scenarioId: string) {
+  const theme = useTheme()
+  const tierColors = getTierColorsFromTheme(theme)
+  const colorKey = `${tierColors[1]}|${tierColors[2]}|${tierColors[3]}|${tierColors[4]}`
+  const tierColorsRef = useRef(tierColors)
+  tierColorsRef.current = tierColors
+
+  const [overrides, setOverrides] = useState<
+    Record<string, OutcomeLocationData>
+  >({})
+
+  useEffect(() => {
+    if (scenarioId === DEMO_SCENARIO_ID) {
+      setOverrides((prev) => (Object.keys(prev).length === 0 ? prev : {}))
+      return
+    }
+
+    let cancelled = false
+    const colors = tierColorsRef.current
+
+    async function fetchOverrides() {
+      const results = await Promise.all(
+        OUTCOME_CODES_FOR_ANIMATION.map((code) =>
+          fetch(`${API_BASE}/tier-map/${scenarioId}/${code}/locations`)
+            .then(async (res) => {
+              if (!res.ok) return { code, data: null }
+              return {
+                code,
+                data: (await res.json()) as TierLocationsResponse,
+              }
+            })
+            .catch(() => ({ code, data: null as TierLocationsResponse | null })),
+        ),
+      )
+
+      if (cancelled) return
+
+      const map: Record<string, OutcomeLocationData> = {}
+      for (const { code, data } of results) {
+        if (!data) continue
+        const ids = new Set<string>()
+        const tierMap: Record<string, TierLevel> = {}
+        const colorMap: Record<string, string> = {}
+        const nameMap: Record<string, string> = {}
+        for (const loc of data.locations) {
+          ids.add(loc.location_id)
+          const level = loc.tier_level as TierLevel
+          tierMap[loc.location_id] = level
+          colorMap[loc.location_id] = colors[level] || "#888888"
+          if (loc.location_name) nameMap[loc.location_id] = loc.location_name
+        }
+        map[code] = { ids, tierMap, colorMap, nameMap }
+      }
+      setOverrides(map)
+    }
+
+    fetchOverrides()
+    return () => {
+      cancelled = true
+    }
+  }, [scenarioId, colorKey]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  return overrides
 }
