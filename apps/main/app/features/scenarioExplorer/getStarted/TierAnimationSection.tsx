@@ -1075,10 +1075,10 @@ export default function TierAnimationSection() {
     // At CONVERGE_START the frozen blues collapse toward a single blue.
     // At BLEND_START the per-DU tier-color blend begins.
     // By BLEND_END the blend is complete and beat2 phase starts.
-    const FREEZE_AT = 0.25
-    const CONVERGE_START = 0.7
-    const BLEND_START = 0.74
-    const BLEND_END = 0.8
+    const FREEZE_AT = 0.18
+    const CONVERGE_START = 0.55
+    const BLEND_START = 0.60
+    const BLEND_END = 0.67
 
     let frozenColorPhase = 0
 
