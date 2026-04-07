@@ -6,10 +6,6 @@ import {
   Typography,
   useTheme,
   CircularProgress,
-  IconButton,
-  PlayArrowIcon,
-  PauseIcon,
-  ReplayIcon,
 } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
@@ -188,6 +184,7 @@ interface OutcomeLayoutItem {
   distributionY: number
   distributionHeight: number
   locationCount: number
+  spaceBelow: number
 }
 
 interface ScreenPolygon {
@@ -234,8 +231,7 @@ export default function TierAnimationSection() {
   const mapOpacity = useTransform(progress, [0, 1], [1, 1])
   // TODO(beat3): restore fade-out: useTransform(progress, [0.73, 0.78], [1, 0])
   const overlayOpacity = useTransform(progress, [0, 1], [1, 1])
-  // Static heading fades once animation begins
-  const headingOpacity = useTransform(progress, [0, 0.02, 0.06], [1, 1, 0])
+  const headingOpacity = useTransform(progress, [0, 1], [1, 1])
 
   const controlsRef = useRef<ReturnType<typeof animate> | null>(null)
 
@@ -1031,7 +1027,7 @@ export default function TierAnimationSection() {
     // At CONVERGE_START the frozen blues collapse toward a single blue.
     // At BLEND_START the per-DU tier-color blend begins.
     // By BLEND_END the blend is complete and beat2 phase starts.
-    const FREEZE_AT = 0.3
+    const FREEZE_AT = 0.25
     const CONVERGE_START = 0.7
     const BLEND_START = 0.74
     const BLEND_END = 0.8
@@ -1070,7 +1066,7 @@ export default function TierAnimationSection() {
 
       if (v < CONVERGE_START) {
         // Beat 1: blues cycling, then frozen
-        const beat1T = v / 0.3
+        const beat1T = v / FREEZE_AT
 
         const fadeIn = Math.min(1, beat1T / 0.33)
         const base = 0.65 * fadeIn
@@ -1804,16 +1800,16 @@ export default function TierAnimationSection() {
     const panelWidth3 = width * (1 / 3)
     const availableWidth = panelWidth3 - insetPx * 2
     const colWidth = (availableWidth - COLUMN_GAP) / 2
-    const headerOffset = 128
-    const topPad = headerOffset + Math.min(32, Math.max(20, width * 0.025))
+    const headerOffset = 140
+    const topPad = headerOffset + Math.min(24, Math.max(16, width * 0.02))
 
     const itemStartY = topPad
 
     const LEFT_COLUMN_CODES = new Set(["CWS_DEL", "AG_REV"])
     const colX: [number, number] = [insetPx, insetPx + colWidth + COLUMN_GAP]
 
-    const EYEBROW_HEIGHT = 24
-    const EYEBROW_GAP = 8
+    const EYEBROW_HEIGHT = 22
+    const EYEBROW_GAP = 6
 
     const eyebrows = [
       {
@@ -1856,6 +1852,7 @@ export default function TierAnimationSection() {
       let distributionHeight = 0
       let locationCount = 0
 
+      let spaceBelow = LAYOUT_LABEL_GAP
       if (isActive) {
         const group = outcomeGroups.find((g) => g.code === code)
         if (group && group.polygons.length > 0) {
@@ -1865,11 +1862,12 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
-          cursors[col] +=
+          spaceBelow =
             LAYOUT_DIST_GAP +
             distributionHeight +
             LAYOUT_COUNT_HEIGHT +
             LAYOUT_POST_DIST_GAP
+          cursors[col] += spaceBelow
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
         }
@@ -1888,6 +1886,7 @@ export default function TierAnimationSection() {
         distributionY,
         distributionHeight,
         locationCount,
+        spaceBelow,
       })
     }
 
@@ -1895,7 +1894,7 @@ export default function TierAnimationSection() {
       eyebrows[1]!.animationStart = 0.34 + firstCol1Index * 0.035 - 0.005
     }
 
-    return { items, eyebrows }
+    return { items, eyebrows, leftColumnBottom: cursors[0] }
   }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
 
   const distributionPositionMap = useMemo(() => {
@@ -1976,24 +1975,6 @@ export default function TierAnimationSection() {
         pointerEvents: "none",
       }}
     >
-      {/* Static heading — fades when animation starts */}
-      <motion.div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          padding: theme.space.panel.padding,
-          zIndex: 4,
-          pointerEvents: "none",
-          opacity: headingOpacity,
-        }}
-      >
-        <Typography variant="h3" component="h2" color="text.secondary">
-          Key outcomes
-        </Typography>
-      </motion.div>
-
       {isLoading ? (
         <Box
           sx={{
@@ -2073,11 +2054,17 @@ export default function TierAnimationSection() {
 
           <BeatTextOverlay
             progress={progress}
+            headingOpacity={headingOpacity}
+            playState={playState}
+            onRewind={handleRewind}
+            onPlay={handlePlay}
+            onPause={handlePause}
             beat2Layout={outcomeLayout}
             onOutcomeClick={isInteractive ? handleOutcomeClick : undefined}
             selectedOutcomeCode={isInteractive ? selectedOutcomeCode : null}
             interactive={isInteractive}
             textHidden={!textVisible}
+            scenarioId="s0020"
             scenarioName={s0020Scenario?.name ?? "Current operations"}
             scenarioDescription={s0020Scenario?.short_description ?? undefined}
             encodingMode={encodingMode}
@@ -2101,74 +2088,7 @@ export default function TierAnimationSection() {
               />
             )}
 
-          {/* Playback controls */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: "10%",
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 5,
-              display: "flex",
-              gap: 1.5,
-              alignItems: "center",
-              pointerEvents: "auto",
-            }}
-          >
-            {/* Rewind — visible once the animation has started */}
-            {playState !== "idle" && (
-              <IconButton
-                onClick={handleRewind}
-                sx={{
-                  width: 48,
-                  height: 48,
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.3)",
-                  },
-                }}
-              >
-                <ReplayIcon sx={{ fontSize: 24 }} />
-              </IconButton>
-            )}
-
-            {/* Play / Pause toggle */}
-            {playState === "playing" ? (
-              <IconButton
-                onClick={handlePause}
-                sx={{
-                  width: 64,
-                  height: 64,
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.35)",
-                  },
-                }}
-              >
-                <PauseIcon sx={{ fontSize: 36 }} />
-              </IconButton>
-            ) : (
-              <IconButton
-                onClick={handlePlay}
-                sx={{
-                  width: 64,
-                  height: 64,
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  backdropFilter: "blur(8px)",
-                  color: "text.secondary",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.35)",
-                  },
-                }}
-              >
-                <PlayArrowIcon sx={{ fontSize: 36 }} />
-              </IconButton>
-            )}
-          </Box>
+         
         </>
       )}
     </Box>

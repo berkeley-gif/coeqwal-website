@@ -679,7 +679,7 @@ export default function OutcomeMorphOverlay({
         const countEl = countRefsMap.current.get(group.code)
         if (countEl) {
           const countFade =
-            v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.01)
+            v >= 1 ? 1 : v < morphEnd ? 0 : Math.min(1, (v - morphEnd) / 0.01)
           countEl.style.opacity = String(countFade)
         }
       }

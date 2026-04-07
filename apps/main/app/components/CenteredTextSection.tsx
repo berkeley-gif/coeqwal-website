@@ -104,7 +104,7 @@ export function CenteredTextSection({
         >
           <Typography
             variant="body1"
-            sx={{ maxSize: themeValues.spacing.paragraphMaxSize }}
+            sx={{ maxSize: themeValues.spacing.paragraphMaxWidth.default }}
           >
             {text}
           </Typography>

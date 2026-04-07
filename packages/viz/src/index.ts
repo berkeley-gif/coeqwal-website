@@ -111,3 +111,18 @@ export {
 
 export { THEME_LINE_PALETTES, getThemeLineColor } from "./utils/themeLineColors"
 export type { ThemeKey } from "./utils/themeLineColors"
+
+export {
+  POINTS_PER_SHAPE,
+  SQUARE_SIZE,
+  SQUARE_GAP,
+  resampleClosedPath,
+  rectPoints,
+  diamondPoints,
+  circlePoints,
+  lineSegmentPoints,
+  pointsToD,
+  easeInOut,
+  lerp,
+} from "./utils/shape-morph"
+export type { ShapeMorphData } from "./utils/shape-morph"
