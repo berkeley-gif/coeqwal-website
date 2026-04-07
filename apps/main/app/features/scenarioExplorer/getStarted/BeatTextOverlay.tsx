@@ -107,11 +107,7 @@ function StoryCtaButton({
         },
       }}
     >
-      <Typography
-        variant="subtitle2"
-        component="span"
-        sx={{ fontWeight: 600 }}
-      >
+      <Typography variant="subtitle2" component="span" sx={{ fontWeight: 600 }}>
         {label}
       </Typography>
       <ArrowForwardIcon
@@ -276,7 +272,7 @@ export default function BeatTextOverlay({
       }
 
       if (beat2IntroRef.current) {
-        const fadeIn = clamp01((v - 0.20) / 0.04)
+        const fadeIn = clamp01((v - 0.2) / 0.04)
         beat2IntroRef.current.style.opacity = String(fadeIn)
       }
 
@@ -332,17 +328,21 @@ export default function BeatTextOverlay({
   useEffect(() => {
     if (!interactive) {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "0"
-      if (scenarioHeaderRef.current) scenarioHeaderRef.current.style.opacity = "0"
+      if (scenarioHeaderRef.current)
+        scenarioHeaderRef.current.style.opacity = "0"
       if (tourCtaRef.current) tourCtaRef.current.style.opacity = "0"
-      if (addLocationCtaRef.current) addLocationCtaRef.current.style.opacity = "0"
+      if (addLocationCtaRef.current)
+        addLocationCtaRef.current.style.opacity = "0"
       return
     }
     const t1 = setTimeout(() => {
       if (calsimTextRef.current) calsimTextRef.current.style.opacity = "1"
     }, 400)
     const t2 = setTimeout(() => {
-      if (scenarioHeaderRef.current) scenarioHeaderRef.current.style.opacity = "1"
-      if (addLocationCtaRef.current) addLocationCtaRef.current.style.opacity = "1"
+      if (scenarioHeaderRef.current)
+        scenarioHeaderRef.current.style.opacity = "1"
+      if (addLocationCtaRef.current)
+        addLocationCtaRef.current.style.opacity = "1"
     }, 1800)
     const t3 = setTimeout(() => {
       if (tourCtaRef.current) tourCtaRef.current.style.opacity = "1"
@@ -494,85 +494,85 @@ export default function BeatTextOverlay({
             },
           }}
         >
-        <Typography variant="body1" component="p">
-          Different water management scenarios bring water to different parts of
-          the system.
-        </Typography>
-        <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
           <Typography variant="body1" component="p">
-            We can group these parts of the system into categories.
+            Different water management scenarios bring water to different parts
+            of the system.
           </Typography>
-        </Box>
-        <Box ref={levelsLineRef} sx={{ mt: 2, opacity: 0 }}>
-          <Typography variant="body1" component="p">
-            We can create levels of outcomes per location within these groups.
-          </Typography>
-        </Box>
-        <Box
-          ref={tierLegendRef}
-          sx={{
-            mt: 2.5,
-            opacity: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          {(
-            [
-              { color: theme.palette.tiers.tier1, label: "Thriving" },
-              { color: theme.palette.tiers.tier2, label: "Functioning" },
-              { color: theme.palette.tiers.tier3, label: "At risk" },
-              { color: theme.palette.tiers.tier4, label: "Critical" },
-            ] as const
-          ).map(({ color, label }) => (
-            <Box
-              key={label}
-              sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-            >
+          <Box ref={beat2IntroRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              We can group these parts of the system into categories.
+            </Typography>
+          </Box>
+          <Box ref={levelsLineRef} sx={{ mt: 2, opacity: 0 }}>
+            <Typography variant="body1" component="p">
+              We can create levels of outcomes per location within these groups.
+            </Typography>
+          </Box>
+          <Box
+            ref={tierLegendRef}
+            sx={{
+              mt: 2.5,
+              opacity: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            {(
+              [
+                { color: theme.palette.tiers.tier1, label: "Thriving" },
+                { color: theme.palette.tiers.tier2, label: "Functioning" },
+                { color: theme.palette.tiers.tier3, label: "At risk" },
+                { color: theme.palette.tiers.tier4, label: "Critical" },
+              ] as const
+            ).map(({ color, label }) => (
               <Box
-                sx={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 0.5,
-                  backgroundColor: color,
-                  flexShrink: 0,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                }}
-              />
-              <Typography variant="body1" component="span">
-                {label}
-              </Typography>
-            </Box>
-          ))}
+                key={label}
+                sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+              >
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 0.5,
+                    backgroundColor: color,
+                    flexShrink: 0,
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                  }}
+                />
+                <Typography variant="body1" component="span">
+                  {label}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+          {/* Calsim data beat — appears after morph completes */}
+          <Box
+            ref={calsimTextRef}
+            sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
+          >
+            <Typography variant="body1" component="p">
+              This is the CalSim water allocation data for these locations for
+              the Current operations water management scenario.
+            </Typography>
+          </Box>
+          {/* Tour CTA — appears after scenario header */}
+          <Box
+            ref={tourCtaRef}
+            sx={{
+              mt: 3,
+              opacity: 0,
+              transition: "opacity 0.6s ease",
+              pointerEvents: "auto",
+              "& .MuiTypography-root": { textShadow: "none" },
+            }}
+          >
+            <StoryCtaButton
+              label="Take a tour of the data"
+              onClick={onTourStart}
+            />
+          </Box>
         </Box>
-        {/* Calsim data beat — appears after morph completes */}
-        <Box
-          ref={calsimTextRef}
-          sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
-        >
-          <Typography variant="body1" component="p">
-            This is the CalSim water allocation data for these locations for the
-            Current operations water management scenario.
-          </Typography>
-        </Box>
-        {/* Tour CTA — appears after scenario header */}
-        <Box
-          ref={tourCtaRef}
-          sx={{
-            mt: 3,
-            opacity: 0,
-            transition: "opacity 0.6s ease",
-            pointerEvents: "auto",
-            "& .MuiTypography-root": { textShadow: "none" },
-          }}
-        >
-          <StoryCtaButton
-            label="Take a tour of the data"
-            onClick={onTourStart}
-          />
-        </Box>
-      </Box>
       </Box>
 
       {/* Beat 2 — white backdrop on the right third */}

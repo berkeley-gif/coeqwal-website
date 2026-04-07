@@ -1,12 +1,7 @@
 "use client"
 
 import { useRef, useState, useEffect, useCallback, useMemo } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  CircularProgress,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
 import { useMotionValue, useTransform, motion, animate } from "@repo/motion"
 import type { MotionValue } from "@repo/motion"
 import { useMap } from "@repo/map"
@@ -303,7 +298,10 @@ export default function TierAnimationSection() {
 
     if (isRestart) {
       progress.set(0)
-      mapActions.setOutcomeVisualization("AG_REV", resolvedScenarioIdRef.current)
+      mapActions.setOutcomeVisualization(
+        "AG_REV",
+        resolvedScenarioIdRef.current,
+      )
     }
 
     // When starting from the beginning, fly the camera home first so
@@ -949,7 +947,10 @@ export default function TierAnimationSection() {
     resolvedScenarioIdRef.current = resolvedScenarioId
     const activeViz = useMapStore.getState().activeOutcomeVisualization
     if (activeViz) {
-      mapActions.setOutcomeVisualization(activeViz.outcomeCode, resolvedScenarioId)
+      mapActions.setOutcomeVisualization(
+        activeViz.outcomeCode,
+        resolvedScenarioId,
+      )
     }
   }, [resolvedScenarioId])
 
@@ -1098,7 +1099,7 @@ export default function TierAnimationSection() {
     // By BLEND_END the blend is complete and beat2 phase starts.
     const FREEZE_AT = 0.18
     const CONVERGE_START = 0.55
-    const BLEND_START = 0.60
+    const BLEND_START = 0.6
     const BLEND_END = 0.67
 
     let frozenColorPhase = 0
@@ -1780,7 +1781,8 @@ export default function TierAnimationSection() {
         polygons.push({
           screenShape: screen.screenPoly,
           centroidScreen: screen.centroidScreen,
-          color: override?.colorMap[locId] ?? locData.colorMap[locId] ?? "#888888",
+          color:
+            override?.colorMap[locId] ?? locData.colorMap[locId] ?? "#888888",
           tier: override?.tierMap[locId] ?? locData.tierMap[locId] ?? 1,
           sourceId: locId,
         })
@@ -2157,8 +2159,6 @@ export default function TierAnimationSection() {
                 mapRef={mapAPI.mapRef}
               />
             )}
-
-         
         </>
       )}
     </Box>

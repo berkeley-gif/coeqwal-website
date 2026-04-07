@@ -32,15 +32,15 @@ export function useComparisonData() {
     useScenarioList()
 
   const {
-    hydroclimatePeriod,
+    hydroclimate,
     showAlternativeBaselines,
     showOnlyChosen,
     selectedScenarios,
   } = useScenarioExplorerStore()
 
   const idMapping = useMemo(
-    () => buildIdMapping(hydroclimatePeriod),
-    [buildIdMapping, hydroclimatePeriod],
+    () => buildIdMapping(hydroclimate),
+    [buildIdMapping, hydroclimate],
   )
 
   const {
@@ -55,12 +55,12 @@ export function useComparisonData() {
   const error = tiersError
 
   // Track hydroclimate changes to drive morph transitions.
-  // Increment morphGeneration each time hydroclimatePeriod actually changes
+  // Increment morphGeneration each time hydroclimate actually changes
   // so chart components can detect when to animate vs. when to hard-redraw.
-  const prevHCRef = useRef(hydroclimatePeriod)
+  const prevHCRef = useRef(hydroclimate)
   const morphGenRef = useRef(0)
-  if (prevHCRef.current !== hydroclimatePeriod) {
-    prevHCRef.current = hydroclimatePeriod
+  if (prevHCRef.current !== hydroclimate) {
+    prevHCRef.current = hydroclimate
     morphGenRef.current += 1
   }
   const morphGeneration = morphGenRef.current

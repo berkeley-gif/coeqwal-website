@@ -395,7 +395,8 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                           <Typography
                             variant="body1"
                             sx={{
-                              maxWidth: themeValues.spacing.paragraphMaxWidth.default,
+                              maxWidth:
+                                themeValues.spacing.paragraphMaxWidth.default,
                               mt: 0.5,
                             }}
                           >

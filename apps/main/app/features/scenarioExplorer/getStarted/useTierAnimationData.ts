@@ -301,7 +301,10 @@ export function useOutcomeTierOverrides(scenarioId: string) {
                 data: (await res.json()) as TierLocationsResponse,
               }
             })
-            .catch(() => ({ code, data: null as TierLocationsResponse | null })),
+            .catch(() => ({
+              code,
+              data: null as TierLocationsResponse | null,
+            })),
         ),
       )
 
@@ -330,7 +333,7 @@ export function useOutcomeTierOverrides(scenarioId: string) {
     return () => {
       cancelled = true
     }
-  }, [scenarioId, colorKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scenarioId, colorKey])
 
   return overrides
 }

@@ -170,6 +170,28 @@ export interface TierLocationResponse {
 }
 
 // ============================================================================
+// Tier Location Assignment Types (lightweight, no geometry)
+// ============================================================================
+
+export interface TierLocationAssignment {
+  location_id: string
+  location_name: string
+  location_type: string
+  tier_level: number
+  tier_value: number | null
+  display_order: number
+}
+
+export interface TierLocationAssignmentsResponse {
+  locations: TierLocationAssignment[]
+  tier_code: string
+  metadata: {
+    total_locations: number
+    tier_counts: Record<string, number>
+  }
+}
+
+// ============================================================================
 // Statistics Types (for reservoir percentile charts)
 // ============================================================================
 
