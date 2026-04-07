@@ -48,7 +48,7 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 variant="body1"
                 key={i}
                 sx={{
-                  maxWidth: themeValues.spacing.paragraphMaxSize,
+                  maxWidth: themeValues.spacing.paragraphMaxWidth.default,
                 }}
               >
                 {parseBoldText(block.text)}
@@ -89,12 +89,12 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                     </ListItemIcon>
                     <ListItemText
                       sx={{
-                        maxWidth: themeValues.spacing.paragraphMaxSize,
+                        maxWidth: themeValues.spacing.paragraphMaxWidth.default,
                       }}
                       slotProps={{
                         primary: {
                           sx: {
-                            maxWidth: themeValues.spacing.paragraphMaxSize,
+                            maxWidth: themeValues.spacing.paragraphMaxWidth.default,
                           },
                         },
                       }}

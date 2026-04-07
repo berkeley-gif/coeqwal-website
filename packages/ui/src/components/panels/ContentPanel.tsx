@@ -54,7 +54,7 @@ export function ContentPanel({
             {heading}
           </Typography>
         )}
-        <Box sx={{ maxWidth: theme.space.paragraphMaxSize }}>{children}</Box>
+        <Box sx={{ maxWidth: theme.space.paragraphMaxWidth.default }}>{children}</Box>
       </Box>
     </Box>
   )
