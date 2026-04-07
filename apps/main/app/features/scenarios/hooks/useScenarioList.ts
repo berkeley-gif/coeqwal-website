@@ -89,8 +89,8 @@ export function useScenarioList() {
    * Falls back to the historical variant if the requested hydroclimate is missing.
    */
   const buildIdMapping = useCallback(
-    (hydroclimatePeriod: string): Record<string, string> => {
-      const hcId = HYDROCLIMATE_ID_MAP[hydroclimatePeriod] ?? HISTORICAL_HC_ID
+    (hydroclimate: string): Record<string, string> => {
+      const hcId = HYDROCLIMATE_ID_MAP[hydroclimate] ?? HISTORICAL_HC_ID
       const mapping: Record<string, string> = {}
       siblingGroups.forEach((group) => {
         const variants = variantMap.get(group.siblingGroup)

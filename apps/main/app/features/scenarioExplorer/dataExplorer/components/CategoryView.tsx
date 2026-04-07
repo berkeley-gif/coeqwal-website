@@ -170,7 +170,7 @@ function useReservoirTierColors(scenarios: string[]) {
       if (!locationData?.locations) return
 
       const scenarioColors: Record<string, string> = {}
-      locationData.locations.forEach((loc) => {
+      locationData.locations.forEach((loc: { location_id: string; tier_level: number }) => {
         // Tier location uses "FOLSM", percentile data uses "S_FOLSM"
         // Add S_ prefix to match percentile reservoir IDs
         const reservoirId = loc.location_id.startsWith("S_")

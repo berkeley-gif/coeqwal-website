@@ -442,11 +442,7 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
         }
 
         // ── Hydroclimate morph: transition dots/baselines to new values ──
-        if (
-          shouldMorphNextRef.current &&
-          scalesRef.current &&
-          baselineData
-        ) {
+        if (shouldMorphNextRef.current && scalesRef.current && baselineData) {
           shouldMorphNextRef.current = false
           const scales = scalesRef.current
           const dataMap = new Map(data.map((s) => [s.id, s]))

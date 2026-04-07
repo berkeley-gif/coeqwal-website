@@ -74,7 +74,7 @@ export default function ComparisonPanel({
   const {
     highlightedScenario,
     setHighlightedScenario,
-    setPinnedScenarioId,
+    togglePinnedScenario,
     relativeToBaseline,
     setRelativeToBaseline,
     highlightBaseline,
@@ -371,9 +371,9 @@ export default function ComparisonPanel({
       setHighlightedScenario(
         highlightedScenarioRef.current === scenarioId ? null : scenarioId,
       )
-      setPinnedScenarioId(scenarioId)
+      togglePinnedScenario(scenarioId)
     },
-    [setHighlightedScenario, setPinnedScenarioId],
+    [setHighlightedScenario, togglePinnedScenario],
   )
 
   const handleChartLineClick = useCallback(

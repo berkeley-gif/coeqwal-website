@@ -94,7 +94,8 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                       slotProps={{
                         primary: {
                           sx: {
-                            maxWidth: themeValues.spacing.paragraphMaxWidth.default,
+                            maxWidth:
+                              themeValues.spacing.paragraphMaxWidth.default,
                           },
                         },
                       }}
