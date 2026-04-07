@@ -332,10 +332,10 @@ export default function VisualizationLayers() {
       {/* Lightweight tooltips from tier animation overlay hover/pin */}
       {locationHighlights
         .filter((hl) => {
-          if (!isGetStartedMode || !hl.pinned) return true
+          if (!isGetStartedMode) return true
           const code = hl.key.split(":")[0]
           return (
-            code === "RES_STOR" || code === "FW_EXP" || code === "FW_DELTA_USES"
+            code !== "RES_STOR" && code !== "FW_EXP" && code !== "FW_DELTA_USES"
           )
         })
         .map((hl) => (

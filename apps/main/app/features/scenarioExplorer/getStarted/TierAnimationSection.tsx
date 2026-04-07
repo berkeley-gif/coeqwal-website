@@ -21,6 +21,7 @@ import {
   mapActions,
   useActiveOutcomeVisualization,
   useLocationHighlights,
+  useMapStore,
 } from "../../map/store"
 import {
   getOutcomeConfig,
@@ -48,6 +49,7 @@ import { getTierLabel } from "../../../content/tiers"
 import { getDemandUnitDisplayName } from "../../map/config/demandUnitNames"
 import { useScenarioTiers } from "../../scenarios/hooks/useTierData"
 import { useScenarios } from "@repo/data/coeqwal/hooks"
+import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { useScenarioExplorerStore } from "../store"
 
 const TOTAL_DURATION = 30
@@ -227,6 +229,7 @@ export default function TierAnimationSection() {
   >("idle")
 
   const polygonsAllowedRef = useRef(false)
+  const resolvedScenarioIdRef = useRef("s0020")
 
   /* ── Hide left-panel text when zoomed past threshold ── */
   const [textVisible, setTextVisible] = useState(true)
@@ -297,7 +300,7 @@ export default function TierAnimationSection() {
 
     if (isRestart) {
       progress.set(0)
-      mapActions.setOutcomeVisualization("AG_REV", "s0020")
+      mapActions.setOutcomeVisualization("AG_REV", resolvedScenarioIdRef.current)
     }
 
     // When starting from the beginning, fly the camera home first so
@@ -394,7 +397,12 @@ export default function TierAnimationSection() {
   const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
   const setHydroclimate = useScenarioExplorerStore((s) => s.setHydroclimate)
   const [spotlightedTier, setSpotlightedTier] = useState<number | null>(null)
-  const { chartData: tierChartData } = useScenarioTiers("s0020")
+  const { buildIdMapping } = useScenarioList()
+  const resolvedScenarioId = useMemo(() => {
+    const mapping = buildIdMapping(hydroclimate)
+    return mapping["s0020"] ?? "s0020"
+  }, [buildIdMapping, hydroclimate])
+  const { chartData: tierChartData } = useScenarioTiers(resolvedScenarioId)
   const { scenarios } = useScenarios()
   const s0020Scenario = useMemo(
     () => scenarios?.find((s) => s.short_code === "s0020"),
@@ -764,7 +772,7 @@ export default function TierAnimationSection() {
       mapActions.clearMapTooltips()
       setHoveredLocation(null)
 
-      mapActions.toggleOutcomeVisualization(code, "s0020")
+      mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
 
       const map = mapAPI.mapRef?.current?.getMap?.()
       if (!map) return
@@ -785,7 +793,7 @@ export default function TierAnimationSection() {
         })
       }
     },
-    [selectedOutcomeCode, mapAPI.mapRef, pinnedLocations],
+    [selectedOutcomeCode, mapAPI.mapRef, pinnedLocations, resolvedScenarioId],
   )
 
   useEffect(() => {
@@ -931,6 +939,15 @@ export default function TierAnimationSection() {
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Keep outcome visualization scenario in sync with hydroclimate ── */
+  useEffect(() => {
+    resolvedScenarioIdRef.current = resolvedScenarioId
+    const activeViz = useMapStore.getState().activeOutcomeVisualization
+    if (activeViz) {
+      mapActions.setOutcomeVisualization(activeViz.outcomeCode, resolvedScenarioId)
+    }
+  }, [resolvedScenarioId])
 
   /* ── Detect when panel scrolls into view ── */
   useEffect(() => {
@@ -1865,7 +1882,7 @@ export default function TierAnimationSection() {
         x: colX[0],
         y: itemStartY,
         columnWidth: colWidth,
-        animationStart: 0.335,
+        animationStart: 0.225,
       },
       {
         label: "Non-consumptive uses",
@@ -1939,7 +1956,7 @@ export default function TierAnimationSection() {
     }
 
     if (firstCol1Index >= 0) {
-      eyebrows[1]!.animationStart = 0.34 + firstCol1Index * 0.035 - 0.005
+      eyebrows[1]!.animationStart = 0.24 + firstCol1Index * 0.035 - 0.015
     }
 
     return { items, eyebrows, leftColumnBottom: cursors[0] }
