@@ -204,7 +204,10 @@ Fetches per-location tier assignments for a single scenario+outcome pair. Return
 ```tsx
 import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
 
-const { data, isLoading, error } = useTierLocationAssignments("s0020", "CWS_DEL")
+const { data, isLoading, error } = useTierLocationAssignments(
+  "s0020",
+  "CWS_DEL",
+)
 // data.locations: TierLocationAssignment[] — all locations with tier_level, location_name, etc.
 // data.tier_code: "CWS_DEL"
 // data.metadata: { total_locations, tier_counts }
@@ -357,8 +360,8 @@ This means your component code doesn't change when the user switches hydroclimat
 
 **Fetched on demand (first access triggers an API call, then cached by SWR):**
 
-| Data                          | How to access                                          | What it contains                                                                         |
-| ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Data                          | How to access                                      | What it contains                                                                         |
+| ----------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Per-location tier assignments | `useTierLocationAssignments(scenarioId, tierCode)` | Every location's tier_level for one scenario+outcome (one request returns all locations) |
 
 All data goes through SWR. Once fetched, everything is cached for subsequent renders. Pre-cached data is bulk-fetched before your component renders; per-location assignments are fetched the first time your component requests a specific scenario+outcome pair.
