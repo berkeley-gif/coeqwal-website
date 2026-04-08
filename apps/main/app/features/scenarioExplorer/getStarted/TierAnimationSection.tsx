@@ -1939,7 +1939,11 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
-          slotHeight = Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
+          const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
+          slotHeight =
+            distributionHeight <= SINGLE_ROW
+              ? distributionHeight
+              : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
           spaceBelow =
             LAYOUT_DIST_GAP +
             slotHeight +
