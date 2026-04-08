@@ -1867,6 +1867,7 @@ export default function TierAnimationSection() {
 
   /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
   const COLUMN_GAP = 12
+  const lockedHeightsRef = useRef<Map<string, number>>(new Map())
 
   const outcomeLayout = useMemo(() => {
     if (!panelSize) return null
@@ -1924,7 +1925,7 @@ export default function TierAnimationSection() {
       const x = colX[col]
       cursors[col] += LAYOUT_LINE_HEIGHT
 
-      const distributionY = cursors[col] + LAYOUT_DIST_GAP
+      let distributionY = cursors[col] + LAYOUT_DIST_GAP
       let distributionHeight = 0
       let slotHeight = 0
       let locationCount = 0
@@ -1934,18 +1935,26 @@ export default function TierAnimationSection() {
         const group = outcomeGroups.find((g) => g.code === code)
         if (group && group.polygons.length > 0) {
           locationCount = group.polygons.length
-          distributionHeight = computeDistributionHeight(
+          const freshHeight = computeDistributionHeight(
             group.polygons,
             sqPerRow,
             colWidth,
           )
+          const locked = lockedHeightsRef.current.get(code)
+          distributionHeight =
+            locked !== undefined ? Math.max(locked, freshHeight) : freshHeight
+          lockedHeightsRef.current.set(code, distributionHeight)
+
           const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
           const isSingleRow = distributionHeight <= SINGLE_ROW
+          if (isSingleRow) {
+            distributionY = cursors[col]
+          }
           slotHeight = isSingleRow
             ? distributionHeight
             : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
           spaceBelow = isSingleRow
-            ? LAYOUT_DIST_GAP + slotHeight + 4 + SLOT_COUNT_FONT + 4
+            ? slotHeight + 4 + SLOT_COUNT_FONT + 4
             : LAYOUT_DIST_GAP +
               slotHeight +
               SLOT_COUNT_GAP +
