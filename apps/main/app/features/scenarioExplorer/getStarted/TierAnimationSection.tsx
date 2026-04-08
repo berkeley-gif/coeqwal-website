@@ -37,6 +37,7 @@ import OutcomeMorphOverlay, {
   type EncodingMode,
   getOutcomeProgressRange,
   computeDistributionHeight,
+  GLYPH_SIZE,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import PinnedLocationsList from "./PinnedLocationsList"
@@ -167,8 +168,10 @@ const ACTIVE_OUTCOMES = new Set([
 const LAYOUT_LINE_HEIGHT = 28
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
 const LAYOUT_DIST_GAP = 4
-const LAYOUT_COUNT_HEIGHT = 14
-const LAYOUT_POST_DIST_GAP = 10
+const SLOT_COUNT_GAP = 10 // fixed gap between slot bottom and "X locations" text
+const SLOT_COUNT_FONT = 11
+const SLOT_POST_GAP = 8 // fixed gap after "X locations" text before next header
+const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
@@ -192,6 +195,7 @@ interface OutcomeLayoutItem {
   isActive: boolean
   distributionY: number
   distributionHeight: number
+  slotHeight: number
   locationCount: number
   spaceBelow: number
 }
@@ -1922,6 +1926,7 @@ export default function TierAnimationSection() {
 
       const distributionY = cursors[col] + LAYOUT_DIST_GAP
       let distributionHeight = 0
+      let slotHeight = 0
       let locationCount = 0
 
       let spaceBelow = LAYOUT_LABEL_GAP
@@ -1934,11 +1939,16 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
+          const isSingleValue = group.polygons.length === 1
+          slotHeight = isSingleValue
+            ? distributionHeight
+            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
           spaceBelow =
             LAYOUT_DIST_GAP +
-            distributionHeight +
-            LAYOUT_COUNT_HEIGHT +
-            LAYOUT_POST_DIST_GAP
+            slotHeight +
+            SLOT_COUNT_GAP +
+            SLOT_COUNT_FONT +
+            SLOT_POST_GAP
           cursors[col] += spaceBelow
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
@@ -1957,6 +1967,7 @@ export default function TierAnimationSection() {
         isActive,
         distributionY,
         distributionHeight,
+        slotHeight,
         locationCount,
         spaceBelow,
       })
@@ -1997,6 +2008,7 @@ export default function TierAnimationSection() {
         y: number
         labelY: number
         maxWidth: number
+        slotHeight: number
         locationDescription: string
       }
     > = {}
@@ -2007,6 +2019,7 @@ export default function TierAnimationSection() {
           y: item.distributionY,
           labelY: item.y,
           maxWidth: item.columnWidth,
+          slotHeight: item.slotHeight,
           locationDescription: describeLocations(item.code, item.locationCount),
         }
       }

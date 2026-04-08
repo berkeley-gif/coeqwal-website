@@ -54,6 +54,7 @@ interface OutcomeMorphOverlayProps {
       y: number
       labelY: number
       maxWidth: number
+      slotHeight: number
       locationDescription: string
     }
   >
@@ -133,7 +134,7 @@ export function computeStableDistributionHeight(
   return (singleTierRows + tierBuffer) * cell
 }
 
-const DOT_RADIUS = 8
+export const DOT_RADIUS = 8
 export const GLYPH_SIZE = 60
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -161,6 +162,7 @@ function computeOutcomeLayout(
   targetY: number,
   maxWidth: number,
   maxCols: number,
+  slotHeight: number,
   chartPoints?: ChartDataPoint[],
   tierColors?: { tier1: string; tier2: string; tier3: string; tier4: string },
 ) {
@@ -197,23 +199,20 @@ function computeOutcomeLayout(
       ? tierColors[`tier${avgTierLevel}` as keyof typeof tierColors]
       : null
 
-  const totalRows = tierKeys.reduce((sum, tier) => {
-    return sum + Math.ceil((byTier.get(tier)?.length ?? 0) / cols)
-  }, 0)
   const gridWidth = cols * cell
-  const gridHeight = totalRows * cell
 
   const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
   const gridCenterX = targetX + GRID_PAD + gridWidth / 2
-  const gridCenterY = targetY + gridHeight / 2
 
-  // Bar chart fits within the distribution area, centered
-  const barGlyphH = gridHeight > 0 ? Math.min(GLYPH_SIZE, gridHeight) : GLYPH_SIZE
-  const barGlyphTop = targetY + (gridHeight - barGlyphH) / 2
+  // Bar chart and average dot are centered within the slot, not the grid
+  const slotCenterY = targetY + slotHeight / 2
 
   const numTiers = 4
   const barHeight = (GLYPH_SIZE * 0.8) / numTiers
   const barSpacing = (GLYPH_SIZE * 0.2) / (numTiers + 1)
+  const barVisualH = numTiers * barHeight + numTiers * barSpacing
+  const barGlyphTop = targetY + (slotHeight - barVisualH) / 2
+  const barGlyphH = barVisualH
   const maxBarWidth = GLYPH_SIZE * 0.7
   const barCornerRadius = barHeight / 4
   const barLeftX = glyphLeft + GLYPH_SIZE * 0.15
@@ -221,7 +220,7 @@ function computeOutcomeLayout(
   const svRadius = DOT_RADIUS
 
   const dotCx = gridCenterX
-  const dotCy = gridCenterY
+  const dotCy = slotCenterY
 
   const results: {
     resampled: [number, number][]
@@ -248,7 +247,7 @@ function computeOutcomeLayout(
 
     let barPts: [number, number][]
     if (isSingleValue) {
-      barPts = circlePoints(gridCenterX, gridCenterY, svRadius, POINTS_PER_SHAPE)
+      barPts = circlePoints(gridCenterX, slotCenterY, svRadius, POINTS_PER_SHAPE)
     } else {
       const barCx = barLeftX + barW / 2
       const barCy =
@@ -310,13 +309,14 @@ function computeOutcomeLayout(
       barGlyphTop,
       barGlyphH,
       gridCenterX,
-      gridCenterY,
+      gridCenterY: slotCenterY,
       numTiers,
       barHeight,
       barSpacing,
       maxBarWidth,
       barCornerRadius,
       barLeftX,
+      slotHeight,
     },
   }
 }
@@ -383,6 +383,7 @@ export default function OutcomeMorphOverlay({
       const gridTargetX = panelLeft + (pos?.x ?? 24)
       const gridTargetY = pos?.y ?? 0
       const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
+      const outcomeSlotHeight = pos?.slotHeight ?? 0
 
       const chartPoints = tierChartData?.[outcome.code]
       const hasData = chartPoints !== undefined && chartPoints.length > 0
@@ -394,6 +395,7 @@ export default function OutcomeMorphOverlay({
         gridTargetY,
         maxColWidth,
         squaresPerRow,
+        outcomeSlotHeight,
         chartPoints,
         tierColors,
       )
@@ -423,12 +425,16 @@ export default function OutcomeMorphOverlay({
           : gridTargetX + maxColWidth
       const locationDescription =
         pos?.locationDescription ?? `${outcome.polygons.length} locations`
-      const countY = shapes.length > 0 ? maxY + pad + 4 : gridTargetY + 46
+      const SLOT_COUNT_GAP = 10
+      const countY =
+        outcomeSlotHeight > 0
+          ? gridTargetY + outcomeSlotHeight + SLOT_COUNT_GAP
+          : gridTargetY + 46
       const bounds = {
         x: boundsLeft,
         y: boundsTop,
         width: boundsRight - boundsLeft,
-        height: Math.max(boundsBottom, countY + 4) - boundsTop,
+        height: Math.max(boundsBottom, countY + 11) - boundsTop,
       }
 
       return {
@@ -594,6 +600,7 @@ export default function OutcomeMorphOverlay({
               el.setAttribute("stroke-opacity", String(0.4 * eased))
             }
           }
+
         }
 
         if (t < 1) {
