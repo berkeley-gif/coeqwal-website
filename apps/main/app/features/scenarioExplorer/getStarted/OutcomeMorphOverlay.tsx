@@ -499,6 +499,7 @@ export default function OutcomeMorphOverlay({
   type ShapeSnapshot = {
     target: [number, number][]
     color: string
+    tier: number
   }
   const prevShapeSnapshotRef = useRef<
     Map<string, Map<string, ShapeSnapshot>> | null
@@ -542,6 +543,7 @@ export default function OutcomeMorphOverlay({
         m.set(shape.sourceId, {
           target: shape.squareTarget,
           color: shape.color,
+          tier: shape.tier,
         })
       }
       snapshot.set(group.code, m)
@@ -576,12 +578,41 @@ export default function OutcomeMorphOverlay({
       cancelAnimationFrame(tierChangeRafRef.current)
     }
 
+    // Step 1: Color change in place (changed squares fade to new tier color)
+    // Step 2: All squares glide from old position to new position
+    const COLOR_FADE = 600
+    const PAUSE_END = COLOR_FADE + 300
+    const SLIDE_DURATION = 600
+    const SLIDE_END = PAUSE_END + SLIDE_DURATION
+    const TOTAL = SLIDE_END
+
+    // Pin all shapes to old positions
+    for (const group of outcomeShapes) {
+      const refs = pathRefsMap.current.get(group.code)
+      if (!refs) continue
+      const oldGroup = prevSnapshot.get(group.code)
+      for (let i = 0; i < group.shapes.length; i++) {
+        const el = refs[i]
+        if (!el) continue
+        const shape = group.shapes[i]!
+        const old = oldGroup?.get(shape.sourceId)
+        if (!old) continue
+        el.setAttribute("d", pointsToD(old.target))
+        el.setAttribute("fill", old.color)
+      }
+    }
+
     const startTime = performance.now()
-    const duration = 500
 
     const tick = (now: number) => {
-      const t = Math.min(1, (now - startTime) / duration)
-      const eased = easeInOut(t)
+      const elapsed = now - startTime
+      const colorT = easeInOut(Math.min(1, elapsed / COLOR_FADE))
+      const slideT =
+        elapsed <= PAUSE_END
+          ? 0
+          : easeInOut(
+              Math.min(1, (elapsed - PAUSE_END) / SLIDE_DURATION),
+            )
 
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
@@ -595,18 +626,24 @@ export default function OutcomeMorphOverlay({
           const old = oldGroup?.get(shape.sourceId)
           if (!old) continue
 
-          const pts = old.target.map((a, pi) =>
-            lerp(a, shape.squareTarget[pi]!, eased),
-          )
-          el.setAttribute("d", pointsToD(pts))
+          const tierChanged = old.tier !== shape.tier
 
-          if (old.color !== shape.color) {
-            el.setAttribute("fill", lerpColor(old.color, shape.color, eased))
+          // Step 1: color fade (only changed squares)
+          if (tierChanged && old.color !== shape.color) {
+            el.setAttribute("fill", lerpColor(old.color, shape.color, colorT))
+          }
+
+          // Step 2: all squares glide to new position
+          if (slideT > 0) {
+            const pts = old.target.map((a, pi) =>
+              lerp(a, shape.squareTarget[pi]!, slideT),
+            )
+            el.setAttribute("d", pointsToD(pts))
           }
         }
       }
 
-      if (t < 1) {
+      if (elapsed < TOTAL) {
         tierChangeRafRef.current = requestAnimationFrame(tick)
       } else {
         tierChangeRafRef.current = null
@@ -866,7 +903,12 @@ export default function OutcomeMorphOverlay({
       }
     }
     const unsub = progress.on("change", handler)
-    handler(progress.get())
+    // Only run initial sync if no tier-change animation is active.
+    // The tier-change effect runs before this one (declaration order),
+    // so tierChangeRafRef will already be set if a transition started.
+    if (tierChangeRafRef.current == null) {
+      handler(progress.get())
+    }
     return unsub
   }, [progress, outcomeShapes, encodingMode, getTargetForMode, getColorForMode])
 
