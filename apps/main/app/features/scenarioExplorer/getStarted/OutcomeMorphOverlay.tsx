@@ -425,7 +425,7 @@ export default function OutcomeMorphOverlay({
           : gridTargetX + maxColWidth
       const locationDescription =
         pos?.locationDescription ?? `${outcome.polygons.length} locations`
-      const SLOT_COUNT_GAP = 10
+      const SLOT_COUNT_GAP = 16
       const countY =
         outcomeSlotHeight > 0
           ? gridTargetY + outcomeSlotHeight + SLOT_COUNT_GAP

@@ -838,6 +838,9 @@ export default function BeatTextOverlay({
                         px: 0.5,
                         mx: -0.5,
                         py: 0.25,
+                        height: 28, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        boxSizing: "border-box",
+                        overflow: "hidden",
                         transition: "color 0.15s",
                         ...(interactive && {
                           "&:hover .MuiTypography-root": {
@@ -848,6 +851,7 @@ export default function BeatTextOverlay({
                     >
                       <Typography
                         variant="subtitle2"
+                        noWrap
                         sx={{
                           ...theme.scenarios.panelTitle,
                           fontWeight: isSelected ? 600 : 400,
@@ -944,6 +948,9 @@ export default function BeatTextOverlay({
                         px: 0.5,
                         mx: -0.5,
                         py: 0.25,
+                        height: 28, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        boxSizing: "border-box",
+                        overflow: "hidden",
                         transition: "color 0.15s",
                         ...(interactive && {
                           "&:hover .MuiTypography-root": {
@@ -954,6 +961,7 @@ export default function BeatTextOverlay({
                     >
                       <Typography
                         variant="subtitle2"
+                        noWrap
                         sx={{
                           ...theme.scenarios.panelTitle,
                           fontWeight: isSelected ? 600 : 400,

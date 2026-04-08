@@ -168,7 +168,7 @@ const ACTIVE_OUTCOMES = new Set([
 const LAYOUT_LINE_HEIGHT = 28
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
 const LAYOUT_DIST_GAP = 4
-const SLOT_COUNT_GAP = 10 // fixed gap between slot bottom and "X locations" text
+const SLOT_COUNT_GAP = 16 // fixed gap between slot bottom and "X locations" text
 const SLOT_COUNT_FONT = 11
 const SLOT_POST_GAP = 8 // fixed gap after "X locations" text before next header
 const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
@@ -1940,16 +1940,17 @@ export default function TierAnimationSection() {
             colWidth,
           )
           const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
-          slotHeight =
-            distributionHeight <= SINGLE_ROW
-              ? distributionHeight
-              : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
-          spaceBelow =
-            LAYOUT_DIST_GAP +
-            slotHeight +
-            SLOT_COUNT_GAP +
-            SLOT_COUNT_FONT +
-            SLOT_POST_GAP
+          const isSingleRow = distributionHeight <= SINGLE_ROW
+          slotHeight = isSingleRow
+            ? distributionHeight
+            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
+          spaceBelow = isSingleRow
+            ? LAYOUT_DIST_GAP + slotHeight + 4 + SLOT_COUNT_FONT + 4
+            : LAYOUT_DIST_GAP +
+              slotHeight +
+              SLOT_COUNT_GAP +
+              SLOT_COUNT_FONT +
+              SLOT_POST_GAP
           cursors[col] += spaceBelow
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
