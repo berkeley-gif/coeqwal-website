@@ -167,7 +167,8 @@ function computeOutcomeLayout(
   const weightedScore =
     totalPolygons > 0
       ? tierKeys.reduce(
-          (sum, tier) => sum + tier * (byTier.get(tier)!.length / totalPolygons),
+          (sum, tier) =>
+            sum + tier * (byTier.get(tier)!.length / totalPolygons),
           0,
         )
       : null
@@ -187,13 +188,16 @@ function computeOutcomeLayout(
   const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
   const glyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
 
-  // For single-value outcomes, use a 4-row dots layout (matching OutcomeDotsGlyph)
-  const numTiers = isSingleValue ? 4 : tierKeys.length
-  const barHeight = (GLYPH_SIZE * 0.8) / Math.max(numTiers, 1)
+  // Always 4 tiers so all bar/dot slots exist, even for empty tiers
+  const numTiers = 4
+  const barHeight = (GLYPH_SIZE * 0.8) / numTiers
   const barSpacing = (GLYPH_SIZE * 0.2) / (numTiers + 1)
   const maxBarWidth = GLYPH_SIZE * 0.7
   const barCornerRadius = barHeight / 4
   const barLeftX = glyphLeft + GLYPH_SIZE * 0.15
+
+  const svRowHeight = GLYPH_SIZE / 4
+  const svRadius = GLYPH_SIZE * 0.1
 
   const dotCx = glyphLeft + GLYPH_SIZE / 2
   const dotCy = glyphTop + GLYPH_SIZE / 2
@@ -215,26 +219,26 @@ function computeOutcomeLayout(
   for (let ti = 0; ti < tierKeys.length; ti++) {
     const tier = tierKeys[ti]!
     const group = byTier.get(tier)!
+    const tierRow = tier - 1 // 0-indexed position in the fixed 4-row layout
 
     // Bar widths derived from distribution squares, not chartData
     const normVal = totalPolygons > 0 ? group.length / totalPolygons : 0
     const barW = Math.max(2, normVal * maxBarWidth)
 
-    // For single-value: morph target is a circle at the tier's row position
-    // (matching OutcomeDotsGlyph: 4 rows, filled circle for active tier)
-    const singleValueRow = tier - 1 // 0-indexed row for tier 1-4
-    const svRowHeight = GLYPH_SIZE / 4
-    const svCx = glyphLeft + GLYPH_SIZE / 2
-    const svCy = glyphTop + svRowHeight * singleValueRow + svRowHeight / 2
-    const svRadius = GLYPH_SIZE * 0.1
-
     let barPts: [number, number][]
     if (isSingleValue) {
+      // Single-value: filled circle at this tier's row
+      const svCx = glyphLeft + GLYPH_SIZE / 2
+      const svCy = glyphTop + svRowHeight * tierRow + svRowHeight / 2
       barPts = circlePoints(svCx, svCy, svRadius, POINTS_PER_SHAPE)
     } else {
+      // Multi-value: bar at this tier's fixed row position
       const barCx = barLeftX + barW / 2
       const barCy =
-        glyphTop + barSpacing + ti * (barHeight + barSpacing) + barHeight / 2
+        glyphTop +
+        barSpacing +
+        tierRow * (barHeight + barSpacing) +
+        barHeight / 2
       barPts = rectPoints(
         barCx,
         barCy,
@@ -779,7 +783,7 @@ export default function OutcomeMorphOverlay({
                       cy={cy}
                       r={r}
                       fill="transparent"
-                      stroke="#d8d8d8"
+                      stroke="#bbb"
                       strokeWidth={2}
                     />
                   )
@@ -787,28 +791,24 @@ export default function OutcomeMorphOverlay({
               ) : (
                 /* Multi-value: horizontal bar tracks with grid lines */
                 <>
-                  {Array.from(
-                    { length: group.glyphMeta.numTiers },
-                    (_, ti) => {
-                      const y =
-                        group.glyphMeta.glyphTop +
-                        group.glyphMeta.barSpacing +
-                        ti *
-                          (group.glyphMeta.barHeight +
-                            group.glyphMeta.barSpacing)
-                      return (
-                        <rect
-                          key={`track-${ti}`}
-                          x={group.glyphMeta.barLeftX}
-                          y={y}
-                          width={group.glyphMeta.maxBarWidth}
-                          height={group.glyphMeta.barHeight}
-                          fill="#d8d8d8"
-                          rx={group.glyphMeta.barCornerRadius}
-                        />
-                      )
-                    },
-                  )}
+                  {Array.from({ length: group.glyphMeta.numTiers }, (_, ti) => {
+                    const y =
+                      group.glyphMeta.glyphTop +
+                      group.glyphMeta.barSpacing +
+                      ti *
+                        (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
+                    return (
+                      <rect
+                        key={`track-${ti}`}
+                        x={group.glyphMeta.barLeftX}
+                        y={y}
+                        width={group.glyphMeta.maxBarWidth}
+                        height={group.glyphMeta.barHeight}
+                        fill="#bbb"
+                        rx={group.glyphMeta.barCornerRadius}
+                      />
+                    )
+                  })}
                   {[0.25, 0.5, 0.75].map((frac, li) => (
                     <line
                       key={`grid-${li}`}
@@ -816,9 +816,7 @@ export default function OutcomeMorphOverlay({
                         group.glyphMeta.barLeftX +
                         group.glyphMeta.maxBarWidth * frac
                       }
-                      y1={
-                        group.glyphMeta.glyphTop + group.glyphMeta.barSpacing
-                      }
+                      y1={group.glyphMeta.glyphTop + group.glyphMeta.barSpacing}
                       x2={
                         group.glyphMeta.barLeftX +
                         group.glyphMeta.maxBarWidth * frac
@@ -828,7 +826,7 @@ export default function OutcomeMorphOverlay({
                         GLYPH_SIZE -
                         group.glyphMeta.barSpacing
                       }
-                      stroke="#ddd"
+                      stroke="#ccc"
                       strokeWidth={0.5}
                       strokeDasharray="1,2"
                     />
@@ -950,20 +948,22 @@ export default function OutcomeMorphOverlay({
                 {group.locationDescription}
               </text>
             )}
-            {!group.hasData && interactive && encodingMode !== "distribution" && (
-              <text
-                x={group.glyphMeta.glyphLeft + GLYPH_SIZE / 2}
-                y={group.glyphMeta.glyphTop + GLYPH_SIZE / 2}
-                fontSize={10}
-                fontFamily="inherit"
-                fill={theme.palette.grey[500]}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontStyle="italic"
-              >
-                No data at this time
-              </text>
-            )}
+            {!group.hasData &&
+              interactive &&
+              encodingMode !== "distribution" && (
+                <text
+                  x={group.glyphMeta.glyphLeft + GLYPH_SIZE / 2}
+                  y={group.glyphMeta.glyphTop + GLYPH_SIZE / 2}
+                  fontSize={10}
+                  fontFamily="inherit"
+                  fill={theme.palette.grey[500]}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontStyle="italic"
+                >
+                  No data at this time
+                </text>
+              )}
           </g>
         )
       })}
