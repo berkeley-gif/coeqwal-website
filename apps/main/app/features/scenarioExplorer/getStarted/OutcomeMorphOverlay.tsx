@@ -494,6 +494,15 @@ export default function OutcomeMorphOverlay({
   const encodingMorphRef = useRef(1)
   const encodingFromRef = useRef<EncodingMode>("distribution")
   const encodingRafRef = useRef<number | null>(null)
+  const tierChangeRafRef = useRef<number | null>(null)
+
+  type ShapeSnapshot = {
+    target: [number, number][]
+    color: string
+  }
+  const prevShapeSnapshotRef = useRef<
+    Map<string, Map<string, ShapeSnapshot>> | null
+  >(null)
 
   const getTargetForMode = useCallback(
     (
@@ -523,8 +532,117 @@ export default function OutcomeMorphOverlay({
     [],
   )
 
+  // --- Hydroclimate tier-change transition (distribution mode only) ---
+  useLayoutEffect(() => {
+    // Snapshot current state for distribution mode
+    const snapshot = new Map<string, Map<string, ShapeSnapshot>>()
+    for (const group of outcomeShapes) {
+      const m = new Map<string, ShapeSnapshot>()
+      for (const shape of group.shapes) {
+        m.set(shape.sourceId, {
+          target: shape.squareTarget,
+          color: shape.color,
+        })
+      }
+      snapshot.set(group.code, m)
+    }
+    const prevSnapshot = prevShapeSnapshotRef.current
+    prevShapeSnapshotRef.current = snapshot
+
+    if (
+      !prevSnapshot ||
+      progress.get() < 1 ||
+      encodingMode !== "distribution" ||
+      encodingRafRef.current != null
+    )
+      return
+
+    // Check if anything changed
+    let changed = false
+    outer: for (const group of outcomeShapes) {
+      const oldGroup = prevSnapshot.get(group.code)
+      if (!oldGroup) continue
+      for (const shape of group.shapes) {
+        const old = oldGroup.get(shape.sourceId)
+        if (old && old.color !== shape.color) {
+          changed = true
+          break outer
+        }
+      }
+    }
+    if (!changed) return
+
+    if (tierChangeRafRef.current != null) {
+      cancelAnimationFrame(tierChangeRafRef.current)
+    }
+
+    const startTime = performance.now()
+    const duration = 500
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - startTime) / duration)
+      const eased = easeInOut(t)
+
+      for (const group of outcomeShapes) {
+        const refs = pathRefsMap.current.get(group.code)
+        if (!refs) continue
+        const oldGroup = prevSnapshot.get(group.code)
+
+        for (let i = 0; i < group.shapes.length; i++) {
+          const el = refs[i]
+          if (!el) continue
+          const shape = group.shapes[i]!
+          const old = oldGroup?.get(shape.sourceId)
+          if (!old) continue
+
+          const pts = old.target.map((a, pi) =>
+            lerp(a, shape.squareTarget[pi]!, eased),
+          )
+          el.setAttribute("d", pointsToD(pts))
+
+          if (old.color !== shape.color) {
+            el.setAttribute("fill", lerpColor(old.color, shape.color, eased))
+          }
+        }
+      }
+
+      if (t < 1) {
+        tierChangeRafRef.current = requestAnimationFrame(tick)
+      } else {
+        tierChangeRafRef.current = null
+        for (const group of outcomeShapes) {
+          const refs = pathRefsMap.current.get(group.code)
+          if (!refs) continue
+          for (let i = 0; i < group.shapes.length; i++) {
+            const el = refs[i]
+            if (!el) continue
+            const shape = group.shapes[i]!
+            el.setAttribute("d", pointsToD(shape.squareTarget))
+            el.setAttribute("fill", shape.color)
+          }
+        }
+      }
+    }
+
+    tierChangeRafRef.current = requestAnimationFrame(tick)
+
+    return () => {
+      if (tierChangeRafRef.current != null) {
+        cancelAnimationFrame(tierChangeRafRef.current)
+        tierChangeRafRef.current = null
+      }
+    }
+  }, [outcomeShapes, encodingMode, progress])
+
+  // --- Encoding-mode transition ---
   useLayoutEffect(() => {
     if (prevEncodingRef.current !== encodingMode && progress.get() >= 1) {
+      // Cancel any tier-change animation so encoding takes over
+      if (tierChangeRafRef.current != null) {
+        cancelAnimationFrame(tierChangeRafRef.current)
+        tierChangeRafRef.current = null
+      }
+
       const fromMode = prevEncodingRef.current
       encodingFromRef.current = fromMode
       encodingMorphRef.current = 0
@@ -658,6 +776,7 @@ export default function OutcomeMorphOverlay({
 
     const handler = (v: number) => {
       if (encodingRafRef.current != null) return
+      if (tierChangeRafRef.current != null) return
 
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
