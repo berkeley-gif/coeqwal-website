@@ -115,6 +115,24 @@ export function computeDistributionHeight(
   return totalRows * cell
 }
 
+/** Tier-agnostic height: stable across hydroclimate changes (depends only on count). */
+export function computeStableDistributionHeight(
+  polygonCount: number,
+  squaresPerRow: number,
+  maxWidth: number,
+): number {
+  if (polygonCount === 0) return 0
+  const cell = SQUARE_SIZE + SQUARE_GAP
+  const cols = Math.min(
+    squaresPerRow,
+    Math.max(1, Math.floor((maxWidth - GRID_PAD * 2) / cell)),
+  )
+  const count = Math.min(polygonCount, MAX_POLYGONS_PER_OUTCOME)
+  const singleTierRows = Math.ceil(count / cols)
+  const tierBuffer = count > cols ? 3 : 0
+  return (singleTierRows + tierBuffer) * cell
+}
+
 const DOT_RADIUS = 8
 export const GLYPH_SIZE = 60
 
