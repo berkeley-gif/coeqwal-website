@@ -850,12 +850,13 @@ export default function BeatTextOverlay({
                       }}
                     >
                       <Typography
-                        variant="subtitle2"
+                        variant="overline"
                         noWrap
                         sx={{
-                          ...theme.scenarios.panelTitle,
-                          fontWeight: isSelected ? 600 : 400,
+                          fontWeight: isSelected ? 700 : 500,
+                          textTransform: "none",
                           transition: "color 0.15s",
+                          color: theme.palette.grey[900],
                         }}
                       >
                         {item.label}
@@ -960,12 +961,13 @@ export default function BeatTextOverlay({
                       }}
                     >
                       <Typography
-                        variant="subtitle2"
+                        variant="overline"
                         noWrap
                         sx={{
-                          ...theme.scenarios.panelTitle,
-                          fontWeight: isSelected ? 600 : 400,
+                          fontWeight: isSelected ? 700 : 500,
+                          textTransform: "none",
                           transition: "color 0.15s",
+                          color: theme.palette.grey[900],
                         }}
                       >
                         {item.label}
