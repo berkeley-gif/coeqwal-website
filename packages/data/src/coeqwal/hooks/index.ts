@@ -72,3 +72,4 @@ export {
   useChannelsPeriodSummary,
 } from "./useEnvFlowStatistics"
 export { useDeltaMonthly } from "./useDeltaStatistics"
+export { useTierLocationAssignments } from "./useTierLocationAssignments"

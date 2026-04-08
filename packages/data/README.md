@@ -197,6 +197,25 @@ const {
 } = useResolvedScenarioTiers()
 ```
 
+#### `useTierLocationAssignments(scenarioId, tierCode)`
+
+Fetches per-location tier assignments for a single scenario+outcome pair. Returns location-level data (no geometry) — suitable for treemaps, tables, or any visualization that needs to know which locations fall into which tier. Pass `null` for either argument to skip fetching.
+
+```tsx
+import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
+
+const { data, isLoading, error } = useTierLocationAssignments("s0020", "CWS_DEL")
+// data.locations: TierLocationAssignment[] — all locations with tier_level, location_name, etc.
+// data.tier_code: "CWS_DEL"
+// data.metadata: { total_locations, tier_counts }
+
+// Conditional fetching (pass null to skip)
+const { data } = useTierLocationAssignments(
+  selectedScenario ?? null,
+  selectedOutcome ?? null,
+)
+```
+
 ### Fetchers
 
 **Prefer hooks** in React components. They handle caching, deduplication, loading states, and errors automatically.
@@ -340,14 +359,12 @@ This means your component code doesn't change when the user switches hydroclimat
 
 | Data                          | How to access                                          | What it contains                                                                         |
 | ----------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Per-location tier assignments | `useSWR(key, () => fetchTierLocationAssignments(...))` | Every location's tier_level for one scenario+outcome (one request returns all locations) |
+| Per-location tier assignments | `useTierLocationAssignments(scenarioId, tierCode)` | Every location's tier_level for one scenario+outcome (one request returns all locations) |
 
 All data goes through SWR. Once fetched, everything is cached for subsequent renders. Pre-cached data is bulk-fetched before your component renders; per-location assignments are fetched the first time your component requests a specific scenario+outcome pair.
 
 ```typescript
-import useSWR from "swr"
-import { CACHE_KEYS } from "@repo/data/cache"
-import { fetchTierLocationAssignments } from "@repo/data/coeqwal"
+import { useTierLocationAssignments } from "@repo/data/coeqwal/hooks"
 
 // All scenario IDs for the active hydroclimate
 const scenarioIds = allScenariosData ? Object.keys(allScenariosData) : []
@@ -378,14 +395,9 @@ const cwsA = tiersA?.tiers["CWS_DEL"]
 // One request per scenario+outcome returns all locations at once.
 // Uses the lightweight /locations endpoint (no polygon geometry).
 // Do not use fetchTierLocationData. That returns full GeoJSON and is much heavier.
-const { data: locationsA } = useSWR(
-  CACHE_KEYS.tierLocations("s0020", "CWS_DEL"),
-  () => fetchTierLocationAssignments("s0020", "CWS_DEL"),
-)
-const { data: locationsB } = useSWR(
-  CACHE_KEYS.tierLocations("s0021", "CWS_DEL"),
-  () => fetchTierLocationAssignments("s0021", "CWS_DEL"),
-)
+// Pass null to skip fetching conditionally.
+const { data: locationsA } = useTierLocationAssignments("s0020", "CWS_DEL")
+const { data: locationsB } = useTierLocationAssignments("s0021", "CWS_DEL")
 // First call fetches from API; subsequent renders with the same
 // scenario+outcome return the cached response instantly.
 
@@ -412,22 +424,22 @@ const { data: locationsB } = useSWR(
 
 ### Step 3: Map integration (coloring polygons)
 
-The persistent Mapbox map already has polygon geometry baked into its vector tiles. You do not need to fetch GeoJSON. To color map polygons by tier level, use the map store:
+The persistent Mapbox map already has polygon geometry baked into its vector tiles. You do not need to fetch GeoJSON. To color map polygons by tier level, use the map store actions:
 
 ```typescript
-import { useMapActions } from "../../map/store"
+import { mapActions } from "../../map/store"
 
-const mapActions = useMapActions()
+// Tell the map to color polygons for a specific outcome (positional args)
+mapActions.setOutcomeVisualization("CWS_DEL", "s0020")
 
-// Tell the map to color polygons for a specific outcome
-mapActions.setOutcomeVisualization({
-  outcomeCode: "CWS_DEL",
-  scenarioId: "s0020",
-  tierColorMap: { 1: "#2ecc71", 2: "#3498db", 3: "#e67e22", 4: "#e74c3c" },
-})
+// Toggle on/off (clears if the same outcome is already active)
+mapActions.toggleOutcomeVisualization("CWS_DEL", "s0020")
+
+// Clear
+mapActions.clearOutcomeVisualization()
 ```
 
-The map layer system reads this state and applies fill colors to the pre-existing Mapbox vector tile polygons. See `@repo/state` README for full map integration details.
+The map layer system reads this state, looks up tier colors from the theme, and applies fill colors to the pre-existing Mapbox vector tile polygons. Tier colors are determined by the theme palette (`theme.palette.tiers.tier1` through `tier4`), not passed by the caller. See the Scenario Explorer README for the full map integration pattern with examples.
 
 **How each outcome type renders on the map:**
 

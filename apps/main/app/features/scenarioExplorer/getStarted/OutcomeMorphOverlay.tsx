@@ -21,11 +21,11 @@ import {
   STATION_NAMES,
 } from "../../map/config/outcomeLocations"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../map/config/outcomeLayerRegistry"
-import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 import {
-  computeTierScore,
-  getTierLevelForScore,
-} from "../../scenarios/components/shared/tierScore"
+  isSingleValueTier,
+  type ChartDataPoint,
+} from "../../scenarios/components/shared/types"
+import { getTierLevelForScore } from "../../scenarios/components/shared/tierScore"
 
 export interface OutcomeGroup {
   code: string
@@ -160,11 +160,22 @@ function computeOutcomeLayout(
   }
   const tierKeys = [...byTier.keys()].sort((a, b) => a - b)
 
-  const score = computeTierScore(chartPoints)
-  const tierLevel = score != null ? getTierLevelForScore(score) : null
+  const isSingleValue = isSingleValueTier(chartPoints)
+  const totalPolygons = polygons.length
+
+  // Average color: weighted mean of tiers based on actual square counts
+  const weightedScore =
+    totalPolygons > 0
+      ? tierKeys.reduce(
+          (sum, tier) => sum + tier * (byTier.get(tier)!.length / totalPolygons),
+          0,
+        )
+      : null
+  const avgTierLevel =
+    weightedScore != null ? getTierLevelForScore(weightedScore) : null
   const avgColor =
-    tierLevel != null && tierColors
-      ? tierColors[`tier${tierLevel}` as keyof typeof tierColors]
+    avgTierLevel != null && tierColors
+      ? tierColors[`tier${avgTierLevel}` as keyof typeof tierColors]
       : null
 
   const totalRows = tierKeys.reduce((sum, tier) => {
@@ -176,7 +187,8 @@ function computeOutcomeLayout(
   const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
   const glyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
 
-  const numTiers = tierKeys.length
+  // For single-value outcomes, use a 4-row dots layout (matching OutcomeDotsGlyph)
+  const numTiers = isSingleValue ? 4 : tierKeys.length
   const barHeight = (GLYPH_SIZE * 0.8) / Math.max(numTiers, 1)
   const barSpacing = (GLYPH_SIZE * 0.2) / (numTiers + 1)
   const maxBarWidth = GLYPH_SIZE * 0.7
@@ -204,19 +216,34 @@ function computeOutcomeLayout(
     const tier = tierKeys[ti]!
     const group = byTier.get(tier)!
 
-    const normVal = chartPoints?.[tier - 1]?.value ?? 0.5
+    // Bar widths derived from distribution squares, not chartData
+    const normVal = totalPolygons > 0 ? group.length / totalPolygons : 0
     const barW = Math.max(2, normVal * maxBarWidth)
-    const barCx = barLeftX + barW / 2
-    const barCy =
-      glyphTop + barSpacing + ti * (barHeight + barSpacing) + barHeight / 2
-    const barPts = rectPoints(
-      barCx,
-      barCy,
-      barW,
-      barHeight,
-      POINTS_PER_SHAPE,
-      barCornerRadius,
-    )
+
+    // For single-value: morph target is a circle at the tier's row position
+    // (matching OutcomeDotsGlyph: 4 rows, filled circle for active tier)
+    const singleValueRow = tier - 1 // 0-indexed row for tier 1-4
+    const svRowHeight = GLYPH_SIZE / 4
+    const svCx = glyphLeft + GLYPH_SIZE / 2
+    const svCy = glyphTop + svRowHeight * singleValueRow + svRowHeight / 2
+    const svRadius = GLYPH_SIZE * 0.1
+
+    let barPts: [number, number][]
+    if (isSingleValue) {
+      barPts = circlePoints(svCx, svCy, svRadius, POINTS_PER_SHAPE)
+    } else {
+      const barCx = barLeftX + barW / 2
+      const barCy =
+        glyphTop + barSpacing + ti * (barHeight + barSpacing) + barHeight / 2
+      barPts = rectPoints(
+        barCx,
+        barCy,
+        barW,
+        barHeight,
+        POINTS_PER_SHAPE,
+        barCornerRadius,
+      )
+    }
     const dotPts = circlePoints(dotCx, dotCy, DOT_RADIUS, POINTS_PER_SHAPE)
 
     for (let i = 0; i < group.length; i++) {
@@ -256,10 +283,11 @@ function computeOutcomeLayout(
 
   return {
     shapes: results,
+    isSingleValue,
     glyphMeta: {
       glyphLeft,
       glyphTop,
-      numTiers: tierKeys.length,
+      numTiers,
       barHeight,
       barSpacing,
       maxBarWidth,
@@ -333,6 +361,7 @@ export default function OutcomeMorphOverlay({
       const maxColWidth = pos?.maxWidth ?? panelWidth * (1 / 3) - 48
 
       const chartPoints = tierChartData?.[outcome.code]
+      const hasData = chartPoints !== undefined && chartPoints.length > 0
       const tierColors = theme.palette.tiers
 
       const layout = computeOutcomeLayout(
@@ -381,6 +410,8 @@ export default function OutcomeMorphOverlay({
       return {
         code: outcome.code,
         shapes,
+        isSingleValue: layout.isSingleValue,
+        hasData,
         glyphMeta: layout.glyphMeta,
         bounds,
         locationDescription,
@@ -731,45 +762,79 @@ export default function OutcomeMorphOverlay({
               }}
               style={{ opacity: 0 }}
             >
-              {Array.from({ length: group.glyphMeta.numTiers }, (_, ti) => {
-                const y =
-                  group.glyphMeta.glyphTop +
-                  group.glyphMeta.barSpacing +
-                  ti * (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
-                return (
-                  <rect
-                    key={`track-${ti}`}
-                    x={group.glyphMeta.barLeftX}
-                    y={y}
-                    width={group.glyphMeta.maxBarWidth}
-                    height={group.glyphMeta.barHeight}
-                    fill="#d8d8d8"
-                    rx={group.glyphMeta.barCornerRadius}
-                  />
-                )
-              })}
-              {[0.25, 0.5, 0.75].map((frac, li) => (
-                <line
-                  key={`grid-${li}`}
-                  x1={
-                    group.glyphMeta.barLeftX +
-                    group.glyphMeta.maxBarWidth * frac
-                  }
-                  y1={group.glyphMeta.glyphTop + group.glyphMeta.barSpacing}
-                  x2={
-                    group.glyphMeta.barLeftX +
-                    group.glyphMeta.maxBarWidth * frac
-                  }
-                  y2={
+              {group.isSingleValue ? (
+                /* Single-value: 4 empty circles matching OutcomeDotsGlyph */
+                Array.from({ length: 4 }, (_, ti) => {
+                  const svRowHeight = GLYPH_SIZE / 4
+                  const cx = group.glyphMeta.glyphLeft + GLYPH_SIZE / 2
+                  const cy =
                     group.glyphMeta.glyphTop +
-                    GLYPH_SIZE -
-                    group.glyphMeta.barSpacing
-                  }
-                  stroke="#ddd"
-                  strokeWidth={0.5}
-                  strokeDasharray="1,2"
-                />
-              ))}
+                    svRowHeight * ti +
+                    svRowHeight / 2
+                  const r = GLYPH_SIZE * 0.1
+                  return (
+                    <circle
+                      key={`dot-track-${ti}`}
+                      cx={cx}
+                      cy={cy}
+                      r={r}
+                      fill="transparent"
+                      stroke="#d8d8d8"
+                      strokeWidth={2}
+                    />
+                  )
+                })
+              ) : (
+                /* Multi-value: horizontal bar tracks with grid lines */
+                <>
+                  {Array.from(
+                    { length: group.glyphMeta.numTiers },
+                    (_, ti) => {
+                      const y =
+                        group.glyphMeta.glyphTop +
+                        group.glyphMeta.barSpacing +
+                        ti *
+                          (group.glyphMeta.barHeight +
+                            group.glyphMeta.barSpacing)
+                      return (
+                        <rect
+                          key={`track-${ti}`}
+                          x={group.glyphMeta.barLeftX}
+                          y={y}
+                          width={group.glyphMeta.maxBarWidth}
+                          height={group.glyphMeta.barHeight}
+                          fill="#d8d8d8"
+                          rx={group.glyphMeta.barCornerRadius}
+                        />
+                      )
+                    },
+                  )}
+                  {[0.25, 0.5, 0.75].map((frac, li) => (
+                    <line
+                      key={`grid-${li}`}
+                      x1={
+                        group.glyphMeta.barLeftX +
+                        group.glyphMeta.maxBarWidth * frac
+                      }
+                      y1={
+                        group.glyphMeta.glyphTop + group.glyphMeta.barSpacing
+                      }
+                      x2={
+                        group.glyphMeta.barLeftX +
+                        group.glyphMeta.maxBarWidth * frac
+                      }
+                      y2={
+                        group.glyphMeta.glyphTop +
+                        GLYPH_SIZE -
+                        group.glyphMeta.barSpacing
+                      }
+                      stroke="#ddd"
+                      strokeWidth={0.5}
+                      strokeDasharray="1,2"
+                    />
+                  ))}
+                </>
+              )}
             </g>
             {group.shapes.map((shape, i) => {
               const isLocationActive =
@@ -883,6 +948,20 @@ export default function OutcomeMorphOverlay({
                 style={{ opacity: 0 }}
               >
                 {group.locationDescription}
+              </text>
+            )}
+            {!group.hasData && interactive && encodingMode !== "distribution" && (
+              <text
+                x={group.glyphMeta.glyphLeft + GLYPH_SIZE / 2}
+                y={group.glyphMeta.glyphTop + GLYPH_SIZE / 2}
+                fontSize={10}
+                fontFamily="inherit"
+                fill={theme.palette.grey[500]}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontStyle="italic"
+              >
+                No data at this time
               </text>
             )}
           </g>
