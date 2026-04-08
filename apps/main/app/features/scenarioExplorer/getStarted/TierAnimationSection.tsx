@@ -36,7 +36,7 @@ import OutcomeMorphOverlay, {
   type LocationInfo,
   type EncodingMode,
   getOutcomeProgressRange,
-  computeDistributionHeight,
+  computeStableDistributionHeight,
   GLYPH_SIZE,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
@@ -164,6 +164,8 @@ const ACTIVE_OUTCOMES = new Set([
   "FW_EXP",
   "WRC_SALMON_AB",
 ])
+
+const SINGLE_VALUE_OUTCOMES = new Set(["DELTA_ECO", "FW_EXP", "FW_DELTA_USES"])
 
 const LAYOUT_LINE_HEIGHT = 28
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
@@ -1862,6 +1864,26 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
+  /* ── Stable polygon counts (independent of tier overrides / hydroclimate) ── */
+  const outcomePolygonCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const { code } of OUTCOME_DISPLAY_ORDER) {
+      const locData = outcomeLocations[code]
+      if (!locData) continue
+      let count = 0
+      for (const locId of locData.ids) {
+        let screenKey = locId
+        if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
+          const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
+          if (gnisName) screenKey = gnisName
+        }
+        if (allScreenPolygons.has(screenKey)) count++
+      }
+      counts[code] = count
+    }
+    return counts
+  }, [allScreenPolygons, outcomeLocations])
+
   /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
   const COLUMN_GAP = 12
 
@@ -1927,16 +1949,16 @@ export default function TierAnimationSection() {
 
       let spaceBelow = LAYOUT_LABEL_GAP
       if (isActive) {
-        const group = outcomeGroups.find((g) => g.code === code)
-        if (group && group.polygons.length > 0) {
-          locationCount = group.polygons.length
-          distributionHeight = computeDistributionHeight(
-            group.polygons,
+        const polyCount = outcomePolygonCounts[code] ?? 0
+        if (polyCount > 0) {
+          locationCount = polyCount
+          distributionHeight = computeStableDistributionHeight(
+            polyCount,
             sqPerRow,
             colWidth,
           )
-          const allSameTier = new Set(group.polygons.map((p) => p.tier)).size <= 1
-          const minChartH = allSameTier ? distributionHeight : GLYPH_SIZE
+          const isSingleValue = SINGLE_VALUE_OUTCOMES.has(code)
+          const minChartH = isSingleValue ? distributionHeight : GLYPH_SIZE
           const chartArea = Math.max(distributionHeight, minChartH)
           const overflow = chartArea - distributionHeight
           const surroundPad = LAYOUT_DIST_GAP + LAYOUT_COUNT_HEIGHT + LAYOUT_POST_DIST_GAP
@@ -1969,7 +1991,7 @@ export default function TierAnimationSection() {
     }
 
     return { items, eyebrows, leftColumnBottom: cursors[0] }
-  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
+  }, [panelSize, outcomePolygonCounts, theme.scenarios.tierGrid.squaresPerRow])
 
   const distributionPositionMap = useMemo(() => {
     if (!outcomeLayout) return {}
