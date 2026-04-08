@@ -36,8 +36,7 @@ import OutcomeMorphOverlay, {
   type LocationInfo,
   type EncodingMode,
   getOutcomeProgressRange,
-  computeStableDistributionHeight,
-  GLYPH_SIZE,
+  computeDistributionHeight,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import PinnedLocationsList from "./PinnedLocationsList"
@@ -165,13 +164,11 @@ const ACTIVE_OUTCOMES = new Set([
   "WRC_SALMON_AB",
 ])
 
-const SINGLE_VALUE_OUTCOMES = new Set(["DELTA_ECO", "FW_EXP", "FW_DELTA_USES"])
-
 const LAYOUT_LINE_HEIGHT = 28
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
 const LAYOUT_DIST_GAP = 4
 const LAYOUT_COUNT_HEIGHT = 14
-const LAYOUT_POST_DIST_GAP = 16 // space.gap.lg (16px)
+const LAYOUT_POST_DIST_GAP = 10
 
 const HIGHLIGHT_GOLD = "#ffd87e"
 const BASE_FILL_OPACITY = 0.75
@@ -1864,26 +1861,6 @@ export default function TierAnimationSection() {
     hideScheduleRef.current = schedule
   }, [activeOutcomeGroups, outcomeLocations])
 
-  /* ── Stable polygon counts (independent of tier overrides / hydroclimate) ── */
-  const outcomePolygonCounts = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const { code } of OUTCOME_DISPLAY_ORDER) {
-      const locData = outcomeLocations[code]
-      if (!locData) continue
-      let count = 0
-      for (const locId of locData.ids) {
-        let screenKey = locId
-        if (code === "RES_STOR" && !allScreenPolygons.has(locId)) {
-          const gnisName = RESERVOIR_CALSIM_TO_GNISIDLABEL[locId]
-          if (gnisName) screenKey = gnisName
-        }
-        if (allScreenPolygons.has(screenKey)) count++
-      }
-      counts[code] = count
-    }
-    return counts
-  }, [allScreenPolygons, outcomeLocations])
-
   /* ── Shared layout for Beat 2 text + distribution alignment (2 columns) ── */
   const COLUMN_GAP = 12
 
@@ -1949,20 +1926,19 @@ export default function TierAnimationSection() {
 
       let spaceBelow = LAYOUT_LABEL_GAP
       if (isActive) {
-        const polyCount = outcomePolygonCounts[code] ?? 0
-        if (polyCount > 0) {
-          locationCount = polyCount
-          distributionHeight = computeStableDistributionHeight(
-            polyCount,
+        const group = outcomeGroups.find((g) => g.code === code)
+        if (group && group.polygons.length > 0) {
+          locationCount = group.polygons.length
+          distributionHeight = computeDistributionHeight(
+            group.polygons,
             sqPerRow,
             colWidth,
           )
-          const isSingleValue = SINGLE_VALUE_OUTCOMES.has(code)
-          const minChartH = isSingleValue ? distributionHeight : GLYPH_SIZE
-          const chartArea = Math.max(distributionHeight, minChartH)
-          const overflow = chartArea - distributionHeight
-          const surroundPad = LAYOUT_DIST_GAP + LAYOUT_COUNT_HEIGHT + LAYOUT_POST_DIST_GAP
-          spaceBelow = chartArea + Math.max(4, surroundPad - overflow)
+          spaceBelow =
+            LAYOUT_DIST_GAP +
+            distributionHeight +
+            LAYOUT_COUNT_HEIGHT +
+            LAYOUT_POST_DIST_GAP
           cursors[col] += spaceBelow
         } else {
           cursors[col] += LAYOUT_LABEL_GAP
@@ -1991,7 +1967,7 @@ export default function TierAnimationSection() {
     }
 
     return { items, eyebrows, leftColumnBottom: cursors[0] }
-  }, [panelSize, outcomePolygonCounts, theme.scenarios.tierGrid.squaresPerRow])
+  }, [panelSize, outcomeGroups, theme.scenarios.tierGrid.squaresPerRow])
 
   const distributionPositionMap = useMemo(() => {
     if (!outcomeLayout) return {}

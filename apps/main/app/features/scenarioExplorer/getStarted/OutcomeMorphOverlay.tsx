@@ -207,9 +207,9 @@ function computeOutcomeLayout(
   const gridCenterX = targetX + GRID_PAD + gridWidth / 2
   const gridCenterY = targetY + gridHeight / 2
 
-  // Bar chart always at full GLYPH_SIZE, centered in the distribution area
-  const barGlyphH = GLYPH_SIZE
-  const barGlyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
+  // Bar chart fits within the distribution area, centered
+  const barGlyphH = gridHeight > 0 ? Math.min(GLYPH_SIZE, gridHeight) : GLYPH_SIZE
+  const barGlyphTop = targetY + (gridHeight - barGlyphH) / 2
 
   const numTiers = 4
   const barHeight = (GLYPH_SIZE * 0.8) / numTiers
@@ -423,7 +423,7 @@ export default function OutcomeMorphOverlay({
           : gridTargetX + maxColWidth
       const locationDescription =
         pos?.locationDescription ?? `${outcome.polygons.length} locations`
-      const countY = shapes.length > 0 ? maxY + pad + 14 : gridTargetY + 46
+      const countY = shapes.length > 0 ? maxY + pad + 4 : gridTargetY + 46
       const bounds = {
         x: boundsLeft,
         y: boundsTop,
