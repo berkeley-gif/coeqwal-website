@@ -1939,10 +1939,7 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
-          const isSingleValue = group.polygons.length === 1
-          slotHeight = isSingleValue
-            ? distributionHeight
-            : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
+          slotHeight = Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
           spaceBelow =
             LAYOUT_DIST_GAP +
             slotHeight +
