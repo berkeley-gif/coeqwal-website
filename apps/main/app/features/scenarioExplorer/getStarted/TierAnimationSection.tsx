@@ -37,6 +37,7 @@ import OutcomeMorphOverlay, {
   type EncodingMode,
   getOutcomeProgressRange,
   computeDistributionHeight,
+  GLYPH_SIZE,
 } from "./OutcomeMorphOverlay"
 import BeatTextOverlay from "./BeatTextOverlay"
 import PinnedLocationsList from "./PinnedLocationsList"
@@ -1934,11 +1935,12 @@ export default function TierAnimationSection() {
             sqPerRow,
             colWidth,
           )
-          spaceBelow =
-            LAYOUT_DIST_GAP +
-            distributionHeight +
-            LAYOUT_COUNT_HEIGHT +
-            LAYOUT_POST_DIST_GAP
+          const allSameTier = new Set(group.polygons.map((p) => p.tier)).size <= 1
+          const minChartH = allSameTier ? distributionHeight : GLYPH_SIZE
+          const chartArea = Math.max(distributionHeight, minChartH)
+          const overflow = chartArea - distributionHeight
+          const surroundPad = LAYOUT_DIST_GAP + LAYOUT_COUNT_HEIGHT + LAYOUT_POST_DIST_GAP
+          spaceBelow = chartArea + Math.max(4, surroundPad - overflow)
           cursors[col] += spaceBelow
         } else {
           cursors[col] += LAYOUT_LABEL_GAP

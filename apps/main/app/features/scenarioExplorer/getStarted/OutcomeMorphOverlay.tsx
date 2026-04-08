@@ -116,7 +116,7 @@ export function computeDistributionHeight(
 }
 
 const DOT_RADIUS = 8
-const GLYPH_SIZE = 60
+export const GLYPH_SIZE = 60
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "")
@@ -186,9 +186,13 @@ function computeOutcomeLayout(
   const gridHeight = totalRows * cell
 
   const glyphLeft = targetX + GRID_PAD + (gridWidth - GLYPH_SIZE) / 2
-  const glyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
+  const gridCenterX = targetX + GRID_PAD + gridWidth / 2
+  const gridCenterY = targetY + gridHeight / 2
 
-  // Always 4 tiers so all bar/dot slots exist, even for empty tiers
+  // Bar chart always at full GLYPH_SIZE, centered in the distribution area
+  const barGlyphH = GLYPH_SIZE
+  const barGlyphTop = targetY + (gridHeight - GLYPH_SIZE) / 2
+
   const numTiers = 4
   const barHeight = (GLYPH_SIZE * 0.8) / numTiers
   const barSpacing = (GLYPH_SIZE * 0.2) / (numTiers + 1)
@@ -196,11 +200,10 @@ function computeOutcomeLayout(
   const barCornerRadius = barHeight / 4
   const barLeftX = glyphLeft + GLYPH_SIZE * 0.15
 
-  const svRowHeight = GLYPH_SIZE / 4
-  const svRadius = GLYPH_SIZE * 0.1
+  const svRadius = DOT_RADIUS
 
-  const dotCx = glyphLeft + GLYPH_SIZE / 2
-  const dotCy = glyphTop + GLYPH_SIZE / 2
+  const dotCx = gridCenterX
+  const dotCy = gridCenterY
 
   const results: {
     resampled: [number, number][]
@@ -227,15 +230,11 @@ function computeOutcomeLayout(
 
     let barPts: [number, number][]
     if (isSingleValue) {
-      // Single-value: filled circle at this tier's row
-      const svCx = glyphLeft + GLYPH_SIZE / 2
-      const svCy = glyphTop + svRowHeight * tierRow + svRowHeight / 2
-      barPts = circlePoints(svCx, svCy, svRadius, POINTS_PER_SHAPE)
+      barPts = circlePoints(gridCenterX, gridCenterY, svRadius, POINTS_PER_SHAPE)
     } else {
-      // Multi-value: bar at this tier's fixed row position
       const barCx = barLeftX + barW / 2
       const barCy =
-        glyphTop +
+        barGlyphTop +
         barSpacing +
         tierRow * (barHeight + barSpacing) +
         barHeight / 2
@@ -290,7 +289,10 @@ function computeOutcomeLayout(
     isSingleValue,
     glyphMeta: {
       glyphLeft,
-      glyphTop,
+      barGlyphTop,
+      barGlyphH,
+      gridCenterX,
+      gridCenterY,
       numTiers,
       barHeight,
       barSpacing,
@@ -766,34 +768,12 @@ export default function OutcomeMorphOverlay({
               }}
               style={{ opacity: 0 }}
             >
-              {group.isSingleValue ? (
-                /* Single-value: 4 empty circles matching OutcomeDotsGlyph */
-                Array.from({ length: 4 }, (_, ti) => {
-                  const svRowHeight = GLYPH_SIZE / 4
-                  const cx = group.glyphMeta.glyphLeft + GLYPH_SIZE / 2
-                  const cy =
-                    group.glyphMeta.glyphTop +
-                    svRowHeight * ti +
-                    svRowHeight / 2
-                  const r = GLYPH_SIZE * 0.1
-                  return (
-                    <circle
-                      key={`dot-track-${ti}`}
-                      cx={cx}
-                      cy={cy}
-                      r={r}
-                      fill="transparent"
-                      stroke="#bbb"
-                      strokeWidth={2}
-                    />
-                  )
-                })
-              ) : (
+              {group.isSingleValue ? null : (
                 /* Multi-value: horizontal bar tracks with grid lines */
                 <>
                   {Array.from({ length: group.glyphMeta.numTiers }, (_, ti) => {
                     const y =
-                      group.glyphMeta.glyphTop +
+                      group.glyphMeta.barGlyphTop +
                       group.glyphMeta.barSpacing +
                       ti *
                         (group.glyphMeta.barHeight + group.glyphMeta.barSpacing)
@@ -816,14 +796,17 @@ export default function OutcomeMorphOverlay({
                         group.glyphMeta.barLeftX +
                         group.glyphMeta.maxBarWidth * frac
                       }
-                      y1={group.glyphMeta.glyphTop + group.glyphMeta.barSpacing}
+                      y1={
+                        group.glyphMeta.barGlyphTop +
+                        group.glyphMeta.barSpacing
+                      }
                       x2={
                         group.glyphMeta.barLeftX +
                         group.glyphMeta.maxBarWidth * frac
                       }
                       y2={
-                        group.glyphMeta.glyphTop +
-                        GLYPH_SIZE -
+                        group.glyphMeta.barGlyphTop +
+                        group.glyphMeta.barGlyphH -
                         group.glyphMeta.barSpacing
                       }
                       stroke="#ccc"
@@ -952,8 +935,8 @@ export default function OutcomeMorphOverlay({
               interactive &&
               encodingMode !== "distribution" && (
                 <text
-                  x={group.glyphMeta.glyphLeft + GLYPH_SIZE / 2}
-                  y={group.glyphMeta.glyphTop + GLYPH_SIZE / 2}
+                  x={group.glyphMeta.gridCenterX}
+                  y={group.glyphMeta.gridCenterY}
                   fontSize={10}
                   fontFamily="inherit"
                   fill={theme.palette.grey[500]}
