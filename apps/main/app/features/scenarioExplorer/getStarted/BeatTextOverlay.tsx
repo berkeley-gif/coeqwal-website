@@ -551,6 +551,23 @@ export default function BeatTextOverlay({
             ref={calsimTextRef}
             sx={{ mt: 2.5, opacity: 0, transition: "opacity 0.6s ease" }}
           >
+            <Typography
+              component="p"
+              variant="overline"
+              sx={{
+                "&&": {
+                  color: theme.palette.grey[600],
+                  fontSize: "0.7rem",
+                  lineHeight: 1,
+                  textShadow: "none",
+                },
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                mb: 1,
+              }}
+            >
+              S0020
+            </Typography>
             <Typography variant="body1" component="p">
               This is the CalSim water allocation data for these locations for
               the Current operations water management scenario.
@@ -622,101 +639,103 @@ export default function BeatTextOverlay({
               : "none",
           }}
         >
-          {scenarioName && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: scenarioDescription ? 0.5 : 1.5,
-              }}
-            >
+          {/* Two-column grid: title/toggle left, ops/climate right */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              rowGap: scenarioDescription ? 0.5 : 1.5,
+              columnGap: 1.5,
+              alignItems: "center",
+            }}
+          >
+            {/* Top-left: title */}
+            {scenarioName && (
               <Typography
                 variant="subtitle1"
                 component="h3"
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 600, gridColumn: 1 }}
               >
                 {scenarioName}
               </Typography>
-              {opsIconDefs.length > 0 && (
-                <Box
+            )}
+
+            {/* Top-right: key operations */}
+            {opsIconDefs.length > 0 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  gridColumn: 2,
+                  justifySelf: "end",
+                }}
+              >
+                <Typography
+                  component="span"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.02em",
+                    color: theme.palette.grey[600],
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.02em",
-                      color: theme.palette.grey[600],
-                      whiteSpace: "nowrap",
-                    }}
+                  Key operations
+                </Typography>
+                {opsIconDefs.map((def) => (
+                  <HybridTooltip
+                    key={def.id}
+                    content={
+                      <>
+                        <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
+                          {def.label}
+                        </Typography>
+                        {def.description}
+                      </>
+                    }
                   >
-                    Key operations
-                  </Typography>
-                  {opsIconDefs.map((def) => (
-                    <HybridTooltip
-                      key={def.id}
-                      content={
-                        <>
-                          <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
-                            {def.label}
-                          </Typography>
-                          {def.description}
-                        </>
-                      }
+                    <Box
+                      tabIndex={0}
+                      aria-label={def.label}
+                      sx={{
+                        width: 26,
+                        height: 26,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "50%",
+                        cursor: "default",
+                        "&:focus-visible": {
+                          outline: `2px solid ${theme.palette.blue.bright}`,
+                          outlineOffset: "2px",
+                        },
+                      }}
                     >
-                      <Box
-                        tabIndex={0}
-                        aria-label={def.label}
-                        sx={{
-                          width: 26,
-                          height: 26,
-                          flexShrink: 0,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "50%",
-                          cursor: "default",
-                          "&:focus-visible": {
-                            outline: `2px solid ${theme.palette.blue.bright}`,
-                            outlineOffset: "2px",
-                          },
-                        }}
-                      >
-                        {renderIconDef(def)}
-                      </Box>
-                    </HybridTooltip>
-                  ))}
-                </Box>
-              )}
-            </Box>
-          )}
-          {scenarioDescription && (
-            <Typography
-              variant="compactSubtitle"
-              component="p"
-              sx={{
-                color: theme.palette.grey[500],
-                mb: 1.5,
-              }}
-            >
-              {descriptionWithLinks}
-            </Typography>
-          )}
-          {encodingMode && onEncodingChange && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                mb: 0.5,
-              }}
-            >
+                      {renderIconDef(def)}
+                    </Box>
+                  </HybridTooltip>
+                ))}
+              </Box>
+            )}
+
+            {/* Description spanning both columns */}
+            {scenarioDescription && (
+              <Typography
+                variant="compactSubtitle"
+                component="p"
+                sx={{
+                  color: theme.palette.grey[500],
+                  gridColumn: "1 / -1",
+                }}
+              >
+                {descriptionWithLinks}
+              </Typography>
+            )}
+
+            {/* Bottom-left: encoding toggle */}
+            {encodingMode && onEncodingChange && (
               <ToggleButtonGroup
                 value={encodingMode}
                 exclusive
@@ -725,6 +744,7 @@ export default function BeatTextOverlay({
                 }}
                 size="small"
                 sx={{
+                  gridColumn: 1,
                   "& .MuiToggleButton-root": {
                     color: theme.palette.grey[600],
                     border: `1px solid ${theme.palette.grey[300]}`,
@@ -752,40 +772,43 @@ export default function BeatTextOverlay({
                 <ToggleButton value="bar">Bar</ToggleButton>
                 <ToggleButton value="average">Average</ToggleButton>
               </ToggleButtonGroup>
-              {onHydroclimateChange && (
-                <Box
+            )}
+
+            {/* Bottom-right: hydroclimate chooser */}
+            {onHydroclimateChange && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  gridColumn: 2,
+                  justifySelf: "end",
+                }}
+              >
+                <Typography
+                  component="span"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    ml: 1.5,
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.02em",
+                    color: theme.palette.grey[600],
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      letterSpacing: "0.02em",
-                      color: theme.palette.grey[600],
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    View by climate
-                  </Typography>
-                  <HydroclimateChooser
-                    value={hydroclimate}
-                    onChange={onHydroclimateChange}
-                    showTitle={false}
-                    showLabels={false}
-                    hideDisabled
-                    iconSize="26px"
-                    iconFontSize="0.95rem"
-                  />
-                </Box>
-              )}
-            </Box>
-          )}
+                  View by climate
+                </Typography>
+                <HydroclimateChooser
+                  value={hydroclimate}
+                  onChange={onHydroclimateChange}
+                  showTitle={false}
+                  showLabels={false}
+                  hideDisabled
+                  iconSize="26px"
+                  iconFontSize="0.95rem"
+                />
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Two-column flow layout for outcome labels */}
