@@ -1288,46 +1288,50 @@ export default function TierAnimationSection() {
           phase = "beat2"
         }
 
-        // Group hide schedule entries by Mapbox layer for polygon outcomes
-        const layerEntries = new Map<
-          string,
-          { idProperty: string; entries: typeof hideScheduleRef.current }
-        >()
+        // Collect demand-units hide schedule entries and line entries
+        const duEntries: typeof hideScheduleRef.current = []
         const lineEntries: typeof hideScheduleRef.current = []
 
         for (const entry of hideScheduleRef.current) {
-          if (v < entry.fadeStart) continue
-          if (entry.geometryType === "polygon" && entry.mapboxLayerId) {
-            let bucket = layerEntries.get(entry.mapboxLayerId)
-            if (!bucket) {
-              bucket = { idProperty: entry.idProperty, entries: [] }
-              layerEntries.set(entry.mapboxLayerId, bucket)
-            }
-            bucket.entries.push(entry)
+          if (
+            entry.geometryType === "polygon" &&
+            entry.mapboxLayerId === "demand-units"
+          ) {
+            duEntries.push(entry)
           } else if (entry.geometryType === "line" && entry.mapboxLayerId) {
             lineEntries.push(entry)
           }
-          // react-marker: no Mapbox layer to hide (SVG replaces them)
         }
 
-        // Per-layer polygon fade (demand-units only — other layers stay hidden;
-        // the SVG overlay handles non-DU outcomes directly).
-        for (const [layerId, { idProperty, entries }] of layerEntries) {
-          if (layerId !== "demand-units") continue
-          if (!map.getLayer(layerId)) continue
+        // Build demand-units opacity expression:
+        // - Fading entries: interpolated opacity (0.65 → 0)
+        // - Not-yet-fading entries: 0.65 (still visible)
+        // - Untracked DUs: 0 (hidden — prevents ghost mid-blue polygons)
+        if (duEntries.length > 0 && map.getLayer("demand-units")) {
           const caseExpr: unknown[] = ["case"]
-          for (const entry of entries) {
-            const fadeDuration = entry.morphStart - entry.fadeStart
-            const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
-            const opacity = 0.65 * (1 - t)
-            caseExpr.push(
-              ["in", ["get", idProperty], ["literal", entry.locationIds]],
-              opacity,
-            )
+          for (const entry of duEntries) {
+            if (v < entry.fadeStart) {
+              caseExpr.push(
+                ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
+                0.65,
+              )
+            } else {
+              const fadeDuration = entry.morphStart - entry.fadeStart
+              const t = Math.min(1, (v - entry.fadeStart) / fadeDuration)
+              const opacity = 0.65 * (1 - t)
+              caseExpr.push(
+                ["in", ["get", "DU_ID"], ["literal", entry.locationIds]],
+                opacity,
+              )
+            }
           }
-          caseExpr.push(0.65)
+          caseExpr.push(0)
           try {
-            map.setPaintProperty(layerId, "fill-opacity", caseExpr as never)
+            map.setPaintProperty(
+              "demand-units",
+              "fill-opacity",
+              caseExpr as never,
+            )
           } catch {
             /* ok */
           }
