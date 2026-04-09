@@ -302,10 +302,7 @@ export default function TierAnimationSection() {
 
     if (isRestart) {
       progress.set(0)
-      mapActions.setOutcomeVisualization(
-        "AG_REV",
-        resolvedScenarioIdRef.current,
-      )
+      mapActions.clearOutcomeVisualization()
 
       // Suppress all map layers to their pre-animation state so nothing
       // lingers from a previous run.
@@ -564,11 +561,31 @@ export default function TierAnimationSection() {
 
     if (!config) {
       if (activeLocationSet.size === 0) mapActions.clearLocationHighlights()
+      // Reset demand-units when no outcome is selected
+      const resetMap = mapAPI.mapRef?.current?.getMap?.()
+      if (resetMap?.isStyleLoaded?.()) {
+        try {
+          if (resetMap.getLayer("demand-units")) {
+            resetMap.setPaintProperty("demand-units", "fill-opacity", 0)
+            resetMap.setFilter("demand-units", DU_CLASS_FILTER as never)
+          }
+          if (resetMap.getLayer("demand-units-outline")) {
+            resetMap.setPaintProperty("demand-units-outline", "line-opacity", 0)
+          }
+        } catch {
+          /* ok */
+        }
+      }
       return
     }
 
     // ── Polygon-specific Mapbox paint changes ──
+    // OutcomePolygonLayer handles filter, fill-color, and base opacity.
+    // This effect only handles gold outlines + spotlight/pinned opacity overrides.
     const map = mapAPI.mapRef?.current?.getMap?.()
+
+    origLineColorRef.current = null
+    origLineWidthRef.current = null
 
     const applyPaintChanges = () => {
       if (!map || config.geometryType !== "polygon") return
@@ -619,6 +636,12 @@ export default function TierAnimationSection() {
               activeMatch,
               2,
               1,
+            ] as never)
+            map.setPaintProperty(outlineId, "line-opacity", [
+              "case",
+              activeMatch,
+              1,
+              0,
             ] as never)
           } else {
             map.setPaintProperty(
@@ -811,6 +834,8 @@ export default function TierAnimationSection() {
     }
   }, [handleTooltipToggle, locHandlers])
 
+  const fadeOutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const handleOutcomeClick = useCallback(
     (code: string, force?: boolean) => {
       const isToggleOff = selectedOutcomeCode === code
@@ -820,9 +845,35 @@ export default function TierAnimationSection() {
       mapActions.clearMapTooltips()
       setHoveredLocation(null)
 
-      mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
+      if (fadeOutTimerRef.current) {
+        clearTimeout(fadeOutTimerRef.current)
+        fadeOutTimerRef.current = null
+      }
 
       const map = mapAPI.mapRef?.current?.getMap?.()
+      const isSwitching =
+        !isToggleOff && selectedOutcomeCode != null && selectedOutcomeCode !== code
+
+      if (isSwitching && map) {
+        const prevConfig = getOutcomeConfig(selectedOutcomeCode!)
+        if (prevConfig?.geometryType === "polygon" && prevConfig.mapboxLayerId) {
+          const fillId = prevConfig.mapboxLayerId
+          if (map.getLayer(fillId)) {
+            map.setPaintProperty(fillId, "fill-opacity-transition", {
+              duration: 200,
+              delay: 0,
+            })
+            map.setPaintProperty(fillId, "fill-opacity", 0)
+          }
+        }
+        fadeOutTimerRef.current = setTimeout(() => {
+          fadeOutTimerRef.current = null
+          mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
+        }, 220)
+      } else {
+        mapActions.toggleOutcomeVisualization(code, resolvedScenarioId)
+      }
+
       if (!map) return
 
       if (isToggleOff) {
@@ -847,6 +898,7 @@ export default function TierAnimationSection() {
   useEffect(() => {
     return () => {
       controlsRef.current?.stop()
+      if (fadeOutTimerRef.current) clearTimeout(fadeOutTimerRef.current)
     }
   }, [])
 
@@ -947,10 +999,9 @@ export default function TierAnimationSection() {
     }
   }, [isInteractive, selectedOutcomeCode, mapAPI.mapRef])
 
-  /* ── Activate persistent map with AG_REV visualization ── */
+  /* ── Activate persistent map (no visualization set until interactive mode) ── */
   useEffect(() => {
     mapActions.setMapMode("get-started")
-    mapActions.setOutcomeVisualization("AG_REV", "s0020")
 
     const suppressInterval = setInterval(() => {
       if (polygonsAllowedRef.current) {

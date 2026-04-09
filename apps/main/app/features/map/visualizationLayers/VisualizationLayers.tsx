@@ -212,11 +212,11 @@ export default function VisualizationLayers() {
       )}
 
       {/* Polygon layer (demand-units, WBA, delta, reservoir)
-          Skipped in get-started mode where TierAnimationSection owns layer styling. */}
+          In get-started mode this only renders after the user clicks a category
+          (activeOutcomeVisualization is null during the animation). */}
       {isVisualizationActive &&
         geometryType === "polygon" &&
-        config &&
-        !isGetStartedMode && (
+        config && (
           <OutcomePolygonLayer
             tierColorMap={tierColorMap}
             layerType={layerType!}
