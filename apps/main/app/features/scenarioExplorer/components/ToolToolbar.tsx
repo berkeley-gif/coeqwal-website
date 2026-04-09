@@ -17,13 +17,9 @@ import {
   useTheme,
   LocationOnIcon,
   Switch,
-  InputBase,
-  IconButton,
-  icons,
 } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { useScenarioExplorerStore } from "../store"
-import ToggleChip from "./ToggleChip"
 
 interface ToolToolbarProps {
   gridAligned?: boolean
@@ -40,24 +36,9 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     setOutcomeDisplayMode,
     showLocationPicker,
     setShowLocationPicker,
-    searchQuery,
-    setSearchQuery,
-    showDefinitions,
-    setShowDefinitions,
-    showAlternativeBaselines,
-    setShowAlternativeBaselines,
     showKeyOperations,
-    setShowKeyOperations,
-    showOnlyChosen,
-    setShowOnlyChosen,
-    sharedScenarioIds,
-    setShowShareDrawer,
-    groupByTheme,
-    setGroupByTheme,
-    exploreMode,
   } = useScenarioExplorerStore()
 
-  const isListMode = exploreMode === "list"
 
   const viewControls = (
     <>
@@ -159,93 +140,6 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     </>
   )
 
-  const searchAndChips = (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.5,
-          minWidth: 140,
-          maxWidth: 200,
-        }}
-      >
-        <InputBase
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search…"
-          size="small"
-          inputProps={{ "aria-label": "Search scenarios" }}
-          sx={{
-            flex: 1,
-            fontSize: "0.8125rem",
-            "& .MuiInputBase-input": {
-              py: 0.5,
-              px: 0.5,
-              "&::placeholder": {
-                color: theme.palette.grey[500],
-                opacity: 1,
-              },
-            },
-          }}
-        />
-        {searchQuery && (
-          <IconButton
-            size="small"
-            onClick={() => setSearchQuery("")}
-            sx={{ p: 0.25 }}
-          >
-            <icons.Close sx={{ fontSize: "0.875rem" }} />
-          </IconButton>
-        )}
-      </Box>
-
-      <VerticalDivider />
-
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.25,
-          flexWrap: "wrap",
-        }}
-      >
-        <ToggleChip
-          label="Definitions"
-          active={showDefinitions}
-          onClick={() => setShowDefinitions(!showDefinitions)}
-        />
-        <ToggleChip
-          label="Baselines"
-          active={showAlternativeBaselines}
-          onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
-        />
-        <ToggleChip
-          label="Key ops"
-          active={showKeyOperations}
-          onClick={() => setShowKeyOperations(!showKeyOperations)}
-        />
-        <ToggleChip
-          label="Chosen only"
-          active={showOnlyChosen}
-          onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-        />
-        <ToggleChip
-          label="Group by theme"
-          active={groupByTheme}
-          onClick={() => setGroupByTheme(!groupByTheme)}
-        />
-        {sharedScenarioIds.length > 0 && (
-          <ToggleChip
-            label={`Share (${sharedScenarioIds.length})`}
-            active={true}
-            onClick={() => setShowShareDrawer(true)}
-          />
-        )}
-      </Box>
-    </>
-  )
-
   if (gridAligned) {
     return (
       <Box
@@ -269,19 +163,21 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           alignItems: "center",
         }}
       >
-        {/* Search + chips — aligned with scenario columns */}
         <Box
           sx={{
             gridColumn: { xs: "1 / -1", sm: "1 / 4" },
             display: "flex",
             alignItems: "center",
-            gap: 1.5,
           }}
         >
-          {searchAndChips}
+          <Typography
+            variant="subtitle2"
+            sx={{ color: theme.palette.explore.text, fontWeight: 500 }}
+          >
+            Scenario library
+          </Typography>
         </Box>
 
-        {/* View controls — aligned with outcomes column */}
         <Box
           sx={{
             gridColumn: { xs: "1 / -1", sm: "4" },

@@ -543,7 +543,7 @@ export default function RefugeSection({
 
       {isLoadingDUs ? null : (
         <>
-          {/* ── Monthly Chart (delivery OR shortage) ─────────────────── */}
+          {/* Monthly Chart (delivery OR shortage) */}
           <Box
             sx={{
               backgroundColor: theme.palette.background.paper,

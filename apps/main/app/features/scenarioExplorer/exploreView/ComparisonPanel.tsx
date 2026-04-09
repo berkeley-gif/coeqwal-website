@@ -852,7 +852,7 @@ export default function ComparisonPanel({
         WebkitUserSelect: "none",
       }}
     >
-      {/* ── HTML axis labels above chart (desktop, parallel only) ──── */}
+      {/* HTML axis labels above chart (desktop, parallel only) */}
       {chartMode === "parallel" && isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -908,7 +908,7 @@ export default function ComparisonPanel({
         </Box>
       )}
 
-      {/* ── HTML axis labels left of chart (mobile, parallel only) ── */}
+      {/* HTML axis labels left of chart (mobile, parallel only) */}
       {chartMode === "parallel" && !isDesktop && axisLayout.length > 0 && (
         <Box
           sx={{
@@ -964,7 +964,7 @@ export default function ComparisonPanel({
         </Box>
       )}
 
-      {/* ── Charts ─────────────────────────────────────────────────── */}
+      {/* Charts */}
       {chartMode === "parallel" && (
         <VerticalParallelLinePlotPeak
           data={chartData}

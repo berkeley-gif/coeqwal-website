@@ -25,6 +25,7 @@ import {
   formatOutcomeLabel,
   type OutcomeName,
 } from "../../scenarios/components/shared"
+import SearchAndChips from "../components/SearchAndChips"
 
 /**
  * Layout mode for responsive grid behavior
@@ -197,26 +198,20 @@ function ColumnHeaders({
 
   return (
     <>
-      {/* Columns 1-2: "Scenario library" (spans checkbox + scenario columns) */}
+      {/* Columns 1-2: Search + visibility chips */}
       <Box
         sx={{
           gridColumn: showOperations ? "1 / 3" : "1 / 3",
           display: { xs: "none", sm: "flex" },
-          alignItems: "flex-start",
+          alignItems: "center",
           alignSelf: "stretch",
+          flexWrap: "wrap",
+          gap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
           pb: hideColumnTitles ? 0 : theme.scenarios.grid.header.standard,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            color: theme.palette.grey[900],
-            fontWeight: 500,
-          }}
-        >
-          Scenario library
-        </Typography>
+        <SearchAndChips />
       </Box>
 
       {/* Column 3: "Key operations" — hidden when showOperations is false or titles hidden */}

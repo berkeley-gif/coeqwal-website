@@ -554,7 +554,7 @@ export default function DeltaSection({
         </ChartGridProvider>
       </Box>
 
-      {/* ── X2 Position (April & September) ─────────────────── */}
+      {/* X2 Position (April & September) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="X2 Position"
@@ -596,7 +596,7 @@ export default function DeltaSection({
         </Box>
       </Box>
 
-      {/* ── Compliance Point Salinity (EM, JP, RS, CO) ────────── */}
+      {/* Compliance Point Salinity (EM, JP, RS, CO) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="Salinity at compliance points"
@@ -642,7 +642,7 @@ export default function DeltaSection({
         </Box>
       </Box>
 
-      {/* ── Pumping Plant Salinity (Banks, Tracy/Jones) ────────── */}
+      {/* Pumping Plant Salinity (Banks, Tracy/Jones) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="Salinity at pumping plants"
@@ -687,7 +687,7 @@ export default function DeltaSection({
         </Box>
       </Box>
 
-      {/* ── Delta Inflows (Sacramento at Hood, SJR at Vernalis) ── */}
+      {/* Delta Inflows (Sacramento at Hood, SJR at Vernalis) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="Delta inflows"
@@ -732,7 +732,7 @@ export default function DeltaSection({
         </Box>
       </Box>
 
-      {/* ── Delta Exports (SWP Banks, CVP Tracy) ────────────── */}
+      {/* Delta Exports (SWP Banks, CVP Tracy) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="Delta exports"
@@ -778,7 +778,7 @@ export default function DeltaSection({
         </Box>
       </Box>
 
-      {/* ── Delta Outflow (NDO) ──────────────────────────────── */}
+      {/* Delta Outflow (NDO) */}
       <Box sx={chartCardSx}>
         <SectionHeader
           title="Delta outflow"
