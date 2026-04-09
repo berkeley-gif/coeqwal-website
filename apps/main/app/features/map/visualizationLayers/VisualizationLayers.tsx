@@ -211,18 +211,22 @@ export default function VisualizationLayers() {
         <PoiMarker coordinates={geocoderMarker} />
       )}
 
-      {/* Polygon layer (demand-units, WBA, delta, reservoir) */}
-      {isVisualizationActive && geometryType === "polygon" && config && (
-        <OutcomePolygonLayer
-          tierColorMap={tierColorMap}
-          layerType={layerType!}
-          idProperty={config.idProperty}
-          featureIds={featureIds}
-          classFilter={config.classFilter}
-          visible={true}
-          mapboxLayerId={config.mapboxLayerId}
-        />
-      )}
+      {/* Polygon layer (demand-units, WBA, delta, reservoir)
+          Skipped in get-started mode where TierAnimationSection owns layer styling. */}
+      {isVisualizationActive &&
+        geometryType === "polygon" &&
+        config &&
+        !isGetStartedMode && (
+          <OutcomePolygonLayer
+            tierColorMap={tierColorMap}
+            layerType={layerType!}
+            idProperty={config.idProperty}
+            featureIds={featureIds}
+            classFilter={config.classFilter}
+            visible={true}
+            mapboxLayerId={config.mapboxLayerId}
+          />
+        )}
 
       {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
       {tierLocations.length > 0 &&
