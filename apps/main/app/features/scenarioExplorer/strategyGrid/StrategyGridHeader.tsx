@@ -45,6 +45,8 @@ export interface StrategyGridHeaderProps {
   showOperations?: boolean
   /** When true, only outcome labels are shown (scenario/ops headers hidden) */
   outcomesOnly?: boolean
+  /** When true, hides the column title row (Scenario library / Key operations / Key outcomes) */
+  hideColumnTitles?: boolean
   /** Active tooltip outcome name */
   activeTooltip: string | null
   /** Current sort column */
@@ -82,6 +84,7 @@ export function StrategyGridHeader({
   layoutMode,
   showOperations = true,
   outcomesOnly = false,
+  hideColumnTitles = false,
   activeTooltip,
   sortBy,
   sortDirection,
@@ -117,10 +120,14 @@ export function StrategyGridHeader({
   return (
     <>
       {/* Column headers row */}
-      <ColumnHeaders layoutMode={layoutMode} showOperations={showOperations} />
+      <ColumnHeaders
+        layoutMode={layoutMode}
+        showOperations={showOperations}
+        hideColumnTitles={hideColumnTitles}
+      />
 
       {/* Divider continuation for Column 3 - only in full mode when operations visible */}
-      {showOutcomeLabels && showOperations && (
+      {!hideColumnTitles && showOutcomeLabels && showOperations && (
         <DividerContinuation column={3} />
       )}
 
@@ -175,11 +182,13 @@ function CompactHeader() {
 interface ColumnHeadersProps {
   layoutMode: LayoutMode
   showOperations?: boolean
+  hideColumnTitles?: boolean
 }
 
 function ColumnHeaders({
   layoutMode,
   showOperations = true,
+  hideColumnTitles = false,
 }: ColumnHeadersProps) {
   const theme = useTheme()
 
@@ -188,7 +197,7 @@ function ColumnHeaders({
 
   return (
     <>
-      {/* Columns 1-2: "Choose scenarios" (spans checkbox + scenario columns) */}
+      {/* Columns 1-2: "Scenario library" (spans checkbox + scenario columns) */}
       <Box
         sx={{
           gridColumn: showOperations ? "1 / 3" : "1 / 3",
@@ -196,7 +205,7 @@ function ColumnHeaders({
           alignItems: "flex-start",
           alignSelf: "stretch",
           pr: theme.scenarios.grid.divider.gap,
-          pb: theme.scenarios.grid.header.standard,
+          pb: hideColumnTitles ? 0 : theme.scenarios.grid.header.standard,
         }}
       >
         <Typography
@@ -210,8 +219,8 @@ function ColumnHeaders({
         </Typography>
       </Box>
 
-      {/* Column 3: "Key operations".hidden when showOperations is false */}
-      {showOperations && (
+      {/* Column 3: "Key operations" — hidden when showOperations is false or titles hidden */}
+      {showOperations && !hideColumnTitles && (
         <Box
           sx={{
             gridColumn: "3",
@@ -237,22 +246,16 @@ function ColumnHeaders({
         </Box>
       )}
 
-      {/* Column 4: "Key outcomes" - only in full mode */}
-      {isFullMode && (
+      {/* Column 4: "Key outcomes" — only in full mode, hidden when titles hidden */}
+      {isFullMode && !hideColumnTitles && (
         <Box
           sx={{
             gridColumn: "4",
             display: { xs: "none", sm: "flex" },
             alignItems: "flex-start",
             alignSelf: "stretch",
-            /**
-             * Tighter bottom padding than other columns.
-             * Outcome category labels appear directly below this header,
-             * so we use component.sm (8px) instead of component.lg (16px).
-             */
             pb: theme.scenarios.grid.header.outcomes,
             pl: theme.scenarios.grid.divider.gap,
-            // Vertical divider at column boundary
             borderLeft: `1px solid ${theme.palette.grey[300]}`,
           }}
         >
@@ -338,10 +341,10 @@ function OutcomeCategoryLabels({
         display: { xs: "none", sm: "grid" },
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
-        pb: theme.scenarios.grid.header.categoryLabels,
+        pt: 0.5,
+        pb: 1.5,
         pl: theme.scenarios.grid.divider.gap,
         ...(!outcomesOnly && {
-          mt: theme.scenarios.grid.divider.pullUp,
           borderLeft: `1px solid ${theme.palette.grey[300]}`,
         }),
         alignSelf: "stretch",

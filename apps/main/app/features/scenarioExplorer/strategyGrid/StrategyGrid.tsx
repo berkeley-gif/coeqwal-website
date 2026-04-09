@@ -58,6 +58,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   renderMode = "all",
   showOperations = true,
   outcomesOnly = false,
+  hideColumnTitles = false,
   sortBy,
   sortDirection = "asc",
   onSortChange,
@@ -191,6 +192,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             layoutMode={layoutMode}
             showOperations={showOperations}
             outcomesOnly={outcomesOnly}
+            hideColumnTitles={hideColumnTitles}
             activeTooltip={activeTooltip}
             sortBy={sortBy ?? null}
             sortDirection={sortDirection}

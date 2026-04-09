@@ -50,6 +50,8 @@ export interface StrategyGridProps {
   showOperations?: boolean
   /** When true, hides scenario title (col 2) and ops (col 3) — shows only outcomes */
   outcomesOnly?: boolean
+  /** When true, hides the column title row (Scenario library / Key operations / Key outcomes) */
+  hideColumnTitles?: boolean
 
   // Sorting (optional)
   sortBy?: string | null

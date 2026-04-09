@@ -136,11 +136,12 @@ export default function ScenarioSelectionSidebar({
           py: 1,
           minHeight: 45,
           borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.explore.background,
         }}
       >
         <Typography
           variant="subtitle2"
-          sx={{ color: theme.palette.grey[900], fontWeight: 500 }}
+          sx={{ color: theme.palette.explore.text, fontWeight: 500 }}
         >
           Scenario library
         </Typography>
@@ -149,9 +150,10 @@ export default function ScenarioSelectionSidebar({
           <Typography
             variant="subtitle2"
             sx={{
-              color: theme.palette.grey[600],
+              color: theme.palette.explore.text,
               fontWeight: 500,
               flexShrink: 0,
+              opacity: 0.7,
             }}
           >
             Key operations
@@ -159,85 +161,97 @@ export default function ScenarioSelectionSidebar({
         )}
       </Box>
 
-      {/* ── Search row ───────────────────────────────────────────────────── */}
+      {/* ── Controls strip: search + visibility toggles ─────────────────── */}
       <Box
         sx={{
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
-          gap: 0.5,
+          gap: 1,
           px: 1,
-          minHeight: 40,
+          py: 0.75,
           borderBottom: `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <InputBase
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search…"
-          size="small"
-          inputProps={{ "aria-label": "Search scenarios" }}
-          sx={{
-            flex: 1,
-            fontSize: "0.8125rem",
-            "& .MuiInputBase-input": {
-              py: 0.5,
-              px: 0.5,
-              "&::placeholder": { color: theme.palette.grey[500], opacity: 1 },
-            },
-          }}
-        />
-        {searchQuery && (
-          <IconButton
-            size="small"
-            onClick={() => setSearchQuery("")}
-            sx={{ p: 0.25 }}
-          >
-            <icons.Close sx={{ fontSize: "0.875rem" }} />
-          </IconButton>
-        )}
-      </Box>
-
-      {/* ── Visibility chip toggles ──────────────────────────────────────── */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 0.25,
-          px: 1,
-          py: 0.5,
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
           flexWrap: "wrap",
         }}
       >
-        <ToggleChip
-          label="Definitions"
-          active={showDefinitions}
-          onClick={() => setShowDefinitions(!showDefinitions)}
-        />
-        <ToggleChip
-          label="Baselines"
-          active={showAlternativeBaselines}
-          onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
-        />
-        <ToggleChip
-          label="Key ops"
-          active={showKeyOperations}
-          onClick={() => setShowKeyOperations(!showKeyOperations)}
-        />
-        <ToggleChip
-          label="Chosen only"
-          active={showOnlyChosen}
-          onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-        />
-        {sharedScenarioIds.length > 0 && (
-          <ToggleChip
-            label={`Share (${sharedScenarioIds.length})`}
-            active={true}
-            onClick={() => setShowShareDrawer(true)}
+        {/* Search */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            minWidth: 100,
+            flex: 1,
+          }}
+        >
+          <InputBase
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search…"
+            size="small"
+            inputProps={{ "aria-label": "Search scenarios" }}
+            sx={{
+              flex: 1,
+              fontSize: "0.8125rem",
+              "& .MuiInputBase-input": {
+                py: 0.5,
+                px: 0.5,
+                "&::placeholder": { color: theme.palette.grey[500], opacity: 1 },
+              },
+            }}
           />
-        )}
+          {searchQuery && (
+            <IconButton
+              size="small"
+              onClick={() => setSearchQuery("")}
+              sx={{ p: 0.25 }}
+            >
+              <icons.Close sx={{ fontSize: "0.875rem" }} />
+            </IconButton>
+          )}
+        </Box>
+
+        {/* Divider */}
+        <Box
+          sx={{
+            width: "1px",
+            height: 20,
+            backgroundColor: theme.palette.divider,
+            flexShrink: 0,
+          }}
+        />
+
+        {/* Toggle chips */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexWrap: "wrap" }}>
+          <ToggleChip
+            label="Definitions"
+            active={showDefinitions}
+            onClick={() => setShowDefinitions(!showDefinitions)}
+          />
+          <ToggleChip
+            label="Baselines"
+            active={showAlternativeBaselines}
+            onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
+          />
+          <ToggleChip
+            label="Key ops"
+            active={showKeyOperations}
+            onClick={() => setShowKeyOperations(!showKeyOperations)}
+          />
+          <ToggleChip
+            label="Chosen only"
+            active={showOnlyChosen}
+            onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+          />
+          {sharedScenarioIds.length > 0 && (
+            <ToggleChip
+              label={`Share (${sharedScenarioIds.length})`}
+              active={true}
+              onClick={() => setShowShareDrawer(true)}
+            />
+          )}
+        </Box>
       </Box>
 
       {/* ── Scrollable scenario list ─────────────────────────────────────── */}
