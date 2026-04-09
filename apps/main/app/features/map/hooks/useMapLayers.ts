@@ -82,6 +82,14 @@ export function useMapLayers() {
   const prevSectionRef = useRef<SectionId | null>(null)
   const initializedRef = useRef(false)
 
+  // Reset initialization state when mapReady cycles (e.g. basemap change)
+  useEffect(() => {
+    if (!mapReady) {
+      initializedRef.current = false
+      prevSectionRef.current = null
+    }
+  }, [mapReady])
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

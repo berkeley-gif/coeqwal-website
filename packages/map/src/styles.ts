@@ -89,11 +89,12 @@ export const MAP_STYLES = {
  * Mapbox style URLs for different themes
  */
 export const MAP_THEME_URLS = {
-  light: "mapbox://styles/finishme",
-  dark: "mapbox://styles/finishme",
-  satellite: "mapbox://styles/finishme",
-  satelliteStreets: "mapbox://styles/finishme",
+  satellite: "mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8",
+  light: "mapbox://styles/mapbox/light-v11",
+  streets: "mapbox://styles/mapbox/streets-v12",
 }
+
+export type MapThemeKey = keyof typeof MAP_THEME_URLS
 
 /**
  * Common transitions for map animations
