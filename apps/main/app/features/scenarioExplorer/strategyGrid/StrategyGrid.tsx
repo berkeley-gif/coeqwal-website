@@ -17,13 +17,14 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React from "react"
-import { Box, useTheme, useMediaQuery } from "@repo/ui/mui"
+import React, { useRef } from "react"
+import { Box, useTheme } from "@repo/ui/mui"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 import { type StrategyGridProps } from "./types"
 import { StrategyGridHeader } from "./StrategyGridHeader"
 import { StrategyGridContent } from "./StrategyGridContent"
+import { useContainerWidth } from "./useContainerWidth"
 
 /**
  * StrategyGrid component - main grid orchestrator
@@ -74,28 +75,33 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 }: StrategyGridProps) {
   const theme = useTheme()
 
-  // Responsive glyph size: 50px at sm, 60px at md+
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
-  const glyphSize = isMdUp ? 60 : 50
+  // Container-width-based responsive layout (replaces viewport useMediaQuery)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const containerWidth = useContainerWidth(containerRef)
 
-  // Responsive breakpoints for layout modes
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"))
-  // Full 4-column layout at 1400px+ (custom breakpoint from theme)
-  const isFullWidth = useMediaQuery(
-    `(min-width: ${theme.scenarios.grid.fullBreakpoint}px)`,
-  )
+  const SM_BREAKPOINT = 600
+  const MD_BREAKPOINT = 900
+  const FULL_BREAKPOINT = theme.scenarios.grid.fullBreakpoint // 1400
+
+  const glyphSize = containerWidth >= MD_BREAKPOINT ? 60 : 50
 
   /**
    * Layout mode determines how columns are arranged:
-   * - "full": All 4 columns inline (1400px+)
-   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600-1399px)
+   * - "full": All 4 columns inline (container ≥ 1400px)
+   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600–1399px)
    * - "compact": Mobile layout (below 600px)
+   *
+   * Derived from container width so the grid adapts when placed in a
+   * sidebar or other constrained context, not just at viewport breakpoints.
    */
-  const layoutMode = isFullWidth ? "full" : isSmUp ? "wrapped" : "compact"
+  const layoutMode =
+    containerWidth >= FULL_BREAKPOINT
+      ? "full"
+      : containerWidth >= SM_BREAKPOINT
+        ? "wrapped"
+        : "compact"
 
-  // Determine if we're in "aligned grid" mode (headers align with glyphs)
-  // Only in full 4-column mode do labels/controls appear in the header row
-  const isAlignedGrid = !compact && !showMapView && isFullWidth
+  const isAlignedGrid = !compact && !showMapView && layoutMode === "full"
 
   // =========================================================================
   // Tooltip State Management
@@ -129,7 +135,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   const shouldRenderContent = renderMode !== "headersOnly"
 
   return (
-    <Box sx={{ position: "relative" }}>
+    <Box
+      ref={containerRef}
+      sx={{
+        position: "relative",
+        containerType: "inline-size",
+        containerName: "strategy-grid",
+      }}
+    >
       {/* Active outcome tooltip - uses MUI Popper for viewport-aware positioning */}
       {/* WCAG 4.1.2: Pass scenario score data and chart data for accessible text representation */}
       <TierTooltipPortal
@@ -150,21 +163,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         sx={{
           display: "grid",
           /**
-           * Responsive grid columns:
-           * - xs: 2 columns (checkbox + content)
-           * - sm (600-1399px): 4 columns (checkbox + scenario + operations + empty), outcomes wrap below
+           * Responsive grid columns via @container queries:
+           * - default: 2 columns (checkbox + content)
+           * - 600px+: 4 columns (checkbox + scenario + operations + outcomes wrap)
            * - 1400px+: Full 4 columns with outcomes inline
            */
           gridTemplateColumns: outcomesOnly
             ? "1fr"
-            : {
-                xs: theme.scenarios.grid.columns.xs,
-                sm: showOperations
-                  ? theme.scenarios.grid.columns.sm
-                  : "32px minmax(0, 1fr) 0fr 1fr",
-              },
+            : theme.scenarios.grid.columns.xs,
           ...(!outcomesOnly && {
-            [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
+            [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]: {
+              gridTemplateColumns: showOperations
+                ? theme.scenarios.grid.columns.sm
+                : "32px minmax(0, 1fr) 0fr 1fr",
+            },
+            [`@container strategy-grid (min-width: ${FULL_BREAKPOINT}px)`]: {
               gridTemplateColumns: showOperations
                 ? theme.scenarios.grid.columns.full
                 : "32px 0.382fr 0fr 1fr",

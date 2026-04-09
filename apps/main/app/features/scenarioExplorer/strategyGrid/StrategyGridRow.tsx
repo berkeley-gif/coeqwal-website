@@ -261,7 +261,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           ? "1fr"
           : compact
             ? "32px 1fr"
-            : { xs: "subgrid", sm: "subgrid" },
+            : "subgrid",
         backgroundColor: isActive
           ? `${accentColor}1A`
           : isHighlighted
@@ -551,9 +551,9 @@ function CompactRowContent({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(3, 1fr)",
-                sm: "repeat(5, 1fr)",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              "@container strategy-grid (min-width: 600px)": {
+                gridTemplateColumns: "repeat(5, 1fr)",
               },
               gap: theme.space.gap.sm,
             }}
@@ -568,9 +568,9 @@ function CompactRowContent({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(3, 1fr)",
-                sm: "repeat(5, 1fr)",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              "@container strategy-grid (min-width: 600px)": {
+                gridTemplateColumns: "repeat(5, 1fr)",
               },
               gap: theme.space.gap.sm,
             }}
@@ -632,12 +632,9 @@ function NonCompactRowContent({
       {/* Column 2: Scenario name and description */}
       <Box
         sx={{
-          gridColumn: { xs: "2", sm: "2" },
-          // Standard gap before divider
+          gridColumn: "2",
           pr: theme.scenarios.grid.divider.gap,
           pt: theme.scenarios.grid.row.padding,
-          // In responsive views (<1400px), no bottom padding since content wraps below
-          // In full mode, standard row padding
           pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
           alignSelf: "start",
         }}
@@ -652,15 +649,16 @@ function NonCompactRowContent({
         />
       </Box>
 
-      {/* Column 3: Key operations - at xs, stacks in column 2 under scenario */}
+      {/* Column 3: Key operations — in compact mode, stacks in column 2 */}
       {showOperations && (
         <Box
           sx={{
-            gridColumn: { xs: "2", sm: "3" },
-            borderLeft: isWrappedMode
-              ? "none"
-              : { sm: `1px solid ${theme.palette.grey[300]}` },
-            pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
+            gridColumn: layoutMode === "compact" ? "2" : "3",
+            borderLeft:
+              layoutMode === "full"
+                ? `1px solid ${theme.palette.grey[300]}`
+                : "none",
+            pl: layoutMode === "full" ? theme.scenarios.grid.divider.gap : 0,
             pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
             display: "flex",
             flexDirection: "column",
@@ -674,7 +672,7 @@ function NonCompactRowContent({
           <Typography
             variant="subtitle2"
             sx={{
-              display: { xs: "block", sm: "none" },
+              display: layoutMode === "compact" ? "block" : "none",
               color: theme.palette.grey[600],
               fontWeight: 500,
             }}
@@ -690,41 +688,41 @@ function NonCompactRowContent({
         </Box>
       )}
 
-      {/* Column 4: Outcome glyphs - wraps below in wrapped mode */}
+      {/* Column 4: Outcome glyphs — wraps below in wrapped mode */}
       <Box
         sx={{
-          // In wrapped mode and xs, start at column 2 (aligns with scenario title); in full mode, use column 4
-          gridColumn: isWrappedMode
-            ? { xs: "2", sm: "2 / -1" }
-            : { xs: "2", sm: "4" },
-          // Vertical divider only in full mode
-          borderLeft: isWrappedMode
-            ? "none"
-            : { sm: `1px solid ${theme.palette.grey[300]}` },
-          // Padding adjustments based on mode
-          pl: isWrappedMode ? 0 : { sm: theme.scenarios.grid.divider.gap },
-          // xs: 16px top padding for more separation from operations
-          // sm wrapped: 8px top padding (+ 8px rowGap = 16px total)
-          // Full mode: glyph alignment offset to align with scenario title
-          pt: isResponsiveView
-            ? { xs: theme.space.gap.lg, sm: theme.space.gap.md }
-            : { sm: theme.scenarios.grid.glyphOffset },
-          pb: { sm: theme.scenarios.grid.row.padding },
+          gridColumn:
+            layoutMode === "compact"
+              ? "2"
+              : isWrappedMode
+                ? "2 / -1"
+                : "4",
+          borderLeft:
+            layoutMode === "full"
+              ? `1px solid ${theme.palette.grey[300]}`
+              : "none",
+          pl: layoutMode === "full" ? theme.scenarios.grid.divider.gap : 0,
+          pt:
+            layoutMode === "full"
+              ? theme.scenarios.grid.glyphOffset
+              : layoutMode === "wrapped"
+                ? theme.space.gap.md
+                : theme.space.gap.lg,
+          pb:
+            layoutMode === "compact"
+              ? 0
+              : theme.scenarios.grid.row.padding,
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
           gap: theme.space.gap.md,
         }}
       >
-        {/* Key outcomes header - in wrapped mode and at xs */}
+        {/* Key outcomes header — shown in wrapped and compact modes */}
         <Typography
           variant="subtitle2"
           sx={{
-            // Show at xs always, at sm only in wrapped mode
-            display: {
-              xs: "block",
-              sm: isWrappedMode ? "block" : "none",
-            },
+            display: layoutMode === "full" ? "none" : "block",
             color: theme.palette.grey[600],
             fontWeight: 500,
           }}
@@ -734,17 +732,14 @@ function NonCompactRowContent({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(3, 1fr)",
-              // In wrapped mode: 5 columns (breaks 9 outcomes into 5+4 rows)
-              // At 1000px+: all 9 fit on one row
-              sm: isWrappedMode
-                ? "repeat(5, 1fr)"
-                : "repeat(auto-fit, minmax(60px, 1fr))",
-            },
-            // At 1000px+ in wrapped mode, show all on one row
+            gridTemplateColumns:
+              layoutMode === "compact"
+                ? "repeat(3, 1fr)"
+                : isWrappedMode
+                  ? "repeat(5, 1fr)"
+                  : "repeat(auto-fit, minmax(60px, 1fr))",
             ...(isWrappedMode && {
-              "@media (min-width: 1000px)": {
+              "@container strategy-grid (min-width: 1000px)": {
                 gridTemplateColumns: "repeat(9, 1fr)",
               },
             }),
@@ -763,14 +758,14 @@ function NonCompactRowContent({
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(3, 1fr)",
-                sm: isWrappedMode
-                  ? "repeat(5, 1fr)"
-                  : "repeat(auto-fit, minmax(60px, 1fr))",
-              },
+              gridTemplateColumns:
+                layoutMode === "compact"
+                  ? "repeat(3, 1fr)"
+                  : isWrappedMode
+                    ? "repeat(5, 1fr)"
+                    : "repeat(auto-fit, minmax(60px, 1fr))",
               ...(isWrappedMode && {
-                "@media (min-width: 1000px)": {
+                "@container strategy-grid (min-width: 1000px)": {
                   gridTemplateColumns: "repeat(9, 1fr)",
                 },
               }),
@@ -840,9 +835,12 @@ function OutcomesOnlyRowContent({
         rowGap: isDistributionView ? "2px" : theme.space.gap.sm,
         pt: theme.scenarios.grid.glyphOffset,
         pb: theme.scenarios.grid.row.padding,
-        pl: theme.scenarios.grid.divider.gap,
-        borderLeft: { sm: `1px solid ${theme.palette.grey[300]}` },
-        alignItems: "end",
+          pl: theme.scenarios.grid.divider.gap,
+          borderLeft: "none",
+          "@container strategy-grid (min-width: 600px)": {
+            borderLeft: `1px solid ${theme.palette.grey[300]}`,
+          },
+          alignItems: "end",
       }}
     >
       {outcomeNames.map(({ shortCode, displayName }) =>
