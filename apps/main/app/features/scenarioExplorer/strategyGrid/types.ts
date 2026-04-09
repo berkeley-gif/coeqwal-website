@@ -65,4 +65,18 @@ export interface StrategyGridProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
+
+  // Sidebar-parity features (Phase 1 unified list)
+  /** Show share/pin action buttons on each row */
+  showActions?: boolean
+  /** Show left accent border on active/chosen/pinned rows */
+  accentBorder?: boolean
+  /** Map of scenario ID to color for accent border / swatch */
+  scenarioColors?: Record<string, string>
+  /** Set of pinned scenario IDs */
+  pinnedScenarioIds?: string[]
+  /** Set of externally active (hovered/highlighted) scenario IDs */
+  activeScenarioIds?: Set<string>
+  /** Called on mouse enter/leave for hover sync with other panels */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
