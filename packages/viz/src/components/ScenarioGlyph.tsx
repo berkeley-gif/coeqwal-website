@@ -6,12 +6,14 @@ import OutcomeDotsGlyph from "./OutcomeDotsGlyph"
 import VerticalOutcomeGlyph from "./VerticalOutcomeGlyph"
 import RoseChart from "./RoseChart"
 import DecileBarChart from "./DecileBarChart"
+import DistributionSquaresGlyph from "./DistributionSquaresGlyph"
 export type GlyphVariant =
   | "bars"
   | "dots"
   | "verticalBars"
   | "rose"
   | "quartile"
+  | "distribution"
 
 export interface ScenarioGlyphProps {
   variant: GlyphVariant
@@ -47,6 +49,10 @@ const ScenarioGlyph: React.FC<ScenarioGlyphProps> = React.memo(
       case "rose": {
         return <RoseChart size={size} />
       }
+      case "distribution":
+        return (
+          <DistributionSquaresGlyph values={values} tierColors={tierColors} />
+        )
       case "quartile": {
         // Use real scenario data from /scenario_data/categorized_deciles/
         const sampleDecileData = {

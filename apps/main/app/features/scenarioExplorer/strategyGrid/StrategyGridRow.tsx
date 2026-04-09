@@ -112,6 +112,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const outcomeDisplayMode = useScenarioExplorerStore(
     (s) => s.outcomeDisplayMode,
   )
+  const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
 
   // Get chart data for this scenario
@@ -129,8 +130,16 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   }
 
   /**
-   * Render a single outcome item — either a summary cell or full glyph
-   * depending on the outcomeDisplayMode store value.
+   * Render a single outcome item. The visualization depends on the
+   * current tool context and the outcomeDisplayMode toggle:
+   *
+   * List view:
+   *   summary      → OutcomeGlyphItem (bars)
+   *   distribution → OutcomeGlyphItem (distribution squares)
+   *
+   * Other tools:
+   *   summary      → TierSummaryCell (compact heatmap)
+   *   distribution → OutcomeGlyphItem (bars)
    */
   const renderOutcomeItem = (shortCode: string, displayName: string) => {
     const chartData = scenarioChartData[shortCode]
@@ -138,7 +147,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     const isSelected = selectedOutcome === displayName
     const isSorted = sortBy === shortCode
 
-    if (outcomeDisplayMode === "summary") {
+    // Non-list + summary toggle → compact heatmap cell
+    if (!isListMode && outcomeDisplayMode === "summary") {
       return (
         <Box
           key={shortCode}
@@ -156,7 +166,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       )
     }
 
-    // Distribution mode — full glyph
+    // All other cases use the full OutcomeGlyphItem shell.
+    // In list mode + distribution toggle, override variant to "distribution".
+    const variantOverride =
+      isListMode && outcomeDisplayMode === "distribution"
+        ? ("distribution" as const)
+        : undefined
     const showLabelBelowGlyph = !isAlignedGrid
     const showControlsBelowGlyph = !isAlignedGrid
 
@@ -174,6 +189,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           isActive={isActive}
           isSelected={isSelected}
           isTooltipActive={activeTooltip === shortCode}
+          variant={variantOverride}
           size={glyphSize}
           showLabel={showLabelBelowGlyph}
           showInfoButton={showControlsBelowGlyph}

@@ -41,9 +41,7 @@ export interface OrderedScenariosResult {
   iconMatchingScenarioIds: Set<string>
   showIconDivider: boolean
   themeBoundaryIndices: number[]
-  allScoreData:
-    | Record<string, Record<string, OutcomeScoreData>>
-    | undefined
+  allScoreData: Record<string, Record<string, OutcomeScoreData>> | undefined
   allChartData: Record<string, Record<string, unknown>>
   outcomeNames: OutcomeName[]
   isLoading: boolean

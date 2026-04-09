@@ -16,7 +16,7 @@
 import React from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
-import { ScenarioGlyph } from "@repo/viz"
+import { ScenarioGlyph, type GlyphVariant } from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
 
 /**
@@ -89,6 +89,8 @@ export interface OutcomeGlyphItemProps {
   isSelected?: boolean
   /** Whether tooltip is active for this outcome */
   isTooltipActive?: boolean
+  /** Override the auto-detected glyph variant (bars/dots/distribution) */
+  variant?: GlyphVariant
   /** Size of the glyph (default: responsive 50/60px) */
   size?: number
   /** Whether to show the outcome label */
@@ -115,6 +117,7 @@ export function OutcomeGlyphItem({
   isActive,
   isSelected = false,
   isTooltipActive = false,
+  variant: variantOverride,
   size,
   showLabel = true,
   showInfoButton = true,
@@ -155,7 +158,8 @@ export function OutcomeGlyphItem({
         theme.palette.tiers.tier4,
       ]
 
-  const variant = isSingleValueTier(chartData) ? "dots" : "bars"
+  const autoVariant = isSingleValueTier(chartData) ? "dots" : "bars"
+  const variant = variantOverride ?? autoVariant
 
   // Glyph is clickable when active and has a click handler
   const isClickable = isActive && !!onGlyphClick
