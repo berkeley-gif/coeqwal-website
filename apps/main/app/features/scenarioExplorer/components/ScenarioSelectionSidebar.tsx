@@ -5,11 +5,10 @@
  * used in non-list explore modes (radar, equity, data).
  *
  * 1. "Scenario library" header with key-ops column toggle
- * 2. Search bar (highlights + floats matches via shared useOrderedScenarios)
- * 3. Visibility chips: Definitions, Baselines, Key ops, Chosen only
- * 4. Scrollable scenario list with StrategyHeader labels, checkboxes,
+ * 2. Scrollable scenario list with StrategyHeader labels, checkboxes,
  *    and a collapsible key operations column
  *
+ * Search and visibility controls now live in ToolToolbar.
  * Row order comes from useOrderedScenarios so it stays in lockstep
  * with the same shared ordering used by ListView.
  */
@@ -23,7 +22,6 @@ import {
   IconButton,
   Tooltip,
   icons,
-  InputBase,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import {
@@ -55,17 +53,9 @@ export default function ScenarioSelectionSidebar({
     togglePinnedScenario,
     showDefinitions,
     showKeyOperations,
-    showAlternativeBaselines,
-    showOnlyChosen,
     searchQuery,
-    setSearchQuery,
-    setShowOnlyChosen,
-    setShowAlternativeBaselines,
-    setShowDefinitions,
-    setShowKeyOperations,
     sharedScenarioIds,
     addToShare,
-    setShowShareDrawer,
     isSortActive,
     selectScenarios,
   } = useScenarioExplorerStore()
@@ -159,99 +149,6 @@ export default function ScenarioSelectionSidebar({
             Key operations
           </Typography>
         )}
-      </Box>
-
-      {/* ── Controls strip: search + visibility toggles ─────────────────── */}
-      <Box
-        sx={{
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-          px: 1,
-          py: 0.75,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Search */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.5,
-            minWidth: 100,
-            flex: 1,
-          }}
-        >
-          <InputBase
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search…"
-            size="small"
-            inputProps={{ "aria-label": "Search scenarios" }}
-            sx={{
-              flex: 1,
-              fontSize: "0.8125rem",
-              "& .MuiInputBase-input": {
-                py: 0.5,
-                px: 0.5,
-                "&::placeholder": { color: theme.palette.grey[500], opacity: 1 },
-              },
-            }}
-          />
-          {searchQuery && (
-            <IconButton
-              size="small"
-              onClick={() => setSearchQuery("")}
-              sx={{ p: 0.25 }}
-            >
-              <icons.Close sx={{ fontSize: "0.875rem" }} />
-            </IconButton>
-          )}
-        </Box>
-
-        {/* Divider */}
-        <Box
-          sx={{
-            width: "1px",
-            height: 20,
-            backgroundColor: theme.palette.divider,
-            flexShrink: 0,
-          }}
-        />
-
-        {/* Toggle chips */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexWrap: "wrap" }}>
-          <ToggleChip
-            label="Definitions"
-            active={showDefinitions}
-            onClick={() => setShowDefinitions(!showDefinitions)}
-          />
-          <ToggleChip
-            label="Baselines"
-            active={showAlternativeBaselines}
-            onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
-          />
-          <ToggleChip
-            label="Key ops"
-            active={showKeyOperations}
-            onClick={() => setShowKeyOperations(!showKeyOperations)}
-          />
-          <ToggleChip
-            label="Chosen only"
-            active={showOnlyChosen}
-            onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-          />
-          {sharedScenarioIds.length > 0 && (
-            <ToggleChip
-              label={`Share (${sharedScenarioIds.length})`}
-              active={true}
-              onClick={() => setShowShareDrawer(true)}
-            />
-          )}
-        </Box>
       </Box>
 
       {/* ── Scrollable scenario list ─────────────────────────────────────── */}
@@ -613,44 +510,3 @@ export default function ScenarioSelectionSidebar({
   )
 }
 
-function ToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  const theme = useTheme()
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        px: 0.75,
-        py: 0.25,
-        border: "none",
-        borderRadius: "10px",
-        cursor: "pointer",
-        fontSize: "0.6875rem",
-        fontWeight: active ? 600 : 400,
-        lineHeight: 1.3,
-        color: active ? theme.palette.blue.bright : theme.palette.grey[600],
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
-        transition: "all 150ms ease",
-        "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-        },
-      }}
-    >
-      {label}
-    </Box>
-  )
-}

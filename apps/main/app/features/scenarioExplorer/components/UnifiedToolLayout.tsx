@@ -1,13 +1,14 @@
 "use client"
 
 /**
- * UnifiedToolLayout.Persistent three-panel chrome for the Scenario Explorer.
+ * UnifiedToolLayout. Shared chrome for all Scenario Explorer tool views.
  *
  * Layout:
- *   [Sidebar (dynamic width)] [Tool area (flex 1)] [Map panel (optional, 1/3)]
+ *   [Sidebar (optional)] [Tool area (flex 1)] [Map panel (optional, 25%)]
  *
- * Sidebar width animates between collapsed and expanded states based on
- * whether the key operations column is visible.
+ * When sidebar is provided (non-list modes), it animates between collapsed
+ * and expanded widths based on key-operations visibility.
+ * When omitted (list mode), the tool area takes the full width.
  */
 
 import React, { useEffect } from "react"
@@ -20,7 +21,7 @@ const SIDEBAR_WIDTH_EXPANDED = 480
 const MAP_WIDTH_PERCENT = 25
 
 interface UnifiedToolLayoutProps {
-  sidebar: React.ReactNode
+  sidebar?: React.ReactNode
   toolbar: React.ReactNode
   chartControls?: React.ReactNode
   children: React.ReactNode
@@ -63,22 +64,24 @@ export default function UnifiedToolLayout({
         overflow: "hidden",
       }}
     >
-      {/* Sidebar (dynamic width, always visible) */}
-      <Box
-        sx={{
-          width: sidebarWidth,
-          flexShrink: 0,
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          overflow: "hidden",
-          borderRight: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-          transition: "width 300ms ease, border-right 300ms ease",
-        }}
-      >
-        {sidebar}
-      </Box>
+      {/* Sidebar (dynamic width, omitted for list mode) */}
+      {sidebar && (
+        <Box
+          sx={{
+            width: sidebarWidth,
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            overflow: "hidden",
+            borderRight: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.paper,
+            transition: "width 300ms ease, border-right 300ms ease",
+          }}
+        >
+          {sidebar}
+        </Box>
+      )}
 
       {/* Tool area (flex, shrinks when map is shown) */}
       <Box

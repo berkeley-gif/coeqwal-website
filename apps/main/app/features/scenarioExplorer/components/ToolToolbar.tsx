@@ -3,12 +3,11 @@
 /**
  * ToolToolbar. Shared toolbar rendered above the active tool content.
  *
- * Layout (left to right):
- * 1. "Show map" toggle (label + MUI Switch)
- * 2. "Show distribution" toggle (label + MUI Switch)
- * 3. "Choose locations to track" button
- * 4. "View by climate" hydroclimate chooser icons
- * 5. (list mode only) Search + visibility toggle chips
+ * Always shows: search + visibility toggle chips + view controls (map,
+ * distribution, locations, climate).
+ *
+ * When `gridAligned` is true (list mode), uses CSS Grid that aligns
+ * with StrategyGrid columns. Otherwise uses a simple flex layout.
  */
 
 import React from "react"
@@ -24,12 +23,13 @@ import {
 } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { useScenarioExplorerStore } from "../store"
+import ToggleChip from "./ToggleChip"
 
 interface ToolToolbarProps {
-  showListControls?: boolean
+  gridAligned?: boolean
 }
 
-export default function ToolToolbar({ showListControls }: ToolToolbarProps) {
+export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
   const theme = useTheme()
   const {
     hydroclimate,
@@ -154,7 +154,91 @@ export default function ToolToolbar({ showListControls }: ToolToolbarProps) {
     </>
   )
 
-  if (showListControls) {
+  const searchAndChips = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          minWidth: 140,
+          maxWidth: 200,
+        }}
+      >
+        <InputBase
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search…"
+          size="small"
+          inputProps={{ "aria-label": "Search scenarios" }}
+          sx={{
+            flex: 1,
+            fontSize: "0.8125rem",
+            "& .MuiInputBase-input": {
+              py: 0.5,
+              px: 0.5,
+              "&::placeholder": {
+                color: theme.palette.grey[500],
+                opacity: 1,
+              },
+            },
+          }}
+        />
+        {searchQuery && (
+          <IconButton
+            size="small"
+            onClick={() => setSearchQuery("")}
+            sx={{ p: 0.25 }}
+          >
+            <icons.Close sx={{ fontSize: "0.875rem" }} />
+          </IconButton>
+        )}
+      </Box>
+
+      <VerticalDivider />
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.25,
+          flexWrap: "wrap",
+        }}
+      >
+        <ToggleChip
+          label="Definitions"
+          active={showDefinitions}
+          onClick={() => setShowDefinitions(!showDefinitions)}
+        />
+        <ToggleChip
+          label="Baselines"
+          active={showAlternativeBaselines}
+          onClick={() =>
+            setShowAlternativeBaselines(!showAlternativeBaselines)
+          }
+        />
+        <ToggleChip
+          label="Key ops"
+          active={showKeyOperations}
+          onClick={() => setShowKeyOperations(!showKeyOperations)}
+        />
+        <ToggleChip
+          label="Chosen only"
+          active={showOnlyChosen}
+          onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+        />
+        {sharedScenarioIds.length > 0 && (
+          <ToggleChip
+            label={`Share (${sharedScenarioIds.length})`}
+            active={true}
+            onClick={() => setShowShareDrawer(true)}
+          />
+        )}
+      </Box>
+    </>
+  )
+
+  if (gridAligned) {
     return (
       <Box
         sx={{
@@ -177,7 +261,7 @@ export default function ToolToolbar({ showListControls }: ToolToolbarProps) {
           alignItems: "center",
         }}
       >
-        {/* List controls (search + chips) — aligned with scenario columns */}
+        {/* Search + chips — aligned with scenario columns */}
         <Box
           sx={{
             gridColumn: { xs: "1 / -1", sm: "1 / 4" },
@@ -186,85 +270,7 @@ export default function ToolToolbar({ showListControls }: ToolToolbarProps) {
             gap: 1.5,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              minWidth: 140,
-              maxWidth: 200,
-            }}
-          >
-            <InputBase
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search…"
-              size="small"
-              inputProps={{ "aria-label": "Search scenarios" }}
-              sx={{
-                flex: 1,
-                fontSize: "0.8125rem",
-                "& .MuiInputBase-input": {
-                  py: 0.5,
-                  px: 0.5,
-                  "&::placeholder": {
-                    color: theme.palette.grey[500],
-                    opacity: 1,
-                  },
-                },
-              }}
-            />
-            {searchQuery && (
-              <IconButton
-                size="small"
-                onClick={() => setSearchQuery("")}
-                sx={{ p: 0.25 }}
-              >
-                <icons.Close sx={{ fontSize: "0.875rem" }} />
-              </IconButton>
-            )}
-          </Box>
-
-          <VerticalDivider />
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.25,
-              flexWrap: "wrap",
-            }}
-          >
-            <ToggleChip
-              label="Definitions"
-              active={showDefinitions}
-              onClick={() => setShowDefinitions(!showDefinitions)}
-            />
-            <ToggleChip
-              label="Baselines"
-              active={showAlternativeBaselines}
-              onClick={() =>
-                setShowAlternativeBaselines(!showAlternativeBaselines)
-              }
-            />
-            <ToggleChip
-              label="Key ops"
-              active={showKeyOperations}
-              onClick={() => setShowKeyOperations(!showKeyOperations)}
-            />
-            <ToggleChip
-              label="Chosen only"
-              active={showOnlyChosen}
-              onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-            />
-            {sharedScenarioIds.length > 0 && (
-              <ToggleChip
-                label={`Share (${sharedScenarioIds.length})`}
-                active={true}
-                onClick={() => setShowShareDrawer(true)}
-              />
-            )}
-          </Box>
+          {searchAndChips}
         </Box>
 
         {/* View controls — aligned with outcomes column */}
@@ -293,12 +299,15 @@ export default function ToolToolbar({ showListControls }: ToolToolbarProps) {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        gap: 1.5,
         px: 1.5,
         py: 0.5,
         minHeight: 44,
+        flexWrap: "wrap",
       }}
     >
+      {searchAndChips}
+      <VerticalDivider />
       {viewControls}
     </Box>
   )
@@ -318,44 +327,3 @@ function VerticalDivider() {
   )
 }
 
-function ToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  const theme = useTheme()
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        px: 0.75,
-        py: 0.25,
-        border: "none",
-        borderRadius: "10px",
-        cursor: "pointer",
-        fontSize: "0.6875rem",
-        fontWeight: active ? 600 : 400,
-        lineHeight: 1.3,
-        color: active ? theme.palette.blue.bright : theme.palette.grey[600],
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
-        transition: "all 150ms ease",
-        "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-        },
-      }}
-    >
-      {label}
-    </Box>
-  )
-}

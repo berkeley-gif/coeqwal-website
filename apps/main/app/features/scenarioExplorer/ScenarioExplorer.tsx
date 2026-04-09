@@ -5,12 +5,12 @@
  *
  * Top-level navigation: Get Started | Go to tools
  *
- * When mainView === "explorer":
- *   - List mode: ToolToolbar + full unified StrategyGrid (no sidebar)
- *   - Other modes: UnifiedToolLayout with persistent ScenarioSelectionSidebar
+ * All explore modes route through UnifiedToolLayout:
+ *   - List mode: no sidebar, ToolToolbar with grid-aligned search/chips
+ *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from "react"
+import React, { useState, useCallback, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -45,7 +45,7 @@ import {
   type MainView,
   type ExploreMode,
 } from "./store"
-import { useMapMode, mapActions } from "../map/store"
+import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
 // Top-level navigation tabs
@@ -192,23 +192,6 @@ export default function ScenarioExplorer() {
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
-
-  const MAP_WIDTH_PERCENT = 25
-  useEffect(() => {
-    if (!isListMode) return
-    if (showMap) {
-      mapActions.setMapMode("explore")
-      mapActions.setExplorePanelWidth(100 - MAP_WIDTH_PERCENT)
-    } else {
-      mapActions.setMapMode("hidden")
-      mapActions.clearOutcomeVisualization()
-    }
-    return () => {
-      mapActions.setMapMode("hidden")
-      mapActions.clearOutcomeVisualization()
-      mapActions.setExplorePanelWidth(50)
-    }
-  }, [isListMode, showMap])
 
   return (
     <Box
@@ -377,82 +360,40 @@ export default function ScenarioExplorer() {
 
           {mainView === "explorer" && (
             <Box sx={{ flex: 1, overflow: "hidden" }}>
-              {isListMode ? (
-                /* List mode: full unified grid, no sidebar */
-                <Box
-                  sx={{
-                    display: "flex",
-                    height: "100%",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      overflow: "hidden",
-                      minWidth: 0,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        flexShrink: 0,
-                        borderBottom: `1px solid ${theme.palette.divider}`,
-                        backgroundColor: theme.palette.explore.background,
-                      }}
-                    >
-                      <ToolToolbar showListControls />
-                    </Box>
-                    <Box sx={{ flex: 1, overflow: "hidden" }}>
-                      <ListView
-                        highlightedIds={highlightedIds}
-                        onScenarioHover={handleToolScenarioHover}
-                      />
-                    </Box>
-                  </Box>
-
-                  {showMap && (
-                    <Box
-                      sx={{
-                        width: `${MAP_WIDTH_PERCENT}%`,
-                        flexShrink: 0,
-                        height: "100%",
-                        pointerEvents: "auto",
-                        backgroundColor: "transparent",
-                      }}
-                    />
-                  )}
-                </Box>
-              ) : (
-                /* Non-list modes: sidebar + tool panel */
-                <UnifiedToolLayout
-                  sidebar={
+              <UnifiedToolLayout
+                sidebar={
+                  isListMode ? undefined : (
                     <ScenarioSelectionSidebar
                       hoveredScenarioId={hoveredScenarioId}
                       onRowHover={handleSidebarRowHover}
                     />
-                  }
-                  toolbar={<ToolToolbar />}
-                  chartControls={chartControls}
-                >
-                  {exploreMode === "radar" && (
-                    <RadarPanel
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                    />
-                  )}
-                  {exploreMode === "equity" && <EquityPanel />}
-                  {exploreMode === "comparison" && (
-                    <ComparisonPanel
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                    />
-                  )}
-                  {exploreMode === "resilience" && <ResiliencePanel />}
-                  {exploreMode === "data" && <DataExplorerView />}
-                </UnifiedToolLayout>
-              )}
+                  )
+                }
+                toolbar={<ToolToolbar gridAligned={isListMode} />}
+                chartControls={isListMode ? undefined : chartControls}
+              >
+                {isListMode && (
+                  <ListView
+                    highlightedIds={highlightedIds}
+                    onScenarioHover={handleToolScenarioHover}
+                  />
+                )}
+                {exploreMode === "radar" && (
+                  <RadarPanel
+                    highlightedIds={highlightedIds}
+                    onScenarioHover={handleToolScenarioHover}
+                  />
+                )}
+                {exploreMode === "equity" && <EquityPanel />}
+                {exploreMode === "comparison" && (
+                  <ComparisonPanel
+                    highlightedIds={highlightedIds}
+                    onScenarioHover={handleToolScenarioHover}
+                  />
+                )}
+                {exploreMode === "resilience" && <ResiliencePanel />}
+                {exploreMode === "data" && <DataExplorerView />}
+              </UnifiedToolLayout>
             </Box>
           )}
         </Box>
