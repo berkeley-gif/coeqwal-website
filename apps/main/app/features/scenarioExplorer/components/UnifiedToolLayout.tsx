@@ -22,25 +22,23 @@ const MAP_WIDTH_PERCENT = 25
 interface UnifiedToolLayoutProps {
   sidebar: React.ReactNode
   toolbar: React.ReactNode
+  chartControls?: React.ReactNode
   children: React.ReactNode
 }
 
 export default function UnifiedToolLayout({
   sidebar,
   toolbar,
+  chartControls,
   children,
 }: UnifiedToolLayoutProps) {
   const theme = useTheme()
   const showMap = useScenarioExplorerStore((s) => s.showMap)
   const showKeyOperations = useScenarioExplorerStore((s) => s.showKeyOperations)
-  const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
 
-  const isListMode = exploreMode === "list"
-  const sidebarWidth = isListMode
-    ? 0
-    : showKeyOperations
-      ? SIDEBAR_WIDTH_EXPANDED
-      : SIDEBAR_WIDTH_COLLAPSED
+  const sidebarWidth = showKeyOperations
+    ? SIDEBAR_WIDTH_EXPANDED
+    : SIDEBAR_WIDTH_COLLAPSED
 
   useEffect(() => {
     if (showMap) {
@@ -74,9 +72,7 @@ export default function UnifiedToolLayout({
           flexDirection: "column",
           height: "100%",
           overflow: "hidden",
-          borderRight: isListMode
-            ? "none"
-            : `1px solid ${theme.palette.divider}`,
+          borderRight: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
           transition: "width 300ms ease, border-right 300ms ease",
         }}
@@ -105,6 +101,11 @@ export default function UnifiedToolLayout({
         >
           {toolbar}
         </Box>
+
+        {/* Per-panel chart controls (optional) */}
+        {chartControls && (
+          <Box sx={{ flexShrink: 0 }}>{chartControls}</Box>
+        )}
 
         {/* Active tool content */}
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>

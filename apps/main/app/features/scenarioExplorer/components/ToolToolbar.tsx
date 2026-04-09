@@ -6,7 +6,7 @@
  * Layout (left to right):
  * 1. "Show map" toggle (label + MUI Switch)
  * 2. "View by climate".hydroclimate chooser icons
- * 3. Tool tabs (List, Tradeoffs, Equity, Resilience, Data in depth)
+ * 3. Tool tabs (List, Radar chart, Distribution comparison, Data in depth)
  */
 
 import React from "react"
@@ -15,9 +15,8 @@ import {
   Typography,
   useTheme,
   ViewListIcon,
-  CompareArrowsIcon,
-  AppsIcon,
-  AutorenewIcon,
+  TimelineIcon,
+  BarChartIcon,
   InsightsIcon,
   Switch,
 } from "@repo/ui/mui"
@@ -32,19 +31,14 @@ const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
       label: "List",
     },
     {
-      mode: "comparison",
-      icon: <CompareArrowsIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Tradeoffs",
+      mode: "radar",
+      icon: <TimelineIcon sx={{ fontSize: "1.1rem" }} />,
+      label: "Radar chart",
     },
     {
-      mode: "equity",
-      icon: <AppsIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Equity",
-    },
-    {
-      mode: "resilience",
-      icon: <AutorenewIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Resilience",
+      mode: "distribution",
+      icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
+      label: "Distribution comparison",
     },
     {
       mode: "data",
