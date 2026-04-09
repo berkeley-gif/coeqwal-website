@@ -60,7 +60,7 @@ export default function GetStartedView() {
         backgroundColor: mapActive ? "transparent" : exploreBg,
       }}
     >
-      {/* ── Welcome ── */}
+      {/* Welcome */}
       <ContentPanel
         background={exploreBg}
         heading="Welcome"
@@ -80,7 +80,7 @@ export default function GetStartedView() {
         </Typography>
       </ContentPanel>
 
-      {/* ── Water Issues ── */}
+      {/* Water Issues */}
       <ContentPanel
         background={theme.palette.blue.dark}
         heading="Water Issues"
@@ -124,10 +124,10 @@ export default function GetStartedView() {
         </Typography>
       </ContentPanel>
 
-      {/* ── Map panel (TierAnimationSection) ── */}
+      {/* Map panel (TierAnimationSection) */}
       <TierAnimationSection />
 
-      {/* ── Key outcomes ── */}
+      {/* Key outcomes */}
       <ContentPanel
         background={theme.palette.nature.forest}
         heading="Key outcomes"
@@ -148,7 +148,7 @@ export default function GetStartedView() {
         </Box>
       </ContentPanel>
 
-      {/* ── Data in depth ── */}
+      {/* Data in depth */}
       <ContentPanel
         background={exploreBg}
         heading="Data in depth"
@@ -187,7 +187,7 @@ export default function GetStartedView() {
         </Typography>
       </ContentPanel>
 
-      {/* ── Before you start your exploration ── */}
+      {/* Before you start your exploration */}
       <ContentPanel
         background={theme.palette.blue.dark}
         heading="Before you start your exploration"

@@ -171,7 +171,7 @@ export function WaterThemeCards({
         </Box>
       </ScrollReveal>
 
-      {/* ── Provisional themes (pending decision) ── */}
+      {/* Provisional themes (pending decision) */}
       <ScrollReveal animation="fadeUp" amount={0.1} duration={0.5} delay={0.1}>
         <Box
           sx={{
