@@ -40,6 +40,8 @@ export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
 export type { ScenarioGlyphProps, GlyphVariant } from "./components/ScenarioGlyph"
 export { default as DistributionSquaresGlyph } from "./components/DistributionSquaresGlyph"
 export type { DistributionSquaresGlyphProps } from "./components/DistributionSquaresGlyph"
+export { default as MorphableDistributionGlyph } from "./components/MorphableDistributionGlyph"
+export type { MorphableDistributionGlyphProps } from "./components/MorphableDistributionGlyph"
 export { default as PercentileBandChart } from "./components/PercentileBandChart"
 export type {
   PercentileBandChartProps,

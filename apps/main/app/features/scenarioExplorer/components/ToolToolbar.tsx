@@ -302,20 +302,19 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     )
   }
 
+  // Non-list modes: search + chips live in the sidebar, toolbar only has view controls
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1.5,
+        gap: 2,
         px: 1.5,
         py: 0.5,
         minHeight: 44,
         flexWrap: "wrap",
       }}
     >
-      {searchAndChips}
-      <VerticalDivider />
       {viewControls}
     </Box>
   )

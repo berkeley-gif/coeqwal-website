@@ -106,6 +106,59 @@ export const OUTCOME_CODE_ORDER: OutcomeCode[] = [
 ]
 
 // =============================================================================
+// OUTCOME LOCATION DESCRIPTIONS
+// =============================================================================
+
+/**
+ * Number of measurement locations for single-value outcomes.
+ * Matches the polygon counts in the get-started overlay.
+ */
+export function getSingleValueLocationCount(code: string): number {
+  switch (code) {
+    case "DELTA_ECO":
+      return 1
+    case "FW_EXP":
+      return 2
+    case "FW_DELTA_USES":
+      return 2
+    case "WRC_SALMON_AB":
+      return 1
+    default:
+      return 0
+  }
+}
+
+/**
+ * Describe the locations measured for an outcome.
+ * Matches the captions shown below distribution squares in the get-started overlay.
+ */
+export function describeOutcomeLocations(
+  code: string,
+  locationCount?: number,
+): string {
+  switch (code) {
+    case "ENV_FLOWS":
+      return locationCount
+        ? `${locationCount} river & tributary reaches`
+        : "river & tributary reaches"
+    case "RES_STOR":
+      return locationCount
+        ? `${locationCount} major California reservoirs`
+        : "major California reservoirs"
+    case "DELTA_ECO":
+      return "Sacramento-San Joaquin Delta"
+    case "FW_EXP":
+      return "Banks & Jones Pumping Plants"
+    case "FW_DELTA_USES":
+      return "Emmaton & Jersey Point"
+    case "WRC_SALMON_AB":
+      return "population health along the Sacramento"
+    default:
+      return locationCount ? `${locationCount} locations` : ""
+  }
+}
+
+// =============================================================================
 // OUTCOME DEFINITIONS
 // =============================================================================
 

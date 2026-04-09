@@ -23,6 +23,7 @@ import {
 import { useScenarioExplorerStore } from "../store"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
+import { describeOutcomeLocations } from "../../../content/outcomes"
 
 export interface StrategyGridRowProps {
   /** Scenario data to display */
@@ -117,6 +118,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
+  const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
   // Refs to store glyph container elements for tooltip anchoring
   const glyphRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -185,17 +187,18 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <OutcomeGlyphItem
           displayName={displayName}
           name={displayName}
+          outcomeCode={shortCode}
           chartData={chartData}
           isActive={isActive}
           isSelected={isSelected}
           isTooltipActive={activeTooltip === shortCode}
           variant={variantOverride}
+          morphEnabled={isListMode}
           size={glyphSize}
           showLabel={showLabelBelowGlyph}
           showInfoButton={showControlsBelowGlyph}
           showSortButton={showControlsBelowGlyph && sortEnabled}
           sortState={isSorted ? sortDirection : null}
-          onGlyphClick={() => handleOutcomeClick(shortCode)}
           onInfoClick={(e) => {
             onTooltipToggle(shortCode, e.currentTarget)
           }}
@@ -252,6 +255,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
         <OutcomesOnlyRowContent
           outcomeNames={outcomeNames}
           renderOutcomeItem={renderOutcomeItem}
+          isDistributionView={isDistributionView}
+          scenarioChartData={scenarioChartData}
         />
       ) : (
         <>
@@ -305,6 +310,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               showThemeBadge={showThemeBadge}
               onThemeBadgeClick={onThemeBadgeClick}
               onIconClick={onIconClick}
+              isDistributionView={isDistributionView}
+              scenarioChartData={scenarioChartData}
             />
           )}
         </>
@@ -449,6 +456,8 @@ interface NonCompactRowContentProps {
   showThemeBadge?: boolean
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
+  isDistributionView?: boolean
+  scenarioChartData?: Record<string, ChartDataPoint[]>
 }
 
 function NonCompactRowContent({
@@ -461,6 +470,8 @@ function NonCompactRowContent({
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
+  isDistributionView = false,
+  scenarioChartData = {},
 }: NonCompactRowContentProps) {
   const theme = useTheme()
 
@@ -591,7 +602,7 @@ function NonCompactRowContent({
               },
             }),
             gap: theme.space.gap.sm,
-            // No margin - gap handles header->content spacing
+            alignItems: isDistributionView ? "center" : undefined,
             mt: 0,
             maxWidth: "100%",
             width: "100%",
@@ -601,6 +612,52 @@ function NonCompactRowContent({
             renderOutcomeItem(shortCode, displayName),
           )}
         </Box>
+        {isDistributionView && (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(3, 1fr)",
+                sm: isWrappedMode
+                  ? "repeat(5, 1fr)"
+                  : "repeat(auto-fit, minmax(60px, 1fr))",
+              },
+              ...(isWrappedMode && {
+                "@media (min-width: 1000px)": {
+                  gridTemplateColumns: "repeat(9, 1fr)",
+                },
+              }),
+              gap: theme.space.gap.sm,
+              maxWidth: "100%",
+              width: "100%",
+            }}
+          >
+            {outcomeNames.map(({ shortCode }) => {
+              const totalLocations =
+                scenarioChartData[shortCode]?.[0]?.totalLocations
+              const description = describeOutcomeLocations(
+                shortCode,
+                totalLocations,
+              )
+              if (!description) return <Box key={`loc-${shortCode}`} />
+              return (
+                <Typography
+                  key={`loc-${shortCode}`}
+                  variant="outcomeLabel"
+                  sx={{
+                    color: theme.palette.grey[500],
+                    fontSize: "0.65rem",
+                    textAlign: "center",
+                    lineHeight: 1.3,
+                    px: 0.25,
+                  }}
+                >
+                  {description}
+                </Typography>
+              )
+            })}
+          </Box>
+        )}
       </Box>
     </>
   )
@@ -609,13 +666,20 @@ function NonCompactRowContent({
 /**
  * Outcomes-only row content — just the outcome glyphs, no title/ops/checkbox.
  * Uses the same CSS grid as OutcomeCategoryLabels in the header so columns align.
+ *
+ * In distribution view, a second grid row of location descriptions is appended
+ * so all descriptions align horizontally across outcomes.
  */
 function OutcomesOnlyRowContent({
   outcomeNames,
   renderOutcomeItem,
+  isDistributionView = false,
+  scenarioChartData = {},
 }: {
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (shortCode: string, displayName: string) => React.ReactNode
+  isDistributionView?: boolean
+  scenarioChartData?: Record<string, ChartDataPoint[]>
 }) {
   const theme = useTheme()
 
@@ -625,16 +689,43 @@ function OutcomesOnlyRowContent({
         gridColumn: "1 / -1",
         display: "grid",
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
-        gap: theme.space.gap.sm,
+        columnGap: theme.space.gap.sm,
+        rowGap: isDistributionView ? "2px" : theme.space.gap.sm,
         pt: theme.scenarios.grid.glyphOffset,
         pb: theme.scenarios.grid.row.padding,
         pl: theme.scenarios.grid.divider.gap,
         borderLeft: { sm: `1px solid ${theme.palette.grey[300]}` },
+        alignItems: "end",
       }}
     >
       {outcomeNames.map(({ shortCode, displayName }) =>
         renderOutcomeItem(shortCode, displayName),
       )}
+      {isDistributionView &&
+        outcomeNames.map(({ shortCode }) => {
+          const totalLocations =
+            scenarioChartData[shortCode]?.[0]?.totalLocations
+          const description = describeOutcomeLocations(
+            shortCode,
+            totalLocations,
+          )
+          if (!description) return <Box key={`loc-${shortCode}`} />
+          return (
+            <Typography
+              key={`loc-${shortCode}`}
+              variant="outcomeLabel"
+              sx={{
+                color: theme.palette.grey[500],
+                fontSize: "0.65rem",
+                textAlign: "center",
+                lineHeight: 1.3,
+                px: 0.25,
+              }}
+            >
+              {description}
+            </Typography>
+          )
+        })}
     </Box>
   )
 }
