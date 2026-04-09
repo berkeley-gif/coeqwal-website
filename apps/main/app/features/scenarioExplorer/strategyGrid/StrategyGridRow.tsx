@@ -690,6 +690,7 @@ function NonCompactRowContent({
 
       {/* Column 4: Outcome glyphs — wraps below in wrapped mode */}
       <Box
+        className="outcome-col"
         sx={{
           gridColumn:
             layoutMode === "compact"

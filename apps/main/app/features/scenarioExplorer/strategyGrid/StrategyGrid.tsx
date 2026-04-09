@@ -72,6 +72,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   pinnedScenarioIds,
   activeScenarioIds,
   onRowHover,
+  hideOutcomes = false,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -167,21 +168,36 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
            * - default: 2 columns (checkbox + content)
            * - 600px+: 4 columns (checkbox + scenario + operations + outcomes wrap)
            * - 1400px+: Full 4 columns with outcomes inline
+           *
+           * When hideOutcomes is true, columns stay at 2-3 (no col 4),
+           * and a descendant selector hides `.outcome-col` elements.
            */
           gridTemplateColumns: outcomesOnly
             ? "1fr"
             : theme.scenarios.grid.columns.xs,
-          ...(!outcomesOnly && {
-            [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]: {
-              gridTemplateColumns: showOperations
-                ? theme.scenarios.grid.columns.sm
-                : "32px minmax(0, 1fr) 0fr 1fr",
-            },
-            [`@container strategy-grid (min-width: ${FULL_BREAKPOINT}px)`]: {
-              gridTemplateColumns: showOperations
-                ? theme.scenarios.grid.columns.full
-                : "32px 0.382fr 0fr 1fr",
-            },
+          ...(!outcomesOnly &&
+            (hideOutcomes
+              ? {
+                  [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]: {
+                    gridTemplateColumns: showOperations
+                      ? "32px minmax(0, 1fr) auto"
+                      : "32px minmax(0, 1fr)",
+                  },
+                }
+              : {
+                  [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]: {
+                    gridTemplateColumns: showOperations
+                      ? theme.scenarios.grid.columns.sm
+                      : "32px minmax(0, 1fr) 0fr 1fr",
+                  },
+                  [`@container strategy-grid (min-width: ${FULL_BREAKPOINT}px)`]: {
+                    gridTemplateColumns: showOperations
+                      ? theme.scenarios.grid.columns.full
+                      : "32px 0.382fr 0fr 1fr",
+                  },
+                })),
+          ...(hideOutcomes && {
+            "& .outcome-col": { display: "none" },
           }),
           /**
            * Grid gap configuration:

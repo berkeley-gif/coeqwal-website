@@ -79,4 +79,11 @@ export interface StrategyGridProps {
   activeScenarioIds?: Set<string>
   /** Called on mouse enter/leave for hover sync with other panels */
   onRowHover?: (scenarioIds: string[] | null) => void
+
+  /**
+   * Hide the outcome columns (col 4) via CSS display:none.
+   * Cascades to children through a `.outcome-col` class selector
+   * on the grid container — no prop drilling required.
+   */
+  hideOutcomes?: boolean
 }
