@@ -24,6 +24,7 @@ import { StrategyGridRow } from "./StrategyGridRow"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { TooltipScenarioContext } from "../../tooltips/useTierTooltipState"
 import type { ScenarioTheme } from "../../../content/scenarios"
+import ThemeGroupHeader from "../components/ThemeGroupHeader"
 
 export interface StrategyGridContentProps {
   /** Scenarios to display */
@@ -38,6 +39,8 @@ export interface StrategyGridContentProps {
   showThemeDivider?: boolean
   /** Whether to show dividers between all adjacent scenarios with different themes */
   showAllThemeDividers?: boolean
+  /** When true, shows ThemeGroupHeader subheaders above each theme group */
+  groupByTheme?: boolean
   /** Set of scenario IDs matching the active icon filter */
   iconMatchingScenarioIds?: Set<string>
   /** Whether to show a divider after the icon-matching group */
@@ -107,6 +110,7 @@ export function StrategyGridContent({
   themeMatchingScenarioIds,
   showThemeDivider = false,
   showAllThemeDividers = false,
+  groupByTheme = false,
   iconMatchingScenarioIds,
   showIconDivider = false,
   selectedScenarios,
@@ -152,6 +156,20 @@ export function StrategyGridContent({
     }
     return scenarios
   })()
+
+  // Pre-compute scenario IDs per theme for ThemeGroupHeader
+  const themeScenarioIds = React.useMemo(() => {
+    if (!groupByTheme) return new Map<string, string[]>()
+    const map = new Map<string, string[]>()
+    for (const s of displayScenarios) {
+      if (s.theme) {
+        const ids = map.get(s.theme) ?? []
+        ids.push(s.scenarioId)
+        map.set(s.theme, ids)
+      }
+    }
+    return map
+  }, [groupByTheme, displayScenarios])
 
   // Create context-aware tooltip handler for a specific scenario
   // Includes chart data for accurate tier display in tooltips
@@ -206,12 +224,36 @@ export function StrategyGridContent({
           showIconDivider && isIconMatch && !isNextIconMatch
 
         // Show divider whenever adjacent scenarios belong to different theme groups
+        // (skip when groupByTheme is true — headers handle the separation)
         const shouldShowThemeGroupDivider =
+          !groupByTheme &&
           showAllThemeDividers &&
           nextScenario !== undefined &&
           scenario.theme !== nextScenario.theme
 
         const rows: React.ReactNode[] = []
+
+        // Theme group header — before the first scenario in each theme group
+        if (groupByTheme && scenario.theme) {
+          const prevScenario = index > 0 ? filteredArray[index - 1] : undefined
+          const isNewGroup =
+            index === 0 || scenario.theme !== prevScenario?.theme
+          if (isNewGroup) {
+            const ids = themeScenarioIds.get(scenario.theme) ?? []
+            rows.push(
+              <Box
+                key={`theme-header-${scenario.theme}`}
+                sx={{ gridColumn: "1 / -1" }}
+              >
+                <ThemeGroupHeader
+                  themeKey={scenario.theme as ScenarioTheme}
+                  scenarioIds={ids}
+                  isFirst={index === 0}
+                />
+              </Box>,
+            )
+          }
+        }
 
         // Main scenario row
         // Use context-aware tooltip handler to include scenario info for accessibility
@@ -240,6 +282,7 @@ export function StrategyGridContent({
             onTierClick={onTierClick}
             onTooltipToggle={createTooltipHandler(scenario)}
             onSortChange={onSortChange}
+            showThemeBadge={!groupByTheme}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
           />,

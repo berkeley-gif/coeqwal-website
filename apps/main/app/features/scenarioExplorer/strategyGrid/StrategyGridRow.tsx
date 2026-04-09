@@ -71,6 +71,8 @@ export interface StrategyGridRowProps {
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
+  /** Whether to show inline theme badge on each row */
+  showThemeBadge?: boolean
   /** Select all scenarios sharing a theme when badge is clicked */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
@@ -102,6 +104,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onTierClick,
   onTooltipToggle,
   onSortChange,
+  showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
 }: StrategyGridRowProps) {
@@ -271,6 +274,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               scenario={scenario}
               outcomeNames={outcomeNames}
               renderOutcomeItem={renderOutcomeItem}
+              showThemeBadge={showThemeBadge}
               onThemeBadgeClick={onThemeBadgeClick}
               onIconClick={onIconClick}
             />
@@ -282,6 +286,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               showDescription={showDefinitions}
               outcomeNames={outcomeNames}
               renderOutcomeItem={renderOutcomeItem}
+              showThemeBadge={showThemeBadge}
               onThemeBadgeClick={onThemeBadgeClick}
               onIconClick={onIconClick}
             />
@@ -299,6 +304,7 @@ interface CompactRowContentProps {
   scenario: ScenarioForDisplay
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  showThemeBadge?: boolean
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
 }
@@ -307,6 +313,7 @@ function CompactRowContent({
   scenario,
   outcomeNames,
   renderOutcomeItem,
+  showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
 }: CompactRowContentProps) {
@@ -333,6 +340,7 @@ function CompactRowContent({
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
+          showThemeBadge={showThemeBadge}
           onThemeBadgeClick={onThemeBadgeClick}
         />
         <Box
@@ -422,6 +430,7 @@ interface NonCompactRowContentProps {
   showDescription?: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
+  showThemeBadge?: boolean
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   onIconClick?: (iconId: string) => void
 }
@@ -433,6 +442,7 @@ function NonCompactRowContent({
   showDescription = true,
   outcomeNames,
   renderOutcomeItem,
+  showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
 }: NonCompactRowContentProps) {
@@ -463,6 +473,7 @@ function NonCompactRowContent({
           titleVariant="body2"
           showDescription={showDescription}
           descriptionMaxWidth="none"
+          showThemeBadge={showThemeBadge}
           onThemeBadgeClick={onThemeBadgeClick}
         />
       </Box>

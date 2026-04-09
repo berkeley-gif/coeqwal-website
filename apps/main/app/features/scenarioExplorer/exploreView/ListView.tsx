@@ -77,6 +77,7 @@ export default function ListView({
     selectedIconId,
     setSelectedTheme,
     setSelectedIconId,
+    groupByTheme,
   } = useScenarioExplorerStore()
 
   const handleSortChange = (
@@ -198,6 +199,7 @@ export default function ListView({
     showAlternativeBaselines,
     showOperations: showKeyOperations,
     hideColumnTitles: true,
+    groupByTheme,
     compact: false,
     onMapViewChange: () => {},
     onShowOnlyChosenChange: setShowOnlyChosen,

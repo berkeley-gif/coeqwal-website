@@ -52,6 +52,8 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     setShowOnlyChosen,
     sharedScenarioIds,
     setShowShareDrawer,
+    groupByTheme,
+    setGroupByTheme,
   } = useScenarioExplorerStore()
 
   const viewControls = (
@@ -224,6 +226,11 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           label="Chosen only"
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+        />
+        <ToggleChip
+          label="Group by theme"
+          active={groupByTheme}
+          onClick={() => setGroupByTheme(!groupByTheme)}
         />
         {sharedScenarioIds.length > 0 && (
           <ToggleChip
