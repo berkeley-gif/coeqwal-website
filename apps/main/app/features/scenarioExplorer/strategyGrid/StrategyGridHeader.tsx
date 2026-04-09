@@ -110,6 +110,7 @@ export function StrategyGridHeader({
         onTooltipToggle={onTooltipToggle}
         onSortChange={onSortChange}
         outcomesOnly
+        layoutMode={layoutMode}
       />
     )
   }
@@ -142,6 +143,7 @@ export function StrategyGridHeader({
           sortEnabled={sortEnabled}
           onTooltipToggle={onTooltipToggle}
           onSortChange={onSortChange}
+          layoutMode={layoutMode}
         />
       )}
     </>
@@ -201,8 +203,8 @@ function ColumnHeaders({
       {/* Columns 1-2: Search + visibility chips */}
       <Box
         sx={{
-          gridColumn: showOperations ? "1 / 3" : "1 / 3",
-          display: { xs: "none", sm: "flex" },
+          gridColumn: "1 / 3",
+          display: layoutMode === "compact" ? "none" : "flex",
           alignItems: "center",
           alignSelf: "stretch",
           flexWrap: "wrap",
@@ -219,7 +221,7 @@ function ColumnHeaders({
         <Box
           sx={{
             gridColumn: "3",
-            display: { xs: "none", sm: "flex" },
+            display: layoutMode === "compact" ? "none" : "flex",
             alignItems: "flex-start",
             alignSelf: "stretch",
             pl: isFullMode ? theme.scenarios.grid.divider.gap : 0,
@@ -246,7 +248,7 @@ function ColumnHeaders({
         <Box
           sx={{
             gridColumn: "4",
-            display: { xs: "none", sm: "flex" },
+            display: "flex",
             alignItems: "flex-start",
             alignSelf: "stretch",
             pb: theme.scenarios.grid.header.outcomes,
@@ -287,7 +289,7 @@ function DividerContinuation({ column }: DividerContinuationProps) {
     <Box
       sx={{
         gridColumn: String(column),
-        display: { xs: "none", sm: "block" },
+        display: "block",
         /**
          * Divider pull-up: negates the grid row gap (8px)
          * so the border appears continuous with the header above.
@@ -315,6 +317,7 @@ interface OutcomeCategoryLabelsProps {
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
   outcomesOnly?: boolean
+  layoutMode?: "full" | "wrapped" | "compact"
 }
 
 function OutcomeCategoryLabels({
@@ -326,6 +329,7 @@ function OutcomeCategoryLabels({
   onTooltipToggle,
   onSortChange,
   outcomesOnly = false,
+  layoutMode = "full",
 }: OutcomeCategoryLabelsProps) {
   const theme = useTheme()
 
@@ -333,7 +337,7 @@ function OutcomeCategoryLabels({
     <Box
       sx={{
         gridColumn: outcomesOnly ? "1 / -1" : "4",
-        display: { xs: "none", sm: "grid" },
+        display: layoutMode === "compact" ? "none" : "grid",
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
         pt: 0.5,
