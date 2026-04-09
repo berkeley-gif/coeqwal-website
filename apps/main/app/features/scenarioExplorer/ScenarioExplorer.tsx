@@ -10,7 +10,7 @@
  *   - Other modes: UnifiedToolLayout with persistent ScenarioSelectionSidebar
  */
 
-import React, { useState, useCallback, useMemo } from "react"
+import React, { useState, useCallback, useMemo, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -45,7 +45,7 @@ import {
   type MainView,
   type ExploreMode,
 } from "./store"
-import { useMapMode } from "../map/store"
+import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
 // Top-level navigation tabs
@@ -193,6 +193,23 @@ export default function ScenarioExplorer() {
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
 
+  const MAP_WIDTH_PERCENT = 25
+  useEffect(() => {
+    if (!isListMode) return
+    if (showMap) {
+      mapActions.setMapMode("explore")
+      mapActions.setExplorePanelWidth(100 - MAP_WIDTH_PERCENT)
+    } else {
+      mapActions.setMapMode("hidden")
+      mapActions.clearOutcomeVisualization()
+    }
+    return () => {
+      mapActions.setMapMode("hidden")
+      mapActions.clearOutcomeVisualization()
+      mapActions.setExplorePanelWidth(50)
+    }
+  }, [isListMode, showMap])
+
   return (
     <Box
       sx={{
@@ -221,9 +238,13 @@ export default function ScenarioExplorer() {
           width: "100%",
           height: theme.layout.collapsedTabHeight,
           background: theme.palette.tabPanels.explore,
-          ...theme.typography.nav,
+          fontFamily: theme.typography.nav.fontFamily,
+          fontSize: theme.typography.nav.fontSize,
+          letterSpacing: theme.typography.nav.letterSpacing,
           lineHeight: 1,
           color: theme.palette.common.white,
+          textShadow: "none",
+          filter: "none",
           justifyContent: "center",
           gap: 1,
         }}
@@ -249,6 +270,7 @@ export default function ScenarioExplorer() {
                 cursor: "pointer",
                 background: active ? "rgba(255,255,255,0.2)" : "transparent",
                 color: theme.palette.common.white,
+                textShadow: "none",
                 transition: "background-color 0.15s",
                 "&:hover": { background: "rgba(255,255,255,0.15)" },
               }}
@@ -262,6 +284,7 @@ export default function ScenarioExplorer() {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   color: "inherit",
+                  textShadow: "none",
                 }}
               >
                 {label}
@@ -304,6 +327,7 @@ export default function ScenarioExplorer() {
                       ? "rgba(255,255,255,0.2)"
                       : "transparent",
                     color: theme.palette.common.white,
+                    textShadow: "none",
                     transition: "background-color 0.15s",
                     "&:hover": { background: "rgba(255,255,255,0.15)" },
                   }}
@@ -317,6 +341,7 @@ export default function ScenarioExplorer() {
                       lineHeight: 1,
                       whiteSpace: "nowrap",
                       color: "inherit",
+                      textShadow: "none",
                     }}
                   >
                     {label}
@@ -357,25 +382,47 @@ export default function ScenarioExplorer() {
                 <Box
                   sx={{
                     display: "flex",
-                    flexDirection: "column",
                     height: "100%",
                     overflow: "hidden",
                   }}
                 >
                   <Box
                     sx={{
-                      flexShrink: 0,
-                      borderBottom: `1px solid ${theme.palette.divider}`,
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      overflow: "hidden",
+                      minWidth: 0,
                     }}
                   >
-                    <ToolToolbar />
+                    <Box
+                      sx={{
+                        flexShrink: 0,
+                        borderBottom: `1px solid ${theme.palette.divider}`,
+                        backgroundColor: theme.palette.explore.background,
+                      }}
+                    >
+                      <ToolToolbar showListControls />
+                    </Box>
+                    <Box sx={{ flex: 1, overflow: "hidden" }}>
+                      <ListView
+                        highlightedIds={highlightedIds}
+                        onScenarioHover={handleToolScenarioHover}
+                      />
+                    </Box>
                   </Box>
-                  <Box sx={{ flex: 1, overflow: "hidden" }}>
-                    <ListView
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
+
+                  {showMap && (
+                    <Box
+                      sx={{
+                        width: `${MAP_WIDTH_PERCENT}%`,
+                        flexShrink: 0,
+                        height: "100%",
+                        pointerEvents: "auto",
+                        backgroundColor: "transparent",
+                      }}
                     />
-                  </Box>
+                  )}
                 </Box>
               ) : (
                 /* Non-list modes: sidebar + tool panel */

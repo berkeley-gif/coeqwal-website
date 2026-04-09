@@ -97,6 +97,7 @@ export default function UnifiedToolLayout({
           sx={{
             flexShrink: 0,
             borderBottom: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.explore.background,
           }}
         >
           {toolbar}
