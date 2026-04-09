@@ -16,8 +16,15 @@
 import React from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { InfoIconButton, ToggleSortButton } from "@repo/ui"
-import { ScenarioGlyph, type GlyphVariant } from "@repo/viz"
+import {
+  ScenarioGlyph,
+  MorphableDistributionGlyph,
+  SQUARE_SIZE,
+  SQUARE_GAP,
+  type GlyphVariant,
+} from "@repo/viz"
 import { isSingleValueTier, type ChartDataPoint } from "./types"
+import { getSingleValueLocationCount } from "../../../../content/outcomes"
 
 /**
  * Generate accessible description of chart data for screen readers
@@ -81,6 +88,8 @@ export interface OutcomeGlyphItemProps {
   displayName: string
   /** Internal name (used for tooltip key) */
   name: string
+  /** Outcome short code (e.g. "DELTA_ECO") — used for single-value square count */
+  outcomeCode?: string
   /** Chart data for this outcome */
   chartData: ChartDataPoint[] | undefined
   /** Whether this outcome has active/valid data */
@@ -91,6 +100,8 @@ export interface OutcomeGlyphItemProps {
   isTooltipActive?: boolean
   /** Override the auto-detected glyph variant (bars/dots/distribution) */
   variant?: GlyphVariant
+  /** When true, use the morphable glyph that animates between bars and distribution */
+  morphEnabled?: boolean
   /** Size of the glyph (default: responsive 50/60px) */
   size?: number
   /** Whether to show the outcome label */
@@ -113,11 +124,13 @@ export function OutcomeGlyphItem({
   displayName,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   name, // Reserved for future tooltip key usage
+  outcomeCode,
   chartData,
   isActive,
   isSelected = false,
   isTooltipActive = false,
   variant: variantOverride,
+  morphEnabled = false,
   size,
   showLabel = true,
   showInfoButton = true,
@@ -158,8 +171,17 @@ export function OutcomeGlyphItem({
         theme.palette.tiers.tier4,
       ]
 
-  const autoVariant = isSingleValueTier(chartData) ? "dots" : "bars"
-  const variant = variantOverride ?? autoVariant
+  const isSingleValue = isSingleValueTier(chartData)
+  const autoVariant = isSingleValue ? "dots" : "bars"
+  const isSingleValueDistribution =
+    variantOverride === "distribution" && isSingleValue
+  const variant = isSingleValueDistribution
+    ? "dots"
+    : (variantOverride ?? autoVariant)
+
+  const useMorphable = morphEnabled && !isSingleValue
+  const morphMode: "bars" | "distribution" =
+    variantOverride === "distribution" ? "distribution" : "bars"
 
   // Glyph is clickable when active and has a click handler
   const isClickable = isActive && !!onGlyphClick
@@ -206,7 +228,51 @@ export function OutcomeGlyphItem({
       }
     >
       {/* Glyph or placeholder */}
-      {isActive ? (
+      {isActive && isSingleValueDistribution ? (
+        (() => {
+          const activeTier = chartData?.find((t) => t.value > 0)
+          const color = activeTier?.color ?? theme.palette.grey[400]
+          const count = outcomeCode
+            ? getSingleValueLocationCount(outcomeCode)
+            : 1
+          const cell = SQUARE_SIZE + SQUARE_GAP
+          const w = count * cell - SQUARE_GAP
+          return (
+            <Box
+              role="img"
+              aria-label={generateChartAriaLabel(displayName, chartData)}
+            >
+              <svg width={w} height={SQUARE_SIZE}>
+                {Array.from({ length: count }, (_, i) => (
+                  <rect
+                    key={i}
+                    x={i * cell}
+                    y={0}
+                    width={SQUARE_SIZE}
+                    height={SQUARE_SIZE}
+                    rx={2}
+                    fill={color}
+                    stroke={color}
+                    strokeWidth={0.5}
+                    strokeOpacity={0.4}
+                  />
+                ))}
+              </svg>
+            </Box>
+          )
+        })()
+      ) : isActive && useMorphable ? (
+        <Box
+          role="img"
+          aria-label={generateChartAriaLabel(displayName, chartData)}
+        >
+          <MorphableDistributionGlyph
+            values={values}
+            tierColors={tierColors}
+            mode={morphMode}
+          />
+        </Box>
+      ) : isActive ? (
         <Box
           role="img"
           aria-label={generateChartAriaLabel(displayName, chartData)}

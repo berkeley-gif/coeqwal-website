@@ -713,7 +713,7 @@ export const themeValues = {
         compact: 2,
       },
       fullBreakpoint: 1400,
-      row: { padding: 3, firstOffset: 0.5, internalGap: 1 },
+      row: { padding: 1.5, firstOffset: 0.5, internalGap: 1 },
       divider: { gap: 1.5, pullUp: -1 },
       header: { standard: 2, outcomes: 1, categoryLabels: 1 },
       glyphOffset: "14px",
@@ -1070,7 +1070,7 @@ const theme = createTheme({
     // Scenario/strategy title - headline for scenario cards/rows
     scenarioTitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "1rem", // 16px
+      fontSize: "0.875rem", // 14px
       fontWeight: 500,
       lineHeight: 1.3,
     },

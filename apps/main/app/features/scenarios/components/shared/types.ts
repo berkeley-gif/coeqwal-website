@@ -11,6 +11,8 @@ export interface ChartDataPoint {
   color: string
   value: number
   tierType?: "single_value" | "multi_value"
+  /** Total locations across all tiers (multi_value only) */
+  totalLocations?: number
 }
 
 export interface OutcomeName {

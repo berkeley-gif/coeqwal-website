@@ -21,6 +21,7 @@ import {
   Checkbox,
   IconButton,
   Tooltip,
+  InputBase,
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
@@ -31,6 +32,7 @@ import {
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import ThemeGroupHeader from "./ThemeGroupHeader"
+import ToggleChip from "./ToggleChip"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -52,11 +54,20 @@ export default function ScenarioSelectionSidebar({
     pinnedScenarioIds,
     togglePinnedScenario,
     showDefinitions,
+    setShowDefinitions,
     showKeyOperations,
-    searchQuery,
-    sharedScenarioIds,
-    addToShare,
+    setShowKeyOperations,
+    showAlternativeBaselines,
+    setShowAlternativeBaselines,
+    showOnlyChosen,
+    setShowOnlyChosen,
     groupByTheme,
+    setGroupByTheme,
+    searchQuery,
+    setSearchQuery,
+    sharedScenarioIds,
+    setShowShareDrawer,
+    addToShare,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -108,8 +119,8 @@ export default function ScenarioSelectionSidebar({
           alignItems: "center",
           justifyContent: "space-between",
           px: 1.5,
-          py: 1,
-          minHeight: 45,
+          py: 0.5,
+          minHeight: 44,
           borderBottom: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.explore.background,
         }}
@@ -133,6 +144,96 @@ export default function ScenarioSelectionSidebar({
           >
             Key operations
           </Typography>
+        )}
+      </Box>
+
+      {/* ── Search bar ──────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          px: 1.5,
+          py: 0.5,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <InputBase
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search…"
+          size="small"
+          inputProps={{ "aria-label": "Search scenarios" }}
+          sx={{
+            flex: 1,
+            fontSize: "0.8125rem",
+            "& .MuiInputBase-input": {
+              py: 0.5,
+              px: 0.5,
+              "&::placeholder": {
+                color: theme.palette.grey[500],
+                opacity: 1,
+              },
+            },
+          }}
+        />
+        {searchQuery && (
+          <IconButton
+            size="small"
+            onClick={() => setSearchQuery("")}
+            sx={{ p: 0.25 }}
+          >
+            <icons.Close sx={{ fontSize: "0.875rem" }} />
+          </IconButton>
+        )}
+      </Box>
+
+      {/* ── Visibility chips ────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 0.25,
+          flexWrap: "wrap",
+          px: 1.5,
+          py: 0.5,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <ToggleChip
+          label="Definitions"
+          active={showDefinitions}
+          onClick={() => setShowDefinitions(!showDefinitions)}
+        />
+        <ToggleChip
+          label="Baselines"
+          active={showAlternativeBaselines}
+          onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
+        />
+        <ToggleChip
+          label="Key ops"
+          active={showKeyOperations}
+          onClick={() => setShowKeyOperations(!showKeyOperations)}
+        />
+        <ToggleChip
+          label="Chosen only"
+          active={showOnlyChosen}
+          onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+        />
+        <ToggleChip
+          label="Group by theme"
+          active={groupByTheme}
+          onClick={() => setGroupByTheme(!groupByTheme)}
+        />
+        {sharedScenarioIds.length > 0 && (
+          <ToggleChip
+            label={`Share (${sharedScenarioIds.length})`}
+            active={true}
+            onClick={() => setShowShareDrawer(true)}
+          />
         )}
       </Box>
 
