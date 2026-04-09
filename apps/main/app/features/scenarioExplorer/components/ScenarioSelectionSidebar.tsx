@@ -73,11 +73,8 @@ export default function ScenarioSelectionSidebar({
     return () => clearTimeout(timer)
   }, [activeScenarioId])
 
-  const {
-    orderedScenarios,
-    matchingScenarioIds,
-    isLoading,
-  } = useOrderedScenarios()
+  const { orderedScenarios, matchingScenarioIds, isLoading } =
+    useOrderedScenarios()
 
   const isSearchActive = searchQuery.trim().length > 0
 
@@ -173,7 +170,8 @@ export default function ScenarioSelectionSidebar({
         {orderedScenarios.flatMap((scenario, index) => {
           const isChosen = selectedScenarios.includes(scenario.scenarioId)
           const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
-          const isSearchMatch = isSearchActive && matchingScenarioIds.has(scenario.scenarioId)
+          const isSearchMatch =
+            isSearchActive && matchingScenarioIds.has(scenario.scenarioId)
           const isSearchDimmed = isSearchActive && !isSearchMatch
           const color = scenarioColors?.[scenario.scenarioId]
           const accentColor = color || theme.palette.blue.bright
@@ -509,4 +507,3 @@ export default function ScenarioSelectionSidebar({
     </Box>
   )
 }
-

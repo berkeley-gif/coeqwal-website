@@ -15,6 +15,8 @@ import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { useMultipleScenarioTiers } from "../../scenarios/hooks"
 import type { Scenario } from "../../scenarios/hooks/useScenarioList"
+import type { OutcomeScoreData } from "../../scenarios/hooks"
+import type { OutcomeName } from "../../scenarios/components/shared"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
 
@@ -39,9 +41,11 @@ export interface OrderedScenariosResult {
   iconMatchingScenarioIds: Set<string>
   showIconDivider: boolean
   themeBoundaryIndices: number[]
-  allScoreData: Record<string, Record<string, { weighted_score: number }>> | undefined
+  allScoreData:
+    | Record<string, Record<string, OutcomeScoreData>>
+    | undefined
   allChartData: Record<string, Record<string, unknown>>
-  outcomeNames: string[]
+  outcomeNames: OutcomeName[]
   isLoading: boolean
   error: string | null
 }
@@ -146,7 +150,7 @@ export function useOrderedScenarios(): OrderedScenariosResult {
     }
 
     // Search: highlight + float (keep all scenarios, matches first)
-    let matchingIds = new Set<string>()
+    const matchingIds = new Set<string>()
     let hasSearchResults = false
 
     if (searchQuery.trim()) {
@@ -179,7 +183,7 @@ export function useOrderedScenarios(): OrderedScenariosResult {
     // Compute theme boundary indices for divider alignment
     const boundaries: number[] = []
     for (let i = 1; i < finalList.length; i++) {
-      if (finalList[i].theme !== finalList[i - 1].theme) {
+      if (finalList[i]?.theme !== finalList[i - 1]?.theme) {
         boundaries.push(i)
       }
     }

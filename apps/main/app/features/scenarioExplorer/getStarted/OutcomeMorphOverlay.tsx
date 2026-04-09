@@ -247,7 +247,12 @@ function computeOutcomeLayout(
 
     let barPts: [number, number][]
     if (isSingleValue) {
-      barPts = circlePoints(gridCenterX, slotCenterY, svRadius, POINTS_PER_SHAPE)
+      barPts = circlePoints(
+        gridCenterX,
+        slotCenterY,
+        svRadius,
+        POINTS_PER_SHAPE,
+      )
     } else {
       const barCx = barLeftX + barW / 2
       const barCy =
@@ -501,9 +506,10 @@ export default function OutcomeMorphOverlay({
     color: string
     tier: number
   }
-  const prevShapeSnapshotRef = useRef<
-    Map<string, Map<string, ShapeSnapshot>> | null
-  >(null)
+  const prevShapeSnapshotRef = useRef<Map<
+    string,
+    Map<string, ShapeSnapshot>
+  > | null>(null)
 
   const getTargetForMode = useCallback(
     (
@@ -610,9 +616,7 @@ export default function OutcomeMorphOverlay({
       const slideT =
         elapsed <= PAUSE_END
           ? 0
-          : easeInOut(
-              Math.min(1, (elapsed - PAUSE_END) / SLIDE_DURATION),
-            )
+          : easeInOut(Math.min(1, (elapsed - PAUSE_END) / SLIDE_DURATION))
 
       for (const group of outcomeShapes) {
         const refs = pathRefsMap.current.get(group.code)
@@ -755,7 +759,6 @@ export default function OutcomeMorphOverlay({
               el.setAttribute("stroke-opacity", String(0.4 * eased))
             }
           }
-
         }
 
         if (t < 1) {
@@ -983,8 +986,7 @@ export default function OutcomeMorphOverlay({
                         group.glyphMeta.maxBarWidth * frac
                       }
                       y1={
-                        group.glyphMeta.barGlyphTop +
-                        group.glyphMeta.barSpacing
+                        group.glyphMeta.barGlyphTop + group.glyphMeta.barSpacing
                       }
                       x2={
                         group.glyphMeta.barLeftX +
@@ -1015,8 +1017,7 @@ export default function OutcomeMorphOverlay({
               const isBarMode = encodingMode === "bar"
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
-              const isClickable =
-                interactive && isSelected && !isAvgMode
+              const isClickable = interactive && isSelected && !isAvgMode
               return (
                 <path
                   key={`${group.code}-${i}`}

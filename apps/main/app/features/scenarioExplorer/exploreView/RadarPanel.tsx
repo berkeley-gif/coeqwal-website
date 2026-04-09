@@ -17,10 +17,7 @@ import React, {
   startTransition,
 } from "react"
 import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
-import {
-  RadarPlot,
-  type VerticalParallelLineData,
-} from "@repo/viz"
+import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -206,9 +203,7 @@ export default function RadarPanel({
           showAllPaths
           onLineHover={setHoveredScenario}
           onLineClick={(d) => {
-            setHighlightedScenario(
-              highlightedScenario === d.id ? null : d.id,
-            )
+            setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
           }}
         />
       </Box>

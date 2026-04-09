@@ -852,11 +852,16 @@ export default function TierAnimationSection() {
 
       const map = mapAPI.mapRef?.current?.getMap?.()
       const isSwitching =
-        !isToggleOff && selectedOutcomeCode != null && selectedOutcomeCode !== code
+        !isToggleOff &&
+        selectedOutcomeCode != null &&
+        selectedOutcomeCode !== code
 
       if (isSwitching && map) {
         const prevConfig = getOutcomeConfig(selectedOutcomeCode!)
-        if (prevConfig?.geometryType === "polygon" && prevConfig.mapboxLayerId) {
+        if (
+          prevConfig?.geometryType === "polygon" &&
+          prevConfig.mapboxLayerId
+        ) {
           const fillId = prevConfig.mapboxLayerId
           if (map.getLayer(fillId)) {
             map.setPaintProperty(fillId, "fill-opacity-transition", {
