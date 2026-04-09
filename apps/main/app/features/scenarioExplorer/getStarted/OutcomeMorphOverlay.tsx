@@ -1016,7 +1016,7 @@ export default function OutcomeMorphOverlay({
               const isAvgMode = encodingMode === "average"
               const isBarOrAvg = isBarMode || isAvgMode
               const isClickable =
-                interactive && (isSelected || (isBarMode && isSelected))
+                interactive && isSelected && !isAvgMode
               return (
                 <path
                   key={`${group.code}-${i}`}
@@ -1069,7 +1069,7 @@ export default function OutcomeMorphOverlay({
                   }}
                   pointerEvents={isClickable ? "all" : "none"}
                   onMouseEnter={
-                    interactive && isSelected
+                    interactive && isSelected && !isBarOrAvg
                       ? () =>
                           onLocationEnter?.({
                             code: group.code,
@@ -1079,7 +1079,7 @@ export default function OutcomeMorphOverlay({
                       : undefined
                   }
                   onMouseLeave={
-                    interactive && isSelected
+                    interactive && isSelected && !isBarOrAvg
                       ? () => onLocationLeave?.()
                       : undefined
                   }
@@ -1089,7 +1089,7 @@ export default function OutcomeMorphOverlay({
                           e.stopPropagation()
                           if (isBarMode && onBarClick) {
                             onBarClick(group.code, shape.tier)
-                          } else {
+                          } else if (!isBarOrAvg) {
                             onLocationClick?.({
                               code: group.code,
                               sourceId: shape.sourceId,
