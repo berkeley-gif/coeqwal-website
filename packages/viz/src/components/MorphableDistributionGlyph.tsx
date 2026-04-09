@@ -392,4 +392,3 @@ const MorphableDistributionGlyph: React.FC<MorphableDistributionGlyphProps> =
 MorphableDistributionGlyph.displayName = "MorphableDistributionGlyph"
 
 export default MorphableDistributionGlyph
-export type { MorphableDistributionGlyphProps }
