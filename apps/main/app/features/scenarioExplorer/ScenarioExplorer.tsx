@@ -19,6 +19,10 @@ import {
   useTheme,
   PlayArrowIcon,
   ViewListIcon,
+  ExploreIcon,
+  AdjustIcon,
+  AppsIcon,
+  InsightsIcon,
   Checkbox,
   FormControlLabel,
 } from "@repo/ui/mui"
@@ -35,11 +39,14 @@ import {
   EquityPanel,
   ResiliencePanel,
   RadarPanel,
-  DistributionComparisonPanel,
 } from "./exploreView"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
-import { useScenarioExplorerStore, type MainView } from "./store"
+import {
+  useScenarioExplorerStore,
+  type MainView,
+  type ExploreMode,
+} from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
@@ -53,16 +60,40 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   },
   {
     view: "explorer",
-    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
+    icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
     label: "Go to tools",
   },
 ]
+
+const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
+  [
+    {
+      mode: "list",
+      icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
+      label: "List",
+    },
+    {
+      mode: "radar",
+      icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
+      label: "Radar chart",
+    },
+    {
+      mode: "equity",
+      icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
+      label: "Distribution comparison",
+    },
+    {
+      mode: "data",
+      icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
+      label: "Data in depth",
+    },
+  ]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, setMainView, exploreMode, showMap } =
+  const { mainView, setMainView, exploreMode, setExploreMode, showMap } =
     useScenarioExplorerStore()
   const mapMode = useMapMode()
 
@@ -187,13 +218,14 @@ export default function ScenarioExplorer() {
           pointerEvents: "auto",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-evenly",
           width: "100%",
           height: theme.layout.collapsedTabHeight,
           background: theme.palette.tabPanels.explore,
           ...theme.typography.nav,
           lineHeight: 1,
           color: theme.palette.common.white,
+          justifyContent: "center",
+          gap: 1,
         }}
       >
         {MAIN_VIEWS.map(({ view, icon, label }) => {
@@ -217,7 +249,6 @@ export default function ScenarioExplorer() {
                 cursor: "pointer",
                 background: active ? "rgba(255,255,255,0.2)" : "transparent",
                 color: theme.palette.common.white,
-                textShadow: "none",
                 transition: "background-color 0.15s",
                 "&:hover": { background: "rgba(255,255,255,0.15)" },
               }}
@@ -231,7 +262,6 @@ export default function ScenarioExplorer() {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   color: "inherit",
-                  textShadow: "none",
                 }}
               >
                 {label}
@@ -239,6 +269,63 @@ export default function ScenarioExplorer() {
             </Box>
           )
         })}
+
+        {mainView === "explorer" && (
+          <>
+            <Box
+              sx={{
+                width: "1px",
+                height: 20,
+                backgroundColor: "rgba(255,255,255,0.35)",
+                flexShrink: 0,
+                mx: 0.5,
+              }}
+            />
+            {TOOL_TABS.map(({ mode, icon, label }) => {
+              const active = exploreMode === mode
+              return (
+                <Box
+                  key={mode}
+                  component="button"
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setExploreMode(mode)}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    px: 1.25,
+                    py: 0.5,
+                    border: "none",
+                    borderRadius: theme.borderRadius.sm ?? "4px",
+                    cursor: "pointer",
+                    background: active
+                      ? "rgba(255,255,255,0.2)"
+                      : "transparent",
+                    color: theme.palette.common.white,
+                    transition: "background-color 0.15s",
+                    "&:hover": { background: "rgba(255,255,255,0.15)" },
+                  }}
+                >
+                  {icon}
+                  <Typography
+                    component="span"
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: active ? 600 : 400,
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                      color: "inherit",
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                </Box>
+              )
+            })}
+          </>
+        )}
       </Box>
 
       {/* Content area */}
@@ -289,19 +376,13 @@ export default function ScenarioExplorer() {
                       onScenarioHover={handleToolScenarioHover}
                     />
                   )}
-                  {exploreMode === "distribution" && (
-                    <DistributionComparisonPanel
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                    />
-                  )}
+                  {exploreMode === "equity" && <EquityPanel />}
                   {exploreMode === "comparison" && (
                     <ComparisonPanel
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
                     />
                   )}
-                  {exploreMode === "equity" && <EquityPanel />}
                   {exploreMode === "resilience" && <ResiliencePanel />}
                   {exploreMode === "data" && <DataExplorerView />}
                 </UnifiedToolLayout>
