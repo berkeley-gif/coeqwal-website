@@ -130,12 +130,13 @@ export function StrategyGridHeader({
 
       {/* Divider continuation for Column 3 - only in full mode when operations visible */}
       {!hideColumnTitles && showOutcomeLabels && showOperations && (
-        <DividerContinuation column={3} />
+        <DividerContinuation column={3} className="outcome-col" />
       )}
 
       {/* Outcome category labels (Column 4) - only in full mode */}
       {showOutcomeLabels && (
         <OutcomeCategoryLabels
+          className="outcome-col"
           outcomeNames={outcomeNames}
           activeTooltip={activeTooltip}
           sortBy={sortBy}
@@ -246,6 +247,7 @@ function ColumnHeaders({
       {/* Column 4: "Key outcomes" — only in full mode, hidden when titles hidden */}
       {isFullMode && !hideColumnTitles && (
         <Box
+          className="outcome-col"
           sx={{
             gridColumn: "4",
             display: "flex",
@@ -280,13 +282,15 @@ function ColumnHeaders({
  */
 interface DividerContinuationProps {
   column: number
+  className?: string
 }
 
-function DividerContinuation({ column }: DividerContinuationProps) {
+function DividerContinuation({ column, className }: DividerContinuationProps) {
   const theme = useTheme()
 
   return (
     <Box
+      className={className}
       sx={{
         gridColumn: String(column),
         display: "block",
@@ -318,6 +322,7 @@ interface OutcomeCategoryLabelsProps {
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
   outcomesOnly?: boolean
   layoutMode?: "full" | "wrapped" | "compact"
+  className?: string
 }
 
 function OutcomeCategoryLabels({
@@ -330,11 +335,13 @@ function OutcomeCategoryLabels({
   onSortChange,
   outcomesOnly = false,
   layoutMode = "full",
+  className,
 }: OutcomeCategoryLabelsProps) {
   const theme = useTheme()
 
   return (
     <Box
+      className={className}
       sx={{
         gridColumn: outcomesOnly ? "1 / -1" : "4",
         display: layoutMode === "compact" ? "none" : "grid",
