@@ -306,6 +306,48 @@ export default function TierAnimationSection() {
         "AG_REV",
         resolvedScenarioIdRef.current,
       )
+
+      // Suppress all map layers to their pre-animation state so nothing
+      // lingers from a previous run.
+      const resetMap = mapAPI.mapRef?.current?.getMap?.()
+      if (resetMap?.isStyleLoaded?.()) {
+        try {
+          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+            if (resetMap.getLayer(fill)) {
+              resetMap.setLayoutProperty(fill, "visibility", "visible")
+              resetMap.setPaintProperty(fill, "fill-opacity-transition", {
+                duration: 0,
+                delay: 0,
+              })
+              resetMap.setPaintProperty(fill, "fill-opacity", 0)
+            }
+            if (resetMap.getLayer(outline)) {
+              resetMap.setLayoutProperty(outline, "visibility", "visible")
+              resetMap.setPaintProperty(outline, "line-opacity", 0)
+            }
+          }
+          for (const lineLayer of ANIM_LINE_LAYERS) {
+            if (resetMap.getLayer(lineLayer)) {
+              resetMap.setPaintProperty(lineLayer, "line-opacity", 0)
+            }
+          }
+          if (resetMap.getLayer("demand-units")) {
+            resetMap.setFilter("demand-units", DU_CLASS_FILTER as never)
+            resetMap.setPaintProperty(
+              "demand-units",
+              "fill-color",
+              beat1FillExpr(0) as never,
+            )
+            resetMap.setPaintProperty(
+              "demand-units",
+              "fill-outline-color",
+              "transparent",
+            )
+          }
+        } catch {
+          /* ok */
+        }
+      }
     }
 
     // When starting from the beginning, fly the camera home first so
@@ -993,6 +1035,16 @@ export default function TierAnimationSection() {
         setTimeout(() => applyPanelOffsetRef.current(), 500)
 
         try {
+          // Ensure all animation layers have visibility "visible" at the
+          // layout level — OutcomePolygonLayer may have set them to "none"
+          // if it was previously mounted in another map mode.
+          for (const { fill, outline } of ANIM_POLYGON_LAYERS) {
+            if (map.getLayer(fill))
+              map.setLayoutProperty(fill, "visibility", "visible")
+            if (map.getLayer(outline))
+              map.setLayoutProperty(outline, "visibility", "visible")
+          }
+
           // Set up demand-units for the beat-1 color cycling
           if (map.getLayer("demand-units")) {
             map.setFilter("demand-units", DU_CLASS_FILTER as never)
