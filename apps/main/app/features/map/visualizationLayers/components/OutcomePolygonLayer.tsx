@@ -254,12 +254,6 @@ export function OutcomePolygonLayer({
       map.setFilter(fillId, null)
     }
 
-    // Special handling for reservoir: keep natural fill color
-    if (layerType === "reservoir") {
-      map.setLayoutProperty(fillId, "visibility", "visible")
-      return
-    }
-
     // Loading state: keep fill invisible and suppress the outline entirely.
     if (!hasTierData) {
       map.setPaintProperty(fillId, "fill-color", "transparent")
