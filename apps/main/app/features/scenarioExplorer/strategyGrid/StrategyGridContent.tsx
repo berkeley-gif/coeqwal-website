@@ -97,6 +97,18 @@ export interface StrategyGridContentProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
+  /** Show share/pin action buttons on each row */
+  showActions?: boolean
+  /** Show left accent border on active/chosen/pinned rows */
+  accentBorder?: boolean
+  /** Map of scenario ID to color for accent border / swatch */
+  scenarioColors?: Record<string, string>
+  /** Set of pinned scenario IDs */
+  pinnedScenarioIds?: string[]
+  /** Set of externally active (hovered/highlighted) scenario IDs */
+  activeScenarioIds?: Set<string>
+  /** Called on mouse enter/leave for hover sync with other panels */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 /**
@@ -136,6 +148,12 @@ export function StrategyGridContent({
   onSortChange,
   onThemeBadgeClick,
   onIconClick,
+  showActions = false,
+  accentBorder = false,
+  scenarioColors,
+  pinnedScenarioIds = [],
+  activeScenarioIds,
+  onRowHover,
 }: StrategyGridContentProps) {
   const theme = useTheme()
 
@@ -285,6 +303,12 @@ export function StrategyGridContent({
             showThemeBadge={!groupByTheme}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
+            showActions={showActions}
+            accentBorder={accentBorder}
+            scenarioColor={scenarioColors?.[scenario.scenarioId]}
+            isPinned={pinnedScenarioIds.includes(scenario.scenarioId)}
+            isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
+            onRowHover={onRowHover}
           />,
         )
 

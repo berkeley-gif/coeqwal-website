@@ -10,7 +10,15 @@
  */
 
 import React, { useRef } from "react"
-import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  Checkbox,
+  IconButton,
+  Tooltip,
+  icons,
+} from "@repo/ui/mui"
 import {
   OutcomeGlyphItem,
   OperationsIconGroup,
@@ -78,6 +86,18 @@ export interface StrategyGridRowProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
+  /** Show share/pin action buttons on each row */
+  showActions?: boolean
+  /** Show left accent border on active/chosen/pinned rows */
+  accentBorder?: boolean
+  /** Optional color for accent border and swatch */
+  scenarioColor?: string
+  /** Whether this scenario is pinned */
+  isPinned?: boolean
+  /** Whether this row is in an "active" state (hovered/highlighted externally) */
+  isActive?: boolean
+  /** Called on mouse enter/leave for hover sync with other panels */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 /**
@@ -108,6 +128,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
+  showActions = false,
+  accentBorder = false,
+  scenarioColor,
+  isPinned = false,
+  isActive = false,
+  onRowHover,
 }: StrategyGridRowProps) {
   const theme = useTheme()
   const outcomeDisplayMode = useScenarioExplorerStore(
@@ -115,6 +141,16 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   )
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
+  const sharedScenarioIds = useScenarioExplorerStore(
+    (s) => s.sharedScenarioIds,
+  )
+  const addToShare = useScenarioExplorerStore((s) => s.addToShare)
+  const togglePinnedScenario = useScenarioExplorerStore(
+    (s) => s.togglePinnedScenario,
+  )
+
+  const accentColor = scenarioColor || theme.palette.blue.bright
+  const isShared = sharedScenarioIds.includes(scenario.scenarioId)
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
@@ -216,38 +252,48 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   return (
     <Box
+      onMouseEnter={onRowHover ? () => onRowHover([scenario.scenarioId]) : undefined}
+      onMouseLeave={onRowHover ? () => onRowHover(null) : undefined}
       sx={{
         gridColumn: "1 / -1",
         display: "grid",
-        // Subgrid inherits parent's column tracks; compact uses simple 2-col
         gridTemplateColumns: outcomesOnly
           ? "1fr"
           : compact
             ? "32px 1fr"
             : { xs: "subgrid", sm: "subgrid" },
-        backgroundColor: isHighlighted ? theme.palette.common.white : "#faf8f5",
+        backgroundColor: isActive
+          ? `${accentColor}1A`
+          : isHighlighted
+            ? theme.palette.common.white
+            : "#faf8f5",
         borderRadius: theme.borderRadius.sm,
-        // Compact mode uses row-level padding; non-compact uses column-level
         ...(compact && {
           py: theme.scenarios.grid.row.padding,
           px: theme.space.component.xl,
         }),
-        // Row gap for internal content; columnGap inherited from parent via subgrid
         rowGap: theme.scenarios.grid.row.internalGap,
-        alignItems: "stretch", // Stretch columns so dividers span full height
-        transition: "background-color 0.2s ease, border-color 0.2s ease",
-        // Outline (not border) to avoid shifting content
+        alignItems: "stretch",
+        transition:
+          "background-color 0.2s ease, border-color 0.2s ease, border-left-color 0.2s ease",
         outline: isHighlighted
           ? `1px solid ${theme.palette.blue.bright}`
           : "none",
         borderBottom: `1px solid ${theme.palette.grey[200]}`,
+        ...(accentBorder && {
+          borderLeft: `3px solid ${
+            isActive || isChosen || isPinned ? accentColor : "transparent"
+          }`,
+        }),
         "&:hover": {
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: isActive
+            ? `${accentColor}26`
+            : theme.palette.background.paper,
+          ...(accentBorder && { borderLeftColor: accentColor }),
         },
         "&:last-child": {
           borderBottom: "1px solid transparent",
         },
-        // First row offset from headers
         ...(isFirst && { marginTop: theme.scenarios.grid.row.firstOffset }),
       }}
     >
@@ -314,11 +360,112 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               scenarioChartData={scenarioChartData}
             />
           )}
+
+          {showActions && (
+            <RowActions
+              scenarioId={scenario.scenarioId}
+              isActive={isActive}
+              isPinned={isPinned}
+              isShared={isShared}
+              accentColor={accentColor}
+              addToShare={addToShare}
+              togglePinnedScenario={togglePinnedScenario}
+            />
+          )}
         </>
       )}
     </Box>
   )
 })
+
+/**
+ * Share / pin action buttons — shown when showActions is true.
+ * Positioned as a flex column overlaid at the row's trailing edge.
+ */
+interface RowActionsProps {
+  scenarioId: string
+  isActive: boolean
+  isPinned: boolean
+  isShared: boolean
+  accentColor: string
+  addToShare: (id: string) => void
+  togglePinnedScenario: (id: string) => void
+}
+
+function RowActions({
+  scenarioId,
+  isActive,
+  isPinned,
+  isShared,
+  accentColor,
+  addToShare,
+  togglePinnedScenario,
+}: RowActionsProps) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      sx={{
+        gridColumn: "-1",
+        gridRow: "1 / -1",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 0.25,
+        pt: 1,
+        pr: 0.5,
+      }}
+    >
+      <Tooltip title={isShared ? "Added to share" : "Add to share"} arrow>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation()
+            addToShare(scenarioId)
+          }}
+          sx={{
+            p: 0.25,
+            opacity: isShared || isActive ? 1 : 0,
+            color: isShared
+              ? theme.palette.blue.bright
+              : isActive
+                ? "rgba(255,255,255,0.7)"
+                : theme.palette.grey[500],
+            transition: "opacity 200ms ease",
+            "*:hover > &": { opacity: 1 },
+          }}
+        >
+          <icons.IosShare sx={{ fontSize: "0.8rem" }} />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation()
+            togglePinnedScenario(scenarioId)
+          }}
+          sx={{
+            p: 0.25,
+            opacity: isPinned || isActive ? 1 : 0,
+            color: isPinned ? accentColor : theme.palette.grey[500],
+            transition: "opacity 200ms ease",
+            "*:hover > &": { opacity: 1 },
+          }}
+        >
+          <icons.PushPin
+            sx={{
+              fontSize: "0.875rem",
+              transform: isPinned ? "none" : "rotate(45deg)",
+            }}
+          />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  )
+}
 
 /**
  * Compact mode content - flexbox-based layout for mobile/condensed view
