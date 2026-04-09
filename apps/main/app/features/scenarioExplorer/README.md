@@ -38,11 +38,11 @@ When `mainView === "explorer"`, five tool tabs are currently shown in the toolba
 All tools are rendered inside `UnifiedToolLayout`, which provides a persistent three-panel chrome:
 
 ```
-[Sidebar (320-480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
+[Sidebar (optional, 320-480px)] [Toolbar + Tool content (flex 1)] [Map panel (optional, 25%)]
 ```
 
-- **Sidebar**: `ScenarioSelectionSidebar`.scenario checkboxes, search, theme filter, pinning
-- **Toolbar**: `ToolToolbar`.distribution toggle, show-map toggle, hydroclimate chooser, tool tab buttons.
+- **Sidebar** (optional): `ScenarioSelectionSidebar`. Scenario checkboxes, theme filter, pinning. Shown in non-list modes; omitted in list mode.
+- **Toolbar**: `ToolToolbar`. Search bar, visibility toggle chips (Definitions, Baselines, Key ops, Chosen only), distribution toggle, show-map toggle, location picker, hydroclimate chooser. In list mode, uses CSS Grid aligned with `StrategyGrid` columns; in other modes, uses inline flex layout.
 - **Tool content**: The active tool component (ListView, ComparisonPanel, EquityPanel, etc.).
 - **Map panel**: Optional transparent reveal area (25% width) that lets the persistent app-level map show through. Toggled by the "Show map" switch in the toolbar.
 
@@ -93,9 +93,10 @@ apps/main/app/features/scenarioExplorer/
 │       └── PercentileMatrixSkeleton.tsx  # Loading skeleton
 │
 ├── components/                       # Shared UI components
-│   ├── UnifiedToolLayout.tsx         # Three-panel layout chrome
-│   ├── ToolToolbar.tsx               # Shared toolbar (toggles + hydroclimate + tool tabs)
-│   ├── ScenarioSelectionSidebar.tsx  # Sidebar with checkboxes, search, theme filter
+│   ├── UnifiedToolLayout.tsx         # Shared layout chrome (optional sidebar + toolbar + map)
+│   ├── ToolToolbar.tsx               # Shared toolbar (search, chips, toggles, hydroclimate)
+│   ├── ScenarioSelectionSidebar.tsx  # Sidebar with checkboxes, theme filter, pinning
+│   ├── ToggleChip.tsx                # Reusable toggle chip button
 │   ├── SearchBar.tsx                 # Search input connected to store
 │   ├── ThemeFilter.tsx               # Theme badge filter
 │   ├── SelectionBanner.tsx           # Shows selected scenario count
@@ -147,9 +148,9 @@ Renders the top-level tab bar and, when `mainView === "explorer"`, wraps everyth
 
 ### UnifiedToolLayout.tsx
 
-Persistent three-panel chrome. Receives `sidebar`, `toolbar`, and `children` as props.
+Shared layout chrome for all explore modes. Receives `sidebar` (optional), `toolbar`, and `children` as props.
 
-- Sidebar width: 0 in list mode, 320px normally, 480px with key operations
+- Sidebar: omitted in list mode, 320px normally, 480px with key operations visible
 - Map panel: transparent 25% reveal area when `showMap` is true
 - Manages map mode via `mapActions` from the map store
 
@@ -346,7 +347,7 @@ Inside the `UnifiedToolLayout` children:
 If you need a new toolbar tab (rather than replacing an existing placeholder):
 
 1. Add to `ExploreMode` in `store.ts`: `| "yourTool"`
-2. Add to `TOOL_TABS` in `ToolToolbar.tsx`
+2. Add to `TOOL_TABS` in `ScenarioExplorer.tsx`
 
 If you're implementing one of the existing placeholders (equity or resilience), the mode and toolbar tab already exist. Just replace the placeholder component contents.
 
