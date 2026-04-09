@@ -651,8 +651,6 @@ export default function OutcomeMorphOverlay({
         tierChangeRafRef.current = requestAnimationFrame(tick)
       } else {
         tierChangeRafRef.current = null
-        const isBarOrAvg =
-          encodingMode === "bar" || encodingMode === "average"
         for (const group of outcomeShapes) {
           const refs = pathRefsMap.current.get(group.code)
           if (!refs) continue
@@ -662,11 +660,7 @@ export default function OutcomeMorphOverlay({
             const shape = group.shapes[i]!
             el.setAttribute("d", pointsToD(shape.squareTarget))
             el.setAttribute("fill", shape.color)
-            if (!shape.isRepresentative && isBarOrAvg) {
-              el.style.opacity = "0"
-            } else {
-              el.style.opacity = "1"
-            }
+            el.style.opacity = "1"
           }
         }
       }

@@ -98,4 +98,3 @@ const DistributionSquaresGlyph: React.FC<DistributionSquaresGlyphProps> =
 DistributionSquaresGlyph.displayName = "DistributionSquaresGlyph"
 
 export default DistributionSquaresGlyph
-export type { DistributionSquaresGlyphProps }
