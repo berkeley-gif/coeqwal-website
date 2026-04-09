@@ -860,8 +860,9 @@ export default function BeatTextOverlay({
                         borderRadius: 1,
                         px: 0.5,
                         mx: -0.5,
-                        py: 0.25,
-                        height: 28, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        height: 20, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        display: "flex",
+                        alignItems: "center",
                         boxSizing: "border-box",
                         overflow: "hidden",
                         transition: "color 0.15s",
@@ -880,6 +881,7 @@ export default function BeatTextOverlay({
                           textTransform: "none",
                           transition: "color 0.15s",
                           color: theme.palette.grey[900],
+                          lineHeight: 1.2,
                         }}
                       >
                         {item.label}
@@ -971,8 +973,9 @@ export default function BeatTextOverlay({
                         borderRadius: 1,
                         px: 0.5,
                         mx: -0.5,
-                        py: 0.25,
-                        height: 28, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        height: 20, // must match LAYOUT_LINE_HEIGHT in TierAnimationSection
+                        display: "flex",
+                        alignItems: "center",
                         boxSizing: "border-box",
                         overflow: "hidden",
                         transition: "color 0.15s",
@@ -991,6 +994,7 @@ export default function BeatTextOverlay({
                           textTransform: "none",
                           transition: "color 0.15s",
                           color: theme.palette.grey[900],
+                          lineHeight: 1.2,
                         }}
                       >
                         {item.label}

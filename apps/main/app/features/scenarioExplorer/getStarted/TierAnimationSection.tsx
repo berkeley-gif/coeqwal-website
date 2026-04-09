@@ -165,12 +165,12 @@ const ACTIVE_OUTCOMES = new Set([
   "WRC_SALMON_AB",
 ])
 
-const LAYOUT_LINE_HEIGHT = 28
+const LAYOUT_LINE_HEIGHT = 20
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
-const LAYOUT_DIST_GAP = 4
+const LAYOUT_DIST_GAP = 0
 const SLOT_COUNT_GAP = 16 // fixed gap between slot bottom and "X locations" text
 const SLOT_COUNT_FONT = 11
-const SLOT_POST_GAP = 8 // fixed gap after "X locations" text before next header
+const SLOT_POST_GAP = 16 // fixed gap after "X locations" text before next header
 const BAR_VISUAL_HEIGHT = GLYPH_SIZE * 0.96 // 4 bars + 4 spacings within GLYPH_SIZE
 
 const HIGHLIGHT_GOLD = "#ffd87e"
@@ -1954,7 +1954,7 @@ export default function TierAnimationSection() {
             ? distributionHeight
             : Math.max(distributionHeight, BAR_VISUAL_HEIGHT)
           spaceBelow = isSingleRow
-            ? slotHeight + 4 + SLOT_COUNT_FONT + 4
+            ? slotHeight + 4 + SLOT_COUNT_FONT + 12
             : LAYOUT_DIST_GAP +
               slotHeight +
               SLOT_COUNT_GAP +
