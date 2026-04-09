@@ -1,15 +1,13 @@
 "use client"
 
 /**
- * ScenarioExplorer.Main scenario exploration interface.
+ * ScenarioExplorer. Main scenario exploration interface.
  *
  * Top-level navigation: Get Started | Go to tools
  *
- * When mainView === "explorer", renders UnifiedToolLayout with:
- *   - Persistent sidebar (ScenarioSelectionSidebar)
- *   - Shared toolbar (ToolToolbar)
- *   - Swappable tool content (List / Radar / Distribution / Data in depth)
- *   - Optional map panel (toggled from toolbar)
+ * When mainView === "explorer":
+ *   - List mode: ToolToolbar + full unified StrategyGrid (no sidebar)
+ *   - Other modes: UnifiedToolLayout with persistent ScenarioSelectionSidebar
  */
 
 import React, { useState, useCallback, useMemo } from "react"
@@ -104,7 +102,7 @@ export default function ScenarioExplorer() {
   const needsTransparentBg =
     isGetStartedMapMode || (mainView === "explorer" && showMap)
 
-  // Hover coordination
+  // Hover coordination (for sidebar ↔ tool panels in non-list modes)
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
   const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
     null,
@@ -192,6 +190,8 @@ export default function ScenarioExplorer() {
     dimUnpinned,
     setDimUnpinned,
   ])
+
+  const isListMode = mainView === "explorer" && exploreMode === "list"
 
   return (
     <Box
@@ -351,9 +351,34 @@ export default function ScenarioExplorer() {
           {mainView === "get-started" && <GetStartedView />}
 
           {mainView === "explorer" && (
-            <>
-              {/* <SelectionBanner /> */}
-              <Box sx={{ flex: 1, overflow: "hidden" }}>
+            <Box sx={{ flex: 1, overflow: "hidden" }}>
+              {isListMode ? (
+                /* List mode: full unified grid, no sidebar */
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      flexShrink: 0,
+                      borderBottom: `1px solid ${theme.palette.divider}`,
+                    }}
+                  >
+                    <ToolToolbar />
+                  </Box>
+                  <Box sx={{ flex: 1, overflow: "hidden" }}>
+                    <ListView
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  </Box>
+                </Box>
+              ) : (
+                /* Non-list modes: sidebar + tool panel */
                 <UnifiedToolLayout
                   sidebar={
                     <ScenarioSelectionSidebar
@@ -364,12 +389,6 @@ export default function ScenarioExplorer() {
                   toolbar={<ToolToolbar />}
                   chartControls={chartControls}
                 >
-                  {exploreMode === "list" && (
-                    <ListView
-                      highlightedIds={highlightedIds}
-                      onScenarioHover={handleToolScenarioHover}
-                    />
-                  )}
                   {exploreMode === "radar" && (
                     <RadarPanel
                       highlightedIds={highlightedIds}
@@ -386,8 +405,8 @@ export default function ScenarioExplorer() {
                   {exploreMode === "resilience" && <ResiliencePanel />}
                   {exploreMode === "data" && <DataExplorerView />}
                 </UnifiedToolLayout>
-              </Box>
-            </>
+              )}
+            </Box>
           )}
         </Box>
       </Box>

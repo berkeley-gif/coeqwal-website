@@ -109,6 +109,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const outcomeDisplayMode = useScenarioExplorerStore(
     (s) => s.outcomeDisplayMode,
   )
+  const showDefinitions = useScenarioExplorerStore(
+    (s) => s.showDefinitions,
+  )
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
@@ -278,6 +281,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               scenario={scenario}
               layoutMode={layoutMode}
               showOperations={showOperations}
+              showDescription={showDefinitions}
               outcomeNames={outcomeNames}
               renderOutcomeItem={renderOutcomeItem}
               onThemeBadgeClick={onThemeBadgeClick}
@@ -417,6 +421,7 @@ interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay
   layoutMode: LayoutMode
   showOperations?: boolean
+  showDescription?: boolean
   outcomeNames: OutcomeName[]
   renderOutcomeItem: (displayName: string, name: string) => React.ReactNode
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
@@ -427,6 +432,7 @@ function NonCompactRowContent({
   scenario,
   layoutMode,
   showOperations = true,
+  showDescription = true,
   outcomeNames,
   renderOutcomeItem,
   onThemeBadgeClick,
@@ -457,6 +463,7 @@ function NonCompactRowContent({
         <StrategyHeader
           strategy={scenario}
           titleVariant="body2"
+          showDescription={showDescription}
           descriptionMaxWidth="none"
           onThemeBadgeClick={onThemeBadgeClick}
         />
