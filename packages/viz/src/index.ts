@@ -37,7 +37,9 @@ export type { TierCirclesProps } from "./components/TierCircles"
 export { default as VerticalOutcomeGlyph } from "./components/VerticalOutcomeGlyph"
 export type { VerticalOutcomeGlyphProps } from "./components/VerticalOutcomeGlyph"
 export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
-export type { ScenarioGlyphProps } from "./components/ScenarioGlyph"
+export type { ScenarioGlyphProps, GlyphVariant } from "./components/ScenarioGlyph"
+export { default as DistributionSquaresGlyph } from "./components/DistributionSquaresGlyph"
+export type { DistributionSquaresGlyphProps } from "./components/DistributionSquaresGlyph"
 export { default as PercentileBandChart } from "./components/PercentileBandChart"
 export type {
   PercentileBandChartProps,

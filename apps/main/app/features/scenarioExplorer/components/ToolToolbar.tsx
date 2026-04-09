@@ -54,7 +54,10 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     setShowShareDrawer,
     groupByTheme,
     setGroupByTheme,
+    exploreMode,
   } = useScenarioExplorerStore()
+
+  const isListMode = exploreMode === "list"
 
   const viewControls = (
     <>

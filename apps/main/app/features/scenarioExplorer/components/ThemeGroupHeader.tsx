@@ -41,8 +41,7 @@ export default function ThemeGroupHeader({
     scenarioIds.length > 0 &&
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
-    !allChecked &&
-    scenarioIds.some((id) => selectedScenarios.includes(id))
+    !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
   const allPinned =
     scenarioIds.length > 0 &&
     scenarioIds.every((id) => pinnedScenarioIds.includes(id))
@@ -120,9 +119,7 @@ export default function ThemeGroupHeader({
 
       <Tooltip
         title={
-          allShared
-            ? "All shared"
-            : `Share all ${themeConfig.label} scenarios`
+          allShared ? "All shared" : `Share all ${themeConfig.label} scenarios`
         }
         arrow
       >
