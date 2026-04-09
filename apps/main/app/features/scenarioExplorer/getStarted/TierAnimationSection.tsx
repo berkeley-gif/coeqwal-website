@@ -1948,7 +1948,7 @@ export default function TierAnimationSection() {
           const SINGLE_ROW = 12 // SQUARE_SIZE + SQUARE_GAP
           const isSingleRow = distributionHeight <= SINGLE_ROW
           if (isSingleRow) {
-            distributionY = cursors[col]
+            distributionY = cursors[col] + 2
           }
           slotHeight = isSingleRow
             ? distributionHeight
