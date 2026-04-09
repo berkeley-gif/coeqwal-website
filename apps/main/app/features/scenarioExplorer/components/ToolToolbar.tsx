@@ -1,12 +1,13 @@
 "use client"
 
 /**
- * ToolToolbar.Shared toolbar rendered above the active tool content.
+ * ToolToolbar. Shared toolbar rendered above the active tool content.
  *
  * Layout (left to right):
  * 1. "Show map" toggle (label + MUI Switch)
- * 2. "View by climate".hydroclimate chooser icons
- * 3. Tool tabs (List, Radar chart, Distribution comparison, Data in depth)
+ * 2. "Show distribution" toggle (label + MUI Switch)
+ * 3. "Choose locations to track" button
+ * 4. "View by climate" hydroclimate chooser icons
  */
 
 import React from "react"
@@ -14,48 +15,23 @@ import {
   Box,
   Typography,
   useTheme,
-  ViewListIcon,
-  TimelineIcon,
-  BarChartIcon,
-  InsightsIcon,
+  LocationOnIcon,
   Switch,
 } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
-import { useScenarioExplorerStore, type ExploreMode } from "../store"
-
-const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
-  [
-    {
-      mode: "list",
-      icon: <ViewListIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "List",
-    },
-    {
-      mode: "radar",
-      icon: <TimelineIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Radar chart",
-    },
-    {
-      mode: "distribution",
-      icon: <BarChartIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Distribution comparison",
-    },
-    {
-      mode: "data",
-      icon: <InsightsIcon sx={{ fontSize: "1.1rem" }} />,
-      label: "Data in depth",
-    },
-  ]
+import { useScenarioExplorerStore } from "../store"
 
 export default function ToolToolbar() {
   const theme = useTheme()
   const {
-    exploreMode,
-    setExploreMode,
     hydroclimate,
     setHydroclimate,
     showMap,
     setShowMap,
+    outcomeDisplayMode,
+    setOutcomeDisplayMode,
+    showLocationPicker,
+    setShowLocationPicker,
   } = useScenarioExplorerStore()
 
   return (
@@ -97,6 +73,72 @@ export default function ToolToolbar() {
         }}
       />
 
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 500,
+            color: theme.palette.text.primary,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Show distribution
+        </Typography>
+        <Switch
+          size="small"
+          checked={outcomeDisplayMode === "distribution"}
+          onChange={(_, checked) =>
+            setOutcomeDisplayMode(checked ? "distribution" : "summary")
+          }
+          sx={{ ml: -0.5 }}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          width: "1px",
+          height: 24,
+          backgroundColor: theme.palette.divider,
+          flexShrink: 0,
+        }}
+      />
+
+      <Box
+        component="button"
+        type="button"
+        onClick={() => setShowLocationPicker(!showLocationPicker)}
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.5,
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: theme.palette.text.primary,
+        }}
+      >
+        <LocationOnIcon sx={{ fontSize: "1.25rem" }} />
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 500,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Choose locations to track
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          width: "1px",
+          height: 24,
+          backgroundColor: theme.palette.divider,
+          flexShrink: 0,
+        }}
+      />
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
         <Typography
           variant="caption"
@@ -118,64 +160,6 @@ export default function ToolToolbar() {
           value={hydroclimate}
           onChange={setHydroclimate}
         />
-      </Box>
-
-      <Box
-        sx={{
-          width: "1px",
-          height: 24,
-          backgroundColor: theme.palette.divider,
-          flexShrink: 0,
-        }}
-      />
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
-        {TOOL_TABS.map(({ mode, icon, label }) => {
-          const active = exploreMode === mode
-          return (
-            <Box
-              key={mode}
-              component="button"
-              type="button"
-              onClick={() => setExploreMode(mode)}
-              aria-pressed={active}
-              aria-label={label}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                px: 1.25,
-                py: 0.5,
-                border: "none",
-                borderRadius: theme.borderRadius.sm ?? "4px",
-                cursor: "pointer",
-                background: active
-                  ? theme.palette.interaction.selectedBackground
-                  : "transparent",
-                color: active
-                  ? theme.palette.blue.bright
-                  : theme.palette.text.primary,
-                fontWeight: active ? 600 : 400,
-                transition: "opacity 0.15s, background-color 0.15s",
-                "&:hover": {
-                  background: theme.palette.interaction.selectedBackground,
-                },
-              }}
-            >
-              {icon}
-              <Typography
-                component="span"
-                variant="subtitle2"
-                sx={{
-                  fontWeight: "inherit",
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {label}
-              </Typography>
-            </Box>
-          )
-        })}
       </Box>
     </Box>
   )

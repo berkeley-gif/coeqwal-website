@@ -147,6 +147,10 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 import AppsIcon from "@mui/icons-material/Apps"
 import AutorenewIcon from "@mui/icons-material/Autorenew"
 import InsightsIcon from "@mui/icons-material/Insights"
+import TrackChangesIcon from "@mui/icons-material/TrackChanges"
+import AdjustIcon from "@mui/icons-material/Adjust"
+import BuildIcon from "@mui/icons-material/Build"
+import ExploreIcon from "@mui/icons-material/Explore"
 
 // Export individually imported icons
 export {
@@ -214,6 +218,10 @@ export {
   AppsIcon,
   AutorenewIcon,
   InsightsIcon,
+  TrackChangesIcon,
+  AdjustIcon,
+  BuildIcon,
+  ExploreIcon,
 }
 
 // Export the full icons library for access to other icons as needed

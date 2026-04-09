@@ -36,7 +36,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
         variant="caption"
         sx={{
           fontWeight: 600,
-          color: theme.palette.text.secondary,
+          color: theme.palette.text.primary,
           whiteSpace: "nowrap",
           flexShrink: 0,
         }}

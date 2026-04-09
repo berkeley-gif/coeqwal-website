@@ -19,9 +19,8 @@ import type { ScenarioTheme } from "../../content/scenarios"
 export type ExploreMode =
   | "list"
   | "radar"
-  | "distribution"
-  | "comparison"
   | "equity"
+  | "comparison"
   | "resilience"
   | "data"
 
@@ -64,6 +63,7 @@ interface ScenarioExplorerState {
   showKeyOperations: boolean
   outcomeDisplayMode: "summary" | "distribution"
   showMap: boolean
+  showLocationPicker: boolean
 
   // Share staging
   sharedScenarioIds: string[]
@@ -122,6 +122,7 @@ interface ScenarioExplorerActions {
   setShowKeyOperations: (show: boolean) => void
   setOutcomeDisplayMode: (mode: "summary" | "distribution") => void
   setShowMap: (show: boolean) => void
+  setShowLocationPicker: (show: boolean) => void
 
   // Share staging
   addToShare: (id: string) => void
@@ -174,8 +175,9 @@ const initialState: ScenarioExplorerState = {
   showAlternativeBaselines: false,
   showDefinitions: false,
   showKeyOperations: false,
-  outcomeDisplayMode: "distribution",
+  outcomeDisplayMode: "summary",
   showMap: false,
+  showLocationPicker: false,
   sharedScenarioIds: [],
   showShareDrawer: false,
   relativeToBaseline: true,
@@ -309,6 +311,11 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowMap: (show) =>
       set((state) => {
         state.showMap = show
+      }),
+
+    setShowLocationPicker: (show) =>
+      set((state) => {
+        state.showLocationPicker = show
       }),
 
     // Share staging
