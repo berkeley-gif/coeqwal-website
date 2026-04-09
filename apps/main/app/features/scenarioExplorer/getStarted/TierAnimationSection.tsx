@@ -167,7 +167,7 @@ const ACTIVE_OUTCOMES = new Set([
 
 const LAYOUT_LINE_HEIGHT = 20
 const LAYOUT_LABEL_GAP = 12 // space.gap.md (12px)
-const LAYOUT_DIST_GAP = 0
+const LAYOUT_DIST_GAP = 6
 const SLOT_COUNT_GAP = 16 // fixed gap between slot bottom and "X locations" text
 const SLOT_COUNT_FONT = 11
 const SLOT_POST_GAP = 16 // fixed gap after "X locations" text before next header
