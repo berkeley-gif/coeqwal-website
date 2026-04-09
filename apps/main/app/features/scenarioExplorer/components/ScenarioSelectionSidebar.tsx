@@ -1,17 +1,17 @@
 "use client"
 
 /**
- * ScenarioSelectionSidebar.Persistent left-hand scenario list panel.
+ * ScenarioSelectionSidebar. Persistent left-hand scenario list panel
+ * used in non-list explore modes (radar, equity, data).
  *
- * Matches the StrategyGrid "Choose scenarios" visual style:
- * 1. "Choose scenarios" header with key-ops column toggle
- * 2. Search bar (filters by name/description)
+ * 1. "Scenario library" header with key-ops column toggle
+ * 2. Search bar (highlights + floats matches via shared useOrderedScenarios)
  * 3. Visibility chips: Definitions, Baselines, Key ops, Chosen only
  * 4. Scrollable scenario list with StrategyHeader labels, checkboxes,
  *    and a collapsible key operations column
  *
- * All state is read/written via useScenarioExplorerStore so changes
- * propagate to every tool automatically.
+ * Row order comes from useOrderedScenarios so it stays in lockstep
+ * with the same shared ordering used by ListView.
  */
 
 import React, { useMemo, useEffect, useRef } from "react"
@@ -26,24 +26,13 @@ import {
   InputBase,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
-import { useScenarioList } from "../../scenarios/hooks"
 import {
   StrategyHeader,
   OperationsIconGroup,
 } from "../../scenarios/components/shared"
-import { useScrollSyncRef } from "./useScrollSync"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
-
-const PRIMARY_BASELINE_ID = "s0020"
-const THEME_ORDER: Record<ScenarioTheme, number> = {
-  baseline: 0,
-  ag_gw: 1,
-  eco: 2,
-  delta: 3,
-  cws: 4,
-  unthemed: 5,
-}
+import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -57,7 +46,6 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
-  const sidebarScrollRef = useScrollSyncRef("sidebar")
 
   const {
     selectedScenarios,
@@ -65,10 +53,10 @@ export default function ScenarioSelectionSidebar({
     highlightedScenario,
     pinnedScenarioIds,
     togglePinnedScenario,
-    showOnlyChosen,
-    showAlternativeBaselines,
     showDefinitions,
     showKeyOperations,
+    showAlternativeBaselines,
+    showOnlyChosen,
     searchQuery,
     setSearchQuery,
     setShowOnlyChosen,
@@ -95,49 +83,17 @@ export default function ScenarioSelectionSidebar({
     return () => clearTimeout(timer)
   }, [activeScenarioId])
 
-  const { siblingGroups, isLoading } = useScenarioList()
+  const {
+    orderedScenarios,
+    matchingScenarioIds,
+    isLoading,
+  } = useOrderedScenarios()
 
-  const filteredScenarios = useMemo(() => {
-    let filtered = siblingGroups.slice()
-
-    if (showOnlyChosen) {
-      filtered = filtered.filter((s) =>
-        selectedScenarios.includes(s.scenarioId),
-      )
-    } else if (!showAlternativeBaselines) {
-      filtered = filtered.filter(
-        (s) => s.theme !== "baseline" || s.scenarioId === PRIMARY_BASELINE_ID,
-      )
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
-      filtered = filtered.filter(
-        (s) =>
-          s.shortLabel.toLowerCase().includes(q) ||
-          s.label.toLowerCase().includes(q) ||
-          s.description.toLowerCase().includes(q),
-      )
-    }
-
-    filtered.sort((a, b) => {
-      const aOrder = a.theme ? (THEME_ORDER[a.theme] ?? 99) : 99
-      const bOrder = b.theme ? (THEME_ORDER[b.theme] ?? 99) : 99
-      return aOrder - bOrder
-    })
-
-    return filtered
-  }, [
-    siblingGroups,
-    showOnlyChosen,
-    showAlternativeBaselines,
-    selectedScenarios,
-    searchQuery,
-  ])
+  const isSearchActive = searchQuery.trim().length > 0
 
   const themeScenarioIds = useMemo(() => {
     const map = new Map<string, string[]>()
-    for (const s of filteredScenarios) {
+    for (const s of orderedScenarios) {
       if (s.theme) {
         const ids = map.get(s.theme) ?? []
         ids.push(s.scenarioId)
@@ -145,7 +101,7 @@ export default function ScenarioSelectionSidebar({
       }
     }
     return map
-  }, [filteredScenarios])
+  }, [orderedScenarios])
 
   const handleThemeToggle = (themeKey: string) => {
     const ids = themeScenarioIds.get(themeKey) ?? []
@@ -169,7 +125,7 @@ export default function ScenarioSelectionSidebar({
         backgroundColor: theme.palette.grey[50],
       }}
     >
-      {/* ── Header: "Choose scenarios" + key-ops column header ─────────── */}
+      {/* ── Header: "Scenario library" + key-ops column header ─────────── */}
       <Box
         sx={{
           flexShrink: 0,
@@ -178,6 +134,7 @@ export default function ScenarioSelectionSidebar({
           justifyContent: "space-between",
           px: 1.5,
           py: 1,
+          minHeight: 45,
           borderBottom: `1px solid ${theme.palette.divider}`,
         }}
       >
@@ -223,7 +180,11 @@ export default function ScenarioSelectionSidebar({
           sx={{
             flex: 1,
             fontSize: "0.8125rem",
-            "& .MuiInputBase-input": { py: 0.5, px: 0.5 },
+            "& .MuiInputBase-input": {
+              py: 0.5,
+              px: 0.5,
+              "&::placeholder": { color: theme.palette.grey[500], opacity: 1 },
+            },
           }}
         />
         {searchQuery && (
@@ -281,7 +242,6 @@ export default function ScenarioSelectionSidebar({
 
       {/* ── Scrollable scenario list ─────────────────────────────────────── */}
       <Box
-        ref={sidebarScrollRef}
         sx={{
           flex: 1,
           minHeight: 0,
@@ -299,9 +259,11 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {filteredScenarios.flatMap((scenario, index) => {
+        {orderedScenarios.flatMap((scenario, index) => {
           const isChosen = selectedScenarios.includes(scenario.scenarioId)
           const isPinned = pinnedScenarioIds.includes(scenario.scenarioId)
+          const isSearchMatch = isSearchActive && matchingScenarioIds.has(scenario.scenarioId)
+          const isSearchDimmed = isSearchActive && !isSearchMatch
           const color = scenarioColors?.[scenario.scenarioId]
           const accentColor = color || theme.palette.blue.bright
           const isActive =
@@ -310,7 +272,7 @@ export default function ScenarioSelectionSidebar({
             scenario.scenarioId === hoveredScenarioId
 
           const prevScenario =
-            index > 0 ? filteredScenarios[index - 1] : undefined
+            index > 0 ? orderedScenarios[index - 1] : undefined
           const isNewThemeGroup =
             !isSortActive &&
             (index === 0 || scenario.theme !== prevScenario?.theme)
@@ -342,6 +304,7 @@ export default function ScenarioSelectionSidebar({
               items.push(
                 <Box
                   key={`theme-header-${scenario.theme}-${index}`}
+                  data-theme-header={scenario.theme}
                   onClick={() => handleThemeToggle(themeKey)}
                   sx={{
                     display: "flex",
@@ -397,7 +360,6 @@ export default function ScenarioSelectionSidebar({
 
                   <Box sx={{ flex: 1 }} />
 
-                  {/* Share all in theme */}
                   <Tooltip
                     title={
                       allThemeShared
@@ -426,7 +388,6 @@ export default function ScenarioSelectionSidebar({
                     </IconButton>
                   </Tooltip>
 
-                  {/* Pin all in theme */}
                   <Tooltip
                     title={
                       allThemePinned
@@ -452,9 +413,7 @@ export default function ScenarioSelectionSidebar({
                       sx={{
                         p: 0.25,
                         opacity: allThemePinned ? 1 : 0,
-                        color: allThemePinned
-                          ? themeColors.text
-                          : themeColors.text,
+                        color: themeColors.text,
                         transition: "opacity 200ms ease",
                       }}
                     >
@@ -474,6 +433,7 @@ export default function ScenarioSelectionSidebar({
           items.push(
             <Box
               key={scenario.scenarioId}
+              data-scenario-id={scenario.scenarioId}
               ref={(el: HTMLDivElement | null) => {
                 if (el) scenarioRowRefs.current.set(scenario.scenarioId, el)
                 else scenarioRowRefs.current.delete(scenario.scenarioId)
@@ -492,8 +452,9 @@ export default function ScenarioSelectionSidebar({
                 }`,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 backgroundColor: isActive ? `${accentColor}1A` : "transparent",
+                opacity: isSearchDimmed ? 0.4 : 1,
                 transition:
-                  "background-color 200ms ease, border-color 200ms ease",
+                  "background-color 200ms ease, border-color 200ms ease, opacity 200ms ease",
                 "&:hover": {
                   backgroundColor: isActive
                     ? `${accentColor}26`
@@ -502,7 +463,6 @@ export default function ScenarioSelectionSidebar({
                 },
               }}
             >
-              {/* Checkbox */}
               <Checkbox
                 size="small"
                 checked={isChosen}
@@ -516,7 +476,6 @@ export default function ScenarioSelectionSidebar({
                 }}
               />
 
-              {/* Color swatch (chart legend) */}
               {color && (
                 <Box
                   aria-hidden="true"
@@ -532,7 +491,6 @@ export default function ScenarioSelectionSidebar({
                 />
               )}
 
-              {/* Scenario label (StrategyHeader) */}
               <Box
                 onClick={() => toggleScenario(scenario.scenarioId)}
                 sx={{ flex: 1, minWidth: 0 }}
@@ -546,7 +504,6 @@ export default function ScenarioSelectionSidebar({
                 />
               </Box>
 
-              {/* Key operations column (collapsible) */}
               <Box
                 sx={{
                   overflow: "hidden",
@@ -565,7 +522,6 @@ export default function ScenarioSelectionSidebar({
                 />
               </Box>
 
-              {/* Action buttons */}
               <Box
                 sx={{
                   display: "flex",
@@ -576,7 +532,6 @@ export default function ScenarioSelectionSidebar({
                   mt: "2px",
                 }}
               >
-                {/* Share */}
                 {(() => {
                   const isShared = sharedScenarioIds.includes(
                     scenario.scenarioId,
@@ -610,7 +565,6 @@ export default function ScenarioSelectionSidebar({
                   )
                 })()}
 
-                {/* Pin */}
                 <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
                   <IconButton
                     size="small"
@@ -645,7 +599,6 @@ export default function ScenarioSelectionSidebar({
   )
 }
 
-/** Small toggle chip used in the visibility controls row */
 function ToggleChip({
   label,
   active,
