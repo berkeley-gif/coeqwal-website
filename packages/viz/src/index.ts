@@ -84,6 +84,9 @@ export type { PairedParallelPlotProps } from "./components/PairedParallelPlot"
 export { default as ArrowFieldPlot } from "./components/ArrowFieldPlot"
 export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
+export { default as RadarPlot } from "./components/RadarPlot"
+export type { RadarPlotProps } from "./components/RadarPlot"
+
 export { default as TierHeatmap } from "./components/TierHeatmap"
 export type {
   TierHeatmapProps,

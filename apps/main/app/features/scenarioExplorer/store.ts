@@ -18,6 +18,8 @@ import type { ScenarioTheme } from "../../content/scenarios"
  */
 export type ExploreMode =
   | "list"
+  | "radar"
+  | "distribution"
   | "comparison"
   | "equity"
   | "resilience"
@@ -67,11 +69,13 @@ interface ScenarioExplorerState {
   sharedScenarioIds: string[]
   showShareDrawer: boolean
 
-  // Chart toggles (comparison panel)
+  // Chart toggles (shared across chart panels)
   relativeToBaseline: boolean
   highlightBaseline: boolean
   overlayTiers: boolean
   defineOutcome: boolean
+  showTierZones: boolean
+  dimUnpinned: boolean
 
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
@@ -131,6 +135,8 @@ interface ScenarioExplorerActions {
   setHighlightBaseline: (show: boolean) => void
   setOverlayTiers: (show: boolean) => void
   setDefineOutcome: (show: boolean) => void
+  setShowTierZones: (show: boolean) => void
+  setDimUnpinned: (show: boolean) => void
 
   // Hydroclimate
   setHydroclimate: (value: string) => void
@@ -176,6 +182,8 @@ const initialState: ScenarioExplorerState = {
   highlightBaseline: false,
   overlayTiers: false,
   defineOutcome: false,
+  showTierZones: true,
+  dimUnpinned: false,
   hydroclimate: "historical",
   isSortActive: false,
   selectedTier: null,
@@ -352,6 +360,16 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setDefineOutcome: (show) =>
       set((state) => {
         state.defineOutcome = show
+      }),
+
+    setShowTierZones: (show) =>
+      set((state) => {
+        state.showTierZones = show
+      }),
+
+    setDimUnpinned: (show) =>
+      set((state) => {
+        state.dimUnpinned = show
       }),
 
     // Hydroclimate

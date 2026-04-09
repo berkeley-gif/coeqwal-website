@@ -8,26 +8,35 @@
  * When mainView === "explorer", renders UnifiedToolLayout with:
  *   - Persistent sidebar (ScenarioSelectionSidebar)
  *   - Shared toolbar (ToolToolbar)
- *   - Swappable tool content (Grid / Tradeoffs / Equity / Resilience)
+ *   - Swappable tool content (List / Radar / Distribution / Data in depth)
  *   - Optional map panel (toggled from toolbar)
  */
 
-import React, { useState, useCallback } from "react"
+import React, { useState, useCallback, useMemo } from "react"
 import {
   Box,
   Typography,
   useTheme,
   PlayArrowIcon,
   ViewListIcon,
+  Checkbox,
+  FormControlLabel,
 } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
+import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
 import ShareDrawer from "./components/ShareDrawer"
 // import SelectionBanner from "./components/SelectionBanner"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
-import { ComparisonPanel, EquityPanel, ResiliencePanel } from "./exploreView"
+import {
+  ComparisonPanel,
+  EquityPanel,
+  ResiliencePanel,
+  RadarPanel,
+  DistributionComparisonPanel,
+} from "./exploreView"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore, type MainView } from "./store"
@@ -49,7 +58,7 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   },
 ]
 
-// Component
+const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
@@ -77,6 +86,81 @@ export default function ScenarioExplorer() {
   const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
     setHoveredScenarioId(scenarioId)
   }, [])
+
+  const {
+    highlightBaseline,
+    setHighlightBaseline,
+    showTierZones,
+    setShowTierZones,
+    dimUnpinned,
+    setDimUnpinned,
+  } = useScenarioExplorerStore()
+
+  const chartControls = useMemo(() => {
+    if (exploreMode === "radar") {
+      return (
+        <ChartControlsBar>
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={highlightBaseline}
+                onChange={(e) => setHighlightBaseline(e.target.checked)}
+                sx={CHECKBOX_SX}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                highlight current operations
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={showTierZones}
+                onChange={(e) => setShowTierZones(e.target.checked)}
+                sx={CHECKBOX_SX}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show tier zones
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={dimUnpinned}
+                onChange={(e) => setDimUnpinned(e.target.checked)}
+                sx={CHECKBOX_SX}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                dim unpinned
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+        </ChartControlsBar>
+      )
+    }
+    return null
+  }, [
+    exploreMode,
+    highlightBaseline,
+    setHighlightBaseline,
+    showTierZones,
+    setShowTierZones,
+    dimUnpinned,
+    setDimUnpinned,
+  ])
 
   return (
     <Box
@@ -191,9 +275,22 @@ export default function ScenarioExplorer() {
                     />
                   }
                   toolbar={<ToolToolbar />}
+                  chartControls={chartControls}
                 >
                   {exploreMode === "list" && (
                     <ListView
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  )}
+                  {exploreMode === "radar" && (
+                    <RadarPanel
+                      highlightedIds={highlightedIds}
+                      onScenarioHover={handleToolScenarioHover}
+                    />
+                  )}
+                  {exploreMode === "distribution" && (
+                    <DistributionComparisonPanel
                       highlightedIds={highlightedIds}
                       onScenarioHover={handleToolScenarioHover}
                     />
