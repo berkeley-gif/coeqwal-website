@@ -93,6 +93,7 @@ export default function UnifiedToolLayout({
           overflow: "hidden",
           minWidth: 0,
           backgroundColor: theme.palette.background.paper,
+          transition: "flex 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
         }}
       >
         {/* Shared toolbar */}
@@ -107,26 +108,23 @@ export default function UnifiedToolLayout({
         </Box>
 
         {/* Per-panel chart controls (optional) */}
-        {chartControls && (
-          <Box sx={{ flexShrink: 0 }}>{chartControls}</Box>
-        )}
+        {chartControls && <Box sx={{ flexShrink: 0 }}>{chartControls}</Box>}
 
         {/* Active tool content */}
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map reveal area.transparent so the persistent fixed-position map shows through */}
-      {showMap && (
-        <Box
-          sx={{
-            width: `${MAP_WIDTH_PERCENT}%`,
-            flexShrink: 0,
-            height: "100%",
-            pointerEvents: "auto",
-            backgroundColor: "transparent",
-          }}
-        />
-      )}
+      {/* Map reveal area — always rendered, width transitions between 0 and 25% */}
+      <Box
+        sx={{
+          width: showMap ? `${MAP_WIDTH_PERCENT}%` : 0,
+          flexShrink: 0,
+          height: "100%",
+          pointerEvents: showMap ? "auto" : "none",
+          backgroundColor: "transparent",
+          transition: "width 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
+        }}
+      />
     </Box>
   )
 }

@@ -213,9 +213,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
         <ToggleChip
           label="Baselines"
           active={showAlternativeBaselines}
-          onClick={() =>
-            setShowAlternativeBaselines(!showAlternativeBaselines)
-          }
+          onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
         />
         <ToggleChip
           label="Key ops"
@@ -326,4 +324,3 @@ function VerticalDivider() {
     />
   )
 }
-

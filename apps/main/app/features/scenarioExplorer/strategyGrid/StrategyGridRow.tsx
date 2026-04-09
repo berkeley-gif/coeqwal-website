@@ -109,9 +109,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const outcomeDisplayMode = useScenarioExplorerStore(
     (s) => s.outcomeDisplayMode,
   )
-  const showDefinitions = useScenarioExplorerStore(
-    (s) => s.showDefinitions,
-  )
+  const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)

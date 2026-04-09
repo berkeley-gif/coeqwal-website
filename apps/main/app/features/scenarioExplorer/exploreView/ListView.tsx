@@ -18,6 +18,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
+import type { ChartDataPoint } from "../../scenarios/components/shared"
 import { getScenariosWithIcon } from "../../scenarios/components/shared/opsIcons"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 
@@ -51,7 +52,8 @@ export default function ListView({
   } = useOrderedScenarios()
 
   const getChartDataForScenario = useMemo(
-    () => (scenarioId: string) => (allChartData[scenarioId] ?? {}) as Record<string, unknown>,
+    () => (scenarioId: string) =>
+      (allChartData[scenarioId] ?? {}) as Record<string, ChartDataPoint[]>,
     [allChartData],
   )
 
@@ -261,4 +263,3 @@ export default function ListView({
     </Box>
   )
 }
-

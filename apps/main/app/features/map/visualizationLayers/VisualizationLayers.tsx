@@ -214,19 +214,17 @@ export default function VisualizationLayers() {
       {/* Polygon layer (demand-units, WBA, delta, reservoir)
           In get-started mode this only renders after the user clicks a category
           (activeOutcomeVisualization is null during the animation). */}
-      {isVisualizationActive &&
-        geometryType === "polygon" &&
-        config && (
-          <OutcomePolygonLayer
-            tierColorMap={tierColorMap}
-            layerType={layerType!}
-            idProperty={config.idProperty}
-            featureIds={featureIds}
-            classFilter={config.classFilter}
-            visible={true}
-            mapboxLayerId={config.mapboxLayerId}
-          />
-        )}
+      {isVisualizationActive && geometryType === "polygon" && config && (
+        <OutcomePolygonLayer
+          tierColorMap={tierColorMap}
+          layerType={layerType!}
+          idProperty={config.idProperty}
+          featureIds={featureIds}
+          classFilter={config.classFilter}
+          visible={true}
+          mapboxLayerId={config.mapboxLayerId}
+        />
+      )}
 
       {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
       {tierLocations.length > 0 &&
