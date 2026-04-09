@@ -1,5 +1,10 @@
 /* Style Mapbox controls */
 
+/* Hide Mapbox logo */
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
 /* Ensure map and canvas receive pointer events */
 .mapboxgl-map {
   pointer-events: auto !important;

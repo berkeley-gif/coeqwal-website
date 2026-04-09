@@ -58,6 +58,7 @@ export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
 
 // Export styles for consistency
 export { MAP_STYLES, MAP_THEME_URLS, MAP_TRANSITIONS } from "./styles"
+export type { MapThemeKey } from "./styles"
 
 // Export hooks for declarative layer management
 export { useMapLayers, useMapSources } from "./hooks/useMapLayers"

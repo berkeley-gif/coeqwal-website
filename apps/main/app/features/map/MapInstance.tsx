@@ -9,6 +9,7 @@ import { Map, NavigationControl, GeolocateControl, useMap } from "@repo/map"
 import { Box, useTheme } from "@repo/ui/mui"
 import {
   useMapMode,
+  useMapStyle,
   useLearnMapScrollOffset,
   useActiveSection,
   useCameraView,
@@ -18,6 +19,7 @@ import {
 } from "./store"
 import { CALIFORNIA_VIEW } from "./config/cameraPresets"
 import type { SectionId } from "./config/sectionLayers"
+import { BasemapPicker } from "./controls/BasemapPicker"
 import "./styles/mapboxControlStyles.css"
 
 // ============================================================================
@@ -105,6 +107,7 @@ export default function MapInstance({
   const prevSectionRef = useRef<SectionId | null>(null)
 
   const mapMode = useMapMode()
+  const mapStyle = useMapStyle()
   const learnMapScrollOffset = useLearnMapScrollOffset()
   const activeSection = useActiveSection()
   const cameraView = useCameraView()
@@ -117,24 +120,55 @@ export default function MapInstance({
   // Map Initialization
   // ============================================================================
 
-  /** Called when map style finishes loading */
+  /** Called when map style finishes loading (initial load or style swap) */
   const handleMapLoad = useCallback(() => {
     const mapboxInstance = map.mapRef?.current?.getMap?.()
     if (!mapboxInstance) return
 
-    // Hide base layers initially (they're shown via useMapLayers as user scrolls)
     MAPBOX_LAYER_IDS.forEach((layerId) => {
       try {
         if (mapboxInstance.getLayer(layerId)) {
           mapboxInstance.setLayoutProperty(layerId, "visibility", "none")
         }
       } catch {
-        // Layer might not exist
+        // Layer might not exist in this style
       }
     })
 
     mapActions.setMapReady(true)
   }, [map.mapRef])
+
+  /** When the style URL changes, cycle mapReady so layer-setup hooks re-run.
+   *  react-map-gl calls map.setStyle() internally; we listen for style.load
+   *  to know when the new style is ready. */
+  const prevStyleRef = useRef(mapStyle)
+  useEffect(() => {
+    if (prevStyleRef.current === mapStyle) return
+    prevStyleRef.current = mapStyle
+
+    mapActions.setMapReady(false)
+
+    const mapboxInstance = map.mapRef?.current?.getMap?.()
+    if (!mapboxInstance) return
+
+    const onStyleLoad = () => {
+      MAPBOX_LAYER_IDS.forEach((layerId) => {
+        try {
+          if (mapboxInstance.getLayer(layerId)) {
+            mapboxInstance.setLayoutProperty(layerId, "visibility", "none")
+          }
+        } catch {
+          /* layer may not exist in this style */
+        }
+      })
+      mapActions.setMapReady(true)
+    }
+
+    mapboxInstance.once("style.load", onStyleLoad)
+    return () => {
+      mapboxInstance.off("style.load", onStyleLoad)
+    }
+  }, [mapStyle, map.mapRef])
 
   // ============================================================================
   // Camera Effects
@@ -246,15 +280,21 @@ export default function MapInstance({
         sx={{
           ...containerStyles,
           "& .mapboxgl-ctrl-bottom-left": {
-            transition: "left 0.3s ease, bottom 0.3s ease",
-            left: isExploreMode ? `calc(${explorePanelWidth}% + 16px)` : "10px",
-            bottom: "16px",
+            flexDirection: "row",
+            alignItems: "flex-end",
+            gap: "8px",
+            transition: "left 0.3s ease, right 0.3s ease, bottom 0.3s ease",
+            pointerEvents: "auto",
+            ...(isExploreMode
+              ? { left: "auto", right: "170px", bottom: "12px" }
+              : { left: "10px", bottom: "12px" }),
+            "& .mapboxgl-ctrl": { margin: "0 !important" },
           },
         }}
       >
         <Map
           mapboxToken={token}
-          mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
+          mapStyle={mapStyle}
           initialViewState={CALIFORNIA_VIEW}
           minZoom={4}
           maxZoom={18}
@@ -275,6 +315,7 @@ export default function MapInstance({
           <GeolocateControl position="bottom-left" />
           {children}
         </Map>
+        <BasemapPicker />
       </Box>
     </>
   )

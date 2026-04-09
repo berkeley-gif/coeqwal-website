@@ -10,6 +10,7 @@ import {
   type SectionLayerConfig,
   type SectionId,
 } from "./config/sectionLayers"
+import { MAP_THEME_URLS, type MapThemeKey } from "@repo/map"
 
 // ============================================================================
 // Types
@@ -46,6 +47,7 @@ interface MapState {
   mapMode: MapMode
   mapReady: boolean
   mapError: boolean
+  mapStyle: string
 
   // Learn mode
   activeSection: SectionId
@@ -72,6 +74,7 @@ const initialState: MapState = {
   mapMode: "hidden",
   mapReady: false,
   mapError: false,
+  mapStyle: MAP_THEME_URLS.satellite,
   activeSection: "california",
   riversProgress: 0,
   geocoderMarker: null,
@@ -117,6 +120,8 @@ export const mapActions = {
   setMapReady: (ready: boolean) => useMapStore.setState({ mapReady: ready }),
 
   setMapError: (error: boolean) => useMapStore.setState({ mapError: error }),
+
+  setMapStyle: (style: string) => useMapStore.setState({ mapStyle: style }),
 
   // Learn mode
   setActiveSection: (section: SectionId) =>
@@ -212,6 +217,7 @@ export const mapActions = {
 export const useMapMode = () => useMapStore((s) => s.mapMode)
 export const useMapReady = () => useMapStore((s) => s.mapReady)
 export const useMapError = () => useMapStore((s) => s.mapError)
+export const useMapStyle = () => useMapStore((s) => s.mapStyle)
 
 // Learn mode
 export const useActiveSection = (): SectionId =>
