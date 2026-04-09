@@ -337,6 +337,9 @@ export default function VisualizationLayers() {
       {locationHighlights
         .filter((hl) => {
           if (!isGetStartedMode) return true
+          // In get-started mode, pinned locations use PinnedLocationsList
+          // cards with leader lines instead of map Popups.
+          if (hl.pinned) return false
           const code = hl.key.split(":")[0]
           return (
             code !== "RES_STOR" && code !== "FW_EXP" && code !== "FW_DELTA_USES"

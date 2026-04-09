@@ -1279,13 +1279,9 @@ export default function TierAnimationSection() {
             if (expr && map.getLayer("demand-units")) {
               map.setPaintProperty("demand-units", "fill-color", expr as never)
             }
-            // Show non-demand-unit polygon layers at their default styling
-            for (const { fill } of ANIM_POLYGON_LAYERS) {
-              if (fill === "demand-units") continue
-              if (map.getLayer(fill)) {
-                map.setPaintProperty(fill, "fill-opacity", 0.65)
-              }
-            }
+            // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
+            // delta-water) stay hidden — the SVG overlay handles their outcomes.
+            // Only demand-units is shown on the map during the animation.
           } catch {
             /* ok */
           }
@@ -1314,8 +1310,10 @@ export default function TierAnimationSection() {
           // react-marker: no Mapbox layer to hide (SVG replaces them)
         }
 
-        // Per-layer polygon fade
+        // Per-layer polygon fade (demand-units only — other layers stay hidden;
+        // the SVG overlay handles non-DU outcomes directly).
         for (const [layerId, { idProperty, entries }] of layerEntries) {
+          if (layerId !== "demand-units") continue
           if (!map.getLayer(layerId)) continue
           const caseExpr: unknown[] = ["case"]
           for (const entry of entries) {
@@ -1330,24 +1328,6 @@ export default function TierAnimationSection() {
           caseExpr.push(0.65)
           try {
             map.setPaintProperty(layerId, "fill-opacity", caseExpr as never)
-          } catch {
-            /* ok */
-          }
-        }
-
-        // For polygon layers with no active entries, restore default opacity
-        const allPolygonLayers = new Set<string>()
-        for (const entry of hideScheduleRef.current) {
-          if (entry.geometryType === "polygon" && entry.mapboxLayerId) {
-            allPolygonLayers.add(entry.mapboxLayerId)
-          }
-        }
-        for (const layerId of allPolygonLayers) {
-          if (layerEntries.has(layerId)) continue
-          try {
-            if (map.getLayer(layerId)) {
-              map.setPaintProperty(layerId, "fill-opacity", 0.65)
-            }
           } catch {
             /* ok */
           }
