@@ -28,9 +28,9 @@ import {
   StrategyHeader,
   OperationsIconGroup,
 } from "../../scenarios/components/shared"
-import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
+import ThemeGroupHeader from "./ThemeGroupHeader"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -56,8 +56,7 @@ export default function ScenarioSelectionSidebar({
     searchQuery,
     sharedScenarioIds,
     addToShare,
-    isSortActive,
-    selectScenarios,
+    groupByTheme,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -78,6 +77,7 @@ export default function ScenarioSelectionSidebar({
 
   const isSearchActive = searchQuery.trim().length > 0
 
+  // Build theme → scenarioIds map for ThemeGroupHeader
   const themeScenarioIds = useMemo(() => {
     const map = new Map<string, string[]>()
     for (const s of orderedScenarios) {
@@ -89,18 +89,6 @@ export default function ScenarioSelectionSidebar({
     }
     return map
   }, [orderedScenarios])
-
-  const handleThemeToggle = (themeKey: string) => {
-    const ids = themeScenarioIds.get(themeKey) ?? []
-    if (ids.length === 0) return
-    const allSelected = ids.every((id) => selectedScenarios.includes(id))
-    if (allSelected) {
-      selectScenarios(selectedScenarios.filter((id) => !ids.includes(id)))
-    } else {
-      const merged = new Set([...selectedScenarios, ...ids])
-      selectScenarios([...merged])
-    }
-  }
 
   return (
     <Box
@@ -183,160 +171,21 @@ export default function ScenarioSelectionSidebar({
           const prevScenario =
             index > 0 ? orderedScenarios[index - 1] : undefined
           const isNewThemeGroup =
-            !isSortActive &&
+            groupByTheme &&
             (index === 0 || scenario.theme !== prevScenario?.theme)
 
           const items: React.ReactNode[] = []
 
           if (isNewThemeGroup && scenario.theme) {
-            const themeConfig =
-              THEME_LABEL_CONFIG[scenario.theme as ScenarioTheme]
-            const themeColors =
-              theme.palette.waterThemes[scenario.theme as ScenarioTheme]
-            if (themeConfig && themeColors) {
-              const themeKey = scenario.theme as string
-              const themeIds = themeScenarioIds.get(themeKey) ?? []
-              const allChecked =
-                themeIds.length > 0 &&
-                themeIds.every((id) => selectedScenarios.includes(id))
-              const someChecked =
-                !allChecked &&
-                themeIds.some((id) => selectedScenarios.includes(id))
-
-              const allThemePinned =
-                themeIds.length > 0 &&
-                themeIds.every((id) => pinnedScenarioIds.includes(id))
-              const allThemeShared =
-                themeIds.length > 0 &&
-                themeIds.every((id) => sharedScenarioIds.includes(id))
-
-              items.push(
-                <Box
-                  key={`theme-header-${scenario.theme}-${index}`}
-                  data-theme-header={scenario.theme}
-                  onClick={() => handleThemeToggle(themeKey)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.75,
-                    px: 1.5,
-                    pt: index === 0 ? 1 : 1.5,
-                    pb: 0.5,
-                    cursor: "pointer",
-                    borderRadius: "4px",
-                    "&:hover": {
-                      backgroundColor: `${themeColors.background}66`,
-                    },
-                    "&:hover .theme-action-icon": {
-                      opacity: 1,
-                    },
-                  }}
-                >
-                  <Checkbox
-                    size="small"
-                    checked={allChecked}
-                    indeterminate={someChecked}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={() => handleThemeToggle(themeKey)}
-                    sx={{
-                      padding: 0,
-                      flexShrink: 0,
-                      transform: "scale(0.8)",
-                      color: themeColors.text,
-                      "&.Mui-checked": { color: themeColors.text },
-                      "&.MuiCheckbox-indeterminate": {
-                        color: themeColors.text,
-                      },
-                    }}
-                  />
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: "0.6rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                      color: themeColors.text,
-                      backgroundColor: themeColors.background,
-                      px: "5px",
-                      py: "1.5px",
-                      borderRadius: "2px",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {themeConfig.label}
-                  </Box>
-
-                  <Box sx={{ flex: 1 }} />
-
-                  <Tooltip
-                    title={
-                      allThemeShared
-                        ? "All shared"
-                        : `Share all ${themeConfig.label} scenarios`
-                    }
-                    arrow
-                  >
-                    <IconButton
-                      className="theme-action-icon"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        themeIds.forEach((id) => addToShare(id))
-                      }}
-                      sx={{
-                        p: 0.25,
-                        opacity: allThemeShared ? 1 : 0,
-                        color: allThemeShared
-                          ? theme.palette.blue.bright
-                          : themeColors.text,
-                        transition: "opacity 200ms ease",
-                      }}
-                    >
-                      <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip
-                    title={
-                      allThemePinned
-                        ? `Unpin all ${themeConfig.label}`
-                        : `Pin all ${themeConfig.label} scenarios`
-                    }
-                    arrow
-                  >
-                    <IconButton
-                      className="theme-action-icon"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (allThemePinned) {
-                          themeIds.forEach((id) => togglePinnedScenario(id))
-                        } else {
-                          themeIds.forEach((id) => {
-                            if (!pinnedScenarioIds.includes(id))
-                              togglePinnedScenario(id)
-                          })
-                        }
-                      }}
-                      sx={{
-                        p: 0.25,
-                        opacity: allThemePinned ? 1 : 0,
-                        color: themeColors.text,
-                        transition: "opacity 200ms ease",
-                      }}
-                    >
-                      <icons.PushPin
-                        sx={{
-                          fontSize: "0.875rem",
-                          transform: allThemePinned ? "none" : "rotate(45deg)",
-                        }}
-                      />
-                    </IconButton>
-                  </Tooltip>
-                </Box>,
-              )
-            }
+            const ids = themeScenarioIds.get(scenario.theme) ?? []
+            items.push(
+              <ThemeGroupHeader
+                key={`theme-header-${scenario.theme}-${index}`}
+                themeKey={scenario.theme as ScenarioTheme}
+                scenarioIds={ids}
+                isFirst={index === 0}
+              />,
+            )
           }
 
           items.push(
@@ -409,7 +258,7 @@ export default function ScenarioSelectionSidebar({
                   titleVariant="body2"
                   showDescription={showDefinitions}
                   descriptionMaxWidth="none"
-                  showThemeBadge={isSortActive}
+                  showThemeBadge={!groupByTheme}
                 />
               </Box>
 

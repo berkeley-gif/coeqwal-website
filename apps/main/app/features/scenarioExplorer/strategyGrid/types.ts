@@ -52,6 +52,8 @@ export interface StrategyGridProps {
   outcomesOnly?: boolean
   /** When true, hides the column title row (Scenario library / Key operations / Key outcomes) */
   hideColumnTitles?: boolean
+  /** When true, shows ThemeGroupHeader subheaders above each theme group instead of divider lines */
+  groupByTheme?: boolean
 
   // Sorting (optional)
   sortBy?: string | null

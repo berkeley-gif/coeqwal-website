@@ -80,6 +80,9 @@ interface ScenarioExplorerState {
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
 
+  // Theme grouping
+  groupByTheme: boolean
+
   // Sort state (shared so both sidebar and list view use the same order)
   sortBy: string | null
   sortDirection: "asc" | "desc"
@@ -144,6 +147,9 @@ interface ScenarioExplorerActions {
   // Hydroclimate
   setHydroclimate: (value: string) => void
 
+  // Theme grouping
+  setGroupByTheme: (group: boolean) => void
+
   // Sort state
   setSortBy: (outcome: string | null) => void
   setSortDirection: (direction: "asc" | "desc") => void
@@ -191,6 +197,7 @@ const initialState: ScenarioExplorerState = {
   showTierZones: true,
   dimUnpinned: false,
   hydroclimate: "historical",
+  groupByTheme: true,
   sortBy: null,
   sortDirection: "asc",
   isSortActive: false,
@@ -391,11 +398,24 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.hydroclimate = value
       }),
 
+    // Theme grouping
+    setGroupByTheme: (group) =>
+      set((state) => {
+        state.groupByTheme = group
+        if (group && state.sortBy !== null) {
+          state.sortBy = null
+          state.isSortActive = false
+        }
+      }),
+
     // Sort state
     setSortBy: (outcome) =>
       set((state) => {
         state.sortBy = outcome
         state.isSortActive = outcome !== null
+        if (outcome !== null) {
+          state.groupByTheme = false
+        }
       }),
 
     setSortDirection: (direction) =>
