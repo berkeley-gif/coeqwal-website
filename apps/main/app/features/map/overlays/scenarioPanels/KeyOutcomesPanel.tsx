@@ -7,7 +7,6 @@
  * Uses shared OutcomeGlyphItem components with ClickTooltip wrappers.
  */
 
-import { useCallback } from "react"
 import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { ClickTooltip } from "@repo/ui"
 import {
@@ -18,7 +17,7 @@ import {
 import { OutcomeGlyphItem } from "../../../scenarios/components/shared"
 import TierTooltipContent from "../../../tooltips/TierTooltipContent"
 import { useTierTooltipState } from "../../../tooltips/useTierTooltipState"
-import { mapActions, useActiveOutcomeVisualization } from "../../store"
+import { useMapVisualizationAction, useActiveMapOutcome } from "../../hooks"
 import type { OutcomeCode } from "../../../../content/outcomes"
 
 interface KeyOutcomesPanelProps {
@@ -42,19 +41,15 @@ export function KeyOutcomesPanel({
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
 
-  // Get current visualization for toggle behavior (using outcome codes)
-  const activeVisualization = useActiveOutcomeVisualization()
+  // Shared map visualization action and active state
+  const { showOnMap } = useMapVisualizationAction()
+  const activeVisualization = useActiveMapOutcome()
   const selectedOutcomeCode = activeVisualization?.outcomeCode ?? null
 
-  // Handler to show outcome data on the map (toggle behavior)
-  const handleShowOnMap = useCallback(
-    (code: OutcomeCode) => {
-      handleClose()
-      mapActions.clearMapTooltips()
-      mapActions.toggleOutcomeVisualization(code, "s0020")
-    },
-    [handleClose],
-  )
+  const handleShowOnMap = (code: OutcomeCode) => {
+    handleClose()
+    showOnMap(code, scenarioId)
+  }
 
   // Helper to check if outcome has valid data (by code)
   const hasData = (code: string): boolean => {

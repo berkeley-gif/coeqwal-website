@@ -36,7 +36,7 @@ export default function ToggleChip({
         fontSize: "0.75rem",
         fontWeight: 500,
         lineHeight: 1.3,
-        color: active ? theme.palette.blue.bright : theme.palette.grey[600],
+        color: active ? theme.palette.blue.bright : theme.palette.grey[800],
         background: active
           ? theme.palette.interaction.selectedBackground
           : theme.palette.grey[200],

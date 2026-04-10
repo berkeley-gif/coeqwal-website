@@ -95,8 +95,19 @@ export default function SharePanel() {
           mb: 3,
         }}
       >
-        {sharedScenarioIds.length} scenario
-        {sharedScenarioIds.length !== 1 ? "s" : ""}
+        {(() => {
+          const uniqueScenarios = new Set(
+            sharedScenarioIds.map((id) =>
+              id.includes(":") ? id.split(":")[0] : id,
+            ),
+          )
+          const scenarioCount = uniqueScenarios.size
+          const chartCount = sharedScenarioIds.length
+          if (chartCount === scenarioCount) {
+            return `${scenarioCount} scenario${scenarioCount !== 1 ? "s" : ""}`
+          }
+          return `${scenarioCount} scenario${scenarioCount !== 1 ? "s" : ""}, ${chartCount} chart${chartCount !== 1 ? "s" : ""}`
+        })()}
       </Typography>
 
       <Box
@@ -110,15 +121,30 @@ export default function SharePanel() {
         }}
       >
         {sharedScenarioIds.map((id) => {
-          const info = scenarioLookup.get(id)
+          const baseId = id.includes(":") ? id.split(":")[0] : id
+          const viewSuffix = id.includes(":") ? id.split(":")[1] : undefined
+          const info = scenarioLookup.get(baseId)
+          const viewLabel =
+            viewSuffix === "distribution"
+              ? "Key outcomes distribution"
+              : viewSuffix === "summary"
+                ? "Key outcomes bar chart"
+                : undefined
           return (
             <ShareScenarioCard
               key={id}
               scenarioId={id}
-              name={info?.name ?? id}
-              description={info?.description ?? ""}
-              chartData={allChartData[id]}
+              name={info?.description ?? info?.name ?? baseId}
+              description={viewLabel ?? ""}
+              chartData={allChartData[baseId]}
               outcomeNames={outcomeNames}
+              viewMode={
+                viewSuffix === "distribution"
+                  ? "distribution"
+                  : viewSuffix === "summary"
+                    ? "summary"
+                    : undefined
+              }
             />
           )
         })}

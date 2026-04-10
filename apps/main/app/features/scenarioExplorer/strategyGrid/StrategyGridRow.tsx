@@ -9,7 +9,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useRef } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -358,7 +358,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               isDistributionView={isDistributionView}
               scenarioChartData={scenarioChartData}
               isPinned={isPinned}
-              isShared={isShared}
               accentColor={accentColor}
               addToShare={addToShare}
               togglePinnedScenario={togglePinnedScenario}
@@ -402,20 +401,68 @@ interface RowActionsProps {
  */
 function InlineRowActions({
   scenarioId,
+  scenarioLabel,
+  displayMode,
   isPinned,
-  isShared,
   accentColor,
   addToShare,
   togglePinnedScenario,
 }: {
   scenarioId: string
+  scenarioLabel: string
+  displayMode: "summary" | "distribution"
   isPinned: boolean
-  isShared: boolean
   accentColor: string
   addToShare: (id: string) => void
   togglePinnedScenario: (id: string) => void
 }) {
   const theme = useTheme()
+  const sharedScenarioIds = useScenarioExplorerStore((s) => s.sharedScenarioIds)
+  const shareKey = `${scenarioId}:${displayMode}`
+  const isShared = sharedScenarioIds.includes(shareKey)
+  const [justShared, setJustShared] = useState(false)
+
+  useEffect(() => {
+    if (!justShared) return
+    const timer = setTimeout(() => setJustShared(false), 3000)
+    return () => clearTimeout(timer)
+  }, [justShared])
+
+  const viewLabel =
+    displayMode === "distribution"
+      ? "Key outcomes distribution"
+      : "Key outcomes bar chart"
+
+  const shareTooltip = justShared ? (
+    <span>
+      Saved <strong>{scenarioLabel}</strong> scenario
+      <br />
+      {viewLabel}
+    </span>
+  ) : isShared ? (
+    <span>
+      Already shared: <strong>{scenarioLabel}</strong> scenario
+      <br />
+      {viewLabel}
+    </span>
+  ) : (
+    <span>
+      Share <strong>{scenarioLabel}</strong> scenario
+      <br />
+      {viewLabel}
+    </span>
+  )
+
+  const pinTooltip = isPinned ? (
+    <span>
+      Unpin <strong>{scenarioLabel}</strong> scenario
+    </span>
+  ) : (
+    <span>
+      Pin <strong>{scenarioLabel}</strong> scenario
+    </span>
+  )
+
   return (
     <Box
       sx={{
@@ -425,7 +472,23 @@ function InlineRowActions({
         ml: 0.25,
       }}
     >
-      <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
+      <Tooltip
+        title={pinTooltip}
+        arrow
+        placement="top-start"
+        slotProps={{
+          popper: {
+            modifiers: [
+              { name: "flip", enabled: true },
+              {
+                name: "preventOverflow",
+                enabled: true,
+                options: { boundary: "viewport", padding: 8 },
+              },
+            ],
+          },
+        }}
+      >
         <IconButton
           size="small"
           onClick={(e) => {
@@ -445,12 +508,29 @@ function InlineRowActions({
           />
         </IconButton>
       </Tooltip>
-      <Tooltip title={isShared ? "Added to share" : "Add to share"} arrow>
+      <Tooltip
+        title={shareTooltip}
+        arrow
+        placement="top-start"
+        slotProps={{
+          popper: {
+            modifiers: [
+              { name: "flip", enabled: true },
+              {
+                name: "preventOverflow",
+                enabled: true,
+                options: { boundary: "viewport", padding: 8 },
+              },
+            ],
+          },
+        }}
+      >
         <IconButton
           size="small"
           onClick={(e) => {
             e.stopPropagation()
-            addToShare(scenarioId)
+            addToShare(shareKey)
+            setJustShared(true)
           }}
           sx={{
             p: 0.25,
@@ -704,19 +784,20 @@ function NonCompactRowContent({
   isDistributionView = false,
   scenarioChartData = {},
   isPinned = false,
-  isShared = false,
   accentColor,
   addToShare,
   togglePinnedScenario,
 }: NonCompactRowContentProps & {
   isPinned?: boolean
-  isShared?: boolean
   accentColor?: string
   addToShare?: (id: string) => void
   togglePinnedScenario?: (id: string) => void
 }) {
   const theme = useTheme()
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
+  const outcomeDisplayMode = useScenarioExplorerStore(
+    (s) => s.outcomeDisplayMode,
+  )
 
   // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
@@ -746,8 +827,9 @@ function NonCompactRowContent({
             isListMode && addToShare && togglePinnedScenario && accentColor ? (
               <InlineRowActions
                 scenarioId={scenario.scenarioId}
+                scenarioLabel={scenario.label}
+                displayMode={outcomeDisplayMode as "summary" | "distribution"}
                 isPinned={isPinned}
-                isShared={isShared}
                 accentColor={accentColor}
                 addToShare={addToShare}
                 togglePinnedScenario={togglePinnedScenario}
