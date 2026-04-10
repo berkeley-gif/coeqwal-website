@@ -213,7 +213,7 @@ function ColumnHeaders({
           alignContent: "center",
           alignSelf: "stretch",
           flexWrap: "wrap",
-          rowGap: 1,
+          rowGap: 0.75,
           columnGap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
         }}
@@ -350,7 +350,7 @@ function OutcomeCategoryLabels({
         gridColumn: outcomesOnly ? "1 / -1" : "4",
         display: layoutMode === "compact" ? "none" : "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: "flex-end",
         pt: theme.scenarios.grid.header.standard,
         pb: theme.scenarios.grid.header.standard,
         pl: theme.scenarios.grid.divider.gap,
@@ -378,7 +378,7 @@ function OutcomeCategoryLabels({
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                gap: theme.space.gap.xs,
+                gap: "6px",
               }}
             >
               <Typography
@@ -401,7 +401,7 @@ function OutcomeCategoryLabels({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  gap: 0,
+                  gap: 0.5,
                 }}
               >
                 <InfoIconButton
