@@ -1007,14 +1007,14 @@ const theme = createTheme({
       textTransform: "capitalize" as const,
     },
     // Tab labels - docked state (with header)
-    // fontSize is 1.3rem (not 1.1rem) to optically compensate for
-    // dark text on light background appearing smaller
+    // Also used for explorer sub-navigation tabs (T2: display font at 1rem)
     tabLabelDocked: {
       fontFamily: themeValues.fontFamily.display,
-      fontSize: "1.3rem",
+      fontSize: "1rem",
       fontWeight: 500,
       lineHeight: 1.1,
-      textTransform: "capitalize" as const,
+      letterSpacing: "0.01em",
+      textTransform: "none" as const,
     },
     dashboard: {
       fontFamily: themeValues.fontFamily.text,
@@ -1086,7 +1086,7 @@ const theme = createTheme({
     // Scenario/strategy title - headline for scenario cards/rows
     scenarioTitle: {
       fontFamily: themeValues.fontFamily.text,
-      fontSize: "0.875rem", // 14px
+      fontSize: "0.9375rem", // 15px — primary content anchor (T3b)
       fontWeight: 500,
       lineHeight: 1.3,
     },

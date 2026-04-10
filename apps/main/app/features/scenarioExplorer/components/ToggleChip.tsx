@@ -33,7 +33,7 @@ export default function ToggleChip({
         border: "none",
         borderRadius: "10px",
         cursor: "pointer",
-        fontSize: "0.6875rem",
+        fontSize: "0.75rem",
         fontWeight: 500,
         lineHeight: 1.3,
         color: active ? theme.palette.blue.bright : theme.palette.grey[600],
@@ -47,7 +47,7 @@ export default function ToggleChip({
         },
       }}
     >
-      <Icon sx={{ fontSize: "0.625rem", flexShrink: 0 }} />
+      <Icon sx={{ fontSize: "0.6875rem", flexShrink: 0 }} />
       {label}
     </Box>
   )

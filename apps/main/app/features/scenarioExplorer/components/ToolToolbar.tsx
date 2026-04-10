@@ -44,7 +44,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     <>
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography
-          variant="caption"
+          variant="dashboard"
           sx={{
             fontWeight: 500,
             color: theme.palette.text.primary,
@@ -65,7 +65,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography
-          variant="caption"
+          variant="dashboard"
           sx={{
             fontWeight: 500,
             color: theme.palette.text.primary,
@@ -103,7 +103,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
       >
         <LocationOnIcon sx={{ fontSize: "1.25rem" }} />
         <Typography
-          variant="caption"
+          variant="dashboard"
           sx={{
             fontWeight: 500,
             whiteSpace: "nowrap",
@@ -117,7 +117,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
         <Typography
-          variant="caption"
+          variant="dashboard"
           sx={{
             fontWeight: 500,
             color: theme.palette.text.primary,
@@ -171,8 +171,12 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           }}
         >
           <Typography
-            variant="subtitle2"
-            sx={{ color: theme.palette.explore.text, fontWeight: 500 }}
+            sx={{
+              fontSize: "0.9375rem",
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: theme.palette.explore.text,
+            }}
           >
             Scenario library
           </Typography>

@@ -168,10 +168,11 @@ function CompactHeader() {
       }}
     >
       <Typography
-        variant="subtitle2"
         sx={{
+          fontSize: "0.9375rem",
+          fontWeight: 600,
+          lineHeight: 1.3,
           color: theme.palette.grey[900],
-          fontWeight: 500,
         }}
       >
         Scenario library
@@ -233,7 +234,7 @@ function ColumnHeaders({
           }}
         >
           <Typography
-            variant="subtitle2"
+            variant="dashboard"
             sx={{
               color: theme.palette.grey[600],
               fontWeight: 500,
@@ -259,7 +260,7 @@ function ColumnHeaders({
           }}
         >
           <Typography
-            variant="subtitle2"
+            variant="dashboard"
             sx={{
               color: theme.palette.grey[600],
               fontWeight: 500,
@@ -370,12 +371,10 @@ function OutcomeCategoryLabels({
           >
             <Typography
               component="div"
+              variant="smallSectionLabel"
               sx={{
-                fontSize: "0.75rem", // 12px
-                fontWeight: 500,
                 color: theme.palette.grey[600],
                 textAlign: "center",
-                lineHeight: 1.3,
                 letterSpacing: "0.01em",
               }}
             >

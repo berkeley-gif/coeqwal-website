@@ -253,9 +253,6 @@ export default function ScenarioExplorer() {
           width: "100%",
           height: theme.layout.collapsedTabHeight,
           background: theme.palette.tabPanels.explore,
-          fontFamily: theme.typography.nav.fontFamily,
-          fontSize: theme.typography.nav.fontSize,
-          letterSpacing: theme.typography.nav.letterSpacing,
           lineHeight: 1,
           color: theme.palette.common.white,
           textShadow: "none",
@@ -293,7 +290,7 @@ export default function ScenarioExplorer() {
               {icon}
               <Typography
                 component="span"
-                variant="subtitle2"
+                variant="tabLabelDocked"
                 sx={{
                   fontWeight: active ? 600 : 400,
                   lineHeight: 1,
@@ -352,7 +349,7 @@ export default function ScenarioExplorer() {
                   {icon}
                   <Typography
                     component="span"
-                    variant="subtitle2"
+                    variant="tabLabelDocked"
                     sx={{
                       fontWeight: active ? 600 : 400,
                       lineHeight: 1,
