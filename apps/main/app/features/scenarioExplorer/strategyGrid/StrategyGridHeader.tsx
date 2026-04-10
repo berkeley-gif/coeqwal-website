@@ -202,17 +202,19 @@ function ColumnHeaders({
 
   return (
     <>
-      {/* Columns 1-2: Search + visibility chips */}
+      {/* Columns 1-2: Search + visibility chips — spans both header rows so content
+          aligns vertically with the tier outcome labels in row 2 */}
       <Box
         sx={{
           gridColumn: "1 / 3",
+          gridRow: "1 / 3",
           display: layoutMode === "compact" ? "none" : "flex",
           alignItems: "center",
+          alignContent: "center",
           alignSelf: "stretch",
           flexWrap: "wrap",
           gap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
-          pb: 0.5,
         }}
       >
         <SearchAndChips />
@@ -345,11 +347,11 @@ function OutcomeCategoryLabels({
       className={className}
       sx={{
         gridColumn: outcomesOnly ? "1 / -1" : "4",
-        display: layoutMode === "compact" ? "none" : "grid",
-        gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
-        gap: theme.space.gap.sm,
+        display: layoutMode === "compact" ? "none" : "flex",
+        flexDirection: "column",
+        justifyContent: "center",
         pt: theme.scenarios.grid.header.standard,
-        pb: theme.scenarios.grid.header.categoryLabels,
+        pb: theme.scenarios.grid.header.standard,
         pl: theme.scenarios.grid.divider.gap,
         ...(!outcomesOnly && {
           borderLeft: `1px solid ${theme.palette.grey[300]}`,
@@ -357,62 +359,71 @@ function OutcomeCategoryLabels({
         alignSelf: "stretch",
       }}
     >
-      {outcomeNames.map(({ shortCode, displayName }) => {
-        const isSorted = sortBy === shortCode
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
+          gap: theme.space.gap.sm,
+          width: "100%",
+        }}
+      >
+        {outcomeNames.map(({ shortCode, displayName }) => {
+          const isSorted = sortBy === shortCode
 
-        return (
-          <Box
-            key={shortCode}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: theme.space.gap.xs,
-            }}
-          >
-            <Typography
-              component="div"
-              variant="smallSectionLabel"
-              sx={{
-                color: theme.palette.text.primary,
-                textAlign: "center",
-                letterSpacing: "0.01em",
-              }}
-            >
-              {formatOutcomeLabel(displayName)}
-            </Typography>
-
+          return (
             <Box
+              key={shortCode}
               sx={{
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: 0,
+                gap: theme.space.gap.xs,
               }}
             >
-              <InfoIconButton
-                isActive={activeTooltip === shortCode}
-                onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
-                title="Click for outcome details"
-              />
+              <Typography
+                component="div"
+                variant="smallSectionLabel"
+                sx={{
+                  color: theme.palette.text.primary,
+                  textAlign: "center",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {formatOutcomeLabel(displayName)}
+              </Typography>
 
-              {sortEnabled && onSortChange && (
-                <ToggleSortButton
-                  sortState={isSorted ? sortDirection : null}
-                  onToggle={(newState) => {
-                    if (newState === null) {
-                      onSortChange(null, "asc")
-                    } else {
-                      onSortChange(shortCode, newState)
-                    }
-                  }}
-                  title="Sort by this outcome"
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 0,
+                }}
+              >
+                <InfoIconButton
+                  isActive={activeTooltip === shortCode}
+                  onClick={(e) => onTooltipToggle(shortCode, e.currentTarget)}
+                  title="Click for outcome details"
                 />
-              )}
+
+                {sortEnabled && onSortChange && (
+                  <ToggleSortButton
+                    sortState={isSorted ? sortDirection : null}
+                    onToggle={(newState) => {
+                      if (newState === null) {
+                        onSortChange(null, "asc")
+                      } else {
+                        onSortChange(shortCode, newState)
+                      }
+                    }}
+                    title="Sort by this outcome"
+                  />
+                )}
+              </Box>
             </Box>
-          </Box>
-        )
-      })}
+          )
+        })}
+      </Box>
     </Box>
   )
 }
