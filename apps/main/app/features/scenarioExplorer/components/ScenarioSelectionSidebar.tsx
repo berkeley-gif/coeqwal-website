@@ -116,15 +116,19 @@ export default function ScenarioSelectionSidebar({
         }}
       >
         <Typography
-          variant="subtitle2"
-          sx={{ color: theme.palette.explore.text, fontWeight: 500 }}
+          sx={{
+            fontSize: "0.9375rem",
+            fontWeight: 600,
+            lineHeight: 1.3,
+            color: theme.palette.explore.text,
+          }}
         >
           Scenario library
         </Typography>
 
         {showKeyOperations && (
           <Typography
-            variant="subtitle2"
+            variant="dashboard"
             sx={{
               color: theme.palette.explore.text,
               fontWeight: 500,
