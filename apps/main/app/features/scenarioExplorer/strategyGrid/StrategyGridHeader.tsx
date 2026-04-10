@@ -172,7 +172,7 @@ function CompactHeader() {
           fontSize: "0.9375rem",
           fontWeight: 600,
           lineHeight: 1.3,
-          color: theme.palette.grey[900],
+          color: theme.palette.text.primary,
         }}
       >
         Scenario library
@@ -373,7 +373,7 @@ function OutcomeCategoryLabels({
               component="div"
               variant="smallSectionLabel"
               sx={{
-                color: theme.palette.grey[600],
+                color: theme.palette.text.primary,
                 textAlign: "center",
                 letterSpacing: "0.01em",
               }}

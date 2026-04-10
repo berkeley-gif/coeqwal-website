@@ -390,7 +390,7 @@ export function StrategyHeader({
         onClick={onTitleClick}
         sx={{
           mb: showDescription ? theme.space.component.xs : 0,
-          color: theme.palette.grey[900],
+          color: theme.palette.text.primary,
           cursor: onTitleClick ? "pointer" : "default",
         }}
       >
