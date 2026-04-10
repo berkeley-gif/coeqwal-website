@@ -69,7 +69,8 @@ export default function ThemeGroupHeader({
         display: "flex",
         alignItems: "center",
         gap: 0.75,
-        px: 1.5,
+        pl: 1,
+        pr: 1.5,
         pt: isFirst ? 1 : 1.5,
         pb: 0.5,
         cursor: "pointer",
@@ -83,15 +84,13 @@ export default function ThemeGroupHeader({
       }}
     >
       <Checkbox
-        size="small"
         checked={allChecked}
         indeterminate={someChecked}
         onClick={(e) => e.stopPropagation()}
         onChange={handleToggle}
         sx={{
-          padding: 0,
+          ...theme.scenarios.checkbox.md,
           flexShrink: 0,
-          transform: "scale(0.8)",
           color: themeColors.text,
           "&.Mui-checked": { color: themeColors.text },
           "&.MuiCheckbox-indeterminate": { color: themeColors.text },

@@ -245,10 +245,9 @@ export default function ScenarioSelectionSidebar({
                 onChange={() => toggleScenario(scenario.scenarioId)}
                 onClick={(e) => e.stopPropagation()}
                 sx={{
-                  padding: 0,
+                  ...theme.scenarios.checkbox.sm,
                   flexShrink: 0,
                   mt: "2px",
-                  transform: "scale(0.85)",
                 }}
               />
 
