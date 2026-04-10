@@ -140,7 +140,11 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           label={groupByTheme ? "grouped by theme" : "ungrouped by theme"}
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
-          tooltip={groupByTheme ? "Ungroup scenarios by theme" : "Group scenarios by theme"}
+          tooltip={
+            groupByTheme
+              ? "Ungroup scenarios by theme"
+              : "Group scenarios by theme"
+          }
         />
         {sharedScenarioIds.length > 0 && (
           <ToggleChip

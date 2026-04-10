@@ -11,13 +11,7 @@
  */
 
 import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  LocationOnIcon,
-  Switch,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, LocationOnIcon, Switch } from "@repo/ui/mui"
 import { HydroclimateChooser } from "../../scenarios/components"
 import { useScenarioExplorerStore } from "../store"
 
@@ -39,26 +33,31 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
     showKeyOperations,
   } = useScenarioExplorerStore()
 
-
   const viewControls = (
     <>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Box
+        component="button"
+        type="button"
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.5,
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          color: theme.palette.text.primary,
+        }}
+      >
         <Typography
           variant="dashboard"
           sx={{
             fontWeight: 500,
-            color: theme.palette.text.primary,
             whiteSpace: "nowrap",
           }}
         >
-          Show map
+          How to read this chart?
         </Typography>
-        <Switch
-          size="small"
-          checked={showMap}
-          onChange={(_, checked) => setShowMap(checked)}
-          sx={{ ml: -0.5 }}
-        />
       </Box>
 
       <VerticalDivider />
@@ -80,6 +79,27 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           onChange={(_, checked) =>
             setOutcomeDisplayMode(checked ? "distribution" : "summary")
           }
+          sx={{ ml: -0.5 }}
+        />
+      </Box>
+
+      <VerticalDivider />
+
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Typography
+          variant="dashboard"
+          sx={{
+            fontWeight: 500,
+            color: theme.palette.text.primary,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Show map
+        </Typography>
+        <Switch
+          size="small"
+          checked={showMap}
+          onChange={(_, checked) => setShowMap(checked)}
           sx={{ ml: -0.5 }}
         />
       </Box>

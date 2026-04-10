@@ -751,12 +751,12 @@ export const themeValues = {
       sm: {
         padding: 0,
         margin: 0,
-        transform: "scale(0.8)",
+        transform: "scale(0.7)",
       } as const,
       /** Standard checkbox — for group headers (theme, section) */
       md: {
         padding: 0,
-        transform: "scale(0.9)",
+        transform: "scale(0.8)",
       } as const,
     },
   },

@@ -327,69 +327,70 @@ export default function ScenarioExplorer() {
             >
               Select scenarios using key outcomes:
             </Typography>
-            {TOOL_TABS.filter(
-              (tab) => !tab.research || showResearchTools,
-            ).map(({ mode, icon, label }) => {
-              const active = exploreMode === mode
-              return (
-                <React.Fragment key={mode}>
-                  {mode === "data" && (
-                    <Typography
-                      component="span"
+            {TOOL_TABS.filter((tab) => !tab.research || showResearchTools).map(
+              ({ mode, icon, label }) => {
+                const active = exploreMode === mode
+                return (
+                  <React.Fragment key={mode}>
+                    {mode === "data" && (
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontFamily:
+                            theme.typography.tabLabelDocked.fontFamily,
+                          fontSize: "0.9375rem",
+                          fontWeight: 500,
+                          lineHeight: 1,
+                          letterSpacing: "0.01em",
+                          whiteSpace: "nowrap",
+                          color: theme.palette.text.secondary,
+                          px: 0.5,
+                        }}
+                      >
+                        View data for selected scenarios:
+                      </Typography>
+                    )}
+                    <Box
+                      component="button"
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setExploreMode(mode)}
                       sx={{
-                        fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                        fontSize: "0.9375rem",
-                        fontWeight: 500,
-                        lineHeight: 1,
-                        letterSpacing: "0.01em",
-                        whiteSpace: "nowrap",
-                        color: theme.palette.text.secondary,
-                        px: 0.5,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        px: 1.25,
+                        py: 0.5,
+                        border: "none",
+                        borderRadius: theme.borderRadius.sm ?? "4px",
+                        cursor: "pointer",
+                        background: active
+                          ? "rgba(255,255,255,0.2)"
+                          : "transparent",
+                        color: theme.palette.common.white,
+                        transition: "background-color 0.15s",
+                        "&:hover": { background: "rgba(255,255,255,0.15)" },
                       }}
                     >
-                      View data for selected scenarios:
-                    </Typography>
-                  )}
-                <Box
-                  component="button"
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setExploreMode(mode)}
-                  sx={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    px: 1.25,
-                    py: 0.5,
-                    border: "none",
-                    borderRadius: theme.borderRadius.sm ?? "4px",
-                    cursor: "pointer",
-                    background: active
-                      ? "rgba(255,255,255,0.2)"
-                      : "transparent",
-                    color: theme.palette.common.white,
-                    transition: "background-color 0.15s",
-                    "&:hover": { background: "rgba(255,255,255,0.15)" },
-                  }}
-                >
-                  {icon}
-                  <Typography
-                    component="span"
-                    variant="dashboard"
-                    sx={{
-                      fontWeight: active ? 600 : 500,
-                      lineHeight: 1,
-                      whiteSpace: "nowrap",
-                      color: theme.palette.text.secondary,
-                    }}
-                  >
-                    {label}
-                  </Typography>
-                </Box>
-                </React.Fragment>
-              )
-            })}
+                      {icon}
+                      <Typography
+                        component="span"
+                        variant="dashboard"
+                        sx={{
+                          fontWeight: active ? 600 : 500,
+                          lineHeight: 1,
+                          whiteSpace: "nowrap",
+                          color: theme.palette.text.secondary,
+                        }}
+                      >
+                        {label}
+                      </Typography>
+                    </Box>
+                  </React.Fragment>
+                )
+              },
+            )}
           </>
         )}
       </Box>

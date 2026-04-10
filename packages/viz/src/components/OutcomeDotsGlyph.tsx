@@ -46,10 +46,10 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
           return (
             <g key={tier.label}>
               <rect
-                x={cx - barHeight / 2}
-                y={y}
-                width={barHeight}
-                height={barHeight}
+                x={cx - barHeight / 2 + 1}
+                y={y + 1}
+                width={barHeight - 2}
+                height={barHeight - 2}
                 rx={barHeight / 4}
                 fill={isFilled ? tier.color : "transparent"}
                 stroke={isFilled ? tier.color : "#d8d8d8"}
