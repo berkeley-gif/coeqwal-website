@@ -98,7 +98,7 @@ export default function SharePanel() {
         {(() => {
           const uniqueScenarios = new Set(
             sharedScenarioIds.map((id) =>
-              id.includes(":") ? id.split(":")[0] : id,
+              id.includes(":") ? id.split(":")[0]! : id,
             ),
           )
           const scenarioCount = uniqueScenarios.size
@@ -121,8 +121,9 @@ export default function SharePanel() {
         }}
       >
         {sharedScenarioIds.map((id) => {
-          const baseId = id.includes(":") ? id.split(":")[0] : id
-          const viewSuffix = id.includes(":") ? id.split(":")[1] : undefined
+          const [baseId, viewSuffix] = id.includes(":")
+            ? [id.split(":")[0]!, id.split(":")[1]]
+            : [id, undefined]
           const info = scenarioLookup.get(baseId)
           const viewLabel =
             viewSuffix === "distribution"
