@@ -175,7 +175,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
               fontSize: "0.9375rem",
               fontWeight: 600,
               lineHeight: 1.3,
-              color: theme.palette.explore.text,
+              color: theme.palette.text.primary,
             }}
           >
             Scenario library

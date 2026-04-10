@@ -520,7 +520,7 @@ function CompactRowContent({
             flexShrink: 0,
           }}
         >
-          <Typography variant="dashboard" sx={{ fontWeight: 500 }}>Key operations</Typography>
+          <Typography variant="dashboard" sx={{ fontWeight: 500, color: theme.palette.grey[600] }}>Key operations</Typography>
           <OperationsIconGroup
             scenarioId={scenario.scenarioId}
             theme={scenario.theme}
@@ -538,7 +538,7 @@ function CompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        <Typography variant="dashboard" sx={{ fontWeight: 500 }}>Key outcomes</Typography>
+        <Typography variant="dashboard" sx={{ fontWeight: 500, color: theme.palette.grey[600] }}>Key outcomes</Typography>
         <Box
           sx={{
             display: "flex",

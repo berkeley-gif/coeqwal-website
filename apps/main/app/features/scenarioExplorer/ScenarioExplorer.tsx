@@ -292,7 +292,7 @@ export default function ScenarioExplorer() {
                 component="span"
                 variant="tabLabelDocked"
                 sx={{
-                  fontWeight: active ? 600 : 400,
+                  fontWeight: active ? 600 : 500,
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   color: "inherit",
@@ -351,7 +351,7 @@ export default function ScenarioExplorer() {
                     component="span"
                     variant="tabLabelDocked"
                     sx={{
-                      fontWeight: active ? 600 : 400,
+                      fontWeight: active ? 600 : 500,
                       lineHeight: 1,
                       whiteSpace: "nowrap",
                       color: "inherit",

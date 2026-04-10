@@ -170,7 +170,7 @@ export default function ScenarioSelectionSidebar({
       >
         {isLoading && (
           <Typography
-            variant="caption"
+            variant="dashboard"
             sx={{ px: 1.5, py: 1, color: theme.palette.grey[500] }}
           >
             Loading…
