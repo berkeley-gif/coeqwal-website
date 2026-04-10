@@ -4,6 +4,11 @@ import { useCallback, useEffect } from "react"
 import { useScenarioExplorerStore } from "../../scenarioExplorer/store"
 import { useScenarioList } from "../../scenarios/hooks/useScenarioList"
 import { mapActions, useMapMode, useMapStore } from "../store"
+import { getOutcomeConfig } from "../config/outcomeLayerRegistry"
+import { fetchTierLocations } from "../visualizationLayers/hooks/useTierData"
+import { HYDROCLIMATE_ID_MAP } from "../../../content/scenarios"
+
+const ALL_HYDROCLIMATES = Object.keys(HYDROCLIMATE_ID_MAP)
 
 /**
  * Shared hook for driving map outcome visualizations from any context.
@@ -16,7 +21,8 @@ import { mapActions, useMapMode, useMapStore } from "../store"
  * - `showOnMapForGroup(outcomeCode, siblingGroupId)` — hydroclimate-aware call
  *   (list view / explore tools). Resolves the sibling group ID to the current
  *   hydroclimate's scenario ID, and reactively re-resolves when the user
- *   switches hydroclimate.
+ *   switches hydroclimate. Also eagerly prefetches tier location data for all
+ *   hydroclimate variants so subsequent switches are instant.
  */
 export function useMapVisualizationAction() {
   const showMap = useScenarioExplorerStore((s) => s.showMap)
@@ -37,6 +43,26 @@ export function useMapVisualizationAction() {
     [isMapVisible],
   )
 
+  /**
+   * Warm the tierLocationCache for every hydroclimate variant of the given
+   * sibling group + outcome so that future hydroclimate switches are instant.
+   */
+  const prefetchSiblingVariants = useCallback(
+    (outcomeCode: string, siblingGroupId: string) => {
+      const config = getOutcomeConfig(outcomeCode)
+      if (!config) return
+
+      for (const hc of ALL_HYDROCLIMATES) {
+        const mapping = buildIdMapping(hc)
+        const resolvedId = mapping[siblingGroupId]
+        if (resolvedId) {
+          fetchTierLocations(resolvedId, config.tierCode).catch(() => {})
+        }
+      }
+    },
+    [buildIdMapping],
+  )
+
   /** Hydroclimate-aware entry point (list view / explore tools). */
   const showOnMapForGroup = useCallback(
     (outcomeCode: string, siblingGroupId: string) => {
@@ -49,8 +75,9 @@ export function useMapVisualizationAction() {
         resolvedId,
         siblingGroupId,
       )
+      prefetchSiblingVariants(outcomeCode, siblingGroupId)
     },
-    [isMapVisible, buildIdMapping, hydroclimate],
+    [isMapVisible, buildIdMapping, hydroclimate, prefetchSiblingVariants],
   )
 
   const clearMap = useCallback(() => {
