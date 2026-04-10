@@ -255,8 +255,6 @@ export default function ScenarioExplorer() {
           background: theme.palette.tabPanels.explore,
           lineHeight: 1,
           color: theme.palette.common.white,
-          textShadow: "none",
-          filter: "none",
           justifyContent: "center",
           gap: 1,
         }}
@@ -282,7 +280,6 @@ export default function ScenarioExplorer() {
                 cursor: "pointer",
                 background: active ? "rgba(255,255,255,0.2)" : "transparent",
                 color: theme.palette.common.white,
-                textShadow: "none",
                 transition: "background-color 0.15s",
                 "&:hover": { background: "rgba(255,255,255,0.15)" },
               }}
@@ -296,7 +293,6 @@ export default function ScenarioExplorer() {
                   lineHeight: 1,
                   whiteSpace: "nowrap",
                   color: "inherit",
-                  textShadow: "none",
                 }}
               >
                 {label}
@@ -341,7 +337,6 @@ export default function ScenarioExplorer() {
                       ? "rgba(255,255,255,0.2)"
                       : "transparent",
                     color: theme.palette.common.white,
-                    textShadow: "none",
                     transition: "background-color 0.15s",
                     "&:hover": { background: "rgba(255,255,255,0.15)" },
                   }}
@@ -355,7 +350,6 @@ export default function ScenarioExplorer() {
                       lineHeight: 1,
                       whiteSpace: "nowrap",
                       color: "inherit",
-                      textShadow: "none",
                     }}
                   >
                     {label}
