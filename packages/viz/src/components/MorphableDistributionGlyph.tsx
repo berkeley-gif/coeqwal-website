@@ -52,8 +52,7 @@ const MAX_BAR_WIDTH = GLYPH_SIZE * 0.7
 const BAR_CORNER_RADIUS = BAR_HEIGHT / 4
 const GRID_WIDTH = COLS * CELL
 const BAR_LEFT_X = (GRID_WIDTH - GLYPH_SIZE) / 2 + GLYPH_SIZE * 0.15
-const BAR_VISUAL_HEIGHT =
-  NUM_TIERS * BAR_HEIGHT + (NUM_TIERS + 1) * BAR_SPACING
+const BAR_VISUAL_HEIGHT = NUM_TIERS * BAR_HEIGHT + (NUM_TIERS + 1) * BAR_SPACING
 
 // ── Lightweight bar-only renderer (4 <rect> pairs) ──────────────────────────
 
@@ -104,8 +103,7 @@ const BarOnly: React.FC<BarOnlyProps> = React.memo(({ values, tierColors }) => {
                 style={{
                   transform: `scaleX(${fraction})`,
                   transformOrigin: `${BAR_LEFT_X}px 0`,
-                  transition:
-                    "transform 800ms cubic-bezier(0.25,0.1,0.25,1)",
+                  transition: "transform 800ms cubic-bezier(0.25,0.1,0.25,1)",
                 }}
               />
             </g>

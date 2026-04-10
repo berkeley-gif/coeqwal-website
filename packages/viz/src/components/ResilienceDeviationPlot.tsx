@@ -326,17 +326,21 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
 
       const hasComparison = !!comparisonData?.length && !!comparisonBaselineData
 
-      const MARGIN = useMemo(() => ({
-        top: 32,
-        right: hasComparison && showSidebar ? 210 : 12,
-        bottom: 48,
-        left: 52,
-      }), [hasComparison, showSidebar])
+      const MARGIN = useMemo(
+        () => ({
+          top: 32,
+          right: hasComparison && showSidebar ? 210 : 12,
+          bottom: 48,
+          left: 52,
+        }),
+        [hasComparison, showSidebar],
+      )
 
-      const compMap = useMemo(() =>
-        hasComparison
-          ? new Map(comparisonData!.map((s) => [s.id, s]))
-          : new Map<string, VerticalParallelLineData>(),
+      const compMap = useMemo(
+        () =>
+          hasComparison
+            ? new Map(comparisonData!.map((s) => [s.id, s]))
+            : new Map<string, VerticalParallelLineData>(),
         [hasComparison, comparisonData],
       )
 

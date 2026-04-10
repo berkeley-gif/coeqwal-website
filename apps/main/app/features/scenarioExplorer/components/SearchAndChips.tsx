@@ -33,8 +33,6 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
     setShowOnlyChosen,
     groupByTheme,
     setGroupByTheme,
-    sharedScenarioIds,
-    setShowShareDrawer,
   } = useScenarioExplorerStore()
 
   return (
@@ -131,13 +129,13 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           }
         />
         <ToggleChip
-          label={showOnlyChosen ? "chosen only" : "all scenarios"}
+          label="show chosen only"
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
           tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}
         />
         <ToggleChip
-          label={groupByTheme ? "grouped by theme" : "not grouped by theme"}
+          label="group by theme"
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
           tooltip={
@@ -146,14 +144,6 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
               : "Group scenarios by theme"
           }
         />
-        {sharedScenarioIds.length > 0 && (
-          <ToggleChip
-            label={`share (${sharedScenarioIds.length})`}
-            active={true}
-            onClick={() => setShowShareDrawer(true)}
-            tooltip="Open share drawer"
-          />
-        )}
       </Box>
     </>
   )
