@@ -357,6 +357,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               onIconClick={onIconClick}
               isDistributionView={isDistributionView}
               scenarioChartData={scenarioChartData}
+              isPinned={isPinned}
+              isShared={isShared}
+              accentColor={accentColor}
+              addToShare={addToShare}
+              togglePinnedScenario={togglePinnedScenario}
             />
           )}
 
@@ -389,6 +394,76 @@ interface RowActionsProps {
   accentColor: string
   addToShare: (id: string) => void
   togglePinnedScenario: (id: string) => void
+}
+
+/**
+ * Inline pin and share icons rendered in the shortcode row of StrategyHeader.
+ * Always visible (full opacity). Reverse order of sidebar (pin first, then share).
+ */
+function InlineRowActions({
+  scenarioId,
+  isPinned,
+  isShared,
+  accentColor,
+  addToShare,
+  togglePinnedScenario,
+}: {
+  scenarioId: string
+  isPinned: boolean
+  isShared: boolean
+  accentColor: string
+  addToShare: (id: string) => void
+  togglePinnedScenario: (id: string) => void
+}) {
+  const theme = useTheme()
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.25,
+        ml: 0.25,
+      }}
+    >
+      <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation()
+            togglePinnedScenario(scenarioId)
+          }}
+          sx={{
+            p: 0.25,
+            color: isPinned ? accentColor : theme.palette.grey[400],
+          }}
+        >
+          <icons.PushPin
+            sx={{
+              fontSize: "0.75rem",
+              transform: isPinned ? "none" : "rotate(45deg)",
+            }}
+          />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title={isShared ? "Added to share" : "Add to share"} arrow>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation()
+            addToShare(scenarioId)
+          }}
+          sx={{
+            p: 0.25,
+            color: isShared
+              ? theme.palette.blue.bright
+              : theme.palette.grey[400],
+          }}
+        >
+          <icons.IosShare sx={{ fontSize: "0.75rem" }} />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  )
 }
 
 function RowActions({
@@ -628,8 +703,20 @@ function NonCompactRowContent({
   onIconClick,
   isDistributionView = false,
   scenarioChartData = {},
-}: NonCompactRowContentProps) {
+  isPinned = false,
+  isShared = false,
+  accentColor,
+  addToShare,
+  togglePinnedScenario,
+}: NonCompactRowContentProps & {
+  isPinned?: boolean
+  isShared?: boolean
+  accentColor?: string
+  addToShare?: (id: string) => void
+  togglePinnedScenario?: (id: string) => void
+}) {
   const theme = useTheme()
+  const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
 
   // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
@@ -655,6 +742,18 @@ function NonCompactRowContent({
           descriptionMaxWidth="none"
           showThemeBadge={showThemeBadge}
           onThemeBadgeClick={onThemeBadgeClick}
+          inlineActions={
+            isListMode && addToShare && togglePinnedScenario && accentColor ? (
+              <InlineRowActions
+                scenarioId={scenario.scenarioId}
+                isPinned={isPinned}
+                isShared={isShared}
+                accentColor={accentColor}
+                addToShare={addToShare}
+                togglePinnedScenario={togglePinnedScenario}
+              />
+            ) : undefined
+          }
         />
       </Box>
 

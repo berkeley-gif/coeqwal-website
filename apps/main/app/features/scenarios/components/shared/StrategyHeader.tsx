@@ -38,6 +38,8 @@ export interface StrategyHeaderProps {
   showThemeBadge?: boolean
   /** Called when the theme badge is clicked.selects all scenarios of that theme */
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
+  /** Optional inline actions rendered at the end of the shortcode/badge row */
+  inlineActions?: React.ReactNode
 }
 
 /**
@@ -308,6 +310,7 @@ export function StrategyHeader({
   showThemeBadge = true,
   onTitleClick,
   onThemeBadgeClick,
+  inlineActions,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = showThemeBadge
@@ -388,6 +391,8 @@ export function StrategyHeader({
         ) : (
           strategy.theme === "baseline" && <ScenarioBadge label="Baseline" />
         )}
+
+        {inlineActions}
       </Box>
       <Typography
         variant="scenarioTitle"

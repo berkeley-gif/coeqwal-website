@@ -137,7 +137,7 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}
         />
         <ToggleChip
-          label={groupByTheme ? "grouped by theme" : "ungrouped by theme"}
+          label={groupByTheme ? "grouped by theme" : "not grouped by theme"}
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
           tooltip={
