@@ -312,13 +312,45 @@ export default function ScenarioExplorer() {
                 mx: 0.5,
               }}
             />
+            <Typography
+              component="span"
+              sx={{
+                fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                fontSize: "0.9375rem",
+                fontWeight: 500,
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+                color: theme.palette.text.secondary,
+                letterSpacing: "0.01em",
+                px: 0.5,
+              }}
+            >
+              Select scenarios using key outcomes:
+            </Typography>
             {TOOL_TABS.filter(
               (tab) => !tab.research || showResearchTools,
             ).map(({ mode, icon, label }) => {
               const active = exploreMode === mode
               return (
+                <React.Fragment key={mode}>
+                  {mode === "data" && (
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                        fontSize: "0.9375rem",
+                        fontWeight: 500,
+                        lineHeight: 1,
+                        letterSpacing: "0.01em",
+                        whiteSpace: "nowrap",
+                        color: theme.palette.text.secondary,
+                        px: 0.5,
+                      }}
+                    >
+                      View data for selected scenarios:
+                    </Typography>
+                  )}
                 <Box
-                  key={mode}
                   component="button"
                   type="button"
                   role="tab"
@@ -355,6 +387,7 @@ export default function ScenarioExplorer() {
                     {label}
                   </Typography>
                 </Box>
+                </React.Fragment>
               )
             })}
           </>
