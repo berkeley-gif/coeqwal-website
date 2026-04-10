@@ -29,6 +29,10 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
+import {
+  useMapVisualizationAction,
+  useActiveMapOutcome,
+} from "../../map/hooks"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
@@ -150,6 +154,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const accentColor = scenarioColor || theme.palette.blue.bright
   const isShared = sharedScenarioIds.includes(scenario.scenarioId)
 
+  // Map visualization hooks
+  const { showOnMap, isMapVisible } = useMapVisualizationAction()
+  const activeMapOutcome = useActiveMapOutcome()
+
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
@@ -224,7 +232,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           outcomeCode={shortCode}
           chartData={chartData}
           isActive={isActive}
-          isSelected={isSelected}
+          isSelected={
+            isSelected ||
+            (isMapVisible &&
+              activeMapOutcome?.outcomeCode === shortCode &&
+              activeMapOutcome?.scenarioId === scenario.scenarioId)
+          }
           isTooltipActive={activeTooltip === shortCode}
           variant={variantOverride}
           morphEnabled={isListMode}
@@ -233,6 +246,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           showInfoButton={showControlsBelowGlyph}
           showSortButton={showControlsBelowGlyph && sortEnabled}
           sortState={isSorted ? sortDirection : null}
+          onGlyphClick={
+            isMapVisible
+              ? () => showOnMap(shortCode, scenario.scenarioId)
+              : undefined
+          }
           onInfoClick={(e) => {
             onTooltipToggle(shortCode, e.currentTarget)
           }}
