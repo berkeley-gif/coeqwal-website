@@ -439,7 +439,7 @@ function InlineRowActions({
         >
           <icons.PushPin
             sx={{
-              fontSize: "0.75rem",
+              fontSize: "0.85rem",
               transform: isPinned ? "none" : "rotate(45deg)",
             }}
           />
@@ -459,7 +459,7 @@ function InlineRowActions({
               : theme.palette.grey[400],
           }}
         >
-          <icons.IosShare sx={{ fontSize: "0.75rem" }} />
+          <icons.IosShare sx={{ fontSize: "0.85rem" }} />
         </IconButton>
       </Tooltip>
     </Box>
@@ -846,7 +846,7 @@ function NonCompactRowContent({
               },
             }),
             gap: theme.space.gap.sm,
-            alignItems: isDistributionView ? "center" : undefined,
+            alignItems: isDistributionView ? "flex-start" : undefined,
             mt: 0,
             maxWidth: "100%",
             width: "100%",
@@ -942,7 +942,7 @@ function OutcomesOnlyRowContent({
         "@container strategy-grid (min-width: 600px)": {
           borderLeft: `1px solid ${theme.palette.grey[300]}`,
         },
-        alignItems: "end",
+        alignItems: isDistributionView ? "start" : "end",
       }}
     >
       {outcomeNames.map(({ shortCode, displayName }) =>
