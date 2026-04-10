@@ -17,6 +17,7 @@ type ChartDataPoint = {
   value: number
   tierType?: "single_value" | "multi_value"
   totalLocations?: number
+  rawCount?: number
 }
 
 const formatTierLabel = (tier: string) =>
@@ -37,6 +38,7 @@ export function convertMultiValueToChartData(
     value: item.normalized,
     tierType: "multi_value" as const,
     totalLocations: tierData.total || undefined,
+    rawCount: item.value ?? undefined,
   }))
 }
 

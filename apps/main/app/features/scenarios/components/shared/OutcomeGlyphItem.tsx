@@ -171,6 +171,16 @@ export function OutcomeGlyphItem({
         theme.palette.tiers.tier4,
       ]
 
+  const locationCounts: [number, number, number, number] | undefined =
+    chartData?.every((t) => t.rawCount != null)
+      ? (chartData.map((t) => t.rawCount!).slice(0, 4) as [
+          number,
+          number,
+          number,
+          number,
+        ])
+      : undefined
+
   const isSingleValue = isSingleValueTier(chartData)
   const autoVariant = isSingleValue ? "dots" : "bars"
   const isSingleValueDistribution =
@@ -270,6 +280,7 @@ export function OutcomeGlyphItem({
             values={values}
             tierColors={tierColors}
             mode={morphMode}
+            locationCounts={locationCounts}
           />
         </Box>
       ) : isActive ? (
