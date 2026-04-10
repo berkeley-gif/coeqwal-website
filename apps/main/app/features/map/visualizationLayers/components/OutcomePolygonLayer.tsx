@@ -137,6 +137,9 @@ function translateReservoirIds(
 /** Duration (ms) for the fill/outline fade-in when tier data first becomes available */
 const FADE_IN_DURATION = 350
 
+/** Duration (ms) for the color crossfade when data changes while already visible */
+const COLOR_TRANSITION_DURATION = 400
+
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -155,6 +158,8 @@ export function OutcomePolygonLayer({
   const outlineCreatedRef = useRef(false)
   /** RAF handle for the deferred fade-in; cancelled if the effect re-runs first */
   const fadeRafRef = useRef<number | null>(null)
+  /** Tracks whether the layer was already showing colored data (for crossfade vs fade-in) */
+  const wasShowingDataRef = useRef(false)
 
   // Get layer IDs based on type
   const { fillId, outlineId } = useMemo(
@@ -244,6 +249,7 @@ export function OutcomePolygonLayer({
         map.setPaintProperty(outlineId, "line-opacity", 0)
         map.setLayoutProperty(outlineId, "visibility", "none")
       }
+      wasShowingDataRef.current = false
       return
     }
 
@@ -266,10 +272,34 @@ export function OutcomePolygonLayer({
       if (map.getLayer(outlineId)) {
         map.setLayoutProperty(outlineId, "visibility", "none")
       }
+      wasShowingDataRef.current = false
       return
     }
 
-    // Data is ready.
+    // ── Crossfade path: data was already showing, just update colors ──
+    // Mapbox interpolates fill-color and line-color natively, so we only
+    // need to set the transition duration and update the expression.
+    if (wasShowingDataRef.current) {
+      map.setPaintProperty(fillId, "fill-color-transition", {
+        duration: COLOR_TRANSITION_DURATION,
+        delay: 0,
+      })
+      map.setPaintProperty(fillId, "fill-color", colorExpression)
+
+      if (map.getLayer(outlineId)) {
+        if (filterExpression) {
+          map.setFilter(outlineId, filterExpression)
+        }
+        map.setPaintProperty(outlineId, "line-color-transition", {
+          duration: COLOR_TRANSITION_DURATION,
+          delay: 0,
+        })
+        map.setPaintProperty(outlineId, "line-color", colorExpression)
+      }
+      return
+    }
+
+    // ── Initial fade-in path: first time data becomes available ──
     // Step 1 (this frame): apply colors, arm the transition spec, set opacity to 0,
     // and make the layer visible at opacity 0. Mapbox renders one frame at opacity 0.
     map.setPaintProperty(fillId, "fill-color", colorExpression)
@@ -383,6 +413,8 @@ export function OutcomePolygonLayer({
         map.setPaintProperty(outlineId, "line-opacity", 1)
         map.setLayoutProperty(outlineId, "visibility", "visible")
       }
+
+      wasShowingDataRef.current = true
     })
 
     return () => {
