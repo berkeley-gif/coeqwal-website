@@ -177,9 +177,36 @@ const MorphableDistributionGlyph: React.FC<MorphableDistributionGlyphProps> =
         [],
       )
 
-      // RAF morph when mode changes
+      // RAF morph when mode changes; snap when only layout changes
       useLayoutEffect(() => {
-        if (prevModeRef.current === mode) return
+        if (prevModeRef.current === mode) {
+          // Layout changed but mode didn't (e.g. hydroclimate switch).
+          // Snap all paths to their new positions without animation.
+          const isBar = mode === "bars"
+          const chromeEl = chromeRef.current
+          if (chromeEl) chromeEl.style.opacity = isBar ? "1" : "0"
+
+          for (let i = 0; i < layout.shapes.length; i++) {
+            const el = pathRefs.current[i]
+            if (!el) continue
+            const shape = layout.shapes[i]!
+            const target = getTarget(shape, mode)
+            el.setAttribute("d", pointsToD(target))
+
+            if (isBar && !shape.isRepresentative) {
+              el.style.opacity = "0"
+            } else {
+              el.style.opacity = "1"
+            }
+            if (isBar && shape.isRepresentative) {
+              el.setAttribute("fill-opacity", "0.8")
+            } else if (!isBar) {
+              el.removeAttribute("fill-opacity")
+            }
+            el.setAttribute("stroke-opacity", isBar ? "0" : "0.4")
+          }
+          return
+        }
         const fromMode = prevModeRef.current
         prevModeRef.current = mode
 
