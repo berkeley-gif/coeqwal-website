@@ -287,12 +287,12 @@ export default function ScenarioExplorer() {
               {icon}
               <Typography
                 component="span"
-                variant="tabLabelDocked"
+                variant="dashboard"
                 sx={{
                   fontWeight: active ? 600 : 500,
                   lineHeight: 1,
                   whiteSpace: "nowrap",
-                  color: "inherit",
+                  color: theme.palette.text.secondary,
                 }}
               >
                 {label}
@@ -344,12 +344,12 @@ export default function ScenarioExplorer() {
                   {icon}
                   <Typography
                     component="span"
-                    variant="tabLabelDocked"
+                    variant="dashboard"
                     sx={{
                       fontWeight: active ? 600 : 500,
                       lineHeight: 1,
                       whiteSpace: "nowrap",
-                      color: "inherit",
+                      color: theme.palette.text.secondary,
                     }}
                   >
                     {label}
