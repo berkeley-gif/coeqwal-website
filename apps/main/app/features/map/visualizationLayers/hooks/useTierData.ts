@@ -46,6 +46,14 @@ import type {
 // Module-level cache for tier location data
 const tierLocationCache = new Map<string, TierLocationsResponse>()
 
+/** Synchronous cache probe — returns cached data or null. */
+export function peekTierLocationCache(
+  scenarioId: string,
+  tierCode: string,
+): TierLocationsResponse | null {
+  return tierLocationCache.get(`${scenarioId}-${tierCode}`) ?? null
+}
+
 /**
  * Fetch tier locations with caching
  *
@@ -228,15 +236,36 @@ export function useTierData(
   const locationDataRef = useRef<Record<string, TierLocation>>({})
   const featureIdsRef = useRef<string[]>([])
 
-  // CRITICAL: Clear refs synchronously when outcome or scenarioId changes
-  // This prevents stale colors from flashing before new data loads
+  // When outcome or scenarioId changes, synchronously replace stale refs.
+  // If the new data is already in the module-level cache (e.g. prefetched
+  // for another hydroclimate), swap it in immediately so the map never
+  // renders an empty frame. Otherwise clear to empty to prevent the wrong
+  // scenario's colors from flashing.
   if (
     outcomeCode !== prevOutcomeCodeRef.current ||
     scenarioId !== prevScenarioIdRef.current
   ) {
-    tierLevelMapRef.current = {}
-    locationDataRef.current = {}
-    featureIdsRef.current = []
+    const cachedForNew =
+      outcomeCode && config && !isSingleValue
+        ? peekTierLocationCache(scenarioId, config.tierCode)
+        : null
+
+    if (cachedForNew && cachedForNew.locations.length > 0) {
+      const nextTierLevel: TierLevelMap = {}
+      const nextLocation: Record<string, TierLocation> = {}
+      cachedForNew.locations.forEach((loc) => {
+        nextTierLevel[loc.location_id] = loc.tier_level as TierLevel
+        nextLocation[loc.location_id] = loc
+      })
+      tierLevelMapRef.current = nextTierLevel
+      locationDataRef.current = nextLocation
+      featureIdsRef.current = Object.keys(nextTierLevel)
+    } else {
+      tierLevelMapRef.current = {}
+      locationDataRef.current = {}
+      featureIdsRef.current = []
+    }
+
     prevOutcomeCodeRef.current = outcomeCode
     prevScenarioIdRef.current = scenarioId
   }
