@@ -41,13 +41,8 @@ export default function LayerOrchestrator() {
 
   // Rivers visibility:
   // - Learn mode: controlled by scroll position
-  // - Get-started mode: hidden (clean map for tier animation)
-  // - Explore mode: always visible
-  const riversVisible = isLearnMode
-    ? showRivers
-    : isGetStartedMode
-      ? false
-      : isMapVisible
+  // - Get-started / Explore mode: hidden (clean map)
+  const riversVisible = isLearnMode ? showRivers : false
 
   // Rivers progress:
   // - Learn mode: animated via scroll (0 -> 1)

@@ -51,6 +51,12 @@ export function useMeetingProgress(
   const optsRef = useRef(options)
   optsRef.current = options
 
+  // Keep the last committed value in a ref so we can skip no-op updates
+  // that only differ by sub-pixel rounding. Without this guard the
+  // ResizeObserver → setProgress → re-render → layout shift → observer
+  // cycle can exceed React's update depth limit.
+  const lastValueRef = useRef(0)
+
   useEffect(() => {
     const measure = () => {
       const container = containerRef.current
@@ -75,15 +81,17 @@ export function useMeetingProgress(
 
       let meetingScrollY: number
       if (rateDiff === 0) {
-        // Same rate: relative gap is constant.
-        // If already meeting (or past), return 0; otherwise they never will.
         meetingScrollY = edgeBY <= edgeAY ? 0 : scrollRange
       } else {
         const deltaScroll = (edgeBY - edgeAY) / rateDiff
         meetingScrollY = scrollY + deltaScroll
       }
 
-      setProgress(Math.max(0, Math.min(1, meetingScrollY / scrollRange)))
+      const next = Math.max(0, Math.min(1, meetingScrollY / scrollRange))
+      if (Math.abs(next - lastValueRef.current) > 1e-4) {
+        lastValueRef.current = next
+        setProgress(next)
+      }
     }
 
     requestAnimationFrame(measure)

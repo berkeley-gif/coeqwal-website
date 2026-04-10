@@ -23,12 +23,17 @@
  * ```
  */
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useMap } from "@repo/map"
-import { useMapMode, useActiveOutcomeVisualization } from "../../store"
+import {
+  useMapMode,
+  useActiveOutcomeVisualization,
+  useExplorePanelWidth,
+} from "../../store"
 import { useTierData, type UseTierDataResult } from "./useTierData"
 import { getOutcomeConfig } from "../../config/outcomeLayerRegistry"
 import { CALIFORNIA_CENTERED_VIEW } from "../../config/cameraPresets"
+import { EXPLORE_BOUNDS } from "../../MapInstance"
 import { getOutcomeName } from "../../../../content/outcomes"
 import type { GeometryType, LayerType, OutcomeLayerConfig } from "../types"
 
@@ -73,6 +78,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   const mapAPI = useMap()
   const mapMode = useMapMode()
   const activeVisualization = useActiveOutcomeVisualization()
+  const explorePanelWidth = useExplorePanelWidth()
 
   // Extract outcomeCode and scenarioId from store
   const outcomeCode = activeVisualization?.outcomeCode ?? null
@@ -105,23 +111,75 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
   // Fetch tier data (using outcomeCode)
   const tierDataResult = useTierData(isActive ? outcomeCode : null, scenarioId)
 
-  // Camera control - zoom to camera preset (e.g., Delta views) or return to
-  // overview when switching to an outcome without a preset.
+  // Track whether we previously had an active visualization so we can
+  // return to the overview when the user deselects an outcome.
+  const wasActiveRef = useRef(false)
+
+  // Camera control — zoom to camera preset on outcome click, return to
+  // overview on deselect. In explore mode, all easeTo/fitBounds calls
+  // include left padding so the camera centers within the visible strip.
   useEffect(() => {
+    if (mapMode === "get-started") return
+
+    const isExplore = mapMode === "explore"
+    const leftPadding = isExplore
+      ? window.innerWidth * (explorePanelWidth / 100) + 10
+      : 0
+    const explorePad = {
+      left: leftPadding,
+      top: isExplore ? 20 : 0,
+      right: isExplore ? 10 : 0,
+      bottom: isExplore ? 60 : 0,
+    }
+
+    // Visualization just deactivated → return to overview
+    if (!isActive && wasActiveRef.current) {
+      wasActiveRef.current = false
+      if (isExplore) {
+        mapAPI.withMap((mapRef) => {
+          mapRef.fitBounds(EXPLORE_BOUNDS, {
+            padding: explorePad,
+            maxZoom: 10,
+            duration: 1000,
+          })
+        })
+      }
+      return
+    }
+
     if (!isActive || !config) return
     if (!tierDataResult.featureIds.length && config.requiresIdMatching) return
 
-    const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
+    wasActiveRef.current = true
 
-    if (mapMode === "explore" || mapMode === "get-started") return
+    const target = config.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
 
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
-      map.easeTo({
-        zoom: target.zoom,
-        center: { lng: target.longitude, lat: target.latitude },
-        duration: 1000,
-      })
+
+      if (config.cameraPreset) {
+        // Outcome has a specific camera preset (e.g., Delta) → zoom in
+        map.easeTo({
+          center: { lng: target.longitude, lat: target.latitude },
+          zoom: target.zoom,
+          padding: explorePad,
+          duration: 1000,
+        })
+      } else if (isExplore) {
+        // No preset in explore → fit Central Valley overview
+        mapRef.fitBounds(EXPLORE_BOUNDS, {
+          padding: explorePad,
+          maxZoom: 10,
+          duration: 1000,
+        })
+      } else {
+        // Learn mode, no preset → centered California view
+        map.easeTo({
+          center: { lng: target.longitude, lat: target.latitude },
+          zoom: target.zoom,
+          duration: 1000,
+        })
+      }
     })
   }, [
     isActive,
@@ -130,6 +188,7 @@ export function useOutcomeVisualization(): UseOutcomeVisualizationResult {
     mapAPI,
     mapMode,
     outcome,
+    explorePanelWidth,
   ])
 
   return {

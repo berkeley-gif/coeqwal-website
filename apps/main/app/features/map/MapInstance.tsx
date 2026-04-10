@@ -36,6 +36,13 @@ export const CALIFORNIA_BOUNDS: [[number, number], [number, number]] = [
   [-114.0, 42.0],
 ]
 
+/** Tighter bounds focused on the Central Valley / Delta region for the
+ *  explore tool view where the 25% strip needs more zoom. */
+export const EXPLORE_BOUNDS: [[number, number], [number, number]] = [
+  [-124.1, 34.4],
+  [-117.7, 42.5],
+]
+
 /** Mapbox style layers that need visibility management */
 const MAPBOX_LAYER_IDS = [
   "california-label",
@@ -174,15 +181,19 @@ export default function MapInstance({
   // Camera Effects
   // ============================================================================
 
-  /** Explore mode: fit to California bounds */
+  /** Explore mode: fit to Central Valley bounds, centered in the visible strip */
   useEffect(() => {
     if (mapMode !== "explore" || !map.mapRef?.current) return
 
     const leftPadding = window.innerWidth * (explorePanelWidth / 100)
-    const topPadding = explorePanelWidth > 50 ? 80 : 200
-    map.mapRef.current.fitBounds(CALIFORNIA_BOUNDS, {
-      padding: { left: leftPadding, top: topPadding, right: 0, bottom: 0 },
-      maxZoom: 7.5,
+    map.mapRef.current.fitBounds(EXPLORE_BOUNDS, {
+      padding: {
+        left: leftPadding + 10,
+        top: 20,
+        right: 10,
+        bottom: 60,
+      },
+      maxZoom: 10,
       duration: 1000,
     })
   }, [mapMode, map, explorePanelWidth])
@@ -213,10 +224,14 @@ export default function MapInstance({
 
     const handleResize = () => {
       const leftPadding = window.innerWidth * (explorePanelWidth / 100)
-      const topPadding = explorePanelWidth > 50 ? 80 : 200
-      map.mapRef.current?.fitBounds(CALIFORNIA_BOUNDS, {
-        padding: { left: leftPadding, top: topPadding, right: 0, bottom: 0 },
-        maxZoom: 7.5,
+      map.mapRef.current?.fitBounds(EXPLORE_BOUNDS, {
+        padding: {
+          left: leftPadding + 10,
+          top: 20,
+          right: 10,
+          bottom: 60,
+        },
+        maxZoom: 10,
         duration: 300,
       })
     }
@@ -280,13 +295,13 @@ export default function MapInstance({
         sx={{
           ...containerStyles,
           "& .mapboxgl-ctrl-bottom-left": {
-            flexDirection: "row",
+            flexDirection: isExploreMode ? "column" : "row",
             alignItems: "flex-end",
             gap: "8px",
             transition: "left 0.3s ease, right 0.3s ease, bottom 0.3s ease",
             pointerEvents: "auto",
             ...(isExploreMode
-              ? { left: "auto", right: "170px", bottom: "12px" }
+              ? { left: "auto", right: "12px", bottom: "80px" }
               : { left: "10px", bottom: "12px" }),
             "& .mapboxgl-ctrl": { margin: "0 !important" },
           },
