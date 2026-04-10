@@ -141,9 +141,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   )
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
-  const sharedScenarioIds = useScenarioExplorerStore(
-    (s) => s.sharedScenarioIds,
-  )
+  const sharedScenarioIds = useScenarioExplorerStore((s) => s.sharedScenarioIds)
   const addToShare = useScenarioExplorerStore((s) => s.addToShare)
   const togglePinnedScenario = useScenarioExplorerStore(
     (s) => s.togglePinnedScenario,
@@ -252,7 +250,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   return (
     <Box
-      onMouseEnter={onRowHover ? () => onRowHover([scenario.scenarioId]) : undefined}
+      onMouseEnter={
+        onRowHover ? () => onRowHover([scenario.scenarioId]) : undefined
+      }
       onMouseLeave={onRowHover ? () => onRowHover(null) : undefined}
       sx={{
         gridColumn: "1 / -1",
@@ -520,7 +520,12 @@ function CompactRowContent({
             flexShrink: 0,
           }}
         >
-          <Typography variant="dashboard" sx={{ fontWeight: 500, color: theme.palette.grey[600] }}>Key operations</Typography>
+          <Typography
+            variant="dashboard"
+            sx={{ fontWeight: 500, color: theme.palette.grey[600] }}
+          >
+            Key operations
+          </Typography>
           <OperationsIconGroup
             scenarioId={scenario.scenarioId}
             theme={scenario.theme}
@@ -538,7 +543,12 @@ function CompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        <Typography variant="dashboard" sx={{ fontWeight: 500, color: theme.palette.grey[600] }}>Key outcomes</Typography>
+        <Typography
+          variant="dashboard"
+          sx={{ fontWeight: 500, color: theme.palette.grey[600] }}
+        >
+          Key outcomes
+        </Typography>
         <Box
           sx={{
             display: "flex",
@@ -692,11 +702,7 @@ function NonCompactRowContent({
         className="outcome-col"
         sx={{
           gridColumn:
-            layoutMode === "compact"
-              ? "2"
-              : isWrappedMode
-                ? "2 / -1"
-                : "4",
+            layoutMode === "compact" ? "2" : isWrappedMode ? "2 / -1" : "4",
           borderLeft:
             layoutMode === "full"
               ? `1px solid ${theme.palette.grey[300]}`
@@ -708,10 +714,7 @@ function NonCompactRowContent({
               : layoutMode === "wrapped"
                 ? theme.space.gap.md
                 : theme.space.gap.lg,
-          pb:
-            layoutMode === "compact"
-              ? 0
-              : theme.scenarios.grid.row.padding,
+          pb: layoutMode === "compact" ? 0 : theme.scenarios.grid.row.padding,
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
@@ -835,12 +838,12 @@ function OutcomesOnlyRowContent({
         rowGap: isDistributionView ? "2px" : theme.space.gap.sm,
         pt: theme.scenarios.grid.glyphOffset,
         pb: theme.scenarios.grid.row.padding,
-          pl: theme.scenarios.grid.divider.gap,
-          borderLeft: "none",
-          "@container strategy-grid (min-width: 600px)": {
-            borderLeft: `1px solid ${theme.palette.grey[300]}`,
-          },
-          alignItems: "end",
+        pl: theme.scenarios.grid.divider.gap,
+        borderLeft: "none",
+        "@container strategy-grid (min-width: 600px)": {
+          borderLeft: `1px solid ${theme.palette.grey[300]}`,
+        },
+        alignItems: "end",
       }}
     >
       {outcomeNames.map(({ shortCode, displayName }) =>

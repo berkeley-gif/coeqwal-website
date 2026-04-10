@@ -10,7 +10,7 @@ import {
   type SectionLayerConfig,
   type SectionId,
 } from "./config/sectionLayers"
-import { MAP_THEME_URLS, type MapThemeKey } from "@repo/map"
+import { MAP_THEME_URLS } from "@repo/map"
 
 // ============================================================================
 // Types

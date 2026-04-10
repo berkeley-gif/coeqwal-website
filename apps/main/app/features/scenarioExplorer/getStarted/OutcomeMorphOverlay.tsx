@@ -914,7 +914,15 @@ export default function OutcomeMorphOverlay({
       handler(progress.get())
     }
     return unsub
-  }, [progress, outcomeShapes, encodingMode, getTargetForMode, getColorForMode, interactive, selectedOutcomeCode])
+  }, [
+    progress,
+    outcomeShapes,
+    encodingMode,
+    getTargetForMode,
+    getColorForMode,
+    interactive,
+    selectedOutcomeCode,
+  ])
 
   return (
     <svg

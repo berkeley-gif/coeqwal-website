@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect, useState, useCallback } from "react"
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { scaleBand, scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
@@ -312,33 +312,33 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
       }, [])
 
       useEffect(() => {
-        if (
-          pinnedScenarioId &&
-          !data.some((s) => s.id === pinnedScenarioId)
-        ) {
+        if (pinnedScenarioId && !data.some((s) => s.id === pinnedScenarioId)) {
           setPinnedScenarioId(null)
         }
       }, [data, pinnedScenarioId])
 
       useEffect(() => {
         return () => {
-          if (hoverTimerRef.current !== null) clearTimeout(hoverTimerRef.current)
+          if (hoverTimerRef.current !== null)
+            clearTimeout(hoverTimerRef.current)
         }
       }, [])
 
-      const hasComparison =
-        !!comparisonData?.length && !!comparisonBaselineData
+      const hasComparison = !!comparisonData?.length && !!comparisonBaselineData
 
-      const MARGIN = {
+      const MARGIN = useMemo(() => ({
         top: 32,
         right: hasComparison && showSidebar ? 210 : 12,
         bottom: 48,
         left: 52,
-      }
+      }), [hasComparison, showSidebar])
 
-      const compMap = hasComparison
-        ? new Map(comparisonData!.map((s) => [s.id, s]))
-        : new Map<string, VerticalParallelLineData>()
+      const compMap = useMemo(() =>
+        hasComparison
+          ? new Map(comparisonData!.map((s) => [s.id, s]))
+          : new Map<string, VerticalParallelLineData>(),
+        [hasComparison, comparisonData],
+      )
 
       const scenarioSpreads = data.map((s) => ({
         scenario: s,
@@ -443,8 +443,7 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
           }
 
           const hasScenarioColors = lineColors.length > 0
-          const dotR =
-            data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+          const dotR = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
           const bracketHalfW = bandW * 0.42
           const effectiveJitter = bandW * 0.45
           const dotDiam = dotR * 2 + 1.5
@@ -654,7 +653,9 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
               dot
                 .on("mouseenter", function () {
                   applyFocusVisuals(scenario.id)
-                  select(this).attr("r", dotR + 2.5).raise()
+                  select(this)
+                    .attr("r", dotR + 2.5)
+                    .raise()
                   if (showScenarioPath) drawPath(scenario.id)
 
                   if (hoverTimerRef.current !== null) {
@@ -668,11 +669,7 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
                     axes,
                   )
                   const baseSpread = hasComparison
-                    ? avgTierSpread(
-                        baselineData,
-                        comparisonBaselineData!,
-                        axes,
-                      )
+                    ? avgTierSpread(baselineData, comparisonBaselineData!, axes)
                     : 0
                   const buffering =
                     hasComparison && baseSpread > 0
@@ -854,10 +851,7 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
               .selectAll<SVGCircleElement, unknown>("circle.buffer-glyph")
               .each(function () {
                 const sid = this.getAttribute("data-scenario-id") ?? ""
-                select(this).attr(
-                  "fill-opacity",
-                  sid === focusId ? 0.8 : 0.04,
-                )
+                select(this).attr("fill-opacity", sid === focusId ? 0.8 : 0.04)
               })
           }
 
@@ -880,19 +874,13 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
               .selectAll<SVGLineElement, unknown>("line.range-bar")
               .each(function () {
                 const sid = this.getAttribute("data-scenario-id") ?? ""
-                select(this).attr(
-                  "stroke-opacity",
-                  getOpacity(sid) * 0.5,
-                )
+                select(this).attr("stroke-opacity", getOpacity(sid) * 0.5)
               })
             bufferLayer
               .selectAll<SVGCircleElement, unknown>("circle.buffer-glyph")
               .each(function () {
                 const sid = this.getAttribute("data-scenario-id") ?? ""
-                select(this).attr(
-                  "fill-opacity",
-                  getOpacity(sid) * 0.6,
-                )
+                select(this).attr("fill-opacity", getOpacity(sid) * 0.6)
               })
           }
 
@@ -933,14 +921,8 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
             const sorted = [...scenarioSpreads].sort(
               (a, b) => a.spread - b.spread,
             )
-            const maxSpread = Math.max(
-              ...sorted.map((s) => s.spread),
-              0.1,
-            )
-            const barH = Math.min(
-              14,
-              (innerH - 24) / sorted.length - 2,
-            )
+            const maxSpread = Math.max(...sorted.map((s) => s.spread), 0.1)
+            const barH = Math.min(14, (innerH - 24) / sorted.length - 2)
             const barScale = scaleLinear()
               .domain([0, maxSpread])
               .range([0, sidebarW - 60])
@@ -997,24 +979,19 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
                   .attr("opacity", 0.7)
               }
 
-              const label =
+              const _label =
                 scenario.name.length > 14
                   ? scenario.name.slice(0, 14) + ".."
                   : scenario.name
               g.append("text")
-                .attr(
-                  "x",
-                  sidebarX + Math.max(bw, 1) + (isBuffering ? 18 : 5),
-                )
+                .attr("x", sidebarX + Math.max(bw, 1) + (isBuffering ? 18 : 5))
                 .attr("y", by + barH / 2)
                 .attr("dominant-baseline", "middle")
                 .attr("font-size", 8)
                 .attr("font-family", FONT_FAMILY)
                 .attr("font-weight", isBaseline ? 700 : 400)
                 .attr("fill", isBaseline ? "#2d3748" : "#718096")
-                .text(
-                  `${spread.toFixed(2)}${isBaseline ? " (BL)" : ""}`,
-                )
+                .text(`${spread.toFixed(2)}${isBaseline ? " (BL)" : ""}`)
 
               // Hover on sidebar bar highlights in main chart
               const barRect = g
@@ -1044,8 +1021,7 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
 
             // Baseline reference tick in sidebar
             if (baseBarW > 0) {
-              const sidebarEndY =
-                sidebarStartY + sorted.length * (barH + 3) + 2
+              const sidebarEndY = sidebarStartY + sorted.length * (barH + 3) + 2
               g.append("line")
                 .attr("x1", sidebarX + baseBarW)
                 .attr("y1", sidebarStartY - 3)
@@ -1162,7 +1138,6 @@ const ResilienceDeviationPlot: React.FC<ResilienceDeviationPlotProps> =
           chosenIds,
           highlightedIds,
           pinnedScenarioId,
-          comparisonData,
           comparisonBaselineData,
           showBaselineStaircase,
           showScenarioPath,
