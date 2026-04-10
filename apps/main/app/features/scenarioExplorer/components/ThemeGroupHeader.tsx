@@ -99,7 +99,7 @@ export default function ThemeGroupHeader({
       <Box
         component="span"
         sx={{
-          fontSize: "0.6rem",
+          fontSize: "0.6875rem",
           fontWeight: 600,
           letterSpacing: "0.06em",
           textTransform: "uppercase",

@@ -339,7 +339,7 @@ export function StrategyHeader({
             color: theme.palette.grey[600],
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            fontSize: "0.7rem",
+            fontSize: "0.6875rem",
             lineHeight: 1,
           }}
         >
