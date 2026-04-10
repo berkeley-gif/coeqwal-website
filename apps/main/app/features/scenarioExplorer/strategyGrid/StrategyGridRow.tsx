@@ -314,23 +314,22 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               alignItems: "flex-start",
               alignSelf: "start",
               ...(!compact && {
-                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 17px)`,
+                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 18px)`,
                 pb: theme.scenarios.grid.row.padding,
               }),
               ...(compact && { gridRow: "1 / -1" }),
             }}
           >
             <Checkbox
+              size="small"
               checked={isChosen}
               onChange={() => onToggleScenario(scenario.scenarioId)}
-              inputProps={{
-                "aria-label": `Select ${scenario.label} scenario`,
+              slotProps={{
+                input: { "aria-label": `Select ${scenario.label} scenario` },
               }}
               sx={{
-                padding: 0,
-                margin: 0,
+                ...theme.scenarios.checkbox.sm,
                 cursor: "pointer",
-                transform: "scale(0.9)",
               }}
             />
           </Box>

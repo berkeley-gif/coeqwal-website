@@ -743,6 +743,22 @@ export const themeValues = {
       letterSpacing: "0.00714em",
       color: palette.grey[900],
     },
+
+    // Reusable checkbox sx presets
+    // Usage: <Checkbox sx={theme.scenarios.checkbox.sm} />
+    checkbox: {
+      /** Small checkbox — for individual scenario rows */
+      sm: {
+        padding: 0,
+        margin: 0,
+        transform: "scale(0.8)",
+      } as const,
+      /** Standard checkbox — for group headers (theme, section) */
+      md: {
+        padding: 0,
+        transform: "scale(0.9)",
+      } as const,
+    },
   },
 }
 

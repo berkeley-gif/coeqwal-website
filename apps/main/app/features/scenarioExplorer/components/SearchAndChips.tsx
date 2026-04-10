@@ -123,7 +123,7 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           }
         />
         <ToggleChip
-          label="key ops"
+          label="key operations"
           active={showKeyOperations}
           onClick={() => setShowKeyOperations(!showKeyOperations)}
           tooltip={
@@ -137,10 +137,10 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}
         />
         <ToggleChip
-          label={groupByTheme ? "by theme" : "ungrouped"}
+          label={groupByTheme ? "grouped by theme" : "ungrouped by theme"}
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
-          tooltip={groupByTheme ? "Ungroup scenarios" : "Group by theme"}
+          tooltip={groupByTheme ? "Ungroup scenarios by theme" : "Group scenarios by theme"}
         />
         {sharedScenarioIds.length > 0 && (
           <ToggleChip
