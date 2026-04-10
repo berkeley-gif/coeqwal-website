@@ -23,7 +23,12 @@ export type MapMode = "hidden" | "learn" | "explore" | "get-started"
 export interface OutcomeVisualization {
   /** Outcome short code (e.g., "CWS_DEL", "AG_REV") */
   outcomeCode: string
+  /** Resolved scenario ID for the current hydroclimate (used by API fetches) */
   scenarioId: string
+  /** Original sibling-group ID, if the visualization was triggered from a
+   *  hydroclimate-aware context (e.g., the list view). Absent for the Learn
+   *  section where the scenario is always the historical variant. */
+  siblingGroupId?: string
 }
 
 /** Lightweight tooltip driven by the tier animation overlay hover/pin */
@@ -156,23 +161,37 @@ export const mapActions = {
     }),
 
   // Visualization
-  setOutcomeVisualization: (outcomeCode: string | null, scenarioId = "s0020") =>
+  setOutcomeVisualization: (
+    outcomeCode: string | null,
+    scenarioId = "s0020",
+    siblingGroupId?: string,
+  ) =>
     useMapStore.setState({
       activeOutcomeVisualization: outcomeCode
-        ? { outcomeCode, scenarioId }
+        ? { outcomeCode, scenarioId, siblingGroupId }
         : null,
     }),
 
   clearOutcomeVisualization: () =>
     useMapStore.setState({ activeOutcomeVisualization: null }),
 
-  toggleOutcomeVisualization: (outcomeCode: string, scenarioId = "s0020") => {
+  toggleOutcomeVisualization: (
+    outcomeCode: string,
+    scenarioId = "s0020",
+    siblingGroupId?: string,
+  ) => {
     const current = useMapStore.getState().activeOutcomeVisualization
+    // Identity check: use siblingGroupId when available so the toggle stays
+    // stable across hydroclimate changes (resolved scenarioId shifts).
+    const currentIdentity =
+      current?.siblingGroupId ?? current?.scenarioId
+    const newIdentity = siblingGroupId ?? scenarioId
+    const isSame =
+      current?.outcomeCode === outcomeCode && currentIdentity === newIdentity
     useMapStore.setState({
-      activeOutcomeVisualization:
-        current?.outcomeCode === outcomeCode
-          ? null
-          : { outcomeCode, scenarioId },
+      activeOutcomeVisualization: isSame
+        ? null
+        : { outcomeCode, scenarioId, siblingGroupId },
     })
   },
 

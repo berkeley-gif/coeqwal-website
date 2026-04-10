@@ -155,7 +155,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const isShared = sharedScenarioIds.includes(scenario.scenarioId)
 
   // Map visualization hooks
-  const { showOnMap, isMapVisible } = useMapVisualizationAction()
+  const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
   const activeMapOutcome = useActiveMapOutcome()
 
   // Get chart data for this scenario
@@ -236,7 +236,8 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
             isSelected ||
             (isMapVisible &&
               activeMapOutcome?.outcomeCode === shortCode &&
-              activeMapOutcome?.scenarioId === scenario.scenarioId)
+              (activeMapOutcome?.siblingGroupId ??
+                activeMapOutcome?.scenarioId) === scenario.scenarioId)
           }
           isTooltipActive={activeTooltip === shortCode}
           variant={variantOverride}
@@ -248,7 +249,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           sortState={isSorted ? sortDirection : null}
           onGlyphClick={
             isMapVisible
-              ? () => showOnMap(shortCode, scenario.scenarioId)
+              ? () => showOnMapForGroup(shortCode, scenario.scenarioId)
               : undefined
           }
           onInfoClick={(e) => {
