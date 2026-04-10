@@ -107,35 +107,47 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
         }}
       >
         <ToggleChip
-          label="Definitions"
+          label="definitions"
           active={showDefinitions}
           onClick={() => setShowDefinitions(!showDefinitions)}
+          tooltip={showDefinitions ? "Hide definitions" : "Show definitions"}
         />
         <ToggleChip
-          label="Baselines"
+          label="baselines"
           active={showAlternativeBaselines}
           onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
+          tooltip={
+            showAlternativeBaselines
+              ? "Hide extra baselines"
+              : "Show extra baselines"
+          }
         />
         <ToggleChip
-          label="Key ops"
+          label="key ops"
           active={showKeyOperations}
           onClick={() => setShowKeyOperations(!showKeyOperations)}
+          tooltip={
+            showKeyOperations ? "Hide key operations" : "Show key operations"
+          }
         />
         <ToggleChip
-          label="Chosen only"
+          label={showOnlyChosen ? "chosen only" : "all scenarios"}
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
+          tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}
         />
         <ToggleChip
-          label="Group by theme"
+          label={groupByTheme ? "by theme" : "ungrouped"}
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
+          tooltip={groupByTheme ? "Ungroup scenarios" : "Group by theme"}
         />
         {sharedScenarioIds.length > 0 && (
           <ToggleChip
-            label={`Share (${sharedScenarioIds.length})`}
+            label={`share (${sharedScenarioIds.length})`}
             active={true}
             onClick={() => setShowShareDrawer(true)}
+            tooltip="Open share drawer"
           />
         )}
       </Box>
