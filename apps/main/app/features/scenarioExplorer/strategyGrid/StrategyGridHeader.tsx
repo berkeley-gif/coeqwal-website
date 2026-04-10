@@ -212,7 +212,7 @@ function ColumnHeaders({
           flexWrap: "wrap",
           gap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
-          pb: 0.75,
+          pb: 0.5,
         }}
       >
         <SearchAndChips />
@@ -348,7 +348,8 @@ function OutcomeCategoryLabels({
         display: layoutMode === "compact" ? "none" : "grid",
         gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
         gap: theme.space.gap.sm,
-        pb: 0.75,
+        pt: theme.scenarios.grid.header.standard,
+        pb: theme.scenarios.grid.header.categoryLabels,
         pl: theme.scenarios.grid.divider.gap,
         ...(!outcomesOnly && {
           borderLeft: `1px solid ${theme.palette.grey[300]}`,

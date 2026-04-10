@@ -713,9 +713,9 @@ export const themeValues = {
         compact: 2,
       },
       fullBreakpoint: 1400,
-      row: { padding: 1.5, firstOffset: 0.5, internalGap: 1 },
-      divider: { gap: 1.5, pullUp: -1 },
-      header: { standard: 2, outcomes: 1, categoryLabels: 1 },
+      row: { padding: 1, firstOffset: 0.5, internalGap: 0.75 },
+      divider: { gap: 1.5, pullUp: -0.75 },
+      header: { standard: 1.5, outcomes: 0.75, categoryLabels: 0.75 },
       glyphOffset: "14px",
     },
 

@@ -71,7 +71,7 @@ export default function ThemeGroupHeader({
         gap: 0.75,
         pl: 1,
         pr: 1.5,
-        pt: isFirst ? 1 : 1.5,
+        pt: isFirst ? 0.75 : 1,
         pb: 0.5,
         cursor: "pointer",
         borderRadius: "4px",
