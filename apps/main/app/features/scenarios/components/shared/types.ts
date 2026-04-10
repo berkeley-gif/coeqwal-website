@@ -13,6 +13,8 @@ export interface ChartDataPoint {
   tierType?: "single_value" | "multi_value"
   /** Total locations across all tiers (multi_value only) */
   totalLocations?: number
+  /** Raw location count for this tier (multi_value only) */
+  rawCount?: number
 }
 
 export interface OutcomeName {
