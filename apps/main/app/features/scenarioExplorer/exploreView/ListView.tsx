@@ -226,7 +226,7 @@ export default function ListView({
         sx={{
           flexShrink: 0,
           px: theme.space.section.md,
-          pt: theme.space.component.lg,
+          pt: 1.25,
           backgroundColor: theme.palette.grey[100],
         }}
       >
