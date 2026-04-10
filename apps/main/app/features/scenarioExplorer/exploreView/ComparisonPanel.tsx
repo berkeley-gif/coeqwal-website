@@ -29,6 +29,7 @@ import {
   VerticalParallelLinePlotPeak,
   ParityPlot,
   DeviationPlot,
+  ResilienceDeviationPlot,
   TierHeatmap,
   TierSankey,
   type VerticalParallelLineData,
@@ -47,12 +48,19 @@ import mockHydroclimateTiers from "../data/mockHydroclimateTiers.json"
 import { useTierTooltipState } from "../../tooltips/useTierTooltipState"
 import { TierTooltipPortal } from "../../tooltips/TierTooltipPortal"
 
-type ChartMode = "parallel" | "parity" | "deviation" | "heatmap" | "sankey"
+type ChartMode =
+  | "parallel"
+  | "parity"
+  | "deviation"
+  | "resilience"
+  | "heatmap"
+  | "sankey"
 
 const CHART_MODES: { key: ChartMode; label: string }[] = [
   { key: "parallel", label: "Parallel" },
   { key: "parity", label: "Parity" },
   { key: "deviation", label: "Column" },
+  { key: "resilience", label: "Resilience" },
   { key: "heatmap", label: "Heatmap" },
   { key: "sankey", label: "Sankey" },
 ]
@@ -760,6 +768,65 @@ export default function ComparisonPanel({
           </Box>
         </Box>
       )}
+      {chartMode === "resilience" && (
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 0.5,
+            alignItems: "center",
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowStaircase}
+                onChange={(e) => setDeviationShowStaircase(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                baseline staircase
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowPath}
+                onChange={(e) => setDeviationShowPath(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                scenario path on hover
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={deviationShowTierZones}
+                onChange={(e) => setDeviationShowTierZones(e.target.checked)}
+                sx={checkboxSx}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                tier zones
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
+        </Box>
+      )}
       {chartMode === "sankey" && multiValueOutcomeCodes.length > 0 && (
         <Box
           sx={{
@@ -1046,6 +1113,29 @@ export default function ComparisonPanel({
           morphShowComparison={deviationMorphShowComp}
           scenarioThemes={scenarioThemeMap}
           morphGeneration={morphGeneration}
+        />
+      )}
+
+      {chartMode === "resilience" && (
+        <ResilienceDeviationPlot
+          data={parityData}
+          axes={deviationSortedAxes}
+          baselineData={baselineScenario ?? undefined}
+          responsive
+          colors={sharedChartColors}
+          lineColors={parityLineColors}
+          onLineHover={setHoveredScenario}
+          onLineClick={handleChartLineClick}
+          chosenIds={chosenIds}
+          highlightedIds={highlightedIds}
+          showBaselineStaircase={deviationShowStaircase}
+          showScenarioPath={deviationShowPath}
+          showTierZones={deviationShowTierZones}
+          comparisonData={deviationComparisonData}
+          comparisonBaselineData={deviationComparisonBaseline}
+          primaryLabel="Historical"
+          comparisonLabel={deviationComparisonLabel}
+          scenarioThemes={scenarioThemeMap}
         />
       )}
 

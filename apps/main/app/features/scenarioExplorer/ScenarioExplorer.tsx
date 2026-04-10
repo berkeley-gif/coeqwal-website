@@ -10,7 +10,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import React, { useState, useCallback, useMemo } from "react"
+import React, { useState, useCallback, useEffect, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -20,6 +20,7 @@ import {
   ExploreIcon,
   AdjustIcon,
   AppsIcon,
+  CompareArrowsIcon,
   InsightsIcon,
   Checkbox,
   FormControlLabel,
@@ -63,29 +64,39 @@ const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
   },
 ]
 
-const TOOL_TABS: { mode: ExploreMode; icon: React.ReactNode; label: string }[] =
-  [
-    {
-      mode: "list",
-      icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
-      label: "List",
-    },
-    {
-      mode: "radar",
-      icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
-      label: "Radar chart",
-    },
-    {
-      mode: "equity",
-      icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
-      label: "Distribution comparison",
-    },
-    {
-      mode: "data",
-      icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
-      label: "Data in depth",
-    },
-  ]
+const TOOL_TABS: {
+  mode: ExploreMode
+  icon: React.ReactNode
+  label: string
+  research?: boolean
+}[] = [
+  {
+    mode: "list",
+    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "List",
+  },
+  {
+    mode: "radar",
+    icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Radar chart",
+  },
+  {
+    mode: "comparison",
+    icon: <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Scenario comparison",
+    research: true,
+  },
+  {
+    mode: "equity",
+    icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Distribution comparison",
+  },
+  {
+    mode: "data",
+    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Data in depth",
+  },
+]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
 
@@ -107,6 +118,27 @@ export default function ScenarioExplorer() {
   const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
     null,
   )
+
+  // Research-only tools hidden by default, toggled with "A" key
+  const [showResearchTools, setShowResearchTools] = useState(false)
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement
+      if (
+        t.tagName === "INPUT" ||
+        t.tagName === "TEXTAREA" ||
+        t.isContentEditable
+      )
+        return
+      if (e.key === "a" || e.key === "A") {
+        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
+          setShowResearchTools((v) => !v)
+        }
+      }
+    }
+    document.addEventListener("keydown", handleKey)
+    return () => document.removeEventListener("keydown", handleKey)
+  }, [])
 
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
@@ -287,7 +319,9 @@ export default function ScenarioExplorer() {
                 mx: 0.5,
               }}
             />
-            {TOOL_TABS.map(({ mode, icon, label }) => {
+            {TOOL_TABS.filter(
+              (tab) => !tab.research || showResearchTools,
+            ).map(({ mode, icon, label }) => {
               const active = exploreMode === mode
               return (
                 <Box
