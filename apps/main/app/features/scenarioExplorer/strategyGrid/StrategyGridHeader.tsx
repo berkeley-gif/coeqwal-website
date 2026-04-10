@@ -213,7 +213,8 @@ function ColumnHeaders({
           alignContent: "center",
           alignSelf: "stretch",
           flexWrap: "wrap",
-          gap: 0.5,
+          rowGap: 1,
+          columnGap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
         }}
       >
@@ -382,11 +383,14 @@ function OutcomeCategoryLabels({
             >
               <Typography
                 component="div"
-                variant="smallSectionLabel"
                 sx={{
+                  fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  letterSpacing: "0.01em",
                   color: theme.palette.text.primary,
                   textAlign: "center",
-                  letterSpacing: "0.01em",
                 }}
               >
                 {formatOutcomeLabel(displayName)}
