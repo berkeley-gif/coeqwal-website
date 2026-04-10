@@ -156,6 +156,10 @@ export default function BeatTextOverlay({
         pattern: /\bSGMA\b/g,
         glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
       },
+      {
+        pattern: /\bDelta Conveyance Project\b/g,
+        glossaryTerm: "Delta Conveyance Project",
+      },
     ],
     [],
   )

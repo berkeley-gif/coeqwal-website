@@ -279,7 +279,7 @@ export function StrategyGridContent({
           <StrategyGridRow
             key={scenario.scenarioId}
             scenario={scenario}
-            isFirst={index === 0}
+            isFirst={!groupByTheme && index === 0}
             isHighlighted={isHighlighted}
             isChosen={selectedScenarios.includes(scenario.scenarioId)}
             compact={compact}

@@ -52,6 +52,10 @@ const GLOSSARY_TERMS = [
     pattern: /\bSGMA\b/g,
     glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
   },
+  {
+    pattern: /\bDelta Conveyance Project\b/g,
+    glossaryTerm: "Delta Conveyance Project",
+  },
 ]
 
 /**
@@ -336,7 +340,7 @@ export function StrategyHeader({
           variant="overline"
           sx={{
             color: theme.palette.grey[600],
-            letterSpacing: "0.08em",
+            letterSpacing: "0.04em",
             textTransform: "uppercase",
             fontSize: "0.6875rem",
             lineHeight: 1,

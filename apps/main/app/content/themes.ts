@@ -102,10 +102,16 @@ export interface ThemeSection {
 export interface ThemeLabelConfig {
   /** Human-readable label for display */
   label: string
+  /** Optional short description shown in an info tooltip next to the theme label */
+  tooltip?: string
 }
 
 export const THEME_LABEL_CONFIG: Record<ScenarioTheme, ThemeLabelConfig> = {
-  baseline: { label: "Baselines" },
+  baseline: {
+    label: "Baselines",
+    tooltip:
+      "Baselines represent current operations of the State Water Project and Central Valley Project. They serve as the reference point for comparing all other scenarios.",
+  },
   ag_gw: { label: "Farms and groundwater" },
   eco: { label: "Rivers, salmon and the Delta ecosystem" },
   delta: { label: "The Delta as a living place" },

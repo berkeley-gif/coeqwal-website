@@ -12,8 +12,8 @@ export interface OutcomeDotsGlyphProps {
 }
 
 /**
- * OutcomeDotsGlyph: small multiple 4-row circle display for single-value tier metrics.
- * Shows 4 circles stacked vertically where only the active tier (value=1) is filled with color.
+ * OutcomeDotsGlyph: small multiple 4-row rounded-square display for single-value tier metrics.
+ * Shows 4 rounded squares stacked vertically where only the active tier (value=1) is filled with color.
  */
 const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
   ({ values, size = 60, tierColors }) => {
@@ -21,7 +21,7 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
       ? values.map((value, idx) => ({
           label: `Tier ${idx + 1}`,
           color: tierColors[idx]!,
-          value: value, // Keep as 0 or 1 for dots
+          value: value,
         }))
       : [
           { label: "Tier 1", color: tierColors[0]!, value: 0 },
@@ -30,27 +30,27 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = React.memo(
           { label: "Tier 4", color: tierColors[3]!, value: 0 },
         ]
 
-    const circleRadius = size * 0.1 // Radius for vertical stacking
-    const rowHeight = size / 4 // Divide into 4 equal rows
-    const cx = size / 2 // Center horizontally
+    const numTiers = tiers.length
+    const barHeight = (size * 0.8) / numTiers
+    const barSpacing = (size * 0.2) / (numTiers + 1)
+    const cx = size / 2
 
     return (
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* Background */}
         <rect width={size} height={size} fill="transparent" />
 
-        {/* Circles - stacked vertically in 4 rows */}
         {tiers.map((tier, i) => {
-          const cy = rowHeight * i + rowHeight / 2 // Center in each row
+          const y = barSpacing + i * (barHeight + barSpacing)
           const isFilled = tier.value > 0
 
           return (
             <g key={tier.label}>
-              {/* Circle */}
-              <circle
-                cx={cx}
-                cy={cy}
-                r={circleRadius}
+              <rect
+                x={cx - barHeight / 2}
+                y={y}
+                width={barHeight}
+                height={barHeight}
+                rx={barHeight / 4}
                 fill={isFilled ? tier.color : "transparent"}
                 stroke={isFilled ? tier.color : "#d8d8d8"}
                 strokeWidth={2}

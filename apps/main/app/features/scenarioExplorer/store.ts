@@ -183,7 +183,7 @@ const initialState: ScenarioExplorerState = {
   showThemeBadges: false,
   selectedIconId: null,
   showAlternativeBaselines: false,
-  showDefinitions: false,
+  showDefinitions: true,
   showKeyOperations: false,
   outcomeDisplayMode: "summary",
   showMap: false,

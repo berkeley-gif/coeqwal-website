@@ -9,12 +9,74 @@
  * Used by StrategyGrid, ScenarioRow, and KeyOperationsPanel.
  */
 
-import React from "react"
+import React, { useCallback } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { HybridTooltip } from "@repo/ui"
+import { useDrawerStore } from "@repo/state/drawer"
 import type { ScenarioTheme } from "../../../../content/scenarios"
 import { getIconSize } from "./strategyIcons"
 import { getScenarioIconDefs, renderIconDef } from "./opsIcons"
+
+const OPS_GLOSSARY_TERMS = [
+  {
+    pattern: /\bSGMA\b/g,
+    glossaryTerm: "Sustainable Groundwater Management Act (SGMA)",
+  },
+  {
+    pattern: /\bDelta Conveyance Project\b/g,
+    glossaryTerm: "Delta Conveyance Project",
+  },
+]
+
+function OpsDescriptionWithLinks({ text }: { text: string }) {
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+
+  const handleClick = useCallback(
+    (glossaryTerm: string) => (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setDrawerContent({ selectedTerm: glossaryTerm })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  const combinedPattern = new RegExp(
+    `(${OPS_GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})`,
+    "g",
+  )
+  const parts = text.split(combinedPattern)
+
+  return (
+    <>
+      {parts.map((part, i) => {
+        const term = OPS_GLOSSARY_TERMS.find((t) =>
+          new RegExp(t.pattern.source).test(part),
+        )
+        if (term) {
+          return (
+            <Box
+              key={i}
+              component="button"
+              onClick={handleClick(term.glossaryTerm)}
+              sx={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                textDecoration: "underline",
+                font: "inherit",
+                color: "inherit",
+              }}
+            >
+              {part}
+            </Box>
+          )
+        }
+        return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
 
 export interface OperationsIconGroupProps {
   /** Scenario ID (e.g., "s0020", "s0025") */
@@ -59,7 +121,7 @@ export function OperationsIconGroup({
               <Typography variant="tooltipHeader" sx={{ mb: 0.5 }}>
                 {def.label}
               </Typography>
-              {def.description}
+              <OpsDescriptionWithLinks text={def.description} />
             </>
           }
         >

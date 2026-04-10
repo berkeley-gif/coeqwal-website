@@ -8,6 +8,7 @@ import {
   useTheme,
   icons,
 } from "@repo/ui/mui"
+import { InfoIconButton } from "@repo/ui"
 import { THEME_LABEL_CONFIG } from "../../../content/themes"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useScenarioExplorerStore } from "../store"
@@ -21,7 +22,6 @@ interface ThemeGroupHeaderProps {
 export default function ThemeGroupHeader({
   themeKey,
   scenarioIds,
-  isFirst = false,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const {
@@ -71,8 +71,8 @@ export default function ThemeGroupHeader({
         gap: 0.75,
         pl: 1,
         pr: 1.5,
-        pt: isFirst ? 0.75 : 1,
-        pb: 0.5,
+        pt: 0,
+        pb: 0,
         cursor: "pointer",
         borderRadius: "4px",
         "&:hover": {
@@ -113,6 +113,15 @@ export default function ThemeGroupHeader({
       >
         {themeConfig.label}
       </Box>
+
+      {themeConfig.tooltip && (
+        <Box onClick={(e) => e.stopPropagation()}>
+          <InfoIconButton
+            tooltipContent={themeConfig.tooltip}
+            placement="right"
+          />
+        </Box>
+      )}
 
       <Box sx={{ flex: 1 }} />
 

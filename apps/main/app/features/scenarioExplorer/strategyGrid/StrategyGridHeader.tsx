@@ -213,7 +213,7 @@ function ColumnHeaders({
           alignContent: "center",
           alignSelf: "stretch",
           flexWrap: "wrap",
-          rowGap: 0.75,
+          rowGap: 1.125,
           columnGap: 0.5,
           pr: theme.scenarios.grid.divider.gap,
         }}
