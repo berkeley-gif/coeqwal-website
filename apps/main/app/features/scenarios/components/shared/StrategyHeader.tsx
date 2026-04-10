@@ -240,7 +240,6 @@ function DescriptionWithGlossaryLinks({
       sx={{
         color: theme.palette.grey[600],
         ...(maxWidth && { maxWidth }),
-        lineHeight: 1.6,
         position: "relative",
       }}
     >
