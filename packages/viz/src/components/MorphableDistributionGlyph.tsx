@@ -185,6 +185,8 @@ const DistOnly: React.FC<DistOnlyProps> = React.memo(
       const counts = locationCounts
         ? (locationCounts as number[])
         : distributeSquares(values as number[], TOTAL_SQUARES)
+      // If tier 1 is empty, offset down by one row so tier 2 aligns across outcomes
+      const topOffset = counts[0] === 0 ? CELL : 0
       const rects: DistSquare[] = []
       let currentRow = 0
       for (let t = 0; t < 4; t++) {
@@ -196,7 +198,7 @@ const DistOnly: React.FC<DistOnlyProps> = React.memo(
           const row = currentRow + Math.floor(i / COLS)
           rects.push({
             x: col * CELL,
-            y: row * CELL,
+            y: row * CELL + topOffset,
             color,
             tier: t + 1,
             sourceId: `tier${t + 1}_loc${i}`,
@@ -204,7 +206,7 @@ const DistOnly: React.FC<DistOnlyProps> = React.memo(
         }
         currentRow += Math.ceil(count / COLS)
       }
-      const gridHeight = currentRow * CELL - SQUARE_GAP
+      const gridHeight = currentRow * CELL - SQUARE_GAP + topOffset
       return { rects, gridHeight }
     }, [values, tierColors, locationCounts])
 
