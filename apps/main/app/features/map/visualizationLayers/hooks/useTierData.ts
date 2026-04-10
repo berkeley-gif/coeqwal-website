@@ -69,6 +69,21 @@ async function fetchTierLocations(
   const response = await fetch(url)
 
   if (!response.ok) {
+    // 404 means no tier data exists for this scenario/outcome combo — return
+    // an empty result instead of throwing so the map simply shows nothing.
+    if (response.status === 404) {
+      const empty: TierLocationsResponse = {
+        scenario: scenarioId,
+        tier_code: tierCode,
+        tier_name: tierCode,
+        tier_type: "multi_value",
+        locations: [],
+        metadata: { total_locations: 0, location_types: [], tier_counts: {} },
+      }
+      tierLocationCache.set(cacheKey, empty)
+      return empty
+    }
+
     const errorData = await response.json().catch(() => ({}))
     throw new Error(
       errorData.detail || `Failed to fetch tier data: ${response.status}`,
