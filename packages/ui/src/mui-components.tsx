@@ -48,6 +48,7 @@ export {
   FormControlLabel,
   TextField,
   IconButton,
+  Menu,
   MenuItem,
   Select,
   FormControl,

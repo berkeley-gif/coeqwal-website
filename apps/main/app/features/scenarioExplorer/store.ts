@@ -8,6 +8,7 @@
 
 import { create, immer } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
+import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 
 // ============================================================================
 // Types
@@ -77,6 +78,9 @@ interface ScenarioExplorerState {
   showTierZones: boolean
   dimUnpinned: boolean
 
+  // Radar axis visibility
+  radarVisibleAxes: string[]
+
   // Hydroclimate selection (shared across all views)
   hydroclimate: string
 
@@ -144,6 +148,10 @@ interface ScenarioExplorerActions {
   setShowTierZones: (show: boolean) => void
   setDimUnpinned: (show: boolean) => void
 
+  // Radar axis visibility
+  toggleRadarAxis: (code: string) => void
+  setRadarVisibleAxes: (codes: string[]) => void
+
   // Hydroclimate
   setHydroclimate: (value: string) => void
 
@@ -196,6 +204,7 @@ const initialState: ScenarioExplorerState = {
   defineOutcome: false,
   showTierZones: true,
   dimUnpinned: false,
+  radarVisibleAxes: [...OUTCOME_CODE_ORDER],
   hydroclimate: "historical",
   groupByTheme: true,
   sortBy: null,
@@ -390,6 +399,23 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setDimUnpinned: (show) =>
       set((state) => {
         state.dimUnpinned = show
+      }),
+
+    toggleRadarAxis: (code) =>
+      set((state) => {
+        const idx = state.radarVisibleAxes.indexOf(code)
+        if (idx >= 0) {
+          if (state.radarVisibleAxes.length > 1) {
+            state.radarVisibleAxes.splice(idx, 1)
+          }
+        } else {
+          state.radarVisibleAxes.push(code)
+        }
+      }),
+
+    setRadarVisibleAxes: (codes) =>
+      set((state) => {
+        state.radarVisibleAxes = codes
       }),
 
     // Hydroclimate

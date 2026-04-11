@@ -21,6 +21,8 @@ import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
+import { useMapVisualizationAction } from "../../map/hooks/useMapVisualizationAction"
+import { getOutcomeCode, getOutcomeName } from "../../../content/outcomes"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -42,9 +44,21 @@ export default function RadarPanel({
     showTierZones,
     dimUnpinned,
     pinnedScenarioIds,
+    radarVisibleAxes,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
+  const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
+
+  const handleDotClick = useCallback(
+    (scenarioId: string, axisName: string) => {
+      if (!isMapVisible) return
+      const code = getOutcomeCode(axisName)
+      if (!code) return
+      showOnMapForGroup(code, scenarioId)
+    },
+    [isMapVisible, showOnMapForGroup],
+  )
 
   const chosenIds = useMemo(
     () => new Set(selectedScenarios),
@@ -117,6 +131,11 @@ export default function RadarPanel({
     return map
   }, [comparisonData, getThemeForScenario])
 
+  const visibleAxisNames = useMemo(() => {
+    const nameSet = new Set(radarVisibleAxes.map(getOutcomeName))
+    return axes.filter((a) => nameSet.has(a))
+  }, [axes, radarVisibleAxes])
+
   const highlightedData = useMemo(
     () =>
       comparisonData.map((scenario) => ({
@@ -187,7 +206,7 @@ export default function RadarPanel({
       >
         <RadarPlot
           data={highlightedData}
-          axes={axes}
+          axes={visibleAxisNames}
           responsive
           lineColors={lineColors}
           baselineData={baselineScenario ?? undefined}
@@ -198,6 +217,7 @@ export default function RadarPanel({
           morphGeneration={morphGeneration}
           pinnedScenarioIds={pinnedSet}
           onPinnedToggle={togglePinnedScenario}
+          onDotClick={handleDotClick}
           dimUnpinned={dimUnpinned}
           showTierZones={showTierZones}
           showAllPaths
