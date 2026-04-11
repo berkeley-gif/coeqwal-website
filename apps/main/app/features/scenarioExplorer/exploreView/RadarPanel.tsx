@@ -45,6 +45,7 @@ export default function RadarPanel({
     dimUnpinned,
     pinnedScenarioIds,
     radarVisibleAxes,
+    showRadarRange,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -116,6 +117,7 @@ export default function RadarPanel({
   const {
     data: comparisonData,
     axes,
+    axisRange,
     lineColors,
     baselineScenario,
     isLoading,
@@ -219,6 +221,7 @@ export default function RadarPanel({
           onPinnedToggle={togglePinnedScenario}
           onDotClick={handleDotClick}
           dimUnpinned={dimUnpinned}
+          axisRange={showRadarRange ? axisRange : undefined}
           showTierZones={showTierZones}
           showAllPaths
           onLineHover={setHoveredScenario}

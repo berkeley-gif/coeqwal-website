@@ -28,6 +28,7 @@ export interface RadarPlotProps {
   onPinnedToggle?: (scenarioId: string) => void
   onDotClick?: (scenarioId: string, axis: string) => void
   dimUnpinned?: boolean
+  axisRange?: Record<string, { min: number; max: number }>
   showDistribution?: boolean
   distributionData?: Record<
     string,
@@ -183,6 +184,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onPinnedToggle,
     onDotClick,
     dimUnpinned = false,
+    axisRange,
     showDistribution = false,
     distributionData,
   }) => {
@@ -524,6 +526,45 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("fill", "#718096")
             .text(TIER_LABELS[i] ?? "")
         })
+
+        // Range band: gray area between per-axis min and max across all scenarios
+        if (axisRange && Object.keys(axisRange).length > 0) {
+          const outerPts: [number, number][] = []
+          const innerPts: [number, number][] = []
+          axes.forEach((axis, i) => {
+            const range = axisRange[axis]
+            if (!range) return
+            const angle = getAngle(i)
+            const rMax = rScale(toTier(range.max))
+            const rMin = rScale(toTier(range.min))
+            outerPts.push([
+              cx + rMax * Math.cos(angle),
+              cy + rMax * Math.sin(angle),
+            ])
+            innerPts.push([
+              cx + rMin * Math.cos(angle),
+              cy + rMin * Math.sin(angle),
+            ])
+          })
+          if (outerPts.length >= 3) {
+            const fwd = outerPts
+              .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
+              .join(" ")
+            const rev = innerPts
+              .reverse()
+              .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
+              .join(" ")
+            g.append("path")
+              .attr("d", `${fwd} Z ${rev} Z`)
+              .attr("fill", "#cbd5e0")
+              .attr("fill-opacity", 0.35)
+              .attr("stroke", "#a0aec0")
+              .attr("stroke-width", 0.8)
+              .attr("stroke-opacity", 0.5)
+              .attr("fill-rule", "evenodd")
+              .attr("pointer-events", "none")
+          }
+        }
 
         // Capture baseline positions for ghost trace
         const baselineRadii = new Map<string, number>()
@@ -941,6 +982,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         showTierZones,
         pinnedScenarioIds,
         dimUnpinned,
+        axisRange,
         showDistribution,
         distributionData,
         getAngle,

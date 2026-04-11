@@ -118,17 +118,32 @@ function RadarAxesDropdown() {
     <>
       <Button
         size="small"
+        variant="outlined"
         onClick={(e) => setAnchorEl(e.currentTarget)}
-        endIcon={<KeyboardArrowDownIcon />}
+        endIcon={
+          <KeyboardArrowDownIcon
+            sx={{
+              fontSize: "1rem !important",
+              transition: "transform 200ms",
+              transform: open ? "rotate(180deg)" : "none",
+            }}
+          />
+        }
         sx={{
           textTransform: "none",
           fontSize: "0.7rem",
-          fontWeight: 500,
+          fontWeight: 600,
           lineHeight: 1.2,
           py: 0.25,
           px: 1,
           minHeight: 0,
-          color: "text.secondary",
+          borderColor: "divider",
+          color: "text.primary",
+          borderRadius: 1,
+          "&:hover": {
+            borderColor: "text.secondary",
+            backgroundColor: "action.hover",
+          },
         }}
       >
         Axes ({radarVisibleAxes.length}/{OUTCOME_CODE_ORDER.length})
@@ -248,6 +263,8 @@ export default function ScenarioExplorer() {
     setShowTierZones,
     dimUnpinned,
     setDimUnpinned,
+    showRadarRange,
+    setShowRadarRange,
   } = useScenarioExplorerStore()
 
   const chartControls = useMemo(() => {
@@ -302,6 +319,22 @@ export default function ScenarioExplorer() {
             }
             sx={{ mr: 1.5 }}
           />
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                checked={showRadarRange}
+                onChange={(e) => setShowRadarRange(e.target.checked)}
+                sx={CHECKBOX_SX}
+              />
+            }
+            label={
+              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
+                show range
+              </Typography>
+            }
+            sx={{ mr: 1.5 }}
+          />
           <RadarAxesDropdown />
         </ChartControlsBar>
       )
@@ -315,6 +348,8 @@ export default function ScenarioExplorer() {
     setShowTierZones,
     dimUnpinned,
     setDimUnpinned,
+    showRadarRange,
+    setShowRadarRange,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"

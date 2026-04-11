@@ -160,6 +160,30 @@ export function useComparisonData() {
     return OUTCOME_CODE_ORDER.map(getOutcomeName)
   }, [])
 
+  // Per-axis min/max across ALL scenarios in the current hydroclimate.
+  const axisRange = useMemo<Record<string, { min: number; max: number }>>(() => {
+    if (!allScoreData) return {}
+    const range: Record<string, { min: number; max: number }> = {}
+    for (const scenarioId of allScenarioIds) {
+      const scores = allScoreData[scenarioId]
+      if (!scores) continue
+      for (const code of OUTCOME_CODE_ORDER) {
+        const s = scores[code]
+        if (s?.normalized_score === undefined) continue
+        const v = s.normalized_score * 2 - 1
+        const name = getOutcomeName(code)
+        const cur = range[name]
+        if (cur) {
+          if (v < cur.min) cur.min = v
+          if (v > cur.max) cur.max = v
+        } else {
+          range[name] = { min: v, max: v }
+        }
+      }
+    }
+    return range
+  }, [allScoreData, allScenarioIds])
+
   const lineColors = useMemo(() => {
     // Create a lookup from the scenarios array
     const colorMap = new Map<string, string>(
@@ -361,6 +385,7 @@ export function useComparisonData() {
   return {
     data: parallelPlotData,
     axes,
+    axisRange,
     outcomeCodes: OUTCOME_CODE_ORDER,
     lineColors,
     scenarios,
