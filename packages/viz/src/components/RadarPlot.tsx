@@ -411,6 +411,45 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             }
           }
 
+          // Transition range shadow
+          if (axisRange && Object.keys(axisRange).length > 0) {
+            const outerPts: [number, number][] = []
+            const innerPts: [number, number][] = []
+            axes.forEach((axis, i) => {
+              const range = axisRange[axis]
+              if (!range) return
+              const angle = getAngle(i)
+              const rMax = scales.rScale(toTier(range.max))
+              const rMin = scales.rScale(toTier(range.min))
+              outerPts.push([
+                scales.cx + rMax * Math.cos(angle),
+                scales.cy + rMax * Math.sin(angle),
+              ])
+              innerPts.push([
+                scales.cx + rMin * Math.cos(angle),
+                scales.cy + rMin * Math.sin(angle),
+              ])
+            })
+            if (outerPts.length >= 3) {
+              const fwd = outerPts
+                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
+                .join(" ")
+              const rev = innerPts
+                .reverse()
+                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
+                .join(" ")
+              const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
+              if (!rangeSel.empty()) {
+                rangeSel
+                  .transition()
+                  .duration(HC_DUR)
+                  .attr("d", `${fwd} Z ${rev} Z`)
+              }
+            }
+          } else {
+            svg.select("path.range-shadow").remove()
+          }
+
           // Transition pinned/hovered polygons
           svg
             .selectAll<SVGPathElement, unknown>("path[data-path-id]")
@@ -555,6 +594,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
               .join(" ")
             g.append("path")
+              .attr("class", "range-shadow")
               .attr("d", `${fwd} Z ${rev} Z`)
               .attr("fill", "#cbd5e0")
               .attr("fill-opacity", 0.35)
