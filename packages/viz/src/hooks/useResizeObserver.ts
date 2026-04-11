@@ -35,12 +35,12 @@ export function useResizeObserver<T extends HTMLElement>(
       let width, height
 
       if ("contentRect" in entry && entry.contentRect) {
-        width = entry.contentRect.width
-        height = entry.contentRect.height
+        width = Math.round(entry.contentRect.width)
+        height = Math.round(entry.contentRect.height)
       } else if (entry.target) {
         const rect = (entry.target as HTMLElement).getBoundingClientRect()
-        width = rect.width
-        height = rect.height
+        width = Math.round(rect.width)
+        height = Math.round(rect.height)
       } else {
         return
       }
@@ -61,10 +61,11 @@ export function useResizeObserver<T extends HTMLElement>(
 
     if (targetRef.current) {
       const rect = targetRef.current.getBoundingClientRect()
+      const w = Math.round(rect.width)
+      const h = Math.round(rect.height)
       setDimensions((prev) => {
-        if (prev.width === rect.width && prev.height === rect.height)
-          return prev
-        return { width: rect.width, height: rect.height }
+        if (prev.width === w && prev.height === h) return prev
+        return { width: w, height: h }
       })
     }
 

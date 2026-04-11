@@ -69,22 +69,49 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
 
 const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
 
+const THEME_PILL_CONFIG: Record<
+  string,
+  { label: string; bg: string; text: string }
+> = {
+  baseline: { label: "Baselines", bg: "#ffd87e", text: "#7a5200" },
+  ag_gw: { label: "Farms and groundwater", bg: "#d0ebd7", text: "#2d6a4f" },
+  eco: {
+    label: "Rivers, salmon and the Delta ecosystem",
+    bg: "#CDDFF1",
+    text: "#1E4F6E",
+  },
+  delta: {
+    label: "The Delta as a living place",
+    bg: "#DED6F0",
+    text: "#3A2888",
+  },
+  cws: { label: "Community water systems", bg: "#ffe5cc", text: "#7a3000" },
+  unthemed: { label: "Other scenarios", bg: "#e0e0e0", text: "#616161" },
+}
+
 function showTooltip(
   el: HTMLDivElement,
   scenarioName: string,
   outcomeName: string,
   tierValue?: number,
+  themeKey?: string,
 ) {
   el.style.display = "block"
-  const tier = tierValue != null ? Math.min(4, Math.max(1, Math.round(tierValue))) : null
+  const tier =
+    tierValue != null ? Math.min(4, Math.max(1, Math.round(tierValue))) : null
   const tierLine =
     tier != null
       ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
         `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
         `Tier ${tier}</div>`
       : ""
+  const pill = themeKey ? THEME_PILL_CONFIG[themeKey] : undefined
+  const themeLine = pill
+    ? `<div><span style="display:inline-block;font-size:8.5px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:${pill.text};background:${pill.bg};padding:1px 4px;border-radius:2px;line-height:1.3">${pill.label}</span></div>`
+    : ""
   el.innerHTML =
-    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em">${scenarioName}</div>` +
+    themeLine +
+    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em;margin-top:${pill ? "3px" : "0"}">${scenarioName}</div>` +
     `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>` +
     tierLine
 }
@@ -192,6 +219,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onDotClick,
     dimUnpinned = false,
     axisRange,
+    scenarioThemes,
     showDistribution = false,
     distributionData,
   }) => {
@@ -745,8 +773,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const sid = el.attr("data-path-id")
               const isFocus = sid === focusId
               const isPin = pinnedScenarioIds.has(sid ?? "")
-              el.attr("stroke-width", isFocus ? 2.8 : isPin ? 1.5 : 1.2)
-                .attr("stroke-opacity", isFocus || isPin ? 0.85 : 0.07)
+              el.attr("stroke-width", isFocus ? 2.8 : isPin ? 1.5 : 1.2).attr(
+                "stroke-opacity",
+                isFocus || isPin ? 0.85 : 0.07,
+              )
             })
         }
 
@@ -780,13 +810,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const el = select(this)
               const sid = el.attr("data-path-id")
               const isPinned = pinnedScenarioIds.has(sid ?? "")
-              const isHighlighted = highlightedIds && highlightedIds.has(sid ?? "")
+              const isHighlighted =
+                highlightedIds && highlightedIds.has(sid ?? "")
               const isBackground = showAllPaths && !isPinned && !isHighlighted
               const dimmed = dimUnpinned && hasPinned && !isPinned
               let strokeOp = isBackground ? 0.55 : 0.45
               if (dimmed) strokeOp = 0.07
-              el.attr("stroke-width", isBackground ? 1.2 : 1.5)
-                .attr("stroke-opacity", strokeOp)
+              el.attr("stroke-width", isBackground ? 1.2 : 1.5).attr(
+                "stroke-opacity",
+                strokeOp,
+              )
             })
         }
 
@@ -866,7 +899,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
                 const el = tooltipRef.current
                 if (el) {
-                  showTooltip(el, scenario.name, axis, sv != null ? toTier(sv) : undefined)
+                  showTooltip(
+                    el,
+                    scenario.name,
+                    axis,
+                    sv != null ? toTier(sv) : undefined,
+                    scenarioThemes?.[scenario.id],
+                  )
                 }
 
                 if (lastNotifiedIdRef.current !== scenario.id) {
@@ -1054,6 +1093,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         pinnedScenarioIds,
         dimUnpinned,
         axisRange,
+        scenarioThemes,
         showDistribution,
         distributionData,
         getAngle,

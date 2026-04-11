@@ -712,7 +712,7 @@ export const themeValues = {
         default: 1, // 8px gap between columns
         compact: 2,
       },
-      fullBreakpoint: 1400,
+      fullBreakpoint: 1200,
       row: { padding: 1, firstOffset: 0.5, internalGap: 0.75 },
       divider: { gap: 1.5, pullUp: -0.75 },
       header: { standard: 1.5, outcomes: 0.75, categoryLabels: 0.75 },
