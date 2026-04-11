@@ -35,6 +35,7 @@ export default function UnifiedToolLayout({
 }: UnifiedToolLayoutProps) {
   const theme = useTheme()
   const showMap = useScenarioExplorerStore((s) => s.showMap)
+  const exploreMode = useScenarioExplorerStore((s) => s.exploreMode)
   const showKeyOperations = useScenarioExplorerStore((s) => s.showKeyOperations)
 
   const sidebarWidth = showKeyOperations
@@ -55,6 +56,13 @@ export default function UnifiedToolLayout({
       mapActions.setExplorePanelWidth(50)
     }
   }, [showMap])
+
+  // Clear map visualization when switching between tools so stale
+  // outcome highlights from a previous tool don't persist.
+  useEffect(() => {
+    mapActions.clearOutcomeVisualization()
+    mapActions.clearMapTooltips()
+  }, [exploreMode])
 
   return (
     <Box
