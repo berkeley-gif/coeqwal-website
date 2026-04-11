@@ -36,7 +36,7 @@ export default function LayerOrchestrator() {
   const showArrows = useShowArrows()
 
   const isLearnMode = mapMode === "learn"
-  const isGetStartedMode = mapMode === "get-started"
+
   const isMapVisible = mapMode !== "hidden"
 
   // Rivers visibility:

@@ -183,8 +183,7 @@ export const mapActions = {
     const current = useMapStore.getState().activeOutcomeVisualization
     // Identity check: use siblingGroupId when available so the toggle stays
     // stable across hydroclimate changes (resolved scenarioId shifts).
-    const currentIdentity =
-      current?.siblingGroupId ?? current?.scenarioId
+    const currentIdentity = current?.siblingGroupId ?? current?.scenarioId
     const newIdentity = siblingGroupId ?? scenarioId
     const isSame =
       current?.outcomeCode === outcomeCode && currentIdentity === newIdentity

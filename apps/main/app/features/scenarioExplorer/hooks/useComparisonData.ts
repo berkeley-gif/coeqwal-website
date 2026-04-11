@@ -161,7 +161,9 @@ export function useComparisonData() {
   }, [])
 
   // Per-axis min/max across ALL scenarios in the current hydroclimate.
-  const axisRange = useMemo<Record<string, { min: number; max: number }>>(() => {
+  const axisRange = useMemo<
+    Record<string, { min: number; max: number }>
+  >(() => {
     if (!allScoreData) return {}
     const range: Record<string, { min: number; max: number }> = {}
     for (const scenarioId of allScenarioIds) {

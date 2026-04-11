@@ -29,10 +29,7 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
-import {
-  useMapVisualizationAction,
-  useActiveMapOutcome,
-} from "../../map/hooks"
+import { useMapVisualizationAction, useActiveMapOutcome } from "../../map/hooks"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
