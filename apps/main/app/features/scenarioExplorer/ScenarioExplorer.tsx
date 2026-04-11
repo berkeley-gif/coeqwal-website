@@ -169,9 +169,7 @@ function RadarAxesDropdown() {
               edge="start"
               size="small"
               checked={allSelected}
-              indeterminate={
-                radarVisibleAxes.length > 0 && !allSelected
-              }
+              indeterminate={radarVisibleAxes.length > 0 && !allSelected}
               sx={CHECKBOX_SX}
             />
           </ListItemIcon>
@@ -183,11 +181,7 @@ function RadarAxesDropdown() {
         {OUTCOME_CODE_ORDER.map((code) => {
           const checked = radarVisibleAxes.includes(code)
           return (
-            <MenuItem
-              key={code}
-              dense
-              onClick={() => toggleRadarAxis(code)}
-            >
+            <MenuItem key={code} dense onClick={() => toggleRadarAxis(code)}>
               <ListItemIcon>
                 <Checkbox
                   edge="start"

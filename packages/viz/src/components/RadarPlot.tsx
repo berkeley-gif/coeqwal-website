@@ -852,12 +852,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   hoverNotifyTimerRef.current = null
                 }
                 resetDotVisuals()
+                pathLayer.selectAll("*").remove()
                 if (hasPinned) {
-                  pathLayer.selectAll("*").remove()
                   pinnedScenarioIds.forEach((id) => drawPolygonForScenario(id))
                   boostPinnedDots(pinnedScenarioIds)
-                } else {
-                  pathLayer.selectAll("*").remove()
+                } else if (showAllPaths) {
+                  data.forEach((s) => drawPolygonForScenario(s.id))
                 }
                 if (tooltipRef.current) hideTooltip(tooltipRef.current)
                 lastNotifiedIdRef.current = null

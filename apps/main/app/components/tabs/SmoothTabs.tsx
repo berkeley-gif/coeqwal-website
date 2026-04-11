@@ -19,7 +19,7 @@ function TabDescription({
   tab: TabKey
   onScrollPromptClick: () => void
 }) {
-  const { openThemePanel } = usePanelRoute()
+  usePanelRoute()
 
   switch (tab) {
     case "learn":
