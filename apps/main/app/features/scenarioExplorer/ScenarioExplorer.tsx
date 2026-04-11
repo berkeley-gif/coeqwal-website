@@ -24,6 +24,12 @@ import {
   InsightsIcon,
   Checkbox,
   FormControlLabel,
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  KeyboardArrowDownIcon,
 } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -48,6 +54,7 @@ import {
 } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
+import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../content/outcomes"
 
 // Top-level navigation tabs
 
@@ -99,6 +106,92 @@ const TOOL_TABS: {
 ]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
+
+function RadarAxesDropdown() {
+  const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
+    useScenarioExplorerStore()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const allSelected = radarVisibleAxes.length === OUTCOME_CODE_ORDER.length
+
+  return (
+    <>
+      <Button
+        size="small"
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        endIcon={<KeyboardArrowDownIcon />}
+        sx={{
+          textTransform: "none",
+          fontSize: "0.7rem",
+          fontWeight: 500,
+          lineHeight: 1.2,
+          py: 0.25,
+          px: 1,
+          minHeight: 0,
+          color: "text.secondary",
+        }}
+      >
+        Axes ({radarVisibleAxes.length}/{OUTCOME_CODE_ORDER.length})
+      </Button>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={() => setAnchorEl(null)}
+        slotProps={{
+          paper: { sx: { maxHeight: 360, minWidth: 220 } },
+        }}
+      >
+        <MenuItem
+          dense
+          onClick={() =>
+            setRadarVisibleAxes(
+              allSelected ? [OUTCOME_CODE_ORDER[0]!] : [...OUTCOME_CODE_ORDER],
+            )
+          }
+        >
+          <ListItemIcon>
+            <Checkbox
+              edge="start"
+              size="small"
+              checked={allSelected}
+              indeterminate={
+                radarVisibleAxes.length > 0 && !allSelected
+              }
+              sx={CHECKBOX_SX}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primary="All outcomes"
+            primaryTypographyProps={{ variant: "compactCaption" }}
+          />
+        </MenuItem>
+        {OUTCOME_CODE_ORDER.map((code) => {
+          const checked = radarVisibleAxes.includes(code)
+          return (
+            <MenuItem
+              key={code}
+              dense
+              onClick={() => toggleRadarAxis(code)}
+            >
+              <ListItemIcon>
+                <Checkbox
+                  edge="start"
+                  size="small"
+                  checked={checked}
+                  sx={CHECKBOX_SX}
+                />
+              </ListItemIcon>
+              <ListItemText
+                primary={getOutcomeName(code)}
+                primaryTypographyProps={{ variant: "compactCaption" }}
+              />
+            </MenuItem>
+          )
+        })}
+      </Menu>
+    </>
+  )
+}
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
@@ -209,6 +302,7 @@ export default function ScenarioExplorer() {
             }
             sx={{ mr: 1.5 }}
           />
+          <RadarAxesDropdown />
         </ChartControlsBar>
       )
     }

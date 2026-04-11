@@ -26,6 +26,7 @@ export interface RadarPlotProps {
   morphGeneration?: number
   pinnedScenarioIds?: Set<string>
   onPinnedToggle?: (scenarioId: string) => void
+  onDotClick?: (scenarioId: string, axis: string) => void
   dimUnpinned?: boolean
   showDistribution?: boolean
   distributionData?: Record<
@@ -180,6 +181,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     morphGeneration,
     pinnedScenarioIds: pinnedScenarioIdsProp,
     onPinnedToggle,
+    onDotClick,
     dimUnpinned = false,
     showDistribution = false,
     distributionData,
@@ -231,6 +233,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onPinnedToggleRef.current = onPinnedToggle
     }, [onPinnedToggle])
+    const onDotClickRef = useRef(onDotClick)
+    useEffect(() => {
+      onDotClickRef.current = onDotClick
+    }, [onDotClick])
 
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
@@ -779,6 +785,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .on("click", () => {
                 onPinnedToggleRef.current?.(scenario.id)
                 onLineClickRef.current?.(scenario)
+                onDotClickRef.current?.(scenario.id, axis)
               })
           })
         })
