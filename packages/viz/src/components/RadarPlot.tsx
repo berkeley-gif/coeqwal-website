@@ -67,19 +67,26 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "Winter-run salmon": ["Winter-run", "salmon"],
 }
 
+const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
+
 function showTooltip(
   el: HTMLDivElement,
-  x: number,
-  y: number,
   scenarioName: string,
   outcomeName: string,
+  tierValue?: number,
 ) {
   el.style.display = "block"
-  el.style.left = `${x}px`
-  el.style.top = `${y}px`
+  const tier = tierValue != null ? Math.min(4, Math.max(1, Math.round(tierValue))) : null
+  const tierLine =
+    tier != null
+      ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
+        `Tier ${tier}</div>`
+      : ""
   el.innerHTML =
     `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em">${scenarioName}</div>` +
-    `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>`
+    `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>` +
+    tierLine
 }
 
 function hideTooltip(el: HTMLDivElement) {
@@ -731,6 +738,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.08)
                 .attr("r", isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7)
             })
+          pathLayer
+            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-path-id")
+              const isFocus = sid === focusId
+              const isPin = pinnedScenarioIds.has(sid ?? "")
+              el.attr("stroke-width", isFocus ? 2.8 : isPin ? 1.5 : 1.2)
+                .attr("stroke-opacity", isFocus || isPin ? 0.85 : 0.07)
+            })
         }
 
         const boostPinnedDots = (ids: Set<string>) => {
@@ -756,6 +773,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 .attr("fill-opacity", op)
                 .attr("stroke-opacity", Math.min(op + 0.1, 1))
                 .attr("r", isPinned ? dotR + 3 : dotR)
+            })
+          pathLayer
+            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-path-id")
+              const isPinned = pinnedScenarioIds.has(sid ?? "")
+              const isHighlighted = highlightedIds && highlightedIds.has(sid ?? "")
+              const isBackground = showAllPaths && !isPinned && !isHighlighted
+              const dimmed = dimUnpinned && hasPinned && !isPinned
+              let strokeOp = isBackground ? 0.55 : 0.45
+              if (dimmed) strokeOp = 0.07
+              el.attr("stroke-width", isBackground ? 1.2 : 1.5)
+                .attr("stroke-opacity", strokeOp)
             })
         }
 
@@ -835,7 +866,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
                 const el = tooltipRef.current
                 if (el) {
-                  showTooltip(el, dotX, cy - radius - 30, scenario.name, axis)
+                  showTooltip(el, scenario.name, axis, sv != null ? toTier(sv) : undefined)
                 }
 
                 if (lastNotifiedIdRef.current !== scenario.id) {
@@ -1056,6 +1087,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           style={{
             display: "none",
             position: "absolute",
+            top: 12,
+            left: 12,
             background: "rgba(255,255,255,0.97)",
             border: "1px solid #eceff1",
             borderRadius: 8,
@@ -1069,7 +1102,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               "0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)",
             whiteSpace: "normal",
             maxWidth: 280,
-            transform: "translateX(-50%)",
           }}
         />
       </div>
