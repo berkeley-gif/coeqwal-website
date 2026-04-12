@@ -91,7 +91,8 @@ export default function UnifiedToolLayout({
         </Box>
       )}
 
-      {/* Tool area (flex, shrinks when map is shown) */}
+      {/* Tool area (flex, shrinks when map is shown).
+          Container query context so ToolToolbar + StrategyGrid share the same width signal. */}
       <Box
         sx={{
           flex: 1,
@@ -102,6 +103,8 @@ export default function UnifiedToolLayout({
           minWidth: 0,
           backgroundColor: theme.palette.background.paper,
           transition: "flex 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
+          containerType: "inline-size",
+          containerName: "strategy-grid",
         }}
       >
         {/* Shared toolbar */}

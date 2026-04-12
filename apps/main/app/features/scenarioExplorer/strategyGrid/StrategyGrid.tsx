@@ -82,14 +82,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   const SM_BREAKPOINT = 600
   const MD_BREAKPOINT = 900
-  const FULL_BREAKPOINT = theme.scenarios.grid.fullBreakpoint // 1400
+  const FULL_BREAKPOINT = theme.scenarios.grid.fullBreakpoint
 
   const glyphSize = containerWidth >= MD_BREAKPOINT ? 60 : 50
 
   /**
    * Layout mode determines how columns are arranged:
-   * - "full": All 4 columns inline (container ≥ 1400px)
-   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600–1399px)
+   * - "full": All 4 columns inline (container ≥ fullBreakpoint, currently 1200px)
+   * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px – fullBreakpoint)
    * - "compact": Mobile layout (below 600px)
    *
    * Derived from container width so the grid adapts when placed in a
@@ -167,7 +167,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
            * Responsive grid columns via @container queries:
            * - default: 2 columns (checkbox + content)
            * - 600px+: 4 columns (checkbox + scenario + operations + outcomes wrap)
-           * - 1400px+: Full 4 columns with outcomes inline
+           * - fullBreakpoint+: Full 4 columns with outcomes inline
            *
            * When hideOutcomes is true, columns stay at 2-3 (no col 4),
            * and a descendant selector hides `.outcome-col` elements.
