@@ -60,7 +60,10 @@ export function ErrorFallback({
         <Button
           variant="outlined"
           onClick={handleRetry}
-          sx={textColor ? { color: textColor, borderColor: textColor } : {}}
+          sx={{
+            color: textColor || "text.primary",
+            borderColor: textColor || "text.primary",
+          }}
         >
           Try again
         </Button>

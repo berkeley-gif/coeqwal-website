@@ -98,8 +98,6 @@ export interface StrategyGridContentProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
-  /** Show share/pin action buttons on each row */
-  showActions?: boolean
   /** Map of scenario ID to color for accent border / swatch */
   scenarioColors?: Record<string, string>
   /** Set of pinned scenario IDs */
@@ -147,7 +145,6 @@ export function StrategyGridContent({
   onSortChange,
   onThemeBadgeClick,
   onIconClick,
-  showActions = false,
   scenarioColors,
   pinnedScenarioIds = [],
   activeScenarioIds,
@@ -333,7 +330,6 @@ export function StrategyGridContent({
           showThemeBadge={opts.showThemeBadge}
           onThemeBadgeClick={onThemeBadgeClick}
           onIconClick={onIconClick}
-          showActions={showActions}
           scenarioColor={scenarioColors?.[scenario.scenarioId]}
           isPinned={pinnedSet.has(scenario.scenarioId)}
           isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
