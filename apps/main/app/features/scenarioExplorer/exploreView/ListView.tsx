@@ -13,8 +13,8 @@
  * Row order and data come from the shared useOrderedScenarios hook.
  */
 
-import React, { useMemo, useRef } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import React, { useEffect, useMemo, useRef } from "react"
+import { Box, Typography, Snackbar, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import StrategyGrid from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
@@ -79,7 +79,26 @@ export default function ListView({
     setSelectedIconId,
     groupByTheme,
     pinnedScenarioIds,
+    pinCapReached,
+    setMaxPinnedScenarios,
+    dismissPinCapReached,
   } = useScenarioExplorerStore()
+
+  const ROW_HEIGHT_ESTIMATE = 80
+  const MAX_STICKY_RATIO = 0.35
+
+  useEffect(() => {
+    const compute = () => {
+      const max = Math.max(
+        2,
+        Math.ceil((window.innerHeight * MAX_STICKY_RATIO) / ROW_HEIGHT_ESTIMATE),
+      )
+      setMaxPinnedScenarios(max)
+    }
+    compute()
+    window.addEventListener("resize", compute)
+    return () => window.removeEventListener("resize", compute)
+  }, [setMaxPinnedScenarios])
 
   const handleSortChange = (
     outcome: string | null,
@@ -266,6 +285,24 @@ export default function ListView({
         )}
         <StrategyGrid {...strategyGridProps} renderMode="contentOnly" />
       </Box>
+
+      <Snackbar
+        open={pinCapReached}
+        autoHideDuration={3000}
+        onClose={dismissPinCapReached}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        message="Pin limit reached — unpin a scenario to pin another"
+        ContentProps={{
+          sx: {
+            backgroundColor: theme.palette.grey[800],
+            color: theme.palette.common.white,
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            borderRadius: theme.borderRadius.sm,
+            justifyContent: "center",
+          },
+        }}
+      />
     </Box>
   )
 }
