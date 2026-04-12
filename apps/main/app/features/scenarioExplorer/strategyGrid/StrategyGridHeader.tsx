@@ -210,7 +210,7 @@ function ColumnHeaders({
           aligns vertically with the tier outcome labels in row 2 */}
       <Box
         sx={{
-          gridColumn: showOperations ? "1 / 4" : "1 / 3",
+          gridColumn: "1 / 4",
           gridRow: "1 / 3",
           display: layoutMode === "compact" ? "none" : "flex",
           alignItems: "center",

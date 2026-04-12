@@ -129,7 +129,7 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           }
         />
         <ToggleChip
-          label="show chosen only"
+          label="chosen only"
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
           tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}

@@ -42,8 +42,10 @@ export default function ToggleChip({
           : theme.palette.grey[200],
         transition: "all 150ms ease",
         "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-          color: theme.palette.blue.bright,
+          background: active
+            ? theme.palette.interaction.selectedBackground
+            : theme.palette.grey[300],
+          color: active ? theme.palette.blue.bright : theme.palette.grey[800],
         },
       }}
     >
