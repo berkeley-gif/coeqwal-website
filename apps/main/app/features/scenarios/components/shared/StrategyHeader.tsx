@@ -282,7 +282,10 @@ function useGlossaryRenderer(description: string) {
       const matchedTerm = match[1] ?? ""
       const trailingPunct = match[2] ?? ""
       for (const term of GLOSSARY_TERMS) {
-        if (matchedTerm && new RegExp(`^${term.pattern.source}$`).test(matchedTerm)) {
+        if (
+          matchedTerm &&
+          new RegExp(`^${term.pattern.source}$`).test(matchedTerm)
+        ) {
           result.push(
             <Box
               component="button"

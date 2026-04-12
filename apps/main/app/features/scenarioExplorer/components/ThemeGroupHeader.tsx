@@ -78,7 +78,9 @@ export default function ThemeGroupHeader({
         minHeight: "24px",
         borderRadius: isFlex ? 0 : "4px",
         backgroundColor: isFlex
-          ? (allChecked ? themeColors.background : theme.palette.learn.background)
+          ? allChecked
+            ? themeColors.background
+            : theme.palette.learn.background
           : allChecked
             ? themeColors.background
             : someChecked
