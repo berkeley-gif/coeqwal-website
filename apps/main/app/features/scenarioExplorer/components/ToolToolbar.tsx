@@ -20,7 +20,10 @@ interface ToolToolbarProps {
   hideTitle?: boolean
 }
 
-export default function ToolToolbar({ gridAligned, hideTitle }: ToolToolbarProps) {
+export default function ToolToolbar({
+  gridAligned,
+  hideTitle,
+}: ToolToolbarProps) {
   const theme = useTheme()
   const {
     hydroclimate,

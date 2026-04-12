@@ -14,12 +14,7 @@
  */
 
 import React, { useMemo, useEffect, useRef } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  Checkbox,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import {
   StrategyHeader,
@@ -218,8 +213,7 @@ export default function ScenarioSelectionSidebar({
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 backgroundColor: isActive ? `${accentColor}1A` : "transparent",
                 opacity: isSearchDimmed ? 0.4 : 1,
-                transition:
-                  "background-color 200ms ease, opacity 200ms ease",
+                transition: "background-color 200ms ease, opacity 200ms ease",
                 "&:hover": {
                   backgroundColor: isActive
                     ? `${accentColor}26`
@@ -259,7 +253,9 @@ export default function ScenarioSelectionSidebar({
                     <InlineRowActions
                       scenarioId={scenario.scenarioId}
                       scenarioLabel={scenario.label}
-                      displayMode={outcomeDisplayMode as "summary" | "distribution"}
+                      displayMode={
+                        outcomeDisplayMode as "summary" | "distribution"
+                      }
                       isPinned={isPinned}
                       accentColor={accentColor}
                       addToShare={addToShare}
