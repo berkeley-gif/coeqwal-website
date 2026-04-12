@@ -91,7 +91,9 @@ export default function ListView({
     const compute = () => {
       const max = Math.max(
         2,
-        Math.ceil((window.innerHeight * MAX_STICKY_RATIO) / ROW_HEIGHT_ESTIMATE),
+        Math.ceil(
+          (window.innerHeight * MAX_STICKY_RATIO) / ROW_HEIGHT_ESTIMATE,
+        ),
       )
       setMaxPinnedScenarios(max)
     }
