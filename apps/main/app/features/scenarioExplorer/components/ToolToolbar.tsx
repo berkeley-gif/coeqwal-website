@@ -161,17 +161,20 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
   )
 
   if (gridAligned) {
+    const SM = 600
+    const FULL = theme.scenarios.grid.fullBreakpoint
+
     return (
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: {
-            xs: theme.scenarios.grid.columns.xs,
-            sm: showKeyOperations
+          gridTemplateColumns: theme.scenarios.grid.columns.xs,
+          [`@container strategy-grid (min-width: ${SM}px)`]: {
+            gridTemplateColumns: showKeyOperations
               ? "32px minmax(0, 600px) 140px 1fr"
               : "32px minmax(0, 600px) 0px 1fr",
           },
-          [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
+          [`@container strategy-grid (min-width: ${FULL}px)`]: {
             gridTemplateColumns: showKeyOperations
               ? theme.scenarios.grid.columns.full
               : "32px 0.382fr 0px 1fr",
@@ -186,7 +189,10 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
       >
         <Box
           sx={{
-            gridColumn: { xs: "1 / -1", sm: "1 / 4" },
+            gridColumn: "1 / -1",
+            [`@container strategy-grid (min-width: ${SM}px)`]: {
+              gridColumn: "1 / 4",
+            },
             display: "flex",
             alignItems: "center",
           }}
@@ -205,16 +211,17 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
 
         <Box
           sx={{
-            gridColumn: { xs: "1 / -1", sm: "4" },
+            gridColumn: "1 / -1",
+            borderLeft: "none",
+            [`@container strategy-grid (min-width: ${SM}px)`]: {
+              gridColumn: "4",
+              borderLeft: `1px solid rgba(0,0,0,0.2)`,
+            },
             display: "flex",
             alignItems: "center",
             alignSelf: "stretch",
             gap: 2,
             pl: theme.scenarios.grid.divider.gap,
-            borderLeft: {
-              xs: "none",
-              sm: `1px solid rgba(0,0,0,0.2)`,
-            },
           }}
         >
           {viewControls}

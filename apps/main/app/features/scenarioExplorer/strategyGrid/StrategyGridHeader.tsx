@@ -28,9 +28,9 @@ import {
 import SearchAndChips from "../components/SearchAndChips"
 
 /**
- * Layout mode for responsive grid behavior
- * - "full": All 4 columns inline (1400px+)
- * - "wrapped": Columns 1-3 inline, column 4 wraps below (600-1399px)
+ * Layout mode for responsive grid behavior (see theme.scenarios.grid.fullBreakpoint).
+ * - "full": All 4 columns inline (container ≥ fullBreakpoint)
+ * - "wrapped": Columns 1-3 inline, column 4 wraps below (600px – fullBreakpoint)
  * - "compact": Mobile layout (below 600px)
  */
 export type LayoutMode = "full" | "wrapped" | "compact"

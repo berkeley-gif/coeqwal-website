@@ -708,9 +708,9 @@ export const themeValues = {
       columns: {
         /** Mobile (<600px): 2 columns (checkbox + content) */
         xs: "32px minmax(0, 1fr)",
-        /** Tablet/desktop (600-1399px): 4 columns - scenario capped at 600px, operations auto, remaining space on right */
+        /** 600px – fullBreakpoint: 4 columns — scenario capped at 600px, operations auto, outcomes wrap below */
         sm: "32px minmax(0, 600px) auto 1fr",
-        /** Large desktop (1400px+): Full 4 columns with outcomes inline */
+        /** Container ≥ fullBreakpoint: golden-ratio columns with outcomes inline */
         full: "32px 0.382fr 140px 1fr",
       },
       gap: {

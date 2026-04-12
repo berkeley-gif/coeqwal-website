@@ -773,8 +773,8 @@ function CompactRowContent({
 /**
  * Non-compact mode content - grid-based layout with vertical dividers
  *
- * In "full" mode (1400px+): 4 columns inline
- * In "wrapped" mode (600-1399px): 3 columns with outcomes wrapping below
+ * In "full" mode (≥ fullBreakpoint): 4 columns inline
+ * In "wrapped" mode (600px – fullBreakpoint): 3 columns with outcomes wrapping below
  */
 interface NonCompactRowContentProps {
   scenario: ScenarioForDisplay
@@ -928,31 +928,25 @@ function NonCompactRowContent({
           gap: theme.space.gap.md,
         }}
       >
-        {/* Key outcomes header — shown in wrapped and compact modes */}
-        <Typography
-          variant="dashboard"
-          sx={{
-            display: layoutMode === "full" ? "none" : "block",
-            color: theme.palette.grey[600],
-            fontWeight: 500,
-          }}
-        >
-          Key outcomes
-        </Typography>
+        {/* Key outcomes label — compact mode only (wrapped uses header row) */}
+        {layoutMode === "compact" && (
+          <Typography
+            variant="dashboard"
+            sx={{
+              color: theme.palette.grey[600],
+              fontWeight: 500,
+            }}
+          >
+            Key outcomes
+          </Typography>
+        )}
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns:
               layoutMode === "compact"
                 ? "repeat(3, 1fr)"
-                : isWrappedMode
-                  ? "repeat(5, 1fr)"
-                  : "repeat(auto-fit, minmax(60px, 1fr))",
-            ...(isWrappedMode && {
-              "@container strategy-grid (min-width: 1000px)": {
-                gridTemplateColumns: "repeat(9, 1fr)",
-              },
-            }),
+                : "repeat(auto-fit, minmax(60px, 1fr))",
             gap: theme.space.gap.sm,
             alignItems: isDistributionView ? "flex-start" : undefined,
             mt: 0,
@@ -971,14 +965,7 @@ function NonCompactRowContent({
               gridTemplateColumns:
                 layoutMode === "compact"
                   ? "repeat(3, 1fr)"
-                  : isWrappedMode
-                    ? "repeat(5, 1fr)"
-                    : "repeat(auto-fit, minmax(60px, 1fr))",
-              ...(isWrappedMode && {
-                "@container strategy-grid (min-width: 1000px)": {
-                  gridTemplateColumns: "repeat(9, 1fr)",
-                },
-              }),
+                  : "repeat(auto-fit, minmax(60px, 1fr))",
               gap: theme.space.gap.sm,
               maxWidth: "100%",
               width: "100%",
