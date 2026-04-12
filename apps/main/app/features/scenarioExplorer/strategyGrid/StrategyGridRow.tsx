@@ -827,6 +827,7 @@ function NonCompactRowContent({
       <Box
         sx={{
           gridColumn: "2",
+          minWidth: 0,
           pr: theme.scenarios.grid.divider.gap,
           pt: theme.scenarios.grid.row.padding,
           pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
