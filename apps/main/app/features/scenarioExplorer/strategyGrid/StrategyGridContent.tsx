@@ -431,8 +431,12 @@ export function StrategyGridContent({
             top: 0,
             zIndex: 2,
             backgroundColor: "#faf8f5",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            borderRadius: theme.borderRadius.sm,
+            boxShadow: `
+              -${theme.spacing(theme.space.tool.px)} 0 0 0 ${theme.palette.grey[100]},
+               ${theme.spacing(theme.space.tool.px)} 0 0 0 ${theme.palette.grey[100]},
+               0 -12px 0 0 #faf8f5,
+               0 4px 8px -2px rgba(0,0,0,0.1)
+            `,
           }}
         >
           {renderScenarioRows(pinnedScenarios, {

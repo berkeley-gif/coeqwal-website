@@ -45,6 +45,8 @@ interface ScenarioExplorerState {
   selectedScenarios: string[]
   highlightedScenario: string | null
   pinnedScenarioIds: string[]
+  maxPinnedScenarios: number
+  pinCapReached: boolean
 
   // Filtering
   searchQuery: string
@@ -113,6 +115,8 @@ interface ScenarioExplorerActions {
   setHighlightedScenario: (scenarioId: string | null) => void
   togglePinnedScenario: (scenarioId: string) => void
   clearPinnedScenarios: () => void
+  setMaxPinnedScenarios: (max: number) => void
+  dismissPinCapReached: () => void
 
   // Filtering
   setSearchQuery: (query: string) => void
@@ -186,6 +190,8 @@ const initialState: ScenarioExplorerState = {
   selectedScenarios: [],
   highlightedScenario: null,
   pinnedScenarioIds: [],
+  maxPinnedScenarios: 5,
+  pinCapReached: false,
   searchQuery: "",
   showOnlyChosen: false,
   selectedTheme: null,
@@ -266,6 +272,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         const idx = state.pinnedScenarioIds.indexOf(scenarioId)
         if (idx >= 0) {
           state.pinnedScenarioIds.splice(idx, 1)
+          state.pinCapReached = false
+        } else if (state.pinnedScenarioIds.length >= state.maxPinnedScenarios) {
+          state.pinCapReached = true
         } else {
           state.pinnedScenarioIds.push(scenarioId)
         }
@@ -274,6 +283,17 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     clearPinnedScenarios: () =>
       set((state) => {
         state.pinnedScenarioIds = []
+        state.pinCapReached = false
+      }),
+
+    setMaxPinnedScenarios: (max) =>
+      set((state) => {
+        state.maxPinnedScenarios = max
+      }),
+
+    dismissPinCapReached: () =>
+      set((state) => {
+        state.pinCapReached = false
       }),
 
     // Filtering
@@ -482,6 +502,7 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.selectedScenarios = []
         state.highlightedScenario = null
         state.pinnedScenarioIds = []
+        state.pinCapReached = false
         state.selectedTier = null
       }),
 

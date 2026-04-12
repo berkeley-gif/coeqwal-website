@@ -27,8 +27,6 @@ export default function ThemeGroupHeader({
   const {
     selectedScenarios,
     selectScenarios,
-    pinnedScenarioIds,
-    togglePinnedScenario,
     sharedScenarioIds,
     addToShare,
   } = useScenarioExplorerStore()
@@ -42,9 +40,6 @@ export default function ThemeGroupHeader({
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
     !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
-  const allPinned =
-    scenarioIds.length > 0 &&
-    scenarioIds.every((id) => pinnedScenarioIds.includes(id))
   const allShared =
     scenarioIds.length > 0 &&
     scenarioIds.every((id) => sharedScenarioIds.includes(id))
@@ -169,42 +164,6 @@ export default function ThemeGroupHeader({
           </IconButton>
         </Tooltip>
 
-        <Tooltip
-          title={
-            allPinned
-              ? `Unpin all ${themeConfig.label}`
-              : `Pin all ${themeConfig.label} scenarios`
-          }
-          arrow
-        >
-          <IconButton
-            className="theme-action-icon"
-            size="small"
-            onClick={() => {
-              if (allPinned) {
-                scenarioIds.forEach((id) => togglePinnedScenario(id))
-              } else {
-                scenarioIds.forEach((id) => {
-                  if (!pinnedScenarioIds.includes(id))
-                    togglePinnedScenario(id)
-                })
-              }
-            }}
-            sx={{
-              p: 0.25,
-              opacity: allPinned ? 1 : 0,
-              color: themeColors.text,
-              transition: "opacity 200ms ease",
-            }}
-          >
-            <icons.PushPin
-              sx={{
-                fontSize: "0.875rem",
-                transform: allPinned ? "none" : "rotate(45deg)",
-              }}
-            />
-          </IconButton>
-        </Tooltip>
       </Box>
     </Box>
   )
