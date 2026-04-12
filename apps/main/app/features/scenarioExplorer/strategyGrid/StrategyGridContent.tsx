@@ -259,16 +259,12 @@ export function StrategyGridContent({
           if (isNewGroup) {
             const ids = themeScenarioIds.get(scenario.theme) ?? []
             rows.push(
-              <Box
+              <ThemeGroupHeader
                 key={`theme-header-${scenario.theme}`}
-                sx={{ gridColumn: "1 / -1" }}
-              >
-                <ThemeGroupHeader
-                  themeKey={scenario.theme as ScenarioTheme}
-                  scenarioIds={ids}
-                  isFirst={index === 0}
-                />
-              </Box>,
+                themeKey={scenario.theme as ScenarioTheme}
+                scenarioIds={ids}
+                isFirst={index === 0}
+              />,
             )
           }
         }

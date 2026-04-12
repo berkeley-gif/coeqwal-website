@@ -66,125 +66,158 @@ export default function ThemeGroupHeader({
       data-theme-header={themeKey}
       onClick={handleToggle}
       sx={{
-        display: "flex",
+        gridColumn: "1 / -1",
+        display: "grid",
+        gridTemplateColumns: "subgrid",
         alignItems: "center",
-        gap: 0.75,
-        pl: 1,
-        pr: 1.5,
-        pt: 0,
-        pb: 0,
+        minHeight: "24px",
         cursor: "pointer",
         borderRadius: "4px",
+        backgroundColor: allChecked
+          ? themeColors.background
+          : someChecked
+            ? `${themeColors.background}44`
+            : "transparent",
+        transition: "background-color 0.15s ease",
         "&:hover": {
-          backgroundColor: `${themeColors.background}66`,
+          backgroundColor: allChecked
+            ? themeColors.background
+            : someChecked
+              ? `${themeColors.background}55`
+              : `${themeColors.background}44`,
         },
         "&:hover .theme-action-icon": {
           opacity: 1,
         },
       }}
     >
-      <Checkbox
-        checked={allChecked}
-        indeterminate={someChecked}
-        onClick={(e) => e.stopPropagation()}
-        onChange={handleToggle}
-        sx={{
-          ...theme.scenarios.checkbox.md,
-          flexShrink: 0,
-          color: themeColors.text,
-          "&.Mui-checked": { color: themeColors.text },
-          "&.MuiCheckbox-indeterminate": { color: themeColors.text },
-        }}
-      />
+      {/* Column 1: Checkbox — inherits grid column 1 from parent */}
       <Box
-        component="span"
         sx={{
-          fontSize: "0.6875rem",
-          fontWeight: 600,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          color: themeColors.text,
-          backgroundColor: themeColors.background,
-          px: "5px",
-          py: "1.5px",
-          borderRadius: "2px",
-          lineHeight: 1.2,
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          mr: -0.5,
         }}
       >
-        {themeConfig.label}
+        <Checkbox
+          checked={allChecked}
+          indeterminate={someChecked}
+          onClick={(e) => e.stopPropagation()}
+          onChange={handleToggle}
+          sx={{
+            ...theme.scenarios.checkbox.md,
+            mt: 0,
+            color: themeColors.text,
+            "&.Mui-checked": { color: themeColors.text },
+            "&.MuiCheckbox-indeterminate": { color: themeColors.text },
+          }}
+        />
       </Box>
 
-      {themeConfig.tooltip && (
-        <Box onClick={(e) => e.stopPropagation()}>
-          <InfoIconButton
-            tooltipContent={themeConfig.tooltip}
-            placement="right"
-          />
-        </Box>
-      )}
-
-      <Box sx={{ flex: 1 }} />
-
-      <Tooltip
-        title={
-          allShared ? "All shared" : `Share all ${themeConfig.label} scenarios`
-        }
-        arrow
+      {/* Column 2+: Label, info, and actions */}
+      <Box
+        sx={{
+          gridColumn: "2 / -1",
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          pr: 1.5,
+        }}
       >
-        <IconButton
-          className="theme-action-icon"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            scenarioIds.forEach((id) => addToShare(id))
-          }}
+        <Box
+          component="span"
           sx={{
-            p: 0.25,
-            opacity: allShared ? 1 : 0,
-            color: allShared ? theme.palette.blue.bright : themeColors.text,
-            transition: "opacity 200ms ease",
-          }}
-        >
-          <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip
-        title={
-          allPinned
-            ? `Unpin all ${themeConfig.label}`
-            : `Pin all ${themeConfig.label} scenarios`
-        }
-        arrow
-      >
-        <IconButton
-          className="theme-action-icon"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            if (allPinned) {
-              scenarioIds.forEach((id) => togglePinnedScenario(id))
-            } else {
-              scenarioIds.forEach((id) => {
-                if (!pinnedScenarioIds.includes(id)) togglePinnedScenario(id)
-              })
-            }
-          }}
-          sx={{
-            p: 0.25,
-            opacity: allPinned ? 1 : 0,
+            fontSize: "0.6875rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
             color: themeColors.text,
-            transition: "opacity 200ms ease",
+            backgroundColor: themeColors.background,
+            px: "5px",
+            py: "1.5px",
+            borderRadius: "2px",
+            lineHeight: 1.2,
           }}
         >
-          <icons.PushPin
-            sx={{
-              fontSize: "0.875rem",
-              transform: allPinned ? "none" : "rotate(45deg)",
+          {themeConfig.label}
+        </Box>
+
+        {themeConfig.tooltip && (
+          <Box onClick={(e) => e.stopPropagation()}>
+            <InfoIconButton
+              tooltipContent={themeConfig.tooltip}
+              placement="right"
+            />
+          </Box>
+        )}
+
+        <Box sx={{ flex: 1 }} />
+
+        <Tooltip
+          title={
+            allShared
+              ? "All shared"
+              : `Share all ${themeConfig.label} scenarios`
+          }
+          arrow
+        >
+          <IconButton
+            className="theme-action-icon"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              scenarioIds.forEach((id) => addToShare(id))
             }}
-          />
-        </IconButton>
-      </Tooltip>
+            sx={{
+              p: 0.25,
+              opacity: allShared ? 1 : 0,
+              color: allShared ? theme.palette.blue.bright : themeColors.text,
+              transition: "opacity 200ms ease",
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.8rem" }} />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip
+          title={
+            allPinned
+              ? `Unpin all ${themeConfig.label}`
+              : `Pin all ${themeConfig.label} scenarios`
+          }
+          arrow
+        >
+          <IconButton
+            className="theme-action-icon"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              if (allPinned) {
+                scenarioIds.forEach((id) => togglePinnedScenario(id))
+              } else {
+                scenarioIds.forEach((id) => {
+                  if (!pinnedScenarioIds.includes(id))
+                    togglePinnedScenario(id)
+                })
+              }
+            }}
+            sx={{
+              p: 0.25,
+              opacity: allPinned ? 1 : 0,
+              color: themeColors.text,
+              transition: "opacity 200ms ease",
+            }}
+          >
+            <icons.PushPin
+              sx={{
+                fontSize: "0.875rem",
+                transform: allPinned ? "none" : "rotate(45deg)",
+              }}
+            />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </Box>
   )
 }

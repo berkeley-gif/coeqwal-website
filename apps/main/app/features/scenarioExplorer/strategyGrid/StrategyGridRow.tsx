@@ -329,8 +329,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               justifyContent: "flex-end",
               alignItems: "flex-start",
               alignSelf: "start",
+              mr: -0.5,
               ...(!compact && {
-                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 18px)`,
+                pt: `calc(${theme.spacing(theme.scenarios.grid.row.padding as number)} + 20px)`,
                 pb: theme.scenarios.grid.row.padding,
               }),
               ...(compact && { gridRow: "1 / -1" }),
