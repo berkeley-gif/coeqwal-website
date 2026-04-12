@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from "react"
 import { usePolygonTooltip } from "./usePolygonTooltip"
 import { useTooltipState } from "./useTooltipState"
+import { getTierLabel } from "../../../../content/tiers"
 import type {
   HoveredFeatureInfo,
   OutcomeLayerConfig,
@@ -45,10 +46,28 @@ export function useMapTooltips({
   })
   const point = useTooltipState()
 
+  // Recompute tier info for point marker pinned features so they stay
+  // current when the scenario or hydroclimate changes.
+  const livePointPinned = useMemo(
+    () =>
+      point.pinnedFeatures.map((feature) => {
+        const currentTier = tierLevelMap[feature.featureId]
+        if (currentTier !== undefined && currentTier !== feature.tierLevel) {
+          return {
+            ...feature,
+            tierLevel: currentTier,
+            tierLabel: getTierLabel(currentTier),
+          }
+        }
+        return feature
+      }),
+    [point.pinnedFeatures, tierLevelMap],
+  )
+
   const hoveredFeature = point.hoveredFeature || polygon.hoveredFeature
   const pinnedFeatures = useMemo(
-    () => [...point.pinnedFeatures, ...polygon.pinnedFeatures],
-    [point.pinnedFeatures, polygon.pinnedFeatures],
+    () => [...livePointPinned, ...polygon.pinnedFeatures],
+    [livePointPinned, polygon.pinnedFeatures],
   )
   const isHoveredAlreadyPinned = useMemo(
     () =>
