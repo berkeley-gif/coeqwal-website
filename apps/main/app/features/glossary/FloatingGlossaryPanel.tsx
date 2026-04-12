@@ -162,7 +162,7 @@ export function FloatingGlossaryPanel({
     )
 
     if (termsInText.length === 0) {
-      return <Typography variant="storyBody">{definition}</Typography>
+      return <Typography variant="dashboard">{definition}</Typography>
     }
 
     // Regex to match all terms
@@ -175,7 +175,7 @@ export function FloatingGlossaryPanel({
     const parts = definition.split(regex)
 
     return (
-      <Typography variant="storyBody" component="div">
+      <Typography variant="dashboard" component="div">
         {parts.map((part, index) => {
           const matchedTerm = termsInText.find(
             (term) => term.term.toLowerCase() === part.toLowerCase(),
@@ -295,7 +295,7 @@ export function FloatingGlossaryPanel({
                           mt: 0.5,
                         }}
                       />
-                      <Typography variant="storyBody">
+                      <Typography variant="dashboard">
                         <strong>{tier.tier}:</strong> {tier.description}
                       </Typography>
                     </Box>
@@ -312,7 +312,7 @@ export function FloatingGlossaryPanel({
                   mt: theme.space.component.lg,
                 }}
               >
-                <Typography variant="storyBody" color="text.secondary">
+                <Typography variant="dashboard" color="text.secondary">
                   <em>See also: </em>
                   <Box
                     component="button"

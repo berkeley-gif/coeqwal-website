@@ -293,10 +293,11 @@ export default function ScenarioSelectionSidebar({
                   sx={{
                     flex: 1,
                     minWidth: 0,
-                    display: "flex",
-                    alignItems: "flex-start",
-                    pt: "22px",
+                    pt: 1,
                     ml: 1,
+                    "& > .MuiBox-root": {
+                      justifyContent: "center",
+                    },
                   }}
                 >
                   <OperationsIconGroup

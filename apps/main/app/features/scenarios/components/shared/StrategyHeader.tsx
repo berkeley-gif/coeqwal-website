@@ -80,34 +80,9 @@ function DescriptionWithGlossaryLinks({
   disableTruncation?: boolean
 }) {
   const theme = useTheme()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
   const [isExpanded, setIsExpanded] = useState(false)
+  const renderTextWithGlossaryLinks = useGlossaryRenderer(description)
 
-  // Handle glossary term click - opens glossary to specific entry
-  const handleGlossaryClick = useCallback(
-    (glossaryTerm: string) => (e: React.MouseEvent) => {
-      e.stopPropagation()
-      setDrawerContent({ selectedTerm: glossaryTerm })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  // WCAG 2.1.1: Handle keyboard activation for glossary links
-  const handleGlossaryKeyDown = useCallback(
-    (glossaryTerm: string) => (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault()
-        e.stopPropagation()
-        setDrawerContent({ selectedTerm: glossaryTerm })
-        openDrawer("glossary")
-      }
-    },
-    [setDrawerContent, openDrawer],
-  )
-
-  // Toggle styles for show more/less - now as buttons
-  // Using blue.medium for WCAG AA contrast compliance (~4.5:1 vs bright's ~3:1)
   const toggleButtonStyles = {
     color: theme.palette.blue.medium,
     fontStyle: "italic",
@@ -120,104 +95,12 @@ function DescriptionWithGlossaryLinks({
     "&:hover": {
       textDecoration: "underline",
     },
-    // WCAG 2.4.7: Focus visible styles
     "&:focus-visible": {
       outline: `2px solid ${theme.palette.blue.bright}`,
       outlineOffset: "2px",
       borderRadius: "2px",
     },
   }
-
-  // Glossary link styles - now as buttons
-  const glossaryLinkStyles = useMemo(
-    () => ({
-      color: theme.palette.blue.bright,
-      borderBottom: `2px solid ${theme.palette.blue.bright}`,
-      cursor: "pointer",
-      background: "none",
-      border: "none",
-      borderBottomStyle: "solid" as const,
-      borderBottomWidth: "2px",
-      borderBottomColor: theme.palette.blue.bright,
-      padding: 0,
-      font: "inherit",
-      "&:hover": {
-        borderBottomWidth: "3px",
-      },
-      // WCAG 2.4.7: Focus visible styles
-      "&:focus-visible": {
-        outline: `2px solid ${theme.palette.blue.bright}`,
-        outlineOffset: "2px",
-        borderRadius: "2px",
-      },
-    }),
-    [theme.palette.blue.bright],
-  )
-
-  // Build text content with glossary links as React nodes
-  const renderTextWithGlossaryLinks = useCallback(() => {
-    // Build combined regex pattern for all glossary terms
-    // Capture trailing punctuation in a separate group so it stays adjacent
-    const combinedPattern = new RegExp(
-      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
-      "g",
-    )
-
-    const result: React.ReactNode[] = []
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
-    while ((match = combinedPattern.exec(description)) !== null) {
-      // Add text before the match
-      if (match.index > lastIndex) {
-        result.push(description.slice(lastIndex, match.index))
-      }
-
-      const matchedTerm = match[1] ?? ""
-      const trailingPunct = match[2] ?? ""
-
-      // Find which glossary term this matches
-      for (const term of GLOSSARY_TERMS) {
-        if (
-          matchedTerm &&
-          new RegExp(`^${term.pattern.source}$`).test(matchedTerm)
-        ) {
-          result.push(
-            <Box
-              component="button"
-              type="button"
-              key={`link-${match.index}`}
-              onClick={handleGlossaryClick(term.glossaryTerm)}
-              onKeyDown={handleGlossaryKeyDown(term.glossaryTerm)}
-              tabIndex={0}
-              aria-label={`Open glossary for ${term.glossaryTerm}`}
-              sx={glossaryLinkStyles}
-            >
-              {matchedTerm}
-            </Box>,
-          )
-          if (trailingPunct) {
-            result.push(trailingPunct)
-          }
-          break
-        }
-      }
-
-      lastIndex = match.index + match[0].length
-    }
-
-    // Add any remaining text after the last match
-    if (lastIndex < description.length) {
-      result.push(description.slice(lastIndex))
-    }
-
-    return result
-  }, [
-    description,
-    handleGlossaryClick,
-    handleGlossaryKeyDown,
-    glossaryLinkStyles,
-  ])
 
   if (disableTruncation) {
     return (
@@ -336,9 +219,101 @@ function DescriptionWithGlossaryLinks({
   )
 }
 
+function useGlossaryRenderer(description: string) {
+  const theme = useTheme()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+
+  const handleClick = useCallback(
+    (term: string) => (e: React.MouseEvent) => {
+      e.stopPropagation()
+      setDrawerContent({ selectedTerm: term })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  const handleKeyDown = useCallback(
+    (term: string) => (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault()
+        e.stopPropagation()
+        setDrawerContent({ selectedTerm: term })
+        openDrawer("glossary")
+      }
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+  const linkStyles = useMemo(
+    () => ({
+      color: theme.palette.blue.bright,
+      borderBottom: `2px solid ${theme.palette.blue.bright}`,
+      cursor: "pointer",
+      background: "none",
+      border: "none",
+      borderBottomStyle: "solid" as const,
+      borderBottomWidth: "2px",
+      borderBottomColor: theme.palette.blue.bright,
+      padding: 0,
+      font: "inherit",
+      "&:hover": { borderBottomWidth: "3px" },
+      "&:focus-visible": {
+        outline: `2px solid ${theme.palette.blue.bright}`,
+        outlineOffset: "2px",
+        borderRadius: "2px",
+      },
+    }),
+    [theme.palette.blue.bright],
+  )
+
+  return useCallback(() => {
+    const combinedPattern = new RegExp(
+      `(${GLOSSARY_TERMS.map((t) => t.pattern.source).join("|")})([.,;:!?]?)`,
+      "g",
+    )
+    const result: React.ReactNode[] = []
+    let lastIndex = 0
+    let match: RegExpExecArray | null
+
+    while ((match = combinedPattern.exec(description)) !== null) {
+      if (match.index > lastIndex) {
+        result.push(description.slice(lastIndex, match.index))
+      }
+      const matchedTerm = match[1] ?? ""
+      const trailingPunct = match[2] ?? ""
+      for (const term of GLOSSARY_TERMS) {
+        if (matchedTerm && new RegExp(`^${term.pattern.source}$`).test(matchedTerm)) {
+          result.push(
+            <Box
+              component="button"
+              type="button"
+              key={`link-${match.index}`}
+              onClick={handleClick(term.glossaryTerm)}
+              onKeyDown={handleKeyDown(term.glossaryTerm)}
+              tabIndex={0}
+              aria-label={`Open glossary for ${term.glossaryTerm}`}
+              sx={linkStyles}
+            >
+              {matchedTerm}
+            </Box>,
+          )
+          if (trailingPunct) result.push(trailingPunct)
+          break
+        }
+      }
+      lastIndex = match.index + match[0].length
+    }
+    if (lastIndex < description.length) {
+      result.push(description.slice(lastIndex))
+    }
+    return result
+  }, [description, handleClick, handleKeyDown, linkStyles])
+}
+
 function CompactDescription({ description }: { description: string }) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
+  const renderGlossaryText = useGlossaryRenderer(description)
 
   const toggleStyles = {
     color: theme.palette.blue.medium,
@@ -365,7 +340,7 @@ function CompactDescription({ description }: { description: string }) {
     >
       {expanded ? (
         <>
-          {description}
+          {renderGlossaryText()}
           <Box
             component="button"
             type="button"
@@ -381,7 +356,7 @@ function CompactDescription({ description }: { description: string }) {
       ) : (
         <Box sx={{ position: "relative" }}>
           <Box sx={{ maxHeight: "2.7em", overflow: "hidden" }}>
-            {description}
+            {renderGlossaryText()}
           </Box>
           <Box
             component="button"
