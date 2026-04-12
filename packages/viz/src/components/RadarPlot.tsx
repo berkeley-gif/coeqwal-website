@@ -65,6 +65,16 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "Freshwater for Delta exports": ["Freshwater for", "Delta exports"],
   "Freshwater for in-Delta uses": ["Freshwater for", "in-Delta uses"],
   "Winter-run salmon": ["Winter-run", "salmon"],
+  "NOD: Community deliveries": ["NOD:", "Community deliveries"],
+  "SOD: Community deliveries": ["SOD:", "Community deliveries"],
+  "NOD: Agricultural revenue": ["NOD:", "Agricultural revenue"],
+  "SOD: Agricultural revenue": ["SOD:", "Agricultural revenue"],
+  "NOD: Environmental flows": ["NOD:", "Environmental flows"],
+  "SOD: Environmental flows": ["SOD:", "Environmental flows"],
+  "NOD: Reservoir storage": ["NOD:", "Reservoir storage"],
+  "SOD: Reservoir storage": ["SOD:", "Reservoir storage"],
+  "NOD: Groundwater storage": ["NOD:", "Groundwater storage"],
+  "SOD: Groundwater storage": ["SOD:", "Groundwater storage"],
 }
 
 const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
