@@ -613,6 +613,11 @@ export const themeValues = {
       y: { xs: 3, md: 4 }, // 24px / 32px vertical
     },
 
+    // Tool-level spacing (explorer tools: list, radar, equity, etc.)
+    tool: {
+      px: 2, // 16px - horizontal padding for tool content areas
+    },
+
     // Full-panel spacing - CSS padding values applied by <Panel> component
     // Uses clamp() for responsive scaling: clamp(min, preferred, max)
     panel: {
