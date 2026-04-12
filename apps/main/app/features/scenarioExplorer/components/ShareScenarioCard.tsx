@@ -62,8 +62,8 @@ export default function ShareScenarioCard({
 
       {/* Scenario full title */}
       <Typography
+        variant="body2"
         sx={{
-          fontSize: "0.8125rem",
           fontWeight: 600,
           lineHeight: 1.3,
           color: theme.palette.grey[900],
@@ -76,9 +76,9 @@ export default function ShareScenarioCard({
       {/* Chart type */}
       {description && (
         <Typography
+          variant="caption"
           sx={{
-            fontSize: "0.6875rem",
-            fontWeight: 400,
+            display: "block",
             lineHeight: 1.3,
             color: theme.palette.grey[700],
             mt: 0.25,

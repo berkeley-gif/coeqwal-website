@@ -24,12 +24,8 @@ export default function ThemeGroupHeader({
   scenarioIds,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
-  const {
-    selectedScenarios,
-    selectScenarios,
-    sharedScenarioIds,
-    addToShare,
-  } = useScenarioExplorerStore()
+  const { selectedScenarios, selectScenarios, sharedScenarioIds, addToShare } =
+    useScenarioExplorerStore()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
   const themeColors = theme.palette.waterThemes[themeKey]
@@ -163,7 +159,6 @@ export default function ThemeGroupHeader({
             <icons.IosShare sx={{ fontSize: "0.8rem" }} />
           </IconButton>
         </Tooltip>
-
       </Box>
     </Box>
   )

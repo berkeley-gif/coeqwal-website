@@ -292,8 +292,7 @@ export function StrategyGridContent({
 
       if (groupByTheme && scenario.theme) {
         const prevScenario = index > 0 ? arr[index - 1] : undefined
-        const isNewGroup =
-          index === 0 || scenario.theme !== prevScenario?.theme
+        const isNewGroup = index === 0 || scenario.theme !== prevScenario?.theme
         if (isNewGroup) {
           const ids = opts.themeIds.get(scenario.theme) ?? []
           if (ids.length > 0) {

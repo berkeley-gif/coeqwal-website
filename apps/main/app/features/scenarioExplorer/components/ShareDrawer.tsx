@@ -16,7 +16,7 @@ import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
 
 const DRAWER_WIDTH = 360
-const TAB_WIDTH = 32
+const TAB_WIDTH = 36
 
 function ShareTab({
   count,
@@ -59,20 +59,22 @@ function ShareTab({
         },
       }}
     >
-      <icons.IosShare sx={{ fontSize: "0.875rem" }} />
+      <icons.IosShare sx={{ fontSize: "1rem" }} />
       <Box
         sx={{
           width: TAB_WIDTH,
-          height: 34,
+          height: 40,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
         }}
       >
+        {/* Explicit fontSize — Typography variants get overridden by the
+            parent Box component="button" default font styles */}
         <Typography
           sx={{
-            fontSize: "0.6875rem",
+            fontSize: "0.875rem",
             fontWeight: 600,
             letterSpacing: "0.05em",
             lineHeight: 1,
@@ -173,9 +175,9 @@ export default function ShareDrawer() {
           }}
         >
           <Typography
+            variant="body1"
             sx={{
               fontWeight: 600,
-              fontSize: "0.9375rem",
               color: theme.palette.text.primary,
             }}
           >
@@ -212,8 +214,8 @@ export default function ShareDrawer() {
         >
           {sharedScenarioIds.length === 0 ? (
             <Typography
+              variant="body2"
               sx={{
-                fontSize: "0.8125rem",
                 color: theme.palette.grey[500],
                 textAlign: "center",
                 mt: 4,
@@ -276,7 +278,7 @@ export default function ShareDrawer() {
               sx={{
                 textTransform: "none",
                 color: theme.palette.grey[600],
-                fontSize: "0.75rem",
+                fontSize: "0.8125rem",
               }}
             >
               Clear all
@@ -285,7 +287,7 @@ export default function ShareDrawer() {
               variant="contained"
               size="small"
               onClick={handleGoToShare}
-              sx={{ textTransform: "none", fontSize: "0.8125rem" }}
+              sx={{ textTransform: "none", fontSize: "0.875rem" }}
             >
               Go to Share
             </Button>
