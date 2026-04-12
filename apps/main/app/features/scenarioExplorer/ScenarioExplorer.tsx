@@ -29,6 +29,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Divider,
   KeyboardArrowDownIcon,
 } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
@@ -54,7 +55,16 @@ import {
 } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
-import { OUTCOME_CODE_ORDER, getOutcomeName } from "../../content/outcomes"
+import {
+  OUTCOME_CODE_ORDER,
+  NOD_SOD_OUTCOME_CODES,
+  ALL_RADAR_AXES_ORDER,
+  NOD_CODES,
+  SOD_CODES,
+  OUTCOME_REGIONAL_VARIANTS,
+  getOutcomeName,
+  type OutcomeCode,
+} from "../../content/outcomes"
 
 // Top-level navigation tabs
 
@@ -106,14 +116,75 @@ const TOOL_TABS: {
 ]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
-const FORM_LABEL_SX = { mr: 1.5, ml: 0, alignItems: "center" } as const
+const FORM_LABEL_SX = { mr: 0, ml: 0, alignItems: "center" } as const
 
 function RadarAxesDropdown() {
   const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
     useScenarioExplorerStore()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
-  const allSelected = radarVisibleAxes.length === OUTCOME_CODE_ORDER.length
+
+  const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
+
+  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
+  const someKeySelected =
+    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
+
+  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) => axesSet.has(c))
+  const someRegionalSelected =
+    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
+
+  const allNodSelected = NOD_CODES.every((c) => axesSet.has(c))
+  const someNodSelected = !allNodSelected && NOD_CODES.some((c) => axesSet.has(c))
+
+  const allSodSelected = SOD_CODES.every((c) => axesSet.has(c))
+  const someSodSelected = !allSodSelected && SOD_CODES.some((c) => axesSet.has(c))
+
+  const toggleGroup = useCallback(
+    (codes: readonly string[], allOn: boolean) => {
+      if (allOn) {
+        const remaining = radarVisibleAxes.filter((c) => !codes.includes(c))
+        setRadarVisibleAxes(
+          remaining.length > 0 ? remaining : [OUTCOME_CODE_ORDER[0]!],
+        )
+      } else {
+        const merged = [...radarVisibleAxes]
+        for (const c of codes) {
+          if (!merged.includes(c)) merged.push(c)
+        }
+        setRadarVisibleAxes(merged)
+      }
+    },
+    [radarVisibleAxes, setRadarVisibleAxes],
+  )
+
+  const renderCheckboxItem = (
+    key: string,
+    label: string,
+    checked: boolean,
+    indeterminate: boolean,
+    onClick: () => void,
+    indent: number = 0,
+  ) => (
+    <MenuItem key={key} dense onClick={onClick} sx={{ pl: 2 + indent * 2 }}>
+      <ListItemIcon>
+        <Checkbox
+          edge="start"
+          size="small"
+          checked={checked}
+          indeterminate={indeterminate}
+          sx={CHECKBOX_SX}
+        />
+      </ListItemIcon>
+      <ListItemText
+        primary={label}
+        primaryTypographyProps={{
+          variant: "compactCaption",
+          fontWeight: indent === 0 ? 600 : 400,
+        }}
+      />
+    </MenuItem>
+  )
 
   return (
     <>
@@ -147,56 +218,72 @@ function RadarAxesDropdown() {
           },
         }}
       >
-        Axes ({radarVisibleAxes.length}/{OUTCOME_CODE_ORDER.length})
+        Axes ({radarVisibleAxes.length}/{ALL_RADAR_AXES_ORDER.length})
       </Button>
       <Menu
         anchorEl={anchorEl}
         open={open}
         onClose={() => setAnchorEl(null)}
         slotProps={{
-          paper: { sx: { maxHeight: 360, minWidth: 220 } },
+          paper: { sx: { maxHeight: 480, minWidth: 260 } },
         }}
       >
-        <MenuItem
-          dense
-          onClick={() =>
-            setRadarVisibleAxes(
-              allSelected ? [OUTCOME_CODE_ORDER[0]!] : [...OUTCOME_CODE_ORDER],
-            )
-          }
-        >
-          <ListItemIcon>
-            <Checkbox
-              edge="start"
-              size="small"
-              checked={allSelected}
-              indeterminate={radarVisibleAxes.length > 0 && !allSelected}
-              sx={CHECKBOX_SX}
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary="All outcomes"
-            primaryTypographyProps={{ variant: "compactCaption" }}
-          />
-        </MenuItem>
-        {OUTCOME_CODE_ORDER.map((code) => {
-          const checked = radarVisibleAxes.includes(code)
-          return (
-            <MenuItem key={code} dense onClick={() => toggleRadarAxis(code)}>
-              <ListItemIcon>
-                <Checkbox
-                  edge="start"
-                  size="small"
-                  checked={checked}
-                  sx={CHECKBOX_SX}
-                />
-              </ListItemIcon>
-              <ListItemText
-                primary={getOutcomeName(code)}
-                primaryTypographyProps={{ variant: "compactCaption" }}
-              />
-            </MenuItem>
-          )
+        {/* ── Collection toggles ── */}
+        {renderCheckboxItem(
+          "_all_key",
+          "All key outcomes",
+          allKeySelected,
+          someKeySelected,
+          () => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected),
+        )}
+        {renderCheckboxItem(
+          "_all_regional",
+          "All regional outcomes",
+          allRegionalSelected,
+          someRegionalSelected,
+          () => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected),
+        )}
+        {renderCheckboxItem(
+          "_nod",
+          "North of Delta (NOD)",
+          allNodSelected,
+          someNodSelected,
+          () => toggleGroup(NOD_CODES, allNodSelected),
+          1,
+        )}
+        {renderCheckboxItem(
+          "_sod",
+          "South of Delta (SOD)",
+          allSodSelected,
+          someSodSelected,
+          () => toggleGroup(SOD_CODES, allSodSelected),
+          1,
+        )}
+
+        <Divider key="_divider" sx={{ my: 0.5 }} />
+
+        {/* ── Individual axes grouped by key outcome ── */}
+        {OUTCOME_CODE_ORDER.flatMap((code) => {
+          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
+          return [
+            renderCheckboxItem(
+              code,
+              getOutcomeName(code),
+              axesSet.has(code),
+              false,
+              () => toggleRadarAxis(code),
+            ),
+            ...(variants?.map((vCode) =>
+              renderCheckboxItem(
+                vCode,
+                getOutcomeName(vCode),
+                axesSet.has(vCode),
+                false,
+                () => toggleRadarAxis(vCode),
+                1,
+              ),
+            ) ?? []),
+          ]
         })}
       </Menu>
     </>
@@ -266,6 +353,7 @@ export default function ScenarioExplorer() {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
+          <RadarAxesDropdown />
           <FormControlLabel
             control={
               <Checkbox
@@ -330,7 +418,6 @@ export default function ScenarioExplorer() {
             }
             sx={FORM_LABEL_SX}
           />
-          <RadarAxesDropdown />
         </ChartControlsBar>
       )
     }

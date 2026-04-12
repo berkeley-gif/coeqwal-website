@@ -14,9 +14,25 @@ import {
 } from "@repo/viz"
 import type { ThemeKey } from "@repo/viz"
 import { useScenarioExplorerStore } from "../store"
+import {
+  NOD_SOD_OUTCOME_CODES,
+  ALL_RADAR_AXES_ORDER,
+} from "../../../content/outcomes"
+import nodSodTiers from "../data/nod-sod-tiers.json"
 
 const PRIMARY_BASELINE_ID = "s0020"
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
+
+const nodSodData = nodSodTiers as Record<
+  string,
+  Record<string, number | null>
+>
+
+/** Convert a tier mean (1-4 scale) to the radar chart's internal format,
+ *  matching the API path: normalized_score = (4 - ws) / 3, then * 2 - 1. */
+function tierMeanToRadarValue(tierMean: number): number {
+  return ((4 - tierMean) / 3) * 2 - 1
+}
 
 /**
  * Hook to transform tier data for VerticalParallelLinePlot.
@@ -130,8 +146,6 @@ export function useComparisonData() {
       .map(({ id: scenarioId, name }) => {
         const scenarioScores = allScoreData[scenarioId] || {}
 
-        // Use display names as keys for the parallel plot axes
-        // Use null for missing data (creates gaps in the chart)
         const values: Record<string, number | null> = {}
         OUTCOME_CODE_ORDER.forEach((code) => {
           const outcomeScore = scenarioScores[code]
@@ -141,6 +155,13 @@ export function useComparisonData() {
           } else {
             values[displayName] = null
           }
+        })
+
+        const localScores = nodSodData[scenarioId]
+        NOD_SOD_OUTCOME_CODES.forEach((code) => {
+          const displayName = getOutcomeName(code)
+          const raw = localScores?.[code]
+          values[displayName] = raw != null ? tierMeanToRadarValue(raw) : null
         })
 
         return {
@@ -155,9 +176,9 @@ export function useComparisonData() {
       })
   }, [allScoreData, scenarios])
 
-  // Axes use display names for user-facing labels
+  // Axes use display names for user-facing labels (standard + NOD/SOD)
   const axes = useMemo(() => {
-    return OUTCOME_CODE_ORDER.map(getOutcomeName)
+    return ALL_RADAR_AXES_ORDER.map(getOutcomeName)
   }, [])
 
   // Per-axis min/max across ALL scenarios in the current hydroclimate.
@@ -173,6 +194,22 @@ export function useComparisonData() {
         const s = scores[code]
         if (s?.normalized_score === undefined) continue
         const v = s.normalized_score * 2 - 1
+        const name = getOutcomeName(code)
+        const cur = range[name]
+        if (cur) {
+          if (v < cur.min) cur.min = v
+          if (v > cur.max) cur.max = v
+        } else {
+          range[name] = { min: v, max: v }
+        }
+      }
+
+      const localScores = nodSodData[scenarioId]
+      if (!localScores) continue
+      for (const code of NOD_SOD_OUTCOME_CODES) {
+        const raw = localScores[code]
+        if (raw == null) continue
+        const v = tierMeanToRadarValue(raw)
         const name = getOutcomeName(code)
         const cur = range[name]
         if (cur) {
@@ -208,6 +245,12 @@ export function useComparisonData() {
       const name = getOutcomeName(code)
       values[name] =
         s?.normalized_score !== undefined ? s.normalized_score * 2 - 1 : null
+    })
+    const baselineLocal = nodSodData[PRIMARY_BASELINE_ID]
+    NOD_SOD_OUTCOME_CODES.forEach((code) => {
+      const name = getOutcomeName(code)
+      const raw = baselineLocal?.[code]
+      values[name] = raw != null ? tierMeanToRadarValue(raw) : null
     })
     return {
       id: PRIMARY_BASELINE_ID,

@@ -32,11 +32,15 @@ export type OutcomeCode = keyof typeof OUTCOME_NAMES
 export const OUTCOME_CODES = Object.keys(OUTCOME_NAMES) as OutcomeCode[]
 
 /**
- * Get display name for an outcome code.
+ * Get display name for an outcome code (checks both API and NOD/SOD codes).
  * Returns the code itself if not found (graceful fallback).
  */
 export function getOutcomeName(code: string): string {
-  return OUTCOME_NAMES[code as OutcomeCode] ?? code
+  return (
+    OUTCOME_NAMES[code as OutcomeCode] ??
+    NOD_SOD_NAMES[code as NodSodCode] ??
+    code
+  )
 }
 
 /**
@@ -104,6 +108,73 @@ export const OUTCOME_CODE_ORDER: OutcomeCode[] = [
   "FW_DELTA_USES",
   "WRC_SALMON_AB",
 ]
+
+// =============================================================================
+// NOD/SOD SPLIT AXES (temporary local data from COEQWAL_V3)
+// =============================================================================
+
+export const NOD_SOD_NAMES = {
+  NOD_DW: "NOD: Community deliveries",
+  SOD_DW: "SOD: Community deliveries",
+  NOD_AG: "NOD: Agricultural revenue",
+  SOD_AG: "SOD: Agricultural revenue",
+  NOD_EFLOWS: "NOD: Environmental flows",
+  SOD_EFLOWS: "SOD: Environmental flows",
+  NOD_RES: "NOD: Reservoir storage",
+  SOD_RES: "SOD: Reservoir storage",
+  NOD_GW: "NOD: Groundwater storage",
+  SOD_GW: "SOD: Groundwater storage",
+} as const
+
+export type NodSodCode = keyof typeof NOD_SOD_NAMES
+
+export const NOD_SOD_OUTCOME_CODES: NodSodCode[] = [
+  "NOD_DW",
+  "SOD_DW",
+  "NOD_AG",
+  "SOD_AG",
+  "NOD_EFLOWS",
+  "SOD_EFLOWS",
+  "NOD_RES",
+  "SOD_RES",
+  "NOD_GW",
+  "SOD_GW",
+]
+
+/** All radar axes: standard API outcomes + NOD/SOD split axes */
+export const ALL_RADAR_AXES_ORDER: string[] = [
+  ...OUTCOME_CODE_ORDER,
+  ...NOD_SOD_OUTCOME_CODES,
+]
+
+/** NOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
+export const NOD_CODES: NodSodCode[] = [
+  "NOD_DW",
+  "NOD_AG",
+  "NOD_EFLOWS",
+  "NOD_RES",
+  "NOD_GW",
+]
+
+/** SOD-only codes, in the same category order as OUTCOME_CODE_ORDER */
+export const SOD_CODES: NodSodCode[] = [
+  "SOD_DW",
+  "SOD_AG",
+  "SOD_EFLOWS",
+  "SOD_RES",
+  "SOD_GW",
+]
+
+/** Maps each key outcome to its [NOD, SOD] variant codes (if any). */
+export const OUTCOME_REGIONAL_VARIANTS: Partial<
+  Record<OutcomeCode, [NodSodCode, NodSodCode]>
+> = {
+  CWS_DEL: ["NOD_DW", "SOD_DW"],
+  AG_REV: ["NOD_AG", "SOD_AG"],
+  ENV_FLOWS: ["NOD_EFLOWS", "SOD_EFLOWS"],
+  RES_STOR: ["NOD_RES", "SOD_RES"],
+  GW_STOR: ["NOD_GW", "SOD_GW"],
+}
 
 // =============================================================================
 // OUTCOME LOCATION DESCRIPTIONS
@@ -186,11 +257,37 @@ export const OUTCOME_DEFINITIONS: Record<OutcomeCode, string> = {
     "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
 }
 
+export const NOD_SOD_DEFINITIONS: Record<NodSodCode, string> = {
+  NOD_DW:
+    "Tiers reflect the degree of NOD Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
+  SOD_DW:
+    "Tiers reflect the degree of SOD Municipal & Industrial demands satisfied by CalSim demand unit or diversion node",
+  NOD_AG:
+    "Tiers correspond to the impact of water shortages on NOD agricultural production",
+  SOD_AG:
+    "Tiers correspond to the impact of water shortages on SOD agricultural production",
+  NOD_EFLOWS:
+    "Tiers reflect the extent to which NOD modeled flows sustain ecological function relative to natural or functional flow targets",
+  SOD_EFLOWS:
+    "Tiers reflect the extent to which SOD modeled flows sustain ecological function relative to natural or functional flow targets",
+  NOD_RES:
+    "Tier reflects the degree to which NOD reservoirs fill each spring in advance of the summer delivery season",
+  SOD_RES:
+    "Tier reflects the degree to which SOD reservoirs fill each spring in advance of the summer delivery season",
+  NOD_GW:
+    "Tier reflects how NOD groundwater storage conditions compare to a reference condition",
+  SOD_GW:
+    "Tier reflects how SOD groundwater storage conditions compare to a reference condition",
+}
+
 /**
- * Get outcome definition by code.
+ * Get outcome definition by code (checks both API and NOD/SOD codes).
  */
 export function getOutcomeDefinition(code: string): string | undefined {
-  return OUTCOME_DEFINITIONS[code as OutcomeCode]
+  return (
+    OUTCOME_DEFINITIONS[code as OutcomeCode] ??
+    NOD_SOD_DEFINITIONS[code as NodSodCode]
+  )
 }
 
 // =============================================================================
