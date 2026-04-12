@@ -19,15 +19,13 @@ import {
   Typography,
   useTheme,
   Checkbox,
-  IconButton,
-  Tooltip,
-  icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
 import {
   StrategyHeader,
   OperationsIconGroup,
 } from "../../scenarios/components/shared"
+import { InlineRowActions } from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import ThemeGroupHeader from "./ThemeGroupHeader"
@@ -56,8 +54,8 @@ export default function ScenarioSelectionSidebar({
     showKeyOperations,
     groupByTheme,
     searchQuery,
-    sharedScenarioIds,
     addToShare,
+    outcomeDisplayMode,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -227,19 +225,15 @@ export default function ScenarioSelectionSidebar({
                 px: 1.5,
                 py: 1,
                 cursor: "pointer",
-                borderLeft: `3px solid ${
-                  isActive || isChosen || isPinned ? accentColor : "transparent"
-                }`,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 backgroundColor: isActive ? `${accentColor}1A` : "transparent",
                 opacity: isSearchDimmed ? 0.4 : 1,
                 transition:
-                  "background-color 200ms ease, border-color 200ms ease, opacity 200ms ease",
+                  "background-color 200ms ease, opacity 200ms ease",
                 "&:hover": {
                   backgroundColor: isActive
                     ? `${accentColor}26`
                     : theme.palette.interaction.selectedBackground,
-                  borderLeftColor: accentColor,
                 },
               }}
             >
@@ -255,118 +249,57 @@ export default function ScenarioSelectionSidebar({
                 }}
               />
 
-              {color && (
+              <Box
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  display: "flex",
+                  alignItems: "stretch",
+                  gap: theme.space.gap.xl,
+                }}
+              >
                 <Box
-                  aria-hidden="true"
+                  onClick={() => toggleScenario(scenario.scenarioId)}
+                  sx={{ flex: "none", width: "60%", minWidth: 0 }}
+                >
+                  <StrategyHeader
+                    strategy={scenario}
+                    titleVariant="body2"
+                    showDescription={showDefinitions}
+                    descriptionMaxWidth="none"
+                    showThemeBadge={!groupByTheme}
+                    inlineActions={
+                      <InlineRowActions
+                        scenarioId={scenario.scenarioId}
+                        scenarioLabel={scenario.label}
+                        displayMode={outcomeDisplayMode as "summary" | "distribution"}
+                        isPinned={isPinned}
+                        accentColor={accentColor}
+                        addToShare={addToShare}
+                        togglePinnedScenario={togglePinnedScenario}
+                      />
+                    }
+                  />
+                </Box>
+
+                <Box
                   sx={{
-                    width: isActive ? 20 : 14,
-                    height: 3,
-                    borderRadius: "1.5px",
-                    backgroundColor: color,
-                    flexShrink: 0,
-                    mt: "10px",
-                    transition: "width 200ms ease",
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: showKeyOperations ? 1 : 0,
+                    pointerEvents: showKeyOperations ? "auto" : "none",
+                    transition: "opacity 200ms ease",
                   }}
-                />
-              )}
-
-              <Box
-                onClick={() => toggleScenario(scenario.scenarioId)}
-                sx={{ flex: 1, minWidth: 0 }}
-              >
-                <StrategyHeader
-                  strategy={scenario}
-                  titleVariant="body2"
-                  showDescription={showDefinitions}
-                  descriptionMaxWidth="none"
-                  showThemeBadge={!groupByTheme}
-                />
-              </Box>
-
-              <Box
-                sx={{
-                  overflow: "hidden",
-                  width: showKeyOperations ? "auto" : 0,
-                  opacity: showKeyOperations ? 1 : 0,
-                  flexShrink: 0,
-                  transition: "width 300ms ease, opacity 250ms ease",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  pt: "2px",
-                }}
-              >
-                <OperationsIconGroup
-                  scenarioId={scenario.scenarioId}
-                  size="sm"
-                />
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 0.25,
-                  flexShrink: 0,
-                  mt: "2px",
-                }}
-              >
-                {(() => {
-                  const isShared = sharedScenarioIds.includes(
-                    scenario.scenarioId,
-                  )
-                  return (
-                    <Tooltip
-                      title={isShared ? "Added to share" : "Add to share"}
-                      arrow
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          addToShare(scenario.scenarioId)
-                        }}
-                        sx={{
-                          p: 0.25,
-                          opacity: isShared || isActive ? 1 : 0,
-                          color: isShared
-                            ? theme.palette.blue.bright
-                            : isActive
-                              ? "rgba(255,255,255,0.7)"
-                              : theme.palette.grey[500],
-                          transition: "opacity 200ms ease",
-                          "*:hover > &": { opacity: 1 },
-                        }}
-                      >
-                        <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-                      </IconButton>
-                    </Tooltip>
-                  )
-                })()}
-
-                <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      togglePinnedScenario(scenario.scenarioId)
-                    }}
-                    sx={{
-                      p: 0.25,
-                      opacity: isPinned || isActive ? 1 : 0,
-                      color: isPinned ? accentColor : theme.palette.grey[500],
-                      transition: "opacity 200ms ease",
-                      "*:hover > &": { opacity: 1 },
-                    }}
-                  >
-                    <icons.PushPin
-                      sx={{
-                        fontSize: "0.875rem",
-                        transform: isPinned ? "none" : "rotate(45deg)",
-                      }}
-                    />
-                  </IconButton>
-                </Tooltip>
+                >
+                  <OperationsIconGroup
+                    scenarioId={scenario.scenarioId}
+                    size="sm"
+                    layout="horizontal"
+                  />
+                </Box>
               </Box>
             </Box>,
           )

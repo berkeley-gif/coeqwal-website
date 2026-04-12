@@ -210,75 +210,73 @@ export default function TierTooltipContent({
       )}
 
       {/* Multi-value tier: Show the distribution across tiers */}
-      {tierType === "multi_value" &&
-        chartData &&
-        scenarioLabel && (
-          <Box
+      {tierType === "multi_value" && chartData && scenarioLabel && (
+        <Box
+          sx={{
+            mb: theme.space.component.md,
+            p: theme.space.component.md,
+            backgroundColor: theme.palette.grey[100],
+            borderRadius: theme.borderRadius.sm,
+            borderLeft: `4px solid ${theme.palette.blue.bright}`,
+          }}
+          role="region"
+          aria-label={`Current scenario performance distribution for ${displayName}`}
+        >
+          <Typography
+            variant="dashboard"
             sx={{
-              mb: theme.space.component.md,
-              p: theme.space.component.md,
-              backgroundColor: theme.palette.grey[100],
-              borderRadius: theme.borderRadius.sm,
-              borderLeft: `4px solid ${theme.palette.blue.bright}`,
+              fontWeight: theme.typography.fontWeightMedium,
+              mb: theme.space.gap.sm,
             }}
-            role="region"
-            aria-label={`Current scenario performance distribution for ${displayName}`}
           >
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontWeight: theme.typography.fontWeightMedium,
-                mb: theme.space.gap.sm,
-              }}
-            >
-              {scenarioLabel}:
-            </Typography>
-            <Typography
-              variant="dashboard"
-              sx={{
-                fontSize: "0.85em",
-                color: theme.palette.grey[600],
-                mb: theme.space.gap.sm,
-              }}
-            >
-              Distribution across locations:
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-              {chartData.map((tier, index) => {
-                const percentage = Math.round(tier.value * 100)
-                return (
+            {scenarioLabel}:
+          </Typography>
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontSize: "0.85em",
+              color: theme.palette.grey[600],
+              mb: theme.space.gap.sm,
+            }}
+          >
+            Distribution across locations:
+          </Typography>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            {chartData.map((tier, index) => {
+              const percentage = Math.round(tier.value * 100)
+              return (
+                <Box
+                  key={tier.label}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: theme.space.gap.sm,
+                  }}
+                >
                   <Box
-                    key={tier.label}
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: theme.space.gap.sm,
+                      width: 10,
+                      height: 10,
+                      borderRadius: theme.borderRadius.xs,
+                      backgroundColor: tier.color,
+                      flexShrink: 0,
                     }}
+                  />
+                  <Typography variant="dashboard" sx={{ minWidth: "85px" }}>
+                    {tierLevelNames[index]}:
+                  </Typography>
+                  <Typography
+                    variant="dashboard"
+                    sx={{ fontWeight: theme.typography.fontWeightMedium }}
                   >
-                    <Box
-                      sx={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: theme.borderRadius.xs,
-                        backgroundColor: tier.color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="dashboard" sx={{ minWidth: "85px" }}>
-                      {tierLevelNames[index]}:
-                    </Typography>
-                    <Typography
-                      variant="dashboard"
-                      sx={{ fontWeight: theme.typography.fontWeightMedium }}
-                    >
-                      {percentage}%
-                    </Typography>
-                  </Box>
-                )
-              })}
-            </Box>
+                    {percentage}%
+                  </Typography>
+                </Box>
+              )
+            })}
           </Box>
-        )}
+        </Box>
+      )}
 
       <Box
         sx={{
