@@ -85,6 +85,7 @@ export default function UnifiedToolLayout({
             borderRight: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
             transition: "width 300ms ease, border-right 300ms ease",
+            pointerEvents: "auto",
           }}
         >
           {sidebar}
@@ -92,7 +93,8 @@ export default function UnifiedToolLayout({
       )}
 
       {/* Tool area (flex, shrinks when map is shown).
-          Container query context so ToolToolbar + StrategyGrid share the same width signal. */}
+          Container query context so ToolToolbar + StrategyGrid share the same width signal.
+          pointer-events:auto so tools remain interactive when map is pass-through. */}
       <Box
         sx={{
           flex: 1,
@@ -105,6 +107,7 @@ export default function UnifiedToolLayout({
           transition: "flex 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
           containerType: "inline-size",
           containerName: "strategy-grid",
+          pointerEvents: "auto",
         }}
       >
         {/* Shared toolbar */}
@@ -125,13 +128,14 @@ export default function UnifiedToolLayout({
         <Box sx={{ flex: 1, overflow: "hidden" }}>{children}</Box>
       </Box>
 
-      {/* Map reveal area — always rendered, width transitions between 0 and 25% */}
+      {/* Map reveal area — always rendered, width transitions between 0 and 25%.
+          pointer-events:none so clicks pass through to the persistent map behind. */}
       <Box
         sx={{
           width: showMap ? `${MAP_WIDTH_PERCENT}%` : 0,
           flexShrink: 0,
           height: "100%",
-          pointerEvents: showMap ? "auto" : "none",
+          pointerEvents: "none",
           backgroundColor: "transparent",
           transition: "width 700ms cubic-bezier(0.25, 0.1, 0.25, 1)",
         }}
