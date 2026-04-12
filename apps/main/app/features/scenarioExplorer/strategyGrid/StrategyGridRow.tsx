@@ -278,11 +278,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           : compact
             ? "32px 1fr"
             : "subgrid",
-        backgroundColor: isActive
+        "--row-bg": isActive
           ? `${accentColor}1A`
           : isHighlighted
             ? theme.palette.common.white
             : "#faf8f5",
+        backgroundColor: "var(--row-bg)",
         borderRadius: theme.borderRadius.sm,
         ...(compact && {
           py: theme.scenarios.grid.row.padding,
@@ -302,9 +303,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           }`,
         }),
         "&:hover": {
-          backgroundColor: isActive
+          "--row-bg": isActive
             ? `${accentColor}26`
             : theme.palette.background.paper,
+          backgroundColor: "var(--row-bg)",
           ...(accentBorder && { borderLeftColor: accentColor }),
         },
         "&:last-child": {

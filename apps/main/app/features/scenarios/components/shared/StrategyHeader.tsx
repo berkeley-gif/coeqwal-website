@@ -234,7 +234,7 @@ function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        {renderTextWithGlossaryLinks()}{" "}
+        {renderTextWithGlossaryLinks()}
         <Box
           component="button"
           type="button"
@@ -251,13 +251,16 @@ function DescriptionWithGlossaryLinks({
           }}
           aria-expanded={true}
           aria-label="Show less description text"
-          sx={toggleButtonStyles}
+          sx={{
+            ...toggleButtonStyles,
+            float: "right",
+          }}
         >
           less
         </Box>
       </motion.div>
 
-      {/* Truncated view — CSS line-clamp reflows naturally on resize */}
+      {/* Truncated view — height-clipped with "… more" overlay at bottom-right */}
       <motion.div
         initial={false}
         animate={{
@@ -268,35 +271,43 @@ function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        <Box
-          sx={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}
-        >
-          {renderTextWithGlossaryLinks()}
-        </Box>
-        <Box
-          component="button"
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsExpanded(true)
-          }}
-          onKeyDown={(e: React.KeyboardEvent) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault()
+        <Box sx={{ position: "relative" }}>
+          <Box
+            sx={{
+              maxHeight: "3em",
+              overflow: "hidden",
+              lineHeight: 1.5,
+            }}
+          >
+            {renderTextWithGlossaryLinks()}
+          </Box>
+          <Box
+            component="button"
+            type="button"
+            onClick={(e) => {
               e.stopPropagation()
               setIsExpanded(true)
-            }
-          }}
-          aria-expanded={false}
-          aria-label="Show more description text"
-          sx={toggleButtonStyles}
-        >
-          more
+            }}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsExpanded(true)
+              }
+            }}
+            aria-expanded={false}
+            aria-label="Show more description text"
+            sx={{
+              ...toggleButtonStyles,
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              pl: 3,
+              background: "linear-gradient(to right, transparent, var(--row-bg) 40%)",
+            }}
+          >
+            … more
+          </Box>
         </Box>
       </motion.div>
     </Typography>
