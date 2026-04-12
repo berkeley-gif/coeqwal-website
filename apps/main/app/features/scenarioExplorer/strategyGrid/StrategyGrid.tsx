@@ -36,7 +36,6 @@ import { useContainerWidth } from "./useContainerWidth"
  */
 const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForScenario,
-  allScoreData,
   outcomeNames,
   scenarios: scenariosProp,
   highlightedScenarios,
@@ -67,7 +66,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onThemeBadgeClick,
   onIconClick,
   showActions,
-  accentBorder,
   scenarioColors,
   pinnedScenarioIds,
   activeScenarioIds,
@@ -145,17 +143,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
       }}
     >
       {/* Active outcome tooltip - uses MUI Popper for viewport-aware positioning */}
-      {/* WCAG 4.1.2: Pass scenario score data and chart data for accessible text representation */}
+      {/* WCAG 4.1.2: Pass chart data for accessible text representation */}
       <TierTooltipPortal
         outcomeCode={activeTooltip}
         anchorEl={tooltipAnchor}
         onClose={closeTooltip}
         onForceClose={forceCloseTooltip}
-        scenarioScore={
-          scenarioContext && allScoreData && activeTooltip
-            ? allScoreData[scenarioContext.scenarioId]?.[activeTooltip]
-            : null
-        }
         scenarioLabel={scenarioContext?.scenarioLabel}
         chartData={scenarioContext?.chartData}
       />
@@ -282,7 +275,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
             showActions={showActions}
-            accentBorder={accentBorder}
             scenarioColors={scenarioColors}
             pinnedScenarioIds={pinnedScenarioIds}
             activeScenarioIds={activeScenarioIds}

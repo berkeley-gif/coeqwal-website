@@ -206,21 +206,37 @@ function ColumnHeaders({
 
   return (
     <>
-      {/* Columns 1-2: Search + visibility chips — spans both header rows so content
-          aligns vertically with the tier outcome labels in row 2 */}
+      {/* Columns 1-3: Search + visibility chips.
+          Full mode: spans both header rows, stretches to align with outcome labels.
+          Wrapped mode: spans all columns, adds "Scenario library" title inline,
+          with bottom padding to visually center against the parent's top padding. */}
       <Box
         sx={{
-          gridColumn: "1 / 4",
-          gridRow: "1 / 3",
+          gridColumn: isFullMode ? "1 / 4" : "1 / -1",
+          gridRow: isFullMode ? "1 / 3" : undefined,
           display: layoutMode === "compact" ? "none" : "flex",
           alignItems: "center",
           alignContent: "center",
-          alignSelf: "stretch",
+          alignSelf: isFullMode ? "stretch" : "center",
           flexWrap: "wrap",
           rowGap: 1.125,
-          columnGap: 0.5,
+          columnGap: isFullMode ? 0.5 : 2,
+          ...(!isFullMode && { pb: 1.25 }),
         }}
       >
+        {!isFullMode && (
+          <Typography
+            sx={{
+              fontSize: "0.9375rem",
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: theme.palette.text.primary,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Scenario library
+          </Typography>
+        )}
         <SearchAndChips />
       </Box>
 
