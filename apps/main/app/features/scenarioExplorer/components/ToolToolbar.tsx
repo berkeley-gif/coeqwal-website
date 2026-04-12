@@ -25,6 +25,7 @@ export default function ToolToolbar({
   hideTitle,
 }: ToolToolbarProps) {
   const theme = useTheme()
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const {
     hydroclimate,
     setHydroclimate,
@@ -36,6 +37,7 @@ export default function ToolToolbar({
     setShowLocationPicker,
     showKeyOperations,
   } = useScenarioExplorerStore()
+  /* eslint-enable @typescript-eslint/no-unused-vars */
 
   const viewControls = (
     <>
