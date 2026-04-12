@@ -46,7 +46,10 @@ export function useMapVisualizationAction() {
   const showOnMap = useCallback(
     (outcomeCode: string, scenarioId: string) => {
       if (!isMapVisible) return
-      mapActions.clearMapTooltips()
+      const current = useMapStore.getState().activeOutcomeVisualization
+      if (!current || current.outcomeCode !== outcomeCode) {
+        mapActions.clearMapTooltips()
+      }
       mapActions.toggleOutcomeVisualization(outcomeCode, scenarioId)
     },
     [isMapVisible],
@@ -79,7 +82,15 @@ export function useMapVisualizationAction() {
       if (!isMapVisible) return
       const mapping = buildIdMapping(hydroclimate)
       const resolvedId = mapping[siblingGroupId] ?? siblingGroupId
-      mapActions.clearMapTooltips()
+
+      // Only clear pinned tooltips when the outcome changes. When switching
+      // scenarios within the same outcome, tooltips stay and update their
+      // tier info reactively.
+      const current = useMapStore.getState().activeOutcomeVisualization
+      if (!current || current.outcomeCode !== outcomeCode) {
+        mapActions.clearMapTooltips()
+      }
+
       mapActions.toggleOutcomeVisualization(
         outcomeCode,
         resolvedId,
