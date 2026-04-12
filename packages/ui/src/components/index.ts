@@ -99,6 +99,13 @@ export type {
 export { ErrorFallback } from "./common/ErrorFallback"
 export type { ErrorFallbackProps } from "./common/ErrorFallback"
 
+// Panel feedback (empty states, errors, info prompts, loading)
+export { PanelFeedback } from "./common/PanelFeedback"
+export type {
+  PanelFeedbackProps,
+  PanelFeedbackVariant,
+} from "./common/PanelFeedback"
+
 // Modal components
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"

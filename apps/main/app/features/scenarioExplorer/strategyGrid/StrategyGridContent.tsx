@@ -15,6 +15,7 @@
 
 import React, { useCallback } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
+import { PanelFeedback } from "@repo/ui"
 import type {
   ChartDataPoint,
   OutcomeName,
@@ -209,6 +210,17 @@ export function StrategyGridContent({
     },
     [onTooltipToggle, onTooltipToggleWithContext, getChartDataForScenario],
   )
+
+  if (displayScenarios.length === 0 && showOnlyChosen) {
+    return (
+      <PanelFeedback
+        variant="empty"
+        title="No scenarios chosen yet"
+        message="Select scenarios using the checkboxes, then toggle &ldquo;chosen only&rdquo; to filter"
+        sx={{ gridColumn: "1 / -1" }}
+      />
+    )
+  }
 
   return (
     <>
