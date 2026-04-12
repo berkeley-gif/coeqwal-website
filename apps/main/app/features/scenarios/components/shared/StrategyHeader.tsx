@@ -18,7 +18,8 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScenarioBadge } from "@repo/ui"
 import { useDrawerStore } from "@repo/state/drawer"
 import { motion } from "@repo/motion"
-import { Truncate } from "@re-dev/react-truncate"
+// CSS line-clamp is used instead of @re-dev/react-truncate so that
+// truncated text reflows automatically when the grid column resizes.
 import type { ScenarioForDisplay } from "./types"
 import { THEME_LABEL_CONFIG } from "../../../../content/themes"
 import type { ScenarioTheme } from "../../../../content/scenarios"
@@ -212,33 +213,6 @@ function DescriptionWithGlossaryLinks({
     glossaryLinkStyles,
   ])
 
-  // Ellipsis with "show more" link for truncated view
-  const showMoreEllipsis = (
-    <Box component="span">
-      ...{" "}
-      <Box
-        component="button"
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          setIsExpanded(true)
-        }}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsExpanded(true)
-          }
-        }}
-        aria-expanded={false}
-        aria-label="Show more description text"
-        sx={toggleButtonStyles}
-      >
-        more
-      </Box>
-    </Box>
-  )
-
   return (
     <Typography
       component="div"
@@ -283,7 +257,7 @@ function DescriptionWithGlossaryLinks({
         </Box>
       </motion.div>
 
-      {/* Truncated view - positioned absolutely when not active */}
+      {/* Truncated view — CSS line-clamp reflows naturally on resize */}
       <motion.div
         initial={false}
         animate={{
@@ -294,9 +268,36 @@ function DescriptionWithGlossaryLinks({
         transition={{ duration: 0.2, ease: "easeInOut" }}
         style={{ top: 0, left: 0, right: 0 }}
       >
-        <Truncate lines={2} ellipsis={showMoreEllipsis}>
-          <span>{renderTextWithGlossaryLinks()}</span>
-        </Truncate>
+        <Box
+          sx={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {renderTextWithGlossaryLinks()}
+        </Box>
+        <Box
+          component="button"
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsExpanded(true)
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsExpanded(true)
+            }
+          }}
+          aria-expanded={false}
+          aria-label="Show more description text"
+          sx={toggleButtonStyles}
+        >
+          more
+        </Box>
       </motion.div>
     </Typography>
   )
