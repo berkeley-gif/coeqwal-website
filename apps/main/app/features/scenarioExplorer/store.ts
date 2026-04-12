@@ -47,6 +47,10 @@ interface ScenarioExplorerState {
   pinnedScenarioIds: string[]
   maxPinnedScenarios: number
   pinCapReached: boolean
+  /** Pins stashed when map view reduces the cap (null = nothing stashed) */
+  stashedPinnedScenarioIds: string[] | null
+  /** True when pins were auto-trimmed for map view (drives distinct snackbar message) */
+  pinsTrimmedForMap: boolean
 
   // Filtering
   searchQuery: string
@@ -117,6 +121,9 @@ interface ScenarioExplorerActions {
   clearPinnedScenarios: () => void
   setMaxPinnedScenarios: (max: number) => void
   dismissPinCapReached: () => void
+  stashAndTrimPins: (keepCount: number) => void
+  restoreStashedPins: () => void
+  dismissPinsTrimmedForMap: () => void
 
   // Filtering
   setSearchQuery: (query: string) => void
@@ -192,6 +199,8 @@ const initialState: ScenarioExplorerState = {
   pinnedScenarioIds: [],
   maxPinnedScenarios: 5,
   pinCapReached: false,
+  stashedPinnedScenarioIds: null,
+  pinsTrimmedForMap: false,
   searchQuery: "",
   showOnlyChosen: false,
   selectedTheme: null,
@@ -294,6 +303,28 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     dismissPinCapReached: () =>
       set((state) => {
         state.pinCapReached = false
+      }),
+
+    stashAndTrimPins: (keepCount) =>
+      set((state) => {
+        state.stashedPinnedScenarioIds = [...state.pinnedScenarioIds]
+        state.pinnedScenarioIds = state.pinnedScenarioIds.slice(-keepCount)
+        state.pinCapReached = false
+        state.pinsTrimmedForMap = true
+      }),
+
+    restoreStashedPins: () =>
+      set((state) => {
+        if (state.stashedPinnedScenarioIds !== null) {
+          state.pinnedScenarioIds = state.stashedPinnedScenarioIds
+          state.stashedPinnedScenarioIds = null
+        }
+        state.pinsTrimmedForMap = false
+      }),
+
+    dismissPinsTrimmedForMap: () =>
+      set((state) => {
+        state.pinsTrimmedForMap = false
       }),
 
     // Filtering
@@ -503,6 +534,8 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         state.highlightedScenario = null
         state.pinnedScenarioIds = []
         state.pinCapReached = false
+        state.stashedPinnedScenarioIds = null
+        state.pinsTrimmedForMap = false
         state.selectedTier = null
       }),
 

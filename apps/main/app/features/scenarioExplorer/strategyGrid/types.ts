@@ -81,4 +81,7 @@ export interface StrategyGridProps {
    * on the grid container — no prop drilling required.
    */
   hideOutcomes?: boolean
+
+  /** Called when the internal layout mode changes (derived from container width) */
+  onLayoutModeChange?: (mode: "full" | "wrapped" | "compact") => void
 }
