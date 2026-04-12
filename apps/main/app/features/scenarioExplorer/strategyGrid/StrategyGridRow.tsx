@@ -87,8 +87,6 @@ export interface StrategyGridRowProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Select all scenarios sharing an operation icon when clicked */
   onIconClick?: (iconId: string) => void
-  /** Show share/pin action buttons on each row */
-  showActions?: boolean
   /** Optional color for accent border and swatch */
   scenarioColor?: string
   /** Whether this scenario is pinned */
@@ -128,7 +126,6 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
-  showActions = false,
   scenarioColor,
   isPinned = false,
   isActive = false,
@@ -140,14 +137,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   )
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
-  const sharedScenarioIds = useScenarioExplorerStore((s) => s.sharedScenarioIds)
   const addToShare = useScenarioExplorerStore((s) => s.addToShare)
   const togglePinnedScenario = useScenarioExplorerStore(
     (s) => s.togglePinnedScenario,
   )
 
   const accentColor = scenarioColor || theme.palette.blue.bright
-  const isShared = sharedScenarioIds.includes(scenario.scenarioId)
 
   // Map visualization hooks
   const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
@@ -375,36 +370,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
             />
           )}
 
-          {showActions && (
-            <RowActions
-              scenarioId={scenario.scenarioId}
-              isActive={isActive}
-              isPinned={isPinned}
-              isShared={isShared}
-              accentColor={accentColor}
-              addToShare={addToShare}
-              togglePinnedScenario={togglePinnedScenario}
-            />
-          )}
         </>
       )}
     </Box>
   )
 })
 
-/**
- * Share / pin action buttons — shown when showActions is true.
- * Positioned as a flex column overlaid at the row's trailing edge.
- */
-interface RowActionsProps {
-  scenarioId: string
-  isActive: boolean
-  isPinned: boolean
-  isShared: boolean
-  accentColor: string
-  addToShare: (id: string) => void
-  togglePinnedScenario: (id: string) => void
-}
 
 /**
  * Inline pin and share icons rendered in the shortcode row of StrategyHeader.
@@ -557,80 +528,6 @@ function InlineRowActions({
   )
 }
 
-function RowActions({
-  scenarioId,
-  isActive,
-  isPinned,
-  isShared,
-  accentColor,
-  addToShare,
-  togglePinnedScenario,
-}: RowActionsProps) {
-  const theme = useTheme()
-
-  return (
-    <Box
-      sx={{
-        gridColumn: "-1",
-        gridRow: "1 / -1",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        gap: 0.25,
-        pt: 1,
-        pr: 0.5,
-      }}
-    >
-      <Tooltip title={isShared ? "Added to share" : "Add to share"} arrow>
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            addToShare(scenarioId)
-          }}
-          sx={{
-            p: 0.25,
-            opacity: isShared || isActive ? 1 : 0,
-            color: isShared
-              ? theme.palette.blue.bright
-              : isActive
-                ? "rgba(255,255,255,0.7)"
-                : theme.palette.grey[500],
-            transition: "opacity 200ms ease",
-            "*:hover > &": { opacity: 1 },
-          }}
-        >
-          <icons.IosShare sx={{ fontSize: "0.8rem" }} />
-        </IconButton>
-      </Tooltip>
-
-      <Tooltip title={isPinned ? "Unpin" : "Pin"} arrow>
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            togglePinnedScenario(scenarioId)
-          }}
-          sx={{
-            p: 0.25,
-            opacity: isPinned || isActive ? 1 : 0,
-            color: isPinned ? accentColor : theme.palette.grey[500],
-            transition: "opacity 200ms ease",
-            "*:hover > &": { opacity: 1 },
-          }}
-        >
-          <icons.PushPin
-            sx={{
-              fontSize: "0.875rem",
-              transform: isPinned ? "none" : "rotate(45deg)",
-            }}
-          />
-        </IconButton>
-      </Tooltip>
-    </Box>
-  )
-}
 
 /**
  * Compact mode content - flexbox-based layout for mobile/condensed view
@@ -901,37 +798,38 @@ function NonCompactRowContent({
           <Box sx={{ flex: "none", width: "50%", minWidth: 0 }}>
             {strategyHeaderBlock(true)}
           </Box>
-          {showOperations && (
-            <Box
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {isCompactMode && (
-                <Typography
-                  variant="dashboard"
-                  sx={{
-                    color: theme.palette.grey[600],
-                    fontWeight: 500,
-                    mb: theme.space.gap.md,
-                  }}
-                >
-                  Key operations
-                </Typography>
-              )}
-              <OperationsIconGroup
-                scenarioId={scenario.scenarioId}
-                theme={scenario.theme}
-                size="md"
-                layout="horizontal"
-                onIconClick={onIconClick}
-              />
-            </Box>
-          )}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: showOperations ? 1 : 0,
+              pointerEvents: showOperations ? "auto" : "none",
+              transition: "opacity 200ms ease",
+            }}
+          >
+            {isCompactMode && (
+              <Typography
+                variant="dashboard"
+                sx={{
+                  color: theme.palette.grey[600],
+                  fontWeight: 500,
+                  mb: theme.space.gap.md,
+                }}
+              >
+                Key operations
+              </Typography>
+            )}
+            <OperationsIconGroup
+              scenarioId={scenario.scenarioId}
+              theme={scenario.theme}
+              size="md"
+              layout="horizontal"
+              onIconClick={onIconClick}
+            />
+          </Box>
         </Box>
       )}
 

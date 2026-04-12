@@ -260,7 +260,6 @@ export default function ListView({
     onSortChange: handleSortChange,
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
-    showActions: true,
     pinnedScenarioIds,
     onLayoutModeChange: handleLayoutModeChange,
   }

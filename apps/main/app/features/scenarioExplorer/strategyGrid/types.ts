@@ -64,8 +64,6 @@ export interface StrategyGridProps {
   onIconClick?: (iconId: string) => void
 
   // Sidebar-parity features (Phase 1 unified list)
-  /** Show share/pin action buttons on each row */
-  showActions?: boolean
   /** Map of scenario ID to color for accent border / swatch */
   scenarioColors?: Record<string, string>
   /** Set of pinned scenario IDs */

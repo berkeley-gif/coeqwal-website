@@ -65,7 +65,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onSortChange,
   onThemeBadgeClick,
   onIconClick,
-  showActions,
   scenarioColors,
   pinnedScenarioIds,
   activeScenarioIds,
@@ -279,7 +278,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             onSortChange={onSortChange}
             onThemeBadgeClick={onThemeBadgeClick}
             onIconClick={onIconClick}
-            showActions={showActions}
             scenarioColors={scenarioColors}
             pinnedScenarioIds={pinnedScenarioIds}
             activeScenarioIds={activeScenarioIds}
