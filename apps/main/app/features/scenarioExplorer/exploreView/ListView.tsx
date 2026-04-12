@@ -225,7 +225,7 @@ export default function ListView({
       <Box
         sx={{
           flexShrink: 0,
-          px: theme.space.section.md,
+          px: theme.space.tool.px,
           pt: 1.25,
           backgroundColor: theme.palette.grey[100],
         }}
@@ -241,7 +241,7 @@ export default function ListView({
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          px: theme.space.section.md,
+          px: theme.space.tool.px,
           pt: "10px",
           pb: theme.space.section.xl,
           borderTop: theme.border.medium,

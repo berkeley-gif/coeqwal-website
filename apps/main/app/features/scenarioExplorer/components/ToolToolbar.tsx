@@ -177,7 +177,7 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
               : "32px 0.382fr 0fr 1fr",
           },
           columnGap: theme.scenarios.grid.gap.default,
-          px: theme.space.section.md,
+          px: theme.space.tool.px,
           py: 0.5,
           minHeight: 44,
           alignItems: "center",
