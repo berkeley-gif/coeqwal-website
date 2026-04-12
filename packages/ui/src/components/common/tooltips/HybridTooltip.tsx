@@ -111,17 +111,18 @@ const getTooltipSlotProps = (
     sx: {
       backgroundColor: theme.palette.background.paper,
       color: theme.palette.text.primary,
+      border: theme.border.light,
+      borderRadius: theme.borderRadius.md,
       boxShadow: theme.shadow.md,
       width,
       maxWidth,
-      py: theme.space.component.md,
-      px: theme.space.component.lg,
+      p: theme.space.component.xl,
       ...theme.typography.compactSubtitle,
     },
   },
   arrow: {
     sx: {
-      color: theme.palette.common.white,
+      color: theme.palette.background.paper,
     },
   },
 })
@@ -171,12 +172,12 @@ export function HybridTooltip({
             zIndex: theme.zIndex.tooltipAboveModal,
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
+            border: theme.border.light,
             boxShadow: theme.shadow.lg,
             borderRadius: theme.borderRadius.md,
             width,
             maxWidth,
-            py: theme.space.component.md,
-            px: theme.space.component.lg,
+            p: theme.space.component.xl,
             ...theme.typography.compactSubtitle,
           }}
         >
@@ -264,12 +265,12 @@ export function HybridTooltip({
               zIndex: theme.zIndex.tooltipAboveModal,
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
+              border: theme.border.light,
               boxShadow: theme.shadow.lg,
               borderRadius: theme.borderRadius.md,
               width,
               maxWidth,
-              py: theme.space.component.md,
-              px: theme.space.component.lg,
+              p: theme.space.component.xl,
               ...theme.typography.compactSubtitle,
               pointerEvents: "auto",
             }}
