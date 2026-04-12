@@ -162,6 +162,7 @@ export default function ScenarioSelectionSidebar({
           flex: 1,
           minHeight: 0,
           overflowY: "auto",
+          overflowX: "hidden",
           overscrollBehavior: "contain",
           pb: 4,
         }}
@@ -204,6 +205,7 @@ export default function ScenarioSelectionSidebar({
                 themeKey={scenario.theme as ScenarioTheme}
                 scenarioIds={ids}
                 isFirst={index === 0}
+                layout="flex"
               />,
             )
           }
@@ -225,6 +227,7 @@ export default function ScenarioSelectionSidebar({
                 px: 1.5,
                 py: 1,
                 cursor: "pointer",
+                overflow: "hidden",
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 backgroundColor: isActive ? `${accentColor}1A` : "transparent",
                 opacity: isSearchDimmed ? 0.4 : 1,
@@ -250,56 +253,46 @@ export default function ScenarioSelectionSidebar({
               />
 
               <Box
+                onClick={() => toggleScenario(scenario.scenarioId)}
+                sx={{ flex: 1, minWidth: 0 }}
+              >
+                <StrategyHeader
+                  strategy={scenario}
+                  titleVariant="body2"
+                  showDescription={showDefinitions}
+                  descriptionMaxWidth="none"
+                  showThemeBadge={!groupByTheme}
+                  inlineActions={
+                    <InlineRowActions
+                      scenarioId={scenario.scenarioId}
+                      scenarioLabel={scenario.label}
+                      displayMode={outcomeDisplayMode as "summary" | "distribution"}
+                      isPinned={isPinned}
+                      accentColor={accentColor}
+                      addToShare={addToShare}
+                      togglePinnedScenario={togglePinnedScenario}
+                    />
+                  }
+                />
+              </Box>
+
+              <Box
                 sx={{
-                  flex: 1,
-                  minWidth: 0,
+                  flexShrink: 0,
+                  width: showKeyOperations ? 120 : 0,
+                  opacity: showKeyOperations ? 1 : 0,
+                  overflow: "hidden",
+                  transition: "width 200ms ease, opacity 200ms ease",
                   display: "flex",
-                  alignItems: "stretch",
-                  gap: theme.space.gap.xl,
+                  alignItems: "flex-start",
+                  pt: "2px",
                 }}
               >
-                <Box
-                  onClick={() => toggleScenario(scenario.scenarioId)}
-                  sx={{ flex: "none", width: "60%", minWidth: 0 }}
-                >
-                  <StrategyHeader
-                    strategy={scenario}
-                    titleVariant="body2"
-                    showDescription={showDefinitions}
-                    descriptionMaxWidth="none"
-                    showThemeBadge={!groupByTheme}
-                    inlineActions={
-                      <InlineRowActions
-                        scenarioId={scenario.scenarioId}
-                        scenarioLabel={scenario.label}
-                        displayMode={outcomeDisplayMode as "summary" | "distribution"}
-                        isPinned={isPinned}
-                        accentColor={accentColor}
-                        addToShare={addToShare}
-                        togglePinnedScenario={togglePinnedScenario}
-                      />
-                    }
-                  />
-                </Box>
-
-                <Box
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: showKeyOperations ? 1 : 0,
-                    pointerEvents: showKeyOperations ? "auto" : "none",
-                    transition: "opacity 200ms ease",
-                  }}
-                >
-                  <OperationsIconGroup
-                    scenarioId={scenario.scenarioId}
-                    size="sm"
-                    layout="horizontal"
-                  />
-                </Box>
+                <OperationsIconGroup
+                  scenarioId={scenario.scenarioId}
+                  size="sm"
+                  layout="horizontal"
+                />
               </Box>
             </Box>,
           )

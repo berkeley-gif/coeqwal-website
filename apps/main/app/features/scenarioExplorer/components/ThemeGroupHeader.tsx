@@ -17,11 +17,14 @@ interface ThemeGroupHeaderProps {
   themeKey: ScenarioTheme
   scenarioIds: string[]
   isFirst?: boolean
+  /** "grid" (default) uses CSS subgrid for StrategyGrid; "flex" uses a flat flex row for sidebar */
+  layout?: "grid" | "flex"
 }
 
 export default function ThemeGroupHeader({
   themeKey,
   scenarioIds,
+  layout = "grid",
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
   const { selectedScenarios, selectScenarios, sharedScenarioIds, addToShare } =
@@ -52,16 +55,28 @@ export default function ThemeGroupHeader({
     }
   }
 
+  const isFlex = layout === "flex"
+
   return (
     <Box
       data-theme-header={themeKey}
       sx={{
-        gridColumn: "1 / -1",
-        display: "grid",
-        gridTemplateColumns: "subgrid",
+        ...(isFlex
+          ? {
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1.5,
+              py: 0.5,
+            }
+          : {
+              gridColumn: "1 / -1",
+              display: "grid",
+              gridTemplateColumns: "subgrid",
+            }),
         alignItems: "center",
         minHeight: "24px",
-        borderRadius: "4px",
+        borderRadius: isFlex ? 0 : "4px",
         backgroundColor: allChecked
           ? themeColors.background
           : someChecked
@@ -73,13 +88,12 @@ export default function ThemeGroupHeader({
         },
       }}
     >
-      {/* Column 1: Checkbox — inherits grid column 1 from parent */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: isFlex ? "center" : "flex-end",
           alignItems: "center",
-          mr: -0.5,
+          ...(isFlex ? {} : { mr: -0.5 }),
         }}
       >
         <Checkbox
@@ -87,7 +101,9 @@ export default function ThemeGroupHeader({
           indeterminate={someChecked}
           onChange={handleToggle}
           sx={{
-            ...theme.scenarios.checkbox.md,
+            ...(isFlex
+              ? theme.scenarios.checkbox.sm
+              : theme.scenarios.checkbox.md),
             mt: 0,
             color: themeColors.text,
             "&.Mui-checked": { color: themeColors.text },
@@ -96,14 +112,13 @@ export default function ThemeGroupHeader({
         />
       </Box>
 
-      {/* Column 2+: Label, info, and actions */}
       <Box
         sx={{
-          gridColumn: "2 / -1",
+          ...(isFlex ? {} : { gridColumn: "2 / -1" }),
           display: "flex",
           alignItems: "center",
           gap: 0.75,
-          pr: 1.5,
+          pr: isFlex ? 0 : 1.5,
         }}
       >
         <Box
