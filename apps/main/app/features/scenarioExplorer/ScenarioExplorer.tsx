@@ -619,9 +619,7 @@ export default function ScenarioExplorer() {
         sx={{
           display: "flex",
           flex: 1,
-          ...(isGetStartedMapMode
-            ? {}
-            : { overflow: "hidden" }),
+          ...(isGetStartedMapMode ? {} : { overflow: "hidden" }),
           ...(!isMapPassThrough && { pointerEvents: "auto" }),
         }}
       >
@@ -630,9 +628,7 @@ export default function ScenarioExplorer() {
             width: "100%",
             display: "flex",
             flexDirection: "column",
-            ...(isGetStartedMapMode
-              ? {}
-              : { overflow: "hidden" }),
+            ...(isGetStartedMapMode ? {} : { overflow: "hidden" }),
             ...(!isMapPassThrough && { pointerEvents: "auto" }),
           }}
         >

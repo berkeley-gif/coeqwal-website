@@ -41,8 +41,7 @@ export function useOutcomeMapAction() {
   const isOutcomeActive = useCallback(
     (outcomeCode: string, scenarioId: string): boolean => {
       if (!isMapVisible || !activeOutcome) return false
-      const identity =
-        activeOutcome.siblingGroupId ?? activeOutcome.scenarioId
+      const identity = activeOutcome.siblingGroupId ?? activeOutcome.scenarioId
       return (
         activeOutcome.outcomeCode === outcomeCode && identity === scenarioId
       )

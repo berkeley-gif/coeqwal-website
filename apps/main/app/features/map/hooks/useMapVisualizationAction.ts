@@ -33,9 +33,7 @@ const PREFETCHABLE_OUTCOMES = Object.entries(OUTCOME_LAYER_REGISTRY)
 export function useMapVisualizationAction() {
   const showMap = useScenarioExplorerStore((s) => s.showMap)
   const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
-  const selectedScenarios = useScenarioExplorerStore(
-    (s) => s.selectedScenarios,
-  )
+  const selectedScenarios = useScenarioExplorerStore((s) => s.selectedScenarios)
   const mapMode = useMapMode()
   const isMapVisible =
     showMap || mapMode === "learn" || mapMode === "get-started"
