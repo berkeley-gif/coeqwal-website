@@ -335,7 +335,7 @@ export function StrategyHeader({
           alignItems: "center",
           gap: "6px",
           mb: "4px",
-          minHeight: "15px",
+          minHeight: "18px",
         }}
       >
         <Typography
