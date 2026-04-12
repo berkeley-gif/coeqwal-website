@@ -121,7 +121,7 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           }
         />
         <ToggleChip
-          label="key ops"
+          label="key operations"
           active={showKeyOperations}
           onClick={() => setShowKeyOperations(!showKeyOperations)}
           tooltip={
