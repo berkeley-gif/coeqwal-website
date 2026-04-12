@@ -77,11 +77,13 @@ export default function ThemeGroupHeader({
         alignItems: "center",
         minHeight: "24px",
         borderRadius: isFlex ? 0 : "4px",
-        backgroundColor: allChecked
-          ? themeColors.background
-          : someChecked
-            ? `${themeColors.background}44`
-            : "transparent",
+        backgroundColor: isFlex
+          ? (allChecked ? themeColors.background : theme.palette.learn.background)
+          : allChecked
+            ? themeColors.background
+            : someChecked
+              ? `${themeColors.background}44`
+              : "transparent",
         transition: "background-color 0.15s ease",
         "&:hover .theme-action-icon": {
           opacity: 1,

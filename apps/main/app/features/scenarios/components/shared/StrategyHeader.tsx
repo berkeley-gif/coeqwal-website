@@ -31,6 +31,8 @@ export interface StrategyHeaderProps {
   showDescription?: boolean
   /** When true, shows the full description without more/less truncation */
   disableTruncation?: boolean
+  /** Tighter spacing: smaller badge row, less margins, CSS line-clamp for description */
+  compact?: boolean
   /** Typography variant for the title */
   titleVariant?: "subtitle1" | "subtitle2" | "body1" | "body2"
   /** Max width for the description */
@@ -334,10 +336,83 @@ function DescriptionWithGlossaryLinks({
   )
 }
 
+function CompactDescription({ description }: { description: string }) {
+  const theme = useTheme()
+  const [expanded, setExpanded] = useState(false)
+
+  const toggleStyles = {
+    color: theme.palette.blue.medium,
+    fontStyle: "italic",
+    cursor: "pointer",
+    background: "none",
+    border: "none",
+    padding: 0,
+    font: "inherit",
+    fontSize: "0.75rem",
+    "&:hover": { textDecoration: "underline" },
+  }
+
+  return (
+    <Box
+      sx={{
+        color: theme.palette.grey[600],
+        fontSize: "0.75rem",
+        lineHeight: 1.35,
+        mt: "1px",
+        pb: 0.5,
+        position: "relative",
+      }}
+    >
+      {expanded ? (
+        <>
+          {description}
+          <Box
+            component="button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setExpanded(false)
+            }}
+            sx={{ ...toggleStyles, float: "right" }}
+          >
+            less
+          </Box>
+        </>
+      ) : (
+        <Box sx={{ position: "relative" }}>
+          <Box sx={{ maxHeight: "2.7em", overflow: "hidden" }}>
+            {description}
+          </Box>
+          <Box
+            component="button"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setExpanded(true)
+            }}
+            sx={{
+              ...toggleStyles,
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              pl: 3,
+              background:
+                "linear-gradient(to right, transparent, var(--row-bg, #fff) 40%)",
+            }}
+          >
+            … more
+          </Box>
+        </Box>
+      )}
+    </Box>
+  )
+}
+
 export function StrategyHeader({
   strategy,
   showDescription = true,
   disableTruncation = false,
+  compact = false,
   titleVariant = "body2",
   descriptionMaxWidth,
   showThemeBadge = true,
@@ -354,11 +429,59 @@ export function StrategyHeader({
     ? theme.palette.waterThemes[strategy.theme]
     : undefined
 
-  // Format label for historical-ag scenario (s0011)
   const displayLabel =
     strategy.scenarioId === "s0011"
       ? "Current operations with historical agricultural land use"
       : strategy.label
+
+  if (compact) {
+    return (
+      <Box sx={{ m: 0, p: 0 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            mb: "1px",
+            minHeight: "16px",
+          }}
+        >
+          <Typography
+            component="span"
+            sx={{
+              color: theme.palette.grey[600],
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              fontSize: "0.6875rem",
+              lineHeight: 1,
+            }}
+          >
+            {strategy.scenarioId.toUpperCase()}
+          </Typography>
+          {inlineActions}
+        </Box>
+        <Box
+          component="span"
+          onClick={onTitleClick}
+          sx={{
+            display: "block",
+            color: theme.palette.text.primary,
+            cursor: onTitleClick ? "pointer" : "default",
+            fontSize: "0.8125rem",
+            fontWeight: 500,
+            lineHeight: 1.3,
+            m: 0,
+            p: 0,
+          }}
+        >
+          {displayLabel}
+        </Box>
+        {showDescription && (
+          <CompactDescription description={strategy.description} />
+        )}
+      </Box>
+    )
+  }
 
   return (
     <Box>

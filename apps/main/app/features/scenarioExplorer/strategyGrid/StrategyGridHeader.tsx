@@ -221,7 +221,7 @@ function ColumnHeaders({
           flexWrap: "wrap",
           rowGap: 1.125,
           columnGap: isFullMode ? 0.5 : 2,
-          ...(!isFullMode && { pb: 1.25 }),
+          ...(!isFullMode && { py: 0.5 }),
         }}
       >
         {!isFullMode && (

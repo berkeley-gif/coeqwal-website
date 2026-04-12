@@ -105,10 +105,10 @@ export default function ScenarioSelectionSidebar({
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           px: 1.5,
-          py: 0.5,
-          minHeight: 44,
+          pt: 0.5,
+          pb: "5px",
+          minHeight: 45,
           borderBottom: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.explore.background,
         }}
@@ -123,20 +123,6 @@ export default function ScenarioSelectionSidebar({
         >
           Scenario library
         </Typography>
-
-        {showKeyOperations && (
-          <Typography
-            variant="dashboard"
-            sx={{
-              color: theme.palette.explore.text,
-              fontWeight: 500,
-              flexShrink: 0,
-              opacity: 0.7,
-            }}
-          >
-            Key operations
-          </Typography>
-        )}
       </Box>
 
       {/* Search + visibility chips */}
@@ -148,7 +134,7 @@ export default function ScenarioSelectionSidebar({
           gap: 0.5,
           flexWrap: "wrap",
           px: 1.5,
-          py: 0.5,
+          py: 1,
           borderBottom: `1px solid ${theme.palette.divider}`,
           backgroundColor: theme.palette.background.paper,
         }}
@@ -221,11 +207,12 @@ export default function ScenarioSelectionSidebar({
               onMouseEnter={() => onRowHover?.([scenario.scenarioId])}
               onMouseLeave={() => onRowHover?.(null)}
               sx={{
+                position: "relative",
                 display: "flex",
                 alignItems: "flex-start",
-                gap: 1,
+                gap: 0.75,
                 px: 1.5,
-                py: 1,
+                py: 0.5,
                 cursor: "pointer",
                 overflow: "hidden",
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
@@ -248,17 +235,23 @@ export default function ScenarioSelectionSidebar({
                 sx={{
                   ...theme.scenarios.checkbox.sm,
                   flexShrink: 0,
-                  mt: "2px",
+                  mt: "16px",
                 }}
               />
 
               <Box
                 onClick={() => toggleScenario(scenario.scenarioId)}
-                sx={{ flex: 1, minWidth: 0 }}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  pr: showKeyOperations ? "140px" : 0,
+                  transition: "padding-right 200ms ease",
+                }}
               >
                 <StrategyHeader
                   strategy={scenario}
                   titleVariant="body2"
+                  compact
                   showDescription={showDefinitions}
                   descriptionMaxWidth="none"
                   showThemeBadge={!groupByTheme}
@@ -278,21 +271,40 @@ export default function ScenarioSelectionSidebar({
 
               <Box
                 sx={{
-                  flexShrink: 0,
-                  width: showKeyOperations ? 120 : 0,
-                  opacity: showKeyOperations ? 1 : 0,
-                  overflow: "hidden",
-                  transition: "width 200ms ease, opacity 200ms ease",
+                  position: "absolute",
+                  top: 0,
+                  right: 12,
+                  bottom: 0,
+                  width: 130,
                   display: "flex",
-                  alignItems: "flex-start",
-                  pt: "2px",
+                  opacity: showKeyOperations ? 1 : 0,
+                  pointerEvents: showKeyOperations ? "auto" : "none",
+                  transition: "opacity 200ms ease",
                 }}
               >
-                <OperationsIconGroup
-                  scenarioId={scenario.scenarioId}
-                  size="sm"
-                  layout="horizontal"
+                <Box
+                  sx={{
+                    width: "1px",
+                    flexShrink: 0,
+                    backgroundColor: theme.palette.grey[300],
+                  }}
                 />
+                <Box
+                  sx={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    pt: "22px",
+                    ml: 1,
+                  }}
+                >
+                  <OperationsIconGroup
+                    scenarioId={scenario.scenarioId}
+                    size="sm"
+                    layout="horizontal"
+                  />
+                </Box>
               </Box>
             </Box>,
           )

@@ -25,7 +25,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
         display: "flex",
         alignItems: "center",
         gap: 2,
-        px: 1.5,
+        px: theme.space.tool.px,
         py: 0.5,
         minHeight: 36,
         borderBottom: `1px solid ${theme.palette.divider}`,
@@ -33,7 +33,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
       }}
     >
       <Typography
-        variant="caption"
+        variant="dashboard"
         sx={{
           fontWeight: 600,
           color: theme.palette.text.primary,
