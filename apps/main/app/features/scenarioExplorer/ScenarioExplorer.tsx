@@ -302,8 +302,12 @@ export default function ScenarioExplorer() {
 
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
-  const needsTransparentBg =
-    isGetStartedMapMode || (mainView === "explorer" && showMap)
+  const isExploreMapMode = mainView === "explorer" && showMap
+  const needsTransparentBg = isGetStartedMapMode || isExploreMapMode
+  // When the map is visible (get-started or explore with map), the root is
+  // pointer-events:none so the persistent map behind can receive interactions.
+  // Child elements opt back in with pointer-events:auto as needed.
+  const isMapPassThrough = isGetStartedMapMode || isExploreMapMode
 
   // Hover coordination (for sidebar ↔ tool panels in non-list modes)
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
@@ -447,7 +451,7 @@ export default function ScenarioExplorer() {
           ? "transparent"
           : theme.palette.explore.background,
         color: theme.palette.text.primary,
-        pointerEvents: isGetStartedMapMode ? "none" : "auto",
+        pointerEvents: isMapPassThrough ? "none" : "auto",
         ...(isGetStartedMapMode ? {} : { height: "100%", overflow: "hidden" }),
       }}
     >
@@ -608,14 +612,17 @@ export default function ScenarioExplorer() {
         )}
       </Box>
 
-      {/* Content area */}
+      {/* Content area — when the map is pass-through (get-started or explore
+          with map), these wrappers stay pointer-events:none so clicks in the
+          map strip fall through to Mapbox. Child tool areas opt back in. */}
       <Box
         sx={{
           display: "flex",
           flex: 1,
           ...(isGetStartedMapMode
             ? {}
-            : { overflow: "hidden", pointerEvents: "auto" }),
+            : { overflow: "hidden" }),
+          ...(!isMapPassThrough && { pointerEvents: "auto" }),
         }}
       >
         <Box
@@ -625,7 +632,8 @@ export default function ScenarioExplorer() {
             flexDirection: "column",
             ...(isGetStartedMapMode
               ? {}
-              : { overflow: "hidden", pointerEvents: "auto" }),
+              : { overflow: "hidden" }),
+            ...(!isMapPassThrough && { pointerEvents: "auto" }),
           }}
         >
           {mainView === "get-started" && <GetStartedView />}
