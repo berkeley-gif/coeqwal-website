@@ -34,6 +34,8 @@ export interface RadarPlotProps {
     string,
     Record<string, { tier: number; count: number; normalized: number }[]>
   >
+  /** When set, the dot matching this axis + scenario gets a highlight ring on the map. */
+  activeMapDot?: { axis: string; scenarioId: string } | null
 }
 
 function toTier(v: number): number {
@@ -232,6 +234,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     scenarioThemes,
     showDistribution = false,
     distributionData,
+    activeMapDot,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -967,6 +970,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           if (hId) drawPolygonForScenario(hId)
         }
 
+
         // 8. Distribution dots.arranged along tier circle arcs
         if (showDistribution && distributionData && hasPinned) {
           const pinnedArr = Array.from(pinnedScenarioIds)
@@ -1115,6 +1119,56 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         updateChart(currentWidth, currentHeight)
       }
     }, [currentWidth, currentHeight, updateChart])
+
+    // Imperatively manage the active-map-dot highlight ring without
+    // triggering a full SVG rebuild when the active outcome changes.
+    useEffect(() => {
+      const svg = select(svgRef.current)
+      svg.selectAll(".active-map-ring, .active-map-glow").remove()
+
+      if (!activeMapDot) return
+
+      const dotsLayer = svg.select("g.dots")
+      if (dotsLayer.empty()) return
+
+      dotsLayer
+        .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+        .each(function () {
+          const el = select(this)
+          const sid = el.attr("data-scenario-id")
+          const axisName = el.attr("data-axis")
+          if (
+            sid === activeMapDot.scenarioId &&
+            axisName === activeMapDot.axis
+          ) {
+            const dotCx = parseFloat(el.attr("cx"))
+            const dotCy = parseFloat(el.attr("cy"))
+            const fill = el.attr("fill") ?? colors.default
+            const baseR = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+            dotsLayer
+              .insert("circle", ":first-child")
+              .attr("class", "active-map-glow")
+              .attr("cx", dotCx)
+              .attr("cy", dotCy)
+              .attr("r", baseR + 8)
+              .attr("fill", fill)
+              .attr("fill-opacity", 0.12)
+              .attr("pointer-events", "none")
+            dotsLayer
+              .insert("circle", "circle.radar-dot")
+              .attr("class", "active-map-ring")
+              .attr("cx", dotCx)
+              .attr("cy", dotCy)
+              .attr("r", baseR + 6)
+              .attr("fill", "none")
+              .attr("stroke", fill)
+              .attr("stroke-width", 2.5)
+              .attr("stroke-opacity", 0.7)
+              .attr("pointer-events", "none")
+            el.attr("r", baseR + 2).raise()
+          }
+        })
+    }, [activeMapDot, colors.default, data.length])
 
     return (
       <div

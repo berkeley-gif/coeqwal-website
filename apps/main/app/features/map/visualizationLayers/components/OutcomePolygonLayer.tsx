@@ -260,8 +260,14 @@ export function OutcomePolygonLayer({
       map.setFilter(fillId, null)
     }
 
-    // Loading state: keep fill invisible and suppress the outline entirely.
+    // Loading state: new outcome selected but tier data hasn't arrived yet.
+    // If we were already showing data (e.g. user clicked a different glyph),
+    // keep the old colors on screen so there's no blank flash. The crossfade
+    // path below will smoothly transition when the new data arrives.
     if (!hasTierData) {
+      if (wasShowingDataRef.current) {
+        return
+      }
       map.setPaintProperty(fillId, "fill-color", "transparent")
       map.setPaintProperty(fillId, "fill-opacity-transition", {
         duration: 0,
@@ -272,7 +278,6 @@ export function OutcomePolygonLayer({
       if (map.getLayer(outlineId)) {
         map.setLayoutProperty(outlineId, "visibility", "none")
       }
-      wasShowingDataRef.current = false
       return
     }
 

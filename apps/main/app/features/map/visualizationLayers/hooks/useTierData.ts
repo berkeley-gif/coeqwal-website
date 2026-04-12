@@ -46,6 +46,9 @@ import type {
 // Module-level cache for tier location data
 const tierLocationCache = new Map<string, TierLocationsResponse>()
 
+// In-flight request deduplication: avoids duplicate fetches for the same key
+const inFlightRequests = new Map<string, Promise<TierLocationsResponse>>()
+
 /** Synchronous cache probe — returns cached data or null. */
 export function peekTierLocationCache(
   scenarioId: string,
@@ -67,40 +70,49 @@ async function fetchTierLocations(
 ): Promise<TierLocationsResponse> {
   const cacheKey = `${scenarioId}-${tierCode}`
 
-  // Check cache first
   const cached = tierLocationCache.get(cacheKey)
-  if (cached) {
-    return cached
-  }
+  if (cached) return cached
 
-  const url = `${API_BASE}/tier-map/${scenarioId}/${tierCode}/locations`
-  const response = await fetch(url)
+  const inFlight = inFlightRequests.get(cacheKey)
+  if (inFlight) return inFlight
 
-  if (!response.ok) {
-    // 404 means no tier data exists for this scenario/outcome combo — return
-    // an empty result instead of throwing so the map simply shows nothing.
-    if (response.status === 404) {
-      const empty: TierLocationsResponse = {
-        scenario: scenarioId,
-        tier_code: tierCode,
-        tier_name: tierCode,
-        tier_type: "multi_value",
-        locations: [],
-        metadata: { total_locations: 0, location_types: [], tier_counts: {} },
+  const request = (async () => {
+    const url = `${API_BASE}/tier-map/${scenarioId}/${tierCode}/locations`
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        const empty: TierLocationsResponse = {
+          scenario: scenarioId,
+          tier_code: tierCode,
+          tier_name: tierCode,
+          tier_type: "multi_value",
+          locations: [],
+          metadata: {
+            total_locations: 0,
+            location_types: [],
+            tier_counts: {},
+          },
+        }
+        tierLocationCache.set(cacheKey, empty)
+        return empty
       }
-      tierLocationCache.set(cacheKey, empty)
-      return empty
+
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        errorData.detail || `Failed to fetch tier data: ${response.status}`,
+      )
     }
 
-    const errorData = await response.json().catch(() => ({}))
-    throw new Error(
-      errorData.detail || `Failed to fetch tier data: ${response.status}`,
-    )
-  }
+    const data: TierLocationsResponse = await response.json()
+    tierLocationCache.set(cacheKey, data)
+    return data
+  })()
 
-  const data: TierLocationsResponse = await response.json()
-  tierLocationCache.set(cacheKey, data)
-  return data
+  inFlightRequests.set(cacheKey, request)
+  request.finally(() => inFlightRequests.delete(cacheKey))
+
+  return request
 }
 
 /**
