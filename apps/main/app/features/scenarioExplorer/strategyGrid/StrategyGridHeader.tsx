@@ -128,9 +128,13 @@ export function StrategyGridHeader({
         hideColumnTitles={hideColumnTitles}
       />
 
-      {/* Divider continuation for Column 3 - only in full mode when operations visible */}
-      {!hideColumnTitles && showOutcomeLabels && showOperations && (
-        <DividerContinuation column={3} className="outcome-col" />
+      {/* Divider continuation for Column 3 - fades with operations */}
+      {!hideColumnTitles && showOutcomeLabels && (
+        <DividerContinuation
+          column={3}
+          className="outcome-col"
+          hidden={!showOperations}
+        />
       )}
 
       {/* Outcome category labels (Column 4) - only in full mode */}
@@ -215,21 +219,24 @@ function ColumnHeaders({
           flexWrap: "wrap",
           rowGap: 1.125,
           columnGap: 0.5,
-          pr: theme.scenarios.grid.divider.gap,
         }}
       >
         <SearchAndChips />
       </Box>
 
-      {/* Column 3: "Key operations" — hidden when showOperations is false or titles hidden */}
-      {showOperations && !hideColumnTitles && (
+      {/* Column 3: "Key operations" — fades in/out with showOperations */}
+      {!hideColumnTitles && (
         <Box
           sx={{
             gridColumn: "3",
             display: layoutMode === "compact" ? "none" : "flex",
             alignItems: "flex-start",
             alignSelf: "stretch",
-            pl: isFullMode ? theme.scenarios.grid.divider.gap : 0,
+            overflow: "hidden",
+            opacity: showOperations ? 1 : 0,
+            pointerEvents: showOperations ? "auto" : "none",
+            transition: "opacity 200ms ease",
+            pl: isFullMode ? 1 : 0,
             pb: theme.scenarios.grid.header.standard,
             borderLeft: isFullMode
               ? `1px solid ${theme.palette.grey[300]}`
@@ -241,6 +248,7 @@ function ColumnHeaders({
             sx={{
               color: theme.palette.grey[600],
               fontWeight: 500,
+              whiteSpace: "nowrap",
             }}
           >
             Key operations
@@ -287,9 +295,14 @@ function ColumnHeaders({
 interface DividerContinuationProps {
   column: number
   className?: string
+  hidden?: boolean
 }
 
-function DividerContinuation({ column, className }: DividerContinuationProps) {
+function DividerContinuation({
+  column,
+  className,
+  hidden = false,
+}: DividerContinuationProps) {
   const theme = useTheme()
 
   return (
@@ -305,6 +318,8 @@ function DividerContinuation({ column, className }: DividerContinuationProps) {
         mt: theme.scenarios.grid.divider.pullUp,
         borderLeft: `1px solid ${theme.palette.grey[300]}`,
         alignSelf: "stretch",
+        opacity: hidden ? 0 : 1,
+        transition: "opacity 200ms ease",
       }}
     />
   )

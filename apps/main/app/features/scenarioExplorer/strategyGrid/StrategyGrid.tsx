@@ -182,23 +182,24 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     {
                       gridTemplateColumns: showOperations
                         ? "32px minmax(0, 1fr) auto"
-                        : "32px minmax(0, 1fr)",
+                        : "32px minmax(0, 1fr) 0px",
                     },
                 }
               : {
                   [`@container strategy-grid (min-width: ${SM_BREAKPOINT}px)`]:
                     {
                       gridTemplateColumns: showOperations
-                        ? theme.scenarios.grid.columns.sm
-                        : "32px minmax(0, 1fr) 0fr 1fr",
+                        ? "32px minmax(0, 600px) 140px 1fr"
+                        : "32px minmax(0, 600px) 0px 1fr",
                     },
                   [`@container strategy-grid (min-width: ${FULL_BREAKPOINT}px)`]:
                     {
                       gridTemplateColumns: showOperations
                         ? theme.scenarios.grid.columns.full
-                        : "32px 0.382fr 0fr 1fr",
+                        : "32px 0.382fr 0px 1fr",
                     },
                 })),
+          transition: "grid-template-columns 300ms ease",
           ...(hideOutcomes && {
             "& .outcome-col": { display: "none" },
           }),

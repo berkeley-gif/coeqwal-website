@@ -856,8 +856,8 @@ function NonCompactRowContent({
         />
       </Box>
 
-      {/* Column 3: Key operations — in compact mode, stacks in column 2 */}
-      {showOperations && (
+      {/* Column 3: Key operations — always rendered in grid mode for smooth transition */}
+      {(showOperations || layoutMode !== "compact") && (
         <Box
           sx={{
             gridColumn: layoutMode === "compact" ? "2" : "3",
@@ -865,7 +865,7 @@ function NonCompactRowContent({
               layoutMode === "full"
                 ? `1px solid ${theme.palette.grey[300]}`
                 : "none",
-            pl: layoutMode === "full" ? theme.scenarios.grid.divider.gap : 0,
+            pl: layoutMode === "full" ? 1 : 0,
             pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
             display: "flex",
             flexDirection: "column",
@@ -874,6 +874,12 @@ function NonCompactRowContent({
             alignItems: "flex-start",
             pt: theme.scenarios.grid.row.padding,
             pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
+            ...(layoutMode !== "compact" && {
+              overflow: "hidden",
+              opacity: showOperations ? 1 : 0,
+              pointerEvents: showOperations ? "auto" : "none",
+              transition: "opacity 200ms ease",
+            }),
           }}
         >
           <Typography

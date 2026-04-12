@@ -711,10 +711,10 @@ export const themeValues = {
         /** Tablet/desktop (600-1399px): 4 columns - scenario capped at 600px, operations auto, remaining space on right */
         sm: "32px minmax(0, 600px) auto 1fr",
         /** Large desktop (1400px+): Full 4 columns with outcomes inline */
-        full: "32px 0.382fr 160px 1fr",
+        full: "32px 0.382fr 140px 1fr",
       },
       gap: {
-        default: 1, // 8px gap between columns
+        default: 1,
         compact: 2,
       },
       fullBreakpoint: 1200,
@@ -724,7 +724,7 @@ export const themeValues = {
       glyphOffset: "14px",
     },
 
-    // Tier grid layout (derived from COEQWALTierVisualization dotsPerRow formula)
+    // Tier grid layout
     tierGrid: {
       squaresPerRow: 10,
     },

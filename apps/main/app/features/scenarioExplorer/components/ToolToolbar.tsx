@@ -168,14 +168,15 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           gridTemplateColumns: {
             xs: theme.scenarios.grid.columns.xs,
             sm: showKeyOperations
-              ? theme.scenarios.grid.columns.sm
-              : "32px minmax(0, 1fr) 0fr 1fr",
+              ? "32px minmax(0, 600px) 140px 1fr"
+              : "32px minmax(0, 600px) 0px 1fr",
           },
           [`@media (min-width: ${theme.scenarios.grid.fullBreakpoint}px)`]: {
             gridTemplateColumns: showKeyOperations
               ? theme.scenarios.grid.columns.full
-              : "32px 0.382fr 0fr 1fr",
+              : "32px 0.382fr 0px 1fr",
           },
+          transition: "grid-template-columns 300ms ease",
           columnGap: theme.scenarios.grid.gap.default,
           px: theme.space.tool.px,
           py: 0.5,

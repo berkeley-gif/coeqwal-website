@@ -64,14 +64,12 @@ export default function ThemeGroupHeader({
   return (
     <Box
       data-theme-header={themeKey}
-      onClick={handleToggle}
       sx={{
         gridColumn: "1 / -1",
         display: "grid",
         gridTemplateColumns: "subgrid",
         alignItems: "center",
         minHeight: "24px",
-        cursor: "pointer",
         borderRadius: "4px",
         backgroundColor: allChecked
           ? themeColors.background
@@ -79,13 +77,6 @@ export default function ThemeGroupHeader({
             ? `${themeColors.background}44`
             : "transparent",
         transition: "background-color 0.15s ease",
-        "&:hover": {
-          backgroundColor: allChecked
-            ? themeColors.background
-            : someChecked
-              ? `${themeColors.background}55`
-              : `${themeColors.background}44`,
-        },
         "&:hover .theme-action-icon": {
           opacity: 1,
         },
@@ -103,7 +94,6 @@ export default function ThemeGroupHeader({
         <Checkbox
           checked={allChecked}
           indeterminate={someChecked}
-          onClick={(e) => e.stopPropagation()}
           onChange={handleToggle}
           sx={{
             ...theme.scenarios.checkbox.md,
@@ -144,7 +134,7 @@ export default function ThemeGroupHeader({
         </Box>
 
         {themeConfig.tooltip && (
-          <Box onClick={(e) => e.stopPropagation()}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <InfoIconButton
               tooltipContent={themeConfig.tooltip}
               placement="right"
@@ -165,8 +155,7 @@ export default function ThemeGroupHeader({
           <IconButton
             className="theme-action-icon"
             size="small"
-            onClick={(e) => {
-              e.stopPropagation()
+            onClick={() => {
               scenarioIds.forEach((id) => addToShare(id))
             }}
             sx={{
@@ -191,8 +180,7 @@ export default function ThemeGroupHeader({
           <IconButton
             className="theme-action-icon"
             size="small"
-            onClick={(e) => {
-              e.stopPropagation()
+            onClick={() => {
               if (allPinned) {
                 scenarioIds.forEach((id) => togglePinnedScenario(id))
               } else {
