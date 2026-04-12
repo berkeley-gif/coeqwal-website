@@ -810,89 +810,128 @@ function NonCompactRowContent({
     (s) => s.outcomeDisplayMode,
   )
 
-  // In wrapped mode, outcomes span full width below the first 3 columns
   const isWrappedMode = layoutMode === "wrapped"
-  // Any responsive view below 1400px (wrapped or xs/compact layout modes)
-  const isResponsiveView = layoutMode !== "full"
+  const isCompactMode = layoutMode === "compact"
+  const isFullMode = layoutMode === "full"
+
+  const inlineActionsNode =
+    isListMode && addToShare && togglePinnedScenario && accentColor ? (
+      <InlineRowActions
+        scenarioId={scenario.scenarioId}
+        scenarioLabel={scenario.label}
+        displayMode={outcomeDisplayMode as "summary" | "distribution"}
+        isPinned={isPinned}
+        accentColor={accentColor}
+        addToShare={addToShare}
+        togglePinnedScenario={togglePinnedScenario}
+      />
+    ) : undefined
+
+  const strategyHeaderBlock = (disableTrunc: boolean) => (
+    <StrategyHeader
+      strategy={scenario}
+      titleVariant="body2"
+      showDescription={showDescription}
+      disableTruncation={disableTrunc}
+      descriptionMaxWidth="none"
+      showThemeBadge={showThemeBadge}
+      onThemeBadgeClick={onThemeBadgeClick}
+      inlineActions={inlineActionsNode}
+    />
+  )
 
   return (
     <>
-      {/* Column 2: Scenario name and description */}
-      <Box
-        sx={{
-          gridColumn: "2",
-          minWidth: 0,
-          pr: theme.scenarios.grid.divider.gap,
-          pt: theme.scenarios.grid.row.padding,
-          pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
-          alignSelf: "start",
-        }}
-      >
-        <StrategyHeader
-          strategy={scenario}
-          titleVariant="body2"
-          showDescription={showDescription}
-          descriptionMaxWidth="none"
-          showThemeBadge={showThemeBadge}
-          onThemeBadgeClick={onThemeBadgeClick}
-          inlineActions={
-            isListMode && addToShare && togglePinnedScenario && accentColor ? (
-              <InlineRowActions
-                scenarioId={scenario.scenarioId}
-                scenarioLabel={scenario.label}
-                displayMode={outcomeDisplayMode as "summary" | "distribution"}
-                isPinned={isPinned}
-                accentColor={accentColor}
-                addToShare={addToShare}
-                togglePinnedScenario={togglePinnedScenario}
-              />
-            ) : undefined
-          }
-        />
-      </Box>
+      {/* Columns 2+3: In wrapped/compact mode, merge into a single flex row;
+          in full mode, keep as separate subgrid cells */}
+      {isFullMode ? (
+        <>
+          {/* Column 2: Scenario name and description */}
+          <Box
+            sx={{
+              gridColumn: "2",
+              minWidth: 0,
+              pr: theme.scenarios.grid.divider.gap,
+              pt: theme.scenarios.grid.row.padding,
+              pb: theme.scenarios.grid.row.padding,
+              alignSelf: "start",
+            }}
+          >
+            {strategyHeaderBlock(false)}
+          </Box>
 
-      {/* Column 3: Key operations — always rendered in grid mode for smooth transition */}
-      {(showOperations || layoutMode !== "compact") && (
-        <Box
-          sx={{
-            gridColumn: layoutMode === "compact" ? "2" : "3",
-            borderLeft:
-              layoutMode === "full"
-                ? `1px solid ${theme.palette.grey[300]}`
-                : "none",
-            pl: layoutMode === "full" ? 1 : 0,
-            pr: isResponsiveView ? theme.scenarios.grid.divider.gap : 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: theme.space.gap.md,
-            justifyContent: "flex-start",
-            alignItems: "flex-start",
-            pt: theme.scenarios.grid.row.padding,
-            pb: isResponsiveView ? 0 : theme.scenarios.grid.row.padding,
-            ...(layoutMode !== "compact" && {
+          {/* Column 3: Key operations */}
+          <Box
+            sx={{
+              gridColumn: "3",
+              borderLeft: `1px solid ${theme.palette.grey[300]}`,
+              pl: 1,
+              display: "flex",
+              flexDirection: "column",
+              gap: theme.space.gap.md,
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              pt: theme.scenarios.grid.row.padding,
+              pb: theme.scenarios.grid.row.padding,
               overflow: "hidden",
               opacity: showOperations ? 1 : 0,
               pointerEvents: showOperations ? "auto" : "none",
               transition: "opacity 200ms ease",
-            }),
-          }}
-        >
-          <Typography
-            variant="dashboard"
-            sx={{
-              display: layoutMode === "compact" ? "block" : "none",
-              color: theme.palette.grey[600],
-              fontWeight: 500,
             }}
           >
-            Key operations
-          </Typography>
-          <OperationsIconGroup
-            scenarioId={scenario.scenarioId}
-            theme={scenario.theme}
-            size="md"
-            onIconClick={onIconClick}
-          />
+            <OperationsIconGroup
+              scenarioId={scenario.scenarioId}
+              theme={scenario.theme}
+              size="md"
+              onIconClick={onIconClick}
+            />
+          </Box>
+        </>
+      ) : (
+        <Box
+          sx={{
+            gridColumn: "2 / -1",
+            display: "flex",
+            alignItems: "stretch",
+            gap: theme.space.gap.xl,
+            pt: theme.scenarios.grid.row.padding,
+            minWidth: 0,
+          }}
+        >
+          <Box sx={{ flex: "none", width: "50%", minWidth: 0 }}>
+            {strategyHeaderBlock(true)}
+          </Box>
+          {showOperations && (
+            <Box
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isCompactMode && (
+                <Typography
+                  variant="dashboard"
+                  sx={{
+                    color: theme.palette.grey[600],
+                    fontWeight: 500,
+                    mb: theme.space.gap.md,
+                  }}
+                >
+                  Key operations
+                </Typography>
+              )}
+              <OperationsIconGroup
+                scenarioId={scenario.scenarioId}
+                theme={scenario.theme}
+                size="md"
+                layout="horizontal"
+                onIconClick={onIconClick}
+              />
+            </Box>
+          )}
         </Box>
       )}
 
