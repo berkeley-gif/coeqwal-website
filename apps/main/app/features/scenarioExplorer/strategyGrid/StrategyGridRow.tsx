@@ -243,7 +243,10 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               : undefined
           }
           onInfoClick={(e) => {
-            (onInfoTooltipToggle ?? onTooltipToggle)(shortCode, e.currentTarget)
+            ;(onInfoTooltipToggle ?? onTooltipToggle)(
+              shortCode,
+              e.currentTarget,
+            )
           }}
           onSortToggle={(newState) => {
             if (newState === null) {
@@ -369,19 +372,17 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               togglePinnedScenario={togglePinnedScenario}
             />
           )}
-
         </>
       )}
     </Box>
   )
 })
 
-
 /**
  * Inline pin and share icons rendered in the shortcode row of StrategyHeader.
  * Always visible (full opacity). Reverse order of sidebar (pin first, then share).
  */
-function InlineRowActions({
+export function InlineRowActions({
   scenarioId,
   scenarioLabel,
   displayMode,
@@ -527,7 +528,6 @@ function InlineRowActions({
     </Box>
   )
 }
-
 
 /**
  * Compact mode content - flexbox-based layout for mobile/condensed view

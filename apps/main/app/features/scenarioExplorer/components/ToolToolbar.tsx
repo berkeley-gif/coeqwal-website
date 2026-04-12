@@ -17,9 +17,10 @@ import { useScenarioExplorerStore } from "../store"
 
 interface ToolToolbarProps {
   gridAligned?: boolean
+  hideTitle?: boolean
 }
 
-export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
+export default function ToolToolbar({ gridAligned, hideTitle }: ToolToolbarProps) {
   const theme = useTheme()
   const {
     hydroclimate,
@@ -187,41 +188,45 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           alignItems: "center",
         }}
       >
-        <Box
-          sx={{
-            gridColumn: "1 / -1",
-            [`@container strategy-grid (min-width: ${SM}px)`]: {
-              gridColumn: "1 / 4",
-            },
-            display: "none",
-            [`@container strategy-grid (min-width: ${FULL}px)`]: {
-              display: "flex",
-            },
-            alignItems: "center",
-          }}
-        >
-          <Typography
+        {!hideTitle && (
+          <Box
             sx={{
-              fontSize: "0.9375rem",
-              fontWeight: 600,
-              lineHeight: 1.3,
-              color: theme.palette.text.primary,
+              gridColumn: "1 / -1",
+              [`@container strategy-grid (min-width: ${SM}px)`]: {
+                gridColumn: "1 / 4",
+              },
+              display: "none",
+              [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                display: "flex",
+              },
+              alignItems: "center",
             }}
           >
-            Scenario library
-          </Typography>
-        </Box>
+            <Typography
+              sx={{
+                fontSize: "0.9375rem",
+                fontWeight: 600,
+                lineHeight: 1.3,
+                color: theme.palette.text.primary,
+              }}
+            >
+              Scenario library
+            </Typography>
+          </Box>
+        )}
 
         <Box
           sx={{
             gridColumn: "1 / -1",
             borderLeft: "none",
             pl: 0,
-            [`@container strategy-grid (min-width: ${FULL}px)`]: {
-              gridColumn: "4",
-              borderLeft: `1px solid rgba(0,0,0,0.2)`,
-              pl: theme.scenarios.grid.divider.gap,
-            },
+            ...(!hideTitle && {
+              [`@container strategy-grid (min-width: ${FULL}px)`]: {
+                gridColumn: "4",
+                borderLeft: `1px solid rgba(0,0,0,0.2)`,
+                pl: theme.scenarios.grid.divider.gap,
+              },
+            }),
             display: "flex",
             alignItems: "center",
             alignSelf: "stretch",

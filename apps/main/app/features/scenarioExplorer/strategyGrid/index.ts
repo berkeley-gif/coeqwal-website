@@ -18,7 +18,7 @@ export { default as StrategyGrid } from "./StrategyGrid"
 // Sub-components
 export { StrategyGridHeader } from "./StrategyGridHeader"
 export { StrategyGridContent } from "./StrategyGridContent"
-export { StrategyGridRow } from "./StrategyGridRow"
+export { StrategyGridRow, InlineRowActions } from "./StrategyGridRow"
 export { GridControls } from "./GridControls"
 
 // Types
