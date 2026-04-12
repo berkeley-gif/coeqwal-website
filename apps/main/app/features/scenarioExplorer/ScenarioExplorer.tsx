@@ -135,10 +135,12 @@ function RadarAxesDropdown() {
     !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
 
   const allNodSelected = NOD_CODES.every((c) => axesSet.has(c))
-  const someNodSelected = !allNodSelected && NOD_CODES.some((c) => axesSet.has(c))
+  const someNodSelected =
+    !allNodSelected && NOD_CODES.some((c) => axesSet.has(c))
 
   const allSodSelected = SOD_CODES.every((c) => axesSet.has(c))
-  const someSodSelected = !allSodSelected && SOD_CODES.some((c) => axesSet.has(c))
+  const someSodSelected =
+    !allSodSelected && SOD_CODES.some((c) => axesSet.has(c))
 
   const toggleGroup = useCallback(
     (codes: readonly string[], allOn: boolean) => {

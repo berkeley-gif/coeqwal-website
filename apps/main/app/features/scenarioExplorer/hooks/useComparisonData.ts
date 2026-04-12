@@ -23,10 +23,7 @@ import nodSodTiers from "../data/nod-sod-tiers.json"
 const PRIMARY_BASELINE_ID = "s0020"
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
-const nodSodData = nodSodTiers as Record<
-  string,
-  Record<string, number | null>
->
+const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
 
 /** Convert a tier mean (1-4 scale) to the radar chart's internal format,
  *  matching the API path: normalized_score = (4 - ws) / 3, then * 2 - 1. */
