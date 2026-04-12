@@ -29,7 +29,7 @@ import {
   type ScenarioForDisplay,
 } from "../../scenarios/components/shared"
 import { useScenarioExplorerStore } from "../store"
-import { useMapVisualizationAction, useActiveMapOutcome } from "../../map/hooks"
+import { useOutcomeMapAction } from "../../map/hooks"
 import type { LayoutMode } from "./StrategyGridHeader"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { describeOutcomeLocations } from "../../../content/outcomes"
@@ -144,9 +144,9 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
 
   const accentColor = scenarioColor || theme.palette.blue.bright
 
-  // Map visualization hooks
-  const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
-  const activeMapOutcome = useActiveMapOutcome()
+  // Map visualization hook
+  const { showOutcomeOnMap, isOutcomeActive, isMapVisible } =
+    useOutcomeMapAction()
 
   // Get chart data for this scenario
   const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
@@ -223,11 +223,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           chartData={chartData}
           isActive={isActive}
           isSelected={
-            isSelected ||
-            (isMapVisible &&
-              activeMapOutcome?.outcomeCode === shortCode &&
-              (activeMapOutcome?.siblingGroupId ??
-                activeMapOutcome?.scenarioId) === scenario.scenarioId)
+            isSelected || isOutcomeActive(shortCode, scenario.scenarioId)
           }
           isTooltipActive={activeTooltip === shortCode}
           variant={variantOverride}
@@ -239,7 +235,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           sortState={isSorted ? sortDirection : null}
           onGlyphClick={
             isMapVisible
-              ? () => showOnMapForGroup(shortCode, scenario.scenarioId)
+              ? () => showOutcomeOnMap(shortCode, scenario.scenarioId)
               : undefined
           }
           onInfoClick={(e) => {

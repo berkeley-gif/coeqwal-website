@@ -21,8 +21,8 @@ import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
-import { useMapVisualizationAction } from "../../map/hooks/useMapVisualizationAction"
-import { getOutcomeCode, getOutcomeName } from "../../../content/outcomes"
+import { useOutcomeMapAction } from "../../map/hooks"
+import { getOutcomeName } from "../../../content/outcomes"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -49,16 +49,18 @@ export default function RadarPanel({
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
-  const { showOnMapForGroup, isMapVisible } = useMapVisualizationAction()
+  const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
 
-  const handleDotClick = useCallback(
-    (scenarioId: string, axisName: string) => {
-      if (!isMapVisible) return
-      const code = getOutcomeCode(axisName)
-      if (!code) return
-      showOnMapForGroup(code, scenarioId)
-    },
-    [isMapVisible, showOnMapForGroup],
+  const activeMapDot = useMemo(
+    () =>
+      activeOutcome
+        ? {
+            axis: getOutcomeName(activeOutcome.outcomeCode),
+            scenarioId:
+              activeOutcome.siblingGroupId ?? activeOutcome.scenarioId,
+          }
+        : null,
+    [activeOutcome],
   )
 
   const chosenIds = useMemo(
@@ -219,7 +221,8 @@ export default function RadarPanel({
           morphGeneration={morphGeneration}
           pinnedScenarioIds={pinnedSet}
           onPinnedToggle={togglePinnedScenario}
-          onDotClick={handleDotClick}
+          onDotClick={(scenarioId, axis) => showOutcomeOnMap(axis, scenarioId)}
+          activeMapDot={activeMapDot}
           dimUnpinned={dimUnpinned}
           axisRange={showRadarRange ? axisRange : undefined}
           showTierZones={showTierZones}

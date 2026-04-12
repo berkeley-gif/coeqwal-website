@@ -40,17 +40,14 @@ export default function ToolToolbar({
   const viewControls = (
     <>
       <Box
-        component="button"
-        type="button"
+        component="span"
         sx={{
           display: "inline-flex",
           alignItems: "center",
           gap: 0.5,
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          color: theme.palette.text.primary,
+          color: "grey.400",
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
         <Typography
@@ -58,12 +55,14 @@ export default function ToolToolbar({
           sx={{
             fontWeight: 500,
             whiteSpace: "nowrap",
+            color: "inherit",
           }}
         >
           How to read this chart?
         </Typography>
       </Box>
 
+      {/* Show distribution — temporarily hidden
       <VerticalDivider />
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
@@ -86,6 +85,7 @@ export default function ToolToolbar({
           sx={{ ml: -0.5 }}
         />
       </Box>
+      */}
 
       <VerticalDivider />
 
@@ -111,26 +111,23 @@ export default function ToolToolbar({
       <VerticalDivider />
 
       <Box
-        component="button"
-        type="button"
-        onClick={() => setShowLocationPicker(!showLocationPicker)}
+        component="span"
         sx={{
           display: "inline-flex",
           alignItems: "center",
           gap: 0.5,
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-          color: theme.palette.text.primary,
+          color: "grey.400",
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
-        <LocationOnIcon sx={{ fontSize: "1.25rem" }} />
+        <LocationOnIcon sx={{ fontSize: "1.25rem", color: "inherit" }} />
         <Typography
           variant="dashboard"
           sx={{
             fontWeight: 500,
             whiteSpace: "nowrap",
+            color: "inherit",
           }}
         >
           Choose locations to track
