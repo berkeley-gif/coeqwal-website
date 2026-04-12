@@ -6,9 +6,9 @@
  * Desktop: Uses Popper for automatic viewport boundary handling with dynamic arrow
  * Mobile: Uses centered modal with vertical scrolling
  *
- * WCAG 4.1.2: When scenarioScore is provided, displays the scenario's actual
- * tier level alongside tier definitions, making chart data accessible to
- * screen reader users.
+ * WCAG 4.1.2: When scenarioLabel + chartData are provided, displays the
+ * scenario's actual tier level alongside tier definitions, making chart data
+ * accessible to screen reader users.
  */
 
 import React, { useEffect, useMemo, useState } from "react"
@@ -22,7 +22,6 @@ import {
 import type { PopperProps } from "@repo/ui/mui"
 import { TooltipCloseButton, MobileModal } from "@repo/ui"
 import TierTooltipContent from "./TierTooltipContent"
-import type { OutcomeScoreData } from "../scenarios/hooks"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
 
 interface TierTooltipPortalProps {
@@ -34,8 +33,6 @@ interface TierTooltipPortalProps {
   onClose: () => void
   /** Called when user clicks close button */
   onForceClose: () => void
-  /** Optional: Current scenario's score data for this outcome (for accessibility) */
-  scenarioScore?: OutcomeScoreData | null
   /** Optional: Scenario label for context */
   scenarioLabel?: string
   /** Optional: Chart data for tier distribution display */
@@ -153,7 +150,6 @@ function DesktopTooltip({
   anchorEl,
   onClose,
   onForceClose,
-  scenarioScore,
   scenarioLabel,
   chartData,
   zIndex: providedZIndex,
@@ -238,7 +234,6 @@ function DesktopTooltip({
             <TierTooltipContent
               outcomeCode={outcomeCode!}
               showTitle={true}
-              scenarioScore={scenarioScore}
               scenarioLabel={scenarioLabel}
               chartData={chartData}
             />
@@ -262,7 +257,6 @@ function TierTooltipMobileView({
   anchorEl,
   onClose,
   onForceClose,
-  scenarioScore,
   scenarioLabel,
   chartData,
 }: TierTooltipPortalProps) {
@@ -291,7 +285,6 @@ function TierTooltipMobileView({
         <TierTooltipContent
           outcomeCode={outcomeCode!}
           showTitle={true}
-          scenarioScore={scenarioScore}
           scenarioLabel={scenarioLabel}
           chartData={chartData}
         />

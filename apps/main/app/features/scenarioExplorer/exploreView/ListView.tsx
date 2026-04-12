@@ -44,7 +44,6 @@ export default function ListView({
     showAllThemeDividers,
     iconMatchingScenarioIds,
     showIconDivider,
-    allScoreData,
     allChartData,
     outcomeNames,
     isLoading,
@@ -201,7 +200,6 @@ export default function ListView({
 
   const strategyGridProps = {
     getChartDataForScenario,
-    allScoreData,
     outcomeNames,
     scenarios: orderedScenarios,
     highlightedScenarios: mergedHighlighted,
@@ -232,7 +230,6 @@ export default function ListView({
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
     showActions: true,
-    accentBorder: true,
     pinnedScenarioIds,
   }
 

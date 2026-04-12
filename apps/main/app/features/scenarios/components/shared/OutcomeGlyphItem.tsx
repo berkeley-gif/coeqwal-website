@@ -329,20 +329,22 @@ export function OutcomeGlyphItem({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: 0.25, // 2px - intentionally tight for label spacing
+            gap: "6px",
             minHeight: "2rem",
             width: "100%",
           }}
         >
           {showLabel && (
             <Typography
-              variant="outcomeLabel"
+              component="div"
               sx={{
-                color: isActive
-                  ? theme.palette.grey[700]
-                  : theme.palette.grey[400],
+                fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                fontSize: "0.8125rem",
+                fontWeight: 600,
+                lineHeight: 1.2,
+                letterSpacing: "0.01em",
+                color: theme.palette.text.primary,
                 textAlign: "center",
-                lineHeight: 1.3,
               }}
             >
               {formatOutcomeLabel(displayName)}
@@ -356,7 +358,7 @@ export function OutcomeGlyphItem({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 0,
+                gap: 0.5,
               }}
             >
               {showInfoButton && onInfoClick && (
@@ -383,5 +385,3 @@ export function OutcomeGlyphItem({
     </Box>
   )
 }
-
-export default OutcomeGlyphItem

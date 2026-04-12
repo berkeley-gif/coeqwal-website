@@ -133,8 +133,6 @@ export default function ThemeGroupHeader({
           </Box>
         )}
 
-        <Box sx={{ flex: 1 }} />
-
         <Tooltip
           title={
             allShared
@@ -152,7 +150,7 @@ export default function ThemeGroupHeader({
             sx={{
               p: 0.25,
               opacity: allShared ? 1 : 0,
-              color: allShared ? theme.palette.blue.bright : themeColors.text,
+              color: theme.palette.text.primary,
               transition: "opacity 200ms ease",
             }}
           >

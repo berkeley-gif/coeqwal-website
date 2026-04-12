@@ -108,41 +108,26 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           label="definitions"
           active={showDefinitions}
           onClick={() => setShowDefinitions(!showDefinitions)}
-          tooltip={showDefinitions ? "Hide definitions" : "Show definitions"}
         />
         <ToggleChip
           label="baselines"
           active={showAlternativeBaselines}
           onClick={() => setShowAlternativeBaselines(!showAlternativeBaselines)}
-          tooltip={
-            showAlternativeBaselines
-              ? "Hide extra baselines"
-              : "Show extra baselines"
-          }
         />
         <ToggleChip
           label="key operations"
           active={showKeyOperations}
           onClick={() => setShowKeyOperations(!showKeyOperations)}
-          tooltip={
-            showKeyOperations ? "Hide key operations" : "Show key operations"
-          }
         />
         <ToggleChip
           label="chosen only"
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-          tooltip={showOnlyChosen ? "Show all scenarios" : "Show chosen only"}
         />
         <ToggleChip
           label="group by theme"
           active={groupByTheme}
           onClick={() => setGroupByTheme(!groupByTheme)}
-          tooltip={
-            groupByTheme
-              ? "Ungroup scenarios by theme"
-              : "Group scenarios by theme"
-          }
         />
       </Box>
     </>

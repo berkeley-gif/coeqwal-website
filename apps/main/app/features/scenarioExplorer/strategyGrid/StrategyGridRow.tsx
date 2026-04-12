@@ -51,8 +51,6 @@ export interface StrategyGridRowProps {
   showOperations?: boolean
   /** When true, only outcomes are shown (no checkbox, title, or ops) */
   outcomesOnly?: boolean
-  /** Show alternative baseline scenarios */
-  showAlternativeBaselines: boolean
   /** Outcome names with display info */
   outcomeNames: OutcomeName[]
   /** Get chart data for this scenario */
@@ -77,8 +75,10 @@ export interface StrategyGridRowProps {
   onToggleScenario: (scenarioId: string) => void
   /** Called when a tier glyph is clicked (for map visualization) */
   onTierClick?: (scenarioId: string, outcomeCode: string) => void
-  /** Toggle tooltip with anchor */
+  /** Toggle tooltip with anchor (may include scenario context for glyph clicks) */
   onTooltipToggle: (name: string, anchor: HTMLElement) => void
+  /** Toggle tooltip without scenario context (for info icon clicks) */
+  onInfoTooltipToggle?: (name: string, anchor: HTMLElement) => void
   /** Sort change handler */
   onSortChange?: (outcomeCode: string | null, direction: "asc" | "desc") => void
   /** Whether to show inline theme badge on each row */
@@ -89,8 +89,6 @@ export interface StrategyGridRowProps {
   onIconClick?: (iconId: string) => void
   /** Show share/pin action buttons on each row */
   showActions?: boolean
-  /** Show left accent border on active/chosen/pinned rows */
-  accentBorder?: boolean
   /** Optional color for accent border and swatch */
   scenarioColor?: string
   /** Whether this scenario is pinned */
@@ -125,12 +123,12 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   onToggleScenario,
   onTierClick,
   onTooltipToggle,
+  onInfoTooltipToggle,
   onSortChange,
   showThemeBadge = true,
   onThemeBadgeClick,
   onIconClick,
   showActions = false,
-  accentBorder = false,
   scenarioColor,
   isPinned = false,
   isActive = false,
@@ -250,7 +248,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
               : undefined
           }
           onInfoClick={(e) => {
-            onTooltipToggle(shortCode, e.currentTarget)
+            (onInfoTooltipToggle ?? onTooltipToggle)(shortCode, e.currentTarget)
           }}
           onSortToggle={(newState) => {
             if (newState === null) {
@@ -297,17 +295,11 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
           ? `1px solid ${theme.palette.blue.bright}`
           : "none",
         borderBottom: `1px solid ${theme.palette.grey[200]}`,
-        ...(accentBorder && {
-          borderLeft: `3px solid ${
-            isActive || isChosen || isPinned ? accentColor : "transparent"
-          }`,
-        }),
         "&:hover": {
           "--row-bg": isActive
             ? `${accentColor}26`
             : theme.palette.background.paper,
           backgroundColor: "var(--row-bg)",
-          ...(accentBorder && { borderLeftColor: accentColor }),
         },
         "&:last-child": {
           borderBottom: "1px solid transparent",

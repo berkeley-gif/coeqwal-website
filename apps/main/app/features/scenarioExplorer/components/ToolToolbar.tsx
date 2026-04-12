@@ -193,7 +193,10 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
             [`@container strategy-grid (min-width: ${SM}px)`]: {
               gridColumn: "1 / 4",
             },
-            display: "flex",
+            display: "none",
+            [`@container strategy-grid (min-width: ${FULL}px)`]: {
+              display: "flex",
+            },
             alignItems: "center",
           }}
         >
@@ -213,15 +216,16 @@ export default function ToolToolbar({ gridAligned }: ToolToolbarProps) {
           sx={{
             gridColumn: "1 / -1",
             borderLeft: "none",
-            [`@container strategy-grid (min-width: ${SM}px)`]: {
+            pl: 0,
+            [`@container strategy-grid (min-width: ${FULL}px)`]: {
               gridColumn: "4",
               borderLeft: `1px solid rgba(0,0,0,0.2)`,
+              pl: theme.scenarios.grid.divider.gap,
             },
             display: "flex",
             alignItems: "center",
             alignSelf: "stretch",
             gap: 2,
-            pl: theme.scenarios.grid.divider.gap,
           }}
         >
           {viewControls}

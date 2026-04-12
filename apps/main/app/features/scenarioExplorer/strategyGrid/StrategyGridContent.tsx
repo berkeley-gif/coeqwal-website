@@ -100,8 +100,6 @@ export interface StrategyGridContentProps {
   onIconClick?: (iconId: string) => void
   /** Show share/pin action buttons on each row */
   showActions?: boolean
-  /** Show left accent border on active/chosen/pinned rows */
-  accentBorder?: boolean
   /** Map of scenario ID to color for accent border / swatch */
   scenarioColors?: Record<string, string>
   /** Set of pinned scenario IDs */
@@ -150,7 +148,6 @@ export function StrategyGridContent({
   onThemeBadgeClick,
   onIconClick,
   showActions = false,
-  accentBorder = false,
   scenarioColors,
   pinnedScenarioIds = [],
   activeScenarioIds,
@@ -319,7 +316,6 @@ export function StrategyGridContent({
           layoutMode={layoutMode}
           showOperations={showOperations}
           outcomesOnly={outcomesOnly}
-          showAlternativeBaselines={showAlternativeBaselines}
           outcomeNames={outcomeNames}
           getChartDataForScenario={getChartDataForScenario}
           selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
@@ -332,12 +328,12 @@ export function StrategyGridContent({
           onToggleScenario={onToggleScenario}
           onTierClick={onTierClick}
           onTooltipToggle={createTooltipHandler(scenario)}
+          onInfoTooltipToggle={onTooltipToggle}
           onSortChange={onSortChange}
           showThemeBadge={opts.showThemeBadge}
           onThemeBadgeClick={onThemeBadgeClick}
           onIconClick={onIconClick}
           showActions={showActions}
-          accentBorder={accentBorder}
           scenarioColor={scenarioColors?.[scenario.scenarioId]}
           isPinned={pinnedSet.has(scenario.scenarioId)}
           isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}

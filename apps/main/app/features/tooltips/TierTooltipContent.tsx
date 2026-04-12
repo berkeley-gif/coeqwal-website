@@ -6,17 +6,14 @@
  * Displays outcome tier descriptions in a consistent format.
  * Used by TierLegend, ClickTooltip, and HybridTooltip.
  *
- * WCAG 4.1.2: When scenarioScore is provided, displays the scenario's actual
- * tier level with a visual indicator, making glyph data accessible to
- * screen reader users as text.
+ * WCAG 4.1.2: When scenarioLabel + chartData are provided, displays the
+ * scenario's actual tier level with a visual indicator, making glyph data
+ * accessible to screen reader users as text.
  */
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import {
-  useOutcomeDefinitions,
-  type OutcomeScoreData,
-} from "../scenarios/hooks"
+import { useOutcomeDefinitions } from "../scenarios/hooks"
 import {
   OUTCOME_TIER_VALUES,
   getOutcomeName,
@@ -28,8 +25,6 @@ interface TierTooltipContentProps {
   /** Outcome code (e.g., "CWS_DEL") */
   outcomeCode: string
   showTitle?: boolean
-  /** Optional: Current scenario's score data for this outcome */
-  scenarioScore?: OutcomeScoreData | null
   /** Optional: Scenario label for context */
   scenarioLabel?: string
   /** Optional: Chart data showing tier distribution or level */
@@ -128,24 +123,11 @@ const getTierFromChartData = (
 }
 
 /**
- * Format distribution percentages for display
- * Converts normalized values (0-1) to percentages
- */
-const formatDistribution = (chartData: TooltipChartDataPoint[]): string[] => {
-  return chartData.map((d) => {
-    const percentage = Math.round(d.value * 100)
-    return `${percentage}%`
-  })
-}
-
-/**
  * Shared tooltip/legend content for tier information
  */
 export default function TierTooltipContent({
   outcomeCode,
   showTitle = true,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  scenarioScore, // Reserved for future equity/gini display
   scenarioLabel,
   chartData,
 }: TierTooltipContentProps) {
@@ -160,12 +142,6 @@ export default function TierTooltipContent({
 
   // Tier level names for display
   const tierLevelNames = ["Optimal", "Sub-optimal", "At-risk", "Critical"]
-
-  // Get distribution percentages for multi-value tiers
-  const distribution =
-    tierType === "multi_value" && chartData
-      ? formatDistribution(chartData)
-      : null
 
   return (
     <Box sx={{ color: theme.palette.text.primary }}>
@@ -235,7 +211,6 @@ export default function TierTooltipContent({
 
       {/* Multi-value tier: Show the distribution across tiers */}
       {tierType === "multi_value" &&
-        distribution &&
         chartData &&
         scenarioLabel && (
           <Box

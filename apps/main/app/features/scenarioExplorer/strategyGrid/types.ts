@@ -7,7 +7,6 @@ import type {
   OutcomeName,
   ScenarioForDisplay,
 } from "../../scenarios/components/shared"
-import type { OutcomeScoreData } from "../../scenarios/hooks"
 import type { ScenarioTheme } from "../../../content/scenarios"
 
 export interface StrategyGridProps {
@@ -15,8 +14,6 @@ export interface StrategyGridProps {
   getChartDataForScenario: (
     scenarioId: string,
   ) => Record<string, ChartDataPoint[]>
-  /** Optional: Score data for all scenarios (for accessibility tooltip display) */
-  allScoreData?: Record<string, Record<string, OutcomeScoreData>>
   outcomeNames: OutcomeName[]
   /** Scenarios to display (from useScenarioList().scenarios) */
   scenarios: ScenarioForDisplay[]
@@ -69,8 +66,6 @@ export interface StrategyGridProps {
   // Sidebar-parity features (Phase 1 unified list)
   /** Show share/pin action buttons on each row */
   showActions?: boolean
-  /** Show left accent border on active/chosen/pinned rows */
-  accentBorder?: boolean
   /** Map of scenario ID to color for accent border / swatch */
   scenarioColors?: Record<string, string>
   /** Set of pinned scenario IDs */

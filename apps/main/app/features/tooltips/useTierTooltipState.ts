@@ -193,5 +193,3 @@ export function useTierTooltipState(options: UseTierTooltipStateOptions = {}) {
     forceClose,
   }
 }
-
-export default useTierTooltipState
