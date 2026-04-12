@@ -106,6 +106,7 @@ const TOOL_TABS: {
 ]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
+const FORM_LABEL_SX = { mr: 1.5, ml: 0, alignItems: "center" } as const
 
 function RadarAxesDropdown() {
   const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
@@ -279,7 +280,7 @@ export default function ScenarioExplorer() {
                 highlight current operations
               </Typography>
             }
-            sx={{ mr: 1.5 }}
+            sx={FORM_LABEL_SX}
           />
           <FormControlLabel
             control={
@@ -295,7 +296,7 @@ export default function ScenarioExplorer() {
                 show tier zones
               </Typography>
             }
-            sx={{ mr: 1.5 }}
+            sx={FORM_LABEL_SX}
           />
           <FormControlLabel
             control={
@@ -311,7 +312,7 @@ export default function ScenarioExplorer() {
                 dim unpinned
               </Typography>
             }
-            sx={{ mr: 1.5 }}
+            sx={FORM_LABEL_SX}
           />
           <FormControlLabel
             control={
@@ -327,7 +328,7 @@ export default function ScenarioExplorer() {
                 show range
               </Typography>
             }
-            sx={{ mr: 1.5 }}
+            sx={FORM_LABEL_SX}
           />
           <RadarAxesDropdown />
         </ChartControlsBar>
