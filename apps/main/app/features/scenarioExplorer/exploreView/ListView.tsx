@@ -78,6 +78,7 @@ export default function ListView({
     setSelectedTheme,
     setSelectedIconId,
     groupByTheme,
+    pinnedScenarioIds,
   } = useScenarioExplorerStore()
 
   const handleSortChange = (
@@ -209,6 +210,9 @@ export default function ListView({
     onSortChange: handleSortChange,
     onThemeBadgeClick: handleThemeBadgeClick,
     onIconClick: handleIconClick,
+    showActions: true,
+    accentBorder: true,
+    pinnedScenarioIds,
   }
 
   return (

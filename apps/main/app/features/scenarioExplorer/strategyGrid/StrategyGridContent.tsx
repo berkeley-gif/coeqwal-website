@@ -13,7 +13,7 @@
  * @see layoutConfig.ts for spacing constant documentation
  */
 
-import React, { useCallback } from "react"
+import React, { useCallback, useMemo } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
 import { PanelFeedback } from "@repo/ui"
 import type {
@@ -176,8 +176,23 @@ export function StrategyGridContent({
     return scenarios
   })()
 
-  // Pre-compute scenario IDs per theme for ThemeGroupHeader
-  const themeScenarioIds = React.useMemo(() => {
+  const pinnedSet = useMemo(
+    () => new Set(pinnedScenarioIds),
+    [pinnedScenarioIds],
+  )
+
+  const pinnedScenarios = useMemo(
+    () => displayScenarios.filter((s) => pinnedSet.has(s.scenarioId)),
+    [displayScenarios, pinnedSet],
+  )
+
+  const unpinnedScenarios = useMemo(
+    () => displayScenarios.filter((s) => !pinnedSet.has(s.scenarioId)),
+    [displayScenarios, pinnedSet],
+  )
+
+  // Pre-compute scenario IDs per theme for ThemeGroupHeader (full display set)
+  const themeScenarioIds = useMemo(() => {
     if (!groupByTheme) return new Map<string, string[]>()
     const map = new Map<string, string[]>()
     for (const s of displayScenarios) {
@@ -190,12 +205,33 @@ export function StrategyGridContent({
     return map
   }, [groupByTheme, displayScenarios])
 
+  // For pinned section: only show theme header when ALL scenarios
+  // in that theme (from the display set) are pinned together.
+  const pinnedThemeScenarioIds = useMemo(() => {
+    if (!groupByTheme || pinnedScenarios.length === 0)
+      return new Map<string, string[]>()
+    const map = new Map<string, string[]>()
+    for (const s of pinnedScenarios) {
+      if (s.theme) {
+        const ids = map.get(s.theme) ?? []
+        ids.push(s.scenarioId)
+        map.set(s.theme, ids)
+      }
+    }
+    // Only keep themes where ALL display-set scenarios are pinned
+    for (const [theme, pinnedIds] of map) {
+      const totalIds = themeScenarioIds.get(theme) ?? []
+      if (pinnedIds.length < totalIds.length) {
+        map.delete(theme)
+      }
+    }
+    return map
+  }, [groupByTheme, pinnedScenarios, themeScenarioIds])
+
   // Create context-aware tooltip handler for a specific scenario
-  // Includes chart data for accurate tier display in tooltips
   const createTooltipHandler = useCallback(
     (scenario: ScenarioForDisplay) => (name: string, anchor: HTMLElement) => {
       if (onTooltipToggleWithContext) {
-        // Get chart data for this specific outcome to pass to tooltip
         const scenarioChartData = getChartDataForScenario(scenario.scenarioId)
         const outcomeChartData = scenarioChartData[name]
 
@@ -211,6 +247,164 @@ export function StrategyGridContent({
     [onTooltipToggle, onTooltipToggleWithContext, getChartDataForScenario],
   )
 
+  /** Render a list of scenarios as grid rows with dividers and optional theme headers. */
+  const renderScenarioRows = (
+    list: ScenarioForDisplay[],
+    opts: {
+      themeIds: Map<string, string[]>
+      showThemeBadge: boolean
+      isFirstGroup: boolean
+    },
+  ) =>
+    list.flatMap((scenario, index, arr) => {
+      const isHighlighted = highlightedScenarios.has(scenario.scenarioId)
+      const nextScenario = arr[index + 1]
+      const isNextHighlighted = nextScenario
+        ? highlightedScenarios.has(nextScenario.scenarioId)
+        : false
+
+      const shouldShowDivider =
+        showSearchDivider && isHighlighted && !isNextHighlighted
+
+      const isThemeMatch =
+        themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+      const isNextThemeMatch = nextScenario
+        ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
+        : false
+      const shouldShowThemeDivider =
+        showThemeDivider && isThemeMatch && !isNextThemeMatch
+
+      const isIconMatch =
+        iconMatchingScenarioIds?.has(scenario.scenarioId) ?? false
+      const isNextIconMatch = nextScenario
+        ? (iconMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
+        : false
+      const shouldShowIconDivider =
+        showIconDivider && isIconMatch && !isNextIconMatch
+
+      const shouldShowThemeGroupDivider =
+        !groupByTheme &&
+        showAllThemeDividers &&
+        nextScenario !== undefined &&
+        scenario.theme !== nextScenario.theme
+
+      const rows: React.ReactNode[] = []
+
+      if (groupByTheme && scenario.theme) {
+        const prevScenario = index > 0 ? arr[index - 1] : undefined
+        const isNewGroup =
+          index === 0 || scenario.theme !== prevScenario?.theme
+        if (isNewGroup) {
+          const ids = opts.themeIds.get(scenario.theme) ?? []
+          if (ids.length > 0) {
+            rows.push(
+              <ThemeGroupHeader
+                key={`theme-header-${scenario.theme}`}
+                themeKey={scenario.theme as ScenarioTheme}
+                scenarioIds={ids}
+                isFirst={opts.isFirstGroup && index === 0}
+              />,
+            )
+          }
+        }
+      }
+
+      rows.push(
+        <StrategyGridRow
+          key={scenario.scenarioId}
+          scenario={scenario}
+          isFirst={!groupByTheme && opts.isFirstGroup && index === 0}
+          isHighlighted={isHighlighted}
+          isChosen={selectedScenarios.includes(scenario.scenarioId)}
+          compact={compact}
+          layoutMode={layoutMode}
+          showOperations={showOperations}
+          outcomesOnly={outcomesOnly}
+          showAlternativeBaselines={showAlternativeBaselines}
+          outcomeNames={outcomeNames}
+          getChartDataForScenario={getChartDataForScenario}
+          selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
+          activeTooltip={activeTooltip}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          sortEnabled={sortEnabled}
+          glyphSize={glyphSize}
+          isAlignedGrid={isAlignedGrid}
+          onToggleScenario={onToggleScenario}
+          onTierClick={onTierClick}
+          onTooltipToggle={createTooltipHandler(scenario)}
+          onSortChange={onSortChange}
+          showThemeBadge={opts.showThemeBadge}
+          onThemeBadgeClick={onThemeBadgeClick}
+          onIconClick={onIconClick}
+          showActions={showActions}
+          accentBorder={accentBorder}
+          scenarioColor={scenarioColors?.[scenario.scenarioId]}
+          isPinned={pinnedSet.has(scenario.scenarioId)}
+          isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
+          onRowHover={onRowHover}
+        />,
+      )
+
+      if (shouldShowDivider) {
+        rows.push(
+          <Box
+            key={`divider-${scenario.scenarioId}`}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
+          />,
+        )
+      }
+
+      if (shouldShowThemeDivider) {
+        rows.push(
+          <Box
+            key={`theme-divider-${scenario.scenarioId}`}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
+          />,
+        )
+      }
+
+      if (shouldShowIconDivider) {
+        rows.push(
+          <Box
+            key={`icon-divider-${scenario.scenarioId}`}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
+          />,
+        )
+      }
+
+      if (shouldShowThemeGroupDivider) {
+        rows.push(
+          <Box
+            key={`theme-group-divider-${scenario.scenarioId}`}
+            sx={{
+              gridColumn: "1 / -1",
+              my: theme.space.section.sm,
+              height: "1px",
+              backgroundColor: theme.palette.grey[300],
+            }}
+          />,
+        )
+      }
+
+      return rows
+    })
+
   if (displayScenarios.length === 0 && showOnlyChosen) {
     return (
       <PanelFeedback
@@ -222,165 +416,38 @@ export function StrategyGridContent({
     )
   }
 
+  const hasPinned = pinnedScenarios.length > 0
+
   return (
     <>
-      {displayScenarios.flatMap((scenario, index, filteredArray) => {
-        const isHighlighted = highlightedScenarios.has(scenario.scenarioId)
-        const nextScenario = filteredArray[index + 1]
-        const isNextHighlighted = nextScenario
-          ? highlightedScenarios.has(nextScenario.scenarioId)
-          : false
+      {/* Sticky pinned rows — stick at top of scroll area */}
+      {hasPinned && (
+        <Box
+          sx={{
+            gridColumn: "1 / -1",
+            display: "grid",
+            gridTemplateColumns: "subgrid",
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            backgroundColor: "#faf8f5",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            borderRadius: theme.borderRadius.sm,
+          }}
+        >
+          {renderScenarioRows(pinnedScenarios, {
+            themeIds: pinnedThemeScenarioIds,
+            showThemeBadge: true,
+            isFirstGroup: true,
+          })}
+        </Box>
+      )}
 
-        // Show divider between last highlighted and first non-highlighted
-        const shouldShowDivider =
-          showSearchDivider && isHighlighted && !isNextHighlighted
-
-        // Show divider after the last theme-matching scenario (filtered view)
-        const isThemeMatch =
-          themeMatchingScenarioIds?.has(scenario.scenarioId) ?? false
-        const isNextThemeMatch = nextScenario
-          ? (themeMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
-          : false
-        const shouldShowThemeDivider =
-          showThemeDivider && isThemeMatch && !isNextThemeMatch
-
-        // Show divider after the last icon-matching scenario
-        const isIconMatch =
-          iconMatchingScenarioIds?.has(scenario.scenarioId) ?? false
-        const isNextIconMatch = nextScenario
-          ? (iconMatchingScenarioIds?.has(nextScenario.scenarioId) ?? false)
-          : false
-        const shouldShowIconDivider =
-          showIconDivider && isIconMatch && !isNextIconMatch
-
-        // Show divider whenever adjacent scenarios belong to different theme groups
-        // (skip when groupByTheme is true — headers handle the separation)
-        const shouldShowThemeGroupDivider =
-          !groupByTheme &&
-          showAllThemeDividers &&
-          nextScenario !== undefined &&
-          scenario.theme !== nextScenario.theme
-
-        const rows: React.ReactNode[] = []
-
-        // Theme group header — before the first scenario in each theme group
-        if (groupByTheme && scenario.theme) {
-          const prevScenario = index > 0 ? filteredArray[index - 1] : undefined
-          const isNewGroup =
-            index === 0 || scenario.theme !== prevScenario?.theme
-          if (isNewGroup) {
-            const ids = themeScenarioIds.get(scenario.theme) ?? []
-            rows.push(
-              <ThemeGroupHeader
-                key={`theme-header-${scenario.theme}`}
-                themeKey={scenario.theme as ScenarioTheme}
-                scenarioIds={ids}
-                isFirst={index === 0}
-              />,
-            )
-          }
-        }
-
-        // Main scenario row
-        // Use context-aware tooltip handler to include scenario info for accessibility
-        rows.push(
-          <StrategyGridRow
-            key={scenario.scenarioId}
-            scenario={scenario}
-            isFirst={!groupByTheme && index === 0}
-            isHighlighted={isHighlighted}
-            isChosen={selectedScenarios.includes(scenario.scenarioId)}
-            compact={compact}
-            layoutMode={layoutMode}
-            showOperations={showOperations}
-            outcomesOnly={outcomesOnly}
-            showAlternativeBaselines={showAlternativeBaselines}
-            outcomeNames={outcomeNames}
-            getChartDataForScenario={getChartDataForScenario}
-            selectedOutcome={selectedOutcomes[scenario.scenarioId] ?? null}
-            activeTooltip={activeTooltip}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            sortEnabled={sortEnabled}
-            glyphSize={glyphSize}
-            isAlignedGrid={isAlignedGrid}
-            onToggleScenario={onToggleScenario}
-            onTierClick={onTierClick}
-            onTooltipToggle={createTooltipHandler(scenario)}
-            onSortChange={onSortChange}
-            showThemeBadge={!groupByTheme}
-            onThemeBadgeClick={onThemeBadgeClick}
-            onIconClick={onIconClick}
-            showActions={showActions}
-            accentBorder={accentBorder}
-            scenarioColor={scenarioColors?.[scenario.scenarioId]}
-            isPinned={pinnedScenarioIds.includes(scenario.scenarioId)}
-            isActive={activeScenarioIds?.has(scenario.scenarioId) ?? false}
-            onRowHover={onRowHover}
-          />,
-        )
-
-        // Search result divider
-        if (shouldShowDivider) {
-          rows.push(
-            <Box
-              key={`divider-${scenario.scenarioId}`}
-              sx={{
-                gridColumn: "1 / -1",
-                my: theme.space.section.sm,
-                height: "1px",
-                backgroundColor: theme.palette.grey[300],
-              }}
-            />,
-          )
-        }
-
-        // Theme group divider — separates theme-matching scenarios from the rest
-        if (shouldShowThemeDivider) {
-          rows.push(
-            <Box
-              key={`theme-divider-${scenario.scenarioId}`}
-              sx={{
-                gridColumn: "1 / -1",
-                my: theme.space.section.sm,
-                height: "1px",
-                backgroundColor: theme.palette.grey[300],
-              }}
-            />,
-          )
-        }
-
-        // Icon group divider — separates icon-matching scenarios from the rest
-        if (shouldShowIconDivider) {
-          rows.push(
-            <Box
-              key={`icon-divider-${scenario.scenarioId}`}
-              sx={{
-                gridColumn: "1 / -1",
-                my: theme.space.section.sm,
-                height: "1px",
-                backgroundColor: theme.palette.grey[300],
-              }}
-            />,
-          )
-        }
-
-        // Theme group boundary divider — between every theme group in the default sort
-        if (shouldShowThemeGroupDivider) {
-          rows.push(
-            <Box
-              key={`theme-group-divider-${scenario.scenarioId}`}
-              sx={{
-                gridColumn: "1 / -1",
-                my: theme.space.section.sm,
-                height: "1px",
-                backgroundColor: theme.palette.grey[300],
-              }}
-            />,
-          )
-        }
-
-        return rows
+      {/* Unpinned rows — scroll normally */}
+      {renderScenarioRows(unpinnedScenarios, {
+        themeIds: themeScenarioIds,
+        showThemeBadge: !groupByTheme,
+        isFirstGroup: !hasPinned,
       })}
     </>
   )
