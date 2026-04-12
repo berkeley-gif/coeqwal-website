@@ -94,6 +94,7 @@ export interface OperationsIconGroupProps {
 export function OperationsIconGroup({
   scenarioId,
   size = "md",
+  layout = "vertical",
   onIconClick,
 }: OperationsIconGroupProps) {
   const theme = useTheme()
@@ -104,13 +105,18 @@ export function OperationsIconGroup({
 
   if (iconDefs.length === 0) return null
 
+  const isHorizontal = layout === "horizontal"
+
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: `repeat(3, ${fixedIconSize})`,
+        gridTemplateColumns: isHorizontal
+          ? `repeat(auto-fill, ${fixedIconSize})`
+          : `repeat(3, ${fixedIconSize})`,
         gap: theme.space.gap.xs,
         justifyContent: "flex-start",
+        ...(isHorizontal && { width: "100%" }),
       }}
     >
       {iconDefs.map((def) => (

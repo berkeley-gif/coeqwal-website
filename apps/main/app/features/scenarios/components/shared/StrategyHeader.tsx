@@ -29,6 +29,8 @@ export interface StrategyHeaderProps {
   strategy: ScenarioForDisplay
   /** Whether to show the description */
   showDescription?: boolean
+  /** When true, shows the full description without more/less truncation */
+  disableTruncation?: boolean
   /** Typography variant for the title */
   titleVariant?: "subtitle1" | "subtitle2" | "body1" | "body2"
   /** Max width for the description */
@@ -69,9 +71,11 @@ const GLOSSARY_TERMS = [
 function DescriptionWithGlossaryLinks({
   description,
   maxWidth,
+  disableTruncation = false,
 }: {
   description: string
   maxWidth?: string | number | object
+  disableTruncation?: boolean
 }) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -213,6 +217,21 @@ function DescriptionWithGlossaryLinks({
     glossaryLinkStyles,
   ])
 
+  if (disableTruncation) {
+    return (
+      <Typography
+        component="div"
+        variant="dashboard"
+        sx={{
+          color: theme.palette.grey[600],
+          ...(maxWidth && { maxWidth }),
+        }}
+      >
+        {renderTextWithGlossaryLinks()}
+      </Typography>
+    )
+  }
+
   return (
     <Typography
       component="div"
@@ -318,6 +337,7 @@ function DescriptionWithGlossaryLinks({
 export function StrategyHeader({
   strategy,
   showDescription = true,
+  disableTruncation = false,
   titleVariant = "body2",
   descriptionMaxWidth,
   showThemeBadge = true,
@@ -424,6 +444,7 @@ export function StrategyHeader({
         <DescriptionWithGlossaryLinks
           description={strategy.description}
           maxWidth={descriptionMaxWidth}
+          disableTruncation={disableTruncation}
         />
       )}
     </Box>
