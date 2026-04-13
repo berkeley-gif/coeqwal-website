@@ -49,12 +49,8 @@ export default function LayerOrchestrator() {
   // - Explore mode: full line (progress = 1)
   const riversProgressValue = isLearnMode ? riversProgress : 1
 
-  // Basin labels fade out as rivers animate
-  const riverBasinLabelsOpacity = isLearnMode
-    ? showRivers
-      ? Math.max(0, 1 - riversProgress / 0.3)
-      : 1
-    : 0
+  // Basin labels are currently disabled; kept at 0 for potential reintroduction.
+  const riverBasinLabelsOpacity = 0
 
   return (
     <>

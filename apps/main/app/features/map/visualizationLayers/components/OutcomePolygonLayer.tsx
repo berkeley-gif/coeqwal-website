@@ -160,12 +160,20 @@ export function OutcomePolygonLayer({
   const fadeRafRef = useRef<number | null>(null)
   /** Tracks whether the layer was already showing colored data (for crossfade vs fade-in) */
   const wasShowingDataRef = useRef(false)
+  const prevFillIdRef = useRef<string>("")
 
   // Get layer IDs based on type
   const { fillId, outlineId } = useMemo(
     () => getLayerIds(layerType, mapboxLayerId),
     [layerType, mapboxLayerId],
   )
+
+  // Reset showing-data flag when the underlying Mapbox layer changes so we
+  // always go through the full fade-in path for the new layer.
+  if (fillId !== prevFillIdRef.current) {
+    prevFillIdRef.current = fillId
+    wasShowingDataRef.current = false
+  }
 
   // For reservoir layer, translate IDs
   const { translatedIds, translatedColorMap } = useMemo(() => {
@@ -279,7 +287,11 @@ export function OutcomePolygonLayer({
     // ── Crossfade path: data was already showing, just update colors ──
     // Mapbox interpolates fill-color and line-color natively, so we only
     // need to set the transition duration and update the expression.
+    // Always ensure visibility is "visible" — the layer may have been hidden
+    // by a previous unmount cleanup when switching between different polygon
+    // layer types (e.g. demand-units → calsim-wba).
     if (wasShowingDataRef.current) {
+      map.setLayoutProperty(fillId, "visibility", "visible")
       map.setPaintProperty(fillId, "fill-color-transition", {
         duration: COLOR_TRANSITION_DURATION,
         delay: 0,
@@ -290,6 +302,7 @@ export function OutcomePolygonLayer({
         if (filterExpression) {
           map.setFilter(outlineId, filterExpression)
         }
+        map.setLayoutProperty(outlineId, "visibility", "visible")
         map.setPaintProperty(outlineId, "line-color-transition", {
           duration: COLOR_TRANSITION_DURATION,
           delay: 0,
