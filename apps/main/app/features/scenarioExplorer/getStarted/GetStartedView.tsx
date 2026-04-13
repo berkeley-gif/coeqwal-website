@@ -19,18 +19,6 @@ const WATER_ISSUE_THEMES = [
   },
 ] as const
 
-const KEY_OUTCOMES = [
-  "Community water system deliveries",
-  "Agricultural revenues",
-  "River ecology",
-  "Bay Delta estuary ecology",
-  "Winter-run salmon abundance",
-  "Freshwater for in-Delta uses",
-  "Freshwater for Delta exports",
-  "Reservoir storage",
-  "Groundwater storage",
-] as const
-
 const CAVEATS = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
   "The scenarios do not include all regions of California nor certain aspects of our water system that may be of interest.",
@@ -127,25 +115,37 @@ export default function GetStartedView() {
       {/* Map panel (TierAnimationSection) */}
       <TierAnimationSection />
 
-      {/* Key outcomes */}
+      {/* Tools */}
       <ContentPanel
         background={theme.palette.nature.forest}
-        heading="Key outcomes"
+        heading="Tools"
         sx={{ pointerEvents: "auto" }}
       >
         <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          All scenarios are described by nine key outcomes, listed below. Click
-          on each to learn more.
+          We have prepared a series of tools to help you understand, compare,
+          and share data from the scenarios. You can find them in the Tools
+          section of this Explore tab.
         </Typography>
         <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
-          {KEY_OUTCOMES.map((outcome) => (
-            <Box component="li" key={outcome} sx={{ mt: sp.sm }}>
+          {["Bar chart", "Radar chart", "Distribution viewer"].map((tool) => (
+            <Box component="li" key={tool} sx={{ mt: sp.sm }}>
               <Typography variant="body1" color="text.secondary">
-                {outcome}
+                {tool}
               </Typography>
             </Box>
           ))}
         </Box>
+        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
+          You can go back and forth between the charts and a map.
+        </Typography>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mt: sp.lg, fontStyle: "italic" }}
+        >
+          Coming soon: you can find locations you are interested in, and track
+          them across the charts.
+        </Typography>
       </ContentPanel>
 
       {/* Data in depth */}
