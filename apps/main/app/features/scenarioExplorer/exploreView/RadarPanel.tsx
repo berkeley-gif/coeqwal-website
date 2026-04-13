@@ -423,6 +423,7 @@ export default function RadarPanel({
             showAllPaths
             showDotsOnly={showDotsOnly}
             dimUnselected={radarSelectedOnly}
+            tooltipLeftOffset={showAxisSelector ? 220 : 0}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(
