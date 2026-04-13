@@ -9,6 +9,7 @@ import {
   RESERVOIR_VIEW as _RESERVOIR_VIEW,
   PUMPING_PLANTS_VIEW,
   JERSEY_POINT_VIEW,
+  CWS_DEL_BOUNDS,
 } from "./cameraPresets"
 
 // ============================================================================
@@ -84,8 +85,10 @@ export interface OutcomeLayerConfig {
   circleRadius?: number
   /** For point layers: circle stroke width */
   circleStrokeWidth?: number
-  /** Camera preset for this outcome (zoom/center for Learn mode) */
+  /** Camera preset for this outcome (zoom/center via easeTo) */
   cameraPreset?: CameraView
+  /** Camera bounds for this outcome (fit-bounds target, takes priority over cameraPreset) */
+  cameraBounds?: [[number, number], [number, number]]
 }
 
 // ============================================================================
@@ -163,6 +166,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     classFilter: "Urban",
     tierCode: "CWS_DEL",
     requiresIdMatching: true,
+    cameraBounds: CWS_DEL_BOUNDS,
     tooltipFields: [
       {
         key: "urbName",
@@ -212,6 +216,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     classFilter: "Agriculture",
     tierCode: "AG_REV",
     requiresIdMatching: true,
+    cameraBounds: CWS_DEL_BOUNDS,
     tooltipFields: [
       {
         key: "modName",
@@ -253,6 +258,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     idProperty: "WBA_ID",
     tierCode: "GW_STOR",
     requiresIdMatching: true,
+    cameraBounds: CWS_DEL_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",

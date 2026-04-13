@@ -143,6 +143,13 @@ export default function MapInstance({
     })
 
     mapActions.setMapReady(true)
+
+    // TEMPORARY — for measuring layer extents. Remove after use.
+    // See apps/main/app/features/map/README.md for the console script.
+    if (process.env.NODE_ENV === "development") {
+      ;(window as unknown as Record<string, unknown>).__mapInstance =
+        mapboxInstance
+    }
   }, [map.mapRef])
 
   /** When the style URL changes, cycle mapReady so layer-setup hooks re-run.
