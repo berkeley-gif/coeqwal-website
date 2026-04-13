@@ -86,6 +86,7 @@ interface ScenarioExplorerState {
   showRadarRange: boolean
   showDotsOnly: boolean
   radarSelectedOnly: boolean
+  showAxisSelector: boolean
 
   // Radar axis visibility
   radarVisibleAxes: string[]
@@ -164,6 +165,7 @@ interface ScenarioExplorerActions {
   setShowRadarRange: (show: boolean) => void
   setShowDotsOnly: (show: boolean) => void
   setRadarSelectedOnly: (show: boolean) => void
+  setShowAxisSelector: (show: boolean) => void
 
   // Radar axis visibility
   toggleRadarAxis: (code: string) => void
@@ -228,6 +230,7 @@ const initialState: ScenarioExplorerState = {
   showRadarRange: true,
   showDotsOnly: false,
   radarSelectedOnly: false,
+  showAxisSelector: false,
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
   hydroclimate: "historical",
   groupByTheme: true,
@@ -473,14 +476,16 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.radarSelectedOnly = show
       }),
+    setShowAxisSelector: (show) =>
+      set((state) => {
+        state.showAxisSelector = show
+      }),
 
     toggleRadarAxis: (code) =>
       set((state) => {
         const idx = state.radarVisibleAxes.indexOf(code)
         if (idx >= 0) {
-          if (state.radarVisibleAxes.length > 1) {
-            state.radarVisibleAxes.splice(idx, 1)
-          }
+          state.radarVisibleAxes.splice(idx, 1)
         } else {
           state.radarVisibleAxes.push(code)
         }

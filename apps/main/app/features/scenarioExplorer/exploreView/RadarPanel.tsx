@@ -16,13 +16,25 @@ import React, {
   useEffect,
   startTransition,
 } from "react"
-import { Box, Typography, useTheme, CircularProgress } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  CircularProgress,
+  Checkbox,
+} from "@repo/ui/mui"
 import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
-import { getOutcomeName } from "../../../content/outcomes"
+import {
+  getOutcomeName,
+  OUTCOME_CODE_ORDER,
+  NOD_SOD_OUTCOME_CODES,
+  OUTCOME_REGIONAL_VARIANTS,
+  type OutcomeCode,
+} from "../../../content/outcomes"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -45,9 +57,12 @@ export default function RadarPanel({
     dimUnpinned,
     pinnedScenarioIds,
     radarVisibleAxes,
+    setRadarVisibleAxes,
+    toggleRadarAxis,
     showRadarRange,
     showDotsOnly,
     radarSelectedOnly,
+    showAxisSelector,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -189,6 +204,54 @@ export default function RadarPanel({
     )
   }
 
+  const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
+
+  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
+  const someKeySelected =
+    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
+
+  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
+    axesSet.has(c),
+  )
+  const someRegionalSelected =
+    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
+
+  const toggleGroup = useCallback(
+    (codes: readonly string[], allOn: boolean) => {
+      if (allOn) {
+        const remaining = radarVisibleAxes.filter((c) => !codes.includes(c))
+        setRadarVisibleAxes(remaining)
+      } else {
+        const merged = [...radarVisibleAxes]
+        for (const c of codes) {
+          if (!merged.includes(c)) merged.push(c)
+        }
+        setRadarVisibleAxes(merged)
+      }
+    },
+    [radarVisibleAxes, setRadarVisibleAxes],
+  )
+
+  const withRegional = useMemo(
+    () =>
+      OUTCOME_CODE_ORDER.filter(
+        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
+      ),
+    [],
+  )
+  const withoutRegional = useMemo(
+    () =>
+      OUTCOME_CODE_ORDER.filter(
+        (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
+      ),
+    [],
+  )
+
+  const checkboxSx = useMemo(
+    () => ({ padding: 0, margin: 0, transform: "scale(0.8)" }),
+    [],
+  )
+
   return (
     <Box
       ref={chartWrapperRef}
@@ -200,42 +263,194 @@ export default function RadarPanel({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      <Box
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+        {showAxisSelector && (
+          <Box
+            sx={{
+              width: 220,
+              minWidth: 220,
+              overflowY: "auto",
+              borderRight: `1px solid ${theme.palette.divider}`,
+              bgcolor: theme.palette.common.white,
+              py: 1.5,
+              px: 1,
+            }}
+          >
+            {/* Group toggles */}
+            <AxisRow
+              label="All key outcomes"
+              checked={allKeySelected}
+              indeterminate={someKeySelected}
+              bold
+              onClick={() => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected)}
+              sx={checkboxSx}
+            />
+            <AxisRow
+              label="All regional outcomes"
+              checked={allRegionalSelected}
+              indeterminate={someRegionalSelected}
+              bold
+              onClick={() =>
+                toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected)
+              }
+              sx={checkboxSx}
+            />
+
+            <Box
+              sx={{
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                my: 1,
+              }}
+            />
+
+            {/* Outcomes with regional variants */}
+            {withRegional.map((code) => {
+              const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
+              return (
+                <React.Fragment key={code}>
+                  <AxisRow
+                    label={getOutcomeName(code)}
+                    checked={axesSet.has(code)}
+                    bold
+                    onClick={() => toggleRadarAxis(code)}
+                    sx={checkboxSx}
+                  />
+                  {variants.map((vCode) => (
+                    <AxisRow
+                      key={vCode}
+                      label={getOutcomeName(vCode)}
+                      checked={axesSet.has(vCode)}
+                      indent
+                      onClick={() => toggleRadarAxis(vCode)}
+                      sx={checkboxSx}
+                    />
+                  ))}
+                </React.Fragment>
+              )
+            })}
+
+            <Box
+              sx={{
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                my: 1,
+              }}
+            />
+
+            {/* Outcomes without regional variants */}
+            {withoutRegional.map((code) => (
+              <AxisRow
+                key={code}
+                label={getOutcomeName(code)}
+                checked={axesSet.has(code)}
+                bold
+                onClick={() => toggleRadarAxis(code)}
+                sx={checkboxSx}
+              />
+            ))}
+          </Box>
+        )}
+
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            minWidth: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: theme.space.component.lg,
+          }}
+        >
+          <RadarPlot
+            data={highlightedData}
+            axes={visibleAxisNames}
+            responsive
+            lineColors={lineColors}
+            baselineData={baselineScenario ?? undefined}
+            highlightBaseline={highlightBaseline}
+            chosenIds={chosenIds}
+            highlightedIds={highlightedIds}
+            scenarioThemes={scenarioThemes}
+            morphGeneration={morphGeneration}
+            pinnedScenarioIds={pinnedSet}
+            onPinnedToggle={togglePinnedScenario}
+            onDotClick={(scenarioId, axis) =>
+              showOutcomeOnMap(axis, scenarioId)
+            }
+            activeMapDot={activeMapDot}
+            dimUnpinned={dimUnpinned}
+            axisRange={showRadarRange ? axisRange : undefined}
+            showTierZones={showTierZones}
+            showAllPaths
+            showDotsOnly={showDotsOnly}
+            onLineHover={setHoveredScenario}
+            onLineClick={(d) => {
+              setHighlightedScenario(
+                highlightedScenario === d.id ? null : d.id,
+              )
+            }}
+          />
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
+function AxisRow({
+  label,
+  checked,
+  indeterminate,
+  bold,
+  indent,
+  onClick,
+  sx,
+}: {
+  label: string
+  checked: boolean
+  indeterminate?: boolean
+  bold?: boolean
+  indent?: boolean
+  onClick: () => void
+  sx: Record<string, unknown>
+}) {
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        width: "100%",
+        border: "none",
+        background: "none",
+        cursor: "pointer",
+        py: 0.35,
+        pl: indent ? 2.5 : 0.5,
+        pr: 0.5,
+        borderRadius: 0.5,
+        "&:hover": { bgcolor: "action.hover" },
+      }}
+    >
+      <Checkbox
+        size="small"
+        checked={checked}
+        indeterminate={indeterminate}
+        tabIndex={-1}
+        sx={sx}
+      />
+      <Typography
+        variant="caption"
         sx={{
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          p: theme.space.component.lg,
+          fontWeight: bold ? 600 : 400,
+          fontSize: "0.72rem",
+          lineHeight: 1.3,
+          textAlign: "left",
         }}
       >
-        <RadarPlot
-          data={highlightedData}
-          axes={visibleAxisNames}
-          responsive
-          lineColors={lineColors}
-          baselineData={baselineScenario ?? undefined}
-          highlightBaseline={highlightBaseline}
-          chosenIds={chosenIds}
-          highlightedIds={highlightedIds}
-          scenarioThemes={scenarioThemes}
-          morphGeneration={morphGeneration}
-          pinnedScenarioIds={pinnedSet}
-          onPinnedToggle={togglePinnedScenario}
-          onDotClick={(scenarioId, axis) => showOutcomeOnMap(axis, scenarioId)}
-          activeMapDot={activeMapDot}
-          dimUnpinned={dimUnpinned}
-          axisRange={showRadarRange ? axisRange : undefined}
-          showTierZones={showTierZones}
-          showAllPaths
-          showDotsOnly={showDotsOnly}
-          onLineHover={setHoveredScenario}
-          onLineClick={(d) => {
-            setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
-          }}
-        />
-      </Box>
+        {label}
+      </Typography>
     </Box>
   )
 }

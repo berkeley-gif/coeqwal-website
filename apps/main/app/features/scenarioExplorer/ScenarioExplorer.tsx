@@ -22,13 +22,6 @@ import {
   AppsIcon,
   CompareArrowsIcon,
   InsightsIcon,
-  Checkbox,
-  Button,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  KeyboardArrowDownIcon,
   icons,
 } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
@@ -54,14 +47,6 @@ import {
 } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
-import {
-  OUTCOME_CODE_ORDER,
-  NOD_SOD_OUTCOME_CODES,
-  ALL_RADAR_AXES_ORDER,
-  OUTCOME_REGIONAL_VARIANTS,
-  getOutcomeName,
-  type OutcomeCode,
-} from "../../content/outcomes"
 
 // Top-level navigation tabs
 
@@ -112,8 +97,6 @@ const TOOL_TABS: {
   },
 ]
 
-const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
-
 function RadarToggleChip({
   label,
   active,
@@ -160,251 +143,6 @@ function RadarToggleChip({
       <Icon sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
       {label}
     </Box>
-  )
-}
-
-function RadarAxesDropdown() {
-  const theme = useTheme()
-  const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
-    useScenarioExplorerStore()
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const open = Boolean(anchorEl)
-
-  const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
-
-  const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
-  const someKeySelected =
-    !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
-
-  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
-    axesSet.has(c),
-  )
-  const someRegionalSelected =
-    !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
-
-  const toggleGroup = useCallback(
-    (codes: readonly string[], allOn: boolean) => {
-      if (allOn) {
-        const remaining = radarVisibleAxes.filter((c) => !codes.includes(c))
-        setRadarVisibleAxes(
-          remaining.length > 0 ? remaining : [OUTCOME_CODE_ORDER[0]!],
-        )
-      } else {
-        const merged = [...radarVisibleAxes]
-        for (const c of codes) {
-          if (!merged.includes(c)) merged.push(c)
-        }
-        setRadarVisibleAxes(merged)
-      }
-    },
-    [radarVisibleAxes, setRadarVisibleAxes],
-  )
-
-  const withRegional = OUTCOME_CODE_ORDER.filter(
-    (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
-  )
-  const withoutRegional = OUTCOME_CODE_ORDER.filter(
-    (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
-  )
-
-  const renderRow = (
-    code: string,
-    label: string,
-    checked: boolean,
-    indeterminate: boolean,
-    onClick: () => void,
-    bold = false,
-  ) => (
-    <MenuItem key={code} dense onClick={onClick} sx={{ pl: 1.5, py: 0.25 }}>
-      <ListItemIcon sx={{ minWidth: 28 }}>
-        <Checkbox
-          edge="start"
-          size="small"
-          checked={checked}
-          indeterminate={indeterminate}
-          sx={CHECKBOX_SX}
-        />
-      </ListItemIcon>
-      <ListItemText
-        primary={label}
-        primaryTypographyProps={{
-          variant: "compactCaption",
-          fontWeight: bold ? 600 : 400,
-          fontSize: "0.75rem",
-        }}
-      />
-    </MenuItem>
-  )
-
-  return (
-    <>
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        endIcon={
-          <KeyboardArrowDownIcon
-            sx={{
-              fontSize: "1rem !important",
-              transition: "transform 200ms",
-              transform: open ? "rotate(180deg)" : "none",
-            }}
-          />
-        }
-        sx={{
-          textTransform: "none",
-          fontSize: "0.7rem",
-          fontWeight: 600,
-          lineHeight: 1.2,
-          py: 0.25,
-          px: 1,
-          minHeight: 0,
-          borderColor: "divider",
-          color: "text.primary",
-          borderRadius: 1,
-          "&:hover": {
-            borderColor: "text.secondary",
-            backgroundColor: "action.hover",
-          },
-        }}
-      >
-        Axes ({radarVisibleAxes.length}/{ALL_RADAR_AXES_ORDER.length})
-      </Button>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        slotProps={{
-          paper: { sx: { maxHeight: "none", overflow: "visible" } },
-          list: { sx: { p: 0 } },
-        }}
-      >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "auto auto auto",
-            gap: 0,
-            p: 1,
-          }}
-        >
-          {/* ── Column 1: Group toggles ── */}
-          <Box
-            sx={{
-              borderRight: `1px solid ${theme.palette.divider}`,
-              pr: 0.5,
-            }}
-          >
-            <Typography
-              variant="compactCaption"
-              sx={{
-                fontWeight: 700,
-                fontSize: "0.7rem",
-                color: "text.secondary",
-                px: 1.5,
-                pt: 0.5,
-                pb: 0.25,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-              }}
-            >
-              Quick select
-            </Typography>
-            {renderRow(
-              "_all_key",
-              "All key outcomes",
-              allKeySelected,
-              someKeySelected,
-              () => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected),
-              true,
-            )}
-            {renderRow(
-              "_all_regional",
-              "All regional outcomes",
-              allRegionalSelected,
-              someRegionalSelected,
-              () => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected),
-              true,
-            )}
-          </Box>
-
-          {/* ── Column 2: Outcomes with regional (NOD/SOD) subselections ── */}
-          <Box
-            sx={{
-              borderRight: `1px solid ${theme.palette.divider}`,
-              px: 0.5,
-            }}
-          >
-            <Typography
-              variant="compactCaption"
-              sx={{
-                fontWeight: 700,
-                fontSize: "0.7rem",
-                color: "text.secondary",
-                px: 1.5,
-                pt: 0.5,
-                pb: 0.25,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-              }}
-            >
-              With regional detail
-            </Typography>
-            {withRegional.flatMap((code) => {
-              const variants =
-                OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
-              return [
-                renderRow(
-                  code,
-                  getOutcomeName(code),
-                  axesSet.has(code),
-                  false,
-                  () => toggleRadarAxis(code),
-                  true,
-                ),
-                ...variants.map((vCode) =>
-                  renderRow(
-                    vCode,
-                    getOutcomeName(vCode),
-                    axesSet.has(vCode),
-                    false,
-                    () => toggleRadarAxis(vCode),
-                  ),
-                ),
-              ]
-            })}
-          </Box>
-
-          {/* ── Column 3: Outcomes without regional subselections ── */}
-          <Box sx={{ pl: 0.5 }}>
-            <Typography
-              variant="compactCaption"
-              sx={{
-                fontWeight: 700,
-                fontSize: "0.7rem",
-                color: "text.secondary",
-                px: 1.5,
-                pt: 0.5,
-                pb: 0.25,
-                textTransform: "uppercase",
-                letterSpacing: "0.04em",
-              }}
-            >
-              Other outcomes
-            </Typography>
-            {withoutRegional.map((code) =>
-              renderRow(
-                code,
-                getOutcomeName(code),
-                axesSet.has(code),
-                false,
-                () => toggleRadarAxis(code),
-                true,
-              ),
-            )}
-          </Box>
-        </Box>
-      </Menu>
-    </>
   )
 }
 
@@ -469,13 +207,19 @@ export default function ScenarioExplorer() {
     setShowDotsOnly,
     radarSelectedOnly,
     setRadarSelectedOnly,
+    showAxisSelector,
+    setShowAxisSelector,
   } = useScenarioExplorerStore()
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <RadarAxesDropdown />
+          <RadarToggleChip
+            label="choose axes"
+            active={showAxisSelector}
+            onClick={() => setShowAxisSelector(!showAxisSelector)}
+          />
           <RadarToggleChip
             label="dots only"
             active={showDotsOnly}
@@ -502,6 +246,8 @@ export default function ScenarioExplorer() {
     return null
   }, [
     exploreMode,
+    showAxisSelector,
+    setShowAxisSelector,
     showDotsOnly,
     setShowDotsOnly,
     showRadarRange,
