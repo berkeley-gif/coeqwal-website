@@ -28,7 +28,6 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Divider,
   KeyboardArrowDownIcon,
   icons,
 } from "@repo/ui/mui"
@@ -59,8 +58,6 @@ import {
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
   ALL_RADAR_AXES_ORDER,
-  NOD_CODES,
-  SOD_CODES,
   OUTCOME_REGIONAL_VARIANTS,
   getOutcomeName,
   type OutcomeCode,
@@ -167,6 +164,7 @@ function RadarToggleChip({
 }
 
 function RadarAxesDropdown() {
+  const theme = useTheme()
   const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
     useScenarioExplorerStore()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -178,17 +176,11 @@ function RadarAxesDropdown() {
   const someKeySelected =
     !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
 
-  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) => axesSet.has(c))
+  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
+    axesSet.has(c),
+  )
   const someRegionalSelected =
     !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
-
-  const allNodSelected = NOD_CODES.every((c) => axesSet.has(c))
-  const someNodSelected =
-    !allNodSelected && NOD_CODES.some((c) => axesSet.has(c))
-
-  const allSodSelected = SOD_CODES.every((c) => axesSet.has(c))
-  const someSodSelected =
-    !allSodSelected && SOD_CODES.some((c) => axesSet.has(c))
 
   const toggleGroup = useCallback(
     (codes: readonly string[], allOn: boolean) => {
@@ -208,16 +200,23 @@ function RadarAxesDropdown() {
     [radarVisibleAxes, setRadarVisibleAxes],
   )
 
-  const renderCheckboxItem = (
-    key: string,
+  const withRegional = OUTCOME_CODE_ORDER.filter(
+    (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] != null,
+  )
+  const withoutRegional = OUTCOME_CODE_ORDER.filter(
+    (c) => OUTCOME_REGIONAL_VARIANTS[c as OutcomeCode] == null,
+  )
+
+  const renderRow = (
+    code: string,
     label: string,
     checked: boolean,
     indeterminate: boolean,
     onClick: () => void,
-    indent: number = 0,
+    bold = false,
   ) => (
-    <MenuItem key={key} dense onClick={onClick} sx={{ pl: 2 + indent * 2 }}>
-      <ListItemIcon>
+    <MenuItem key={code} dense onClick={onClick} sx={{ pl: 1.5, py: 0.25 }}>
+      <ListItemIcon sx={{ minWidth: 28 }}>
         <Checkbox
           edge="start"
           size="small"
@@ -230,7 +229,8 @@ function RadarAxesDropdown() {
         primary={label}
         primaryTypographyProps={{
           variant: "compactCaption",
-          fontWeight: indent === 0 ? 600 : 400,
+          fontWeight: bold ? 600 : 400,
+          fontSize: "0.75rem",
         }}
       />
     </MenuItem>
@@ -275,66 +275,134 @@ function RadarAxesDropdown() {
         open={open}
         onClose={() => setAnchorEl(null)}
         slotProps={{
-          paper: { sx: { maxHeight: 480, minWidth: 260 } },
+          paper: { sx: { maxHeight: "none", overflow: "visible" } },
+          list: { sx: { p: 0 } },
         }}
       >
-        {/* ── Collection toggles ── */}
-        {renderCheckboxItem(
-          "_all_key",
-          "All key outcomes",
-          allKeySelected,
-          someKeySelected,
-          () => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected),
-        )}
-        {renderCheckboxItem(
-          "_all_regional",
-          "All regional outcomes",
-          allRegionalSelected,
-          someRegionalSelected,
-          () => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected),
-        )}
-        {renderCheckboxItem(
-          "_nod",
-          "North of Delta (NOD)",
-          allNodSelected,
-          someNodSelected,
-          () => toggleGroup(NOD_CODES, allNodSelected),
-          1,
-        )}
-        {renderCheckboxItem(
-          "_sod",
-          "South of Delta (SOD)",
-          allSodSelected,
-          someSodSelected,
-          () => toggleGroup(SOD_CODES, allSodSelected),
-          1,
-        )}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "auto auto auto",
+            gap: 0,
+            p: 1,
+          }}
+        >
+          {/* ── Column 1: Group toggles ── */}
+          <Box
+            sx={{
+              borderRight: `1px solid ${theme.palette.divider}`,
+              pr: 0.5,
+            }}
+          >
+            <Typography
+              variant="compactCaption"
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                color: "text.secondary",
+                px: 1.5,
+                pt: 0.5,
+                pb: 0.25,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Quick select
+            </Typography>
+            {renderRow(
+              "_all_key",
+              "All key outcomes",
+              allKeySelected,
+              someKeySelected,
+              () => toggleGroup(OUTCOME_CODE_ORDER, allKeySelected),
+              true,
+            )}
+            {renderRow(
+              "_all_regional",
+              "All regional outcomes",
+              allRegionalSelected,
+              someRegionalSelected,
+              () => toggleGroup(NOD_SOD_OUTCOME_CODES, allRegionalSelected),
+              true,
+            )}
+          </Box>
 
-        <Divider key="_divider" sx={{ my: 0.5 }} />
+          {/* ── Column 2: Outcomes with regional (NOD/SOD) subselections ── */}
+          <Box
+            sx={{
+              borderRight: `1px solid ${theme.palette.divider}`,
+              px: 0.5,
+            }}
+          >
+            <Typography
+              variant="compactCaption"
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                color: "text.secondary",
+                px: 1.5,
+                pt: 0.5,
+                pb: 0.25,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              With regional detail
+            </Typography>
+            {withRegional.flatMap((code) => {
+              const variants =
+                OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
+              return [
+                renderRow(
+                  code,
+                  getOutcomeName(code),
+                  axesSet.has(code),
+                  false,
+                  () => toggleRadarAxis(code),
+                  true,
+                ),
+                ...variants.map((vCode) =>
+                  renderRow(
+                    vCode,
+                    getOutcomeName(vCode),
+                    axesSet.has(vCode),
+                    false,
+                    () => toggleRadarAxis(vCode),
+                  ),
+                ),
+              ]
+            })}
+          </Box>
 
-        {/* ── Individual axes grouped by key outcome ── */}
-        {OUTCOME_CODE_ORDER.flatMap((code) => {
-          const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]
-          return [
-            renderCheckboxItem(
-              code,
-              getOutcomeName(code),
-              axesSet.has(code),
-              false,
-              () => toggleRadarAxis(code),
-            ),
-            ...(variants?.map((vCode) =>
-              renderCheckboxItem(
-                vCode,
-                getOutcomeName(vCode),
-                axesSet.has(vCode),
+          {/* ── Column 3: Outcomes without regional subselections ── */}
+          <Box sx={{ pl: 0.5 }}>
+            <Typography
+              variant="compactCaption"
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                color: "text.secondary",
+                px: 1.5,
+                pt: 0.5,
+                pb: 0.25,
+                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+              }}
+            >
+              Other outcomes
+            </Typography>
+            {withoutRegional.map((code) =>
+              renderRow(
+                code,
+                getOutcomeName(code),
+                axesSet.has(code),
                 false,
-                () => toggleRadarAxis(vCode),
-                1,
+                () => toggleRadarAxis(code),
+                true,
               ),
-            ) ?? []),
-          ]
-        })}
+            )}
+          </Box>
+        </Box>
       </Menu>
     </>
   )
@@ -399,6 +467,8 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     showDotsOnly,
     setShowDotsOnly,
+    radarSelectedOnly,
+    setRadarSelectedOnly,
   } = useScenarioExplorerStore()
 
   const chartControls = useMemo(() => {
@@ -421,6 +491,11 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
+          <RadarToggleChip
+            label="selected only"
+            active={radarSelectedOnly}
+            onClick={() => setRadarSelectedOnly(!radarSelectedOnly)}
+          />
         </ChartControlsBar>
       )
     }
@@ -433,6 +508,8 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     highlightBaseline,
     setHighlightBaseline,
+    radarSelectedOnly,
+    setRadarSelectedOnly,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
