@@ -84,6 +84,7 @@ interface ScenarioExplorerState {
   showTierZones: boolean
   dimUnpinned: boolean
   showRadarRange: boolean
+  showDotsOnly: boolean
 
   // Radar axis visibility
   radarVisibleAxes: string[]
@@ -160,6 +161,7 @@ interface ScenarioExplorerActions {
   setShowTierZones: (show: boolean) => void
   setDimUnpinned: (show: boolean) => void
   setShowRadarRange: (show: boolean) => void
+  setShowDotsOnly: (show: boolean) => void
 
   // Radar axis visibility
   toggleRadarAxis: (code: string) => void
@@ -222,6 +224,7 @@ const initialState: ScenarioExplorerState = {
   showTierZones: true,
   dimUnpinned: false,
   showRadarRange: true,
+  showDotsOnly: false,
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
   hydroclimate: "historical",
   groupByTheme: true,
@@ -458,6 +461,10 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowRadarRange: (show) =>
       set((state) => {
         state.showRadarRange = show
+      }),
+    setShowDotsOnly: (show) =>
+      set((state) => {
+        state.showDotsOnly = show
       }),
 
     toggleRadarAxis: (code) =>

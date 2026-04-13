@@ -36,6 +36,8 @@ export interface RadarPlotProps {
   >
   /** When set, the dot matching this axis + scenario gets a highlight ring on the map. */
   activeMapDot?: { axis: string; scenarioId: string } | null
+  /** When true, hide connecting lines and show only dots */
+  showDotsOnly?: boolean
 }
 
 function toTier(v: number): number {
@@ -235,6 +237,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     showDistribution = false,
     distributionData,
     activeMapDot,
+    showDotsOnly = false,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -784,6 +787,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         const drawPolygonForScenario = (scenarioId: string) => {
           pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
+          if (showDotsOnly) return
           const pts = dotPositions.get(scenarioId)
           if (!pts || pts.length < 3) return
           const activeList = data
@@ -1216,6 +1220,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         highlightedIds,
         highlightBaseline,
         showAllPaths,
+        showDotsOnly,
         showTierZones,
         pinnedScenarioIds,
         dimUnpinned,

@@ -46,6 +46,7 @@ export default function RadarPanel({
     pinnedScenarioIds,
     radarVisibleAxes,
     showRadarRange,
+    showDotsOnly,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -227,6 +228,7 @@ export default function RadarPanel({
           axisRange={showRadarRange ? axisRange : undefined}
           showTierZones={showTierZones}
           showAllPaths
+          showDotsOnly={showDotsOnly}
           onLineHover={setHoveredScenario}
           onLineClick={(d) => {
             setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
