@@ -339,7 +339,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           // Transition dots
           const morphHasPinned = pinnedScenarioIds.size > 0
           const morphHasChosenIds = chosenIds && chosenIds.size > 0
-          const morphDIM = 0.1
+          const morphDIM = 0.15
 
           svg
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
@@ -659,7 +659,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
         const dotR = 4
-        const DIM_OPACITY = 0.1
+        const DIM_OPACITY = 0.15
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 

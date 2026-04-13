@@ -413,7 +413,6 @@ export default function RadarPanel({
             scenarioThemes={scenarioThemes}
             morphGeneration={morphGeneration}
             pinnedScenarioIds={pinnedSet}
-            onPinnedToggle={togglePinnedScenario}
             onDotClick={(scenarioId, axis) =>
               showOutcomeOnMap(axis, scenarioId)
             }
