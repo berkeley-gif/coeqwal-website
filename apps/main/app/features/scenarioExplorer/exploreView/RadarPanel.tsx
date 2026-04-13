@@ -63,6 +63,7 @@ export default function RadarPanel({
     showDotsOnly,
     radarSelectedOnly,
     showAxisSelector,
+    hydroclimate,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -166,44 +167,6 @@ export default function RadarPanel({
     [comparisonData, highlightedScenario],
   )
 
-  if (isLoading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          gap: 2,
-        }}
-      >
-        <CircularProgress size={32} />
-        <Typography variant="body2" color="text.secondary">
-          Loading radar data...
-        </Typography>
-      </Box>
-    )
-  }
-
-  if (!hasData && !radarSelectedOnly) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          px: theme.space.component.lg,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Select scenarios to view the radar chart.
-        </Typography>
-      </Box>
-    )
-  }
-
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 
   const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
@@ -252,6 +215,59 @@ export default function RadarPanel({
     [],
   )
 
+  const hasRegionalAxis = NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
+  const [nodSodSnackOpen, setNodSodSnackOpen] = useState(false)
+  const prevHydroRef = useRef(hydroclimate)
+
+  useEffect(() => {
+    if (prevHydroRef.current !== hydroclimate) {
+      prevHydroRef.current = hydroclimate
+      if (hydroclimate !== "historical" && hasRegionalAxis) {
+        setNodSodSnackOpen(true)
+        const timer = setTimeout(() => setNodSodSnackOpen(false), 4000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [hydroclimate, hasRegionalAxis])
+
+  if (isLoading && !hasData) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          gap: 2,
+        }}
+      >
+        <CircularProgress size={32} />
+        <Typography variant="body2" color="text.secondary">
+          Loading radar data...
+        </Typography>
+      </Box>
+    )
+  }
+
+  if (!hasData && !radarSelectedOnly) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          px: theme.space.component.lg,
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Select scenarios to view the radar chart.
+        </Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box
       ref={chartWrapperRef}
@@ -261,6 +277,7 @@ export default function RadarPanel({
         height: "100%",
         overflow: "hidden",
         backgroundColor: theme.palette.grey[100],
+        position: "relative",
       }}
     >
       <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
@@ -416,6 +433,42 @@ export default function RadarPanel({
           />
         </Box>
       </Box>
+
+      {isLoading && hasData && (
+        <CircularProgress
+          size={18}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            zIndex: 10,
+            opacity: 0.5,
+          }}
+        />
+      )}
+
+      {nodSodSnackOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+            bgcolor: theme.palette.grey[800],
+            color: theme.palette.common.white,
+            fontSize: "0.85rem",
+            fontWeight: 500,
+            borderRadius: theme.borderRadius.sm,
+            px: 2,
+            py: 1,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          NOD/SOD alternative hydroclimates not loaded yet
+        </Box>
+      )}
     </Box>
   )
 }

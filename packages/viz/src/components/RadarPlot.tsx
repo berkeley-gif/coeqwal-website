@@ -338,6 +338,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           // Transition dots
           const morphHasPinned = pinnedScenarioIds.size > 0
+          const morphHasChosenIds = chosenIds && chosenIds.size > 0
+          const morphDIM = 0.1
+
           svg
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
             .each(function () {
@@ -356,10 +359,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 el.transition().duration(HC_DUR).attr("fill-opacity", 0)
                 return
               }
+              const mIsSelected = morphHasChosenIds && chosenIds!.has(sid)
+              const mIsPinned = pinnedScenarioIds.has(sid)
+              const mAnyHighlight =
+                (dimUnselected && morphHasChosenIds) ||
+                (dimUnpinned && morphHasPinned)
+              const mIsHighlighted = mIsSelected || mIsPinned
               const restoreOp =
-                dimUnpinned && morphHasPinned && !pinnedScenarioIds.has(sid)
-                  ? 0.1
-                  : 1.0
+                mAnyHighlight && !mIsHighlighted ? morphDIM : 1.0
               const r = scales.rScale(toTier(sv))
               const angle = getAngle(axisIdx)
               const dodgeOff = parseFloat(el.attr("data-dodge") ?? "0")
@@ -494,22 +501,23 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 const pathGen = line<{ x: number; y: number }>()
                   .x((d) => d.x)
                   .y((d) => d.y)
-                const isPinned = pinnedScenarioIds.has(scenario.id)
-                const isHighlighted =
-                  highlightedIds && highlightedIds.has(scenario.id)
-                const isBackground =
-                  showAllPaths && !isPinned && !isHighlighted
-                const dimmed = dimUnpinned && morphHasPinned && !isPinned
-                let strokeOp = isBackground ? 0.55 : 1.0
-                if (dimmed) strokeOp = DIM_OPACITY
+                const mSel = morphHasChosenIds && chosenIds!.has(scenario.id)
+                const mPin = pinnedScenarioIds.has(scenario.id)
+                const mHi = mSel || mPin
+                const mAny =
+                  (dimUnselected && morphHasChosenIds) ||
+                  (dimUnpinned && morphHasPinned)
+                let mStrokeOp = mAny && !mHi ? morphDIM : mHi ? 1.0 : 0.55
+                let mStrokeW = mSel ? 3.5 : mPin ? 3 : 1.5
+                if (showDotsOnly) mStrokeOp = morphDIM
                 postPathLayer
                   .append("path")
                   .attr("data-path-id", scenario.id)
                   .attr("d", pathGen([...pts, pts[0]!]) ?? "")
                   .attr("fill", "none")
                   .attr("stroke", color)
-                  .attr("stroke-width", isBackground ? 1.5 : 3)
-                  .attr("stroke-opacity", strokeOp)
+                  .attr("stroke-width", mStrokeW)
+                  .attr("stroke-opacity", mStrokeOp)
                   .attr("stroke-linejoin", "round")
                   .attr("pointer-events", "none")
               })
@@ -595,7 +603,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               }
             }
 
-            if (morphHasPinned) {
+            {
               const postDotsLayer = postSvg.select<SVGGElement>("g.dots")
               if (!postDotsLayer.empty()) {
                 postDotsLayer
@@ -603,10 +611,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   .each(function () {
                     const sid =
                       this.getAttribute("data-scenario-id") ?? ""
-                    if (!pinnedScenarioIds.has(sid)) return
+                    const mSel2 =
+                      morphHasChosenIds && chosenIds!.has(sid)
+                    const mPin2 = pinnedScenarioIds.has(sid)
+                    const mHi2 = mSel2 || mPin2
+                    const mAny2 =
+                      (dimUnselected && morphHasChosenIds) ||
+                      (dimUnpinned && morphHasPinned)
+                    const mR = mPin2
+                      ? dotR2 + 3
+                      : mSel2
+                        ? dotR2 + 1.5
+                        : mAny2 && !mHi2
+                          ? dotR2 * 0.7
+                          : dotR2
+                    const mOp = mAny2 && !mHi2 ? morphDIM : 1.0
                     select(this)
-                      .attr("r", dotR2 + 3)
-                      .attr("fill-opacity", 1)
+                      .attr("r", mR)
+                      .attr("fill-opacity", mOp)
+                      .attr("stroke-opacity", mOp)
                   })
               }
             }
@@ -634,23 +657,69 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const g = svg.append("g")
 
         const hasPinned = pinnedScenarioIds.size > 0
-        const sidebarHighlightActive =
-          !hasPinned && highlightedIds && highlightedIds.size > 0
-
         const hasScenarioColors = lineColors.length > 0
         const dotR = 4
         const DIM_OPACITY = 0.1
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 
-        const getOpacity = (id: string) => {
-          if (dimUnselected && hasChosenIds && !chosenIds!.has(id)) {
-            return DIM_OPACITY
+        const resolveVisuals = (
+          scenarioId: string,
+          focusId?: string | null,
+        ) => {
+          const isFocused = focusId != null && scenarioId === focusId
+          const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
+          const isPinned = pinnedScenarioIds.has(scenarioId)
+
+          const anyHighlightActive =
+            focusId != null ||
+            dimUnselected ||
+            (dimUnpinned && hasPinned)
+
+          const isHighlighted = isFocused || isSelected || isPinned
+
+          if (isFocused || isSelected) {
+            return {
+              dotR: dotR + 2.5,
+              opacity: 1.0,
+              strokeWidth: 3.5,
+              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+            }
           }
-          if (dimUnpinned && hasPinned) {
-            return pinnedScenarioIds.has(id) ? 1.0 : DIM_OPACITY
+
+          if (isPinned) {
+            return {
+              dotR: dotR + 3,
+              opacity: 1.0,
+              strokeWidth: 3,
+              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+            }
           }
-          return 1.0
+
+          if (anyHighlightActive) {
+            return {
+              dotR: dotR * 0.7,
+              opacity: DIM_OPACITY,
+              strokeWidth: 1.5,
+              strokeOpacity: DIM_OPACITY,
+            }
+          }
+
+          if (showDotsOnly) {
+            return {
+              dotR,
+              opacity: 1.0,
+              strokeWidth: 1.5,
+              strokeOpacity: DIM_OPACITY,
+            }
+          }
+
+          return {
+            dotR,
+            opacity: 1.0,
+            strokeWidth: 1.5,
+            strokeOpacity: 0.55,
+          }
         }
 
         // 1. Tier zone rings (draw from outermost inward; each filled circle
@@ -797,7 +866,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const T_DUR = hasAnimatedRef.current ? 0 : 400
         hasAnimatedRef.current = true
 
-        const drawPolygonForScenario = (scenarioId: string) => {
+        const drawPolygonForScenario = (
+          scenarioId: string,
+          focusId?: string | null,
+        ) => {
           pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
           const pts = dotPositions.get(scenarioId)
           if (!pts || pts.length < 3) return
@@ -811,26 +883,15 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const pathGen = line<(typeof pts)[number]>()
             .x((d) => d.x)
             .y((d) => d.y)
-          const isPinned = pinnedScenarioIds.has(scenarioId)
-          const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
-          const isHighlighted = highlightedIds && highlightedIds.has(scenarioId)
-          const isBackground = showAllPaths && !isPinned && !isHighlighted && !isSelected
-          const dimmed = dimUnpinned && hasPinned && !isPinned
-          const unselected =
-            dimUnselected && hasChosenIds && !chosenIds!.has(scenarioId)
-          let strokeOp = isBackground ? 0.55 : 1.0
-          let strokeW = isSelected ? 3.5 : isBackground ? 1.5 : 3
-          if (showDotsOnly) strokeOp = DIM_OPACITY
-          if (unselected) strokeOp = DIM_OPACITY
-          if (dimmed) strokeOp = DIM_OPACITY
+          const vis = resolveVisuals(scenarioId, focusId)
           pathLayer
             .append("path")
             .attr("data-path-id", scenarioId)
             .attr("d", pathGen([...pts, pts[0]!]) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
-            .attr("stroke-width", strokeW)
-            .attr("stroke-opacity", strokeOp)
+            .attr("stroke-width", vis.strokeWidth)
+            .attr("stroke-opacity", vis.strokeOpacity)
             .attr("stroke-linejoin", "round")
             .attr("pointer-events", "none")
         }
@@ -840,34 +901,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
             .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
-              const isFocus = sid === focusId
-              const isPin = pinnedScenarioIds.has(sid)
+              const vis = resolveVisuals(sid, focusId)
               select(this)
-                .attr("fill-opacity", isFocus || isPin ? 1.0 : DIM_OPACITY)
-                .attr("stroke-opacity", isFocus || isPin ? 1.0 : DIM_OPACITY)
-                .attr("r", isFocus ? dotR + 1.5 : isPin ? dotR + 3 : dotR * 0.7)
+                .attr("fill-opacity", vis.opacity)
+                .attr("stroke-opacity", vis.opacity)
+                .attr("r", vis.dotR)
             })
           pathLayer
             .selectAll<SVGPathElement, unknown>("path[data-path-id]")
             .each(function () {
               const el = select(this)
-              const sid = el.attr("data-path-id")
-              const isFocus = sid === focusId
-              const isPin = pinnedScenarioIds.has(sid ?? "")
-              el.attr("stroke-width", isFocus ? 3.5 : isPin ? 3 : 1.5)
-                .attr("stroke-opacity", isFocus || isPin ? 1.0 : DIM_OPACITY)
-            })
-        }
-
-        const boostPinnedDots = (ids: Set<string>) => {
-          dotsLayer
-            .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-            .each(function () {
-              const sid = this.getAttribute("data-scenario-id") ?? ""
-              if (!ids.has(sid)) return
-              select(this)
-                .attr("r", dotR + 3)
-                .attr("fill-opacity", 1)
+              const sid = el.attr("data-path-id") ?? ""
+              const vis = resolveVisuals(sid, focusId)
+              el.attr("stroke-width", vis.strokeWidth)
+                .attr("stroke-opacity", vis.strokeOpacity)
             })
         }
 
@@ -876,33 +923,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
             .each(function () {
               const sid = this.getAttribute("data-scenario-id") ?? ""
-              const op = getOpacity(sid)
-              const isPinned = pinnedScenarioIds.has(sid)
-              const isSelected = hasChosenIds && chosenIds!.has(sid)
+              const vis = resolveVisuals(sid)
               select(this)
-                .attr("fill-opacity", op)
-                .attr("stroke-opacity", op)
-                .attr("r", isPinned ? dotR + 3 : isSelected ? dotR + 1.5 : dotR)
+                .attr("fill-opacity", vis.opacity)
+                .attr("stroke-opacity", vis.opacity)
+                .attr("r", vis.dotR)
             })
           pathLayer
             .selectAll<SVGPathElement, unknown>("path[data-path-id]")
             .each(function () {
               const el = select(this)
               const sid = el.attr("data-path-id") ?? ""
-              const isPinned = pinnedScenarioIds.has(sid)
-              const isSelected = hasChosenIds && chosenIds!.has(sid)
-              const isHighlighted =
-                highlightedIds && highlightedIds.has(sid)
-              const isBackground = showAllPaths && !isPinned && !isHighlighted && !isSelected
-              const dimmed = dimUnpinned && hasPinned && !isPinned
-              const unselected =
-                dimUnselected && hasChosenIds && !chosenIds!.has(sid)
-              let strokeOp = isBackground ? 0.55 : 1.0
-              if (showDotsOnly) strokeOp = DIM_OPACITY
-              if (unselected) strokeOp = DIM_OPACITY
-              if (dimmed) strokeOp = DIM_OPACITY
-              el.attr("stroke-width", isSelected ? 3.5 : isBackground ? 1.5 : 3)
-                .attr("stroke-opacity", strokeOp)
+              const vis = resolveVisuals(sid)
+              el.attr("stroke-width", vis.strokeWidth)
+                .attr("stroke-opacity", vis.strokeOpacity)
             })
         }
 
@@ -920,7 +954,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               cx + r * Math.cos(angle) + dodgeOff * Math.cos(perpAngle)
             const dotY =
               cy + r * Math.sin(angle) + dodgeOff * Math.sin(perpAngle)
-            const opacity = getOpacity(scenario.id)
             const color = hasScenarioColors
               ? lineColors[si] || colors.default
               : colors.default
@@ -934,17 +967,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               si,
             })
 
-            const isPinnedDot = pinnedScenarioIds.has(scenario.id)
-            const isSelected = hasChosenIds && chosenIds!.has(scenario.id)
-            const targetR = isPinnedDot
-              ? dotR + 3
-              : sidebarHighlightActive
-                ? highlightedIds!.has(scenario.id)
-                  ? dotR + 1.5
-                  : dotR * 0.7
-                : isSelected
-                  ? dotR + 1.5
-                  : dotR
+            const vis = resolveVisuals(scenario.id)
 
             const dot = dotsLayer
               .append("circle")
@@ -953,10 +976,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("cy", cy)
               .attr("r", 0)
               .attr("fill", color)
-              .attr("fill-opacity", opacity)
+              .attr("fill-opacity", vis.opacity)
               .attr("stroke", "#fff")
               .attr("stroke-width", 1)
-              .attr("stroke-opacity", opacity)
+              .attr("stroke-opacity", vis.opacity)
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
               .attr("data-axis", axis)
@@ -967,7 +990,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .duration(T_DUR)
               .attr("cx", dotX)
               .attr("cy", dotY)
-              .attr("r", targetR)
+              .attr("r", vis.dotR)
 
             dot
               .on("mouseenter", function () {
@@ -976,7 +999,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   .attr("r", dotR + 2.5)
                   .raise()
 
-                drawPolygonForScenario(scenario.id)
+                drawPolygonForScenario(scenario.id, scenario.id)
 
                 if (hoverNotifyTimerRef.current !== null) {
                   clearTimeout(hoverNotifyTimerRef.current)
@@ -1010,9 +1033,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 resetDotVisuals()
                 pathLayer.selectAll("*").remove()
                 data.forEach((s) => drawPolygonForScenario(s.id))
-                if (hasPinned) {
-                  boostPinnedDots(pinnedScenarioIds)
-                }
                 if (tooltipRef.current) hideTooltip(tooltipRef.current)
                 lastNotifiedIdRef.current = null
                 onLineHoverRef.current?.(null)
@@ -1107,10 +1127,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         data.forEach((scenario) => {
           drawPolygonForScenario(scenario.id)
         })
-
-        if (hasPinned) {
-          boostPinnedDots(pinnedScenarioIds)
-        }
 
         // 8. Distribution dots.arranged along tier circle arcs
         if (showDistribution && distributionData && hasPinned) {
