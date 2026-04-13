@@ -400,46 +400,17 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             }
           }
 
-          // Transition range shadow
-          if (axisRange && Object.keys(axisRange).length > 0) {
-            const outerPts: [number, number][] = []
-            const innerPts: [number, number][] = []
-            axes.forEach((axis, i) => {
-              const range = axisRange[axis]
-              if (!range) return
-              const angle = getAngle(i)
-              const rMax = scales.rScale(toTier(range.max))
-              const rMin = scales.rScale(toTier(range.min))
-              outerPts.push([
-                scales.cx + rMax * Math.cos(angle),
-                scales.cy + rMax * Math.sin(angle),
-              ])
-              innerPts.push([
-                scales.cx + rMin * Math.cos(angle),
-                scales.cy + rMin * Math.sin(angle),
-              ])
-            })
-            if (outerPts.length >= 3) {
-              const fwd = outerPts
-                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
-                .join(" ")
-              const rev = innerPts
-                .reverse()
-                .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
-                .join(" ")
-              const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
-              if (!rangeSel.empty()) {
-                rangeSel
-                  .transition()
-                  .duration(HC_DUR)
-                  .attr("d", `${fwd} Z ${rev} Z`)
-              }
-            }
-          } else {
-            svg.select("path.range-shadow").remove()
+          // Range shadow: crossfade instead of tweening the arc path
+          const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
+          if (!rangeSel.empty()) {
+            rangeSel
+              .transition()
+              .duration(HC_DUR * 0.4)
+              .attr("fill-opacity", 0)
+              .attr("stroke-opacity", 0)
           }
 
-          // Transition pinned/hovered polygons
+          // Transition pinned/hovered polygons alongside dots
           svg
             .selectAll<SVGPathElement, unknown>("path[data-path-id]")
             .each(function () {
@@ -454,9 +425,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 if (sv == null) return
                 const r = scales.rScale(toTier(sv))
                 const angle = getAngle(i)
+                const dodgeEl = svg.select(
+                  `circle[data-axis="${axis}"][data-scenario-id="${sid}"]`,
+                )
+                const dodgeOff = dodgeEl.empty()
+                  ? 0
+                  : parseFloat(dodgeEl.attr("data-dodge") ?? "0")
+                const perpAngle = angle + Math.PI / 2
                 pts.push([
-                  scales.cx + r * Math.cos(angle),
-                  scales.cy + r * Math.sin(angle),
+                  scales.cx +
+                    r * Math.cos(angle) +
+                    dodgeOff * Math.cos(perpAngle),
+                  scales.cy +
+                    r * Math.sin(angle) +
+                    dodgeOff * Math.sin(perpAngle),
                 ])
               })
               if (pts.length >= 3) {
@@ -468,6 +450,160 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   .attr("d", pathGen([...pts, pts[0]!]) ?? "")
               }
             })
+
+          // After morph completes, do a full redraw of lines and range band
+          setTimeout(() => {
+            if (!svgRef.current || !scalesRef.current) return
+            const postSvg = select(svgRef.current)
+            const postScales = scalesRef.current
+
+            // Rebuild polygon lines from current dot positions
+            const postPathLayer = postSvg.select<SVGGElement>(
+              "g.scenario-paths",
+            )
+            if (!postPathLayer.empty()) {
+              postPathLayer.selectAll("*").remove()
+              const postDotPositions = new Map<
+                string,
+                { x: number; y: number }[]
+              >()
+              postSvg
+                .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+                .each(function () {
+                  const el = select(this)
+                  const sid = el.attr("data-scenario-id") ?? ""
+                  const dotCx = parseFloat(el.attr("cx") ?? "0")
+                  const dotCy = parseFloat(el.attr("cy") ?? "0")
+                  if (!postDotPositions.has(sid))
+                    postDotPositions.set(sid, [])
+                  postDotPositions.get(sid)!.push({ x: dotCx, y: dotCy })
+                })
+              data.forEach((scenario, si) => {
+                const pts = postDotPositions.get(scenario.id)
+                if (!pts || pts.length < 3) return
+                const color = lineColors.length > 0
+                  ? lineColors[si] || colors.default
+                  : colors.default
+                const pathGen = line<{ x: number; y: number }>()
+                  .x((d) => d.x)
+                  .y((d) => d.y)
+                const isPinned = pinnedScenarioIds.has(scenario.id)
+                const isHighlighted =
+                  highlightedIds && highlightedIds.has(scenario.id)
+                const isBackground =
+                  showAllPaths && !isPinned && !isHighlighted
+                const dimmed = dimUnpinned && morphHasPinned && !isPinned
+                let strokeOp = isBackground ? 0.55 : 1.0
+                if (dimmed) strokeOp = 0.07
+                postPathLayer
+                  .append("path")
+                  .attr("data-path-id", scenario.id)
+                  .attr("d", pathGen([...pts, pts[0]!]) ?? "")
+                  .attr("fill", "none")
+                  .attr("stroke", color)
+                  .attr("stroke-width", isBackground ? 1.5 : 3)
+                  .attr("stroke-opacity", strokeOp)
+                  .attr("stroke-linejoin", "round")
+                  .attr("pointer-events", "none")
+              })
+            }
+
+            // Rebuild range band from final dot positions
+            const dotR2 =
+              data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+            if (axisRange && Object.keys(axisRange).length > 0) {
+              const spokeInfo: {
+                angle: number
+                maxR: number
+                minR: number
+                outerHalf: number
+                innerHalf: number
+              }[] = []
+              axes.forEach((axis, axisIdx) => {
+                const angle = getAngle(axisIdx)
+                let maxR = -Infinity
+                let minR = Infinity
+                let maxDodge = 0
+                data.forEach((scenario) => {
+                  const sv = scenario.values[axis]
+                  if (sv == null) return
+                  const r = postScales.rScale(toTier(sv))
+                  if (r > maxR) maxR = r
+                  if (r < minR) minR = r
+                  const el = postSvg.select(
+                    `circle[data-axis="${axis}"][data-scenario-id="${scenario.id}"]`,
+                  )
+                  const d = Math.abs(
+                    parseFloat(el.attr("data-dodge") ?? "0"),
+                  )
+                  if (d > maxDodge) maxDodge = d
+                })
+                if (maxR === -Infinity) return
+                const spread = (maxDodge + dotR2) * 0.5
+                spokeInfo.push({
+                  angle,
+                  maxR,
+                  minR,
+                  outerHalf: maxR > 0 ? Math.atan2(spread, maxR) : 0,
+                  innerHalf: minR > 0 ? Math.atan2(spread, minR) : 0,
+                })
+              })
+              if (spokeInfo.length >= 3) {
+                let outerD = ""
+                spokeInfo.forEach((s, i) => {
+                  const sa = s.angle - s.outerHalf
+                  const ea = s.angle + s.outerHalf
+                  const sx = postScales.cx + s.maxR * Math.cos(sa)
+                  const sy = postScales.cy + s.maxR * Math.sin(sa)
+                  const ex = postScales.cx + s.maxR * Math.cos(ea)
+                  const ey = postScales.cy + s.maxR * Math.sin(ea)
+                  outerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+                  outerD += ` A${s.maxR},${s.maxR} 0 0 1 ${ex},${ey}`
+                })
+                outerD += " Z"
+                let innerD = ""
+                const revSpokes = [...spokeInfo].reverse()
+                revSpokes.forEach((s, i) => {
+                  const sa = s.angle + s.innerHalf
+                  const ea = s.angle - s.innerHalf
+                  const sx = postScales.cx + s.minR * Math.cos(sa)
+                  const sy = postScales.cy + s.minR * Math.sin(sa)
+                  const ex = postScales.cx + s.minR * Math.cos(ea)
+                  const ey = postScales.cy + s.minR * Math.sin(ea)
+                  innerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+                  innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
+                })
+                innerD += " Z"
+                const newRangeSel = postSvg.select<SVGPathElement>(
+                  "path.range-shadow",
+                )
+                if (!newRangeSel.empty()) {
+                  newRangeSel
+                    .attr("d", `${outerD} ${innerD}`)
+                    .transition()
+                    .duration(HC_DUR * 0.4)
+                    .attr("fill-opacity", 0.35)
+                    .attr("stroke-opacity", 0.5)
+                }
+              }
+            }
+
+            if (morphHasPinned) {
+              const postDotsLayer = postSvg.select<SVGGElement>("g.dots")
+              if (!postDotsLayer.empty()) {
+                postDotsLayer
+                  .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
+                  .each(function () {
+                    const sid =
+                      this.getAttribute("data-scenario-id") ?? ""
+                    if (!pinnedScenarioIds.has(sid)) return
+                    select(this)
+                      .attr("r", dotR2 + 3)
+                      .attr("fill-opacity", 1)
+                  })
+              }
+            }
+          }, HC_DUR + 50)
 
           return
         }
@@ -556,45 +692,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .text(TIER_LABELS[i] ?? "")
         })
 
-        // Range band: gray area between per-axis min and max across all scenarios
-        if (axisRange && Object.keys(axisRange).length > 0) {
-          const outerPts: [number, number][] = []
-          const innerPts: [number, number][] = []
-          axes.forEach((axis, i) => {
-            const range = axisRange[axis]
-            if (!range) return
-            const angle = getAngle(i)
-            const rMax = rScale(toTier(range.max))
-            const rMin = rScale(toTier(range.min))
-            outerPts.push([
-              cx + rMax * Math.cos(angle),
-              cy + rMax * Math.sin(angle),
-            ])
-            innerPts.push([
-              cx + rMin * Math.cos(angle),
-              cy + rMin * Math.sin(angle),
-            ])
-          })
-          if (outerPts.length >= 3) {
-            const fwd = outerPts
-              .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
-              .join(" ")
-            const rev = innerPts
-              .reverse()
-              .map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`)
-              .join(" ")
-            g.append("path")
-              .attr("class", "range-shadow")
-              .attr("d", `${fwd} Z ${rev} Z`)
-              .attr("fill", "#cbd5e0")
-              .attr("fill-opacity", 0.35)
-              .attr("stroke", "#a0aec0")
-              .attr("stroke-width", 0.8)
-              .attr("stroke-opacity", 0.5)
-              .attr("fill-rule", "evenodd")
-              .attr("pointer-events", "none")
-          }
-        }
+        // Range band placeholder — drawn after dots so we can use actual positions
+        const rangeBandLayer = g
+          .insert("g", "g.ghost-baselines")
+          .attr("class", "range-band")
 
         // Capture baseline positions for ghost trace
         const baselineRadii = new Map<string, number>()
@@ -888,6 +989,84 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               })
           })
         })
+
+        // Range band: arcs along polar circles at each spoke to cover dodge
+        if (axisRange && Object.keys(axisRange).length > 0) {
+          const spokeInfo: {
+            angle: number
+            maxR: number
+            minR: number
+            outerHalf: number
+            innerHalf: number
+          }[] = []
+          axes.forEach((axis, axisIdx) => {
+            const angle = getAngle(axisIdx)
+            let maxR = -Infinity
+            let minR = Infinity
+            let maxDodge = 0
+            data.forEach((scenario) => {
+              const sv = scenario.values[axis]
+              if (sv == null) return
+              const r = rScale(toTier(sv))
+              if (r > maxR) maxR = r
+              if (r < minR) minR = r
+              const d = Math.abs(
+                dodgeMap.get(`${axis}:${scenario.id}`) ?? 0,
+              )
+              if (d > maxDodge) maxDodge = d
+            })
+            if (maxR === -Infinity) return
+            const spread = (maxDodge + dotR) * 0.5
+            spokeInfo.push({
+              angle,
+              maxR,
+              minR,
+              outerHalf: maxR > 0 ? Math.atan2(spread, maxR) : 0,
+              innerHalf: minR > 0 ? Math.atan2(spread, minR) : 0,
+            })
+          })
+
+          if (spokeInfo.length >= 3) {
+            let outerD = ""
+            spokeInfo.forEach((s, i) => {
+              const sa = s.angle - s.outerHalf
+              const ea = s.angle + s.outerHalf
+              const sx = cx + s.maxR * Math.cos(sa)
+              const sy = cy + s.maxR * Math.sin(sa)
+              const ex = cx + s.maxR * Math.cos(ea)
+              const ey = cy + s.maxR * Math.sin(ea)
+              outerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+              outerD += ` A${s.maxR},${s.maxR} 0 0 1 ${ex},${ey}`
+            })
+            outerD += " Z"
+
+            let innerD = ""
+            const rev = [...spokeInfo].reverse()
+            rev.forEach((s, i) => {
+              const sa = s.angle + s.innerHalf
+              const ea = s.angle - s.innerHalf
+              const sx = cx + s.minR * Math.cos(sa)
+              const sy = cy + s.minR * Math.sin(sa)
+              const ex = cx + s.minR * Math.cos(ea)
+              const ey = cy + s.minR * Math.sin(ea)
+              innerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
+              innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
+            })
+            innerD += " Z"
+
+            rangeBandLayer
+              .append("path")
+              .attr("class", "range-shadow")
+              .attr("d", `${outerD} ${innerD}`)
+              .attr("fill", "#cbd5e0")
+              .attr("fill-opacity", 0.35)
+              .attr("stroke", "#a0aec0")
+              .attr("stroke-width", 0.8)
+              .attr("stroke-opacity", 0.5)
+              .attr("fill-rule", "evenodd")
+              .attr("pointer-events", "none")
+          }
+        }
 
         // Always draw all scenario polygons so dots never appear without lines
         data.forEach((scenario) => {
