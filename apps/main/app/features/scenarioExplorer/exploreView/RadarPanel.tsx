@@ -50,7 +50,6 @@ export default function RadarPanel({
   const {
     highlightedScenario,
     setHighlightedScenario,
-    togglePinnedScenario,
     selectedScenarios,
     highlightBaseline,
     showTierZones,
@@ -173,9 +172,7 @@ export default function RadarPanel({
   const someKeySelected =
     !allKeySelected && OUTCOME_CODE_ORDER.some((c) => axesSet.has(c))
 
-  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) =>
-    axesSet.has(c),
-  )
+  const allRegionalSelected = NOD_SOD_OUTCOME_CODES.every((c) => axesSet.has(c))
   const someRegionalSelected =
     !allRegionalSelected && NOD_SOD_OUTCOME_CODES.some((c) => axesSet.has(c))
 
@@ -426,9 +423,7 @@ export default function RadarPanel({
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
-              setHighlightedScenario(
-                highlightedScenario === d.id ? null : d.id,
-              )
+              setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
             }}
           />
         </Box>

@@ -232,10 +232,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onLineHover,
     onLineClick,
     chosenIds,
-    highlightedIds,
+    highlightedIds: _highlightedIds,
     highlightBaseline = true,
-    showScenarioPath = true,
-    showAllPaths = false,
+    showScenarioPath: _showScenarioPath = true,
+    showAllPaths: _showAllPaths = false,
     showTierZones = true,
     morphGeneration,
     pinnedScenarioIds: pinnedScenarioIdsProp,
@@ -370,8 +370,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const mIsSelected = morphHasChosenIds && chosenIds!.has(sid)
               const mIsPinned = pinnedScenarioIds.has(sid)
               const mAnyHighlight =
-                dimUnselected ||
-                (dimUnpinned && morphHasPinned)
+                dimUnselected || (dimUnpinned && morphHasPinned)
               const mIsHighlighted = mIsSelected || mIsPinned
               const restoreOp =
                 mAnyHighlight && !mIsHighlighted ? morphDIM : 1.0
@@ -480,9 +479,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const postScales = scalesRef.current
 
             // Rebuild polygon lines from current dot positions
-            const postPathLayer = postSvg.select<SVGGElement>(
-              "g.scenario-paths",
-            )
+            const postPathLayer =
+              postSvg.select<SVGGElement>("g.scenario-paths")
             if (!postPathLayer.empty()) {
               postPathLayer.selectAll("*").remove()
               const postDotPositions = new Map<
@@ -496,27 +494,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   const sid = el.attr("data-scenario-id") ?? ""
                   const dotCx = parseFloat(el.attr("cx") ?? "0")
                   const dotCy = parseFloat(el.attr("cy") ?? "0")
-                  if (!postDotPositions.has(sid))
-                    postDotPositions.set(sid, [])
+                  if (!postDotPositions.has(sid)) postDotPositions.set(sid, [])
                   postDotPositions.get(sid)!.push({ x: dotCx, y: dotCy })
                 })
               data.forEach((scenario, si) => {
                 const pts = postDotPositions.get(scenario.id)
                 if (!pts || pts.length < 3) return
-                const color = lineColors.length > 0
-                  ? lineColors[si] || colors.default
-                  : colors.default
+                const color =
+                  lineColors.length > 0
+                    ? lineColors[si] || colors.default
+                    : colors.default
                 const pathGen = line<{ x: number; y: number }>()
                   .x((d) => d.x)
                   .y((d) => d.y)
                 const mSel = morphHasChosenIds && chosenIds!.has(scenario.id)
                 const mPin = pinnedScenarioIds.has(scenario.id)
                 const mHi = mSel || mPin
-                const mAny =
-                  dimUnselected ||
-                  (dimUnpinned && morphHasPinned)
+                const mAny = dimUnselected || (dimUnpinned && morphHasPinned)
                 let mStrokeOp = mAny && !mHi ? morphDIM : mHi ? 1.0 : 0.55
-                let mStrokeW = mSel ? 3.5 : mPin ? 3 : 1.5
+                const mStrokeW = mSel ? 3.5 : mPin ? 3 : 1.5
                 if (showDotsOnly) mStrokeOp = morphDIM
                 postPathLayer
                   .append("path")
@@ -532,8 +528,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             }
 
             // Rebuild range band from final dot positions
-            const dotR2 =
-              data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+            const dotR2 = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
             if (axisRange && Object.keys(axisRange).length > 0) {
               const spokeInfo: {
                 angle: number
@@ -556,9 +551,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   const el = postSvg.select(
                     `circle[data-axis="${axis}"][data-scenario-id="${scenario.id}"]`,
                   )
-                  const d = Math.abs(
-                    parseFloat(el.attr("data-dodge") ?? "0"),
-                  )
+                  const d = Math.abs(parseFloat(el.attr("data-dodge") ?? "0"))
                   if (d > maxDodge) maxDodge = d
                 })
                 if (maxR === -Infinity) return
@@ -597,9 +590,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
                 })
                 innerD += " Z"
-                const newRangeSel = postSvg.select<SVGPathElement>(
-                  "path.range-shadow",
-                )
+                const newRangeSel =
+                  postSvg.select<SVGPathElement>("path.range-shadow")
                 if (!newRangeSel.empty()) {
                   newRangeSel
                     .attr("d", `${outerD} ${innerD}`)
@@ -617,15 +609,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 postDotsLayer
                   .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
                   .each(function () {
-                    const sid =
-                      this.getAttribute("data-scenario-id") ?? ""
-                    const mSel2 =
-                      morphHasChosenIds && chosenIds!.has(sid)
+                    const sid = this.getAttribute("data-scenario-id") ?? ""
+                    const mSel2 = morphHasChosenIds && chosenIds!.has(sid)
                     const mPin2 = pinnedScenarioIds.has(sid)
                     const mHi2 = mSel2 || mPin2
                     const mAny2 =
-                      dimUnselected ||
-                      (dimUnpinned && morphHasPinned)
+                      dimUnselected || (dimUnpinned && morphHasPinned)
                     const mR = mPin2
                       ? dotR2 + 3
                       : mSel2
@@ -680,11 +669,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const isPinned = pinnedScenarioIds.has(scenarioId)
 
           const anyHighlightActive =
-            focusId != null ||
-            dimUnselected ||
-            (dimUnpinned && hasPinned)
-
-          const isHighlighted = isFocused || isSelected || isPinned
+            focusId != null || dimUnselected || (dimUnpinned && hasPinned)
 
           if (isFocused || isSelected) {
             return {
@@ -921,8 +906,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const el = select(this)
               const sid = el.attr("data-path-id") ?? ""
               const vis = resolveVisuals(sid, focusId)
-              el.attr("stroke-width", vis.strokeWidth)
-                .attr("stroke-opacity", vis.strokeOpacity)
+              el.attr("stroke-width", vis.strokeWidth).attr(
+                "stroke-opacity",
+                vis.strokeOpacity,
+              )
             })
         }
 
@@ -943,8 +930,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const el = select(this)
               const sid = el.attr("data-path-id") ?? ""
               const vis = resolveVisuals(sid)
-              el.attr("stroke-width", vis.strokeWidth)
-                .attr("stroke-opacity", vis.strokeOpacity)
+              el.attr("stroke-width", vis.strokeWidth).attr(
+                "stroke-opacity",
+                vis.strokeOpacity,
+              )
             })
         }
 
@@ -1074,9 +1063,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const r = rScale(toTier(sv))
               if (r > maxR) maxR = r
               if (r < minR) minR = r
-              const d = Math.abs(
-                dodgeMap.get(`${axis}:${scenario.id}`) ?? 0,
-              )
+              const d = Math.abs(dodgeMap.get(`${axis}:${scenario.id}`) ?? 0)
               if (d > maxDodge) maxDodge = d
             })
             if (maxR === -Infinity) return
@@ -1268,9 +1255,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         baselineData,
         lineColors,
         colors,
-        highlightedIds,
         highlightBaseline,
-        showAllPaths,
         showDotsOnly,
         dimUnselected,
         chosenIds,
