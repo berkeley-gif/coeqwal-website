@@ -22,7 +22,7 @@ import {
   getOutcomeConfig,
   RESERVOIR_CALSIM_TO_GNISIDLABEL,
 } from "../../map/config/outcomeLayerRegistry"
-import { CALIFORNIA_CENTERED_VIEW } from "../../map/config/cameraPresets"
+import { resolveOutcomeCamera } from "../../map/config/resolveOutcomeCamera"
 import {
   getOutcomeLocationCoordinates,
   SALMON_RIVER_CENTROID,
@@ -888,13 +888,20 @@ export default function TierAnimationSection() {
           duration: 1000,
         })
       } else {
-        const config = getOutcomeConfig(code)
-        const target = config?.cameraPreset ?? CALIFORNIA_CENTERED_VIEW
-        map.easeTo({
-          center: { lng: target.longitude, lat: target.latitude },
-          zoom: target.zoom,
-          duration: 1000,
-        })
+        const action = resolveOutcomeCamera(code, "get-started")
+        if (action.type === "fitBounds") {
+          mapAPI.mapRef?.current?.fitBounds(action.bounds, {
+            padding: action.padding,
+            maxZoom: action.maxZoom,
+            duration: action.duration,
+          })
+        } else {
+          map.easeTo({
+            center: action.center,
+            zoom: action.zoom,
+            duration: action.duration,
+          })
+        }
       }
     },
     [selectedOutcomeCode, mapAPI.mapRef, pinnedLocations, resolvedScenarioId],
@@ -1698,7 +1705,7 @@ export default function TierAnimationSection() {
     )
       return
 
-    const vpMap = new Map<string, ScreenPolygon>()
+    const vpMap = new Map(viewportDataRef.current)
 
     for (const [featureId, data] of cachedGeoRingsRef.current) {
       const vpPoly: [number, number][] = []

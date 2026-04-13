@@ -76,3 +76,11 @@ export const RESERVOIR_VIEW: CameraView = {
   bearing: 0,
   pitch: 0,
 }
+
+/** Bounding box enclosing California's Urban demand-unit polygons
+ *  (Community Water Systems). Measured from the demand_units tileset
+ *  filtered to Class === "Urban" (167 features). */
+export const CWS_DEL_BOUNDS: [[number, number], [number, number]] = [
+  [-123.525, 34.995], // SW corner [lng, lat]
+  [-118.803, 41.745], // NE corner [lng, lat]
+]
