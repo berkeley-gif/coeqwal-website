@@ -4,7 +4,7 @@
  * Active tools:
  * - ListView: Scenario grid tool (StrategyGrid with tier outcome glyphs)
  * - RadarPanel: Radar chart wrapping @repo/viz RadarPlot
- * - EquityPanel: Distribution comparison (chart content by another developer)
+ * - EquityPanel: Distribution comparison (chart content by Yuya, a Ph.D. student/developer at the Davis Viz Lab)
  *
  * Preserved (not currently in toolbar, available for future use):
  * - ComparisonPanel: Tradeoffs tool with parallel coords / parity / deviation charts

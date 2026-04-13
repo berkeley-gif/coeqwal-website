@@ -667,11 +667,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const isFocused = focusId != null && scenarioId === focusId
           const isSelected = hasChosenIds && chosenIds!.has(scenarioId)
           const isPinned = pinnedScenarioIds.has(scenarioId)
+          const isBaseline =
+            highlightBaseline && baselineData != null && scenarioId === baselineData.id
 
           const anyHighlightActive =
             focusId != null || dimUnselected || (dimUnpinned && hasPinned)
 
-          if (isFocused || isSelected) {
+          if (isFocused || isSelected || isBaseline) {
             return {
               dotR: dotR + 2.5,
               opacity: 1.0,

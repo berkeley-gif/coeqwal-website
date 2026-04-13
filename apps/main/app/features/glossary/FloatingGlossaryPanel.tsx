@@ -385,7 +385,7 @@ export function FloatingGlossaryPanel({
         transform: isOpen ? "scale(1)" : "scale(0.9)",
         transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
         opacity: isOpen ? 1 : 0,
-        transition: theme.transition.bouncy,
+        transition: `${theme.transition.bouncy}, left 700ms cubic-bezier(0.25,0.1,0.25,1), right 700ms cubic-bezier(0.25,0.1,0.25,1)`,
         pointerEvents: isOpen ? "auto" : "none",
         zIndex: theme.zIndex.floating,
         display: "flex",

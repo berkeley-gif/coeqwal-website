@@ -295,13 +295,14 @@ export default function MapInstance({
         sx={{
           ...containerStyles,
           "& .mapboxgl-ctrl-bottom-left": {
+            display: "flex !important",
             flexDirection: isExploreMode ? "column" : "row",
             alignItems: "flex-end",
             gap: "8px",
             transition: "left 0.3s ease, right 0.3s ease, bottom 0.3s ease",
             pointerEvents: "auto",
             ...(isExploreMode
-              ? { left: "auto", right: "12px", bottom: "80px" }
+              ? { left: "auto", right: "12px", bottom: "33px" }
               : { left: "10px", bottom: "12px" }),
             "& .mapboxgl-ctrl": { margin: "0 !important" },
           },
