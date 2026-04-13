@@ -4,6 +4,11 @@
  * LanguageSwitcher - Toggle between English and Spanish
  *
  * Uses ToggleButtonGroup for language selection.
+ * 
+ * MIGRATION NOTE (2026):
+ * Previously read locale directly from @repo/i18n context.
+ * Now accepts locale state and change handler as props, making this
+ * component translation-system agnostic.
  *
  * WCAG 2.0 AA Compliance:
  * - WCAG 1.3.1: role="group" with aria-label for screen readers
@@ -14,30 +19,61 @@
 
 import React from "react"
 import { ToggleButtonGroup, ToggleButton, useMediaQuery } from "@mui/material"
-import { useTranslation } from "@repo/i18n"
 
 // Minimum touch target size for WCAG 2.5.5
 const MIN_TOUCH_TARGET = 44
 const DESKTOP_HEIGHT = 36
 
-export function LanguageSwitcher() {
-  const { locale, setLocale } = useTranslation()
+export interface LocaleOption {
+  value: string
+  label: string
+}
+
+// Default options so existing callers that don't need
+// custom locales don't have to pass this prop at all.
+const DEFAULT_LOCALE_OPTIONS: LocaleOption[] = [
+  { value: "en", label: "English" },
+  { value: "es", label: "Español" },
+]
+
+interface LanguageSwitcherProps {
+  /** The currently active locale. */
+  currentLocale: string
+  /**
+  * Called when the user selects a new locale.
+  */
+  onLocaleChange: (locale: string) => void
+  /**
+   * Override locale options for apps that support more than en/es.
+   * Defaults to English + Español.
+   */
+  localeOptions?: LocaleOption[]
+}
+
+export function LanguageSwitcher({
+  currentLocale,
+  onLocaleChange,
+  localeOptions = DEFAULT_LOCALE_OPTIONS,
+}: LanguageSwitcherProps) {
   // WCAG 2.5.5: Larger touch targets on mobile
   const isMobile = useMediaQuery("(max-width: 749px)")
   const buttonHeight = isMobile ? MIN_TOUCH_TARGET : DESKTOP_HEIGHT
 
-  const handleChange = (
+  function handleChange(
     _event: React.MouseEvent<HTMLElement>,
-    newLocale: "en" | "es" | null,
-  ) => {
-    if (newLocale) {
-      setLocale(newLocale)
+    newLocale: string | null,
+  ) {
+    // MUI ToggleButtonGroup passes null when the user clicks the
+    // already-selected option. Guard here to avoid a no-op navigation
+    // or unnecessary state update in the caller.
+    if (newLocale && newLocale !== currentLocale) {
+      onLocaleChange(newLocale)
     }
   }
 
   return (
     <ToggleButtonGroup
-      value={locale}
+      value={currentLocale}
       exclusive
       onChange={handleChange}
       // WCAG 1.3.1: Descriptive label for screen readers
@@ -61,12 +97,16 @@ export function LanguageSwitcher() {
         },
       }}
     >
-      <ToggleButton value="en" aria-label="English">
-        English
-      </ToggleButton>
-      <ToggleButton value="es" aria-label="Español">
-        Español
-      </ToggleButton>
+      {/* Render buttons dynamically from localeOptions */}
+      {localeOptions.map((option) => (
+        <ToggleButton
+          key={option.value}
+          value={option.value}
+          aria-label={option.label}
+        >
+          {option.label}
+        </ToggleButton>
+      ))}
     </ToggleButtonGroup>
   )
 }

@@ -13,6 +13,7 @@
  */
 
 import { Suspense } from "react"
+import { getTranslations } from "next-intl/server"
 import { SkipLink } from "@repo/ui"
 import { ClientProviders } from "./components/ClientProviders"
 import { MainContent } from "./components/MainContent"
@@ -23,11 +24,12 @@ import IntroSection from "./sections/IntroSection"
 import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations("Common")
   return (
     <ClientProviders>
       {/* WCAG 2.4.1: Skip link must be first focusable element in DOM */}
-      <SkipLink />
+      <SkipLink label={t("skipToContent")} />
 
       {/* WCAG 2.4.3: Header must come before map in DOM for correct tab order
           Tab order: Skip Link > Header nav > Map controls > Main content */}

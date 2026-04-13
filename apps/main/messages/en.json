@@ -1,0 +1,149 @@
+{
+  "Common": {
+    "skipToContent": "Skip to main content"
+  },
+  "App": {
+    "homePanel": {
+      "titleLine1": "What is the future of",
+      "titleLine2": "California's water?",
+      "content": "Water connects all Californians and is vital to our communities, farms, and the environment. Delivering water to meet all needs is not easy, especially as our climate changes.",
+      "callToAction": "On this site, you can learn how water in California's Central Valley is managed, explore how allocations shift under different scenarios, and use the same tools as decision-makers to empower new pathways toward a sustainable and equitable water future."
+    },
+    "frontmatterPanel": {
+      "boldText": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly-funded project that sheds light on how water is managed in California and how climate change affects our water future."
+    },
+    "mapPanel": {
+      "panelOne": {
+        "boldText": "Do you know that California has one of the most complex water systems in the world?"
+      }
+    },
+    "scenariosPanel": {
+      "part1": "Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these operational strategies under the climate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change.",
+      "part2": "These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between goals. By understanding how different decisions affect water allocations for different communities, we can imagine new ways of improving water management in California."
+    },
+    "interstitialPanel": {
+      "content": "On this site, you can learn about California's water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future."
+    },
+    "interstitial": {
+      "content": [
+        "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Agriculture, communities, and ecosystems are all connected by California water.",
+        "The COEQWAL project helps you understand how California moves water, what alternative water management scenarios look like, and the effects of a changing climate. Using the same computer models as the state Department of Water Resources and the U.S. Bureau of Reclamation, COEQWAL models a broad range of water management scenarios to explore alternative possibilities for the future of water in California."
+      ],
+      "boldText": "From mountains to coast and north to south,",
+      "part1": "Many Californians would be surprised to learn how controlled our state's surface water is. Californians share water through one of the largest and most complex conveyance and allocation systems in the world, particularly in the Central Valley. Communities, agriculture, and ecosystems are all connected by California water.",
+      "part2": "Our climate determines how much water falls on our state. Water rights, policies, and laws guide who gets water, the amount of water they get, and when they get it. State and federal agencies make operational decisions about storage, conveyance, and deliveries based on these rules and regulations. They use an open-source computational model called CalSim to understand how their operational decisions affect where the water goes.",
+      "part3": "The COEQWAL project uses CalSim to model a broad range of alternative water management scenarios, each designed to ask,"
+    },
+    "secondaryNavigation": {
+      "tab1": "Learn",
+      "tab2": "Current Operations",
+      "tab3": "Scenario Themes"
+    },
+    "CaliforniaWaterPanel": {
+      "title": "California Water"
+    },
+    "californiaWater": {
+      "title": "California Water",
+      "paragraph1": "Most of California's water falls in the winter as rain and snow in northern California and the Sierra Nevada. This precipitation – highly variable from year to year – is the state's primary water supply.",
+      "paragraph2": "Snowpack serves as a natural reservoir, releasing water throughout the spring. As rainfall and melting snow flows from the mountains into rivers of the Central Valley, some of it seeps underground and replenishes large aquifers.",
+      "paragraph3": "The Sacramento River - California's largest - flows from the north and joins with the San Joaquin River, flowing up from the south, in the Delta. These flows create one of the most ecologically rich estuaries on the West Coast before flowing out to the San Francisco Bay and Pacific Ocean. In the Delta, freshwater mixes with saltwater, creating a shifting salinity balance shaped by the amount of flow and the tides.",
+      "paragraph4": "Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, over the past century we have transformed how water moves through California.",
+      "arLabel": {
+        "title": "Atmospheric River",
+        "date": "December 2024"
+      }
+    },
+    "managingWater": {
+      "title": "Managing Water",
+      "paragraph1": "California's vast water system includes over a thousand dams and hundreds of miles of canals. Our large reservoirs, such as Lake Shasta and Lake Oroville, collect water from rain and melting snow in the winter and spring. Reservoirs reduce the risk of flooding in the winter and store water into the dry season for use by farms, communities, and ecosystems.",
+      "paragraph2": "Much of the freshwater flowing from the Sacramento and San Joaquin rivers into the Delta is pumped into canals that deliver water back to farms in the San Joaquin Valley and communities in Southern California.",
+      "paragraph3": "Managing California's water is no easy task. Precipitation varies unpredictably both seasonally and year to year, and a web of laws, regulations, and institutions shapes how water is managed and allocated across the state."
+    },
+    "challenges": {
+      "title": "Growing Challenges",
+      "paragraph1": "California's water is essential for farms, communities, and the environment-but not everyone has equal access. Historically, laws prevented Indigenous communities and people of color from securing land and water rights, and the effects of these injustices are still felt today. Many communities continue to struggle with limited or unsafe drinking water, and the state is facing a growing population.",
+      "paragraph2": "The transformation of our water system has taken a toll on freshwater ecosystems. Dams have reduced river flows and blocked migratory fish like the endangered Sacramento River winter-run Chinook salmon. For more than a century, farms have relied heavily on groundwater for irrigation, depleting aquifers throughout the Central Valley.",
+      "paragraph3": "Climate change is making things even more challenging. California is experiencing more extreme weather, and rising temperatures mean less snow in the mountains. Meanwhile, rising sea levels are pushing saltwater farther inland, threatening ecosystems, farms, communities, and the water supply system in the Delta.",
+      "paragraph4": "Despite these challenges, California has opportunities to adapt. By improving the way we manage water, we can better meet future needs and ensure a more fair and sustainable water supply for everyone."
+    },
+    "calsim": {
+      "title": "Exploring Alternatives with CalSim",
+      "paragraph1": "To explore alternative ways of managing water, we need to understand how much water is available, where it's needed, and how decisions in one part of the system can affect everything else. That's where CalSim comes in. CalSim is a powerful water modeling tool that simulates how water moves through California's major water projects within the Central Valley and connected regions.",
+      "paragraph2": "The model tracks how much surface water flows into reservoirs, how much is stored and released, where it gets delivered, and how much groundwater is used or preserved. The advantage of CalSim is in its flexibility-we can change the rules for distributing water and see the effects. For example, we can adjust priorities, modify regulations, and even test what happens if new infrastructure is added. We can also see how the system might respond to different climate conditions. This is the model that the state Department of Water Resources and the U.S. Bureau of Reclamation uses to model water management across the state.",
+      "paragraph3": "Each unique combination of rules and climate conditions creates a scenario that shows how water might be allocated under different circumstances. The COEQWAL project is using CalSim to build a library of these scenarios for you to explore on this website. We've also developed tools to help you see how different choices impact the outcomes that you care about and the tradeoffs of those outcomes."
+    },
+    "invitation": {
+      "title": "Begin your Exploration",
+      "paragraph1": "We invite you to explore the current operations scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
+      "paragraph2": "We have organized our library of scenarios into themes that address specific water issues. You can explore the in-depth description of these themes and their scenarios.",
+      "paragraph3": "You can also go straight to the source and access the unprocessed scenario run data for the COEQWAL scenarios by clicking the Raw Data button above.",
+      "paragraph4": "Below you can search our library of scenarios for specific outcomes."
+    },
+    "scenarioResults": {
+      "title": "Scenario Results",
+      "description": "View and compare results from different water management scenarios.",
+      "search": "Search"
+    },
+    "questionBuilder": {
+      "defaultTerms": {
+        "waterAvailability": "water outcomes",
+        "outcomes": "water outcomes",
+        "decisions": "decisions",
+        "decisions_sub": "decisions"
+      },
+      "scenarioSingular": "scenarios",
+      "scenarioPlural": "scenarios",
+      "singularVerb": "does",
+      "pluralVerb": "do",
+      "questionFormat": "How {verb} {operation} affect {outcome}?",
+      "questionFormatWithClimate": "How {verb} {operation} affect {outcome} with {climate}?",
+      "swappedFormat": "To {outcome}, which {operation} could we consider?",
+      "swappedFormatNoChange": "To {outcome}, which {operation} could we consider?",
+      "connectors": {
+        "and": "and",
+        "in": "in",
+        "to": "to",
+        "under": "under",
+        "increase": "increase",
+        "decrease": "decrease",
+        "affect": "affect",
+        "with": "with"
+      },
+      "ui": {
+        "switch": "switch",
+        "clearSelection": "Clear selection",
+        "clearOperations": "Clear operations",
+        "clearOutcomes": "Clear outcomes",
+        "clearSelections": "Clear selections"
+      },
+      "operationsSelector": {
+        "title": "{decisions}",
+        "swappedTitle": "could we consider?",
+        "searchPlaceholder": "Operations search coming soon",
+        "searchOperations": "Search operations",
+        "comingSoon": "Coming Soon"
+      },
+      "outcomesSelector": {
+        "title": "{waterAvailability}",
+        "swappedTitle": "To change {waterAvailability}",
+        "includeClimate": "Include future climate conditions",
+        "chooseLocation": "My community",
+        "mapPlaceholder": "Map Placeholder"
+      },
+      "climateSelector": {
+        "title": "climate",
+        "options": {
+          "hist_adj": "current climate",
+          "cc50": "moderate warming",
+          "cc95": "severe warming",
+          "extreme_warming": "extreme warming",
+          "extreme_drying": "extreme drying",
+          "wetter_future": "wetter future"
+        }
+      },
+      "sectionAccordion": {
+        "comingSoon": "Coming soon"
+      }
+    }
+  }
+}

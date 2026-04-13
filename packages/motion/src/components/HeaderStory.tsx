@@ -33,6 +33,14 @@ type TranslationsMap = {
 interface HeaderProps {
   drawerOpen?: boolean
   drawerPosition?: "left" | "right"
+  /**
+ * Current locale. Controls which language the header renders in.
+ */
+  locale?: "en" | "es"
+  /**
+ * Called when user selects a new locale via the LanguageSwitcher.
+ */
+  onLocaleChange?: (locale: string) => void
 }
 
 const translations: TranslationsMap = {
@@ -57,12 +65,13 @@ const translations: TranslationsMap = {
 export function HeaderStory({
   drawerOpen = false,
   drawerPosition = "right",
+  locale = "en",
+  onLocaleChange,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {}
-  const { locale, isLoading } = useTranslation()
   const [isHidden, setIsHidden] = useState(false)
   const { scrollY } = useScroll()
   const lastYRef = useRef(0)
@@ -76,9 +85,9 @@ export function HeaderStory({
   })
 
   // Use 'en' as default until client-side hydration is complete
-  const safeLocale = !locale || isLoading ? "en" : locale
+  const safeLocale = translations[locale] ? locale : "en"
   const componentText =
-    translations[safeLocale as keyof TranslationsMap] || translations.en
+    translations[safeLocale]
 
   return (
     <MotionAppBar
@@ -157,7 +166,10 @@ export function HeaderStory({
           >
             {componentText.buttons.about}
           </Button>
-          <LanguageSwitcher />
+          <LanguageSwitcher
+            currentLocale={safeLocale}
+            onLocaleChange={onLocaleChange ?? (() => { })}
+          />
         </Stack>
       </Toolbar>
     </MotionAppBar>

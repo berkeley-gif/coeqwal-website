@@ -31,6 +31,7 @@
     "@turf/turf": "^7.2.0",
     "@types/geojson": "^7946.0.14",
     "next": "^15.5.9",
+    "next-intl": "^4.9.1",
     "react-scrollama": "^2.4.2",
     "swr": "^2.3.6"
   },
