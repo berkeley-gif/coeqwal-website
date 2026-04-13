@@ -120,7 +120,7 @@ export default function SearchAndChips({ showDivider }: SearchAndChipsProps) {
           onClick={() => setShowKeyOperations(!showKeyOperations)}
         />
         <ToggleChip
-          label="chosen only"
+          label="selected only"
           active={showOnlyChosen}
           onClick={() => setShowOnlyChosen(!showOnlyChosen)}
         />

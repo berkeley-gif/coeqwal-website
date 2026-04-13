@@ -44,7 +44,7 @@ function toTier(v: number): number {
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
 const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
-const TIER_BAND_COLORS = ["#edf2f7", "#ffffff", "#edf2f7", "#ffffff"] as const
+const TIER_BAND_COLORS = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const
 
 const DEFAULT_COLORS = {
   default: "#546e7a",
@@ -431,7 +431,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     dodgeOff * Math.sin(perpAngle),
                 )
                 .attr("fill-opacity", restoreOp)
-                .attr("stroke-opacity", Math.min(restoreOp + 0.1, 1))
+                .attr("stroke-opacity", restoreOp)
             })
 
           // Transition baseline highlight polygon
@@ -554,7 +554,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           !hasPinned && highlightedIds && highlightedIds.size > 0
 
         const hasScenarioColors = lineColors.length > 0
-        const dotR = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+        const dotR = 4
 
         const getOpacity = (id: string) => {
           if (dimUnpinned && hasPinned) {
@@ -585,8 +585,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("cy", cy)
             .attr("r", r)
             .attr("fill", "none")
-            .attr("stroke", "#cbd5e0")
-            .attr("stroke-width", 0.8)
+            .attr("stroke", "#b0bec5")
+            .attr("stroke-width", 1)
         })
 
         axes.forEach((_, i) => {
@@ -597,8 +597,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("y1", cy)
             .attr("x2", cx + outerR * Math.cos(angle))
             .attr("y2", cy + outerR * Math.sin(angle))
-            .attr("stroke", "#cbd5e0")
-            .attr("stroke-width", 0.8)
+            .attr("stroke", "#b0bec5")
+            .attr("stroke-width", 1)
         })
 
         // Tier labels along the first spoke (top)
@@ -688,9 +688,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .append("path")
               .attr("class", "baseline-polygon")
               .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-              .attr("fill", "rgba(45,55,72,0.10)")
+              .attr("fill", "none")
               .attr("stroke", "#2d3748")
-              .attr("stroke-width", 2)
+              .attr("stroke-width", 3)
               .attr("stroke-opacity", 0.6)
               .attr("pointer-events", "none")
           }
@@ -752,7 +752,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const isHighlighted = highlightedIds && highlightedIds.has(scenarioId)
           const isBackground = showAllPaths && !isPinned && !isHighlighted
           const dimmed = dimUnpinned && hasPinned && !isPinned
-          let strokeOp = isBackground ? 0.55 : 0.45
+          let strokeOp = isBackground ? 0.55 : 1.0
           if (dimmed) strokeOp = 0.07
           pathLayer
             .append("path")
@@ -760,10 +760,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("d", pathGen([...pts, pts[0]!]) ?? "")
             .attr("fill", "none")
             .attr("stroke", color)
-            .attr("stroke-width", isBackground ? 1.2 : 1.5)
+            .attr("stroke-width", isBackground ? 1.5 : 3)
             .attr("stroke-opacity", strokeOp)
             .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
             .attr("pointer-events", "none")
         }
 
@@ -786,10 +785,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const sid = el.attr("data-path-id")
               const isFocus = sid === focusId
               const isPin = pinnedScenarioIds.has(sid ?? "")
-              el.attr("stroke-width", isFocus ? 2.8 : isPin ? 1.5 : 1.2).attr(
-                "stroke-opacity",
-                isFocus || isPin ? 0.85 : 0.07,
-              )
+              el.attr("stroke-width", isFocus ? 3.5 : isPin ? 3 : 1.5)
+                .attr("stroke-opacity", isFocus || isPin ? 1.0 : 0.07)
             })
         }
 
@@ -814,7 +811,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const isPinned = pinnedScenarioIds.has(sid)
               select(this)
                 .attr("fill-opacity", op)
-                .attr("stroke-opacity", Math.min(op + 0.1, 1))
+                .attr("stroke-opacity", op)
                 .attr("r", isPinned ? dotR + 3 : dotR)
             })
           pathLayer
@@ -827,12 +824,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 highlightedIds && highlightedIds.has(sid ?? "")
               const isBackground = showAllPaths && !isPinned && !isHighlighted
               const dimmed = dimUnpinned && hasPinned && !isPinned
-              let strokeOp = isBackground ? 0.55 : 0.45
+              let strokeOp = isBackground ? 0.55 : 1.0
               if (dimmed) strokeOp = 0.07
-              el.attr("stroke-width", isBackground ? 1.2 : 1.5).attr(
-                "stroke-opacity",
-                strokeOp,
-              )
+              el.attr("stroke-width", isBackground ? 1.5 : 3)
+                .attr("stroke-opacity", strokeOp)
             })
         }
 
@@ -881,9 +876,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("r", 0)
               .attr("fill", color)
               .attr("fill-opacity", opacity)
-              .attr("stroke", color)
-              .attr("stroke-width", 1.5)
-              .attr("stroke-opacity", Math.min(opacity + 0.1, 1))
+              .attr("stroke", "#fff")
+              .attr("stroke-width", 1)
+              .attr("stroke-opacity", opacity)
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
               .attr("data-axis", axis)
@@ -1063,20 +1058,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("y", ly - 6)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 11)
+              .attr("font-size", 13)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#4a5568")
+              .attr("font-weight", "normal")
+              .attr("fill", "rgba(0,0,0,0.72)")
               .text(curated[0])
             g.append("text")
               .attr("x", lx)
               .attr("y", ly + 7)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 11)
+              .attr("font-size", 13)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#4a5568")
+              .attr("font-weight", "normal")
+              .attr("fill", "rgba(0,0,0,0.72)")
               .text(curated[1])
           } else {
             g.append("text")
@@ -1084,10 +1079,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("y", ly)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 11)
+              .attr("font-size", 13)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#4a5568")
+              .attr("font-weight", "normal")
+              .attr("fill", "rgba(0,0,0,0.72)")
               .text(axis)
           }
         })
@@ -1143,7 +1138,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const dotCx = parseFloat(el.attr("cx"))
             const dotCy = parseFloat(el.attr("cy"))
             const fill = el.attr("fill") ?? colors.default
-            const baseR = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
+            const baseR = 4
             dotsLayer
               .insert("circle", ":first-child")
               .attr("class", "active-map-glow")
