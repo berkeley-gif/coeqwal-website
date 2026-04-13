@@ -362,7 +362,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               const mIsSelected = morphHasChosenIds && chosenIds!.has(sid)
               const mIsPinned = pinnedScenarioIds.has(sid)
               const mAnyHighlight =
-                (dimUnselected && morphHasChosenIds) ||
+                dimUnselected ||
                 (dimUnpinned && morphHasPinned)
               const mIsHighlighted = mIsSelected || mIsPinned
               const restoreOp =
@@ -505,7 +505,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 const mPin = pinnedScenarioIds.has(scenario.id)
                 const mHi = mSel || mPin
                 const mAny =
-                  (dimUnselected && morphHasChosenIds) ||
+                  dimUnselected ||
                   (dimUnpinned && morphHasPinned)
                 let mStrokeOp = mAny && !mHi ? morphDIM : mHi ? 1.0 : 0.55
                 let mStrokeW = mSel ? 3.5 : mPin ? 3 : 1.5
@@ -616,7 +616,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     const mPin2 = pinnedScenarioIds.has(sid)
                     const mHi2 = mSel2 || mPin2
                     const mAny2 =
-                      (dimUnselected && morphHasChosenIds) ||
+                      dimUnselected ||
                       (dimUnpinned && morphHasPinned)
                     const mR = mPin2
                       ? dotR2 + 3

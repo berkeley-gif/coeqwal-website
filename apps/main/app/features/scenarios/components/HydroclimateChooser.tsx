@@ -191,7 +191,7 @@ export function HydroclimateChooser({
                         ? theme.palette.grey[400]
                         : config?.bgColor || theme.palette.blue.bright,
                       border: isSelected
-                        ? theme.border.highlight
+                        ? `3px solid ${theme.palette.common.white}`
                         : "3px solid transparent",
                       boxShadow: isSelected
                         ? theme.shadow.sm
