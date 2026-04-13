@@ -81,7 +81,8 @@ const BarOnly: React.FC<BarOnlyProps> = React.memo(({ values, tierColors }) => {
         {Array.from({ length: NUM_TIERS }, (_, ti) => {
           const y = BAR_SPACING + ti * (BAR_HEIGHT + BAR_SPACING)
           const normVal = valTotal > 0 ? values[ti]! / valTotal : 0
-          const fraction = normVal > 0 ? Math.max(2 / MAX_BAR_WIDTH, normVal) : 0
+          const fraction =
+            normVal > 0 ? Math.max(2 / MAX_BAR_WIDTH, normVal) : 0
           return (
             <g key={ti}>
               <rect

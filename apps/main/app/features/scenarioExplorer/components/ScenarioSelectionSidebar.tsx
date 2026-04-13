@@ -159,22 +159,20 @@ export default function ScenarioSelectionSidebar({
           </Typography>
         )}
 
-        {!isLoading &&
-          showOnlyChosen &&
-          selectedScenarios.length === 0 && (
-            <Typography
-              variant="caption"
-              sx={{
-                px: 1.5,
-                py: 3,
-                color: theme.palette.text.primary,
-                textAlign: "center",
-                display: "block",
-              }}
-            >
-              Select a scenario to see it here
-            </Typography>
-          )}
+        {!isLoading && showOnlyChosen && selectedScenarios.length === 0 && (
+          <Typography
+            variant="caption"
+            sx={{
+              px: 1.5,
+              py: 3,
+              color: theme.palette.text.primary,
+              textAlign: "center",
+              display: "block",
+            }}
+          >
+            Select a scenario to see it here
+          </Typography>
+        )}
 
         {orderedScenarios.flatMap((scenario, index) => {
           const isChosen = selectedScenarios.includes(scenario.scenarioId)
