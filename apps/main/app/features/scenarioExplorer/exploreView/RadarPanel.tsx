@@ -406,6 +406,7 @@ export default function RadarPanel({
             showTierZones={showTierZones}
             showAllPaths
             showDotsOnly={showDotsOnly}
+            dimUnselected={radarSelectedOnly}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(
