@@ -40,6 +40,8 @@ export interface RadarPlotProps {
   showDotsOnly?: boolean
   /** When true, dim scenarios not in chosenIds */
   dimUnselected?: boolean
+  /** Extra left offset for the tooltip (e.g. when a sidebar overlaps) */
+  tooltipLeftOffset?: number
 }
 
 function toTier(v: number): number {
@@ -111,6 +113,7 @@ function showTooltip(
   outcomeName: string,
   tierValue?: number,
   themeKey?: string,
+  scenarioId?: string,
 ) {
   el.style.display = "block"
   const tier =
@@ -125,9 +128,13 @@ function showTooltip(
   const themeLine = pill
     ? `<div><span style="display:inline-block;font-size:8.5px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:${pill.text};background:${pill.bg};padding:1px 4px;border-radius:2px;line-height:1.3">${pill.label}</span></div>`
     : ""
+  const idLine = scenarioId
+    ? `<div style="color:#718096;font-size:10px;letter-spacing:0.03em;margin-top:2px">${scenarioId}</div>`
+    : ""
   el.innerHTML =
     themeLine +
-    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em;margin-top:${pill ? "3px" : "0"}">${scenarioName}</div>` +
+    idLine +
+    `<div style="font-weight:600;color:#1a202c;font-size:11.5px;letter-spacing:0.01em;margin-top:${pill || scenarioId ? "3px" : "0"}">${scenarioName}</div>` +
     `<div style="color:#4a5568;margin-top:3px;font-size:10.5px">${outcomeName}</div>` +
     tierLine
 }
@@ -242,6 +249,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     activeMapDot,
     showDotsOnly = false,
     dimUnselected = false,
+    tooltipLeftOffset = 0,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -1014,6 +1022,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     axis,
                     sv != null ? toTier(sv) : undefined,
                     scenarioThemes?.[scenario.id],
+                    scenario.id,
                   )
                 }
 
@@ -1354,7 +1363,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             display: "none",
             position: "absolute",
             top: 12,
-            left: 12,
+            left: 12 + tooltipLeftOffset,
             background: "rgba(255,255,255,0.97)",
             border: "1px solid #eceff1",
             borderRadius: 8,
