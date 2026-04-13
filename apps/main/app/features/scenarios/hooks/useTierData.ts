@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useRef } from "react"
 import { useTheme } from "@repo/ui/mui"
 import useSWR, { useSWRConfig } from "swr"
 import { useTiers, useScenarios } from "@repo/data/coeqwal/hooks"
@@ -221,14 +221,18 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     data: rawScenariosData,
     error: scenarioTiersError,
     isLoading: scenarioTiersLoading,
+    isValidating: scenarioTiersValidating,
   } = useSWR(
     fetchIds.length > 0 ? CACHE_KEYS.allScenarioTiers(fetchIds) : null,
     () => fetchAllScenarioTiers(fetchIds),
     { keepPreviousData: true },
   )
 
-  // Re-key from resolved IDs to sibling group IDs when mapping is active
-  const allScenariosData = useMemo(() => {
+  // Re-key from resolved IDs to sibling group IDs when mapping is active.
+  // While SWR is validating with kept stale data, the raw data keys won't
+  // match the new reverseMap, producing garbage. Hold the previous good
+  // result until fresh data arrives.
+  const rekeyedData = useMemo(() => {
     if (!rawScenariosData) return undefined
     if (!reverseMap) return rawScenariosData
     const result: Record<string, ScenarioTiersResponse> = {}
@@ -238,6 +242,14 @@ export function useMultipleScenarioTiers(idMapping?: Record<string, string>) {
     })
     return result
   }, [rawScenariosData, reverseMap])
+
+  const prevGoodDataRef = useRef(rekeyedData)
+  if (!scenarioTiersValidating && rekeyedData !== undefined) {
+    prevGoodDataRef.current = rekeyedData
+  }
+  const allScenariosData = scenarioTiersValidating
+    ? prevGoodDataRef.current
+    : rekeyedData
 
   // Scenario IDs to expose: sibling group IDs (mapping keys) or raw IDs
   const scenarioIds = useMemo(
