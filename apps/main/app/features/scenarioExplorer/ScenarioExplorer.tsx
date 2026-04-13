@@ -23,7 +23,6 @@ import {
   CompareArrowsIcon,
   InsightsIcon,
   Checkbox,
-  FormControlLabel,
   Button,
   Menu,
   MenuItem,
@@ -31,6 +30,7 @@ import {
   ListItemText,
   Divider,
   KeyboardArrowDownIcon,
+  icons,
 } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -116,7 +116,55 @@ const TOOL_TABS: {
 ]
 
 const CHECKBOX_SX = { padding: 0, margin: 0, transform: "scale(0.85)" } as const
-const FORM_LABEL_SX = { mr: 0, ml: 0, alignItems: "center" } as const
+
+function RadarToggleChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  const theme = useTheme()
+  const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
+
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      aria-label={label}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "5px",
+        px: 1.25,
+        py: 0.5,
+        border: "none",
+        borderRadius: "12px",
+        cursor: "pointer",
+        fontSize: "0.8125rem",
+        fontWeight: 500,
+        lineHeight: 1.3,
+        whiteSpace: "nowrap",
+        color: active ? theme.palette.blue.bright : theme.palette.grey[800],
+        background: active
+          ? theme.palette.interaction.selectedBackground
+          : theme.palette.grey[200],
+        transition: "all 150ms ease",
+        "&:hover": {
+          background: theme.palette.interaction.selectedBackground,
+          color: theme.palette.blue.bright,
+        },
+      }}
+    >
+      <Icon sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+      {label}
+    </Box>
+  )
+}
 
 function RadarAxesDropdown() {
   const { radarVisibleAxes, toggleRadarAxis, setRadarVisibleAxes } =
@@ -347,12 +395,10 @@ export default function ScenarioExplorer() {
   const {
     highlightBaseline,
     setHighlightBaseline,
-    showTierZones,
-    setShowTierZones,
-    dimUnpinned,
-    setDimUnpinned,
     showRadarRange,
     setShowRadarRange,
+    showDotsOnly,
+    setShowDotsOnly,
   } = useScenarioExplorerStore()
 
   const chartControls = useMemo(() => {
@@ -360,69 +406,20 @@ export default function ScenarioExplorer() {
       return (
         <ChartControlsBar>
           <RadarAxesDropdown />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={highlightBaseline}
-                onChange={(e) => setHighlightBaseline(e.target.checked)}
-                sx={CHECKBOX_SX}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                highlight current operations
-              </Typography>
-            }
-            sx={FORM_LABEL_SX}
+          <RadarToggleChip
+            label="dots only"
+            active={showDotsOnly}
+            onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={showTierZones}
-                onChange={(e) => setShowTierZones(e.target.checked)}
-                sx={CHECKBOX_SX}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show tier zones
-              </Typography>
-            }
-            sx={FORM_LABEL_SX}
+          <RadarToggleChip
+            label="show range"
+            active={showRadarRange}
+            onClick={() => setShowRadarRange(!showRadarRange)}
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={dimUnpinned}
-                onChange={(e) => setDimUnpinned(e.target.checked)}
-                sx={CHECKBOX_SX}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                dim unpinned
-              </Typography>
-            }
-            sx={FORM_LABEL_SX}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                size="small"
-                checked={showRadarRange}
-                onChange={(e) => setShowRadarRange(e.target.checked)}
-                sx={CHECKBOX_SX}
-              />
-            }
-            label={
-              <Typography variant="compactCaption" sx={{ ml: 0.5 }}>
-                show range
-              </Typography>
-            }
-            sx={FORM_LABEL_SX}
+          <RadarToggleChip
+            label="highlight current operations"
+            active={highlightBaseline}
+            onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
         </ChartControlsBar>
       )
@@ -430,14 +427,12 @@ export default function ScenarioExplorer() {
     return null
   }, [
     exploreMode,
-    highlightBaseline,
-    setHighlightBaseline,
-    showTierZones,
-    setShowTierZones,
-    dimUnpinned,
-    setDimUnpinned,
+    showDotsOnly,
+    setShowDotsOnly,
     showRadarRange,
     setShowRadarRange,
+    highlightBaseline,
+    setHighlightBaseline,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
