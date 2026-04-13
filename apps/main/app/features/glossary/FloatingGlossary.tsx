@@ -78,7 +78,8 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     return () => window.removeEventListener("resize", onResize)
   }, [])
 
-  const mapStripRight = viewportWidth * (MAP_STRIP_PERCENT / 100) + DEFAULT_RIGHT
+  const mapStripRight =
+    viewportWidth * (MAP_STRIP_PERCENT / 100) + DEFAULT_RIGHT
 
   const position: Position = useMemo(() => {
     if (hasDragged && dragRight != null) {
