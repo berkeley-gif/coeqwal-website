@@ -263,12 +263,16 @@ export default function RadarPanel({
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      <Box sx={{ display: "flex", flex: 1, minHeight: 0 }}>
+      <Box sx={{ position: "relative", flex: 1, minHeight: 0 }}>
         {showAxisSelector && (
           <Box
             sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              bottom: 0,
               width: 220,
-              minWidth: 220,
+              zIndex: 2,
               overflowY: "auto",
               borderRight: `1px solid ${theme.palette.divider}`,
               bgcolor: theme.palette.common.white,
@@ -352,9 +356,11 @@ export default function RadarPanel({
 
         <Box
           sx={{
-            flex: 1,
-            minHeight: 0,
-            minWidth: 0,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
