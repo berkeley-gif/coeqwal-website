@@ -727,13 +727,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             const pathGen = line<[number, number]>()
               .x((d) => d[0])
               .y((d) => d[1])
+            const blIdx = data.findIndex((s) => s.id === baselineData.id)
+            const blStroke =
+              blIdx >= 0 && hasScenarioColors
+                ? lineColors[blIdx] || "#cc9a06"
+                : "#cc9a06"
             baselineHighlightLayer
               .append("path")
               .attr("class", "baseline-polygon")
               .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-              .attr("fill", "#2b6cb0")
-              .attr("fill-opacity", 0.13)
-              .attr("stroke", "#2b6cb0")
+              .attr("fill", "#cc9a06")
+              .attr("fill-opacity", 0.12)
+              .attr("stroke", blStroke)
               .attr("stroke-width", 2.5)
               .attr("stroke-opacity", 0.55)
               .attr("pointer-events", "none")
