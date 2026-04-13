@@ -273,14 +273,27 @@ export default function RadarPanel({
               bottom: 0,
               width: 220,
               zIndex: 2,
-              overflowY: "auto",
+              overflowY: "scroll",
               borderRight: `1px solid ${theme.palette.divider}`,
-              bgcolor: theme.palette.common.white,
+              bgcolor: theme.palette.background.paper,
               py: 1.5,
               px: 1,
             }}
           >
-            {/* Group toggles */}
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.7rem",
+                letterSpacing: "0.04em",
+                color: "text.primary",
+                mb: 1,
+                display: "block",
+                pl: 0.5,
+              }}
+            >
+              Choose axes
+            </Typography>
             <AxisRow
               label="All key outcomes"
               checked={allKeySelected}
@@ -311,7 +324,7 @@ export default function RadarPanel({
             {withRegional.map((code) => {
               const variants = OUTCOME_REGIONAL_VARIANTS[code as OutcomeCode]!
               return (
-                <React.Fragment key={code}>
+                <Box key={code} sx={{ mb: 0.75 }}>
                   <AxisRow
                     label={getOutcomeName(code)}
                     checked={axesSet.has(code)}
@@ -322,14 +335,18 @@ export default function RadarPanel({
                   {variants.map((vCode) => (
                     <AxisRow
                       key={vCode}
-                      label={getOutcomeName(vCode)}
+                      label={
+                        vCode.startsWith("NOD")
+                          ? "North of Delta"
+                          : "South of Delta"
+                      }
                       checked={axesSet.has(vCode)}
                       indent
                       onClick={() => toggleRadarAxis(vCode)}
                       sx={checkboxSx}
                     />
                   ))}
-                </React.Fragment>
+                </Box>
               )
             })}
 
@@ -364,7 +381,7 @@ export default function RadarPanel({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            p: theme.space.component.lg,
+            p: 0,
           }}
         >
           <RadarPlot
@@ -449,7 +466,7 @@ function AxisRow({
       <Typography
         variant="caption"
         sx={{
-          fontWeight: bold ? 600 : 400,
+          fontWeight: bold ? 500 : 400,
           fontSize: "0.72rem",
           lineHeight: 1.3,
           textAlign: "left",
