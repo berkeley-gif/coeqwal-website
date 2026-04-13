@@ -48,7 +48,6 @@ export function useComparisonData() {
     hydroclimate,
     showAlternativeBaselines,
     showOnlyChosen,
-    radarSelectedOnly,
     selectedScenarios,
   } = useScenarioExplorerStore()
 
@@ -90,9 +89,6 @@ export function useComparisonData() {
     if (showOnlyChosen && selectedScenarios.length > 0) {
       const chosen = new Set(selectedScenarios)
       filtered = filtered.filter((id) => chosen.has(id))
-    } else if (radarSelectedOnly) {
-      const chosen = new Set(selectedScenarios)
-      filtered = filtered.filter((id) => chosen.has(id))
     }
     return [...filtered].sort((a, b) => {
       if (a === PRIMARY_BASELINE_ID) return -1
@@ -103,7 +99,6 @@ export function useComparisonData() {
     allScenarioIds,
     showAlternativeBaselines,
     showOnlyChosen,
-    radarSelectedOnly,
     selectedScenarios,
     getThemeForScenario,
   ])

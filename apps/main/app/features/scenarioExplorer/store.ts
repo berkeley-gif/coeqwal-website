@@ -227,7 +227,7 @@ const initialState: ScenarioExplorerState = {
   defineOutcome: false,
   showTierZones: true,
   dimUnpinned: false,
-  showRadarRange: true,
+  showRadarRange: false,
   showDotsOnly: false,
   radarSelectedOnly: false,
   showAxisSelector: false,

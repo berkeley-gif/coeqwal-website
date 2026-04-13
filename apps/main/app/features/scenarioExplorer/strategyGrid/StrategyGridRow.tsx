@@ -386,6 +386,7 @@ export function InlineRowActions({
   accentColor,
   addToShare,
   togglePinnedScenario,
+  hidePinning,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -394,6 +395,7 @@ export function InlineRowActions({
   accentColor: string
   addToShare: (id: string) => void
   togglePinnedScenario: (id: string) => void
+  hidePinning?: boolean
 }) {
   const theme = useTheme()
   const sharedScenarioIds = useScenarioExplorerStore((s) => s.sharedScenarioIds)
@@ -451,42 +453,44 @@ export function InlineRowActions({
         ml: 0.25,
       }}
     >
-      <Tooltip
-        title={pinTooltip}
-        arrow
-        placement="top-start"
-        slotProps={{
-          popper: {
-            modifiers: [
-              { name: "flip", enabled: true },
-              {
-                name: "preventOverflow",
-                enabled: true,
-                options: { boundary: "viewport", padding: 8 },
-              },
-            ],
-          },
-        }}
-      >
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation()
-            togglePinnedScenario(scenarioId)
-          }}
-          sx={{
-            p: 0.25,
-            color: isPinned ? accentColor : theme.palette.grey[400],
+      {!hidePinning && (
+        <Tooltip
+          title={pinTooltip}
+          arrow
+          placement="top-start"
+          slotProps={{
+            popper: {
+              modifiers: [
+                { name: "flip", enabled: true },
+                {
+                  name: "preventOverflow",
+                  enabled: true,
+                  options: { boundary: "viewport", padding: 8 },
+                },
+              ],
+            },
           }}
         >
-          <icons.PushPin
-            sx={{
-              fontSize: "0.85rem",
-              transform: isPinned ? "none" : "rotate(45deg)",
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation()
+              togglePinnedScenario(scenarioId)
             }}
-          />
-        </IconButton>
-      </Tooltip>
+            sx={{
+              p: 0.25,
+              color: isPinned ? accentColor : theme.palette.grey[400],
+            }}
+          >
+            <icons.PushPin
+              sx={{
+                fontSize: "0.85rem",
+                transform: isPinned ? "none" : "rotate(45deg)",
+              }}
+            />
+          </IconButton>
+        </Tooltip>
+      )}
       <Tooltip
         title={shareTooltip}
         arrow

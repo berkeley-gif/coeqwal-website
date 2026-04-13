@@ -51,6 +51,7 @@ export default function ScenarioSelectionSidebar({
     searchQuery,
     addToShare,
     outcomeDisplayMode,
+    exploreMode,
   } = useScenarioExplorerStore()
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -260,6 +261,7 @@ export default function ScenarioSelectionSidebar({
                       accentColor={accentColor}
                       addToShare={addToShare}
                       togglePinnedScenario={togglePinnedScenario}
+                      hidePinning={exploreMode === "radar"}
                     />
                   }
                 />
