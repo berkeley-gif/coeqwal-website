@@ -8,9 +8,10 @@
  * Only appears after user scrolls past the hero section.
  */
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useTheme, useMediaQuery } from "@repo/ui/mui"
 import { useDrawerStore } from "@repo/state/drawer"
+import { useMapMode } from "../map/store"
 import { FloatingGlossaryButton } from "./FloatingGlossaryButton"
 import { FloatingGlossaryPanel } from "./FloatingGlossaryPanel"
 
@@ -30,9 +31,12 @@ interface Position {
 export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+  const mapMode = useMapMode()
+  const isExploreMap = mapMode === "explore"
 
   const [isOpen, setIsOpen] = useState(false)
-  const [position, setPosition] = useState<Position>({ bottom: 32, right: 32 })
+  const [hasDragged, setHasDragged] = useState(false)
+  const [dragRight, setDragRight] = useState<number | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [currentSelectedTerm, setCurrentSelectedTerm] = useState<
     string | undefined
@@ -60,6 +64,32 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     window.addEventListener("scroll", checkScrollPosition, { passive: true })
     return () => window.removeEventListener("scroll", checkScrollPosition)
   }, [checkScrollPosition])
+
+  const MAP_STRIP_PERCENT = 25
+  const DEFAULT_BOTTOM = 32
+  const DEFAULT_RIGHT = 32
+
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200,
+  )
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth)
+    window.addEventListener("resize", onResize)
+    return () => window.removeEventListener("resize", onResize)
+  }, [])
+
+  const mapStripRight = viewportWidth * (MAP_STRIP_PERCENT / 100) + DEFAULT_RIGHT
+
+  const position: Position = useMemo(() => {
+    if (hasDragged && dragRight != null) {
+      const minRight = isExploreMap ? mapStripRight : 16
+      return { bottom: DEFAULT_BOTTOM, right: Math.max(minRight, dragRight) }
+    }
+    return {
+      bottom: DEFAULT_BOTTOM,
+      right: isExploreMap ? mapStripRight : DEFAULT_RIGHT,
+    }
+  }, [hasDragged, dragRight, isExploreMap, mapStripRight])
 
   // Connect to drawer store for external control (e.g., from IntroSection)
   const drawerStore = useDrawerStore()
@@ -124,13 +154,10 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const handleDragMove = (e: MouseEvent) => {
     if (!isDragging || !dragStartRef.current) return
 
-    // Only horizontal movement (left-right)
     const deltaX = dragStartRef.current.x - e.clientX
-
-    setPosition({
-      bottom: position.bottom, // Keep vertical position fixed
-      right: Math.max(16, dragStartRef.current.right + deltaX),
-    })
+    const newRight = Math.max(16, dragStartRef.current.right + deltaX)
+    setHasDragged(true)
+    setDragRight(newRight)
   }
 
   const handleDragEnd = () => {

@@ -221,6 +221,11 @@ export default function ScenarioExplorer() {
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
           <RadarToggleChip
+            label="selected only"
+            active={radarSelectedOnly}
+            onClick={() => setRadarSelectedOnly(!radarSelectedOnly)}
+          />
+          <RadarToggleChip
             label="dots only"
             active={showDotsOnly}
             onClick={() => setShowDotsOnly(!showDotsOnly)}
@@ -234,11 +239,6 @@ export default function ScenarioExplorer() {
             label="highlight current operations"
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
-          />
-          <RadarToggleChip
-            label="selected only"
-            active={radarSelectedOnly}
-            onClick={() => setRadarSelectedOnly(!radarSelectedOnly)}
           />
         </ChartControlsBar>
       )

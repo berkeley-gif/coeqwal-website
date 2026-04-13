@@ -38,20 +38,35 @@ export function BasemapPicker() {
     <Box
       sx={{
         position: "absolute",
-        bottom: 12,
         zIndex: 2,
         display: "flex",
-        gap: 1,
         pointerEvents: "auto",
         bgcolor: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(6px)",
         borderRadius: 1.5,
         p: 0.75,
         boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
-        transition: "left 0.3s ease, right 0.3s ease",
+        transition:
+          "left 0.3s ease, right 0.3s ease, bottom 0.3s ease, transform 0.3s ease",
         ...(isExploreMode
-          ? { left: "auto", right: 10 }
-          : { left: 84, right: "auto" }),
+          ? {
+              // Center within the right 25% map strip: strip starts at 75vw,
+              // center is at 87.5vw → left 87.5% + translateX(-50%)
+              flexDirection: "row",
+              gap: 1,
+              left: "87.5%",
+              right: "auto",
+              bottom: 40,
+              transform: "translateX(-50%)",
+            }
+          : {
+              flexDirection: "row",
+              gap: 1,
+              left: 84,
+              right: "auto",
+              bottom: 12,
+              transform: "none",
+            }),
       }}
     >
       {BASEMAP_OPTIONS.map(({ key, label }) => {

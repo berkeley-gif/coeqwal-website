@@ -25,6 +25,8 @@
   border-radius: 50% !important;
   box-shadow: none !important;
   padding: 0 !important;
+  position: relative !important;
+  left: 1px !important;
 }
 
 /* Make GeolocateControl button round */
