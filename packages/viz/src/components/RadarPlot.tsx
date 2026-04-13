@@ -615,7 +615,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         // ── Full rebuild ──
         const svg = select(svgRef.current)
         svg.selectAll("*").remove()
-        if (!baselineData || w <= 0 || h <= 0) return
+        if (w <= 0 || h <= 0) return
 
         const MARGIN = 80
         const size = Math.min(w, h)
@@ -702,11 +702,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         // Capture baseline positions for ghost trace
         const baselineRadii = new Map<string, number>()
-        axes.forEach((axis) => {
-          const bv = baselineData.values[axis]
-          if (bv == null) return
-          baselineRadii.set(axis, rScale(toTier(bv)))
-        })
+        if (baselineData) {
+          axes.forEach((axis) => {
+            const bv = baselineData.values[axis]
+            if (bv == null) return
+            baselineRadii.set(axis, rScale(toTier(bv)))
+          })
+        }
         initialBaselineRef.current = baselineRadii
         hasMorphedRef.current = false
 

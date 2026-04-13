@@ -47,6 +47,7 @@ export default function RadarPanel({
     radarVisibleAxes,
     showRadarRange,
     showDotsOnly,
+    radarSelectedOnly,
   } = useScenarioExplorerStore()
 
   const { getThemeForScenario } = useScenarioList()
@@ -170,7 +171,7 @@ export default function RadarPanel({
     )
   }
 
-  if (!hasData) {
+  if (!hasData && !radarSelectedOnly) {
     return (
       <Box
         sx={{
