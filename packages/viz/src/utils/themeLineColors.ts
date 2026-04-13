@@ -1,36 +1,29 @@
 /**
- * Line color palettes for the parallel coordinates chart.
+ * Hand-curated line color palettes for scenario charts (radar, parallel
+ * coordinates, etc.).
  *
- * Each scenario theme is assigned a 7-color ramp sampled from a D3 continuous
- * multi-hue interpolator. Multi-hue schemes vary both hue and lightness, giving
- * better within-theme differentiation than single-hue ramps.
+ * Each theme has a 7-color palette of medium-to-dark, saturated colors that
+ * are all clearly visible against a white chart background. Colors within a
+ * theme share a hue family but vary in lightness and saturation so that up to
+ * 7 scenarios from the same theme are distinguishable.
  *
- * Colors are sampled over t = [PALETTE_START, PALETTE_END] of each interpolator
- * to stay in the mid-to-dark portion of the scale, ensuring all steps are
- * readable against a white chart background.
+ * The palettes are ordered so the first few slots are the most "canonical"
+ * colors for each theme, with later slots offering variation. This means the
+ * most common case (1–3 scenarios per theme) always gets the strongest colors.
  *
- * Theme-to-interpolator mapping:
- *   baseline   interpolateYlOrBr   warm oranges and browns
- *   ag_gw      interpolateYlGn     medium to dark greens
- *   eco        interpolateGnBu     teal through blue
- *   delta      interpolateBuPu     mid blue through deep violet
- *   cws        interpolateYlOrRd   orange through red
+ * Theme-to-hue mapping:
+ *   baseline   warm amber / brown
+ *   ag_gw      green (medium to forest)
+ *   eco        teal / blue
+ *   delta      purple / violet
+ *   cws        orange / red
+ *   unthemed   neutral grey
  *
- * Special case: s0020 (Current Operations) uses the golden yellow baseline badge
- * color (#ffd87e) so its chart line and sidebar legend swatch match the
- * baseline ScenarioBadge exactly.
+ * Special case: s0020 (Current Operations) uses a dark goldenrod so its chart
+ * line reads as the canonical baseline scenario while remaining visible on
+ * white backgrounds.
  */
-import {
-  interpolateBuPu,
-  interpolateGnBu,
-  interpolateGreys,
-  interpolateYlGn,
-  interpolateYlOrBr,
-  interpolateYlOrRd,
-} from "d3"
 
-// Local string-union mirror of ScenarioTheme (defined in apps/main/content/scenarios.ts).
-// Kept here to avoid a cross-package import.
 export type ThemeKey =
   | "baseline"
   | "ag_gw"
@@ -39,50 +32,74 @@ export type ThemeKey =
   | "cws"
   | "unthemed"
 
-// Sample 7 evenly spaced points from each interpolator, then reorder
-// so that consecutive indices get maximally distant colors.
-const PALETTE_START = 0.3
-const PALETTE_END = 0.97
-const PALETTE_STEPS = 7
-
-// Interleave order: [0,4,2,6,1,5,3] maximises distance between
-// consecutive slots so the first 2–4 scenarios assigned are always
-// highly distinguishable, regardless of how many are active.
-const INTERLEAVE = [0, 4, 2, 6, 1, 5, 3]
-
-const makeThemePalette = (interpolator: (t: number) => string): string[] => {
-  const linear = Array.from({ length: PALETTE_STEPS }, (_, i) =>
-    interpolator(
-      PALETTE_START + (i / (PALETTE_STEPS - 1)) * (PALETTE_END - PALETTE_START),
-    ),
-  )
-  return INTERLEAVE.map((idx) => linear[idx]!)
-}
-
-/**
- * Seven mid-to-dark colors per theme, sampled from D3 multi-hue interpolators.
- * Index 0 is the lightest step in the sampled range; index 6 is the darkest.
- */
 export const THEME_LINE_PALETTES: Record<ThemeKey, string[]> = {
-  baseline: makeThemePalette(interpolateYlOrBr),
-  ag_gw: makeThemePalette(interpolateYlGn),
-  eco: makeThemePalette(interpolateGnBu),
-  delta: makeThemePalette(interpolateBuPu),
-  cws: makeThemePalette(interpolateYlOrRd),
-  unthemed: makeThemePalette(interpolateGreys),
+  baseline: [
+    "#d4a017",
+    "#8c6800",
+    "#e6b830",
+    "#a67c00",
+    "#c49212",
+    "#785800",
+    "#daa520",
+  ],
+  ag_gw: [
+    "#2e9e50",
+    "#0e6028",
+    "#55b56a",
+    "#1a7a38",
+    "#3c8e52",
+    "#157032",
+    "#48a860",
+  ],
+  eco: [
+    "#1890b0",
+    "#08587e",
+    "#30b0cc",
+    "#0c6e94",
+    "#1580a0",
+    "#0a6488",
+    "#28a2ba",
+  ],
+  delta: [
+    "#8868bb",
+    "#503290",
+    "#a282cc",
+    "#6646aa",
+    "#7858b2",
+    "#5c3aa0",
+    "#9678c2",
+  ],
+  cws: [
+    "#e06020",
+    "#a02010",
+    "#f08030",
+    "#c03818",
+    "#d04c1c",
+    "#b02c14",
+    "#ea7028",
+  ],
+  unthemed: [
+    "#707070",
+    "#383838",
+    "#8a8a8a",
+    "#505050",
+    "#5e5e5e",
+    "#444444",
+    "#7e7e7e",
+  ],
 }
 
 /**
- * Gold color for s0020 (Current Operations).
- * Matches the baseline ScenarioBadge background color (#ffd87e, golden yellow)
- * so the chart line and sidebar legend swatch both read as the canonical baseline scenario.
+ * Dark goldenrod for s0020 (Current Operations).
+ * Recognizable as the "baseline gold" while remaining clearly visible on
+ * white chart backgrounds (unlike the lighter badge color #ffd87e).
  */
-const CURRENT_OPS_COLOR = "#ffd87e"
+const CURRENT_OPS_COLOR = "#cc9a06"
 
 /**
  * Returns the line color for a scenario.
  *
- * s0020 (Current Operations) always returns the gold baseline badge color.
+ * s0020 (Current Operations) always returns the dark goldenrod color.
  * All other scenarios receive a color from their theme's palette,
  * indexed by their position among selected scenarios within that theme.
  *

@@ -326,67 +326,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const svg = select(svgRef.current)
           const HC_DUR = 600
 
-          // Show/hide ghost baseline
-          if (initialBaselineRef.current) {
-            const ghostStored = initialBaselineRef.current
-            let isBackToInitial = true
-            axes.forEach((axis) => {
-              const storedR = ghostStored.get(axis)
-              const bv = baselineData.values[axis]
-              if (storedR == null || bv == null) return
-              const newR = scales.rScale(toTier(bv))
-              if (Math.abs(newR - storedR) > 1) isBackToInitial = false
-            })
-
-            const ghostSel = svg.select("g.ghost-baselines")
-            if (isBackToInitial && !ghostSel.empty()) {
-              ghostSel
-                .selectAll("*")
-                .transition()
-                .duration(HC_DUR)
-                .attr("opacity", 0)
-                .on("end", function () {
-                  select(this).remove()
-                })
-            } else if (
-              !isBackToInitial &&
-              (ghostSel.empty() || ghostSel.selectAll("*").empty())
-            ) {
-              const gHost = ghostSel.empty()
-                ? svg
-                    .select("g")
-                    .insert("g", "g.baseline-highlight")
-                    .attr("class", "ghost-baselines")
-                : ghostSel
-              const pts: [number, number][] = []
-              axes.forEach((axis, i) => {
-                const storedR = ghostStored.get(axis)
-                if (storedR == null) return
-                const angle = getAngle(i)
-                pts.push([
-                  scales.cx + storedR * Math.cos(angle),
-                  scales.cy + storedR * Math.sin(angle),
-                ])
-              })
-              if (pts.length >= 3) {
-                const pathGen = line<[number, number]>()
-                  .x((d) => d[0])
-                  .y((d) => d[1])
-                gHost
-                  .append("path")
-                  .attr("d", pathGen([...pts, pts[0]!]) ?? "")
-                  .attr("fill", "none")
-                  .attr("stroke", "#2d3748")
-                  .attr("stroke-width", 2)
-                  .attr("stroke-dasharray", "6,4")
-                  .attr("opacity", 0)
-                  .attr("pointer-events", "none")
-                  .transition()
-                  .duration(HC_DUR)
-                  .attr("opacity", 0.55)
-              }
-            }
-          }
+          // Ghost baseline (dashed line showing original position) — disabled
+          // if (initialBaselineRef.current) { ... }
 
           // Transition dots
           const morphHasPinned = pinnedScenarioIds.size > 0
@@ -585,7 +526,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("cy", cy)
             .attr("r", r)
             .attr("fill", "none")
-            .attr("stroke", "#b0bec5")
+            .attr("stroke", "#dce3ea")
             .attr("stroke-width", 1)
         })
 
@@ -597,7 +538,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("y1", cy)
             .attr("x2", cx + outerR * Math.cos(angle))
             .attr("y2", cy + outerR * Math.sin(angle))
-            .attr("stroke", "#b0bec5")
+            .attr("stroke", "#dce3ea")
             .attr("stroke-width", 1)
         })
 
@@ -607,10 +548,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           g.append("text")
             .attr("x", cx + 6)
             .attr("y", cy - r - 3)
-            .attr("font-size", 10)
+            .attr("font-size", 9.5)
             .attr("font-family", FONT_FAMILY)
             .attr("font-weight", 500)
-            .attr("fill", "#718096")
+            .attr("fill", "#a0aec0")
+            .attr("letter-spacing", "0.02em")
             .text(TIER_LABELS[i] ?? "")
         })
 
@@ -688,10 +630,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .append("path")
               .attr("class", "baseline-polygon")
               .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-              .attr("fill", "none")
-              .attr("stroke", "#2d3748")
-              .attr("stroke-width", 3)
-              .attr("stroke-opacity", 0.6)
+              .attr("fill", "#2b6cb0")
+              .attr("fill-opacity", 0.13)
+              .attr("stroke", "#2b6cb0")
+              .attr("stroke-width", 2.5)
+              .attr("stroke-opacity", 0.55)
               .attr("pointer-events", "none")
           }
         }
@@ -735,7 +678,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         const drawPolygonForScenario = (scenarioId: string) => {
           pathLayer.selectAll(`[data-path-id="${scenarioId}"]`).remove()
-          if (!showScenarioPath && !showAllPaths) return
           const pts = dotPositions.get(scenarioId)
           if (!pts || pts.length < 3) return
           const activeList = data
@@ -898,7 +840,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   .attr("r", dotR + 2.5)
                   .raise()
 
-                if (showScenarioPath) drawPolygonForScenario(scenario.id)
+                drawPolygonForScenario(scenario.id)
 
                 if (hoverNotifyTimerRef.current !== null) {
                   clearTimeout(hoverNotifyTimerRef.current)
@@ -931,11 +873,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                 }
                 resetDotVisuals()
                 pathLayer.selectAll("*").remove()
+                data.forEach((s) => drawPolygonForScenario(s.id))
                 if (hasPinned) {
-                  pinnedScenarioIds.forEach((id) => drawPolygonForScenario(id))
                   boostPinnedDots(pinnedScenarioIds)
-                } else if (showAllPaths) {
-                  data.forEach((s) => drawPolygonForScenario(s.id))
                 }
                 if (tooltipRef.current) hideTooltip(tooltipRef.current)
                 lastNotifiedIdRef.current = null
@@ -949,20 +889,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           })
         })
 
-        // Draw all scenario polygons if showAllPaths is on
-        if (showAllPaths) {
-          data.forEach((scenario) => {
-            drawPolygonForScenario(scenario.id)
-          })
-        }
+        // Always draw all scenario polygons so dots never appear without lines
+        data.forEach((scenario) => {
+          drawPolygonForScenario(scenario.id)
+        })
 
-        // Draw pinned polygons on initial render
         if (hasPinned) {
-          pinnedScenarioIds.forEach((id) => drawPolygonForScenario(id))
           boostPinnedDots(pinnedScenarioIds)
-        } else if (!showAllPaths && highlightedIds && highlightedIds.size > 0) {
-          const hId = highlightedIds.values().next().value as string
-          if (hId) drawPolygonForScenario(hId)
         }
 
         // 8. Distribution dots.arranged along tier circle arcs
@@ -1055,23 +988,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           if (curated) {
             g.append("text")
               .attr("x", lx)
-              .attr("y", ly - 6)
+              .attr("y", ly - 8)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 13)
+              .attr("font-size", 12.5)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", "normal")
-              .attr("fill", "rgba(0,0,0,0.72)")
+              .attr("font-weight", 500)
+              .attr("fill", "#4a5568")
+              .attr("letter-spacing", "0.01em")
               .text(curated[0])
             g.append("text")
               .attr("x", lx)
-              .attr("y", ly + 7)
+              .attr("y", ly + 8)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 13)
+              .attr("font-size", 12.5)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", "normal")
-              .attr("fill", "rgba(0,0,0,0.72)")
+              .attr("font-weight", 500)
+              .attr("fill", "#4a5568")
+              .attr("letter-spacing", "0.01em")
               .text(curated[1])
           } else {
             g.append("text")
@@ -1079,10 +1014,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("y", ly)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 13)
+              .attr("font-size", 12.5)
               .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", "normal")
-              .attr("fill", "rgba(0,0,0,0.72)")
+              .attr("font-weight", 500)
+              .attr("fill", "#4a5568")
+              .attr("letter-spacing", "0.01em")
               .text(axis)
           }
         })
@@ -1095,7 +1031,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         colors,
         highlightedIds,
         highlightBaseline,
-        showScenarioPath,
         showAllPaths,
         showTierZones,
         pinnedScenarioIds,
