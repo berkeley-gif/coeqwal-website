@@ -78,6 +78,8 @@ interface HydroclimateChooserProps {
   iconFontSize?: string
   /** When true, only show options that have data (hide disabled/coming-soon) */
   hideDisabled?: boolean
+  /** Extra values to treat as disabled (shown greyed out, not clickable) */
+  disabledValues?: Set<string>
 }
 
 export function HydroclimateChooser({
@@ -89,6 +91,7 @@ export function HydroclimateChooser({
   iconSize = "40px",
   iconFontSize = "1.5rem",
   hideDisabled = false,
+  disabledValues,
 }: HydroclimateChooserProps) {
   const theme = useTheme()
 
@@ -135,9 +138,11 @@ export function HydroclimateChooser({
             const config = HYDROCLIMATE_CONFIG[option.value]
             const IconComponent = config?.icon || HistoryIcon
             const isSelected = value === option.value
-            const isDisabled = !AVAILABLE_HYDROCLIMATES.has(option.value)
+            const noData = !AVAILABLE_HYDROCLIMATES.has(option.value)
+            const isDisabled =
+              noData || (disabledValues?.has(option.value) ?? false)
 
-            if (hideDisabled && isDisabled) {
+            if (hideDisabled && noData) {
               return null
             }
 

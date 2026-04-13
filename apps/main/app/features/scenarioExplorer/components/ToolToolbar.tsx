@@ -36,8 +36,13 @@ export default function ToolToolbar({
     showLocationPicker,
     setShowLocationPicker,
     showKeyOperations,
+    exploreMode,
   } = useScenarioExplorerStore()
   /* eslint-enable @typescript-eslint/no-unused-vars */
+
+  // TODO: re-enable warmer-drier-i in radar once it has complete data
+  const radarDisabledClimates =
+    exploreMode === "radar" ? new Set(["warmer-drier-i"]) : undefined
 
   const viewControls = (
     <>
@@ -158,6 +163,7 @@ export default function ToolToolbar({
           iconFontSize="1rem"
           value={hydroclimate}
           onChange={setHydroclimate}
+          disabledValues={radarDisabledClimates}
         />
       </Box>
     </>
