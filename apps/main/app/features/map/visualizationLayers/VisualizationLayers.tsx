@@ -49,7 +49,8 @@ import {
   getOnLocationHover,
 } from "../store"
 
-// Large polygon covering California and surrounding area for dim overlay
+// Large polygon covering well beyond California for dim overlay.
+// Must be oversized so edges are never visible even at low zoom levels.
 const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
   type: "FeatureCollection",
   features: [
@@ -60,11 +61,11 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
         type: "Polygon",
         coordinates: [
           [
-            [-130, 30], // SW corner (Pacific Ocean)
-            [-130, 45], // NW corner
-            [-110, 45], // NE corner (Nevada/Oregon)
-            [-110, 30], // SE corner (Arizona)
-            [-130, 30], // Close polygon
+            [-145, 20],
+            [-145, 55],
+            [-95, 55],
+            [-95, 20],
+            [-145, 20],
           ],
         ],
       },
