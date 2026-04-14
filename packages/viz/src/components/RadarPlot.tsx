@@ -278,9 +278,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       radius: number
     } | null>(null)
 
-    const morphTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-      null,
-    )
+    const morphTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const lastNotifiedIdRef = useRef<string | null>(null)
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -511,9 +509,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
 
         // Range band placeholder — drawn after dots so we can use actual positions
-        const rangeBandLayer = g
-          .append("g")
-          .attr("class", "range-band")
+        const rangeBandLayer = g.append("g").attr("class", "range-band")
 
         // 4. Baseline highlight polygon
         const baselineHighlightLayer = g
@@ -579,16 +575,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
 
         // Build dot positions for polygon drawing
-        const dotPositions = new Map<
-          string,
-          { x: number; y: number }[]
-        >()
+        const dotPositions = new Map<string, { x: number; y: number }[]>()
 
-        const T_DUR = morphSnapshot
-          ? HC_DUR
-          : hasAnimatedRef.current
-            ? 0
-            : 400
+        const T_DUR = morphSnapshot ? HC_DUR : hasAnimatedRef.current ? 0 : 400
         hasAnimatedRef.current = true
 
         const drawPolygonForScenario = (
@@ -693,9 +682,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
             const vis = resolveVisuals(scenario.id)
 
-            const oldPos = morphSnapshot?.dots.get(
-              `${axis}:${scenario.id}`,
-            )
+            const oldPos = morphSnapshot?.dots.get(`${axis}:${scenario.id}`)
             const isNewInMorph = morphSnapshot != null && !oldPos
             const startCx = oldPos ? oldPos.cx : morphSnapshot ? dotX : cx
             const startCy = oldPos ? oldPos.cy : morphSnapshot ? dotY : cy

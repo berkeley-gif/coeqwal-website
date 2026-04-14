@@ -7,9 +7,10 @@ import {
   DELTA_VIEW,
   SACRAMENTO_RIVER_VIEW as _SACRAMENTO_RIVER_VIEW,
   RESERVOIR_VIEW as _RESERVOIR_VIEW,
-  PUMPING_PLANTS_VIEW,
-  JERSEY_POINT_VIEW,
   CWS_DEL_BOUNDS,
+  DELTA_ECO_BOUNDS,
+  FW_EXP_BOUNDS,
+  FW_DELTA_USES_BOUNDS,
   ENV_FLOWS_BOUNDS,
   RES_STOR_BOUNDS,
 } from "./cameraPresets"
@@ -343,11 +344,11 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     requiresIdMatching: false,
     featureIdMap: { DELTA_ECO: "DETAW" },
     outlineOnly: true,
+    cameraBounds: DELTA_ECO_BOUNDS,
     tooltipFields: [
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "Delta",
-    cameraPreset: DELTA_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -395,6 +396,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "FW_DELTA_USES",
     requiresIdMatching: true, // 2 per-station tier levels (EM, JP).use /locations path
+    cameraBounds: FW_DELTA_USES_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -405,7 +407,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
-    cameraPreset: JERSEY_POINT_VIEW,
   },
 
   FW_EXP: {
@@ -414,6 +415,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "FW_EXP",
     requiresIdMatching: false,
+    cameraBounds: FW_EXP_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -424,7 +426,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
-    cameraPreset: PUMPING_PLANTS_VIEW,
   },
 }
 

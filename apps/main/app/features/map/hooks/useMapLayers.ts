@@ -333,7 +333,10 @@ export function useMapLayers() {
 
       if (mapInstance.getLayer(outlineLayer)) {
         const rawOpacity =
-          (mapInstance.getPaintProperty(outlineLayer, "line-opacity") as number) ?? 0
+          (mapInstance.getPaintProperty(
+            outlineLayer,
+            "line-opacity",
+          ) as number) ?? 0
         const startOpacity = Math.max(0, Math.min(1, rawOpacity))
 
         if (startOpacity > 0.01) {
@@ -347,7 +350,11 @@ export function useMapLayers() {
             const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
 
             try {
-              mapInstance.setPaintProperty(outlineLayer, "line-opacity", opacity)
+              mapInstance.setPaintProperty(
+                outlineLayer,
+                "line-opacity",
+                opacity,
+              )
             } catch {
               return
             }
