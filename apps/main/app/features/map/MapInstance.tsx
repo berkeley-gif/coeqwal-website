@@ -18,6 +18,7 @@ import {
   type MapMode,
 } from "./store"
 import { CALIFORNIA_VIEW } from "./config/cameraPresets"
+import { ensureCustomLayers } from "./config/tilesetSources"
 import type { SectionId } from "./config/sectionLayers"
 import { BasemapPicker } from "./controls/BasemapPicker"
 import "./styles/mapboxControlStyles.css"
@@ -52,55 +53,6 @@ const MAPBOX_LAYER_IDS = [
   "inflow-watersheds",
   "delta-water",
 ] as const
-
-/**
- * Create the delta-detaw runtime layer (DETAW polygon from the WBA/geoschem
- * source). Used by DeltaInfoPanel (Learn mode) and TierAnimationSection
- * (get-started). Separate from calsim-wba to avoid conflicts with GW_STOR.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ensureDeltaDetawLayer(mapInstance: any) {
-  const filter = ["==", ["get", "WBA_ID"], "DETAW"]
-
-  if (!mapInstance.getLayer("delta-detaw")) {
-    try {
-      mapInstance.addLayer({
-        id: "delta-detaw",
-        type: "fill",
-        source: "composite",
-        "source-layer": "geoschem",
-        filter,
-        paint: {
-          "fill-color": "transparent",
-          "fill-opacity": 0,
-        },
-        layout: { visibility: "none" },
-      })
-    } catch {
-      // Layer may already exist
-    }
-  }
-
-  if (!mapInstance.getLayer("delta-detaw-outline")) {
-    try {
-      mapInstance.addLayer({
-        id: "delta-detaw-outline",
-        type: "line",
-        source: "composite",
-        "source-layer": "geoschem",
-        filter,
-        paint: {
-          "line-color": "#7EB8DA",
-          "line-width": 4,
-          "line-opacity": 0,
-        },
-        layout: { visibility: "none" },
-      })
-    } catch {
-      // Layer may already exist
-    }
-  }
-}
 
 // ============================================================================
 // Styling
@@ -192,11 +144,9 @@ export default function MapInstance({
       }
     })
 
-    ensureDeltaDetawLayer(mapboxInstance)
+    ensureCustomLayers(mapboxInstance)
     mapActions.setMapReady(true)
 
-    // TEMPORARY — for measuring layer extents. Remove after use.
-    // See apps/main/app/features/map/README.md for the console script.
     if (process.env.NODE_ENV === "development") {
       ;(window as unknown as Record<string, unknown>).__mapInstance =
         mapboxInstance
@@ -226,7 +176,7 @@ export default function MapInstance({
           /* layer may not exist in this style */
         }
       })
-      ensureDeltaDetawLayer(mapboxInstance)
+      ensureCustomLayers(mapboxInstance)
       mapActions.setMapReady(true)
     }
 

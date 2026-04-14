@@ -8,6 +8,7 @@ Persistent Mapbox GL map used across the Learn, Get Started, and Explore tabs.
 - **`PersistentMapWrapper.tsx`** — thin shell: `MapInstance` + `LayerOrchestrator`.
 - **`LayerOrchestrator.tsx`** — mounts/unmounts visualization layer hooks based on active outcome.
 - **`store.ts`** — Zustand store for map mode, active outcome visualization, camera padding, and tier animation highlights.
+- **`config/tilesetSources.ts`** — COEQWAL custom tileset source definitions and runtime layer injection. On the satellite basemap these tilesets live in the `composite` source; on non-satellite basemaps (Light, Streets) they are added as standalone vector tile sources at runtime via `ensureCustomLayers()`.
 - **`config/outcomeLayerRegistry.ts`** — single source of truth for all outcome layer configs (geometry type, Mapbox layer IDs, tooltip fields, camera presets/bounds).
 - **`config/cameraPresets.ts`** — named `CameraView` (center + zoom) and `cameraBounds` (`[[sw], [ne]]`) constants.
 - **`visualizationLayers/hooks/useOutcomeVisualization.ts`** — activates/deactivates a layer, fetches tier data, drives camera on outcome click.
@@ -68,9 +69,12 @@ Open the app in the browser, navigate to the Explore tab, enable the map, and cl
 ```javascript
 const map = window.__mapInstance // set automatically in dev mode by MapInstance.tsx
 
+// Resolve which source provides the tileset data.
+// On satellite this is "composite"; on Light/Streets it is a standalone source.
+const source = map.getLayer("demand-units")?.source ?? "composite"
+
 // Replace 'demand_units' and the filter to match your layer.
-// Note: the Mapbox tileset source-layer is 'demand_units' (underscore).
-const features = map.querySourceFeatures("composite", {
+const features = map.querySourceFeatures(source, {
   sourceLayer: "demand_units",
 })
 
