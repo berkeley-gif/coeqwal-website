@@ -244,10 +244,16 @@ export function OutcomePolygonLayer({
   useEffect(() => {
     if (!mapRef?.current || !fillId) return
 
+    // Style is being reloaded — reset state so the next run (mapReady = true)
+    // always uses the full fade-in path with proper paint initialization.
+    if (!mapReady) {
+      wasShowingDataRef.current = false
+      outlineCreatedRef.current = false
+      return
+    }
+
     const map = mapRef.current.getMap()
     if (!map.getLayer(fillId)) {
-      // Layer was destroyed (e.g. basemap style change) — reset refs so
-      // the next run goes through the full fade-in path and recreates the outline.
       outlineCreatedRef.current = false
       wasShowingDataRef.current = false
       return
@@ -498,14 +504,17 @@ export function OutcomePolygonLayer({
         map.setFilter(fillId, ["==", idProperty || "id", ""])
       }
 
-      // Remove outline layer we created
-      if (map.getLayer(outlineId) && outlineCreatedRef.current) {
-        try {
-          map.removeLayer(outlineId)
-        } catch {
-          /* ignore */
+      if (map.getLayer(outlineId)) {
+        if (outlineCreatedRef.current) {
+          try {
+            map.removeLayer(outlineId)
+          } catch {
+            /* ignore */
+          }
+          outlineCreatedRef.current = false
+        } else {
+          map.setLayoutProperty(outlineId, "visibility", "none")
         }
-        outlineCreatedRef.current = false
       }
     }
   }, [mapRef, fillId, outlineId, idProperty])
