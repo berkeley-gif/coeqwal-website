@@ -45,7 +45,7 @@ import {
   type MainView,
   type ExploreMode,
 } from "./store"
-import { useMapMode } from "../map/store"
+import { useMapMode, mapActions } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
 
 // Top-level navigation tabs
@@ -96,6 +96,45 @@ const TOOL_TABS: {
     label: "Data in depth",
   },
 ]
+
+function SimpleButton({
+  label,
+  onClick,
+}: {
+  label: string
+  onClick: () => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "5px",
+        px: 1.25,
+        py: 0.5,
+        border: "none",
+        borderRadius: "12px",
+        cursor: "pointer",
+        fontSize: "0.8125rem",
+        fontWeight: 500,
+        lineHeight: 1.3,
+        whiteSpace: "nowrap",
+        "&:hover": {
+          background: theme.palette.interaction.selectedBackground,
+          color: theme.palette.blue.bright,
+        },
+      }}
+    >
+      {label}
+    </Box>
+  )
+}
 
 function RadarToggleChip({
   label,
@@ -148,8 +187,15 @@ function RadarToggleChip({
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, setMainView, exploreMode, setExploreMode, showMap } =
-    useScenarioExplorerStore()
+  const {
+    mainView,
+    setMainView,
+    exploreMode,
+    setExploreMode,
+    showMap,
+    showEquityComparison,
+    setShowEquityComparison,
+  } = useScenarioExplorerStore()
   const mapMode = useMapMode()
 
   usePrefetchTiers()
@@ -243,6 +289,21 @@ export default function ScenarioExplorer() {
         </ChartControlsBar>
       )
     }
+    if (exploreMode === "equity") {
+      return (
+        <ChartControlsBar>
+          <RadarToggleChip
+            label="Compare to Baseline"
+            active={showEquityComparison}
+            onClick={() => setShowEquityComparison(!showEquityComparison)}
+          />
+          <SimpleButton
+            label="Clear map highlights"
+            onClick={() => mapActions.clearLocationHighlights()}
+          />
+        </ChartControlsBar>
+      )
+    }
     return null
   }, [
     exploreMode,
@@ -256,6 +317,8 @@ export default function ScenarioExplorer() {
     setHighlightBaseline,
     radarSelectedOnly,
     setRadarSelectedOnly,
+    showEquityComparison,
+    setShowEquityComparison,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -460,6 +523,7 @@ export default function ScenarioExplorer() {
                     <ScenarioSelectionSidebar
                       hoveredScenarioId={hoveredScenarioId}
                       onRowHover={handleSidebarRowHover}
+                      singleSelect={exploreMode === "equity"}
                     />
                   )
                 }
