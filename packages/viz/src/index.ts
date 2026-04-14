@@ -108,6 +108,9 @@ export type {
   TierSankeyGroup,
 } from "./components/TierSankey"
 
+export { default as TierGrid } from "./components/TierGrid"
+export type { TierGridProps } from "./components/TierGrid"
+
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
 

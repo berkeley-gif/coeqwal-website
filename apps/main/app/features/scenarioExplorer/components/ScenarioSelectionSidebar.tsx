@@ -30,18 +30,21 @@ interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
   onRowHover?: (scenarioIds: string[] | null) => void
+  singleSelect?: boolean
 }
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredScenarioId,
   onRowHover,
+  singleSelect = false,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
 
   const {
     selectedScenarios,
     toggleScenario,
+    selectScenarios,
     highlightedScenario,
     pinnedScenarioIds,
     togglePinnedScenario,
@@ -55,8 +58,24 @@ export default function ScenarioSelectionSidebar({
     exploreMode,
   } = useScenarioExplorerStore()
 
+  const handleScenarioSelect = (scenarioId: string) => {
+    return singleSelect
+      ? selectScenarios([scenarioId])
+      : toggleScenario(scenarioId)
+  }
+
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+
+  // When switching to single-select mode, keep only the first selected scenario
+  useEffect(() => {
+    if (singleSelect && selectedScenarios.length > 1) {
+      const firstScenario = selectedScenarios[0]
+      if (firstScenario) {
+        selectScenarios([firstScenario])
+      }
+    }
+  }, [singleSelect, selectedScenarios, selectScenarios])
 
   useEffect(() => {
     if (!activeScenarioId) return
@@ -238,20 +257,45 @@ export default function ScenarioSelectionSidebar({
                 },
               }}
             >
-              <Checkbox
-                size="small"
-                checked={isChosen}
-                onChange={() => toggleScenario(scenario.scenarioId)}
-                onClick={(e) => e.stopPropagation()}
-                sx={{
-                  ...theme.scenarios.checkbox.sm,
-                  flexShrink: 0,
-                  mt: "16px",
-                }}
-              />
+              {singleSelect ? (
+                <Box
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleScenarioSelect(scenario.scenarioId)
+                  }}
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    border: `2px solid ${isChosen ? theme.palette.primary.main : theme.palette.grey[400]}`,
+                    backgroundColor: isChosen
+                      ? theme.palette.primary.main
+                      : "transparent",
+                    flexShrink: 0,
+                    mt: "16px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    "&:hover": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                />
+              ) : (
+                <Checkbox
+                  size="small"
+                  checked={isChosen}
+                  onChange={() => handleScenarioSelect(scenario.scenarioId)}
+                  onClick={(e) => e.stopPropagation()}
+                  sx={{
+                    ...theme.scenarios.checkbox.sm,
+                    flexShrink: 0,
+                    mt: "16px",
+                  }}
+                />
+              )}
 
               <Box
-                onClick={() => toggleScenario(scenario.scenarioId)}
+                onClick={() => handleScenarioSelect(scenario.scenarioId)}
                 sx={{
                   flex: 1,
                   minWidth: 0,
