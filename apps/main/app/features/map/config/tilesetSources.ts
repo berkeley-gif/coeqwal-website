@@ -146,9 +146,7 @@ export const RUNTIME_LAYERS: RuntimeLayerDef[] = [
 // HELPERS
 // ============================================================================
 
-const tilesetMap = new Map(
-  COEQWAL_TILESETS.map((t) => [t.sourceId, t]),
-)
+const tilesetMap = new Map(COEQWAL_TILESETS.map((t) => [t.sourceId, t]))
 
 /**
  * Ensure all custom COEQWAL sources and layers exist on the map.
@@ -204,8 +202,11 @@ export function ensureCustomLayers(mapInstance: any) {
  * Checks for a known runtime layer that uses the source-layer, reads its
  * source from the map, and returns it. Falls back to "composite".
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function resolveSourceForQuery(mapInstance: any, layerId: string): string {
+export function resolveSourceForQuery(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mapInstance: any,
+  layerId: string,
+): string {
   try {
     const layer = mapInstance.getLayer(layerId)
     if (layer) return (layer as { source: string }).source
