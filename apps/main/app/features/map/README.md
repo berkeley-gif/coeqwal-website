@@ -112,8 +112,8 @@ Copy the output into `cameraPresets.ts` and set `cameraBounds` in the registry e
 | Outcome         | Constant               | Coverage                                                                                                                                             |
 | --------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `CWS_DEL`       | `CWS_DEL_BOUNDS`       | `[[-123.525, 34.995], [-118.803, 41.745]]` — Urban demand units (167 features), measured from `demand_units` tileset with `Class === "Urban"` filter |
-| `DELTA_ECO`     | `DELTA_ECO_BOUNDS`     | `[[-121.862, 37.676], [-121.24, 38.589]]` — Legal Delta (DETAW polygon), measured from `geoschem` tileset with `WBA_ID === "DETAW"` filter          |
-| `FW_EXP`        | `FW_EXP_BOUNDS`        | `[[-121.77, 37.65], [-121.44, 37.95]]` — Two SWP/CVP export pumping plants (Banks + Jones), computed from `STATION_COORDINATES`                     |
+| `DELTA_ECO`     | `DELTA_ECO_BOUNDS`     | `[[-121.862, 37.676], [-121.24, 38.589]]` — Legal Delta (DETAW polygon), measured from `geoschem` tileset with `WBA_ID === "DETAW"` filter           |
+| `FW_EXP`        | `FW_EXP_BOUNDS`        | `[[-121.77, 37.65], [-121.44, 37.95]]` — Two SWP/CVP export pumping plants (Banks + Jones), computed from `STATION_COORDINATES`                      |
 | `FW_DELTA_USES` | `FW_DELTA_USES_BOUNDS` | `[[-121.89, 37.92], [-121.54, 38.23]]` — Two Delta salinity compliance stations (Emmaton + Jersey Point), computed from `STATION_COORDINATES`        |
-| `ENV_FLOWS`     | `ENV_FLOWS_BOUNDS`     | `[[-123.804, 36.295], [-119.897, 41.72]]` — 17 environmental flow monitoring stations, computed from `ENV_FLOWS_COORDINATES`                        |
-| `RES_STOR`      | `RES_STOR_BOUNDS`      | `[[-123.68, 36.26], [-117.66, 41.73]]` — 7 reservoirs, computed from `RESERVOIR_CONFIGS`                                                            |
+| `ENV_FLOWS`     | `ENV_FLOWS_BOUNDS`     | `[[-123.804, 36.295], [-119.897, 41.72]]` — 17 environmental flow monitoring stations, computed from `ENV_FLOWS_COORDINATES`                         |
+| `RES_STOR`      | `RES_STOR_BOUNDS`      | `[[-123.68, 36.26], [-117.66, 41.73]]` — 7 reservoirs, computed from `RESERVOIR_CONFIGS`                                                             |
