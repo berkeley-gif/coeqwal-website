@@ -139,7 +139,7 @@ const ANIM_POLYGON_LAYERS = [
   { fill: "demand-units", outline: "demand-units-outline" },
   { fill: "calsim-wba", outline: "calsim-wba-outline" },
   { fill: "california-reservoir", outline: "california-reservoir-outline" },
-  { fill: "delta-water", outline: "delta-water-outline" },
+  { fill: "delta-detaw", outline: "delta-detaw-outline" },
 ] as const
 
 const ANIM_LINE_LAYERS = ["sacramento-river-body"] as const
@@ -657,52 +657,54 @@ export default function TierAnimationSection() {
           }
         }
 
-        if (spotlightedTier != null) {
-          const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
-          if (locData) {
-            const spotlightIds: string[] = []
-            for (const [locId, tier] of Object.entries(locData.tierMap)) {
-              if (tier === spotlightedTier) {
-                const fid =
-                  selectedOutcomeCode === "RES_STOR"
-                    ? (RESERVOIR_CALSIM_TO_GNISIDLABEL[locId] ?? locId)
-                    : locId
-                spotlightIds.push(fid)
+        if (!config.outlineOnly) {
+          if (spotlightedTier != null) {
+            const locData = outcomeLocationsRef.current[selectedOutcomeCode!]
+            if (locData) {
+              const spotlightIds: string[] = []
+              for (const [locId, tier] of Object.entries(locData.tierMap)) {
+                if (tier === spotlightedTier) {
+                  const fid =
+                    selectedOutcomeCode === "RES_STOR"
+                      ? (RESERVOIR_CALSIM_TO_GNISIDLABEL[locId] ?? locId)
+                      : locId
+                  spotlightIds.push(fid)
+                }
+              }
+              if (spotlightIds.length > 0) {
+                const spotlightMatch = [
+                  "in",
+                  ["get", idProp],
+                  ["literal", spotlightIds],
+                ]
+                map.setPaintProperty(fillId, "fill-opacity", [
+                  "case",
+                  spotlightMatch,
+                  0.9,
+                  0.12,
+                ] as never)
               }
             }
-            if (spotlightIds.length > 0) {
-              const spotlightMatch = [
-                "in",
-                ["get", idProp],
-                ["literal", spotlightIds],
-              ]
-              map.setPaintProperty(fillId, "fill-opacity", [
-                "case",
-                spotlightMatch,
-                0.9,
-                0.12,
-              ] as never)
-            }
+          } else if (pinnedFeatureIds.length > 0) {
+            const pinnedMatch = [
+              "in",
+              ["get", idProp],
+              ["literal", pinnedFeatureIds],
+            ]
+            map.setPaintProperty(fillId, "fill-opacity", [
+              "step",
+              ["zoom"],
+              ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
+              ZOOM_THRESHOLD,
+              ZOOMED_IN_OPACITY,
+            ] as never)
+          } else {
+            map.setPaintProperty(
+              fillId,
+              "fill-opacity",
+              ZOOM_AWARE_BASE_OPACITY as never,
+            )
           }
-        } else if (pinnedFeatureIds.length > 0) {
-          const pinnedMatch = [
-            "in",
-            ["get", idProp],
-            ["literal", pinnedFeatureIds],
-          ]
-          map.setPaintProperty(fillId, "fill-opacity", [
-            "step",
-            ["zoom"],
-            ["case", pinnedMatch, 1, BASE_FILL_OPACITY],
-            ZOOM_THRESHOLD,
-            ZOOMED_IN_OPACITY,
-          ] as never)
-        } else {
-          map.setPaintProperty(
-            fillId,
-            "fill-opacity",
-            ZOOM_AWARE_BASE_OPACITY as never,
-          )
         }
       } catch {
         /* ok */
@@ -1343,7 +1345,7 @@ export default function TierAnimationSection() {
               map.setPaintProperty("demand-units", "fill-color", expr as never)
             }
             // Non-demand-unit polygon layers (calsim-wba, california-reservoir,
-            // delta-water) stay hidden — the SVG overlay handles their outcomes.
+            // delta-detaw) stay hidden — the SVG overlay handles their outcomes.
             // Only demand-units is shown on the map during the animation.
           } catch {
             /* ok */
