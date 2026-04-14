@@ -315,9 +315,9 @@ export function useMapLayers() {
     }
   }, [activeSection, showInflowWatersheds, map.mapRef, mapReady])
 
-  // Hide delta-water layer when leaving the delta section in Learn mode only
-  // (The delta-water layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
-  // NOTE: In Explore mode, delta-water is managed by useMapboxLayerStyling for outcome visualization
+  // Hide delta-detaw layer when leaving the delta section in Learn mode only
+  // (The delta-detaw layer is shown by DeltaInfoPanel when user clicks to zoom to delta)
+  // NOTE: In Explore mode, the DETAW polygon is managed by OutcomePolygonLayer via calsim-wba
   useEffect(() => {
     if (!mapReady) return
     if (mapMode !== "learn") return // Only manage in Learn mode
@@ -326,18 +326,16 @@ export function useMapLayers() {
     const mapInstance = coordinator.getValidMap(map.mapRef)
     if (!mapInstance) return
 
-    // Hide delta-water
+    // Hide delta-detaw (outline + fill)
     try {
-      if (mapInstance.getLayer("delta-water")) {
-        // Fade out and hide
+      const outlineLayer = "delta-detaw-outline"
+      const fillLayer = "delta-detaw"
+
+      if (mapInstance.getLayer(outlineLayer)) {
         const rawOpacity =
-          (mapInstance.getPaintProperty(
-            "delta-water",
-            "fill-opacity",
-          ) as number) ?? 0
+          (mapInstance.getPaintProperty(outlineLayer, "line-opacity") as number) ?? 0
         const startOpacity = Math.max(0, Math.min(1, rawOpacity))
 
-        // Only fade out if currently visible
         if (startOpacity > 0.01) {
           const duration = FADE_DURATION
           const startTime = performance.now()
@@ -349,11 +347,7 @@ export function useMapLayers() {
             const opacity = Math.max(0, Math.min(1, startOpacity * (1 - eased)))
 
             try {
-              mapInstance.setPaintProperty(
-                "delta-water",
-                "fill-opacity",
-                opacity,
-              )
+              mapInstance.setPaintProperty(outlineLayer, "line-opacity", opacity)
             } catch {
               return
             }
@@ -361,7 +355,10 @@ export function useMapLayers() {
             if (progress < 1) {
               requestAnimationFrame(fadeOut)
             } else {
-              mapInstance.setLayoutProperty("delta-water", "visibility", "none")
+              mapInstance.setLayoutProperty(outlineLayer, "visibility", "none")
+              if (mapInstance.getLayer(fillLayer)) {
+                mapInstance.setLayoutProperty(fillLayer, "visibility", "none")
+              }
             }
           }
 

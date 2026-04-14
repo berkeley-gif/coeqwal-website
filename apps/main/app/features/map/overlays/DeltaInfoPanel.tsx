@@ -21,8 +21,9 @@ interface DeltaInfoPanelProps {
   map: MapOperationsAPI
 }
 
-// Delta water layer ID (Mapbox tileset: coeqwal.delta-water)
-const DELTA_WATER_LAYER = "delta-water"
+// Runtime layers showing the DETAW polygon from the WBA/geoschem source
+const DELTA_FILL_LAYER = "delta-detaw"
+const DELTA_OUTLINE_LAYER = "delta-detaw-outline"
 
 export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
   const theme = useTheme()
@@ -43,19 +44,20 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       })
     }
 
-    // Show and fade in delta-water layer
+    // Show and fade in the delta outline (fill stays transparent)
     if (map.mapRef?.current) {
       try {
         const mapInstance = map.mapRef.current.getMap()
-        if (mapInstance.getLayer(DELTA_WATER_LAYER)) {
-          // Make visible
-          mapInstance.setLayoutProperty(
-            DELTA_WATER_LAYER,
-            "visibility",
-            "visible",
-          )
 
-          // Animate opacity from 0 to 0.9
+        // Make fill layer visible (transparent, just for potential hover/click targets)
+        if (mapInstance.getLayer(DELTA_FILL_LAYER)) {
+          mapInstance.setLayoutProperty(DELTA_FILL_LAYER, "visibility", "visible")
+        }
+
+        if (mapInstance.getLayer(DELTA_OUTLINE_LAYER)) {
+          mapInstance.setLayoutProperty(DELTA_OUTLINE_LAYER, "visibility", "visible")
+          mapInstance.setPaintProperty(DELTA_OUTLINE_LAYER, "line-opacity", 0)
+
           const targetOpacity = 0.9
           const duration = ANIMATION_DURATION.EASE
           const startTime = performance.now()
@@ -63,20 +65,13 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           const animateOpacity = (currentTime: number) => {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-            const opacity = Math.max(
-              0,
-              Math.min(targetOpacity, eased * targetOpacity),
-            )
+            const eased = 1 - Math.pow(1 - progress, 3)
+            const opacity = Math.max(0, Math.min(targetOpacity, eased * targetOpacity))
 
             try {
-              mapInstance.setPaintProperty(
-                DELTA_WATER_LAYER,
-                "fill-opacity",
-                opacity,
-              )
+              mapInstance.setPaintProperty(DELTA_OUTLINE_LAYER, "line-opacity", opacity)
             } catch {
-              // Layer might not support this property
+              return
             }
 
             if (progress < 1) {
@@ -84,12 +79,10 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             }
           }
 
-          // Start from 0 opacity
-          mapInstance.setPaintProperty(DELTA_WATER_LAYER, "fill-opacity", 0)
           requestAnimationFrame(animateOpacity)
         }
       } catch {
-        // Silently fail if delta-water layer doesn't exist
+        // Silently fail if layers don't exist yet
       }
     }
   }

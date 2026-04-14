@@ -223,6 +223,8 @@ export default function VisualizationLayers() {
           classFilter={config.classFilter}
           visible={true}
           mapboxLayerId={config.mapboxLayerId}
+          featureIdMap={config.featureIdMap}
+          outlineOnly={config.outlineOnly}
         />
       )}
 

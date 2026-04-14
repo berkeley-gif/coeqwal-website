@@ -40,6 +40,10 @@ interface OutcomePolygonLayerProps {
   visible: boolean
   /** Mapbox layer ID (optional, defaults based on layerType) */
   mapboxLayerId?: string
+  /** Maps tier-data IDs to Mapbox feature property values */
+  featureIdMap?: Record<string, string>
+  /** Transparent fill with a broad tier-colored outline */
+  outlineOnly?: boolean
 }
 
 // Mapbox expression type
@@ -103,27 +107,26 @@ function getLayerIds(layerType: LayerType, mapboxLayerId?: string) {
 }
 
 /**
- * Translate CalSim IDs to gnisidlabel for reservoir layer
+ * Translate feature IDs using a mapping (API IDs → Mapbox property values).
+ * Reservoir layer uses the hardcoded RESERVOIR_CALSIM_TO_GNISIDLABEL mapping;
+ * other layers may supply a per-outcome featureIdMap from the registry.
  */
-function translateReservoirIds(
+function translateFeatureIds(
   featureIds: string[],
   tierColorMap: TierColorMap,
+  mapping: Record<string, string>,
 ): { translatedIds: string[]; translatedColorMap: TierColorMap } {
   const translatedIds = featureIds
-    .map((id) => RESERVOIR_CALSIM_TO_GNISIDLABEL[id])
+    .map((id) => mapping[id])
     .filter((v): v is string => !!v)
 
-  // Dedupe (SLUIS_CVP and SLUIS_SWP both map to "San Luis Reservoir")
   const uniqueIds = [...new Set(translatedIds)]
 
   const translatedColorMap: TierColorMap = {}
-  Object.entries(tierColorMap).forEach(([calsimId, color]) => {
-    const gnisLabel = RESERVOIR_CALSIM_TO_GNISIDLABEL[calsimId]
-    if (gnisLabel) {
-      // Keep the first color (or could take worst tier)
-      if (!translatedColorMap[gnisLabel]) {
-        translatedColorMap[gnisLabel] = color
-      }
+  Object.entries(tierColorMap).forEach(([id, color]) => {
+    const mapped = mapping[id]
+    if (mapped && !translatedColorMap[mapped]) {
+      translatedColorMap[mapped] = color
     }
   })
 
@@ -152,6 +155,8 @@ export function OutcomePolygonLayer({
   classFilter,
   visible,
   mapboxLayerId,
+  featureIdMap,
+  outlineOnly,
 }: OutcomePolygonLayerProps) {
   const theme = useTheme()
   const { mapRef } = useMap()
@@ -175,13 +180,20 @@ export function OutcomePolygonLayer({
     wasShowingDataRef.current = false
   }
 
-  // For reservoir layer, translate IDs
+  // Translate API IDs → Mapbox feature property values when needed
   const { translatedIds, translatedColorMap } = useMemo(() => {
     if (layerType === "reservoir") {
-      return translateReservoirIds(featureIds, tierColorMap)
+      return translateFeatureIds(
+        featureIds,
+        tierColorMap,
+        RESERVOIR_CALSIM_TO_GNISIDLABEL,
+      )
+    }
+    if (featureIdMap && Object.keys(featureIdMap).length > 0) {
+      return translateFeatureIds(featureIds, tierColorMap, featureIdMap)
     }
     return { translatedIds: featureIds, translatedColorMap: tierColorMap }
-  }, [layerType, featureIds, tierColorMap])
+  }, [layerType, featureIds, tierColorMap, featureIdMap])
 
   // Check if we have tier data loaded
   const hasTierData = Object.keys(translatedColorMap).length > 0
@@ -365,7 +377,10 @@ export function OutcomePolygonLayer({
       })
       map.setPaintProperty(outlineId, "line-opacity", 0)
 
-      if (layerType === "delta") {
+      if (outlineOnly) {
+        map.setPaintProperty(outlineId, "line-width", 4)
+        map.setPaintProperty(outlineId, "line-offset", 0)
+      } else if (layerType === "delta") {
         map.setPaintProperty(outlineId, "line-width", 0.5)
         map.setPaintProperty(outlineId, "line-offset", 0)
       } else {
@@ -406,7 +421,9 @@ export function OutcomePolygonLayer({
       fadeRafRef.current = null
       if (!map.getLayer(fillId)) return
 
-      if (layerType === "delta") {
+      if (outlineOnly) {
+        map.setPaintProperty(fillId, "fill-opacity", 0)
+      } else if (layerType === "delta") {
         map.setPaintProperty(fillId, "fill-opacity", 0.9)
       } else {
         map.setPaintProperty(fillId, "fill-opacity", [
@@ -445,6 +462,7 @@ export function OutcomePolygonLayer({
     filterExpression,
     layerType,
     hasTierData,
+    outlineOnly,
   ])
 
   // Cleanup on unmount

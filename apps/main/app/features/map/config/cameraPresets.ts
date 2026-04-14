@@ -84,3 +84,18 @@ export const CWS_DEL_BOUNDS: [[number, number], [number, number]] = [
   [-123.525, 34.995], // SW corner [lng, lat]
   [-118.803, 41.745], // NE corner [lng, lat]
 ]
+
+/** Bounding box enclosing ENV_FLOWS monitoring stations (17 stations).
+ *  Computed from hardcoded coordinates in outcomeLocations.ts. */
+export const ENV_FLOWS_BOUNDS: [[number, number], [number, number]] = [
+  [-123.804, 36.295], // SW corner [lng, lat]
+  [-119.897, 41.720], // NE corner [lng, lat]
+]
+
+/** Bounding box enclosing RES_STOR reservoir markers (7 reservoirs).
+ *  Computed from RESERVOIR_CONFIGS in outcomeLocations.ts.
+ *  Extra vertical padding for marker labels. */
+export const RES_STOR_BOUNDS: [[number, number], [number, number]] = [
+  [-123.68, 36.26], // SW corner [lng, lat]
+  [-117.66, 41.73], // NE corner [lng, lat]
+]
