@@ -243,7 +243,13 @@ export function OutcomePolygonLayer({
     if (!mapRef?.current || !fillId) return
 
     const map = mapRef.current.getMap()
-    if (!map.getLayer(fillId)) return
+    if (!map.getLayer(fillId)) {
+      // Layer was destroyed (e.g. basemap style change) — reset refs so
+      // the next run goes through the full fade-in path and recreates the outline.
+      outlineCreatedRef.current = false
+      wasShowingDataRef.current = false
+      return
+    }
 
     // Cancel any pending deferred fade-in from a previous run
     if (fadeRafRef.current !== null) {
@@ -310,6 +316,10 @@ export function OutcomePolygonLayer({
       })
       map.setPaintProperty(fillId, "fill-color", colorExpression)
 
+      if (outlineOnly) {
+        map.setPaintProperty(fillId, "fill-opacity", 0)
+      }
+
       if (map.getLayer(outlineId)) {
         if (filterExpression) {
           map.setFilter(outlineId, filterExpression)
@@ -334,6 +344,11 @@ export function OutcomePolygonLayer({
     })
     map.setPaintProperty(fillId, "fill-opacity", 0)
     map.setLayoutProperty(fillId, "visibility", "visible")
+
+    // Reset stale ref if the outline was destroyed (e.g. basemap style change)
+    if (!map.getLayer(outlineId) && outlineCreatedRef.current) {
+      outlineCreatedRef.current = false
+    }
 
     // Create outline layer if it doesn't exist, starting at opacity 0
     if (!map.getLayer(outlineId) && !outlineCreatedRef.current) {

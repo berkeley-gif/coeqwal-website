@@ -113,13 +113,20 @@ let _onLocationHover:
 export const mapActions = {
   // Core
   setMapMode: (mode: MapMode) => {
-    useMapStore.setState({
+    const updates: Partial<MapState> = {
       mapMode: mode,
       activeOutcomeVisualization:
         mode === "hidden"
           ? null
           : useMapStore.getState().activeOutcomeVisualization,
-    })
+    }
+
+    // Learn and get-started always use the satellite basemap
+    if (mode === "learn" || mode === "get-started") {
+      updates.mapStyle = MAP_THEME_URLS.satellite
+    }
+
+    useMapStore.setState(updates)
   },
 
   setMapReady: (ready: boolean) => useMapStore.setState({ mapReady: ready }),
