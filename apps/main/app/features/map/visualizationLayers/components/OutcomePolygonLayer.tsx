@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useRef } from "react"
 import { useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { useMapReady } from "../../store"
 import type { TierColorMap, LayerType } from "../types"
 import {
   LAYER_IDS,
@@ -160,6 +161,7 @@ export function OutcomePolygonLayer({
 }: OutcomePolygonLayerProps) {
   const theme = useTheme()
   const { mapRef } = useMap()
+  const mapReady = useMapReady()
   const outlineCreatedRef = useRef(false)
   /** RAF handle for the deferred fade-in; cancelled if the effect re-runs first */
   const fadeRafRef = useRef<number | null>(null)
@@ -478,6 +480,7 @@ export function OutcomePolygonLayer({
     layerType,
     hasTierData,
     outlineOnly,
+    mapReady,
   ])
 
   // Cleanup on unmount
