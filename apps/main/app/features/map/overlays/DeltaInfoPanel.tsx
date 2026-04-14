@@ -51,11 +51,19 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
 
         // Make fill layer visible (transparent, just for potential hover/click targets)
         if (mapInstance.getLayer(DELTA_FILL_LAYER)) {
-          mapInstance.setLayoutProperty(DELTA_FILL_LAYER, "visibility", "visible")
+          mapInstance.setLayoutProperty(
+            DELTA_FILL_LAYER,
+            "visibility",
+            "visible",
+          )
         }
 
         if (mapInstance.getLayer(DELTA_OUTLINE_LAYER)) {
-          mapInstance.setLayoutProperty(DELTA_OUTLINE_LAYER, "visibility", "visible")
+          mapInstance.setLayoutProperty(
+            DELTA_OUTLINE_LAYER,
+            "visibility",
+            "visible",
+          )
           mapInstance.setPaintProperty(DELTA_OUTLINE_LAYER, "line-opacity", 0)
 
           const targetOpacity = 0.9
@@ -66,10 +74,17 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
-            const opacity = Math.max(0, Math.min(targetOpacity, eased * targetOpacity))
+            const opacity = Math.max(
+              0,
+              Math.min(targetOpacity, eased * targetOpacity),
+            )
 
             try {
-              mapInstance.setPaintProperty(DELTA_OUTLINE_LAYER, "line-opacity", opacity)
+              mapInstance.setPaintProperty(
+                DELTA_OUTLINE_LAYER,
+                "line-opacity",
+                opacity,
+              )
             } catch {
               return
             }
