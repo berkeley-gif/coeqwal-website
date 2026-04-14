@@ -337,6 +337,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   DELTA_ECO: {
     geometryType: "polygon",
     layerType: "delta",
+    mapboxLayerId: "delta-detaw",
     sourceLayer: "geoschem",
     idProperty: "WBA_ID",
     tierCode: "DELTA_ECO",
