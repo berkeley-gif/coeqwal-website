@@ -41,6 +41,7 @@ import type { TierLocation } from "./types"
 // Store
 import {
   useMapMode,
+  useMapStyle,
   useGeocoderMarker,
   useClearTooltipsSignal,
   useLocationHighlights,
@@ -48,6 +49,7 @@ import {
   getOnLocationClick,
   getOnLocationHover,
 } from "../store"
+import { MAP_THEME_URLS } from "@repo/map"
 
 // Large polygon covering well beyond California for dim overlay.
 // Must be oversized so edges are never visible even at low zoom levels.
@@ -175,12 +177,16 @@ export default function VisualizationLayers() {
 
   const isLearnMode = mapMode === "learn"
   const isGetStartedMode = mapMode === "get-started"
+  const mapStyle = useMapStyle()
+  const isSatellite = mapStyle === MAP_THEME_URLS.satellite
 
-  // Memoize dim opacity (skip in get-started mode for clean background)
+  // Dim overlay only on satellite basemap (light/streets have enough contrast)
   const dimOpacity = useMemo(
     () =>
-      isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0,
-    [isVisualizationActive, isGetStartedMode],
+      isVisualizationActive && !isGetStartedMode && isSatellite
+        ? BASEMAP_DIM_OPACITY
+        : 0,
+    [isVisualizationActive, isGetStartedMode, isSatellite],
   )
 
   // Position dim overlay below all outcome polygon fill layers so
