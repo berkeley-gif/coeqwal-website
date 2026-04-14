@@ -28,7 +28,7 @@ import { useOutcomeVisualization } from "./hooks/useOutcomeVisualization"
 import { useMapTooltips } from "./hooks/useMapTooltips"
 
 // Config
-import { BASEMAP_DIM_OPACITY } from "../config/outcomeLayerRegistry"
+import { BASEMAP_DIM_OPACITY, LAYER_IDS } from "../config/outcomeLayerRegistry"
 
 // Tooltips
 import { MapFeatureTooltip } from "../../tooltips/MapFeatureTooltip"
@@ -182,6 +182,54 @@ export default function VisualizationLayers() {
       isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0,
     [isVisualizationActive, isGetStartedMode],
   )
+
+  // Position dim overlay below all outcome polygon fill layers so
+  // tier-colored polygons render above the darkened basemap.
+  useEffect(() => {
+    const mapInstance = map.mapRef?.current?.getMap()
+    if (!mapInstance) return
+
+    const DIM_ID = "basemap-dim-overlay"
+    const OUTCOME_FILLS = new Set<string>([
+      LAYER_IDS.demandUnits.fill,
+      LAYER_IDS.wba.fill,
+      LAYER_IDS.delta.fill,
+      LAYER_IDS.reservoir.fill,
+    ])
+
+    const positionDimLayer = () => {
+      if (!mapInstance.getLayer(DIM_ID)) return
+
+      mapInstance.setPaintProperty(DIM_ID, "fill-opacity-transition", {
+        duration: 800,
+        delay: 0,
+      })
+
+      const style = mapInstance.getStyle()
+      if (!style?.layers) return
+
+      for (const layer of style.layers) {
+        if (OUTCOME_FILLS.has(layer.id)) {
+          try {
+            mapInstance.moveLayer(DIM_ID, layer.id)
+          } catch {
+            /* layer may not exist yet */
+          }
+          break
+        }
+      }
+    }
+
+    const raf = requestAnimationFrame(positionDimLayer)
+
+    const onStyle = () => requestAnimationFrame(positionDimLayer)
+    mapInstance.on("styledata", onStyle)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      mapInstance.off("styledata", onStyle)
+    }
+  }, [map])
 
   const highlightedLocationIds = useMemo(() => {
     if (locationHighlights.length === 0) return undefined
