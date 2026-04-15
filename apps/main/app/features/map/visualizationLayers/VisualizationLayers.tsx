@@ -458,9 +458,27 @@ export default function VisualizationLayers() {
                   sx={{
                     width: 8,
                     height: 8,
-                    borderRadius: "2px",
                     backgroundColor: hl.tierColor,
                     flexShrink: 0,
+                    ...(hl.shape === "triangle-up" && {
+                      width: 0,
+                      height: 0,
+                      backgroundColor: "transparent",
+                      borderLeft: "4px solid transparent",
+                      borderRight: "4px solid transparent",
+                      borderBottom: `8px solid ${hl.tierColor}`,
+                    }),
+                    ...(hl.shape === "triangle-down" && {
+                      width: 0,
+                      height: 0,
+                      backgroundColor: "transparent",
+                      borderLeft: "4px solid transparent",
+                      borderRight: "4px solid transparent",
+                      borderTop: `8px solid ${hl.tierColor}`,
+                    }),
+                    ...(!hl.shape || hl.shape === "square"
+                      ? { borderRadius: "2px" }
+                      : {}),
                   }}
                 />
                 Tier {hl.tierLevel}: {hl.tierLabel}

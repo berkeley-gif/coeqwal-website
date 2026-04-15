@@ -301,8 +301,6 @@ export default function EquityPanel() {
 
   const handleShowOnMap = useCallback(
     (locationIds: string[]) => {
-      console.log("Show on map:", locationIds)
-
       // Get the Mapbox map instance
       const map = mapRef?.current?.getMap()
 
@@ -310,19 +308,24 @@ export default function EquityPanel() {
       const highlights = selectedObjectives
         .filter((obj) => locationIds.includes(obj.locationId))
         .map((obj) => {
-          // Get tier color based on comparison mode
+          // Get tier color and shape based on comparison mode
           let tierColor = "#999"
+          let shape: "square" | "triangle-up" | "triangle-down" = "square"
+
           if (showEquityComparison) {
             const currentTierNum = parseInt(obj.tier.replace("Tier ", ""))
             const baselineTierNum = parseInt(
               obj.baselineTier.replace("Tier ", ""),
             )
             if (currentTierNum === baselineTierNum) {
-              tierColor = "#90caf9" // Light blue - no change
+              tierColor = "#64b5f6" // Light blue - no change
+              shape = "square"
             } else if (currentTierNum < baselineTierNum) {
-              tierColor = "#2196f3" // Blue - improved
+              tierColor = "#1976d2" // Blue - improved
+              shape = "triangle-up"
             } else {
-              tierColor = "#f44336" // Red - worsened
+              tierColor = "#d32f2f" // Red - worsened
+              shape = "triangle-down"
             }
           }
 
@@ -342,7 +345,6 @@ export default function EquityPanel() {
           if (!coords && obj.tierCode) {
             coords = getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
           }
-          console.log(obj.tierCode, obj.locationId, coords)
 
           return {
             key: obj.locationId,
@@ -352,6 +354,7 @@ export default function EquityPanel() {
             tierLevel: obj.tierLevel,
             tierLabel: TIER_LABELS[obj.tierLevel as 1 | 2 | 3 | 4] || "Unknown",
             tierColor,
+            shape,
             pinned: true,
           }
         })
@@ -364,6 +367,31 @@ export default function EquityPanel() {
     },
     [selectedObjectives, showEquityComparison, mapRef],
   )
+
+  // Update selectedObjectives with fresh data when scenario or comparison mode changes
+  useEffect(() => {
+    if (selectedObjectives.length > 0) {
+      const locationIds = new Set(
+        selectedObjectives.map((obj) => obj.locationId),
+      )
+      const updatedObjectives = objectives.filter((obj) =>
+        locationIds.has(obj.locationId),
+      )
+      if (updatedObjectives.length > 0) {
+        setSelectedObjectives(updatedObjectives)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScenario, showEquityComparison])
+
+  // Update highlights when selected objectives changes
+  useEffect(() => {
+    if (selectedObjectives.length > 0 && showMap) {
+      const locationIds = selectedObjectives.map((obj) => obj.locationId)
+      handleShowOnMap(locationIds)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedObjectives, showMap])
 
   return (
     <Box
