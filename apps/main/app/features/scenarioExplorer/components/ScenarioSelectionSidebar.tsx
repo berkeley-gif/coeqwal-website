@@ -24,10 +24,9 @@ import {
 import { InlineRowActions } from "../strategyGrid"
 import type { ScenarioTheme } from "../../../content/scenarios"
 import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
+import { getTierLabel, getTierColorsFromTheme } from "../../../content/tiers"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
-
-const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
@@ -47,6 +46,7 @@ export default function ScenarioSelectionSidebar({
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
+  const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
 
   const {
     selectedScenarios,
@@ -240,8 +240,8 @@ export default function ScenarioSelectionSidebar({
                 borderRadius: theme.borderRadius.sm,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
                 "--row-bg": isActive
-                  ? `${accentColor}1A`
-                  : hasActiveScenario && !isActive
+                  ? theme.palette.background.paper
+                  : hasActiveScenario
                     ? "#f0eeeb"
                     : "#faf8f5",
                 backgroundColor: "var(--row-bg)",
@@ -249,9 +249,7 @@ export default function ScenarioSelectionSidebar({
                 transition:
                   "background-color 0.2s ease, border-color 0.2s ease, opacity 200ms ease",
                 "&:hover": {
-                  "--row-bg": isActive
-                    ? `${accentColor}26`
-                    : theme.palette.background.paper,
+                  "--row-bg": theme.palette.background.paper,
                   backgroundColor: "var(--row-bg)",
                 },
               }}
@@ -282,6 +280,10 @@ export default function ScenarioSelectionSidebar({
                   titleVariant="body2"
                   compact
                   showDescription={showDefinitions}
+                  expandDescription={
+                    showDefinitions &&
+                    scenario.scenarioId === hoveredScenarioId
+                  }
                   descriptionMaxWidth="none"
                   showThemeBadge={!groupByTheme}
                   inlineActions={
@@ -311,40 +313,48 @@ export default function ScenarioSelectionSidebar({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         style={{ overflow: "hidden" }}
                       >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.75,
-                            pt: 0.5,
-                            pb: 0.75,
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "3px",
-                              flexShrink: 0,
-                              bgcolor:
-                                TIER_SWATCH_COLORS[
-                                  Math.round(hoveredAxisInfo.tierValue)
-                                ] ?? theme.palette.grey[400],
-                            }}
-                          />
+                        <Box sx={{ pt: 0.5, pb: 0.75 }}>
                           <Typography
-                            variant="compactTitle"
-                            sx={{ color: theme.palette.text.secondary }}
+                            variant="compactSubtitle"
+                            sx={{
+                              display: "block",
+                              fontWeight: 500,
+                              color: theme.palette.text.primary,
+                            }}
                           >
                             {hoveredAxisInfo.axis}
-                            <Box
-                              component="span"
-                              sx={{ mx: 0.5, color: theme.palette.grey[400] }}
-                            >
-                              ·
-                            </Box>
-                            Tier {Math.round(hoveredAxisInfo.tierValue)}
                           </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              mt: 0.25,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "3px",
+                                flexShrink: 0,
+                                bgcolor:
+                                  tierColors[
+                                    Math.round(
+                                      hoveredAxisInfo.tierValue,
+                                    ) as keyof typeof tierColors
+                                  ] ?? theme.palette.grey[400],
+                              }}
+                            />
+                            <Typography
+                              variant="compactCaption"
+                              sx={{ color: theme.palette.grey[600] }}
+                            >
+                              {getTierLabel(
+                                Math.round(hoveredAxisInfo.tierValue),
+                              )}
+                            </Typography>
+                          </Box>
                         </Box>
                       </motion.div>
                     )}
