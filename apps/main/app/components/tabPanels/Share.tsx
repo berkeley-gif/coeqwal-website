@@ -156,6 +156,7 @@ function SortableShareCard({
       const dataUrl = await toPng(el, {
         pixelRatio: dpr * 2,
         backgroundColor: "#ffffff",
+        skipFonts: true,
       })
       const label =
         item.type === "barChart"
@@ -446,6 +447,7 @@ export default function SharePanel() {
           const dataUrl = await toPng(el, {
             pixelRatio: dpr * 2,
             backgroundColor: "#ffffff",
+            skipFonts: true,
           })
           const label =
             item.type === "barChart"
