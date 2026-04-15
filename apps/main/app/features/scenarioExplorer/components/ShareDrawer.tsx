@@ -26,12 +26,14 @@ function ShareItemCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
+  hydroclimate,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<string, { name: string; description: string }>
   allChartData: Record<string, Record<string, unknown> | undefined>
+  hydroclimate: string
 }) {
   const theme = useTheme()
 
@@ -49,6 +51,7 @@ function ShareItemCard({
         scenarioId={item.id}
         name={info?.description ?? info?.name ?? item.scenarioId}
         description={viewLabel}
+        hydroclimate={hydroclimate}
         chartData={chartData}
         outcomeNames={outcomeNames}
         onRemove={() => onRemove(item.id)}

@@ -9,12 +9,34 @@ import { useScenarioExplorerStore } from "../store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const WATER_ISSUE_THEMES = [
-  { label: "Drinking water for community water systems", themeKey: "cws" },
-  { label: "Groundwater management for agriculture", themeKey: "ag_gw" },
-  { label: "Water for salmon, rivers, and the estuary", themeKey: "eco" },
-  { label: "Balancing water needs in the Delta", themeKey: "delta" },
   {
-    label: "Understanding impacts of operations",
+    title: "Community water systems",
+    description:
+      "Whether people and communities can reliably access safe drinking water for daily life, health, and essential services",
+    themeKey: "cws",
+  },
+  {
+    title: "Farms and groundwater",
+    description:
+      "Whether agricultural water deliveries can sustain food production, while preventing over-draft of groundwater basins",
+    themeKey: "ag_gw",
+  },
+  {
+    title: "Rivers, salmon and the Delta ecosystem",
+    description:
+      "Whether rivers, salmon, and the Delta estuary receive the flows they need to thrive",
+    themeKey: "eco",
+  },
+  {
+    title: "The Delta as a living place",
+    description:
+      "Whether the Delta is a place where communities, farms, and ecosystems coexist and thrive",
+    themeKey: "delta",
+  },
+  {
+    title: "Operations and impacts",
+    description:
+      "How management decisions affect trade-offs, equity and resilience",
     themeKey: "governance",
   },
 ] as const
@@ -68,17 +90,12 @@ export default function GetStartedView() {
             py: theme.space.panel.padding,
           }}
         >
-          {/* Heading — runs two column widths, own row above grid */}
+          {/* Heading */}
           <Typography
             variant="h3"
             component="h2"
             color="text.secondary"
-            sx={{
-              fontWeight: 300,
-              letterSpacing: "-0.025em",
-              lineHeight: 1.15,
-              maxWidth: "66%",
-            }}
+            sx={{ maxWidth: "66%" }}
           >
             What is the COEQWAL scenario library
             <br />
@@ -226,49 +243,106 @@ export default function GetStartedView() {
         </Box>
       </Box>
 
-      {/* Water Issues */}
-      <ContentPanel
-        background={theme.palette.blue.dark}
-        heading="Water Issues"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          COEQWAL scenarios are designed to address specific water issues. These
-          include:
-        </Typography>
-        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
-          {WATER_ISSUE_THEMES.map(({ label, themeKey }) => (
-            <Box component="li" key={themeKey} sx={{ mt: sp.sm }}>
-              <Typography
+      {/* Water Issues — custom layout for five-column grid */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.blue.dark,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          {/* Five-column grid */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              alignItems: "start",
+              columnGap: theme.space.section.sm,
+              rowGap: sp.lg,
+            }}
+          >
+            {/* Heading — full width */}
+            <Typography
+              variant="h3"
+              component="h2"
+              color="text.secondary"
+              sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: theme.space.section.md }}
+            >
+              What water issues interest you?
+            </Typography>
+
+            {/* Intro — full width, below the gap */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ gridColumn: "1 / -1", maxWidth: "66%" }}
+            >
+              COEQWAL scenarios are designed to address key water challenges
+              across California, including:
+            </Typography>
+
+            {/* Five issue columns */}
+            {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => (
+              <Box
+                key={themeKey}
                 component="button"
-                variant="body1"
                 onClick={() => openThemePanel(themeKey)}
                 sx={{
-                  background: "none",
-                  border: "none",
-                  p: 0,
-                  color: "text.secondary",
-                  textDecoration: "underline",
-                  textDecorationColor: "rgba(255,255,255,0.4)",
-                  textUnderlineOffset: "3px",
-                  cursor: "pointer",
-                  font: "inherit",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: theme.borderRadius.md,
+                  p: sp.lg,
                   textAlign: "left",
+                  cursor: "pointer",
+                  transition: theme.transition.default,
                   "&:hover": {
+                    background: "rgba(255,255,255,0.14)",
+                    borderColor: "rgba(255,255,255,0.25)",
+                  },
+                  "&:hover .issue-title": {
                     textDecorationColor: "rgba(255,255,255,0.8)",
                   },
                 }}
               >
-                {label}
-              </Typography>
-            </Box>
-          ))}
+                <Typography
+                  className="issue-title"
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight={600}
+                  sx={{
+                    textDecoration: "underline",
+                    textDecorationColor: "rgba(255,255,255,0.35)",
+                    textUnderlineOffset: "3px",
+                  }}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.sm, opacity: 0.85 }}
+                >
+                  {description}
+                </Typography>
+              </Box>
+            ))}
+
+            {/* Footer CTA — full width */}
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ gridColumn: "1 / -1" }}
+            >
+              Click on each water issue to learn more.
+            </Typography>
+          </Box>
         </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          If you are interested in one of these issues, we suggest you click on
-          the text above.
-        </Typography>
-      </ContentPanel>
+      </Box>
 
       {/* Map panel (TierAnimationSection) */}
       <TierAnimationSection />

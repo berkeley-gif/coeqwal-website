@@ -9,11 +9,17 @@ import {
   type ChartDataPoint,
 } from "../../scenarios/components/shared/types"
 import { getSingleValueLocationCount } from "../../../content/outcomes"
+import {
+  hydroclimateOptions,
+  type HydroclimateOption,
+} from "../../../content/scenarios"
+import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
 
 interface ShareScenarioCardProps {
   scenarioId: string
   name: string
   description: string
+  hydroclimate?: string
   chartData?: Record<string, ChartDataPoint[]>
   outcomeNames: { shortCode: string; displayName: string }[]
   onRemove?: (id: string) => void
@@ -24,12 +30,20 @@ export default function ShareScenarioCard({
   scenarioId,
   name,
   description,
+  hydroclimate,
   chartData,
   outcomeNames,
   onRemove,
   viewMode,
 }: ShareScenarioCardProps) {
   const theme = useTheme()
+
+  const climateOption: HydroclimateOption | undefined = hydroclimate
+    ? hydroclimateOptions.find((o) => o.value === hydroclimate)
+    : undefined
+  const climateConfig = hydroclimate
+    ? HYDROCLIMATE_CONFIG[hydroclimate]
+    : undefined
 
   return (
     <Box
@@ -73,20 +87,63 @@ export default function ShareScenarioCard({
         {name}
       </Typography>
 
-      {/* Chart type */}
-      {description && (
-        <Typography
-          variant="caption"
-          sx={{
-            display: "block",
-            lineHeight: 1.3,
-            color: theme.palette.grey[700],
-            mt: 0.25,
-          }}
-        >
-          {description}
-        </Typography>
-      )}
+      {/* Metadata row: hydroclimate badge + chart type */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.75,
+          mt: 0.5,
+          flexWrap: "wrap",
+        }}
+      >
+        {climateOption && climateConfig && (
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.375,
+              backgroundColor: `${climateConfig.bgColor}14`,
+              border: `1px solid ${climateConfig.bgColor}33`,
+              borderRadius: "4px",
+              px: 0.625,
+              py: 0.125,
+            }}
+          >
+            <Box
+              sx={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                backgroundColor: climateConfig.bgColor,
+                flexShrink: 0,
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: "0.625rem",
+                lineHeight: 1.2,
+                fontWeight: 500,
+                color: theme.palette.grey[800],
+                whiteSpace: "nowrap",
+              }}
+            >
+              {climateOption.label}
+            </Typography>
+          </Box>
+        )}
+        {description && (
+          <Typography
+            sx={{
+              fontSize: "0.6875rem",
+              lineHeight: 1.3,
+              color: theme.palette.grey[500],
+            }}
+          >
+            {description}
+          </Typography>
+        )}
+      </Box>
 
       {/* Outcome glyphs */}
       {chartData &&
