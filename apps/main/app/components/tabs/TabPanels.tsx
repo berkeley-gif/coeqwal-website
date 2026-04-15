@@ -23,6 +23,7 @@ import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
+import { parseShareItemsParam } from "../tabPanels/Share"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },
@@ -83,17 +84,39 @@ export default function TabPanels() {
       navigateToTab(urlTab)
     }
 
-    const scenariosParam = params.get("scenarios")
-    if (scenariosParam) {
-      const ids = scenariosParam.split(",").filter(Boolean)
-      if (ids.length > 0) {
-        useScenarioExplorerStore.getState().setSharedScenarioIds(ids)
-      }
-    }
-
     const climateParam = params.get("climate")
     if (climateParam) {
       useScenarioExplorerStore.getState().setHydroclimate(climateParam)
+    }
+
+    const itemsParam = params.get("items")
+    if (itemsParam) {
+      const parsed = parseShareItemsParam(itemsParam)
+      if (parsed.length > 0) {
+        useScenarioExplorerStore.getState().setShareItems(parsed)
+      }
+    } else {
+      const scenariosParam = params.get("scenarios")
+      if (scenariosParam) {
+        const ids = scenariosParam.split(",").filter(Boolean)
+        if (ids.length > 0) {
+          const items = ids.map((raw) => {
+            const [scenarioId, modeSuffix] = raw.includes(":")
+              ? [raw.split(":")[0]!, raw.split(":")[1]]
+              : [raw, undefined]
+            return {
+              id: crypto.randomUUID(),
+              type: "barChart" as const,
+              scenarioId,
+              viewMode:
+                modeSuffix === "distribution"
+                  ? ("distribution" as const)
+                  : ("summary" as const),
+            }
+          })
+          useScenarioExplorerStore.getState().setShareItems(items)
+        }
+      }
     }
 
     if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {

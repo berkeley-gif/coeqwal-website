@@ -1,24 +1,340 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
-import { Box, Typography, Button, Tooltip, useTheme, icons } from "@repo/ui/mui"
+import React, { useMemo, useState, useCallback } from "react"
+import {
+  Box,
+  Typography,
+  Button,
+  Tooltip,
+  IconButton,
+  useTheme,
+  icons,
+} from "@repo/ui/mui"
+import {
+  DndContext,
+  pointerWithin,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
+import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
+import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
+import {
+  downloadFromDataUrl,
+  exportAsJSON,
+  getTimestampedFilename,
+} from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
 
-function buildShareUrl(ids: string[], climate: string): string {
-  const parts = [`tab=share`, `scenarios=${ids.join(",")}`]
+// ---------------------------------------------------------------------------
+// URL helpers
+// ---------------------------------------------------------------------------
+
+function encodeShareItems(items: ShareItem[], climate: string): string {
+  const parts = [`tab=share`]
   if (climate !== "historical") parts.push(`climate=${climate}`)
+  const encoded = items.map((item) => {
+    if (item.type === "barChart") {
+      return `b.${item.scenarioId}.${item.viewMode === "summary" ? "s" : "d"}`
+    }
+    const ids = item.scenarioIds.join("~")
+    const axes = item.axes.join("~")
+    let flags = ""
+    if (item.showRange) flags += "r"
+    if (item.highlightBaseline) flags += "b"
+    if (item.showDotsOnly) flags += "d"
+    return `r.${ids}.${axes}.${flags}`
+  })
+  if (encoded.length > 0) parts.push(`items=${encoded.join(",")}`)
   return `${window.location.origin}/?${parts.join("&")}`
 }
+
+// ---------------------------------------------------------------------------
+// Shared URL parsing (exported for use by TabPanels restore logic)
+// ---------------------------------------------------------------------------
+
+export function parseShareItemsParam(param: string): ShareItem[] {
+  if (!param) return []
+  return param
+    .split(",")
+    .map((token): ShareItem | null => {
+      const parts = token.split(".")
+      if (parts[0] === "b" && parts.length >= 3) {
+        return {
+          id: crypto.randomUUID(),
+          type: "barChart",
+          scenarioId: parts[1]!,
+          viewMode: parts[2] === "d" ? "distribution" : "summary",
+        }
+      }
+      if (parts[0] === "r" && parts.length >= 3) {
+        const scenarioIds = parts[1]!.split("~").filter(Boolean)
+        const axes = parts[2]!.split("~").filter(Boolean)
+        const flags = parts[3] ?? ""
+        return {
+          id: crypto.randomUUID(),
+          type: "radar",
+          scenarioIds,
+          axes,
+          showRange: flags.includes("r"),
+          highlightBaseline: flags.includes("b"),
+          showDotsOnly: flags.includes("d"),
+        }
+      }
+      return null
+    })
+    .filter(Boolean) as ShareItem[]
+}
+
+// ---------------------------------------------------------------------------
+// Transform helper for dnd-kit (translate only, no scale)
+// ---------------------------------------------------------------------------
+
+function transformToCSS(
+  transform: { x: number; y: number; scaleX: number; scaleY: number } | null,
+): string | undefined {
+  if (!transform) return undefined
+  const { x, y } = transform
+  return `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`
+}
+
+// ---------------------------------------------------------------------------
+// Sortable card (unified for both barChart and radar items)
+// ---------------------------------------------------------------------------
+
+function SortableShareCard({
+  item,
+  onRemove,
+  onDownloadImage,
+  onDownloadData,
+  outcomeNames,
+  scenarioLookup,
+  allChartData,
+}: {
+  item: ShareItem
+  onRemove: (id: string) => void
+  onDownloadImage: (item: ShareItem) => void
+  onDownloadData: (item: ShareItem) => void
+  outcomeNames: { shortCode: string; displayName: string }[]
+  scenarioLookup: Map<string, { name: string; description: string }>
+  allChartData: Record<string, Record<string, unknown> | undefined>
+}) {
+  const theme = useTheme()
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id })
+
+  const style: React.CSSProperties = {
+    transform: transformToCSS(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    touchAction: "none",
+    zIndex: isDragging ? 100 : "auto",
+  }
+
+  const renderContent = () => {
+    if (item.type === "barChart") {
+      const info = scenarioLookup.get(item.scenarioId)
+      const viewLabel =
+        item.viewMode === "distribution"
+          ? "Key outcomes distribution"
+          : "Key outcomes bar chart"
+      const chartData =
+        (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
+        (allChartData[item.scenarioId] as Record<string, ChartDataPoint[]> | undefined)
+      return (
+        <Box sx={{ px: 0.5, pb: 0.5 }}>
+          <ShareScenarioCard
+            scenarioId={item.id}
+            name={info?.description ?? info?.name ?? item.scenarioId}
+            description={viewLabel}
+            chartData={chartData}
+            outcomeNames={outcomeNames}
+            viewMode={item.viewMode}
+          />
+        </Box>
+      )
+    }
+
+    const radarLabel = `Radar: ${item.scenarioIds.length} scenario${item.scenarioIds.length !== 1 ? "s" : ""}`
+    const toggleParts: string[] = []
+    if (item.showRange) toggleParts.push("range")
+    if (item.highlightBaseline) toggleParts.push("baseline")
+    const subtitle =
+      toggleParts.length > 0
+        ? `with ${toggleParts.join(" + ")}`
+        : `${item.axes.length} axes`
+
+    return (
+      <>
+        {item.cachedImageDataUrl ? (
+          <Box sx={{ px: 1, pb: 0.75 }}>
+            <Box
+              component="img"
+              src={item.cachedImageDataUrl}
+              alt={radarLabel}
+              sx={{
+                width: "100%",
+                height: "auto",
+                maxHeight: 200,
+                objectFit: "contain",
+                borderRadius: "4px",
+                backgroundColor: "#fff",
+              }}
+            />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              px: 1,
+              pb: 0.75,
+              minHeight: 80,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: theme.palette.grey[500],
+              fontSize: "0.75rem",
+            }}
+          >
+            Radar view (re-open Explore to regenerate image)
+          </Box>
+        )}
+        <Box sx={{ px: 1.5, pb: 0.5 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: theme.palette.grey[900],
+              fontSize: "0.8125rem",
+            }}
+          >
+            {radarLabel}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              lineHeight: 1.3,
+              color: theme.palette.grey[600],
+              fontSize: "0.6875rem",
+              mt: 0.25,
+            }}
+          >
+            {subtitle}
+          </Typography>
+        </Box>
+      </>
+    )
+  }
+
+  return (
+    <Box
+      ref={setNodeRef}
+      style={style}
+      sx={{
+        position: "relative",
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: "8px",
+        backgroundColor: theme.palette.background.paper,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {/* Drag handle */}
+      <Box
+        {...attributes}
+        {...listeners}
+        sx={{
+          cursor: isDragging ? "grabbing" : "grab",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 0.5,
+          color: theme.palette.grey[400],
+          "&:hover": { color: theme.palette.grey[600] },
+        }}
+      >
+        <icons.DragIndicator sx={{ fontSize: "1rem" }} />
+      </Box>
+
+      {renderContent()}
+
+      {/* Actions */}
+      <Box sx={{ px: 1.5, pb: 1.25 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 0.5,
+            mt: 0.5,
+            alignItems: "center",
+          }}
+        >
+          <Tooltip title="Download image" arrow>
+            <IconButton
+              size="small"
+              onClick={() => onDownloadImage(item)}
+              disabled={!item.cachedImageDataUrl}
+              sx={{ p: 0.5, color: theme.palette.grey[500] }}
+            >
+              <icons.Image sx={{ fontSize: "0.875rem" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Download data" arrow>
+            <IconButton
+              size="small"
+              onClick={() => onDownloadData(item)}
+              disabled={!item.cachedChartData}
+              sx={{ p: 0.5, color: theme.palette.grey[500] }}
+            >
+              <icons.DataObject sx={{ fontSize: "0.875rem" }} />
+            </IconButton>
+          </Tooltip>
+          <Box sx={{ flex: 1 }} />
+          <Tooltip title="Remove" arrow>
+            <IconButton
+              size="small"
+              onClick={() => onRemove(item.id)}
+              sx={{ p: 0.5, color: theme.palette.grey[400] }}
+            >
+              <icons.Close sx={{ fontSize: "0.875rem" }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main SharePanel
+// ---------------------------------------------------------------------------
 
 export default function SharePanel() {
   const theme = useTheme()
   const { navigateToTab } = useTabNavigation()
   const [copied, setCopied] = useState(false)
 
-  const { sharedScenarioIds, hydroclimate } = useScenarioExplorerStore()
+  const { shareItems, hydroclimate, reorderShareItems, removeShareItem } =
+    useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
@@ -31,7 +347,73 @@ export default function SharePanel() {
     return map
   }, [siblingGroups])
 
-  if (sharedScenarioIds.length === 0) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  const itemIds = useMemo(
+    () => shareItems.map((s) => s.id),
+    [shareItems],
+  )
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over || active.id === over.id) return
+      const oldIndex = itemIds.indexOf(active.id as string)
+      const newIndex = itemIds.indexOf(over.id as string)
+      if (oldIndex === -1 || newIndex === -1) return
+      reorderShareItems(arrayMove(itemIds, oldIndex, newIndex))
+    },
+    [itemIds, reorderShareItems],
+  )
+
+  const handleDownloadImage = useCallback(async (item: ShareItem) => {
+    if (!item.cachedImageDataUrl) return
+    const filename = getTimestampedFilename(
+      `coeqwal-${item.type}`,
+      "png",
+    )
+    await downloadFromDataUrl(item.cachedImageDataUrl, filename)
+  }, [])
+
+  const handleDownloadData = useCallback((item: ShareItem) => {
+    if (!item.cachedChartData) return
+    const filename = getTimestampedFilename(
+      `coeqwal-${item.type}-data`,
+      "json",
+    )
+    exportAsJSON(item.cachedChartData, filename)
+  }, [])
+
+  const handleDownloadAllImages = useCallback(async () => {
+    for (const item of shareItems) {
+      if (!item.cachedImageDataUrl) continue
+      const filename = getTimestampedFilename(
+        `coeqwal-${item.type}`,
+        "png",
+      )
+      await downloadFromDataUrl(item.cachedImageDataUrl, filename)
+    }
+  }, [shareItems])
+
+  const handleDownloadAllData = useCallback(() => {
+    const allData = shareItems
+      .filter((s) => s.cachedChartData)
+      .map((s) => ({
+        type: s.type,
+        ...(s.type === "barChart"
+          ? { scenarioId: s.scenarioId, viewMode: s.viewMode }
+          : { scenarioIds: s.scenarioIds, axes: s.axes }),
+        chartData: s.cachedChartData,
+      }))
+    exportAsJSON(allData, getTimestampedFilename("coeqwal-chart-data", "json"))
+  }, [shareItems])
+
+  if (shareItems.length === 0) {
     return (
       <Box
         sx={{
@@ -80,7 +462,7 @@ export default function SharePanel() {
   }
 
   return (
-    <Box sx={{ px: 3, py: 3, maxWidth: 800, mx: "auto" }}>
+    <Box sx={{ px: 3, py: 3, maxWidth: 960, mx: "auto" }}>
       <Typography
         variant="h5"
         sx={{ fontWeight: 600, mb: 0.5, color: theme.palette.text.secondary }}
@@ -95,69 +477,51 @@ export default function SharePanel() {
           mb: 3,
         }}
       >
-        {(() => {
-          const uniqueScenarios = new Set(
-            sharedScenarioIds.map((id) =>
-              id.includes(":") ? id.split(":")[0]! : id,
-            ),
-          )
-          const scenarioCount = uniqueScenarios.size
-          const chartCount = sharedScenarioIds.length
-          if (chartCount === scenarioCount) {
-            return `${scenarioCount} scenario${scenarioCount !== 1 ? "s" : ""}`
-          }
-          return `${scenarioCount} scenario${scenarioCount !== 1 ? "s" : ""}, ${chartCount} chart${chartCount !== 1 ? "s" : ""}`
-        })()}
+        {shareItems.length} item{shareItems.length !== 1 ? "s" : ""}.
+        Drag to rearrange. Download individually or export all.
       </Typography>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            md: "1fr 1fr",
-          },
-          gap: 2,
-        }}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={pointerWithin}
+        onDragEnd={handleDragEnd}
       >
-        {sharedScenarioIds.map((id) => {
-          const [baseId, viewSuffix] = id.includes(":")
-            ? [id.split(":")[0]!, id.split(":")[1]]
-            : [id, undefined]
-          const info = scenarioLookup.get(baseId)
-          const viewLabel =
-            viewSuffix === "distribution"
-              ? "Key outcomes distribution"
-              : viewSuffix === "summary"
-                ? "Key outcomes bar chart"
-                : undefined
-          return (
-            <ShareScenarioCard
-              key={id}
-              scenarioId={id}
-              name={info?.description ?? info?.name ?? baseId}
-              description={viewLabel ?? ""}
-              chartData={allChartData[baseId]}
-              outcomeNames={outcomeNames}
-              viewMode={
-                viewSuffix === "distribution"
-                  ? "distribution"
-                  : viewSuffix === "summary"
-                    ? "summary"
-                    : undefined
-              }
-            />
-          )
-        })}
-      </Box>
+        <SortableContext items={itemIds} strategy={rectSortingStrategy}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: "1fr 1fr",
+              },
+              gap: 2,
+            }}
+          >
+            {shareItems.map((item) => (
+              <SortableShareCard
+                key={item.id}
+                item={item}
+                onRemove={removeShareItem}
+                onDownloadImage={handleDownloadImage}
+                onDownloadData={handleDownloadData}
+                outcomeNames={outcomeNames}
+                scenarioLookup={scenarioLookup}
+                allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+              />
+            ))}
+          </Box>
+        </SortableContext>
+      </DndContext>
 
+      {/* Export bar */}
       <Box
         sx={{
           display: "flex",
+          flexWrap: "wrap",
           gap: 1.5,
           mt: 3,
           pt: 2,
-          borderTop: `1px solid rgba(255,255,255,0.2)`,
+          borderTop: `1px solid rgba(255,255,255,0.15)`,
         }}
       >
         <Tooltip
@@ -168,7 +532,7 @@ export default function SharePanel() {
             variant="outlined"
             size="small"
             onClick={async () => {
-              const url = buildShareUrl(sharedScenarioIds, hydroclimate)
+              const url = encodeShareItems(shareItems, hydroclimate)
               try {
                 await navigator.clipboard.writeText(url)
               } catch {
@@ -201,7 +565,34 @@ export default function SharePanel() {
         <Button
           variant="outlined"
           size="small"
+          onClick={handleDownloadAllImages}
+          startIcon={<icons.Image sx={{ fontSize: "0.875rem" }} />}
+          sx={{
+            textTransform: "none",
+            color: theme.palette.text.secondary,
+            borderColor: "rgba(255,255,255,0.3)",
+          }}
+        >
+          Download all images
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={handleDownloadAllData}
+          startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
+          sx={{
+            textTransform: "none",
+            color: theme.palette.text.secondary,
+            borderColor: "rgba(255,255,255,0.3)",
+          }}
+        >
+          Download all data
+        </Button>
+        <Button
+          variant="outlined"
+          size="small"
           disabled
+          startIcon={<icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />}
           sx={{
             textTransform: "none",
             color: theme.palette.text.secondary,

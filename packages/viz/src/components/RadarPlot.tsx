@@ -57,6 +57,8 @@ export interface RadarPlotProps {
       anchor: "start" | "end" | "middle"
     }[],
   ) => void
+  /** External ref to access the rendered SVG element (e.g. for capture/export) */
+  svgRefCallback?: (svg: SVGSVGElement | null) => void
 }
 
 function toTier(v: number): number {
@@ -268,6 +270,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     enableTooltip = true,
     onDotHover,
     onAxisPositions,
+    svgRefCallback,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -1181,7 +1184,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         }}
       >
         <svg
-          ref={svgRef}
+          ref={(el) => {
+            (svgRef as React.MutableRefObject<SVGSVGElement | null>).current = el
+            svgRefCallback?.(el)
+          }}
           width={currentWidth}
           height={currentHeight}
           style={{ display: "block", width: "100%", height: "100%" }}

@@ -12,7 +12,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -138,6 +138,15 @@ export default function ScenarioExplorer() {
     setShowAxisSelector,
   } = useScenarioExplorerStore()
 
+  const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
+
+  const handleRadarCaptureReady = useCallback(
+    (capture: () => Promise<void>) => {
+      radarCaptureRef.current = capture
+    },
+    [],
+  )
+
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
@@ -167,6 +176,36 @@ export default function ScenarioExplorer() {
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
           />
+          <Box
+            component="button"
+            type="button"
+            onClick={() => radarCaptureRef.current?.()}
+            aria-label="capture view"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              transition: "all 150ms ease",
+              "&:hover": {
+                background: theme.palette.interaction.selectedBackground,
+                color: theme.palette.blue.bright,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            capture view
+          </Box>
         </ChartControlsBar>
       )
     }
@@ -183,6 +222,7 @@ export default function ScenarioExplorer() {
     setHighlightBaseline,
     radarShowAll,
     setRadarShowAll,
+    theme,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -248,6 +288,7 @@ export default function ScenarioExplorer() {
                     highlightedIds={highlightedIds}
                     onScenarioHover={handleToolScenarioHover}
                     onAxisHover={handleAxisHover}
+                    onCaptureReady={handleRadarCaptureReady}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}

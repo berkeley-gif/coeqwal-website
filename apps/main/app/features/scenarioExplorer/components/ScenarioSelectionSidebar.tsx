@@ -59,7 +59,7 @@ export default function ScenarioSelectionSidebar({
     showOnlyChosen,
     groupByTheme,
     searchQuery,
-    addToShare,
+    addShareItem,
     outcomeDisplayMode,
     exploreMode,
   } = useScenarioExplorerStore()
@@ -294,7 +294,18 @@ export default function ScenarioSelectionSidebar({
                       }
                       isPinned={isPinned}
                       accentColor={accentColor}
-                      addToShare={addToShare}
+                      onShare={() => {
+                        const vm =
+                          outcomeDisplayMode === "distribution"
+                            ? "distribution"
+                            : "summary"
+                        addShareItem({
+                          id: crypto.randomUUID(),
+                          type: "barChart",
+                          scenarioId: scenario.scenarioId,
+                          viewMode: vm as "summary" | "distribution",
+                        })
+                      }}
                       togglePinnedScenario={togglePinnedScenario}
                       hidePinning={exploreMode === "radar"}
                     />

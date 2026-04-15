@@ -56,17 +56,45 @@ State management combines **Zustand** stores (map state, scenario explorer state
 
 ## Stack
 
-- [Next.js](https://nextjs.org/)
-- [React](https://reactjs.org/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Turborepo](https://turbo.build/repo)
-- [pnpm](https://pnpm.io/)
-- [React-map-gl](https://visgl.github.io/react-map-gl/) (using mapbox)
-  - [Mapbox](https://mapbox.com/)
-- [D3](https://d3js.org/)
-- [MaterialUI](https://mui.com/material-ui/)
-- [motion](https://motion.dev/)
-- [SASS](https://sass-lang.com/)
+| Layer | Technology |
+|-------|------------|
+| Framework | [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://reactjs.org/), [TypeScript 5.8](https://www.typescriptlang.org/) |
+| Build | [Turborepo](https://turbo.build/repo), [pnpm 10](https://pnpm.io/), Node 22 |
+| UI | [MUI v7](https://mui.com/material-ui/) + [Emotion](https://emotion.sh/), [SASS](https://sass-lang.com/) |
+| State | [Zustand](https://zustand-demo.pmnd.rs/) (with [Immer](https://immerjs.github.io/immer/)), React Context |
+| Data fetching | [SWR](https://swr.vercel.app/), native fetch |
+| Maps | [Mapbox GL](https://mapbox.com/) + [react-map-gl](https://visgl.github.io/react-map-gl/), [Turf.js](https://turfjs.org/) |
+| Charts | [D3 v7](https://d3js.org/) (custom components in `@repo/viz`) |
+| Animation | [Framer Motion](https://motion.dev/), [Flubber](https://github.com/veltman/flubber) (shape morphing) |
+| Scrollytelling | [react-scrollama](https://github.com/jsonkao/react-scrollama), custom `@repo/scrollytelling` |
+| Drag and drop | [@dnd-kit](https://dndkit.com/) |
+| Deploy | [AWS Amplify](https://aws.amazon.com/amplify/) (static export) |
+
+## Key architecture patterns
+
+### Data flow
+
+The main app wraps its component tree in a `DataProvider` (SWR) that communicates with the external COEQWAL API at `https://api.coeqwal.org/api`. Typed hooks in `@repo/data` (such as `useScenarios`, `useTiers`, `useReservoirPercentiles`, and others) abstract the API calls and manage caching via SWR cache keys. File downloads are handled through a separate AWS API Gateway endpoint. There are no Next.js API routes in the repo. All three apps are statically exported and rely entirely on client-side fetching to external services.
+
+### State management
+
+Zustand stores manage complex UI state for the map (`apps/main/app/features/map/store.ts`) and the scenario explorer (`apps/main/app/features/scenarioExplorer/store.ts`). React Context is used for the map API (`MapContext`), tab navigation (`TabsProvider`), chart grid layout (`ChartGridContext`), and internationalization (`TranslationProvider`). The active tab is also synced to URL query parameters.
+
+### Persistent map
+
+The main app renders a Mapbox map that persists behind all scrolling and tabbed content. A `LayerOrchestrator` manages base layers (basins, rivers, directional arrows) and visualization layers (scenario outcome polygons, tier markers, points of interest). The map is dynamically imported with `ssr: false` to avoid bundling Mapbox GL on the server.
+
+### Static export
+
+All three apps use `output: "export"` in their Next.js config, producing fully static sites deployed to AWS Amplify. This means no server-side rendering at request time, no API routes, and no middleware. The `NEXT_PUBLIC_MAPBOX_TOKEN` environment variable is required at build time.
+
+### Visualization
+
+The `@repo/viz` package contains custom D3 chart components covering a wide range of chart types: line, bar, radar, sankey, dumbbell, percentile bands, dot strips, parallel plots, heatmaps, distribution glyphs, and more. These are purpose-built for water data and scenario comparison.
+
+### Internationalization
+
+Under construction
 
 ## Installation
 
@@ -88,7 +116,7 @@ corepack prepare pnpm@10.0.0 --activate
 
 Note (in case you were reading the `amplify.yml` and wondering): Locally it's easiest to use Corepack. AWS Amplify instead installs pnpm globally in the container they use to run the build.
 
-### Installating the repo and packages
+### Installing the repo and packages
 
 Clone the repository, cd into the repo, and install dependencies.
 
@@ -173,7 +201,7 @@ rm -rf .turbo apps/main/.next
 
 See also the `clean` scripts in the root `package.json`.
 
-## Changes from the Standard Turborepo
+## Changes from the standard Turborepo
 
 This Turborepo has been customized to meet the needs of the COEQWAL project. Key changes include:
 
