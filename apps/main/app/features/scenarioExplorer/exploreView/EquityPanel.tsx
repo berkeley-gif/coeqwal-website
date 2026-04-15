@@ -16,11 +16,142 @@ import { useScenarioExplorerStore } from "../store"
 import { mapActions, useMapStore } from "../../map/store"
 import { TIER_LABELS } from "../../../content/tiers"
 import { getOutcomeLocationCoordinates } from "../../map/config/outcomeLocations"
+import {
+  OUTCOME_LAYER_REGISTRY,
+  RESERVOIR_CALSIM_TO_GNISIDLABEL,
+} from "../../map/config/outcomeLayerRegistry"
+import { useMap } from "@repo/map"
 
 const TIERS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]
 
+// ============================================================================
+// CENTROID CALCULATION HELPERS
+// ============================================================================
+
+/**
+ * Calculate the centroid of a polygon using geographic center method
+ */
+function calculatePolygonCentroid(coordinates: number[][][]): [number, number] {
+  const outerRing = coordinates[0]
+  if (!outerRing || outerRing.length === 0) {
+    return [0, 0]
+  }
+
+  let sumLng = 0
+  let sumLat = 0
+  let count = 0
+
+  for (const coord of outerRing) {
+    const lng = coord[0]
+    const lat = coord[1]
+    if (lng !== undefined && lat !== undefined) {
+      sumLng += lng
+      sumLat += lat
+      count++
+    }
+  }
+
+  return count > 0 ? [sumLng / count, sumLat / count] : [0, 0]
+}
+
+/**
+ * Calculate centroid for a MultiPolygon
+ */
+function calculateMultiPolygonCentroid(
+  coordinates: number[][][][],
+): [number, number] {
+  if (coordinates.length === 0) {
+    return [0, 0]
+  }
+
+  let largestPolygon = coordinates[0]
+  let maxPoints = largestPolygon?.[0]?.length ?? 0
+
+  for (const polygon of coordinates) {
+    const pointCount = polygon?.[0]?.length ?? 0
+    if (pointCount > maxPoints) {
+      maxPoints = pointCount
+      largestPolygon = polygon
+    }
+  }
+
+  if (!largestPolygon) {
+    return [0, 0]
+  }
+
+  return calculatePolygonCentroid(largestPolygon)
+}
+
+/**
+ * Get the centroid for a polygon feature from Mapbox
+ */
+function getPolygonCentroidFromMapbox(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any,
+  outcomeCode: string,
+  locationId: string,
+): [number, number] | null {
+  const config = OUTCOME_LAYER_REGISTRY[outcomeCode]
+
+  // Only works for polygon layers
+  if (!config || config.geometryType !== "polygon") {
+    return null
+  }
+
+  let sourceLayer = config.sourceLayer
+  const idProperty = outcomeCode != "DELTA_ECO" ? config.idProperty : "WBA_ID"
+
+  if (!sourceLayer || !idProperty) {
+    return null
+  }
+  const sourceId = "composite"
+
+  if (outcomeCode == "AG_REV" || outcomeCode == "CWS_DEL")
+    sourceLayer = "demand_units"
+  if (outcomeCode == "RES_STOR")
+    locationId = RESERVOIR_CALSIM_TO_GNISIDLABEL[locationId] || locationId
+  if (outcomeCode == "DELTA_ECO") sourceLayer = "delta_water"
+
+  try {
+    // Query the source for the specific feature
+    const filter =
+      outcomeCode === "DELTA_ECO"
+        ? undefined
+        : ["==", ["get", idProperty], locationId]
+
+    const features = map.querySourceFeatures(sourceId, {
+      sourceLayer: sourceLayer,
+      ...(filter && { filter }),
+    })
+
+    if (features.length === 0) {
+      return null
+    }
+
+    const feature = features[0]
+    const geometry = feature.geometry
+
+    if (geometry.type === "Polygon" && geometry.coordinates) {
+      return calculatePolygonCentroid(geometry.coordinates as number[][][])
+    } else if (geometry.type === "MultiPolygon" && geometry.coordinates) {
+      return calculateMultiPolygonCentroid(
+        geometry.coordinates as number[][][][],
+      )
+    }
+
+    return null
+  } catch (error) {
+    console.warn(
+      `Failed to get centroid for ${locationId} in ${outcomeCode}:`,
+      error,
+    )
+    return null
+  }
+}
+
 export default function EquityPanel() {
   const theme = useTheme()
+  const { mapRef } = useMap()
 
   // Get currently selected scenarios and comparison mode from the store
   const { selectedScenarios, showEquityComparison, showMap } =
@@ -172,6 +303,9 @@ export default function EquityPanel() {
     (locationIds: string[]) => {
       console.log("Show on map:", locationIds)
 
+      // Get the Mapbox map instance
+      const map = mapRef?.current?.getMap()
+
       // Create location highlights from selected objectives
       const highlights = selectedObjectives
         .filter((obj) => locationIds.includes(obj.locationId))
@@ -192,16 +326,27 @@ export default function EquityPanel() {
             }
           }
 
-          console.log(obj.tierCode, obj.locationId)
+          // Get coordinates - try polygon centroid first, fallback to hardcoded
+          let coords: [number, number] | null = null
 
-          // Get coordinates from tier code and location ID
-          const coords = obj.tierCode
-            ? getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
-            : null
+          if (obj.tierCode && map) {
+            // Try to get centroid from polygon layer
+            coords = getPolygonCentroidFromMapbox(
+              map,
+              obj.tierCode,
+              obj.locationId,
+            )
+          }
+
+          // Fallback to hardcoded coordinates if polygon centroid not available
+          if (!coords && obj.tierCode) {
+            coords = getOutcomeLocationCoordinates(obj.tierCode, obj.locationId)
+          }
+          console.log(obj.tierCode, obj.locationId, coords)
 
           return {
             key: obj.locationId,
-            longitude: coords?.[0] ?? -121, // TODO: FIX Need real locations
+            longitude: coords?.[0] ?? -121,
             latitude: coords?.[1] ?? 38.5,
             name: obj.locationName,
             tierLevel: obj.tierLevel,
@@ -214,10 +359,10 @@ export default function EquityPanel() {
       // Set location highlights on the map
       mapActions.setLocationHighlights(highlights)
 
-      // Switch to explore mode to show the map
+      // Switch to explore mode to show the map, just to be sure... maybe not needed
       mapActions.setMapMode("explore")
     },
-    [selectedObjectives, showEquityComparison],
+    [selectedObjectives, showEquityComparison, mapRef],
   )
 
   return (
