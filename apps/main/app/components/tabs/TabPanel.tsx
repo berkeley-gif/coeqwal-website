@@ -16,11 +16,19 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
     const mapMode = useMapMode()
     const thisPanelId = `panel-${tabKey}`
 
-    // Map tab panels (in Learn, Explore) need transparent backgrounds and no padding
-    // so the persistent map shows through and content sits flush with tabs.
+    // Learn tab is always transparent so the persistent map shows through.
+    // Explore tab is transparent only in get-started mode (map behind);
+    // in tool modes it uses a solid background to prevent map flash.
     const isMapTab = tabKey === "learn" || tabKey === "explore"
     const isExploreTab = tabKey === "explore"
-    const backgroundColor = isMapTab ? "transparent" : undefined
+    const backgroundColor =
+      tabKey === "learn"
+        ? "transparent"
+        : isExploreTab
+          ? mapMode === "get-started"
+            ? "transparent"
+            : theme.palette.explore.background
+          : undefined
     const padding = isMapTab ? "0" : `2rem ${theme.space.panel.padding}`
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
