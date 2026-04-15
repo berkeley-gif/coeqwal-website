@@ -32,6 +32,31 @@ export type ExploreMode =
  */
 export type MainView = "get-started" | "explorer" | "data"
 
+/**
+ * A single item staged for the Share tab composition grid.
+ * The union discriminant `type` determines which rendering path is used.
+ */
+export type ShareItem =
+  | {
+      id: string
+      type: "barChart"
+      scenarioId: string
+      viewMode: "summary" | "distribution"
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+    }
+  | {
+      id: string
+      type: "radar"
+      scenarioIds: string[]
+      axes: string[]
+      showRange: boolean
+      highlightBaseline: boolean
+      showDotsOnly: boolean
+      cachedImageDataUrl?: string
+      cachedChartData?: Record<string, unknown>
+    }
+
 // ============================================================================
 // State Interface
 // ============================================================================
@@ -73,7 +98,7 @@ interface ScenarioExplorerState {
   showLocationPicker: boolean
 
   // Share staging
-  sharedScenarioIds: string[]
+  shareItems: ShareItem[]
   showShareDrawer: boolean
 
   // Chart toggles (shared across chart panels)
@@ -149,10 +174,12 @@ interface ScenarioExplorerActions {
   setShowLocationPicker: (show: boolean) => void
 
   // Share staging
-  addToShare: (id: string) => void
-  removeFromShare: (id: string) => void
-  clearShared: () => void
-  setSharedScenarioIds: (ids: string[]) => void
+  addShareItem: (item: ShareItem) => void
+  removeShareItem: (id: string) => void
+  reorderShareItems: (orderedIds: string[]) => void
+  clearShareItems: () => void
+  setShareItems: (items: ShareItem[]) => void
+  updateShareItem: (id: string, patch: Partial<ShareItem>) => void
   setShowShareDrawer: (open: boolean) => void
 
   // Chart toggles
@@ -219,7 +246,7 @@ const initialState: ScenarioExplorerState = {
   outcomeDisplayMode: "summary",
   showMap: false,
   showLocationPicker: false,
-  sharedScenarioIds: [],
+  shareItems: [],
   showShareDrawer: false,
   relativeToBaseline: true,
   highlightBaseline: false,
@@ -404,28 +431,49 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       }),
 
     // Share staging
-    addToShare: (id) =>
+    addShareItem: (item) =>
       set((state) => {
-        if (!state.sharedScenarioIds.includes(id)) {
-          state.sharedScenarioIds.push(id)
+        if (item.type === "barChart") {
+          const exists = state.shareItems.some(
+            (s) =>
+              s.type === "barChart" &&
+              s.scenarioId === item.scenarioId &&
+              s.viewMode === item.viewMode,
+          )
+          if (exists) return
         }
+        state.shareItems.push(item)
         state.showShareDrawer = true
       }),
 
-    removeFromShare: (id) =>
+    removeShareItem: (id) =>
       set((state) => {
-        const idx = state.sharedScenarioIds.indexOf(id)
-        if (idx > -1) state.sharedScenarioIds.splice(idx, 1)
+        const idx = state.shareItems.findIndex((s) => s.id === id)
+        if (idx > -1) state.shareItems.splice(idx, 1)
       }),
 
-    clearShared: () =>
+    reorderShareItems: (orderedIds) =>
       set((state) => {
-        state.sharedScenarioIds = []
+        const byId = new Map(state.shareItems.map((s) => [s.id, s]))
+        state.shareItems = orderedIds
+          .map((id) => byId.get(id))
+          .filter(Boolean) as ShareItem[]
       }),
 
-    setSharedScenarioIds: (ids) =>
+    clearShareItems: () =>
       set((state) => {
-        state.sharedScenarioIds = ids
+        state.shareItems = []
+      }),
+
+    setShareItems: (items) =>
+      set((state) => {
+        state.shareItems = items
+      }),
+
+    updateShareItem: (id, patch) =>
+      set((state) => {
+        const item = state.shareItems.find((s) => s.id === id)
+        if (item) Object.assign(item, patch)
       }),
 
     setShowShareDrawer: (open) =>

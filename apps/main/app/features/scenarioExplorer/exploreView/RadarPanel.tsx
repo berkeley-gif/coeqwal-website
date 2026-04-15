@@ -27,6 +27,7 @@ import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
 import { ChartToast, InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
+import type { ShareItem } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -38,6 +39,7 @@ import {
   OUTCOME_REGIONAL_VARIANTS,
   type OutcomeCode,
 } from "../../../content/outcomes"
+import { captureSvgToBlob } from "../dataExplorer/utils/exportUtils"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -45,12 +47,15 @@ interface RadarPanelProps {
   onAxisHover?: (
     info: { scenarioId: string; axis: string; tierValue: number } | null,
   ) => void
+  /** Exposes a capture function to the parent so it can trigger radar capture */
+  onCaptureReady?: (capture: () => Promise<void>) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
   onScenarioHover,
   onAxisHover,
+  onCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -72,8 +77,15 @@ export default function RadarPanel({
     hydroclimate,
   } = useScenarioExplorerStore()
 
+  const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+
   const { getThemeForScenario } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
+
+  const radarSvgRef = useRef<SVGSVGElement | null>(null)
+  const handleSvgRef = useCallback((svg: SVGSVGElement | null) => {
+    radarSvgRef.current = svg
+  }, [])
 
   const activeMapDot = useMemo(
     () =>
@@ -214,6 +226,47 @@ export default function RadarPanel({
     const nameSet = new Set(radarVisibleAxes.map(getOutcomeName))
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
+
+  // Radar capture function — exposed to parent via onCaptureReady
+  const captureRadar = useCallback(async () => {
+    const svg = radarSvgRef.current
+    if (!svg) {
+      console.warn("[RadarPanel] captureRadar: SVG ref is null")
+      return
+    }
+    try {
+      const { dataUrl } = await captureSvgToBlob(svg)
+      const scenarioIds = filteredData.map((d) => d.id)
+
+      const item: ShareItem = {
+        id: crypto.randomUUID(),
+        type: "radar",
+        scenarioIds,
+        axes: [...radarVisibleAxes],
+        showRange: showRadarRange,
+        highlightBaseline,
+        showDotsOnly: showDotsOnly,
+        cachedImageDataUrl: dataUrl,
+        cachedChartData: Object.fromEntries(
+          filteredData.map((d) => [d.id, d.values]),
+        ),
+      }
+      addShareItem(item)
+    } catch (err) {
+      console.error("[RadarPanel] captureRadar failed:", err)
+    }
+  }, [
+    filteredData,
+    radarVisibleAxes,
+    showRadarRange,
+    highlightBaseline,
+    showDotsOnly,
+    addShareItem,
+  ])
+
+  useEffect(() => {
+    onCaptureReady?.(captureRadar)
+  }, [captureRadar, onCaptureReady])
 
   const highlightedData = useMemo(
     () =>
@@ -465,6 +518,7 @@ export default function RadarPanel({
             dimUnselected={radarShowAll && selectedScenarios.length > 0}
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
             enableTooltip={false}
+            svgRefCallback={handleSvgRef}
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}
             onLineHover={setHoveredScenario}

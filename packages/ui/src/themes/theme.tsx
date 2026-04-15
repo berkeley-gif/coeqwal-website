@@ -361,6 +361,7 @@ const palette = {
   tabPanels: {
     learn: "#64A4D6", // brand.water
     explore: "#3D7DB5", // brand.panelMedium
+    exploreDeep: "#2f6fa8", // Darker explore — welcome panel background
     share: "#193D6B", // brand.panelDark
   },
 

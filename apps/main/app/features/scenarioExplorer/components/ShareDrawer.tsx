@@ -11,12 +11,130 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
+import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
+import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
+
+function ShareItemCard({
+  item,
+  onRemove,
+  outcomeNames,
+  scenarioLookup,
+  allChartData,
+}: {
+  item: ShareItem
+  onRemove: (id: string) => void
+  outcomeNames: { shortCode: string; displayName: string }[]
+  scenarioLookup: Map<string, { name: string; description: string }>
+  allChartData: Record<string, Record<string, unknown> | undefined>
+}) {
+  const theme = useTheme()
+
+  if (item.type === "barChart") {
+    const info = scenarioLookup.get(item.scenarioId)
+    const viewLabel =
+      item.viewMode === "distribution"
+        ? "Key outcomes distribution"
+        : "Key outcomes bar chart"
+    const chartData =
+      (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
+      (allChartData[item.scenarioId] as Record<string, ChartDataPoint[]> | undefined)
+    return (
+      <ShareScenarioCard
+        scenarioId={item.id}
+        name={info?.description ?? info?.name ?? item.scenarioId}
+        description={viewLabel}
+        chartData={chartData}
+        outcomeNames={outcomeNames}
+        onRemove={() => onRemove(item.id)}
+        viewMode={item.viewMode}
+      />
+    )
+  }
+
+  const radarLabel = `Radar: ${item.scenarioIds.length} scenario${item.scenarioIds.length !== 1 ? "s" : ""}`
+  const toggleParts: string[] = []
+  if (item.showRange) toggleParts.push("range")
+  if (item.highlightBaseline) toggleParts.push("baseline")
+  const subtitle =
+    toggleParts.length > 0
+      ? `with ${toggleParts.join(" + ")}`
+      : `${item.axes.length} axes`
+
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: theme.borderRadius?.sm ?? "6px",
+        backgroundColor: theme.palette.background.paper,
+        p: 1,
+        mb: 1,
+        overflow: "hidden",
+      }}
+    >
+      <IconButton
+        size="small"
+        onClick={() => onRemove(item.id)}
+        sx={{
+          position: "absolute",
+          top: 4,
+          right: 4,
+          p: 0.25,
+          color: theme.palette.grey[400],
+          "&:hover": { color: theme.palette.grey[700] },
+          zIndex: 1,
+        }}
+      >
+        <icons.Close sx={{ fontSize: "0.875rem" }} />
+      </IconButton>
+      {item.cachedImageDataUrl && (
+        <Box
+          component="img"
+          src={item.cachedImageDataUrl}
+          alt={radarLabel}
+          sx={{
+            width: "100%",
+            height: "auto",
+            maxHeight: 120,
+            objectFit: "contain",
+            borderRadius: "4px",
+            backgroundColor: "#fff",
+            mb: 0.75,
+          }}
+        />
+      )}
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 600,
+          lineHeight: 1.3,
+          color: theme.palette.grey[900],
+          fontSize: "0.75rem",
+          pr: 2.5,
+        }}
+      >
+        {radarLabel}
+      </Typography>
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          lineHeight: 1.3,
+          color: theme.palette.grey[600],
+          fontSize: "0.6875rem",
+        }}
+      >
+        {subtitle}
+      </Typography>
+    </Box>
+  )
+}
 
 function ShareTab({
   count,
@@ -51,6 +169,7 @@ function ShareTab({
         border: "none",
         borderRadius: "8px 0 0 8px",
         cursor: "pointer",
+        pointerEvents: "auto",
         backgroundColor: theme.palette.blue.bright,
         color: "#fff",
         boxShadow: "-2px 0 8px rgba(0,0,0,0.15)",
@@ -70,8 +189,6 @@ function ShareTab({
           flexShrink: 0,
         }}
       >
-        {/* Explicit fontSize — Typography variants get overridden by the
-            parent Box component="button" default font styles */}
         <Typography
           sx={{
             fontSize: "0.875rem",
@@ -114,11 +231,11 @@ export default function ShareDrawer() {
   const { navigateToTab } = useTabNavigation()
 
   const {
-    sharedScenarioIds,
+    shareItems,
     showShareDrawer,
     setShowShareDrawer,
-    removeFromShare,
-    clearShared,
+    removeShareItem,
+    clearShareItems,
   } = useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
@@ -144,7 +261,7 @@ export default function ShareDrawer() {
   return (
     <>
       <ShareTab
-        count={sharedScenarioIds.length}
+        count={shareItems.length}
         isOpen={showShareDrawer}
         onClick={() => setShowShareDrawer(!showShareDrawer)}
       />
@@ -155,9 +272,13 @@ export default function ShareDrawer() {
         sx={{
           "& .MuiDrawer-paper": {
             width: DRAWER_WIDTH,
+            height: "100vh",
+            maxHeight: "100vh",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
+            pointerEvents: "auto",
             boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
           },
         }}
@@ -181,17 +302,7 @@ export default function ShareDrawer() {
               color: theme.palette.text.primary,
             }}
           >
-            {(() => {
-              const uniqueScenarios = new Set(
-                sharedScenarioIds.map((id) =>
-                  id.includes(":") ? id.split(":")[0]! : id,
-                ),
-              )
-              const sc = uniqueScenarios.size
-              const ch = sharedScenarioIds.length
-              if (ch === sc) return `Share (${sc})`
-              return `Share (${sc} scenario${sc !== 1 ? "s" : ""}, ${ch} chart${ch !== 1 ? "s" : ""})`
-            })()}
+            Share ({shareItems.length})
           </Typography>
           <IconButton
             size="small"
@@ -201,6 +312,50 @@ export default function ShareDrawer() {
             <icons.Close sx={{ fontSize: "1.125rem" }} />
           </IconButton>
         </Box>
+
+        {/* Action chips */}
+        {shareItems.length > 0 && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              gap: 0.75,
+              px: 2,
+              py: 1,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Box
+              component="button"
+              type="button"
+              onClick={clearShareItems}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                px: 1.25,
+                py: 0.5,
+                border: "none",
+                borderRadius: "12px",
+                cursor: "pointer",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+                color: theme.palette.grey[800],
+                background: theme.palette.grey[200],
+                transition: "all 150ms ease",
+                "&:hover": {
+                  background: theme.palette.interaction.selectedBackground,
+                  color: theme.palette.blue.bright,
+                },
+              }}
+            >
+              <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+              Clear all
+            </Box>
+          </Box>
+        )}
 
         {/* Scrollable card list */}
         <Box
@@ -212,7 +367,7 @@ export default function ShareDrawer() {
             py: 1.5,
           }}
         >
-          {sharedScenarioIds.length === 0 ? (
+          {shareItems.length === 0 ? (
             <Typography
               variant="body2"
               sx={{
@@ -226,63 +381,32 @@ export default function ShareDrawer() {
               Click the share icon on a scenario to add it.
             </Typography>
           ) : (
-            sharedScenarioIds.map((id) => {
-              const [baseId, viewSuffix] = id.includes(":")
-                ? [id.split(":")[0]!, id.split(":")[1]]
-                : [id, undefined]
-              const info = scenarioLookup.get(baseId)
-              const viewLabel =
-                viewSuffix === "distribution"
-                  ? "Key outcomes distribution"
-                  : viewSuffix === "summary"
-                    ? "Key outcomes bar chart"
-                    : undefined
-              return (
-                <ShareScenarioCard
-                  key={id}
-                  scenarioId={id}
-                  name={info?.description ?? info?.name ?? baseId}
-                  description={viewLabel ?? ""}
-                  chartData={allChartData[baseId]}
-                  outcomeNames={outcomeNames}
-                  onRemove={removeFromShare}
-                  viewMode={
-                    viewSuffix === "distribution"
-                      ? "distribution"
-                      : viewSuffix === "summary"
-                        ? "summary"
-                        : undefined
-                  }
-                />
-              )
-            })
+            shareItems.map((item) => (
+              <ShareItemCard
+                key={item.id}
+                item={item}
+                onRemove={removeShareItem}
+                outcomeNames={outcomeNames}
+                scenarioLookup={scenarioLookup}
+                allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+              />
+            ))
           )}
         </Box>
 
         {/* Footer actions */}
-        {sharedScenarioIds.length > 0 && (
+        {shareItems.length > 0 && (
           <Box
             sx={{
               flexShrink: 0,
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "flex-end",
               px: 2,
               py: 1.5,
               borderTop: `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Button
-              size="small"
-              onClick={clearShared}
-              sx={{
-                textTransform: "none",
-                color: theme.palette.grey[600],
-                fontSize: "0.8125rem",
-              }}
-            >
-              Clear all
-            </Button>
             <Button
               variant="contained"
               size="small"

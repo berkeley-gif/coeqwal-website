@@ -27,7 +27,7 @@ export default function ThemeGroupHeader({
   layout = "grid",
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
-  const { selectedScenarios, selectScenarios, sharedScenarioIds, addToShare } =
+  const { selectedScenarios, selectScenarios, shareItems, addShareItem, outcomeDisplayMode } =
     useScenarioExplorerStore()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
@@ -39,9 +39,14 @@ export default function ThemeGroupHeader({
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
     !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
+  const viewMode = outcomeDisplayMode === "distribution" ? "distribution" : "summary"
   const allShared =
     scenarioIds.length > 0 &&
-    scenarioIds.every((id) => sharedScenarioIds.includes(id))
+    scenarioIds.every((sid) =>
+      shareItems.some(
+        (s) => s.type === "barChart" && s.scenarioId === sid && s.viewMode === viewMode,
+      ),
+    )
 
   const handleToggle = () => {
     if (scenarioIds.length === 0) return
@@ -164,7 +169,14 @@ export default function ThemeGroupHeader({
             className="theme-action-icon"
             size="small"
             onClick={() => {
-              scenarioIds.forEach((id) => addToShare(id))
+              scenarioIds.forEach((sid) => {
+                addShareItem({
+                  id: crypto.randomUUID(),
+                  type: "barChart",
+                  scenarioId: sid,
+                  viewMode: viewMode as "summary" | "distribution",
+                })
+              })
             }}
             sx={{
               p: 0.25,
