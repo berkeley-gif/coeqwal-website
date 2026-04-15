@@ -55,6 +55,7 @@ type TabsContextShape = {
   state: State
   dispatch: React.Dispatch<Action>
   tabsRef: React.RefObject<HTMLDivElement | null>
+  subNavRef: React.RefObject<HTMLDivElement | null>
   panelRef: React.RefObject<HTMLDivElement | null>
   hasEnteredTabsFirstTime: boolean
   setHasEnteredTabsFirstTime: React.Dispatch<React.SetStateAction<boolean>>
@@ -73,6 +74,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(tabsReducer, initialState)
 
   const tabsRef = useRef<HTMLDivElement>(null)
+  const subNavRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
   const scrollIntentRef = useRef<"none" | "user" | "sync">("none")
@@ -95,6 +97,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       state,
       dispatch,
       tabsRef,
+      subNavRef,
       panelRef,
       scrollIntentRef,
       hasEnteredTabsFirstTime,
@@ -127,6 +130,7 @@ export function useTabs() {
       state: initialState,
       dispatch: () => {},
       tabsRef: { current: null } as React.RefObject<HTMLDivElement | null>,
+      subNavRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       panelRef: { current: null } as React.RefObject<HTMLDivElement | null>,
       hasEnteredTabsFirstTime: false,
       setHasEnteredTabsFirstTime: () => {},

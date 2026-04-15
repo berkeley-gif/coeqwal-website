@@ -1,36 +1,25 @@
 "use client"
 
 /**
- * ScenarioExplorer. Main scenario exploration interface.
+ * ScenarioExplorer - Content area for the Explore tab.
  *
- * Top-level navigation: Get Started | Go to tools
+ * Navigation (ExploreSubNav) has been lifted to the page shell so it
+ * participates in the sticky stacking alongside SmoothTabs. This
+ * component only renders the active view content.
  *
  * All explore modes route through UnifiedToolLayout:
  *   - List mode: no sidebar, ToolToolbar with grid-aligned search/chips
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  PlayArrowIcon,
-  ViewListIcon,
-  ExploreIcon,
-  AdjustIcon,
-  AppsIcon,
-  CompareArrowsIcon,
-  InsightsIcon,
-  icons,
-} from "@repo/ui/mui"
+import { useCallback, useMemo, useState } from "react"
+import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
 import ToolToolbar from "./components/ToolToolbar"
 import ChartControlsBar from "./components/ChartControlsBar"
 import ScenarioSelectionSidebar from "./components/ScenarioSelectionSidebar"
 import ShareDrawer from "./components/ShareDrawer"
-// import SelectionBanner from "./components/SelectionBanner"
 import KeyboardShortcuts from "./components/KeyboardShortcuts"
 import {
   ComparisonPanel,
@@ -40,62 +29,9 @@ import {
 } from "./exploreView"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
-import {
-  useScenarioExplorerStore,
-  type MainView,
-  type ExploreMode,
-} from "./store"
+import { useScenarioExplorerStore } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
-
-// Top-level navigation tabs
-
-const MAIN_VIEWS: { view: MainView; icon: React.ReactNode; label: string }[] = [
-  {
-    view: "get-started",
-    icon: <PlayArrowIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Get started",
-  },
-  {
-    view: "explorer",
-    icon: <ExploreIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Go to tools",
-  },
-]
-
-const TOOL_TABS: {
-  mode: ExploreMode
-  icon: React.ReactNode
-  label: string
-  research?: boolean
-}[] = [
-  {
-    mode: "list",
-    icon: <ViewListIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "List",
-  },
-  {
-    mode: "radar",
-    icon: <AdjustIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Radar chart",
-  },
-  {
-    mode: "comparison",
-    icon: <CompareArrowsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Scenario comparison",
-    research: true,
-  },
-  {
-    mode: "equity",
-    icon: <AppsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Distribution comparison",
-  },
-  {
-    mode: "data",
-    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Data in depth",
-  },
-]
 
 function RadarToggleChip({
   label,
@@ -148,8 +84,7 @@ function RadarToggleChip({
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
-  const { mainView, setMainView, exploreMode, setExploreMode, showMap } =
-    useScenarioExplorerStore()
+  const { mainView, exploreMode, showMap } = useScenarioExplorerStore()
   const mapMode = useMapMode()
 
   usePrefetchTiers()
@@ -168,27 +103,6 @@ export default function ScenarioExplorer() {
   const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
     null,
   )
-
-  // Research-only tools hidden by default, toggled with "A" key
-  const [showResearchTools, setShowResearchTools] = useState(false)
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement
-      if (
-        t.tagName === "INPUT" ||
-        t.tagName === "TEXTAREA" ||
-        t.isContentEditable
-      )
-        return
-      if (e.key === "a" || e.key === "A") {
-        if (!e.altKey && !e.ctrlKey && !e.metaKey) {
-          setShowResearchTools((v) => !v)
-        }
-      }
-    }
-    document.addEventListener("keydown", handleKey)
-    return () => document.removeEventListener("keydown", handleKey)
-  }, [])
 
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
@@ -273,164 +187,7 @@ export default function ScenarioExplorer() {
         ...(isGetStartedMapMode ? {} : { height: "100%", overflow: "hidden" }),
       }}
     >
-      {/* Tab navigation */}
-      <Box
-        role="tablist"
-        aria-label="Explore section tabs"
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: theme.zIndex.pageContent,
-          flexShrink: 0,
-          pointerEvents: "auto",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          height: theme.layout.collapsedTabHeight,
-          background: theme.palette.tabPanels.explore,
-          lineHeight: 1,
-          color: theme.palette.common.white,
-          justifyContent: "center",
-          gap: 1,
-        }}
-      >
-        {MAIN_VIEWS.map(({ view, icon, label }) => {
-          const active = mainView === view
-          return (
-            <Box
-              key={view}
-              component="button"
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setMainView(view)}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.5,
-                px: 1.25,
-                py: 0.5,
-                border: "none",
-                borderRadius: theme.borderRadius.sm ?? "4px",
-                cursor: "pointer",
-                background: active ? "rgba(255,255,255,0.2)" : "transparent",
-                color: theme.palette.common.white,
-                transition: "background-color 0.15s",
-                "&:hover": { background: "rgba(255,255,255,0.15)" },
-              }}
-            >
-              {icon}
-              <Typography
-                component="span"
-                variant="dashboard"
-                sx={{
-                  fontWeight: active ? 600 : 500,
-                  lineHeight: 1,
-                  whiteSpace: "nowrap",
-                  color: theme.palette.text.secondary,
-                }}
-              >
-                {label}
-              </Typography>
-            </Box>
-          )
-        })}
-
-        {mainView === "explorer" && (
-          <>
-            <Box
-              sx={{
-                width: "1px",
-                height: 20,
-                backgroundColor: "rgba(255,255,255,0.35)",
-                flexShrink: 0,
-                mx: 0.5,
-              }}
-            />
-            <Typography
-              component="span"
-              sx={{
-                fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                fontSize: "0.9375rem",
-                fontWeight: 500,
-                lineHeight: 1,
-                whiteSpace: "nowrap",
-                color: theme.palette.text.secondary,
-                letterSpacing: "0.01em",
-                px: 0.5,
-              }}
-            >
-              Select scenarios using key outcomes:
-            </Typography>
-            {TOOL_TABS.filter((tab) => !tab.research || showResearchTools).map(
-              ({ mode, icon, label }) => {
-                const active = exploreMode === mode
-                return (
-                  <React.Fragment key={mode}>
-                    {mode === "data" && (
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontFamily:
-                            theme.typography.tabLabelDocked.fontFamily,
-                          fontSize: "0.9375rem",
-                          fontWeight: 500,
-                          lineHeight: 1,
-                          letterSpacing: "0.01em",
-                          whiteSpace: "nowrap",
-                          color: theme.palette.text.secondary,
-                          px: 0.5,
-                        }}
-                      >
-                        View data for selected scenarios:
-                      </Typography>
-                    )}
-                    <Box
-                      component="button"
-                      type="button"
-                      role="tab"
-                      aria-selected={active}
-                      onClick={() => setExploreMode(mode)}
-                      sx={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        px: 1.25,
-                        py: 0.5,
-                        border: "none",
-                        borderRadius: theme.borderRadius.sm ?? "4px",
-                        cursor: "pointer",
-                        background: active
-                          ? "rgba(255,255,255,0.2)"
-                          : "transparent",
-                        color: theme.palette.common.white,
-                        transition: "background-color 0.15s",
-                        "&:hover": { background: "rgba(255,255,255,0.15)" },
-                      }}
-                    >
-                      {icon}
-                      <Typography
-                        component="span"
-                        variant="dashboard"
-                        sx={{
-                          fontWeight: active ? 600 : 500,
-                          lineHeight: 1,
-                          whiteSpace: "nowrap",
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        {label}
-                      </Typography>
-                    </Box>
-                  </React.Fragment>
-                )
-              },
-            )}
-          </>
-        )}
-      </Box>
-
-      {/* Content area — when the map is pass-through (get-started or explore
+      {/* Content area -- when the map is pass-through (get-started or explore
           with map), these wrappers stay pointer-events:none so clicks in the
           map strip fall through to Mapbox. Child tool areas opt back in. */}
       <Box
