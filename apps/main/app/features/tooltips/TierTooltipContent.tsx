@@ -141,9 +141,7 @@ export default function TierTooltipContent({
   // Determine tier type and current tier from chart data (more accurate than score)
   const { tierType, currentTier } = getTierFromChartData(chartData)
 
-  const tierLevelNames = [1, 2, 3, 4].map(
-    (t) => TIER_LABELS[t as TierLevel],
-  )
+  const tierLevelNames = [1, 2, 3, 4].map((t) => TIER_LABELS[t as TierLevel])
 
   return (
     <Box sx={{ color: theme.palette.text.primary }}>

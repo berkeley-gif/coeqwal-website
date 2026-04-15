@@ -139,7 +139,9 @@ export default function ScenarioExplorer() {
   } | null>(null)
 
   const handleOutcomeHover = useCallback(
-    (info: { scenarioId: string; outcome: string; tierValue: number } | null) => {
+    (
+      info: { scenarioId: string; outcome: string; tierValue: number } | null,
+    ) => {
       setHoveredOutcomeInfo(info)
     },
     [],

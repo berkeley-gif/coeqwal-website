@@ -40,9 +40,7 @@ export default function ShareRadarCard({
     : undefined
 
   const title =
-    scenarioNames.length === 1
-      ? "Radar: Single Scenario"
-      : `Radar Comparison`
+    scenarioNames.length === 1 ? "Radar: Single Scenario" : `Radar Comparison`
 
   const toggleLabels: string[] = []
   if (showRange) toggleLabels.push("Range shown")
