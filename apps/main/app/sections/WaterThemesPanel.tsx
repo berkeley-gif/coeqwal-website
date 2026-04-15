@@ -430,6 +430,7 @@ function WaterThemesPanelContent({
                   justifyContent: "flex-start",
                   cursor: active ? "pointer" : "default",
                   transition: theme.transition.default,
+                  ...(!active && { opacity: 0.45 }),
                   ...(active && {
                     "&:hover": {
                       background: "rgba(210,228,242,0.9)",

@@ -41,6 +41,81 @@ const WATER_ISSUE_THEMES = [
   },
 ] as const
 
+const HYDROCLIMATES = [
+  {
+    title: "Historical hydroclimate (baseline)",
+    description:
+      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
+  },
+  {
+    title: "Moderate-dry climate risk",
+    description:
+      "Warmer and slightly drier conditions (\u22121% runoff change) — 50th percentile level of concern",
+  },
+  {
+    title: "Moderate-wet climate risk",
+    description:
+      "Warmer and wetter conditions (+7% runoff change) — 44th percentile level of concern",
+  },
+  {
+    title: "High climate risk",
+    description:
+      "Warmer and much drier conditions (\u22127% runoff change) — 95th percentile level of concern",
+  },
+  {
+    title: "Extreme climate risk",
+    description:
+      "Much warmer and extremely drier conditions (\u221221% runoff change) — 99th percentile level of concern",
+  },
+] as const
+
+const KEY_OUTCOMES = [
+  {
+    title: "Community water deliveries",
+    description:
+      "Reliability of water supplies to communities to satisfy essential drinking water needs",
+  },
+  {
+    title: "Agricultural revenue",
+    description:
+      "Economic productivity of agricultural crops based on water availability",
+  },
+  {
+    title: "Environmental flows",
+    description:
+      "Seasonal patterns of river flows needed to support healthy ecosystems",
+  },
+  {
+    title: "Delta estuary ecology",
+    description:
+      "Seasonal patterns of flows needed to support the health of the Bay Delta estuary",
+  },
+  {
+    title: "Winter-run salmon",
+    description:
+      "Population status of Sacramento River winter-run Chinook salmon",
+  },
+  {
+    title: "Freshwater for in-Delta uses",
+    description:
+      "Availability of freshwater in the Delta to support local communities and farms",
+  },
+  {
+    title: "Freshwater for Delta exports",
+    description:
+      "Availability of freshwater for export to other regions",
+  },
+  {
+    title: "Reservoir storage",
+    description: "Levels of water stored in major reservoirs",
+  },
+  {
+    title: "Groundwater storage",
+    description:
+      "Amount and trends of water stored in groundwater basins",
+  },
+] as const
+
 const CAVEATS = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
   "The scenarios do not include all regions of California nor certain aspects of our water system that may be of interest.",
@@ -305,6 +380,7 @@ export default function GetStartedView() {
                     justifyContent: "flex-start",
                     cursor: active ? "pointer" : "default",
                     transition: theme.transition.default,
+                    ...(!active && { opacity: 0.45 }),
                     ...(active && {
                       "&:hover": {
                         background: "rgba(255,255,255,0.14)",
@@ -340,6 +416,240 @@ export default function GetStartedView() {
               Click on each water issue to learn more.
             </Typography>
           </Box>
+        </Box>
+      </Box>
+
+      {/* Hydroclimate Futures */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.nature.forest,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: sp.sm }}
+          >
+            Hydroclimate futures
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.md, opacity: 0.85 }}
+          >
+            How are climate change impacts evaluated?
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              columnGap: theme.space.section.lg,
+              rowGap: sp.lg,
+              mb: theme.space.section.lg,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              COEQWAL evaluates how the outcomes of different water management
+              strategies are affected by alternative hydroclimate futures. We
+              specifically evaluate how the outcomes of water management
+              strategies change with climate-driven shifts in water supplies and
+              temperature.
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              The COEQWAL scenario library evaluates various hydroclimates that
+              represent different levels of risk to the water supply system:
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              alignItems: "stretch",
+              columnGap: theme.space.section.sm,
+              rowGap: sp.lg,
+            }}
+          >
+            {HYDROCLIMATES.map(({ title, description }, i) => {
+              const dimmed = i === 2 || i === 4
+              return (
+              <Box
+                key={title}
+                sx={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: theme.borderRadius.md,
+                  p: sp.lg,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  ...(dimmed && { opacity: 0.45 }),
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight={600}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.sm, opacity: 0.85 }}
+                >
+                  {description}
+                </Typography>
+              </Box>
+              )
+            })}
+          </Box>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: sp.lg }}
+          >
+            A summary of each hydroclimate future can be accessed{" "}
+            <Typography
+              component="button"
+              variant="body2"
+              sx={{
+                background: "none",
+                border: "none",
+                p: 0,
+                color: "text.secondary",
+                textDecoration: "underline",
+                textDecorationColor: "rgba(255,255,255,0.4)",
+                textUnderlineOffset: "3px",
+                cursor: "pointer",
+                font: "inherit",
+                "&:hover": {
+                  textDecorationColor: "rgba(255,255,255,0.8)",
+                },
+              }}
+            >
+              here
+            </Typography>
+            .
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Key Outcomes */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: exploreBg,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: sp.sm }}
+          >
+            Key Outcomes
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.md, opacity: 0.85 }}
+          >
+            How are scenario results described?
+          </Typography>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+          >
+            The results of each scenario are summarized by nine key outcomes:
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              alignItems: "stretch",
+              columnGap: theme.space.section.sm,
+              rowGap: theme.space.section.sm,
+            }}
+          >
+            {KEY_OUTCOMES.map(({ title, description }) => (
+              <Box
+                key={title}
+                sx={{
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: theme.borderRadius.md,
+                  p: sp.lg,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight={600}
+                >
+                  {title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: sp.sm, opacity: 0.85 }}
+                >
+                  {description}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: sp.lg }}
+          >
+            A summary of all key outcomes can be accessed{" "}
+            <Typography
+              component="button"
+              variant="body2"
+              sx={{
+                background: "none",
+                border: "none",
+                p: 0,
+                color: "text.secondary",
+                textDecoration: "underline",
+                textDecorationColor: "rgba(255,255,255,0.4)",
+                textUnderlineOffset: "3px",
+                cursor: "pointer",
+                font: "inherit",
+                "&:hover": {
+                  textDecorationColor: "rgba(255,255,255,0.8)",
+                },
+              }}
+            >
+              here
+            </Typography>
+            .
+          </Typography>
         </Box>
       </Box>
 
