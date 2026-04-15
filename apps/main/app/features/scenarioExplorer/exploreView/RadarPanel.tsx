@@ -159,7 +159,7 @@ export default function RadarPanel({
     if (radarShowAll) return lineColors
     if (selectedScenarios.length === 0) return []
     return comparisonData
-      .map((d, i) => ({ id: d.id, color: lineColors[i] }))
+      .map((d, i) => ({ id: d.id, color: lineColors[i] ?? "#666666" }))
       .filter(({ id }) => selectedSet.has(id))
       .map(({ color }) => color)
   }, [comparisonData, lineColors, selectedSet, selectedScenarios.length, radarShowAll])
@@ -448,24 +448,22 @@ export default function RadarPanel({
               pointerEvents: "none",
             }}
           >
-            <Box
+            <Typography
+              variant="compactTitle"
               sx={{
-                bgcolor: theme.palette.grey[800],
+                bgcolor: theme.palette.tabPanels.share,
                 color: theme.palette.common.white,
-                fontSize: "0.9rem",
-                fontWeight: 500,
                 borderRadius: theme.borderRadius.sm,
                 px: 3,
                 py: 1.5,
                 textAlign: "center",
-                maxWidth: 340,
-                lineHeight: 1.5,
+                maxWidth: 360,
                 boxShadow: theme.shadows[4],
               }}
             >
-              Select scenarios on the left to see them on the chart, or check show all scenarios,
-              above
-            </Box>
+              Select scenarios on the left to see them on the chart, or check
+              show all scenarios, above
+            </Typography>
           </Box>
         )}
 
@@ -484,23 +482,21 @@ export default function RadarPanel({
               pointerEvents: "none",
             }}
           >
-            <Box
+            <Typography
+              variant="compactTitle"
               sx={{
-                bgcolor: theme.palette.grey[800],
+                bgcolor: theme.palette.tabPanels.share,
                 color: theme.palette.common.white,
-                fontSize: "0.9rem",
-                fontWeight: 500,
                 borderRadius: theme.borderRadius.sm,
                 px: 3,
                 py: 1.5,
                 textAlign: "center",
                 maxWidth: 340,
-                lineHeight: 1.5,
                 boxShadow: theme.shadows[4],
               }}
             >
               Choose axes to show data
-            </Box>
+            </Typography>
           </Box>
         )}
       </Box>
