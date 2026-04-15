@@ -188,9 +188,8 @@ export default function ExploreSubNav() {
             gap: 1,
             minWidth: 0,
             opacity: mainView === "explorer" ? 1 : 0,
-            transition: mainView === "explorer"
-              ? "opacity 0.25s 0.15s"
-              : "opacity 0.15s",
+            transition:
+              mainView === "explorer" ? "opacity 0.25s 0.15s" : "opacity 0.15s",
           }}
         >
           <Box

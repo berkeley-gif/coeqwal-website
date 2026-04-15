@@ -31,7 +31,10 @@ function ShareItemCard({
   item: ShareItem
   onRemove: (id: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
-  scenarioLookup: Map<string, { name: string; description: string; definition: string }>
+  scenarioLookup: Map<
+    string,
+    { name: string; description: string; definition: string }
+  >
   allChartData: Record<string, Record<string, unknown> | undefined>
   hydroclimate: string
 }) {
@@ -45,7 +48,9 @@ function ShareItemCard({
         : "Key outcomes bar chart"
     const chartData =
       (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
-      (allChartData[item.scenarioId] as Record<string, ChartDataPoint[]> | undefined)
+      (allChartData[item.scenarioId] as
+        | Record<string, ChartDataPoint[]>
+        | undefined)
     return (
       <ShareScenarioCard
         scenarioId={item.id}
@@ -247,7 +252,10 @@ export default function ShareDrawer() {
     useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
-    const map = new Map<string, { name: string; description: string; definition: string }>()
+    const map = new Map<
+      string,
+      { name: string; description: string; definition: string }
+    >()
     siblingGroups.forEach((s) => {
       map.set(s.scenarioId, {
         name: s.shortLabel,
@@ -397,7 +405,12 @@ export default function ShareDrawer() {
                 onRemove={removeShareItem}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
-                allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+                allChartData={
+                  allChartData as Record<
+                    string,
+                    Record<string, unknown> | undefined
+                  >
+                }
                 hydroclimate={hydroclimate}
               />
             ))

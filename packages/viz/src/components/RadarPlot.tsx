@@ -1185,7 +1185,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       >
         <svg
           ref={(el) => {
-            (svgRef as React.MutableRefObject<SVGSVGElement | null>).current = el
+            ;(svgRef as React.MutableRefObject<SVGSVGElement | null>).current =
+              el
             svgRefCallback?.(el)
           }}
           width={currentWidth}

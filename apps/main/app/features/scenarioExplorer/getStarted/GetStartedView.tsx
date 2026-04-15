@@ -5,7 +5,6 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { LinedList, InfoCard } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
-import { useScenarioExplorerStore } from "../store"
 import TierAnimationSection from "./TierAnimationSection"
 
 const WATER_ISSUE_THEMES = [
@@ -102,8 +101,7 @@ const KEY_OUTCOMES = [
   },
   {
     title: "Freshwater for Delta exports",
-    description:
-      "Availability of freshwater for export to other regions",
+    description: "Availability of freshwater for export to other regions",
   },
   {
     title: "Reservoir storage",
@@ -111,8 +109,7 @@ const KEY_OUTCOMES = [
   },
   {
     title: "Groundwater storage",
-    description:
-      "Amount and trends of water stored in groundwater basins",
+    description: "Amount and trends of water stored in groundwater basins",
   },
 ] as const
 
@@ -164,7 +161,6 @@ export default function GetStartedView() {
   const mapMode = useMapMode()
   const mapActive = mapMode === "get-started"
   const { openThemePanel } = usePanelRoute()
-  const setMainView = useScenarioExplorerStore((s) => s.setMainView)
 
   const exploreBg = theme.palette.tabPanels.explore
   const sp = theme.space.component
@@ -240,20 +236,28 @@ export default function GetStartedView() {
                 </Typography>{" "}
                 affect outcomes for communities, farms, and the environment.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: sp.md }}
+              >
                 Each scenario pairs a{" "}
                 <Typography component="span" variant="body2" fontWeight={600}>
                   water management strategy
                 </Typography>{" "}
-                (the operating rules, policies, and infrastructure decisions that
-                determine how water is allocated) with a{" "}
+                (the operating rules, policies, and infrastructure decisions
+                that determine how water is allocated) with a{" "}
                 <Typography component="span" variant="body2" fontWeight={600}>
                   hydroclimate
                 </Typography>{" "}
                 (the temperature and precipitation patterns that determine how
                 much water is available).
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: sp.md }}
+              >
                 The management strategy represents what we can control and the
                 hydroclimate represents what we can&rsquo;t control and must
                 prepare for.
@@ -269,7 +273,11 @@ export default function GetStartedView() {
               >
                 The library
               </Typography>
-              <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                fontWeight={500}
+              >
                 COEQWAL has compiled a library of over 100 scenarios.
               </Typography>
               <Typography
@@ -278,8 +286,9 @@ export default function GetStartedView() {
                 fontWeight={500}
                 sx={{ mt: sp.md }}
               >
-                Each scenario is associated with dozens of outcome variables that
-                describe how water is allocated to different locations and users.
+                Each scenario is associated with dozens of outcome variables
+                that describe how water is allocated to different locations and
+                users.
               </Typography>
               <Typography
                 variant="body2"
@@ -290,7 +299,11 @@ export default function GetStartedView() {
                 Visualization tools can be used to compare scenarios, examine
                 outcomes, and interpret results across different perspectives.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mt: sp.md }}
+              >
                 A summary of all scenarios can be accessed{" "}
                 <Typography
                   component="button"
@@ -326,14 +339,23 @@ export default function GetStartedView() {
                 What you&rsquo;ll learn
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                By exploring the scenario library, you will gain understanding of
-                how:
+                By exploring the scenario library, you will gain understanding
+                of how:
               </Typography>
               <LinedList
                 items={[
-                  { label: "Management strategies affect trade-offs and synergies among outcomes" },
-                  { label: "Benefits and impacts are distributed among water users and locations" },
-                  { label: "Different strategies perform under varying levels of climate stress" },
+                  {
+                    label:
+                      "Management strategies affect trade-offs and synergies among outcomes",
+                  },
+                  {
+                    label:
+                      "Benefits and impacts are distributed among water users and locations",
+                  },
+                  {
+                    label:
+                      "Different strategies perform under varying levels of climate stress",
+                  },
                 ]}
                 color={theme.palette.common.white}
                 arrows={false}
@@ -373,7 +395,11 @@ export default function GetStartedView() {
               variant="h3"
               component="h2"
               color="text.secondary"
-              sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: theme.space.section.md }}
+              sx={{
+                gridColumn: "1 / -1",
+                maxWidth: "66%",
+                mb: theme.space.section.md,
+              }}
             >
               What water issues interest you?
             </Typography>
@@ -486,11 +512,7 @@ export default function GetStartedView() {
             ))}
           </Box>
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: sp.lg }}
-          >
+          <Typography variant="body2" color="text.secondary" sx={{ mt: sp.lg }}>
             A summary of each hydroclimate future can be accessed{" "}
             <Typography
               component="button"
@@ -573,11 +595,7 @@ export default function GetStartedView() {
             ))}
           </Box>
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: sp.lg }}
-          >
+          <Typography variant="body2" color="text.secondary" sx={{ mt: sp.lg }}>
             A summary of all key outcomes can be accessed{" "}
             <Typography
               component="button"
@@ -711,15 +729,18 @@ export default function GetStartedView() {
                 items={[
                   {
                     label: "Trade-offs",
-                    description: "How outcomes improve or decline together across scenarios",
+                    description:
+                      "How outcomes improve or decline together across scenarios",
                   },
                   {
                     label: "Equity",
-                    description: "How benefits and impacts are distributed across outcomes and locations of interest",
+                    description:
+                      "How benefits and impacts are distributed across outcomes and locations of interest",
                   },
                   {
                     label: "Resilience",
-                    description: "How outcomes change under increasing levels of climate stress",
+                    description:
+                      "How outcomes change under increasing levels of climate stress",
                   },
                 ]}
                 color={theme.palette.common.white}
