@@ -32,9 +32,8 @@ import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
+import { toPng } from "html-to-image"
 import {
-  captureElementToBlob,
-  downloadBlob,
   downloadFromDataUrl,
   exportAsJSON,
   getTimestampedFilename,
@@ -124,6 +123,7 @@ function SortableShareCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
+  hydroclimate,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -132,6 +132,7 @@ function SortableShareCard({
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<string, { name: string; description: string }>
   allChartData: Record<string, Record<string, unknown> | undefined>
+  hydroclimate: string
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -148,15 +149,19 @@ function SortableShareCard({
     const el = contentRef.current
     if (!el) return
     try {
-      const { blob } = await captureElementToBlob(el, {
-        scale: 2,
+      const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
+      const dataUrl = await toPng(el, {
+        pixelRatio: dpr * 2,
         backgroundColor: "#ffffff",
       })
       const label =
         item.type === "barChart"
           ? `coeqwal-${item.scenarioId}-${item.viewMode}`
           : `coeqwal-radar-${item.scenarioIds.length}scenarios`
-      downloadBlob(blob, getTimestampedFilename(label, "png"))
+      await downloadFromDataUrl(
+        dataUrl,
+        getTimestampedFilename(label, "png"),
+      )
     } catch {
       if (item.cachedImageDataUrl) {
         await downloadFromDataUrl(
@@ -191,6 +196,7 @@ function SortableShareCard({
             scenarioId={item.id}
             name={info?.description ?? info?.name ?? item.scenarioId}
             description={viewLabel}
+            hydroclimate={hydroclimate}
             chartData={chartData}
             outcomeNames={outcomeNames}
             viewMode={item.viewMode}
@@ -427,15 +433,20 @@ export default function SharePanel() {
       const el = cardContentRefs.current.get(item.id)
       if (el) {
         try {
-          const { blob } = await captureElementToBlob(el, {
-            scale: 2,
+          const dpr =
+            typeof window !== "undefined" ? window.devicePixelRatio : 1
+          const dataUrl = await toPng(el, {
+            pixelRatio: dpr * 2,
             backgroundColor: "#ffffff",
           })
           const label =
             item.type === "barChart"
               ? `coeqwal-${item.scenarioId}-${item.viewMode}`
               : `coeqwal-radar-${item.scenarioIds.length}scenarios`
-          downloadBlob(blob, getTimestampedFilename(label, "png"))
+          await downloadFromDataUrl(
+            dataUrl,
+            getTimestampedFilename(label, "png"),
+          )
         } catch {
           if (item.cachedImageDataUrl) {
             await downloadFromDataUrl(
@@ -560,6 +571,7 @@ export default function SharePanel() {
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
                 allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+                hydroclimate={hydroclimate}
               />
             ))}
           </Box>

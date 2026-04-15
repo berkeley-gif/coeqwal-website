@@ -915,8 +915,9 @@ const theme = createTheme({
     h3: {
       fontFamily: themeValues.fontFamily.display,
       fontSize: typeScale.h3,
-      fontWeight: 500,
-      lineHeight: 1.1,
+      fontWeight: 300,
+      lineHeight: 1.15,
+      letterSpacing: "0.01em",
     },
     h4: {
       fontFamily: themeValues.fontFamily.display,
