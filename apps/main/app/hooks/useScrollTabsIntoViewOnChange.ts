@@ -69,5 +69,13 @@ export function useScrollTabsIntoViewOnChange({
     })
 
     return () => cancelAnimationFrame(raf)
-  }, [activeTab, behavior, offsetPx, tabsRef, subNavRef, isInTabsArea, panelRef])
+  }, [
+    activeTab,
+    behavior,
+    offsetPx,
+    tabsRef,
+    subNavRef,
+    isInTabsArea,
+    panelRef,
+  ])
 }

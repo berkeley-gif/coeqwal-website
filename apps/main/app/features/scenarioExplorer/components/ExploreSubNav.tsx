@@ -6,13 +6,11 @@
  * Renders the "Get started / Go to tools" primary sub-tabs and, when in
  * explorer mode, the tool sub-tabs (List, Radar chart, etc.).
  *
- * This component lives outside TabPanels in the page shell so it can
- * participate in the sticky stacking alongside SmoothTabs, independent
- * of the panel's overflow behavior.
+ * Rendered inside SmoothTabs as a normal flow child of the sticky
+ * container, so it stays pinned without its own sticky positioning.
  */
 
 import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "@repo/motion"
 import {
   Box,
   Typography,
@@ -81,7 +79,7 @@ const TOOL_TABS: {
 
 export default function ExploreSubNav() {
   const theme = useTheme()
-  const { state, subNavRef, descriptionsExpanded } = useTabs()
+  const { state, subNavRef } = useTabs()
   const { activeTab } = state
 
   const { mainView, setMainView, exploreMode, setExploreMode } =
@@ -108,56 +106,125 @@ export default function ExploreSubNav() {
     return () => document.removeEventListener("keydown", handleKey)
   }, [])
 
-  const isVisible = activeTab === "explore" && descriptionsExpanded
+  if (activeTab !== "explore") return null
+
   const navHeight = theme.layout.collapsedTabHeight
 
   return (
-    <div
+    <Box
       ref={subNavRef}
-      style={{
-        position: "sticky",
-        top:
-          theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight,
-        zIndex: theme.zIndex.appBar,
+      role="tablist"
+      aria-label="Explore section tabs"
+      sx={{
+        flexShrink: 0,
+        pointerEvents: "auto",
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        height: navHeight,
+        background: theme.palette.tabPanels.explore,
+        lineHeight: 1,
+        color: theme.palette.common.white,
+        justifyContent: "center",
+        gap: 1,
       }}
     >
-      <AnimatePresence initial={false}>
-        {isVisible && (
-          <motion.div
-            key="explore-subnav"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: navHeight, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: "hidden" }}
+      {MAIN_VIEWS.map(({ view, icon, label }) => {
+        const active = mainView === view
+        return (
+          <Box
+            key={view}
+            component="button"
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => setMainView(view)}
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: theme.borderRadius.sm ?? "4px",
+              cursor: "pointer",
+              background: active ? "rgba(255,255,255,0.2)" : "transparent",
+              color: theme.palette.common.white,
+              transition: "background-color 0.15s",
+              "&:hover": { background: "rgba(255,255,255,0.15)" },
+            }}
           >
-            <Box
-              role="tablist"
-              aria-label="Explore section tabs"
+            {icon}
+            <Typography
+              component="span"
+              variant="dashboard"
               sx={{
-                flexShrink: 0,
-                pointerEvents: "auto",
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                height: navHeight,
-                background: theme.palette.tabPanels.explore,
+                fontWeight: active ? 600 : 500,
                 lineHeight: 1,
-                color: theme.palette.common.white,
-                justifyContent: "center",
-                gap: 1,
+                whiteSpace: "nowrap",
+                color: theme.palette.text.secondary,
               }}
             >
-              {MAIN_VIEWS.map(({ view, icon, label }) => {
-                const active = mainView === view
-                return (
+              {label}
+            </Typography>
+          </Box>
+        )
+      })}
+
+      {mainView === "explorer" && (
+        <>
+          <Box
+            sx={{
+              width: "1px",
+              height: 20,
+              backgroundColor: "rgba(255,255,255,0.35)",
+              flexShrink: 0,
+              mx: 0.5,
+            }}
+          />
+          <Typography
+            component="span"
+            sx={{
+              fontFamily: theme.typography.tabLabelDocked.fontFamily,
+              fontSize: "0.9375rem",
+              fontWeight: 500,
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+              color: theme.palette.text.secondary,
+              letterSpacing: "0.01em",
+              px: 0.5,
+            }}
+          >
+            Select scenarios using key outcomes:
+          </Typography>
+          {TOOL_TABS.filter((tab) => !tab.research || showResearchTools).map(
+            ({ mode, icon, label }) => {
+              const active = exploreMode === mode
+              return (
+                <React.Fragment key={mode}>
+                  {mode === "data" && (
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontFamily: theme.typography.tabLabelDocked.fontFamily,
+                        fontSize: "0.9375rem",
+                        fontWeight: 500,
+                        lineHeight: 1,
+                        letterSpacing: "0.01em",
+                        whiteSpace: "nowrap",
+                        color: theme.palette.text.secondary,
+                        px: 0.5,
+                      }}
+                    >
+                      View data for selected scenarios:
+                    </Typography>
+                  )}
                   <Box
-                    key={view}
                     component="button"
                     type="button"
                     role="tab"
                     aria-selected={active}
-                    onClick={() => setMainView(view)}
+                    onClick={() => setExploreMode(mode)}
                     sx={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -172,7 +239,9 @@ export default function ExploreSubNav() {
                         : "transparent",
                       color: theme.palette.common.white,
                       transition: "background-color 0.15s",
-                      "&:hover": { background: "rgba(255,255,255,0.15)" },
+                      "&:hover": {
+                        background: "rgba(255,255,255,0.15)",
+                      },
                     }}
                   >
                     {icon}
@@ -189,107 +258,12 @@ export default function ExploreSubNav() {
                       {label}
                     </Typography>
                   </Box>
-                )
-              })}
-
-              {mainView === "explorer" && (
-                <>
-                  <Box
-                    sx={{
-                      width: "1px",
-                      height: 20,
-                      backgroundColor: "rgba(255,255,255,0.35)",
-                      flexShrink: 0,
-                      mx: 0.5,
-                    }}
-                  />
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                      fontSize: "0.9375rem",
-                      fontWeight: 500,
-                      lineHeight: 1,
-                      whiteSpace: "nowrap",
-                      color: theme.palette.text.secondary,
-                      letterSpacing: "0.01em",
-                      px: 0.5,
-                    }}
-                  >
-                    Select scenarios using key outcomes:
-                  </Typography>
-                  {TOOL_TABS.filter(
-                    (tab) => !tab.research || showResearchTools,
-                  ).map(({ mode, icon, label }) => {
-                    const active = exploreMode === mode
-                    return (
-                      <React.Fragment key={mode}>
-                        {mode === "data" && (
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontFamily:
-                                theme.typography.tabLabelDocked.fontFamily,
-                              fontSize: "0.9375rem",
-                              fontWeight: 500,
-                              lineHeight: 1,
-                              letterSpacing: "0.01em",
-                              whiteSpace: "nowrap",
-                              color: theme.palette.text.secondary,
-                              px: 0.5,
-                            }}
-                          >
-                            View data for selected scenarios:
-                          </Typography>
-                        )}
-                        <Box
-                          component="button"
-                          type="button"
-                          role="tab"
-                          aria-selected={active}
-                          onClick={() => setExploreMode(mode)}
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                            px: 1.25,
-                            py: 0.5,
-                            border: "none",
-                            borderRadius: theme.borderRadius.sm ?? "4px",
-                            cursor: "pointer",
-                            background: active
-                              ? "rgba(255,255,255,0.2)"
-                              : "transparent",
-                            color: theme.palette.common.white,
-                            transition: "background-color 0.15s",
-                            "&:hover": {
-                              background: "rgba(255,255,255,0.15)",
-                            },
-                          }}
-                        >
-                          {icon}
-                          <Typography
-                            component="span"
-                            variant="dashboard"
-                            sx={{
-                              fontWeight: active ? 600 : 500,
-                              lineHeight: 1,
-                              whiteSpace: "nowrap",
-                              color: theme.palette.text.secondary,
-                            }}
-                          >
-                            {label}
-                          </Typography>
-                        </Box>
-                      </React.Fragment>
-                    )
-                  })}
-                </>
-              )}
-            </Box>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+                </React.Fragment>
+              )
+            },
+          )}
+        </>
+      )}
+    </Box>
   )
 }
