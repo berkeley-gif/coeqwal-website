@@ -28,7 +28,7 @@ import { useOutcomeVisualization } from "./hooks/useOutcomeVisualization"
 import { useMapTooltips } from "./hooks/useMapTooltips"
 
 // Config
-import { BASEMAP_DIM_OPACITY } from "../config/outcomeLayerRegistry"
+import { BASEMAP_DIM_OPACITY, LAYER_IDS } from "../config/outcomeLayerRegistry"
 
 // Tooltips
 import { MapFeatureTooltip } from "../../tooltips/MapFeatureTooltip"
@@ -41,6 +41,7 @@ import type { TierLocation } from "./types"
 // Store
 import {
   useMapMode,
+  useMapStyle,
   useGeocoderMarker,
   useClearTooltipsSignal,
   useLocationHighlights,
@@ -48,8 +49,10 @@ import {
   getOnLocationClick,
   getOnLocationHover,
 } from "../store"
+import { MAP_THEME_URLS } from "@repo/map"
 
-// Large polygon covering California and surrounding area for dim overlay
+// Large polygon covering well beyond California for dim overlay.
+// Must be oversized so edges are never visible even at low zoom levels.
 const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
   type: "FeatureCollection",
   features: [
@@ -60,11 +63,11 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
         type: "Polygon",
         coordinates: [
           [
-            [-130, 30], // SW corner (Pacific Ocean)
-            [-130, 45], // NW corner
-            [-110, 45], // NE corner (Nevada/Oregon)
-            [-110, 30], // SE corner (Arizona)
-            [-130, 30], // Close polygon
+            [-145, 20],
+            [-145, 55],
+            [-95, 55],
+            [-95, 20],
+            [-145, 20],
           ],
         ],
       },
@@ -174,13 +177,65 @@ export default function VisualizationLayers() {
 
   const isLearnMode = mapMode === "learn"
   const isGetStartedMode = mapMode === "get-started"
+  const mapStyle = useMapStyle()
+  const isSatellite = mapStyle === MAP_THEME_URLS.satellite
 
-  // Memoize dim opacity (skip in get-started mode for clean background)
+  // Dim overlay only on satellite basemap (light/streets have enough contrast)
   const dimOpacity = useMemo(
     () =>
-      isVisualizationActive && !isGetStartedMode ? BASEMAP_DIM_OPACITY : 0,
-    [isVisualizationActive, isGetStartedMode],
+      isVisualizationActive && !isGetStartedMode && isSatellite
+        ? BASEMAP_DIM_OPACITY
+        : 0,
+    [isVisualizationActive, isGetStartedMode, isSatellite],
   )
+
+  // Position dim overlay below all outcome polygon fill layers so
+  // tier-colored polygons render above the darkened basemap.
+  useEffect(() => {
+    const mapInstance = map.mapRef?.current?.getMap()
+    if (!mapInstance) return
+
+    const DIM_ID = "basemap-dim-overlay"
+    const OUTCOME_FILLS = new Set<string>([
+      LAYER_IDS.demandUnits.fill,
+      LAYER_IDS.wba.fill,
+      LAYER_IDS.delta.fill,
+      LAYER_IDS.reservoir.fill,
+    ])
+
+    const positionDimLayer = () => {
+      if (!mapInstance.getLayer(DIM_ID)) return
+
+      mapInstance.setPaintProperty(DIM_ID, "fill-opacity-transition", {
+        duration: 800,
+        delay: 0,
+      })
+
+      const style = mapInstance.getStyle()
+      if (!style?.layers) return
+
+      for (const layer of style.layers) {
+        if (OUTCOME_FILLS.has(layer.id)) {
+          try {
+            mapInstance.moveLayer(DIM_ID, layer.id)
+          } catch {
+            /* layer may not exist yet */
+          }
+          break
+        }
+      }
+    }
+
+    const raf = requestAnimationFrame(positionDimLayer)
+
+    const onStyle = () => requestAnimationFrame(positionDimLayer)
+    mapInstance.on("styledata", onStyle)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      mapInstance.off("styledata", onStyle)
+    }
+  }, [map])
 
   const highlightedLocationIds = useMemo(() => {
     if (locationHighlights.length === 0) return undefined
@@ -223,6 +278,8 @@ export default function VisualizationLayers() {
           classFilter={config.classFilter}
           visible={true}
           mapboxLayerId={config.mapboxLayerId}
+          featureIdMap={config.featureIdMap}
+          outlineOnly={config.outlineOnly}
         />
       )}
 

@@ -8,8 +8,9 @@
  */
 
 import React from "react"
-import { Marker } from "@repo/map"
+import { Marker, MAP_THEME_URLS } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
+import { useMapStyle } from "../../store"
 import { RESERVOIR_CALSIM_TO_GNISIDLABEL } from "../../config/outcomeLayerRegistry"
 import {
   RESERVOIR_CONFIGS,
@@ -60,6 +61,12 @@ export function TierLocationLabels({
   onClick,
 }: TierLocationLabelsProps) {
   const theme = useTheme()
+  const mapStyle = useMapStyle()
+  const isSatellite = mapStyle === MAP_THEME_URLS.satellite
+
+  const leaderLineColor = isSatellite
+    ? `${theme.palette.common.white}CC`
+    : `${theme.palette.text.primary}99`
 
   const getTierColor = (tier: number): string => {
     switch (tier) {
@@ -188,11 +195,7 @@ export function TierLocationLabels({
                   y1={10}
                   x2={0}
                   y2={10 + armDy}
-                  stroke={
-                    isHighlighted
-                      ? goldAccent
-                      : `${theme.palette.common.white}CC`
-                  }
+                  stroke={isHighlighted ? goldAccent : leaderLineColor}
                   strokeWidth={isHighlighted ? "2" : "1.5"}
                 />
               </svg>
