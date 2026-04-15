@@ -281,8 +281,7 @@ export default function ScenarioSelectionSidebar({
                   compact
                   showDescription={showDefinitions}
                   expandDescription={
-                    showDefinitions &&
-                    scenario.scenarioId === hoveredScenarioId
+                    showDefinitions && scenario.scenarioId === hoveredScenarioId
                   }
                   descriptionMaxWidth="none"
                   showThemeBadge={!groupByTheme}
@@ -303,61 +302,60 @@ export default function ScenarioSelectionSidebar({
                 />
 
                 <AnimatePresence>
-                  {scenario.scenarioId ===
-                    hoveredAxisInfo?.scenarioId && (
-                      <motion.div
-                        key="axis-hover-detail"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        style={{ overflow: "hidden" }}
-                      >
-                        <Box sx={{ pt: 0.5, pb: 0.75 }}>
-                          <Typography
-                            variant="compactSubtitle"
-                            sx={{
-                              display: "block",
-                              fontWeight: 500,
-                              color: theme.palette.text.primary,
-                            }}
-                          >
-                            {hoveredAxisInfo.axis}
-                          </Typography>
+                  {scenario.scenarioId === hoveredAxisInfo?.scenarioId && (
+                    <motion.div
+                      key="axis-hover-detail"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <Box sx={{ pt: 0.5, pb: 0.75 }}>
+                        <Typography
+                          variant="compactSubtitle"
+                          sx={{
+                            display: "block",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                          }}
+                        >
+                          {hoveredAxisInfo.axis}
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            mt: 0.25,
+                          }}
+                        >
                           <Box
                             sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 0.75,
-                              mt: 0.25,
+                              width: 10,
+                              height: 10,
+                              borderRadius: "3px",
+                              flexShrink: 0,
+                              bgcolor:
+                                tierColors[
+                                  Math.round(
+                                    hoveredAxisInfo.tierValue,
+                                  ) as keyof typeof tierColors
+                                ] ?? theme.palette.grey[400],
                             }}
+                          />
+                          <Typography
+                            variant="compactCaption"
+                            sx={{ color: theme.palette.grey[600] }}
                           >
-                            <Box
-                              sx={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: "3px",
-                                flexShrink: 0,
-                                bgcolor:
-                                  tierColors[
-                                    Math.round(
-                                      hoveredAxisInfo.tierValue,
-                                    ) as keyof typeof tierColors
-                                  ] ?? theme.palette.grey[400],
-                              }}
-                            />
-                            <Typography
-                              variant="compactCaption"
-                              sx={{ color: theme.palette.grey[600] }}
-                            >
-                              {getTierLabel(
-                                Math.round(hoveredAxisInfo.tierValue),
-                              )}
-                            </Typography>
-                          </Box>
+                            {getTierLabel(
+                              Math.round(hoveredAxisInfo.tierValue),
+                            )}
+                          </Typography>
                         </Box>
-                      </motion.div>
-                    )}
+                      </Box>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </Box>
 
