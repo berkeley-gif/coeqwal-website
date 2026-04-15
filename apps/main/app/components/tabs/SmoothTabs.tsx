@@ -70,7 +70,7 @@ function TabDescription({
 }
 
 export default function SmoothTabs() {
-  const { state, tabsRef, isInTabsArea } = useTabs()
+  const { state, tabsRef, isInTabsArea, setDescriptionsExpanded } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const theme = useTheme()
@@ -92,6 +92,11 @@ export default function SmoothTabs() {
     if (isInTabsArea) setForceHideDescriptions(false)
   }, [isInTabsArea])
 
+  // Keep context in sync so ExploreSubNav can follow the same visibility.
+  useEffect(() => {
+    setDescriptionsExpanded(showDescriptions)
+  }, [showDescriptions, setDescriptionsExpanded])
+
   // Expand interstitial when activeTab changes while docked (covers both
   // tab clicks and AutoAdvanceFooter navigation).
   const prevTabRef = useRef(activeTab)
@@ -103,29 +108,30 @@ export default function SmoothTabs() {
   }, [activeTab, isInTabsArea])
 
   // When user scrolls after a click-open, retract the descriptions.
-  // Delayed so the programmatic smooth-scroll from tab navigation
-  // doesn't immediately close the interstitial.
+  // Uses wheel/touchmove instead of scroll to avoid false triggers from
+  // animation-driven layout shifts (AutoHeight spring, ExploreSubNav entrance).
   const scrollHandlerRef = useRef<(() => void) | null>(null)
   useEffect(() => {
     if (!clickOpened) return
 
-    const timer = setTimeout(() => {
-      const handleScroll = () => {
-        scrollHandlerRef.current = null
-        setClickOpened(false)
-      }
-      scrollHandlerRef.current = handleScroll
+    const close = () => {
+      window.removeEventListener("wheel", close)
+      window.removeEventListener("touchmove", close)
+      scrollHandlerRef.current = null
+      setClickOpened(false)
+    }
 
-      window.addEventListener("scroll", handleScroll, {
-        passive: true,
-        once: true,
-      })
-    }, 800)
+    const timer = setTimeout(() => {
+      scrollHandlerRef.current = close
+      window.addEventListener("wheel", close, { passive: true })
+      window.addEventListener("touchmove", close, { passive: true })
+    }, 600)
 
     return () => {
       clearTimeout(timer)
       if (scrollHandlerRef.current) {
-        window.removeEventListener("scroll", scrollHandlerRef.current)
+        window.removeEventListener("wheel", scrollHandlerRef.current)
+        window.removeEventListener("touchmove", scrollHandlerRef.current)
         scrollHandlerRef.current = null
       }
     }
@@ -147,10 +153,9 @@ export default function SmoothTabs() {
     (tab: TabKey | undefined) => {
       if (tab && tab !== activeTab) {
         navigateToTab(tab)
-      }
-      // Always show descriptions on tab click, even if already on this tab
-      if (isInTabsArea) {
-        setClickOpened(true)
+        if (isInTabsArea) setClickOpened(true)
+      } else if (isInTabsArea) {
+        setClickOpened((prev) => !prev)
       }
     },
     [activeTab, navigateToTab, isInTabsArea],

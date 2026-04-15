@@ -81,7 +81,7 @@ const TOOL_TABS: {
 
 export default function ExploreSubNav() {
   const theme = useTheme()
-  const { state, subNavRef } = useTabs()
+  const { state, subNavRef, descriptionsExpanded } = useTabs()
   const { activeTab } = state
 
   const { mainView, setMainView, exploreMode, setExploreMode } =
@@ -108,7 +108,7 @@ export default function ExploreSubNav() {
     return () => document.removeEventListener("keydown", handleKey)
   }, [])
 
-  const isVisible = activeTab === "explore"
+  const isVisible = activeTab === "explore" && descriptionsExpanded
   const navHeight = theme.layout.collapsedTabHeight
 
   return (

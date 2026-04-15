@@ -66,6 +66,8 @@ type TabsContextShape = {
   setIsHeaderDark: React.Dispatch<React.SetStateAction<boolean>>
   isPastHero: boolean
   setIsPastHero: React.Dispatch<React.SetStateAction<boolean>>
+  descriptionsExpanded: boolean
+  setDescriptionsExpanded: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
@@ -92,6 +94,9 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   // tracks whether user has scrolled past 50% of the hero section
   const [isPastHero, setIsPastHero] = React.useState(false)
 
+  // whether the tab description/interstitial panels are currently expanded
+  const [descriptionsExpanded, setDescriptionsExpanded] = React.useState(true)
+
   const value = useMemo(
     () => ({
       state,
@@ -108,8 +113,10 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       setIsHeaderDark,
       isPastHero,
       setIsPastHero,
+      descriptionsExpanded,
+      setDescriptionsExpanded,
     }),
-    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark, isPastHero],
+    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark, isPastHero, descriptionsExpanded],
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
@@ -143,6 +150,8 @@ export function useTabs() {
       setIsHeaderDark: () => {},
       isPastHero: false,
       setIsPastHero: () => {},
+      descriptionsExpanded: true,
+      setDescriptionsExpanded: () => {},
     }
   }
 

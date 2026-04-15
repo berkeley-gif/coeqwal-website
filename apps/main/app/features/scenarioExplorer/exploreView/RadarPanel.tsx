@@ -40,11 +40,15 @@ import {
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
   onScenarioHover?: (scenarioId: string | null) => void
+  onAxisHover?: (
+    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  ) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
   onScenarioHover,
+  onAxisHover,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -123,6 +127,13 @@ export default function RadarPanel({
   useEffect(() => {
     onScenarioHover?.(hoveredScenario?.id ?? null)
   }, [hoveredScenario, onScenarioHover])
+
+  const handleDotHover = useCallback(
+    (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
+      onAxisHover?.(info)
+    },
+    [onAxisHover],
+  )
 
   // Prevent browser text-selection inside the chart area
   const chartWrapperRef = useRef<HTMLDivElement>(null)
@@ -427,6 +438,8 @@ export default function RadarPanel({
             showDotsOnly={showDotsOnly}
             dimUnselected={radarShowAll && selectedScenarios.length > 0}
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
+            enableTooltip={false}
+            onDotHover={handleDotHover}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(highlightedScenario === d.id ? null : d.id)

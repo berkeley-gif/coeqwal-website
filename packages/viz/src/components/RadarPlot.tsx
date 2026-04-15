@@ -42,6 +42,12 @@ export interface RadarPlotProps {
   dimUnselected?: boolean
   /** Extra left offset for the tooltip (e.g. when a sidebar overlaps) */
   tooltipLeftOffset?: number
+  /** When false, suppress the built-in tooltip on dot hover */
+  enableTooltip?: boolean
+  /** Called on dot mouseenter/mouseleave with axis-level hover info */
+  onDotHover?: (
+    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  ) => void
 }
 
 function toTier(v: number): number {
@@ -250,6 +256,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     showDotsOnly = false,
     dimUnselected = false,
     tooltipLeftOffset = 0,
+    enableTooltip = true,
+    onDotHover,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -304,6 +312,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onDotClickRef.current = onDotClick
     }, [onDotClick])
+    const onDotHoverRef = useRef(onDotHover)
+    useEffect(() => {
+      onDotHoverRef.current = onDotHover
+    }, [onDotHover])
 
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
@@ -733,17 +745,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   hoverNotifyTimerRef.current = null
                 }
 
-                const el = tooltipRef.current
-                if (el) {
-                  showTooltip(
-                    el,
-                    scenario.name,
-                    axis,
-                    sv != null ? toTier(sv) : undefined,
-                    scenarioThemes?.[scenario.id],
-                    scenario.id,
-                  )
+                if (enableTooltip) {
+                  const el = tooltipRef.current
+                  if (el) {
+                    showTooltip(
+                      el,
+                      scenario.name,
+                      axis,
+                      sv != null ? toTier(sv) : undefined,
+                      scenarioThemes?.[scenario.id],
+                      scenario.id,
+                    )
+                  }
                 }
+
+                onDotHoverRef.current?.({
+                  scenarioId: scenario.id,
+                  axis,
+                  tierValue: sv != null ? toTier(sv) : 0,
+                })
 
                 if (lastNotifiedIdRef.current !== scenario.id) {
                   hoverNotifyTimerRef.current = setTimeout(() => {
@@ -758,7 +778,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   clearTimeout(hoverNotifyTimerRef.current)
                   hoverNotifyTimerRef.current = null
                 }
-                if (tooltipRef.current) hideTooltip(tooltipRef.current)
+                if (enableTooltip && tooltipRef.current)
+                  hideTooltip(tooltipRef.current)
+                onDotHoverRef.current?.(null)
 
                 if (leaveResetTimerRef.current !== null) {
                   clearTimeout(leaveResetTimerRef.current)
