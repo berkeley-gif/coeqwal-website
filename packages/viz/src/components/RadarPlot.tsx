@@ -48,6 +48,15 @@ export interface RadarPlotProps {
   onDotHover?: (
     info: { scenarioId: string; axis: string; tierValue: number } | null,
   ) => void
+  /** Called after each render with pixel positions for placing info icons near axis labels */
+  onAxisPositions?: (
+    positions: {
+      axis: string
+      x: number
+      y: number
+      anchor: "start" | "end" | "middle"
+    }[],
+  ) => void
 }
 
 function toTier(v: number): number {
@@ -258,6 +267,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     tooltipLeftOffset = 0,
     enableTooltip = true,
     onDotHover,
+    onAxisPositions,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -316,6 +326,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onDotHoverRef.current = onDotHover
     }, [onDotHover])
+    const onAxisPositionsRef = useRef(onAxisPositions)
+    useEffect(() => {
+      onAxisPositionsRef.current = onAxisPositions
+    }, [onAxisPositions])
 
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
@@ -1013,6 +1027,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         }
 
         // 9. Axis labels (outside ring)
+        const axisPositions: {
+          axis: string
+          x: number
+          y: number
+          anchor: "start" | "end" | "middle"
+        }[] = []
         axes.forEach((axis, i) => {
           const angle = getAngle(i)
           const labelR = radius + 24
@@ -1061,7 +1081,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("letter-spacing", "0.01em")
               .text(axis)
           }
+
+          axisPositions.push({
+            axis,
+            x: lx,
+            y: ly,
+            anchor: anchor as "start" | "end" | "middle",
+          })
         })
+
+        onAxisPositionsRef.current?.(axisPositions)
       },
       [
         data,

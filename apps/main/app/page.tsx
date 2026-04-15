@@ -21,7 +21,6 @@ import { Header } from "./components/Header"
 import { FloatingGlossary } from "./features/glossary"
 import IntroSection from "./sections/IntroSection"
 import SmoothTabs from "./components/tabs/SmoothTabs"
-import ExploreSubNav from "./features/scenarioExplorer/components/ExploreSubNav"
 import TabPanels from "./components/tabs/TabPanels"
 
 export default function Home() {
@@ -48,7 +47,6 @@ export default function Home() {
         </Suspense>
         <Suspense fallback={null}>
           <SmoothTabs />
-          <ExploreSubNav />
           <TabPanels />
         </Suspense>
       </MainContent>

@@ -24,13 +24,15 @@ import {
   Checkbox,
 } from "@repo/ui/mui"
 import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
-import { ChartToast } from "@repo/ui"
+import { ChartToast, InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
   getOutcomeName,
+  getOutcomeCode,
+  getOutcomeDefinition,
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
   OUTCOME_REGIONAL_VARIANTS,
@@ -133,6 +135,24 @@ export default function RadarPanel({
       onAxisHover?.(info)
     },
     [onAxisHover],
+  )
+
+  const [axisPositions, setAxisPositions] = useState<
+    { axis: string; x: number; y: number; anchor: "start" | "end" | "middle" }[]
+  >([])
+
+  const handleAxisPositions = useCallback(
+    (
+      positions: {
+        axis: string
+        x: number
+        y: number
+        anchor: "start" | "end" | "middle"
+      }[],
+    ) => {
+      setAxisPositions(positions)
+    },
+    [],
   )
 
   // Prevent browser text-selection inside the chart area
@@ -446,12 +466,85 @@ export default function RadarPanel({
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
             enableTooltip={false}
             onDotHover={handleDotHover}
+            onAxisPositions={handleAxisPositions}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
             }}
           />
         </Box>
+
+        {/* TODO: Info icon overlay — one per axis label (disabled pending refinement)
+        {axisPositions.length > 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          >
+            {axisPositions.map(({ axis, x, y, anchor }) => {
+              const code = getOutcomeCode(axis)
+              const definition = code
+                ? getOutcomeDefinition(code)
+                : undefined
+              if (!definition) return null
+
+              const offsetX =
+                anchor === "start" ? 6 : anchor === "end" ? -6 : 0
+              const offsetY = anchor === "middle" ? 14 : 0
+              const translate =
+                anchor === "start"
+                  ? "translate(0, -50%)"
+                  : anchor === "end"
+                    ? "translate(-100%, -50%)"
+                    : "translate(-50%, 0)"
+
+              return (
+                <Box
+                  key={axis}
+                  sx={{
+                    position: "absolute",
+                    left: x + offsetX,
+                    top: y + offsetY,
+                    transform: translate,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  <InfoIconButton
+                    variant="inline"
+                    placement="top"
+                    tooltipContent={
+                      <Box sx={{ maxWidth: 260 }}>
+                        <Typography
+                          variant="compactSubtitle"
+                          sx={{
+                            fontWeight: 600,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          {axis}
+                        </Typography>
+                        <Typography
+                          variant="compactCaption"
+                          sx={{ display: "block" }}
+                        >
+                          {definition}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </Box>
+              )
+            })}
+          </Box>
+        )}
+        */}
 
         {noScenariosSelected && !isLoading && (
           <ChartToast>
