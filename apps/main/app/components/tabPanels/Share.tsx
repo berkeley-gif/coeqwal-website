@@ -31,6 +31,7 @@ import type { ShareItem } from "../../features/scenarioExplorer/store"
 import { useResolvedScenarioTiers } from "../../features/scenarioExplorer/hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
+import ShareRadarCard from "../../features/scenarioExplorer/components/ShareRadarCard"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
 import { toPng } from "html-to-image"
 import {
@@ -211,75 +212,22 @@ function SortableShareCard({
       )
     }
 
-    const radarLabel = `Radar: ${item.scenarioIds.length} scenario${item.scenarioIds.length !== 1 ? "s" : ""}`
-    const toggleParts: string[] = []
-    if (item.showRange) toggleParts.push("range")
-    if (item.highlightBaseline) toggleParts.push("baseline")
-    const subtitle =
-      toggleParts.length > 0
-        ? `with ${toggleParts.join(" + ")}`
-        : `${item.axes.length} axes`
+    const radarScenarioNames = item.scenarioIds.map(
+      (id) => scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
+    )
 
     return (
-      <>
-        {item.cachedImageDataUrl ? (
-          <Box sx={{ px: 1, pb: 0.75 }}>
-            <Box
-              component="img"
-              src={item.cachedImageDataUrl}
-              alt={radarLabel}
-              sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: 200,
-                objectFit: "contain",
-                borderRadius: "4px",
-                backgroundColor: "#fff",
-              }}
-            />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              px: 1,
-              pb: 0.75,
-              minHeight: 80,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: theme.palette.grey[500],
-              fontSize: "0.75rem",
-            }}
-          >
-            Radar view (re-open Explore to regenerate image)
-          </Box>
-        )}
-        <Box sx={{ px: 1.5, pb: 0.5 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 600,
-              lineHeight: 1.3,
-              color: theme.palette.grey[900],
-              fontSize: "0.8125rem",
-            }}
-          >
-            {radarLabel}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              lineHeight: 1.3,
-              color: theme.palette.grey[600],
-              fontSize: "0.6875rem",
-              mt: 0.25,
-            }}
-          >
-            {subtitle}
-          </Typography>
-        </Box>
-      </>
+      <Box sx={{ px: 0.5, pb: 0.5 }}>
+        <ShareRadarCard
+          scenarioNames={radarScenarioNames}
+          hydroclimate={hydroclimate}
+          axes={item.axes}
+          showRange={item.showRange}
+          highlightBaseline={item.highlightBaseline}
+          showDotsOnly={item.showDotsOnly}
+          cachedImageDataUrl={item.cachedImageDataUrl}
+        />
+      </Box>
     )
   }
 

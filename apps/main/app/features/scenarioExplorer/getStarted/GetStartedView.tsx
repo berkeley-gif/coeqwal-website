@@ -882,12 +882,14 @@ export default function GetStartedView() {
               color={theme.palette.common.white}
               arrows={false}
               labelVariant="body2"
+              labelWeight={400}
             />
             <LinedList
               items={CAVEATS.slice(3).map((c) => ({ label: c }))}
               color={theme.palette.common.white}
               arrows={false}
               labelVariant="body2"
+              labelWeight={400}
             />
           </Box>
         </Box>

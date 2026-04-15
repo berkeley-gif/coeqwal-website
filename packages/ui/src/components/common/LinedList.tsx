@@ -30,6 +30,8 @@ export interface LinedListProps {
   labelVariant?: "subtitle1" | "body1" | "body2"
   /** Typography variant for the optional description. Defaults to "body2". */
   descriptionVariant?: "body1" | "body2"
+  /** Font weight for label text. Defaults to 600. */
+  labelWeight?: number
   sx?: SxProps<Theme>
 }
 
@@ -39,12 +41,14 @@ function LinedListRow({
   arrows,
   labelVariant,
   descriptionVariant,
+  labelWeight,
 }: {
   item: LinedListItem
   color: string
   arrows: boolean
   labelVariant: LinedListProps["labelVariant"]
   descriptionVariant: LinedListProps["descriptionVariant"]
+  labelWeight: number
 }) {
   const interactive = !!(item.onClick || item.href)
 
@@ -71,7 +75,7 @@ function LinedListRow({
       }}
     >
       <Box>
-        <Typography variant={labelVariant} sx={{ fontWeight: 600 }}>
+        <Typography variant={labelVariant} sx={{ fontWeight: labelWeight }}>
           {item.label}
         </Typography>
         {item.description && (
@@ -96,6 +100,7 @@ export function LinedList({
   arrows = true,
   labelVariant = "subtitle1",
   descriptionVariant = "body2",
+  labelWeight = 600,
   sx,
 }: LinedListProps) {
   const theme = useTheme()
@@ -111,6 +116,7 @@ export function LinedList({
           arrows={arrows}
           labelVariant={labelVariant}
           descriptionVariant={descriptionVariant}
+          labelWeight={labelWeight}
         />
       ))}
     </Box>
