@@ -24,6 +24,7 @@ import {
   Checkbox,
 } from "@repo/ui/mui"
 import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
+import { ChartToast } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
@@ -434,70 +435,14 @@ export default function RadarPanel({
         </Box>
 
         {noScenariosSelected && !isLoading && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 3,
-              pointerEvents: "none",
-            }}
-          >
-            <Typography
-              variant="compactTitle"
-              sx={{
-                bgcolor: theme.palette.tabPanels.share,
-                color: theme.palette.common.white,
-                borderRadius: theme.borderRadius.sm,
-                px: 3,
-                py: 1.5,
-                textAlign: "center",
-                maxWidth: 360,
-                boxShadow: theme.shadows[4],
-              }}
-            >
-              Select scenarios on the left to see them on the chart, or check
-              show all scenarios, above
-            </Typography>
-          </Box>
+          <ChartToast>
+            Select scenarios on the left to see them on the chart, or check
+            show all scenarios, above
+          </ChartToast>
         )}
 
         {!noScenariosSelected && noAxesChosen && !isLoading && (
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 3,
-              pointerEvents: "none",
-            }}
-          >
-            <Typography
-              variant="compactTitle"
-              sx={{
-                bgcolor: theme.palette.tabPanels.share,
-                color: theme.palette.common.white,
-                borderRadius: theme.borderRadius.sm,
-                px: 3,
-                py: 1.5,
-                textAlign: "center",
-                maxWidth: 340,
-                boxShadow: theme.shadows[4],
-              }}
-            >
-              Choose axes to show data
-            </Typography>
-          </Box>
+          <ChartToast maxWidth={340}>Choose axes to show data</ChartToast>
         )}
       </Box>
 

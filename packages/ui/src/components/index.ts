@@ -106,6 +106,10 @@ export type {
   PanelFeedbackVariant,
 } from "./common/PanelFeedback"
 
+// Chart toast (centered overlay pill for chart guidance states)
+export { ChartToast } from "./common/ChartToast"
+export type { ChartToastProps } from "./common/ChartToast"
+
 // Modal components
 export { MobileModal } from "./common/MobileModal"
 export type { MobileModalProps } from "./common/MobileModal"
