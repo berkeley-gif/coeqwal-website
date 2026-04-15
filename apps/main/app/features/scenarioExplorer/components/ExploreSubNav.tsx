@@ -116,7 +116,8 @@ export default function ExploreSubNav() {
       ref={subNavRef}
       style={{
         position: "sticky",
-        top: theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight,
+        top:
+          theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight,
         zIndex: theme.zIndex.appBar,
       }}
     >

@@ -1081,6 +1081,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         showDistribution,
         distributionData,
         getAngle,
+        enableTooltip,
       ],
     )
 

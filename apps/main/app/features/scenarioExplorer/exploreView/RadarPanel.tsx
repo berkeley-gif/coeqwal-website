@@ -174,7 +174,13 @@ export default function RadarPanel({
       .map((d, i) => ({ id: d.id, color: lineColors[i] ?? "#666666" }))
       .filter(({ id }) => selectedSet.has(id))
       .map(({ color }) => color)
-  }, [comparisonData, lineColors, selectedSet, selectedScenarios.length, radarShowAll])
+  }, [
+    comparisonData,
+    lineColors,
+    selectedSet,
+    selectedScenarios.length,
+    radarShowAll,
+  ])
 
   const scenarioThemes = useMemo(() => {
     const map: Record<string, string> = {}
@@ -449,8 +455,8 @@ export default function RadarPanel({
 
         {noScenariosSelected && !isLoading && (
           <ChartToast>
-            Select scenarios on the left to see them on the chart, or check
-            show all scenarios, above
+            Select scenarios on the left to see them on the chart, or check show
+            all scenarios, above
           </ChartToast>
         )}
 

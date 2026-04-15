@@ -116,7 +116,14 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       descriptionsExpanded,
       setDescriptionsExpanded,
     }),
-    [state, hasEnteredTabsFirstTime, isInTabsArea, isHeaderDark, isPastHero, descriptionsExpanded],
+    [
+      state,
+      hasEnteredTabsFirstTime,
+      isInTabsArea,
+      isHeaderDark,
+      isPastHero,
+      descriptionsExpanded,
+    ],
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>
