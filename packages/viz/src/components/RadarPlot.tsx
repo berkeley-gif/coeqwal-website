@@ -55,7 +55,7 @@ function toTier(v: number): number {
 }
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
-const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
+const TIER_LABELS = ["Optimal", "Acceptable", "At-risk", "Critical"] as const
 const TIER_BAND_COLORS = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const
 
 const DEFAULT_COLORS = {
@@ -128,7 +128,7 @@ function showTooltip(
     tier != null
       ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
         `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
-        `Tier ${tier}</div>`
+        `${TIER_LABELS[tier - 1] ?? `Tier ${tier}`}</div>`
       : ""
   const pill = themeKey ? THEME_PILL_CONFIG[themeKey] : undefined
   const themeLine = pill

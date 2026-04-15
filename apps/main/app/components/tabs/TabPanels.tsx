@@ -18,7 +18,6 @@ import { AutoHeight } from "@repo/ui"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
 import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
-
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
@@ -110,13 +109,12 @@ export default function TabPanels() {
   }, [])
 
   // Background color tied to active tab.
-  // Learn tab is always transparent (map shows through).
-  // Explore tab uses a solid background to prevent map flash during transitions;
-  // get-started mode still gets transparent via the TabPanel layer.
+  // Learn and explore tabs are always transparent so the persistent map
+  // can show through. Child components manage their own opaque backgrounds.
   // Note: Use rgba format for Framer Motion animation compatibility.
   const panelColor: string = useMemo(() => {
-    if (activeTab === "learn") return "rgba(0, 0, 0, 0)"
-    if (activeTab === "explore") return "rgba(194, 216, 235, 1)"
+    if (activeTab === "learn" || activeTab === "explore")
+      return "rgba(0, 0, 0, 0)"
     return TABS.find((t) => t.key === activeTab)?.panelColor ?? "#ffffff"
   }, [activeTab])
 
@@ -154,7 +152,7 @@ export default function TabPanels() {
         <motion.div
           initial={false}
           animate={{ backgroundColor: panelColor }}
-          transition={{ type: "spring", stiffness: 180, damping: 26 }}
+          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           style={{
             position: "relative",
             borderRadius: 0,
