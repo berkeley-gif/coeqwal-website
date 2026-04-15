@@ -361,46 +361,25 @@ export const hydroclimateOptions: HydroclimateOption[] = [
     value: "historical",
     label: "Historical",
     description:
-      "Historical temperature and precipitation over CV inflow basins according to a 100-year observational record",
+      "Temperature, precipitation, and streamflow patterns reflect historical conditions",
   },
   {
     value: "warmer-wetter",
-    label: "Warmer & Wetter",
+    label: "Moderate-dry climate risk",
     description:
-      "1.2\u00B0C temperature increase and 4% precipitation increase, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
+      "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
   },
   {
     value: "warmer-drier-i",
-    label: "Warmer & Drier I",
+    label: "High climate risk",
     description:
-      "1.5\u00B0C temperature increase and 3% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
-  },
-  {
-    value: "warmer-drier-ii",
-    label: "Warmer & Drier II",
-    description:
-      "1.8\u00B0C temperature increase and 9% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
-  },
-  {
-    value: "warmer-drier-iii",
-    label: "Warmer & Drier III",
-    description:
-      "1.9\u00B0C temperature increase and 7% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
-  },
-  {
-    value: "warmer-drier-iv",
-    label: "Warmer & Drier IV",
-    description:
-      "1.4\u00B0C temperature increase and 12% precipitation decrease, based on 30-year mean values (2028\u20132057 vs. 1992\u20132021) over CV inflow basins",
+      "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
   },
 ]
 
 /** Hydroclimate labels for the discrete slider */
 export const hydroclimateLabels = [
   "Historical",
-  "Warmer Wetter",
-  "Warmer Drier I",
-  "Warmer Drier II",
-  "Warmer Drier III",
-  "Warmer Drier IV",
+  "Moderate-dry climate risk",
+  "High climate risk",
 ]

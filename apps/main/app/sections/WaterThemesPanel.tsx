@@ -312,16 +312,11 @@ function WaterThemesPanelContent({
   const progress = useScrollProgress()
 
   // Phase opacities.when reduced motion, show final state
-  // Image fades out after the last theme circle/label has appeared
+  // Image stays visible while cards are fully opaque, then fades out late
   const imageOpacity = useScrollValue(
     progress,
-    [0.75, 0.88],
+    [0.85, 0.95],
     prefersReducedMotion ? [0, 0] : [1, 0],
-  )
-  const circleOutlineOpacity = useScrollValue(
-    progress,
-    [0.15, 0.3],
-    prefersReducedMotion ? [1, 1] : [0, 1],
   )
 
   return (
@@ -339,6 +334,7 @@ function WaterThemesPanelContent({
         sx={{
           position: "absolute",
           inset: 0,
+          zIndex: 0,
           background: `linear-gradient(to bottom, ${theme.palette.brand.water}, ${theme.palette.brand.panelLight})`,
         }}
       />
@@ -354,130 +350,114 @@ function WaterThemesPanelContent({
           left: 0,
           width: "100%",
           height: "auto",
+          zIndex: 0,
           opacity: imageOpacity,
           pointerEvents: "none",
         }}
       />
 
-      {/* Layer 3: SVG overlay.circles, photos, labels */}
-      <svg
-        viewBox={`0 0 ${IMG_W} ${IMG_H}`}
-        preserveAspectRatio="xMidYMax meet"
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          width: "100%",
-          height: "auto",
-          pointerEvents: "none",
-        }}
-      >
-        {/* Photo fills.commented out; re-enable if circle photos return
-        <defs>
-          {CIRCLE_CONFIG.map((c) => (
-            <clipPath key={`clip-${c.id}`} id={`clip-${c.id}`}>
-              <circle cx={c.cx} cy={c.cy} r={c.r} />
-            </clipPath>
-          ))}
-        </defs>
-
-        {CIRCLE_CONFIG.map((c, i) => (
-          <ThemeCirclePhoto
-            key={`photo-${c.id}`}
-            circle={c}
-            index={i}
-            progress={progress}
-            prefersReducedMotion={prefersReducedMotion}
-          />
-        ))}
-        */}
-
-        {/* Dashed circle outlines (on top of photos) */}
-        {CIRCLE_CONFIG.map((c) => (
-          <motion.circle
-            key={`outline-${c.id}`}
-            cx={c.cx}
-            cy={c.cy}
-            r={c.r}
-            fill="none"
-            stroke="white"
-            strokeWidth={8}
-            strokeDasharray="18 20"
-            style={{ opacity: circleOutlineOpacity }}
-          />
-        ))}
-
-        {/* Labels via foreignObject */}
-        {CIRCLE_CONFIG.map((c, i) => {
-          const active = c.id === "eco" || c.id === "delta"
-          return (
-            <ThemeCircleLabel
-              key={`label-${c.id}`}
-              circle={c}
-              index={i}
-              progress={progress}
-              prefersReducedMotion={prefersReducedMotion}
-              onLearnMore={active ? () => openThemePanel(c.id) : undefined}
-              comingSoon={!active}
-            />
-          )
-        })}
-      </svg>
-
-      {/* Layer 4: Text content.headline + description */}
-      <motion.div
-        style={{
+      {/* Layer 3: Text content + theme cards */}
+      <Box
+        sx={{
           position: "relative",
-          zIndex: 1,
-          opacity: contentOpacity,
-          paddingLeft: theme.space.panel.padding,
-          paddingRight: theme.space.panel.padding,
-          paddingTop: theme.space.panel.topOffset,
+          zIndex: 2,
+          px: theme.space.panel.padding,
+          pt: theme.space.panel.topOffset,
+          pb: theme.space.panel.padding,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          height: "100%",
+          boxSizing: "border-box",
         }}
       >
-        {/* Responsive headline.visible on xs–md only */}
-        <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
-          <Typography
-            variant="h2Main"
-            component="span"
-            sx={{ display: "block", color: "text.primary" }}
-          >
-            What water issues
-          </Typography>
-          <Typography
-            variant="h1"
-            component="span"
-            sx={{ display: "block", color: "text.primary" }}
-          >
-            matter to you?
-          </Typography>
-        </Box>
+        {/* Headline + intro — fades in with crossfade */}
+        <motion.div style={{ opacity: contentOpacity }}>
+          {/* Responsive headline — visible on xs–md only */}
+          <Box sx={{ display: { xs: "block", lg: "none" }, mb: 2 }}>
+            <Typography
+              variant="h2Main"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              What water issues
+            </Typography>
+            <Typography
+              variant="h1"
+              component="span"
+              sx={{ display: "block", color: "text.primary" }}
+            >
+              matter to you?
+            </Typography>
+          </Box>
 
-        {/* Description.right column on md+, matching CoeqwalPanel split layout */}
+          <Typography
+            variant="body2"
+            sx={{ color: "text.primary", maxWidth: "66%", mb: theme.space.section.md }}
+          >
+            Water is important to all of us — from farmers in the Central Valley
+            to communities in the Delta, from salmon in the Sacramento River to
+            urban water users in Los Angeles. We can consider how decisions affect
+            the issues people care about.
+          </Typography>
+        </motion.div>
+
+        {/* Five theme cards — horizontal grid */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-            columnGap: { md: 6 },
+            gridTemplateColumns: "repeat(5, 1fr)",
+            alignItems: "stretch",
+            columnGap: theme.space.section.sm,
+            rowGap: theme.space.component.lg,
           }}
         >
-          <Box />
-          <Typography
-            variant="displayBody"
-            component="div"
-            sx={{
-              color: "text.primary",
-              maxWidth: "calc(100% - 40px)",
-            }}
-          >
-            Water is important to all of us.from farmers in the Central Valley
-            to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions
-            affect the issues people care about.
-          </Typography>
+          {CIRCLE_CONFIG.map((c) => {
+            const active = c.id !== "cws" && c.id !== "governance"
+            return (
+              <Box
+                key={c.id}
+                component={active ? "button" : "div"}
+                onClick={active ? () => openThemePanel(c.id) : undefined}
+                sx={{
+                  background: "rgba(210,228,242,0.8)",
+                  border: "1px solid rgba(210,228,242,0.85)",
+                  borderRadius: theme.borderRadius.md,
+                  p: theme.space.component.lg,
+                  textAlign: "left",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  cursor: active ? "pointer" : "default",
+                  transition: theme.transition.default,
+                  ...(active && {
+                    "&:hover": {
+                      background: "rgba(210,228,242,0.9)",
+                    },
+                  }),
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{ color: "text.primary" }}
+                >
+                  {c.label}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    mt: theme.space.component.sm,
+                  }}
+                >
+                  {c.description}
+                </Typography>
+              </Box>
+            )
+          })}
         </Box>
-      </motion.div>
+      </Box>
     </Box>
   )
 }

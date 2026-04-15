@@ -235,6 +235,7 @@ export default function ShareDrawer() {
 
   const {
     shareItems,
+    hydroclimate,
     showShareDrawer,
     setShowShareDrawer,
     removeShareItem,
@@ -392,6 +393,7 @@ export default function ShareDrawer() {
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
                 allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+                hydroclimate={hydroclimate}
               />
             ))
           )}
