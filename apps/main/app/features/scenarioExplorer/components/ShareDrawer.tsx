@@ -15,6 +15,7 @@ import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
+import ShareRadarCard from "./ShareRadarCard"
 import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 
 const DRAWER_WIDTH = 360
@@ -66,82 +67,21 @@ function ShareItemCard({
     )
   }
 
-  const radarLabel = `Radar: ${item.scenarioIds.length} scenario${item.scenarioIds.length !== 1 ? "s" : ""}`
-  const toggleParts: string[] = []
-  if (item.showRange) toggleParts.push("range")
-  if (item.highlightBaseline) toggleParts.push("baseline")
-  const subtitle =
-    toggleParts.length > 0
-      ? `with ${toggleParts.join(" + ")}`
-      : `${item.axes.length} axes`
+  const radarScenarioNames = item.scenarioIds.map(
+    (id) => scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
+  )
 
   return (
-    <Box
-      sx={{
-        position: "relative",
-        border: `1px solid ${theme.palette.divider}`,
-        borderRadius: theme.borderRadius?.sm ?? "6px",
-        backgroundColor: theme.palette.background.paper,
-        p: 1,
-        mb: 1,
-        overflow: "hidden",
-      }}
-    >
-      <IconButton
-        size="small"
-        onClick={() => onRemove(item.id)}
-        sx={{
-          position: "absolute",
-          top: 4,
-          right: 4,
-          p: 0.25,
-          color: theme.palette.grey[400],
-          "&:hover": { color: theme.palette.grey[700] },
-          zIndex: 1,
-        }}
-      >
-        <icons.Close sx={{ fontSize: "0.875rem" }} />
-      </IconButton>
-      {item.cachedImageDataUrl && (
-        <Box
-          component="img"
-          src={item.cachedImageDataUrl}
-          alt={radarLabel}
-          sx={{
-            width: "100%",
-            height: "auto",
-            maxHeight: 120,
-            objectFit: "contain",
-            borderRadius: "4px",
-            backgroundColor: "#fff",
-            mb: 0.75,
-          }}
-        />
-      )}
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 600,
-          lineHeight: 1.3,
-          color: theme.palette.grey[900],
-          fontSize: "0.75rem",
-          pr: 2.5,
-        }}
-      >
-        {radarLabel}
-      </Typography>
-      <Typography
-        variant="caption"
-        sx={{
-          display: "block",
-          lineHeight: 1.3,
-          color: theme.palette.grey[600],
-          fontSize: "0.6875rem",
-        }}
-      >
-        {subtitle}
-      </Typography>
-    </Box>
+    <ShareRadarCard
+      scenarioNames={radarScenarioNames}
+      hydroclimate={hydroclimate}
+      axes={item.axes}
+      showRange={item.showRange}
+      highlightBaseline={item.highlightBaseline}
+      showDotsOnly={item.showDotsOnly}
+      cachedImageDataUrl={item.cachedImageDataUrl}
+      onRemove={() => onRemove(item.id)}
+    />
   )
 }
 
