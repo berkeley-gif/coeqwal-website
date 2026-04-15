@@ -132,15 +132,15 @@ export default function ScenarioExplorer() {
     setHoveredScenarioId(scenarioId)
   }, [])
 
-  const [hoveredAxisInfo, setHoveredAxisInfo] = useState<{
+  const [hoveredOutcomeInfo, setHoveredOutcomeInfo] = useState<{
     scenarioId: string
-    axis: string
+    outcome: string
     tierValue: number
   } | null>(null)
 
-  const handleAxisHover = useCallback(
-    (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      setHoveredAxisInfo(info)
+  const handleOutcomeHover = useCallback(
+    (info: { scenarioId: string; outcome: string; tierValue: number } | null) => {
+      setHoveredOutcomeInfo(info)
     },
     [],
   )
@@ -289,7 +289,7 @@ export default function ScenarioExplorer() {
                   isListMode ? undefined : (
                     <ScenarioSelectionSidebar
                       hoveredScenarioId={hoveredScenarioId}
-                      hoveredAxisInfo={hoveredAxisInfo}
+                      hoveredOutcomeInfo={hoveredOutcomeInfo}
                       onRowHover={handleSidebarRowHover}
                     />
                   )
@@ -307,7 +307,7 @@ export default function ScenarioExplorer() {
                   <RadarPanel
                     highlightedIds={highlightedIds}
                     onScenarioHover={handleToolScenarioHover}
-                    onAxisHover={handleAxisHover}
+                    onOutcomeHover={handleOutcomeHover}
                     onCaptureReady={handleRadarCaptureReady}
                   />
                 )}

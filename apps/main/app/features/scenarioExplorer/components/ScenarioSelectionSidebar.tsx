@@ -31,9 +31,9 @@ import SearchAndChips from "./SearchAndChips"
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
-  hoveredAxisInfo?: {
+  hoveredOutcomeInfo?: {
     scenarioId: string
-    axis: string
+    outcome: string
     tierValue: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
@@ -42,7 +42,7 @@ interface ScenarioSelectionSidebarProps {
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredScenarioId,
-  hoveredAxisInfo,
+  hoveredOutcomeInfo,
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
@@ -313,9 +313,9 @@ export default function ScenarioSelectionSidebar({
                 />
 
                 <AnimatePresence>
-                  {scenario.scenarioId === hoveredAxisInfo?.scenarioId && (
+                  {scenario.scenarioId === hoveredOutcomeInfo?.scenarioId && (
                     <motion.div
-                      key="axis-hover-detail"
+                      key="outcome-hover-detail"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -331,7 +331,7 @@ export default function ScenarioSelectionSidebar({
                             color: theme.palette.text.primary,
                           }}
                         >
-                          {hoveredAxisInfo.axis}
+                          {hoveredOutcomeInfo.outcome}
                         </Typography>
                         <Box
                           sx={{
@@ -350,7 +350,7 @@ export default function ScenarioSelectionSidebar({
                               bgcolor:
                                 tierColors[
                                   Math.round(
-                                    hoveredAxisInfo.tierValue,
+                                    hoveredOutcomeInfo.tierValue,
                                   ) as keyof typeof tierColors
                                 ] ?? theme.palette.grey[400],
                             }}
@@ -360,7 +360,7 @@ export default function ScenarioSelectionSidebar({
                             sx={{ color: theme.palette.grey[600] }}
                           >
                             {getTierLabel(
-                              Math.round(hoveredAxisInfo.tierValue),
+                              Math.round(hoveredOutcomeInfo.tierValue),
                             )}
                           </Typography>
                         </Box>
