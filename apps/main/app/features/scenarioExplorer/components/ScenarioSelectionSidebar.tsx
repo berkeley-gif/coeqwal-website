@@ -15,6 +15,7 @@
 
 import React, { useMemo, useEffect, useRef } from "react"
 import { Box, Typography, useTheme, Checkbox } from "@repo/ui/mui"
+import { motion, AnimatePresence } from "@repo/motion"
 import { useScenarioExplorerStore } from "../store"
 import {
   StrategyHeader,
@@ -26,15 +27,23 @@ import { useOrderedScenarios } from "../hooks/useOrderedScenarios"
 import ThemeGroupHeader from "./ThemeGroupHeader"
 import SearchAndChips from "./SearchAndChips"
 
+const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
+
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
   hoveredScenarioId?: string | null
+  hoveredAxisInfo?: {
+    scenarioId: string
+    axis: string
+    tierValue: number
+  } | null
   onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredScenarioId,
+  hoveredAxisInfo,
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
@@ -57,6 +66,7 @@ export default function ScenarioSelectionSidebar({
 
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+  const hasActiveScenario = activeScenarioId !== null
 
   useEffect(() => {
     if (!activeScenarioId) return
@@ -227,14 +237,22 @@ export default function ScenarioSelectionSidebar({
                 py: 0.5,
                 cursor: "pointer",
                 overflow: "hidden",
+                borderRadius: theme.borderRadius.sm,
                 borderBottom: `1px solid ${theme.palette.grey[200]}`,
-                backgroundColor: isActive ? `${accentColor}1A` : "transparent",
+                "--row-bg": isActive
+                  ? `${accentColor}1A`
+                  : hasActiveScenario && !isActive
+                    ? "#f0eeeb"
+                    : "#faf8f5",
+                backgroundColor: "var(--row-bg)",
                 opacity: isSearchDimmed ? 0.4 : 1,
-                transition: "background-color 200ms ease, opacity 200ms ease",
+                transition:
+                  "background-color 0.2s ease, border-color 0.2s ease, opacity 200ms ease",
                 "&:hover": {
-                  backgroundColor: isActive
+                  "--row-bg": isActive
                     ? `${accentColor}26`
-                    : theme.palette.interaction.selectedBackground,
+                    : theme.palette.background.paper,
+                  backgroundColor: "var(--row-bg)",
                 },
               }}
             >
@@ -281,6 +299,56 @@ export default function ScenarioSelectionSidebar({
                     />
                   }
                 />
+
+                <AnimatePresence>
+                  {scenario.scenarioId ===
+                    hoveredAxisInfo?.scenarioId && (
+                      <motion.div
+                        key="axis-hover-detail"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            pt: 0.5,
+                            pb: 0.75,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: "3px",
+                              flexShrink: 0,
+                              bgcolor:
+                                TIER_SWATCH_COLORS[
+                                  Math.round(hoveredAxisInfo.tierValue)
+                                ] ?? theme.palette.grey[400],
+                            }}
+                          />
+                          <Typography
+                            variant="compactTitle"
+                            sx={{ color: theme.palette.text.secondary }}
+                          >
+                            {hoveredAxisInfo.axis}
+                            <Box
+                              component="span"
+                              sx={{ mx: 0.5, color: theme.palette.grey[400] }}
+                            >
+                              ·
+                            </Box>
+                            Tier {Math.round(hoveredAxisInfo.tierValue)}
+                          </Typography>
+                        </Box>
+                      </motion.div>
+                    )}
+                </AnimatePresence>
               </Box>
 
               <Box
