@@ -298,7 +298,7 @@ export default function ScenarioExplorer() {
             onClick={() => setShowEquityComparison(!showEquityComparison)}
           />
           <SimpleButton
-            label="Clear map highlights"
+            label="Clear Map Selection"
             onClick={() => mapActions.clearLocationHighlights()}
           />
         </ChartControlsBar>
