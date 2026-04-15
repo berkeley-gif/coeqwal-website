@@ -25,12 +25,14 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
 
     // Explore tab gets a fixed viewport height so it doesn't cause page scroll,
     // EXCEPT when in get-started mode which uses page scroll like the learn tab.
+    // The sub-nav (ExploreSubNav) is an additional sticky bar above the panel.
     const headerAndTabsOffset =
       theme.layout.collapsedHeaderHeight + theme.layout.collapsedTabHeight
+    const subNavHeight = isExploreTab ? theme.layout.collapsedTabHeight : 0
     const exploreStyles: React.CSSProperties =
       isExploreTab && mapMode !== "get-started"
         ? {
-            height: `calc(100vh - ${headerAndTabsOffset}px)`,
+            height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
             overflow: "hidden",
           }
         : {}
