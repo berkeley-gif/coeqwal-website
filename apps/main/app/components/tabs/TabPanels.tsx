@@ -25,9 +25,9 @@ import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 
 const panelVariants = {
-  enter: { opacity: 0, x: 30 }, // is this used?
+  enter: { opacity: 0, x: 20 },
   center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -30 },
+  exit: { opacity: 0, x: -20 },
 }
 
 export default function TabPanels() {
@@ -109,13 +109,14 @@ export default function TabPanels() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Background color tied to active tab
-  // Learn and Explore tabs use transparent - they manage their own backgrounds
-  // (Learn uses persistent map, Explore uses DashboardPanel with conditional background)
-  // Note: Use rgba format for Framer Motion animation compatibility
+  // Background color tied to active tab.
+  // Learn tab is always transparent (map shows through).
+  // Explore tab uses a solid background to prevent map flash during transitions;
+  // get-started mode still gets transparent via the TabPanel layer.
+  // Note: Use rgba format for Framer Motion animation compatibility.
   const panelColor: string = useMemo(() => {
-    if (activeTab === "learn" || activeTab === "explore")
-      return "rgba(0, 0, 0, 0)"
+    if (activeTab === "learn") return "rgba(0, 0, 0, 0)"
+    if (activeTab === "explore") return "rgba(194, 216, 235, 1)"
     return TABS.find((t) => t.key === activeTab)?.panelColor ?? "#ffffff"
   }, [activeTab])
 
@@ -151,7 +152,7 @@ export default function TabPanels() {
     <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
       <AutoHeight>
         <motion.div
-          initial={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
+          initial={false}
           animate={{ backgroundColor: panelColor }}
           transition={{ type: "spring", stiffness: 180, damping: 26 }}
           style={{
@@ -165,10 +166,10 @@ export default function TabPanels() {
             <motion.div
               key={activeTab}
               variants={panelVariants}
-              initial="center"
+              initial="enter"
               animate="center"
               exit="exit"
-              transition={{ type: "spring", stiffness: 220, damping: 26 }}
+              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
               style={{
                 position: "relative",
                 pointerEvents: isMapTab ? "none" : "auto",
