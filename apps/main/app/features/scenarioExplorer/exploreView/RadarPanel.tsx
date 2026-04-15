@@ -268,6 +268,7 @@ export default function RadarPanel({
   }
 
   const noScenariosSelected = selectedScenarios.length === 0 && !radarShowAll
+  const noAxesChosen = visibleAxisNames.length === 0
 
   return (
     <Box
@@ -462,8 +463,43 @@ export default function RadarPanel({
                 boxShadow: theme.shadows[4],
               }}
             >
-              Select scenarios to see them on the chart, or check select all,
+              Select scenarios on the left to see them on the chart, or check show all scenarios,
               above
+            </Box>
+          </Box>
+        )}
+
+        {!noScenariosSelected && noAxesChosen && !isLoading && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 3,
+              pointerEvents: "none",
+            }}
+          >
+            <Box
+              sx={{
+                bgcolor: theme.palette.grey[800],
+                color: theme.palette.common.white,
+                fontSize: "0.9rem",
+                fontWeight: 500,
+                borderRadius: theme.borderRadius.sm,
+                px: 3,
+                py: 1.5,
+                textAlign: "center",
+                maxWidth: 340,
+                lineHeight: 1.5,
+                boxShadow: theme.shadows[4],
+              }}
+            >
+              Choose axes to show data
             </Box>
           </Box>
         )}
