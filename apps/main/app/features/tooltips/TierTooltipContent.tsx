@@ -19,6 +19,7 @@ import {
   getOutcomeName,
   type OutcomeCode,
 } from "../../content/outcomes"
+import { TIER_LABELS, type TierLevel } from "../../content/tiers"
 import type { TooltipChartDataPoint } from "./useTierTooltipState"
 
 interface TierTooltipContentProps {
@@ -63,7 +64,7 @@ const formatTierText = (text: string, fontWeightMedium: number = 500) => {
     }
 
     const subParts = part.split(
-      /(Optimal:|Sub-optimal:|At-risk:|Critical:|Compromised:|\d+%)/g,
+      /(Optimal:|Acceptable:|Sub-optimal:|At-risk:|Critical:|Compromised:|\d+%)/g,
     )
 
     return subParts.map((subPart, subIndex) => {
@@ -71,7 +72,7 @@ const formatTierText = (text: string, fontWeightMedium: number = 500) => {
 
       if (
         subPart.match(
-          /^(Optimal:|Sub-optimal:|At-risk:|Critical:|Compromised:)$/,
+          /^(Optimal:|Acceptable:|Sub-optimal:|At-risk:|Critical:|Compromised:)$/,
         )
       ) {
         return (
@@ -140,8 +141,9 @@ export default function TierTooltipContent({
   // Determine tier type and current tier from chart data (more accurate than score)
   const { tierType, currentTier } = getTierFromChartData(chartData)
 
-  // Tier level names for display
-  const tierLevelNames = ["Optimal", "Sub-optimal", "At-risk", "Critical"]
+  const tierLevelNames = [1, 2, 3, 4].map(
+    (t) => TIER_LABELS[t as TierLevel],
+  )
 
   return (
     <Box sx={{ color: theme.palette.text.primary }}>

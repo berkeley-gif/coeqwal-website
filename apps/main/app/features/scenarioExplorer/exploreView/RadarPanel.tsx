@@ -44,8 +44,8 @@ import { captureSvgToBlob } from "../dataExplorer/utils/exportUtils"
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
   onScenarioHover?: (scenarioId: string | null) => void
-  onAxisHover?: (
-    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  onOutcomeHover?: (
+    info: { scenarioId: string; outcome: string; tierValue: number } | null,
   ) => void
   /** Exposes a capture function to the parent so it can trigger radar capture */
   onCaptureReady?: (capture: () => Promise<void>) => void
@@ -54,7 +54,7 @@ interface RadarPanelProps {
 export default function RadarPanel({
   highlightedIds = null,
   onScenarioHover,
-  onAxisHover,
+  onOutcomeHover,
   onCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
@@ -144,9 +144,13 @@ export default function RadarPanel({
 
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      onAxisHover?.(info)
+      onOutcomeHover?.(
+        info
+          ? { scenarioId: info.scenarioId, outcome: info.axis, tierValue: info.tierValue }
+          : null,
+      )
     },
-    [onAxisHover],
+    [onOutcomeHover],
   )
 
   const [axisPositions, setAxisPositions] = useState<
