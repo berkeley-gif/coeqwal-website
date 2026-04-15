@@ -68,7 +68,7 @@ export default function GetStartedView() {
             py: theme.space.panel.padding,
           }}
         >
-          {/* Heading — Neue Haas Grotesk Display, optically tuned */}
+          {/* Heading — runs two column widths, own row above grid */}
           <Typography
             variant="h3"
             component="h2"
@@ -77,16 +77,18 @@ export default function GetStartedView() {
               fontWeight: 300,
               letterSpacing: "-0.025em",
               lineHeight: 1.15,
-              maxWidth: "20ch",
+              maxWidth: "66%",
             }}
           >
-            What is the COEQWAL scenario library and how should I use it?
+            What is the COEQWAL scenario library
+            <br />
+            and how should I use it?
           </Typography>
 
-          {/* Three-column grid — full panel width */}
+          {/* Three-column grid */}
           <Box
             sx={{
-              mt: theme.space.section.md,
+              mt: theme.space.section.xl,
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
               columnGap: theme.space.section.lg,
