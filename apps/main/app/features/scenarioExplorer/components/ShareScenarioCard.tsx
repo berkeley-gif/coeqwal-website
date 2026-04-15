@@ -139,7 +139,7 @@ export default function ShareScenarioCard({
                   color: theme.palette.grey[800],
                 }}
               >
-                {climateOption.label}
+                {climateOption.label} hydroclimate
               </Typography>
               <Typography
                 sx={{

@@ -2,7 +2,7 @@
 
 import { useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { LinedList, InfoCard } from "@repo/ui"
+import { LinedList, InfoCard, BarredColumns } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
 import TierAnimationSection from "./TierAnimationSection"
@@ -416,7 +416,7 @@ export default function GetStartedView() {
 
             {/* Five issue columns */}
             {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
-              const active = themeKey !== "cws" && themeKey !== "governance"
+              const active = themeKey !== "governance"
               return (
                 <InfoCard
                   key={themeKey}
@@ -654,14 +654,7 @@ export default function GetStartedView() {
             What are the data behind these key outcomes?
           </Typography>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              columnGap: theme.space.section.lg,
-              rowGap: sp.lg,
-            }}
-          >
+          <Box sx={{ maxWidth: "50%" }}>
             <Typography variant="body2" color="text.secondary">
               The key outcomes are calculated from additional variables that can
               be viewed in the{" "}
@@ -673,7 +666,7 @@ export default function GetStartedView() {
               groundwater storage levels, and salinity conditions within the
               Bay-Delta estuary.
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
               Using the{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
                 DATA IN DEPTH
@@ -813,42 +806,27 @@ export default function GetStartedView() {
             these questions:
           </Typography>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              alignItems: "stretch",
-              columnGap: theme.space.section.sm,
-              rowGap: sp.lg,
-              mb: theme.space.section.lg,
-            }}
-          >
-            {[
+          <BarredColumns
+            items={[
               {
-                question: "How is my water interest doing now?",
+                title: "How is my water interest doing now?",
                 description:
                   "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
               },
               {
-                question:
-                  "How could alternative strategies impact my water interest?",
+                title: "How could alternative strategies impact my water interest?",
                 description:
                   "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
               },
               {
-                question: "How does climate change shift the picture?",
+                title: "How does climate change shift the picture?",
                 description:
                   "Select scenarios that represent how current operations and alternative strategies perform under alternative hydroclimates.",
               },
-            ].map(({ question, description }) => (
-              <InfoCard
-                key={question}
-                title={question}
-                description={description}
-                variant="onDark"
-              />
-            ))}
-          </Box>
+            ]}
+            color={theme.palette.common.white}
+            sx={{ mb: theme.space.section.lg }}
+          />
 
           <Typography variant="body2" color="text.secondary">
             As you explore scenarios with different visualization tools, use the

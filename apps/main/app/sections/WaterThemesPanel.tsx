@@ -417,7 +417,7 @@ function WaterThemesPanelContent({
           }}
         >
           {CIRCLE_CONFIG.map((c) => {
-            const active = c.id !== "cws" && c.id !== "governance"
+            const active = c.id !== "governance"
             return (
               <InfoCard
                 key={c.id}
