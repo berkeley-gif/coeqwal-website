@@ -392,7 +392,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
-        const dotR = 4
+        const dotR = 3.5
         const DIM_OPACITY = 0.15
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
@@ -414,18 +414,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           if (isFocused || isSelected || isBaseline) {
             return {
-              dotR: dotR + 2.5,
+              dotR: dotR + 2,
               opacity: 1.0,
-              strokeWidth: 3.5,
+              strokeWidth: 2.5,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
 
           if (isPinned) {
             return {
-              dotR: dotR + 3,
+              dotR: dotR + 2.5,
               opacity: 1.0,
-              strokeWidth: 3,
+              strokeWidth: 2.5,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
@@ -434,7 +434,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return {
               dotR: dotR * 0.7,
               opacity: DIM_OPACITY,
-              strokeWidth: 1.5,
+              strokeWidth: 1.2,
               strokeOpacity: DIM_OPACITY,
             }
           }
@@ -443,7 +443,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return {
               dotR,
               opacity: 1.0,
-              strokeWidth: 1.5,
+              strokeWidth: 1.2,
               strokeOpacity: DIM_OPACITY,
             }
           }
@@ -451,7 +451,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           return {
             dotR,
             opacity: 1.0,
-            strokeWidth: 1.5,
+            strokeWidth: 1.2,
             strokeOpacity: 0.55,
           }
         }
