@@ -18,15 +18,16 @@ import { AutoHeight } from "@repo/ui"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
 import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
+
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
 
 const panelVariants = {
-  enter: { opacity: 0, x: 20 },
+  enter: { opacity: 0, x: 30 },
   center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 },
+  exit: { opacity: 0, x: -30 },
 }
 
 export default function TabPanels() {
@@ -108,10 +109,10 @@ export default function TabPanels() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Background color tied to active tab.
-  // Learn and explore tabs are always transparent so the persistent map
-  // can show through. Child components manage their own opaque backgrounds.
-  // Note: Use rgba format for Framer Motion animation compatibility.
+  // Background color tied to active tab
+  // Learn and Explore tabs use transparent - they manage their own backgrounds
+  // (Learn uses persistent map, Explore uses DashboardPanel with conditional background)
+  // Note: Use rgba format for Framer Motion animation compatibility
   const panelColor: string = useMemo(() => {
     if (activeTab === "learn" || activeTab === "explore")
       return "rgba(0, 0, 0, 0)"
@@ -150,9 +151,9 @@ export default function TabPanels() {
     <div style={{ pointerEvents: isMapTab ? "none" : "auto" }}>
       <AutoHeight>
         <motion.div
-          initial={false}
+          initial={{ backgroundColor: "rgba(0, 0, 0, 0)" }}
           animate={{ backgroundColor: panelColor }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ type: "spring", stiffness: 180, damping: 26 }}
           style={{
             position: "relative",
             borderRadius: 0,
@@ -164,10 +165,10 @@ export default function TabPanels() {
             <motion.div
               key={activeTab}
               variants={panelVariants}
-              initial="enter"
+              initial="center"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ type: "spring", stiffness: 220, damping: 26 }}
               style={{
                 position: "relative",
                 pointerEvents: isMapTab ? "none" : "auto",
