@@ -261,7 +261,7 @@ export default function GetStartedView() {
             sx={{
               display: "grid",
               gridTemplateColumns: "repeat(5, 1fr)",
-              alignItems: "start",
+              alignItems: "stretch",
               columnGap: theme.space.section.sm,
               rowGap: sp.lg,
             }}
@@ -280,63 +280,62 @@ export default function GetStartedView() {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ gridColumn: "1 / -1", maxWidth: "66%" }}
+              sx={{ gridColumn: "1 / -1", maxWidth: "66%", mb: sp.lg }}
             >
               COEQWAL scenarios are designed to address key water challenges
               across California, including:
             </Typography>
 
             {/* Five issue columns */}
-            {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => (
-              <Box
-                key={themeKey}
-                component="button"
-                onClick={() => openThemePanel(themeKey)}
-                sx={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: theme.borderRadius.md,
-                  p: sp.lg,
-                  textAlign: "left",
-                  cursor: "pointer",
-                  transition: theme.transition.default,
-                  "&:hover": {
-                    background: "rgba(255,255,255,0.14)",
-                    borderColor: "rgba(255,255,255,0.25)",
-                  },
-                  "&:hover .issue-title": {
-                    textDecorationColor: "rgba(255,255,255,0.8)",
-                  },
-                }}
-              >
-                <Typography
-                  className="issue-title"
-                  variant="body2"
-                  color="text.secondary"
-                  fontWeight={600}
+            {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
+              const active = themeKey !== "cws" && themeKey !== "governance"
+              return (
+                <Box
+                  key={themeKey}
+                  component={active ? "button" : "div"}
+                  onClick={active ? () => openThemePanel(themeKey) : undefined}
                   sx={{
-                    textDecoration: "underline",
-                    textDecorationColor: "rgba(255,255,255,0.35)",
-                    textUnderlineOffset: "3px",
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: theme.borderRadius.md,
+                    p: sp.lg,
+                    textAlign: "left",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-start",
+                    cursor: active ? "pointer" : "default",
+                    transition: theme.transition.default,
+                    ...(active && {
+                      "&:hover": {
+                        background: "rgba(255,255,255,0.14)",
+                        borderColor: "rgba(255,255,255,0.25)",
+                      },
+                    }),
                   }}
                 >
-                  {title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.sm, opacity: 0.85 }}
-                >
-                  {description}
-                </Typography>
-              </Box>
-            ))}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    fontWeight={600}
+                  >
+                    {title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: sp.sm, opacity: 0.85 }}
+                  >
+                    {description}
+                  </Typography>
+                </Box>
+              )
+            })}
 
             {/* Footer CTA — full width */}
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ gridColumn: "1 / -1" }}
+              sx={{ gridColumn: "1 / -1", mt: sp.lg }}
             >
               Click on each water issue to learn more.
             </Typography>

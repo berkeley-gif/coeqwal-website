@@ -40,7 +40,7 @@ export default function ToolToolbar({
   } = useScenarioExplorerStore()
   /* eslint-enable @typescript-eslint/no-unused-vars */
 
-  // TODO: re-enable warmer-drier-i in radar once it has complete data
+  // TODO: re-enable high climate risk in radar once it has complete data
   const radarDisabledClimates =
     exploreMode === "radar" ? new Set(["warmer-drier-i"]) : undefined
 

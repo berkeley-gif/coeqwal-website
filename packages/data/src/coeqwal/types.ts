@@ -100,7 +100,7 @@ export interface ScenarioListItem {
   short_description: string | null
   /** Whether this scenario is active/visible */
   is_active: boolean
-  /** Hydroclimate variant (e.g., 2 = historical, 3 = warmer-wetter, 4 = warmer-drier) */
+  /** Hydroclimate variant (2 = historical, 3 = moderate-dry climate risk, 4 = high climate risk) */
   hydroclimate_id: number
   /** Short code of the baseline scenario this derives from, or null for baselines */
   baseline_scenario: string | null
