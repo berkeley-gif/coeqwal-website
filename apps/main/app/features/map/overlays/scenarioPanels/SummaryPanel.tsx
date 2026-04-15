@@ -37,6 +37,7 @@ import { fetchTierLocations } from "../../visualizationLayers/hooks/useTierData"
 // import { fetchTierLocationData } from "@repo/data/coeqwal"
 import { getOutcomeName } from "../../../../content/outcomes"
 import { useActiveOutcomeVisualization } from "../../store"
+import { resolveSourceForQuery } from "../../config/tilesetSources"
 import { useMap } from "@repo/map"
 
 // ============================================================================
@@ -137,7 +138,8 @@ export function SummaryPanel({
                 const resultMap = new Map<string, DemandUnitProperties>()
 
                 // Query source features to get properties
-                const features = map.querySourceFeatures("composite", {
+                const source = resolveSourceForQuery(map, "demand-units")
+                const features = map.querySourceFeatures(source, {
                   sourceLayer: "demand_units",
                 })
 

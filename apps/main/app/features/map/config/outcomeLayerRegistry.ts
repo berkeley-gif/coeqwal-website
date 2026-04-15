@@ -4,12 +4,15 @@
 
 import {
   type CameraView,
-  DELTA_VIEW,
+  DELTA_VIEW as _DELTA_VIEW,
   SACRAMENTO_RIVER_VIEW as _SACRAMENTO_RIVER_VIEW,
   RESERVOIR_VIEW as _RESERVOIR_VIEW,
-  PUMPING_PLANTS_VIEW,
-  JERSEY_POINT_VIEW,
   CWS_DEL_BOUNDS,
+  DELTA_ECO_BOUNDS,
+  FW_EXP_BOUNDS,
+  FW_DELTA_USES_BOUNDS,
+  ENV_FLOWS_BOUNDS,
+  RES_STOR_BOUNDS,
 } from "./cameraPresets"
 
 // ============================================================================
@@ -89,6 +92,14 @@ export interface OutcomeLayerConfig {
   cameraPreset?: CameraView
   /** Camera bounds for this outcome (fit-bounds target, takes priority over cameraPreset) */
   cameraBounds?: [[number, number], [number, number]]
+  /**
+   * Maps tier-data IDs (e.g. outcome codes) to Mapbox feature property values.
+   * Used when the API returns one ID but the tileset uses a different one.
+   * Similar to RESERVOIR_CALSIM_TO_GNISIDLABEL but configured per-outcome.
+   */
+  featureIdMap?: Record<string, string>
+  /** When true, render with transparent fill and a broad tier-colored outline */
+  outlineOnly?: boolean
 }
 
 // ============================================================================
@@ -107,8 +118,8 @@ export const LAYER_IDS = {
     outline: "calsim-wba-outline",
   },
   delta: {
-    fill: "delta-water",
-    outline: "delta-water-outline",
+    fill: "delta-detaw",
+    outline: "delta-detaw-outline",
   },
   // Reservoir layer (polygon)
   reservoir: {
@@ -299,6 +310,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     idProperty: "gnisidlabel",
     tierCode: "RES_STOR",
     requiresIdMatching: true,
+    cameraBounds: RES_STOR_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -325,16 +337,18 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
   DELTA_ECO: {
     geometryType: "polygon",
     layerType: "delta",
-    mapboxLayerId: "delta-water",
-    mapboxSource: "coeqwal.delta-water",
-    sourceLayer: "delta-water",
+    mapboxLayerId: "delta-detaw",
+    sourceLayer: "geoschem",
+    idProperty: "WBA_ID",
     tierCode: "DELTA_ECO",
-    requiresIdMatching: false, // Single polygon, no ID matching
+    requiresIdMatching: false,
+    featureIdMap: { DELTA_ECO: "DETAW" },
+    outlineOnly: true,
+    cameraBounds: DELTA_ECO_BOUNDS,
     tooltipFields: [
       { key: "name", label: null, source: "computed", isPrimary: true },
     ],
     idLabel: "Delta",
-    cameraPreset: DELTA_VIEW,
   },
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -363,6 +377,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "ENV_FLOWS",
     requiresIdMatching: true, // 17 per-station tier levels.must use multi-value /locations path
+    cameraBounds: ENV_FLOWS_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -381,6 +396,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "FW_DELTA_USES",
     requiresIdMatching: true, // 2 per-station tier levels (EM, JP).use /locations path
+    cameraBounds: FW_DELTA_USES_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -391,7 +407,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
-    cameraPreset: JERSEY_POINT_VIEW,
   },
 
   FW_EXP: {
@@ -400,6 +415,7 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
     mapboxLayerId: "", // No Mapbox layer - React rendered
     tierCode: "FW_EXP",
     requiresIdMatching: false,
+    cameraBounds: FW_EXP_BOUNDS,
     tooltipFields: [
       {
         key: "locationName",
@@ -410,7 +426,6 @@ export const OUTCOME_LAYER_REGISTRY: Record<string, OutcomeLayerConfig> = {
       },
     ],
     idLabel: "Station ID",
-    cameraPreset: PUMPING_PLANTS_VIEW,
   },
 }
 

@@ -260,9 +260,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     const tooltipRef = useRef<HTMLDivElement>(null)
     const hasAnimatedRef = useRef(false)
 
-    const initialBaselineRef = useRef<Map<string, number> | null>(null)
-    const hasMorphedRef = useRef(false)
-
     const shouldMorphNextRef = useRef(false)
     const prevMorphGenRef = useRef(morphGeneration)
     if (
@@ -281,8 +278,13 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       radius: number
     } | null>(null)
 
+    const morphTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
     const lastNotifiedIdRef = useRef<string | null>(null)
     const hoverNotifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null,
+    )
+    const leaveResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
       null,
     )
 
@@ -327,314 +329,49 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           clearTimeout(hoverNotifyTimerRef.current)
           hoverNotifyTimerRef.current = null
         }
+        if (leaveResetTimerRef.current !== null) {
+          clearTimeout(leaveResetTimerRef.current)
+          leaveResetTimerRef.current = null
+        }
         if (tooltipRef.current) hideTooltip(tooltipRef.current)
 
         const numAxes = axes.length
         if (numAxes === 0) return
 
-        // ── Hydroclimate morph ──
-        if (shouldMorphNextRef.current && scalesRef.current && baselineData) {
+        // ── Snapshot for morph animation ──
+        const HC_DUR = 600
+        let morphSnapshot: {
+          dots: Map<string, { cx: number; cy: number }>
+          baselineD: string | null
+        } | null = null
+
+        if (shouldMorphNextRef.current) {
           shouldMorphNextRef.current = false
-          hasMorphedRef.current = true
-          const scales = scalesRef.current
-          const dataMap = new Map(data.map((s) => [s.id, s]))
-          const svg = select(svgRef.current)
-          const HC_DUR = 600
-
-          // Ghost baseline (dashed line showing original position) — disabled
-          // if (initialBaselineRef.current) { ... }
-
-          // Transition dots
-          const morphHasPinned = pinnedScenarioIds.size > 0
-          const morphHasChosenIds = chosenIds && chosenIds.size > 0
-          const morphDIM = 0.15
-
-          svg
+          const prevSvg = select(svgRef.current)
+          const dots = new Map<string, { cx: number; cy: number }>()
+          prevSvg
             .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
             .each(function () {
               const el = select(this)
-              const sid = el.attr("data-scenario-id")
-              const axisName = el.attr("data-axis")
-              const axisIdx = axes.indexOf(axisName ?? "")
-              if (!sid || axisIdx < 0) return
-              const scenario = dataMap.get(sid)
-              if (!scenario) {
-                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
-                return
-              }
-              const sv = scenario.values[axisName!]
-              if (sv == null) {
-                el.transition().duration(HC_DUR).attr("fill-opacity", 0)
-                return
-              }
-              const mIsSelected = morphHasChosenIds && chosenIds!.has(sid)
-              const mIsPinned = pinnedScenarioIds.has(sid)
-              const mAnyHighlight =
-                dimUnselected || (dimUnpinned && morphHasPinned)
-              const mIsHighlighted = mIsSelected || mIsPinned
-              const restoreOp =
-                mAnyHighlight && !mIsHighlighted ? morphDIM : 1.0
-              const r = scales.rScale(toTier(sv))
-              const angle = getAngle(axisIdx)
-              const dodgeOff = parseFloat(el.attr("data-dodge") ?? "0")
-              const perpAngle = angle + Math.PI / 2
-              el.transition()
-                .duration(HC_DUR)
-                .attr(
-                  "cx",
-                  scales.cx +
-                    r * Math.cos(angle) +
-                    dodgeOff * Math.cos(perpAngle),
-                )
-                .attr(
-                  "cy",
-                  scales.cy +
-                    r * Math.sin(angle) +
-                    dodgeOff * Math.sin(perpAngle),
-                )
-                .attr("fill-opacity", restoreOp)
-                .attr("stroke-opacity", restoreOp)
+              const key = `${el.attr("data-axis")}:${el.attr("data-scenario-id")}`
+              dots.set(key, {
+                cx: parseFloat(el.attr("cx") ?? "0"),
+                cy: parseFloat(el.attr("cy") ?? "0"),
+              })
             })
-
-          // Transition baseline highlight polygon
-          if (highlightBaseline) {
-            const blPts: [number, number][] = []
-            axes.forEach((axis, i) => {
-              const bv = baselineData.values[axis]
-              if (bv == null) return
-              const r = scales.rScale(toTier(bv))
-              const angle = getAngle(i)
-              blPts.push([
-                scales.cx + r * Math.cos(angle),
-                scales.cy + r * Math.sin(angle),
-              ])
-            })
-            if (blPts.length >= 3) {
-              const pathGen = line<[number, number]>()
-                .x((d) => d[0])
-                .y((d) => d[1])
-              svg
-                .select<SVGPathElement>("path.baseline-polygon")
-                .transition()
-                .duration(HC_DUR)
-                .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-            }
+          const blPath = prevSvg.select<SVGPathElement>("path.baseline-polygon")
+          morphSnapshot = {
+            dots,
+            baselineD: blPath.empty() ? null : blPath.attr("d"),
           }
-
-          // Range shadow: crossfade instead of tweening the arc path
-          const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
-          if (!rangeSel.empty()) {
-            rangeSel
-              .transition()
-              .duration(HC_DUR * 0.4)
-              .attr("fill-opacity", 0)
-              .attr("stroke-opacity", 0)
-          }
-
-          // Transition pinned/hovered polygons alongside dots
-          svg
-            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
-            .each(function () {
-              const el = select(this)
-              const sid = el.attr("data-path-id")
-              if (!sid) return
-              const scenario = dataMap.get(sid)
-              if (!scenario) return
-              const pts: [number, number][] = []
-              axes.forEach((axis, i) => {
-                const sv = scenario.values[axis]
-                if (sv == null) return
-                const r = scales.rScale(toTier(sv))
-                const angle = getAngle(i)
-                const dodgeEl = svg.select(
-                  `circle[data-axis="${axis}"][data-scenario-id="${sid}"]`,
-                )
-                const dodgeOff = dodgeEl.empty()
-                  ? 0
-                  : parseFloat(dodgeEl.attr("data-dodge") ?? "0")
-                const perpAngle = angle + Math.PI / 2
-                pts.push([
-                  scales.cx +
-                    r * Math.cos(angle) +
-                    dodgeOff * Math.cos(perpAngle),
-                  scales.cy +
-                    r * Math.sin(angle) +
-                    dodgeOff * Math.sin(perpAngle),
-                ])
-              })
-              if (pts.length >= 3) {
-                const pathGen = line<[number, number]>()
-                  .x((d) => d[0])
-                  .y((d) => d[1])
-                el.transition()
-                  .duration(HC_DUR)
-                  .attr("d", pathGen([...pts, pts[0]!]) ?? "")
-              }
-            })
-
-          // After morph completes, do a full redraw of lines and range band
-          setTimeout(() => {
-            if (!svgRef.current || !scalesRef.current) return
-            const postSvg = select(svgRef.current)
-            const postScales = scalesRef.current
-
-            // Rebuild polygon lines from current dot positions
-            const postPathLayer =
-              postSvg.select<SVGGElement>("g.scenario-paths")
-            if (!postPathLayer.empty()) {
-              postPathLayer.selectAll("*").remove()
-              const postDotPositions = new Map<
-                string,
-                { x: number; y: number }[]
-              >()
-              postSvg
-                .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-                .each(function () {
-                  const el = select(this)
-                  const sid = el.attr("data-scenario-id") ?? ""
-                  const dotCx = parseFloat(el.attr("cx") ?? "0")
-                  const dotCy = parseFloat(el.attr("cy") ?? "0")
-                  if (!postDotPositions.has(sid)) postDotPositions.set(sid, [])
-                  postDotPositions.get(sid)!.push({ x: dotCx, y: dotCy })
-                })
-              data.forEach((scenario, si) => {
-                const pts = postDotPositions.get(scenario.id)
-                if (!pts || pts.length < 3) return
-                const color =
-                  lineColors.length > 0
-                    ? lineColors[si] || colors.default
-                    : colors.default
-                const pathGen = line<{ x: number; y: number }>()
-                  .x((d) => d.x)
-                  .y((d) => d.y)
-                const mSel = morphHasChosenIds && chosenIds!.has(scenario.id)
-                const mPin = pinnedScenarioIds.has(scenario.id)
-                const mHi = mSel || mPin
-                const mAny = dimUnselected || (dimUnpinned && morphHasPinned)
-                let mStrokeOp = mAny && !mHi ? morphDIM : mHi ? 1.0 : 0.55
-                const mStrokeW = mSel ? 3.5 : mPin ? 3 : 1.5
-                if (showDotsOnly) mStrokeOp = morphDIM
-                postPathLayer
-                  .append("path")
-                  .attr("data-path-id", scenario.id)
-                  .attr("d", pathGen([...pts, pts[0]!]) ?? "")
-                  .attr("fill", "none")
-                  .attr("stroke", color)
-                  .attr("stroke-width", mStrokeW)
-                  .attr("stroke-opacity", mStrokeOp)
-                  .attr("stroke-linejoin", "round")
-                  .attr("pointer-events", "none")
-              })
-            }
-
-            // Rebuild range band from final dot positions
-            const dotR2 = data.length > 15 ? 3.5 : data.length > 8 ? 4.5 : 5.5
-            if (axisRange && Object.keys(axisRange).length > 0) {
-              const spokeInfo: {
-                angle: number
-                maxR: number
-                minR: number
-                outerHalf: number
-                innerHalf: number
-              }[] = []
-              axes.forEach((axis, axisIdx) => {
-                const angle = getAngle(axisIdx)
-                let maxR = -Infinity
-                let minR = Infinity
-                let maxDodge = 0
-                data.forEach((scenario) => {
-                  const sv = scenario.values[axis]
-                  if (sv == null) return
-                  const r = postScales.rScale(toTier(sv))
-                  if (r > maxR) maxR = r
-                  if (r < minR) minR = r
-                  const el = postSvg.select(
-                    `circle[data-axis="${axis}"][data-scenario-id="${scenario.id}"]`,
-                  )
-                  const d = Math.abs(parseFloat(el.attr("data-dodge") ?? "0"))
-                  if (d > maxDodge) maxDodge = d
-                })
-                if (maxR === -Infinity) return
-                const spread = (maxDodge + dotR2) * 0.5
-                spokeInfo.push({
-                  angle,
-                  maxR,
-                  minR,
-                  outerHalf: maxR > 0 ? Math.atan2(spread, maxR) : 0,
-                  innerHalf: minR > 0 ? Math.atan2(spread, minR) : 0,
-                })
-              })
-              if (spokeInfo.length >= 3) {
-                let outerD = ""
-                spokeInfo.forEach((s, i) => {
-                  const sa = s.angle - s.outerHalf
-                  const ea = s.angle + s.outerHalf
-                  const sx = postScales.cx + s.maxR * Math.cos(sa)
-                  const sy = postScales.cy + s.maxR * Math.sin(sa)
-                  const ex = postScales.cx + s.maxR * Math.cos(ea)
-                  const ey = postScales.cy + s.maxR * Math.sin(ea)
-                  outerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
-                  outerD += ` A${s.maxR},${s.maxR} 0 0 1 ${ex},${ey}`
-                })
-                outerD += " Z"
-                let innerD = ""
-                const revSpokes = [...spokeInfo].reverse()
-                revSpokes.forEach((s, i) => {
-                  const sa = s.angle + s.innerHalf
-                  const ea = s.angle - s.innerHalf
-                  const sx = postScales.cx + s.minR * Math.cos(sa)
-                  const sy = postScales.cy + s.minR * Math.sin(sa)
-                  const ex = postScales.cx + s.minR * Math.cos(ea)
-                  const ey = postScales.cy + s.minR * Math.sin(ea)
-                  innerD += i === 0 ? `M${sx},${sy}` : ` L${sx},${sy}`
-                  innerD += ` A${s.minR},${s.minR} 0 0 0 ${ex},${ey}`
-                })
-                innerD += " Z"
-                const newRangeSel =
-                  postSvg.select<SVGPathElement>("path.range-shadow")
-                if (!newRangeSel.empty()) {
-                  newRangeSel
-                    .attr("d", `${outerD} ${innerD}`)
-                    .transition()
-                    .duration(HC_DUR * 0.4)
-                    .attr("fill-opacity", 0.35)
-                    .attr("stroke-opacity", 0.5)
-                }
-              }
-            }
-
-            {
-              const postDotsLayer = postSvg.select<SVGGElement>("g.dots")
-              if (!postDotsLayer.empty()) {
-                postDotsLayer
-                  .selectAll<SVGCircleElement, unknown>("circle.radar-dot")
-                  .each(function () {
-                    const sid = this.getAttribute("data-scenario-id") ?? ""
-                    const mSel2 = morphHasChosenIds && chosenIds!.has(sid)
-                    const mPin2 = pinnedScenarioIds.has(sid)
-                    const mHi2 = mSel2 || mPin2
-                    const mAny2 =
-                      dimUnselected || (dimUnpinned && morphHasPinned)
-                    const mR = mPin2
-                      ? dotR2 + 3
-                      : mSel2
-                        ? dotR2 + 1.5
-                        : mAny2 && !mHi2
-                          ? dotR2 * 0.7
-                          : dotR2
-                    const mOp = mAny2 && !mHi2 ? morphDIM : 1.0
-                    select(this)
-                      .attr("r", mR)
-                      .attr("fill-opacity", mOp)
-                      .attr("stroke-opacity", mOp)
-                  })
-              }
-            }
-          }, HC_DUR + 50)
-
-          return
+        } else {
+          shouldMorphNextRef.current = false
         }
-        shouldMorphNextRef.current = false
+
+        if (morphTimeoutRef.current !== null) {
+          clearTimeout(morphTimeoutRef.current)
+          morphTimeoutRef.current = null
+        }
 
         // ── Full rebuild ──
         const svg = select(svgRef.current)
@@ -772,24 +509,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
 
         // Range band placeholder — drawn after dots so we can use actual positions
-        const rangeBandLayer = g
-          .insert("g", "g.ghost-baselines")
-          .attr("class", "range-band")
-
-        // Capture baseline positions for ghost trace
-        const baselineRadii = new Map<string, number>()
-        if (baselineData) {
-          axes.forEach((axis) => {
-            const bv = baselineData.values[axis]
-            if (bv == null) return
-            baselineRadii.set(axis, rScale(toTier(bv)))
-          })
-        }
-        initialBaselineRef.current = baselineRadii
-        hasMorphedRef.current = false
-
-        // 3. Ghost baseline layer (empty on first render)
-        g.append("g").attr("class", "ghost-baselines")
+        const rangeBandLayer = g.append("g").attr("class", "range-band")
 
         // 4. Baseline highlight polygon
         const baselineHighlightLayer = g
@@ -855,12 +575,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         })
 
         // Build dot positions for polygon drawing
-        const dotPositions = new Map<
-          string,
-          { x: number; y: number; color: string; si: number }[]
-        >()
+        const dotPositions = new Map<string, { x: number; y: number }[]>()
 
-        const T_DUR = hasAnimatedRef.current ? 0 : 400
+        const T_DUR = morphSnapshot ? HC_DUR : hasAnimatedRef.current ? 0 : 400
         hasAnimatedRef.current = true
 
         const drawPolygonForScenario = (
@@ -877,7 +594,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           const color = hasScenarioColors
             ? lineColors[si] || colors.default
             : colors.default
-          const pathGen = line<(typeof pts)[number]>()
+          const pathGen = line<{ x: number; y: number }>()
             .x((d) => d.x)
             .y((d) => d.y)
           const vis = resolveVisuals(scenarioId, focusId)
@@ -961,26 +678,28 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
             if (!dotPositions.has(scenario.id))
               dotPositions.set(scenario.id, [])
-            dotPositions.get(scenario.id)!.push({
-              x: dotX,
-              y: dotY,
-              color,
-              si,
-            })
+            dotPositions.get(scenario.id)!.push({ x: dotX, y: dotY })
 
             const vis = resolveVisuals(scenario.id)
+
+            const oldPos = morphSnapshot?.dots.get(`${axis}:${scenario.id}`)
+            const isNewInMorph = morphSnapshot != null && !oldPos
+            const startCx = oldPos ? oldPos.cx : morphSnapshot ? dotX : cx
+            const startCy = oldPos ? oldPos.cy : morphSnapshot ? dotY : cy
+            const startR = morphSnapshot ? vis.dotR : 0
+            const startOp = isNewInMorph ? 0 : vis.opacity
 
             const dot = dotsLayer
               .append("circle")
               .attr("class", "radar-dot")
-              .attr("cx", cx)
-              .attr("cy", cy)
-              .attr("r", 0)
+              .attr("cx", startCx)
+              .attr("cy", startCy)
+              .attr("r", startR)
               .attr("fill", color)
-              .attr("fill-opacity", vis.opacity)
+              .attr("fill-opacity", startOp)
               .attr("stroke", "#fff")
               .attr("stroke-width", 1)
-              .attr("stroke-opacity", vis.opacity)
+              .attr("stroke-opacity", startOp)
               .attr("cursor", "pointer")
               .attr("data-scenario-id", scenario.id)
               .attr("data-axis", axis)
@@ -992,9 +711,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("cx", dotX)
               .attr("cy", dotY)
               .attr("r", vis.dotR)
+              .attr("fill-opacity", vis.opacity)
+              .attr("stroke-opacity", vis.opacity)
 
             dot
               .on("mouseenter", function () {
+                if (leaveResetTimerRef.current !== null) {
+                  clearTimeout(leaveResetTimerRef.current)
+                  leaveResetTimerRef.current = null
+                }
+
                 applyFocusVisuals(scenario.id)
                 select(this)
                   .attr("r", dotR + 2.5)
@@ -1032,12 +758,17 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   clearTimeout(hoverNotifyTimerRef.current)
                   hoverNotifyTimerRef.current = null
                 }
-                resetDotVisuals()
-                pathLayer.selectAll("*").remove()
-                data.forEach((s) => drawPolygonForScenario(s.id))
                 if (tooltipRef.current) hideTooltip(tooltipRef.current)
-                lastNotifiedIdRef.current = null
-                onLineHoverRef.current?.(null)
+
+                if (leaveResetTimerRef.current !== null) {
+                  clearTimeout(leaveResetTimerRef.current)
+                }
+                leaveResetTimerRef.current = setTimeout(() => {
+                  leaveResetTimerRef.current = null
+                  resetDotVisuals()
+                  lastNotifiedIdRef.current = null
+                  onLineHoverRef.current?.(null)
+                }, 20)
               })
               .on("click", () => {
                 onPinnedToggleRef.current?.(scenario.id)
@@ -1127,6 +858,63 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         data.forEach((scenario) => {
           drawPolygonForScenario(scenario.id)
         })
+
+        // ── Morph animation: override elements to old positions, transition ──
+        if (morphSnapshot) {
+          const morphPathGen = line<{ x: number; y: number }>()
+            .x((d) => d.x)
+            .y((d) => d.y)
+
+          pathLayer
+            .selectAll<SVGPathElement, unknown>("path[data-path-id]")
+            .each(function () {
+              const el = select(this)
+              const sid = el.attr("data-path-id")
+              if (!sid) return
+              const finalD = el.attr("d")
+              const oldPts: { x: number; y: number }[] = []
+              axes.forEach((a) => {
+                const old = morphSnapshot!.dots.get(`${a}:${sid}`)
+                if (old) oldPts.push({ x: old.cx, y: old.cy })
+              })
+              if (oldPts.length >= 3) {
+                const oldD = morphPathGen([...oldPts, oldPts[0]!])
+                el.attr("d", oldD ?? "")
+                  .transition()
+                  .duration(HC_DUR)
+                  .attr("d", finalD ?? "")
+              } else {
+                const finalOp = parseFloat(el.attr("stroke-opacity") ?? "0.55")
+                el.attr("stroke-opacity", 0)
+                  .transition()
+                  .duration(HC_DUR)
+                  .attr("stroke-opacity", finalOp)
+              }
+            })
+
+          const blPath = svg.select<SVGPathElement>("path.baseline-polygon")
+          if (!blPath.empty() && morphSnapshot.baselineD) {
+            const finalBlD = blPath.attr("d")
+            blPath
+              .attr("d", morphSnapshot.baselineD)
+              .transition()
+              .duration(HC_DUR)
+              .attr("d", finalBlD ?? "")
+          }
+
+          const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
+          if (!rangeSel.empty()) {
+            rangeSel.attr("fill-opacity", 0).attr("stroke-opacity", 0)
+            morphTimeoutRef.current = setTimeout(() => {
+              morphTimeoutRef.current = null
+              rangeSel
+                .transition()
+                .duration(HC_DUR * 0.4)
+                .attr("fill-opacity", 0.35)
+                .attr("stroke-opacity", 0.5)
+            }, HC_DUR)
+          }
+        }
 
         // 8. Distribution dots.arranged along tier circle arcs
         if (showDistribution && distributionData && hasPinned) {
