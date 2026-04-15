@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useCallback } from "react"
+import React, { useMemo, useState, useCallback, useRef } from "react"
 import {
   Box,
   Typography,
@@ -33,6 +33,8 @@ import { useTabNavigation } from "../../hooks/useTabNavigation"
 import ShareScenarioCard from "../../features/scenarioExplorer/components/ShareScenarioCard"
 import type { ChartDataPoint } from "../../features/scenarios/components/shared/types"
 import {
+  captureElementToBlob,
+  downloadBlob,
   downloadFromDataUrl,
   exportAsJSON,
   getTimestampedFilename,
@@ -117,21 +119,22 @@ function transformToCSS(
 function SortableShareCard({
   item,
   onRemove,
-  onDownloadImage,
   onDownloadData,
+  onRegisterContentRef,
   outcomeNames,
   scenarioLookup,
   allChartData,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
-  onDownloadImage: (item: ShareItem) => void
   onDownloadData: (item: ShareItem) => void
+  onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
   outcomeNames: { shortCode: string; displayName: string }[]
   scenarioLookup: Map<string, { name: string; description: string }>
   allChartData: Record<string, Record<string, unknown> | undefined>
 }) {
   const theme = useTheme()
+  const contentRef = useRef<HTMLDivElement>(null)
   const {
     attributes,
     listeners,
@@ -140,6 +143,29 @@ function SortableShareCard({
     transition,
     isDragging,
   } = useSortable({ id: item.id })
+
+  const handleDownloadImage = useCallback(async () => {
+    const el = contentRef.current
+    if (!el) return
+    try {
+      const { blob } = await captureElementToBlob(el, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+      })
+      const label =
+        item.type === "barChart"
+          ? `coeqwal-${item.scenarioId}-${item.viewMode}`
+          : `coeqwal-radar-${item.scenarioIds.length}scenarios`
+      downloadBlob(blob, getTimestampedFilename(label, "png"))
+    } catch {
+      if (item.cachedImageDataUrl) {
+        await downloadFromDataUrl(
+          item.cachedImageDataUrl,
+          getTimestampedFilename(`coeqwal-${item.type}`, "png"),
+        )
+      }
+    }
+  }, [item])
 
   const style: React.CSSProperties = {
     transform: transformToCSS(transform),
@@ -276,7 +302,14 @@ function SortableShareCard({
         <icons.DragIndicator sx={{ fontSize: "1rem" }} />
       </Box>
 
-      {renderContent()}
+      <Box
+        ref={(el: HTMLDivElement | null) => {
+          (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = el
+          onRegisterContentRef(item.id, el)
+        }}
+      >
+        {renderContent()}
+      </Box>
 
       {/* Actions */}
       <Box sx={{ px: 1.5, pb: 1.25 }}>
@@ -291,8 +324,7 @@ function SortableShareCard({
           <Tooltip title="Download image" arrow>
             <IconButton
               size="small"
-              onClick={() => onDownloadImage(item)}
-              disabled={!item.cachedImageDataUrl}
+              onClick={handleDownloadImage}
               sx={{ p: 0.5, color: theme.palette.grey[500] }}
             >
               <icons.Image sx={{ fontSize: "0.875rem" }} />
@@ -371,15 +403,6 @@ export default function SharePanel() {
     [itemIds, reorderShareItems],
   )
 
-  const handleDownloadImage = useCallback(async (item: ShareItem) => {
-    if (!item.cachedImageDataUrl) return
-    const filename = getTimestampedFilename(
-      `coeqwal-${item.type}`,
-      "png",
-    )
-    await downloadFromDataUrl(item.cachedImageDataUrl, filename)
-  }, [])
-
   const handleDownloadData = useCallback((item: ShareItem) => {
     if (!item.cachedChartData) return
     const filename = getTimestampedFilename(
@@ -389,14 +412,44 @@ export default function SharePanel() {
     exportAsJSON(item.cachedChartData, filename)
   }, [])
 
+  const cardContentRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  const registerCardRef = useCallback(
+    (id: string, el: HTMLDivElement | null) => {
+      if (el) cardContentRefs.current.set(id, el)
+      else cardContentRefs.current.delete(id)
+    },
+    [],
+  )
+
   const handleDownloadAllImages = useCallback(async () => {
     for (const item of shareItems) {
-      if (!item.cachedImageDataUrl) continue
-      const filename = getTimestampedFilename(
-        `coeqwal-${item.type}`,
-        "png",
-      )
-      await downloadFromDataUrl(item.cachedImageDataUrl, filename)
+      const el = cardContentRefs.current.get(item.id)
+      if (el) {
+        try {
+          const { blob } = await captureElementToBlob(el, {
+            scale: 2,
+            backgroundColor: "#ffffff",
+          })
+          const label =
+            item.type === "barChart"
+              ? `coeqwal-${item.scenarioId}-${item.viewMode}`
+              : `coeqwal-radar-${item.scenarioIds.length}scenarios`
+          downloadBlob(blob, getTimestampedFilename(label, "png"))
+        } catch {
+          if (item.cachedImageDataUrl) {
+            await downloadFromDataUrl(
+              item.cachedImageDataUrl,
+              getTimestampedFilename(`coeqwal-${item.type}`, "png"),
+            )
+          }
+        }
+      } else if (item.cachedImageDataUrl) {
+        await downloadFromDataUrl(
+          item.cachedImageDataUrl,
+          getTimestampedFilename(`coeqwal-${item.type}`, "png"),
+        )
+      }
     }
   }, [shareItems])
 
@@ -502,8 +555,8 @@ export default function SharePanel() {
                 key={item.id}
                 item={item}
                 onRemove={removeShareItem}
-                onDownloadImage={handleDownloadImage}
                 onDownloadData={handleDownloadData}
+                onRegisterContentRef={registerCardRef}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
                 allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
