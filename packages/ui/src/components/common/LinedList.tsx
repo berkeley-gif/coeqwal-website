@@ -1,6 +1,12 @@
 "use client"
 
-import { Box, Typography, useTheme, type SxProps, type Theme } from "@mui/material"
+import {
+  Box,
+  Typography,
+  useTheme,
+  type SxProps,
+  type Theme,
+} from "@mui/material"
 import { NavArrow } from "./NavArrow"
 
 export interface LinedListItem {
@@ -78,11 +84,7 @@ function LinedListRow({
         )}
       </Box>
       {arrows && interactive && (
-        <NavArrow
-          className="lined-list-arrow"
-          opacity={0.6}
-          bold={false}
-        />
+        <NavArrow className="lined-list-arrow" opacity={0.6} bold={false} />
       )}
     </Box>
   )

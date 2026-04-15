@@ -1,6 +1,12 @@
 "use client"
 
-import { Box, Typography, useTheme, type SxProps, type Theme } from "@mui/material"
+import {
+  Box,
+  Typography,
+  useTheme,
+  type SxProps,
+  type Theme,
+} from "@mui/material"
 
 export interface InfoCardProps {
   title: string

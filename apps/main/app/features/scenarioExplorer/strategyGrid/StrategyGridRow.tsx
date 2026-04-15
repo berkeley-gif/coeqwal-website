@@ -178,12 +178,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     }
 
     addShareItem(item)
-  }, [
-    scenario.scenarioId,
-    outcomeDisplayMode,
-    scenarioChartData,
-    addShareItem,
-  ])
+  }, [scenario.scenarioId, outcomeDisplayMode, scenarioChartData, addShareItem])
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
   // Refs to store glyph container elements for tooltip anchoring

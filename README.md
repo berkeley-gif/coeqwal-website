@@ -56,19 +56,19 @@ State management combines **Zustand** stores (map state, scenario explorer state
 
 ## Stack
 
-| Layer | Technology |
-|-------|------------|
-| Framework | [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://reactjs.org/), [TypeScript 5.8](https://www.typescriptlang.org/) |
-| Build | [Turborepo](https://turbo.build/repo), [pnpm 10](https://pnpm.io/), Node 22 |
-| UI | [MUI v7](https://mui.com/material-ui/) + [Emotion](https://emotion.sh/), [SASS](https://sass-lang.com/) |
-| State | [Zustand](https://zustand-demo.pmnd.rs/) (with [Immer](https://immerjs.github.io/immer/)), React Context |
-| Data fetching | [SWR](https://swr.vercel.app/), native fetch |
-| Maps | [Mapbox GL](https://mapbox.com/) + [react-map-gl](https://visgl.github.io/react-map-gl/), [Turf.js](https://turfjs.org/) |
-| Charts | [D3 v7](https://d3js.org/) (custom components in `@repo/viz`) |
-| Animation | [Framer Motion](https://motion.dev/), [Flubber](https://github.com/veltman/flubber) (shape morphing) |
-| Scrollytelling | [react-scrollama](https://github.com/jsonkao/react-scrollama), custom `@repo/scrollytelling` |
-| Drag and drop | [@dnd-kit](https://dndkit.com/) |
-| Deploy | [AWS Amplify](https://aws.amazon.com/amplify/) (static export) |
+| Layer          | Technology                                                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Framework      | [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://reactjs.org/), [TypeScript 5.8](https://www.typescriptlang.org/) |
+| Build          | [Turborepo](https://turbo.build/repo), [pnpm 10](https://pnpm.io/), Node 22                                                         |
+| UI             | [MUI v7](https://mui.com/material-ui/) + [Emotion](https://emotion.sh/), [SASS](https://sass-lang.com/)                             |
+| State          | [Zustand](https://zustand-demo.pmnd.rs/) (with [Immer](https://immerjs.github.io/immer/)), React Context                            |
+| Data fetching  | [SWR](https://swr.vercel.app/), native fetch                                                                                        |
+| Maps           | [Mapbox GL](https://mapbox.com/) + [react-map-gl](https://visgl.github.io/react-map-gl/), [Turf.js](https://turfjs.org/)            |
+| Charts         | [D3 v7](https://d3js.org/) (custom components in `@repo/viz`)                                                                       |
+| Animation      | [Framer Motion](https://motion.dev/), [Flubber](https://github.com/veltman/flubber) (shape morphing)                                |
+| Scrollytelling | [react-scrollama](https://github.com/jsonkao/react-scrollama), custom `@repo/scrollytelling`                                        |
+| Drag and drop  | [@dnd-kit](https://dndkit.com/)                                                                                                     |
+| Deploy         | [AWS Amplify](https://aws.amazon.com/amplify/) (static export)                                                                      |
 
 ## Key architecture patterns
 

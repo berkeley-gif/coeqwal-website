@@ -130,7 +130,10 @@ function SortableShareCard({
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
   outcomeNames: { shortCode: string; displayName: string }[]
-  scenarioLookup: Map<string, { name: string; description: string; definition: string }>
+  scenarioLookup: Map<
+    string,
+    { name: string; description: string; definition: string }
+  >
   allChartData: Record<string, Record<string, unknown> | undefined>
   hydroclimate: string
 }) {
@@ -158,10 +161,7 @@ function SortableShareCard({
         item.type === "barChart"
           ? `coeqwal-${item.scenarioId}-${item.viewMode}`
           : `coeqwal-radar-${item.scenarioIds.length}scenarios`
-      await downloadFromDataUrl(
-        dataUrl,
-        getTimestampedFilename(label, "png"),
-      )
+      await downloadFromDataUrl(dataUrl, getTimestampedFilename(label, "png"))
     } catch {
       if (item.cachedImageDataUrl) {
         await downloadFromDataUrl(
@@ -188,8 +188,12 @@ function SortableShareCard({
           ? "Key outcomes distribution"
           : "Key outcomes bar chart"
       const chartData =
-        (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
-        (allChartData[item.scenarioId] as Record<string, ChartDataPoint[]> | undefined)
+        (item.cachedChartData as
+          | Record<string, ChartDataPoint[]>
+          | undefined) ??
+        (allChartData[item.scenarioId] as
+          | Record<string, ChartDataPoint[]>
+          | undefined)
       return (
         <Box sx={{ px: 0.5, pb: 0.5 }}>
           <ShareScenarioCard
@@ -311,7 +315,9 @@ function SortableShareCard({
 
       <Box
         ref={(el: HTMLDivElement | null) => {
-          (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = el
+          ;(
+            contentRef as React.MutableRefObject<HTMLDivElement | null>
+          ).current = el
           onRegisterContentRef(item.id, el)
         }}
       >
@@ -379,7 +385,10 @@ export default function SharePanel() {
     useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
-    const map = new Map<string, { name: string; description: string; definition: string }>()
+    const map = new Map<
+      string,
+      { name: string; description: string; definition: string }
+    >()
     siblingGroups.forEach((s) => {
       map.set(s.scenarioId, {
         name: s.shortLabel,
@@ -397,10 +406,7 @@ export default function SharePanel() {
     }),
   )
 
-  const itemIds = useMemo(
-    () => shareItems.map((s) => s.id),
-    [shareItems],
-  )
+  const itemIds = useMemo(() => shareItems.map((s) => s.id), [shareItems])
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -416,10 +422,7 @@ export default function SharePanel() {
 
   const handleDownloadData = useCallback((item: ShareItem) => {
     if (!item.cachedChartData) return
-    const filename = getTimestampedFilename(
-      `coeqwal-${item.type}-data`,
-      "json",
-    )
+    const filename = getTimestampedFilename(`coeqwal-${item.type}-data`, "json")
     exportAsJSON(item.cachedChartData, filename)
   }, [])
 
@@ -546,8 +549,8 @@ export default function SharePanel() {
           mb: 3,
         }}
       >
-        {shareItems.length} item{shareItems.length !== 1 ? "s" : ""}.
-        Drag to rearrange. Download individually or export all.
+        {shareItems.length} item{shareItems.length !== 1 ? "s" : ""}. Drag to
+        rearrange. Download individually or export all.
       </Typography>
 
       <DndContext
@@ -575,7 +578,12 @@ export default function SharePanel() {
                 onRegisterContentRef={registerCardRef}
                 outcomeNames={outcomeNames}
                 scenarioLookup={scenarioLookup}
-                allChartData={allChartData as Record<string, Record<string, unknown> | undefined>}
+                allChartData={
+                  allChartData as Record<
+                    string,
+                    Record<string, unknown> | undefined
+                  >
+                }
                 hydroclimate={hydroclimate}
               />
             ))}

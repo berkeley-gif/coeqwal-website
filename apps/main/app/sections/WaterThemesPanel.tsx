@@ -393,12 +393,16 @@ function WaterThemesPanelContent({
 
           <Typography
             variant="body2"
-            sx={{ color: "text.primary", maxWidth: "66%", mb: theme.space.section.md }}
+            sx={{
+              color: "text.primary",
+              maxWidth: "66%",
+              mb: theme.space.section.md,
+            }}
           >
             Water is important to all of us — from farmers in the Central Valley
             to communities in the Delta, from salmon in the Sacramento River to
-            urban water users in Los Angeles. We can consider how decisions affect
-            the issues people care about.
+            urban water users in Los Angeles. We can consider how decisions
+            affect the issues people care about.
           </Typography>
         </motion.div>
 
