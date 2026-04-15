@@ -171,8 +171,28 @@ export default function ExploreSubNav() {
         )
       })}
 
-      {mainView === "explorer" && (
-        <>
+      {/* Grid container: 0fr collapses to zero width, 1fr reveals. */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: mainView === "explorer" ? "1fr" : "0fr",
+          transition: "grid-template-columns 0.35s cubic-bezier(0.4,0,0.2,1)",
+          flexShrink: 0,
+        }}
+      >
+        <Box
+          sx={{
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            minWidth: 0,
+            opacity: mainView === "explorer" ? 1 : 0,
+            transition: mainView === "explorer"
+              ? "opacity 0.25s 0.15s"
+              : "opacity 0.15s",
+          }}
+        >
           <Box
             sx={{
               width: "1px",
@@ -262,8 +282,8 @@ export default function ExploreSubNav() {
               )
             },
           )}
-        </>
-      )}
+        </Box>
+      </Box>
     </Box>
   )
 }
