@@ -12,7 +12,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -88,6 +88,26 @@ export default function ScenarioExplorer() {
   const mapMode = useMapMode()
 
   usePrefetchTiers()
+
+  // When switching to explorer tools, scroll so the tabs are docked and
+  // the ToolToolbar is visible right below the sticky header + sub-nav.
+  const prevMainViewRef = useRef(mainView)
+  useEffect(() => {
+    const prev = prevMainViewRef.current
+    prevMainViewRef.current = mainView
+    if (prev === mainView) return
+    if (mainView !== "explorer") return
+
+    const tabsEl = document.getElementById("tabs")
+    if (!tabsEl) return
+
+    requestAnimationFrame(() => {
+      const tabsRect = tabsEl.getBoundingClientRect()
+      const targetY =
+        window.scrollY + tabsRect.top - theme.layout.collapsedHeaderHeight
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    })
+  }, [mainView, theme.layout.collapsedHeaderHeight])
 
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"

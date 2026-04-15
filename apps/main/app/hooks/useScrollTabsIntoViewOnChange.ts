@@ -17,7 +17,7 @@ export function useScrollTabsIntoViewOnChange({
   behavior = "smooth",
   offsetPx = 0,
 }: Options) {
-  const { state, tabsRef, subNavRef, panelRef, isInTabsArea } = useTabs()
+  const { state, tabsRef, panelRef, isInTabsArea } = useTabs()
   const { activeTab } = state
 
   // Track whether we were in the tabs area on last render
@@ -53,10 +53,10 @@ export function useScrollTabsIntoViewOnChange({
 
     const raf = requestAnimationFrame(() => {
       const panelRect = panelEl.getBoundingClientRect()
+      // tabsHeight includes ExploreSubNav (it's a child of SmoothTabs)
       const tabsHeight = tabsEl.offsetHeight
-      const subNavHeight = subNavRef.current?.offsetHeight ?? 0
       const absolutePanelTop = window.scrollY + panelRect.top
-      const rawTarget = absolutePanelTop - tabsHeight - subNavHeight - offsetPx
+      const rawTarget = absolutePanelTop - tabsHeight - offsetPx
 
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight
@@ -74,7 +74,6 @@ export function useScrollTabsIntoViewOnChange({
     behavior,
     offsetPx,
     tabsRef,
-    subNavRef,
     isInTabsArea,
     panelRef,
   ])

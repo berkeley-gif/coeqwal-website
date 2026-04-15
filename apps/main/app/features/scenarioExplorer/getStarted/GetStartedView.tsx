@@ -2,7 +2,7 @@
 
 import { useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { ContentPanel } from "@repo/ui"
+import { LinedList, InfoCard } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
 import { useScenarioExplorerStore } from "../store"
@@ -116,12 +116,45 @@ const KEY_OUTCOMES = [
   },
 ] as const
 
+const VIZ_TOOLS: ReadonlyArray<{
+  title: string
+  description: string
+  dimmed?: boolean
+}> = [
+  {
+    title: "Map view",
+    description:
+      "Displays how outcomes vary across locations of interest and reveals spatial patterns in outcomes.",
+  },
+  {
+    title: "Distribution viewer",
+    description:
+      "Highlights how outcomes vary across key outcomes and among different locations of interest and communities, revealing who benefits and who is most impacted.",
+  },
+  {
+    title: "Radar chart",
+    description:
+      "Shows how outcomes vary within a scenario and enables comparisons across scenarios, highlighting commonalities, differences, and trade-offs.",
+  },
+  {
+    title: "Scatterplot",
+    description:
+      "Compares scenarios at the system level to reveal the relative effects of operational decisions and climate change on outcomes.",
+    dimmed: true,
+  },
+  {
+    title: "Heatmaps",
+    description:
+      "Show how scenarios perform across increasing levels of climate stress, highlighting which management strategies are most resilient or vulnerable to climate impacts.",
+  },
+]
+
 const CAVEATS = [
   "All scenarios are created by CalSim3, a water planning tool to guide operations of California\u2019s water supply system in the Central Valley.",
   "The scenarios do not include all regions of California nor certain aspects of our water system that may be of interest.",
-  "Key outcomes summarize scenario results over a 100-year period. Annual variation in outcomes can be explored with the DATA IN DEPTH VIEW.",
+  "Key outcomes summarize scenario results over a 100-year period. Annual variation in outcomes can be explored with the DATA IN DEPTH view and in the GET DATA section.",
   "The hydroclimates used in scenarios approximate the range of historical and potential future conditions that our system may experience. They do not represent historical observations or predicted future conditions according to climate models.",
-  "Predictions of water deliveries to location of interest with small water demands are less reliable than predictions for water users that receive large water volumes.",
+  "Estimates of water deliveries to locations of interest with small water demands may be less reliable than delivery estimates for water users that receive larger volumes.",
   "The outcomes of CalSim scenarios are best interpreted in a comparative manner \u2014 evaluating how outcomes change relative to current operations (as a baseline) is more appropriate than assessing the specific outcomes of any particular scenario.",
 ] as const
 
@@ -296,23 +329,17 @@ export default function GetStartedView() {
                 By exploring the scenario library, you will gain understanding of
                 how:
               </Typography>
-              <Box component="ul" sx={{ listStyle: "disc", pl: "1.25em", mt: sp.sm, color: "text.secondary" }}>
-                {[
-                  "Management strategies affect trade-offs and synergies among outcomes",
-                  "Benefits and impacts are distributed among water users and locations",
-                  "Different strategies perform under varying levels of climate stress",
-                ].map((item) => (
-                  <Box component="li" key={item} sx={{ mt: sp.sm }}>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      fontWeight={500}
-                    >
-                      {item}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
+              <LinedList
+                items={[
+                  { label: "Management strategies affect trade-offs and synergies among outcomes" },
+                  { label: "Benefits and impacts are distributed among water users and locations" },
+                  { label: "Different strategies perform under varying levels of climate stress" },
+                ]}
+                color={theme.palette.common.white}
+                arrows={false}
+                labelVariant="body2"
+                sx={{ mt: sp.sm }}
+              />
             </Box>
           </Box>
         </Box>
@@ -365,45 +392,14 @@ export default function GetStartedView() {
             {WATER_ISSUE_THEMES.map(({ title, description, themeKey }) => {
               const active = themeKey !== "cws" && themeKey !== "governance"
               return (
-                <Box
+                <InfoCard
                   key={themeKey}
-                  component={active ? "button" : "div"}
+                  title={title}
+                  description={description}
                   onClick={active ? () => openThemePanel(themeKey) : undefined}
-                  sx={{
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: theme.borderRadius.md,
-                    p: sp.lg,
-                    textAlign: "left",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    cursor: active ? "pointer" : "default",
-                    transition: theme.transition.default,
-                    ...(!active && { opacity: 0.45 }),
-                    ...(active && {
-                      "&:hover": {
-                        background: "rgba(255,255,255,0.14)",
-                        borderColor: "rgba(255,255,255,0.25)",
-                      },
-                    }),
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    fontWeight={600}
-                  >
-                    {title}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: sp.sm, opacity: 0.85 }}
-                  >
-                    {description}
-                  </Typography>
-                </Box>
+                  dimmed={!active}
+                  variant="onDark"
+                />
               )
             })}
 
@@ -479,39 +475,15 @@ export default function GetStartedView() {
               rowGap: sp.lg,
             }}
           >
-            {HYDROCLIMATES.map(({ title, description }, i) => {
-              const dimmed = i === 2 || i === 4
-              return (
-              <Box
+            {HYDROCLIMATES.map(({ title, description }, i) => (
+              <InfoCard
                 key={title}
-                sx={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: theme.borderRadius.md,
-                  p: sp.lg,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                  ...(dimmed && { opacity: 0.45 }),
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  fontWeight={600}
-                >
-                  {title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.sm, opacity: 0.85 }}
-                >
-                  {description}
-                </Typography>
-              </Box>
-              )
-            })}
+                title={title}
+                description={description}
+                dimmed={i === 2 || i === 4}
+                variant="onDark"
+              />
+            ))}
           </Box>
 
           <Typography
@@ -564,7 +536,7 @@ export default function GetStartedView() {
             color="text.secondary"
             sx={{ maxWidth: "66%", mb: sp.sm }}
           >
-            Key Outcomes
+            Key outcomes
           </Typography>
           <Typography
             variant="body1"
@@ -592,33 +564,12 @@ export default function GetStartedView() {
             }}
           >
             {KEY_OUTCOMES.map(({ title, description }) => (
-              <Box
+              <InfoCard
                 key={title}
-                sx={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                  borderRadius: theme.borderRadius.md,
-                  p: sp.lg,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  fontWeight={600}
-                >
-                  {title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: sp.sm, opacity: 0.85 }}
-                >
-                  {description}
-                </Typography>
-              </Box>
+                title={title}
+                description={description}
+                variant="onDark"
+              />
             ))}
           </Box>
 
@@ -656,97 +607,292 @@ export default function GetStartedView() {
       {/* Map panel (TierAnimationSection) */}
       <TierAnimationSection />
 
-      {/* Tools */}
-      <ContentPanel
-        background={theme.palette.nature.forest}
-        heading="Tools"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          We have prepared a series of tools to help you understand, compare,
-          and share data from the scenarios. You can find them in the Tools
-          section of this Explore tab.
-        </Typography>
-        <Box component="ul" sx={{ listStyle: "none", p: 0, mt: sp.md }}>
-          {["Bar chart", "Radar chart", "Distribution viewer"].map((tool) => (
-            <Box component="li" key={tool} sx={{ mt: sp.sm }}>
-              <Typography variant="body1" color="text.secondary">
-                {tool}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          You can go back and forth between the charts and a map.
-        </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: sp.lg, fontStyle: "italic" }}
+      {/* Data in Depth */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.nature.forest,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
         >
-          Coming soon: you can find locations you are interested in, and track
-          them across the charts.
-        </Typography>
-      </ContentPanel>
-
-      {/* Data in depth */}
-      <ContentPanel
-        background={exploreBg}
-        heading="Data in depth"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          In addition to the key outcomes, there are dozens of detailed scenario
-          outcome variables that describe different features of the systems,
-          including river flows, reservoir and groundwater storage, water
-          deliveries, and Delta salinity.
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          A full list of outcome variables can be accessed{" "}
           <Typography
-            component="button"
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: sp.sm }}
+          >
+            Data in depth
+          </Typography>
+          <Typography
             variant="body1"
-            onClick={() => setMainView("data")}
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.lg, opacity: 0.85 }}
+          >
+            What are the data behind these key outcomes?
+          </Typography>
+
+          <Box
             sx={{
-              background: "none",
-              border: "none",
-              p: 0,
-              color: "text.secondary",
-              textDecoration: "underline",
-              cursor: "pointer",
-              font: "inherit",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              columnGap: theme.space.section.lg,
+              rowGap: sp.lg,
             }}
           >
-            here
-          </Typography>
-          .
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          Using the &ldquo;Data in Depth&rdquo; tool, users can generate
-          summaries and plots of these different outcome variables to explore
-          how they vary over space and time.
-        </Typography>
-      </ContentPanel>
-
-      {/* Before you start your exploration */}
-      <ContentPanel
-        background={theme.palette.blue.dark}
-        heading="Before you start your exploration"
-        sx={{ pointerEvents: "auto" }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ mt: sp.lg }}>
-          There are a few important things to keep in mind:
-        </Typography>
-        <Box component="ul" sx={{ pl: 2, mt: sp.md, color: "text.secondary" }}>
-          {CAVEATS.map((caveat, i) => (
-            <Box component="li" key={i} sx={{ mt: sp.sm }}>
-              <Typography variant="body1" color="text.secondary">
-                {caveat}
-              </Typography>
-            </Box>
-          ))}
+            <Typography variant="body2" color="text.secondary">
+              The key outcomes are calculated from additional variables that can
+              be viewed in the{" "}
+              <Typography component="span" variant="body2" fontWeight={600}>
+                DATA IN DEPTH
+              </Typography>{" "}
+              section. These describe different features of the water system,
+              including river flows, water delivery amounts, reservoir and
+              groundwater storage levels, and salinity conditions within the
+              Bay-Delta estuary.
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Using the{" "}
+              <Typography component="span" variant="body2" fontWeight={600}>
+                DATA IN DEPTH
+              </Typography>{" "}
+              tool, you can generate summaries and plots of these different
+              outcome variables to explore how they vary over space and time for
+              different scenarios.
+            </Typography>
+          </Box>
         </Box>
-      </ContentPanel>
+      </Box>
+
+      {/* Interpreting Scenario Outcomes */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: exploreBg,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.lg }}
+          >
+            Interpreting scenario outcomes
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              columnGap: theme.space.section.lg,
+            }}
+          >
+            {/* Left — three lenses */}
+            <Box>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: theme.space.section.md }}
+              >
+                The visualization tools help to understand how different
+                management strategies and hydroclimate conditions affect:
+              </Typography>
+              <LinedList
+                items={[
+                  {
+                    label: "Trade-offs",
+                    description: "How outcomes improve or decline together across scenarios",
+                  },
+                  {
+                    label: "Equity",
+                    description: "How benefits and impacts are distributed across outcomes and locations of interest",
+                  },
+                  {
+                    label: "Resilience",
+                    description: "How outcomes change under increasing levels of climate stress",
+                  },
+                ]}
+                color={theme.palette.common.white}
+                arrows={false}
+                labelVariant="body2"
+                descriptionVariant="body2"
+              />
+            </Box>
+
+            {/* Right — visualization tools */}
+            <Box>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ mb: sp.sm }}
+              >
+                Each tool highlights these perspectives in different ways:
+              </Typography>
+              <LinedList
+                items={VIZ_TOOLS.map(({ title, description, dimmed }) => ({
+                  label: title,
+                  description,
+                  opacity: dimmed ? 0.45 : 1,
+                }))}
+                color={theme.palette.common.white}
+                arrows={false}
+                labelVariant="body2"
+                descriptionVariant="body2"
+              />
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* Choose Your Scenarios */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.blue.dark,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: sp.sm }}
+          >
+            Choose your scenarios
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.md, opacity: 0.85 }}
+          >
+            Which water management strategies do you want to explore?
+          </Typography>
+
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+          >
+            To use the library effectively, you may want to start by asking
+            these questions:
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              alignItems: "stretch",
+              columnGap: theme.space.section.sm,
+              rowGap: sp.lg,
+              mb: theme.space.section.lg,
+            }}
+          >
+            {[
+              {
+                question: "How is my water interest doing now?",
+                description:
+                  "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
+              },
+              {
+                question:
+                  "How could alternative strategies impact my water interest?",
+                description:
+                  "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
+              },
+              {
+                question: "How does climate change shift the picture?",
+                description:
+                  "Select scenarios that represent how current operations and alternative strategies perform under alternative hydroclimates.",
+              },
+            ].map(({ question, description }) => (
+              <InfoCard
+                key={question}
+                title={question}
+                description={description}
+                variant="onDark"
+              />
+            ))}
+          </Box>
+
+          <Typography variant="body2" color="text.secondary">
+            As you explore scenarios with different visualization tools, use the
+            &ldquo;share&rdquo; icon to save graphs, text, or maps of interest.
+            These will be saved in the{" "}
+            <Typography component="span" variant="body2" fontWeight={600}>
+              SHARE
+            </Typography>{" "}
+            section of the site.
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Before You Begin Your Exploration */}
+      <Box sx={{ pointerEvents: "auto" }}>
+        <Box
+          sx={{
+            backgroundColor: theme.palette.tabPanels.exploreDeep,
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            px: theme.space.panel.padding,
+            py: theme.space.panel.padding,
+          }}
+        >
+          <Typography
+            variant="h3"
+            component="h2"
+            color="text.secondary"
+            sx={{ maxWidth: "66%", mb: theme.space.section.md }}
+          >
+            Before you begin your exploration
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ maxWidth: "50%", mb: theme.space.section.md }}
+          >
+            There are a few things to keep in mind:
+          </Typography>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              columnGap: theme.space.section.lg,
+              maxWidth: "85%",
+            }}
+          >
+            <LinedList
+              items={CAVEATS.slice(0, 3).map((c) => ({ label: c }))}
+              color={theme.palette.common.white}
+              arrows={false}
+              labelVariant="body2"
+            />
+            <LinedList
+              items={CAVEATS.slice(3).map((c) => ({ label: c }))}
+              color={theme.palette.common.white}
+              arrows={false}
+              labelVariant="body2"
+            />
+          </Box>
+        </Box>
+      </Box>
     </Box>
   )
 }

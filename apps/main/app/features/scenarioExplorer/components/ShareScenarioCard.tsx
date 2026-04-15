@@ -18,6 +18,7 @@ import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChoo
 interface ShareScenarioCardProps {
   scenarioId: string
   name: string
+  scenarioDefinition?: string
   description: string
   hydroclimate?: string
   chartData?: Record<string, ChartDataPoint[]>
@@ -29,6 +30,7 @@ interface ShareScenarioCardProps {
 export default function ShareScenarioCard({
   scenarioId,
   name,
+  scenarioDefinition,
   description,
   hydroclimate,
   chartData,
@@ -74,7 +76,7 @@ export default function ShareScenarioCard({
         </IconButton>
       )}
 
-      {/* Scenario full title */}
+      {/* Scenario title */}
       <Typography
         variant="body2"
         sx={{
@@ -87,49 +89,68 @@ export default function ShareScenarioCard({
         {name}
       </Typography>
 
-      {/* Metadata row: hydroclimate badge + chart type */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          mt: 0.5,
-          flexWrap: "wrap",
-        }}
-      >
+      {/* Scenario definition */}
+      {scenarioDefinition && (
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.4,
+            color: theme.palette.grey[600],
+            mt: 0.25,
+            pr: onRemove ? 2.5 : 0,
+          }}
+        >
+          {scenarioDefinition}
+        </Typography>
+      )}
+
+      {/* Hydroclimate + chart type metadata */}
+      <Box sx={{ mt: 0.75 }}>
         {climateOption && climateConfig && (
           <Box
             sx={{
               display: "inline-flex",
-              alignItems: "center",
-              gap: 0.375,
-              backgroundColor: `${climateConfig.bgColor}14`,
-              border: `1px solid ${climateConfig.bgColor}33`,
+              alignItems: "flex-start",
+              gap: 0.5,
+              backgroundColor: `${climateConfig.bgColor}0F`,
+              border: `1px solid ${climateConfig.bgColor}28`,
               borderRadius: "4px",
-              px: 0.625,
-              py: 0.125,
+              px: 0.75,
+              py: 0.375,
+              mb: 0.5,
             }}
           >
             <Box
               sx={{
-                width: 6,
-                height: 6,
+                width: 7,
+                height: 7,
                 borderRadius: "50%",
                 backgroundColor: climateConfig.bgColor,
                 flexShrink: 0,
+                mt: "3px",
               }}
             />
-            <Typography
-              sx={{
-                fontSize: "0.625rem",
-                lineHeight: 1.2,
-                fontWeight: 500,
-                color: theme.palette.grey[800],
-                whiteSpace: "nowrap",
-              }}
-            >
-              {climateOption.label}
-            </Typography>
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "0.625rem",
+                  lineHeight: 1.3,
+                  fontWeight: 600,
+                  color: theme.palette.grey[800],
+                }}
+              >
+                {climateOption.label}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.5625rem",
+                  lineHeight: 1.3,
+                  color: theme.palette.grey[600],
+                }}
+              >
+                {climateOption.description}
+              </Typography>
+            </Box>
           </Box>
         )}
         {description && (
@@ -138,6 +159,7 @@ export default function ShareScenarioCard({
               fontSize: "0.6875rem",
               lineHeight: 1.3,
               color: theme.palette.grey[500],
+              display: "block",
             }}
           >
             {description}

@@ -31,7 +31,7 @@ function ShareItemCard({
   item: ShareItem
   onRemove: (id: string) => void
   outcomeNames: { shortCode: string; displayName: string }[]
-  scenarioLookup: Map<string, { name: string; description: string }>
+  scenarioLookup: Map<string, { name: string; description: string; definition: string }>
   allChartData: Record<string, Record<string, unknown> | undefined>
   hydroclimate: string
 }) {
@@ -50,6 +50,7 @@ function ShareItemCard({
       <ShareScenarioCard
         scenarioId={item.id}
         name={info?.description ?? info?.name ?? item.scenarioId}
+        scenarioDefinition={info?.definition}
         description={viewLabel}
         hydroclimate={hydroclimate}
         chartData={chartData}
@@ -246,9 +247,13 @@ export default function ShareDrawer() {
     useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
-    const map = new Map<string, { name: string; description: string }>()
+    const map = new Map<string, { name: string; description: string; definition: string }>()
     siblingGroups.forEach((s) => {
-      map.set(s.scenarioId, { name: s.shortLabel, description: s.label })
+      map.set(s.scenarioId, {
+        name: s.shortLabel,
+        description: s.label,
+        definition: s.description,
+      })
     })
     return map
   }, [siblingGroups])
