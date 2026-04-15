@@ -55,10 +55,11 @@ export interface TierGridProps {
 // Constants
 // ============================================================================
 
-const MARGIN = { top: 50, right: 10, bottom: 400, left: 60 }
+const MARGIN = { top: 50, right: 50, bottom: 100, left: 60 }
 const MAX_DOT_SIZE = 16
 const MIN_DOT_SIZE = 4
 const CELL_PADDING = 0
+const MIN_CATEGORY_WIDTH = 80
 
 const DEFAULT_TIER_COLORS = {
   "Tier 1": "#1ca367",
@@ -76,8 +77,6 @@ export const calculateCategoryWidths = (
   categories: string[],
   gridWidth: number,
 ): CategoryLayout[] => {
-  const MIN_CATEGORY_WIDTH = 50
-
   const categoryObjectiveCounts = new Map<string, number>()
   categories.forEach((category) => {
     const count = objectives.filter((obj) => obj.category === category).length
@@ -463,7 +462,7 @@ const drawTierGrid = (
       .attr("y", MARGIN.top + i * tierHeight + tierHeight / 2)
       .attr("text-anchor", "end")
       .attr("dominant-baseline", "middle")
-      .style("font-size", "15px")
+      .style("font-size", "11px")
       .style("fill", "#666")
       .text(tier)
   })
@@ -482,22 +481,46 @@ const drawCategoryLabels = (
 
   categoryLayouts.forEach((layout) => {
     const x = MARGIN.left + layout.startX + layout.width / 2
-    const y = MARGIN.top + gridHeight + 20
+    const y = MARGIN.top + gridHeight + 15
 
-    const text = labelLayer
+    // Split long category names into multiple lines
+    const maxCharsPerLine = 8 // Approximate chars that fit
+    const words = layout.category.split(" ")
+    const lines: string[] = []
+    let currentLine = ""
+
+    words.forEach((word) => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word
+      if (testLine.length <= maxCharsPerLine) {
+        currentLine = testLine
+      } else {
+        if (currentLine) lines.push(currentLine)
+        currentLine = word
+      }
+    })
+    if (currentLine) lines.push(currentLine)
+
+    const textElement = labelLayer
       .append("text")
       .attr("x", x)
       .attr("y", y)
-      .attr("text-anchor", "start")
-      .attr("dominant-baseline", "middle")
-      .attr("transform", `rotate(90, ${x}, ${y})`)
-      .style("font-size", "15px")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "hanging")
+      .style("font-size", "11px")
       .style("fill", "#333")
       .style("cursor", onCategoryClick ? "pointer" : "default")
-      .text(layout.category)
+
+    // Add each line as a tspan
+    lines.forEach((line, i) => {
+      textElement
+        .append("tspan")
+        .attr("x", x)
+        .attr("dy", i === 0 ? 0 : "1.2em")
+        .text(line)
+    })
 
     if (onCategoryClick) {
-      text.on("click", () => onCategoryClick(layout.category))
+      textElement.on("click", () => onCategoryClick(layout.category))
     }
   })
 }
