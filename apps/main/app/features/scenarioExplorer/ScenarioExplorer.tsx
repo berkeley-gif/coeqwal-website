@@ -205,8 +205,8 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     showDotsOnly,
     setShowDotsOnly,
-    radarSelectedOnly,
-    setRadarSelectedOnly,
+    radarShowAll,
+    setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
   } = useScenarioExplorerStore()
@@ -221,9 +221,9 @@ export default function ScenarioExplorer() {
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
           <RadarToggleChip
-            label="selected only"
-            active={radarSelectedOnly}
-            onClick={() => setRadarSelectedOnly(!radarSelectedOnly)}
+            label="show all scenarios"
+            active={radarShowAll}
+            onClick={() => setRadarShowAll(!radarShowAll)}
           />
           <RadarToggleChip
             label="dots only"
@@ -254,8 +254,8 @@ export default function ScenarioExplorer() {
     setShowRadarRange,
     highlightBaseline,
     setHighlightBaseline,
-    radarSelectedOnly,
-    setRadarSelectedOnly,
+    radarShowAll,
+    setRadarShowAll,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"

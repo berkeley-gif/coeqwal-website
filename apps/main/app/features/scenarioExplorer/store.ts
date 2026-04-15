@@ -85,7 +85,7 @@ interface ScenarioExplorerState {
   dimUnpinned: boolean
   showRadarRange: boolean
   showDotsOnly: boolean
-  radarSelectedOnly: boolean
+  radarShowAll: boolean
   showAxisSelector: boolean
 
   // Radar axis visibility
@@ -164,7 +164,7 @@ interface ScenarioExplorerActions {
   setDimUnpinned: (show: boolean) => void
   setShowRadarRange: (show: boolean) => void
   setShowDotsOnly: (show: boolean) => void
-  setRadarSelectedOnly: (show: boolean) => void
+  setRadarShowAll: (show: boolean) => void
   setShowAxisSelector: (show: boolean) => void
 
   // Radar axis visibility
@@ -229,7 +229,7 @@ const initialState: ScenarioExplorerState = {
   dimUnpinned: false,
   showRadarRange: false,
   showDotsOnly: false,
-  radarSelectedOnly: false,
+  radarShowAll: false,
   showAxisSelector: false,
   radarVisibleAxes: [...OUTCOME_CODE_ORDER],
   hydroclimate: "historical",
@@ -472,9 +472,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         state.showDotsOnly = show
       }),
-    setRadarSelectedOnly: (show) =>
+    setRadarShowAll: (show) =>
       set((state) => {
-        state.radarSelectedOnly = show
+        state.radarShowAll = show
       }),
     setShowAxisSelector: (show) =>
       set((state) => {
