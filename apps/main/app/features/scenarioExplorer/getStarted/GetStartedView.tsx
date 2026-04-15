@@ -666,7 +666,11 @@ export default function GetStartedView() {
               groundwater storage levels, and salinity conditions within the
               Bay-Delta estuary.
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: sp.md }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: sp.md }}
+            >
               Using the{" "}
               <Typography component="span" variant="body2" fontWeight={600}>
                 DATA IN DEPTH
@@ -814,7 +818,8 @@ export default function GetStartedView() {
                   "This is the current operations scenario under the historical hydroclimate, which serves as a baseline for comparison.",
               },
               {
-                title: "How could alternative strategies impact my water interest?",
+                title:
+                  "How could alternative strategies impact my water interest?",
                 description:
                   "Select one or more scenarios to compare against the current operations scenario under the historical hydroclimate.",
               },

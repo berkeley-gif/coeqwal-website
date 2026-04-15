@@ -68,7 +68,8 @@ function ShareItemCard({
   }
 
   const radarScenarioNames = item.scenarioIds.map(
-    (id) => scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
+    (id) =>
+      scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
   )
 
   return (

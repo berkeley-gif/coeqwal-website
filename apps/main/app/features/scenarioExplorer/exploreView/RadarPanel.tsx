@@ -146,7 +146,11 @@ export default function RadarPanel({
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
       onOutcomeHover?.(
         info
-          ? { scenarioId: info.scenarioId, outcome: info.axis, tierValue: info.tierValue }
+          ? {
+              scenarioId: info.scenarioId,
+              outcome: info.axis,
+              tierValue: info.tierValue,
+            }
           : null,
       )
     },
