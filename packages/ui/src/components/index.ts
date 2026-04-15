@@ -53,6 +53,12 @@ export type {
   CompactSelectGroup,
 } from "./common/CompactSelect"
 
+// Content components
+export { LinedList } from "./common/LinedList"
+export type { LinedListProps, LinedListItem } from "./common/LinedList"
+export { InfoCard } from "./common/InfoCard"
+export type { InfoCardProps } from "./common/InfoCard"
+
 // Text utilities
 export { TruncatedText } from "./common/TruncatedText"
 export type { TruncatedTextProps } from "./common/TruncatedText"

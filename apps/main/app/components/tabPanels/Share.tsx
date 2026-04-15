@@ -130,7 +130,7 @@ function SortableShareCard({
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
   outcomeNames: { shortCode: string; displayName: string }[]
-  scenarioLookup: Map<string, { name: string; description: string }>
+  scenarioLookup: Map<string, { name: string; description: string; definition: string }>
   allChartData: Record<string, Record<string, unknown> | undefined>
   hydroclimate: string
 }) {
@@ -195,6 +195,7 @@ function SortableShareCard({
           <ShareScenarioCard
             scenarioId={item.id}
             name={info?.description ?? info?.name ?? item.scenarioId}
+            scenarioDefinition={info?.definition}
             description={viewLabel}
             hydroclimate={hydroclimate}
             chartData={chartData}
@@ -378,9 +379,13 @@ export default function SharePanel() {
     useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
-    const map = new Map<string, { name: string; description: string }>()
+    const map = new Map<string, { name: string; description: string; definition: string }>()
     siblingGroups.forEach((s) => {
-      map.set(s.scenarioId, { name: s.shortLabel, description: s.label })
+      map.set(s.scenarioId, {
+        name: s.shortLabel,
+        description: s.label,
+        definition: s.description,
+      })
     })
     return map
   }, [siblingGroups])

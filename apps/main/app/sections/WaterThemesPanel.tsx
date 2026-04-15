@@ -15,7 +15,7 @@
 
 import React from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { NavArrow } from "@repo/ui"
+import { NavArrow, InfoCard } from "@repo/ui"
 import { motion, useReducedMotion } from "@repo/motion"
 import {
   StickyScrollSection,
@@ -415,46 +415,14 @@ function WaterThemesPanelContent({
           {CIRCLE_CONFIG.map((c) => {
             const active = c.id !== "cws" && c.id !== "governance"
             return (
-              <Box
+              <InfoCard
                 key={c.id}
-                component={active ? "button" : "div"}
+                title={c.label}
+                description={c.description}
                 onClick={active ? () => openThemePanel(c.id) : undefined}
-                sx={{
-                  background: "rgba(210,228,242,0.8)",
-                  border: "1px solid rgba(210,228,242,0.85)",
-                  borderRadius: theme.borderRadius.md,
-                  p: theme.space.component.lg,
-                  textAlign: "left",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-start",
-                  cursor: active ? "pointer" : "default",
-                  transition: theme.transition.default,
-                  ...(!active && { opacity: 0.45 }),
-                  ...(active && {
-                    "&:hover": {
-                      background: "rgba(210,228,242,0.9)",
-                    },
-                  }),
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  fontWeight={600}
-                  sx={{ color: "text.primary" }}
-                >
-                  {c.label}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.primary",
-                    mt: theme.space.component.sm,
-                  }}
-                >
-                  {c.description}
-                </Typography>
-              </Box>
+                dimmed={!active}
+                variant="onLight"
+              />
             )
           })}
         </Box>

@@ -34,6 +34,7 @@ const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(
       isExploreTab && mapMode !== "get-started"
         ? {
             height: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
+            minHeight: `calc(100vh - ${headerAndTabsOffset + subNavHeight}px)`,
             overflow: "hidden",
           }
         : {}
