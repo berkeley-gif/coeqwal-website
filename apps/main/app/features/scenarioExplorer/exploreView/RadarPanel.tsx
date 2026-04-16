@@ -214,6 +214,7 @@ export default function RadarPanel({
         id: crypto.randomUUID(),
         type: "radar",
         scenarioIds,
+        scenarioColors: [...filteredLineColors],
         axes: [...radarVisibleAxes],
         showRange: showRadarRange,
         highlightBaseline,
@@ -230,6 +231,7 @@ export default function RadarPanel({
     }
   }, [
     filteredData,
+    filteredLineColors,
     radarVisibleAxes,
     showRadarRange,
     highlightBaseline,
