@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useCallback, useRef } from "react"
+import React, { useMemo, useState, useCallback, useRef, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -45,7 +45,11 @@ import {
 // URL helpers
 // ---------------------------------------------------------------------------
 
-function encodeShareItems(items: ShareItem[], climate: string): string {
+function encodeShareItems(
+  items: ShareItem[],
+  climate: string,
+  storyIds?: string[],
+): string {
   const parts = [`tab=share`]
   if (climate !== "historical") parts.push(`climate=${climate}`)
   const encoded = items.map((item) => {
@@ -62,6 +66,15 @@ function encodeShareItems(items: ShareItem[], climate: string): string {
     return `r.${ids}.${axes}.${flags}.${hc}`
   })
   if (encoded.length > 0) parts.push(`items=${encoded.join(",")}`)
+
+  if (storyIds && storyIds.length > 0) {
+    const idToIndex = new Map(items.map((item, i) => [item.id, i]))
+    const indices = storyIds
+      .map((id) => idToIndex.get(id))
+      .filter((i): i is number => i != null)
+    if (indices.length > 0) parts.push(`story=${indices.join(",")}`)
+  }
+
   return `${window.location.origin}/?${parts.join("&")}`
 }
 
@@ -69,9 +82,12 @@ function encodeShareItems(items: ShareItem[], climate: string): string {
 // Shared URL parsing (exported for use by TabPanels restore logic)
 // ---------------------------------------------------------------------------
 
-export function parseShareItemsParam(param: string): ShareItem[] {
-  if (!param) return []
-  return param
+export function parseShareItemsParam(
+  param: string,
+  storyParam?: string,
+): { items: ShareItem[]; storyItemIds: string[] } {
+  if (!param) return { items: [], storyItemIds: [] }
+  const items = param
     .split(",")
     .map((token): ShareItem | null => {
       const parts = token.split(".")
@@ -102,6 +118,17 @@ export function parseShareItemsParam(param: string): ShareItem[] {
       return null
     })
     .filter(Boolean) as ShareItem[]
+
+  let storyItemIds: string[] = []
+  if (storyParam) {
+    storyItemIds = storyParam
+      .split(",")
+      .map((s) => parseInt(s, 10))
+      .filter((i) => !isNaN(i) && i >= 0 && i < items.length)
+      .map((i) => items[i]!.id)
+  }
+
+  return { items, storyItemIds }
 }
 
 // ---------------------------------------------------------------------------
@@ -117,12 +144,139 @@ function transformToCSS(
 }
 
 // ---------------------------------------------------------------------------
-// Sortable card (unified for both barChart and radar items)
+// TrayCard — full-size card for the bottom tray (same content as StoryCard)
 // ---------------------------------------------------------------------------
 
-function SortableShareCard({
+const TRAY_CARD_WIDTH = 280
+
+function TrayCard({
   item,
-  onRemove,
+  isInStory,
+  onToggle,
+  outcomeNames,
+  scenarioLookup,
+  allChartData,
+}: {
+  item: ShareItem
+  isInStory: boolean
+  onToggle: () => void
+  outcomeNames: { shortCode: string; displayName: string }[]
+  scenarioLookup: Map<
+    string,
+    { name: string; description: string; definition: string }
+  >
+  allChartData: Record<string, Record<string, unknown> | undefined>
+}) {
+  const theme = useTheme()
+
+  const renderContent = () => {
+    if (item.type === "barChart") {
+      const info = scenarioLookup.get(item.scenarioId)
+      const viewLabel =
+        item.viewMode === "distribution"
+          ? "Key outcomes distribution"
+          : "Key outcomes bar chart"
+      const chartData =
+        (item.cachedChartData as
+          | Record<string, ChartDataPoint[]>
+          | undefined) ??
+        (allChartData[item.scenarioId] as
+          | Record<string, ChartDataPoint[]>
+          | undefined)
+      return (
+        <ShareScenarioCard
+          scenarioId={item.id}
+          name={info?.description ?? info?.name ?? item.scenarioId}
+          scenarioDefinition={info?.definition}
+          description={viewLabel}
+          hydroclimate={item.hydroclimate}
+          chartData={chartData}
+          outcomeNames={outcomeNames}
+          viewMode={item.viewMode}
+        />
+      )
+    }
+
+    const radarScenarioNames = item.scenarioIds.map(
+      (id) =>
+        scenarioLookup.get(id)?.description ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+    const radarScenarioDefinitions = item.scenarioIds.map(
+      (id) => scenarioLookup.get(id)?.definition ?? "",
+    )
+
+    return (
+      <ShareRadarCard
+        scenarioNames={radarScenarioNames}
+        scenarioDefinitions={radarScenarioDefinitions}
+        scenarioColors={item.scenarioColors}
+        hydroclimate={item.hydroclimate}
+        showRange={item.showRange}
+        highlightBaseline={item.highlightBaseline}
+        showDotsOnly={item.showDotsOnly}
+        cachedImageDataUrl={item.cachedImageDataUrl}
+      />
+    )
+  }
+
+  return (
+    <Box
+      onClick={onToggle}
+      sx={{
+        position: "relative",
+        width: TRAY_CARD_WIDTH,
+        minWidth: TRAY_CARD_WIDTH,
+        borderRadius: "8px",
+        border: `2px solid ${isInStory ? theme.palette.primary.main : theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        overflow: "hidden",
+        cursor: "pointer",
+        opacity: isInStory ? 0.55 : 1,
+        transition: "all 150ms ease",
+        "&:hover": {
+          borderColor: theme.palette.primary.main,
+          opacity: isInStory ? 0.65 : 1,
+        },
+      }}
+    >
+      <Box sx={{ px: 0.5, pb: 0.5, pointerEvents: "none" }}>
+        {renderContent()}
+      </Box>
+
+      {/* In-story badge */}
+      {isInStory && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            backgroundColor: theme.palette.primary.main,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+          }}
+        >
+          <icons.Check sx={{ fontSize: "1rem", color: "#fff" }} />
+        </Box>
+      )}
+    </Box>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// StoryCard — sortable full-size card for the story canvas
+// ---------------------------------------------------------------------------
+
+function StoryCard({
+  item,
+  onRemoveFromStory,
+  onDelete,
   onDownloadData,
   onRegisterContentRef,
   outcomeNames,
@@ -130,7 +284,8 @@ function SortableShareCard({
   allChartData,
 }: {
   item: ShareItem
-  onRemove: (id: string) => void
+  onRemoveFromStory: (id: string) => void
+  onDelete: (id: string) => void
   onDownloadData: (item: ShareItem) => void
   onRegisterContentRef: (id: string, el: HTMLDivElement | null) => void
   outcomeNames: { shortCode: string; displayName: string }[]
@@ -333,13 +488,22 @@ function SortableShareCard({
             )
           })()}
           <Box sx={{ flex: 1 }} />
-          <Tooltip title="Remove" arrow>
+          <Tooltip title="Remove from story" arrow>
             <IconButton
               size="small"
-              onClick={() => onRemove(item.id)}
+              onClick={() => onRemoveFromStory(item.id)}
               sx={{ p: 0.5, color: theme.palette.grey[400] }}
             >
-              <icons.Close sx={{ fontSize: "0.875rem" }} />
+              <icons.RemoveCircleOutline sx={{ fontSize: "0.875rem" }} />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete card" arrow>
+            <IconButton
+              size="small"
+              onClick={() => onDelete(item.id)}
+              sx={{ p: 0.5, color: theme.palette.grey[400] }}
+            >
+              <icons.Delete sx={{ fontSize: "0.875rem" }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -357,11 +521,35 @@ export default function SharePanel() {
   const { navigateToTab } = useTabNavigation()
   const [copied, setCopied] = useState(false)
 
-  const { shareItems, hydroclimate, reorderShareItems, removeShareItem } =
-    useScenarioExplorerStore()
+  const {
+    shareItems,
+    storyItemIds,
+    hydroclimate,
+    removeShareItem,
+    addToStory,
+    removeFromStory,
+    reorderStory,
+    updateShareItem,
+  } = useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
+
+  // Rehydrate cachedChartData for bar chart items restored from localStorage
+  useEffect(() => {
+    if (!allChartData) return
+    for (const item of shareItems) {
+      if (
+        item.type === "barChart" &&
+        !item.cachedChartData &&
+        allChartData[item.scenarioId]
+      ) {
+        updateShareItem(item.id, {
+          cachedChartData: allChartData[item.scenarioId] as Record<string, unknown>,
+        })
+      }
+    }
+  }, [shareItems, allChartData, updateShareItem])
 
   const scenarioLookup = useMemo(() => {
     const map = new Map<
@@ -378,6 +566,18 @@ export default function SharePanel() {
     return map
   }, [siblingGroups])
 
+  const storyItemIdSet = useMemo(
+    () => new Set(storyItemIds),
+    [storyItemIds],
+  )
+
+  const storyItems = useMemo(() => {
+    const byId = new Map(shareItems.map((s) => [s.id, s]))
+    return storyItemIds
+      .map((id) => byId.get(id))
+      .filter(Boolean) as ShareItem[]
+  }, [shareItems, storyItemIds])
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
@@ -385,18 +585,27 @@ export default function SharePanel() {
     }),
   )
 
-  const itemIds = useMemo(() => shareItems.map((s) => s.id), [shareItems])
-
-  const handleDragEnd = useCallback(
+  const handleStoryDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event
       if (!over || active.id === over.id) return
-      const oldIndex = itemIds.indexOf(active.id as string)
-      const newIndex = itemIds.indexOf(over.id as string)
+      const oldIndex = storyItemIds.indexOf(active.id as string)
+      const newIndex = storyItemIds.indexOf(over.id as string)
       if (oldIndex === -1 || newIndex === -1) return
-      reorderShareItems(arrayMove(itemIds, oldIndex, newIndex))
+      reorderStory(arrayMove(storyItemIds, oldIndex, newIndex))
     },
-    [itemIds, reorderShareItems],
+    [storyItemIds, reorderStory],
+  )
+
+  const handleToggleStory = useCallback(
+    (id: string) => {
+      if (storyItemIdSet.has(id)) {
+        removeFromStory(id)
+      } else {
+        addToStory(id)
+      }
+    },
+    [storyItemIdSet, addToStory, removeFromStory],
   )
 
   const handleDownloadData = useCallback(
@@ -433,7 +642,8 @@ export default function SharePanel() {
   )
 
   const handleDownloadAllImages = useCallback(async () => {
-    for (const item of shareItems) {
+    const items = storyItems.length > 0 ? storyItems : shareItems
+    for (const item of items) {
       const el = cardContentRefs.current.get(item.id)
       if (el) {
         try {
@@ -467,19 +677,21 @@ export default function SharePanel() {
         )
       }
     }
-  }, [shareItems])
+  }, [storyItems, shareItems])
 
   const handleDownloadAllData = useCallback(() => {
+    const items = storyItems.length > 0 ? storyItems : shareItems
     exportAllShareItemsAsCSV(
-      shareItems,
+      items,
       getTimestampedFilename("coeqwal-chart-data", "csv"),
       (id) =>
         scenarioLookup.get(id)?.description ??
         scenarioLookup.get(id)?.name ??
         id,
     )
-  }, [shareItems, scenarioLookup])
+  }, [storyItems, shareItems, scenarioLookup])
 
+  // ── Empty state: no share items at all ──
   if (shareItems.length === 0) {
     return (
       <Box
@@ -488,6 +700,7 @@ export default function SharePanel() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          height: "100%",
           minHeight: 400,
           gap: 2,
           px: 3,
@@ -528,151 +741,246 @@ export default function SharePanel() {
     )
   }
 
+  // ── Two-zone layout (left tray | right canvas) ──
   return (
-    <Box sx={{ px: 3, py: 3, maxWidth: 960, mx: "auto" }}>
-      <Typography
-        variant="h5"
-        sx={{ fontWeight: 600, mb: 0.5, color: theme.palette.text.secondary }}
-      >
-        Share
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: "0.875rem",
-          color: theme.palette.text.secondary,
-          opacity: 0.8,
-          mb: 3,
-        }}
-      >
-        {shareItems.length} item{shareItems.length !== 1 ? "s" : ""}. Drag to
-        rearrange. Download individually or export all.
-      </Typography>
-
-      <DndContext
-        sensors={sensors}
-        collisionDetection={pointerWithin}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={itemIds} strategy={rectSortingStrategy}>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "1fr 1fr",
-              },
-              gap: 2,
-            }}
-          >
-            {shareItems.map((item) => (
-              <SortableShareCard
-                key={item.id}
-                item={item}
-                onRemove={removeShareItem}
-                onDownloadData={handleDownloadData}
-                onRegisterContentRef={registerCardRef}
-                outcomeNames={outcomeNames}
-                scenarioLookup={scenarioLookup}
-                allChartData={
-                  allChartData as Record<
-                    string,
-                    Record<string, unknown> | undefined
-                  >
-                }
-              />
-            ))}
-          </Box>
-        </SortableContext>
-      </DndContext>
-
-      {/* Export bar */}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        height: "100%",
+      }}
+    >
+      {/* ─── Scorecard Tray (left, fixed-width, vertical scroll) ─── */}
       <Box
         sx={{
+          flexShrink: 0,
+          width: TRAY_CARD_WIDTH + 32,
+          borderRight: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.grey[50],
+          px: 2,
+          py: 2,
           display: "flex",
-          flexWrap: "wrap",
-          gap: 1.5,
-          mt: 3,
-          pt: 2,
-          borderTop: `1px solid rgba(255,255,255,0.15)`,
+          flexDirection: "column",
+          gap: 2,
+          overflowY: "auto",
+          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: theme.palette.grey[300],
+            borderRadius: 3,
+          },
         }}
       >
-        <Tooltip
-          title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
-          arrow
-        >
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={async () => {
-              const url = encodeShareItems(shareItems, hydroclimate)
-              try {
-                await navigator.clipboard.writeText(url)
-              } catch {
-                const ta = document.createElement("textarea")
-                ta.value = url
-                document.body.appendChild(ta)
-                ta.select()
-                document.execCommand("copy")
-                document.body.removeChild(ta)
-              }
-              setCopied(true)
-              setTimeout(() => setCopied(false), 2000)
-            }}
-            startIcon={
-              copied ? (
-                <icons.Check sx={{ fontSize: "1rem" }} />
-              ) : (
-                <icons.ContentCopy sx={{ fontSize: "1rem" }} />
-              )
+        {shareItems.map((item) => (
+          <TrayCard
+            key={item.id}
+            item={item}
+            isInStory={storyItemIdSet.has(item.id)}
+            onToggle={() => handleToggleStory(item.id)}
+            outcomeNames={outcomeNames}
+            scenarioLookup={scenarioLookup}
+            allChartData={
+              allChartData as Record<
+                string,
+                Record<string, unknown> | undefined
+              >
             }
+          />
+        ))}
+      </Box>
+
+      {/* ─── Story Canvas (right, scrollable) ─── */}
+      <Box sx={{ flex: 1, minWidth: 0, overflow: "auto", px: 3, py: 3 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            mb: 0.5,
+            color: theme.palette.text.secondary,
+          }}
+        >
+          Share
+        </Typography>
+
+        {storyItems.length > 0 ? (
+          <>
+            <Typography
+              sx={{
+                fontSize: "0.875rem",
+                color: theme.palette.text.secondary,
+                opacity: 0.8,
+                mb: 3,
+              }}
+            >
+              {storyItems.length} card{storyItems.length !== 1 ? "s" : ""} in
+              your story. Drag to rearrange.
+            </Typography>
+
+            <DndContext
+              sensors={sensors}
+              collisionDetection={pointerWithin}
+              onDragEnd={handleStoryDragEnd}
+            >
+              <SortableContext
+                items={storyItemIds}
+                strategy={rectSortingStrategy}
+              >
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      md: "1fr 1fr",
+                    },
+                    gap: 2,
+                  }}
+                >
+                  {storyItems.map((item) => (
+                    <StoryCard
+                      key={item.id}
+                      item={item}
+                      onRemoveFromStory={removeFromStory}
+                      onDelete={removeShareItem}
+                      onDownloadData={handleDownloadData}
+                      onRegisterContentRef={registerCardRef}
+                      outcomeNames={outcomeNames}
+                      scenarioLookup={scenarioLookup}
+                      allChartData={
+                        allChartData as Record<
+                          string,
+                          Record<string, unknown> | undefined
+                        >
+                      }
+                    />
+                  ))}
+                </Box>
+              </SortableContext>
+            </DndContext>
+          </>
+        ) : (
+          <Box
             sx={{
-              textTransform: "none",
-              color: theme.palette.text.secondary,
-              borderColor: "rgba(255,255,255,0.3)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              py: 8,
+              gap: 1.5,
+              opacity: 0.6,
             }}
           >
-            {copied ? "Copied!" : "Copy link"}
-          </Button>
-        </Tooltip>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={handleDownloadAllImages}
-          startIcon={<icons.Image sx={{ fontSize: "0.875rem" }} />}
-          sx={{
-            textTransform: "none",
-            color: theme.palette.text.secondary,
-            borderColor: "rgba(255,255,255,0.3)",
-          }}
-        >
-          Download all images
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={handleDownloadAllData}
-          startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
-          sx={{
-            textTransform: "none",
-            color: theme.palette.text.secondary,
-            borderColor: "rgba(255,255,255,0.3)",
-          }}
-        >
-          Download all data
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          disabled
-          startIcon={<icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />}
-          sx={{
-            textTransform: "none",
-            color: theme.palette.text.secondary,
-            borderColor: "rgba(255,255,255,0.3)",
-          }}
-        >
-          Download PDF
-        </Button>
+            <icons.ArrowBack
+              sx={{ fontSize: "2rem", color: theme.palette.grey[400] }}
+            />
+            <Typography
+              sx={{
+                fontSize: "0.9375rem",
+                color: theme.palette.text.secondary,
+                textAlign: "center",
+                maxWidth: 360,
+              }}
+            >
+              Click cards in the tray on the left to add them to your story
+            </Typography>
+          </Box>
+        )}
+
+        {/* ─── Export bar ─── */}
+        {storyItems.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.5,
+              mt: 3,
+              pt: 2,
+              borderTop: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Tooltip
+              title={
+                copied ? "Copied!" : "Copy shareable URL to clipboard"
+              }
+              arrow
+            >
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={async () => {
+                  const url = encodeShareItems(shareItems, hydroclimate, storyItemIds)
+                  try {
+                    await navigator.clipboard.writeText(url)
+                  } catch {
+                    const ta = document.createElement("textarea")
+                    ta.value = url
+                    document.body.appendChild(ta)
+                    ta.select()
+                    document.execCommand("copy")
+                    document.body.removeChild(ta)
+                  }
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                startIcon={
+                  copied ? (
+                    <icons.Check sx={{ fontSize: "1rem" }} />
+                  ) : (
+                    <icons.ContentCopy sx={{ fontSize: "1rem" }} />
+                  )
+                }
+                sx={{
+                  textTransform: "none",
+                  color: theme.palette.text.secondary,
+                  borderColor: theme.palette.divider,
+                }}
+              >
+                {copied ? "Copied!" : "Copy link"}
+              </Button>
+            </Tooltip>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleDownloadAllImages}
+              startIcon={<icons.Image sx={{ fontSize: "0.875rem" }} />}
+              sx={{
+                textTransform: "none",
+                color: theme.palette.text.secondary,
+                borderColor: theme.palette.divider,
+              }}
+            >
+              Download all images
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleDownloadAllData}
+              startIcon={
+                <icons.DataObject sx={{ fontSize: "0.875rem" }} />
+              }
+              sx={{
+                textTransform: "none",
+                color: theme.palette.text.secondary,
+                borderColor: theme.palette.divider,
+              }}
+            >
+              Download all data
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled
+              startIcon={
+                <icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />
+              }
+              sx={{
+                textTransform: "none",
+                color: theme.palette.text.secondary,
+                borderColor: theme.palette.divider,
+              }}
+            >
+              Download PDF
+            </Button>
+          </Box>
+        )}
       </Box>
     </Box>
   )
