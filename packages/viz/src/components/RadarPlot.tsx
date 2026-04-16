@@ -377,6 +377,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         let morphSnapshot: {
           dots: Map<string, { cx: number; cy: number }>
           baselineD: string | null
+          rangeD: string | null
         } | null = null
 
         if (shouldMorphNextRef.current) {
@@ -394,9 +395,11 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               })
             })
           const blPath = prevSvg.select<SVGPathElement>("path.baseline-polygon")
+          const rangePath = prevSvg.select<SVGPathElement>("path.range-shadow")
           morphSnapshot = {
             dots,
             baselineD: blPath.empty() ? null : blPath.attr("d"),
+            rangeD: rangePath.empty() ? null : rangePath.attr("d"),
           }
         } else {
           shouldMorphNextRef.current = false
@@ -946,7 +949,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }
 
           const rangeSel = svg.select<SVGPathElement>("path.range-shadow")
-          if (!rangeSel.empty()) {
+          if (!rangeSel.empty() && morphSnapshot.rangeD) {
+            const finalRangeD = rangeSel.attr("d")
+            rangeSel
+              .attr("d", morphSnapshot.rangeD)
+              .transition()
+              .duration(HC_DUR)
+              .attr("d", finalRangeD ?? "")
+          } else if (!rangeSel.empty()) {
             rangeSel.attr("fill-opacity", 0).attr("stroke-opacity", 0)
             morphTimeoutRef.current = setTimeout(() => {
               morphTimeoutRef.current = null
