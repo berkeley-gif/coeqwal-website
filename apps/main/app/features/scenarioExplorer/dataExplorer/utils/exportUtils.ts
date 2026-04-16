@@ -220,7 +220,7 @@ export function getTimestampedFilename(
  * Inline all computed styles on an SVG clone so it renders identically when
  * serialised as a standalone image (outside the document's stylesheets).
  */
-function inlineStyles(clone: SVGElement, original: SVGElement) {
+export function inlineStyles(clone: SVGElement, original: SVGElement) {
   const computed = window.getComputedStyle(original)
   const dominated = [
     "fill",
@@ -323,6 +323,71 @@ export async function captureSvgToBlob(
       )
     }
     img.onerror = () => reject(new Error("Failed to load SVG as image"))
+    img.src = svgDataUri
+  })
+}
+
+/**
+ * Rasterise an already-styled SVG clone to a PNG blob + data URL.
+ *
+ * To be used when we've already called `inlineStyles` and performed any
+ * DOM surgery (e.g. pruning elements) on the clone. Pass the pixel
+ * dimensions of the *original* on-screen SVG so the canvas is sized
+ * correctly.
+ */
+export async function rasterizeSvgClone(
+  clone: SVGSVGElement,
+  width: number,
+  height: number,
+  options: { scale?: number; backgroundColor?: string } = {},
+): Promise<{ blob: Blob; dataUrl: string }> {
+  const { scale = 2, backgroundColor = "#ffffff" } = options
+
+  clone.removeAttribute("style")
+  clone.setAttribute("width", String(width))
+  clone.setAttribute("height", String(height))
+  if (!clone.getAttribute("viewBox")) {
+    clone.setAttribute("viewBox", `0 0 ${width} ${height}`)
+  }
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+
+  const serializer = new XMLSerializer()
+  const svgString = serializer.serializeToString(clone)
+  const svgDataUri =
+    "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString)
+
+  const canvasWidth = width * scale
+  const canvasHeight = height * scale
+
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = canvasWidth
+      canvas.height = canvasHeight
+      const ctx = canvas.getContext("2d")
+      if (!ctx) {
+        reject(new Error("Could not get canvas 2d context"))
+        return
+      }
+      ctx.fillStyle = backgroundColor
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+      ctx.drawImage(img, 0, 0, canvasWidth, canvasHeight)
+
+      const dataUrl = canvas.toDataURL("image/png")
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Failed to create image blob from SVG clone"))
+            return
+          }
+          resolve({ blob, dataUrl })
+        },
+        "image/png",
+        1.0,
+      )
+    }
+    img.onerror = () => reject(new Error("Failed to load SVG clone as image"))
     img.src = svgDataUri
   })
 }

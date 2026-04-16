@@ -38,7 +38,15 @@ import {
   OUTCOME_REGIONAL_VARIANTS,
   type OutcomeCode,
 } from "../../../content/outcomes"
-import { captureSvgToBlob } from "../dataExplorer/utils/exportUtils"
+import {
+  captureSvgToBlob,
+  inlineStyles,
+  rasterizeSvgClone,
+} from "../dataExplorer/utils/exportUtils"
+
+export type SingleScenarioCaptureFn = (
+  scenarioId: string,
+) => Promise<{ dataUrl: string; color: string } | null>
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -47,12 +55,15 @@ interface RadarPanelProps {
   ) => void
   /** Exposes a capture function to the parent so it can trigger radar capture */
   onCaptureReady?: (capture: () => Promise<void>) => void
+  /** Exposes a single-scenario capture function for sidebar share */
+  onSingleCaptureReady?: (capture: SingleScenarioCaptureFn) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
   onOutcomeHover,
   onCaptureReady,
+  onSingleCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -243,6 +254,47 @@ export default function RadarPanel({
   useEffect(() => {
     onCaptureReady?.(captureRadar)
   }, [captureRadar, onCaptureReady])
+
+  const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
+    async (scenarioId) => {
+      const svg = radarSvgRef.current
+      if (!svg) return null
+
+      try {
+        const clone = svg.cloneNode(true) as SVGSVGElement
+        inlineStyles(clone, svg)
+
+        clone
+          .querySelectorAll<SVGPathElement>("path[data-path-id]")
+          .forEach((p) => {
+            if (p.getAttribute("data-path-id") !== scenarioId) p.remove()
+          })
+        clone
+          .querySelectorAll<SVGCircleElement>("circle.radar-dot")
+          .forEach((d) => {
+            if (d.getAttribute("data-scenario-id") !== scenarioId) d.remove()
+          })
+
+        const rect = svg.getBoundingClientRect()
+        const w = rect.width || svg.clientWidth || 600
+        const h = rect.height || svg.clientHeight || 600
+        const { dataUrl } = await rasterizeSvgClone(clone, w, h)
+
+        const idx = filteredData.findIndex((d) => d.id === scenarioId)
+        const color = idx >= 0 ? (filteredLineColors[idx] ?? "#666666") : "#666666"
+
+        return { dataUrl, color }
+      } catch (err) {
+        console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
+        return null
+      }
+    },
+    [filteredData, filteredLineColors],
+  )
+
+  useEffect(() => {
+    onSingleCaptureReady?.(captureSingleScenarioRadar)
+  }, [captureSingleScenarioRadar, onSingleCaptureReady])
 
   const highlightedData = useMemo(
     () =>
