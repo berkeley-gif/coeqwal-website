@@ -655,16 +655,38 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       name: "coeqwal-share",
       partialize: (state) => ({
         shareItems: state.shareItems.map((item) => {
-          const { cachedImageDataUrl, cachedChartData, ...rest } = item as Record<string, unknown>
-          return rest as ShareItem
+          if (item.type === "barChart") {
+            const { cachedImageDataUrl, cachedChartData, ...rest } = item
+            return rest
+          }
+          const { cachedChartData, ...rest } = item
+          return rest
         }),
         storyItemIds: state.storyItemIds,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<Pick<ScenarioExplorerState, "shareItems" | "storyItemIds">>
+        const persistedItems = p?.shareItems
+        if (!persistedItems || persistedItems.length === 0) {
+          return { ...current }
+        }
+        const currentById = new Map(current.shareItems.map((s) => [s.id, s]))
+        const merged = persistedItems.map((pItem) => {
+          const cItem = currentById.get(pItem.id)
+          if (!cItem) return pItem
+          return {
+            ...pItem,
+            cachedImageDataUrl:
+              (pItem as Record<string, unknown>).cachedImageDataUrl ??
+              cItem.cachedImageDataUrl,
+            cachedChartData:
+              (pItem as Record<string, unknown>).cachedChartData ??
+              cItem.cachedChartData,
+          } as ShareItem
+        })
         return {
           ...current,
-          shareItems: p?.shareItems ?? current.shareItems,
+          shareItems: merged,
           storyItemIds: p?.storyItemIds ?? current.storyItemIds,
         }
       },

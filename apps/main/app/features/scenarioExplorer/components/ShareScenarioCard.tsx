@@ -171,40 +171,26 @@ export default function ShareScenarioCard({
       {chartData &&
         outcomeNames.length > 0 &&
         (viewMode === "distribution" ? (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              rowGap: 1.5,
-              columnGap: 1,
-              mt: 1,
-              justifyItems: "center",
-              alignItems: "start",
-            }}
-          >
-            {outcomeNames.map(({ shortCode, displayName }) => {
-              const data = chartData[shortCode]
-              if (!data || data.length === 0) return null
+          (() => {
+            const ROW1_CODES = new Set(["CWS_DEL", "AG_REV", "ENV_FLOWS", "RES_STOR", "GW_STOR"])
+            const row1: { shortCode: string; displayName: string }[] = []
+            const row2: { shortCode: string; displayName: string }[] = []
+            for (const o of outcomeNames) {
+              const data = chartData[o.shortCode]
+              if (!data || data.length === 0) continue
+              if (ROW1_CODES.has(o.shortCode)) {
+                row1.push(o)
+              } else {
+                row2.push(o)
+              }
+            }
 
-              const values = data.map((t) => t.value).slice(0, 4) as [
-                number,
-                number,
-                number,
-                number,
-              ]
-              const tierColors = data.map((t) => t.color).slice(0, 4) as [
-                string,
-                string,
-                string,
-                string,
-              ]
+            const renderOutcome = (shortCode: string, displayName: string) => {
+              const data = chartData[shortCode]!
+              const values = data.map((t) => t.value).slice(0, 4) as [number, number, number, number]
+              const tierColors = data.map((t) => t.color).slice(0, 4) as [string, string, string, string]
               const locationCounts = data.every((t) => t.rawCount != null)
-                ? (data.map((t) => t.rawCount!).slice(0, 4) as [
-                    number,
-                    number,
-                    number,
-                    number,
-                  ])
+                ? (data.map((t) => t.rawCount!).slice(0, 4) as [number, number, number, number])
                 : undefined
               const singleValue = isSingleValueTier(data)
 
@@ -283,8 +269,47 @@ export default function ShareScenarioCard({
                   </Box>
                 </Box>
               )
-            })}
-          </Box>
+            }
+
+            return (
+              <Box sx={{ mt: 1 }}>
+                {/* Row 1: Community deliveries, Ag revenue, Env flows, Reservoir storage, GW storage */}
+                {row1.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1.5,
+                      justifyContent: "center",
+                      alignItems: "start",
+                    }}
+                  >
+                    {row1.map(({ shortCode, displayName }) =>
+                      renderOutcome(shortCode, displayName),
+                    )}
+                  </Box>
+                )}
+
+                {/* Row 2: Delta ecology, FW for exports, FW for in-Delta, Winter-run salmon */}
+                {row2.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1.5,
+                      justifyContent: "center",
+                      alignItems: "start",
+                      mt: row1.length > 0 ? 1.5 : 0,
+                    }}
+                  >
+                    {row2.map(({ shortCode, displayName }) =>
+                      renderOutcome(shortCode, displayName),
+                    )}
+                  </Box>
+                )}
+              </Box>
+            )
+          })()
         ) : (
           <Box
             sx={{
