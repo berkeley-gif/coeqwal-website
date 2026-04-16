@@ -214,21 +214,27 @@ export function exportShareItemAsCSV(
   }
 
   if (item.type === "radar") {
-    const data = item.cachedChartData as Record<
-      string,
-      Record<string, number | null>
-    >
-    const scenarioIds = Object.keys(data)
+    const raw = item.cachedChartData as Record<string, unknown>
+    const scenarioIds = item.scenarioIds ?? Object.keys(raw)
     if (scenarioIds.length === 0) return
 
+    const data: Record<string, Record<string, number | null>> = {}
+    for (const id of scenarioIds) {
+      const entry = raw[id]
+      if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+        data[id] = entry as Record<string, number | null>
+      }
+    }
+    if (Object.keys(data).length === 0) return
+
     const outcomeNames = Array.from(
-      new Set(scenarioIds.flatMap((id) => Object.keys(data[id] ?? {}))),
+      new Set(Object.values(data).flatMap((v) => Object.keys(v))),
     )
     const headers = ["Scenario", ...outcomeNames.map(csvEscape)]
-    const rows = scenarioIds.map((id) => {
+    const rows = Object.entries(data).map(([id, values]) => {
       const label = scenarioNameLookup?.(id) ?? id
       const vals = outcomeNames.map((o) => {
-        const v = (data[id] as Record<string, number | null>)?.[o]
+        const v = values[o]
         return v != null ? String(v) : ""
       })
       return [csvEscape(label), ...vals]
@@ -267,24 +273,31 @@ export function exportAllShareItemsAsCSV(
     }
 
     if (item.type === "radar") {
-      const data = item.cachedChartData as Record<
-        string,
-        Record<string, number | null>
-      >
-      const scenarioIds = Object.keys(data)
-      if (scenarioIds.length === 0) continue
+      const raw = item.cachedChartData as Record<string, unknown>
+      const scenarioIds = item.scenarioIds ?? Object.keys(raw)
 
-      const names = scenarioIds.map((id) => scenarioNameLookup?.(id) ?? id)
+      const data: Record<string, Record<string, number | null>> = {}
+      for (const id of scenarioIds) {
+        const entry = raw[id]
+        if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+          data[id] = entry as Record<string, number | null>
+        }
+      }
+      if (Object.keys(data).length === 0) continue
+
+      const names = Object.keys(data).map(
+        (id) => scenarioNameLookup?.(id) ?? id,
+      )
       sections.push(`# Radar: ${names.join(", ")}`)
 
       const outcomeNames = Array.from(
-        new Set(scenarioIds.flatMap((id) => Object.keys(data[id] ?? {}))),
+        new Set(Object.values(data).flatMap((v) => Object.keys(v))),
       )
       sections.push(["Scenario", ...outcomeNames.map(csvEscape)].join(","))
-      for (const id of scenarioIds) {
+      for (const [id, values] of Object.entries(data)) {
         const label = scenarioNameLookup?.(id) ?? id
         const vals = outcomeNames.map((o) => {
-          const v = (data[id] as Record<string, number | null>)?.[o]
+          const v = values[o]
           return v != null ? String(v) : ""
         })
         sections.push([csvEscape(label), ...vals].join(","))
