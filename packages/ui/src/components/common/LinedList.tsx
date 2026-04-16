@@ -26,6 +26,8 @@ export interface LinedListProps {
   color?: string
   /** Show forward arrows on interactive rows. Defaults to true. */
   arrows?: boolean
+  /** Optional leading icon rendered before each row's text. */
+  icon?: React.ReactNode
   /** Typography variant for the label. Defaults to "subtitle1". */
   labelVariant?: "subtitle1" | "body1" | "body2"
   /** Typography variant for the optional description. Defaults to "body2". */
@@ -39,6 +41,7 @@ function LinedListRow({
   item,
   color,
   arrows,
+  icon,
   labelVariant,
   descriptionVariant,
   labelWeight,
@@ -46,6 +49,7 @@ function LinedListRow({
   item: LinedListItem
   color: string
   arrows: boolean
+  icon?: React.ReactNode
   labelVariant: LinedListProps["labelVariant"]
   descriptionVariant: LinedListProps["descriptionVariant"]
   labelWeight: number
@@ -61,7 +65,7 @@ function LinedListRow({
       onClick={item.onClick}
       sx={{
         display: "flex",
-        alignItems: "center",
+        alignItems: icon ? "flex-start" : "center",
         justifyContent: "space-between",
         gap: 1,
         py: 2,
@@ -74,7 +78,10 @@ function LinedListRow({
         "&:hover .lined-list-arrow": { transform: "translateX(4px)" },
       }}
     >
-      <Box>
+      {icon && (
+        <Box sx={{ flexShrink: 0, mt: "4px", lineHeight: 0 }}>{icon}</Box>
+      )}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant={labelVariant} sx={{ fontWeight: labelWeight }}>
           {item.label}
         </Typography>
@@ -98,6 +105,7 @@ export function LinedList({
   items,
   color: colorProp,
   arrows = true,
+  icon,
   labelVariant = "subtitle1",
   descriptionVariant = "body2",
   labelWeight = 600,
@@ -114,6 +122,7 @@ export function LinedList({
           item={item}
           color={color}
           arrows={arrows}
+          icon={icon}
           labelVariant={labelVariant}
           descriptionVariant={descriptionVariant}
           labelWeight={labelWeight}
