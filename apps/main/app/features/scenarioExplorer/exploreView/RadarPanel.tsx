@@ -285,9 +285,12 @@ export default function RadarPanel({
         const { dataUrl } = await rasterizeSvgClone(clone, w, h)
 
         const idx = filteredData.findIndex((d) => d.id === scenarioId)
-        const color = idx >= 0 ? (filteredLineColors[idx] ?? "#666666") : "#666666"
+        const color =
+          idx >= 0 ? (filteredLineColors[idx] ?? "#666666") : "#666666"
 
-        const scenarioEntry = filteredData.find((d) => d.id === scenarioId)
+        const scenarioEntry = comparisonData.find(
+          (d) => d.id === scenarioId,
+        )
         const chartData: Record<string, unknown> = scenarioEntry
           ? { [scenarioId]: scenarioEntry.values }
           : {}
@@ -298,7 +301,7 @@ export default function RadarPanel({
         return null
       }
     },
-    [filteredData, filteredLineColors],
+    [comparisonData, filteredData, filteredLineColors],
   )
 
   useEffect(() => {

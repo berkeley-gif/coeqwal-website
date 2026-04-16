@@ -301,16 +301,37 @@ function SortableShareCard({
               <icons.Image sx={{ fontSize: "0.875rem" }} />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Download data" arrow>
-            <IconButton
-              size="small"
-              onClick={() => onDownloadData(item)}
-              disabled={!item.cachedChartData}
-              sx={{ p: 0.5, color: theme.palette.grey[500] }}
-            >
-              <icons.DataObject sx={{ fontSize: "0.875rem" }} />
-            </IconButton>
-          </Tooltip>
+          {(() => {
+            const hasData =
+              !!item.cachedChartData &&
+              Object.keys(item.cachedChartData).length > 0
+            return (
+              <Tooltip
+                title={
+                  hasData
+                    ? "Download data"
+                    : "No data available. Try re-sharing."
+                }
+                arrow
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => onDownloadData(item)}
+                    disabled={!hasData}
+                    sx={{
+                      p: 0.5,
+                      color: hasData
+                        ? theme.palette.grey[500]
+                        : theme.palette.grey[300],
+                    }}
+                  >
+                    <icons.DataObject sx={{ fontSize: "0.875rem" }} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )
+          })()}
           <Box sx={{ flex: 1 }} />
           <Tooltip title="Remove" arrow>
             <IconButton
@@ -380,7 +401,11 @@ export default function SharePanel() {
 
   const handleDownloadData = useCallback(
     (item: ShareItem) => {
-      if (!item.cachedChartData) return
+      if (
+        !item.cachedChartData ||
+        Object.keys(item.cachedChartData).length === 0
+      )
+        return
       const filename = getTimestampedFilename(
         `coeqwal-${item.type}-data`,
         "csv",
