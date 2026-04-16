@@ -8,7 +8,10 @@ interface DimensionObject {
 }
 
 /**
- * A hook that observes the size of an element and returns its dimensions
+ * A hook that observes the size of an element and returns its dimensions.
+ *
+ * Uses requestAnimationFrame to coalesce multiple resize events within a
+ * single frame into one state update.
  *
  * @param targetRef - The ref of the element to observe
  * @returns The dimensions of the observed element
@@ -44,8 +47,6 @@ export function useResizeObserver<T extends HTMLElement>(
         return
       }
 
-      // Defer state update to the next animation frame to prevent
-      // ResizeObserver feedback loops during CSS transitions.
       cancelAnimationFrame(rafIdRef.current)
       rafIdRef.current = requestAnimationFrame(() => {
         setDimensions((prev) => {
