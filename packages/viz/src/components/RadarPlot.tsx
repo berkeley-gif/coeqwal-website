@@ -160,6 +160,15 @@ function hideTooltip(el: HTMLDivElement) {
   el.style.display = "none"
 }
 
+/** Simple deterministic hash: scenario ID -> stable integer */
+function stableHash(s: string): number {
+  let h = 0
+  for (let i = 0; i < s.length; i++) {
+    h = (h * 31 + s.charCodeAt(i)) | 0
+  }
+  return h
+}
+
 function computeSpokeDodge(
   entries: { id: string; r: number }[],
   dotDiam: number,
@@ -175,7 +184,11 @@ function computeSpokeDodge(
   const minDist = dotDiam + 1.5
   const placed: { r: number; off: number }[] = []
 
-  const sorted = [...entries].sort((a, b) => a.r - b.r)
+  const sorted = [...entries].sort((a, b) => {
+    const rDiff = a.r - b.r
+    if (Math.abs(rDiff) > minDist) return rDiff
+    return stableHash(a.id) - stableHash(b.id)
+  })
 
   for (const entry of sorted) {
     let bestOff = 0
