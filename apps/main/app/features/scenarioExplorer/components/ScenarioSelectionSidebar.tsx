@@ -61,6 +61,10 @@ export default function ScenarioSelectionSidebar({
     outcomeDisplayMode,
     exploreMode,
     hydroclimate,
+    radarVisibleAxes,
+    showRadarRange,
+    highlightBaseline,
+    showDotsOnly,
   } = useScenarioExplorerStore()
 
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
@@ -295,17 +299,33 @@ export default function ScenarioSelectionSidebar({
                       isPinned={isPinned}
                       accentColor={accentColor}
                       onShare={() => {
-                        const vm =
-                          outcomeDisplayMode === "distribution"
-                            ? "distribution"
-                            : "summary"
-                        addShareItem({
-                          id: crypto.randomUUID(),
-                          type: "barChart",
-                          scenarioId: scenario.scenarioId,
-                          viewMode: vm as "summary" | "distribution",
-                          hydroclimate,
-                        })
+                        if (exploreMode === "radar") {
+                          addShareItem({
+                            id: crypto.randomUUID(),
+                            type: "radar",
+                            scenarioIds: [scenario.scenarioId],
+                            scenarioColors: scenarioColors
+                              ? [scenarioColors[scenario.scenarioId] ?? "#666666"]
+                              : undefined,
+                            axes: [...radarVisibleAxes],
+                            showRange: showRadarRange,
+                            highlightBaseline,
+                            showDotsOnly,
+                            hydroclimate,
+                          })
+                        } else {
+                          const vm =
+                            outcomeDisplayMode === "distribution"
+                              ? "distribution"
+                              : "summary"
+                          addShareItem({
+                            id: crypto.randomUUID(),
+                            type: "barChart",
+                            scenarioId: scenario.scenarioId,
+                            viewMode: vm as "summary" | "distribution",
+                            hydroclimate,
+                          })
+                        }
                       }}
                       togglePinnedScenario={togglePinnedScenario}
                       hidePinning={exploreMode === "radar"}
