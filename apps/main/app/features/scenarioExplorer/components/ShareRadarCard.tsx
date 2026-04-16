@@ -10,6 +10,7 @@ import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChoo
 
 interface ShareRadarCardProps {
   scenarioNames: string[]
+  scenarioDefinitions?: string[]
   scenarioColors?: string[]
   hydroclimate?: string
   showRange: boolean
@@ -21,6 +22,7 @@ interface ShareRadarCardProps {
 
 export default function ShareRadarCard({
   scenarioNames,
+  scenarioDefinitions,
   scenarioColors,
   hydroclimate,
   showRange,
@@ -38,8 +40,7 @@ export default function ShareRadarCard({
     ? HYDROCLIMATE_CONFIG[hydroclimate]
     : undefined
 
-  const title =
-    scenarioNames.length === 1 ? "Radar: Single Scenario" : "Radar Comparison"
+  const isSingle = scenarioNames.length === 1
 
   const toggleLabels: string[] = []
   if (showRange) toggleLabels.push("Range shown")
@@ -74,47 +75,89 @@ export default function ShareRadarCard({
         </IconButton>
       )}
 
-      {/* Title */}
-      <Typography
-        variant="body2"
-        sx={{
-          fontWeight: 600,
-          lineHeight: 1.3,
-          color: theme.palette.grey[900],
-          pr: onRemove ? 2.5 : 0,
-        }}
-      >
-        {title}
-      </Typography>
+      {isSingle ? (
+        <>
+          {/* Single scenario: name + definition, same style as bar chart scorecard */}
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: theme.palette.grey[900],
+              pr: onRemove ? 2.5 : 0,
+            }}
+          >
+            {scenarioNames[0]}
+          </Typography>
 
-      {/* Scenario legend */}
-      <Box sx={{ mt: 0.5, display: "flex", flexDirection: "column", gap: 0.25 }}>
-        {scenarioNames.map((name, i) => (
-          <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor:
-                  scenarioColors?.[i] ?? theme.palette.grey[400],
-                flexShrink: 0,
-              }}
-            />
+          {scenarioDefinitions?.[0] && (
             <Typography
               sx={{
                 fontSize: "0.6875rem",
-                lineHeight: 1.3,
-                color: theme.palette.grey[700],
+                lineHeight: 1.4,
+                color: theme.palette.grey[600],
+                mt: 0.25,
+                pr: onRemove ? 2.5 : 0,
               }}
             >
-              {name}
+              {scenarioDefinitions[0]}
             </Typography>
-          </Box>
-        ))}
-      </Box>
+          )}
+        </>
+      ) : (
+        <>
+          {/* Multi-scenario: "Radar Comparison" title + colored legend */}
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: theme.palette.grey[900],
+              pr: onRemove ? 2.5 : 0,
+            }}
+          >
+            Radar Comparison
+          </Typography>
 
-      {/* Hydroclimate badge + toggle states */}
+          <Box
+            sx={{
+              mt: 0.5,
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.25,
+            }}
+          >
+            {scenarioNames.map((name, i) => (
+              <Box
+                key={i}
+                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              >
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    backgroundColor:
+                      scenarioColors?.[i] ?? theme.palette.grey[400],
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: "0.6875rem",
+                    lineHeight: 1.3,
+                    color: theme.palette.grey[700],
+                  }}
+                >
+                  {name}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </>
+      )}
+
+      {/* Hydroclimate badge + chart type label + toggle states */}
       <Box sx={{ mt: 0.75 }}>
         {climateOption && climateConfig && (
           <Box
@@ -164,18 +207,17 @@ export default function ShareRadarCard({
           </Box>
         )}
 
-        {toggleLabels.length > 0 && (
-          <Typography
-            sx={{
-              fontSize: "0.6875rem",
-              lineHeight: 1.3,
-              color: theme.palette.grey[500],
-              display: "block",
-            }}
-          >
-            {toggleLabels.join(" · ")}
-          </Typography>
-        )}
+        <Typography
+          sx={{
+            fontSize: "0.6875rem",
+            lineHeight: 1.3,
+            color: theme.palette.grey[500],
+            display: "block",
+          }}
+        >
+          Radar chart
+          {toggleLabels.length > 0 ? ` · ${toggleLabels.join(" · ")}` : ""}
+        </Typography>
       </Box>
 
       {/* Radar chart image */}
@@ -183,7 +225,7 @@ export default function ShareRadarCard({
         <Box
           component="img"
           src={cachedImageDataUrl}
-          alt={title}
+          alt={isSingle ? scenarioNames[0] : "Radar Comparison"}
           sx={{
             width: "100%",
             height: "auto",

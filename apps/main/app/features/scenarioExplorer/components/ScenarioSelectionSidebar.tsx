@@ -36,12 +36,16 @@ interface ScenarioSelectionSidebarProps {
     tierValue?: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
+  onCaptureRadarScenario?: (
+    scenarioId: string,
+  ) => Promise<{ dataUrl: string; color: string } | null>
 }
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
   hoveredInteraction,
   onRowHover,
+  onCaptureRadarScenario,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -298,20 +302,29 @@ export default function ScenarioSelectionSidebar({
                       }
                       isPinned={isPinned}
                       accentColor={accentColor}
-                      onShare={() => {
+                      onShare={async () => {
                         if (exploreMode === "radar") {
+                          const result = await onCaptureRadarScenario?.(
+                            scenario.scenarioId,
+                          )
                           addShareItem({
                             id: crypto.randomUUID(),
                             type: "radar",
                             scenarioIds: [scenario.scenarioId],
-                            scenarioColors: scenarioColors
-                              ? [scenarioColors[scenario.scenarioId] ?? "#666666"]
-                              : undefined,
+                            scenarioColors: result
+                              ? [result.color]
+                              : scenarioColors
+                                ? [
+                                    scenarioColors[scenario.scenarioId] ??
+                                      "#666666",
+                                  ]
+                                : undefined,
                             axes: [...radarVisibleAxes],
                             showRange: showRadarRange,
                             highlightBaseline,
                             showDotsOnly,
                             hydroclimate,
+                            cachedImageDataUrl: result?.dataUrl,
                           })
                         } else {
                           const vm =

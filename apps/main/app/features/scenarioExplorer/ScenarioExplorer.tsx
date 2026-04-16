@@ -27,6 +27,7 @@ import {
   ResiliencePanel,
   RadarPanel,
 } from "./exploreView"
+import type { SingleScenarioCaptureFn } from "./exploreView"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
@@ -161,10 +162,25 @@ export default function ScenarioExplorer() {
   } = useScenarioExplorerStore()
 
   const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
+  const radarSingleCaptureRef = useRef<SingleScenarioCaptureFn | null>(null)
 
   const handleRadarCaptureReady = useCallback(
     (capture: () => Promise<void>) => {
       radarCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleRadarSingleCaptureReady = useCallback(
+    (capture: SingleScenarioCaptureFn) => {
+      radarSingleCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleCaptureRadarScenario = useCallback(
+    async (scenarioId: string) => {
+      return radarSingleCaptureRef.current?.(scenarioId) ?? null
     },
     [],
   )
@@ -292,6 +308,7 @@ export default function ScenarioExplorer() {
                     <ScenarioSelectionSidebar
                       hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
+                      onCaptureRadarScenario={handleCaptureRadarScenario}
                     />
                   )
                 }
@@ -309,6 +326,7 @@ export default function ScenarioExplorer() {
                     highlightedIds={highlightedIds}
                     onOutcomeHover={handleOutcomeHover}
                     onCaptureReady={handleRadarCaptureReady}
+                    onSingleCaptureReady={handleRadarSingleCaptureReady}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}

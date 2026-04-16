@@ -219,11 +219,15 @@ function SortableShareCard({
         scenarioLookup.get(id)?.name ??
         id,
     )
+    const radarScenarioDefinitions = item.scenarioIds.map(
+      (id) => scenarioLookup.get(id)?.definition ?? "",
+    )
 
     return (
       <Box sx={{ px: 0.5, pb: 0.5 }}>
         <ShareRadarCard
           scenarioNames={radarScenarioNames}
+          scenarioDefinitions={radarScenarioDefinitions}
           scenarioColors={item.scenarioColors}
           hydroclimate={item.hydroclimate}
           showRange={item.showRange}

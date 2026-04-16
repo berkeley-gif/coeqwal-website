@@ -69,10 +69,14 @@ function ShareItemCard({
     (id) =>
       scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
   )
+  const radarScenarioDefinitions = item.scenarioIds.map(
+    (id) => scenarioLookup.get(id)?.definition ?? "",
+  )
 
   return (
     <ShareRadarCard
       scenarioNames={radarScenarioNames}
+      scenarioDefinitions={radarScenarioDefinitions}
       scenarioColors={item.scenarioColors}
       hydroclimate={item.hydroclimate}
       showRange={item.showRange}
