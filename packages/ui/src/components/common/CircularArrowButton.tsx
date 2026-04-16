@@ -35,6 +35,15 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
   const theme = useTheme()
   const buttonColor = color || theme.palette.blue.darkest
 
+  const arrowStroke = theme.strokeWidth.accent
+  const iconStrokeSx = {
+    "& path": {
+      stroke: "currentColor",
+      strokeWidth: `${arrowStroke}px`,
+      paintOrder: "stroke fill",
+    },
+  }
+
   // If decorative, render without interactive semantics
   if (decorative) {
     return (
@@ -44,7 +53,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
           width: size,
           height: size,
           borderRadius: "50%",
-          border: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
+          border: `${arrowStroke}px solid ${buttonColor}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -54,6 +63,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
         <ArrowDownwardIcon
           sx={{
             transform: rotation ? `rotate(${rotation})` : undefined,
+            ...iconStrokeSx,
           }}
         />
       </div>
@@ -68,11 +78,11 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
         width: size,
         height: size,
         borderRadius: theme.borderRadius.circle,
-        border: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
+        border: `${arrowStroke}px solid ${buttonColor}`,
         color: buttonColor,
         // WCAG 2.4.7: Focus visible indicator - DO NOT REMOVE
         "&:focus-visible": {
-          outline: `${theme.strokeWidth.rule}px solid ${buttonColor}`,
+          outline: `${arrowStroke}px solid ${buttonColor}`,
           outlineOffset: 2,
         },
         ...sx,
@@ -81,6 +91,7 @@ export const CircularArrowButton: React.FC<CircularArrowButtonProps> = ({
       <ArrowDownwardIcon
         sx={{
           transform: rotation ? `rotate(${rotation})` : undefined,
+          ...iconStrokeSx,
         }}
       />
     </IconButton>

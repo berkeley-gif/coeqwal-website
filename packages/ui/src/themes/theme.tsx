@@ -473,7 +473,8 @@ const zIndex = {
 
 // Stroke width - design system line weight
 const strokeWidth = {
-  rule: 0.5, // Primary line weight (px) used for borders, outlines, and SVG strokes
+  rule: 0.5, // Hairline rule (px) used for subtle dividers
+  accent: 1.25, // Primary accent line weight (px) used for navigation arrows, circular buttons, icon outlines, and hero-header borders
 }
 
 // Border styles

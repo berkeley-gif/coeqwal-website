@@ -92,6 +92,8 @@ export {
   CurrentOpsIcon,
   CurrentOpsMultipleIcon,
 } from "./icons/DocumentIcons"
+export { WaterDroplet } from "./icons/WaterDroplet"
+export type { WaterDropletProps } from "./icons/WaterDroplet"
 
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
