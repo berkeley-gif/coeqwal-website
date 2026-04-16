@@ -33,6 +33,7 @@ export default function ThemeGroupHeader({
     shareItems,
     addShareItem,
     outcomeDisplayMode,
+    hydroclimate,
   } = useScenarioExplorerStore()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
@@ -53,7 +54,8 @@ export default function ThemeGroupHeader({
         (s) =>
           s.type === "barChart" &&
           s.scenarioId === sid &&
-          s.viewMode === viewMode,
+          s.viewMode === viewMode &&
+          s.hydroclimate === hydroclimate,
       ),
     )
 
@@ -184,6 +186,7 @@ export default function ThemeGroupHeader({
                   type: "barChart",
                   scenarioId: sid,
                   viewMode: viewMode as "summary" | "distribution",
+                  hydroclimate,
                 })
               })
             }}

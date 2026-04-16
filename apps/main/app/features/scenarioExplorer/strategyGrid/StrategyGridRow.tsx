@@ -140,6 +140,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
   const isListMode = useScenarioExplorerStore((s) => s.exploreMode === "list")
   const showDefinitions = useScenarioExplorerStore((s) => s.showDefinitions)
   const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+  const hydroclimate = useScenarioExplorerStore((s) => s.hydroclimate)
   const togglePinnedScenario = useScenarioExplorerStore(
     (s) => s.togglePinnedScenario,
   )
@@ -164,6 +165,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
       type: "barChart",
       scenarioId: scenario.scenarioId,
       viewMode,
+      hydroclimate,
       cachedChartData: scenarioChartData as Record<string, unknown>,
     }
 
@@ -178,7 +180,7 @@ export const StrategyGridRow = React.memo(function StrategyGridRow({
     }
 
     addShareItem(item)
-  }, [scenario.scenarioId, outcomeDisplayMode, scenarioChartData, addShareItem])
+  }, [scenario.scenarioId, outcomeDisplayMode, scenarioChartData, addShareItem, hydroclimate])
   const isDistributionView = isListMode && outcomeDisplayMode === "distribution"
 
   // Refs to store glyph container elements for tooltip anchoring

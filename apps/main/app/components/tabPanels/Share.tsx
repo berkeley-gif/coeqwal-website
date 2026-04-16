@@ -48,8 +48,9 @@ function encodeShareItems(items: ShareItem[], climate: string): string {
   const parts = [`tab=share`]
   if (climate !== "historical") parts.push(`climate=${climate}`)
   const encoded = items.map((item) => {
+    const hc = item.hydroclimate === "historical" ? "" : item.hydroclimate
     if (item.type === "barChart") {
-      return `b.${item.scenarioId}.${item.viewMode === "summary" ? "s" : "d"}`
+      return `b.${item.scenarioId}.${item.viewMode === "summary" ? "s" : "d"}.${hc}`
     }
     const ids = item.scenarioIds.join("~")
     const axes = item.axes.join("~")
@@ -57,7 +58,7 @@ function encodeShareItems(items: ShareItem[], climate: string): string {
     if (item.showRange) flags += "r"
     if (item.highlightBaseline) flags += "b"
     if (item.showDotsOnly) flags += "d"
-    return `r.${ids}.${axes}.${flags}`
+    return `r.${ids}.${axes}.${flags}.${hc}`
   })
   if (encoded.length > 0) parts.push(`items=${encoded.join(",")}`)
   return `${window.location.origin}/?${parts.join("&")}`
@@ -79,6 +80,7 @@ export function parseShareItemsParam(param: string): ShareItem[] {
           type: "barChart",
           scenarioId: parts[1]!,
           viewMode: parts[2] === "d" ? "distribution" : "summary",
+          hydroclimate: parts[3] || "historical",
         }
       }
       if (parts[0] === "r" && parts.length >= 3) {
@@ -93,6 +95,7 @@ export function parseShareItemsParam(param: string): ShareItem[] {
           showRange: flags.includes("r"),
           highlightBaseline: flags.includes("b"),
           showDotsOnly: flags.includes("d"),
+          hydroclimate: parts[4] || "historical",
         }
       }
       return null
@@ -124,7 +127,6 @@ function SortableShareCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
-  hydroclimate,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -136,7 +138,6 @@ function SortableShareCard({
     { name: string; description: string; definition: string }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
-  hydroclimate: string
 }) {
   const theme = useTheme()
   const contentRef = useRef<HTMLDivElement>(null)
@@ -203,7 +204,7 @@ function SortableShareCard({
             name={info?.description ?? info?.name ?? item.scenarioId}
             scenarioDefinition={info?.definition}
             description={viewLabel}
-            hydroclimate={hydroclimate}
+            hydroclimate={item.hydroclimate}
             chartData={chartData}
             outcomeNames={outcomeNames}
             viewMode={item.viewMode}
@@ -223,7 +224,7 @@ function SortableShareCard({
       <Box sx={{ px: 0.5, pb: 0.5 }}>
         <ShareRadarCard
           scenarioNames={radarScenarioNames}
-          hydroclimate={hydroclimate}
+          hydroclimate={item.hydroclimate}
           axes={item.axes}
           showRange={item.showRange}
           highlightBaseline={item.highlightBaseline}
@@ -537,7 +538,6 @@ export default function SharePanel() {
                     Record<string, unknown> | undefined
                   >
                 }
-                hydroclimate={hydroclimate}
               />
             ))}
           </Box>

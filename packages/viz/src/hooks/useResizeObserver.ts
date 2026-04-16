@@ -21,11 +21,10 @@ export function useResizeObserver<T extends HTMLElement>(
     height: 0,
   })
 
-  // Use a refs to track the observer and the current element
   const observerRef = useRef<ResizeObserver | null>(null)
+  const rafIdRef = useRef<number>(0)
 
   useEffect(() => {
-    // Create the observer
     const resizeObserver = new ResizeObserver((entries) => {
       if (!Array.isArray(entries) || !entries.length) return
 
@@ -45,20 +44,24 @@ export function useResizeObserver<T extends HTMLElement>(
         return
       }
 
-      setDimensions((prev) => {
-        if (prev.width === width && prev.height === height) return prev
-        return { width, height }
+      // Defer state update to the next animation frame to prevent
+      // ResizeObserver feedback loops during CSS transitions.
+      cancelAnimationFrame(rafIdRef.current)
+      rafIdRef.current = requestAnimationFrame(() => {
+        setDimensions((prev) => {
+          if (prev.width === width && prev.height === height) return prev
+          return { width, height }
+        })
       })
     })
 
-    // Store the observer reference
     observerRef.current = resizeObserver
 
-    // Start observing
     if (targetRef.current) {
       resizeObserver.observe(targetRef.current)
     }
 
+    // Synchronous initial measurement (runs once on mount)
     if (targetRef.current) {
       const rect = targetRef.current.getBoundingClientRect()
       const w = Math.round(rect.width)
@@ -69,8 +72,8 @@ export function useResizeObserver<T extends HTMLElement>(
       })
     }
 
-    // Cleanup
     return () => {
+      cancelAnimationFrame(rafIdRef.current)
       resizeObserver.disconnect()
     }
   }, [targetRef])

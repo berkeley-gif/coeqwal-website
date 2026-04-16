@@ -60,6 +60,7 @@ export default function ScenarioSelectionSidebar({
     addShareItem,
     outcomeDisplayMode,
     exploreMode,
+    hydroclimate,
   } = useScenarioExplorerStore()
 
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
@@ -303,6 +304,7 @@ export default function ScenarioSelectionSidebar({
                           type: "barChart",
                           scenarioId: scenario.scenarioId,
                           viewMode: vm as "summary" | "distribution",
+                          hydroclimate,
                         })
                       }}
                       togglePinnedScenario={togglePinnedScenario}

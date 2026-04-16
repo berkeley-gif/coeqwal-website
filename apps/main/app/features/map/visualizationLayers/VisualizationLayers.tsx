@@ -75,7 +75,7 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
   ],
 }
 
-export default function VisualizationLayers() {
+export default function VisualizationLayers({ hidden = false }: { hidden?: boolean }) {
   const map = useMap()
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
@@ -180,18 +180,22 @@ export default function VisualizationLayers() {
   const mapStyle = useMapStyle()
   const isSatellite = mapStyle === MAP_THEME_URLS.satellite
 
-  // Dim overlay only on satellite basemap (light/streets have enough contrast)
+  // Dim overlay only on satellite basemap (light/streets have enough contrast).
+  // Force to 0 when the map is hidden so the Source stays mounted without visual effect.
   const dimOpacity = useMemo(
     () =>
-      isVisualizationActive && !isGetStartedMode && isSatellite
+      !hidden && isVisualizationActive && !isGetStartedMode && isSatellite
         ? BASEMAP_DIM_OPACITY
         : 0,
-    [isVisualizationActive, isGetStartedMode, isSatellite],
+    [hidden, isVisualizationActive, isGetStartedMode, isSatellite],
   )
 
   // Position dim overlay below all outcome polygon fill layers so
   // tier-colored polygons render above the darkened basemap.
+  // Skip when hidden to avoid styledata -> moveLayer -> styledata feedback loops.
   useEffect(() => {
+    if (hidden) return
+
     const mapInstance = map.mapRef?.current?.getMap()
     if (!mapInstance) return
 
@@ -235,7 +239,7 @@ export default function VisualizationLayers() {
       cancelAnimationFrame(raf)
       mapInstance.off("styledata", onStyle)
     }
-  }, [map])
+  }, [map, hidden])
 
   const highlightedLocationIds = useMemo(() => {
     if (locationHighlights.length === 0) return undefined
@@ -247,227 +251,232 @@ export default function VisualizationLayers() {
     return ids
   }, [locationHighlights])
 
+  const dimPaint = useMemo(
+    () => ({ "fill-color": "#000000", "fill-opacity": dimOpacity }),
+    [dimOpacity],
+  )
+
   return (
     <>
       {/* Basemap dim overlay - darkens map when visualization is active */}
       <Source id="basemap-dim-source" type="geojson" data={DIM_OVERLAY_GEOJSON}>
-        <Layer
-          id="basemap-dim-overlay"
-          type="fill"
-          paint={{
-            "fill-color": "#000000",
-            "fill-opacity": dimOpacity,
-          }}
-        />
+        <Layer id="basemap-dim-overlay" type="fill" paint={dimPaint} />
       </Source>
 
-      {/* Point of interest marker (Learn mode only) */}
-      {isLearnMode && geocoderMarker && (
-        <PoiMarker coordinates={geocoderMarker} />
-      )}
+      {!hidden && (
+        <>
+          {/* Point of interest marker (Learn mode only) */}
+          {isLearnMode && geocoderMarker && (
+            <PoiMarker coordinates={geocoderMarker} />
+          )}
 
-      {/* Polygon layer (demand-units, WBA, delta, reservoir)
-          In get-started mode this only renders after the user clicks a category
-          (activeOutcomeVisualization is null during the animation). */}
-      {isVisualizationActive && geometryType === "polygon" && config && (
-        <OutcomePolygonLayer
-          tierColorMap={tierColorMap}
-          layerType={layerType!}
-          idProperty={config.idProperty}
-          featureIds={featureIds}
-          classFilter={config.classFilter}
-          visible={true}
-          mapboxLayerId={config.mapboxLayerId}
-          featureIdMap={config.featureIdMap}
-          outlineOnly={config.outlineOnly}
-        />
-      )}
+          {/* Polygon layer (demand-units, WBA, delta, reservoir)
+              In get-started mode this only renders after the user clicks a category
+              (activeOutcomeVisualization is null during the animation). */}
+          {isVisualizationActive && geometryType === "polygon" && config && (
+            <OutcomePolygonLayer
+              tierColorMap={tierColorMap}
+              layerType={layerType!}
+              idProperty={config.idProperty}
+              featureIds={featureIds}
+              classFilter={config.classFilter}
+              visible={true}
+              mapboxLayerId={config.mapboxLayerId}
+              featureIdMap={config.featureIdMap}
+              outlineOnly={config.outlineOnly}
+            />
+          )}
 
-      {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
-      {tierLocations.length > 0 &&
-        !usesMapboxLayers &&
-        tierCode &&
-        outcomeCode !== "FW_EXP" &&
-        outcomeCode !== "FW_DELTA_USES" && (
-          <TierMarkers
-            locations={tierLocations}
-            tierCode={tierCode}
-            onHover={
-              isGetStartedMode
-                ? (feature) => {
-                    if (!feature) {
-                      getOnLocationHover()?.(null)
-                    } else {
-                      getOnLocationHover()?.({
+          {/* React markers for non-Mapbox outcomes (except Delta station outcomes which use labels) */}
+          {tierLocations.length > 0 &&
+            !usesMapboxLayers &&
+            tierCode &&
+            outcomeCode !== "FW_EXP" &&
+            outcomeCode !== "FW_DELTA_USES" && (
+              <TierMarkers
+                locations={tierLocations}
+                tierCode={tierCode}
+                onHover={
+                  isGetStartedMode
+                    ? (feature) => {
+                        if (!feature) {
+                          getOnLocationHover()?.(null)
+                        } else {
+                          getOnLocationHover()?.({
+                            code: outcomeCode!,
+                            sourceId: feature.featureId,
+                            tier: feature.tierLevel,
+                          })
+                        }
+                      }
+                    : handlePointHover
+                }
+                onClick={
+                  isGetStartedMode
+                    ? (feature) => {
+                        getOnLocationClick()?.({
+                          code: outcomeCode!,
+                          sourceId: feature.featureId,
+                          tier: feature.tierLevel,
+                        })
+                      }
+                    : handlePointClick
+                }
+                highlightedIds={highlightedLocationIds}
+              />
+            )}
+
+          {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
+          {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
+            <TierLocationLabels
+              tierLookup={tierLevelMap}
+              highlightedIds={highlightedLocationIds}
+              onHover={
+                isGetStartedMode
+                  ? (info) => {
+                      if (!info) {
+                        getOnLocationHover()?.(null)
+                      } else {
+                        getOnLocationHover()?.({
+                          code: outcomeCode!,
+                          sourceId: info.id,
+                          tier: info.tier,
+                        })
+                      }
+                    }
+                  : undefined
+              }
+              onClick={
+                isGetStartedMode
+                  ? (info) => {
+                      getOnLocationClick()?.({
                         code: outcomeCode!,
-                        sourceId: feature.featureId,
-                        tier: feature.tierLevel,
+                        sourceId: info.id,
+                        tier: info.tier,
                       })
                     }
-                  }
-                : handlePointHover
-            }
-            onClick={
-              isGetStartedMode
-                ? (feature) => {
-                    getOnLocationClick()?.({
-                      code: outcomeCode!,
-                      sourceId: feature.featureId,
-                      tier: feature.tierLevel,
-                    })
-                  }
-                : handlePointClick
-            }
-            highlightedIds={highlightedLocationIds}
-          />
-        )}
-
-      {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
-      {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
-        <TierLocationLabels
-          tierLookup={tierLevelMap}
-          highlightedIds={highlightedLocationIds}
-          onHover={
-            isGetStartedMode
-              ? (info) => {
-                  if (!info) {
-                    getOnLocationHover()?.(null)
-                  } else {
-                    getOnLocationHover()?.({
-                      code: outcomeCode!,
-                      sourceId: info.id,
-                      tier: info.tier,
-                    })
-                  }
-                }
-              : undefined
-          }
-          onClick={
-            isGetStartedMode
-              ? (info) => {
-                  getOnLocationClick()?.({
-                    code: outcomeCode!,
-                    sourceId: info.id,
-                    tier: info.tier,
-                  })
-                }
-              : undefined
-          }
-        />
-      )}
-      {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
-        (tierLocations.length > 0 || Object.keys(locationData).length > 0) && (
-          <TierLocationLabels
-            locationItems={
-              tierLocations.length > 0
-                ? tierLocations
-                : Object.values(locationData)
-            }
-            highlightedIds={highlightedLocationIds}
-          />
-        )}
-
-      {/* Pinned tooltips (multiple allowed) — suppressed in get-started mode */}
-      {!isGetStartedMode &&
-        pinnedFeatures.map((feature) => (
-          <MapFeatureTooltip
-            key={`pinned-${feature.featureId}`}
-            feature={feature}
-            isPinned={true}
-            onClose={() => clearPinned(feature)}
-          />
-        ))}
-
-      {/* Hover tooltip (only if not already pinned) — suppressed in get-started mode */}
-      {!isGetStartedMode && hoveredFeature && !isHoveredAlreadyPinned && (
-        <MapFeatureTooltip
-          key="hover"
-          feature={hoveredFeature}
-          isPinned={false}
-          onClose={() => {}}
-        />
-      )}
-
-      {/* Lightweight tooltips from tier animation overlay hover/pin */}
-      {locationHighlights
-        .filter((hl) => {
-          if (!isGetStartedMode) return true
-          // In get-started mode, pinned locations use PinnedLocationsList
-          // cards with leader lines instead of map Popups.
-          if (hl.pinned) return false
-          const code = hl.key.split(":")[0]
-          return (
-            code !== "RES_STOR" && code !== "FW_EXP" && code !== "FW_DELTA_USES"
-          )
-        })
-        .map((hl) => (
-          <Popup
-            key={hl.key}
-            className="location-highlight-popup"
-            longitude={hl.longitude}
-            latitude={hl.latitude}
-            anchor="bottom"
-            closeButton={false}
-            closeOnClick={false}
-            offset={12}
-            style={{ zIndex: 10 }}
-          >
-            <Box
-              onClick={
-                hl.pinned ? () => getOnLocationToggle()?.(hl.key) : undefined
+                  : undefined
               }
-              sx={{
-                display: "inline-flex",
-                flexDirection: "column",
-                alignItems: "center",
-                p: "3px 8px",
-                borderRadius: "4px",
-                background: "rgba(255,255,255,0.75)",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-                fontSize: 11,
-                lineHeight: 1.3,
-                textAlign: "center",
-                color: "#333",
-                whiteSpace: "nowrap",
-                cursor: hl.pinned ? "pointer" : "default",
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: 600,
-                  maxWidth: 200,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {hl.name}
-              </Box>
-              <Box
-                component="span"
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontWeight: 500,
-                  color: hl.tierColor,
-                }}
+            />
+          )}
+          {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
+            (tierLocations.length > 0 ||
+              Object.keys(locationData).length > 0) && (
+              <TierLocationLabels
+                locationItems={
+                  tierLocations.length > 0
+                    ? tierLocations
+                    : Object.values(locationData)
+                }
+                highlightedIds={highlightedLocationIds}
+              />
+            )}
+
+          {/* Pinned tooltips (multiple allowed) — suppressed in get-started mode */}
+          {!isGetStartedMode &&
+            pinnedFeatures.map((feature) => (
+              <MapFeatureTooltip
+                key={`pinned-${feature.featureId}`}
+                feature={feature}
+                isPinned={true}
+                onClose={() => clearPinned(feature)}
+              />
+            ))}
+
+          {/* Hover tooltip (only if not already pinned) — suppressed in get-started mode */}
+          {!isGetStartedMode && hoveredFeature && !isHoveredAlreadyPinned && (
+            <MapFeatureTooltip
+              key="hover"
+              feature={hoveredFeature}
+              isPinned={false}
+              onClose={() => {}}
+            />
+          )}
+
+          {/* Lightweight tooltips from tier animation overlay hover/pin */}
+          {locationHighlights
+            .filter((hl) => {
+              if (!isGetStartedMode) return true
+              if (hl.pinned) return false
+              const code = hl.key.split(":")[0]
+              return (
+                code !== "RES_STOR" &&
+                code !== "FW_EXP" &&
+                code !== "FW_DELTA_USES"
+              )
+            })
+            .map((hl) => (
+              <Popup
+                key={hl.key}
+                className="location-highlight-popup"
+                longitude={hl.longitude}
+                latitude={hl.latitude}
+                anchor="bottom"
+                closeButton={false}
+                closeOnClick={false}
+                offset={12}
+                style={{ zIndex: 10 }}
               >
                 <Box
-                  component="span"
+                  onClick={
+                    hl.pinned
+                      ? () => getOnLocationToggle()?.(hl.key)
+                      : undefined
+                  }
                   sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "2px",
-                    backgroundColor: hl.tierColor,
-                    flexShrink: 0,
+                    display: "inline-flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    p: "3px 8px",
+                    borderRadius: "4px",
+                    background: "rgba(255,255,255,0.75)",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+                    fontSize: 11,
+                    lineHeight: 1.3,
+                    textAlign: "center",
+                    color: "#333",
+                    whiteSpace: "nowrap",
+                    cursor: hl.pinned ? "pointer" : "default",
                   }}
-                />
-                Tier {hl.tierLevel}: {hl.tierLabel}
-              </Box>
-            </Box>
-          </Popup>
-        ))}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      fontWeight: 600,
+                      maxWidth: 200,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {hl.name}
+                  </Box>
+                  <Box
+                    component="span"
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontWeight: 500,
+                      color: hl.tierColor,
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "2px",
+                        backgroundColor: hl.tierColor,
+                        flexShrink: 0,
+                      }}
+                    />
+                    Tier {hl.tierLevel}: {hl.tierLabel}
+                  </Box>
+                </Box>
+              </Popup>
+            ))}
+        </>
+      )}
     </>
   )
 }

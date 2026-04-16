@@ -27,7 +27,6 @@ function ShareItemCard({
   outcomeNames,
   scenarioLookup,
   allChartData,
-  hydroclimate,
 }: {
   item: ShareItem
   onRemove: (id: string) => void
@@ -37,7 +36,6 @@ function ShareItemCard({
     { name: string; description: string; definition: string }
   >
   allChartData: Record<string, Record<string, unknown> | undefined>
-  hydroclimate: string
 }) {
   const theme = useTheme()
 
@@ -58,7 +56,7 @@ function ShareItemCard({
         name={info?.description ?? info?.name ?? item.scenarioId}
         scenarioDefinition={info?.definition}
         description={viewLabel}
-        hydroclimate={hydroclimate}
+        hydroclimate={item.hydroclimate}
         chartData={chartData}
         outcomeNames={outcomeNames}
         onRemove={() => onRemove(item.id)}
@@ -75,7 +73,7 @@ function ShareItemCard({
   return (
     <ShareRadarCard
       scenarioNames={radarScenarioNames}
-      hydroclimate={hydroclimate}
+      hydroclimate={item.hydroclimate}
       axes={item.axes}
       showRange={item.showRange}
       highlightBaseline={item.highlightBaseline}
@@ -182,7 +180,6 @@ export default function ShareDrawer() {
 
   const {
     shareItems,
-    hydroclimate,
     showShareDrawer,
     setShowShareDrawer,
     removeShareItem,
@@ -352,7 +349,6 @@ export default function ShareDrawer() {
                     Record<string, unknown> | undefined
                   >
                 }
-                hydroclimate={hydroclimate}
               />
             ))
           )}
