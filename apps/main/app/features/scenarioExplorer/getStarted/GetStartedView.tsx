@@ -709,7 +709,7 @@ export default function GetStartedView() {
             sx={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              columnGap: theme.space.section.lg,
+              columnGap: theme.space.section.xl,
             }}
           >
             {/* Left — three lenses */}
@@ -830,6 +830,7 @@ export default function GetStartedView() {
               },
             ]}
             color={theme.palette.common.white}
+            columnGap={theme.space.section.xl}
             sx={{ mb: theme.space.section.lg }}
           />
 
@@ -878,7 +879,7 @@ export default function GetStartedView() {
             sx={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
-              columnGap: theme.space.section.lg,
+              columnGap: theme.space.section.xl,
               maxWidth: "85%",
             }}
           >
