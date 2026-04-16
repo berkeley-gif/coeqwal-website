@@ -146,6 +146,7 @@ import SwapVertIcon from "@mui/icons-material/SwapVert"
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 import AppsIcon from "@mui/icons-material/Apps"
+import GridOnIcon from "@mui/icons-material/GridOn"
 import AutorenewIcon from "@mui/icons-material/Autorenew"
 import InsightsIcon from "@mui/icons-material/Insights"
 import TrackChangesIcon from "@mui/icons-material/TrackChanges"
@@ -217,6 +218,7 @@ export {
   ArrowUpwardIcon,
   ArrowDownwardIcon,
   AppsIcon,
+  GridOnIcon,
   AutorenewIcon,
   InsightsIcon,
   TrackChangesIcon,
