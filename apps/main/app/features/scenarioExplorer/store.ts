@@ -288,369 +288,371 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       ...initialState,
 
       // Navigation
-    setMainView: (view) =>
-      set((state) => {
-        state.mainView = view
-      }),
+      setMainView: (view) =>
+        set((state) => {
+          state.mainView = view
+        }),
 
-    setExploreMode: (mode) =>
-      set((state) => {
-        state.exploreMode = mode
-      }),
+      setExploreMode: (mode) =>
+        set((state) => {
+          state.exploreMode = mode
+        }),
 
-    // Scenario selection
-    toggleScenario: (scenarioId) =>
-      set((state) => {
-        const index = state.selectedScenarios.indexOf(scenarioId)
-        if (index > -1) {
-          state.selectedScenarios.splice(index, 1)
-        } else {
-          state.selectedScenarios.push(scenarioId)
-        }
-      }),
+      // Scenario selection
+      toggleScenario: (scenarioId) =>
+        set((state) => {
+          const index = state.selectedScenarios.indexOf(scenarioId)
+          if (index > -1) {
+            state.selectedScenarios.splice(index, 1)
+          } else {
+            state.selectedScenarios.push(scenarioId)
+          }
+        }),
 
-    selectScenarios: (scenarioIds) =>
-      set((state) => {
-        state.selectedScenarios = scenarioIds
-      }),
+      selectScenarios: (scenarioIds) =>
+        set((state) => {
+          state.selectedScenarios = scenarioIds
+        }),
 
-    clearScenarios: () =>
-      set((state) => {
-        state.selectedScenarios = []
-      }),
+      clearScenarios: () =>
+        set((state) => {
+          state.selectedScenarios = []
+        }),
 
-    setHighlightedScenario: (scenarioId) =>
-      set((state) => {
-        state.highlightedScenario = scenarioId
-      }),
+      setHighlightedScenario: (scenarioId) =>
+        set((state) => {
+          state.highlightedScenario = scenarioId
+        }),
 
-    togglePinnedScenario: (scenarioId) =>
-      set((state) => {
-        const idx = state.pinnedScenarioIds.indexOf(scenarioId)
-        if (idx >= 0) {
-          state.pinnedScenarioIds.splice(idx, 1)
+      togglePinnedScenario: (scenarioId) =>
+        set((state) => {
+          const idx = state.pinnedScenarioIds.indexOf(scenarioId)
+          if (idx >= 0) {
+            state.pinnedScenarioIds.splice(idx, 1)
+            state.pinCapReached = false
+          } else if (
+            state.pinnedScenarioIds.length >= state.maxPinnedScenarios
+          ) {
+            state.pinCapReached = true
+          } else {
+            state.pinnedScenarioIds.push(scenarioId)
+          }
+        }),
+
+      clearPinnedScenarios: () =>
+        set((state) => {
+          state.pinnedScenarioIds = []
           state.pinCapReached = false
-        } else if (state.pinnedScenarioIds.length >= state.maxPinnedScenarios) {
-          state.pinCapReached = true
-        } else {
-          state.pinnedScenarioIds.push(scenarioId)
-        }
-      }),
+        }),
 
-    clearPinnedScenarios: () =>
-      set((state) => {
-        state.pinnedScenarioIds = []
-        state.pinCapReached = false
-      }),
+      setMaxPinnedScenarios: (max) =>
+        set((state) => {
+          state.maxPinnedScenarios = max
+        }),
 
-    setMaxPinnedScenarios: (max) =>
-      set((state) => {
-        state.maxPinnedScenarios = max
-      }),
+      dismissPinCapReached: () =>
+        set((state) => {
+          state.pinCapReached = false
+        }),
 
-    dismissPinCapReached: () =>
-      set((state) => {
-        state.pinCapReached = false
-      }),
+      stashAndTrimPins: (keepCount) =>
+        set((state) => {
+          state.stashedPinnedScenarioIds = [...state.pinnedScenarioIds]
+          state.pinnedScenarioIds = state.pinnedScenarioIds.slice(-keepCount)
+          state.pinCapReached = false
+          state.pinsTrimmedForMap = true
+        }),
 
-    stashAndTrimPins: (keepCount) =>
-      set((state) => {
-        state.stashedPinnedScenarioIds = [...state.pinnedScenarioIds]
-        state.pinnedScenarioIds = state.pinnedScenarioIds.slice(-keepCount)
-        state.pinCapReached = false
-        state.pinsTrimmedForMap = true
-      }),
+      restoreStashedPins: () =>
+        set((state) => {
+          if (state.stashedPinnedScenarioIds !== null) {
+            state.pinnedScenarioIds = state.stashedPinnedScenarioIds
+            state.stashedPinnedScenarioIds = null
+          }
+          state.pinsTrimmedForMap = false
+        }),
 
-    restoreStashedPins: () =>
-      set((state) => {
-        if (state.stashedPinnedScenarioIds !== null) {
-          state.pinnedScenarioIds = state.stashedPinnedScenarioIds
-          state.stashedPinnedScenarioIds = null
-        }
-        state.pinsTrimmedForMap = false
-      }),
+      dismissPinsTrimmedForMap: () =>
+        set((state) => {
+          state.pinsTrimmedForMap = false
+        }),
 
-    dismissPinsTrimmedForMap: () =>
-      set((state) => {
-        state.pinsTrimmedForMap = false
-      }),
+      // Filtering
+      setSearchQuery: (query) =>
+        set((state) => {
+          state.searchQuery = query
+        }),
 
-    // Filtering
-    setSearchQuery: (query) =>
-      set((state) => {
-        state.searchQuery = query
-      }),
+      setShowOnlyChosen: (show) =>
+        set((state) => {
+          state.showOnlyChosen = show
+        }),
 
-    setShowOnlyChosen: (show) =>
-      set((state) => {
-        state.showOnlyChosen = show
-      }),
+      // Theme filtering
+      setSelectedTheme: (theme) =>
+        set((state) => {
+          state.selectedTheme = theme
+          if (theme === null) {
+            state.showOnlyTheme = false
+          }
+        }),
 
-    // Theme filtering
-    setSelectedTheme: (theme) =>
-      set((state) => {
-        state.selectedTheme = theme
-        if (theme === null) {
+      setShowOnlyTheme: (show) =>
+        set((state) => {
+          state.showOnlyTheme = show
+        }),
+
+      setShowThemeBadges: (show) =>
+        set((state) => {
+          state.showThemeBadges = show
+        }),
+
+      // Icon filtering
+      setSelectedIconId: (iconId) =>
+        set((state) => {
+          state.selectedIconId = iconId
+        }),
+
+      // Display options
+      setShowAlternativeBaselines: (show) =>
+        set((state) => {
+          state.showAlternativeBaselines = show
+        }),
+
+      setShowDefinitions: (show) =>
+        set((state) => {
+          state.showDefinitions = show
+        }),
+
+      setShowKeyOperations: (show) =>
+        set((state) => {
+          state.showKeyOperations = show
+        }),
+
+      setOutcomeDisplayMode: (mode) =>
+        set((state) => {
+          state.outcomeDisplayMode = mode
+        }),
+
+      setShowMap: (show) =>
+        set((state) => {
+          state.showMap = show
+        }),
+
+      setShowLocationPicker: (show) =>
+        set((state) => {
+          state.showLocationPicker = show
+        }),
+
+      // Share staging
+      addShareItem: (item) =>
+        set((state) => {
+          if (item.type === "barChart") {
+            const exists = state.shareItems.some(
+              (s) =>
+                s.type === "barChart" &&
+                s.scenarioId === item.scenarioId &&
+                s.viewMode === item.viewMode &&
+                s.hydroclimate === item.hydroclimate,
+            )
+            if (exists) return
+          }
+          state.shareItems.push(item)
+          state.showShareDrawer = true
+        }),
+
+      removeShareItem: (id) =>
+        set((state) => {
+          const idx = state.shareItems.findIndex((s) => s.id === id)
+          if (idx > -1) state.shareItems.splice(idx, 1)
+          const storyIdx = state.storyItemIds.indexOf(id)
+          if (storyIdx > -1) state.storyItemIds.splice(storyIdx, 1)
+        }),
+
+      reorderShareItems: (orderedIds) =>
+        set((state) => {
+          const byId = new Map(state.shareItems.map((s) => [s.id, s]))
+          state.shareItems = orderedIds
+            .map((id) => byId.get(id))
+            .filter(Boolean) as ShareItem[]
+        }),
+
+      clearShareItems: () =>
+        set((state) => {
+          state.shareItems = []
+          state.storyItemIds = []
+        }),
+
+      setShareItems: (items) =>
+        set((state) => {
+          state.shareItems = items
+        }),
+
+      updateShareItem: (id, patch) =>
+        set((state) => {
+          const item = state.shareItems.find((s) => s.id === id)
+          if (item) Object.assign(item, patch)
+        }),
+
+      setShowShareDrawer: (open) =>
+        set((state) => {
+          state.showShareDrawer = open
+        }),
+
+      // Story arrangement
+      addToStory: (id) =>
+        set((state) => {
+          if (!state.storyItemIds.includes(id)) {
+            state.storyItemIds.push(id)
+          }
+        }),
+
+      removeFromStory: (id) =>
+        set((state) => {
+          const idx = state.storyItemIds.indexOf(id)
+          if (idx > -1) state.storyItemIds.splice(idx, 1)
+        }),
+
+      reorderStory: (orderedIds) =>
+        set((state) => {
+          state.storyItemIds = orderedIds
+        }),
+
+      clearStory: () =>
+        set((state) => {
+          state.storyItemIds = []
+        }),
+
+      // Chart toggles
+      setRelativeToBaseline: (show) =>
+        set((state) => {
+          state.relativeToBaseline = show
+        }),
+
+      setHighlightBaseline: (show) =>
+        set((state) => {
+          state.highlightBaseline = show
+        }),
+
+      setOverlayTiers: (show) =>
+        set((state) => {
+          state.overlayTiers = show
+        }),
+
+      setDefineOutcome: (show) =>
+        set((state) => {
+          state.defineOutcome = show
+        }),
+
+      setShowTierZones: (show) =>
+        set((state) => {
+          state.showTierZones = show
+        }),
+
+      setDimUnpinned: (show) =>
+        set((state) => {
+          state.dimUnpinned = show
+        }),
+
+      setShowRadarRange: (show) =>
+        set((state) => {
+          state.showRadarRange = show
+        }),
+      setShowDotsOnly: (show) =>
+        set((state) => {
+          state.showDotsOnly = show
+        }),
+      setRadarShowAll: (show) =>
+        set((state) => {
+          state.radarShowAll = show
+        }),
+      setShowAxisSelector: (show) =>
+        set((state) => {
+          state.showAxisSelector = show
+        }),
+
+      toggleRadarAxis: (code) =>
+        set((state) => {
+          const idx = state.radarVisibleAxes.indexOf(code)
+          if (idx >= 0) {
+            state.radarVisibleAxes.splice(idx, 1)
+          } else {
+            state.radarVisibleAxes.push(code)
+          }
+        }),
+
+      setRadarVisibleAxes: (codes) =>
+        set((state) => {
+          state.radarVisibleAxes = codes
+        }),
+
+      // Hydroclimate
+      setHydroclimate: (value) =>
+        set((state) => {
+          state.hydroclimate = value
+        }),
+
+      // Theme grouping
+      setGroupByTheme: (group) =>
+        set((state) => {
+          state.groupByTheme = group
+          if (group && state.sortBy !== null) {
+            state.sortBy = null
+            state.isSortActive = false
+          }
+        }),
+
+      // Sort state
+      setSortBy: (outcome) =>
+        set((state) => {
+          state.sortBy = outcome
+          state.isSortActive = outcome !== null
+          if (outcome !== null) {
+            state.groupByTheme = false
+          }
+        }),
+
+      setSortDirection: (direction) =>
+        set((state) => {
+          state.sortDirection = direction
+        }),
+
+      setIsSortActive: (active) =>
+        set((state) => {
+          state.isSortActive = active
+        }),
+
+      // Tier selection
+      setSelectedTier: (tier) =>
+        set((state) => {
+          state.selectedTier = tier
+        }),
+
+      // Reset functions
+      resetFilters: () =>
+        set((state) => {
+          state.searchQuery = ""
+          state.selectedTheme = null
           state.showOnlyTheme = false
-        }
-      }),
+          state.selectedIconId = null
+        }),
 
-    setShowOnlyTheme: (show) =>
-      set((state) => {
-        state.showOnlyTheme = show
-      }),
+      resetSelections: () =>
+        set((state) => {
+          state.selectedScenarios = []
+          state.highlightedScenario = null
+          state.pinnedScenarioIds = []
+          state.pinCapReached = false
+          state.stashedPinnedScenarioIds = null
+          state.pinsTrimmedForMap = false
+          state.selectedTier = null
+        }),
 
-    setShowThemeBadges: (show) =>
-      set((state) => {
-        state.showThemeBadges = show
-      }),
-
-    // Icon filtering
-    setSelectedIconId: (iconId) =>
-      set((state) => {
-        state.selectedIconId = iconId
-      }),
-
-    // Display options
-    setShowAlternativeBaselines: (show) =>
-      set((state) => {
-        state.showAlternativeBaselines = show
-      }),
-
-    setShowDefinitions: (show) =>
-      set((state) => {
-        state.showDefinitions = show
-      }),
-
-    setShowKeyOperations: (show) =>
-      set((state) => {
-        state.showKeyOperations = show
-      }),
-
-    setOutcomeDisplayMode: (mode) =>
-      set((state) => {
-        state.outcomeDisplayMode = mode
-      }),
-
-    setShowMap: (show) =>
-      set((state) => {
-        state.showMap = show
-      }),
-
-    setShowLocationPicker: (show) =>
-      set((state) => {
-        state.showLocationPicker = show
-      }),
-
-    // Share staging
-    addShareItem: (item) =>
-      set((state) => {
-        if (item.type === "barChart") {
-          const exists = state.shareItems.some(
-            (s) =>
-              s.type === "barChart" &&
-              s.scenarioId === item.scenarioId &&
-              s.viewMode === item.viewMode &&
-              s.hydroclimate === item.hydroclimate,
-          )
-          if (exists) return
-        }
-        state.shareItems.push(item)
-        state.showShareDrawer = true
-      }),
-
-    removeShareItem: (id) =>
-      set((state) => {
-        const idx = state.shareItems.findIndex((s) => s.id === id)
-        if (idx > -1) state.shareItems.splice(idx, 1)
-        const storyIdx = state.storyItemIds.indexOf(id)
-        if (storyIdx > -1) state.storyItemIds.splice(storyIdx, 1)
-      }),
-
-    reorderShareItems: (orderedIds) =>
-      set((state) => {
-        const byId = new Map(state.shareItems.map((s) => [s.id, s]))
-        state.shareItems = orderedIds
-          .map((id) => byId.get(id))
-          .filter(Boolean) as ShareItem[]
-      }),
-
-    clearShareItems: () =>
-      set((state) => {
-        state.shareItems = []
-        state.storyItemIds = []
-      }),
-
-    setShareItems: (items) =>
-      set((state) => {
-        state.shareItems = items
-      }),
-
-    updateShareItem: (id, patch) =>
-      set((state) => {
-        const item = state.shareItems.find((s) => s.id === id)
-        if (item) Object.assign(item, patch)
-      }),
-
-    setShowShareDrawer: (open) =>
-      set((state) => {
-        state.showShareDrawer = open
-      }),
-
-    // Story arrangement
-    addToStory: (id) =>
-      set((state) => {
-        if (!state.storyItemIds.includes(id)) {
-          state.storyItemIds.push(id)
-        }
-      }),
-
-    removeFromStory: (id) =>
-      set((state) => {
-        const idx = state.storyItemIds.indexOf(id)
-        if (idx > -1) state.storyItemIds.splice(idx, 1)
-      }),
-
-    reorderStory: (orderedIds) =>
-      set((state) => {
-        state.storyItemIds = orderedIds
-      }),
-
-    clearStory: () =>
-      set((state) => {
-        state.storyItemIds = []
-      }),
-
-    // Chart toggles
-    setRelativeToBaseline: (show) =>
-      set((state) => {
-        state.relativeToBaseline = show
-      }),
-
-    setHighlightBaseline: (show) =>
-      set((state) => {
-        state.highlightBaseline = show
-      }),
-
-    setOverlayTiers: (show) =>
-      set((state) => {
-        state.overlayTiers = show
-      }),
-
-    setDefineOutcome: (show) =>
-      set((state) => {
-        state.defineOutcome = show
-      }),
-
-    setShowTierZones: (show) =>
-      set((state) => {
-        state.showTierZones = show
-      }),
-
-    setDimUnpinned: (show) =>
-      set((state) => {
-        state.dimUnpinned = show
-      }),
-
-    setShowRadarRange: (show) =>
-      set((state) => {
-        state.showRadarRange = show
-      }),
-    setShowDotsOnly: (show) =>
-      set((state) => {
-        state.showDotsOnly = show
-      }),
-    setRadarShowAll: (show) =>
-      set((state) => {
-        state.radarShowAll = show
-      }),
-    setShowAxisSelector: (show) =>
-      set((state) => {
-        state.showAxisSelector = show
-      }),
-
-    toggleRadarAxis: (code) =>
-      set((state) => {
-        const idx = state.radarVisibleAxes.indexOf(code)
-        if (idx >= 0) {
-          state.radarVisibleAxes.splice(idx, 1)
-        } else {
-          state.radarVisibleAxes.push(code)
-        }
-      }),
-
-    setRadarVisibleAxes: (codes) =>
-      set((state) => {
-        state.radarVisibleAxes = codes
-      }),
-
-    // Hydroclimate
-    setHydroclimate: (value) =>
-      set((state) => {
-        state.hydroclimate = value
-      }),
-
-    // Theme grouping
-    setGroupByTheme: (group) =>
-      set((state) => {
-        state.groupByTheme = group
-        if (group && state.sortBy !== null) {
-          state.sortBy = null
-          state.isSortActive = false
-        }
-      }),
-
-    // Sort state
-    setSortBy: (outcome) =>
-      set((state) => {
-        state.sortBy = outcome
-        state.isSortActive = outcome !== null
-        if (outcome !== null) {
-          state.groupByTheme = false
-        }
-      }),
-
-    setSortDirection: (direction) =>
-      set((state) => {
-        state.sortDirection = direction
-      }),
-
-    setIsSortActive: (active) =>
-      set((state) => {
-        state.isSortActive = active
-      }),
-
-    // Tier selection
-    setSelectedTier: (tier) =>
-      set((state) => {
-        state.selectedTier = tier
-      }),
-
-    // Reset functions
-    resetFilters: () =>
-      set((state) => {
-        state.searchQuery = ""
-        state.selectedTheme = null
-        state.showOnlyTheme = false
-        state.selectedIconId = null
-      }),
-
-    resetSelections: () =>
-      set((state) => {
-        state.selectedScenarios = []
-        state.highlightedScenario = null
-        state.pinnedScenarioIds = []
-        state.pinCapReached = false
-        state.stashedPinnedScenarioIds = null
-        state.pinsTrimmedForMap = false
-        state.selectedTier = null
-      }),
-
-    resetAll: () =>
-      set((state) => {
-        Object.assign(state, initialState)
-      }),
-  })),
+      resetAll: () =>
+        set((state) => {
+          Object.assign(state, initialState)
+        }),
+    })),
     {
       name: "coeqwal-share",
       partialize: (state) => ({
@@ -665,7 +667,9 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         storyItemIds: state.storyItemIds,
       }),
       merge: (persisted, current) => {
-        const p = persisted as Partial<Pick<ScenarioExplorerState, "shareItems" | "storyItemIds">>
+        const p = persisted as Partial<
+          Pick<ScenarioExplorerState, "shareItems" | "storyItemIds">
+        >
         const persistedItems = p?.shareItems
         if (!persistedItems || persistedItems.length === 0) {
           return { ...current }
