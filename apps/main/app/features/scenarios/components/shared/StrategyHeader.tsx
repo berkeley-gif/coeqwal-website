@@ -47,6 +47,8 @@ export interface StrategyHeaderProps {
   inlineActions?: React.ReactNode
   /** When true, force-expand a truncated compact description */
   expandDescription?: boolean
+  /** Optional adornment rendered before the title text (e.g. a legend dot) */
+  titleStartAdornment?: React.ReactNode
 }
 
 /**
@@ -408,6 +410,7 @@ export function StrategyHeader({
   onThemeBadgeClick,
   inlineActions,
   expandDescription = false,
+  titleStartAdornment,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = showThemeBadge
@@ -453,7 +456,9 @@ export function StrategyHeader({
           component="span"
           onClick={onTitleClick}
           sx={{
-            display: "block",
+            display: "flex",
+            alignItems: "baseline",
+            gap: titleStartAdornment ? "6px" : 0,
             color: theme.palette.text.primary,
             cursor: onTitleClick ? "pointer" : "default",
             fontSize: "0.8125rem",
@@ -463,6 +468,7 @@ export function StrategyHeader({
             p: 0,
           }}
         >
+          {titleStartAdornment}
           {displayLabel}
         </Box>
         {showDescription && (

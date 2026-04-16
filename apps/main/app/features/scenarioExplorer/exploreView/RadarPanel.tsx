@@ -57,6 +57,8 @@ interface RadarPanelProps {
   onOutcomeHover?: (
     info: { scenarioId: string; outcome: string; tierValue: number } | null,
   ) => void
+  /** Notifies parent of the current scenarioId → color mapping for the radar chart */
+  onScenarioColors?: (colors: Record<string, string>) => void
   /** Exposes a capture function to the parent so it can trigger radar capture */
   onCaptureReady?: (capture: () => Promise<void>) => void
   /** Exposes a single-scenario capture function for sidebar share */
@@ -66,6 +68,7 @@ interface RadarPanelProps {
 export default function RadarPanel({
   highlightedIds = null,
   onOutcomeHover,
+  onScenarioColors,
   onCaptureReady,
   onSingleCaptureReady,
 }: RadarPanelProps) {
@@ -202,6 +205,18 @@ export default function RadarPanel({
     radarShowAll,
   ])
 
+  const scenarioColorMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    filteredData.forEach((d, i) => {
+      map[d.id] = filteredLineColors[i] ?? "#666666"
+    })
+    return map
+  }, [filteredData, filteredLineColors])
+
+  useEffect(() => {
+    onScenarioColors?.(scenarioColorMap)
+  }, [scenarioColorMap, onScenarioColors])
+
   const scenarioThemes = useMemo(() => {
     const map: Record<string, string> = {}
     filteredData.forEach((d) => {
@@ -269,6 +284,8 @@ export default function RadarPanel({
       let didToggle = false
 
       if (!alreadyVisible) {
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.visibility = "hidden"
         toggleScenario(scenarioId)
         didToggle = true
         await new Promise<void>((r) =>
@@ -318,6 +335,8 @@ export default function RadarPanel({
         if (didToggle) {
           toggleScenario(scenarioId)
         }
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.visibility = ""
       }
     },
     [
