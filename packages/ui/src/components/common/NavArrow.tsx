@@ -6,7 +6,7 @@
  * on the icon itself don't conflict with the static rotation.
  */
 
-import { ArrowForwardIcon } from "../../mui-components"
+import { ArrowForwardIcon, useTheme } from "../../mui-components"
 import type { SxProps, Theme } from "@mui/material/styles"
 
 const ROTATION: Record<NavArrowDirection, string | undefined> = {
@@ -41,6 +41,7 @@ export function NavArrow({
   bold = true,
   sx,
 }: NavArrowProps) {
+  const theme = useTheme()
   const rotation = ROTATION[direction]
 
   return (
@@ -61,7 +62,7 @@ export function NavArrow({
           ...(bold && {
             "& path": {
               stroke: "currentColor",
-              strokeWidth: "0.5px",
+              strokeWidth: `${theme.strokeWidth.accent}px`,
               paintOrder: "stroke fill",
             },
           }),
