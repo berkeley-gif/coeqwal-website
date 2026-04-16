@@ -438,12 +438,12 @@ function StoryCard({
       </Box>
 
       {/* Actions */}
-      <Box sx={{ px: 1.5, pb: 1.25 }}>
+      <Box sx={{ px: 1.5, pb: 1.5 }}>
         <Box
           sx={{
             display: "flex",
-            gap: 0.5,
-            mt: 0.5,
+            gap: 1,
+            mt: 1,
             alignItems: "center",
           }}
         >
@@ -451,9 +451,9 @@ function StoryCard({
             <IconButton
               size="small"
               onClick={handleDownloadImage}
-              sx={{ p: 0.5, color: theme.palette.grey[500] }}
+              sx={{ p: 0.75, color: theme.palette.grey[600] }}
             >
-              <icons.Image sx={{ fontSize: "0.875rem" }} />
+              <icons.Image sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
           {(() => {
@@ -475,13 +475,13 @@ function StoryCard({
                     onClick={() => onDownloadData(item)}
                     disabled={!hasData}
                     sx={{
-                      p: 0.5,
+                      p: 0.75,
                       color: hasData
-                        ? theme.palette.grey[500]
+                        ? theme.palette.grey[600]
                         : theme.palette.grey[300],
                     }}
                   >
-                    <icons.DataObject sx={{ fontSize: "0.875rem" }} />
+                    <icons.DataObject sx={{ fontSize: "1.25rem" }} />
                   </IconButton>
                 </span>
               </Tooltip>
@@ -492,18 +492,18 @@ function StoryCard({
             <IconButton
               size="small"
               onClick={() => onRemoveFromStory(item.id)}
-              sx={{ p: 0.5, color: theme.palette.grey[400] }}
+              sx={{ p: 0.75, color: theme.palette.grey[500] }}
             >
-              <icons.RemoveCircleOutline sx={{ fontSize: "0.875rem" }} />
+              <icons.RemoveCircleOutline sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete card" arrow>
             <IconButton
               size="small"
               onClick={() => onDelete(item.id)}
-              sx={{ p: 0.5, color: theme.palette.grey[400] }}
+              sx={{ p: 0.75, color: theme.palette.grey[500] }}
             >
-              <icons.Delete sx={{ fontSize: "0.875rem" }} />
+              <icons.Delete sx={{ fontSize: "1.25rem" }} />
             </IconButton>
           </Tooltip>
         </Box>

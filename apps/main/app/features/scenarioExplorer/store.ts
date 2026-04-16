@@ -6,7 +6,7 @@
  * should remain in individual components.
  */
 
-import { create, immer, persist } from "@repo/state/zustand"
+import { create, immer } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 
@@ -59,6 +59,54 @@ export type ShareItem =
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
     }
+
+// ============================================================================
+// Manual localStorage persistence for shareItems + storyItemIds
+// ============================================================================
+
+const SHARE_STORAGE_KEY = "coeqwal-share-v1"
+
+function loadShareState(): {
+  shareItems: ShareItem[]
+  storyItemIds: string[]
+} {
+  try {
+    if (typeof window === "undefined") {
+      return { shareItems: [], storyItemIds: [] }
+    }
+    const raw = localStorage.getItem(SHARE_STORAGE_KEY)
+    if (!raw) return { shareItems: [], storyItemIds: [] }
+    const parsed = JSON.parse(raw)
+    return {
+      shareItems: Array.isArray(parsed.shareItems) ? parsed.shareItems : [],
+      storyItemIds: Array.isArray(parsed.storyItemIds)
+        ? parsed.storyItemIds
+        : [],
+    }
+  } catch {
+    return { shareItems: [], storyItemIds: [] }
+  }
+}
+
+function saveShareState(shareItems: ShareItem[], storyItemIds: string[]) {
+  try {
+    if (typeof window === "undefined") return
+    const stripped = shareItems.map((item) => {
+      if (item.type === "barChart") {
+        const { cachedImageDataUrl, cachedChartData, ...rest } = item
+        return rest
+      }
+      const { cachedChartData, ...rest } = item
+      return rest
+    })
+    localStorage.setItem(
+      SHARE_STORAGE_KEY,
+      JSON.stringify({ shareItems: stripped, storyItemIds }),
+    )
+  } catch {
+    // localStorage full or unavailable — silently ignore
+  }
+}
 
 // ============================================================================
 // State Interface
@@ -234,6 +282,8 @@ type ScenarioExplorerStore = ScenarioExplorerState & ScenarioExplorerActions
 // Initial State
 // ============================================================================
 
+const persisted = loadShareState()
+
 const initialState: ScenarioExplorerState = {
   mainView: "get-started",
   exploreMode: "list",
@@ -256,8 +306,8 @@ const initialState: ScenarioExplorerState = {
   outcomeDisplayMode: "summary",
   showMap: false,
   showLocationPicker: false,
-  shareItems: [],
-  storyItemIds: [],
+  shareItems: persisted.shareItems,
+  storyItemIds: persisted.storyItemIds,
   showShareDrawer: false,
   relativeToBaseline: true,
   highlightBaseline: false,
@@ -283,9 +333,8 @@ const initialState: ScenarioExplorerState = {
 // ============================================================================
 
 export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
-  persist(
-    immer<ScenarioExplorerStore>((set) => ({
-      ...initialState,
+  immer<ScenarioExplorerStore>((set) => ({
+    ...initialState,
 
       // Navigation
       setMainView: (view) =>
@@ -653,47 +702,18 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
           Object.assign(state, initialState)
         }),
     })),
-    {
-      name: "coeqwal-share",
-      partialize: (state) => ({
-        shareItems: state.shareItems.map((item) => {
-          if (item.type === "barChart") {
-            const { cachedImageDataUrl, cachedChartData, ...rest } = item
-            return rest
-          }
-          const { cachedChartData, ...rest } = item
-          return rest
-        }),
-        storyItemIds: state.storyItemIds,
-      }),
-      merge: (persisted, current) => {
-        const p = persisted as Partial<
-          Pick<ScenarioExplorerState, "shareItems" | "storyItemIds">
-        >
-        const persistedItems = p?.shareItems
-        if (!persistedItems || persistedItems.length === 0) {
-          return { ...current }
-        }
-        const currentById = new Map(current.shareItems.map((s) => [s.id, s]))
-        const merged = persistedItems.map((pItem) => {
-          const cItem = currentById.get(pItem.id)
-          if (!cItem) return pItem
-          return {
-            ...pItem,
-            cachedImageDataUrl:
-              (pItem as Record<string, unknown>).cachedImageDataUrl ??
-              cItem.cachedImageDataUrl,
-            cachedChartData:
-              (pItem as Record<string, unknown>).cachedChartData ??
-              cItem.cachedChartData,
-          } as ShareItem
-        })
-        return {
-          ...current,
-          shareItems: merged,
-          storyItemIds: p?.storyItemIds ?? current.storyItemIds,
-        }
-      },
-    },
-  ),
 )
+
+// Auto-save shareItems + storyItemIds to localStorage on every change
+let prevShareRef: ShareItem[] = persisted.shareItems
+let prevStoryRef: string[] = persisted.storyItemIds
+useScenarioExplorerStore.subscribe((state) => {
+  if (
+    state.shareItems !== prevShareRef ||
+    state.storyItemIds !== prevStoryRef
+  ) {
+    prevShareRef = state.shareItems
+    prevStoryRef = state.storyItemIds
+    saveShareState(state.shareItems, state.storyItemIds)
+  }
+})
