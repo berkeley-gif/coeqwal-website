@@ -234,11 +234,7 @@ function radarDataToCSV(
   const lines: string[] = []
   lines.push(csvQuote("Scale: 1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical"))
   lines.push("")
-  if (scenarioLabels.length === 1) {
-    lines.push(csvQuote(`Key outcomes: ${scenarioLabels[0]}`))
-  } else {
-    lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
-  }
+  lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
 
   for (const outcome of outcomeNames) {
     const vals = scenarioEntries.map(([, values]) => {
