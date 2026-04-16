@@ -284,13 +284,23 @@ export default function RadarPanel({
       let didToggle = false
 
       if (!alreadyVisible) {
-        const wrapper = chartWrapperRef.current
-        if (wrapper) wrapper.style.visibility = "hidden"
         toggleScenario(scenarioId)
         didToggle = true
-        await new Promise<void>((r) =>
-          requestAnimationFrame(() => setTimeout(r, 120)),
-        )
+        const deadline = Date.now() + 2000
+        await new Promise<void>((resolve) => {
+          const check = () => {
+            const svg = radarSvgRef.current
+            if (
+              svg?.querySelector(`path[data-path-id="${scenarioId}"]`) ||
+              Date.now() > deadline
+            ) {
+              resolve()
+            } else {
+              requestAnimationFrame(check)
+            }
+          }
+          requestAnimationFrame(check)
+        })
       }
 
       try {
@@ -335,8 +345,6 @@ export default function RadarPanel({
         if (didToggle) {
           toggleScenario(scenarioId)
         }
-        const wrapper = chartWrapperRef.current
-        if (wrapper) wrapper.style.visibility = ""
       }
     },
     [
