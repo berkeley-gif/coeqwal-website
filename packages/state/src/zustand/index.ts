@@ -4,3 +4,4 @@
 
 export { create } from "zustand"
 export { immer } from "zustand/middleware/immer"
+export { persist } from "zustand/middleware"

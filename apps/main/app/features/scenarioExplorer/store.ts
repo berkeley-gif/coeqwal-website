@@ -6,7 +6,7 @@
  * should remain in individual components.
  */
 
-import { create, immer } from "@repo/state/zustand"
+import { create, immer, persist } from "@repo/state/zustand"
 import type { ScenarioTheme } from "../../content/scenarios"
 import { OUTCOME_CODE_ORDER } from "../../content/outcomes"
 
@@ -102,6 +102,7 @@ interface ScenarioExplorerState {
 
   // Share staging
   shareItems: ShareItem[]
+  storyItemIds: string[]
   showShareDrawer: boolean
 
   // Chart toggles (shared across chart panels)
@@ -185,6 +186,12 @@ interface ScenarioExplorerActions {
   updateShareItem: (id: string, patch: Partial<ShareItem>) => void
   setShowShareDrawer: (open: boolean) => void
 
+  // Story arrangement
+  addToStory: (id: string) => void
+  removeFromStory: (id: string) => void
+  reorderStory: (orderedIds: string[]) => void
+  clearStory: () => void
+
   // Chart toggles
   setRelativeToBaseline: (show: boolean) => void
   setHighlightBaseline: (show: boolean) => void
@@ -250,6 +257,7 @@ const initialState: ScenarioExplorerState = {
   showMap: false,
   showLocationPicker: false,
   shareItems: [],
+  storyItemIds: [],
   showShareDrawer: false,
   relativeToBaseline: true,
   highlightBaseline: false,
@@ -275,10 +283,11 @@ const initialState: ScenarioExplorerState = {
 // ============================================================================
 
 export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
-  immer<ScenarioExplorerStore>((set) => ({
-    ...initialState,
+  persist(
+    immer<ScenarioExplorerStore>((set) => ({
+      ...initialState,
 
-    // Navigation
+      // Navigation
     setMainView: (view) =>
       set((state) => {
         state.mainView = view
@@ -454,6 +463,8 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
       set((state) => {
         const idx = state.shareItems.findIndex((s) => s.id === id)
         if (idx > -1) state.shareItems.splice(idx, 1)
+        const storyIdx = state.storyItemIds.indexOf(id)
+        if (storyIdx > -1) state.storyItemIds.splice(storyIdx, 1)
       }),
 
     reorderShareItems: (orderedIds) =>
@@ -467,6 +478,7 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     clearShareItems: () =>
       set((state) => {
         state.shareItems = []
+        state.storyItemIds = []
       }),
 
     setShareItems: (items) =>
@@ -483,6 +495,30 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
     setShowShareDrawer: (open) =>
       set((state) => {
         state.showShareDrawer = open
+      }),
+
+    // Story arrangement
+    addToStory: (id) =>
+      set((state) => {
+        if (!state.storyItemIds.includes(id)) {
+          state.storyItemIds.push(id)
+        }
+      }),
+
+    removeFromStory: (id) =>
+      set((state) => {
+        const idx = state.storyItemIds.indexOf(id)
+        if (idx > -1) state.storyItemIds.splice(idx, 1)
+      }),
+
+    reorderStory: (orderedIds) =>
+      set((state) => {
+        state.storyItemIds = orderedIds
+      }),
+
+    clearStory: () =>
+      set((state) => {
+        state.storyItemIds = []
       }),
 
     // Chart toggles
@@ -615,4 +651,23 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
         Object.assign(state, initialState)
       }),
   })),
+    {
+      name: "coeqwal-share",
+      partialize: (state) => ({
+        shareItems: state.shareItems.map((item) => {
+          const { cachedImageDataUrl, cachedChartData, ...rest } = item as Record<string, unknown>
+          return rest as ShareItem
+        }),
+        storyItemIds: state.storyItemIds,
+      }),
+      merge: (persisted, current) => {
+        const p = persisted as Partial<Pick<ScenarioExplorerState, "shareItems" | "storyItemIds">>
+        return {
+          ...current,
+          shareItems: p?.shareItems ?? current.shareItems,
+          storyItemIds: p?.storyItemIds ?? current.storyItemIds,
+        }
+      },
+    },
+  ),
 )

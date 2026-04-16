@@ -91,9 +91,14 @@ export default function TabPanels() {
 
     const itemsParam = params.get("items")
     if (itemsParam) {
-      const parsed = parseShareItemsParam(itemsParam)
+      const storyParam = params.get("story") ?? undefined
+      const { items: parsed, storyItemIds } = parseShareItemsParam(itemsParam, storyParam)
       if (parsed.length > 0) {
-        useScenarioExplorerStore.getState().setShareItems(parsed)
+        const store = useScenarioExplorerStore.getState()
+        store.setShareItems(parsed)
+        if (storyItemIds.length > 0) {
+          store.reorderStory(storyItemIds)
+        }
       }
     } else {
       const scenariosParam = params.get("scenarios")
