@@ -514,13 +514,16 @@ export function InlineRowActions({
               togglePinnedScenario(scenarioId)
             }}
             sx={{
-              p: 0.25,
-              color: isPinned ? accentColor : theme.palette.grey[400],
+              p: 0.375,
+              color: isPinned ? accentColor : theme.palette.grey[500],
+              "&:hover": {
+                color: isPinned ? accentColor : theme.palette.grey[700],
+              },
             }}
           >
             <icons.PushPin
               sx={{
-                fontSize: "0.85rem",
+                fontSize: "1rem",
                 transform: isPinned ? "none" : "rotate(45deg)",
               }}
             />
@@ -552,13 +555,18 @@ export function InlineRowActions({
             setJustShared(true)
           }}
           sx={{
-            p: 0.25,
+            p: 0.375,
             color: isShared
               ? theme.palette.blue.bright
-              : theme.palette.grey[400],
+              : theme.palette.grey[500],
+            "&:hover": {
+              color: isShared
+                ? theme.palette.blue.bright
+                : theme.palette.grey[700],
+            },
           }}
         >
-          <icons.IosShare sx={{ fontSize: "0.85rem" }} />
+          <icons.IosShare sx={{ fontSize: "1rem" }} />
         </IconButton>
       </Tooltip>
     </Box>
