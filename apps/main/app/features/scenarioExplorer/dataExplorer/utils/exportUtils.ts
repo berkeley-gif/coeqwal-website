@@ -120,6 +120,183 @@ export function exportAsJSON(
   URL.revokeObjectURL(url)
 }
 
+function csvEscape(val: string): string {
+  if (val.includes(",") || val.includes('"') || val.includes("\n")) {
+    return `"${val.replace(/"/g, '""')}"`
+  }
+  return val
+}
+
+type BarTierEntry = {
+  label?: string
+  value?: number
+  rawCount?: number
+  tierType?: "single_value" | "multi_value"
+}
+
+/**
+ * Convert bar chart tier data into a readable CSV string.
+ *
+ * Values are reported as number of locations per tier.
+ * Single-location outcomes get a 1 in their active tier.
+ *
+ *   Scenario, <name>
+ *   Outcome, Optimal, Acceptable, At-risk, Critical, Total Locations
+ *   Delta Exports, 1, 2, 1, 0, 4
+ *   Delta Outflow, 0, 1, 0, 0, 1
+ *   …
+ */
+function barChartDataToCSV(
+  data: Record<string, BarTierEntry[]>,
+  scenarioLabel: string,
+): string {
+  const outcomes = Object.keys(data)
+  if (outcomes.length === 0) return ""
+
+  const firstTiers = data[outcomes[0]!]!
+  const tierNames = firstTiers.map((t) => t.label ?? "")
+
+  const header = ["Outcome", ...tierNames.map(csvEscape), "Total Locations"]
+
+  const rows = outcomes.map((outcome) => {
+    const tiers = data[outcome]!
+    const isSingle = tiers[0]?.tierType === "single_value"
+
+    let counts: string[]
+    let total: string
+    if (isSingle) {
+      counts = tiers.map((t) => (t.value && t.value > 0 ? "1" : "0"))
+      total = "1"
+    } else {
+      counts = tiers.map((t) => String(t.rawCount ?? 0))
+      total = String(tiers.reduce((sum, t) => sum + (t.rawCount ?? 0), 0))
+    }
+    return [csvEscape(outcome), ...counts, total]
+  })
+
+  return [
+    `Scenario,${csvEscape(scenarioLabel)}`,
+    header.join(","),
+    ...rows.map((r) => r.join(",")),
+  ].join("\n")
+}
+
+/**
+ * Export a single share-item's chart data as CSV.
+ *
+ * Bar chart items produce a readable matrix — one row per outcome,
+ * tier scores as columns (Optimal, Acceptable, At-risk, Critical).
+ *
+ * Radar items produce a scenario × outcome matrix:
+ *   Scenario, Outcome1, Outcome2, …
+ */
+export function exportShareItemAsCSV(
+  item: {
+    type: string
+    scenarioId?: string
+    scenarioIds?: string[]
+    cachedChartData?: Record<string, unknown>
+  },
+  filename: string,
+  scenarioNameLookup?: (id: string) => string,
+) {
+  if (!item.cachedChartData) return
+
+  if (item.type === "barChart") {
+    const data = item.cachedChartData as Record<
+      string,
+      { label?: string; value?: number; rawCount?: number }[]
+    >
+    const scenarioLabel = scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
+    const lines = barChartDataToCSV(data, scenarioLabel)
+    downloadCSV(lines, filename)
+    return
+  }
+
+  if (item.type === "radar") {
+    const data = item.cachedChartData as Record<
+      string,
+      Record<string, number | null>
+    >
+    const scenarioIds = Object.keys(data)
+    if (scenarioIds.length === 0) return
+
+    const outcomeNames = Array.from(
+      new Set(scenarioIds.flatMap((id) => Object.keys(data[id] ?? {}))),
+    )
+    const headers = ["Scenario", ...outcomeNames.map(csvEscape)]
+    const rows = scenarioIds.map((id) => {
+      const label = scenarioNameLookup?.(id) ?? id
+      const vals = outcomeNames.map((o) => {
+        const v = (data[id] as Record<string, number | null>)?.[o]
+        return v != null ? String(v) : ""
+      })
+      return [csvEscape(label), ...vals]
+    })
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
+    downloadCSV(csv, filename)
+    return
+  }
+}
+
+/**
+ * Export all share-items' chart data as a single multi-sheet-style CSV.
+ * Each item's data is separated by a header row indicating the item type.
+ */
+export function exportAllShareItemsAsCSV(
+  items: Array<{
+    type: string
+    scenarioId?: string
+    scenarioIds?: string[]
+    cachedChartData?: Record<string, unknown>
+  }>,
+  filename: string,
+  scenarioNameLookup?: (id: string) => string,
+) {
+  const sections: string[] = []
+
+  for (const item of items) {
+    if (!item.cachedChartData) continue
+
+    if (item.type === "barChart") {
+      const label =
+        scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
+      const data = item.cachedChartData as Record<string, BarTierEntry[]>
+      sections.push(barChartDataToCSV(data, label))
+      sections.push("")
+    }
+
+    if (item.type === "radar") {
+      const data = item.cachedChartData as Record<
+        string,
+        Record<string, number | null>
+      >
+      const scenarioIds = Object.keys(data)
+      if (scenarioIds.length === 0) continue
+
+      const names = scenarioIds.map((id) => scenarioNameLookup?.(id) ?? id)
+      sections.push(`# Radar: ${names.join(", ")}`)
+
+      const outcomeNames = Array.from(
+        new Set(scenarioIds.flatMap((id) => Object.keys(data[id] ?? {}))),
+      )
+      sections.push(["Scenario", ...outcomeNames.map(csvEscape)].join(","))
+      for (const id of scenarioIds) {
+        const label = scenarioNameLookup?.(id) ?? id
+        const vals = outcomeNames.map((o) => {
+          const v = (data[id] as Record<string, number | null>)?.[o]
+          return v != null ? String(v) : ""
+        })
+        sections.push([csvEscape(label), ...vals].join(","))
+      }
+      sections.push("")
+    }
+  }
+
+  if (sections.length === 0) return
+  downloadCSV(sections.join("\n"), filename)
+}
+
 /**
  * Download CSV helper
  */

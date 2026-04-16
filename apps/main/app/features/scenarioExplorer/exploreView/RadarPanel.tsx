@@ -46,7 +46,11 @@ import {
 
 export type SingleScenarioCaptureFn = (
   scenarioId: string,
-) => Promise<{ dataUrl: string; color: string } | null>
+) => Promise<{
+  dataUrl: string
+  color: string
+  chartData: Record<string, unknown>
+} | null>
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
@@ -283,7 +287,12 @@ export default function RadarPanel({
         const idx = filteredData.findIndex((d) => d.id === scenarioId)
         const color = idx >= 0 ? (filteredLineColors[idx] ?? "#666666") : "#666666"
 
-        return { dataUrl, color }
+        const scenarioEntry = filteredData.find((d) => d.id === scenarioId)
+        const chartData: Record<string, unknown> = scenarioEntry
+          ? { [scenarioId]: scenarioEntry.values }
+          : {}
+
+        return { dataUrl, color, chartData }
       } catch (err) {
         console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
         return null

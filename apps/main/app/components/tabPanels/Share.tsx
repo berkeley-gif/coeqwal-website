@@ -36,7 +36,8 @@ import type { ChartDataPoint } from "../../features/scenarios/components/shared/
 import { toPng } from "html-to-image"
 import {
   downloadFromDataUrl,
-  exportAsJSON,
+  exportShareItemAsCSV,
+  exportAllShareItemsAsCSV,
   getTimestampedFilename,
 } from "../../features/scenarioExplorer/dataExplorer/utils/exportUtils"
 
@@ -377,11 +378,24 @@ export default function SharePanel() {
     [itemIds, reorderShareItems],
   )
 
-  const handleDownloadData = useCallback((item: ShareItem) => {
-    if (!item.cachedChartData) return
-    const filename = getTimestampedFilename(`coeqwal-${item.type}-data`, "json")
-    exportAsJSON(item.cachedChartData, filename)
-  }, [])
+  const handleDownloadData = useCallback(
+    (item: ShareItem) => {
+      if (!item.cachedChartData) return
+      const filename = getTimestampedFilename(
+        `coeqwal-${item.type}-data`,
+        "csv",
+      )
+      exportShareItemAsCSV(
+        item,
+        filename,
+        (id) =>
+          scenarioLookup.get(id)?.description ??
+          scenarioLookup.get(id)?.name ??
+          id,
+      )
+    },
+    [scenarioLookup],
+  )
 
   const cardContentRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
@@ -431,17 +445,15 @@ export default function SharePanel() {
   }, [shareItems])
 
   const handleDownloadAllData = useCallback(() => {
-    const allData = shareItems
-      .filter((s) => s.cachedChartData)
-      .map((s) => ({
-        type: s.type,
-        ...(s.type === "barChart"
-          ? { scenarioId: s.scenarioId, viewMode: s.viewMode }
-          : { scenarioIds: s.scenarioIds, axes: s.axes }),
-        chartData: s.cachedChartData,
-      }))
-    exportAsJSON(allData, getTimestampedFilename("coeqwal-chart-data", "json"))
-  }, [shareItems])
+    exportAllShareItemsAsCSV(
+      shareItems,
+      getTimestampedFilename("coeqwal-chart-data", "csv"),
+      (id) =>
+        scenarioLookup.get(id)?.description ??
+        scenarioLookup.get(id)?.name ??
+        id,
+    )
+  }, [shareItems, scenarioLookup])
 
   if (shareItems.length === 0) {
     return (
