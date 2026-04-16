@@ -1,8 +1,7 @@
 "use client"
 
-import React, { useRef, useEffect, useCallback, useState, useMemo } from "react"
+import React, { useRef, useEffect, useCallback, useMemo } from "react"
 import { scaleLinear, select, line } from "d3"
-import { useResizeObserver } from "../hooks/useResizeObserver"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 
 export interface RadarPlotProps {
@@ -348,18 +347,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       onAxisPositionsRef.current = onAxisPositions
     }, [onAxisPositions])
 
-    const dimensions = useResizeObserver(
-      containerRef as React.RefObject<HTMLElement>,
-    )
-    const [currentWidth, setCurrentWidth] = useState(width)
-    const [currentHeight, setCurrentHeight] = useState(height)
-
-    useEffect(() => {
-      if (responsive && dimensions) {
-        setCurrentWidth(dimensions.width)
-        setCurrentHeight(dimensions.height)
-      }
-    }, [responsive, dimensions])
+    const lastDimsRef = useRef<{ width: number; height: number }>({
+      width: 0,
+      height: 0,
+    })
 
     const getAngle = useCallback(
       (i: number) => (i / axes.length) * 2 * Math.PI - Math.PI / 2,
@@ -1131,11 +1122,54 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       ],
     )
 
+    // Keep a ref to updateChart so the ResizeObserver can call it without
+    // going through React state (which would create a feedback loop).
+    const updateChartRef = useRef(updateChart)
     useEffect(() => {
-      if (currentWidth > 0 && currentHeight > 0) {
-        updateChart(currentWidth, currentHeight)
+      updateChartRef.current = updateChart
+    }, [updateChart])
+
+    // When updateChart identity changes (props/data changed), re-run it
+    // at the last known dimensions.
+    useEffect(() => {
+      const { width: w, height: h } = lastDimsRef.current
+      if (w > 0 && h > 0) {
+        updateChart(w, h)
       }
-    }, [currentWidth, currentHeight, updateChart])
+    }, [updateChart])
+
+    // Observe container size imperatively; call updateChart directly
+    // without a React state roundtrip to avoid resize → re-render loops.
+    useEffect(() => {
+      const el = containerRef.current
+      if (!el || !responsive) return
+
+      const ro = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        const { width: w, height: h } = entry.contentRect
+        const rw = Math.round(w)
+        const rh = Math.round(h)
+        const prev = lastDimsRef.current
+        if (prev.width === rw && prev.height === rh) return
+        lastDimsRef.current = { width: rw, height: rh }
+        if (rw > 0 && rh > 0) {
+          updateChartRef.current(rw, rh)
+        }
+      })
+
+      ro.observe(el)
+
+      const rect = el.getBoundingClientRect()
+      const iw = Math.round(rect.width)
+      const ih = Math.round(rect.height)
+      if (iw > 0 && ih > 0) {
+        lastDimsRef.current = { width: iw, height: ih }
+        updateChartRef.current(iw, ih)
+      }
+
+      return () => ro.disconnect()
+    }, [responsive])
 
     // Imperatively manage the active-map-dot highlight ring without
     // triggering a full SVG rebuild when the active outcome changes.
@@ -1191,8 +1225,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       <div
         ref={containerRef}
         style={{
-          width: responsive ? "100%" : currentWidth,
-          height: responsive ? "100%" : currentHeight,
+          width: responsive ? "100%" : width,
+          height: responsive ? "100%" : height,
           minHeight: 400,
           position: "relative",
         }}
@@ -1203,8 +1237,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               el
             svgRefCallback?.(el)
           }}
-          width={currentWidth}
-          height={currentHeight}
+          width={width}
+          height={height}
           style={{ display: "block", width: "100%", height: "100%" }}
         />
         <div

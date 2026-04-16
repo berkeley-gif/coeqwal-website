@@ -207,26 +207,38 @@ export default function VisualizationLayers({ hidden = false }: { hidden?: boole
       LAYER_IDS.reservoir.fill,
     ])
 
-    const positionDimLayer = () => {
-      if (!mapInstance.getLayer(DIM_ID)) return
-
+    if (mapInstance.getLayer(DIM_ID)) {
       mapInstance.setPaintProperty(DIM_ID, "fill-opacity-transition", {
         duration: 800,
         delay: 0,
       })
+    }
+
+    const positionDimLayer = () => {
+      if (!mapInstance.getLayer(DIM_ID)) return
 
       const style = mapInstance.getStyle()
       if (!style?.layers) return
 
-      for (const layer of style.layers) {
-        if (OUTCOME_FILLS.has(layer.id)) {
-          try {
-            mapInstance.moveLayer(DIM_ID, layer.id)
-          } catch {
-            /* layer may not exist yet */
-          }
+      const layerIds = style.layers.map((l) => l.id)
+      const dimIdx = layerIds.indexOf(DIM_ID)
+      if (dimIdx === -1) return
+
+      let firstFillId: string | undefined
+      for (const id of layerIds) {
+        if (OUTCOME_FILLS.has(id)) {
+          firstFillId = id
           break
         }
+      }
+
+      if (!firstFillId) return
+      if (dimIdx < layerIds.indexOf(firstFillId)) return
+
+      try {
+        mapInstance.moveLayer(DIM_ID, firstFillId)
+      } catch {
+        /* layer may not exist yet */
       }
     }
 
