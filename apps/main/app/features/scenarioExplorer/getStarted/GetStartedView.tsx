@@ -275,17 +275,12 @@ export default function GetStartedView() {
               >
                 The library
               </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                fontWeight={500}
-              >
+              <Typography variant="body2" color="text.secondary">
                 COEQWAL has compiled a library of over 100 scenarios.
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
-                fontWeight={500}
                 sx={{ mt: sp.md }}
               >
                 Each scenario is associated with dozens of outcome variables
@@ -295,7 +290,6 @@ export default function GetStartedView() {
               <Typography
                 variant="body2"
                 color="text.secondary"
-                fontWeight={500}
                 sx={{ mt: sp.md }}
               >
                 Visualization tools can be used to compare scenarios, examine
