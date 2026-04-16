@@ -120,11 +120,24 @@ export function exportAsJSON(
   URL.revokeObjectURL(url)
 }
 
+/**
+ * Convert the internal radar coordinate (-1 … +1) back to a weighted
+ * tier score on the 1–4 scale used by the tier system:
+ *   1 = Optimal, 2 = Acceptable, 3 = At-risk, 4 = Critical
+ */
+function radarValueToTierScore(v: number): number {
+  return Math.round((4 - (v + 1) * 1.5) * 100) / 100
+}
+
 function csvEscape(val: string): string {
   if (val.includes(",") || val.includes('"') || val.includes("\n")) {
     return `"${val.replace(/"/g, '""')}"`
   }
   return val
+}
+
+function csvQuote(val: string): string {
+  return `"${val.replace(/"/g, '""')}"`
 }
 
 type BarTierEntry = {
@@ -182,6 +195,63 @@ function barChartDataToCSV(
 }
 
 /**
+ * Convert radar chart data into a readable CSV string.
+ *
+ * Layout: outcomes as rows, scenarios as columns.
+ *
+ *   Scale: 1 = Optimal  2 = Acceptable  3 = At-risk  4 = Critical
+ *   (blank line)
+ *   Outcome, Scenario A, Scenario B
+ *   Delta Exports, 2.35, 1.80
+ *   Delta Outflow, 1.50, 2.00
+ */
+function radarDataToCSV(
+  rawData: Record<string, unknown>,
+  scenarioIds?: string[],
+  scenarioNameLookup?: (id: string) => string,
+): string | null {
+  const ids = scenarioIds ?? Object.keys(rawData)
+  if (ids.length === 0) return null
+
+  const data: Record<string, Record<string, number | null>> = {}
+  for (const id of ids) {
+    const entry = rawData[id]
+    if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+      data[id] = entry as Record<string, number | null>
+    }
+  }
+  const scenarioEntries = Object.entries(data)
+  if (scenarioEntries.length === 0) return null
+
+  const outcomeNames = Array.from(
+    new Set(scenarioEntries.flatMap(([, v]) => Object.keys(v))),
+  )
+
+  const scenarioLabels = scenarioEntries.map(
+    ([id]) => scenarioNameLookup?.(id) ?? id,
+  )
+
+  const lines: string[] = []
+  lines.push(csvQuote("Scale: 1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical"))
+  lines.push("")
+  if (scenarioLabels.length === 1) {
+    lines.push(csvQuote(`Key outcomes: ${scenarioLabels[0]}`))
+  } else {
+    lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
+  }
+
+  for (const outcome of outcomeNames) {
+    const vals = scenarioEntries.map(([, values]) => {
+      const v = values[outcome]
+      return v != null ? String(radarValueToTierScore(v)) : ""
+    })
+    lines.push([csvQuote(outcome), ...vals].join(","))
+  }
+
+  return lines.join("\n")
+}
+
+/**
  * Export a single share-item's chart data as CSV.
  *
  * Bar chart items produce a readable matrix — one row per outcome,
@@ -214,33 +284,8 @@ export function exportShareItemAsCSV(
   }
 
   if (item.type === "radar") {
-    const raw = item.cachedChartData as Record<string, unknown>
-    const scenarioIds = item.scenarioIds ?? Object.keys(raw)
-    if (scenarioIds.length === 0) return
-
-    const data: Record<string, Record<string, number | null>> = {}
-    for (const id of scenarioIds) {
-      const entry = raw[id]
-      if (entry && typeof entry === "object" && !Array.isArray(entry)) {
-        data[id] = entry as Record<string, number | null>
-      }
-    }
-    if (Object.keys(data).length === 0) return
-
-    const outcomeNames = Array.from(
-      new Set(Object.values(data).flatMap((v) => Object.keys(v))),
-    )
-    const headers = ["Scenario", ...outcomeNames.map(csvEscape)]
-    const rows = Object.entries(data).map(([id, values]) => {
-      const label = scenarioNameLookup?.(id) ?? id
-      const vals = outcomeNames.map((o) => {
-        const v = values[o]
-        return v != null ? String(v) : ""
-      })
-      return [csvEscape(label), ...vals]
-    })
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
-    downloadCSV(csv, filename)
+    const csv = radarDataToCSV(item.cachedChartData as Record<string, unknown>, item.scenarioIds, scenarioNameLookup)
+    if (csv) downloadCSV(csv, filename)
     return
   }
 }
@@ -273,36 +318,15 @@ export function exportAllShareItemsAsCSV(
     }
 
     if (item.type === "radar") {
-      const raw = item.cachedChartData as Record<string, unknown>
-      const scenarioIds = item.scenarioIds ?? Object.keys(raw)
-
-      const data: Record<string, Record<string, number | null>> = {}
-      for (const id of scenarioIds) {
-        const entry = raw[id]
-        if (entry && typeof entry === "object" && !Array.isArray(entry)) {
-          data[id] = entry as Record<string, number | null>
-        }
-      }
-      if (Object.keys(data).length === 0) continue
-
-      const names = Object.keys(data).map(
-        (id) => scenarioNameLookup?.(id) ?? id,
+      const csv = radarDataToCSV(
+        item.cachedChartData as Record<string, unknown>,
+        item.scenarioIds,
+        scenarioNameLookup,
       )
-      sections.push(`# Radar: ${names.join(", ")}`)
-
-      const outcomeNames = Array.from(
-        new Set(Object.values(data).flatMap((v) => Object.keys(v))),
-      )
-      sections.push(["Scenario", ...outcomeNames.map(csvEscape)].join(","))
-      for (const [id, values] of Object.entries(data)) {
-        const label = scenarioNameLookup?.(id) ?? id
-        const vals = outcomeNames.map((o) => {
-          const v = values[o]
-          return v != null ? String(v) : ""
-        })
-        sections.push([csvEscape(label), ...vals].join(","))
+      if (csv) {
+        sections.push(csv)
+        sections.push("")
       }
-      sections.push("")
     }
   }
 
