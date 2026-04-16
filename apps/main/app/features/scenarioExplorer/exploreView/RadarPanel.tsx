@@ -284,6 +284,8 @@ export default function RadarPanel({
       let didToggle = false
 
       if (!alreadyVisible) {
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = "0"
         toggleScenario(scenarioId)
         didToggle = true
         const deadline = Date.now() + 2000
@@ -345,6 +347,8 @@ export default function RadarPanel({
         if (didToggle) {
           toggleScenario(scenarioId)
         }
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = ""
       }
     },
     [
