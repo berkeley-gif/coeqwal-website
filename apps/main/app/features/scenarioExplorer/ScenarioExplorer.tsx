@@ -120,29 +120,29 @@ export default function ScenarioExplorer() {
 
   // Hover coordination (for sidebar ↔ tool panels in non-list modes)
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
-  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
-    null,
-  )
+
+  const [hoveredInteraction, setHoveredInteraction] = useState<{
+    scenarioId: string
+    outcome?: string
+    tierValue?: number
+  } | null>(null)
 
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
   }, [])
 
-  const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
-    setHoveredScenarioId(scenarioId)
-  }, [])
-
-  const [hoveredOutcomeInfo, setHoveredOutcomeInfo] = useState<{
-    scenarioId: string
-    outcome: string
-    tierValue: number
-  } | null>(null)
+  const handleToolScenarioHover = useCallback(
+    (scenarioId: string | null) => {
+      setHoveredInteraction(scenarioId ? { scenarioId } : null)
+    },
+    [],
+  )
 
   const handleOutcomeHover = useCallback(
     (
       info: { scenarioId: string; outcome: string; tierValue: number } | null,
     ) => {
-      setHoveredOutcomeInfo(info)
+      setHoveredInteraction(info)
     },
     [],
   )
@@ -290,8 +290,7 @@ export default function ScenarioExplorer() {
                 sidebar={
                   isListMode ? undefined : (
                     <ScenarioSelectionSidebar
-                      hoveredScenarioId={hoveredScenarioId}
-                      hoveredOutcomeInfo={hoveredOutcomeInfo}
+                      hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
                     />
                   )
@@ -308,7 +307,6 @@ export default function ScenarioExplorer() {
                 {exploreMode === "radar" && (
                   <RadarPanel
                     highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
                     onOutcomeHover={handleOutcomeHover}
                     onCaptureReady={handleRadarCaptureReady}
                   />

@@ -30,19 +30,17 @@ import SearchAndChips from "./SearchAndChips"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
-  hoveredScenarioId?: string | null
-  hoveredOutcomeInfo?: {
+  hoveredInteraction?: {
     scenarioId: string
-    outcome: string
-    tierValue: number
+    outcome?: string
+    tierValue?: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
-  hoveredScenarioId,
-  hoveredOutcomeInfo,
+  hoveredInteraction,
   onRowHover,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
@@ -64,6 +62,7 @@ export default function ScenarioSelectionSidebar({
     exploreMode,
   } = useScenarioExplorerStore()
 
+  const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const activeScenarioId = highlightedScenario || hoveredScenarioId || null
   const hasActiveScenario = activeScenarioId !== null
@@ -313,60 +312,61 @@ export default function ScenarioSelectionSidebar({
                 />
 
                 <AnimatePresence>
-                  {scenario.scenarioId === hoveredOutcomeInfo?.scenarioId && (
-                    <motion.div
-                      key="outcome-hover-detail"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <Box sx={{ pt: 0.5, pb: 0.75 }}>
-                        <Typography
-                          variant="compactSubtitle"
-                          sx={{
-                            display: "block",
-                            fontWeight: 500,
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          {hoveredOutcomeInfo.outcome}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.75,
-                            mt: 0.25,
-                          }}
-                        >
+                  {scenario.scenarioId === hoveredInteraction?.scenarioId &&
+                    hoveredInteraction.outcome != null && (
+                      <motion.div
+                        key="outcome-hover-detail"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <Box sx={{ pt: 0.5, pb: 0.75 }}>
+                          <Typography
+                            variant="compactSubtitle"
+                            sx={{
+                              display: "block",
+                              fontWeight: 500,
+                              color: theme.palette.text.primary,
+                            }}
+                          >
+                            {hoveredInteraction.outcome}
+                          </Typography>
                           <Box
                             sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "3px",
-                              flexShrink: 0,
-                              bgcolor:
-                                tierColors[
-                                  Math.round(
-                                    hoveredOutcomeInfo.tierValue,
-                                  ) as keyof typeof tierColors
-                                ] ?? theme.palette.grey[400],
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              mt: 0.25,
                             }}
-                          />
-                          <Typography
-                            variant="compactCaption"
-                            sx={{ color: theme.palette.grey[600] }}
                           >
-                            {getTierLabel(
-                              Math.round(hoveredOutcomeInfo.tierValue),
-                            )}
-                          </Typography>
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "3px",
+                                flexShrink: 0,
+                                bgcolor:
+                                  tierColors[
+                                    Math.round(
+                                      hoveredInteraction.tierValue!,
+                                    ) as keyof typeof tierColors
+                                  ] ?? theme.palette.grey[400],
+                              }}
+                            />
+                            <Typography
+                              variant="compactCaption"
+                              sx={{ color: theme.palette.grey[600] }}
+                            >
+                              {getTierLabel(
+                                Math.round(hoveredInteraction.tierValue!),
+                              )}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
-                    </motion.div>
-                  )}
+                      </motion.div>
+                    )}
                 </AnimatePresence>
               </Box>
 
