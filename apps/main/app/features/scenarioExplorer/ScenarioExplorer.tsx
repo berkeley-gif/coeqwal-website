@@ -136,12 +136,9 @@ export default function ScenarioExplorer() {
     setHighlightedIds(ids ? new Set(ids) : null)
   }, [])
 
-  const handleToolScenarioHover = useCallback(
-    (scenarioId: string | null) => {
-      setHoveredInteraction(scenarioId ? { scenarioId } : null)
-    },
-    [],
-  )
+  const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
+    setHoveredInteraction(scenarioId ? { scenarioId } : null)
+  }, [])
 
   const handleOutcomeHover = useCallback(
     (
@@ -183,12 +180,9 @@ export default function ScenarioExplorer() {
     [],
   )
 
-  const handleCaptureRadarScenario = useCallback(
-    async (scenarioId: string) => {
-      return radarSingleCaptureRef.current?.(scenarioId) ?? null
-    },
-    [],
-  )
+  const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
+    return radarSingleCaptureRef.current?.(scenarioId) ?? null
+  }, [])
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {

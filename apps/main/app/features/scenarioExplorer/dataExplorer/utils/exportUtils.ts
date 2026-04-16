@@ -232,7 +232,11 @@ function radarDataToCSV(
   )
 
   const lines: string[] = []
-  lines.push(csvQuote("Scale: 1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical"))
+  lines.push(
+    csvQuote(
+      "Scale: 1 = Optimal | 2 = Acceptable | 3 = At-risk | 4 = Critical",
+    ),
+  )
   lines.push("")
   lines.push(["Key outcomes", ...scenarioLabels.map(csvQuote)].join(","))
 
@@ -273,14 +277,19 @@ export function exportShareItemAsCSV(
       string,
       { label?: string; value?: number; rawCount?: number }[]
     >
-    const scenarioLabel = scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
+    const scenarioLabel =
+      scenarioNameLookup?.(item.scenarioId ?? "") ?? item.scenarioId ?? ""
     const lines = barChartDataToCSV(data, scenarioLabel)
     downloadCSV(lines, filename)
     return
   }
 
   if (item.type === "radar") {
-    const csv = radarDataToCSV(item.cachedChartData as Record<string, unknown>, item.scenarioIds, scenarioNameLookup)
+    const csv = radarDataToCSV(
+      item.cachedChartData as Record<string, unknown>,
+      item.scenarioIds,
+      scenarioNameLookup,
+    )
     if (csv) downloadCSV(csv, filename)
     return
   }

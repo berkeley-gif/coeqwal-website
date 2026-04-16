@@ -75,7 +75,11 @@ const DIM_OVERLAY_GEOJSON: GeoJSON.FeatureCollection = {
   ],
 }
 
-export default function VisualizationLayers({ hidden = false }: { hidden?: boolean }) {
+export default function VisualizationLayers({
+  hidden = false,
+}: {
+  hidden?: boolean
+}) {
   const map = useMap()
   const mapMode = useMapMode()
   const geocoderMarker = useGeocoderMarker()
@@ -339,38 +343,39 @@ export default function VisualizationLayers({ hidden = false }: { hidden?: boole
             )}
 
           {/* Tier location labels (reservoirs, pumping plants, compliance stations) */}
-          {layerType === "reservoir" && Object.keys(tierLevelMap).length > 0 && (
-            <TierLocationLabels
-              tierLookup={tierLevelMap}
-              highlightedIds={highlightedLocationIds}
-              onHover={
-                isGetStartedMode
-                  ? (info) => {
-                      if (!info) {
-                        getOnLocationHover()?.(null)
-                      } else {
-                        getOnLocationHover()?.({
+          {layerType === "reservoir" &&
+            Object.keys(tierLevelMap).length > 0 && (
+              <TierLocationLabels
+                tierLookup={tierLevelMap}
+                highlightedIds={highlightedLocationIds}
+                onHover={
+                  isGetStartedMode
+                    ? (info) => {
+                        if (!info) {
+                          getOnLocationHover()?.(null)
+                        } else {
+                          getOnLocationHover()?.({
+                            code: outcomeCode!,
+                            sourceId: info.id,
+                            tier: info.tier,
+                          })
+                        }
+                      }
+                    : undefined
+                }
+                onClick={
+                  isGetStartedMode
+                    ? (info) => {
+                        getOnLocationClick()?.({
                           code: outcomeCode!,
                           sourceId: info.id,
                           tier: info.tier,
                         })
                       }
-                    }
-                  : undefined
-              }
-              onClick={
-                isGetStartedMode
-                  ? (info) => {
-                      getOnLocationClick()?.({
-                        code: outcomeCode!,
-                        sourceId: info.id,
-                        tier: info.tier,
-                      })
-                    }
-                  : undefined
-              }
-            />
-          )}
+                    : undefined
+                }
+              />
+            )}
           {(outcomeCode === "FW_EXP" || outcomeCode === "FW_DELTA_USES") &&
             (tierLocations.length > 0 ||
               Object.keys(locationData).length > 0) && (
