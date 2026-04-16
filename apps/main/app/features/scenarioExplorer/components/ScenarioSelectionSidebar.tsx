@@ -38,7 +38,11 @@ interface ScenarioSelectionSidebarProps {
   onRowHover?: (scenarioIds: string[] | null) => void
   onCaptureRadarScenario?: (
     scenarioId: string,
-  ) => Promise<{ dataUrl: string; color: string } | null>
+  ) => Promise<{
+    dataUrl: string
+    color: string
+    chartData: Record<string, unknown>
+  } | null>
 }
 
 export default function ScenarioSelectionSidebar({
@@ -325,6 +329,7 @@ export default function ScenarioSelectionSidebar({
                             showDotsOnly,
                             hydroclimate,
                             cachedImageDataUrl: result?.dataUrl,
+                            cachedChartData: result?.chartData,
                           })
                         } else {
                           const vm =
