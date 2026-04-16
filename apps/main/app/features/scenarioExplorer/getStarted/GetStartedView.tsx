@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, OpacityOutlinedIcon } from "@repo/ui/mui"
 import { LinedList, InfoCard, BarredColumns } from "@repo/ui"
 import { useMapMode } from "../../map/store"
 import { usePanelRoute } from "../../../hooks/usePanelRoute"
@@ -164,6 +164,38 @@ export default function GetStartedView() {
 
   const exploreBg = theme.palette.tabPanels.explore
   const sp = theme.space.component
+
+  const dropletIcon = (
+    <svg
+      viewBox="0 0 24 24"
+      width="1.1em"
+      height="1.1em"
+      style={{ color: "inherit" }}
+    >
+      <defs>
+        <clipPath id="droplet-clip">
+          <path d="M12 2.69l-5.66 5.66a8 8 0 1 0 11.32 0L12 2.69z" />
+        </clipPath>
+      </defs>
+      <rect
+        clipPath="url(#droplet-clip)"
+        x="0"
+        y="14"
+        width="24"
+        height="12"
+        fill="currentColor"
+        opacity={0.3}
+      />
+      <path
+        d="M12 2.69l-5.66 5.66a8 8 0 1 0 11.32 0L12 2.69z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.25}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 
   return (
     <Box
@@ -359,6 +391,7 @@ export default function GetStartedView() {
                 ]}
                 color={theme.palette.common.white}
                 arrows={false}
+                icon={dropletIcon}
                 labelVariant="body2"
                 sx={{ mt: sp.sm }}
               />
@@ -887,6 +920,7 @@ export default function GetStartedView() {
               items={CAVEATS.slice(0, 3).map((c) => ({ label: c }))}
               color={theme.palette.common.white}
               arrows={false}
+              icon={dropletIcon}
               labelVariant="body2"
               labelWeight={400}
             />
@@ -894,6 +928,7 @@ export default function GetStartedView() {
               items={CAVEATS.slice(3).map((c) => ({ label: c }))}
               color={theme.palette.common.white}
               arrows={false}
+              icon={dropletIcon}
               labelVariant="body2"
               labelWeight={400}
             />

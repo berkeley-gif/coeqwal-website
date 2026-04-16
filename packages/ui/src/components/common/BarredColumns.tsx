@@ -17,6 +17,8 @@ export interface BarredColumnsProps {
   items: BarredColumnItem[]
   /** Override the rule + text color. Defaults to current text color. */
   color?: string
+  /** Optional leading icon rendered before each column's title. */
+  icon?: React.ReactNode
   /** Typography variant for the title. Defaults to "body2". */
   titleVariant?: "subtitle1" | "body1" | "body2"
   /** Typography variant for the description. Defaults to "body2". */
@@ -29,6 +31,7 @@ export interface BarredColumnsProps {
 export function BarredColumns({
   items,
   color: colorProp,
+  icon,
   titleVariant = "body2",
   descriptionVariant = "body2",
   columnGap,
@@ -58,6 +61,9 @@ export function BarredColumns({
             py: 2,
           }}
         >
+          {icon && (
+            <Box sx={{ mb: 1, mt: "1px", lineHeight: 0 }}>{icon}</Box>
+          )}
           <Typography variant={titleVariant} sx={{ fontWeight: 600 }}>
             {title}
           </Typography>

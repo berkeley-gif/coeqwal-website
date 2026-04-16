@@ -97,6 +97,7 @@ import SettingsIcon from "@mui/icons-material/Settings"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import OpacityIcon from "@mui/icons-material/Opacity"
+import OpacityOutlinedIcon from "@mui/icons-material/OpacityOutlined"
 import EngineeringIcon from "@mui/icons-material/Engineering"
 import ReportProblemIcon from "@mui/icons-material/ReportProblem"
 import BarChartIcon from "@mui/icons-material/BarChart"
@@ -171,6 +172,7 @@ export {
   ChevronLeftIcon,
   ChevronRightIcon,
   OpacityIcon,
+  OpacityOutlinedIcon,
   EngineeringIcon,
   ReportProblemIcon,
   BarChartIcon,
