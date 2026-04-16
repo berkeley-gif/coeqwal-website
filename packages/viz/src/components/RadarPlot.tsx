@@ -833,19 +833,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           }[] = []
           axes.forEach((axis, axisIdx) => {
             const angle = getAngle(axisIdx)
-            let maxR = -Infinity
-            let minR = Infinity
+            const range = axisRange![axis]
+            if (!range) return
+
+            const maxR = rScale(toTier(range.max))
+            const minR = rScale(toTier(range.min))
+
             let maxDodge = 0
             data.forEach((scenario) => {
-              const sv = scenario.values[axis]
-              if (sv == null) return
-              const r = rScale(toTier(sv))
-              if (r > maxR) maxR = r
-              if (r < minR) minR = r
               const d = Math.abs(dodgeMap.get(`${axis}:${scenario.id}`) ?? 0)
               if (d > maxDodge) maxDodge = d
             })
-            if (maxR === -Infinity) return
+
             const spread = (maxDodge + dotR) * 0.5
             spokeInfo.push({
               angle,
