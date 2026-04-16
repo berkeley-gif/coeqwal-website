@@ -42,6 +42,7 @@ export type ShareItem =
       type: "barChart"
       scenarioId: string
       viewMode: "summary" | "distribution"
+      hydroclimate: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
     }
@@ -53,6 +54,7 @@ export type ShareItem =
       showRange: boolean
       highlightBaseline: boolean
       showDotsOnly: boolean
+      hydroclimate: string
       cachedImageDataUrl?: string
       cachedChartData?: Record<string, unknown>
     }
@@ -438,7 +440,8 @@ export const useScenarioExplorerStore = create<ScenarioExplorerStore>()(
             (s) =>
               s.type === "barChart" &&
               s.scenarioId === item.scenarioId &&
-              s.viewMode === item.viewMode,
+              s.viewMode === item.viewMode &&
+              s.hydroclimate === item.hydroclimate,
           )
           if (exists) return
         }

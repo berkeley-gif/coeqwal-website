@@ -64,7 +64,7 @@ export default function LayerOrchestrator() {
         arrowsOpacity={arrowsOpacity}
       />
 
-      {isMapVisible && <VisualizationLayers />}
+      <VisualizationLayers hidden={!isMapVisible} />
     </>
   )
 }

@@ -112,6 +112,7 @@ export default function TabPanels() {
                 modeSuffix === "distribution"
                   ? ("distribution" as const)
                   : ("summary" as const),
+              hydroclimate: climateParam || "historical",
             }
           })
           useScenarioExplorerStore.getState().setShareItems(items)

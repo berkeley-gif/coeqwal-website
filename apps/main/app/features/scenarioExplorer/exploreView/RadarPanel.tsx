@@ -218,6 +218,7 @@ export default function RadarPanel({
         showRange: showRadarRange,
         highlightBaseline,
         showDotsOnly: showDotsOnly,
+        hydroclimate,
         cachedImageDataUrl: dataUrl,
         cachedChartData: Object.fromEntries(
           filteredData.map((d) => [d.id, d.values]),
@@ -233,6 +234,7 @@ export default function RadarPanel({
     showRadarRange,
     highlightBaseline,
     showDotsOnly,
+    hydroclimate,
     addShareItem,
   ])
 
