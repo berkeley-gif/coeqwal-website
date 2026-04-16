@@ -14,7 +14,6 @@ import React, {
   useRef,
   useCallback,
   useEffect,
-  startTransition,
 } from "react"
 import {
   Box,
@@ -23,7 +22,7 @@ import {
   CircularProgress,
   Checkbox,
 } from "@repo/ui/mui"
-import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
+import { RadarPlot } from "@repo/viz"
 import { ChartToast, InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
@@ -43,7 +42,6 @@ import { captureSvgToBlob } from "../dataExplorer/utils/exportUtils"
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
-  onScenarioHover?: (scenarioId: string | null) => void
   onOutcomeHover?: (
     info: { scenarioId: string; outcome: string; tierValue: number } | null,
   ) => void
@@ -53,7 +51,6 @@ interface RadarPanelProps {
 
 export default function RadarPanel({
   highlightedIds = null,
-  onScenarioHover,
   onOutcomeHover,
   onCaptureReady,
 }: RadarPanelProps) {
@@ -108,39 +105,6 @@ export default function RadarPanel({
     () => new Set(pinnedScenarioIds),
     [pinnedScenarioIds],
   )
-
-  // Hover state with debounce (same pattern as ComparisonPanel)
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastHoveredIdRef = useRef<string | null>(null)
-
-  const [hoveredScenario, setHoveredScenarioRaw] =
-    useState<VerticalParallelLineData | null>(null)
-
-  const setHoveredScenario = useCallback(
-    (scenario: VerticalParallelLineData | null) => {
-      const nextId = scenario?.id ?? null
-      if (nextId === lastHoveredIdRef.current) return
-      lastHoveredIdRef.current = nextId
-
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current)
-        hoverTimerRef.current = null
-      }
-      if (scenario) {
-        startTransition(() => setHoveredScenarioRaw(scenario))
-      } else {
-        hoverTimerRef.current = setTimeout(
-          () => startTransition(() => setHoveredScenarioRaw(null)),
-          200,
-        )
-      }
-    },
-    [],
-  )
-
-  useEffect(() => {
-    onScenarioHover?.(hoveredScenario?.id ?? null)
-  }, [hoveredScenario, onScenarioHover])
 
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
@@ -529,7 +493,6 @@ export default function RadarPanel({
             svgRefCallback={handleSvgRef}
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}
-            onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
             }}

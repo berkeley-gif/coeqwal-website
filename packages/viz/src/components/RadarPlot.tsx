@@ -14,6 +14,7 @@ export interface RadarPlotProps {
   height?: number
   colors?: { default: string; highlighted: string; background: string }
   lineColors?: string[]
+  /** @deprecated Prefer onDotHover which fires immediately with outcome detail. */
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
   chosenIds?: Set<string>
