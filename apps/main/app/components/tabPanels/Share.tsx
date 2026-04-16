@@ -224,8 +224,8 @@ function SortableShareCard({
       <Box sx={{ px: 0.5, pb: 0.5 }}>
         <ShareRadarCard
           scenarioNames={radarScenarioNames}
+          scenarioColors={item.scenarioColors}
           hydroclimate={item.hydroclimate}
-          axes={item.axes}
           showRange={item.showRange}
           highlightBaseline={item.highlightBaseline}
           showDotsOnly={item.showDotsOnly}

@@ -50,6 +50,7 @@ export type ShareItem =
       id: string
       type: "radar"
       scenarioIds: string[]
+      scenarioColors?: string[]
       axes: string[]
       showRange: boolean
       highlightBaseline: boolean

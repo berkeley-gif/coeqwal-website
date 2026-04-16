@@ -73,8 +73,8 @@ function ShareItemCard({
   return (
     <ShareRadarCard
       scenarioNames={radarScenarioNames}
+      scenarioColors={item.scenarioColors}
       hydroclimate={item.hydroclimate}
-      axes={item.axes}
       showRange={item.showRange}
       highlightBaseline={item.highlightBaseline}
       showDotsOnly={item.showDotsOnly}
