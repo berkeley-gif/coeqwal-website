@@ -163,6 +163,7 @@ export default function ScenarioExplorer() {
     setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
+    selectedScenarios,
   } = useScenarioExplorerStore()
 
   const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
@@ -221,6 +222,7 @@ export default function ScenarioExplorer() {
           <Box
             component="button"
             type="button"
+            disabled={selectedScenarios.length === 0 && !radarShowAll}
             onClick={() => radarCaptureRef.current?.()}
             aria-label="capture view"
             sx={{
@@ -231,7 +233,6 @@ export default function ScenarioExplorer() {
               py: 0.5,
               border: "none",
               borderRadius: "12px",
-              cursor: "pointer",
               fontSize: "0.8125rem",
               fontWeight: 500,
               lineHeight: 1.3,
@@ -239,9 +240,21 @@ export default function ScenarioExplorer() {
               color: theme.palette.grey[800],
               background: theme.palette.grey[200],
               transition: "all 150ms ease",
+              cursor:
+                selectedScenarios.length === 0 && !radarShowAll
+                  ? "default"
+                  : "pointer",
+              opacity:
+                selectedScenarios.length === 0 && !radarShowAll ? 0.4 : 1,
               "&:hover": {
-                background: theme.palette.interaction.selectedBackground,
-                color: theme.palette.blue.bright,
+                background:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.interaction.selectedBackground,
+                color:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.blue.bright,
               },
             }}
           >
@@ -264,6 +277,7 @@ export default function ScenarioExplorer() {
     setHighlightBaseline,
     radarShowAll,
     setRadarShowAll,
+    selectedScenarios,
     theme,
   ])
 
