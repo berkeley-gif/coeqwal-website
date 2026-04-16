@@ -545,7 +545,10 @@ export default function SharePanel() {
         allChartData[item.scenarioId]
       ) {
         updateShareItem(item.id, {
-          cachedChartData: allChartData[item.scenarioId] as Record<string, unknown>,
+          cachedChartData: allChartData[item.scenarioId] as Record<
+            string,
+            unknown
+          >,
         })
       }
     }
@@ -566,16 +569,11 @@ export default function SharePanel() {
     return map
   }, [siblingGroups])
 
-  const storyItemIdSet = useMemo(
-    () => new Set(storyItemIds),
-    [storyItemIds],
-  )
+  const storyItemIdSet = useMemo(() => new Set(storyItemIds), [storyItemIds])
 
   const storyItems = useMemo(() => {
     const byId = new Map(shareItems.map((s) => [s.id, s]))
-    return storyItemIds
-      .map((id) => byId.get(id))
-      .filter(Boolean) as ShareItem[]
+    return storyItemIds.map((id) => byId.get(id)).filter(Boolean) as ShareItem[]
   }, [shareItems, storyItemIds])
 
   const sensors = useSensors(
@@ -897,16 +895,18 @@ export default function SharePanel() {
             }}
           >
             <Tooltip
-              title={
-                copied ? "Copied!" : "Copy shareable URL to clipboard"
-              }
+              title={copied ? "Copied!" : "Copy shareable URL to clipboard"}
               arrow
             >
               <Button
                 variant="outlined"
                 size="small"
                 onClick={async () => {
-                  const url = encodeShareItems(shareItems, hydroclimate, storyItemIds)
+                  const url = encodeShareItems(
+                    shareItems,
+                    hydroclimate,
+                    storyItemIds,
+                  )
                   try {
                     await navigator.clipboard.writeText(url)
                   } catch {
@@ -953,9 +953,7 @@ export default function SharePanel() {
               variant="outlined"
               size="small"
               onClick={handleDownloadAllData}
-              startIcon={
-                <icons.DataObject sx={{ fontSize: "0.875rem" }} />
-              }
+              startIcon={<icons.DataObject sx={{ fontSize: "0.875rem" }} />}
               sx={{
                 textTransform: "none",
                 color: theme.palette.text.secondary,
@@ -968,9 +966,7 @@ export default function SharePanel() {
               variant="outlined"
               size="small"
               disabled
-              startIcon={
-                <icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />
-              }
+              startIcon={<icons.PictureAsPdf sx={{ fontSize: "0.875rem" }} />}
               sx={{
                 textTransform: "none",
                 color: theme.palette.text.secondary,

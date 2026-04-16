@@ -172,7 +172,13 @@ export default function ShareScenarioCard({
         outcomeNames.length > 0 &&
         (viewMode === "distribution" ? (
           (() => {
-            const ROW1_CODES = new Set(["CWS_DEL", "AG_REV", "ENV_FLOWS", "RES_STOR", "GW_STOR"])
+            const ROW1_CODES = new Set([
+              "CWS_DEL",
+              "AG_REV",
+              "ENV_FLOWS",
+              "RES_STOR",
+              "GW_STOR",
+            ])
             const row1: { shortCode: string; displayName: string }[] = []
             const row2: { shortCode: string; displayName: string }[] = []
             for (const o of outcomeNames) {
@@ -187,10 +193,25 @@ export default function ShareScenarioCard({
 
             const renderOutcome = (shortCode: string, displayName: string) => {
               const data = chartData[shortCode]!
-              const values = data.map((t) => t.value).slice(0, 4) as [number, number, number, number]
-              const tierColors = data.map((t) => t.color).slice(0, 4) as [string, string, string, string]
+              const values = data.map((t) => t.value).slice(0, 4) as [
+                number,
+                number,
+                number,
+                number,
+              ]
+              const tierColors = data.map((t) => t.color).slice(0, 4) as [
+                string,
+                string,
+                string,
+                string,
+              ]
               const locationCounts = data.every((t) => t.rawCount != null)
-                ? (data.map((t) => t.rawCount!).slice(0, 4) as [number, number, number, number])
+                ? (data.map((t) => t.rawCount!).slice(0, 4) as [
+                    number,
+                    number,
+                    number,
+                    number,
+                  ])
                 : undefined
               const singleValue = isSingleValueTier(data)
 

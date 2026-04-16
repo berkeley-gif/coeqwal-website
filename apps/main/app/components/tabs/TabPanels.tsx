@@ -92,7 +92,10 @@ export default function TabPanels() {
     const itemsParam = params.get("items")
     if (itemsParam) {
       const storyParam = params.get("story") ?? undefined
-      const { items: parsed, storyItemIds } = parseShareItemsParam(itemsParam, storyParam)
+      const { items: parsed, storyItemIds } = parseShareItemsParam(
+        itemsParam,
+        storyParam,
+      )
       if (parsed.length > 0) {
         const store = useScenarioExplorerStore.getState()
         store.setShareItems(parsed)
