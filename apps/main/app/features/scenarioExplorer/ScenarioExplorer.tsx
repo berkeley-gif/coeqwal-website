@@ -128,6 +128,10 @@ export default function ScenarioExplorer() {
     tierValue?: number
   } | null>(null)
 
+  const [radarScenarioColors, setRadarScenarioColors] = useState<
+    Record<string, string>
+  >({})
+
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
   }, [])
@@ -306,6 +310,11 @@ export default function ScenarioExplorer() {
                 sidebar={
                   isListMode ? undefined : (
                     <ScenarioSelectionSidebar
+                      scenarioColors={
+                        exploreMode === "radar"
+                          ? radarScenarioColors
+                          : undefined
+                      }
                       hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
                       onCaptureRadarScenario={handleCaptureRadarScenario}
@@ -325,6 +334,7 @@ export default function ScenarioExplorer() {
                   <RadarPanel
                     highlightedIds={highlightedIds}
                     onOutcomeHover={handleOutcomeHover}
+                    onScenarioColors={setRadarScenarioColors}
                     onCaptureReady={handleRadarCaptureReady}
                     onSingleCaptureReady={handleRadarSingleCaptureReady}
                   />
