@@ -798,7 +798,7 @@ export default function SharePanel() {
             color: theme.palette.text.secondary,
           }}
         >
-          Share
+          Tell your water story
         </Typography>
 
         {storyItems.length > 0 ? (
