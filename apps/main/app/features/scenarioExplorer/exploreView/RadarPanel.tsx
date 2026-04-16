@@ -8,13 +8,7 @@
  * with the sidebar and other panels.
  */
 
-import React, {
-  useMemo,
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-} from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -44,9 +38,7 @@ import {
   rasterizeSvgClone,
 } from "../dataExplorer/utils/exportUtils"
 
-export type SingleScenarioCaptureFn = (
-  scenarioId: string,
-) => Promise<{
+export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
   color: string
   chartData: Record<string, unknown>
@@ -331,8 +323,7 @@ export default function RadarPanel({
         const allData = comparisonData
         const allColors = lineColors
         const idx = allData.findIndex((d) => d.id === scenarioId)
-        const color =
-          idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
+        const color = idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
 
         const scenarioEntry = allData.find((d) => d.id === scenarioId)
         const chartData: Record<string, unknown> = scenarioEntry

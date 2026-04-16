@@ -28,7 +28,7 @@ export default function BasinsLayer({
   visible,
   riverBasinLabelsOpacity = 1,
 }: BasinsLayerProps) {
-  const visibility = visible ? "visible" : "none"
+  const visibility: "visible" | "none" = visible ? "visible" : "none"
 
   const isOutcomeActive = useIsOutcomeVisualizationActive()
 
@@ -71,7 +71,7 @@ export default function BasinsLayer({
         ["==", ["get", "name"], "San Joaquin River Basin"],
         [0, 0],
         [0, 1],
-      ],
+      ] as [string, ...any[]],
     }),
     [visibility],
   )
@@ -88,7 +88,7 @@ export default function BasinsLayer({
         ["==", ["get", "name"], "San Joaquin River Basin"],
         labelsOpacity,
         isOutcomeActive ? 0 : 1,
-      ],
+      ] as [string, ...any[]],
     }),
     [labelsOpacity, isOutcomeActive],
   )

@@ -36,9 +36,7 @@ interface ScenarioSelectionSidebarProps {
     tierValue?: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
-  onCaptureRadarScenario?: (
-    scenarioId: string,
-  ) => Promise<{
+  onCaptureRadarScenario?: (scenarioId: string) => Promise<{
     dataUrl: string
     color: string
     chartData: Record<string, unknown>
