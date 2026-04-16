@@ -75,6 +75,7 @@ export default function RadarPanel({
     highlightedScenario,
     setHighlightedScenario,
     selectedScenarios,
+    toggleScenario,
     highlightBaseline,
     showTierZones,
     dimUnpinned,
@@ -261,10 +262,24 @@ export default function RadarPanel({
 
   const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
     async (scenarioId) => {
-      const svg = radarSvgRef.current
-      if (!svg) return null
+      if (!radarSvgRef.current) return null
+
+      const alreadyVisible =
+        radarShowAll || selectedScenarios.includes(scenarioId)
+      let didToggle = false
+
+      if (!alreadyVisible) {
+        toggleScenario(scenarioId)
+        didToggle = true
+        await new Promise<void>((r) =>
+          requestAnimationFrame(() => setTimeout(r, 120)),
+        )
+      }
 
       try {
+        const svg = radarSvgRef.current
+        if (!svg) return null
+
         const clone = svg.cloneNode(true) as SVGSVGElement
         inlineStyles(clone, svg)
 
@@ -284,13 +299,13 @@ export default function RadarPanel({
         const h = rect.height || svg.clientHeight || 600
         const { dataUrl } = await rasterizeSvgClone(clone, w, h)
 
-        const idx = filteredData.findIndex((d) => d.id === scenarioId)
+        const allData = comparisonData
+        const allColors = lineColors
+        const idx = allData.findIndex((d) => d.id === scenarioId)
         const color =
-          idx >= 0 ? (filteredLineColors[idx] ?? "#666666") : "#666666"
+          idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
 
-        const scenarioEntry = comparisonData.find(
-          (d) => d.id === scenarioId,
-        )
+        const scenarioEntry = allData.find((d) => d.id === scenarioId)
         const chartData: Record<string, unknown> = scenarioEntry
           ? { [scenarioId]: scenarioEntry.values }
           : {}
@@ -299,9 +314,19 @@ export default function RadarPanel({
       } catch (err) {
         console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
         return null
+      } finally {
+        if (didToggle) {
+          toggleScenario(scenarioId)
+        }
       }
     },
-    [comparisonData, filteredData, filteredLineColors],
+    [
+      comparisonData,
+      lineColors,
+      selectedScenarios,
+      radarShowAll,
+      toggleScenario,
+    ],
   )
 
   useEffect(() => {
