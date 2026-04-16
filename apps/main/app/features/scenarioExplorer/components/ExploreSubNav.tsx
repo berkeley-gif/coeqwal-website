@@ -20,8 +20,8 @@ import {
   ExploreIcon,
   AdjustIcon,
   AppsIcon,
+  GridOnIcon,
   CompareArrowsIcon,
-  InsightsIcon,
 } from "@repo/ui/mui"
 import {
   useScenarioExplorerStore,
@@ -71,9 +71,9 @@ const TOOL_TABS: {
     label: "Distribution comparison",
   },
   {
-    mode: "data",
-    icon: <InsightsIcon sx={{ fontSize: "1.25rem" }} />,
-    label: "Data in depth",
+    mode: "resilience",
+    icon: <GridOnIcon sx={{ fontSize: "1.25rem" }} />,
+    label: "Resilience heatmap",
   },
 ]
 
@@ -221,23 +221,6 @@ export default function ExploreSubNav() {
               const active = exploreMode === mode
               return (
                 <React.Fragment key={mode}>
-                  {mode === "data" && (
-                    <Typography
-                      component="span"
-                      sx={{
-                        fontFamily: theme.typography.tabLabelDocked.fontFamily,
-                        fontSize: "0.9375rem",
-                        fontWeight: 500,
-                        lineHeight: 1,
-                        letterSpacing: "0.01em",
-                        whiteSpace: "nowrap",
-                        color: theme.palette.text.secondary,
-                        px: 0.5,
-                      }}
-                    >
-                      View data for selected scenarios:
-                    </Typography>
-                  )}
                   <Box
                     component="button"
                     type="button"
