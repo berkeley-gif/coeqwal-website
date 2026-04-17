@@ -90,6 +90,8 @@ export default function RadarPanel({
         scenarioFill: "#193D6B",
         tierFill: "#193D6B",
         axisTitleFill: "#193D6B",
+        scenarioControlsRowHeightPx: 26,
+        scenarioControlsRowGapPx: 4,
       })
     }, [theme])
 
@@ -411,6 +413,7 @@ export default function RadarPanel({
             scenarioLabel={scenarioLabel}
             lineColor={lineColor}
             accentColor={accentColor}
+            chromePaddingLeftPx={payload.chromePaddingLeftPx}
             captureSingle={captureSingleScenarioRadar}
           />,
         )
