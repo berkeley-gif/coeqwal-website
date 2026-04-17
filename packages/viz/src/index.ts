@@ -99,6 +99,7 @@ export type {
   RadarPlotAxisLabelDetailStyle,
   RadarAxisDetailBottomMode,
   RadarAxisLabelDetailPayload,
+  RadarAxisLabelDetailChromeMountPayload,
   RadarAxisLabelDetailChromeOptions,
   RadarAxisLabelDetailPointerBridge,
 } from "./components/radarAxisLabelDetail"

@@ -429,6 +429,7 @@ export function InlineRowActions({
   togglePinnedScenario,
   hidePinning,
   shareIconNudgeTop,
+  dense,
 }: {
   scenarioId: string
   scenarioLabel: string
@@ -440,6 +441,8 @@ export function InlineRowActions({
   hidePinning?: boolean
   /** Optional visual offset for the share control (e.g. sidebar alignment) */
   shareIconNudgeTop?: string
+  /** Tighter padding and gaps (e.g. radar axis detail foreignObject row) */
+  dense?: boolean
 }) {
   const theme = useTheme()
   const shareItems = useScenarioExplorerStore((s) => s.shareItems)
@@ -492,13 +495,16 @@ export function InlineRowActions({
     </span>
   )
 
+  const iconPad = dense ? 0.25 : 0.375
+  const iconSize = dense ? "0.875rem" : "1rem"
+
   return (
     <Box
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 0.25,
-        ml: 0.25,
+        gap: dense ? 0 : 0.25,
+        ml: dense ? 0 : 0.25,
       }}
     >
       {!hidePinning && (
@@ -526,7 +532,7 @@ export function InlineRowActions({
               togglePinnedScenario(scenarioId)
             }}
             sx={{
-              p: 0.375,
+              p: iconPad,
               color: isPinned ? accentColor : theme.palette.grey[500],
               "&:hover": {
                 color: isPinned ? accentColor : theme.palette.grey[700],
@@ -535,7 +541,7 @@ export function InlineRowActions({
           >
             <icons.PushPin
               sx={{
-                fontSize: "1rem",
+                fontSize: iconSize,
                 transform: isPinned ? "none" : "rotate(45deg)",
               }}
             />
@@ -567,7 +573,7 @@ export function InlineRowActions({
             setJustShared(true)
           }}
           sx={{
-            p: 0.375,
+            p: iconPad,
             ...(shareIconNudgeTop != null && {
               position: "relative",
               top: shareIconNudgeTop,
@@ -582,7 +588,7 @@ export function InlineRowActions({
             },
           }}
         >
-          <icons.IosShare sx={{ fontSize: "1rem" }} />
+          <icons.IosShare sx={{ fontSize: iconSize }} />
         </IconButton>
       </Tooltip>
     </Box>

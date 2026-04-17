@@ -23,12 +23,15 @@ function RadarAxisDetailScenarioControlsInner({
   scenarioLabel,
   lineColor,
   accentColor,
+  chromePaddingLeftPx,
   captureSingle,
 }: {
   scenarioId: string
   scenarioLabel: string
   lineColor: string
   accentColor: string
+  /** From viz: aligns checkbox with LTR start of SVG scenario title for any `text-anchor`. */
+  chromePaddingLeftPx: number
   captureSingle: RadarAxisDetailCaptureFn
 }) {
   const theme = useTheme()
@@ -55,16 +58,20 @@ function RadarAxisDetailScenarioControlsInner({
   const isChosen = selectedScenarios.includes(scenarioId)
   const isPinned = pinnedScenarioIds.includes(scenarioId)
 
+  /** Right inset: matches `panelPaddingX` in viz detail style. */
+  const panelPadX = 9
+
   return (
     <Box
       sx={{
         display: "flex",
-        alignItems: "center",
-        gap: 0.5,
+        alignItems: "flex-start",
+        gap: 1,
         height: "100%",
         boxSizing: "border-box",
-        pl: 0.25,
-        pr: 0.5,
+        pl: `${chromePaddingLeftPx}px`,
+        pr: `${panelPadX}px`,
+        py: 0,
       }}
     >
       <Checkbox
@@ -74,51 +81,76 @@ function RadarAxisDetailScenarioControlsInner({
         onClick={(e) => e.stopPropagation()}
         sx={{
           ...theme.scenarios.checkbox.sm,
+          /** Scale from left so the visible control lines up with `contentX` (see viz `foreignObject` x). */
+          transformOrigin: "0 50%",
           flexShrink: 0,
-          alignSelf: "center",
+          alignSelf: "flex-start",
           mt: "1px",
         }}
       />
-      <Typography
-        component="span"
+      {/* First row matches StrategyHeader compact (ScenarioSelectionSidebar). */}
+      <Box
         sx={{
           flex: 1,
           minWidth: 0,
-          color: theme.palette.grey[600],
-          letterSpacing: "0.04em",
-          textTransform: "uppercase",
-          fontSize: "0.6875rem",
-          lineHeight: 1,
+          /**
+           * Partial offset for `transformOrigin: "0 50%"` (dead space in the
+           * checkbox flex item); keep less negative than before so there is
+           * clear space between the glyph and the short code.
+           */
+          marginLeft: theme.spacing(-1),
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          mb: "1px",
+          minHeight: "16px",
         }}
       >
-        {scenarioId.toUpperCase()}
-      </Typography>
-      <InlineRowActions
-        scenarioId={scenarioId}
-        scenarioLabel={scenarioLabel}
-        displayMode={outcomeDisplayMode as "summary" | "distribution"}
-        isPinned={isPinned}
-        accentColor={accentColor}
-        hidePinning
-        shareIconNudgeTop="-2px"
-        onShare={async () => {
-          const result = await captureSingle(scenarioId)
-          addShareItem({
-            id: crypto.randomUUID(),
-            type: "radar",
-            scenarioIds: [scenarioId],
-            scenarioColors: result ? [result.color] : [lineColor],
-            axes: [...radarVisibleAxes],
-            showRange: showRadarRange,
-            highlightBaseline,
-            showDotsOnly,
-            hydroclimate,
-            cachedImageDataUrl: result?.dataUrl,
-            cachedChartData: result?.chartData,
-          })
-        }}
-        togglePinnedScenario={togglePinnedScenario}
-      />
+        <Typography
+          component="span"
+          sx={{
+            flex: "0 1 auto",
+            minWidth: 0,
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            color: theme.palette.grey[600],
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            fontSize: "0.6875rem",
+            lineHeight: 1,
+          }}
+        >
+          {scenarioId.toUpperCase()}
+        </Typography>
+        <InlineRowActions
+          scenarioId={scenarioId}
+          scenarioLabel={scenarioLabel}
+          displayMode={outcomeDisplayMode as "summary" | "distribution"}
+          isPinned={isPinned}
+          accentColor={accentColor}
+          hidePinning
+          shareIconNudgeTop="-2px"
+          onShare={async () => {
+            const result = await captureSingle(scenarioId)
+            addShareItem({
+              id: crypto.randomUUID(),
+              type: "radar",
+              scenarioIds: [scenarioId],
+              scenarioColors: result ? [result.color] : [lineColor],
+              axes: [...radarVisibleAxes],
+              showRange: showRadarRange,
+              highlightBaseline,
+              showDotsOnly,
+              hydroclimate,
+              cachedImageDataUrl: result?.dataUrl,
+              cachedChartData: result?.chartData,
+            })
+          }}
+          togglePinnedScenario={togglePinnedScenario}
+        />
+      </Box>
     </Box>
   )
 }
@@ -130,6 +162,7 @@ export function RadarAxisDetailScenarioControlsRoot({
   scenarioLabel,
   lineColor,
   accentColor,
+  chromePaddingLeftPx,
   captureSingle,
 }: {
   theme: Theme
@@ -137,6 +170,7 @@ export function RadarAxisDetailScenarioControlsRoot({
   scenarioLabel: string
   lineColor: string
   accentColor: string
+  chromePaddingLeftPx: number
   captureSingle: RadarAxisDetailCaptureFn
 }) {
   return (
@@ -146,6 +180,7 @@ export function RadarAxisDetailScenarioControlsRoot({
         scenarioLabel={scenarioLabel}
         lineColor={lineColor}
         accentColor={accentColor}
+        chromePaddingLeftPx={chromePaddingLeftPx}
         captureSingle={captureSingle}
       />
     </ThemeProvider>

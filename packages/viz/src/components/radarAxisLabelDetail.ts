@@ -145,11 +145,21 @@ export type RadarAxisLabelDetailPayload = {
   tierIndex: number
 }
 
+/** Payload passed to `onScenarioControlsMount` — includes layout for anchor-aware chrome. */
+export type RadarAxisLabelDetailChromeMountPayload =
+  RadarAxisLabelDetailPayload & {
+    /**
+     * Pixels from the left edge of the detail `foreignObject` to the LTR start
+     * of the first line of the SVG scenario title (matches `text-anchor`).
+     */
+    chromePaddingLeftPx: number
+  }
+
 /** Optional UI (e.g. React via createRoot) mounted into a foreignObject at the top of the detail. */
 export type RadarAxisLabelDetailChromeOptions = {
   onScenarioControlsMount?: (
     host: HTMLDivElement,
-    payload: RadarAxisLabelDetailPayload,
+    payload: RadarAxisLabelDetailChromeMountPayload,
   ) => void
   onScenarioControlsUnmount?: (host: HTMLDivElement) => void
   /**
@@ -219,6 +229,14 @@ const AXIS_DETAIL_CHIP_W = 8
 const AXIS_DETAIL_CHIP_H = 8
 const AXIS_DETAIL_CHIP_RX = 1.5
 const AXIS_DETAIL_CHIP_TEXT_GAP = 5
+/**
+ * Horizontal slack for the React controls row: checkbox slot, `gap` after it,
+ * short-code→actions gap, and one share icon (see ScenarioSelectionSidebar).
+ * Added to measured uppercase short-code width for `foreignObject` sizing.
+ */
+const AXIS_DETAIL_CHROME_ROW_FIXED_PX = 92
+/** Floor for tight `foreignObject` / panel content width. */
+const AXIS_DETAIL_INNER_WIDTH_MIN_PX = 88
 /** Downward nudge so hanging-baseline tooltip text aligns with middle-baseline axis titles. */
 const RADAR_DETAIL_BOTTOM_REPOSITIONED_Y_NUDGE_PX = 3
 /** Extra horizontal offset beyond `detailBottomGapPx` for bottom-repositioned hovers. */
@@ -286,6 +304,21 @@ function measureSvgTextWidth(
   const w = t.getComputedTextLength()
   svg.removeChild(t)
   return w
+}
+
+/** Matches compact StrategyHeader short-code typography (0.6875rem, weight 400). */
+function estimateAxisDetailChromeRowWidthPx(
+  svg: SVGSVGElement | null,
+  scenarioId: string,
+  fontFamily: string,
+): number {
+  const shortCodeSpec = {
+    fontSize: "11px",
+    fontFamily,
+    fontWeight: 400,
+  }
+  const codeW = measureSvgTextWidth(svg, scenarioId.toUpperCase(), shortCodeSpec)
+  return AXIS_DETAIL_CHROME_ROW_FIXED_PX + codeW
 }
 
 function estimateLineHeightPx(fontSize: string): number {
@@ -452,10 +485,6 @@ export function renderRadarAxisLabelDetailInto(
   const showChrome = Boolean(chrome?.onScenarioControlsMount)
   const controlsH = showChrome ? s.scenarioControlsRowHeightPx : 0
   const controlsGap = showChrome ? s.scenarioControlsRowGapPx : 0
-  const foW = s.detailMaxWidthPx
-  let foX = contentX
-  if (contentAnchor === "end") foX = contentX - foW
-  else if (contentAnchor === "middle") foX = contentX - foW / 2
   const scenarioSpec = {
     fontSize: s.scenarioFontSize,
     fontFamily: s.fontFamily,
@@ -466,6 +495,63 @@ export function renderRadarAxisLabelDetailInto(
     fontFamily: s.fontFamily,
     fontWeight: s.tierFontWeight,
   }
+
+  const scenarioLines = wrapTextToLines(
+    payload.scenarioName,
+    maxContentW,
+    scenarioSpec,
+    svgRoot,
+  )
+  let scenarioBlockW = 0
+  for (const line of scenarioLines) {
+    scenarioBlockW = Math.max(
+      scenarioBlockW,
+      measureSvgTextWidth(svgRoot, line, scenarioSpec),
+    )
+  }
+
+  const tierMaxW = maxContentW - AXIS_DETAIL_CHIP_W - AXIS_DETAIL_CHIP_TEXT_GAP
+  const tierDisplay = ellipsizeToWidth(tierText, tierMaxW, tierSpec, svgRoot)
+  const tierRowW =
+    AXIS_DETAIL_CHIP_W +
+    AXIS_DETAIL_CHIP_TEXT_GAP +
+    measureSvgTextWidth(svgRoot, tierDisplay, tierSpec)
+
+  const chromeRowW = showChrome
+    ? estimateAxisDetailChromeRowWidthPx(
+        svgRoot,
+        payload.scenarioId,
+        s.fontFamily,
+      )
+    : 0
+
+  const innerContentW = Math.max(scenarioBlockW, tierRowW, chromeRowW)
+  const foW = Math.min(
+    s.detailMaxWidthPx,
+    Math.max(
+      AXIS_DETAIL_INNER_WIDTH_MIN_PX,
+      Math.ceil(innerContentW),
+    ),
+  )
+
+  let foX = contentX
+  if (contentAnchor === "end") foX = contentX - foW
+  else if (contentAnchor === "middle") foX = contentX - foW / 2
+
+  /** Middle-anchored spokes: keep the card centered on the axis but left-align body copy + chrome. */
+  const detailTextX = contentAnchor === "middle" ? foX : contentX
+  const detailTextAnchor: "start" | "end" | "middle" =
+    contentAnchor === "middle" ? "start" : contentAnchor
+
+  const firstLine = scenarioLines[0] ?? ""
+  const firstLineW = measureSvgTextWidth(svgRoot, firstLine, scenarioSpec)
+  let scenarioNameStartX = contentX
+  if (contentAnchor === "end") scenarioNameStartX = contentX - firstLineW
+  else if (contentAnchor === "middle") scenarioNameStartX = foX
+  const chromePaddingLeftPx = Math.max(
+    0,
+    Math.min(foW, Math.round(scenarioNameStartX - foX)),
+  )
 
   let y = y0
   if (isBottomRepositioned) {
@@ -496,23 +582,20 @@ export function renderRadarAxisLabelDetailInto(
       .style("overflow", "hidden")
       .node() as HTMLDivElement
 
-    chrome!.onScenarioControlsMount!(host, payload)
+    chrome!.onScenarioControlsMount!(host, {
+      ...payload,
+      chromePaddingLeftPx,
+    })
     y += controlsH + controlsGap
   }
 
-  const scenarioLines = wrapTextToLines(
-    payload.scenarioName,
-    maxContentW,
-    scenarioSpec,
-    svgRoot,
-  )
   const scenarioLineH = estimateLineHeightPx(s.scenarioFontSize)
 
   const scenarioEl = inner
     .append("text")
-    .attr("x", contentX)
+    .attr("x", detailTextX)
     .attr("y", y)
-    .attr("text-anchor", contentAnchor)
+    .attr("text-anchor", detailTextAnchor)
     .attr("dominant-baseline", "hanging")
     .attr("font-size", s.scenarioFontSize)
     .attr("font-family", s.fontFamily)
@@ -521,21 +604,14 @@ export function renderRadarAxisLabelDetailInto(
     .attr("letter-spacing", s.scenarioLetterSpacing)
 
   scenarioLines.forEach((line, i) => {
-    const tspan = scenarioEl.append("tspan").attr("x", contentX).text(line)
+    const tspan = scenarioEl.append("tspan").attr("x", detailTextX).text(line)
     if (i > 0) tspan.attr("dy", scenarioLineH)
   })
 
   y += scenarioLines.length * scenarioLineH + s.lineGapPx
 
-  const tierMaxW = maxContentW - AXIS_DETAIL_CHIP_W - AXIS_DETAIL_CHIP_TEXT_GAP
-  const tierDisplay = ellipsizeToWidth(tierText, tierMaxW, tierSpec, svgRoot)
-
-  const tierRowW =
-    AXIS_DETAIL_CHIP_W +
-    AXIS_DETAIL_CHIP_TEXT_GAP +
-    measureSvgTextWidth(svgRoot, tierDisplay, tierSpec)
   let rowStartX = contentX
-  if (contentAnchor === "middle") rowStartX = contentX - tierRowW / 2
+  if (contentAnchor === "middle") rowStartX = foX
   if (contentAnchor === "end") rowStartX = contentX - tierRowW
 
   inner
