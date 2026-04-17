@@ -61,7 +61,7 @@ export interface Scenario {
 
   /** Technical run name from API */
   runName: string
-  /** Hydroclimate variant ID (e.g., 2 = historical, 3 = warmer-wetter) */
+  /** Hydroclimate variant ID (e.g., 2 = historical, 3 = cc50) */
   hydroclimateId: number
   /** Short code of the baseline scenario this derives from, or null */
   baselineScenario: string | null
@@ -81,15 +81,15 @@ export interface HydroclimateOption {
  */
 export const HYDROCLIMATE_ID_MAP: Record<string, number> = {
   historical: 2,
-  "warmer-wetter": 3,
-  "warmer-drier-i": 4,
+  cc50: 3,
+  cc95: 4,
 }
 
 /** Reverse lookup: API hydroclimate_id -> frontend string value */
 export const HYDROCLIMATE_LABEL_MAP: Record<number, string> = {
   2: "historical",
-  3: "warmer-wetter",
-  4: "warmer-drier-i",
+  3: "cc50",
+  4: "cc95",
 }
 
 export interface OperationIcon {
@@ -364,13 +364,13 @@ export const hydroclimateOptions: HydroclimateOption[] = [
       "Temperature, precipitation, and streamflow patterns reflect historical conditions",
   },
   {
-    value: "warmer-wetter",
+    value: "cc50",
     label: "Moderate-dry climate risk",
     description:
       "50th percentile level of concern: warmer and slightly drier conditions (\u22121% runoff change)",
   },
   {
-    value: "warmer-drier-i",
+    value: "cc95",
     label: "High climate risk",
     description:
       "95th percentile level of concern: warmer and much drier conditions (\u22127% runoff change)",
@@ -383,3 +383,14 @@ export const hydroclimateLabels = [
   "Moderate-dry climate risk",
   "High climate risk",
 ]
+
+/**
+ * Compact labels for hydroclimates, keyed by value. Use in tight UI like
+ * chips, toggle buttons, and heatmap axis ticks where the full
+ * `hydroclimateOptions[].label` is too long.
+ */
+export const HYDROCLIMATE_SHORT_LABELS: Record<string, string> = {
+  historical: "Historical",
+  cc50: "Moderate risk",
+  cc95: "High risk",
+}

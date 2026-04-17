@@ -36,11 +36,11 @@ export const HYDROCLIMATE_CONFIG: Record<
     icon: HistoryIcon,
     bgColor: "#2d89b7",
   },
-  "warmer-wetter": {
+  cc50: {
     icon: WbSunnyIcon,
     bgColor: "#e89830",
   },
-  "warmer-drier-i": {
+  cc95: {
     icon: LocalFireDepartmentIcon,
     bgColor: "#c62828",
   },

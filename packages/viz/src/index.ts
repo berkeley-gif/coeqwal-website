@@ -114,6 +114,13 @@ export type {
   TierHeatmapProps,
   TierHeatmapCell,
 } from "./components/TierHeatmap"
+export { default as ResilienceHeatmap } from "./components/ResilienceHeatmap"
+export type {
+  ResilienceHeatmapProps,
+  ResilienceHeatmapCell,
+  ResilienceAxisItem,
+  ResilienceHeatmapPalette,
+} from "./components/ResilienceHeatmap"
 export { default as TierSankey } from "./components/TierSankey"
 export type {
   TierSankeyProps,
