@@ -33,55 +33,7 @@ import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
 import { useMapMode } from "../map/store"
 import { usePrefetchTiers } from "./hooks/usePrefetchTiers"
-
-function RadarToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  const theme = useTheme()
-  const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
-
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      aria-label={label}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        px: 1.25,
-        py: 0.5,
-        border: "none",
-        borderRadius: "12px",
-        cursor: "pointer",
-        fontSize: "0.8125rem",
-        fontWeight: 500,
-        lineHeight: 1.3,
-        whiteSpace: "nowrap",
-        color: active ? theme.palette.blue.bright : theme.palette.grey[800],
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
-        transition: "all 150ms ease",
-        "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-          color: theme.palette.blue.bright,
-        },
-      }}
-    >
-      <Icon sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-      {label}
-    </Box>
-  )
-}
+import { RadarToggleChip } from "./components/RadarToggleChip"
 
 export default function ScenarioExplorer() {
   const theme = useTheme()

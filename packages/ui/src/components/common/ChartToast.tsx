@@ -45,6 +45,7 @@ export function ChartToast({ children, maxWidth = 360, sx }: ChartToastProps) {
       }}
     >
       <Typography
+        component="div"
         variant="compactTitle"
         sx={{
           bgcolor: theme.palette.tabPanels.share,
