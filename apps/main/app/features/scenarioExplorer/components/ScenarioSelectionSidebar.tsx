@@ -244,6 +244,7 @@ export default function ScenarioSelectionSidebar({
                 isFirst={index === 0}
                 layout="flex"
                 onRowHover={onRowHover}
+                singleSelect={singleSelect}
               />,
             )
           }
