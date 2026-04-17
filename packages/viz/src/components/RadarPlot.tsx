@@ -1141,6 +1141,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("class", "axis-label")
             .attr("data-axis", axis)
             .attr("data-label-x", lx)
+            .attr("data-label-y", ly)
             .attr("data-detail-y", detailY)
             .attr("data-text-anchor", anchor)
             .attr(
