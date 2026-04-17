@@ -152,6 +152,12 @@ export default function ScenarioExplorer() {
   const [resilienceControls, setResilienceControls] =
     useState<ResilienceControlsState>({
       view: "scenario",
+      cellEncoding: "tier",
+      deltaMode: "none",
+      deltaBaselineScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
+      aggregateScope: "all",
+      reorderBySimilarity: false,
+      showMarginals: false,
       focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
       focusOutcomeCode: "CWS_DEL",
       selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
