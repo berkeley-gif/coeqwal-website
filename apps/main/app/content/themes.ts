@@ -25,7 +25,7 @@ export type ImageBlock = {
   type: "image"
   src: string
   alt: string
-  caption?: string
+  caption?: string // USAGE NOTE: Use \n to create paragraph-like breaks between lines
 }
 
 export type ContentBlock = ParagraphBlock | ListBlock | ImageBlock
@@ -625,12 +625,6 @@ export const WATER_THEMES: Theme[] = [
               type: "paragraph",
               text: "Millions of Californians rely on water pumped from the Sacramento-San Joaquin Delta. At the same time, the Delta is a living place – home to communities, farms that grow food, and fish and birds that depend on healthy rivers and wetlands.",
             },
-            {
-              type: "image",
-              src: "/images/themes/delta_salinity_overview_graph.png",
-              alt: "Delta flow diagram",
-              caption: "Rising tides and saline waters flowing into the Delta",
-            },
           ],
         },
       },
@@ -655,6 +649,18 @@ export const WATER_THEMES: Theme[] = [
             {
               type: "paragraph",
               text: "Understanding how the Delta functions – as both infrastructure and living ecosystem – helps inform decisions about its future.",
+            },
+            {
+              type: "image",
+              src: "/images/themes/Delta_Salinity_Flows-01.svg",
+              alt: "Delta flow diagram",
+              caption: "Water flow in the Delta changes with seasons, tides, and infrastructure operations. Winter storms and spring snowmelt bring in freshwater flows, while daily high tides push saltwater inland. Pumps in the southwest corner of the Delta export water to meet demand. \n When pumping is high relative to inflows, flow directions can reverse, pulling water and fish toward pumps and drawing saltwater deeper into the Delta.",
+            },
+                        {
+              type: "image",
+              src: "/images/themes/Delta_Salinity_Flows-02.svg",
+              alt: "Delta flow diagram",
+              caption: "Pumping water from the Delta into water supply canals changes the flow direction and salinity in rivers and wetlands.\nWith low pumping (left), high freshwater inflows keep water moving seaward and salinity low. In summer, low freshwater flows allow tides to push saltwater farther inland.\n With high pumping (right), water is pulled toward export canals. Even with strong inflows, flows shift toward pumps. In dry periods, rivers can reverse and salty water moves deeper into the Delta.\n Demand for water peaks in late summer when freshwater inflows are at their lowest. At this time, high pumping rates are most needed, but create tradeoffs for ecosystems and salinity control.",
             },
           ],
         },

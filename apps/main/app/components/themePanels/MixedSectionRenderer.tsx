@@ -1,5 +1,6 @@
 // apps/main/components/theme-panel/MixedSectionRenderer.tsx
 
+import { Fragment } from "react"
 import {
   Typography,
   List,
@@ -21,6 +22,15 @@ function parseBoldText(text: string): React.ReactNode {
   return parts.map((part, i) =>
     i % 2 === 1 ? <strong key={i}>{part}</strong> : part,
   )
+}
+
+// Reusable alongside parseBoldText — splits on \n and inserts a space between lines or paragraphs.
+function parseCaptionBlocks(text: string): React.ReactNode {
+  return text.split("\n").map((line, i) => (
+    <Typography key={i} variant="caption" sx={{ color: "inherit" }}>
+      {line}
+    </Typography>
+  ))
 }
 
 export function MixedSectionRenderer({ content }: { content: MixedSection }) {
@@ -112,45 +122,56 @@ export function MixedSectionRenderer({ content }: { content: MixedSection }) {
                 component="figure"
                 sx={{
                   margin: 0,
-                  // Tighter margin on mobile.avoids competing with Panel padding
+                  boxShadow: muiTheme.shadow.lg,
+                  borderRadius: muiTheme.borderRadius.md,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: isMobile ? "column" : "row",
+                  alignItems: isMobile ? "stretch" : "center",
                   mx: isMobile ? 0 : "30px",
                   my: isMobile ? "16px" : "30px",
-                  display: "flex",
-                  alignItems: "center",
-                  flexDirection: "column",
+                  padding: muiTheme.space.component.xl
                 }}
               >
                 <Box
                   component={motion.img}
                   initial="hidden"
                   whileInView="show"
-                  viewport={{ once: false, amount: 0.3 }}
+                  viewport={{ once: true, amount: 0.3 }}
                   variants={fadeInRight}
                   src={block.src}
                   alt={block.alt}
                   sx={{
-                    width: "100%",
-                    // On desktop, cap image width so it doesn't stretch too wide
-                    maxWidth: isMobile ? "100%" : "800px",
-                    margin: "0 auto",
+                    // On desktop: take up roughly half the card.
+                    // On mobile: full width of the card.
+                    width: isMobile ? "100%" : "50%",
+                    flexShrink: 0,
                     height: "auto",
                     display: "block",
-                    borderRadius: muiTheme.borderRadius.md,
                   }}
                 />
                 {block.caption && (
                   <Typography
                     component="figcaption"
-                    variant="caption"
+                    variant="body2"
                     sx={{
-                      mt: 1,
-                      color: muiTheme.palette.grey[600],
-                      textAlign: "center",
-                      // Match image width constraint
-                      maxWidth: isMobile ? "100%" : "800px",
+                      flexGrow: 1,
+                      color: muiTheme.palette.text.primary,
+                      p: isMobile
+                        ? muiTheme.space.listGap.md
+                        : muiTheme.space.listGap.lg,
+
+                      // On desktop: left-align reads naturally beside the image.
+                      // On mobile: center reads better as a label under a full-width image.
+                      gap: muiTheme.space.listGap.sm,
+                      textAlign: isMobile ? "center" : "left",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column"
                     }}
                   >
-                    {block.caption}
+                    {parseCaptionBlocks(block.caption)}
                   </Typography>
                 )}
               </Box>
