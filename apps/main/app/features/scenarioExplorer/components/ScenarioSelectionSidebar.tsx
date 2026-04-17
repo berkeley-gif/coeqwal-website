@@ -75,7 +75,8 @@ export default function ScenarioSelectionSidebar({
 
   const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
-  const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+  const activeScenarioId =
+    hoveredScenarioId ?? highlightedScenario ?? null
   const hasActiveScenario = activeScenarioId !== null
 
   useEffect(() => {

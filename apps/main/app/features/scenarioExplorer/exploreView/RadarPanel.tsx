@@ -90,8 +90,6 @@ export default function RadarPanel({
   }, [theme])
 
   const {
-    highlightedScenario,
-    setHighlightedScenario,
     selectedScenarios,
     toggleScenario,
     highlightBaseline,
@@ -380,15 +378,6 @@ export default function RadarPanel({
     onSingleCaptureReady?.(captureSingleScenarioRadar)
   }, [captureSingleScenarioRadar, onSingleCaptureReady])
 
-  const highlightedData = useMemo(
-    () =>
-      filteredData.map((scenario) => ({
-        ...scenario,
-        highlighted: scenario.id === highlightedScenario,
-      })),
-    [filteredData, highlightedScenario],
-  )
-
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 
   const allKeySelected = OUTCOME_CODE_ORDER.every((c) => axesSet.has(c))
@@ -613,7 +602,7 @@ export default function RadarPanel({
           }}
         >
           <RadarPlot
-            data={highlightedData}
+            data={filteredData}
             axes={visibleAxisNames}
             responsive
             lineColors={filteredLineColors}
@@ -639,9 +628,6 @@ export default function RadarPanel({
             svgRefCallback={handleSvgRef}
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}
-            onLineClick={(d) => {
-              setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
-            }}
             axisLabelDetailStyle={radarAxisLabelDetailStyle}
           />
         </Box>
