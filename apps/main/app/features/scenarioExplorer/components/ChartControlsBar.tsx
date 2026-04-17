@@ -47,7 +47,8 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
       <Box
         sx={{
           width: "1px",
-          height: 20,
+          alignSelf: "stretch",
+          minHeight: 20,
           backgroundColor: theme.palette.divider,
           flexShrink: 0,
         }}
