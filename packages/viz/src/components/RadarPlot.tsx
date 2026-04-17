@@ -1,8 +1,19 @@
 "use client"
 
 import React, { useRef, useEffect, useCallback, useMemo } from "react"
-import { scaleLinear, select, line } from "d3"
+import { scaleLinear, select, line, type Selection } from "d3"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
+import {
+  type RadarPlotAxisLabelDetailStyle,
+  mergeRadarAxisLabelDetailStyle,
+  renderRadarAxisLabelDetailInto,
+  RADAR_AXIS_DETAIL_SHADOW_FILTER_ID,
+  RADAR_TIER_LABELS,
+  RADAR_TIER_SWATCH_COLORS,
+  type RadarAxisLabelDetailPayload,
+} from "./radarAxisLabelDetail"
+
+export type { RadarPlotAxisLabelDetailStyle } from "./radarAxisLabelDetail"
 
 export interface RadarPlotProps {
   data: VerticalParallelLineData[]
@@ -59,6 +70,11 @@ export interface RadarPlotProps {
   ) => void
   /** External ref to access the rendered SVG element (e.g. for capture/export) */
   svgRefCallback?: (svg: SVGSVGElement | null) => void
+  /**
+   * Typography and panel chrome for the axis-label hover detail.
+   * Pass values from theme
+   */
+  axisLabelDetailStyle?: Partial<RadarPlotAxisLabelDetailStyle>
 }
 
 function toTier(v: number): number {
@@ -66,7 +82,6 @@ function toTier(v: number): number {
 }
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
-const TIER_LABELS = ["Optimal", "Acceptable", "At-risk", "Critical"] as const
 const TIER_BAND_COLORS = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const
 
 const DEFAULT_COLORS = {
@@ -102,8 +117,6 @@ const LABEL_BREAK_POINTS: Record<string, [string, string]> = {
   "SOD: Groundwater storage": ["SOD:", "Groundwater storage"],
 }
 
-const TIER_SWATCH_COLORS = ["", "#1ca367", "#31b2c5", "#f2944f", "#ee5d32"]
-
 const THEME_PILL_CONFIG: Record<
   string,
   { label: string; bg: string; text: string }
@@ -138,8 +151,8 @@ function showTooltip(
   const tierLine =
     tier != null
       ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
-        `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
-        `${TIER_LABELS[tier - 1] ?? `Tier ${tier}`}</div>`
+        `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${RADAR_TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
+        `${RADAR_TIER_LABELS[tier - 1] ?? `Tier ${tier}`}</div>`
       : ""
   const pill = themeKey ? THEME_PILL_CONFIG[themeKey] : undefined
   const themeLine = pill
@@ -284,7 +297,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     onDotHover,
     onAxisPositions,
     svgRefCallback,
+    axisLabelDetailStyle: axisLabelDetailStyleProp,
   }) => {
+    const axisLabelDetailStyle = useMemo(
+      () => mergeRadarAxisLabelDetailStyle(axisLabelDetailStyleProp),
+      [axisLabelDetailStyleProp],
+    )
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
       [pinnedScenarioIdsProp],
@@ -415,6 +433,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         svg.selectAll("*").remove()
         if (w <= 0 || h <= 0) return
 
+        const sh = axisLabelDetailStyle
+        if (sh.panelShadowBlur > 0) {
+          const filt = svg
+            .append("defs")
+            .append("filter")
+            .attr("id", RADAR_AXIS_DETAIL_SHADOW_FILTER_ID)
+            .attr("x", "-40%")
+            .attr("y", "-40%")
+            .attr("width", "180%")
+            .attr("height", "180%")
+          filt
+            .append("feDropShadow")
+            .attr("dx", sh.panelShadowDx)
+            .attr("dy", sh.panelShadowDy)
+            .attr("stdDeviation", sh.panelShadowBlur)
+            .attr("flood-color", sh.panelShadowColor)
+            .attr("flood-opacity", sh.panelShadowOpacity)
+        }
+
         const MARGIN = 80
         const size = Math.min(w, h)
         const radius = (size - MARGIN * 2) / 2
@@ -425,7 +462,19 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const rScale = scaleLinear().domain([4.5, 0.5]).range([0, radius])
         scalesRef.current = { rScale: (n: number) => rScale(n), cx, cy, radius }
 
-        const g = svg.append("g")
+        const g = svg.append("g").attr("class", "radar-chart-root")
+
+        const showAxisLabelDetail = (
+          axisKey: string,
+          detail: RadarAxisLabelDetailPayload | null,
+        ) => {
+          renderRadarAxisLabelDetailInto(
+            g as Selection<SVGGElement, unknown, null, undefined>,
+            axisKey,
+            detail,
+            axisLabelDetailStyle,
+          )
+        }
 
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
@@ -542,7 +591,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("font-weight", 500)
             .attr("fill", "#718096")
             .attr("letter-spacing", "0.02em")
-            .text(TIER_LABELS[i] ?? "")
+            .text(RADAR_TIER_LABELS[i] ?? "")
         })
 
         // Range band placeholder — drawn after dots so we can use actual positions
@@ -795,6 +844,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   tierValue: sv != null ? toTier(sv) : 0,
                 })
 
+                showAxisLabelDetail(axis, {
+                  scenarioName: scenario.name,
+                  tierIndex: Math.min(
+                    4,
+                    Math.max(1, Math.round(toTier(sv))),
+                  ),
+                })
+
                 if (lastNotifiedIdRef.current !== scenario.id) {
                   hoverNotifyTimerRef.current = setTimeout(() => {
                     hoverNotifyTimerRef.current = null
@@ -820,12 +877,20 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   resetDotVisuals()
                   lastNotifiedIdRef.current = null
                   onLineHoverRef.current?.(null)
+                  showAxisLabelDetail(axis, null)
                 }, 20)
               })
               .on("click", () => {
                 onPinnedToggleRef.current?.(scenario.id)
                 onLineClickRef.current?.(scenario)
                 onDotClickRef.current?.(scenario.id, axis)
+                showAxisLabelDetail(axis, {
+                  scenarioName: scenario.name,
+                  tierIndex: Math.min(
+                    4,
+                    Math.max(1, Math.round(toTier(sv))),
+                  ),
+                })
               })
           })
         })
@@ -1067,42 +1132,64 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             Math.abs(angleDeg + 90) < 5 ? "middle" : isLeft ? "end" : "start"
 
           const curated = LABEL_BREAK_POINTS[axis]
+          const detailY = curated
+            ? ly + axisLabelDetailStyle.detailAnchorOffsetTwoLinePx
+            : ly + axisLabelDetailStyle.detailAnchorOffsetOneLinePx
+          const labelGroup = g
+            .append("g")
+            .attr("class", "axis-label")
+            .attr("data-axis", axis)
+            .attr("data-label-x", lx)
+            .attr("data-detail-y", detailY)
+            .attr("data-text-anchor", anchor)
+
           if (curated) {
-            g.append("text")
+            labelGroup
+              .append("text")
+              .attr("class", "axis-label-title")
               .attr("x", lx)
               .attr("y", ly - 8)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 12.5)
-              .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#2d3748")
-              .attr("letter-spacing", "0.01em")
+              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+              .attr("font-family", axisLabelDetailStyle.fontFamily)
+              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+              .attr("fill", axisLabelDetailStyle.axisTitleFill)
+              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
               .text(curated[0])
-            g.append("text")
+            labelGroup
+              .append("text")
+              .attr("class", "axis-label-title")
               .attr("x", lx)
               .attr("y", ly + 8)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 12.5)
-              .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#2d3748")
-              .attr("letter-spacing", "0.01em")
+              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+              .attr("font-family", axisLabelDetailStyle.fontFamily)
+              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+              .attr("fill", axisLabelDetailStyle.axisTitleFill)
+              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
               .text(curated[1])
           } else {
-            g.append("text")
+            labelGroup
+              .append("text")
+              .attr("class", "axis-label-title")
               .attr("x", lx)
               .attr("y", ly)
               .attr("text-anchor", anchor)
               .attr("dominant-baseline", "middle")
-              .attr("font-size", 12.5)
-              .attr("font-family", FONT_FAMILY)
-              .attr("font-weight", 500)
-              .attr("fill", "#2d3748")
-              .attr("letter-spacing", "0.01em")
+              .attr("font-size", axisLabelDetailStyle.scenarioFontSize)
+              .attr("font-family", axisLabelDetailStyle.fontFamily)
+              .attr("font-weight", axisLabelDetailStyle.scenarioFontWeight)
+              .attr("fill", axisLabelDetailStyle.axisTitleFill)
+              .attr("letter-spacing", axisLabelDetailStyle.scenarioLetterSpacing)
               .text(axis)
           }
+
+          labelGroup
+            .append("g")
+            .attr("class", "axis-label-detail")
+            .attr("visibility", "hidden")
 
           axisPositions.push({
             axis,
@@ -1133,6 +1220,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         distributionData,
         getAngle,
         enableTooltip,
+        axisLabelDetailStyle,
       ],
     )
 

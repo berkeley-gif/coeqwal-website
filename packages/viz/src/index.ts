@@ -95,6 +95,11 @@ export type { ArrowFieldPlotProps } from "./components/ArrowFieldPlot"
 
 export { default as RadarPlot } from "./components/RadarPlot"
 export type { RadarPlotProps } from "./components/RadarPlot"
+export type { RadarPlotAxisLabelDetailStyle } from "./components/radarAxisLabelDetail"
+export {
+  mergeRadarAxisLabelDetailStyle,
+  DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE,
+} from "./components/radarAxisLabelDetail"
 
 export { default as TierHeatmap } from "./components/TierHeatmap"
 export type {
