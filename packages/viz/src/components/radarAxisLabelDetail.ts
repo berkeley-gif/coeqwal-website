@@ -37,14 +37,6 @@ export type RadarPlotAxisLabelDetailStyle = {
   /** Max width of the hover detail panel (SVG user units / px). */
   detailMaxWidthPx: number
   /**
-   * Max panel width when the hover uses bottom-aware repositioning
-   * (`data-detail-bottom-mode` ≠ `default`). **Wider** than `detailMaxWidthPx`
-   * lets scenario names stay on fewer lines, which **shortens** the panel
-   * vertically. Effective cap is `max(this, detailMaxWidthPx)` so bottom
-   * hovers are never narrower than the default-axis cap.
-   */
-  detailBottomRepositionedMaxWidthPx: number
-  /**
    * Vertical distance from the spoke label anchor (`ly`) to the top of the
    * scenario title, when the axis uses a two-line title.
    */
@@ -197,8 +189,7 @@ export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyl
     scenarioFill: "#1a1a1a",
     tierFill: "#1a1a1a",
     axisTitleFill: "#1a1a1a",
-    detailMaxWidthPx: 220,
-    detailBottomRepositionedMaxWidthPx: 360,
+    detailMaxWidthPx: 200,
     detailAnchorOffsetTwoLinePx: 27,
     detailAnchorOffsetOneLinePx: 22,
     detailBottomGapPx: 8,
@@ -382,9 +373,6 @@ export function renderRadarAxisLabelDetailInto(
     }
   }
   const isBottomRepositioned = bottomMode !== "default"
-  const panelCapPx = isBottomRepositioned
-    ? Math.max(s.detailBottomRepositionedMaxWidthPx, s.detailMaxWidthPx)
-    : s.detailMaxWidthPx
   const svgRoot = rootG.node()?.ownerSVGElement ?? null
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
@@ -395,7 +383,7 @@ export function renderRadarAxisLabelDetailInto(
     .attr("class", "axis-label-detail-inner")
 
   const padX = s.panelPaddingX
-  const maxContentW = Math.max(48, panelCapPx - 2 * padX)
+  const maxContentW = Math.max(48, s.detailMaxWidthPx - 2 * padX)
   const scenarioSpec = {
     fontSize: s.scenarioFontSize,
     fontFamily: s.fontFamily,
@@ -485,7 +473,7 @@ export function renderRadarAxisLabelDetailInto(
   const padTop = s.panelPaddingTop
   const padBottom = s.panelPaddingY
   const naturalW = bbox.width + 2 * padX
-  const panelW = Math.max(1, Math.min(naturalW, panelCapPx))
+  const panelW = Math.max(1, Math.min(naturalW, s.detailMaxWidthPx))
   const panelH = Math.max(1, bbox.height + padTop + padBottom)
   let panelX = bbox.x - padX
   if (contentAnchor === "end") {
