@@ -169,6 +169,10 @@ const AXIS_DETAIL_CHIP_W = 8
 const AXIS_DETAIL_CHIP_H = 8
 const AXIS_DETAIL_CHIP_RX = 1.5
 const AXIS_DETAIL_CHIP_TEXT_GAP = 5
+/** Downward nudge so hanging-baseline tooltip text aligns with middle-baseline axis titles. */
+const RADAR_DETAIL_BOTTOM_REPOSITIONED_Y_NUDGE_PX = 3
+/** Extra horizontal offset beyond `detailBottomGapPx` for bottom-repositioned hovers. */
+const RADAR_DETAIL_BOTTOM_REPOSITIONED_HORIZONTAL_OUTSET_PX = 5
 
 export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyle =
   {
@@ -367,12 +371,13 @@ export function renderRadarAxisLabelDetailInto(
   const gap = s.detailBottomGapPx
   let contentX = lx
   let contentAnchor: "start" | "end" | "middle" = anchor
+  const hOutset = RADAR_DETAIL_BOTTOM_REPOSITIONED_HORIZONTAL_OUTSET_PX
   if (labelBBox) {
     if (bottomMode === "single-right" || bottomMode === "pair-right") {
-      contentX = labelBBox.x + labelBBox.width + gap
+      contentX = labelBBox.x + labelBBox.width + gap + hOutset
       contentAnchor = "start"
     } else if (bottomMode === "pair-left") {
-      contentX = labelBBox.x - gap
+      contentX = labelBBox.x - gap - hOutset
       contentAnchor = "end"
     }
   }
@@ -403,6 +408,15 @@ export function renderRadarAxisLabelDetailInto(
   }
 
   let y = y0
+  if (isBottomRepositioned) {
+    const nudge = RADAR_DETAIL_BOTTOM_REPOSITIONED_Y_NUDGE_PX
+    if (labelBBox) {
+      y = labelBBox.y + nudge
+    } else {
+      const lyAttr = Number(labelG.attr("data-label-y"))
+      y = Number.isFinite(lyAttr) ? lyAttr + nudge : y0
+    }
+  }
 
   const scenarioLines = wrapTextToLines(
     payload.scenarioName,
@@ -502,4 +516,8 @@ export function renderRadarAxisLabelDetailInto(
   if (s.panelShadowBlur > 0) {
     panel.attr("filter", `url(#${RADAR_AXIS_DETAIL_SHADOW_FILTER_ID})`)
   }
+
+  // Paint order: later siblings draw on top. Raise this axis so the hover panel
+  // isn’t occluded by neighboring `g.axis-label` title text.
+  labelG.raise()
 }
