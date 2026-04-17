@@ -1,6 +1,6 @@
 "use client"
 
-import { select, type Selection } from "d3"
+import { select, type BaseType, type Selection } from "d3"
 
 /** Typography, panel chrome, and layout for the SVG axis-label hover detail. */
 export type RadarPlotAxisLabelDetailStyle = {
@@ -37,6 +37,14 @@ export type RadarPlotAxisLabelDetailStyle = {
   /** Max width of the hover detail panel (SVG user units / px). */
   detailMaxWidthPx: number
   /**
+   * Max panel width when the hover uses bottom-aware repositioning
+   * (`data-detail-bottom-mode` ≠ `default`). **Wider** than `detailMaxWidthPx`
+   * lets scenario names stay on fewer lines, which **shortens** the panel
+   * vertically. Effective cap is `max(this, detailMaxWidthPx)` so bottom
+   * hovers are never narrower than the default-axis cap.
+   */
+  detailBottomRepositionedMaxWidthPx: number
+  /**
    * Vertical distance from the spoke label anchor (`ly`) to the top of the
    * scenario title, when the axis uses a two-line title.
    */
@@ -45,6 +53,91 @@ export type RadarPlotAxisLabelDetailStyle = {
    * Same as `detailAnchorOffsetTwoLinePx` for a single-line axis title.
    */
   detailAnchorOffsetOneLinePx: number
+  /** Horizontal gap between static axis title bbox and bottom-detail hover card. */
+  detailBottomGapPx: number
+}
+
+/** Set from `data-detail-bottom-mode` on `g.axis-label` (see RadarPlot). */
+export type RadarAxisDetailBottomMode =
+  | "default"
+  | "single-right"
+  | "pair-left"
+  | "pair-right"
+
+/** More than 15 axes: wider bottom band of repositioned hovers. */
+const RADAR_DETAIL_EXPANDED_BOTTOM_MIN_AXES = 16
+
+/**
+ * - Even N≤15: `single-right` for `i === N/2` only.
+ * - Even N≥16: bottom three — `pair-right` / `single-right` / `pair-left` for
+ *   `N/2-1`, `N/2`, `N/2+1`.
+ * - Odd N≤15: `pair-right` / `pair-left` for the two spokes straddling 6 o'clock.
+ * - Odd N≥17: bottom four — `floor(N/2)-1` … `floor(N/2)+2`, by angle vs 6 o'clock
+ *   (`pair-right` if `i < N/2`, else `pair-left`).
+ */
+export function radarAxisDetailBottomModeForIndex(
+  i: number,
+  numAxes: number,
+): RadarAxisDetailBottomMode {
+  const n = numAxes
+  if (n < 2 || i < 0 || i >= n) return "default"
+  const expanded = n >= RADAR_DETAIL_EXPANDED_BOTTOM_MIN_AXES
+
+  if (n % 2 === 0) {
+    const c = n / 2
+    if (expanded) {
+      if (i === c - 1) return "pair-right"
+      if (i === c) return "single-right"
+      if (i === c + 1) return "pair-left"
+      return "default"
+    }
+    return i === c ? "single-right" : "default"
+  }
+
+  const iLow = Math.floor(n / 2)
+  if (expanded) {
+    if (i >= iLow - 1 && i <= iLow + 2) {
+      return i < n / 2 ? "pair-right" : "pair-left"
+    }
+    return "default"
+  }
+  if (i === iLow) return "pair-right"
+  if (i === iLow + 1) return "pair-left"
+  return "default"
+}
+
+function parseBottomMode(raw: string | null): RadarAxisDetailBottomMode {
+  if (
+    raw === "single-right" ||
+    raw === "pair-left" ||
+    raw === "pair-right" ||
+    raw === "default"
+  ) {
+    return raw
+  }
+  return "default"
+}
+
+function unionAxisLabelTitleBBox(
+  labelG: Selection<BaseType, unknown, SVGGElement, unknown>,
+): { x: number; y: number; width: number; height: number } | null {
+  const nodes = labelG
+    .selectAll<SVGTextElement, unknown>(".axis-label-title")
+    .nodes()
+  if (nodes.length === 0) return null
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const n of nodes) {
+    const b = n.getBBox()
+    minX = Math.min(minX, b.x)
+    minY = Math.min(minY, b.y)
+    maxX = Math.max(maxX, b.x + b.width)
+    maxY = Math.max(maxY, b.y + b.height)
+  }
+  if (!Number.isFinite(minX)) return null
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
 }
 
 export type RadarAxisLabelDetailPayload = {
@@ -101,8 +194,10 @@ export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyl
     tierFill: "#1a1a1a",
     axisTitleFill: "#1a1a1a",
     detailMaxWidthPx: 220,
+    detailBottomRepositionedMaxWidthPx: 360,
     detailAnchorOffsetTwoLinePx: 27,
     detailAnchorOffsetOneLinePx: 22,
+    detailBottomGapPx: 8,
   }
 
 export function mergeRadarAxisLabelDetailStyle(
@@ -267,6 +362,24 @@ export function renderRadarAxisLabelDetailInto(
   detailG.selectAll("*").remove()
 
   const s = style
+  const bottomMode = parseBottomMode(labelG.attr("data-detail-bottom-mode"))
+  const labelBBox = unionAxisLabelTitleBBox(labelG)
+  const gap = s.detailBottomGapPx
+  let contentX = lx
+  let contentAnchor: "start" | "end" | "middle" = anchor
+  if (labelBBox) {
+    if (bottomMode === "single-right" || bottomMode === "pair-right") {
+      contentX = labelBBox.x + labelBBox.width + gap
+      contentAnchor = "start"
+    } else if (bottomMode === "pair-left") {
+      contentX = labelBBox.x - gap
+      contentAnchor = "end"
+    }
+  }
+  const isBottomRepositioned = bottomMode !== "default"
+  const panelCapPx = isBottomRepositioned
+    ? Math.max(s.detailBottomRepositionedMaxWidthPx, s.detailMaxWidthPx)
+    : s.detailMaxWidthPx
   const svgRoot = rootG.node()?.ownerSVGElement ?? null
   const tierIdx = Math.min(4, Math.max(1, payload.tierIndex))
   const tierColor = RADAR_TIER_SWATCH_COLORS[tierIdx] ?? "#718096"
@@ -277,7 +390,7 @@ export function renderRadarAxisLabelDetailInto(
     .attr("class", "axis-label-detail-inner")
 
   const padX = s.panelPaddingX
-  const maxContentW = Math.max(48, s.detailMaxWidthPx - 2 * padX)
+  const maxContentW = Math.max(48, panelCapPx - 2 * padX)
   const scenarioSpec = {
     fontSize: s.scenarioFontSize,
     fontFamily: s.fontFamily,
@@ -301,9 +414,9 @@ export function renderRadarAxisLabelDetailInto(
 
   const scenarioEl = inner
     .append("text")
-    .attr("x", lx)
+    .attr("x", contentX)
     .attr("y", y)
-    .attr("text-anchor", anchor)
+    .attr("text-anchor", contentAnchor)
     .attr("dominant-baseline", "hanging")
     .attr("font-size", s.scenarioFontSize)
     .attr("font-family", s.fontFamily)
@@ -312,7 +425,7 @@ export function renderRadarAxisLabelDetailInto(
     .attr("letter-spacing", s.scenarioLetterSpacing)
 
   scenarioLines.forEach((line, i) => {
-    const tspan = scenarioEl.append("tspan").attr("x", lx).text(line)
+    const tspan = scenarioEl.append("tspan").attr("x", contentX).text(line)
     if (i > 0) tspan.attr("dy", scenarioLineH)
   })
 
@@ -325,9 +438,9 @@ export function renderRadarAxisLabelDetailInto(
     AXIS_DETAIL_CHIP_W +
     AXIS_DETAIL_CHIP_TEXT_GAP +
     measureSvgTextWidth(svgRoot, tierDisplay, tierSpec)
-  let rowStartX = lx
-  if (anchor === "middle") rowStartX = lx - tierRowW / 2
-  if (anchor === "end") rowStartX = lx - tierRowW
+  let rowStartX = contentX
+  if (contentAnchor === "middle") rowStartX = contentX - tierRowW / 2
+  if (contentAnchor === "end") rowStartX = contentX - tierRowW
 
   inner
     .append("rect")
@@ -358,12 +471,12 @@ export function renderRadarAxisLabelDetailInto(
   const padTop = s.panelPaddingTop
   const padBottom = s.panelPaddingY
   const naturalW = bbox.width + 2 * padX
-  const panelW = Math.max(1, Math.min(naturalW, s.detailMaxWidthPx))
+  const panelW = Math.max(1, Math.min(naturalW, panelCapPx))
   const panelH = Math.max(1, bbox.height + padTop + padBottom)
   let panelX = bbox.x - padX
-  if (anchor === "end") {
+  if (contentAnchor === "end") {
     panelX = bbox.x + bbox.width + padX - panelW
-  } else if (anchor === "middle") {
+  } else if (contentAnchor === "middle") {
     const mid = bbox.x + bbox.width / 2
     panelX = mid - panelW / 2
   }
