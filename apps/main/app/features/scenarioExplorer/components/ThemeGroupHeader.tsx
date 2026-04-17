@@ -116,23 +116,19 @@ export default function ThemeGroupHeader({
       <Box
         sx={{
           display: "flex",
-          justifyContent: isFlex ? "center" : "flex-end",
+          justifyContent: "flex-end",
           alignItems: "center",
-          ...(isFlex ? {} : { mr: -0.5 }),
+          ...(isFlex ? { flexShrink: 0 } : { mr: -0.5 }),
         }}
       >
         <Checkbox
+          size="small"
           checked={allChecked}
           indeterminate={someChecked}
           onChange={handleToggle}
           sx={{
-            ...(isFlex
-              ? theme.scenarios.checkbox.sm
-              : theme.scenarios.checkbox.md),
+            ...theme.scenarios.checkbox.md,
             mt: 0,
-            color: themeColors.text,
-            "&.Mui-checked": { color: themeColors.text },
-            "&.MuiCheckbox-indeterminate": { color: themeColors.text },
           }}
         />
       </Box>
