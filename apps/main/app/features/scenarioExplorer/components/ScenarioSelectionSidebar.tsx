@@ -305,13 +305,11 @@ export default function ScenarioSelectionSidebar({
                         component="span"
                         sx={{
                           display: "inline-block",
-                          width: 8,
-                          height: 8,
+                          width: 12,
+                          height: 12,
                           borderRadius: "50%",
                           backgroundColor: color,
                           flexShrink: 0,
-                          position: "relative",
-                          top: "-1px",
                         }}
                       />
                     ) : undefined
