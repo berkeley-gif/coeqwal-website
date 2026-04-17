@@ -150,7 +150,8 @@ export type RadarAxisLabelDetailChromeMountPayload =
   RadarAxisLabelDetailPayload & {
     /**
      * Pixels from the left edge of the detail `foreignObject` to the LTR start
-     * of the first line of the SVG scenario title (matches `text-anchor`).
+     * of the first line of the SVG scenario title. Detail copy is always
+     * `text-anchor: start` at `foX`, so this is `0`.
      */
     chromePaddingLeftPx: number
   }
@@ -538,20 +539,10 @@ export function renderRadarAxisLabelDetailInto(
   if (contentAnchor === "end") foX = contentX - foW
   else if (contentAnchor === "middle") foX = contentX - foW / 2
 
-  /** Middle-anchored spokes: keep the card centered on the axis but left-align body copy + chrome. */
-  const detailTextX = contentAnchor === "middle" ? foX : contentX
-  const detailTextAnchor: "start" | "end" | "middle" =
-    contentAnchor === "middle" ? "start" : contentAnchor
-
-  const firstLine = scenarioLines[0] ?? ""
-  const firstLineW = measureSvgTextWidth(svgRoot, firstLine, scenarioSpec)
-  let scenarioNameStartX = contentX
-  if (contentAnchor === "end") scenarioNameStartX = contentX - firstLineW
-  else if (contentAnchor === "middle") scenarioNameStartX = foX
-  const chromePaddingLeftPx = Math.max(
-    0,
-    Math.min(foW, Math.round(scenarioNameStartX - foX)),
-  )
+  /** Rows always LTR / left-aligned within the card (`foX`…`foX+foW`), regardless of chart side. */
+  const detailTextX = foX
+  const detailTextAnchor = "start" as const
+  const chromePaddingLeftPx = 0
 
   let y = y0
   if (isBottomRepositioned) {
@@ -610,9 +601,7 @@ export function renderRadarAxisLabelDetailInto(
 
   y += scenarioLines.length * scenarioLineH + s.lineGapPx
 
-  let rowStartX = contentX
-  if (contentAnchor === "middle") rowStartX = foX
-  if (contentAnchor === "end") rowStartX = contentX - tierRowW
+  const rowStartX = foX
 
   inner
     .append("rect")

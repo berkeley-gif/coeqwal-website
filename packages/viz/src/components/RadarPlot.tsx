@@ -562,11 +562,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
         const dotR = 3.5
-        const DIM_OPACITY = 0.15
+        const DIM_OPACITY = 0.22
         const EMPHASIS_DOT_DELTA = 1.2
         const EMPHASIS_STROKE_WIDTH = 2
+        /** Slightly lighter than selected emphasis — sidebar / crosshair hover trace */
+        const HOVER_HIGHLIGHT_DOT_DELTA = 0.85
+        const HOVER_HIGHLIGHT_STROKE_WIDTH = 1.65
         const PIN_DOT_DELTA = 1.45
-        const HOVER_DOT_RADIUS_BUMP = 1.7
+        const HOVER_DOT_RADIUS_BUMP = 1.45
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 
@@ -594,9 +597,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           strokeOpacity: DIM_OPACITY,
         } as const
         const hoverEmphasisVisuals = {
-          dotR: dotR + EMPHASIS_DOT_DELTA,
+          dotR: dotR + HOVER_HIGHLIGHT_DOT_DELTA,
           opacity: 1.0,
-          strokeWidth: EMPHASIS_STROKE_WIDTH,
+          strokeWidth: HOVER_HIGHLIGHT_STROKE_WIDTH,
           strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
         } as const
 
