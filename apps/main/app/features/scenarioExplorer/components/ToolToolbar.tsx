@@ -47,54 +47,63 @@ export default function ToolToolbar({
   const viewControls = (
     <>
       <Box
-        component="span"
         sx={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 0.5,
-          color: "grey.400",
-          pointerEvents: "none",
-          userSelect: "none",
+          display: "none",
+          "@media (min-width: 1475px)": {
+            display: "contents",
+          },
         }}
       >
-        <Typography
-          variant="dashboard"
+        <Box
+          component="span"
           sx={{
-            fontWeight: 500,
-            whiteSpace: "nowrap",
-            color: "inherit",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            color: "grey.400",
+            pointerEvents: "none",
+            userSelect: "none",
           }}
         >
-          How to read this chart?
-        </Typography>
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              color: "inherit",
+            }}
+          >
+            How to read this chart?
+          </Typography>
+        </Box>
+
+        {/* Show distribution — temporarily hidden
+        <VerticalDivider />
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography
+            variant="dashboard"
+            sx={{
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Show distribution
+          </Typography>
+          <Switch
+            size="small"
+            checked={outcomeDisplayMode === "distribution"}
+            onChange={(_, checked) =>
+              setOutcomeDisplayMode(checked ? "distribution" : "summary")
+            }
+            sx={{ ml: -0.5 }}
+          />
+        </Box>
+        */}
+
+        <VerticalDivider />
       </Box>
-
-      {/* Show distribution — temporarily hidden
-      <VerticalDivider />
-
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-        <Typography
-          variant="dashboard"
-          sx={{
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Show distribution
-        </Typography>
-        <Switch
-          size="small"
-          checked={outcomeDisplayMode === "distribution"}
-          onChange={(_, checked) =>
-            setOutcomeDisplayMode(checked ? "distribution" : "summary")
-          }
-          sx={{ ml: -0.5 }}
-        />
-      </Box>
-      */}
-
-      <VerticalDivider />
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <Typography
