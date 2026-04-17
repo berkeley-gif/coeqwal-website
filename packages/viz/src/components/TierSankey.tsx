@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react"
 import { path as pathFactory, select } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 
 export interface SankeyScenarioFlow {
   scenarioId: string
@@ -266,7 +267,13 @@ const TierSankey: React.FC<TierSankeyProps> = React.memo(
 
         const getOpacity = (scenarioId: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(scenarioId) ? 0.6 : 0.08
+            return isFullOpacityDuringSidebarHighlight(
+              scenarioId,
+              highlightedIds,
+              chosenIds,
+            )
+              ? 0.6
+              : 0.08
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(scenarioId) ? 0.5 : 0.1

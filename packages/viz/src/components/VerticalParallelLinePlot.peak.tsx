@@ -14,6 +14,7 @@ import {
   type Selection,
 } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 
 export interface VerticalParallelLineData {
   id: string
@@ -215,6 +216,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
       const isHovered =
         hoveredIndex === scenarioIndex ||
         (highlightedIds != null && highlightedIds.has(scenario.id))
+      const sidebarChosenVisible =
+        highlightedIds != null &&
+        highlightedIds.size > 0 &&
+        isFullOpacityDuringSidebarHighlight(
+          scenario.id,
+          highlightedIds,
+          chosenIds,
+        ) &&
+        hoveredIndex === null
 
       // ── Opacity ──────────────────────────────────────────────
       let lineOpacity: number
@@ -222,6 +232,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = React.
 
       if (hasHighlight) {
         if (isHovered) {
+          lineOpacity = 1.0; circleOpacity = 1.0
+        } else if (chosen && active && sidebarChosenVisible) {
+          // Match other explore charts: selected traces stay fully visible during sidebar hover.
           lineOpacity = 1.0; circleOpacity = 1.0
         } else if (chosen && active) {
           lineOpacity = 0.35; circleOpacity = 0.4

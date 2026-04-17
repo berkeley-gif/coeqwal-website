@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import { scaleBand, select } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 
 export interface TierHeatmapCell {
   scenarioId: string
@@ -174,7 +175,13 @@ const TierHeatmap: React.FC<TierHeatmapProps> = React.memo(
 
         const getOpacity = (scenarioId: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(scenarioId) ? 1.0 : 0.2
+            return isFullOpacityDuringSidebarHighlight(
+              scenarioId,
+              highlightedIds,
+              chosenIds,
+            )
+              ? 1.0
+              : 0.2
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(scenarioId) ? 1.0 : 0.3

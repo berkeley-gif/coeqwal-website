@@ -71,7 +71,12 @@ export default function ScenarioExplorer() {
   // Child elements opt back in with pointer-events:auto as needed.
   const isMapPassThrough = isGetStartedMapMode || isExploreMapMode
 
-  // Hover coordination (for sidebar ↔ tool panels in non-list modes)
+  /**
+   * Hover coordination (sidebar ↔ tool panels in non-list modes).
+   * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
+   * Charts must keep `chosenIds` (selected scenarios) visible when this is set —
+   * it adds emphasis for hovered IDs; it does not replace selection visibility.
+   */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
 
   const [hoveredInteraction, setHoveredInteraction] = useState<{
