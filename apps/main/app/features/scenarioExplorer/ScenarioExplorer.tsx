@@ -156,14 +156,14 @@ export default function ScenarioExplorer() {
             onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
           <InlineToggleChip
-            label="show range"
-            active={showRadarRange}
-            onClick={() => setShowRadarRange(!showRadarRange)}
-          />
-          <InlineToggleChip
             label="highlight current operations"
             active={highlightBaseline}
             onClick={() => setHighlightBaseline(!highlightBaseline)}
+          />
+          <InlineToggleChip
+            label="show range"
+            active={showRadarRange}
+            onClick={() => setShowRadarRange(!showRadarRange)}
           />
           <Box
             component="button"

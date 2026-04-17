@@ -627,48 +627,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         // Range band placeholder — drawn after dots so we can use actual positions
         const rangeBandLayer = g.append("g").attr("class", "range-band")
 
-        // 4. Baseline highlight polygon
-        const baselineHighlightLayer = g
-          .append("g")
-          .attr("class", "baseline-highlight")
-        if (highlightBaseline && baselineData) {
-          const blPts: [number, number][] = []
-          axes.forEach((axis, i) => {
-            const bv = baselineData.values[axis]
-            if (bv == null) return
-            const r = rScale(toTier(bv))
-            const angle = getAngle(i)
-            blPts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)])
-          })
-          if (blPts.length >= 3) {
-            const pathGen = line<[number, number]>()
-              .x((d) => d[0])
-              .y((d) => d[1])
-            const blIdx = data.findIndex((s) => s.id === baselineData.id)
-            const blStroke =
-              blIdx >= 0 && hasScenarioColors
-                ? lineColors[blIdx] || "#cc9a06"
-                : "#cc9a06"
-            baselineHighlightLayer
-              .append("path")
-              .attr("class", "baseline-polygon")
-              .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
-              .attr("fill", "#cc9a06")
-              .attr("fill-opacity", 0.12)
-              .attr("stroke", blStroke)
-              .attr("stroke-width", 2.5)
-              .attr("stroke-opacity", 0.55)
-              .attr("pointer-events", "none")
-          }
-        }
-
-        // 5. Distribution dots layer
+        // 4. Distribution dots layer
         const distributionLayer = g
           .append("g")
           .attr("class", "distribution-dots")
 
-        // 6. Scenario path layer
+        // 5. Scenario path layer
         const pathLayer = g.append("g").attr("class", "scenario-paths")
+
+        // 6. Baseline gold overlay — sibling after pathLayer so it paints above scenario traces
+        const baselineHighlightLayer = g
+          .append("g")
+          .attr("class", "baseline-highlight")
 
         // 7. Dots layer
         const dotsLayer = g.append("g").attr("class", "dots")
@@ -1010,6 +980,45 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         data.forEach((scenario) => {
           drawPolygonForScenario(scenario.id)
         })
+
+        if (
+          highlightBaseline &&
+          baselineData &&
+          data.some((s) => s.id === baselineData.id)
+        ) {
+          drawPolygonForScenario(baselineData.id)
+        }
+
+        if (highlightBaseline && baselineData) {
+          const blPts: [number, number][] = []
+          axes.forEach((axis, i) => {
+            const bv = baselineData.values[axis]
+            if (bv == null) return
+            const r = rScale(toTier(bv))
+            const angle = getAngle(i)
+            blPts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)])
+          })
+          if (blPts.length >= 3) {
+            const pathGen = line<[number, number]>()
+              .x((d) => d[0])
+              .y((d) => d[1])
+            const blIdx = data.findIndex((s) => s.id === baselineData.id)
+            const blStroke =
+              blIdx >= 0 && hasScenarioColors
+                ? lineColors[blIdx] || "#cc9a06"
+                : "#cc9a06"
+            baselineHighlightLayer
+              .append("path")
+              .attr("class", "baseline-polygon")
+              .attr("d", pathGen([...blPts, blPts[0]!]) ?? "")
+              .attr("fill", "#cc9a06")
+              .attr("fill-opacity", 0.12)
+              .attr("stroke", blStroke)
+              .attr("stroke-width", 2.5)
+              .attr("stroke-opacity", 0.55)
+              .attr("pointer-events", "none")
+          }
+        }
 
         // ── Morph animation: override elements to old positions, transition ──
         if (morphSnapshot) {
