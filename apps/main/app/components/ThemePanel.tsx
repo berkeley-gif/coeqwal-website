@@ -507,6 +507,8 @@ export function ThemePanel({ theme }: ThemePanelProps) {
                     display: "flex",
                     flexDirection: "column",
                     gap: muiTheme.space.gap.xl,
+                    paddingTop: muiTheme.space.listGap.md,
+                    paddingBottom: muiTheme.space.listGap.md,
                   }}
                 >
                   {SECTION_LABELS[section.id] && (
