@@ -4,7 +4,7 @@
   <circle cx="60" cy="60" r="60" style="fill: #2d89b7;"/>
   <g style="isolation: isolate;">
     <g style="isolation: isolate;">
-      <text transform="translate(26.3079 68.2599)" style="fill: #f2f0ef; font-family: ArialRoundedMTBold, &apos;Arial Rounded MT Bold&apos;; font-size: 24px; isolation: isolate;"><tspan x="0" y="0">TUCP</tspan></text>
+      <text transform="translate(26.3079 68.2599)" style="fill: #fcfbfa; font-family: ArialRoundedMTBold, &apos;Arial Rounded MT Bold&apos;; font-size: 24px; isolation: isolate;"><tspan x="0" y="0">TUCP</tspan></text>
     </g>
   </g>
 </svg>

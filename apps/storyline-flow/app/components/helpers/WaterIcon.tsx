@@ -1,7 +1,7 @@
 import { motion } from "@repo/motion"
 
 export function WaterDropIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   transform = "translate(0, 0)",
 }: {
   color?: string
@@ -19,7 +19,7 @@ export function WaterDropIcon({
       }}
     >
       <motion.path
-        initial={{ fill: "#f2f0ef" }}
+        initial={{ fill: "#fcfbfa" }}
         animate={{ fill: color }}
         style={{
           transform: transform,

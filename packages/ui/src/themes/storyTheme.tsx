@@ -49,7 +49,7 @@ const storyTheme = createTheme({
       ...baseTheme.typography.body1,
       fontSize: "0.875rem", // xs default
       lineHeight: 1.5,
-      color: "#f2f0ef",
+      color: "#fcfbfa",
       "@media (min-width: 1200px)": {
         fontSize: "1.2rem",
       },
@@ -60,7 +60,7 @@ const storyTheme = createTheme({
     h2: {
       ...baseTheme.typography.h2,
       fontFamily: themeValues.fontFamily.ingeborgTrial,
-      color: "#f2f0ef",
+      color: "#fcfbfa",
       "@media (min-width: 1200px)": {
         fontSize: "3.35rem",
       },
@@ -71,7 +71,7 @@ const storyTheme = createTheme({
     h3: {
       ...baseTheme.typography.h3,
       fontFamily: themeValues.fontFamily.ingeborgTrial,
-      color: "#f2f0ef",
+      color: "#fcfbfa",
       "@media (min-width: 1200px)": {
         fontSize: "1.8rem",
       },
@@ -82,7 +82,7 @@ const storyTheme = createTheme({
     h4: {
       ...baseTheme.typography.h4,
       fontFamily: themeValues.fontFamily.ingeborgTrial,
-      color: "#f2f0ef",
+      color: "#fcfbfa",
       "@media (min-width: 1200px)": {
         fontSize: "1.6rem",
       },
@@ -255,7 +255,7 @@ const storyTheme = createTheme({
     MuiSlider: {
       styleOverrides: {
         root: {
-          color: "#f2f0ef",
+          color: "#fcfbfa",
           height: 5,
         },
         thumb: {

@@ -29,7 +29,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
         py: 0.5,
         minHeight: 36,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.common.white,
       }}
     >
       <Typography

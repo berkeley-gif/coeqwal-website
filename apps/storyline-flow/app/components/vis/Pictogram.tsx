@@ -334,7 +334,7 @@ function IconContainer({
             x2={x + (config.iconSize * percentage) / 100 + shift.x}
             y2={y - config.iconSize * (rowIdx + 1)}
             style={{ clipPath: partialGrowth }}
-            stroke="#f2f0ef"
+            stroke="#fcfbfa"
             strokeWidth="2"
             strokeDasharray="2,2"
           />
@@ -346,7 +346,7 @@ function IconContainer({
               dominantBaseline: "middle",
               textAnchor: "end",
               opacity: partialOpacity,
-              fill: "#f2f0ef",
+              fill: "#fcfbfa",
             }}
             dy="0.7rem"
           >
@@ -362,7 +362,7 @@ function IconContainer({
             x2={x + (config.iconSize * percentage) / 100 + shift.x}
             y2={y + config.iconSize + 30 + shift.y}
             style={{ clipPath: totalGrowth }}
-            stroke="#f2f0ef"
+            stroke="#fcfbfa"
             strokeWidth="2"
             strokeDasharray="2,2"
           />
@@ -382,7 +382,7 @@ function IconContainer({
                   : "start",
               fontWeight: "bold",
               opacity: totalOpacity,
-              fill: "#f2f0ef",
+              fill: "#fcfbfa",
             }}
             dy="1rem"
           >
