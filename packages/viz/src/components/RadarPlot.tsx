@@ -514,6 +514,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const hasScenarioColors = lineColors.length > 0
         const dotR = 3.5
         const DIM_OPACITY = 0.15
+        const EMPHASIS_DOT_DELTA = 1
+        const EMPHASIS_STROKE_WIDTH = 1.85
+        const PIN_DOT_DELTA = 1.25
+        const HOVER_DOT_RADIUS_BUMP = 1.5
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 
@@ -541,9 +545,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           if (isFocused || isExternallyHighlighted) {
             return {
-              dotR: dotR + 2,
+              dotR: dotR + EMPHASIS_DOT_DELTA,
               opacity: 1.0,
-              strokeWidth: 2.5,
+              strokeWidth: EMPHASIS_STROKE_WIDTH,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
@@ -559,18 +563,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           if (isSelected || isBaseline) {
             return {
-              dotR: dotR + 2,
+              dotR: dotR + EMPHASIS_DOT_DELTA,
               opacity: 1.0,
-              strokeWidth: 2.5,
+              strokeWidth: EMPHASIS_STROKE_WIDTH,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
 
           if (isPinned) {
             return {
-              dotR: dotR + 2.5,
+              dotR: dotR + PIN_DOT_DELTA,
               opacity: 1.0,
-              strokeWidth: 2.5,
+              strokeWidth: EMPHASIS_STROKE_WIDTH,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
@@ -847,7 +851,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
                 applyFocusVisuals(scenario.id)
                 select(this)
-                  .attr("r", dotR + 2.5)
+                  .attr("r", dotR + HOVER_DOT_RADIUS_BUMP)
                   .raise()
 
                 drawPolygonForScenario(scenario.id, scenario.id)
