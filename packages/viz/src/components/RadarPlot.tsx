@@ -372,7 +372,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     })
 
     const getAngle = useCallback(
-      (i: number) => (i / axes.length) * 2 * Math.PI - Math.PI / 2,
+      (i: number) =>
+        axes.length > 0
+          ? (i / axes.length) * 2 * Math.PI - Math.PI / 2
+          : -Math.PI / 2,
       [axes.length],
     )
 
@@ -389,7 +392,6 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         if (tooltipRef.current) hideTooltip(tooltipRef.current)
 
         const numAxes = axes.length
-        if (numAxes === 0) return
 
         // ── Snapshot for morph animation ──
         const HC_DUR = 600
@@ -1074,7 +1076,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         }
 
         // 8. Distribution dots.arranged along tier circle arcs
-        if (showDistribution && distributionData && hasPinned) {
+        if (numAxes > 0 && showDistribution && distributionData && hasPinned) {
           const pinnedArr = Array.from(pinnedScenarioIds)
           const pinCount = pinnedArr.length
           const locDotR = 2.5
