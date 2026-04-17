@@ -477,6 +477,33 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           )
         }
 
+        const axisTitleFontWeightDefault =
+          axisLabelDetailStyle.scenarioFontWeight
+        const axisTitleFontWeightHover = Math.min(
+          900,
+          axisTitleFontWeightDefault + 200,
+        )
+        const setAxisLabelTitlesFontWeight = (
+          axisKey: string,
+          weight: number,
+        ) => {
+          g.selectAll("g.axis-label")
+            .filter(function () {
+              return (
+                (this as SVGGElement).getAttribute("data-axis") === axisKey
+              )
+            })
+            .selectAll("text.axis-label-title")
+            .attr("font-weight", weight)
+        }
+
+        const resetAllAxisLabelTitlesFontWeight = () => {
+          g.selectAll("g.axis-label text.axis-label-title").attr(
+            "font-weight",
+            axisTitleFontWeightDefault,
+          )
+        }
+
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
         const dotR = 3.5
@@ -813,6 +840,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   leaveResetTimerRef.current = null
                 }
 
+                // Entering a new dot cancels the previous dot’s leave timeout, so
+                // reset every spoke first (cross-axis moves otherwise leave stale bold).
+                resetAllAxisLabelTitlesFontWeight()
+
                 applyFocusVisuals(scenario.id)
                 select(this)
                   .attr("r", dotR + 2.5)
@@ -852,6 +883,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                     Math.max(1, Math.round(toTier(sv))),
                   ),
                 })
+                setAxisLabelTitlesFontWeight(axis, axisTitleFontWeightHover)
 
                 if (lastNotifiedIdRef.current !== scenario.id) {
                   hoverNotifyTimerRef.current = setTimeout(() => {
@@ -878,6 +910,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   resetDotVisuals()
                   lastNotifiedIdRef.current = null
                   onLineHoverRef.current?.(null)
+                  resetAllAxisLabelTitlesFontWeight()
                   showAxisLabelDetail(axis, null)
                 }, 20)
               })

@@ -601,6 +601,8 @@ export default function RadarPanel({
             alignItems: "center",
             justifyContent: "center",
             p: 0,
+            // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
+            transform: "translateY(-10px)",
           }}
         >
           <RadarPlot
