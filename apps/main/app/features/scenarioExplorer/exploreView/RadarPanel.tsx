@@ -13,7 +13,6 @@ import {
   Box,
   Typography,
   useTheme,
-  alpha,
   CircularProgress,
   Checkbox,
 } from "@repo/ui/mui"
@@ -73,7 +72,6 @@ export default function RadarPanel({
 
   const radarAxisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
     const axisTypo = theme.typography.axisLabel
-    const primary = theme.palette.text.primary
 
     return mergeRadarAxisLabelDetailStyle({
       fontFamily: axisTypo.fontFamily as string,
@@ -82,11 +80,11 @@ export default function RadarPanel({
       scenarioLetterSpacing: axisTypo.letterSpacing as string,
       tierFontSize: theme.typography.compactCaption.fontSize as string,
       tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
-      panelFill: alpha(theme.palette.common.white, 0.9),
+      panelFill: theme.palette.common.white,
       panelStroke: "none",
-      scenarioFill: primary,
-      tierFill: primary,
-      axisTitleFill: primary,
+      scenarioFill: "#193D6B",
+      tierFill: "#193D6B",
+      axisTitleFill: "#193D6B",
     })
   }, [theme])
 

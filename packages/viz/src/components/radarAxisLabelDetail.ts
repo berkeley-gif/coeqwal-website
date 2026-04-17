@@ -95,7 +95,7 @@ export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyl
     panelShadowBlur: 0,
     panelShadowColor: "#000000",
     panelShadowOpacity: 0,
-    panelFill: "rgba(242, 240, 239, 0.9)",
+    panelFill: "#fcfbfa",
     panelStroke: "none",
     scenarioFill: "#1a1a1a",
     tierFill: "#1a1a1a",
@@ -108,7 +108,13 @@ export const DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE: RadarPlotAxisLabelDetailStyl
 export function mergeRadarAxisLabelDetailStyle(
   partial?: Partial<RadarPlotAxisLabelDetailStyle>,
 ): RadarPlotAxisLabelDetailStyle {
-  return { ...DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE, ...partial }
+  if (!partial) return { ...DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE }
+  const out = { ...DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE }
+  for (const key of Object.keys(partial) as (keyof RadarPlotAxisLabelDetailStyle)[]) {
+    const v = partial[key]
+    if (v !== undefined) (out as Record<string, unknown>)[key as string] = v
+  }
+  return out
 }
 
 function measureSvgTextWidth(
@@ -352,7 +358,8 @@ export function renderRadarAxisLabelDetailInto(
   const padTop = s.panelPaddingTop
   const padBottom = s.panelPaddingY
   const naturalW = bbox.width + 2 * padX
-  const panelW = Math.min(naturalW, s.detailMaxWidthPx)
+  const panelW = Math.max(1, Math.min(naturalW, s.detailMaxWidthPx))
+  const panelH = Math.max(1, bbox.height + padTop + padBottom)
   let panelX = bbox.x - padX
   if (anchor === "end") {
     panelX = bbox.x + bbox.width + padX - panelW
@@ -361,18 +368,23 @@ export function renderRadarAxisLabelDetailInto(
     panelX = mid - panelW / 2
   }
 
+  const fill = s.panelFill || DEFAULT_RADAR_AXIS_LABEL_DETAIL_STYLE.panelFill
   const panel = inner
     .insert("rect", ":first-child")
     .attr("class", "axis-label-detail-panel")
     .attr("x", panelX)
     .attr("y", bbox.y - padTop)
     .attr("width", panelW)
-    .attr("height", bbox.height + padTop + padBottom)
+    .attr("height", panelH)
     .attr("rx", s.panelRadius)
     .attr("ry", s.panelRadius)
-    .attr("fill", s.panelFill)
-    .attr("stroke", s.panelStroke)
-    .attr("stroke-width", s.panelStroke === "none" ? 0 : 0.75)
+    .attr("fill", fill)
+
+  if (s.panelStroke === "none") {
+    panel.attr("stroke", "none").attr("stroke-width", 0)
+  } else {
+    panel.attr("stroke", s.panelStroke).attr("stroke-width", 0.75)
+  }
 
   if (s.panelShadowBlur > 0) {
     panel.attr("filter", `url(#${RADAR_AXIS_DETAIL_SHADOW_FILTER_ID})`)

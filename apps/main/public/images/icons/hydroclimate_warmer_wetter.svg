@@ -3,7 +3,7 @@
   <defs>
     <style>
       .bg { fill: #4caf50; }
-      .fg { fill: #f2f0ef; }
+      .fg { fill: #fcfbfa; }
     </style>
   </defs>
   <!-- Green background circle -->
@@ -19,8 +19,8 @@
     <path d="M70,65 L68,78 Q68,82 72,78 L70,65 Z"/>
     <path d="M85,68 L83,80 Q83,84 87,80 L85,68 Z"/>
     <!-- Sun peeking from behind -->
-    <circle cx="85" cy="35" r="12" fill="#f2f0ef"/>
-    <g stroke="#f2f0ef" stroke-width="3" stroke-linecap="round">
+    <circle cx="85" cy="35" r="12" fill="#fcfbfa"/>
+    <g stroke="#fcfbfa" stroke-width="3" stroke-linecap="round">
       <line x1="85" y1="18" x2="85" y2="12"/>
       <line x1="97" y1="23" x2="102" y2="18"/>
       <line x1="102" y1="35" x2="108" y2="35"/>

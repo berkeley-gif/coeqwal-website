@@ -313,7 +313,7 @@ const palette = {
 
   // Common colors (mirrored in MUI palette.common for consistency)
   common: {
-    white: "#f2f0ef", // Off-white
+    white: "#fcfbfa",
     black: "#000000",
   },
 

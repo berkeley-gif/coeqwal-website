@@ -10,7 +10,7 @@ export interface DeprecatedIconProps {
 }
 
 export function VisibleIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
@@ -33,7 +33,7 @@ export function VisibleIcon({
 }
 
 export function ArticleIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
@@ -54,7 +54,7 @@ export function ArticleIcon({
 }
 
 export function PeopleIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
@@ -88,7 +88,7 @@ export function PeopleIcon({
 }
 
 export function AlmondIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
@@ -144,7 +144,7 @@ export function AlmondIcon({
 }
 
 export function MoneyBagIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   delay = 0.5,
   animation = "hidden",
 }: DeprecatedIconProps) {
@@ -166,7 +166,7 @@ export function MoneyBagIcon({
 }
 
 export function FarmIcon({
-  color = "#f2f0ef",
+  color = "#fcfbfa",
   delay = 0.5,
   animation = "hidden",
 }: DeprecatedIconProps) {

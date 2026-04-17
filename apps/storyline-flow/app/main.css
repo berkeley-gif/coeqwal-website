@@ -3,7 +3,7 @@
   --primary-color-transparent: #1a447280;
   --dark-color: #021224;
   --light-color: #1a3a5c;
-  --text-color: #f2f0ef;
+  --text-color: #fcfbfa;
 }
 
 /* All for header */
@@ -157,7 +157,7 @@ html {
   width: 2rem;
   height: 2rem;
   background-color: transparent;
-  border: 5px solid #f2f0ef;
+  border: 5px solid #fcfbfa;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -166,7 +166,7 @@ html {
   width: 10rem;
   height: 10rem;
   background-color: transparent;
-  border: 10px solid #f2f0ef;
+  border: 10px solid #fcfbfa;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -175,7 +175,7 @@ html {
   width: 5rem;
   height: 5rem;
   background-color: transparent;
-  border: 7px solid #f2f0ef;
+  border: 7px solid #fcfbfa;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -183,7 +183,7 @@ html {
 .section-indicator {
   width: 0.5rem;
   height: 0.5rem;
-  background-color: #f2f0ef;
+  background-color: #fcfbfa;
   border-radius: 50%;
 }
 

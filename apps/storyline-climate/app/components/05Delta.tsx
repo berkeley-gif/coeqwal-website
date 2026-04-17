@@ -345,10 +345,10 @@ function MapControl({
           orientation="vertical"
           size="large"
           sx={{
-            color: "#f2f0ef",
+            color: "#fcfbfa",
             "& .MuiToggleButton-root": {
-              borderColor: "#f2f0ef",
-              color: "#f2f0ef",
+              borderColor: "#fcfbfa",
+              color: "#fcfbfa",
               padding: "10px 16px", // controls visual size
               fontSize: "1.2rem", // controls visual size
               borderRadius: 0,
@@ -359,11 +359,11 @@ function MapControl({
             },
             // selected state
             "& .MuiToggleButton-root.Mui-selected": {
-              backgroundColor: "#f2f0ef",
+              backgroundColor: "#fcfbfa",
               color: "#104472",
               "&:hover": {
                 color: "#3c71a0ff",
-                backgroundColor: "#f2f0ef",
+                backgroundColor: "#fcfbfa",
               },
             },
             "& .MuiToggleButton-root:first-of-type": {
@@ -393,7 +393,7 @@ function MapControl({
             justifyContent: "center",
           }}
         >
-          <p style={{ color: "#f2f0ef", fontSize: "1.4rem" }}>
+          <p style={{ color: "#fcfbfa", fontSize: "1.4rem" }}>
             {strategyContent[strategy]}
           </p>
         </Box>
@@ -469,7 +469,7 @@ function AdaptationParagraph() {
           <span style={{ fontWeight: "bold" }}>
             <a
               href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
-              style={{ color: "#f2f0ef", textDecoration: "underline" }}
+              style={{ color: "#fcfbfa", textDecoration: "underline" }}
             >
               Just Transitions in the Delta
             </a>

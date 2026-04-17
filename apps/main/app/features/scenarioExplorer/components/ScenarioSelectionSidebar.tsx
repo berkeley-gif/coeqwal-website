@@ -153,7 +153,7 @@ export default function ScenarioSelectionSidebar({
           px: 1.5,
           py: 1,
           borderBottom: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.common.white,
         }}
       >
         <SearchAndChips />
