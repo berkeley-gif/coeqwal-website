@@ -514,10 +514,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         const hasScenarioColors = lineColors.length > 0
         const dotR = 3.5
         const DIM_OPACITY = 0.15
-        const EMPHASIS_DOT_DELTA = 1
-        const EMPHASIS_STROKE_WIDTH = 1.85
-        const PIN_DOT_DELTA = 1.25
-        const HOVER_DOT_RADIUS_BUMP = 1.5
+        const EMPHASIS_DOT_DELTA = 1.2
+        const EMPHASIS_STROKE_WIDTH = 2
+        const PIN_DOT_DELTA = 1.45
+        const HOVER_DOT_RADIUS_BUMP = 1.7
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 
