@@ -426,6 +426,9 @@ export function StrategyHeader({
       : strategy.label
 
   if (compact) {
+    /** Matches title line box height for first-line-only legend dot alignment */
+    const compactTitleLineHeight = 1.3
+
     return (
       <Box sx={{ m: 0, p: 0 }}>
         <Box
@@ -456,19 +459,32 @@ export function StrategyHeader({
           onClick={onTitleClick}
           sx={{
             display: "flex",
-            alignItems: "baseline",
+            alignItems: "flex-start",
             gap: titleStartAdornment ? "6px" : 0,
             color: theme.palette.text.primary,
             cursor: onTitleClick ? "pointer" : "default",
             fontSize: "0.8125rem",
             fontWeight: 500,
-            lineHeight: 1.3,
+            lineHeight: compactTitleLineHeight,
             m: 0,
             p: 0,
           }}
         >
-          {titleStartAdornment}
-          {displayLabel}
+          {titleStartAdornment ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexShrink: 0,
+                height: `${compactTitleLineHeight}em`,
+              }}
+            >
+              {titleStartAdornment}
+            </Box>
+          ) : null}
+          <Box component="span" sx={{ flex: 1, minWidth: 0 }}>
+            {displayLabel}
+          </Box>
         </Box>
         {showDescription && (
           <CompactDescription
