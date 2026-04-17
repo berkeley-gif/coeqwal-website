@@ -594,6 +594,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         // 7. Dots layer
         const dotsLayer = g.append("g").attr("class", "dots")
 
+        // 8. Highlight overlay (always above dots so the active-map ring isn't occluded)
+        g.append("g").attr("class", "highlight-overlay")
+
         // Compute dodge offsets per axis (perpendicular to spoke)
         const dodgeMap = new Map<string, number>()
         const dotDiam = dotR * 2 + 1.5
@@ -741,6 +744,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("data-scenario-id", scenario.id)
               .attr("data-axis", axis)
               .attr("data-dodge", dodgeOff)
+              .attr("data-final-cx", dotX)
+              .attr("data-final-cy", dotY)
 
             dot
               .transition()
@@ -1180,13 +1185,17 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
       return () => ro.disconnect()
     }, [responsive])
 
-    // Imperatively manage the active-map-dot highlight ring without
+    // Imperatively manage the active-map-dot highlight without
     // triggering a full SVG rebuild when the active outcome changes.
+    // Glow, ring, and a copy of the dot are placed in a dedicated
+    // overlay group that sits above the dots layer in SVG paint order.
     useEffect(() => {
       const svg = select(svgRef.current)
-      svg.selectAll(".active-map-ring, .active-map-glow").remove()
+      const overlay = svg.select("g.highlight-overlay")
+      if (!overlay.empty()) overlay.selectAll("*").remove()
 
       if (!activeMapDot) return
+      if (overlay.empty()) return
 
       const dotsLayer = svg.select("g.dots")
       if (dotsLayer.empty()) return
@@ -1201,12 +1210,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             sid === activeMapDot.scenarioId &&
             axisName === activeMapDot.axis
           ) {
-            const dotCx = parseFloat(el.attr("cx"))
-            const dotCy = parseFloat(el.attr("cy"))
+            const dotCx = parseFloat(el.attr("data-final-cx") ?? el.attr("cx"))
+            const dotCy = parseFloat(el.attr("data-final-cy") ?? el.attr("cy"))
             const fill = el.attr("fill") ?? colors.default
             const baseR = 4
-            dotsLayer
-              .insert("circle", ":first-child")
+            overlay
+              .append("circle")
               .attr("class", "active-map-glow")
               .attr("cx", dotCx)
               .attr("cy", dotCy)
@@ -1214,8 +1223,8 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("fill", fill)
               .attr("fill-opacity", 0.12)
               .attr("pointer-events", "none")
-            dotsLayer
-              .insert("circle", "circle.radar-dot")
+            overlay
+              .append("circle")
               .attr("class", "active-map-ring")
               .attr("cx", dotCx)
               .attr("cy", dotCy)
@@ -1225,7 +1234,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("stroke-width", 2.5)
               .attr("stroke-opacity", 0.7)
               .attr("pointer-events", "none")
-            el.attr("r", baseR + 2).raise()
+            overlay
+              .append("circle")
+              .attr("class", "active-map-dot-copy")
+              .attr("cx", dotCx)
+              .attr("cy", dotCy)
+              .attr("r", baseR + 2)
+              .attr("fill", fill)
+              .attr("fill-opacity", 1)
+              .attr("stroke", "#fff")
+              .attr("stroke-width", 1)
+              .attr("stroke-opacity", 1)
+              .attr("pointer-events", "none")
           }
         })
     }, [activeMapDot, colors.default, data.length])
