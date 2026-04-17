@@ -71,23 +71,24 @@ export default function RadarPanel({
 }: RadarPanelProps) {
   const theme = useTheme()
 
-  const radarAxisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
-    const axisTypo = theme.typography.axisLabel
+  const radarAxisLabelDetailStyle =
+    useMemo((): RadarPlotAxisLabelDetailStyle => {
+      const axisTypo = theme.typography.axisLabel
 
-    return mergeRadarAxisLabelDetailStyle({
-      fontFamily: axisTypo.fontFamily as string,
-      scenarioFontSize: axisTypo.fontSize as string,
-      scenarioFontWeight: Number(axisTypo.fontWeight),
-      scenarioLetterSpacing: axisTypo.letterSpacing as string,
-      tierFontSize: theme.typography.compactCaption.fontSize as string,
-      tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
-      panelFill: theme.palette.common.white,
-      panelStroke: "none",
-      scenarioFill: "#193D6B",
-      tierFill: "#193D6B",
-      axisTitleFill: "#193D6B",
-    })
-  }, [theme])
+      return mergeRadarAxisLabelDetailStyle({
+        fontFamily: axisTypo.fontFamily as string,
+        scenarioFontSize: axisTypo.fontSize as string,
+        scenarioFontWeight: Number(axisTypo.fontWeight),
+        scenarioLetterSpacing: axisTypo.letterSpacing as string,
+        tierFontSize: theme.typography.compactCaption.fontSize as string,
+        tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
+        panelFill: theme.palette.common.white,
+        panelStroke: "none",
+        scenarioFill: "#193D6B",
+        tierFill: "#193D6B",
+        axisTitleFill: "#193D6B",
+      })
+    }, [theme])
 
   const {
     selectedScenarios,
@@ -730,35 +731,29 @@ export default function RadarPanel({
           </ChartToast>
         )}
 
-        {!noScenariosSelected &&
-          !isLoading &&
-          visibleAxisNames.length <= 2 && (
-            <ChartToast maxWidth={440}>
-              <Box
-                sx={{
-                  pointerEvents: "auto",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                }}
-              >
-                <Box component="span">
-                  To show data, use
-                </Box>
-                <InlineToggleChip
-                  label="choose axes"
-                  active={showAxisSelector}
-                  onClick={() => setShowAxisSelector(!showAxisSelector)}
-                  onDarkBackground
-                />
-                <Box component="span">
-                  in the chart controls above.
-                </Box>
-              </Box>
-            </ChartToast>
-          )}
+        {!noScenariosSelected && !isLoading && visibleAxisNames.length <= 2 && (
+          <ChartToast maxWidth={440}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">To show data, use</Box>
+              <InlineToggleChip
+                label="choose axes"
+                active={showAxisSelector}
+                onClick={() => setShowAxisSelector(!showAxisSelector)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
+          </ChartToast>
+        )}
       </Box>
 
       {isLoading && hasData && (

@@ -315,7 +315,10 @@ export default function GetStartedView() {
                     cursor: "pointer",
                     font: "inherit",
                     "&:hover": {
-                      textDecorationColor: alpha(theme.palette.common.white, 0.8),
+                      textDecorationColor: alpha(
+                        theme.palette.common.white,
+                        0.8,
+                      ),
                     },
                   }}
                 >

@@ -61,9 +61,7 @@ export function BarredColumns({
             py: 2,
           }}
         >
-          {icon && (
-            <Box sx={{ mb: 1, mt: "1px", lineHeight: 0 }}>{icon}</Box>
-          )}
+          {icon && <Box sx={{ mb: 1, mt: "1px", lineHeight: 0 }}>{icon}</Box>}
           <Typography variant={titleVariant} sx={{ fontWeight: 600 }}>
             {title}
           </Typography>
