@@ -281,4 +281,4 @@ props type. It also exports:
 
 - **`useResizeObserver`** - shared responsive sizing hook
 - **D3 utilities** - `parseDecileData`, `createDecileColorScale`, `formatValue`, etc. from `utils/d3-utils.ts`
-- **Color palettes** - `THEME_LINE_PALETTES`, `getThemeLineColor` from `utils/themeLineColors.ts`
+- **Color palettes** - `THEME_LINE_PALETTES`, `THEME_LINE_PALETTES_LIGHT_TO_DARK` (light→dark for chart indices), `getThemeLineColor` from `utils/themeLineColors.ts`
