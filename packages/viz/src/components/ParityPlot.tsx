@@ -10,6 +10,7 @@ import {
   select,
 } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 
 export interface ParityPlotProps {
@@ -330,7 +331,13 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
         // Opacity logic
         const getOpacity = (id: string) => {
           if (sidebarHighlightActive) {
-            return highlightedIds!.has(id) ? 1.0 : 0.08
+            return isFullOpacityDuringSidebarHighlight(
+              id,
+              highlightedIds,
+              chosenIds,
+            )
+              ? 1.0
+              : 0.08
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(id) ? 0.85 : 0.2
@@ -460,7 +467,11 @@ const ParityPlot: React.FC<ParityPlotProps> = React.memo(
               .attr("data-axis", axis)
               .attr("data-base-r", baseRadius)
             const targetR = sidebarHighlightActive
-              ? highlightedIds!.has(scenario.id)
+              ? isFullOpacityDuringSidebarHighlight(
+                  scenario.id,
+                  highlightedIds,
+                  chosenIds,
+                )
                 ? baseRadius + 1.5
                 : baseRadius * 0.7
               : baseRadius

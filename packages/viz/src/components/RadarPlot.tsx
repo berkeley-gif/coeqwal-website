@@ -31,7 +31,15 @@ export interface RadarPlotProps {
   /** @deprecated Prefer onDotHover which fires immediately with outcome detail. */
   onLineHover?: (data: VerticalParallelLineData | null) => void
   onLineClick?: (data: VerticalParallelLineData) => void
+  /**
+   * User-selected scenarios — stay fully visible even when `highlightedIds` is
+   * set (e.g. sidebar row hover); see `resolveVisuals` external-highlight policy.
+   */
   chosenIds?: Set<string>
+  /**
+   * Transient IDs to emphasize from outside the chart (sidebar / theme header
+   * hover). Does not replace `chosenIds`: selected traces remain opaque.
+   */
   highlightedIds?: Set<string> | null
   highlightBaseline?: boolean
   showScenarioPath?: boolean
@@ -562,6 +570,36 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
 
+        /**
+         * External highlight (`highlightedIds`): emphasize those traces only;
+         * chosen, baseline, and pinned stay at normal resting emphasis (not dimmed).
+         * Chart dot hover (`focusId`) unchanged.
+         */
+        const selectedOrBaselineVisuals = {
+          dotR: dotR + EMPHASIS_DOT_DELTA,
+          opacity: 1.0,
+          strokeWidth: EMPHASIS_STROKE_WIDTH,
+          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+        } as const
+        const pinnedVisuals = {
+          dotR: dotR + PIN_DOT_DELTA,
+          opacity: 1.0,
+          strokeWidth: EMPHASIS_STROKE_WIDTH,
+          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+        } as const
+        const externalDimVisuals = {
+          dotR: dotR * 0.7,
+          opacity: DIM_OPACITY,
+          strokeWidth: 1.2,
+          strokeOpacity: DIM_OPACITY,
+        } as const
+        const hoverEmphasisVisuals = {
+          dotR: dotR + EMPHASIS_DOT_DELTA,
+          opacity: 1.0,
+          strokeWidth: EMPHASIS_STROKE_WIDTH,
+          strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
+        } as const
+
         const resolveVisuals = (
           scenarioId: string,
           focusId?: string | null,
@@ -585,39 +623,21 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             hasExternalHighlight
 
           if (isFocused || isExternallyHighlighted) {
-            return {
-              dotR: dotR + EMPHASIS_DOT_DELTA,
-              opacity: 1.0,
-              strokeWidth: EMPHASIS_STROKE_WIDTH,
-              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-            }
+            return hoverEmphasisVisuals
           }
 
           if (hasExternalHighlight) {
-            return {
-              dotR: dotR * 0.7,
-              opacity: DIM_OPACITY,
-              strokeWidth: 1.2,
-              strokeOpacity: DIM_OPACITY,
-            }
+            if (isSelected || isBaseline) return selectedOrBaselineVisuals
+            if (isPinned) return pinnedVisuals
+            return externalDimVisuals
           }
 
           if (isSelected || isBaseline) {
-            return {
-              dotR: dotR + EMPHASIS_DOT_DELTA,
-              opacity: 1.0,
-              strokeWidth: EMPHASIS_STROKE_WIDTH,
-              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-            }
+            return selectedOrBaselineVisuals
           }
 
           if (isPinned) {
-            return {
-              dotR: dotR + PIN_DOT_DELTA,
-              opacity: 1.0,
-              strokeWidth: EMPHASIS_STROKE_WIDTH,
-              strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
-            }
+            return pinnedVisuals
           }
 
           if (anyHighlightActive) {

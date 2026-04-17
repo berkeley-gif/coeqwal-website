@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import { scaleBand, scaleLinear, select, line } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 
 export interface DeviationPlotProps {
@@ -708,7 +709,13 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
 
         const getOpacity = (id: string) => {
           if (sidebarHighlightActive) {
-            return highlightedIds!.has(id) ? 1.0 : 0.08
+            return isFullOpacityDuringSidebarHighlight(
+              id,
+              highlightedIds,
+              chosenIds,
+            )
+              ? 1.0
+              : 0.08
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(id) ? 0.9 : 0.25
@@ -1073,7 +1080,11 @@ const DeviationPlot: React.FC<DeviationPlotProps> = React.memo(
                 .attr("data-base-r", dotR)
 
               const targetR = sidebarHighlightActive
-                ? highlightedIds!.has(scenario.id)
+                ? isFullOpacityDuringSidebarHighlight(
+                    scenario.id,
+                    highlightedIds,
+                    chosenIds,
+                  )
                   ? dotR + 1.5
                   : dotR * 0.7
                 : dotR

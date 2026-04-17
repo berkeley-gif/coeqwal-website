@@ -134,6 +134,8 @@ export {
   getNestedValue,
 } from "./utils/d3-utils"
 
+export { isFullOpacityDuringSidebarHighlight } from "./utils/sidebarHighlightPolicy"
+
 export {
   THEME_LINE_PALETTES,
   THEME_LINE_PALETTES_LIGHT_TO_DARK,

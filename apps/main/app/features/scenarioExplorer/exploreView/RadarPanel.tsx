@@ -5,7 +5,8 @@
  *
  * Wraps the @repo/viz RadarPlot component with store-driven data
  * via the shared useComparisonData hook. Supports hover coordination
- * with the sidebar and other panels.
+ * with the sidebar and other panels. Sidebar `highlightedIds` append
+ * scenarios to the chart so their traces render even when not selected.
  */
 
 import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
@@ -205,26 +206,46 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
-  const filteredData = useMemo(() => {
-    if (radarShowAll) return comparisonData
-    if (selectedScenarios.length === 0) return []
-    return comparisonData.filter((d) => selectedSet.has(d.id))
-  }, [comparisonData, selectedSet, selectedScenarios.length, radarShowAll])
+  /** Stable palette index aligned with `comparisonData`. */
+  const scenarioColorById = useMemo(() => {
+    const m = new Map<string, string>()
+    comparisonData.forEach((d, i) => {
+      m.set(d.id, lineColors[i] ?? "#666666")
+    })
+    return m
+  }, [comparisonData, lineColors])
 
-  const filteredLineColors = useMemo(() => {
-    if (radarShowAll) return lineColors
-    if (selectedScenarios.length === 0) return []
-    return comparisonData
-      .map((d, i) => ({ id: d.id, color: lineColors[i] ?? "#666666" }))
-      .filter(({ id }) => selectedSet.has(id))
-      .map(({ color }) => color)
+  const filteredData = useMemo(() => {
+    let base: typeof comparisonData
+    if (radarShowAll) base = comparisonData
+    else if (selectedScenarios.length === 0) base = []
+    else base = comparisonData.filter((d) => selectedSet.has(d.id))
+
+    if (highlightedIds == null || highlightedIds.size === 0) return base
+
+    const seen = new Set(base.map((d) => d.id))
+    const merged = [...base]
+    for (const id of highlightedIds) {
+      if (seen.has(id)) continue
+      const row = comparisonData.find((d) => d.id === id)
+      if (row) {
+        merged.push(row)
+        seen.add(id)
+      }
+    }
+    return merged
   }, [
     comparisonData,
-    lineColors,
     selectedSet,
     selectedScenarios.length,
     radarShowAll,
+    highlightedIds,
   ])
+
+  const filteredLineColors = useMemo(
+    () => filteredData.map((d) => scenarioColorById.get(d.id) ?? "#666666"),
+    [filteredData, scenarioColorById],
+  )
 
   const scenarioColorMap = useMemo(() => {
     const map: Record<string, string> = {}
@@ -507,7 +528,7 @@ export default function RadarPanel({
     )
   }
 
-  const noScenariosSelected = selectedScenarios.length === 0 && !radarShowAll
+  const hasRadarTraceData = filteredData.length > 0
 
   return (
     <Box
@@ -753,7 +774,7 @@ export default function RadarPanel({
         )}
         */}
 
-        {noScenariosSelected && !isLoading && (
+        {!hasRadarTraceData && !isLoading && (
           <ChartToast maxWidth={480}>
             <Box
               sx={{
@@ -779,7 +800,7 @@ export default function RadarPanel({
           </ChartToast>
         )}
 
-        {!noScenariosSelected && !isLoading && visibleAxisNames.length <= 2 && (
+        {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
           <ChartToast maxWidth={440}>
             <Box
               sx={{
