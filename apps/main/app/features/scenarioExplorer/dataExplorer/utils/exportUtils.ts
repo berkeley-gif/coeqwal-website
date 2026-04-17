@@ -1,4 +1,5 @@
 import type { OutcomeMetric } from "../../config/outcomeDefinitions"
+import { themeValues } from "@repo/ui/themes/theme"
 
 /**
  * Export utilities for Data Explorer
@@ -484,7 +485,8 @@ export async function captureSvgToBlob(
   svgElement: SVGSVGElement,
   options: { scale?: number; backgroundColor?: string } = {},
 ): Promise<{ blob: Blob; dataUrl: string }> {
-  const { scale = 2, backgroundColor = "#ffffff" } = options
+  const { scale = 2, backgroundColor = themeValues.palette.common.white } =
+    options
 
   const clone = svgElement.cloneNode(true) as SVGSVGElement
   inlineStyles(clone, svgElement)
@@ -560,7 +562,8 @@ export async function rasterizeSvgClone(
   height: number,
   options: { scale?: number; backgroundColor?: string } = {},
 ): Promise<{ blob: Blob; dataUrl: string }> {
-  const { scale = 2, backgroundColor = "#ffffff" } = options
+  const { scale = 2, backgroundColor = themeValues.palette.common.white } =
+    options
 
   clone.removeAttribute("style")
   clone.setAttribute("width", String(width))
@@ -620,7 +623,8 @@ export async function captureElementToBlob(
   element: HTMLElement,
   options: { scale?: number; backgroundColor?: string } = {},
 ): Promise<{ blob: Blob; dataUrl: string }> {
-  const { scale = 2, backgroundColor = "#ffffff" } = options
+  const { scale = 2, backgroundColor = themeValues.palette.common.white } =
+    options
   const rect = element.getBoundingClientRect()
   const canvasW = rect.width * scale
   const canvasH = rect.height * scale

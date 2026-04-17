@@ -231,7 +231,7 @@ export default function ShareRadarCard({
             height: "auto",
             objectFit: "contain",
             borderRadius: "4px",
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.common.white,
             mt: 1,
           }}
         />

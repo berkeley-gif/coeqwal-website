@@ -8,7 +8,7 @@
  */
 
 import React from "react"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { TruncatedText } from "@repo/ui"
 import { hydroclimateOptions } from "../content/scenarios"
 import { HYDROCLIMATE_CONFIG } from "../features/scenarios/components/HydroclimateChooser"
@@ -23,6 +23,7 @@ const ICON_SIZE = 16
 export default function HydroclimateList({
   color = "inherit",
 }: HydroclimateListProps) {
+  const theme = useTheme()
   return (
     <Box sx={{ width: "100%" }}>
       {/* Intro text */}
@@ -97,7 +98,7 @@ export default function HydroclimateList({
                 >
                   <IconComponent
                     sx={{
-                      color: "#ffffff",
+                      color: theme.palette.common.white,
                       fontSize: ICON_SIZE * 0.65,
                     }}
                   />

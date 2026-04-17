@@ -1,4 +1,4 @@
-import { createTheme, Theme } from "@mui/material/styles"
+import { createTheme, Theme, alpha } from "@mui/material/styles"
 
 /* ========================================================
  * COEQWAL MUI THEME
@@ -502,9 +502,9 @@ const background = {
     dark: "rgba(0, 0, 0, 0.8)",
   },
   whiteOverlay: {
-    50: "rgba(255, 255, 255, 0.5)", // Semi-transparent white
-    85: "rgba(255, 255, 255, 0.85)", // Readable overlay with map context showing through
-    95: "rgba(255, 255, 255, 0.95)", // Nearly opaque panels
+    50: alpha(palette.common.white, 0.5),
+    85: alpha(palette.common.white, 0.85),
+    95: alpha(palette.common.white, 0.95),
   },
 }
 
@@ -850,10 +850,10 @@ const theme = createTheme({
       background: "#94B8DA",
       text: themeValues.palette.blue.darkest,
     },
-    // MUI standard colors
+    // MUI standard colors (surfaces use warm off-white = common.white)
     background: {
-      default: "#FFFFFF",
-      paper: "#FFFFFF", // Solid white for UI backgrounds
+      default: themeValues.palette.common.white,
+      paper: themeValues.palette.common.white,
     },
     text: {
       primary: themeValues.palette.brand.panelDark,
@@ -864,7 +864,7 @@ const theme = createTheme({
       hover: themeValues.palette.grey[100],
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
-      disabledBackground: "#FFFFFF",
+      disabledBackground: themeValues.palette.common.white,
     },
     interaction: {
       hoverBackground: themeValues.palette.grey[100],

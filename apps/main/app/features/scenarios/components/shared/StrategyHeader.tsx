@@ -386,8 +386,7 @@ function CompactDescription({
               bottom: 0,
               right: 0,
               pl: 3,
-              background:
-                "linear-gradient(to right, transparent, var(--row-bg, #fff) 40%)",
+              background: `linear-gradient(to right, transparent, var(--row-bg, ${theme.palette.common.white}) 40%)`,
             }}
           >
             … more

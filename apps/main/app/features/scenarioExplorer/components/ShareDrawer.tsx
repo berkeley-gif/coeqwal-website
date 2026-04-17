@@ -123,7 +123,7 @@ function ShareTab({
         cursor: "pointer",
         pointerEvents: "auto",
         backgroundColor: theme.palette.blue.bright,
-        color: "#fff",
+        color: theme.palette.common.white,
         boxShadow: "-2px 0 8px rgba(0,0,0,0.15)",
         "&:hover": {
           backgroundColor: theme.palette.blue.darkest,
@@ -161,7 +161,7 @@ function ShareTab({
             minWidth: 18,
             height: 18,
             borderRadius: "9px",
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.common.white,
             color: theme.palette.blue.bright,
             fontSize: "0.625rem",
             fontWeight: 700,

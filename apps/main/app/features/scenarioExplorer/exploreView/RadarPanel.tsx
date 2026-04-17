@@ -13,6 +13,7 @@ import {
   Box,
   Typography,
   useTheme,
+  alpha,
   CircularProgress,
   Checkbox,
 } from "@repo/ui/mui"
@@ -81,7 +82,7 @@ export default function RadarPanel({
       scenarioLetterSpacing: axisTypo.letterSpacing as string,
       tierFontSize: theme.typography.compactCaption.fontSize as string,
       tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
-      panelFill: "rgba(255,255,255,0.9)",
+      panelFill: alpha(theme.palette.common.white, 0.9),
       panelStroke: "none",
       scenarioFill: primary,
       tierFill: primary,
