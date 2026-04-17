@@ -20,7 +20,8 @@ import { createTheme, Theme } from "@mui/material/styles"
  *                       palette, typography, components
  *                       Typography variants: h1, h2–h6, body1, body2,
  *                       nav, tabLabel, tabLabelDocked, storyBody, displayBody,
- *                       dashboard, panelTitle, subtitle1/2, caption, overline
+ *                       dashboard, panelTitle, subtitle1/2, caption, overline,
+ *                       compactTitle–micro, axisLabel, scenarioTitle, …
  *
  * 5. Post-creation    - Attach design tokens to theme object (theme.space, etc.)
  *
@@ -1072,6 +1073,17 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.4,
     },
+    /**
+     * Radar chart (and similar): static spoke labels and scenario title in SVG hover cards.
+     * Matches former 13px / 500 / 0.04em axis styling (0.8125rem at 16px root).
+     */
+    axisLabel: {
+      fontFamily: themeValues.fontFamily.text,
+      fontSize: "0.8125rem", // 13px
+      fontWeight: 500,
+      lineHeight: 1.2,
+      letterSpacing: "0.04em",
+    },
     compactCaption: {
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.caption, // 0.75rem (12px)
@@ -1504,6 +1516,7 @@ const theme = createTheme({
           nav: "span",
           compactTitle: "span",
           compactSubtitle: "span",
+          axisLabel: "span",
           compactCaption: "span",
           compactMicro: "span",
         },
@@ -1878,6 +1891,7 @@ declare module "@mui/material/styles" {
     outcomeHeader: React.CSSProperties
     compactTitle: React.CSSProperties
     compactSubtitle: React.CSSProperties
+    axisLabel: React.CSSProperties
     compactCaption: React.CSSProperties
     compactMicro: React.CSSProperties
     tooltipHeader: React.CSSProperties
@@ -1898,6 +1912,7 @@ declare module "@mui/material/styles" {
     outcomeHeader?: React.CSSProperties
     compactTitle?: React.CSSProperties
     compactSubtitle?: React.CSSProperties
+    axisLabel?: React.CSSProperties
     compactCaption?: React.CSSProperties
     compactMicro?: React.CSSProperties
     tooltipHeader?: React.CSSProperties
@@ -1929,6 +1944,7 @@ declare module "@mui/material/Typography" {
     outcomeHeader: true
     compactTitle: true
     compactSubtitle: true
+    axisLabel: true
     compactCaption: true
     compactMicro: true
     tooltipHeader: true

@@ -16,7 +16,11 @@ import {
   CircularProgress,
   Checkbox,
 } from "@repo/ui/mui"
-import { RadarPlot } from "@repo/viz"
+import {
+  RadarPlot,
+  mergeRadarAxisLabelDetailStyle,
+  type RadarPlotAxisLabelDetailStyle,
+} from "@repo/viz"
 import { ChartToast, InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
@@ -65,6 +69,25 @@ export default function RadarPanel({
   onSingleCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
+
+  const radarAxisLabelDetailStyle = useMemo((): RadarPlotAxisLabelDetailStyle => {
+    const axisTypo = theme.typography.axisLabel
+    const primary = theme.palette.text.primary
+
+    return mergeRadarAxisLabelDetailStyle({
+      fontFamily: axisTypo.fontFamily as string,
+      scenarioFontSize: axisTypo.fontSize as string,
+      scenarioFontWeight: Number(axisTypo.fontWeight),
+      scenarioLetterSpacing: axisTypo.letterSpacing as string,
+      tierFontSize: theme.typography.compactCaption.fontSize as string,
+      tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
+      panelFill: "rgba(255,255,255,0.9)",
+      panelStroke: "none",
+      scenarioFill: primary,
+      tierFill: primary,
+      axisTitleFill: primary,
+    })
+  }, [theme])
 
   const {
     highlightedScenario,
@@ -611,6 +634,7 @@ export default function RadarPanel({
             onLineClick={(d) => {
               setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
             }}
+            axisLabelDetailStyle={radarAxisLabelDetailStyle}
           />
         </Box>
 
