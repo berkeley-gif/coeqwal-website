@@ -160,7 +160,11 @@ const DotStripPlot: React.FC<DotStripPlotProps> = React.memo(
         // Opacity logic
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return isFullOpacityDuringSidebarHighlight(id, highlightedIds, chosenIds)
+            return isFullOpacityDuringSidebarHighlight(
+              id,
+              highlightedIds,
+              chosenIds,
+            )
               ? 1.0
               : 0.12
           }

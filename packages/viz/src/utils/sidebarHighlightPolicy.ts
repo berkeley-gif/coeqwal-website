@@ -10,7 +10,5 @@ export function isFullOpacityDuringSidebarHighlight(
   chosenIds: Set<string> | null | undefined,
 ): boolean {
   if (highlightedIds == null || highlightedIds.size === 0) return false
-  return (
-    highlightedIds.has(scenarioId) || (chosenIds?.has(scenarioId) ?? false)
-  )
+  return highlightedIds.has(scenarioId) || (chosenIds?.has(scenarioId) ?? false)
 }

@@ -407,45 +407,46 @@ export default function RadarPanel({
 
   const axisDetailChromeRootsRef = useRef(new Map<HTMLDivElement, Root>())
 
-  const axisLabelDetailChrome = useMemo((): RadarAxisLabelDetailChromeOptions => {
-    return {
-      onBeforeSvgDomClear() {
-        const map = axisDetailChromeRootsRef.current
-        for (const root of map.values()) {
-          root.unmount()
-        }
-        map.clear()
-      },
-      onScenarioControlsMount(host, payload) {
-        const map = axisDetailChromeRootsRef.current
-        let root = map.get(host)
-        if (!root) {
-          root = createRoot(host)
-          map.set(host, root)
-        }
-        const scenarioLabel = getDisplayName(payload.scenarioId)
-        const lineColor = scenarioColorMap[payload.scenarioId] ?? "#666666"
-        const accentColor = lineColor || theme.palette.blue.bright
+  const axisLabelDetailChrome =
+    useMemo((): RadarAxisLabelDetailChromeOptions => {
+      return {
+        onBeforeSvgDomClear() {
+          const map = axisDetailChromeRootsRef.current
+          for (const root of map.values()) {
+            root.unmount()
+          }
+          map.clear()
+        },
+        onScenarioControlsMount(host, payload) {
+          const map = axisDetailChromeRootsRef.current
+          let root = map.get(host)
+          if (!root) {
+            root = createRoot(host)
+            map.set(host, root)
+          }
+          const scenarioLabel = getDisplayName(payload.scenarioId)
+          const lineColor = scenarioColorMap[payload.scenarioId] ?? "#666666"
+          const accentColor = lineColor || theme.palette.blue.bright
 
-        root.render(
-          <RadarAxisDetailScenarioControlsRoot
-            theme={theme}
-            scenarioId={payload.scenarioId}
-            scenarioLabel={scenarioLabel}
-            lineColor={lineColor}
-            accentColor={accentColor}
-            chromePaddingLeftPx={payload.chromePaddingLeftPx}
-            captureSingle={captureSingleScenarioRadar}
-          />,
-        )
-      },
-      onScenarioControlsUnmount(host) {
-        const r = axisDetailChromeRootsRef.current.get(host)
-        r?.unmount()
-        axisDetailChromeRootsRef.current.delete(host)
-      },
-    }
-  }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
+          root.render(
+            <RadarAxisDetailScenarioControlsRoot
+              theme={theme}
+              scenarioId={payload.scenarioId}
+              scenarioLabel={scenarioLabel}
+              lineColor={lineColor}
+              accentColor={accentColor}
+              chromePaddingLeftPx={payload.chromePaddingLeftPx}
+              captureSingle={captureSingleScenarioRadar}
+            />,
+          )
+        },
+        onScenarioControlsUnmount(host) {
+          const r = axisDetailChromeRootsRef.current.get(host)
+          r?.unmount()
+          axisDetailChromeRootsRef.current.delete(host)
+        },
+      }
+    }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
 
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 

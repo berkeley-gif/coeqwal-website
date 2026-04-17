@@ -238,7 +238,11 @@ const PairedParallelPlot: React.FC<PairedParallelPlotProps> = React.memo(
 
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return isFullOpacityDuringSidebarHighlight(id, highlightedIds, chosenIds)
+            return isFullOpacityDuringSidebarHighlight(
+              id,
+              highlightedIds,
+              chosenIds,
+            )
               ? 1.0
               : 0.08
           }
