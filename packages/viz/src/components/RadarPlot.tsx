@@ -11,6 +11,7 @@ import {
   RADAR_TIER_LABELS,
   RADAR_TIER_SWATCH_COLORS,
   type RadarAxisLabelDetailPayload,
+  radarAxisDetailBottomModeForIndex,
 } from "./radarAxisLabelDetail"
 
 export type { RadarPlotAxisLabelDetailStyle } from "./radarAxisLabelDetail"
@@ -1142,6 +1143,10 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             .attr("data-label-x", lx)
             .attr("data-detail-y", detailY)
             .attr("data-text-anchor", anchor)
+            .attr(
+              "data-detail-bottom-mode",
+              radarAxisDetailBottomModeForIndex(i, axes.length),
+            )
 
           if (curated) {
             labelGroup
