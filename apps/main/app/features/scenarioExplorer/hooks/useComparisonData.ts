@@ -19,8 +19,12 @@ import {
   ALL_RADAR_AXES_ORDER,
 } from "../../../content/outcomes"
 import nodSodTiers from "../data/nod-sod-tiers.json"
+import {
+  PRIMARY_SCENARIO_BASELINE_ID,
+  buildIndexWithinThemeMap,
+} from "../utils/scenarioIdSort"
 
-const PRIMARY_BASELINE_ID = "s0020"
+const PRIMARY_BASELINE_ID = PRIMARY_SCENARIO_BASELINE_ID
 export const SANKEY_ALL_OUTCOMES = "__ALL__"
 
 const nodSodData = nodSodTiers as Record<string, Record<string, number | null>>
@@ -103,36 +107,52 @@ export function useComparisonData() {
     getThemeForScenario,
   ])
 
+  const scenarioIndexWithinTheme = useMemo(
+    () => buildIndexWithinThemeMap(scenarioIds, getThemeForScenario),
+    [scenarioIds, getThemeForScenario],
+  )
+
+  const allScenarioIndexWithinTheme = useMemo(
+    () => buildIndexWithinThemeMap(allScenarioIds, getThemeForScenario),
+    [allScenarioIds, getThemeForScenario],
+  )
+
   // Build scenarios array with dynamic names and theme-aligned colors.
-  // Per-theme counters ensure each scenario gets the next step in its theme's
-  // ColorBrewer multi-hue ramp (baseline = YlOrBr, ag_gw = YlGn, etc.).
+  // Within each theme, palette index follows the same order as the scenario sidebar
+  // (primary baseline first, then ascending short code).
   const scenarios = useMemo(() => {
-    const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return scenarioIds.map((id) => {
       const theme = getThemeForScenario(id) as ThemeKey
-      const idx = themeCounters[theme] ?? 0
-      themeCounters[theme] = idx + 1
+      const idx = scenarioIndexWithinTheme.get(id) ?? 0
       return {
         id,
         name: getDisplayName(id),
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [scenarioIds, getDisplayName, getThemeForScenario])
+  }, [
+    scenarioIds,
+    getDisplayName,
+    getThemeForScenario,
+    scenarioIndexWithinTheme,
+  ])
 
   const allScenarios = useMemo(() => {
-    const themeCounters: Partial<Record<ThemeKey, number>> = {}
     return allScenarioIds.map((id) => {
       const theme = getThemeForScenario(id) as ThemeKey
-      const idx = themeCounters[theme] ?? 0
-      themeCounters[theme] = idx + 1
+      const idx = allScenarioIndexWithinTheme.get(id) ?? 0
       return {
         id,
         name: getDisplayName(id),
         color: getThemeLineColor(theme, idx, id),
       }
     })
-  }, [allScenarioIds, getDisplayName, getThemeForScenario])
+  }, [
+    allScenarioIds,
+    getDisplayName,
+    getThemeForScenario,
+    allScenarioIndexWithinTheme,
+  ])
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
     if (!allScoreData || Object.keys(allScoreData).length === 0) {

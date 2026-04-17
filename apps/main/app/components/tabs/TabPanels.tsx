@@ -23,6 +23,7 @@ import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
 import SharePanel from "../tabPanels/Share"
 import { useScenarioExplorerStore } from "../../features/scenarioExplorer/store"
+import { parseShareItemsParam } from "../tabPanels/Share"
 
 const panelVariants = {
   enter: { opacity: 0, x: 30 },
@@ -83,17 +84,48 @@ export default function TabPanels() {
       navigateToTab(urlTab)
     }
 
-    const scenariosParam = params.get("scenarios")
-    if (scenariosParam) {
-      const ids = scenariosParam.split(",").filter(Boolean)
-      if (ids.length > 0) {
-        useScenarioExplorerStore.getState().setSharedScenarioIds(ids)
-      }
-    }
-
     const climateParam = params.get("climate")
     if (climateParam) {
       useScenarioExplorerStore.getState().setHydroclimate(climateParam)
+    }
+
+    const itemsParam = params.get("items")
+    if (itemsParam) {
+      const storyParam = params.get("story") ?? undefined
+      const { items: parsed, storyItemIds } = parseShareItemsParam(
+        itemsParam,
+        storyParam,
+      )
+      if (parsed.length > 0) {
+        const store = useScenarioExplorerStore.getState()
+        store.setShareItems(parsed)
+        if (storyItemIds.length > 0) {
+          store.reorderStory(storyItemIds)
+        }
+      }
+    } else {
+      const scenariosParam = params.get("scenarios")
+      if (scenariosParam) {
+        const ids = scenariosParam.split(",").filter(Boolean)
+        if (ids.length > 0) {
+          const items = ids.map((raw) => {
+            const [scenarioId, modeSuffix] = raw.includes(":")
+              ? [raw.split(":")[0]!, raw.split(":")[1]]
+              : [raw, undefined]
+            return {
+              id: crypto.randomUUID(),
+              type: "barChart" as const,
+              scenarioId,
+              viewMode:
+                modeSuffix === "distribution"
+                  ? ("distribution" as const)
+                  : ("summary" as const),
+              hydroclimate: climateParam || "historical",
+            }
+          })
+          useScenarioExplorerStore.getState().setShareItems(items)
+        }
+      }
     }
 
     if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {
@@ -116,8 +148,11 @@ export default function TabPanels() {
   const panelColor: string = useMemo(() => {
     if (activeTab === "learn" || activeTab === "explore")
       return "rgba(0, 0, 0, 0)"
-    return TABS.find((t) => t.key === activeTab)?.panelColor ?? "#ffffff"
-  }, [activeTab])
+    return (
+      TABS.find((t) => t.key === activeTab)?.panelColor ??
+      theme.palette.common.white
+    )
+  }, [activeTab, theme.palette.common.white])
 
   // Map tabs need pointerEvents: "none" on wrapper so the persistent map
   // behind (at z-index: -1) can receive drag/pan events.

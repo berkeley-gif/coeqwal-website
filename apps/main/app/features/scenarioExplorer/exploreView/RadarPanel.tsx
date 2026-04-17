@@ -5,17 +5,12 @@
  *
  * Wraps the @repo/viz RadarPlot component with store-driven data
  * via the shared useComparisonData hook. Supports hover coordination
- * with the sidebar and other panels.
+ * with the sidebar and other panels. Sidebar `highlightedIds` append
+ * scenarios to the chart so their traces render even when not selected.
  */
 
-import React, {
-  useMemo,
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-  startTransition,
-} from "react"
+import React, { useMemo, useState, useRef, useCallback, useEffect } from "react"
+import { createRoot, type Root } from "react-dom/client"
 import {
   Box,
   Typography,
@@ -23,10 +18,16 @@ import {
   CircularProgress,
   Checkbox,
 } from "@repo/ui/mui"
-import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
-import { ChartToast, InfoIconButton } from "@repo/ui"
+import {
+  RadarPlot,
+  mergeRadarAxisLabelDetailStyle,
+  type RadarPlotAxisLabelDetailStyle,
+  type RadarAxisLabelDetailChromeOptions,
+} from "@repo/viz"
+import { ChartToast, InfoIconButton, TooltipCloseButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
+import type { ShareItem } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
@@ -38,26 +39,66 @@ import {
   OUTCOME_REGIONAL_VARIANTS,
   type OutcomeCode,
 } from "../../../content/outcomes"
+import {
+  captureSvgToBlob,
+  inlineStyles,
+  rasterizeSvgClone,
+} from "../dataExplorer/utils/exportUtils"
+import { InlineToggleChip } from "../components/InlineToggleChip"
+import { RadarAxisDetailScenarioControlsRoot } from "./RadarAxisDetailScenarioControls"
+
+export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
+  dataUrl: string
+  color: string
+  chartData: Record<string, unknown>
+} | null>
 
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
-  onScenarioHover?: (scenarioId: string | null) => void
-  onAxisHover?: (
-    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  onOutcomeHover?: (
+    info: { scenarioId: string; outcome: string; tierValue: number } | null,
   ) => void
+  /** Notifies parent of the current scenarioId → color mapping for the radar chart */
+  onScenarioColors?: (colors: Record<string, string>) => void
+  /** Exposes a capture function to the parent so it can trigger radar capture */
+  onCaptureReady?: (capture: () => Promise<void>) => void
+  /** Exposes a single-scenario capture function for sidebar share */
+  onSingleCaptureReady?: (capture: SingleScenarioCaptureFn) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
-  onScenarioHover,
-  onAxisHover,
+  onOutcomeHover,
+  onScenarioColors,
+  onCaptureReady,
+  onSingleCaptureReady,
 }: RadarPanelProps) {
   const theme = useTheme()
 
+  const radarAxisLabelDetailStyle =
+    useMemo((): RadarPlotAxisLabelDetailStyle => {
+      const axisTypo = theme.typography.axisLabel
+
+      return mergeRadarAxisLabelDetailStyle({
+        fontFamily: axisTypo.fontFamily as string,
+        scenarioFontSize: axisTypo.fontSize as string,
+        scenarioFontWeight: Number(axisTypo.fontWeight),
+        scenarioLetterSpacing: axisTypo.letterSpacing as string,
+        tierFontSize: theme.typography.compactCaption.fontSize as string,
+        tierFontWeight: Number(theme.typography.compactCaption.fontWeight),
+        panelFill: theme.palette.common.white,
+        panelStroke: "none",
+        scenarioFill: "#193D6B",
+        tierFill: "#193D6B",
+        axisTitleFill: "#193D6B",
+        scenarioControlsRowHeightPx: 26,
+        scenarioControlsRowGapPx: 4,
+      })
+    }, [theme])
+
   const {
-    highlightedScenario,
-    setHighlightedScenario,
     selectedScenarios,
+    toggleScenario,
     highlightBaseline,
     showTierZones,
     dimUnpinned,
@@ -68,12 +109,21 @@ export default function RadarPanel({
     showRadarRange,
     showDotsOnly,
     radarShowAll,
+    setRadarShowAll,
     showAxisSelector,
+    setShowAxisSelector,
     hydroclimate,
   } = useScenarioExplorerStore()
 
-  const { getThemeForScenario } = useScenarioList()
+  const addShareItem = useScenarioExplorerStore((s) => s.addShareItem)
+
+  const { getThemeForScenario, getDisplayName } = useScenarioList()
   const { showOutcomeOnMap, activeOutcome } = useOutcomeMapAction()
+
+  const radarSvgRef = useRef<SVGSVGElement | null>(null)
+  const handleSvgRef = useCallback((svg: SVGSVGElement | null) => {
+    radarSvgRef.current = svg
+  }, [])
 
   const activeMapDot = useMemo(
     () =>
@@ -97,44 +147,19 @@ export default function RadarPanel({
     [pinnedScenarioIds],
   )
 
-  // Hover state with debounce (same pattern as ComparisonPanel)
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const lastHoveredIdRef = useRef<string | null>(null)
-
-  const [hoveredScenario, setHoveredScenarioRaw] =
-    useState<VerticalParallelLineData | null>(null)
-
-  const setHoveredScenario = useCallback(
-    (scenario: VerticalParallelLineData | null) => {
-      const nextId = scenario?.id ?? null
-      if (nextId === lastHoveredIdRef.current) return
-      lastHoveredIdRef.current = nextId
-
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current)
-        hoverTimerRef.current = null
-      }
-      if (scenario) {
-        startTransition(() => setHoveredScenarioRaw(scenario))
-      } else {
-        hoverTimerRef.current = setTimeout(
-          () => startTransition(() => setHoveredScenarioRaw(null)),
-          200,
-        )
-      }
-    },
-    [],
-  )
-
-  useEffect(() => {
-    onScenarioHover?.(hoveredScenario?.id ?? null)
-  }, [hoveredScenario, onScenarioHover])
-
   const handleDotHover = useCallback(
     (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      onAxisHover?.(info)
+      onOutcomeHover?.(
+        info
+          ? {
+              scenarioId: info.scenarioId,
+              outcome: info.axis,
+              tierValue: info.tierValue,
+            }
+          : null,
+      )
     },
-    [onAxisHover],
+    [onOutcomeHover],
   )
 
   const [axisPositions, setAxisPositions] = useState<
@@ -181,26 +206,58 @@ export default function RadarPanel({
     [selectedScenarios],
   )
 
-  const filteredData = useMemo(() => {
-    if (radarShowAll) return comparisonData
-    if (selectedScenarios.length === 0) return []
-    return comparisonData.filter((d) => selectedSet.has(d.id))
-  }, [comparisonData, selectedSet, selectedScenarios.length, radarShowAll])
+  /** Stable palette index aligned with `comparisonData`. */
+  const scenarioColorById = useMemo(() => {
+    const m = new Map<string, string>()
+    comparisonData.forEach((d, i) => {
+      m.set(d.id, lineColors[i] ?? "#666666")
+    })
+    return m
+  }, [comparisonData, lineColors])
 
-  const filteredLineColors = useMemo(() => {
-    if (radarShowAll) return lineColors
-    if (selectedScenarios.length === 0) return []
-    return comparisonData
-      .map((d, i) => ({ id: d.id, color: lineColors[i] ?? "#666666" }))
-      .filter(({ id }) => selectedSet.has(id))
-      .map(({ color }) => color)
+  const filteredData = useMemo(() => {
+    let base: typeof comparisonData
+    if (radarShowAll) base = comparisonData
+    else if (selectedScenarios.length === 0) base = []
+    else base = comparisonData.filter((d) => selectedSet.has(d.id))
+
+    if (highlightedIds == null || highlightedIds.size === 0) return base
+
+    const seen = new Set(base.map((d) => d.id))
+    const merged = [...base]
+    for (const id of highlightedIds) {
+      if (seen.has(id)) continue
+      const row = comparisonData.find((d) => d.id === id)
+      if (row) {
+        merged.push(row)
+        seen.add(id)
+      }
+    }
+    return merged
   }, [
     comparisonData,
-    lineColors,
     selectedSet,
     selectedScenarios.length,
     radarShowAll,
+    highlightedIds,
   ])
+
+  const filteredLineColors = useMemo(
+    () => filteredData.map((d) => scenarioColorById.get(d.id) ?? "#666666"),
+    [filteredData, scenarioColorById],
+  )
+
+  const scenarioColorMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    filteredData.forEach((d, i) => {
+      map[d.id] = filteredLineColors[i] ?? "#666666"
+    })
+    return map
+  }, [filteredData, filteredLineColors])
+
+  useEffect(() => {
+    onScenarioColors?.(scenarioColorMap)
+  }, [scenarioColorMap, onScenarioColors])
 
   const scenarioThemes = useMemo(() => {
     const map: Record<string, string> = {}
@@ -215,14 +272,181 @@ export default function RadarPanel({
     return axes.filter((a) => nameSet.has(a))
   }, [axes, radarVisibleAxes])
 
-  const highlightedData = useMemo(
-    () =>
-      filteredData.map((scenario) => ({
-        ...scenario,
-        highlighted: scenario.id === highlightedScenario,
-      })),
-    [filteredData, highlightedScenario],
+  // Radar capture function — exposed to parent via onCaptureReady
+  const captureRadar = useCallback(async () => {
+    const svg = radarSvgRef.current
+    if (!svg) {
+      console.warn("[RadarPanel] captureRadar: SVG ref is null")
+      return
+    }
+    try {
+      const { dataUrl } = await captureSvgToBlob(svg)
+      const scenarioIds = filteredData.map((d) => d.id)
+
+      const item: ShareItem = {
+        id: crypto.randomUUID(),
+        type: "radar",
+        scenarioIds,
+        scenarioColors: [...filteredLineColors],
+        axes: [...radarVisibleAxes],
+        showRange: showRadarRange,
+        highlightBaseline,
+        showDotsOnly: showDotsOnly,
+        hydroclimate,
+        cachedImageDataUrl: dataUrl,
+        cachedChartData: Object.fromEntries(
+          filteredData.map((d) => [d.id, d.values]),
+        ),
+      }
+      addShareItem(item)
+    } catch (err) {
+      console.error("[RadarPanel] captureRadar failed:", err)
+    }
+  }, [
+    filteredData,
+    filteredLineColors,
+    radarVisibleAxes,
+    showRadarRange,
+    highlightBaseline,
+    showDotsOnly,
+    hydroclimate,
+    addShareItem,
+  ])
+
+  useEffect(() => {
+    onCaptureReady?.(captureRadar)
+  }, [captureRadar, onCaptureReady])
+
+  const captureSingleScenarioRadar: SingleScenarioCaptureFn = useCallback(
+    async (scenarioId) => {
+      if (!radarSvgRef.current) return null
+
+      const alreadyVisible =
+        radarShowAll || selectedScenarios.includes(scenarioId)
+      let didToggle = false
+
+      if (!alreadyVisible) {
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = "0"
+        toggleScenario(scenarioId)
+        didToggle = true
+        const deadline = Date.now() + 2000
+        await new Promise<void>((resolve) => {
+          const check = () => {
+            const svg = radarSvgRef.current
+            if (
+              svg?.querySelector(`path[data-path-id="${scenarioId}"]`) ||
+              Date.now() > deadline
+            ) {
+              resolve()
+            } else {
+              requestAnimationFrame(check)
+            }
+          }
+          requestAnimationFrame(check)
+        })
+      }
+
+      try {
+        const svg = radarSvgRef.current
+        if (!svg) return null
+
+        const clone = svg.cloneNode(true) as SVGSVGElement
+        inlineStyles(clone, svg)
+
+        clone
+          .querySelectorAll<SVGPathElement>("path[data-path-id]")
+          .forEach((p) => {
+            if (p.getAttribute("data-path-id") !== scenarioId) p.remove()
+          })
+        clone
+          .querySelectorAll<SVGCircleElement>("circle.radar-dot")
+          .forEach((d) => {
+            if (d.getAttribute("data-scenario-id") !== scenarioId) d.remove()
+          })
+
+        const rect = svg.getBoundingClientRect()
+        const w = rect.width || svg.clientWidth || 600
+        const h = rect.height || svg.clientHeight || 600
+        const { dataUrl } = await rasterizeSvgClone(clone, w, h)
+
+        const allData = comparisonData
+        const allColors = lineColors
+        const idx = allData.findIndex((d) => d.id === scenarioId)
+        const color = idx >= 0 ? (allColors[idx] ?? "#666666") : "#666666"
+
+        const scenarioEntry = allData.find((d) => d.id === scenarioId)
+        const chartData: Record<string, unknown> = scenarioEntry
+          ? { [scenarioId]: scenarioEntry.values }
+          : {}
+
+        return { dataUrl, color, chartData }
+      } catch (err) {
+        console.error("[RadarPanel] captureSingleScenarioRadar failed:", err)
+        return null
+      } finally {
+        if (didToggle) {
+          toggleScenario(scenarioId)
+        }
+        const wrapper = chartWrapperRef.current
+        if (wrapper) wrapper.style.opacity = ""
+      }
+    },
+    [
+      comparisonData,
+      lineColors,
+      selectedScenarios,
+      radarShowAll,
+      toggleScenario,
+    ],
   )
+
+  useEffect(() => {
+    onSingleCaptureReady?.(captureSingleScenarioRadar)
+  }, [captureSingleScenarioRadar, onSingleCaptureReady])
+
+  const axisDetailChromeRootsRef = useRef(new Map<HTMLDivElement, Root>())
+
+  const axisLabelDetailChrome =
+    useMemo((): RadarAxisLabelDetailChromeOptions => {
+      return {
+        onBeforeSvgDomClear() {
+          const map = axisDetailChromeRootsRef.current
+          for (const root of map.values()) {
+            root.unmount()
+          }
+          map.clear()
+        },
+        onScenarioControlsMount(host, payload) {
+          const map = axisDetailChromeRootsRef.current
+          let root = map.get(host)
+          if (!root) {
+            root = createRoot(host)
+            map.set(host, root)
+          }
+          const scenarioLabel = getDisplayName(payload.scenarioId)
+          const lineColor = scenarioColorMap[payload.scenarioId] ?? "#666666"
+          const accentColor = lineColor || theme.palette.blue.bright
+
+          root.render(
+            <RadarAxisDetailScenarioControlsRoot
+              theme={theme}
+              scenarioId={payload.scenarioId}
+              scenarioLabel={scenarioLabel}
+              lineColor={lineColor}
+              accentColor={accentColor}
+              chromePaddingLeftPx={payload.chromePaddingLeftPx}
+              captureSingle={captureSingleScenarioRadar}
+            />,
+          )
+        },
+        onScenarioControlsUnmount(host) {
+          const r = axisDetailChromeRootsRef.current.get(host)
+          r?.unmount()
+          axisDetailChromeRootsRef.current.delete(host)
+        },
+      }
+    }, [theme, getDisplayName, scenarioColorMap, captureSingleScenarioRadar])
 
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
 
@@ -305,8 +529,7 @@ export default function RadarPanel({
     )
   }
 
-  const noScenariosSelected = selectedScenarios.length === 0 && !radarShowAll
-  const noAxesChosen = visibleAxisNames.length === 0
+  const hasRadarTraceData = filteredData.length > 0
 
   return (
     <Box
@@ -337,6 +560,10 @@ export default function RadarPanel({
               px: 1,
             }}
           >
+            <TooltipCloseButton
+              onClick={() => setShowAxisSelector(false)}
+              ariaLabel="Close choose axes panel"
+            />
             <Typography
               variant="caption"
               sx={{
@@ -347,6 +574,7 @@ export default function RadarPanel({
                 mb: 1,
                 display: "block",
                 pl: 0.5,
+                pr: 5,
               }}
             >
               Choose axes
@@ -439,10 +667,12 @@ export default function RadarPanel({
             alignItems: "center",
             justifyContent: "center",
             p: 0,
+            // Nudge chart + in-SVG axis detail up so bottom hovers clear the viewport
+            transform: "translateY(-10px)",
           }}
         >
           <RadarPlot
-            data={highlightedData}
+            data={filteredData}
             axes={visibleAxisNames}
             responsive
             lineColors={filteredLineColors}
@@ -465,12 +695,11 @@ export default function RadarPanel({
             dimUnselected={radarShowAll && selectedScenarios.length > 0}
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
             enableTooltip={false}
+            svgRefCallback={handleSvgRef}
             onDotHover={handleDotHover}
             onAxisPositions={handleAxisPositions}
-            onLineHover={setHoveredScenario}
-            onLineClick={(d) => {
-              setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
-            }}
+            axisLabelDetailStyle={radarAxisLabelDetailStyle}
+            axisLabelDetailChrome={axisLabelDetailChrome}
           />
         </Box>
 
@@ -546,15 +775,54 @@ export default function RadarPanel({
         )}
         */}
 
-        {noScenariosSelected && !isLoading && (
-          <ChartToast>
-            Select scenarios on the left to see them on the chart, or check show
-            all scenarios, above
+        {!hasRadarTraceData && !isLoading && (
+          <ChartToast maxWidth={480}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">
+                Select scenarios on the left to see them on the chart, or use
+              </Box>
+              <InlineToggleChip
+                label="show all scenarios"
+                active={radarShowAll}
+                onClick={() => setRadarShowAll(!radarShowAll)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
           </ChartToast>
         )}
 
-        {!noScenariosSelected && noAxesChosen && !isLoading && (
-          <ChartToast maxWidth={340}>Choose axes to show data</ChartToast>
+        {hasRadarTraceData && !isLoading && visibleAxisNames.length <= 2 && (
+          <ChartToast maxWidth={440}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">To show data, use</Box>
+              <InlineToggleChip
+                label="choose axes"
+                active={showAxisSelector}
+                onClick={() => setShowAxisSelector(!showAxisSelector)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
+          </ChartToast>
         )}
       </Box>
 

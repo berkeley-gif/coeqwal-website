@@ -126,7 +126,7 @@ export default function LearnPanel() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "theme.palette.common.white",
+                color: theme.palette.common.white,
                 flexDirection: "column",
                 gap: theme.space.gap.lg,
                 pointerEvents: "none", // Don't block map panning while loading

@@ -8,7 +8,10 @@ interface DimensionObject {
 }
 
 /**
- * A hook that observes the size of an element and returns its dimensions
+ * A hook that observes the size of an element and returns its dimensions.
+ *
+ * Uses requestAnimationFrame to coalesce multiple resize events within a
+ * single frame into one state update.
  *
  * @param targetRef - The ref of the element to observe
  * @returns The dimensions of the observed element
@@ -21,11 +24,10 @@ export function useResizeObserver<T extends HTMLElement>(
     height: 0,
   })
 
-  // Use a refs to track the observer and the current element
   const observerRef = useRef<ResizeObserver | null>(null)
+  const rafIdRef = useRef<number>(0)
 
   useEffect(() => {
-    // Create the observer
     const resizeObserver = new ResizeObserver((entries) => {
       if (!Array.isArray(entries) || !entries.length) return
 
@@ -45,20 +47,22 @@ export function useResizeObserver<T extends HTMLElement>(
         return
       }
 
-      setDimensions((prev) => {
-        if (prev.width === width && prev.height === height) return prev
-        return { width, height }
+      cancelAnimationFrame(rafIdRef.current)
+      rafIdRef.current = requestAnimationFrame(() => {
+        setDimensions((prev) => {
+          if (prev.width === width && prev.height === height) return prev
+          return { width, height }
+        })
       })
     })
 
-    // Store the observer reference
     observerRef.current = resizeObserver
 
-    // Start observing
     if (targetRef.current) {
       resizeObserver.observe(targetRef.current)
     }
 
+    // Synchronous initial measurement (runs once on mount)
     if (targetRef.current) {
       const rect = targetRef.current.getBoundingClientRect()
       const w = Math.round(rect.width)
@@ -69,8 +73,8 @@ export function useResizeObserver<T extends HTMLElement>(
       })
     }
 
-    // Cleanup
     return () => {
+      cancelAnimationFrame(rafIdRef.current)
       resizeObserver.disconnect()
     }
   }, [targetRef])

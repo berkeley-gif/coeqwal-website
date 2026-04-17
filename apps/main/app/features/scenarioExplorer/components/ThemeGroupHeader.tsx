@@ -19,16 +19,25 @@ interface ThemeGroupHeaderProps {
   isFirst?: boolean
   /** "grid" (default) uses CSS subgrid for StrategyGrid; "flex" uses a flat flex row for sidebar */
   layout?: "grid" | "flex"
+  /** Sidebar / grid: highlight linked charts when hovering this header (all theme scenario ids). */
+  onRowHover?: (scenarioIds: string[] | null) => void
 }
 
 export default function ThemeGroupHeader({
   themeKey,
   scenarioIds,
   layout = "grid",
+  onRowHover,
 }: ThemeGroupHeaderProps) {
   const theme = useTheme()
-  const { selectedScenarios, selectScenarios, sharedScenarioIds, addToShare } =
-    useScenarioExplorerStore()
+  const {
+    selectedScenarios,
+    selectScenarios,
+    shareItems,
+    addShareItem,
+    outcomeDisplayMode,
+    hydroclimate,
+  } = useScenarioExplorerStore()
 
   const themeConfig = THEME_LABEL_CONFIG[themeKey]
   const themeColors = theme.palette.waterThemes[themeKey]
@@ -39,9 +48,19 @@ export default function ThemeGroupHeader({
     scenarioIds.every((id) => selectedScenarios.includes(id))
   const someChecked =
     !allChecked && scenarioIds.some((id) => selectedScenarios.includes(id))
+  const viewMode =
+    outcomeDisplayMode === "distribution" ? "distribution" : "summary"
   const allShared =
     scenarioIds.length > 0 &&
-    scenarioIds.every((id) => sharedScenarioIds.includes(id))
+    scenarioIds.every((sid) =>
+      shareItems.some(
+        (s) =>
+          s.type === "barChart" &&
+          s.scenarioId === sid &&
+          s.viewMode === viewMode &&
+          s.hydroclimate === hydroclimate,
+      ),
+    )
 
   const handleToggle = () => {
     if (scenarioIds.length === 0) return
@@ -60,6 +79,8 @@ export default function ThemeGroupHeader({
   return (
     <Box
       data-theme-header={themeKey}
+      onMouseEnter={() => onRowHover?.(scenarioIds)}
+      onMouseLeave={() => onRowHover?.(null)}
       sx={{
         ...(isFlex
           ? {
@@ -95,23 +116,19 @@ export default function ThemeGroupHeader({
       <Box
         sx={{
           display: "flex",
-          justifyContent: isFlex ? "center" : "flex-end",
+          justifyContent: "flex-end",
           alignItems: "center",
-          ...(isFlex ? {} : { mr: -0.5 }),
+          ...(isFlex ? { flexShrink: 0 } : { mr: -0.5 }),
         }}
       >
         <Checkbox
+          size="small"
           checked={allChecked}
           indeterminate={someChecked}
           onChange={handleToggle}
           sx={{
-            ...(isFlex
-              ? theme.scenarios.checkbox.sm
-              : theme.scenarios.checkbox.md),
+            ...theme.scenarios.checkbox.md,
             mt: 0,
-            color: themeColors.text,
-            "&.Mui-checked": { color: themeColors.text },
-            "&.MuiCheckbox-indeterminate": { color: themeColors.text },
           }}
         />
       </Box>
@@ -164,7 +181,15 @@ export default function ThemeGroupHeader({
             className="theme-action-icon"
             size="small"
             onClick={() => {
-              scenarioIds.forEach((id) => addToShare(id))
+              scenarioIds.forEach((sid) => {
+                addShareItem({
+                  id: crypto.randomUUID(),
+                  type: "barChart",
+                  scenarioId: sid,
+                  viewMode: viewMode as "summary" | "distribution",
+                  hydroclimate,
+                })
+              })
             }}
             sx={{
               p: 0.25,

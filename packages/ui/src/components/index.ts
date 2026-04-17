@@ -53,6 +53,17 @@ export type {
   CompactSelectGroup,
 } from "./common/CompactSelect"
 
+// Content components
+export { LinedList } from "./common/LinedList"
+export type { LinedListProps, LinedListItem } from "./common/LinedList"
+export { InfoCard } from "./common/InfoCard"
+export type { InfoCardProps } from "./common/InfoCard"
+export { BarredColumns } from "./common/BarredColumns"
+export type {
+  BarredColumnsProps,
+  BarredColumnItem,
+} from "./common/BarredColumns"
+
 // Text utilities
 export { TruncatedText } from "./common/TruncatedText"
 export type { TruncatedTextProps } from "./common/TruncatedText"
@@ -81,18 +92,27 @@ export {
   CurrentOpsIcon,
   CurrentOpsMultipleIcon,
 } from "./icons/DocumentIcons"
+export { WaterDroplet } from "./icons/WaterDroplet"
+export type { WaterDropletProps } from "./icons/WaterDroplet"
 
 // Call-response UI components
 export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
 export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
 
 // Chip components
-export { ToggleChip, TierChip, LocationChip, ScenarioBadge } from "./Chip"
+export {
+  ToggleChip,
+  TierChip,
+  LocationChip,
+  ScenarioBadge,
+  HydroclimateBadge,
+} from "./Chip"
 export type {
   ToggleChipProps,
   TierChipProps,
   LocationChipProps,
   ScenarioBadgeProps,
+  HydroclimateBadgeProps,
 } from "./Chip"
 
 // Error handling

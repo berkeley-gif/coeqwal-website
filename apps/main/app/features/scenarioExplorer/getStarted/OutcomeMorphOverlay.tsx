@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useLayoutEffect, useMemo, useCallback } from "react"
-import { useTheme } from "@repo/ui/mui"
+import { useTheme, alpha } from "@repo/ui/mui"
 import type { MotionValue } from "@repo/motion"
 import {
   type ShapeMorphData,
@@ -1163,7 +1163,7 @@ export default function OutcomeMorphOverlay({
               margin: "0 auto",
               padding: "3px 8px",
               borderRadius: 4,
-              background: "rgba(255,255,255,0.92)",
+              background: alpha(theme.palette.common.white, 0.92),
               boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
               fontFamily: "inherit",
               fontSize: 11,

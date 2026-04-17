@@ -30,31 +30,31 @@ const models: Model[] = [
     model: "Warmer & Drier I",
     background: "#d08b2f",
     hover: "#b87222",
-    text: "#f2f0ef",
+    text: "#fcfbfa",
   },
   {
     model: "Warmer & Drier II",
     background: "#b86a2f",
     hover: "#a55b28",
-    text: "#f2f0ef",
+    text: "#fcfbfa",
   },
   {
     model: "Warmer & Drier III",
     background: "#b86a2f",
     hover: "#a55b28",
-    text: "#f2f0ef",
+    text: "#fcfbfa",
   },
   {
     model: "Warmer & Drier IV",
     background: "#a23e2b",
     hover: "#913526",
-    text: "#f2f0ef",
+    text: "#fcfbfa",
   },
   {
     model: "Warmer & Wetter",
     background: "#6c8ba0ff",
     hover: "#4e6d80ff",
-    text: "#f2f0ef",
+    text: "#fcfbfa",
   },
 ]
 
@@ -107,19 +107,19 @@ export default function HydroClimateContainer() {
             exclusive
             value="streamflow"
             sx={{
-              color: "#f2f0ef",
+              color: "#fcfbfa",
               "& .MuiButtonGroup-grouped, & .MuiButton-root": {
-                borderColor: "#f2f0ef",
+                borderColor: "#fcfbfa",
               },
             }}
           >
-            <ToggleButton sx={{ color: "#f2f0ef" }} value="temperature">
+            <ToggleButton sx={{ color: "#fcfbfa" }} value="temperature">
               Temperature
             </ToggleButton>
-            <ToggleButton sx={{ color: "#f2f0ef" }} value="precipitation">
+            <ToggleButton sx={{ color: "#fcfbfa" }} value="precipitation">
               Precipitation
             </ToggleButton>
-            <ToggleButton sx={{ color: "#f2f0ef" }} value="streamflow">
+            <ToggleButton sx={{ color: "#fcfbfa" }} value="streamflow">
               Streamflow
             </ToggleButton>
           </ToggleButtonGroup>
@@ -340,7 +340,7 @@ function Rules({
           <path
             key={idx}
             d={`M0,${yScale(val)} L${size.width - margin.right - margin.left},${yScale(val)}`}
-            stroke="#f2f0ef"
+            stroke="#fcfbfa"
             strokeOpacity={0.3}
             strokeWidth={0.5}
           ></path>
@@ -351,7 +351,7 @@ function Rules({
           <path
             key={idx}
             d={`M${xScale(val)},${yScale(-15.5)} L${xScale(val)},${yScale(15.5)}`}
-            stroke="#f2f0ef"
+            stroke="#fcfbfa"
             strokeOpacity={0.3}
             strokeWidth={0.5}
           ></path>
@@ -400,7 +400,7 @@ function XAxis({
       <g className="x-axis" transform={`translate(${margin.left}, 0)`}>
         <path
           d={`M0,${yOffset} L${size.width - margin.right - margin.left},${yOffset}`}
-          stroke="#f2f0ef"
+          stroke="#fcfbfa"
           strokeWidth={1}
         ></path>
       </g>
@@ -467,7 +467,7 @@ function YTick({
         x2={0}
         y1={yPos}
         y2={yPos}
-        stroke="#f2f0ef"
+        stroke="#fcfbfa"
         strokeWidth={1}
       ></line>
       <text x={0} dx="-0.75em" y={yPos}>

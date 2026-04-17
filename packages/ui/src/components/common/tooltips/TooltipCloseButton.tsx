@@ -31,11 +31,14 @@ export interface TooltipCloseButtonProps {
   onClick: () => void
   /** Custom offset from top-right corner in pixels. Defaults to theme spacing. */
   offset?: { top?: number; right?: number }
+  /** Defaults to "Close tooltip". */
+  ariaLabel?: string
 }
 
 export function TooltipCloseButton({
   onClick,
   offset,
+  ariaLabel = "Close tooltip",
 }: TooltipCloseButtonProps) {
   return (
     <Box
@@ -80,7 +83,7 @@ export function TooltipCloseButton({
           outlineOffset: "2px",
         },
       }}
-      aria-label="Close tooltip"
+      aria-label={ariaLabel}
     >
       <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
         <path d="M11.25 1.8075L10.1925 0.75L6 4.9425L1.8075 0.75L0.75 1.8075L4.9425 6L0.75 10.1925L1.8075 11.25L6 7.0575L10.1925 11.25L11.25 10.1925L7.0575 6L11.25 1.8075Z" />

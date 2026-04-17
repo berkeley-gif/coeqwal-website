@@ -11,12 +11,82 @@ import {
   icons,
 } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "../store"
+import type { ShareItem } from "../store"
 import { useResolvedScenarioTiers } from "../hooks/useResolvedScenarioTiers"
 import { useTabNavigation } from "../../../hooks/useTabNavigation"
 import ShareScenarioCard from "./ShareScenarioCard"
+import ShareRadarCard from "./ShareRadarCard"
+import type { ChartDataPoint } from "../../scenarios/components/shared/types"
 
 const DRAWER_WIDTH = 360
 const TAB_WIDTH = 36
+
+function ShareItemCard({
+  item,
+  onRemove,
+  outcomeNames,
+  scenarioLookup,
+  allChartData,
+}: {
+  item: ShareItem
+  onRemove: (id: string) => void
+  outcomeNames: { shortCode: string; displayName: string }[]
+  scenarioLookup: Map<
+    string,
+    { name: string; description: string; definition: string }
+  >
+  allChartData: Record<string, Record<string, unknown> | undefined>
+}) {
+  const theme = useTheme()
+
+  if (item.type === "barChart") {
+    const info = scenarioLookup.get(item.scenarioId)
+    const viewLabel =
+      item.viewMode === "distribution"
+        ? "Key outcomes distribution"
+        : "Key outcomes bar chart"
+    const chartData =
+      (item.cachedChartData as Record<string, ChartDataPoint[]> | undefined) ??
+      (allChartData[item.scenarioId] as
+        | Record<string, ChartDataPoint[]>
+        | undefined)
+    return (
+      <ShareScenarioCard
+        scenarioId={item.id}
+        name={info?.description ?? info?.name ?? item.scenarioId}
+        scenarioDefinition={info?.definition}
+        description={viewLabel}
+        hydroclimate={item.hydroclimate}
+        chartData={chartData}
+        outcomeNames={outcomeNames}
+        onRemove={() => onRemove(item.id)}
+        viewMode={item.viewMode}
+      />
+    )
+  }
+
+  const radarScenarioNames = item.scenarioIds.map(
+    (id) =>
+      scenarioLookup.get(id)?.description ?? scenarioLookup.get(id)?.name ?? id,
+  )
+  const radarScenarioDefinitions = item.scenarioIds.map(
+    (id) => scenarioLookup.get(id)?.definition ?? "",
+  )
+
+  return (
+    <ShareRadarCard
+      scenarioNames={radarScenarioNames}
+      scenarioDefinitions={radarScenarioDefinitions}
+      scenarioColors={item.scenarioColors}
+      hydroclimate={item.hydroclimate}
+      showRange={item.showRange}
+      highlightBaseline={item.highlightBaseline}
+      showDotsOnly={item.showDotsOnly}
+      cachedImageDataUrl={item.cachedImageDataUrl}
+      onRemove={() => onRemove(item.id)}
+    />
+  )
+}
 
 function ShareTab({
   count,
@@ -51,8 +121,9 @@ function ShareTab({
         border: "none",
         borderRadius: "8px 0 0 8px",
         cursor: "pointer",
+        pointerEvents: "auto",
         backgroundColor: theme.palette.blue.bright,
-        color: "#fff",
+        color: theme.palette.common.white,
         boxShadow: "-2px 0 8px rgba(0,0,0,0.15)",
         "&:hover": {
           backgroundColor: theme.palette.blue.darkest,
@@ -70,8 +141,6 @@ function ShareTab({
           flexShrink: 0,
         }}
       >
-        {/* Explicit fontSize — Typography variants get overridden by the
-            parent Box component="button" default font styles */}
         <Typography
           sx={{
             fontSize: "0.875rem",
@@ -92,7 +161,7 @@ function ShareTab({
             minWidth: 18,
             height: 18,
             borderRadius: "9px",
-            backgroundColor: "#fff",
+            backgroundColor: theme.palette.common.white,
             color: theme.palette.blue.bright,
             fontSize: "0.625rem",
             fontWeight: 700,
@@ -114,20 +183,27 @@ export default function ShareDrawer() {
   const { navigateToTab } = useTabNavigation()
 
   const {
-    sharedScenarioIds,
+    shareItems,
     showShareDrawer,
     setShowShareDrawer,
-    removeFromShare,
-    clearShared,
+    removeShareItem,
+    clearShareItems,
   } = useScenarioExplorerStore()
 
   const { siblingGroups, allChartData, outcomeNames } =
     useResolvedScenarioTiers()
 
   const scenarioLookup = useMemo(() => {
-    const map = new Map<string, { name: string; description: string }>()
+    const map = new Map<
+      string,
+      { name: string; description: string; definition: string }
+    >()
     siblingGroups.forEach((s) => {
-      map.set(s.scenarioId, { name: s.shortLabel, description: s.label })
+      map.set(s.scenarioId, {
+        name: s.shortLabel,
+        description: s.label,
+        definition: s.description,
+      })
     })
     return map
   }, [siblingGroups])
@@ -144,7 +220,7 @@ export default function ShareDrawer() {
   return (
     <>
       <ShareTab
-        count={sharedScenarioIds.length}
+        count={shareItems.length}
         isOpen={showShareDrawer}
         onClick={() => setShowShareDrawer(!showShareDrawer)}
       />
@@ -155,9 +231,13 @@ export default function ShareDrawer() {
         sx={{
           "& .MuiDrawer-paper": {
             width: DRAWER_WIDTH,
+            height: "100vh",
+            maxHeight: "100vh",
             boxSizing: "border-box",
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
+            pointerEvents: "auto",
             boxShadow: "-4px 0 12px rgba(0,0,0,0.08)",
           },
         }}
@@ -181,17 +261,7 @@ export default function ShareDrawer() {
               color: theme.palette.text.primary,
             }}
           >
-            {(() => {
-              const uniqueScenarios = new Set(
-                sharedScenarioIds.map((id) =>
-                  id.includes(":") ? id.split(":")[0]! : id,
-                ),
-              )
-              const sc = uniqueScenarios.size
-              const ch = sharedScenarioIds.length
-              if (ch === sc) return `Share (${sc})`
-              return `Share (${sc} scenario${sc !== 1 ? "s" : ""}, ${ch} chart${ch !== 1 ? "s" : ""})`
-            })()}
+            Share ({shareItems.length})
           </Typography>
           <IconButton
             size="small"
@@ -201,6 +271,50 @@ export default function ShareDrawer() {
             <icons.Close sx={{ fontSize: "1.125rem" }} />
           </IconButton>
         </Box>
+
+        {/* Action chips */}
+        {shareItems.length > 0 && (
+          <Box
+            sx={{
+              flexShrink: 0,
+              display: "flex",
+              gap: 0.75,
+              px: 2,
+              py: 1,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Box
+              component="button"
+              type="button"
+              onClick={clearShareItems}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                px: 1.25,
+                py: 0.5,
+                border: "none",
+                borderRadius: "12px",
+                cursor: "pointer",
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+                color: theme.palette.grey[800],
+                background: theme.palette.grey[200],
+                transition: "all 150ms ease",
+                "&:hover": {
+                  background: theme.palette.interaction.selectedBackground,
+                  color: theme.palette.blue.bright,
+                },
+              }}
+            >
+              <icons.Close sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+              Clear all
+            </Box>
+          </Box>
+        )}
 
         {/* Scrollable card list */}
         <Box
@@ -212,7 +326,7 @@ export default function ShareDrawer() {
             py: 1.5,
           }}
         >
-          {sharedScenarioIds.length === 0 ? (
+          {shareItems.length === 0 ? (
             <Typography
               variant="body2"
               sx={{
@@ -226,63 +340,37 @@ export default function ShareDrawer() {
               Click the share icon on a scenario to add it.
             </Typography>
           ) : (
-            sharedScenarioIds.map((id) => {
-              const [baseId, viewSuffix] = id.includes(":")
-                ? [id.split(":")[0]!, id.split(":")[1]]
-                : [id, undefined]
-              const info = scenarioLookup.get(baseId)
-              const viewLabel =
-                viewSuffix === "distribution"
-                  ? "Key outcomes distribution"
-                  : viewSuffix === "summary"
-                    ? "Key outcomes bar chart"
-                    : undefined
-              return (
-                <ShareScenarioCard
-                  key={id}
-                  scenarioId={id}
-                  name={info?.description ?? info?.name ?? baseId}
-                  description={viewLabel ?? ""}
-                  chartData={allChartData[baseId]}
-                  outcomeNames={outcomeNames}
-                  onRemove={removeFromShare}
-                  viewMode={
-                    viewSuffix === "distribution"
-                      ? "distribution"
-                      : viewSuffix === "summary"
-                        ? "summary"
-                        : undefined
-                  }
-                />
-              )
-            })
+            shareItems.map((item) => (
+              <ShareItemCard
+                key={item.id}
+                item={item}
+                onRemove={removeShareItem}
+                outcomeNames={outcomeNames}
+                scenarioLookup={scenarioLookup}
+                allChartData={
+                  allChartData as Record<
+                    string,
+                    Record<string, unknown> | undefined
+                  >
+                }
+              />
+            ))
           )}
         </Box>
 
         {/* Footer actions */}
-        {sharedScenarioIds.length > 0 && (
+        {shareItems.length > 0 && (
           <Box
             sx={{
               flexShrink: 0,
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "flex-end",
               px: 2,
               py: 1.5,
               borderTop: `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Button
-              size="small"
-              onClick={clearShared}
-              sx={{
-                textTransform: "none",
-                color: theme.palette.grey[600],
-                fontSize: "0.8125rem",
-              }}
-            >
-              Clear all
-            </Button>
             <Button
               variant="contained"
               size="small"

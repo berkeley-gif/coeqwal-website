@@ -9,11 +9,18 @@ import {
   type ChartDataPoint,
 } from "../../scenarios/components/shared/types"
 import { getSingleValueLocationCount } from "../../../content/outcomes"
+import {
+  hydroclimateOptions,
+  type HydroclimateOption,
+} from "../../../content/scenarios"
+import { HYDROCLIMATE_CONFIG } from "../../scenarios/components/HydroclimateChooser"
 
 interface ShareScenarioCardProps {
   scenarioId: string
   name: string
+  scenarioDefinition?: string
   description: string
+  hydroclimate?: string
   chartData?: Record<string, ChartDataPoint[]>
   outcomeNames: { shortCode: string; displayName: string }[]
   onRemove?: (id: string) => void
@@ -23,13 +30,22 @@ interface ShareScenarioCardProps {
 export default function ShareScenarioCard({
   scenarioId,
   name,
+  scenarioDefinition,
   description,
+  hydroclimate,
   chartData,
   outcomeNames,
   onRemove,
   viewMode,
 }: ShareScenarioCardProps) {
   const theme = useTheme()
+
+  const climateOption: HydroclimateOption | undefined = hydroclimate
+    ? hydroclimateOptions.find((o) => o.value === hydroclimate)
+    : undefined
+  const climateConfig = hydroclimate
+    ? HYDROCLIMATE_CONFIG[hydroclimate]
+    : undefined
 
   return (
     <Box
@@ -60,7 +76,7 @@ export default function ShareScenarioCard({
         </IconButton>
       )}
 
-      {/* Scenario full title */}
+      {/* Scenario title */}
       <Typography
         variant="body2"
         sx={{
@@ -73,40 +89,110 @@ export default function ShareScenarioCard({
         {name}
       </Typography>
 
-      {/* Chart type */}
-      {description && (
+      {/* Scenario definition */}
+      {scenarioDefinition && (
         <Typography
-          variant="caption"
           sx={{
-            display: "block",
-            lineHeight: 1.3,
-            color: theme.palette.grey[700],
+            fontSize: "0.6875rem",
+            lineHeight: 1.4,
+            color: theme.palette.grey[600],
             mt: 0.25,
+            pr: onRemove ? 2.5 : 0,
           }}
         >
-          {description}
+          {scenarioDefinition}
         </Typography>
       )}
+
+      {/* Hydroclimate + chart type metadata */}
+      <Box sx={{ mt: 0.75 }}>
+        {climateOption && climateConfig && (
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "flex-start",
+              gap: 0.5,
+              backgroundColor: `${climateConfig.bgColor}0F`,
+              border: `1px solid ${climateConfig.bgColor}28`,
+              borderRadius: "4px",
+              px: 0.75,
+              py: 0.375,
+              mb: 0.5,
+            }}
+          >
+            <Box
+              sx={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                backgroundColor: climateConfig.bgColor,
+                flexShrink: 0,
+                mt: "3px",
+              }}
+            />
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "0.625rem",
+                  lineHeight: 1.3,
+                  fontWeight: 600,
+                  color: theme.palette.grey[800],
+                }}
+              >
+                {climateOption.label} hydroclimate
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.5625rem",
+                  lineHeight: 1.3,
+                  color: theme.palette.grey[600],
+                }}
+              >
+                {climateOption.description}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+        {description && (
+          <Typography
+            sx={{
+              fontSize: "0.6875rem",
+              lineHeight: 1.3,
+              color: theme.palette.grey[500],
+              display: "block",
+            }}
+          >
+            {description}
+          </Typography>
+        )}
+      </Box>
 
       {/* Outcome glyphs */}
       {chartData &&
         outcomeNames.length > 0 &&
         (viewMode === "distribution" ? (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              rowGap: 1.5,
-              columnGap: 1,
-              mt: 1,
-              justifyItems: "center",
-              alignItems: "start",
-            }}
-          >
-            {outcomeNames.map(({ shortCode, displayName }) => {
-              const data = chartData[shortCode]
-              if (!data || data.length === 0) return null
+          (() => {
+            const ROW1_CODES = new Set([
+              "CWS_DEL",
+              "AG_REV",
+              "ENV_FLOWS",
+              "RES_STOR",
+              "GW_STOR",
+            ])
+            const row1: { shortCode: string; displayName: string }[] = []
+            const row2: { shortCode: string; displayName: string }[] = []
+            for (const o of outcomeNames) {
+              const data = chartData[o.shortCode]
+              if (!data || data.length === 0) continue
+              if (ROW1_CODES.has(o.shortCode)) {
+                row1.push(o)
+              } else {
+                row2.push(o)
+              }
+            }
 
+            const renderOutcome = (shortCode: string, displayName: string) => {
+              const data = chartData[shortCode]!
               const values = data.map((t) => t.value).slice(0, 4) as [
                 number,
                 number,
@@ -204,8 +290,47 @@ export default function ShareScenarioCard({
                   </Box>
                 </Box>
               )
-            })}
-          </Box>
+            }
+
+            return (
+              <Box sx={{ mt: 1 }}>
+                {/* Row 1: Community deliveries, Ag revenue, Env flows, Reservoir storage, GW storage */}
+                {row1.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1.5,
+                      justifyContent: "center",
+                      alignItems: "start",
+                    }}
+                  >
+                    {row1.map(({ shortCode, displayName }) =>
+                      renderOutcome(shortCode, displayName),
+                    )}
+                  </Box>
+                )}
+
+                {/* Row 2: Delta ecology, FW for exports, FW for in-Delta, Winter-run salmon */}
+                {row2.length > 0 && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 1.5,
+                      justifyContent: "center",
+                      alignItems: "start",
+                      mt: row1.length > 0 ? 1.5 : 0,
+                    }}
+                  >
+                    {row2.map(({ shortCode, displayName }) =>
+                      renderOutcome(shortCode, displayName),
+                    )}
+                  </Box>
+                )}
+              </Box>
+            )
+          })()
         ) : (
           <Box
             sx={{

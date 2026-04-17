@@ -29,7 +29,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
         py: 0.5,
         minHeight: 36,
         borderBottom: `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.common.white,
       }}
     >
       <Typography
@@ -47,7 +47,8 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
       <Box
         sx={{
           width: "1px",
-          height: 20,
+          alignSelf: "stretch",
+          minHeight: 20,
           backgroundColor: theme.palette.divider,
           flexShrink: 0,
         }}
@@ -58,7 +59,7 @@ export default function ChartControlsBar({ children }: ChartControlsBarProps) {
           display: "flex",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: 1.5,
+          gap: 0.5,
         }}
       >
         {children}

@@ -30,22 +30,26 @@ import SearchAndChips from "./SearchAndChips"
 
 interface ScenarioSelectionSidebarProps {
   scenarioColors?: Record<string, string>
-  hoveredScenarioId?: string | null
-  hoveredAxisInfo?: {
+  hoveredInteraction?: {
     scenarioId: string
-    axis: string
-    tierValue: number
+    outcome?: string
+    tierValue?: number
   } | null
   onRowHover?: (scenarioIds: string[] | null) => void
   singleSelect?: boolean
+  onCaptureRadarScenario?: (scenarioId: string) => Promise<{
+    dataUrl: string
+    color: string
+    chartData: Record<string, unknown>
+  } | null>
 }
 
 export default function ScenarioSelectionSidebar({
   scenarioColors,
-  hoveredScenarioId,
-  hoveredAxisInfo,
+  hoveredInteraction,
   onRowHover,
   singleSelect = false,
+  onCaptureRadarScenario,
 }: ScenarioSelectionSidebarProps) {
   const theme = useTheme()
   const tierColors = useMemo(() => getTierColorsFromTheme(theme), [theme])
@@ -62,9 +66,14 @@ export default function ScenarioSelectionSidebar({
     showOnlyChosen,
     groupByTheme,
     searchQuery,
-    addToShare,
+    addShareItem,
     outcomeDisplayMode,
     exploreMode,
+    hydroclimate,
+    radarVisibleAxes,
+    showRadarRange,
+    highlightBaseline,
+    showDotsOnly,
   } = useScenarioExplorerStore()
 
   const handleScenarioSelect = (scenarioId: string) => {
@@ -73,8 +82,9 @@ export default function ScenarioSelectionSidebar({
       : toggleScenario(scenarioId)
   }
 
+  const hoveredScenarioId = hoveredInteraction?.scenarioId ?? null
   const scenarioRowRefs = useRef<Map<string, HTMLDivElement>>(new Map())
-  const activeScenarioId = highlightedScenario || hoveredScenarioId || null
+  const activeScenarioId = hoveredScenarioId ?? highlightedScenario ?? null
   const hasActiveScenario = activeScenarioId !== null
 
   // When switching to single-select mode, keep only the first selected scenario
@@ -162,7 +172,7 @@ export default function ScenarioSelectionSidebar({
           px: 1.5,
           py: 1,
           borderBottom: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.common.white,
         }}
       >
         <SearchAndChips />
@@ -233,6 +243,7 @@ export default function ScenarioSelectionSidebar({
                 scenarioIds={ids}
                 isFirst={index === 0}
                 layout="flex"
+                onRowHover={onRowHover}
               />,
             )
           }
@@ -309,6 +320,19 @@ export default function ScenarioSelectionSidebar({
                   }}
                 />
               )}
+              <Checkbox
+                size="small"
+                checked={isChosen}
+                onChange={() => toggleScenario(scenario.scenarioId)}
+                onClick={(e) => e.stopPropagation()}
+                sx={{
+                  ...theme.scenarios.checkbox.sm,
+                  flexShrink: 0,
+                  alignSelf: "flex-start",
+                  // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
+                  mt: "1px",
+                }}
+              />
 
               <Box
                 onClick={() => handleScenarioSelect(scenario.scenarioId)}
@@ -329,6 +353,21 @@ export default function ScenarioSelectionSidebar({
                   }
                   descriptionMaxWidth="none"
                   showThemeBadge={!groupByTheme}
+                  titleStartAdornment={
+                    color ? (
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "inline-block",
+                          width: 12,
+                          height: 12,
+                          borderRadius: "50%",
+                          backgroundColor: color,
+                          flexShrink: 0,
+                        }}
+                      />
+                    ) : undefined
+                  }
                   inlineActions={
                     <InlineRowActions
                       scenarioId={scenario.scenarioId}
@@ -338,7 +377,46 @@ export default function ScenarioSelectionSidebar({
                       }
                       isPinned={isPinned}
                       accentColor={accentColor}
-                      addToShare={addToShare}
+                      shareIconNudgeTop="-2px"
+                      onShare={async () => {
+                        if (exploreMode === "radar") {
+                          const result = await onCaptureRadarScenario?.(
+                            scenario.scenarioId,
+                          )
+                          addShareItem({
+                            id: crypto.randomUUID(),
+                            type: "radar",
+                            scenarioIds: [scenario.scenarioId],
+                            scenarioColors: result
+                              ? [result.color]
+                              : scenarioColors
+                                ? [
+                                    scenarioColors[scenario.scenarioId] ??
+                                      "#666666",
+                                  ]
+                                : undefined,
+                            axes: [...radarVisibleAxes],
+                            showRange: showRadarRange,
+                            highlightBaseline,
+                            showDotsOnly,
+                            hydroclimate,
+                            cachedImageDataUrl: result?.dataUrl,
+                            cachedChartData: result?.chartData,
+                          })
+                        } else {
+                          const vm =
+                            outcomeDisplayMode === "distribution"
+                              ? "distribution"
+                              : "summary"
+                          addShareItem({
+                            id: crypto.randomUUID(),
+                            type: "barChart",
+                            scenarioId: scenario.scenarioId,
+                            viewMode: vm as "summary" | "distribution",
+                            hydroclimate,
+                          })
+                        }
+                      }}
                       togglePinnedScenario={togglePinnedScenario}
                       hidePinning={exploreMode === "radar"}
                     />
@@ -346,60 +424,61 @@ export default function ScenarioSelectionSidebar({
                 />
 
                 <AnimatePresence>
-                  {scenario.scenarioId === hoveredAxisInfo?.scenarioId && (
-                    <motion.div
-                      key="axis-hover-detail"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      style={{ overflow: "hidden" }}
-                    >
-                      <Box sx={{ pt: 0.5, pb: 0.75 }}>
-                        <Typography
-                          variant="compactSubtitle"
-                          sx={{
-                            display: "block",
-                            fontWeight: 500,
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          {hoveredAxisInfo.axis}
-                        </Typography>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.75,
-                            mt: 0.25,
-                          }}
-                        >
+                  {scenario.scenarioId === hoveredInteraction?.scenarioId &&
+                    hoveredInteraction.outcome != null && (
+                      <motion.div
+                        key="outcome-hover-detail"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <Box sx={{ pt: 0.5, pb: 0.75 }}>
+                          <Typography
+                            variant="compactSubtitle"
+                            sx={{
+                              display: "block",
+                              fontWeight: 500,
+                              color: theme.palette.text.primary,
+                            }}
+                          >
+                            {hoveredInteraction.outcome}
+                          </Typography>
                           <Box
                             sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: "3px",
-                              flexShrink: 0,
-                              bgcolor:
-                                tierColors[
-                                  Math.round(
-                                    hoveredAxisInfo.tierValue,
-                                  ) as keyof typeof tierColors
-                                ] ?? theme.palette.grey[400],
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.75,
+                              mt: 0.25,
                             }}
-                          />
-                          <Typography
-                            variant="compactCaption"
-                            sx={{ color: theme.palette.grey[600] }}
                           >
-                            {getTierLabel(
-                              Math.round(hoveredAxisInfo.tierValue),
-                            )}
-                          </Typography>
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "3px",
+                                flexShrink: 0,
+                                bgcolor:
+                                  tierColors[
+                                    Math.round(
+                                      hoveredInteraction.tierValue!,
+                                    ) as keyof typeof tierColors
+                                  ] ?? theme.palette.grey[400],
+                              }}
+                            />
+                            <Typography
+                              variant="compactCaption"
+                              sx={{ color: theme.palette.grey[600] }}
+                            >
+                              {getTierLabel(
+                                Math.round(hoveredInteraction.tierValue!),
+                              )}
+                            </Typography>
+                          </Box>
                         </Box>
-                      </Box>
-                    </motion.div>
-                  )}
+                      </motion.div>
+                    )}
                 </AnimatePresence>
               </Box>
 

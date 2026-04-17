@@ -15,6 +15,7 @@ import React, { useMemo, useState, useCallback } from "react"
 import { PackedDots } from "@repo/viz"
 import type { DotDatum } from "@repo/viz"
 import { Box, Typography, Tooltip } from "@repo/ui/mui"
+import { themeValues } from "@repo/ui/themes/theme"
 import { useScenarioList } from "../features/scenarios/hooks"
 
 interface ScenarioDotsProps {
@@ -22,7 +23,7 @@ interface ScenarioDotsProps {
   scenarioIds: string[]
   /** Diameter of the container circle in px */
   size: number
-  /** Fill color for dots (default: white) */
+  /** Fill color for dots (default: theme common.white) */
   fillColor?: string
   /** Called when the hovered scenario changes (null = no hover) */
   onHoverChange?: (id: string | null) => void
@@ -42,7 +43,7 @@ function createVirtualAnchor(rect: DOMRect) {
 export default function ScenarioDots({
   scenarioIds,
   size,
-  fillColor = "#ffffff",
+  fillColor = themeValues.palette.common.white,
   onHoverChange,
 }: ScenarioDotsProps) {
   const { scenarioMap } = useScenarioList()

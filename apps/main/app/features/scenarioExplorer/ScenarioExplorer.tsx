@@ -12,7 +12,7 @@
  *   - Other modes: ScenarioSelectionSidebar + ToolToolbar + chart controls
  */
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Box, useTheme, icons } from "@repo/ui/mui"
 import GetStartedView from "./getStarted/GetStartedView"
 import UnifiedToolLayout from "./components/UnifiedToolLayout"
@@ -27,6 +27,13 @@ import {
   ResiliencePanel,
   RadarPanel,
 } from "./exploreView"
+import type {
+  SingleScenarioCaptureFn,
+  ResilienceControlsState,
+} from "./exploreView"
+import ResilienceControls from "./exploreView/ResilienceControls"
+import { RESILIENCE_HYDROCLIMATES } from "./hooks/useResilienceMatrix"
+import { PRIMARY_SCENARIO_BASELINE_ID } from "./utils/scenarioIdSort"
 import ListView from "./exploreView/ListView"
 import DataExplorerView from "./dataExplorer/DataExplorerView"
 import { useScenarioExplorerStore } from "./store"
@@ -72,54 +79,7 @@ function SimpleButton({
   )
 }
 
-function RadarToggleChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
-  const theme = useTheme()
-  const Icon = active ? icons.CheckCircle : icons.RadioButtonUnchecked
-
-  return (
-    <Box
-      component="button"
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      aria-label={label}
-      sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        px: 1.25,
-        py: 0.5,
-        border: "none",
-        borderRadius: "12px",
-        cursor: "pointer",
-        fontSize: "0.8125rem",
-        fontWeight: 500,
-        lineHeight: 1.3,
-        whiteSpace: "nowrap",
-        color: active ? theme.palette.blue.bright : theme.palette.grey[800],
-        background: active
-          ? theme.palette.interaction.selectedBackground
-          : theme.palette.grey[200],
-        transition: "all 150ms ease",
-        "&:hover": {
-          background: theme.palette.interaction.selectedBackground,
-          color: theme.palette.blue.bright,
-        },
-      }}
-    >
-      <Icon sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
-      {label}
-    </Box>
-  )
-}
+import { InlineToggleChip } from "./components/InlineToggleChip"
 
 export default function ScenarioExplorer() {
   const theme = useTheme()
@@ -137,6 +97,26 @@ export default function ScenarioExplorer() {
 
   usePrefetchTiers()
 
+  // When switching to explorer tools, scroll so the tabs are docked and
+  // the ToolToolbar is visible right below the sticky header + sub-nav.
+  const prevMainViewRef = useRef(mainView)
+  useEffect(() => {
+    const prev = prevMainViewRef.current
+    prevMainViewRef.current = mainView
+    if (prev === mainView) return
+    if (mainView !== "explorer") return
+
+    const tabsEl = document.getElementById("tabs")
+    if (!tabsEl) return
+
+    requestAnimationFrame(() => {
+      const tabsRect = tabsEl.getBoundingClientRect()
+      const targetY =
+        window.scrollY + tabsRect.top - theme.layout.collapsedHeaderHeight
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    })
+  }, [mainView, theme.layout.collapsedHeaderHeight])
+
   const isGetStartedMapMode =
     mainView === "get-started" && mapMode === "get-started"
   const isExploreMapMode = mainView === "explorer" && showMap
@@ -146,29 +126,37 @@ export default function ScenarioExplorer() {
   // Child elements opt back in with pointer-events:auto as needed.
   const isMapPassThrough = isGetStartedMapMode || isExploreMapMode
 
-  // Hover coordination (for sidebar ↔ tool panels in non-list modes)
+  /**
+   * Hover coordination (sidebar ↔ tool panels in non-list modes).
+   * `highlightedIds` is a transient Set from sidebar / theme-header row hover only.
+   * Charts must keep `chosenIds` (selected scenarios) visible when this is set —
+   * it adds emphasis for hovered IDs; it does not replace selection visibility.
+   */
   const [highlightedIds, setHighlightedIds] = useState<Set<string> | null>(null)
-  const [hoveredScenarioId, setHoveredScenarioId] = useState<string | null>(
-    null,
-  )
+
+  const [hoveredInteraction, setHoveredInteraction] = useState<{
+    scenarioId: string
+    outcome?: string
+    tierValue?: number
+  } | null>(null)
+
+  const [radarScenarioColors, setRadarScenarioColors] = useState<
+    Record<string, string>
+  >({})
 
   const handleSidebarRowHover = useCallback((ids: string[] | null) => {
     setHighlightedIds(ids ? new Set(ids) : null)
   }, [])
 
   const handleToolScenarioHover = useCallback((scenarioId: string | null) => {
-    setHoveredScenarioId(scenarioId)
+    setHoveredInteraction(scenarioId ? { scenarioId } : null)
   }, [])
 
-  const [hoveredAxisInfo, setHoveredAxisInfo] = useState<{
-    scenarioId: string
-    axis: string
-    tierValue: number
-  } | null>(null)
-
-  const handleAxisHover = useCallback(
-    (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
-      setHoveredAxisInfo(info)
+  const handleOutcomeHover = useCallback(
+    (
+      info: { scenarioId: string; outcome: string; tierValue: number } | null,
+    ) => {
+      setHoveredInteraction(info)
     },
     [],
   )
@@ -184,36 +172,135 @@ export default function ScenarioExplorer() {
     setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
+    selectedScenarios,
   } = useScenarioExplorerStore()
+
+  const radarCaptureRef = useRef<(() => Promise<void>) | null>(null)
+  const radarSingleCaptureRef = useRef<SingleScenarioCaptureFn | null>(null)
+
+  const handleRadarCaptureReady = useCallback(
+    (capture: () => Promise<void>) => {
+      radarCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleRadarSingleCaptureReady = useCallback(
+    (capture: SingleScenarioCaptureFn) => {
+      radarSingleCaptureRef.current = capture
+    },
+    [],
+  )
+
+  const handleCaptureRadarScenario = useCallback(async (scenarioId: string) => {
+    return radarSingleCaptureRef.current?.(scenarioId) ?? null
+  }, [])
+
+  // Resilience heatmap controls (panel-local state, lifted here so the
+  // toolbar and panel share one source of truth without store changes).
+  const [resilienceControls, setResilienceControls] =
+    useState<ResilienceControlsState>({
+      view: "scenario",
+      cellEncoding: "tier",
+      deltaMode: "none",
+      deltaBaselineScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
+      aggregateScope: "all",
+      reorderBySimilarity: false,
+      showMarginals: false,
+      focusScenarioId: PRIMARY_SCENARIO_BASELINE_ID,
+      focusOutcomeCode: "CWS_DEL",
+      selectedHydroclimates: new Set(RESILIENCE_HYDROCLIMATES),
+      showRegionalSplit: false,
+      showCellNumbers: true,
+    })
+
+  const handleResilienceControlsChange = useCallback(
+    (next: Partial<ResilienceControlsState>) => {
+      setResilienceControls((prev) => ({ ...prev, ...next }))
+    },
+    [],
+  )
 
   const chartControls = useMemo(() => {
     if (exploreMode === "radar") {
       return (
         <ChartControlsBar>
-          <RadarToggleChip
+          <InlineToggleChip
             label="choose axes"
             active={showAxisSelector}
             onClick={() => setShowAxisSelector(!showAxisSelector)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="show all scenarios"
             active={radarShowAll}
             onClick={() => setRadarShowAll(!radarShowAll)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
             label="dots only"
             active={showDotsOnly}
             onClick={() => setShowDotsOnly(!showDotsOnly)}
           />
-          <RadarToggleChip
+          <InlineToggleChip
+            label="highlight current operations"
+            active={highlightBaseline}
+            onClick={() => setHighlightBaseline(!highlightBaseline)}
+          />
+          <InlineToggleChip
             label="show range"
             active={showRadarRange}
             onClick={() => setShowRadarRange(!showRadarRange)}
           />
-          <RadarToggleChip
-            label="highlight current operations"
-            active={highlightBaseline}
-            onClick={() => setHighlightBaseline(!highlightBaseline)}
+          <Box
+            component="button"
+            type="button"
+            disabled={selectedScenarios.length === 0 && !radarShowAll}
+            onClick={() => radarCaptureRef.current?.()}
+            aria-label="capture view"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
+              px: 1.25,
+              py: 0.5,
+              border: "none",
+              borderRadius: "12px",
+              fontSize: "0.8125rem",
+              fontWeight: 500,
+              lineHeight: 1.3,
+              whiteSpace: "nowrap",
+              color: theme.palette.grey[800],
+              background: theme.palette.grey[200],
+              transition: "all 150ms ease",
+              cursor:
+                selectedScenarios.length === 0 && !radarShowAll
+                  ? "default"
+                  : "pointer",
+              opacity:
+                selectedScenarios.length === 0 && !radarShowAll ? 0.4 : 1,
+              "&:hover": {
+                background:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.interaction.selectedBackground,
+                color:
+                  selectedScenarios.length === 0 && !radarShowAll
+                    ? undefined
+                    : theme.palette.blue.bright,
+              },
+            }}
+          >
+            <icons.IosShare sx={{ fontSize: "0.875rem", flexShrink: 0 }} />
+            capture view
+          </Box>
+        </ChartControlsBar>
+      )
+    }
+    if (exploreMode === "resilience") {
+      return (
+        <ChartControlsBar>
+          <ResilienceControls
+            controls={resilienceControls}
+            onChange={handleResilienceControlsChange}
           />
         </ChartControlsBar>
       )
@@ -221,7 +308,7 @@ export default function ScenarioExplorer() {
     if (exploreMode === "equity") {
       return (
         <ChartControlsBar>
-          <RadarToggleChip
+          <InlineToggleChip
             label="Compare to Baseline"
             active={showEquityComparison}
             onClick={() => setShowEquityComparison(!showEquityComparison)}
@@ -248,6 +335,10 @@ export default function ScenarioExplorer() {
     setRadarShowAll,
     showEquityComparison,
     setShowEquityComparison,
+    selectedScenarios,
+    theme,
+    resilienceControls,
+    handleResilienceControlsChange,
   ])
 
   const isListMode = mainView === "explorer" && exploreMode === "list"
@@ -293,14 +384,24 @@ export default function ScenarioExplorer() {
                 sidebar={
                   isListMode ? undefined : (
                     <ScenarioSelectionSidebar
-                      hoveredScenarioId={hoveredScenarioId}
-                      hoveredAxisInfo={hoveredAxisInfo}
+                      scenarioColors={
+                        exploreMode === "radar"
+                          ? radarScenarioColors
+                          : undefined
+                      }
+                      hoveredInteraction={hoveredInteraction}
                       onRowHover={handleSidebarRowHover}
                       singleSelect={exploreMode === "equity"}
+                      onCaptureRadarScenario={handleCaptureRadarScenario}
                     />
                   )
                 }
-                toolbar={<ToolToolbar gridAligned hideTitle={!isListMode} />}
+                toolbar={
+                  <ToolToolbar
+                    gridAligned={isListMode}
+                    hideTitle={!isListMode}
+                  />
+                }
                 chartControls={isListMode ? undefined : chartControls}
               >
                 {isListMode && (
@@ -312,8 +413,10 @@ export default function ScenarioExplorer() {
                 {exploreMode === "radar" && (
                   <RadarPanel
                     highlightedIds={highlightedIds}
-                    onScenarioHover={handleToolScenarioHover}
-                    onAxisHover={handleAxisHover}
+                    onOutcomeHover={handleOutcomeHover}
+                    onScenarioColors={setRadarScenarioColors}
+                    onCaptureReady={handleRadarCaptureReady}
+                    onSingleCaptureReady={handleRadarSingleCaptureReady}
                   />
                 )}
                 {exploreMode === "equity" && <EquityPanel />}
@@ -323,7 +426,13 @@ export default function ScenarioExplorer() {
                     onScenarioHover={handleToolScenarioHover}
                   />
                 )}
-                {exploreMode === "resilience" && <ResiliencePanel />}
+                {exploreMode === "resilience" && (
+                  <ResiliencePanel
+                    controls={resilienceControls}
+                    highlightedIds={highlightedIds}
+                    onScenarioHover={handleToolScenarioHover}
+                  />
+                )}
                 {exploreMode === "data" && <DataExplorerView />}
               </UnifiedToolLayout>
             </Box>

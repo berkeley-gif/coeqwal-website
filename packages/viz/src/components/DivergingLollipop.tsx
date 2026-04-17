@@ -3,6 +3,7 @@
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import { scaleBand, scaleLinear, select, symbol, symbolDiamond } from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
+import { isFullOpacityDuringSidebarHighlight } from "../utils/sidebarHighlightPolicy"
 import type { VerticalParallelLineData } from "./VerticalParallelLinePlot.peak"
 
 export interface DivergingLollipopProps {
@@ -148,7 +149,13 @@ const DivergingLollipop: React.FC<DivergingLollipopProps> = React.memo(
         // Opacity logic
         const getOpacity = (id: string) => {
           if (highlightedIds && highlightedIds.size > 0) {
-            return highlightedIds.has(id) ? 1.0 : 0.12
+            return isFullOpacityDuringSidebarHighlight(
+              id,
+              highlightedIds,
+              chosenIds,
+            )
+              ? 1.0
+              : 0.12
           }
           if (chosenIds && chosenIds.size > 0) {
             return chosenIds.has(id) ? 0.85 : 0.2

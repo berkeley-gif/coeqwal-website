@@ -103,6 +103,9 @@ importers:
       '@types/geojson':
         specifier: ^7946.0.14
         version: 7946.0.16
+      html-to-image:
+        specifier: ^1.11.13
+        version: 1.11.13
       next:
         specifier: ^15.5.9
         version: 15.5.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
@@ -2809,6 +2812,9 @@ packages:
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+
+  html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
 
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
@@ -7438,6 +7444,8 @@ snapshots:
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
+
+  html-to-image@1.11.13: {}
 
   http-proxy-agent@7.0.2:
     dependencies:

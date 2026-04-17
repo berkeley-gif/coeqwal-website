@@ -97,6 +97,7 @@ import SettingsIcon from "@mui/icons-material/Settings"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import OpacityIcon from "@mui/icons-material/Opacity"
+import OpacityOutlinedIcon from "@mui/icons-material/OpacityOutlined"
 import EngineeringIcon from "@mui/icons-material/Engineering"
 import ReportProblemIcon from "@mui/icons-material/ReportProblem"
 import BarChartIcon from "@mui/icons-material/BarChart"
@@ -146,6 +147,7 @@ import SwapVertIcon from "@mui/icons-material/SwapVert"
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward"
 import AppsIcon from "@mui/icons-material/Apps"
+import GridOnIcon from "@mui/icons-material/GridOn"
 import AutorenewIcon from "@mui/icons-material/Autorenew"
 import InsightsIcon from "@mui/icons-material/Insights"
 import TrackChangesIcon from "@mui/icons-material/TrackChanges"
@@ -170,6 +172,7 @@ export {
   ChevronLeftIcon,
   ChevronRightIcon,
   OpacityIcon,
+  OpacityOutlinedIcon,
   EngineeringIcon,
   ReportProblemIcon,
   BarChartIcon,
@@ -217,6 +220,7 @@ export {
   ArrowUpwardIcon,
   ArrowDownwardIcon,
   AppsIcon,
+  GridOnIcon,
   AutorenewIcon,
   InsightsIcon,
   TrackChangesIcon,
@@ -229,7 +233,7 @@ export {
 export * as icons from "@mui/icons-material"
 
 // Styles and themes
-export { useTheme, alpha, styled } from "@mui/material/styles"
+export { useTheme, alpha, styled, ThemeProvider } from "@mui/material/styles"
 export type { Theme } from "@mui/material/styles"
 
 // System utilities and types
