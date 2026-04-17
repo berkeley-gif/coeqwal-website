@@ -24,12 +24,15 @@ import {
   Checkbox,
 } from "@repo/ui/mui"
 import { RadarPlot, type VerticalParallelLineData } from "@repo/viz"
+import { ChartToast, InfoIconButton } from "@repo/ui"
 import { useComparisonData } from "../hooks/useComparisonData"
 import { useScenarioExplorerStore } from "../store"
 import { useScenarioList } from "../../scenarios/hooks"
 import { useOutcomeMapAction } from "../../map/hooks"
 import {
   getOutcomeName,
+  getOutcomeCode,
+  getOutcomeDefinition,
   OUTCOME_CODE_ORDER,
   NOD_SOD_OUTCOME_CODES,
   OUTCOME_REGIONAL_VARIANTS,
@@ -39,11 +42,15 @@ import {
 interface RadarPanelProps {
   highlightedIds?: Set<string> | null
   onScenarioHover?: (scenarioId: string | null) => void
+  onAxisHover?: (
+    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  ) => void
 }
 
 export default function RadarPanel({
   highlightedIds = null,
   onScenarioHover,
+  onAxisHover,
 }: RadarPanelProps) {
   const theme = useTheme()
 
@@ -60,7 +67,7 @@ export default function RadarPanel({
     toggleRadarAxis,
     showRadarRange,
     showDotsOnly,
-    radarSelectedOnly,
+    radarShowAll,
     showAxisSelector,
     hydroclimate,
   } = useScenarioExplorerStore()
@@ -123,6 +130,31 @@ export default function RadarPanel({
     onScenarioHover?.(hoveredScenario?.id ?? null)
   }, [hoveredScenario, onScenarioHover])
 
+  const handleDotHover = useCallback(
+    (info: { scenarioId: string; axis: string; tierValue: number } | null) => {
+      onAxisHover?.(info)
+    },
+    [onAxisHover],
+  )
+
+  const [axisPositions, setAxisPositions] = useState<
+    { axis: string; x: number; y: number; anchor: "start" | "end" | "middle" }[]
+  >([])
+
+  const handleAxisPositions = useCallback(
+    (
+      positions: {
+        axis: string
+        x: number
+        y: number
+        anchor: "start" | "end" | "middle"
+      }[],
+    ) => {
+      setAxisPositions(positions)
+    },
+    [],
+  )
+
   // Prevent browser text-selection inside the chart area
   const chartWrapperRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -144,13 +176,39 @@ export default function RadarPanel({
     morphGeneration,
   } = useComparisonData()
 
+  const selectedSet = useMemo(
+    () => new Set(selectedScenarios),
+    [selectedScenarios],
+  )
+
+  const filteredData = useMemo(() => {
+    if (radarShowAll) return comparisonData
+    if (selectedScenarios.length === 0) return []
+    return comparisonData.filter((d) => selectedSet.has(d.id))
+  }, [comparisonData, selectedSet, selectedScenarios.length, radarShowAll])
+
+  const filteredLineColors = useMemo(() => {
+    if (radarShowAll) return lineColors
+    if (selectedScenarios.length === 0) return []
+    return comparisonData
+      .map((d, i) => ({ id: d.id, color: lineColors[i] ?? "#666666" }))
+      .filter(({ id }) => selectedSet.has(id))
+      .map(({ color }) => color)
+  }, [
+    comparisonData,
+    lineColors,
+    selectedSet,
+    selectedScenarios.length,
+    radarShowAll,
+  ])
+
   const scenarioThemes = useMemo(() => {
     const map: Record<string, string> = {}
-    comparisonData.forEach((d) => {
+    filteredData.forEach((d) => {
       map[d.id] = getThemeForScenario(d.id) ?? "unthemed"
     })
     return map
-  }, [comparisonData, getThemeForScenario])
+  }, [filteredData, getThemeForScenario])
 
   const visibleAxisNames = useMemo(() => {
     const nameSet = new Set(radarVisibleAxes.map(getOutcomeName))
@@ -159,11 +217,11 @@ export default function RadarPanel({
 
   const highlightedData = useMemo(
     () =>
-      comparisonData.map((scenario) => ({
+      filteredData.map((scenario) => ({
         ...scenario,
         highlighted: scenario.id === highlightedScenario,
       })),
-    [comparisonData, highlightedScenario],
+    [filteredData, highlightedScenario],
   )
 
   const axesSet = useMemo(() => new Set(radarVisibleAxes), [radarVisibleAxes])
@@ -247,23 +305,8 @@ export default function RadarPanel({
     )
   }
 
-  if (!hasData && !radarSelectedOnly) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          px: theme.space.component.lg,
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Select scenarios to view the radar chart.
-        </Typography>
-      </Box>
-    )
-  }
+  const noScenariosSelected = selectedScenarios.length === 0 && !radarShowAll
+  const noAxesChosen = visibleAxisNames.length === 0
 
   return (
     <Box
@@ -402,7 +445,7 @@ export default function RadarPanel({
             data={highlightedData}
             axes={visibleAxisNames}
             responsive
-            lineColors={lineColors}
+            lineColors={filteredLineColors}
             baselineData={baselineScenario ?? undefined}
             highlightBaseline={highlightBaseline}
             chosenIds={chosenIds}
@@ -419,14 +462,100 @@ export default function RadarPanel({
             showTierZones={showTierZones}
             showAllPaths
             showDotsOnly={showDotsOnly}
-            dimUnselected={radarSelectedOnly}
+            dimUnselected={radarShowAll && selectedScenarios.length > 0}
             tooltipLeftOffset={showAxisSelector ? 220 : 0}
+            enableTooltip={false}
+            onDotHover={handleDotHover}
+            onAxisPositions={handleAxisPositions}
             onLineHover={setHoveredScenario}
             onLineClick={(d) => {
               setHighlightedScenario(highlightedScenario === d.id ? null : d.id)
             }}
           />
         </Box>
+
+        {/* TODO: Info icon overlay — one per axis label (disabled pending refinement)
+        {axisPositions.length > 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              pointerEvents: "none",
+              zIndex: 1,
+            }}
+          >
+            {axisPositions.map(({ axis, x, y, anchor }) => {
+              const code = getOutcomeCode(axis)
+              const definition = code
+                ? getOutcomeDefinition(code)
+                : undefined
+              if (!definition) return null
+
+              const offsetX =
+                anchor === "start" ? 6 : anchor === "end" ? -6 : 0
+              const offsetY = anchor === "middle" ? 14 : 0
+              const translate =
+                anchor === "start"
+                  ? "translate(0, -50%)"
+                  : anchor === "end"
+                    ? "translate(-100%, -50%)"
+                    : "translate(-50%, 0)"
+
+              return (
+                <Box
+                  key={axis}
+                  sx={{
+                    position: "absolute",
+                    left: x + offsetX,
+                    top: y + offsetY,
+                    transform: translate,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  <InfoIconButton
+                    variant="inline"
+                    placement="top"
+                    tooltipContent={
+                      <Box sx={{ maxWidth: 260 }}>
+                        <Typography
+                          variant="compactSubtitle"
+                          sx={{
+                            fontWeight: 600,
+                            display: "block",
+                            mb: 0.5,
+                          }}
+                        >
+                          {axis}
+                        </Typography>
+                        <Typography
+                          variant="compactCaption"
+                          sx={{ display: "block" }}
+                        >
+                          {definition}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                </Box>
+              )
+            })}
+          </Box>
+        )}
+        */}
+
+        {noScenariosSelected && !isLoading && (
+          <ChartToast>
+            Select scenarios on the left to see them on the chart, or check show
+            all scenarios, above
+          </ChartToast>
+        )}
+
+        {!noScenariosSelected && noAxesChosen && !isLoading && (
+          <ChartToast maxWidth={340}>Choose axes to show data</ChartToast>
+        )}
       </Box>
 
       {isLoading && hasData && (

@@ -801,14 +801,6 @@ export default function TierGrid({
     }
   }, [currentWidth, currentHeight, animate, objectives])
 
-  // Auto-trigger map display when selectedObjectives changes
-  useEffect(() => {
-    if (onShowOnMap && selectedObjectives.length > 0) {
-      const locationIds = selectedObjectives.map((obj) => obj.locationId)
-      onShowOnMap(locationIds)
-    }
-  }, [selectedObjectives, onShowOnMap])
-
   return (
     <div
       ref={containerRef}

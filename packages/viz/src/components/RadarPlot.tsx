@@ -42,6 +42,21 @@ export interface RadarPlotProps {
   dimUnselected?: boolean
   /** Extra left offset for the tooltip (e.g. when a sidebar overlaps) */
   tooltipLeftOffset?: number
+  /** When false, suppress the built-in tooltip on dot hover */
+  enableTooltip?: boolean
+  /** Called on dot mouseenter/mouseleave with axis-level hover info */
+  onDotHover?: (
+    info: { scenarioId: string; axis: string; tierValue: number } | null,
+  ) => void
+  /** Called after each render with pixel positions for placing info icons near axis labels */
+  onAxisPositions?: (
+    positions: {
+      axis: string
+      x: number
+      y: number
+      anchor: "start" | "end" | "middle"
+    }[],
+  ) => void
 }
 
 function toTier(v: number): number {
@@ -49,7 +64,7 @@ function toTier(v: number): number {
 }
 
 const TIER_POSITIONS = [1, 2, 3, 4] as const
-const TIER_LABELS = ["Tier 1", "Tier 2", "Tier 3", "Tier 4"] as const
+const TIER_LABELS = ["Optimal", "Acceptable", "At-risk", "Critical"] as const
 const TIER_BAND_COLORS = ["#ffffff", "#ffffff", "#ffffff", "#ffffff"] as const
 
 const DEFAULT_COLORS = {
@@ -122,7 +137,7 @@ function showTooltip(
     tier != null
       ? `<div style="display:flex;align-items:center;gap:5px;margin-top:3px;color:#4a5568;font-size:10.5px">` +
         `<span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${TIER_SWATCH_COLORS[tier]};flex-shrink:0"></span>` +
-        `Tier ${tier}</div>`
+        `${TIER_LABELS[tier - 1] ?? `Tier ${tier}`}</div>`
       : ""
   const pill = themeKey ? THEME_PILL_CONFIG[themeKey] : undefined
   const themeLine = pill
@@ -250,6 +265,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     showDotsOnly = false,
     dimUnselected = false,
     tooltipLeftOffset = 0,
+    enableTooltip = true,
+    onDotHover,
+    onAxisPositions,
   }) => {
     const pinnedScenarioIds = useMemo(
       () => pinnedScenarioIdsProp ?? new Set<string>(),
@@ -304,6 +322,14 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
     useEffect(() => {
       onDotClickRef.current = onDotClick
     }, [onDotClick])
+    const onDotHoverRef = useRef(onDotHover)
+    useEffect(() => {
+      onDotHoverRef.current = onDotHover
+    }, [onDotHover])
+    const onAxisPositionsRef = useRef(onAxisPositions)
+    useEffect(() => {
+      onAxisPositionsRef.current = onAxisPositions
+    }, [onAxisPositions])
 
     const dimensions = useResizeObserver(
       containerRef as React.RefObject<HTMLElement>,
@@ -392,7 +418,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
         const hasPinned = pinnedScenarioIds.size > 0
         const hasScenarioColors = lineColors.length > 0
-        const dotR = 4
+        const dotR = 3.5
         const DIM_OPACITY = 0.15
 
         const hasChosenIds = chosenIds && chosenIds.size > 0
@@ -414,18 +440,18 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
 
           if (isFocused || isSelected || isBaseline) {
             return {
-              dotR: dotR + 2.5,
+              dotR: dotR + 2,
               opacity: 1.0,
-              strokeWidth: 3.5,
+              strokeWidth: 2.5,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
 
           if (isPinned) {
             return {
-              dotR: dotR + 3,
+              dotR: dotR + 2.5,
               opacity: 1.0,
-              strokeWidth: 3,
+              strokeWidth: 2.5,
               strokeOpacity: showDotsOnly ? DIM_OPACITY : 1.0,
             }
           }
@@ -434,7 +460,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return {
               dotR: dotR * 0.7,
               opacity: DIM_OPACITY,
-              strokeWidth: 1.5,
+              strokeWidth: 1.2,
               strokeOpacity: DIM_OPACITY,
             }
           }
@@ -443,7 +469,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
             return {
               dotR,
               opacity: 1.0,
-              strokeWidth: 1.5,
+              strokeWidth: 1.2,
               strokeOpacity: DIM_OPACITY,
             }
           }
@@ -451,7 +477,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
           return {
             dotR,
             opacity: 1.0,
-            strokeWidth: 1.5,
+            strokeWidth: 1.2,
             strokeOpacity: 0.55,
           }
         }
@@ -733,17 +759,25 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   hoverNotifyTimerRef.current = null
                 }
 
-                const el = tooltipRef.current
-                if (el) {
-                  showTooltip(
-                    el,
-                    scenario.name,
-                    axis,
-                    sv != null ? toTier(sv) : undefined,
-                    scenarioThemes?.[scenario.id],
-                    scenario.id,
-                  )
+                if (enableTooltip) {
+                  const el = tooltipRef.current
+                  if (el) {
+                    showTooltip(
+                      el,
+                      scenario.name,
+                      axis,
+                      sv != null ? toTier(sv) : undefined,
+                      scenarioThemes?.[scenario.id],
+                      scenario.id,
+                    )
+                  }
                 }
+
+                onDotHoverRef.current?.({
+                  scenarioId: scenario.id,
+                  axis,
+                  tierValue: sv != null ? toTier(sv) : 0,
+                })
 
                 if (lastNotifiedIdRef.current !== scenario.id) {
                   hoverNotifyTimerRef.current = setTimeout(() => {
@@ -758,7 +792,9 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
                   clearTimeout(hoverNotifyTimerRef.current)
                   hoverNotifyTimerRef.current = null
                 }
-                if (tooltipRef.current) hideTooltip(tooltipRef.current)
+                if (enableTooltip && tooltipRef.current)
+                  hideTooltip(tooltipRef.current)
+                onDotHoverRef.current?.(null)
 
                 if (leaveResetTimerRef.current !== null) {
                   clearTimeout(leaveResetTimerRef.current)
@@ -991,6 +1027,12 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         }
 
         // 9. Axis labels (outside ring)
+        const axisPositions: {
+          axis: string
+          x: number
+          y: number
+          anchor: "start" | "end" | "middle"
+        }[] = []
         axes.forEach((axis, i) => {
           const angle = getAngle(i)
           const labelR = radius + 24
@@ -1039,7 +1081,16 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
               .attr("letter-spacing", "0.01em")
               .text(axis)
           }
+
+          axisPositions.push({
+            axis,
+            x: lx,
+            y: ly,
+            anchor: anchor as "start" | "end" | "middle",
+          })
         })
+
+        onAxisPositionsRef.current?.(axisPositions)
       },
       [
         data,
@@ -1059,6 +1110,7 @@ const RadarPlot: React.FC<RadarPlotProps> = React.memo(
         showDistribution,
         distributionData,
         getAngle,
+        enableTooltip,
       ],
     )
 

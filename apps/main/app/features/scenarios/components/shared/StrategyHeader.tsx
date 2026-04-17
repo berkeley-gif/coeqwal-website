@@ -45,6 +45,8 @@ export interface StrategyHeaderProps {
   onThemeBadgeClick?: (theme: ScenarioTheme) => void
   /** Optional inline actions rendered at the end of the shortcode/badge row */
   inlineActions?: React.ReactNode
+  /** When true, force-expand a truncated compact description */
+  expandDescription?: boolean
 }
 
 /**
@@ -313,7 +315,13 @@ function useGlossaryRenderer(description: string) {
   }, [description, handleClick, handleKeyDown, linkStyles])
 }
 
-function CompactDescription({ description }: { description: string }) {
+function CompactDescription({
+  description,
+  forceExpanded = false,
+}: {
+  description: string
+  forceExpanded?: boolean
+}) {
   const theme = useTheme()
   const [expanded, setExpanded] = useState(false)
   const renderGlossaryText = useGlossaryRenderer(description)
@@ -341,20 +349,22 @@ function CompactDescription({ description }: { description: string }) {
         position: "relative",
       }}
     >
-      {expanded ? (
+      {expanded || forceExpanded ? (
         <>
           {renderGlossaryText()}
-          <Box
-            component="button"
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setExpanded(false)
-            }}
-            sx={{ ...toggleStyles, float: "right" }}
-          >
-            less
-          </Box>
+          {!forceExpanded && (
+            <Box
+              component="button"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setExpanded(false)
+              }}
+              sx={{ ...toggleStyles, float: "right" }}
+            >
+              less
+            </Box>
+          )}
         </>
       ) : (
         <Box sx={{ position: "relative" }}>
@@ -397,6 +407,7 @@ export function StrategyHeader({
   onTitleClick,
   onThemeBadgeClick,
   inlineActions,
+  expandDescription = false,
 }: StrategyHeaderProps) {
   const theme = useTheme()
   const showAllThemeBadges = showThemeBadge
@@ -455,7 +466,10 @@ export function StrategyHeader({
           {displayLabel}
         </Box>
         {showDescription && (
-          <CompactDescription description={strategy.description} />
+          <CompactDescription
+            description={strategy.description}
+            forceExpanded={expandDescription}
+          />
         )}
       </Box>
     )

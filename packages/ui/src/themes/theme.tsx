@@ -1061,7 +1061,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.text,
       fontSize: typeScale.compact.title, // 0.9rem (14.4px)
       fontWeight: 500,
-      lineHeight: 1.4,
+      lineHeight: 1.5,
     },
     compactSubtitle: {
       fontFamily: themeValues.fontFamily.text,

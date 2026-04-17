@@ -22,12 +22,12 @@ The tier API (`/api/tier-map/{scenario}/{tier}/locations`) returns `location_id`
 
 Geometry comes from **Mapbox vector tilesets** (managed in Mapbox Studio). The API's `location_id` is matched to tileset features via an `idProperty` configured in `config/outcomeLayerRegistry.ts`:
 
-| Outcome | Mapbox layer | `idProperty` | Notes |
-| ------- | ------------ | ------------ | ----- |
-| `CWS_DEL`, `AG_REV` | `demand-units` | `DU_ID` | Demand unit polygons |
-| `GW_STOR` | `calsim-wba` | `WBA_ID` | Water budget area polygons |
-| `RES_STOR` | `california-reservoir` | `gnisidlabel` | Uses `RESERVOIR_CALSIM_TO_GNISIDLABEL` to translate CalSim IDs -> tileset IDs |
-| `DELTA_ECO` | `delta-detaw` | `WBA_ID` | Single polygon filtered to `DETAW` |
+| Outcome             | Mapbox layer           | `idProperty`  | Notes                                                                         |
+| ------------------- | ---------------------- | ------------- | ----------------------------------------------------------------------------- |
+| `CWS_DEL`, `AG_REV` | `demand-units`         | `DU_ID`       | Demand unit polygons                                                          |
+| `GW_STOR`           | `calsim-wba`           | `WBA_ID`      | Water budget area polygons                                                    |
+| `RES_STOR`          | `california-reservoir` | `gnisidlabel` | Uses `RESERVOIR_CALSIM_TO_GNISIDLABEL` to translate CalSim IDs -> tileset IDs |
+| `DELTA_ECO`         | `delta-detaw`          | `WBA_ID`      | Single polygon filtered to `DETAW`                                            |
 
 Runtime source injection (`config/tilesetSources.ts`) ensures these tilesets are available on all basemap styles, not just the satellite style that includes them in its composite source.
 
@@ -37,12 +37,12 @@ Coordinates are **hardcoded** in a single file:
 
 **`config/outcomeLocations.ts`**
 
-| Lookup table | Used by | Keyed on |
-| ------------ | ------- | -------- |
-| `ENV_FLOWS_COORDINATES` | `TierMarkers` (diamond markers for 17 env flow stations) | CalSim station ID (e.g. `SAC049`) |
-| `STATION_COORDINATES` | `TierLocationLabels` (compliance + pumping plant labels) | Station ID (`EM`, `JP`, `CAA003`, `DMC000`) |
-| `RESERVOIR_CONFIGS` | `TierLocationLabels` (reservoir label positions + stagger) | GNIS name (e.g. `"Shasta Lake"`) |
-| `SALMON_RIVER_CENTROID` | Single point for Sacramento River salmon outcome | N/A |
+| Lookup table            | Used by                                                    | Keyed on                                    |
+| ----------------------- | ---------------------------------------------------------- | ------------------------------------------- |
+| `ENV_FLOWS_COORDINATES` | `TierMarkers` (diamond markers for 17 env flow stations)   | CalSim station ID (e.g. `SAC049`)           |
+| `STATION_COORDINATES`   | `TierLocationLabels` (compliance + pumping plant labels)   | Station ID (`EM`, `JP`, `CAA003`, `DMC000`) |
+| `RESERVOIR_CONFIGS`     | `TierLocationLabels` (reservoir label positions + stagger) | GNIS name (e.g. `"Shasta Lake"`)            |
+| `SALMON_RIVER_CENTROID` | Single point for Sacramento River salmon outcome           | N/A                                         |
 
 A unified helper `getOutcomeLocationCoordinates(outcomeCode, locationId)` resolves any outcome + location ID to `[lng, lat]`.
 

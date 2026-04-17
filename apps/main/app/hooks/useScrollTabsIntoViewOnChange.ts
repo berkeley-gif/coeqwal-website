@@ -17,7 +17,7 @@ export function useScrollTabsIntoViewOnChange({
   behavior = "smooth",
   offsetPx = 0,
 }: Options) {
-  const { state, tabsRef, panelRef, isInTabsArea } = useTabs()
+  const { state, tabsRef, subNavRef, panelRef, isInTabsArea } = useTabs()
   const { activeTab } = state
 
   // Track whether we were in the tabs area on last render
@@ -54,8 +54,9 @@ export function useScrollTabsIntoViewOnChange({
     const raf = requestAnimationFrame(() => {
       const panelRect = panelEl.getBoundingClientRect()
       const tabsHeight = tabsEl.offsetHeight
+      const subNavHeight = subNavRef.current?.offsetHeight ?? 0
       const absolutePanelTop = window.scrollY + panelRect.top
-      const rawTarget = absolutePanelTop - tabsHeight - offsetPx
+      const rawTarget = absolutePanelTop - tabsHeight - subNavHeight - offsetPx
 
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight
@@ -68,5 +69,13 @@ export function useScrollTabsIntoViewOnChange({
     })
 
     return () => cancelAnimationFrame(raf)
-  }, [activeTab, behavior, offsetPx, tabsRef, isInTabsArea, panelRef])
+  }, [
+    activeTab,
+    behavior,
+    offsetPx,
+    tabsRef,
+    subNavRef,
+    isInTabsArea,
+    panelRef,
+  ])
 }
