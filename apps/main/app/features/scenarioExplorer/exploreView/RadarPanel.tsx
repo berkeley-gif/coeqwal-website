@@ -41,7 +41,7 @@ import {
   inlineStyles,
   rasterizeSvgClone,
 } from "../dataExplorer/utils/exportUtils"
-import { RadarToggleChip } from "../components/RadarToggleChip"
+import { InlineToggleChip } from "../components/InlineToggleChip"
 
 export type SingleScenarioCaptureFn = (scenarioId: string) => Promise<{
   dataUrl: string
@@ -104,6 +104,7 @@ export default function RadarPanel({
     showRadarRange,
     showDotsOnly,
     radarShowAll,
+    setRadarShowAll,
     showAxisSelector,
     setShowAxisSelector,
     hydroclimate,
@@ -713,9 +714,28 @@ export default function RadarPanel({
         */}
 
         {noScenariosSelected && !isLoading && (
-          <ChartToast>
-            Select scenarios on the left to see them on the chart, or check show
-            all scenarios, above
+          <ChartToast maxWidth={480}>
+            <Box
+              sx={{
+                pointerEvents: "auto",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <Box component="span">
+                Select scenarios on the left to see them on the chart, or use
+              </Box>
+              <InlineToggleChip
+                label="show all scenarios"
+                active={radarShowAll}
+                onClick={() => setRadarShowAll(!radarShowAll)}
+                onDarkBackground
+              />
+              <Box component="span">in the chart controls above.</Box>
+            </Box>
           </ChartToast>
         )}
 
@@ -736,7 +756,7 @@ export default function RadarPanel({
                 <Box component="span">
                   To show data, use
                 </Box>
-                <RadarToggleChip
+                <InlineToggleChip
                   label="choose axes"
                   active={showAxisSelector}
                   onClick={() => setShowAxisSelector(!showAxisSelector)}
