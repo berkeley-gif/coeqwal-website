@@ -754,17 +754,21 @@ export const themeValues = {
 
     // Reusable checkbox sx presets
     // Usage: <Checkbox sx={theme.scenarios.checkbox.sm} />
+    // md is 1.2× sm (5:6 scale factors) so group/theme headers read slightly larger than scenario rows.
     checkbox: {
-      /** Small checkbox — for individual scenario rows */
+      /** Small checkbox — individual scenario rows (list, grid, sidebar) */
       sm: {
         padding: 0,
         margin: 0,
         transform: "scale(0.7)",
+        transformOrigin: "100% 50%",
       } as const,
-      /** Standard checkbox — for group headers (theme, section) */
+      /** Group header checkbox — theme/section “select all”; visually ~20% larger than sm */
       md: {
         padding: 0,
-        transform: "scale(0.8)",
+        margin: 0,
+        transform: "scale(0.84)",
+        transformOrigin: "100% 50%",
       } as const,
     },
   },

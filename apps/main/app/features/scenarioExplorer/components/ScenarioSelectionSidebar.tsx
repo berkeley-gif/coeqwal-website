@@ -274,7 +274,9 @@ export default function ScenarioSelectionSidebar({
                 sx={{
                   ...theme.scenarios.checkbox.sm,
                   flexShrink: 0,
-                  mt: "16px",
+                  alignSelf: "flex-start",
+                  // Light nudge to align with StrategyHeader compact row 1 (short code + share icons)
+                  mt: "1px",
                 }}
               />
 
